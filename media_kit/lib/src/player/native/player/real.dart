@@ -163,29 +163,7 @@ class NativePlayer extends PlatformPlayer {
       await stop(open: true, synchronized: false);
 
       // Enter paused state.
-      {
-        final name = 'pause'.toNativeUtf8();
-        final value = calloc<Uint8>();
-        mpv.mpv_get_property(
-          ctx,
-          name,
-          generated.mpv_format.MPV_FORMAT_FLAG,
-          value.cast(),
-        );
-        if (value.value == 0) {
-          // We are using `cycle pause` because it waits & prevents the race condition.
-          final command = 'cycle pause'.toNativeUtf8();
-          mpv.mpv_command_string(ctx, command);
-          // NOTE: Handled as part of [stop] logic.
-          // state = state.copyWith(playing: false);
-          // if (!playingController.isClosed) {
-          //   playingController.add(false);
-          // }
-        }
-
-        calloc.free(name);
-        calloc.free(value);
-      }
+      await _setPropertyFlag('pause', true);
 
       // NOTE: Handled as part of [stop] logic.
       // isShuffleEnabled = false;
@@ -208,21 +186,7 @@ class NativePlayer extends PlatformPlayer {
       // If [play] is `true`, then exit paused state.
       if (play) {
         isPlayingStateChangeAllowed = true;
-        final name = 'pause'.toNativeUtf8();
-        final value = calloc<Uint8>();
-        mpv.mpv_get_property(
-          ctx,
-          name,
-          generated.mpv_format.MPV_FORMAT_FLAG,
-          value.cast(),
-        );
-        if (value.value == 1) {
-          // We are using `cycle pause` because it waits & prevents the race condition.
-          final command = 'cycle pause'.toNativeUtf8();
-          mpv.mpv_command_string(ctx, command);
-        }
-        calloc.free(name);
-        calloc.free(value);
+        await _setPropertyFlag('pause', false);
         state = state.copyWith(playing: true);
         if (!playingController.isClosed) {
           playingController.add(true);
@@ -230,18 +194,7 @@ class NativePlayer extends PlatformPlayer {
       }
 
       // Jump to the specified [index] (in both cases either [play] is `true` or `false`).
-      {
-        final name = 'playlist-pos'.toNativeUtf8();
-        final value = calloc<Int64>()..value = index;
-        mpv.mpv_set_property(
-          ctx,
-          name,
-          generated.mpv_format.MPV_FORMAT_INT64,
-          value.cast(),
-        );
-        calloc.free(name);
-        calloc.free(value);
-      }
+      await _setPropertyInt64('playlist-pos', index);
     }
 
     if (synchronized) {
@@ -266,11 +219,13 @@ class NativePlayer extends PlatformPlayer {
       isPlayingStateChangeAllowed = false;
       isBufferingStateChangeAllowed = false;
 
-      const commands = ['stop', 'playlist-clear', 'playlist-play-index none'];
-      for (final command in commands) {
-        final args = command.toNativeUtf8();
-        mpv.mpv_command_string(ctx, args);
-        calloc.free(args);
+      const commands = [
+        ['stop'],
+        ['playlist-clear'],
+        ['playlist-play-index', 'none'],
+      ];
+      for (final c in commands) {
+        await command(c);
       }
 
       // Reset the remaining attributes.
@@ -372,19 +327,7 @@ class NativePlayer extends PlatformPlayer {
         playingController.add(true);
       }
 
-      final name = 'pause'.toNativeUtf8();
-      final value = calloc<Uint8>();
-      mpv.mpv_get_property(
-        ctx,
-        name,
-        generated.mpv_format.MPV_FORMAT_FLAG,
-        value.cast(),
-      );
-      if (value.value == 1) {
-        await playOrPause(notify: false, synchronized: false);
-      }
-      calloc.free(name);
-      calloc.free(value);
+      await _setPropertyFlag('pause', false);
     }
 
     if (synchronized) {
@@ -409,19 +352,7 @@ class NativePlayer extends PlatformPlayer {
         playingController.add(false);
       }
 
-      final name = 'pause'.toNativeUtf8();
-      final value = calloc<Uint8>();
-      mpv.mpv_get_property(
-        ctx,
-        name,
-        generated.mpv_format.MPV_FORMAT_FLAG,
-        value.cast(),
-      );
-      if (value.value == 0) {
-        await playOrPause(notify: false, synchronized: false);
-      }
-      calloc.free(name);
-      calloc.free(value);
+      await _setPropertyFlag('pause', false);
     }
 
     if (synchronized) {
@@ -455,20 +386,9 @@ class NativePlayer extends PlatformPlayer {
       // This condition is specifically for the case when the internal playlist is ended (with [PlaylistLoopMode.none]), and we want to play the playlist again if play/pause is pressed.
       if (state.completed) {
         await seek(Duration.zero, synchronized: false);
-        final name = 'playlist-pos'.toNativeUtf8();
-        final value = calloc<Int64>()..value = 0;
-        mpv.mpv_set_property(
-          ctx,
-          name,
-          generated.mpv_format.MPV_FORMAT_INT64,
-          value.cast(),
-        );
-        calloc.free(name);
-        calloc.free(value);
+        await _setPropertyInt64('playlist-pos', 0);
       }
-      final command = 'cycle pause'.toNativeUtf8();
-      mpv.mpv_command_string(ctx, command);
-      calloc.free(command);
+      await command(['cycle', 'pause']);
     }
 
     if (synchronized) {
@@ -493,9 +413,7 @@ class NativePlayer extends PlatformPlayer {
       current.add(media);
       // ---------------------------------------------
 
-      final command = 'loadfile ${media.uri} append'.toNativeUtf8();
-      mpv.mpv_command_string(ctx, command);
-      calloc.free(command);
+      await command(['loadfile', media.uri, 'append']);
     }
 
     if (synchronized) {
@@ -549,9 +467,7 @@ class NativePlayer extends PlatformPlayer {
         }
       }
 
-      final command = 'playlist-remove $index'.toNativeUtf8();
-      mpv.mpv_command_string(ctx, command);
-      calloc.free(command);
+      await command(['playlist-remove', index.toString()]);
     }
 
     if (synchronized) {
@@ -581,9 +497,7 @@ class NativePlayer extends PlatformPlayer {
       }
 
       await play(synchronized: false);
-      final command = 'playlist-next'.toNativeUtf8();
-      mpv.mpv_command_string(ctx, command);
-      calloc.free(command);
+      await command(['playlist-next']);
     }
 
     if (synchronized) {
@@ -613,9 +527,7 @@ class NativePlayer extends PlatformPlayer {
       }
 
       await play(synchronized: false);
-      final command = 'playlist-prev'.toNativeUtf8();
-      mpv.mpv_command_string(ctx, command);
-      calloc.free(command);
+      await command(['playlist-prev']);
     }
 
     if (synchronized) {
@@ -636,16 +548,7 @@ class NativePlayer extends PlatformPlayer {
       await waitForVideoControllerInitializationIfAttached;
 
       await play(synchronized: false);
-      final name = 'playlist-pos'.toNativeUtf8();
-      final value = calloc<Int64>()..value = index;
-      mpv.mpv_set_property(
-        ctx,
-        name,
-        generated.mpv_format.MPV_FORMAT_INT64,
-        value.cast(),
-      );
-      calloc.free(name);
-      calloc.free(value);
+      await _setPropertyInt64('playlist-pos', index);
     }
 
     if (synchronized) {
@@ -678,9 +581,7 @@ class NativePlayer extends PlatformPlayer {
       current = values;
       // ---------------------------------------------
 
-      final command = 'playlist-move $from $to'.toNativeUtf8();
-      mpv.mpv_command_string(ctx, command);
-      calloc.free(command);
+      await command(['playlist-move', from.toString(), to.toString()]);
     }
 
     if (synchronized) {
@@ -701,10 +602,11 @@ class NativePlayer extends PlatformPlayer {
       await waitForPlayerInitialization;
       await waitForVideoControllerInitializationIfAttached;
 
-      await compute(
-        _seek,
-        _SeekData(ctx.address, NativeLibrary.path, duration),
-      );
+      await command([
+        'seek',
+        (duration.inMilliseconds / 1000).toStringAsFixed(4),
+        'absolute'
+      ]);
 
       // It is self explanatory that PlayerState.completed & PlayerStream.completed must enter the false state if seek is called. Typically after EOF.
       // https://github.com/media-kit/media-kit/issues/221
@@ -734,34 +636,26 @@ class NativePlayer extends PlatformPlayer {
       await waitForPlayerInitialization;
       await waitForVideoControllerInitializationIfAttached;
 
-      final file = 'loop-file'.toNativeUtf8();
-      final playlist = 'loop-playlist'.toNativeUtf8();
-      final yes = 'yes'.toNativeUtf8();
-      final no = 'no'.toNativeUtf8();
       switch (playlistMode) {
         case PlaylistMode.none:
           {
-            mpv.mpv_set_property_string(ctx, file, no);
-            mpv.mpv_set_property_string(ctx, playlist, no);
+            await _setPropertyString('loop-file', 'no');
+            await _setPropertyString('loop-playlist', 'no');
             break;
           }
         case PlaylistMode.single:
           {
-            mpv.mpv_set_property_string(ctx, file, yes);
-            mpv.mpv_set_property_string(ctx, playlist, no);
+            await _setPropertyString('loop-file', 'yes');
+            await _setPropertyString('loop-playlist', 'no');
             break;
           }
         case PlaylistMode.loop:
           {
-            mpv.mpv_set_property_string(ctx, file, no);
-            mpv.mpv_set_property_string(ctx, playlist, yes);
+            await _setPropertyString('loop-file', 'no');
+            await _setPropertyString('loop-playlist', 'yes');
             break;
           }
       }
-      calloc.free(file);
-      calloc.free(playlist);
-      calloc.free(yes);
-      calloc.free(no);
 
       state = state.copyWith(playlistMode: playlistMode);
       if (!playlistModeController.isClosed) {
@@ -786,37 +680,7 @@ class NativePlayer extends PlatformPlayer {
       await waitForPlayerInitialization;
       await waitForVideoControllerInitializationIfAttached;
 
-      {
-        final name = 'mute'.toNativeUtf8();
-        final value = calloc<Bool>();
-        mpv.mpv_get_property(
-          ctx,
-          name,
-          generated.mpv_format.MPV_FORMAT_FLAG,
-          value.cast(),
-        );
-        if (value.value) {
-          // Unmute the player before setting the volume.
-          final command = 'cycle mute'.toNativeUtf8();
-          mpv.mpv_command_string(ctx, command);
-          calloc.free(command);
-        }
-        calloc.free(name);
-        calloc.free(value);
-      }
-      {
-        final name = 'volume'.toNativeUtf8();
-        final value = calloc<Double>();
-        value.value = volume;
-        mpv.mpv_set_property(
-          ctx,
-          name,
-          generated.mpv_format.MPV_FORMAT_DOUBLE,
-          value.cast(),
-        );
-        calloc.free(name);
-        calloc.free(value);
-      }
+      await _setPropertyDouble('volume', volume);
     }
 
     if (synchronized) {
@@ -850,19 +714,10 @@ class NativePlayer extends PlatformPlayer {
         // Apparently, using scaletempo:scale actually controls the playback rate as intended after setting audio-pitch-correction as FALSE.
         // speed on the other hand, changes the pitch when audio-pitch-correction is set to FALSE.
         // Since, it also alters the actual [speed], the scaletempo:scale is divided by the same value of [pitch] to compensate the speed change.
-        var name = 'audio-pitch-correction'.toNativeUtf8();
-        final no = 'no'.toNativeUtf8();
-        mpv.mpv_set_property_string(ctx, name, no);
-        calloc.free(name);
-        calloc.free(no);
-        name = 'af'.toNativeUtf8();
+        await _setPropertyFlag('audio-pitch-correction', false);
         // Divide by [state.pitch] to compensate the speed change caused by pitch shift.
-        final value =
-            'scaletempo:scale=${(state.rate / state.pitch).toStringAsFixed(8)}'
-                .toNativeUtf8();
-        mpv.mpv_set_property_string(ctx, name, value);
-        calloc.free(name);
-        calloc.free(value);
+        await _setPropertyString('af',
+            'scaletempo:scale=${(state.rate / state.pitch).toStringAsFixed(8)}');
       } else {
         // Pitch shift control is disabled.
 
@@ -870,17 +725,7 @@ class NativePlayer extends PlatformPlayer {
         if (!rateController.isClosed) {
           rateController.add(state.rate);
         }
-        final name = 'speed'.toNativeUtf8();
-        final value = calloc<Double>();
-        value.value = rate;
-        mpv.mpv_set_property(
-          ctx,
-          name,
-          generated.mpv_format.MPV_FORMAT_DOUBLE,
-          value.cast(),
-        );
-        calloc.free(name);
-        calloc.free(value);
+        await _setPropertyDouble('speed', rate);
       }
     }
 
@@ -915,29 +760,11 @@ class NativePlayer extends PlatformPlayer {
         // Apparently, using scaletempo:scale actually controls the playback rate as intended after setting audio-pitch-correction as FALSE.
         // speed on the other hand, changes the pitch when audio-pitch-correction is set to FALSE.
         // Since, it also alters the actual [speed], the scaletempo:scale is divided by the same value of [pitch] to compensate the speed change.
-        var name = 'audio-pitch-correction'.toNativeUtf8();
-        final no = 'no'.toNativeUtf8();
-        mpv.mpv_set_property_string(ctx, name, no);
-        calloc.free(name);
-        calloc.free(no);
-        name = 'speed'.toNativeUtf8();
-        final speed = calloc<Double>()..value = pitch;
-        mpv.mpv_set_property(
-          ctx,
-          name,
-          generated.mpv_format.MPV_FORMAT_DOUBLE,
-          speed.cast(),
-        );
-        calloc.free(name);
-        calloc.free(speed);
-        name = 'af'.toNativeUtf8();
+        await _setPropertyFlag('audio-pitch-correction', false);
+        await _setPropertyDouble('speed', pitch);
         // Divide by [state.pitch] to compensate the speed change caused by pitch shift.
-        final value =
-            'scaletempo:scale=${(state.rate / state.pitch).toStringAsFixed(8)}'
-                .toNativeUtf8();
-        mpv.mpv_set_property_string(ctx, name, value);
-        calloc.free(name);
-        calloc.free(value);
+        await _setPropertyString('af',
+            'scaletempo:scale=${(state.rate / state.pitch).toStringAsFixed(8)}');
       } else {
         // Pitch shift control is disabled.
         throw ArgumentError('[PlayerConfiguration.pitch] is false');
@@ -992,11 +819,7 @@ class NativePlayer extends PlatformPlayer {
       await waitForPlayerInitialization;
       await waitForVideoControllerInitializationIfAttached;
 
-      final name = 'audio-device'.toNativeUtf8();
-      final value = audioDevice.name.toNativeUtf8();
-      mpv.mpv_set_property_string(ctx, name, value);
-      calloc.free(name);
-      calloc.free(value);
+      await _setPropertyString('audio-device', audioDevice.name);
     }
 
     if (synchronized) {
@@ -1019,11 +842,7 @@ class NativePlayer extends PlatformPlayer {
       await waitForPlayerInitialization;
       await waitForVideoControllerInitializationIfAttached;
 
-      final name = 'vid'.toNativeUtf8();
-      final value = track.id.toNativeUtf8();
-      mpv.mpv_set_property_string(ctx, name, value);
-      calloc.free(name);
-      calloc.free(value);
+      await _setPropertyString('vid', track.id);
       state = state.copyWith(track: state.track.copyWith(video: track));
       if (!trackController.isClosed) {
         trackController.add(state.track);
@@ -1075,11 +894,7 @@ class NativePlayer extends PlatformPlayer {
           trackController.add(state.track);
         }
       } else {
-        final name = 'aid'.toNativeUtf8();
-        final value = track.id.toNativeUtf8();
-        mpv.mpv_set_property_string(ctx, name, value);
-        calloc.free(name);
-        calloc.free(value);
+        await _setPropertyString('aid', track.id);
         state = state.copyWith(track: state.track.copyWith(audio: track));
         if (!trackController.isClosed) {
           trackController.add(state.track);
@@ -1155,11 +970,7 @@ class NativePlayer extends PlatformPlayer {
           trackController.add(state.track);
         }
       } else {
-        final name = 'sid'.toNativeUtf8();
-        final value = track.id.toNativeUtf8();
-        mpv.mpv_set_property_string(ctx, name, value);
-        calloc.free(name);
-        calloc.free(value);
+        await _setPropertyString('sid', track.id);
         state = state.copyWith(track: state.track.copyWith(subtitle: track));
         if (!trackController.isClosed) {
           trackController.add(state.track);
@@ -1385,6 +1196,25 @@ class NativePlayer extends PlatformPlayer {
             audioDevicesController.add(audioDevices);
           }
         }
+      }
+    }
+    if (event.ref.event_id ==
+        generated.mpv_event_id.MPV_EVENT_SET_PROPERTY_REPLY) {
+      final completer = _setPropertyRequests.remove(event.ref.reply_userdata);
+      if (completer == null) {
+        print(
+            'Warning: Received MPV_EVENT_SET_PROPERTY_REPLY with unregistered ID ${event.ref.reply_userdata}');
+      } else {
+        completer.complete(event.ref.error);
+      }
+    }
+    if (event.ref.event_id == generated.mpv_event_id.MPV_EVENT_COMMAND_REPLY) {
+      final completer = _commandRequests.remove(event.ref.reply_userdata);
+      if (completer == null) {
+        print(
+            'Warning: Received MPV_EVENT_COMMAND_REPLY with unregistered ID ${event.ref.reply_userdata}');
+      } else {
+        completer.complete(event.ref.error);
       }
     }
 
@@ -1984,9 +1814,8 @@ class NativePlayer extends PlatformPlayer {
       }
     }
     if (event.ref.event_id == generated.mpv_event_id.MPV_EVENT_LOG_MESSAGE) {
-      final eventLogMessage = event.ref.data
-          .cast<generated.mpv_event_log_message>()
-          .ref;
+      final eventLogMessage =
+          event.ref.data.cast<generated.mpv_event_log_message>().ref;
       final prefix = eventLogMessage.prefix.toDartString().trim();
       final level = eventLogMessage.level.toDartString().trim();
       final text = eventLogMessage.text.toDartString().trim();
@@ -2285,25 +2114,11 @@ class NativePlayer extends PlatformPlayer {
         properties['ao'] = 'null';
       }
 
-      for (final property in properties.entries) {
-        final name = property.key.toNativeUtf8();
-        final value = property.value.toNativeUtf8();
-        mpv.mpv_set_property_string(ctx, name, value);
-        calloc.free(name);
-        calloc.free(value);
-      }
+      await Future.wait(properties.entries
+          .map((entry) => _setPropertyString(entry.key, entry.value)));
 
       if (configuration.muted) {
-        final name = 'mute'.toNativeUtf8();
-        final value = calloc<Bool>()..value = true;
-        mpv.mpv_set_property(
-          ctx,
-          name,
-          generated.mpv_format.MPV_FORMAT_FLAG,
-          value.cast(),
-        );
-        calloc.free(name);
-        calloc.free(value);
+        await _setPropertyDouble('volume', 0);
 
         state = state.copyWith(volume: 0.0);
         if (!volumeController.isClosed) {
@@ -2372,26 +2187,80 @@ class NativePlayer extends PlatformPlayer {
     }
   }
 
+  int _asyncRequestNumber = 0;
+  final Map<int, Completer<int>> _setPropertyRequests = {};
+  final Map<int, Completer<int>> _commandRequests = {};
+
+  /// Asynchronous property setting
+  Future<void> _setProperty(
+    String name,
+    int format,
+    Pointer<Void> data,
+  ) async {
+    final requestNumber = _asyncRequestNumber++;
+    final completer = _setPropertyRequests[requestNumber] = Completer<int>();
+    final namePtr = name.toNativeUtf8();
+    final immediate = mpv.mpv_set_property_async(
+        ctx, requestNumber, namePtr.cast(), format, data);
+    calloc.free(namePtr);
+    if (immediate < 0) {
+      // Sending failed
+      _error(immediate);
+      return;
+    }
+    _error(await completer.future);
+  }
+
+  Future<void> _setPropertyFlag(String name, bool value) async {
+    final ptr = calloc<Bool>(1)..value = value;
+    await _setProperty(name, generated.mpv_format.MPV_FORMAT_FLAG, ptr.cast());
+    calloc.free(ptr);
+  }
+
+  Future<void> _setPropertyDouble(String name, double value) async {
+    final ptr = calloc<Double>(1)..value = value;
+    await _setProperty(
+        name, generated.mpv_format.MPV_FORMAT_DOUBLE, ptr.cast());
+    calloc.free(ptr);
+  }
+
+  Future<void> _setPropertyInt64(String name, int value) async {
+    final ptr = calloc<Int64>(1)..value = value;
+    await _setProperty(name, generated.mpv_format.MPV_FORMAT_INT64, ptr.cast());
+    calloc.free(ptr);
+  }
+
+  Future<void> _setPropertyString(String name, String value) async {
+    final string = value.toNativeUtf8();
+    // It wants char**
+    final ptr = calloc<Pointer<Void>>(1);
+    ptr.value = Pointer.fromAddress(string.address);
+    await _setProperty(
+        name, generated.mpv_format.MPV_FORMAT_STRING, ptr.cast());
+    calloc.free(ptr);
+    calloc.free(string);
+  }
+
   /// Calls mpv command passed as [args].
   /// Automatically freeds memory after command sending.
-  static void statiCommand(
-    List<String> args,
-    generated.MPV mpv,
-    Pointer<generated.mpv_handle> ctx,
-  ) {
-    final pointers = args.map((e) => e.toNativeUtf8()).toList();
+  Future<void> command(List<String> args) async {
+    final pointers = args.map<Pointer<Uint8>>((e) => e.toNativeUtf8()).toList();
     final arr = calloc<Pointer<Uint8>>(128);
     for (int i = 0; i < args.length; i++) {
       arr[i] = pointers[i];
     }
-
-    mpv.mpv_command(ctx, arr.cast());
-
+    final requestNumber = _asyncRequestNumber++;
+    final completer = _commandRequests[requestNumber] = Completer<int>();
+    final immediate = mpv.mpv_command_async(ctx, requestNumber, arr.cast());
     calloc.free(arr);
     pointers.forEach(calloc.free);
+    if (immediate < 0) {
+      // Sending failed
+      _error(immediate);
+      return;
+    }
+    _error(await completer.future);
   }
-
-  void command(List<String> args) => statiCommand(args, mpv, ctx);
 
   /// Internal generated libmpv C API bindings.
   final generated.MPV mpv = generated.MPV(
@@ -2497,28 +2366,6 @@ class NativePlayer extends PlatformPlayer {
 //
 // TODO: Maybe eventually move all methods to [Isolate]?
 // --------------------------------------------------
-
-class _SeekData {
-  final int ctx;
-  final String lib;
-  final Duration duration;
-
-  _SeekData(this.ctx, this.lib, this.duration);
-}
-
-/// [NativePlayer.seek]
-void _seek(_SeekData data) {
-  // ---------
-  final mpv = generated.MPV(DynamicLibrary.open(data.lib));
-  final ctx = Pointer<generated.mpv_handle>.fromAddress(data.ctx);
-  // ---------
-  final duration = data.duration;
-  // ---------
-  final value = duration.inMilliseconds / 1000;
-  final command = 'seek ${value.toStringAsFixed(4)} absolute'.toNativeUtf8();
-  mpv.mpv_command_string(ctx, command);
-  calloc.free(command);
-}
 
 class _ScreenshotData {
   final int ctx;
