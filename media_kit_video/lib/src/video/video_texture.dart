@@ -8,8 +8,6 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:media_kit_video/media_kit_video_controls/media_kit_video_controls.dart';
-import 'package:media_kit_video/media_kit_video_controls/src/controls/methods/video_state.dart';
-
 import 'package:media_kit_video/src/subtitle/subtitle_view.dart';
 import 'package:media_kit_video/media_kit_video_controls/media_kit_video_controls.dart'
     as media_kit_video_controls;
@@ -125,6 +123,17 @@ class Video extends StatefulWidget {
   final bool flipX;
   final bool flipY;
 
+  final GestureDragStartCallback? onVerticalDragStart;
+  final GestureDragUpdateCallback? onVerticalDragUpdate;
+  final GestureDragEndCallback? onVerticalDragEnd;
+  final GestureTapCallback? onTap;
+  final GestureTapDownCallback? onDoubleTapDown;
+  final GestureLongPressStartCallback? onLongPressStart;
+  final GestureLongPressEndCallback? onLongPressEnd;
+
+  final bool enableDragSubtitle;
+  final ValueChanged<EdgeInsets>? onUpdatePadding;
+
   /// {@macro video}
   const Video({
     Key? key,
@@ -152,6 +161,15 @@ class Video extends StatefulWidget {
     this.onInteractionEnd,
     this.flipX = false,
     this.flipY = false,
+    this.onVerticalDragStart,
+    this.onVerticalDragUpdate,
+    this.onVerticalDragEnd,
+    this.onTap,
+    this.onDoubleTapDown,
+    this.onLongPressStart,
+    this.onLongPressEnd,
+    this.enableDragSubtitle = false,
+    this.onUpdatePadding,
   }) : super(key: key);
 
   @override
@@ -481,22 +499,49 @@ class VideoState extends State<Video> with WidgetsBindingObserver {
                 ),
                 if (widget.dmWidget != null)
                   Positioned.fill(top: 4, child: widget.dmWidget!),
+
+                // if (videoViewParameters.controls != null)
+                //   Positioned.fill(
+                //     child: videoViewParameters.controls!.call(this),
+                //   ),
+
+                Positioned.fill(
+                  left: 16,
+                  top: 25,
+                  right: 15,
+                  bottom: 15,
+                  child: GestureDetector(
+                    onVerticalDragStart: widget.onVerticalDragStart,
+                    onVerticalDragUpdate: widget.onVerticalDragUpdate,
+                    onVerticalDragEnd: widget.onVerticalDragEnd,
+                    onTap: widget.onTap,
+                    onDoubleTapDown: widget.onDoubleTapDown,
+                    onLongPressStart: widget.onLongPressStart,
+                    onLongPressEnd: widget.onLongPressEnd,
+                  ),
+                ),
+
                 if (videoViewParameters.subtitleViewConfiguration.visible &&
                     !(widget.controller.player.platform?.configuration.libass ??
                         false))
                   Positioned.fill(
                     child: IgnorePointer(
+                      ignoring: !widget.enableDragSubtitle,
                       child: SubtitleView(
                         controller: widget.controller,
                         key: _subtitleViewKey,
                         configuration:
                             videoViewParameters.subtitleViewConfiguration,
+                        enableDragSubtitle: widget.enableDragSubtitle,
+                        onUpdatePadding: (padding) {
+                          widget.onUpdatePadding?.call(padding);
+                          update(
+                              subtitleViewConfiguration: videoViewParameters
+                                  .subtitleViewConfiguration
+                                  .copyWith(padding: padding));
+                        },
                       ),
                     ),
-                  ),
-                if (videoViewParameters.controls != null)
-                  Positioned.fill(
-                    child: videoViewParameters.controls!.call(this),
                   ),
               ],
             ),

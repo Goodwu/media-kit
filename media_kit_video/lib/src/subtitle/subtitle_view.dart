@@ -4,7 +4,7 @@
 /// All rights reserved.
 /// Use of this source code is governed by MIT license that can be found in the LICENSE file.
 import 'dart:async';
-import 'dart:math';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import 'package:media_kit_video/src/video_controller/video_controller.dart';
@@ -21,11 +21,17 @@ class SubtitleView extends StatefulWidget {
   /// The configuration to be used for the subtitles.
   final SubtitleViewConfiguration configuration;
 
+  final bool enableDragSubtitle;
+
+  final ValueChanged<EdgeInsets>? onUpdatePadding;
+
   /// {@macro subtitle_view}
   const SubtitleView({
     Key? key,
     required this.controller,
     required this.configuration,
+    this.enableDragSubtitle = false,
+    this.onUpdatePadding,
   }) : super(key: key);
 
   @override
@@ -78,20 +84,18 @@ class SubtitleViewState extends State<SubtitleView> {
     });
   }
 
+  @override
+  void didUpdateWidget(SubtitleView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    padding = widget.configuration.padding;
+  }
+
   /// {@macro subtitle_view}
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
         // Calculate the visible text scale factor.
-        final textScaleFactor = widget.configuration.textScaleFactor ??
-            MediaQuery.of(context).textScaleFactor *
-                sqrt(
-                  ((constraints.maxWidth * constraints.maxHeight) /
-                          (kTextScaleFactorReferenceWidth *
-                              kTextScaleFactorReferenceHeight))
-                      .clamp(0.0, 1.0),
-                );
         Widget text(TextStyle style) => Text(
               [
                 for (final line in subtitle)
@@ -99,34 +103,46 @@ class SubtitleViewState extends State<SubtitleView> {
               ].join('\n'),
               style: style,
               textAlign: widget.configuration.textAlign,
-              textScaleFactor: textScaleFactor,
+              textScaler: const TextScaler.linear(1),
             );
-        return Material(
-          color: Colors.transparent,
-          child: AnimatedContainer(
-            padding: widget.configuration.padding,
-            duration: duration,
-            alignment: Alignment.bottomCenter,
-            child: widget.configuration.strokeWidth != null
-                ? Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      text(
-                        widget.configuration.style.copyWith(
-                          color: null,
-                          background: null,
-                          backgroundColor: null,
-                          foreground: Paint()
-                            ..color = Colors.black
-                            ..style = PaintingStyle.stroke
-                            ..strokeWidth = widget.configuration.strokeWidth!,
-                        ),
-                      ),
-                      text(widget.configuration.style),
-                    ],
-                  )
-                : text(widget.configuration.style),
-          ),
+        Widget subtitleView() => widget.configuration.strokeWidth != null
+            ? Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  text(
+                    widget.configuration.style.copyWith(
+                      color: null,
+                      background: null,
+                      backgroundColor: null,
+                      foreground: Paint()
+                        ..color = Colors.black
+                        ..style = PaintingStyle.stroke
+                        ..strokeWidth = widget.configuration.strokeWidth!,
+                    ),
+                  ),
+                  text(widget.configuration.style),
+                ],
+              )
+            : text(widget.configuration.style);
+        return AnimatedContainer(
+          margin: padding,
+          duration: duration,
+          alignment: Alignment.bottomCenter,
+          child: widget.enableDragSubtitle
+              ? GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onVerticalDragUpdate: (details) {
+                    double bottom =
+                        clampDouble(padding.bottom - details.delta.dy, 0, 200);
+                    padding = padding.copyWith(bottom: bottom);
+                    setState(() {});
+                  },
+                  onVerticalDragEnd: (details) {
+                    widget.onUpdatePadding?.call(padding);
+                  },
+                  child: subtitleView(),
+                )
+              : subtitleView(),
         );
       },
     );
@@ -179,4 +195,22 @@ class SubtitleViewConfiguration {
     ),
     this.strokeWidth,
   });
+
+  SubtitleViewConfiguration copyWith({
+    bool? visible,
+    TextStyle? style,
+    TextAlign? textAlign,
+    double? textScaleFactor,
+    EdgeInsets? padding,
+    double? strokeWidth,
+  }) {
+    return SubtitleViewConfiguration(
+      visible: visible ?? this.visible,
+      style: style ?? this.style,
+      textAlign: textAlign ?? this.textAlign,
+      textScaleFactor: textScaleFactor ?? this.textScaleFactor,
+      padding: padding ?? this.padding,
+      strokeWidth: strokeWidth ?? this.strokeWidth,
+    );
+  }
 }
