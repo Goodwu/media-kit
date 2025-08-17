@@ -213,4 +213,25 @@ class SubtitleViewConfiguration {
       strokeWidth: strokeWidth ?? this.strokeWidth,
     );
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is SubtitleViewConfiguration &&
+        other.visible == visible &&
+        other.style == style &&
+        other.textAlign == textAlign &&
+        other.textScaleFactor == textScaleFactor &&
+        other.padding == padding &&
+        other.strokeWidth == strokeWidth;
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      visible, style, textAlign, textScaleFactor, padding, strokeWidth);
 }

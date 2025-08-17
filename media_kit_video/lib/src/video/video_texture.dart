@@ -273,7 +273,7 @@ class VideoState extends State<Video> with WidgetsBindingObserver {
 
     final currentParams = _videoViewParametersNotifier.value;
 
-    final newParams = currentParams.copyWith(
+    final newParams = VideoViewParameters(
       width:
           widget.width != oldWidget.width ? widget.width : currentParams.width,
       height: widget.height != oldWidget.height
