@@ -399,6 +399,7 @@ class VideoState extends State<Video> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    late final devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
     return media_kit_video_controls.VideoStateInheritedWidget(
       state: this as dynamic,
       contextNotifier: _contextNotifier,
@@ -454,11 +455,14 @@ class VideoState extends State<Video> with WidgetsBindingObserver {
                                               width: videoViewParameters
                                                           .aspectRatio ==
                                                       null
-                                                  ? rect.width
-                                                  : rect.height *
+                                                  ? rect.width /
+                                                      devicePixelRatio
+                                                  : rect.height /
+                                                      devicePixelRatio *
                                                       videoViewParameters
                                                           .aspectRatio!,
-                                              height: rect.height,
+                                              height: rect.height /
+                                                  devicePixelRatio,
                                               child: Stack(
                                                 children: [
                                                   const SizedBox(),
