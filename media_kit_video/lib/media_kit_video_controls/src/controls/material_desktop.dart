@@ -629,7 +629,6 @@ class _MaterialDesktopVideoControlsState
                           toggleFullscreen(context);
                         }
                       },
-
                 onPanUpdate: _theme(context).modifyVolumeOnScroll
                     ? (e) {
                         if (e.delta.dy > 0) {

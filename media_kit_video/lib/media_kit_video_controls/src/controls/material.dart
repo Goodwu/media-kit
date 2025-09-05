@@ -6,8 +6,8 @@
 // ignore_for_file: non_constant_identifier_names
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_volume_controller/flutter_volume_controller.dart';
 import 'package:media_kit_video/media_kit_video.dart';
-import 'package:volume_controller/volume_controller.dart';
 import 'package:screen_brightness/screen_brightness.dart';
 
 import 'package:media_kit_video/media_kit_video_controls/src/controls/methods/video_state.dart';
@@ -774,9 +774,9 @@ class _MaterialVideoControlsState extends State<_MaterialVideoControls> {
     // package:volume_controller
     Future.microtask(() async {
       try {
-        VolumeController.instance.showSystemUI = false;
-        _volumeValue = await VolumeController.instance.getVolume();
-        VolumeController.instance.addListener((value) {
+        FlutterVolumeController.updateShowSystemUI(false);
+        _volumeValue = await FlutterVolumeController.getVolume() ?? 0;
+        FlutterVolumeController.addListener((value) {
           if (mounted && !_volumeInterceptEventStream) {
             setState(() {
               _volumeValue = value;
@@ -807,7 +807,7 @@ class _MaterialVideoControlsState extends State<_MaterialVideoControls> {
     // --------------------------------------------------
     // package:volume_controller
     try {
-      VolumeController.instance.setVolume(value);
+      FlutterVolumeController.setVolume(value);
     } catch (_) {}
     setState(() {
       _volumeValue = value;
@@ -1568,6 +1568,7 @@ class MaterialSeekBarState extends State<MaterialSeekBar> {
 
   @override
   void dispose() {
+    FlutterVolumeController.removeListener();
     widget.delta?.removeListener(listener);
     for (final subscription in subscriptions) {
       subscription.cancel();
