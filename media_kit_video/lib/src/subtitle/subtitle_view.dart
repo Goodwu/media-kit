@@ -93,58 +93,48 @@ class SubtitleViewState extends State<SubtitleView> {
   /// {@macro subtitle_view}
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        // Calculate the visible text scale factor.
-        Widget text(TextStyle style) => Text(
-              [
-                for (final line in subtitle)
-                  if (line.trim().isNotEmpty) line.trim(),
-              ].join('\n'),
-              style: style,
-              textAlign: widget.configuration.textAlign,
-              textScaler: const TextScaler.linear(1),
-            );
-        Widget subtitleView() => widget.configuration.strokeWidth != null
-            ? Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  text(
-                    widget.configuration.style.copyWith(
-                      color: null,
-                      background: null,
-                      backgroundColor: null,
-                      foreground: Paint()
-                        ..color = Colors.black
-                        ..style = PaintingStyle.stroke
-                        ..strokeWidth = widget.configuration.strokeWidth!,
-                    ),
-                  ),
-                  text(widget.configuration.style),
-                ],
-              )
-            : text(widget.configuration.style);
-        return AnimatedContainer(
-          margin: padding,
-          duration: duration,
-          alignment: Alignment.bottomCenter,
-          child: widget.enableDragSubtitle
-              ? GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onVerticalDragUpdate: (details) {
-                    double bottom =
-                        clampDouble(padding.bottom - details.delta.dy, 0, 200);
-                    padding = padding.copyWith(bottom: bottom);
-                    setState(() {});
-                  },
-                  onVerticalDragEnd: (details) {
-                    widget.onUpdatePadding?.call(padding);
-                  },
-                  child: subtitleView(),
-                )
-              : subtitleView(),
+    Widget text(TextStyle style) => Text(
+          [
+            for (final line in subtitle)
+              if (line.trim().isNotEmpty) line.trim(),
+          ].join('\n'),
+          style: style,
+          textAlign: widget.configuration.textAlign,
+          textScaler: const TextScaler.linear(1),
         );
-      },
+
+    Widget subtitleView() {
+      if (widget.configuration.strokeStyle != null) {
+        return Stack(
+          clipBehavior: Clip.none,
+          children: [
+            text(widget.configuration.strokeStyle!),
+            text(widget.configuration.style),
+          ],
+        );
+      }
+      return text(widget.configuration.style);
+    }
+
+    return AnimatedContainer(
+      margin: padding,
+      duration: duration,
+      alignment: Alignment.bottomCenter,
+      child: widget.enableDragSubtitle
+          ? GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onVerticalDragUpdate: (details) {
+                double bottom =
+                    clampDouble(padding.bottom - details.delta.dy, 0, 200);
+                padding = padding.copyWith(bottom: bottom);
+                setState(() {});
+              },
+              onVerticalDragEnd: (details) {
+                widget.onUpdatePadding?.call(padding);
+              },
+              child: subtitleView(),
+            )
+          : subtitleView(),
     );
   }
 }
@@ -162,6 +152,8 @@ class SubtitleViewConfiguration {
   /// The text style to be used for the subtitles.
   final TextStyle style;
 
+  final TextStyle? strokeStyle;
+
   /// The text alignment to be used for the subtitles.
   final TextAlign textAlign;
 
@@ -170,8 +162,6 @@ class SubtitleViewConfiguration {
 
   /// The padding to be used for the subtitles.
   final EdgeInsets padding;
-
-  final double? strokeWidth;
 
   /// {@macro subtitle_view_configuration}
   const SubtitleViewConfiguration({
@@ -185,6 +175,7 @@ class SubtitleViewConfiguration {
       fontWeight: FontWeight.normal,
       backgroundColor: Color(0xaa000000),
     ),
+    this.strokeStyle,
     this.textAlign = TextAlign.center,
     this.textScaleFactor,
     this.padding = const EdgeInsets.fromLTRB(
@@ -193,24 +184,23 @@ class SubtitleViewConfiguration {
       16.0,
       24.0,
     ),
-    this.strokeWidth,
   });
 
   SubtitleViewConfiguration copyWith({
     bool? visible,
     TextStyle? style,
+    TextStyle? strokeStyle,
     TextAlign? textAlign,
     double? textScaleFactor,
     EdgeInsets? padding,
-    double? strokeWidth,
   }) {
     return SubtitleViewConfiguration(
       visible: visible ?? this.visible,
       style: style ?? this.style,
+      strokeStyle: strokeStyle ?? this.strokeStyle,
       textAlign: textAlign ?? this.textAlign,
       textScaleFactor: textScaleFactor ?? this.textScaleFactor,
       padding: padding ?? this.padding,
-      strokeWidth: strokeWidth ?? this.strokeWidth,
     );
   }
 
@@ -225,13 +215,13 @@ class SubtitleViewConfiguration {
     return other is SubtitleViewConfiguration &&
         other.visible == visible &&
         other.style == style &&
+        other.strokeStyle == strokeStyle &&
         other.textAlign == textAlign &&
         other.textScaleFactor == textScaleFactor &&
-        other.padding == padding &&
-        other.strokeWidth == strokeWidth;
+        other.padding == padding;
   }
 
   @override
   int get hashCode => Object.hash(
-      visible, style, textAlign, textScaleFactor, padding, strokeWidth);
+      visible, style, strokeStyle, textAlign, textScaleFactor, padding);
 }
