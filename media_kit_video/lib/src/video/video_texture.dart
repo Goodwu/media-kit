@@ -393,6 +393,10 @@ class VideoState extends State<Video> with WidgetsBindingObserver {
 
   void refreshView() {}
 
+  static final gestureSettings = Platform.isIOS
+      ? const DeviceGestureSettings(touchSlop: 9)
+      : const DeviceGestureSettings(touchSlop: 4);
+
   @override
   Widget build(BuildContext context) {
     late final devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
@@ -413,9 +417,7 @@ class VideoState extends State<Video> with WidgetsBindingObserver {
               children: [
                 Positioned.fill(
                   child: MediaQuery(
-                    data: MediaQuery.of(context).copyWith(
-                        gestureSettings:
-                            const DeviceGestureSettings(touchSlop: 3.5)),
+                    data: MediaQueryData(gestureSettings: gestureSettings),
                     child: InteractiveViewer(
                       transformationController: widget.transformationController,
                       panEnabled: false,
