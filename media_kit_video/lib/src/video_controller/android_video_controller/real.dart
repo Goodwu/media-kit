@@ -91,7 +91,7 @@ class AndroidVideoController extends PlatformVideoController {
             Pointer.fromAddress(handle),
             name.cast(),
           );
-          final current = path.cast<Utf8>().toDartString();
+          final current = path.toDartString();
           calloc.free(name.cast());
           mpv.mpv_free(path.cast());
 

@@ -72,7 +72,7 @@ void main() {
         (event) async {
           if (event.ref.event_id == mpv_event_id.MPV_EVENT_PROPERTY_CHANGE) {
             final prop = event.ref.data.cast<mpv_event_property>();
-            if (prop.ref.name.cast<Utf8>().toDartString() == 'pause' &&
+            if (prop.ref.name.toDartString() == 'pause' &&
                 prop.ref.format == mpv_format.MPV_FORMAT_FLAG) {
               final value = prop.ref.data.cast<Bool>().value;
               if (value) {
@@ -142,7 +142,7 @@ void main() {
         );
         calloc.free(name);
         expect(
-          value.cast<Utf8>().toDartString(),
+          value.toDartString(),
           'yes',
         );
       }
@@ -154,7 +154,7 @@ void main() {
         );
         calloc.free(name);
         expect(
-          value.cast<Utf8>().toDartString(),
+          value.toDartString(),
           dirname(Platform.script.toFilePath()),
         );
       }
@@ -184,7 +184,7 @@ void main() {
         );
         calloc.free(name);
         expect(
-          value.cast<Utf8>().toDartString(),
+          value.toDartString(),
           'yes',
         );
       }
@@ -196,7 +196,7 @@ void main() {
         );
         calloc.free(name);
         expect(
-          value.cast<Utf8>().toDartString(),
+          value.toDartString(),
           dirname(Platform.script.toFilePath()),
         );
       }

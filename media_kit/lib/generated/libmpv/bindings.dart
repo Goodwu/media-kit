@@ -36,7 +36,7 @@ class MPV {
   /// @param error error number, see enum mpv_error
   /// @return A static string describing the error. The string is completely
   /// static, i.e. doesn't need to be deallocated, and is valid forever.
-  ffi.Pointer<ffi.Int8> mpv_error_string(
+  ffi.Pointer<ffi.Uint8> mpv_error_string(
     int error,
   ) {
     return _mpv_error_string(
@@ -45,10 +45,10 @@ class MPV {
   }
 
   late final _mpv_error_stringPtr =
-      _lookup<ffi.NativeFunction<ffi.Pointer<ffi.Int8> Function(ffi.Int32)>>(
+      _lookup<ffi.NativeFunction<ffi.Pointer<ffi.Uint8> Function(ffi.Int32)>>(
           'mpv_error_string');
   late final _mpv_error_string =
-      _mpv_error_stringPtr.asFunction<ffi.Pointer<ffi.Int8> Function(int)>();
+      _mpv_error_stringPtr.asFunction<ffi.Pointer<ffi.Uint8> Function(int)>();
 
   /// General function to deallocate memory returned by some of the API functions.
   /// Call this only if it's explicitly documented as allowed. Calling this on
@@ -74,7 +74,7 @@ class MPV {
   ///
   /// @return The client name. The string is read-only and is valid until the
   /// mpv_handle is destroyed.
-  ffi.Pointer<ffi.Int8> mpv_client_name(
+  ffi.Pointer<ffi.Uint8> mpv_client_name(
     ffi.Pointer<mpv_handle> ctx,
   ) {
     return _mpv_client_name(
@@ -84,10 +84,10 @@ class MPV {
 
   late final _mpv_client_namePtr = _lookup<
       ffi.NativeFunction<
-          ffi.Pointer<ffi.Int8> Function(
+          ffi.Pointer<ffi.Uint8> Function(
               ffi.Pointer<mpv_handle>)>>('mpv_client_name');
   late final _mpv_client_name = _mpv_client_namePtr
-      .asFunction<ffi.Pointer<ffi.Int8> Function(ffi.Pointer<mpv_handle>)>();
+      .asFunction<ffi.Pointer<ffi.Uint8> Function(ffi.Pointer<mpv_handle>)>();
 
   /// Return the ID of this client handle. Every client has its own unique ID. This
   /// ID is never reused by the core, even if the mpv_handle at hand gets destroyed
@@ -321,7 +321,7 @@ class MPV {
   /// @return a new handle, or NULL on error
   ffi.Pointer<mpv_handle> mpv_create_client(
     ffi.Pointer<mpv_handle> ctx,
-    ffi.Pointer<ffi.Int8> name,
+    ffi.Pointer<ffi.Uint8> name,
   ) {
     return _mpv_create_client(
       ctx,
@@ -332,10 +332,10 @@ class MPV {
   late final _mpv_create_clientPtr = _lookup<
       ffi.NativeFunction<
           ffi.Pointer<mpv_handle> Function(ffi.Pointer<mpv_handle>,
-              ffi.Pointer<ffi.Int8>)>>('mpv_create_client');
+              ffi.Pointer<ffi.Uint8>)>>('mpv_create_client');
   late final _mpv_create_client = _mpv_create_clientPtr.asFunction<
       ffi.Pointer<mpv_handle> Function(
-          ffi.Pointer<mpv_handle>, ffi.Pointer<ffi.Int8>)>();
+          ffi.Pointer<mpv_handle>, ffi.Pointer<ffi.Uint8>)>();
 
   /// This is the same as mpv_create_client(), but the created mpv_handle is
   /// treated as a weak reference. If all mpv_handles referencing a core are
@@ -349,7 +349,7 @@ class MPV {
   /// mpv_handle will block until all weak mpv_handles are destroyed.
   ffi.Pointer<mpv_handle> mpv_create_weak_client(
     ffi.Pointer<mpv_handle> ctx,
-    ffi.Pointer<ffi.Int8> name,
+    ffi.Pointer<ffi.Uint8> name,
   ) {
     return _mpv_create_weak_client(
       ctx,
@@ -360,10 +360,10 @@ class MPV {
   late final _mpv_create_weak_clientPtr = _lookup<
       ffi.NativeFunction<
           ffi.Pointer<mpv_handle> Function(ffi.Pointer<mpv_handle>,
-              ffi.Pointer<ffi.Int8>)>>('mpv_create_weak_client');
+              ffi.Pointer<ffi.Uint8>)>>('mpv_create_weak_client');
   late final _mpv_create_weak_client = _mpv_create_weak_clientPtr.asFunction<
       ffi.Pointer<mpv_handle> Function(
-          ffi.Pointer<mpv_handle>, ffi.Pointer<ffi.Int8>)>();
+          ffi.Pointer<mpv_handle>, ffi.Pointer<ffi.Uint8>)>();
 
   /// Load a config file. This loads and parses the file, and sets every entry in
   /// the config file's default section as if mpv_set_option_string() is called.
@@ -383,7 +383,7 @@ class MPV {
   /// @return error code
   int mpv_load_config_file(
     ffi.Pointer<mpv_handle> ctx,
-    ffi.Pointer<ffi.Int8> filename,
+    ffi.Pointer<ffi.Uint8> filename,
   ) {
     return _mpv_load_config_file(
       ctx,
@@ -394,9 +394,9 @@ class MPV {
   late final _mpv_load_config_filePtr = _lookup<
       ffi.NativeFunction<
           ffi.Int32 Function(ffi.Pointer<mpv_handle>,
-              ffi.Pointer<ffi.Int8>)>>('mpv_load_config_file');
+              ffi.Pointer<ffi.Uint8>)>>('mpv_load_config_file');
   late final _mpv_load_config_file = _mpv_load_config_filePtr.asFunction<
-      int Function(ffi.Pointer<mpv_handle>, ffi.Pointer<ffi.Int8>)>();
+      int Function(ffi.Pointer<mpv_handle>, ffi.Pointer<ffi.Uint8>)>();
 
   /// This does nothing since mpv 0.23.0 (API version 1.24). Below is the
   /// description of the old behavior.
@@ -540,7 +540,7 @@ class MPV {
   /// @return error code
   int mpv_set_option(
     ffi.Pointer<mpv_handle> ctx,
-    ffi.Pointer<ffi.Int8> name,
+    ffi.Pointer<ffi.Uint8> name,
     int format,
     ffi.Pointer<ffi.Void> data,
   ) {
@@ -554,10 +554,10 @@ class MPV {
 
   late final _mpv_set_optionPtr = _lookup<
       ffi.NativeFunction<
-          ffi.Int32 Function(ffi.Pointer<mpv_handle>, ffi.Pointer<ffi.Int8>,
+          ffi.Int32 Function(ffi.Pointer<mpv_handle>, ffi.Pointer<ffi.Uint8>,
               ffi.Int32, ffi.Pointer<ffi.Void>)>>('mpv_set_option');
   late final _mpv_set_option = _mpv_set_optionPtr.asFunction<
-      int Function(ffi.Pointer<mpv_handle>, ffi.Pointer<ffi.Int8>, int,
+      int Function(ffi.Pointer<mpv_handle>, ffi.Pointer<ffi.Uint8>, int,
           ffi.Pointer<ffi.Void>)>();
 
   /// Convenience function to set an option to a string value. This is like
@@ -566,8 +566,8 @@ class MPV {
   /// @return error code
   int mpv_set_option_string(
     ffi.Pointer<mpv_handle> ctx,
-    ffi.Pointer<ffi.Int8> name,
-    ffi.Pointer<ffi.Int8> data,
+    ffi.Pointer<ffi.Uint8> name,
+    ffi.Pointer<ffi.Uint8> data,
   ) {
     return _mpv_set_option_string(
       ctx,
@@ -578,11 +578,11 @@ class MPV {
 
   late final _mpv_set_option_stringPtr = _lookup<
       ffi.NativeFunction<
-          ffi.Int32 Function(ffi.Pointer<mpv_handle>, ffi.Pointer<ffi.Int8>,
-              ffi.Pointer<ffi.Int8>)>>('mpv_set_option_string');
+          ffi.Int32 Function(ffi.Pointer<mpv_handle>, ffi.Pointer<ffi.Uint8>,
+              ffi.Pointer<ffi.Uint8>)>>('mpv_set_option_string');
   late final _mpv_set_option_string = _mpv_set_option_stringPtr.asFunction<
-      int Function(ffi.Pointer<mpv_handle>, ffi.Pointer<ffi.Int8>,
-          ffi.Pointer<ffi.Int8>)>();
+      int Function(ffi.Pointer<mpv_handle>, ffi.Pointer<ffi.Uint8>,
+          ffi.Pointer<ffi.Uint8>)>();
 
   /// Send a command to the player. Commands are the same as those used in
   /// input.conf, except that this function takes parameters in a pre-split
@@ -598,7 +598,7 @@ class MPV {
   /// @return error code
   int mpv_command(
     ffi.Pointer<mpv_handle> ctx,
-    ffi.Pointer<ffi.Pointer<ffi.Int8>> args,
+    ffi.Pointer<ffi.Pointer<ffi.Uint8>> args,
   ) {
     return _mpv_command(
       ctx,
@@ -609,10 +609,10 @@ class MPV {
   late final _mpv_commandPtr = _lookup<
       ffi.NativeFunction<
           ffi.Int32 Function(ffi.Pointer<mpv_handle>,
-              ffi.Pointer<ffi.Pointer<ffi.Int8>>)>>('mpv_command');
+              ffi.Pointer<ffi.Pointer<ffi.Uint8>>)>>('mpv_command');
   late final _mpv_command = _mpv_commandPtr.asFunction<
       int Function(
-          ffi.Pointer<mpv_handle>, ffi.Pointer<ffi.Pointer<ffi.Int8>>)>();
+          ffi.Pointer<mpv_handle>, ffi.Pointer<ffi.Pointer<ffi.Uint8>>)>();
 
   /// Same as mpv_command(), but allows passing structured data in any format.
   /// In particular, calling mpv_command() is exactly like calling
@@ -680,7 +680,7 @@ class MPV {
   /// @return error code (the result parameter is not set on error)
   int mpv_command_ret(
     ffi.Pointer<mpv_handle> ctx,
-    ffi.Pointer<ffi.Pointer<ffi.Int8>> args,
+    ffi.Pointer<ffi.Pointer<ffi.Uint8>> args,
     ffi.Pointer<mpv_node> result,
   ) {
     return _mpv_command_ret(
@@ -694,10 +694,10 @@ class MPV {
       ffi.NativeFunction<
           ffi.Int32 Function(
               ffi.Pointer<mpv_handle>,
-              ffi.Pointer<ffi.Pointer<ffi.Int8>>,
+              ffi.Pointer<ffi.Pointer<ffi.Uint8>>,
               ffi.Pointer<mpv_node>)>>('mpv_command_ret');
   late final _mpv_command_ret = _mpv_command_retPtr.asFunction<
-      int Function(ffi.Pointer<mpv_handle>, ffi.Pointer<ffi.Pointer<ffi.Int8>>,
+      int Function(ffi.Pointer<mpv_handle>, ffi.Pointer<ffi.Pointer<ffi.Uint8>>,
           ffi.Pointer<mpv_node>)>();
 
   /// Same as mpv_command, but use input.conf parsing for splitting arguments.
@@ -707,7 +707,7 @@ class MPV {
   /// This also has OSD and string expansion enabled by default.
   int mpv_command_string(
     ffi.Pointer<mpv_handle> ctx,
-    ffi.Pointer<ffi.Int8> args,
+    ffi.Pointer<ffi.Uint8> args,
   ) {
     return _mpv_command_string(
       ctx,
@@ -718,9 +718,9 @@ class MPV {
   late final _mpv_command_stringPtr = _lookup<
       ffi.NativeFunction<
           ffi.Int32 Function(ffi.Pointer<mpv_handle>,
-              ffi.Pointer<ffi.Int8>)>>('mpv_command_string');
+              ffi.Pointer<ffi.Uint8>)>>('mpv_command_string');
   late final _mpv_command_string = _mpv_command_stringPtr.asFunction<
-      int Function(ffi.Pointer<mpv_handle>, ffi.Pointer<ffi.Int8>)>();
+      int Function(ffi.Pointer<mpv_handle>, ffi.Pointer<ffi.Uint8>)>();
 
   /// Same as mpv_command, but run the command asynchronously.
   ///
@@ -743,7 +743,7 @@ class MPV {
   int mpv_command_async(
     ffi.Pointer<mpv_handle> ctx,
     int reply_userdata,
-    ffi.Pointer<ffi.Pointer<ffi.Int8>> args,
+    ffi.Pointer<ffi.Pointer<ffi.Uint8>> args,
   ) {
     return _mpv_command_async(
       ctx,
@@ -755,10 +755,10 @@ class MPV {
   late final _mpv_command_asyncPtr = _lookup<
       ffi.NativeFunction<
           ffi.Int32 Function(ffi.Pointer<mpv_handle>, ffi.Uint64,
-              ffi.Pointer<ffi.Pointer<ffi.Int8>>)>>('mpv_command_async');
+              ffi.Pointer<ffi.Pointer<ffi.Uint8>>)>>('mpv_command_async');
   late final _mpv_command_async = _mpv_command_asyncPtr.asFunction<
       int Function(
-          ffi.Pointer<mpv_handle>, int, ffi.Pointer<ffi.Pointer<ffi.Int8>>)>();
+          ffi.Pointer<mpv_handle>, int, ffi.Pointer<ffi.Pointer<ffi.Uint8>>)>();
 
   /// Same as mpv_command_node(), but run it asynchronously. Basically, this
   /// function is to mpv_command_node() what mpv_command_async() is to
@@ -867,7 +867,7 @@ class MPV {
   /// @return error code
   int mpv_set_property(
     ffi.Pointer<mpv_handle> ctx,
-    ffi.Pointer<ffi.Int8> name,
+    ffi.Pointer<ffi.Uint8> name,
     int format,
     ffi.Pointer<ffi.Void> data,
   ) {
@@ -881,10 +881,10 @@ class MPV {
 
   late final _mpv_set_propertyPtr = _lookup<
       ffi.NativeFunction<
-          ffi.Int32 Function(ffi.Pointer<mpv_handle>, ffi.Pointer<ffi.Int8>,
+          ffi.Int32 Function(ffi.Pointer<mpv_handle>, ffi.Pointer<ffi.Uint8>,
               ffi.Int32, ffi.Pointer<ffi.Void>)>>('mpv_set_property');
   late final _mpv_set_property = _mpv_set_propertyPtr.asFunction<
-      int Function(ffi.Pointer<mpv_handle>, ffi.Pointer<ffi.Int8>, int,
+      int Function(ffi.Pointer<mpv_handle>, ffi.Pointer<ffi.Uint8>, int,
           ffi.Pointer<ffi.Void>)>();
 
   /// Convenience function to set a property to a string value.
@@ -892,8 +892,8 @@ class MPV {
   /// This is like calling mpv_set_property() with MPV_FORMAT_STRING.
   int mpv_set_property_string(
     ffi.Pointer<mpv_handle> ctx,
-    ffi.Pointer<ffi.Int8> name,
-    ffi.Pointer<ffi.Int8> data,
+    ffi.Pointer<ffi.Uint8> name,
+    ffi.Pointer<ffi.Uint8> data,
   ) {
     return _mpv_set_property_string(
       ctx,
@@ -904,11 +904,11 @@ class MPV {
 
   late final _mpv_set_property_stringPtr = _lookup<
       ffi.NativeFunction<
-          ffi.Int32 Function(ffi.Pointer<mpv_handle>, ffi.Pointer<ffi.Int8>,
-              ffi.Pointer<ffi.Int8>)>>('mpv_set_property_string');
+          ffi.Int32 Function(ffi.Pointer<mpv_handle>, ffi.Pointer<ffi.Uint8>,
+              ffi.Pointer<ffi.Uint8>)>>('mpv_set_property_string');
   late final _mpv_set_property_string = _mpv_set_property_stringPtr.asFunction<
-      int Function(ffi.Pointer<mpv_handle>, ffi.Pointer<ffi.Int8>,
-          ffi.Pointer<ffi.Int8>)>();
+      int Function(ffi.Pointer<mpv_handle>, ffi.Pointer<ffi.Uint8>,
+          ffi.Pointer<ffi.Uint8>)>();
 
   /// Set a property asynchronously. You will receive the result of the operation
   /// as MPV_EVENT_SET_PROPERTY_REPLY event. The mpv_event.error field will contain
@@ -926,7 +926,7 @@ class MPV {
   int mpv_set_property_async(
     ffi.Pointer<mpv_handle> ctx,
     int reply_userdata,
-    ffi.Pointer<ffi.Int8> name,
+    ffi.Pointer<ffi.Uint8> name,
     int format,
     ffi.Pointer<ffi.Void> data,
   ) {
@@ -944,11 +944,11 @@ class MPV {
           ffi.Int32 Function(
               ffi.Pointer<mpv_handle>,
               ffi.Uint64,
-              ffi.Pointer<ffi.Int8>,
+              ffi.Pointer<ffi.Uint8>,
               ffi.Int32,
               ffi.Pointer<ffi.Void>)>>('mpv_set_property_async');
   late final _mpv_set_property_async = _mpv_set_property_asyncPtr.asFunction<
-      int Function(ffi.Pointer<mpv_handle>, int, ffi.Pointer<ffi.Int8>, int,
+      int Function(ffi.Pointer<mpv_handle>, int, ffi.Pointer<ffi.Uint8>, int,
           ffi.Pointer<ffi.Void>)>();
 
   /// Read the value of the given property.
@@ -969,7 +969,7 @@ class MPV {
   /// @return error code
   int mpv_get_property(
     ffi.Pointer<mpv_handle> ctx,
-    ffi.Pointer<ffi.Int8> name,
+    ffi.Pointer<ffi.Uint8> name,
     int format,
     ffi.Pointer<ffi.Void> data,
   ) {
@@ -983,10 +983,10 @@ class MPV {
 
   late final _mpv_get_propertyPtr = _lookup<
       ffi.NativeFunction<
-          ffi.Int32 Function(ffi.Pointer<mpv_handle>, ffi.Pointer<ffi.Int8>,
+          ffi.Int32 Function(ffi.Pointer<mpv_handle>, ffi.Pointer<ffi.Uint8>,
               ffi.Int32, ffi.Pointer<ffi.Void>)>>('mpv_get_property');
   late final _mpv_get_property = _mpv_get_propertyPtr.asFunction<
-      int Function(ffi.Pointer<mpv_handle>, ffi.Pointer<ffi.Int8>, int,
+      int Function(ffi.Pointer<mpv_handle>, ffi.Pointer<ffi.Uint8>, int,
           ffi.Pointer<ffi.Void>)>();
 
   /// Return the value of the property with the given name as string. This is
@@ -1000,9 +1000,9 @@ class MPV {
   /// @param name The property name.
   /// @return Property value, or NULL if the property can't be retrieved. Free
   /// the string with mpv_free().
-  ffi.Pointer<ffi.Int8> mpv_get_property_string(
+  ffi.Pointer<ffi.Uint8> mpv_get_property_string(
     ffi.Pointer<mpv_handle> ctx,
-    ffi.Pointer<ffi.Int8> name,
+    ffi.Pointer<ffi.Uint8> name,
   ) {
     return _mpv_get_property_string(
       ctx,
@@ -1012,20 +1012,20 @@ class MPV {
 
   late final _mpv_get_property_stringPtr = _lookup<
       ffi.NativeFunction<
-          ffi.Pointer<ffi.Int8> Function(ffi.Pointer<mpv_handle>,
-              ffi.Pointer<ffi.Int8>)>>('mpv_get_property_string');
+          ffi.Pointer<ffi.Uint8> Function(ffi.Pointer<mpv_handle>,
+              ffi.Pointer<ffi.Uint8>)>>('mpv_get_property_string');
   late final _mpv_get_property_string = _mpv_get_property_stringPtr.asFunction<
-      ffi.Pointer<ffi.Int8> Function(
-          ffi.Pointer<mpv_handle>, ffi.Pointer<ffi.Int8>)>();
+      ffi.Pointer<ffi.Uint8> Function(
+          ffi.Pointer<mpv_handle>, ffi.Pointer<ffi.Uint8>)>();
 
   /// Return the property as "OSD" formatted string. This is the same as
   /// mpv_get_property_string, but using MPV_FORMAT_OSD_STRING.
   ///
   /// @return Property value, or NULL if the property can't be retrieved. Free
   /// the string with mpv_free().
-  ffi.Pointer<ffi.Int8> mpv_get_property_osd_string(
+  ffi.Pointer<ffi.Uint8> mpv_get_property_osd_string(
     ffi.Pointer<mpv_handle> ctx,
-    ffi.Pointer<ffi.Int8> name,
+    ffi.Pointer<ffi.Uint8> name,
   ) {
     return _mpv_get_property_osd_string(
       ctx,
@@ -1035,12 +1035,12 @@ class MPV {
 
   late final _mpv_get_property_osd_stringPtr = _lookup<
       ffi.NativeFunction<
-          ffi.Pointer<ffi.Int8> Function(ffi.Pointer<mpv_handle>,
-              ffi.Pointer<ffi.Int8>)>>('mpv_get_property_osd_string');
+          ffi.Pointer<ffi.Uint8> Function(ffi.Pointer<mpv_handle>,
+              ffi.Pointer<ffi.Uint8>)>>('mpv_get_property_osd_string');
   late final _mpv_get_property_osd_string =
       _mpv_get_property_osd_stringPtr.asFunction<
-          ffi.Pointer<ffi.Int8> Function(
-              ffi.Pointer<mpv_handle>, ffi.Pointer<ffi.Int8>)>();
+          ffi.Pointer<ffi.Uint8> Function(
+              ffi.Pointer<mpv_handle>, ffi.Pointer<ffi.Uint8>)>();
 
   /// Get a property asynchronously. You will receive the result of the operation
   /// as well as the property data with the MPV_EVENT_GET_PROPERTY_REPLY event.
@@ -1055,7 +1055,7 @@ class MPV {
   int mpv_get_property_async(
     ffi.Pointer<mpv_handle> ctx,
     int reply_userdata,
-    ffi.Pointer<ffi.Int8> name,
+    ffi.Pointer<ffi.Uint8> name,
     int format,
   ) {
     return _mpv_get_property_async(
@@ -1069,9 +1069,9 @@ class MPV {
   late final _mpv_get_property_asyncPtr = _lookup<
       ffi.NativeFunction<
           ffi.Int32 Function(ffi.Pointer<mpv_handle>, ffi.Uint64,
-              ffi.Pointer<ffi.Int8>, ffi.Int32)>>('mpv_get_property_async');
+              ffi.Pointer<ffi.Uint8>, ffi.Int32)>>('mpv_get_property_async');
   late final _mpv_get_property_async = _mpv_get_property_asyncPtr.asFunction<
-      int Function(ffi.Pointer<mpv_handle>, int, ffi.Pointer<ffi.Int8>, int)>();
+      int Function(ffi.Pointer<mpv_handle>, int, ffi.Pointer<ffi.Uint8>, int)>();
 
   /// Get a notification whenever the given property changes. You will receive
   /// updates as MPV_EVENT_PROPERTY_CHANGE. Note that this is not very precise:
@@ -1129,7 +1129,7 @@ class MPV {
   int mpv_observe_property(
     ffi.Pointer<mpv_handle> mpv,
     int reply_userdata,
-    ffi.Pointer<ffi.Int8> name,
+    ffi.Pointer<ffi.Uint8> name,
     int format,
   ) {
     return _mpv_observe_property(
@@ -1143,9 +1143,9 @@ class MPV {
   late final _mpv_observe_propertyPtr = _lookup<
       ffi.NativeFunction<
           ffi.Int32 Function(ffi.Pointer<mpv_handle>, ffi.Uint64,
-              ffi.Pointer<ffi.Int8>, ffi.Int32)>>('mpv_observe_property');
+              ffi.Pointer<ffi.Uint8>, ffi.Int32)>>('mpv_observe_property');
   late final _mpv_observe_property = _mpv_observe_propertyPtr.asFunction<
-      int Function(ffi.Pointer<mpv_handle>, int, ffi.Pointer<ffi.Int8>, int)>();
+      int Function(ffi.Pointer<mpv_handle>, int, ffi.Pointer<ffi.Uint8>, int)>();
 
   /// Undo mpv_observe_property(). This will remove all observed properties for
   /// which the given number was passed as reply_userdata to mpv_observe_property.
@@ -1184,7 +1184,7 @@ class MPV {
   /// interfaces.
   /// The string is completely static, i.e. doesn't need to be deallocated,
   /// and is valid forever.
-  ffi.Pointer<ffi.Int8> mpv_event_name(
+  ffi.Pointer<ffi.Uint8> mpv_event_name(
     int event,
   ) {
     return _mpv_event_name(
@@ -1193,10 +1193,10 @@ class MPV {
   }
 
   late final _mpv_event_namePtr =
-      _lookup<ffi.NativeFunction<ffi.Pointer<ffi.Int8> Function(ffi.Int32)>>(
+      _lookup<ffi.NativeFunction<ffi.Pointer<ffi.Uint8> Function(ffi.Int32)>>(
           'mpv_event_name');
   late final _mpv_event_name =
-      _mpv_event_namePtr.asFunction<ffi.Pointer<ffi.Int8> Function(int)>();
+      _mpv_event_namePtr.asFunction<ffi.Pointer<ffi.Uint8> Function(int)>();
 
   /// Convert the given src event to a mpv_node, and set *dst to the result. *dst
   /// is set to a MPV_FORMAT_NODE_MAP, with fields for corresponding mpv_event and
@@ -1281,7 +1281,7 @@ class MPV {
   /// @return error code
   int mpv_request_log_messages(
     ffi.Pointer<mpv_handle> ctx,
-    ffi.Pointer<ffi.Int8> min_level,
+    ffi.Pointer<ffi.Uint8> min_level,
   ) {
     return _mpv_request_log_messages(
       ctx,
@@ -1292,10 +1292,10 @@ class MPV {
   late final _mpv_request_log_messagesPtr = _lookup<
       ffi.NativeFunction<
           ffi.Int32 Function(ffi.Pointer<mpv_handle>,
-              ffi.Pointer<ffi.Int8>)>>('mpv_request_log_messages');
+              ffi.Pointer<ffi.Uint8>)>>('mpv_request_log_messages');
   late final _mpv_request_log_messages =
       _mpv_request_log_messagesPtr.asFunction<
-          int Function(ffi.Pointer<mpv_handle>, ffi.Pointer<ffi.Int8>)>();
+          int Function(ffi.Pointer<mpv_handle>, ffi.Pointer<ffi.Uint8>)>();
 
   /// Wait for the next event, or until the timeout expires, or if another thread
   /// makes a call to mpv_wakeup(). Passing 0 as timeout will never wait, and
@@ -1489,7 +1489,7 @@ class MPV {
   int mpv_hook_add(
     ffi.Pointer<mpv_handle> ctx,
     int reply_userdata,
-    ffi.Pointer<ffi.Int8> name,
+    ffi.Pointer<ffi.Uint8> name,
     int priority,
   ) {
     return _mpv_hook_add(
@@ -1503,9 +1503,9 @@ class MPV {
   late final _mpv_hook_addPtr = _lookup<
       ffi.NativeFunction<
           ffi.Int32 Function(ffi.Pointer<mpv_handle>, ffi.Uint64,
-              ffi.Pointer<ffi.Int8>, ffi.Int32)>>('mpv_hook_add');
+              ffi.Pointer<ffi.Uint8>, ffi.Int32)>>('mpv_hook_add');
   late final _mpv_hook_add = _mpv_hook_addPtr.asFunction<
-      int Function(ffi.Pointer<mpv_handle>, int, ffi.Pointer<ffi.Int8>, int)>();
+      int Function(ffi.Pointer<mpv_handle>, int, ffi.Pointer<ffi.Uint8>, int)>();
 
   /// Respond to a MPV_EVENT_HOOK event. You must call this after you have handled
   /// the event. There is no way to "cancel" or "stop" the hook.
@@ -1630,14 +1630,14 @@ class MPV {
       ffi.Pointer<ffi.Void> Function(ffi.Pointer<mpv_handle>, int)>();
 }
 
-class max_align_t extends ffi.Opaque {}
+final class max_align_t extends ffi.Opaque {}
 
-class __fsid_t extends ffi.Struct {
+final class __fsid_t extends ffi.Struct {
   @ffi.Array.multi([2])
   external ffi.Array<ffi.Int32> __val;
 }
 
-class mpv_handle extends ffi.Opaque {}
+final class mpv_handle extends ffi.Opaque {}
 
 /// List of error codes than can be returned by API functions. 0 and positive
 /// return values always mean success, negative values are always errors.
@@ -1846,7 +1846,7 @@ abstract class mpv_format {
 /// the data. In some cases (mpv_get_property()), you have to free it with
 /// mpv_free_node_contents(). If you fill this struct yourself, you're also
 /// responsible for freeing it, and you must not call mpv_free_node_contents().
-class mpv_node extends ffi.Struct {
+final class mpv_node extends ffi.Struct {
   external UnnamedUnion1 u;
 
   /// Type of the data stored in this struct. This value rules what members in
@@ -1868,8 +1868,8 @@ class mpv_node extends ffi.Struct {
   external int format;
 }
 
-class UnnamedUnion1 extends ffi.Union {
-  external ffi.Pointer<ffi.Int8> string;
+final class UnnamedUnion1 extends ffi.Union {
+  external ffi.Pointer<ffi.Uint8> string;
 
   /// valid if format==MPV_FORMAT_STRING
   @ffi.Int32()
@@ -1894,7 +1894,7 @@ class UnnamedUnion1 extends ffi.Union {
 }
 
 /// (see mpv_node)
-class mpv_node_list extends ffi.Struct {
+final class mpv_node_list extends ffi.Struct {
   /// Number of entries. Negative values are not allowed.
   @ffi.Int32()
   external int num;
@@ -1917,11 +1917,11 @@ class mpv_node_list extends ffi.Struct {
   /// keys[num-1] (inclusive) are valid. Otherwise, this can be NULL.
   /// The keys are in random order. The only guarantee is that keys[N] belongs
   /// to the value values[N]. NULL keys are not allowed.
-  external ffi.Pointer<ffi.Pointer<ffi.Int8>> keys;
+  external ffi.Pointer<ffi.Pointer<ffi.Uint8>> keys;
 }
 
 /// (see mpv_node)
-class mpv_byte_array extends ffi.Struct {
+final class mpv_byte_array extends ffi.Struct {
   /// Pointer to the data. In what format the data is stored is up to whatever
   /// uses MPV_FORMAT_BYTE_ARRAY.
   external ffi.Pointer<ffi.Void> data;
@@ -2109,9 +2109,9 @@ abstract class mpv_event_id {
   static const int MPV_EVENT_HOOK = 25;
 }
 
-class mpv_event_property extends ffi.Struct {
+final class mpv_event_property extends ffi.Struct {
   /// Name of the property.
-  external ffi.Pointer<ffi.Int8> name;
+  external ffi.Pointer<ffi.Uint8> name;
 
   /// Format of the data field in the same struct. See enum mpv_format.
   /// This is always the same format as the requested format, except when
@@ -2162,21 +2162,21 @@ abstract class mpv_log_level {
   static const int MPV_LOG_LEVEL_TRACE = 70;
 }
 
-class mpv_event_log_message extends ffi.Struct {
+final class mpv_event_log_message extends ffi.Struct {
   /// The module prefix, identifies the sender of the message. As a special
   /// case, if the message buffer overflows, this will be set to the string
   /// "overflow" (which doesn't appear as prefix otherwise), and the text
   /// field will contain an informative message.
-  external ffi.Pointer<ffi.Int8> prefix;
+  external ffi.Pointer<ffi.Uint8> prefix;
 
   /// The log level as string. See mpv_request_log_messages() for possible
   /// values. The level "no" is never used here.
-  external ffi.Pointer<ffi.Int8> level;
+  external ffi.Pointer<ffi.Uint8> level;
 
   /// The log message. It consists of 1 line of text, and is terminated with
   /// a newline character. (Before API version 1.6, it could contain multiple
   /// or partial lines.)
-  external ffi.Pointer<ffi.Int8> text;
+  external ffi.Pointer<ffi.Uint8> text;
 
   /// The same contents as the level field, but as a numeric ID.
   /// Since API version 1.6.
@@ -2215,13 +2215,13 @@ abstract class mpv_end_file_reason {
 }
 
 /// Since API version 1.108.
-class mpv_event_start_file extends ffi.Struct {
+final class mpv_event_start_file extends ffi.Struct {
   /// Playlist entry ID of the file being loaded now.
   @ffi.Int64()
   external int playlist_entry_id;
 }
 
-class mpv_event_end_file extends ffi.Struct {
+final class mpv_event_end_file extends ffi.Struct {
   /// Corresponds to the values in enum mpv_end_file_reason (the "int" type
   /// will be replaced with mpv_end_file_reason on the next ABI bump).
   ///
@@ -2266,14 +2266,14 @@ class mpv_event_end_file extends ffi.Struct {
 }
 
 /// @deprecated see MPV_EVENT_SCRIPT_INPUT_DISPATCH for remarks
-class mpv_event_script_input_dispatch extends ffi.Struct {
+final class mpv_event_script_input_dispatch extends ffi.Struct {
   @ffi.Int32()
   external int arg0;
 
-  external ffi.Pointer<ffi.Int8> type;
+  external ffi.Pointer<ffi.Uint8> type;
 }
 
-class mpv_event_client_message extends ffi.Struct {
+final class mpv_event_client_message extends ffi.Struct {
   /// Arbitrary arguments chosen by the sender of the message. If num_args > 0,
   /// you can access args[0] through args[num_args - 1] (inclusive). What
   /// these arguments mean is up to the sender and receiver.
@@ -2281,19 +2281,19 @@ class mpv_event_client_message extends ffi.Struct {
   @ffi.Int32()
   external int num_args;
 
-  external ffi.Pointer<ffi.Pointer<ffi.Int8>> args;
+  external ffi.Pointer<ffi.Pointer<ffi.Uint8>> args;
 }
 
-class mpv_event_hook extends ffi.Struct {
+final class mpv_event_hook extends ffi.Struct {
   /// The hook name as passed to mpv_hook_add().
-  external ffi.Pointer<ffi.Int8> name;
+  external ffi.Pointer<ffi.Uint8> name;
 
   /// Internal ID that must be passed to mpv_hook_continue().
   @ffi.Uint64()
   external int id;
 }
 
-class mpv_event_command extends ffi.Struct {
+final class mpv_event_command extends ffi.Struct {
   /// Result data of the command. Note that success/failure is signaled
   /// separately via mpv_event.error. This field is only for result data
   /// in case of success. Most commands leave it at MPV_FORMAT_NONE. Set
@@ -2301,7 +2301,7 @@ class mpv_event_command extends ffi.Struct {
   external mpv_node result;
 }
 
-class mpv_event extends ffi.Struct {
+final class mpv_event extends ffi.Struct {
   /// One of mpv_event. Keep in mind that later ABI compatible releases might
   /// add new event types. These should be ignored by the API user.
   @ffi.Int32()

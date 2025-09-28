@@ -92,10 +92,10 @@ abstract class AndroidContentUriProvider {
 
 // C/C++:
 
-typedef OpenFileDescriptorCXX = Int32 Function(Pointer<Utf8> uri);
+typedef OpenFileDescriptorCXX = Int32 Function(Pointer<Uint8> uri);
 typedef CloseFileDescriptorCXX = Void Function(Int32 fileDescriptor);
 
 // Dart:
 
-typedef OpenFileDescriptorDart = int Function(Pointer<Utf8> uri);
+typedef OpenFileDescriptorDart = int Function(Pointer<Uint8> uri);
 typedef CloseFileDescriptorDart = void Function(int fileDescriptor);

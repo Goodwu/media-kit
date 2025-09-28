@@ -53,7 +53,7 @@ abstract class AndroidAssetLoader {
     final name = asset.toNativeUtf8();
     final result = List.generate(4096, (index) => ' ').join('').toNativeUtf8();
     fn.call(name.cast(), result.cast());
-    final path = result.cast<Utf8>().toDartString().trim();
+    final path = result.toDartString().trim();
     calloc.free(name);
     calloc.free(result);
     return path;
@@ -67,8 +67,8 @@ abstract class AndroidAssetLoader {
 
 // C/C++:
 
-typedef FnCXX = Void Function(Pointer<Utf8> asset, Pointer<Utf8> result);
+typedef FnCXX = Void Function(Pointer<Uint8> asset, Pointer<Uint8> result);
 
 // Dart:
 
-typedef FnDart = void Function(Pointer<Utf8> asset, Pointer<Utf8> result);
+typedef FnDart = void Function(Pointer<Uint8> asset, Pointer<Uint8> result);

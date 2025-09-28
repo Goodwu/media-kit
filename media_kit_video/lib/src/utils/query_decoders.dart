@@ -40,13 +40,13 @@ Future<HashSet<String>> queryDecoders(int handle) {
           if (decoder.format == mpv_format.MPV_FORMAT_NODE_MAP) {
             String? name;
             for (int j = 0; j < decoder.u.list.ref.num; j++) {
-              final k = decoder.u.list.ref.keys[j].cast<Utf8>().toDartString();
+              final k = decoder.u.list.ref.keys[j].toDartString();
               final v = decoder.u.list.ref.values[j];
               if (k == 'codec' && v.format == mpv_format.MPV_FORMAT_STRING) {
-                name ??= v.u.string.cast<Utf8>().toDartString();
+                name ??= v.u.string.toDartString();
               }
               if (k == 'driver' && v.format == mpv_format.MPV_FORMAT_STRING) {
-                name ??= v.u.string.cast<Utf8>().toDartString();
+                name ??= v.u.string.toDartString();
               }
             }
             if (name != null) {

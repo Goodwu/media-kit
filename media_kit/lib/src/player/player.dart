@@ -4,7 +4,6 @@
 /// All rights reserved.
 /// Use of this source code is governed by MIT license that can be found in the LICENSE file.
 import 'dart:typed_data';
-import 'package:universal_platform/universal_platform.dart';
 
 import 'package:media_kit/src/models/track.dart';
 import 'package:media_kit/src/models/playable.dart';
@@ -16,7 +15,6 @@ import 'package:media_kit/src/models/playlist_mode.dart';
 import 'package:media_kit/src/models/player_stream.dart';
 
 import 'package:media_kit/src/player/native/player/player.dart';
-import 'package:media_kit/src/player/web/player/player.dart';
 import 'package:media_kit/src/player/platform_player.dart';
 
 /// {@template player}
@@ -103,23 +101,11 @@ class Player {
   Player({
     PlayerConfiguration configuration = const PlayerConfiguration(),
   }) {
-    if (UniversalPlatform.isWindows) {
-      platform = NativePlayer(configuration: configuration);
-    } else if (UniversalPlatform.isLinux) {
-      platform = NativePlayer(configuration: configuration);
-    } else if (UniversalPlatform.isMacOS) {
-      platform = NativePlayer(configuration: configuration);
-    } else if (UniversalPlatform.isIOS) {
-      platform = NativePlayer(configuration: configuration);
-    } else if (UniversalPlatform.isAndroid) {
-      platform = NativePlayer(configuration: configuration);
-    } else if (UniversalPlatform.isWeb) {
-      platform = WebPlayer(configuration: configuration);
-    }
+    platform = NativePlayer(configuration: configuration);
   }
 
   /// Platform specific internal implementation initialized depending upon the current platform.
-  PlatformPlayer? platform;
+  NativePlayer? platform;
 
   /// Current state of the [Player].
   PlayerState get state => platform!.state;

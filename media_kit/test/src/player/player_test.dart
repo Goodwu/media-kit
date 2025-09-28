@@ -5,7 +5,6 @@ import 'dart:collection';
 import 'dart:typed_data';
 import 'package:test/test.dart';
 import 'package:collection/collection.dart';
-import 'package:universal_platform/universal_platform.dart';
 
 import 'package:media_kit/src/models/track.dart';
 import 'package:media_kit/src/models/playlist.dart';
@@ -18,7 +17,6 @@ import 'package:media_kit/src/models/playlist_mode.dart';
 import 'package:media_kit/src/media_kit.dart';
 import 'package:media_kit/src/player/player.dart';
 import 'package:media_kit/src/player/platform_player.dart';
-import 'package:media_kit/src/player/web/player/player.dart';
 import 'package:media_kit/src/player/native/player/player.dart';
 
 import '../../common/sources.dart';
@@ -31,8 +29,6 @@ void main() {
 
     // For preventing video driver & audio driver initialization errors in unit-tests.
     NativePlayer.test = true;
-    // For preventing "DOMException: play() failed because the user didn't interact with the document first." in unit-tests.
-    WebPlayer.test = true;
   });
   test(
     'player-platform',
@@ -45,20 +41,7 @@ void main() {
 
       addTearDown(player.dispose);
     },
-    skip: UniversalPlatform.isWeb,
-  );
-  test(
-    'player-platform',
-    () {
-      final player = Player();
-      expect(
-        player.platform,
-        isA<WebPlayer>(),
-      );
-
-      addTearDown(player.dispose);
-    },
-    skip: !UniversalPlatform.isWeb,
+    skip: false,
   );
   test(
     'player-wait-for-player-initialization',
@@ -92,9 +75,7 @@ void main() {
 
       final player = Player(
         configuration: PlayerConfiguration(
-          ready: () {
-            expectReady();
-          },
+          ready: expectReady,
         ),
       );
 
@@ -502,7 +483,7 @@ void main() {
       await player.dispose();
     },
     // TODO: Can't test on web.
-    skip: UniversalPlatform.isWeb,
+    skip: false,
   );
   test(
     'player-open-playable-media-extras',
@@ -840,7 +821,7 @@ void main() {
       await server.close();
     },
     timeout: Timeout(const Duration(minutes: 1)),
-    skip: UniversalPlatform.isWeb,
+    skip: false,
   );
   test(
     'player-open-playable-playlist-http-headers',
@@ -930,7 +911,7 @@ void main() {
       await server.close();
     },
     timeout: Timeout(const Duration(minutes: 1, seconds: 30)),
-    skip: UniversalPlatform.isWeb,
+    skip: false,
   );
   test(
     'player-play-after-completed',
@@ -1197,7 +1178,7 @@ void main() {
 
       addTearDown(player.dispose);
     },
-    skip: UniversalPlatform.isWeb,
+    skip: false,
   );
   test(
     'player-set-audio-device',
@@ -1236,7 +1217,7 @@ void main() {
 
       addTearDown(player.dispose);
     },
-    skip: UniversalPlatform.isWeb,
+    skip: false,
   );
   test(
     'player-set-audio-device',
@@ -1250,7 +1231,7 @@ void main() {
 
       addTearDown(player.dispose);
     },
-    skip: !UniversalPlatform.isWeb,
+    skip: true,
   );
   test(
     'player-set-volume',
@@ -1333,7 +1314,7 @@ void main() {
 
       addTearDown(player.dispose);
     },
-    skip: UniversalPlatform.isWeb,
+    skip: false,
   );
   test(
     'player-set-pitch-enabled',
@@ -1368,7 +1349,7 @@ void main() {
 
       addTearDown(player.dispose);
     },
-    skip: UniversalPlatform.isWeb,
+    skip: false,
   );
   test(
     'player-set-pitch-enabled',
@@ -1382,7 +1363,7 @@ void main() {
 
       addTearDown(player.dispose);
     },
-    skip: !UniversalPlatform.isWeb,
+    skip: true,
   );
   test(
     'player-set-playlist-mode',
@@ -2269,7 +2250,7 @@ void main() {
 
       addTearDown(player.dispose);
     },
-    skip: UniversalPlatform.isWeb,
+    skip: false,
   );
   test(
     'player-set-pitch-negative',
@@ -2283,7 +2264,7 @@ void main() {
 
       addTearDown(player.dispose);
     },
-    skip: !UniversalPlatform.isWeb,
+    skip: true,
   );
   test(
     'player-set-shuffle',
@@ -2438,7 +2419,7 @@ void main() {
       await player.dispose();
     },
     timeout: Timeout(const Duration(minutes: 1)),
-    skip: UniversalPlatform.isWeb,
+    skip: false,
   );
   test(
     'player-buffering-network',
@@ -2507,7 +2488,7 @@ void main() {
       await player.dispose();
     },
     timeout: Timeout(const Duration(minutes: 1)),
-    skip: UniversalPlatform.isWeb,
+    skip: false,
   );
   test(
     'player-buffering-network-play-false',
@@ -2866,7 +2847,7 @@ void main() {
       await player.dispose();
     },
     timeout: Timeout(const Duration(minutes: 2)),
-    skip: UniversalPlatform.isWeb,
+    skip: false,
   );
   test(
     'player-screenshot-format',
@@ -2897,7 +2878,7 @@ void main() {
       await player.dispose();
     },
     timeout: Timeout(const Duration(minutes: 2)),
-    skip: UniversalPlatform.isWeb,
+    skip: false,
   );
   test(
     'player-screenshot',
@@ -2920,7 +2901,7 @@ void main() {
       await player.dispose();
     },
     timeout: Timeout(const Duration(minutes: 2)),
-    skip: !UniversalPlatform.isWeb,
+    skip: true,
   );
   test(
     'player-screenshot-format',
@@ -2943,7 +2924,7 @@ void main() {
       await player.dispose();
     },
     timeout: Timeout(const Duration(minutes: 2)),
-    skip: !UniversalPlatform.isWeb,
+    skip: true,
   );
   test(
     'player-screenshot-argument-error',
@@ -3140,7 +3121,7 @@ void main() {
 
       await player.dispose();
     },
-    skip: UniversalPlatform.isWeb,
+    skip: false,
     timeout: Timeout(const Duration(minutes: 2)),
   );
   test(
@@ -3233,7 +3214,7 @@ void main() {
 
       await player.dispose();
     },
-    skip: UniversalPlatform.isWeb,
+    skip: false,
     timeout: Timeout(const Duration(minutes: 3)),
   );
   test(
@@ -3780,7 +3761,7 @@ Simply for <u>everyone</u>
 
       await player.dispose();
     },
-    skip: !UniversalPlatform.isWeb,
+    skip: true,
     timeout: Timeout(const Duration(minutes: 2)),
   );
   test(
@@ -3949,7 +3930,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit.
 
       await player.dispose();
     },
-    skip: UniversalPlatform.isWeb,
+    skip: false,
   );
   test(
     'player-native-player-observe-property',
@@ -4025,7 +4006,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit.
 
       await player.dispose();
     },
-    skip: UniversalPlatform.isWeb,
+    skip: false,
   );
 }
 

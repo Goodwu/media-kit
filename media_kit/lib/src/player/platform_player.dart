@@ -61,12 +61,8 @@ abstract class PlatformPlayer {
     volumeController.stream.distinct(
       (previous, current) => previous == current,
     ),
-    rateController.stream.distinct(
-      (previous, current) => previous == current,
-    ),
-    pitchController.stream.distinct(
-      (previous, current) => previous == current,
-    ),
+    rateController.stream.distinct((previous, current) => previous == current),
+    pitchController.stream.distinct((previous, current) => previous == current),
     bufferingController.stream.distinct(
       (previous, current) => previous == current,
     ),
@@ -87,59 +83,51 @@ abstract class PlatformPlayer {
       (previous, current) => previous == current,
     ),
     audioDevicesController.stream.distinct(
-      (previous, current) => ListEquality().equals(previous, current),
+      (previous, current) => const ListEquality().equals(previous, current),
     ),
-    trackController.stream.distinct(
-      (previous, current) => previous == current,
-    ),
+    trackController.stream.distinct((previous, current) => previous == current),
     tracksController.stream.distinct(
       (previous, current) => previous == current,
     ),
-    widthController.stream.distinct(
-      (previous, current) => previous == current,
-    ),
+    widthController.stream.distinct((previous, current) => previous == current),
     heightController.stream.distinct(
       (previous, current) => previous == current,
     ),
     subtitleController.stream.distinct(
-      (previous, current) => ListEquality().equals(previous, current),
+      (previous, current) => const ListEquality().equals(previous, current),
     ),
-    logController.stream.distinct(
-      (previous, current) => previous == current,
-    ),
+    logController.stream.distinct((previous, current) => previous == current),
     /* ERROR STREAM SHOULD NOT BE DISTINCT */
     errorController.stream,
   );
 
   @mustCallSuper
   Future<void> dispose() async {
-    await Future.wait(
-      [
-        playlistController.close(),
-        playingController.close(),
-        completedController.close(),
-        positionController.close(),
-        durationController.close(),
-        volumeController.close(),
-        rateController.close(),
-        pitchController.close(),
-        bufferingController.close(),
-        bufferController.close(),
-        playlistModeController.close(),
-        audioParamsController.close(),
-        videoParamsController.close(),
-        audioBitrateController.close(),
-        audioDeviceController.close(),
-        audioDevicesController.close(),
-        trackController.close(),
-        tracksController.close(),
-        widthController.close(),
-        heightController.close(),
-        subtitleController.close(),
-        logController.close(),
-        errorController.close(),
-      ],
-    );
+    await Future.wait([
+      playlistController.close(),
+      playingController.close(),
+      completedController.close(),
+      positionController.close(),
+      durationController.close(),
+      volumeController.close(),
+      rateController.close(),
+      pitchController.close(),
+      bufferingController.close(),
+      bufferController.close(),
+      playlistModeController.close(),
+      audioParamsController.close(),
+      videoParamsController.close(),
+      audioBitrateController.close(),
+      audioDeviceController.close(),
+      audioDevicesController.close(),
+      trackController.close(),
+      tracksController.close(),
+      widthController.close(),
+      heightController.close(),
+      subtitleController.close(),
+      logController.close(),
+      errorController.close(),
+    ]);
     for (final callback in release) {
       try {
         await callback.call();
@@ -150,79 +138,52 @@ abstract class PlatformPlayer {
     }
   }
 
-  Future<void> open(
-    Playable playable, {
-    bool play = true,
-  }) {
-    throw UnimplementedError(
-      '[PlatformPlayer.open] is not implemented',
-    );
+  Future<void> open(Playable playable, {bool play = true}) {
+    throw UnimplementedError('[PlatformPlayer.open] is not implemented');
   }
 
   Future<void> stop() {
-    throw UnimplementedError(
-      '[PlatformPlayer.stop] is not implemented',
-    );
+    throw UnimplementedError('[PlatformPlayer.stop] is not implemented');
   }
 
   Future<void> play() {
-    throw UnimplementedError(
-      '[PlatformPlayer.play] is not implemented',
-    );
+    throw UnimplementedError('[PlatformPlayer.play] is not implemented');
   }
 
   Future<void> pause() {
-    throw UnimplementedError(
-      '[PlatformPlayer.pause] is not implemented',
-    );
+    throw UnimplementedError('[PlatformPlayer.pause] is not implemented');
   }
 
   Future<void> playOrPause() {
-    throw UnimplementedError(
-      '[PlatformPlayer.playOrPause] is not implemented',
-    );
+    throw UnimplementedError('[PlatformPlayer.playOrPause] is not implemented');
   }
 
   Future<void> add(Media media) {
-    throw UnimplementedError(
-      '[PlatformPlayer.add] is not implemented',
-    );
+    throw UnimplementedError('[PlatformPlayer.add] is not implemented');
   }
 
   Future<void> remove(int index) {
-    throw UnimplementedError(
-      '[PlatformPlayer.remove] is not implemented',
-    );
+    throw UnimplementedError('[PlatformPlayer.remove] is not implemented');
   }
 
   Future<void> next() {
-    throw UnimplementedError(
-      '[PlatformPlayer.next] is not implemented',
-    );
+    throw UnimplementedError('[PlatformPlayer.next] is not implemented');
   }
 
   Future<void> previous() {
-    throw UnimplementedError(
-      '[PlatformPlayer.previous] is not implemented',
-    );
+    throw UnimplementedError('[PlatformPlayer.previous] is not implemented');
   }
 
   Future<void> jump(int index) {
-    throw UnimplementedError(
-      '[PlatformPlayer.jump] is not implemented',
-    );
+    throw UnimplementedError('[PlatformPlayer.jump] is not implemented');
   }
 
   Future<void> move(int from, int to) {
-    throw UnimplementedError(
-      '[PlatformPlayer.move] is not implemented',
-    );
+    throw UnimplementedError('[PlatformPlayer.move] is not implemented');
   }
 
   Future<void> seek(Duration duration) {
-    throw UnimplementedError(
-      '[PlatformPlayer.seek] is not implemented',
-    );
+    throw UnimplementedError('[PlatformPlayer.seek] is not implemented');
   }
 
   Future<void> setPlaylistMode(PlaylistMode playlistMode) {
@@ -232,27 +193,19 @@ abstract class PlatformPlayer {
   }
 
   Future<void> setVolume(double volume) {
-    throw UnimplementedError(
-      '[PlatformPlayer.volume] is not implemented',
-    );
+    throw UnimplementedError('[PlatformPlayer.volume] is not implemented');
   }
 
   Future<void> setRate(double rate) {
-    throw UnimplementedError(
-      '[PlatformPlayer.rate] is not implemented',
-    );
+    throw UnimplementedError('[PlatformPlayer.rate] is not implemented');
   }
 
   Future<void> setPitch(double pitch) {
-    throw UnimplementedError(
-      '[PlatformPlayer.pitch] is not implemented',
-    );
+    throw UnimplementedError('[PlatformPlayer.pitch] is not implemented');
   }
 
   Future<void> setShuffle(bool shuffle) {
-    throw UnimplementedError(
-      '[PlatformPlayer.shuffle] is not implemented',
-    );
+    throw UnimplementedError('[PlatformPlayer.shuffle] is not implemented');
   }
 
   Future<void> setAudioDevice(AudioDevice audioDevice) {
@@ -280,15 +233,11 @@ abstract class PlatformPlayer {
   }
 
   Future<Uint8List?> screenshot({String? format = 'image/jpeg'}) async {
-    throw UnimplementedError(
-      '[PlatformPlayer.screenshot] is not implemented',
-    );
+    throw UnimplementedError('[PlatformPlayer.screenshot] is not implemented');
   }
 
   Future<int> get handle {
-    throw UnimplementedError(
-      '[PlatformPlayer.handle] is not implemented',
-    );
+    throw UnimplementedError('[PlatformPlayer.handle] is not implemented');
   }
 
   @protected
@@ -486,6 +435,8 @@ class PlayerConfiguration {
   /// Learn more: https://ffmpeg.org/ffmpeg-protocols.html#Protocol-Options
   final List<String> protocolWhitelist;
 
+  final Map<String, String>? options;
+
   /// {@macro player_configuration}
   const PlayerConfiguration({
     this.vo = 'null',
@@ -509,6 +460,7 @@ class PlayerConfiguration {
       'https',
       'crypto',
     ],
+    this.options,
   });
 }
 

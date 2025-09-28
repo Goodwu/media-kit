@@ -174,8 +174,8 @@ typedef mpv_lavc_set_java_vmDart = int Function(Pointer<Void> vm);
 typedef MediaKitAndroidHelperGetJavaVMCXX = Pointer<Void> Function();
 typedef MediaKitAndroidHelperGetJavaVMDart = Pointer<Void> Function();
 
-typedef MediaKitAndroidHelperGetFilesDirCXX = Pointer<Utf8> Function();
-typedef MediaKitAndroidHelperGetFilesDirDart = Pointer<Utf8> Function();
+typedef MediaKitAndroidHelperGetFilesDirCXX = Pointer<Uint8> Function();
+typedef MediaKitAndroidHelperGetFilesDirDart = Pointer<Uint8> Function();
 
 typedef MediaKitAndroidHelperIsEmulatorCXX = Int8 Function();
 typedef MediaKitAndroidHelperIsEmulatorDart = int Function();
