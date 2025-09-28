@@ -192,7 +192,17 @@ class NativePlayer extends PlatformPlayer {
       // isPlayingStateChangeAllowed = false;
 
       for (int i = 0; i < playlist.length; i++) {
-        command(['loadfile', playlist[i].uri, 'append']);
+        if (playlist[i].extras case final extras?) {
+          command([
+            'loadfile',
+            playlist[i].uri,
+            'append',
+            '0',
+            extras.entries.map((e) => '${e.key}=${e.value}').join(','),
+          ]);
+        } else {
+          command(['loadfile', playlist[i].uri, 'append']);
+        }
       }
 
       // If [play] is `true`, then exit paused state.
