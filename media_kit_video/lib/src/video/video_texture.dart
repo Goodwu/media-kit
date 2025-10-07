@@ -239,6 +239,7 @@ class VideoState extends State<Video> with WidgetsBindingObserver {
 
   @override
   void didChangeDependencies() {
+    devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
     _videoViewParametersNotifier =
         media_kit_video_controls.VideoStateInheritedWidget.maybeOf(
               context,
@@ -394,13 +395,14 @@ class VideoState extends State<Video> with WidgetsBindingObserver {
 
   void refreshView() {}
 
-  static final gestureSettings = Platform.isIOS
-      ? const DeviceGestureSettings(touchSlop: 9)
-      : const DeviceGestureSettings(touchSlop: 4);
+  static final mediaQueryData = MediaQueryData(
+      gestureSettings:
+          DeviceGestureSettings(touchSlop: Platform.isIOS ? 9 : 4));
+
+  late double devicePixelRatio;
 
   @override
   Widget build(BuildContext context) {
-    late final devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
     return media_kit_video_controls.VideoStateInheritedWidget(
       state: this as dynamic,
       contextNotifier: _contextNotifier,
@@ -416,90 +418,87 @@ class VideoState extends State<Video> with WidgetsBindingObserver {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                Positioned.fill(
-                  child: MediaQuery(
-                    data: MediaQueryData(gestureSettings: gestureSettings),
-                    child: InteractiveViewer(
-                      transformationController: widget.transformationController,
-                      panEnabled: false,
-                      scaleEnabled: widget.scaleEnabled,
-                      minScale: widget.enableShrinkVideoSize ? 0.75 : 1,
-                      maxScale: 2.0,
-                      boundaryMargin: widget.enableShrinkVideoSize
-                          ? const EdgeInsets.all(double.infinity)
-                          : EdgeInsets.zero,
-                      panAxis: PanAxis.aligned,
-                      onInteractionStart: widget.onInteractionStart,
-                      onInteractionUpdate: widget.onInteractionUpdate,
-                      onInteractionEnd: widget.onInteractionEnd,
-                      child: Transform.flip(
-                        flipX: widget.flipX,
-                        flipY: widget.flipY,
-                        child: ClipRect(
-                          child: FittedBox(
-                            fit: videoViewParameters.fit,
-                            alignment: videoViewParameters.alignment,
-                            child: ValueListenableBuilder<
-                                PlatformVideoController?>(
-                              valueListenable: widget.controller.notifier,
-                              builder: (context, notifier, _) => notifier ==
-                                      null
-                                  ? const SizedBox.shrink()
-                                  : ValueListenableBuilder<int?>(
-                                      valueListenable: notifier.id,
-                                      builder: (context, id, _) {
-                                        return ValueListenableBuilder<Rect?>(
-                                          valueListenable: notifier.rect,
-                                          builder: (context, rect, _) {
-                                            if (id != null &&
-                                                rect != null &&
-                                                _visible) {
-                                              return SizedBox(
-                                                // Apply aspect ratio if provided.
-                                                width: videoViewParameters
-                                                            .aspectRatio ==
-                                                        null
-                                                    ? rect.width /
-                                                        devicePixelRatio
-                                                    : rect.height /
-                                                        devicePixelRatio *
-                                                        videoViewParameters
-                                                            .aspectRatio!,
-                                                height: rect.height /
-                                                    devicePixelRatio,
-                                                child: Stack(
-                                                  children: [
-                                                    const SizedBox(),
+                MediaQuery(
+                  data: mediaQueryData,
+                  child: InteractiveViewer(
+                    transformationController: widget.transformationController,
+                    panEnabled: false,
+                    scaleEnabled: widget.scaleEnabled,
+                    minScale: widget.enableShrinkVideoSize ? 0.75 : 1,
+                    maxScale: 2.0,
+                    boundaryMargin: widget.enableShrinkVideoSize
+                        ? const EdgeInsets.all(double.infinity)
+                        : EdgeInsets.zero,
+                    panAxis: PanAxis.aligned,
+                    onInteractionStart: widget.onInteractionStart,
+                    onInteractionUpdate: widget.onInteractionUpdate,
+                    onInteractionEnd: widget.onInteractionEnd,
+                    child: Transform.flip(
+                      flipX: widget.flipX,
+                      flipY: widget.flipY,
+                      child: ClipRect(
+                        child: FittedBox(
+                          fit: videoViewParameters.fit,
+                          alignment: videoViewParameters.alignment,
+                          child:
+                              ValueListenableBuilder<PlatformVideoController?>(
+                            valueListenable: widget.controller.notifier,
+                            builder: (context, notifier, _) => notifier == null
+                                ? const SizedBox.shrink()
+                                : ValueListenableBuilder<int?>(
+                                    valueListenable: notifier.id,
+                                    builder: (context, id, _) {
+                                      return ValueListenableBuilder<Rect?>(
+                                        valueListenable: notifier.rect,
+                                        builder: (context, rect, _) {
+                                          if (id != null &&
+                                              rect != null &&
+                                              _visible) {
+                                            return SizedBox(
+                                              // Apply aspect ratio if provided.
+                                              width: videoViewParameters
+                                                          .aspectRatio ==
+                                                      null
+                                                  ? rect.width /
+                                                      devicePixelRatio
+                                                  : rect.height /
+                                                      devicePixelRatio *
+                                                      videoViewParameters
+                                                          .aspectRatio!,
+                                              height: rect.height /
+                                                  devicePixelRatio,
+                                              child: Stack(
+                                                children: [
+                                                  const SizedBox(),
+                                                  Positioned.fill(
+                                                    child: Texture(
+                                                      textureId: id,
+                                                      filterQuality:
+                                                          videoViewParameters
+                                                              .filterQuality,
+                                                    ),
+                                                  ),
+                                                  // Keep the |Texture| hidden before the first frame renders. In native implementation, if no default frame size is passed (through VideoController), a starting 1 pixel sized texture/surface is created to initialize the render context & check for H/W support.
+                                                  // This is then resized based on the video dimensions & accordingly texture ID, texture, EGLDisplay, EGLSurface etc. (depending upon platform) are also changed. Just don't show that 1 pixel texture to the UI.
+                                                  // NOTE: Unmounting |Texture| causes the |MarkTextureFrameAvailable| to not do anything on GNU/Linux.
+                                                  if (rect.width <= 1.0 &&
+                                                      rect.height <= 1.0)
                                                     Positioned.fill(
-                                                      child: Texture(
-                                                        textureId: id,
-                                                        filterQuality:
+                                                      child: Container(
+                                                        color:
                                                             videoViewParameters
-                                                                .filterQuality,
+                                                                .fill,
                                                       ),
                                                     ),
-                                                    // Keep the |Texture| hidden before the first frame renders. In native implementation, if no default frame size is passed (through VideoController), a starting 1 pixel sized texture/surface is created to initialize the render context & check for H/W support.
-                                                    // This is then resized based on the video dimensions & accordingly texture ID, texture, EGLDisplay, EGLSurface etc. (depending upon platform) are also changed. Just don't show that 1 pixel texture to the UI.
-                                                    // NOTE: Unmounting |Texture| causes the |MarkTextureFrameAvailable| to not do anything on GNU/Linux.
-                                                    if (rect.width <= 1.0 &&
-                                                        rect.height <= 1.0)
-                                                      Positioned.fill(
-                                                        child: Container(
-                                                          color:
-                                                              videoViewParameters
-                                                                  .fill,
-                                                        ),
-                                                      ),
-                                                  ],
-                                                ),
-                                              );
-                                            }
-                                            return const SizedBox.shrink();
-                                          },
-                                        );
-                                      },
-                                    ),
-                            ),
+                                                ],
+                                              ),
+                                            );
+                                          }
+                                          return const SizedBox.shrink();
+                                        },
+                                      );
+                                    },
+                                  ),
                           ),
                         ),
                       ),
