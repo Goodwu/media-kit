@@ -115,6 +115,7 @@ class Video extends StatefulWidget {
   final Future<void> Function() onExitFullscreen;
 
   final Widget? dmWidget;
+  final Widget? gestureWidget;
 
   final TransformationController? transformationController;
   final bool scaleEnabled;
@@ -124,11 +125,6 @@ class Video extends StatefulWidget {
   final GestureScaleEndCallback? onInteractionEnd;
   final bool flipX;
   final bool flipY;
-
-  final ValueChanged<TapUpDetails>? onTapUp;
-  final GestureTapDownCallback? onDoubleTapDown;
-  final GestureLongPressStartCallback? onLongPressStart;
-  final GestureLongPressEndCallback? onLongPressEnd;
 
   final bool enableDragSubtitle;
   final ValueChanged<EdgeInsets>? onUpdatePadding;
@@ -160,10 +156,7 @@ class Video extends StatefulWidget {
     this.onInteractionEnd,
     this.flipX = false,
     this.flipY = false,
-    this.onTapUp,
-    this.onDoubleTapDown,
-    this.onLongPressStart,
-    this.onLongPressEnd,
+    this.gestureWidget,
     this.enableDragSubtitle = false,
     this.onUpdatePadding,
   }) : super(key: key);
@@ -505,21 +498,15 @@ class VideoState extends State<Video> with WidgetsBindingObserver {
                   ),
                 ),
                 if (widget.dmWidget != null)
-                  Positioned.fill(child: widget.dmWidget!,),
+                  Positioned.fill(child: widget.dmWidget!),
 
                 // if (videoViewParameters.controls != null)
                 //   Positioned.fill(
                 //     child: videoViewParameters.controls!.call(this),
                 //   ),
 
-                Positioned.fill(
-                  child: GestureDetector(
-                    onTapUp: widget.onTapUp,
-                    onDoubleTapDown: widget.onDoubleTapDown,
-                    onLongPressStart: widget.onLongPressStart,
-                    onLongPressEnd: widget.onLongPressEnd,
-                  ),
-                ),
+                if (widget.gestureWidget != null)
+                  Positioned.fill(child: widget.gestureWidget!),
 
                 if (videoViewParameters.subtitleViewConfiguration.visible &&
                     !(widget.controller.player.platform?.configuration.libass ??
