@@ -506,7 +506,7 @@ class VideoState extends State<Video> with WidgetsBindingObserver {
                   ),
                 ),
                 if (widget.dmWidget != null)
-                  Positioned.fill(top: 4, child: widget.dmWidget!),
+                  Positioned.fill(child: widget.dmWidget!,),
 
                 // if (videoViewParameters.controls != null)
                 //   Positioned.fill(
@@ -514,10 +514,6 @@ class VideoState extends State<Video> with WidgetsBindingObserver {
                 //   ),
 
                 Positioned.fill(
-                  left: 16,
-                  top: 25,
-                  right: 15,
-                  bottom: 15,
                   child: GestureDetector(
                     onTapDown: (details) => _tapDetails = details,
                     onTap: widget.onTap == null ? null : () => widget.onTap!(_tapDetails),
