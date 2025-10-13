@@ -125,7 +125,7 @@ class Video extends StatefulWidget {
   final bool flipX;
   final bool flipY;
 
-  final ValueChanged<TapDownDetails?>? onTap;
+  final ValueChanged<TapUpDetails>? onTapUp;
   final GestureTapDownCallback? onDoubleTapDown;
   final GestureLongPressStartCallback? onLongPressStart;
   final GestureLongPressEndCallback? onLongPressEnd;
@@ -160,7 +160,7 @@ class Video extends StatefulWidget {
     this.onInteractionEnd,
     this.flipX = false,
     this.flipY = false,
-    this.onTap,
+    this.onTapUp,
     this.onDoubleTapDown,
     this.onLongPressStart,
     this.onLongPressEnd,
@@ -182,7 +182,6 @@ class VideoState extends State<Video> with WidgetsBindingObserver {
   late int? _width = widget.controller.player.state.width;
   late int? _height = widget.controller.player.state.height;
   late bool _visible = (_width ?? 0) > 0 && (_height ?? 0) > 0;
-  TapDownDetails? _tapDetails;
 
   bool _pauseDueToPauseUponEnteringBackgroundMode = false;
   // Public API:
@@ -515,8 +514,7 @@ class VideoState extends State<Video> with WidgetsBindingObserver {
 
                 Positioned.fill(
                   child: GestureDetector(
-                    onTapDown: (details) => _tapDetails = details,
-                    onTap: widget.onTap == null ? null : () => widget.onTap!(_tapDetails),
+                    onTapUp: widget.onTapUp,
                     onDoubleTapDown: widget.onDoubleTapDown,
                     onLongPressStart: widget.onLongPressStart,
                     onLongPressEnd: widget.onLongPressEnd,
