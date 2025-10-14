@@ -1,7 +1,5 @@
 import 'dart:async';
-import 'dart:io';
 
-import 'package:flutter/gestures.dart' show DeviceGestureSettings;
 import 'package:flutter/material.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 
@@ -24,10 +22,6 @@ class SimpleVideo extends StatefulWidget {
 }
 
 class SimpleVideoState extends State<SimpleVideo> {
-  static final videoMediaQueryData = MediaQueryData(
-    gestureSettings: DeviceGestureSettings(touchSlop: Platform.isIOS ? 9 : 4),
-  );
-
   late double _devicePixelRatio;
   late int? _width = widget.controller.player.state.width;
   late int? _height = widget.controller.player.state.height;

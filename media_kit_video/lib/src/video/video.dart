@@ -4,4 +4,5 @@
 /// All rights reserved.
 /// Use of this source code is governed by MIT license that can be found in the LICENSE file.
 
-export 'video_texture.dart' if (dart.library.html) 'video_web.dart';
+export 'video_texture.dart';
+export 'simple_video_texture.dart';

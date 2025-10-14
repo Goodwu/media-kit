@@ -19,8 +19,6 @@ import 'package:media_kit_video/src/video_view_parameters.dart';
 import 'package:media_kit_video/src/video_controller/video_controller.dart';
 import 'package:media_kit_video/src/video_controller/platform_video_controller.dart';
 
-export 'simple_video_texture.dart';
-
 /// {@template video}
 ///
 /// Video
