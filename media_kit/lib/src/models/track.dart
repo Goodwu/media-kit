@@ -14,7 +14,7 @@ import 'package:collection/collection.dart';
 /// This may be selected for output in [Player].
 ///
 /// {@endtemplate}
-abstract class _Track {
+sealed class _Track {
   final String id;
   final String? title;
   final String? language;
@@ -33,6 +33,8 @@ abstract class _Track {
   final int? rotate; /* demux-rotate */
   final double? par; /* demux-par */
   final int? audiochannels; /* audio-channels */
+  final String? externalFilename; /* externalFilename */
+  final bool selected; /* selected */
   // ----------------------------------------
 
   /// {@macro _track}
@@ -54,27 +56,25 @@ abstract class _Track {
     this.rotate,
     this.par,
     this.audiochannels,
+    this.externalFilename,
+    this.selected = false,
   });
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    if (this is VideoTrack && other is VideoTrack) return id == other.id;
-    if (this is AudioTrack && other is AudioTrack) return id == other.id;
-    if (this is SubtitleTrack && other is SubtitleTrack) return id == other.id;
+    if (runtimeType == other.runtimeType && other is _Track) {
+      return id == other.id;
+    }
     return false;
   }
 
   @override
-  int get hashCode {
-    if (this is VideoTrack) return 0x1 ^ id.hashCode;
-    if (this is AudioTrack) return 0x2 ^ id.hashCode;
-    if (this is SubtitleTrack) return 0x3 ^ id.hashCode;
-    return 0x0;
-  }
+  int get hashCode => Object.hash(runtimeType, id);
 
   @override
-  String toString() => '$runtimeType('
+  String toString() =>
+      '$runtimeType('
       '$id, '
       '$title, '
       '$language, '
@@ -91,7 +91,9 @@ abstract class _Track {
       'bitrate: $bitrate, '
       'rotate: $rotate, '
       'par: $par, '
-      'audiochannels: $audiochannels'
+      'audiochannels: $audiochannels, '
+      'externalFilename: $externalFilename, '
+      'selected: $selected'
       ')';
 }
 
@@ -123,13 +125,15 @@ class VideoTrack extends _Track {
     super.rotate,
     super.par,
     super.audiochannels,
+    super.externalFilename,
+    super.selected = false,
   });
 
   /// No video track. Disables video output.
-  factory VideoTrack.no() => VideoTrack('no', null, null);
+  factory VideoTrack.no() => const VideoTrack('no', null, null);
 
   /// Default video track. Selects the first video track.
-  factory VideoTrack.auto() => VideoTrack('auto', null, null);
+  factory VideoTrack.auto() => const VideoTrack('auto', null, null);
 }
 
 /// {@template audio_track}
@@ -164,30 +168,24 @@ class AudioTrack extends _Track {
     super.par,
     super.audiochannels,
     this.uri = false,
+    super.externalFilename,
+    super.selected = false,
   });
 
   /// No audio track. Disables audio output.
-  factory AudioTrack.no() => AudioTrack('no', null, null);
+  factory AudioTrack.no() => const AudioTrack('no', null, null);
 
   /// Default audio track. Selects the first audio track.
-  factory AudioTrack.auto() => AudioTrack('auto', null, null);
+  factory AudioTrack.auto() => const AudioTrack('auto', null, null);
 
   /// [AudioTrack] loaded with URI.
   ///
   /// This factory constructor may be used to load external audio as URI.
   ///
   /// **NOTE:** External audio track is automatically unloaded upon playback completion.
-  factory AudioTrack.uri(
-    String uri, {
-    String? title,
-    String? language,
-  }) =>
-      AudioTrack(
-        uri,
-        title,
-        language,
-        uri: true,
-      );
+  const AudioTrack.uri(String uri, {String? title, String? language})
+    : uri = true,
+      super(uri, title, language);
 
   @override
   bool operator ==(Object other) {
@@ -201,7 +199,7 @@ class AudioTrack extends _Track {
   }
 
   @override
-  int get hashCode => 0x3 ^ id.hashCode ^ uri.hashCode;
+  int get hashCode => Object.hash(runtimeType, id, uri);
 }
 
 /// {@template subtitle_track}
@@ -215,9 +213,6 @@ class AudioTrack extends _Track {
 class SubtitleTrack extends _Track {
   /// Whether the subtitle track is loaded from URI.
   final bool uri;
-
-  /// Whether the audio track is loaded from data.
-  final bool data;
 
   /// {@macro subtitle_track}
   const SubtitleTrack(
@@ -239,38 +234,24 @@ class SubtitleTrack extends _Track {
     super.par,
     super.audiochannels,
     this.uri = false,
-    this.data = false,
+    super.externalFilename,
+    super.selected = false,
   });
 
   /// No subtitle track. Disables subtitle output.
-  factory SubtitleTrack.no() => SubtitleTrack('no', null, null);
+  factory SubtitleTrack.no() => const SubtitleTrack('no', null, null);
 
   /// Default subtitle track. Selects the first subtitle track.
-  factory SubtitleTrack.auto() => SubtitleTrack('auto', null, null);
+  factory SubtitleTrack.auto() => const SubtitleTrack('auto', null, null);
 
   /// [SubtitleTrack] loaded with URI.
   ///
   /// This factory constructor may be used to load external subtitles e.g. SRT, WebVTT etc. as URI.
   ///
   /// **NOTE:** External audio track is automatically unloaded upon playback completion.
-  factory SubtitleTrack.uri(
-    String uri, {
-    String? title,
-    String? language,
-  }) =>
-      SubtitleTrack(uri, title, language, uri: true);
-
-  /// [SubtitleTrack] loaded with data.
-  ///
-  /// This factory constructor may be used to load external subtitles e.g. SRT, WebVTT etc. as data.
-  ///
-  /// **NOTE:** External audio track is automatically unloaded upon playback completion.
-  factory SubtitleTrack.data(
-    String data, {
-    String? title,
-    String? language,
-  }) =>
-      SubtitleTrack(data, title, language, data: true);
+  const SubtitleTrack.uri(String uri, {String? title, String? language})
+    : uri = true,
+      super(uri, title, language);
 
   @override
   bool operator ==(Object other) {
@@ -278,13 +259,13 @@ class SubtitleTrack extends _Track {
       return true;
     }
     if (other is SubtitleTrack) {
-      return id == other.id && uri == other.uri && data == other.data;
+      return id == other.id && uri == other.uri;
     }
     return false;
   }
 
   @override
-  int get hashCode => 0x3 ^ id.hashCode ^ uri.hashCode ^ data.hashCode;
+  int get hashCode => Object.hash(runtimeType, id, uri);
 }
 
 // For composition in [PlayerState] & [PlayerStreams] classes.
@@ -337,7 +318,7 @@ class Track {
   }
 
   @override
-  int get hashCode => video.hashCode ^ audio.hashCode ^ subtitle.hashCode;
+  int get hashCode => Object.hash(video, audio, subtitle);
 
   @override
   String toString() =>
@@ -381,20 +362,26 @@ class Tracks {
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     if (other is Tracks) {
-      return ListEquality().equals(video, other.video) &&
-          ListEquality().equals(audio, other.audio) &&
-          ListEquality().equals(subtitle, other.subtitle);
+      return const ListEquality().equals(video, other.video) &&
+          const ListEquality().equals(audio, other.audio) &&
+          const ListEquality().equals(subtitle, other.subtitle);
     }
     return false;
   }
 
   @override
-  int get hashCode =>
-      ListEquality().hash(video) ^
-      ListEquality().hash(audio) ^
-      ListEquality().hash(subtitle);
+  int get hashCode => Object.hash(
+    Object.hashAll(video),
+    Object.hashAll(audio),
+    Object.hashAll(subtitle),
+  );
 
   @override
   String toString() =>
       'Tracks(video: $video, audio: $audio, subtitle: $subtitle)';
+}
+
+// ignore: library_private_types_in_public_api
+extension TrackExt<T extends _Track> on List<T> {
+  T? get selected => skip(2).firstWhereOrNull((i) => i.selected);
 }

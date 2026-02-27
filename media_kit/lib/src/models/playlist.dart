@@ -4,9 +4,7 @@
 /// All rights reserved.
 /// Use of this source code is governed by MIT license that can be found in the LICENSE file.
 
-import 'package:collection/collection.dart';
-import 'package:media_kit/src/models/playable.dart';
-import 'package:media_kit/src/models/media/media.dart';
+part of 'playable.dart';
 
 /// {@template playlist}
 ///
@@ -37,30 +35,21 @@ class Playlist extends Playable {
   final int index;
 
   /// {@macro playlist}
-  const Playlist(
-    this.medias, {
-    this.index = 0,
-  });
+  const Playlist(this.medias, {this.index = 0});
 
-  Playlist copyWith({
-    List<Media>? medias,
-    int? index,
-  }) {
-    return Playlist(
-      medias ?? this.medias,
-      index: index ?? this.index,
-    );
+  Playlist copyWith({List<Media>? medias, int? index}) {
+    return Playlist(medias ?? this.medias, index: index ?? this.index);
   }
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is Playlist &&
-          ListEquality().equals(medias, other.medias) &&
-          index == other.index;
+          index == other.index &&
+          const ListEquality().equals(medias, other.medias);
 
   @override
-  int get hashCode => ListEquality().hash(medias) ^ index.hashCode;
+  int get hashCode => Object.hash(index, Object.hashAll(medias));
 
   @override
   String toString() => 'Playlist(medias: $medias, index: $index)';
