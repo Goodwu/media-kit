@@ -107,6 +107,8 @@ elseif(${CMAKE_SYSTEM_NAME} MATCHES "Android")
     "${CMAKE_CURRENT_SOURCE_DIR}/../../../../../libmpv/src/main/jniLibs/${ANDROID_ABI}/libmediakitandroidhelper.so"
   )
 
+  target_link_options(${TARGET_NAME} PRIVATE "-Wl,-z,max-page-size=16384")
+
   # Additional options.
   set_target_properties(
     ${TARGET_NAME} PROPERTIES
