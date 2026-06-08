@@ -4,6 +4,7 @@
 /// All rights reserved.
 /// Use of this source code is governed by MIT license that can be found in the LICENSE file.
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 
 /// {@template _track}
 ///
@@ -33,7 +34,6 @@ sealed class _Track {
   final int? rotate; /* demux-rotate */
   final double? par; /* demux-par */
   final int? audiochannels; /* audio-channels */
-  final String? externalFilename; /* externalFilename */
   final bool selected; /* selected */
   // ----------------------------------------
 
@@ -56,7 +56,6 @@ sealed class _Track {
     this.rotate,
     this.par,
     this.audiochannels,
-    this.externalFilename,
     this.selected = false,
   });
 
@@ -92,7 +91,6 @@ sealed class _Track {
       'rotate: $rotate, '
       'par: $par, '
       'audiochannels: $audiochannels, '
-      'externalFilename: $externalFilename, '
       'selected: $selected'
       ')';
 }
@@ -125,7 +123,6 @@ class VideoTrack extends _Track {
     super.rotate,
     super.par,
     super.audiochannels,
-    super.externalFilename,
     super.selected = false,
   });
 
@@ -168,7 +165,6 @@ class AudioTrack extends _Track {
     super.par,
     super.audiochannels,
     this.uri = false,
-    super.externalFilename,
     super.selected = false,
   });
 
@@ -234,7 +230,6 @@ class SubtitleTrack extends _Track {
     super.par,
     super.audiochannels,
     this.uri = false,
-    super.externalFilename,
     super.selected = false,
   });
 
@@ -362,9 +357,9 @@ class Tracks {
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     if (other is Tracks) {
-      return const ListEquality().equals(video, other.video) &&
-          const ListEquality().equals(audio, other.audio) &&
-          const ListEquality().equals(subtitle, other.subtitle);
+      return listEquals(video, other.video) &&
+          listEquals(audio, other.audio) &&
+          listEquals(subtitle, other.subtitle);
     }
     return false;
   }

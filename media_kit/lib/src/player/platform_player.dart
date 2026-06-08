@@ -5,7 +5,7 @@
 /// Use of this source code is governed by MIT license that can be found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:typed_data';
+import 'dart:ui' as ui show Image;
 import 'package:media_kit/src/models/subtitle.dart';
 import 'package:meta/meta.dart';
 
@@ -178,9 +178,7 @@ abstract class PlatformPlayer {
     );
   }
 
-  Future<Uint8List?> screenshot({
-    ScreenshotFormat format = ScreenshotFormat.jpeg,
-  }) async {
+  Future<ui.Image?> screenshot() async {
     throw UnimplementedError('[PlatformPlayer.screenshot] is not implemented');
   }
 
@@ -378,5 +376,3 @@ enum MPVLogLevel {
   /// Extremely noisy.
   trace,
 }
-
-enum ScreenshotFormat { none, jpeg, png }

@@ -7,9 +7,9 @@ import 'dart:ffi';
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 import 'package:media_kit/src/models/subtitle.dart';
 import 'package:meta/meta.dart';
-import 'package:image/image.dart';
 import 'package:synchronized/synchronized.dart';
 
 import 'package:media_kit/ffi/ffi.dart';
@@ -20,7 +20,6 @@ import 'package:media_kit/src/player/native/core/initializer.dart';
 import 'package:media_kit/src/player/native/core/native_library.dart';
 import 'package:media_kit/src/player/native/core/initializer_native_event_loop.dart';
 
-import 'package:media_kit/src/player/native/utils/isolates.dart';
 import 'package:media_kit/src/player/native/utils/android_helper.dart';
 
 import 'package:media_kit/src/models/track.dart';
@@ -707,7 +706,7 @@ class NativePlayer extends PlatformPlayer {
         isShuffleEnabled = shuffle;
         return command([shuffle ? 'playlist-shuffle' : 'playlist-unshuffle']);
       }
-      return Future.value();
+      return Future.syncValue(null);
     }
 
     if (synchronized) {
@@ -868,17 +867,21 @@ class NativePlayer extends PlatformPlayer {
   /// * `image/png`: Returns a PNG encoded image.
   /// * `null`: Returns BGRA pixel buffer.
   @override
-  Future<Uint8List?> screenshot({
-    ScreenshotFormat format = ScreenshotFormat.jpeg,
-    bool synchronized = true,
-  }) {
-    Future<Uint8List?> function() {
+  Future<ui.Image?> screenshot({bool synchronized = true}) {
+    Future<ui.Image?> function() {
       throwIfDisposed();
 
-      return compute(
-        _screenshot,
-        _ScreenshotData(ctx.address, NativeLibrary.path, format),
+      final rgba = _bgr0ToRgba();
+      if (rgba == null) return Future.syncValue(null);
+      final completer = Completer<ui.Image>.sync();
+      ui.decodeImageFromPixels(
+        rgba.$1,
+        rgba.$2,
+        rgba.$3,
+        .rgba8888,
+        completer.complete,
       );
+      return completer.future;
     }
 
     if (synchronized) {
@@ -1191,7 +1194,6 @@ class NativePlayer extends PlatformPlayer {
                     double? par;
                     int? audiochannels;
                     bool selected = false;
-                    String? externalFilename;
                     for (int j = 0; j < map.num; j++) {
                       final property = map.keys[j].toDartString();
                       switch (map.values[j].format) {
@@ -1210,8 +1212,6 @@ class NativePlayer extends PlatformPlayer {
                               decoder = value;
                             case 'demux-channels':
                               channels = value;
-                            case 'external-filename':
-                              externalFilename = value;
                           }
                         case generated.mpv_format.MPV_FORMAT_FLAG:
                           switch (property) {
@@ -1270,7 +1270,6 @@ class NativePlayer extends PlatformPlayer {
                           rotate: rotate,
                           par: par,
                           audiochannels: audiochannels,
-                          externalFilename: externalFilename,
                           selected: selected,
                         );
                         video.add(track);
@@ -1294,7 +1293,6 @@ class NativePlayer extends PlatformPlayer {
                           rotate: rotate,
                           par: par,
                           audiochannels: audiochannels,
-                          externalFilename: externalFilename,
                           selected: selected,
                         );
                         audio.add(track);
@@ -1318,7 +1316,6 @@ class NativePlayer extends PlatformPlayer {
                           rotate: rotate,
                           par: par,
                           audiochannels: audiochannels,
-                          externalFilename: externalFilename,
                           selected: selected,
                         );
                         subtitle.add(track);
@@ -2036,118 +2033,76 @@ class NativePlayer extends PlatformPlayer {
     calloc.free(value);
     return audioDevices;
   }
-}
 
-// --------------------------------------------------
-// Performance sensitive methods in [Player] are executed in an [Isolate].
-// This avoids blocking the Dart event loop for long periods of time.
-//
-// TODO: Maybe eventually move all methods to [Isolate]?
-// --------------------------------------------------
+  /// [NativePlayer.screenshot]
+  (Uint8List, int, int)? _bgr0ToRgba() {
+    // https://mpv.io/manual/stable/#command-interface-screenshot-raw
+    const args = ['screenshot-raw', 'video'];
 
-class _ScreenshotData {
-  final int ctx;
-  final String lib;
-  final ScreenshotFormat format;
+    final result = calloc<generated.mpv_node>();
 
-  const _ScreenshotData(this.ctx, this.lib, this.format);
-}
-
-/// [NativePlayer.screenshot]
-Uint8List? _screenshot(_ScreenshotData data) {
-  // ---------
-  final mpv = generated.MPV(DynamicLibrary.open(data.lib));
-  final ctx = Pointer<generated.mpv_handle>.fromAddress(data.ctx);
-  // ---------
-  final format = data.format;
-  // ---------
-
-  // https://mpv.io/manual/stable/#command-interface-screenshot-raw
-  const args = ['screenshot-raw', 'video'];
-
-  final result = calloc<generated.mpv_node>();
-
-  final pointers = args.map((e) => e.toNativeUtf8()).toList();
-  final arr = calloc<Pointer<Uint8>>(args.length + 1);
-  for (int i = 0; i < args.length; i++) {
-    arr[i] = pointers[i];
-  }
-  mpv.mpv_command_ret(ctx, arr, result);
-
-  Uint8List? image;
-
-  if (result.ref.format == generated.mpv_format.MPV_FORMAT_NODE_MAP) {
-    int? w, h, stride;
-    Uint8List? bytes;
-
-    final map = result.ref.u.list;
-    for (int i = 0; i < map.ref.num; i++) {
-      final key = map.ref.keys[i].toDartString();
-      final value = map.ref.values[i];
-      switch (value.format) {
-        case generated.mpv_format.MPV_FORMAT_INT64:
-          switch (key) {
-            case 'w':
-              w = value.u.int64;
-            case 'h':
-              h = value.u.int64;
-            case 'stride':
-              stride = value.u.int64;
-          }
-        case generated.mpv_format.MPV_FORMAT_BYTE_ARRAY:
-          switch (key) {
-            case 'data':
-              final data = value.u.ba.ref.data.cast<Uint8>();
-              bytes = data.asTypedList(value.u.ba.ref.size);
-          }
-      }
+    final pointers = args.map((e) => e.toNativeUtf8()).toList();
+    final arr = calloc<Pointer<Uint8>>(args.length + 1);
+    for (int i = 0; i < args.length; i++) {
+      arr[i] = pointers[i];
     }
+    mpv.mpv_command_ret(ctx, arr, result);
 
-    if (w != null && h != null && stride != null && bytes != null) {
-      switch (format) {
-        case ScreenshotFormat.jpeg:
-          final pixels = Image(width: w, height: h, numChannels: 3);
-          final data = pixels.data!.buffer.asUint8List();
+    try {
+      if (result.ref.format == generated.mpv_format.MPV_FORMAT_NODE_MAP) {
+        int? w, h, stride;
+        Uint8List? bytes;
+
+        final map = result.ref.u.list.ref;
+        for (int i = 0; i < map.num; i++) {
+          final key = map.keys[i].toDartString();
+          final value = map.values[i];
+          switch (value.format) {
+            case generated.mpv_format.MPV_FORMAT_INT64:
+              switch (key) {
+                case 'w':
+                  w = value.u.int64;
+                case 'h':
+                  h = value.u.int64;
+                case 'stride':
+                  stride = value.u.int64;
+              }
+            case generated.mpv_format.MPV_FORMAT_BYTE_ARRAY:
+              switch (key) {
+                case 'data':
+                  final data = value.u.ba.ref.data.cast<Uint8>();
+                  bytes = data.asTypedList(value.u.ba.ref.size);
+              }
+          }
+        }
+
+        if (w != null && h != null && stride != null && bytes != null) {
+          final data = Uint8List(w * h * 4);
           for (int y = 0; y < h; y++) {
             final srcRowStart = y * stride;
-            final dstRowStart = y * w * 3;
+            final dstRowStart = y * w * 4;
             for (int x = 0; x < w; x++) {
               final srcIdx = srcRowStart + (x << 2);
-              final dstIdx = dstRowStart + x * 3;
+              final dstIdx = dstRowStart + x * 4;
               data[dstIdx] = bytes[srcIdx + 2]; // R
               data[dstIdx + 1] = bytes[srcIdx + 1]; // G
               data[dstIdx + 2] = bytes[srcIdx]; // B
+              data[dstIdx + 3] = 0xFF;
             }
           }
-          image = encodeJpg(pixels);
-        case ScreenshotFormat.png:
-          final pixels = Image(width: w, height: h, numChannels: 3);
-          final data = pixels.data!.buffer.asUint8List();
-          for (int y = 0; y < h; y++) {
-            final srcRowStart = y * stride;
-            final dstRowStart = y * w * 3;
-            for (int x = 0; x < w; x++) {
-              final srcIdx = srcRowStart + (x << 2);
-              final dstIdx = dstRowStart + x * 3;
-              data[dstIdx] = bytes[srcIdx + 2]; // R
-              data[dstIdx + 1] = bytes[srcIdx + 1]; // G
-              data[dstIdx + 2] = bytes[srcIdx]; // B
-            }
-          }
-          image = encodePng(pixels);
-        case ScreenshotFormat.none:
-          image = bytes;
+          return (data, w, h);
+        }
       }
+    } finally {
+      pointers.forEach(calloc.free);
+      mpv.mpv_free_node_contents(result);
+
+      calloc.free(arr);
+      calloc.free(result);
     }
+
+    return null;
   }
-
-  pointers.forEach(calloc.free);
-  mpv.mpv_free_node_contents(result);
-
-  calloc.free(arr);
-  calloc.free(result);
-
-  return image;
 }
 
 // --------------------------------------------------

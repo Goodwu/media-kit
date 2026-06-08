@@ -4,7 +4,7 @@
 /// All rights reserved.
 /// Use of this source code is governed by MIT license that can be found in the LICENSE file.
 
-import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 
 part 'playlist.dart';
 part 'media.dart';

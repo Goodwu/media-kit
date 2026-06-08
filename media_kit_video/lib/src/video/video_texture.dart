@@ -328,7 +328,7 @@ class VideoState extends State<Video> with WidgetsBindingObserver {
       widget.controller.player.stream.size.listen((value) {
         _width = value.$1;
         _height = value.$2;
-        final visible = (_width ?? 0) > 0 && (_height ?? 0) > 0;
+        final visible = _width! > 0 && _height! > 0;
         if (_visible != visible) {
           setState(() {
             _visible = visible;

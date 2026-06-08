@@ -46,7 +46,7 @@ class Playlist extends Playable {
       identical(this, other) ||
       other is Playlist &&
           index == other.index &&
-          const ListEquality().equals(medias, other.medias);
+          listEquals(medias, other.medias);
 
   @override
   int get hashCode => Object.hash(index, Object.hashAll(medias));
