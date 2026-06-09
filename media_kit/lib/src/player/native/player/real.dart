@@ -1677,7 +1677,6 @@ class NativePlayer extends PlatformPlayer {
       'scale': 'bilinear',
       'dscale': 'bilinear',
       'dither': 'no',
-      'cache': 'yes',
       'correct-downscaling': 'no',
       'linear-downscaling': 'no',
       'sigmoid-upscaling': 'no',
@@ -1688,9 +1687,7 @@ class NativePlayer extends PlatformPlayer {
       // Other properties based on [PlayerConfiguration].
       if (!configuration.osc) ...const {'osc': 'no', 'osd-level': '0'},
       'title': configuration.title,
-      'demuxer-max-bytes': configuration.bufferSize.toString(),
-      'demuxer-max-back-bytes': configuration.bufferSize.toString(),
-      if (configuration.vo != null) 'vo': '${configuration.vo}',
+      'vo': ?configuration.vo,
       'demuxer-lavf-o': [
         'seg_max_retry=5',
         'strict=experimental',
@@ -1702,10 +1699,13 @@ class NativePlayer extends PlatformPlayer {
       'secondary-sub-visibility': 'no',
     };
 
-    if (test) {
-      properties['vo'] = 'null';
-      properties['ao'] = 'null';
-    }
+    assert(() {
+      if (test) {
+        properties['vo'] = 'null';
+        properties['ao'] = 'null';
+      }
+      return true;
+    }());
 
     await Future.wait(
       properties.entries.map(

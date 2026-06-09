@@ -304,11 +304,6 @@ class PlayerConfiguration {
   /// Default: `none`.
   final MPVLogLevel logLevel;
 
-  /// Sets the demuxer cache size (in bytes) for native backend.
-  ///
-  /// Default: `32` MB or `32 * 1024 * 1024` bytes.
-  final int bufferSize;
-
   /// Sets the list of allowed protocols for native backend.
   ///
   /// Default: `['file', 'tcp', 'tls', 'http', 'https', 'crypto', 'data']`.
@@ -326,7 +321,6 @@ class PlayerConfiguration {
     this.title = 'package:media_kit',
     this.ready,
     this.logLevel = MPVLogLevel.error,
-    this.bufferSize = 32 * 1024 * 1024,
     this.protocolWhitelist = const [
       'udp',
       'rtp',
