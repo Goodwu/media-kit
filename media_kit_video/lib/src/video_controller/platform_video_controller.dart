@@ -51,6 +51,26 @@ abstract class PlatformVideoController {
     int? height,
   });
 
+  /// Creates or binds a platform native video output. Backends without a
+  /// native HDR surface return false and leave Texture output available.
+  Future<bool> createNativeOutput({
+    Object? surfaceId,
+    Object? windowHandle,
+  }) async => false;
+
+  /// Applies stream color metadata and reports whether native output is active.
+  Future<Map<String, Object?>> configureHdrOutput(
+    Map<String, Object?> metadata,
+  ) async => <String, Object?>{
+    'backend': 'none',
+    'appliedColorSpace': 'sdr',
+    'active': false,
+    'failureReason': 'native-hdr-not-supported',
+  };
+
+  /// Restores SDR output before a surface is disposed or rebuilt.
+  Future<void> resetHdrOutput() async {}
+
   /// A [Future] that completes when the first video frame has been rendered.
   Future<void> get waitUntilFirstFrameRendered =>
       waitUntilFirstFrameRenderedCompleter.future;
