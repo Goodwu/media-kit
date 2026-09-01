@@ -46,6 +46,11 @@ jobs:
           git -C "$flutter_ohos" checkout --detach FETCH_HEAD
           echo "$RUNNER_TEMP/flutter-ohos/bin" >> "$GITHUB_PATH"
         working-directory: .
+      - name: Verify Flutter OHOS toolchain
+        run: |
+          set -euo pipefail
+          flutter --version
+          dart --version
       - name: Resolve locked dependencies
         run: flutter pub get --enforce-lockfile
       - name: Build unsigned HAP
