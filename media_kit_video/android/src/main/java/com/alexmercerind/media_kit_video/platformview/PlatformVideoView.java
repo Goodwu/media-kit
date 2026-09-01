@@ -123,7 +123,10 @@ public final class PlatformVideoView implements PlatformView {
 
     /** Applies the display dataspace only after the decoder has identified HDR. */
     public boolean setColorSpace(@NonNull String transfer) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q ||
+        // HCPP is gated at API 34 by the app. Keep this method equally strict:
+        // DataSpace/SurfaceControl dataspace support must never be resolved on
+        // older Android runtimes.
+        if (Build.VERSION.SDK_INT < 34 ||
                 !surfaceView.isAttachedToWindow()) {
             return false;
         }
@@ -151,6 +154,7 @@ public final class PlatformVideoView implements PlatformView {
     @Override
     public void dispose() {
         Log.i(TAG, "dispose: handle=" + handle);
+        PlatformVideoViewFactory.remove(handle);
         if (surfaceView.getHolder().getSurface() != null) {
             surfaceView.getHolder().getSurface().release();
         }

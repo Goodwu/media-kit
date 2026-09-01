@@ -36,6 +36,10 @@ public class PlatformVideoViewFactory extends PlatformViewFactory {
         return view != null && view.setColorSpace(transfer);
     }
 
+    static void remove(long handle) {
+        views.remove(handle);
+    }
+
     /**
      * Constructs a new PlatformVideoViewFactory.
      *
