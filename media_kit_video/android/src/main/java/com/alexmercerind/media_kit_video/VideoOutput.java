@@ -10,6 +10,7 @@ package com.alexmercerind.media_kit_video;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.Surface;
 
 import java.util.Locale;
 
@@ -25,29 +26,58 @@ public class VideoOutput implements TextureRegistry.SurfaceProducer.Callback {
     private final TextureUpdateCallback textureUpdateCallback;
 
     private final TextureRegistry.SurfaceProducer surfaceProducer;
+    private final TextureRegistry.SurfaceTextureEntry surfaceTextureEntry;
+    private final Surface surfaceTextureSurface;
 
     private final Object lock = new Object();
 
-    VideoOutput(TextureRegistry textureRegistryReference, TextureUpdateCallback textureUpdateCallback) {
+    VideoOutput(TextureRegistry textureRegistryReference,
+            boolean enableSurfaceProducer,
+            TextureUpdateCallback textureUpdateCallback) {
         this.textureUpdateCallback = textureUpdateCallback;
 
-        surfaceProducer = textureRegistryReference.createSurfaceProducer();
-        surfaceProducer.setCallback(this);
+        if (enableSurfaceProducer) {
+            surfaceProducer = textureRegistryReference.createSurfaceProducer();
+            surfaceProducer.setCallback(this);
+            surfaceTextureEntry = null;
+            surfaceTextureSurface = null;
+        } else {
+            surfaceProducer = null;
+            surfaceTextureEntry = textureRegistryReference.createSurfaceTexture();
+            surfaceTextureSurface = new Surface(surfaceTextureEntry.surfaceTexture());
+            id = surfaceTextureEntry.id();
+            wid = GlobalObjectRefManager.newGlobalObjectRef(surfaceTextureSurface);
+            textureUpdateCallback.onTextureUpdate(id, wid, 0, 0);
+        }
     }
 
     public void dispose() {
         synchronized (lock) {
-            try {
-                surfaceProducer.getSurface().release();
-            } catch (Throwable e) {
-                Log.e(TAG, "dispose", e);
+            if (surfaceProducer != null) {
+                try {
+                    surfaceProducer.getSurface().release();
+                } catch (Throwable e) {
+                    Log.e(TAG, "dispose", e);
+                }
+                try {
+                    surfaceProducer.release();
+                } catch (Throwable e) {
+                    Log.e(TAG, "dispose", e);
+                }
+                onSurfaceCleanup();
+            } else {
+                textureUpdateCallback.onTextureUpdate(id, 0, 0, 0);
+                if (wid != 0) {
+                    GlobalObjectRefManager.deleteGlobalObjectRef(wid);
+                    wid = 0;
+                }
+                if (surfaceTextureSurface != null) {
+                    surfaceTextureSurface.release();
+                }
+                if (surfaceTextureEntry != null) {
+                    surfaceTextureEntry.release();
+                }
             }
-            try {
-                surfaceProducer.release();
-            } catch (Throwable e) {
-                Log.e(TAG, "dispose", e);
-            }
-            onSurfaceCleanup();
         }
     }
 
@@ -58,6 +88,11 @@ public class VideoOutput implements TextureRegistry.SurfaceProducer.Callback {
     private void setSurfaceSize(int width, int height, boolean force) {
         synchronized (lock) {
             try {
+                if (surfaceProducer == null) {
+                    surfaceTextureEntry.surfaceTexture().setDefaultBufferSize(width, height);
+                    textureUpdateCallback.onTextureUpdate(id, wid, width, height);
+                    return;
+                }
                 if (!force && surfaceProducer.getWidth() == width && surfaceProducer.getHeight() == height) {
                     return;
                 }
@@ -72,6 +107,9 @@ public class VideoOutput implements TextureRegistry.SurfaceProducer.Callback {
     @Override
     public void onSurfaceAvailable() {
         synchronized (lock) {
+            if (surfaceProducer == null) {
+                return;
+            }
             Log.i(TAG, "onSurfaceAvailable: id=" + id + ", wid=" + wid + ", width=" + surfaceProducer.getWidth() + ", height=" + surfaceProducer.getHeight());
             id = surfaceProducer.id();
             wid = GlobalObjectRefManager.newGlobalObjectRef(surfaceProducer.getSurface());
@@ -82,6 +120,9 @@ public class VideoOutput implements TextureRegistry.SurfaceProducer.Callback {
     @Override
     public void onSurfaceCleanup() {
         synchronized (lock) {
+            if (surfaceProducer == null) {
+                return;
+            }
             Log.i(TAG, "onSurfaceCleanup: id=" + id + ", wid=" + wid + ", width=" + surfaceProducer.getWidth() + ", height=" + surfaceProducer.getHeight());
             textureUpdateCallback.onTextureUpdate(id, 0, surfaceProducer.getWidth(), surfaceProducer.getHeight());
             if (wid != 0) {
