@@ -528,6 +528,10 @@ class PlayerConfiguration {
   /// When set to `true`, `hls_ad_filter=1` is passed to disable ads.
   final bool adBlocker;
 
+  /// Additional libmpv options applied before initialization.
+  /// Kept for compatibility with media-kit 1.1.x applications.
+  final Map<String, String> options;
+
   /// {@macro player_configuration}
   const PlayerConfiguration({
     this.vo = 'null',
@@ -555,6 +559,7 @@ class PlayerConfiguration {
       'crypto',
     ],
     this.adBlocker = false,
+    this.options = const <String, String>{},
   });
 }
 

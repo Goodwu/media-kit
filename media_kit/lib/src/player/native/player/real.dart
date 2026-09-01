@@ -2342,6 +2342,7 @@ class NativePlayer extends PlatformPlayer {
         // without the option can safely ignore it.
         if (!configuration.osc) 'osc': 'no',
       };
+      options.addAll(configuration.options);
 
       if (Platform.isAndroid &&
           configuration.libass &&
