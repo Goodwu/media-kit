@@ -5,9 +5,6 @@ on:
     branches:
       - ohos
       - integration/piliplusx-hdr-08b
-  push:
-    branches:
-      - integration/piliplusx-hdr-08b
   workflow_dispatch:
 
 concurrency:
