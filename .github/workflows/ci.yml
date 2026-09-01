@@ -145,6 +145,7 @@ jobs:
           git -C $flutterPath remote add origin https://github.com/flutter/flutter.git
           git -C $flutterPath fetch --depth 1 origin d3b14c876900e553bc736ca19295fc09e3853e8e
           git -C $flutterPath checkout --detach FETCH_HEAD
+          git -C $flutterPath tag -f 3.47.2 FETCH_HEAD
           Add-Content -Path $env:GITHUB_PATH -Value (Join-Path $flutterPath "bin")
           & (Join-Path $flutterPath "bin\flutter.bat") --version
       - run: flutter pub get --enforce-lockfile
