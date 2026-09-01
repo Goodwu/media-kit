@@ -17,6 +17,8 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.SurfaceControl;
+import android.hardware.DataSpace;
 
 import androidx.annotation.NonNull;
 
@@ -119,6 +121,32 @@ public final class PlatformVideoView implements PlatformView {
         return surfaceView;
     }
 
+    /** Applies the display dataspace only after the decoder has identified HDR. */
+    public boolean setColorSpace(@NonNull String transfer) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q ||
+                !surfaceView.isAttachedToWindow()) {
+            return false;
+        }
+        final int dataSpace;
+        if ("pq".equals(transfer)) {
+            dataSpace = DataSpace.DATASPACE_BT2020_PQ;
+        } else if ("hlg".equals(transfer)) {
+            dataSpace = DataSpace.DATASPACE_BT2020_HLG;
+        } else {
+            dataSpace = DataSpace.DATASPACE_SRGB;
+        }
+        try {
+            new SurfaceControl.Transaction()
+                    .setDataSpace(surfaceView.getSurfaceControl(), dataSpace)
+                    .apply();
+            Log.i(TAG, "setColorSpace: handle=" + handle + ", transfer=" + transfer);
+            return true;
+        } catch (Throwable error) {
+            Log.e(TAG, "setColorSpace: handle=" + handle + ", transfer=" + transfer, error);
+            return false;
+        }
+    }
+
     /** Disposes of the resources used by this PlatformView. */
     @Override
     public void dispose() {
@@ -128,4 +156,3 @@ public final class PlatformVideoView implements PlatformView {
         }
     }
 }
-

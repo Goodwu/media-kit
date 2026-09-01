@@ -80,6 +80,12 @@ public class MediaKitVideoPlugin implements FlutterPlugin, MethodCallHandler {
                 result.success(null);
                 break;
             }
+            case "PlatformVideoView.SetColorSpace": {
+                final long handle = Long.parseLong(call.argument("handle"));
+                final String transfer = call.argument("transfer");
+                result.success(PlatformVideoViewFactory.setColorSpace(handle, transfer));
+                break;
+            }
             case "Utils.IsEmulator": {
                 result.success(Utils.isEmulator());
                 break;

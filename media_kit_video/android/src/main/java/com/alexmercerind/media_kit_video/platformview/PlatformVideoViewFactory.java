@@ -20,6 +20,7 @@ import android.util.Log;
 import java.util.Objects;
 import java.util.HashMap;
 import java.util.function.Consumer;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A factory class responsible for creating platform video views that can be embedded in a Flutter
@@ -28,6 +29,12 @@ import java.util.function.Consumer;
 public class PlatformVideoViewFactory extends PlatformViewFactory {
     private static final String TAG = "PlatformVideoViewFactory";
     private final MethodChannel channel;
+    private static final ConcurrentHashMap<Long, PlatformVideoView> views = new ConcurrentHashMap<>();
+
+    public static boolean setColorSpace(long handle, String transfer) {
+        final PlatformVideoView view = views.get(handle);
+        return view != null && view.setColorSpace(transfer);
+    }
 
     /**
      * Constructs a new PlatformVideoViewFactory.
@@ -58,12 +65,13 @@ public class PlatformVideoViewFactory extends PlatformViewFactory {
 
         Log.i(TAG, "Creating PlatformVideoView for handle: " + handle);
         final long finalHandle = handle;
-        return new PlatformVideoView(context, handle, width, height,
+        final PlatformVideoView view = new PlatformVideoView(context, handle, width, height,
             (wid) -> channel.invokeMethod("PlatformVideoView.SurfaceAvailable", new HashMap<String, Object>() {{
                 put("handle", finalHandle);
                 put("wid", wid);
             }})
         );
+        views.put(handle, view);
+        return view;
     }
 }
-
