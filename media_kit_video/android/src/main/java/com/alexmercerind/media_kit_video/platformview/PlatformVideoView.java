@@ -20,6 +20,11 @@ import android.view.View;
 import android.view.SurfaceControl;
 import android.hardware.DataSpace;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import androidx.annotation.NonNull;
 
 import io.flutter.plugin.platform.PlatformView;
@@ -32,6 +37,7 @@ import com.alexmercerind.media_kit_video.GlobalObjectRefManager;
 public final class PlatformVideoView implements PlatformView {
     private static final String TAG = "PlatformVideoView";
     private static final Handler handler = new Handler(Looper.getMainLooper());
+    private static final Executor transactionExecutor = Runnable::run;
     @NonNull
     private final SurfaceView surfaceView;
     private final long handle;
@@ -138,12 +144,31 @@ public final class PlatformVideoView implements PlatformView {
         } else {
             dataSpace = DataSpace.DATASPACE_SRGB;
         }
-        try {
-            new SurfaceControl.Transaction()
-                    .setDataSpace(surfaceView.getSurfaceControl(), dataSpace)
+        final SurfaceControl surfaceControl = surfaceView.getSurfaceControl();
+        if (!surfaceControl.isValid()) {
+            return false;
+        }
+        final CountDownLatch committed = new CountDownLatch(1);
+        final AtomicBoolean transactionCommitted = new AtomicBoolean(false);
+        try (SurfaceControl.Transaction transaction = new SurfaceControl.Transaction()) {
+            transaction
+                    .setDataSpace(surfaceControl, dataSpace)
+                    .addTransactionCommittedListener(transactionExecutor, () -> {
+                        transactionCommitted.set(true);
+                        committed.countDown();
+                    })
                     .apply();
-            Log.i(TAG, "setColorSpace: handle=" + handle + ", transfer=" + transfer);
-            return true;
+            if (!committed.await(500, TimeUnit.MILLISECONDS)) {
+                Log.e(TAG, "setColorSpace: transaction commit timed out: handle=" + handle);
+                return false;
+            }
+            Log.i(TAG, "setColorSpace: handle=" + handle + ", transfer=" + transfer +
+                    ", transactionCommitted=" + transactionCommitted.get());
+            return transactionCommitted.get();
+        } catch (InterruptedException error) {
+            Thread.currentThread().interrupt();
+            Log.e(TAG, "setColorSpace: transaction wait interrupted: handle=" + handle, error);
+            return false;
         } catch (Throwable error) {
             Log.e(TAG, "setColorSpace: handle=" + handle + ", transfer=" + transfer, error);
             return false;
