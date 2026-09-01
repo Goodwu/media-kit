@@ -72,6 +72,10 @@ void nativeEnsureInitialized({String? libmpv}) {
 ///
 /// {@endtemplate}
 class NativePlayer extends PlatformPlayer {
+  /// Compatibility view for media_kit_video's platform-specific controllers.
+  /// The application-facing `Player` typedef points directly to this class.
+  PlatformPlayer? get platform => this;
+
   static Future<NativePlayer> create({
     PlayerConfiguration configuration = const PlayerConfiguration(),
   }) async {
