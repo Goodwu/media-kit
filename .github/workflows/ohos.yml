@@ -44,6 +44,10 @@ jobs:
           git -C "$flutter_ohos" remote add origin https://gitcode.com/openharmony-tpc/flutter_flutter.git
           git -C "$flutter_ohos" fetch --depth 1 origin aa76d9bbeee7806a87dbd202d2550dfd11550b82
           git -C "$flutter_ohos" checkout --detach FETCH_HEAD
+          # The OHOS fork does not publish upstream Flutter release tags. Add
+          # a local build-metadata tag so Flutter reports a semver-compatible
+          # framework version instead of 0.0.0-unknown.
+          git -C "$flutter_ohos" tag -f 3.44.9+ohos aa76d9bbeee7806a87dbd202d2550dfd11550b82
           echo "$RUNNER_TEMP/flutter-ohos/bin" >> "$GITHUB_PATH"
         working-directory: .
       - name: Verify Flutter OHOS toolchain
