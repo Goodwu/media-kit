@@ -10,7 +10,11 @@ import 'package:media_kit/src/player/platform_player.dart';
 void webEnsureInitialized({String? libmpv}) {}
 
 class WebPlayer extends PlatformPlayer {
-  WebPlayer({required super.configuration});
+  WebPlayer({PlayerConfiguration configuration = const PlayerConfiguration()})
+      : super(configuration: configuration);
+
+  /// Compatibility view for media_kit_video's platform-specific controllers.
+  PlatformPlayer? get platform => this;
 
   /// Whether the [WebPlayer] is initialized for unit-testing.
   @visibleForTesting

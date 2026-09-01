@@ -40,10 +40,14 @@ void webEnsureInitialized({String? libmpv}) {}
 ///
 /// {@endtemplate}
 class WebPlayer extends PlatformPlayer {
+  /// Compatibility view for media_kit_video's platform-specific controllers.
+  PlatformPlayer? get platform => this;
+
   /// {@macro web_player}
-  WebPlayer({required super.configuration})
+  WebPlayer({PlayerConfiguration configuration = const PlayerConfiguration()})
       : id = js.context[kInstanceCount] ?? 0,
-        element = html.VideoElement() {
+        element = html.VideoElement(),
+        super(configuration: configuration) {
     lock.synchronized(() async {
       element
         // Do not add autoplay=false attribute: https://stackoverflow.com/a/19664804/12825435
