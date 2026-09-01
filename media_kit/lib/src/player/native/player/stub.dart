@@ -10,7 +10,11 @@ import 'package:media_kit/src/player/platform_player.dart';
 void nativeEnsureInitialized({String? libmpv}) {}
 
 class NativePlayer extends PlatformPlayer {
-  NativePlayer({required super.configuration});
+  NativePlayer({PlayerConfiguration configuration = const PlayerConfiguration()})
+      : super(configuration: configuration);
+
+  /// Compatibility view for media_kit_video's platform-specific controllers.
+  PlatformPlayer? get platform => this;
 
   /// Whether the [NativePlayer] is initialized for unit-testing.
   @visibleForTesting
