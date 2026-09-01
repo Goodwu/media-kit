@@ -85,8 +85,9 @@ class NativePlayer extends PlatformPlayer {
   }
 
   /// {@macro native_player}
-  NativePlayer({required super.configuration})
-      : mpv = generated.MPV(DynamicLibrary.open(NativeLibrary.path)) {
+  NativePlayer({PlayerConfiguration configuration = const PlayerConfiguration()})
+      : mpv = generated.MPV(DynamicLibrary.open(NativeLibrary.path)),
+        super(configuration: configuration) {
     future = _create()
       ..then((_) {
         try {
