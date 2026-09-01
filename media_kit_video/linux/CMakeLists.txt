@@ -34,6 +34,32 @@ option(MEDIA_KIT_USE_SYSTEM_LIBMPV
        "Use the distribution libmpv instead of the bundled prebuilt archive"
        OFF)
 
+# The bundled archive is built on a newer distribution and may require a
+# newer glibc than the target desktop. Prefer a system libmpv automatically on
+# older glibc hosts when one is installed; otherwise retain the verified
+# bundled archive path used by CI and release builds.
+if(NOT MEDIA_KIT_USE_SYSTEM_LIBMPV AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  execute_process(
+    COMMAND getconf GNU_LIBC_VERSION
+    OUTPUT_VARIABLE SYSTEM_GLIBC_VERSION
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_QUIET
+  )
+  if(SYSTEM_GLIBC_VERSION MATCHES "^glibc 2\\.([0-9]+)$")
+    set(SYSTEM_GLIBC_MINOR "${CMAKE_MATCH_1}")
+    if(SYSTEM_GLIBC_MINOR LESS 38)
+      find_package(PkgConfig QUIET)
+      if(PkgConfig_FOUND)
+        pkg_check_modules(SYSTEM_MPV QUIET mpv)
+        if(SYSTEM_MPV_FOUND)
+          set(MEDIA_KIT_USE_SYSTEM_LIBMPV ON CACHE BOOL "" FORCE)
+          message(STATUS "glibc ${SYSTEM_GLIBC_VERSION} detected; using system libmpv")
+        endif()
+      endif()
+    endif()
+  endif()
+endif()
+
 if(ARCH_NAME STREQUAL "x86_64")
   set(LIBMPV_ZIP_URL "https://github.com/Predidit/libmpv-linux-build/releases/download/20260810/libmpv_x86_64.zip")
   set(LIBMPV_ZIP_SHA256 "45922100e5240bf69a72fa2ae140d5b54e1ed03993a8a3746dc798e3ae8ad6e4")
