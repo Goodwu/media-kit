@@ -4,11 +4,6 @@
 /// All rights reserved.
 /// Use of this source code is governed by MIT license that can be found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-
-part 'playlist.dart';
-part 'media.dart';
-
 // A marker interface for accepting both [Media] and [Playlist] in [Player.open].
 
 /// {@template playable}
@@ -19,7 +14,7 @@ part 'media.dart';
 /// A playable item in [Player]. It can be [Media] or [Playlist].
 ///
 /// {@endtemplate}
-sealed class Playable {
+abstract class Playable {
   /// {@macro playable}
   const Playable();
 }

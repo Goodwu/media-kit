@@ -4,29 +4,28 @@
 /// All rights reserved.
 /// Use of this source code is governed by MIT license that can be found in the LICENSE file.
 import 'dart:async';
-import 'dart:io';
 import 'package:flutter/widgets.dart';
 
 import 'package:media_kit/media_kit.dart';
-import 'package:media_kit_video/src/video_controller/android_video_controller/android_video_controller.dart';
-import 'package:media_kit_video/src/video_controller/native_video_controller/native_video_controller.dart';
+
+import 'package:media_kit_video/src/video_controller/video_controller.dart';
 
 /// {@template platform_video_controller}
 ///
 /// PlatformVideoController
 /// -----------------------
 ///
-/// This class provides the interface for platform specific [PlatformVideoController] implementations.
+/// This class provides the interface for platform specific [VideoController] implementations.
 /// The platform specific implementations are expected to implement the methods accordingly.
 ///
-/// The subclasses are then used in composition with the [PlatformVideoController] class, based on the platform the application is running on.
+/// The subclasses are then used in composition with the [VideoController] class, based on the platform the application is running on.
 ///
 /// {@endtemplate}
 abstract class PlatformVideoController {
   /// The [Player] instance associated with this instance.
   final Player player;
 
-  /// User defined configuration for [PlatformVideoController].
+  /// User defined configuration for [VideoController].
   final VideoControllerConfiguration configuration;
 
   /// Texture ID of the video output, registered with Flutter engine by the native implementation.
@@ -36,7 +35,10 @@ abstract class PlatformVideoController {
   final ValueNotifier<Rect?> rect = ValueNotifier<Rect?>(null);
 
   /// {@macro platform_video_controller}
-  PlatformVideoController(this.player, this.configuration);
+  PlatformVideoController(
+    this.player,
+    this.configuration,
+  );
 
   /// Sets the required size of the video output.
   /// This may yield substantial performance improvements if a small [width] & [height] is specified.
@@ -44,7 +46,10 @@ abstract class PlatformVideoController {
   /// Remember:
   /// * “Premature optimization is the root of all evil”
   /// * “With great power comes great responsibility”
-  Future<void>? setSize({int? width, int? height});
+  Future<void> setSize({
+    int? width,
+    int? height,
+  });
 
   /// A [Future] that completes when the first video frame has been rendered.
   Future<void> get waitUntilFirstFrameRendered =>
@@ -55,18 +60,9 @@ abstract class PlatformVideoController {
   @protected
   final waitUntilFirstFrameRenderedCompleter = Completer<void>();
 
-  static Future<PlatformVideoController> create(
-    Player player, {
-    VideoControllerConfiguration configuration =
-        const VideoControllerConfiguration(),
-  }) {
-    return (NativeVideoController.supported
-        ? NativeVideoController.create
-        : AndroidVideoController.supported
-        ? AndroidVideoController.create
-        : throw UnimplementedError(
-            '[VideoController] is unavailable for ${Platform.operatingSystem}.',
-          ))(player, configuration);
+  void dispose() {
+    id.dispose();
+    rect.dispose();
   }
 }
 
@@ -74,7 +70,7 @@ abstract class PlatformVideoController {
 ///
 /// VideoControllerConfiguration
 /// ----------------------------
-/// Configurable options for customizing the [PlatformVideoController] behavior.
+/// Configurable options for customizing the [VideoController] behavior.
 ///
 /// {@endtemplate}
 class VideoControllerConfiguration {
@@ -83,14 +79,21 @@ class VideoControllerConfiguration {
   /// Default: Platform specific.
   /// * Windows, GNU/Linux, macOS & iOS: `libmpv`
   /// * Android: `gpu`
+  /// * Ohos: `gpu-next`
   final String? vo;
 
   /// Sets the [`--hwdec`](https://mpv.io/manual/stable/#options-hwdec) property on native backend.
   ///
   /// Default: Platform specific.
-  /// * Windows, GNU/Linux, macOS & iOS : `auto`
+  /// * Windows, GNU/Linux, macOS & iOS, Ohos : `auto`
   /// * Android: `auto-safe`
   final String? hwdec;
+
+  /// The scale for the video output.
+  /// This may be used for performance reasons. Specifying this option will cause [width] & [height] to be ignored.
+  ///
+  /// Default: `1.0`
+  final double scale;
 
   /// The fixed width for the video output.
   /// This may be used for performance reasons.
@@ -106,8 +109,20 @@ class VideoControllerConfiguration {
 
   /// Whether to enable hardware acceleration.
   ///
+  /// DO NOT DISABLE THIS OPTION MEANINGLESSLY.
+  /// THE BATTERY WILL DRAIN, THE DEVICE MAY HEAT UP & CPU USAGE WILL BE HIGH.
+  ///
   /// Default: `true`
   final bool enableHardwareAcceleration;
+
+  /// Whether to use Flutter's `SurfaceProducer` API on Android.
+  ///
+  /// This option only has effect on Android. If disabled, the Android
+  /// implementation uses the `SurfaceTexture` code path instead. The
+  /// `SurfaceTexture` code path is only effective with Android's Skia backend.
+  ///
+  /// Default: `true`
+  final bool enableAndroidSurfaceProducer;
 
   /// Whether to attach `android.view.Surface` after video parameters are known.
   ///
@@ -116,13 +131,60 @@ class VideoControllerConfiguration {
   /// * [vo] != gpu : `false`
   final bool? androidAttachSurfaceAfterVideoParameters;
 
+  /// Whether to use PlatformView instead of Texture for video rendering on Android.
+  ///
+  /// PlatformView provides better performance and compatibility for some use cases,
+  /// but may have limitations with certain Flutter features (e.g., transformations).
+  ///
+  /// Default: `false`
+  final bool usePlatformView;
+
+  /// Whether to use Hybrid Composition++ (HCPP) for better PlatformView rendering on Android.
+  ///
+  /// Default: `false`
+  final bool useHCPP;
+
   /// {@macro video_controller_configuration}
   const VideoControllerConfiguration({
     this.vo,
     this.hwdec,
     this.width,
     this.height,
+    this.scale = 1.0,
     this.enableHardwareAcceleration = true,
+    this.enableAndroidSurfaceProducer = true,
     this.androidAttachSurfaceAfterVideoParameters,
+    this.usePlatformView = false,
+    this.useHCPP = false,
   });
+
+  /// Returns a copy of this class with the given fields replaced by the new values.
+  VideoControllerConfiguration copyWith({
+    String? vo,
+    String? hwdec,
+    double? scale,
+    int? width,
+    int? height,
+    bool? enableHardwareAcceleration,
+    bool? enableAndroidSurfaceProducer,
+    bool? androidAttachSurfaceAfterVideoParameters,
+    bool? usePlatformView,
+    bool? useHCPP,
+  }) =>
+      VideoControllerConfiguration(
+        vo: vo ?? this.vo,
+        hwdec: hwdec ?? this.hwdec,
+        scale: scale ?? this.scale,
+        width: width ?? this.width,
+        height: height ?? this.height,
+        enableHardwareAcceleration:
+            enableHardwareAcceleration ?? this.enableHardwareAcceleration,
+        enableAndroidSurfaceProducer:
+            enableAndroidSurfaceProducer ?? this.enableAndroidSurfaceProducer,
+        androidAttachSurfaceAfterVideoParameters:
+            androidAttachSurfaceAfterVideoParameters ??
+                this.androidAttachSurfaceAfterVideoParameters,
+        usePlatformView: usePlatformView ?? this.usePlatformView,
+        useHCPP: useHCPP ?? this.useHCPP,
+      );
 }

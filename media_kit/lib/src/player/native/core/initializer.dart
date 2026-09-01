@@ -3,51 +3,74 @@
 /// Copyright © 2021 & onwards, Hitesh Kumar Saini <saini123hitesh@gmail.com>.
 /// All rights reserved.
 /// Use of this source code is governed by MIT license that can be found in the LICENSE file.
-import 'dart:async';
 import 'dart:ffi';
+import 'dart:isolate';
 
-import 'initializer_isolate.dart';
-import 'initializer_native_event_loop.dart';
+import 'package:media_kit/generated/libmpv/bindings.dart' as generated;
+import 'package:media_kit/src/player/native/core/execmem_restriction.dart';
+import 'package:media_kit/src/player/native/core/initializer_isolate.dart';
+import 'package:media_kit/src/player/native/core/initializer_native_callable.dart';
+import 'package:media_kit/src/values.dart';
 
-import 'package:media_kit/generated/libmpv/bindings.dart';
-
-/// Creates & returns initialized [Pointer<mpv_handle>].
-/// Pass [path] to libmpv dynamic library & [callback] to receive event callbacks as [Pointer<mpv_event>].
+/// {@template initializer}
 ///
-/// Optionally, [options] may be passed to set libmpv options before the initialization.
+/// Initializer
+/// -----------
+/// Initializes [Pointer<mpv_handle>] & notifies about events through the supplied callback.
 ///
-/// Platform specific threaded event loop is preferred over [Isolate] based event loop (automatic fallback).
-/// See package:media_kit_native_event_loop for more details.
-abstract class Initializer {
-  /// Creates & returns initialized [Pointer<mpv_handle>].
-  static FutureOr<Pointer<mpv_handle>> create(
-    MPV mpv,
-    FutureOr<void> Function(Pointer<mpv_event> event)? callback, {
+/// {@endtemplate}
+class Initializer {
+  /// Singleton instance.
+  static Initializer? _instance;
+
+  /// {@macro initializer}
+  Initializer._(this.mpv);
+
+  /// {@macro initializer}
+  factory Initializer(generated.MPV mpv) {
+    _instance ??= Initializer._(mpv);
+    return _instance!;
+  }
+
+  /// Generated libmpv C API bindings.
+  final generated.MPV mpv;
+
+  /// Creates [Pointer<mpv_handle>].
+  Future<Pointer<generated.mpv_handle>> create(
+    Future<void> Function(Pointer<generated.mpv_event>) callback, {
     Map<String, String> options = const {},
-  }) {
-    try {
-      return InitializerNativeEventLoop.create(
-        mpv,
-        callback,
-        options,
-      );
-    } catch (e, s) {
-      Zone.current.handleUncaughtError(e, s);
-      return InitializerIsolate.create(
-        mpv,
-        callback,
-        options,
-      );
+  }) async {
+    // Hot-restart tears down the Dart isolate, which invalidates any previously
+    // registered `NativeCallable` trampolines. In debug mode, prefer the isolate
+    // based implementation to avoid native -> Dart callbacks that can outlive
+    // the isolate and crash with "Callback invoked after it has been deleted".
+    // See: https://github.com/media-kit/media-kit/issues/1340
+    // We still use NativeCallable based implementation in release mode and unit tests for better performance.
+    if (kDebugMode && isMainIsolate()) {
+      return InitializerIsolate().create(callback, options: options);
+    }
+    if (!isExecmemRestricted) {
+      return InitializerNativeCallable(mpv).create(callback, options: options);
+    } else {
+      return InitializerIsolate().create(callback, options: options);
     }
   }
 
-  /// Disposes the event loop of the [Pointer<mpv_handle>] created by [create].
-  /// NOTE: [Pointer<mpv_handle>] itself is not disposed.
-  static void dispose(Pointer<mpv_handle> handle) {
-    try {
-      InitializerNativeEventLoop.dispose(handle);
-    } catch (_) {
-      InitializerIsolate.dispose(handle);
+  /// Disposes [Pointer<mpv_handle>].
+  void dispose(Pointer<generated.mpv_handle> ctx) {
+    if (kDebugMode && isMainIsolate()) {
+      InitializerIsolate().dispose(mpv, ctx);
+      return;
     }
+    if (!isExecmemRestricted) {
+      InitializerNativeCallable(mpv).dispose(ctx);
+    } else {
+      InitializerIsolate().dispose(mpv, ctx);
+    }
+  }
+
+  bool isMainIsolate() {
+    final name = Isolate.current.debugName;
+    return name == 'main';
   }
 }

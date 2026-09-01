@@ -120,31 +120,29 @@ class VideoParams {
   }
 
   @override
-  int get hashCode => Object.hash(
-    pixelformat,
-    hwPixelformat,
-    w,
-    h,
-    dw,
-    dh,
-    aspect,
-    par,
-    colormatrix,
-    colorlevels,
-    primaries,
-    gamma,
-    sigPeak,
-    light,
-    chromaLocation,
-    rotate,
-    stereoIn,
-    averageBpp,
-    alpha,
-  );
+  int get hashCode =>
+      pixelformat.hashCode ^
+      hwPixelformat.hashCode ^
+      w.hashCode ^
+      h.hashCode ^
+      dw.hashCode ^
+      dh.hashCode ^
+      aspect.hashCode ^
+      par.hashCode ^
+      colormatrix.hashCode ^
+      colorlevels.hashCode ^
+      primaries.hashCode ^
+      gamma.hashCode ^
+      sigPeak.hashCode ^
+      light.hashCode ^
+      chromaLocation.hashCode ^
+      rotate.hashCode ^
+      stereoIn.hashCode ^
+      averageBpp.hashCode ^
+      alpha.hashCode;
 
   @override
-  String toString() =>
-      'VideoParams('
+  String toString() => 'VideoParams('
       'pixelformat: $pixelformat, '
       'hwPixelformat: $hwPixelformat, '
       'w: $w, '

@@ -7,12 +7,14 @@
 import 'dart:io';
 import 'dart:ffi';
 
+/// {@template native_library}
+///
 /// NativeLibrary
 /// -------------
 ///
-/// This class is used to discover & load the libmpv shared library.
-/// It is generally present with the name `libmpv-2.dll` on Windows & `libmpv.so` on GNU/Linux.
+/// Discovers & loads the libmpv shared library.
 ///
+/// {@endtemplate}
 abstract class NativeLibrary {
   /// The resolved libmpv dynamic library.
   static String get path {
@@ -44,41 +46,66 @@ abstract class NativeLibrary {
       }
     } catch (_) {}
     // Attempt to load default names.
-    final names = switch (Platform.operatingSystem) {
-      'windows' => const ['libmpv-2.dll', 'mpv-2.dll', 'mpv-1.dll'],
-      'linux' => const ['libmpv.so', 'libmpv.so.2', 'libmpv.so.1'],
-      'macos' || 'ios' => const ['Mpv.framework/Mpv'],
-      'android' => const ['libmpv.so'],
-      _ => throw UnimplementedError(
+    final names = {
+      'windows': [
+        'libmpv-2.dll',
+        'mpv-2.dll',
+        'mpv-1.dll',
+      ],
+      'linux': [
+        'libmpv.so.2',
+      ],
+      'macos': [
+        'Mpv.framework/Mpv',
+      ],
+      'ios': [
+        'Mpv.framework/Mpv',
+      ],
+      'android': [
+        'libmpv.so',
+      ],
+      'ohos': [
+        'libmpv.so',
+        'libmpv.so.2',
+      ],
+    }[Platform.operatingSystem];
+    if (names != null) {
+      // Try to load the dynamic library from the system using [DynamicLibrary.open].
+      for (final name in names) {
+        try {
+          DynamicLibrary.open(name);
+          _resolved = name;
+          return;
+        } catch (_) {}
+      }
+      // If the dynamic library is not loaded, throw an [Exception].
+      if (_resolved == null) {
+        throw Exception(
+          {
+            'windows':
+                'Cannot find libmpv-2.dll in your system %PATH%. One way to deal with this is to ship libmpv-2.dll with your compiled executable or script in the same directory.',
+            'linux':
+                'Cannot find libmpv at the usual places. Depending upon your distribution, you can install the libmpv package to make shared library available globally. On Debian or Ubuntu based systems, you can install it with: apt install libmpv-dev.',
+            'macos':
+                'Cannot find Mpv.framework/Mpv. Please ensure it\'s presence in the Frameworks folder of the application.',
+            'ios':
+                'Cannot find Mpv.framework/Mpv. Please ensure it\'s presence in the Frameworks folder of the application.',
+            'android':
+                'Cannot find libmpv.so. Please ensure it\'s presence in the APK.',
+            'ohos':
+                'Cannot find libmpv. Please ensure it\'s presence in the HAP.',
+          }[Platform.operatingSystem]!,
+        );
+      }
+    } else {
+      throw Exception(
         'Unsupported operating system: ${Platform.operatingSystem}',
-      ),
-    };
-    // Try to load the dynamic library from the system using [DynamicLibrary.open].
-    for (final name in names) {
-      try {
-        DynamicLibrary.open(name);
-        _resolved = name;
-        return;
-      } catch (_) {}
-    }
-    // If the dynamic library is not loaded, throw an [Exception].
-    if (_resolved == null) {
-      throw Exception(switch (Platform.operatingSystem) {
-        'windows' =>
-          'Cannot find libmpv-2.dll in your system %PATH%. One way to deal with this is to ship libmpv-2.dll with your compiled executable or script in the same directory.',
-        'linux' =>
-          'Cannot find libmpv at the usual places. Depending upon your distribution, you can install the libmpv package to make shared library available globally. On Debian or Ubuntu based systems, you can install it with: apt install libmpv-dev.',
-        'macos' || 'ios' =>
-          'Cannot find Mpv.framework/Mpv. Please ensure it\'s presence in the Frameworks folder of the application.',
-        'android' =>
-          'Cannot find libmpv.so. Please ensure it\'s presence in the APK.',
-        _ => null,
-      });
+      );
     }
   }
 
   /// The resolved libmpv dynamic library.
   ///
-  /// **NOTE:** We are storing this value as [String] because we want to share this across [Isolate]s.
+  /// **NOTE:** We are storing this value as [String] because we want to send/receive this across [Isolate]s.
   static String? _resolved;
 }

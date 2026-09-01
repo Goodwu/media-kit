@@ -85,15 +85,14 @@ class VideoViewParameters {
           other.subtitleViewConfiguration == subtitleViewConfiguration;
 
   @override
-  int get hashCode => Object.hash(
-    width,
-    height,
-    fit,
-    fill,
-    alignment,
-    aspectRatio,
-    filterQuality,
-    controls,
-    subtitleViewConfiguration,
-  );
+  int get hashCode =>
+      width.hashCode ^
+      height.hashCode ^
+      fit.hashCode ^
+      fill.hashCode ^
+      alignment.hashCode ^
+      aspectRatio.hashCode ^
+      filterQuality.hashCode ^
+      controls.hashCode ^
+      subtitleViewConfiguration.hashCode;
 }

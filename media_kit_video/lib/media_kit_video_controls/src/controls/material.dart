@@ -5,14 +5,12 @@
 /// Use of this source code is governed by MIT license that can be found in the LICENSE file.
 // ignore_for_file: non_constant_identifier_names
 import 'dart:async';
-import 'package:flutter/material.dart';
-import 'package:flutter_volume_controller/flutter_volume_controller.dart';
-import 'package:media_kit_video/media_kit_video.dart';
 
-import 'package:media_kit_video/media_kit_video_controls/src/controls/methods/video_state.dart';
+import 'package:flutter/material.dart';
+import 'package:media_kit_video/media_kit_video.dart';
 import 'package:media_kit_video/media_kit_video_controls/src/controls/extensions/duration.dart';
+import 'package:media_kit_video/media_kit_video_controls/src/controls/methods/video_state.dart';
 import 'package:media_kit_video/media_kit_video_controls/src/controls/widgets/video_controls_theme_data_injector.dart';
-import 'package:screen_brightness_platform_interface/screen_brightness_platform_interface.dart';
 
 /// {@template material_video_controls}
 ///
@@ -42,8 +40,6 @@ const kDefaultMaterialVideoControlsThemeDataFullscreen =
   displaySeekBar: true,
   automaticallyImplySkipNextButton: true,
   automaticallyImplySkipPreviousButton: true,
-  volumeGesture: true,
-  brightnessGesture: true,
   seekGesture: true,
   gesturesEnabledWhileControlsVisible: true,
   seekOnDoubleTap: true,
@@ -58,8 +54,6 @@ const kDefaultMaterialVideoControlsThemeDataFullscreen =
   controlsHoverDuration: Duration(seconds: 3),
   controlsTransitionDuration: Duration(milliseconds: 300),
   bufferingIndicatorBuilder: null,
-  volumeIndicatorBuilder: null,
-  brightnessIndicatorBuilder: null,
   seekIndicatorBuilder: null,
   speedUpIndicatorBuilder: null,
   primaryButtonBar: [
@@ -121,12 +115,6 @@ class MaterialVideoControlsThemeData {
   /// Whether a skip previous button should be displayed if there are more than one videos in the playlist.
   final bool automaticallyImplySkipPreviousButton;
 
-  /// Whether to modify volume on vertical drag gesture on the right side of the screen.
-  final bool volumeGesture;
-
-  /// Whether to modify screen brightness on vertical drag gesture on the left side of the screen.
-  final bool brightnessGesture;
-
   /// Whether to seek on horizontal drag gesture.
   final bool seekGesture;
 
@@ -159,6 +147,12 @@ class MaterialVideoControlsThemeData {
   /// the space for each indicator. Modifying these values can change the layout of the seek indicators,
   /// giving more or less space to each one based on the specified ratios.
   final List<int> seekOnDoubleTapLayoutWidgetRatios;
+
+  /// Duration of seek on double tap backward.
+  final Duration seekOnDoubleTapBackwardDuration;
+
+  /// Duration of seek on double tap forward.
+  final Duration seekOnDoubleTapForwardDuration;
 
   /// Whether the controls are initially visible.
   final bool visibleOnMount;
@@ -196,12 +190,6 @@ class MaterialVideoControlsThemeData {
 
   /// Builder for the buffering indicator.
   final Widget Function(BuildContext)? bufferingIndicatorBuilder;
-
-  /// Custom builder for volume indicator.
-  final Widget Function(BuildContext, double)? volumeIndicatorBuilder;
-
-  /// Custom builder for brightness indicator.
-  final Widget Function(BuildContext, double)? brightnessIndicatorBuilder;
 
   /// Custom builder for seek indicator.
   final Widget Function(BuildContext, Duration)? seekIndicatorBuilder;
@@ -274,14 +262,14 @@ class MaterialVideoControlsThemeData {
     this.displaySeekBar = true,
     this.automaticallyImplySkipNextButton = true,
     this.automaticallyImplySkipPreviousButton = true,
-    this.volumeGesture = false,
-    this.brightnessGesture = false,
     this.seekGesture = false,
     this.gesturesEnabledWhileControlsVisible = true,
     this.seekOnDoubleTap = false,
     this.seekOnDoubleTapEnabledWhileControlsVisible = true,
     this.seekOnDoubleTapLayoutTapsRatios = const [1, 1, 1],
     this.seekOnDoubleTapLayoutWidgetRatios = const [1, 1, 1],
+    this.seekOnDoubleTapBackwardDuration = const Duration(seconds: 10),
+    this.seekOnDoubleTapForwardDuration = const Duration(seconds: 10),
     this.visibleOnMount = false,
     this.speedUpOnLongPress = false,
     this.speedUpFactor = 2.0,
@@ -292,8 +280,6 @@ class MaterialVideoControlsThemeData {
     this.controlsHoverDuration = const Duration(seconds: 3),
     this.controlsTransitionDuration = const Duration(milliseconds: 300),
     this.bufferingIndicatorBuilder,
-    this.volumeIndicatorBuilder,
-    this.brightnessIndicatorBuilder,
     this.seekIndicatorBuilder,
     this.speedUpIndicatorBuilder,
     this.primaryButtonBar = const [
@@ -333,14 +319,14 @@ class MaterialVideoControlsThemeData {
     bool? displaySeekBar,
     bool? automaticallyImplySkipNextButton,
     bool? automaticallyImplySkipPreviousButton,
-    bool? volumeGesture,
-    bool? brightnessGesture,
     bool? seekGesture,
     bool? gesturesEnabledWhileControlsVisible,
     bool? seekOnDoubleTap,
     bool? seekOnDoubleTapEnabledWhileControlsVisible,
     List<int>? seekOnDoubleTapLayoutTapsRatios,
     List<int>? seekOnDoubleTapLayoutWidgetRatios,
+    Duration? seekOnDoubleTapBackwardDuration,
+    Duration? seekOnDoubleTapForwardDuration,
     bool? visibleOnMount,
     bool? speedUpOnLongPress,
     double? speedUpFactor,
@@ -350,8 +336,6 @@ class MaterialVideoControlsThemeData {
     Duration? controlsHoverDuration,
     Duration? controlsTransitionDuration,
     Widget Function(BuildContext)? bufferingIndicatorBuilder,
-    Widget Function(BuildContext, double)? volumeIndicatorBuilder,
-    Widget Function(BuildContext, double)? brightnessIndicatorBuilder,
     Widget Function(BuildContext, Duration)? seekIndicatorBuilder,
     Widget Function(BuildContext, double)? speedUpIndicatorBuilder,
     List<Widget>? primaryButtonBar,
@@ -380,8 +364,6 @@ class MaterialVideoControlsThemeData {
       automaticallyImplySkipPreviousButton:
           automaticallyImplySkipPreviousButton ??
               this.automaticallyImplySkipPreviousButton,
-      volumeGesture: volumeGesture ?? this.volumeGesture,
-      brightnessGesture: brightnessGesture ?? this.brightnessGesture,
       seekGesture: seekGesture ?? this.seekGesture,
       gesturesEnabledWhileControlsVisible:
           gesturesEnabledWhileControlsVisible ??
@@ -394,6 +376,10 @@ class MaterialVideoControlsThemeData {
           this.seekOnDoubleTapLayoutTapsRatios,
       seekOnDoubleTapLayoutWidgetRatios: seekOnDoubleTapLayoutWidgetRatios ??
           this.seekOnDoubleTapLayoutWidgetRatios,
+      seekOnDoubleTapBackwardDuration: seekOnDoubleTapBackwardDuration ??
+          this.seekOnDoubleTapBackwardDuration,
+      seekOnDoubleTapForwardDuration:
+          seekOnDoubleTapForwardDuration ?? this.seekOnDoubleTapForwardDuration,
       visibleOnMount: visibleOnMount ?? this.visibleOnMount,
       speedUpOnLongPress: speedUpOnLongPress ?? this.speedUpOnLongPress,
       speedUpFactor: speedUpFactor ?? this.speedUpFactor,
@@ -408,10 +394,6 @@ class MaterialVideoControlsThemeData {
           controlsTransitionDuration ?? this.controlsTransitionDuration,
       bufferingIndicatorBuilder:
           bufferingIndicatorBuilder ?? this.bufferingIndicatorBuilder,
-      volumeIndicatorBuilder:
-          volumeIndicatorBuilder ?? this.volumeIndicatorBuilder,
-      brightnessIndicatorBuilder:
-          brightnessIndicatorBuilder ?? this.brightnessIndicatorBuilder,
       seekIndicatorBuilder: seekIndicatorBuilder ?? this.seekIndicatorBuilder,
       speedUpIndicatorBuilder:
           speedUpIndicatorBuilder ?? this.speedUpIndicatorBuilder,
@@ -490,15 +472,7 @@ class _MaterialVideoControlsState extends State<_MaterialVideoControls> {
   late bool visible = _theme(context).visibleOnMount;
   Timer? _timer;
 
-  double _brightnessValue = 0.0;
-  bool _brightnessIndicator = false;
-  Timer? _brightnessTimer;
-
-  double _volumeValue = 0.0;
-  bool _volumeIndicator = false;
-  Timer? _volumeTimer;
-  // The default event stream in package:volume_controller is buggy.
-  bool _volumeInterceptEventStream = false;
+  double _currentRate = 1.0;
 
   Offset _dragInitialDelta =
       Offset.zero; // Initial position for horizontal drag
@@ -539,6 +513,7 @@ class _MaterialVideoControlsState extends State<_MaterialVideoControls> {
     setState(() {
       _speedUpIndicator = true;
     });
+    _currentRate = controller(context).player.state.rate;
     controller(context).player.setRate(_theme(context).speedUpFactor);
   }
 
@@ -546,7 +521,7 @@ class _MaterialVideoControlsState extends State<_MaterialVideoControls> {
     setState(() {
       _speedUpIndicator = false;
     });
-    controller(context).player.setRate(1.0);
+    controller(context).player.setRate(_currentRate);
   }
 
   @override
@@ -600,15 +575,6 @@ class _MaterialVideoControlsState extends State<_MaterialVideoControls> {
     for (final subscription in subscriptions) {
       subscription.cancel();
     }
-    // --------------------------------------------------
-    // package:screen_brightness
-    Future.microtask(() async {
-      try {
-        await ScreenBrightnessPlatform.instance
-            .resetApplicationScreenBrightness();
-      } catch (_) {}
-    });
-    // --------------------------------------------------
     _timerSeekBackwardButton?.cancel();
     _timerSeekForwardButton?.cancel();
     super.dispose();
@@ -771,82 +737,6 @@ class _MaterialVideoControlsState extends State<_MaterialVideoControls> {
   @override
   void initState() {
     super.initState();
-    // --------------------------------------------------
-    // package:volume_controller
-    Future.microtask(() async {
-      try {
-        FlutterVolumeController.updateShowSystemUI(false);
-        _volumeValue = await FlutterVolumeController.getVolume() ?? 0;
-        FlutterVolumeController.addListener((value) {
-          if (mounted && !_volumeInterceptEventStream) {
-            setState(() {
-              _volumeValue = value;
-            });
-          }
-        });
-      } catch (_) {}
-    });
-    // --------------------------------------------------
-    // --------------------------------------------------
-    // package:screen_brightness
-    Future.microtask(() async {
-      try {
-        _brightnessValue = await ScreenBrightnessPlatform.instance.application;
-        ScreenBrightnessPlatform.instance.onApplicationScreenBrightnessChanged
-            .listen((value) {
-          if (mounted) {
-            setState(() {
-              _brightnessValue = value;
-            });
-          }
-        });
-      } catch (_) {}
-    });
-    // --------------------------------------------------
-  }
-
-  Future<void> setVolume(double value) async {
-    // --------------------------------------------------
-    // package:volume_controller
-    try {
-      FlutterVolumeController.setVolume(value);
-    } catch (_) {}
-    setState(() {
-      _volumeValue = value;
-      _volumeIndicator = true;
-      _volumeInterceptEventStream = true;
-    });
-    _volumeTimer?.cancel();
-    _volumeTimer = Timer(const Duration(milliseconds: 200), () {
-      if (mounted) {
-        setState(() {
-          _volumeIndicator = false;
-          _volumeInterceptEventStream = false;
-        });
-      }
-    });
-    // --------------------------------------------------
-  }
-
-  Future<void> setBrightness(double value) async {
-    // --------------------------------------------------
-    // package:screen_brightness
-    try {
-      await ScreenBrightnessPlatform.instance
-          .setApplicationScreenBrightness(value);
-    } catch (_) {}
-    setState(() {
-      _brightnessIndicator = true;
-    });
-    _brightnessTimer?.cancel();
-    _brightnessTimer = Timer(const Duration(milliseconds: 200), () {
-      if (mounted) {
-        setState(() {
-          _brightnessIndicator = false;
-        });
-      }
-    });
-    // --------------------------------------------------
   }
 
   @override
@@ -946,40 +836,6 @@ class _MaterialVideoControlsState extends State<_MaterialVideoControls> {
                           },
                           onHorizontalDragEnd: (details) {
                             onHorizontalDragEnd();
-                          },
-                          onVerticalDragUpdate: (e) async {
-                            final delta = e.delta.dy;
-                            final Offset position = e.localPosition;
-
-                            if (position.dx <= widgetWidth(context) / 2) {
-                              // Left side of screen swiped
-                              if ((!mount &&
-                                      _theme(context).brightnessGesture) ||
-                                  (_theme(context).brightnessGesture &&
-                                      _theme(context)
-                                          .gesturesEnabledWhileControlsVisible)) {
-                                final brightness = _brightnessValue -
-                                    delta /
-                                        _theme(context)
-                                            .verticalGestureSensitivity;
-                                final result = brightness.clamp(0.0, 1.0);
-                                setBrightness(result);
-                              }
-                            } else {
-                              // Right side of screen swiped
-
-                              if ((!mount && _theme(context).volumeGesture) ||
-                                  (_theme(context).volumeGesture &&
-                                      _theme(context)
-                                          .gesturesEnabledWhileControlsVisible)) {
-                                final volume = _volumeValue -
-                                    delta /
-                                        _theme(context)
-                                            .verticalGestureSensitivity;
-                                final result = volume.clamp(0.0, 1.0);
-                                setVolume(result);
-                              }
-                            }
                           },
                           child: Container(
                             color: const Color(0x00000000),
@@ -1144,122 +1000,6 @@ class _MaterialVideoControlsState extends State<_MaterialVideoControls> {
                   ),
                 ),
               ),
-              // Volume Indicator.
-              IgnorePointer(
-                child: AnimatedOpacity(
-                  curve: Curves.easeInOut,
-                  opacity: (!mount ||
-                              _theme(context)
-                                  .gesturesEnabledWhileControlsVisible) &&
-                          _volumeIndicator
-                      ? 1.0
-                      : 0.0,
-                  duration: _theme(context).controlsTransitionDuration,
-                  child: _theme(context)
-                          .volumeIndicatorBuilder
-                          ?.call(context, _volumeValue) ??
-                      Container(
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: const Color(0x88000000),
-                          borderRadius: BorderRadius.circular(64.0),
-                        ),
-                        height: 52.0,
-                        width: 108.0,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Container(
-                              height: 52.0,
-                              width: 42.0,
-                              alignment: Alignment.centerRight,
-                              child: Icon(
-                                _volumeValue == 0.0
-                                    ? Icons.volume_off
-                                    : _volumeValue < 0.5
-                                        ? Icons.volume_down
-                                        : Icons.volume_up,
-                                color: const Color(0xFFFFFFFF),
-                                size: 24.0,
-                              ),
-                            ),
-                            const SizedBox(width: 8.0),
-                            Expanded(
-                              child: Text(
-                                '${(_volumeValue * 100.0).round()}%',
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  fontSize: 14.0,
-                                  color: Color(0xFFFFFFFF),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 16.0),
-                          ],
-                        ),
-                      ),
-                ),
-              ),
-              // Brightness Indicator.
-              IgnorePointer(
-                child: AnimatedOpacity(
-                  curve: Curves.easeInOut,
-                  opacity: (!mount ||
-                              _theme(context)
-                                  .gesturesEnabledWhileControlsVisible) &&
-                          _brightnessIndicator
-                      ? 1.0
-                      : 0.0,
-                  duration: _theme(context).controlsTransitionDuration,
-                  child: _theme(context)
-                          .brightnessIndicatorBuilder
-                          ?.call(context, _volumeValue) ??
-                      Container(
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: const Color(0x88000000),
-                          borderRadius: BorderRadius.circular(64.0),
-                        ),
-                        height: 52.0,
-                        width: 108.0,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Container(
-                              height: 52.0,
-                              width: 42.0,
-                              alignment: Alignment.centerRight,
-                              child: Icon(
-                                _brightnessValue < 1.0 / 3.0
-                                    ? Icons.brightness_low
-                                    : _brightnessValue < 2.0 / 3.0
-                                        ? Icons.brightness_medium
-                                        : Icons.brightness_high,
-                                color: const Color(0xFFFFFFFF),
-                                size: 24.0,
-                              ),
-                            ),
-                            const SizedBox(width: 8.0),
-                            Expanded(
-                              child: Text(
-                                '${(_brightnessValue * 100.0).round()}%',
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  fontSize: 14.0,
-                                  color: Color(0xFFFFFFFF),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 16.0),
-                          ],
-                        ),
-                      ),
-                ),
-              ),
               // Speedup Indicator.
               IgnorePointer(
                 child: Padding(
@@ -1378,6 +1118,8 @@ class _MaterialVideoControlsState extends State<_MaterialVideoControls> {
                                   opacity: _hideSeekBackwardButton ? 0 : 1.0,
                                   duration: const Duration(milliseconds: 200),
                                   child: _BackwardSeekIndicator(
+                                    duration: _theme(context)
+                                        .seekOnDoubleTapBackwardDuration,
                                     onChanged: (value) {
                                       _seekBarDeltaValueNotifier.value = -value;
                                     },
@@ -1418,10 +1160,10 @@ class _MaterialVideoControlsState extends State<_MaterialVideoControls> {
                         if (_theme(context)
                                 .seekOnDoubleTapLayoutWidgetRatios[1] >
                             0)
-                          Expanded(
-                              flex: _theme(context)
-                                  .seekOnDoubleTapLayoutWidgetRatios[1],
-                              child: const SizedBox()),
+                          Spacer(
+                            flex: _theme(context)
+                                .seekOnDoubleTapLayoutWidgetRatios[1],
+                          ),
                         Expanded(
                           flex: _theme(context)
                               .seekOnDoubleTapLayoutWidgetRatios[2],
@@ -1430,6 +1172,8 @@ class _MaterialVideoControlsState extends State<_MaterialVideoControls> {
                                   opacity: _hideSeekForwardButton ? 0 : 1.0,
                                   duration: const Duration(milliseconds: 200),
                                   child: _ForwardSeekIndicator(
+                                    duration: _theme(context)
+                                        .seekOnDoubleTapForwardDuration,
                                     onChanged: (value) {
                                       _seekBarDeltaValueNotifier.value = value;
                                     },
@@ -1571,7 +1315,6 @@ class MaterialSeekBarState extends State<MaterialSeekBar> {
 
   @override
   void dispose() {
-    FlutterVolumeController.removeListener();
     widget.delta?.removeListener(listener);
     for (final subscription in subscriptions) {
       subscription.cancel();
@@ -1585,6 +1328,7 @@ class MaterialSeekBarState extends State<MaterialSeekBar> {
       tapped = true;
       slider = percent.clamp(0.0, 1.0);
     });
+    controller(context).player.seek(duration * slider);
   }
 
   void onPointerDown() {
@@ -1597,13 +1341,11 @@ class MaterialSeekBarState extends State<MaterialSeekBar> {
   void onPointerUp() {
     widget.onSeekEnd?.call();
     setState(() {
-      tapped = false;
-    });
-    controller(context).player.seek(duration * slider);
-    setState(() {
       // Explicitly set the position to prevent the slider from jumping.
+      tapped = false;
       position = duration * slider;
     });
+    controller(context).player.seek(duration * slider);
   }
 
   void onPanStart(DragStartDetails e, BoxConstraints constraints) {
@@ -2017,10 +1759,12 @@ class MaterialPositionIndicatorState extends State<MaterialPositionIndicator> {
 }
 
 class _BackwardSeekIndicator extends StatefulWidget {
+  final Duration duration;
   final void Function(Duration) onChanged;
   final void Function(Duration) onSubmitted;
   const _BackwardSeekIndicator({
     Key? key,
+    required this.duration,
     required this.onChanged,
     required this.onSubmitted,
   }) : super(key: key);
@@ -2030,7 +1774,7 @@ class _BackwardSeekIndicator extends StatefulWidget {
 }
 
 class _BackwardSeekIndicatorState extends State<_BackwardSeekIndicator> {
-  Duration value = const Duration(seconds: 10);
+  late Duration value = widget.duration;
 
   Timer? timer;
 
@@ -2104,10 +1848,12 @@ class _BackwardSeekIndicatorState extends State<_BackwardSeekIndicator> {
 }
 
 class _ForwardSeekIndicator extends StatefulWidget {
+  final Duration duration;
   final void Function(Duration) onChanged;
   final void Function(Duration) onSubmitted;
   const _ForwardSeekIndicator({
     Key? key,
+    required this.duration,
     required this.onChanged,
     required this.onSubmitted,
   }) : super(key: key);
@@ -2117,7 +1863,7 @@ class _ForwardSeekIndicator extends StatefulWidget {
 }
 
 class _ForwardSeekIndicatorState extends State<_ForwardSeekIndicator> {
-  Duration value = const Duration(seconds: 10);
+  late Duration value = widget.duration;
 
   Timer? timer;
 

@@ -466,6 +466,7 @@ The following state(s) are available as events:
 | `Stream<AudioParams>`       | `audioParams`  | Audio parameters of the currently playing media source e.g. sample rate, channels, etc.                  |
 | `Stream<VideoParams>`       | `videoParams`  | Video parameters of the currently playing media source e.g. width, height, rotation etc.                 |
 | `Stream<double?>`           | `audioBitrate` | Audio bitrate of the currently playing media source.                                                     |
+| `Stream<double?>`           | `videoBitrate` | Video bitrate of the currently playing media source.                                                     |
 | `Stream<AudioDevice>`       | `audioDevice`  | Currently selected audio device.                                                                         |
 | `Stream<List<AudioDevice>>` | `audioDevices` | Currently available audio devices.                                                                       |
 | `Stream<Track>`             | `track`        | Currently selected video, audio and subtitle track.                                                      |
@@ -727,6 +728,7 @@ final VideoController player = VideoController(
   configuration: const VideoControllerConfiguration(
     // Supply your options:
     enableHardwareAcceleration: true,      // default: true
+    enableAndroidSurfaceProducer: true,    // Android only, default: true
     width: 640,                            // default: null
     height: 480,                           // default: null
     // The in-code comments is best place to know more about these options:

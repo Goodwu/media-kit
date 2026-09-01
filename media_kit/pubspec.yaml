@@ -29,21 +29,24 @@ topics:
   - cross-platform
 
 environment:
-  sdk: ">=3.10.0 <4.0.0"
-  flutter: ">=3.29.0 <4.0.0"
+  sdk: ">=3.1.0 <4.0.0"
 
 dependencies:
+  collection: ^1.17.0
+  http: ">=0.13.0 <2.0.0"
+  image: ^4.0.17
+  js: ^0.7.1
   meta: ^1.8.0
   path: ^1.8.0
-  collection: ^1.17.0
+  safe_local_storage: ^2.0.1
   synchronized: ^3.1.0
-  flutter:
-    sdk: flutter
+  universal_platform: ^1.0.0+1
+  uri_parser: ^3.0.0
+  uuid: ">=2.0.0 <5.0.0"
 
 dev_dependencies:
   test: ^1.24.1
-  lints: ^6.1.0
-  http: ">=0.13.0 <2.0.0"
+  lints: ^5.0.0
 
 ffigen:
   name: MPV
@@ -51,33 +54,9 @@ ffigen:
   headers:
     entry-points:
       - headers/client.h
-  type-map:
-    native-types:
-      char:
-        lib: ffi
-        c-type: Uint8
-        dart-type: int
-  exclude-all-by-default: true
-  enums:
-    include:
-      - 'mpv_.*'
-    as-int:
-      exclude: []
-  functions:
-    include:
-      - 'mpv_.*'
-    leaf:
-      include:
-        - 'mpv_client_api_version'
-  structs:
-    include:
-      - 'mpv_.*'
-  unions:
-    include:
-      - 'mpv_.*'
-  globals:
-    include:
-      - 'mpv_.*'
-  macros:
-    include:
-      - 'mpv_.*'
+  dart-bool: true
+
+flutter:
+  assets:
+    - path: assets/web/
+      platforms: [web]

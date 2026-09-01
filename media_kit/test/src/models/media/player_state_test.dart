@@ -4,12 +4,12 @@
 /// All rights reserved.
 /// Use of this source code is governed by MIT license that can be found in the LICENSE file.
 
-import 'package:media_kit/src/models/playable.dart';
-import 'package:media_kit/src/models/subtitle.dart';
 import 'package:test/test.dart';
 import 'package:collection/collection.dart';
 
 import 'package:media_kit/src/models/track.dart';
+import 'package:media_kit/src/models/playlist.dart';
+import 'package:media_kit/src/models/audio_device.dart';
 import 'package:media_kit/src/models/player_state.dart';
 import 'package:media_kit/src/models/playlist_mode.dart';
 
@@ -67,6 +67,14 @@ void main() {
       expect(state.audioParams.channels, isNull);
       expect(state.audioParams.channelCount, isNull);
       expect(state.audioParams.hrChannels, isNull);
+      expect(
+        state.audioBitrate,
+        isNull,
+      );
+      expect(
+        state.videoBitrate,
+        isNull,
+      );
       expect(state.videoParams.pixelformat, isNull);
       expect(state.videoParams.hwPixelformat, isNull);
       expect(state.videoParams.w, isNull);
@@ -86,6 +94,18 @@ void main() {
       expect(state.videoParams.stereoIn, isNull);
       expect(state.videoParams.averageBpp, isNull);
       expect(state.videoParams.alpha, isNull);
+      expect(
+        state.audioDevice,
+        equals(AudioDevice.auto()),
+      );
+      expect(
+        ListEquality().equals(state.audioDevices, [AudioDevice.auto()]),
+        isTrue,
+      );
+      expect(
+        ListEquality().equals(state.audioDevices, [AudioDevice.auto()]),
+        isTrue,
+      );
       expect(
         state.track,
         equals(Track()),
@@ -136,7 +156,7 @@ void main() {
         isNull,
       );
       expect(
-        state.subtitle == const Subtitle.raw(),
+        ListEquality().equals(state.subtitle, ['', '']),
         isTrue,
       );
     },

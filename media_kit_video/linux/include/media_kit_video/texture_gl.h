@@ -22,9 +22,17 @@ G_DECLARE_FINAL_TYPE(TextureGL, texture_gl, TEXTURE_GL, TEXTURE_GL, FlTextureGL)
 
 TextureGL* texture_gl_new(VideoOutput* video_output);
 
-/**
- * @brief Populates texture with video frame.
- */
+// Creates/resizes all three mailbox buffers if needed. GL thread only.
+void texture_gl_check_and_resize(TextureGL* self, gint64 required_width, gint64 required_height);
+
+// Renders an mpv frame to the back buffer. GL thread only.
+// Returns TRUE if a frame was rendered.
+gboolean texture_gl_render(TextureGL* self);
+
+// Publishes the back buffer into the mailbox (dirty=1). GL thread only.
+void texture_gl_swap_buffers(TextureGL* self);
+
+// Consumer side of the mailbox; called from Flutter's raster thread.
 gboolean texture_gl_populate_texture(FlTextureGL* texture,
                                      guint32* target,
                                      guint32* name,

@@ -3,9 +3,8 @@
 /// Copyright © 2023 & onwards, Abdelaziz Mahdy <abdelaziz.h.mahdy@gmail.com>.
 /// All rights reserved.
 /// Use of this source code is governed by MIT license that can be found in the LICENSE file.
-import 'dart:io';
-
 import 'package:media_kit/media_kit.dart';
+import 'package:universal_platform/universal_platform.dart';
 
 import 'package:video_player_media_kit/src/media_kit_video_player.dart';
 
@@ -48,12 +47,14 @@ class VideoPlayerMediaKit {
     bool macOS = false,
     bool windows = false,
     bool linux = false,
+    bool web = false,
   }) {
-    if ((Platform.isAndroid && android) ||
-        (Platform.isIOS && iOS) ||
-        (Platform.isMacOS && macOS) ||
-        (Platform.isWindows && windows) ||
-        (Platform.isLinux && linux)) {
+    if ((UniversalPlatform.isAndroid && android) ||
+        (UniversalPlatform.isIOS && iOS) ||
+        (UniversalPlatform.isMacOS && macOS) ||
+        (UniversalPlatform.isWindows && windows) ||
+        (UniversalPlatform.isLinux && linux) ||
+        (UniversalPlatform.isWeb && web)) {
       MediaKit.ensureInitialized();
       MediaKitVideoPlayer.registerWith();
     }
