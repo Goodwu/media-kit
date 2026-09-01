@@ -28,7 +28,7 @@ jobs:
           cmake -E tar x mpv-dev-x86_64-20230811-git-140ec21.7z libmpv-2.dll
         shell: cmd
 
-      - run: dart pub get
+      - run: dart pub get --enforce-lockfile
       - run: dart test
 
   media_kit-tests-linux:
@@ -47,7 +47,7 @@ jobs:
         with:
           channel: "stable"
           cache: true
-      - run: dart pub get
+      - run: dart pub get --enforce-lockfile
       - run: dart test
 
   media_kit-tests-macos:
@@ -67,7 +67,7 @@ jobs:
         with:
           channel: "stable"
           cache: true
-      - run: dart pub get
+      - run: dart pub get --enforce-lockfile
       - run: dart test
 
   media_kit-tests-web:
@@ -88,7 +88,7 @@ jobs:
           cache: true
       # Delete tests which import native code & depend upon dart:ffi
       - run: rm -r test/src/player/native
-      - run: dart pub get
+      - run: dart pub get --enforce-lockfile
       - run: dart test --platform chrome
 
   windows:
@@ -105,7 +105,7 @@ jobs:
         with:
           channel: "stable"
           cache: true
-      - run: flutter pub get
+      - run: flutter pub get --enforce-lockfile
       - run: flutter build windows --verbose
       - run: cmake -E tar "cfv" "media_kit_test_win32_x64.7z" --format=7zip "build\windows\x64\runner\Release"
       - uses: actions/upload-artifact@v4
@@ -138,7 +138,7 @@ jobs:
           git clone https://github.com/flutter/flutter.git -b stable --depth 1 $flutterPath
           Add-Content -Path $env:GITHUB_PATH -Value (Join-Path $flutterPath "bin")
           & (Join-Path $flutterPath "bin\flutter.bat") --version
-      - run: flutter pub get
+      - run: flutter pub get --enforce-lockfile
       - run: flutter build windows --verbose
       - run: cmake -E tar "cfv" "media_kit_test_win32_arm64.7z" --format=7zip "build\windows\arm64\runner\Release"
       - uses: actions/upload-artifact@v4
@@ -173,7 +173,7 @@ jobs:
       - name: Resolve Flutter packages with transient retry
         run: |
           for attempt in 1 2 3; do
-            if flutter pub get; then
+            if flutter pub get --enforce-lockfile; then
               exit 0
             fi
             if [ "$attempt" -lt 3 ]; then
@@ -210,7 +210,7 @@ jobs:
         with:
           channel: "stable"
           cache: true
-      - run: flutter pub get
+      - run: flutter pub get --enforce-lockfile
       - run: flutter build macos --verbose
       - run: 7z a media_kit_test_macos_universal.7z build/macos/Build/Products/Release/media_kit_test.app
       - uses: actions/upload-artifact@v4
@@ -240,7 +240,7 @@ jobs:
         with:
           channel: "stable"
           cache: true
-      - run: flutter pub get
+      - run: flutter pub get --enforce-lockfile
       - run: flutter build ios --verbose --no-codesign
       - run: 7z a media_kit_test_ios_arm64.7z build/ios/iphoneos/Runner.app
       - uses: actions/upload-artifact@v4
@@ -277,7 +277,7 @@ jobs:
         with:
           channel: "stable"
           cache: true
-      - run: flutter pub get
+      - run: flutter pub get --enforce-lockfile
       - run: flutter build apk --split-per-abi --verbose
       - run: |
           mv build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk build/app/outputs/flutter-apk/media_kit_test_android-armeabi-v7a.apk
@@ -556,3 +556,104 @@ jobs:
 
       - run: flutter pub get
       - run: flutter build apk --split-per-abi --verbose
+
+  release-metadata:
+    name: Release manifest and checksums
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs:
+      - windows
+      - windows-arm64
+      - linux
+      - macos
+      - ios
+      - android
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: "true"
+          fetch-depth: 0
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      - name: Generate release metadata
+        env:
+          SOURCE_COMMIT: ${{ github.sha }}
+          RUN_ID: ${{ github.run_id }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
+        run: |
+          set -euo pipefail
+          mapfile -d '' files < <(find artifacts -type f -print0 | sort -z)
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo 'No build artifacts were downloaded' >&2
+            exit 1
+          fi
+          sha256sum "${files[@]}" | sed 's#  artifacts/##' > SHA256SUMS
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+
+          root = Path('artifacts')
+          entries = []
+          for path in sorted(p for p in root.rglob('*') if p.is_file()):
+              data = path.read_bytes()
+              name = path.name
+              lower = name.lower()
+              if 'android' in lower:
+                  platform = 'android'
+              elif 'ios' in lower:
+                  platform = 'ios'
+              elif 'macos' in lower:
+                  platform = 'macos'
+              elif 'linux' in lower:
+                  platform = 'linux'
+              elif 'win' in lower:
+                  platform = 'windows'
+              else:
+                  platform = 'unknown'
+              if 'arm64' in lower or 'arm-v8a' in lower:
+                  abi = 'arm64'
+              elif 'armeabi-v7a' in lower:
+                  abi = 'armeabi-v7a'
+              elif 'x86_64' in lower or 'x64' in lower:
+                  abi = 'x86_64'
+              elif 'universal' in lower:
+                  abi = 'universal'
+              else:
+                  abi = 'unspecified'
+              entries.append({
+                  'file': str(path.relative_to(root)),
+                  'sha256': hashlib.sha256(data).hexdigest(),
+                  'platform': platform,
+                  'abi': abi,
+              })
+          manifest = {
+              'schema': 1,
+              'source_commit': os.environ['SOURCE_COMMIT'],
+              'workflow_run_id': int(os.environ['RUN_ID']),
+              'workflow_run_attempt': int(os.environ['RUN_ATTEMPT']),
+              'artifacts': entries,
+          }
+          Path('manifest.json').write_text(
+              json.dumps(manifest, indent=2, sort_keys=True) + '\n',
+              encoding='utf-8',
+          )
+          sha256sum manifest.json >> SHA256SUMS
+          cat manifest.json
+          cat SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: media-kit-release-metadata
+          path: |
+            manifest.json
+            SHA256SUMS
+      - uses: softprops/action-gh-release@v1
+        with:
+          draft: true
+          prerelease: false
+          tag_name: "vnext"
+          files: |
+            manifest.json
+            SHA256SUMS
