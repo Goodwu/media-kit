@@ -28,7 +28,7 @@ jobs:
           cmake -E tar x mpv-dev-x86_64-20230811-git-140ec21.7z libmpv-2.dll
         shell: cmd
 
-      - run: dart pub get --enforce-lockfile
+      - run: dart pub get
       - run: dart test
 
   media_kit-tests-linux:
@@ -47,7 +47,7 @@ jobs:
         with:
           channel: "stable"
           cache: true
-      - run: dart pub get --enforce-lockfile
+      - run: dart pub get
       - run: dart test
 
   media_kit-tests-macos:
@@ -67,7 +67,7 @@ jobs:
         with:
           channel: "stable"
           cache: true
-      - run: dart pub get --enforce-lockfile
+      - run: dart pub get
       - run: dart test
 
   media_kit-tests-web:
@@ -88,7 +88,7 @@ jobs:
           cache: true
       # Delete tests which import native code & depend upon dart:ffi
       - run: rm -r test/src/player/native
-      - run: dart pub get --enforce-lockfile
+      - run: dart pub get
       - run: dart test --platform chrome
 
   windows:
