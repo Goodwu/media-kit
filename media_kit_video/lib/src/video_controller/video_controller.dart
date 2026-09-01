@@ -54,6 +54,16 @@ import 'package:media_kit_video/src/video_controller/web_video_controller/web_vi
 ///
 /// {@endtemplate}
 class VideoController {
+  static Future<VideoController> create(
+    Player player, {
+    VideoControllerConfiguration configuration =
+        const VideoControllerConfiguration(),
+  }) async {
+    final controller = VideoController(player, configuration: configuration);
+    await controller.platform.future;
+    return controller;
+  }
+
   /// The [Player] instance associated with this [VideoController].
   final Player player;
 

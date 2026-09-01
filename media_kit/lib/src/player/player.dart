@@ -98,7 +98,7 @@ import 'package:media_kit/src/player/platform_player.dart';
 ///
 /// {@endtemplate}
 ///
-class Player {
+typedef Player = NativePlayer;
   /// {@macro player}
   Player({
     PlayerConfiguration configuration = const PlayerConfiguration(),

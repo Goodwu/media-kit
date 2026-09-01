@@ -72,6 +72,14 @@ void nativeEnsureInitialized({String? libmpv}) {
 ///
 /// {@endtemplate}
 class NativePlayer extends PlatformPlayer {
+  static Future<NativePlayer> create({
+    PlayerConfiguration configuration = const PlayerConfiguration(),
+  }) async {
+    final player = NativePlayer(configuration: configuration);
+    await player.future;
+    return player;
+  }
+
   /// {@macro native_player}
   NativePlayer({required super.configuration})
       : mpv = generated.MPV(DynamicLibrary.open(NativeLibrary.path)) {
