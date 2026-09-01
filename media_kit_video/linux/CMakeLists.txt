@@ -30,6 +30,10 @@ endif()
 
 message(STATUS "Detected architecture: ${ARCH_NAME}")
 
+option(MEDIA_KIT_USE_SYSTEM_LIBMPV
+       "Use the distribution libmpv instead of the bundled prebuilt archive"
+       OFF)
+
 if(ARCH_NAME STREQUAL "x86_64")
   set(LIBMPV_ZIP_URL "https://github.com/Predidit/libmpv-linux-build/releases/download/20260810/libmpv_x86_64.zip")
   set(LIBMPV_ZIP_SHA256 "45922100e5240bf69a72fa2ae140d5b54e1ed03993a8a3746dc798e3ae8ad6e4")
@@ -45,8 +49,23 @@ endif()
 set(LIBMPV_ZIP_PATH "${CMAKE_BINARY_DIR}/libmpv_${ARCH_NAME}.zip")
 set(LIBMPV_UNZIP_DIR "${CMAKE_BINARY_DIR}/mpv")
 
-make_directory("${LIBMPV_UNZIP_DIR}") 
-message(STATUS "create libmpv unzip directory ${LIBMPV_UNZIP_DIR}")
+if(MEDIA_KIT_USE_SYSTEM_LIBMPV)
+  find_package(PkgConfig REQUIRED)
+  pkg_check_modules(MPV REQUIRED IMPORTED_TARGET mpv)
+  find_library(LIBMPV_LIBRARY NAMES mpv mpv.so.2 mpv.so.1
+               PATHS ${MPV_LIBRARY_DIRS} NO_DEFAULT_PATH)
+  if(NOT LIBMPV_LIBRARY)
+    find_library(LIBMPV_LIBRARY NAMES mpv mpv.so.2 mpv.so.1)
+  endif()
+  if(NOT LIBMPV_LIBRARY)
+    message(FATAL_ERROR "system libmpv library not found")
+  endif()
+  get_filename_component(LIBMPV_PATH "${LIBMPV_LIBRARY}" DIRECTORY)
+  set(LIBMPV_HEADER_UNZIP_DIR "${MPV_INCLUDE_DIRS}")
+  message(STATUS "using system libmpv from ${LIBMPV_LIBRARY}")
+else()
+  make_directory("${LIBMPV_UNZIP_DIR}")
+  message(STATUS "create libmpv unzip directory ${LIBMPV_UNZIP_DIR}")
 
 message(STATUS "downloading libmpv from ${LIBMPV_ZIP_URL} to ${LIBMPV_ZIP_PATH}")
 file(DOWNLOAD ${LIBMPV_ZIP_URL} ${LIBMPV_ZIP_PATH} SHOW_PROGRESS STATUS download_status)
@@ -80,6 +99,7 @@ else()
 endif()
 
 set(LIBMPV_PATH "${LIBMPV_UNZIP_DIR}")
+set(LIBMPV_LIBRARY "${LIBMPV_PATH}/libmpv.so.2")
 
 if(EXISTS "${LIBMPV_PATH}/libmpv.so.2")
   message(STATUS "libmpv.so.2 founded ${LIBMPV_PATH}/libmpv.so.2")
@@ -119,6 +139,7 @@ if(NOT unzip_result EQUAL 0)
 else()
   message(STATUS "unzip libmpv header success.")
 endif()
+endif()
 
 if(MEDIA_KIT_LIBS_AVAILABLE)
   add_library(
@@ -155,7 +176,7 @@ if(MEDIA_KIT_LIBS_AVAILABLE)
 
   set_target_properties(
     libmpv PROPERTIES
-    IMPORTED_LOCATION "${LIBMPV_UNZIP_DIR}/libmpv.so.2"
+    IMPORTED_LOCATION "${LIBMPV_LIBRARY}"
   )
 
   target_compile_definitions(
@@ -231,6 +252,6 @@ file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/mpv")
 
 set(
   media_kit_video_bundled_libraries
-  "${LIBMPV_PATH}/libmpv.so.2"
+  "${LIBMPV_LIBRARY}"
   PARENT_SCOPE
 )
