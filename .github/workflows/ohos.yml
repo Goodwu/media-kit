@@ -42,7 +42,7 @@ jobs:
           mkdir -p "$flutter_ohos"
           git -C "$flutter_ohos" init
           git -C "$flutter_ohos" remote add origin https://gitcode.com/openharmony-tpc/flutter_flutter.git
-          git -C "$flutter_ohos" fetch --depth 1 origin 3162ec7f729abb51993cf1006be9b489c0e5c5dc
+          git -C "$flutter_ohos" fetch --depth 1 origin aa76d9bbeee7806a87dbd202d2550dfd11550b82
           git -C "$flutter_ohos" checkout --detach FETCH_HEAD
           echo "$RUNNER_TEMP/flutter-ohos/bin" >> "$GITHUB_PATH"
         working-directory: .
@@ -63,7 +63,7 @@ jobs:
         env:
           SOURCE_COMMIT: ${{ github.sha }}
           RUN_ID: ${{ github.run_id }}
-          FLUTTER_OHOS_COMMIT: 3162ec7f729abb51993cf1006be9b489c0e5c5dc
+          FLUTTER_OHOS_COMMIT: aa76d9bbeee7806a87dbd202d2550dfd11550b82
           SETUP_OHOS_COMMIT: 5c8e74d05fc9888a387b6154ba06d0cd9ede3da1
           OHOS_CLI_VERSION: 6.0.0.858
         run: |
