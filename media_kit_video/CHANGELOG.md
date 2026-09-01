@@ -1,4 +1,5 @@
 ## 1.2.5
+- fix(android): wait for SurfaceControl HDR dataspace transaction commit
 - fix: subtitleView not being updated
 - fix: mobile double tap areas hidden but still mounted
 - fix: mobile center click is delayed
