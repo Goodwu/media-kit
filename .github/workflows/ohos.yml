@@ -29,7 +29,7 @@ jobs:
       - name: Set up HarmonyOS toolchain
         uses: ErBWs/setup-ohos@5c8e74d05fc9888a387b6154ba06d0cd9ede3da1
         with:
-          version: 6.0.0.858
+          version: 26.0.0.621
           cache: true
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -44,28 +44,46 @@ jobs:
           git -C "$flutter_ohos" remote add origin https://gitcode.com/openharmony-tpc/flutter_flutter.git
           git -C "$flutter_ohos" fetch --depth 1 origin aa76d9bbeee7806a87dbd202d2550dfd11550b82
           git -C "$flutter_ohos" checkout --detach FETCH_HEAD
+          # The OHOS fork does not publish upstream Flutter release tags. Add
+          # a local build-metadata tag so Flutter reports a semver-compatible
+          # framework version instead of 0.0.0-unknown.
+          git -C "$flutter_ohos" tag -f 3.44.9+ohos aa76d9bbeee7806a87dbd202d2550dfd11550b82
           echo "$RUNNER_TEMP/flutter-ohos/bin" >> "$GITHUB_PATH"
         working-directory: .
+      - name: Verify Flutter OHOS toolchain
+        run: |
+          set -euo pipefail
+          flutter --version
+          dart --version
       - name: Resolve locked dependencies
-        run: flutter pub get --enforce-lockfile
+        run: |
+          set -euo pipefail
+          cp pubspec.ohos.lock pubspec.lock
+          flutter pub get --enforce-lockfile
+      - name: Upload OHOS lock candidate
+        uses: actions/upload-artifact@v4
+        with:
+          name: ohos-pubspec-lock
+          path: media_kit_test/pubspec.lock
       - name: Build unsigned HAP
         run: |
           set -euo pipefail
           grep -F '"enableSignTask": false' ohos/hvigor/hvigor-config.json5
-          flutter build hap --release
+          flutter build hap --release --no-codesign
       - name: Verify HAP is unsigned and arm64
         run: |
           set -euo pipefail
-          hap=$(find ohos/entry/build -type f -name '*unsigned.hap' -print -quit)
+          hap=$(find build/ohos/hap -type f -name '*unsigned.hap' -print -quit)
           test -n "$hap"
-          unzip -l "$hap" | grep -E '(^|/)libs/arm64-v8a/'
+          unzip -l "$hap" | tee "$RUNNER_TEMP/hap-contents.txt"
+          grep -E 'libs/(arm64-v8a|arm64|aarch64)/' "$RUNNER_TEMP/hap-contents.txt"
       - name: Generate OHOS release metadata
         env:
           SOURCE_COMMIT: ${{ github.sha }}
           RUN_ID: ${{ github.run_id }}
           FLUTTER_OHOS_COMMIT: aa76d9bbeee7806a87dbd202d2550dfd11550b82
           SETUP_OHOS_COMMIT: 5c8e74d05fc9888a387b6154ba06d0cd9ede3da1
-          OHOS_CLI_VERSION: 6.0.0.858
+          OHOS_CLI_VERSION: 26.0.0.621
         run: |
           set -euo pipefail
           hap=$(find ohos/entry/build -type f -name '*unsigned.hap' -print -quit)
