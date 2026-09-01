@@ -60,16 +60,17 @@ jobs:
           set -euo pipefail
           flutter pub get
           cp pubspec.lock pubspec.ohos.lock
-      - name: Build unsigned HAP
-        run: |
-          set -euo pipefail
-          grep -F '"enableSignTask": false' ohos/hvigor/hvigor-config.json5
-          flutter build hap --release
       - name: Upload OHOS lock candidate
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ohos-pubspec-lock
           path: media_kit_test/pubspec.ohos.lock
+      - name: Build unsigned HAP
+        run: |
+          set -euo pipefail
+          grep -F '"enableSignTask": false' ohos/hvigor/hvigor-config.json5
+          flutter build hap --release --no-codesign
       - name: Verify HAP is unsigned and arm64
         run: |
           set -euo pipefail
