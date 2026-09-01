@@ -170,7 +170,17 @@ jobs:
         with:
           channel: "stable"
           cache: true
-      - run: flutter pub get
+      - name: Resolve Flutter packages with transient retry
+        run: |
+          for attempt in 1 2 3; do
+            if flutter pub get; then
+              exit 0
+            fi
+            if [ "$attempt" -lt 3 ]; then
+              sleep $((attempt * 10))
+            fi
+          done
+          exit 1
       - run: flutter build linux --verbose
       - run: 7z a media_kit_test_linux_x64.7z build/linux/x64/release/bundle
       - uses: actions/upload-artifact@v4
