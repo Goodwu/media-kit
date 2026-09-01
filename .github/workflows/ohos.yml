@@ -26,9 +26,9 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y curl unzip xz-utils zip libglu1-mesa python3
         working-directory: .
       - name: Set up HarmonyOS toolchain
-        uses: ErBWs/setup-ohos@v1
+        uses: ErBWs/setup-ohos@5c8e74d05fc9888a387b6154ba06d0cd9ede3da1
         with:
-          version: latest
+          version: 6.0.0.858
           cache: true
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -37,13 +37,17 @@ jobs:
           java-version: "17"
       - name: Set up Flutter OHOS
         run: |
-          git clone -b oh-3.35.7-dev https://gitcode.com/openharmony-tpc/flutter_flutter.git "$RUNNER_TEMP/flutter-ohos"
+          git clone https://gitcode.com/openharmony-tpc/flutter_flutter.git "$RUNNER_TEMP/flutter-ohos"
+          git -C "$RUNNER_TEMP/flutter-ohos" checkout --detach 3162ec7f729abb51993cf1006be9b489c0e5c5dc
           echo "$RUNNER_TEMP/flutter-ohos/bin" >> "$GITHUB_PATH"
         working-directory: .
       - name: Resolve locked dependencies
         run: flutter pub get --enforce-lockfile
       - name: Build unsigned HAP
-        run: flutter build hap --release
+        run: |
+          set -euo pipefail
+          grep -F '"enableSignTask": false' ohos/hvigor/hvigor-config.json5
+          flutter build hap --release
       - name: Verify HAP is unsigned and arm64
         run: |
           set -euo pipefail
@@ -54,6 +58,9 @@ jobs:
         env:
           SOURCE_COMMIT: ${{ github.sha }}
           RUN_ID: ${{ github.run_id }}
+          FLUTTER_OHOS_COMMIT: 3162ec7f729abb51993cf1006be9b489c0e5c5dc
+          SETUP_OHOS_COMMIT: 5c8e74d05fc9888a387b6154ba06d0cd9ede3da1
+          OHOS_CLI_VERSION: 6.0.0.858
         run: |
           set -euo pipefail
           hap=$(find ohos/entry/build -type f -name '*unsigned.hap' -print -quit)
@@ -73,6 +80,9 @@ jobs:
               'schema': 1,
               'source_commit': os.environ['SOURCE_COMMIT'],
               'workflow_run_id': int(os.environ['RUN_ID']),
+              'flutter_ohos_commit': os.environ['FLUTTER_OHOS_COMMIT'],
+              'setup_ohos_commit': os.environ['SETUP_OHOS_COMMIT'],
+              'ohos_cli_version': os.environ['OHOS_CLI_VERSION'],
               'platform': 'ohos',
               'abi': 'arm64-v8a',
               'hdr_backend': 'texture-tone-map',
