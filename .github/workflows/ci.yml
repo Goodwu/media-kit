@@ -5,6 +5,12 @@ on:
       - main
       - dev
   workflow_dispatch:
+    inputs:
+      run_package_tests:
+        description: Run the long media_kit package test suites
+        required: false
+        default: false
+        type: boolean
 
 concurrency:
   group: media-kit-ci-${{ github.workflow }}-${{ github.ref }}
@@ -12,6 +18,7 @@ concurrency:
 
 jobs:
   media_kit-tests-windows:
+    if: ${{ github.event_name == 'pull_request' || inputs.run_package_tests == true }}
     name: package:media_kit tests (Windows)
     runs-on: windows-latest
     defaults:
@@ -37,6 +44,7 @@ jobs:
       - run: dart test
 
   media_kit-tests-linux:
+    if: ${{ github.event_name == 'pull_request' || inputs.run_package_tests == true }}
     name: package:media_kit tests (Linux)
     runs-on: ubuntu-latest
     defaults:
@@ -56,6 +64,7 @@ jobs:
       - run: dart test
 
   media_kit-tests-macos:
+    if: ${{ github.event_name == 'pull_request' || inputs.run_package_tests == true }}
     name: package:media_kit tests (macOS)
     runs-on: macos-latest
     env:
@@ -76,6 +85,7 @@ jobs:
       - run: dart test
 
   media_kit-tests-web:
+    if: ${{ github.event_name == 'pull_request' || inputs.run_package_tests == true }}
     name: package:media_kit tests (Web)
     runs-on: ubuntu-latest
     defaults:
