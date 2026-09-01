@@ -4,6 +4,7 @@
 /// All rights reserved.
 /// Use of this source code is governed by MIT license that can be found in the LICENSE file.
 import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 
 import 'package:media_kit/media_kit.dart';
@@ -35,10 +36,7 @@ abstract class PlatformVideoController {
   final ValueNotifier<Rect?> rect = ValueNotifier<Rect?>(null);
 
   /// {@macro platform_video_controller}
-  PlatformVideoController(
-    this.player,
-    this.configuration,
-  );
+  PlatformVideoController(this.player, this.configuration);
 
   /// Sets the required size of the video output.
   /// This may yield substantial performance improvements if a small [width] & [height] is specified.
@@ -46,10 +44,7 @@ abstract class PlatformVideoController {
   /// Remember:
   /// * “Premature optimization is the root of all evil”
   /// * “With great power comes great responsibility”
-  Future<void> setSize({
-    int? width,
-    int? height,
-  });
+  Future<void> setSize({int? width, int? height});
 
   /// A [Future] that completes when the first video frame has been rendered.
   Future<void> get waitUntilFirstFrameRendered =>
@@ -63,6 +58,13 @@ abstract class PlatformVideoController {
   void dispose() {
     id.dispose();
     rect.dispose();
+  }
+
+  /// Releases this controller before creating another output for the same
+  /// player. Platform implementations with per-player controller caches must
+  /// remove the cached entry as part of this operation.
+  Future<void> disposeForRebuild() async {
+    dispose();
   }
 }
 
@@ -170,21 +172,20 @@ class VideoControllerConfiguration {
     bool? androidAttachSurfaceAfterVideoParameters,
     bool? usePlatformView,
     bool? useHCPP,
-  }) =>
-      VideoControllerConfiguration(
-        vo: vo ?? this.vo,
-        hwdec: hwdec ?? this.hwdec,
-        scale: scale ?? this.scale,
-        width: width ?? this.width,
-        height: height ?? this.height,
-        enableHardwareAcceleration:
-            enableHardwareAcceleration ?? this.enableHardwareAcceleration,
-        enableAndroidSurfaceProducer:
-            enableAndroidSurfaceProducer ?? this.enableAndroidSurfaceProducer,
-        androidAttachSurfaceAfterVideoParameters:
-            androidAttachSurfaceAfterVideoParameters ??
-                this.androidAttachSurfaceAfterVideoParameters,
-        usePlatformView: usePlatformView ?? this.usePlatformView,
-        useHCPP: useHCPP ?? this.useHCPP,
-      );
+  }) => VideoControllerConfiguration(
+    vo: vo ?? this.vo,
+    hwdec: hwdec ?? this.hwdec,
+    scale: scale ?? this.scale,
+    width: width ?? this.width,
+    height: height ?? this.height,
+    enableHardwareAcceleration:
+        enableHardwareAcceleration ?? this.enableHardwareAcceleration,
+    enableAndroidSurfaceProducer:
+        enableAndroidSurfaceProducer ?? this.enableAndroidSurfaceProducer,
+    androidAttachSurfaceAfterVideoParameters:
+        androidAttachSurfaceAfterVideoParameters ??
+        this.androidAttachSurfaceAfterVideoParameters,
+    usePlatformView: usePlatformView ?? this.usePlatformView,
+    useHCPP: useHCPP ?? this.useHCPP,
+  );
 }

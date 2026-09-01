@@ -31,6 +31,7 @@ class OhosVideoController extends PlatformVideoController {
 
   /// [Lock] used to synchronize [onLoadHooks], [onUnloadHooks] & [subscription].
   final lock = Lock();
+  bool _disposed = false;
 
   NativePlayer get platform => player.platform as NativePlayer;
 
@@ -208,7 +209,13 @@ class OhosVideoController extends PlatformVideoController {
   }
 
   /// Disposes the instance. Releases allocated resources back to the system.
+  @override
+  Future<void> disposeForRebuild() => _dispose();
+
+  /// Disposes the instance. Releases allocated resources back to the system.
   Future<void> _dispose() async {
+    if (_disposed) return;
+    _disposed = true;
     await videoParamsSubscription?.cancel();
     final handle = await player.handle;
     _controllers.remove(handle);
