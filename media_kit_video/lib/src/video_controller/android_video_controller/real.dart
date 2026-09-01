@@ -246,6 +246,45 @@ class AndroidVideoController extends PlatformVideoController {
     );
   }
 
+  @override
+  Future<bool> createNativeOutput({
+    Object? surfaceId,
+    Object? windowHandle,
+  }) async {
+    // PlatformView surfaces are published asynchronously through wid.
+    // Never claim creation until the native surface callback has arrived.
+    return wid.value != null && wid.value != 0;
+  }
+
+  @override
+  Future<Map<String, Object?>> configureHdrOutput(
+    Map<String, Object?> metadata,
+  ) async {
+    final handle = await player.handle;
+    final transfer = metadata['transfer']?.toString() ?? 'unknown';
+    final applied = wid.value != null && wid.value != 0
+        ? await _channel.invokeMethod<bool>('PlatformVideoView.SetColorSpace', {
+            'handle': handle.toString(),
+            'transfer': transfer,
+          }) ?? false
+        : false;
+    return <String, Object?>{
+      'backend': 'android-surface-dataspace',
+      'appliedColorSpace': applied ? transfer : 'sdr',
+      'active': applied,
+      'failureReason': applied ? '' : 'surface-dataspace-not-acknowledged',
+    };
+  }
+
+  @override
+  Future<void> resetHdrOutput() async {
+    final handle = await player.handle;
+    await _channel.invokeMethod<bool>('PlatformVideoView.SetColorSpace', {
+      'handle': handle.toString(),
+      'transfer': 'sdr',
+    });
+  }
+
   /// Disposes the instance. Releases allocated resources back to the system.
   Future<void> _dispose() async {
     super.dispose();
