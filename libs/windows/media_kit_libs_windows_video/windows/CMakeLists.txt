@@ -8,6 +8,7 @@ cmake_minimum_required(VERSION 3.14)
 
 # This option is read by the other packages which are part of package:media_kit.
 option(MEDIA_KIT_LIBS_AVAILABLE "package:media_kit libraries are available." ON)
+set(MEDIA_KIT_VIDEO_LIBS_AVAILABLE ON CACHE BOOL "package:media_kit video libraries are available." FORCE)
 
 set(PROJECT_NAME "media_kit_libs_windows_video")
 project(${PROJECT_NAME} LANGUAGES CXX)
