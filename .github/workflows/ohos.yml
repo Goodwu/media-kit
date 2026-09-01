@@ -83,7 +83,7 @@ jobs:
           hap=$(find build/ohos/hap -type f -name '*unsigned.hap' -print -quit)
           test -n "$hap"
           unzip -l "$hap" | tee "$RUNNER_TEMP/hap-contents.txt"
-          grep -E '(^|/)(libs|lib)/.*(arm64-v8a|arm64|aarch64)' "$RUNNER_TEMP/hap-contents.txt"
+          grep -E 'libs/(arm64-v8a|arm64|aarch64)/' "$RUNNER_TEMP/hap-contents.txt"
       - name: Generate OHOS release metadata
         env:
           SOURCE_COMMIT: ${{ github.sha }}
