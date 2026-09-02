@@ -37,7 +37,14 @@ public class VideoOutput: NSObject {
   private var texture: ResizableTextureProtocol!
   private var textureId: Int64 = -1
   private var currentSize: CGSize = CGSize.zero
-  private var disposed: Bool = false
+  private enum DisposalState {
+    case active
+    case disposing
+    case disposed
+  }
+  private let disposalLock = NSLock()
+  private var disposalState: DisposalState = .active
+  private var disposalCompletions: [() -> Void] = []
 
   init(
     handle: Int64,
@@ -65,18 +72,29 @@ public class VideoOutput: NSObject {
   deinit {
     worker.cancel()
 
-    disposed = true
-    disposeTextureId()
+    if !isDisposalRequested {
+      disposeTextureId()
+    }
   }
 
   public func setSize(width: Int64?, height: Int64?) {
+    if isDisposalRequested {
+      return
+    }
     worker.enqueue {
+      if self.isDisposalRequested {
+        return
+      }
       self.width = width
       self.height = height
     }
   }
 
   private func _init() {
+    if isDisposalRequested {
+      return
+    }
+
     let enableHardwareAcceleration =
       VideoOutput.isSimulator ? false : enableHardwareAcceleration
 
@@ -140,17 +158,26 @@ public class VideoOutput: NSObject {
     textureId = -1
     DispatchQueue.main.async {
       // Textures must be unregistered on the platform thread
-      registry_.unregisterTexture(textureId_)
+      if textureId_ >= 0 {
+        registry_.unregisterTexture(textureId_)
+      }
     }
   }
 
   public func updateCallback() {
+    if isDisposalRequested {
+      return
+    }
     worker.enqueue {
       self._updateCallback()
     }
   }
 
   private func _updateCallback() {
+    if isDisposalRequested {
+      return
+    }
+
     let size = videoSize
 
     if size.width == 0 || size.height == 0 {
@@ -168,15 +195,70 @@ public class VideoOutput: NSObject {
       }
     }
 
-    if disposed {
-      return
-    }
-
     texture.render(size)
     DispatchQueue.main.sync { [weak self] in
       guard let that = self else { return }
       // Textures must be marked as available from the main thread
       that.registry.textureFrameAvailable(that.textureId)
+    }
+  }
+
+  // Dispose in the worker's queue order, then synchronously unregister the
+  // Flutter texture on the platform thread. The completion is invoked only
+  // after both the worker and texture registry have stopped referring to this
+  // output, so a replacement using the same handle cannot race the old one.
+  public func dispose(completion: @escaping () -> Void) {
+    let shouldStart = disposalLock.synchronized { () -> Bool in
+      switch disposalState {
+      case .active:
+        disposalState = .disposing
+        disposalCompletions.append(completion)
+        return true
+      case .disposing:
+        disposalCompletions.append(completion)
+        return false
+      case .disposed:
+        DispatchQueue.main.async {
+          completion()
+        }
+        return false
+      }
+    }
+
+    guard shouldStart else {
+      return
+    }
+
+    worker.enqueue {
+      let that = self
+
+      let registry = that.registry
+      let textureId = that.textureId
+      that.textureId = -1
+
+      DispatchQueue.main.sync {
+        if textureId >= 0 {
+          registry.unregisterTexture(textureId)
+        }
+      }
+
+      // Release the native texture only after unregistering it from Flutter.
+      that.texture = nil
+      let completions = that.disposalLock.synchronized { () -> [() -> Void] in
+        that.disposalState = .disposed
+        let completions = that.disposalCompletions
+        that.disposalCompletions.removeAll()
+        return completions
+      }
+      DispatchQueue.main.async {
+        completions.forEach { $0() }
+      }
+    }
+  }
+
+  private var isDisposalRequested: Bool {
+    disposalLock.synchronized {
+      disposalState != .active
     }
   }
 
@@ -198,5 +280,13 @@ public class VideoOutput: NSObject {
                                       ? params.dh
                                       : params.dw))
         )
+  }
+}
+
+private extension NSLock {
+  func synchronized<T>(_ body: () throws -> T) rethrows -> T {
+    lock()
+    defer { unlock() }
+    return try body()
   }
 }
