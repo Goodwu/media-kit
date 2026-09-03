@@ -12,11 +12,14 @@ public class TextureGLContext {
   init(
     context: CGLContextObj,
     textureCache: CVOpenGLTextureCache,
-    size: CGSize
+    size: CGSize,
+    halfFloat: Bool = false
   ) {
     self.context = context
 
-    self.pixelBuffer = OpenGLHelpers.createPixelBuffer(size)
+    self.pixelBuffer = halfFloat
+      ? OpenGLHelpers.createHalfFloatPixelBuffer(size)
+      : OpenGLHelpers.createPixelBuffer(size)
 
     self.texture = OpenGLHelpers.createTexture(
       textureCache,

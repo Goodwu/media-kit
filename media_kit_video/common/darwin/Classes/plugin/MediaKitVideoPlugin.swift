@@ -28,10 +28,30 @@ public class MediaKitVideoPlugin: NSObject, FlutterPlugin {
       utils: utils
     )
     registrar.addMethodCallDelegate(instance, channel: channel)
+    #if canImport(Flutter)
+      registrar.register(NativeSurfaceViewFactory(onLayerReady: { handle, generation, rendererReady in
+        let report = instance.nativeSurfaceOutput.attachLayer(handle: handle, generation: generation, rendererReady: rendererReady)
+        var event: [String: Any] = report
+        event["handle"] = handle
+        event["generation"] = generation
+        event["rendererReady"] = rendererReady
+        instance.channel.invokeMethod("NativeSurface.Ready", arguments: event)
+      }), withId: "com.alexmercerind/media_kit_video/native_surface")
+    #elseif canImport(FlutterMacOS)
+      registrar.register(NativeSurfaceViewFactory(onLayerReady: { handle, generation, rendererReady in
+        let report = instance.nativeSurfaceOutput.attachLayer(handle: handle, generation: generation, rendererReady: rendererReady)
+        var event: [String: Any] = report
+        event["handle"] = handle
+        event["generation"] = generation
+        event["rendererReady"] = rendererReady
+        instance.channel.invokeMethod("NativeSurface.Ready", arguments: event)
+      }), withId: "com.alexmercerind/media_kit_video/native_surface")
+    #endif
   }
 
   private let channel: FlutterMethodChannel
   private let videoOutputManager: VideoOutputManager
+  private let nativeSurfaceOutput = NativeSurfaceOutput()
   private let utils: UtilsProtocol?
 
   init(
@@ -44,6 +64,13 @@ public class MediaKitVideoPlugin: NSObject, FlutterPlugin {
       registry: registry
     )
     self.utils = utils
+    super.init()
+    nativeSurfaceOutput.onStateChanged = { [weak self] report in
+      DispatchQueue.main.async { [weak self] in
+        guard let self else { return }
+        self.channel.invokeMethod("NativeSurface.Ready", arguments: report)
+      }
+    }
   }
 
   public func handle(
@@ -51,6 +78,24 @@ public class MediaKitVideoPlugin: NSObject, FlutterPlugin {
     result: @escaping FlutterResult
   ) {
     switch call.method {
+    case "createNativeOutput":
+      handleNativeOutput(call.arguments, result: result) { handle, generation, _ in
+        return self.nativeSurfaceOutput.create(handle: handle, generation: generation)
+      }
+    case "configureHdrOutput":
+      handleNativeOutput(call.arguments, result: result) { handle, generation, configuration in
+        return self.nativeSurfaceOutput.configure(handle: handle, generation: generation, configuration: configuration)
+      }
+    case "resetHdrOutput":
+      handleNativeOutput(call.arguments, result: result) { handle, generation, _ in
+        return self.nativeSurfaceOutput.reset(handle: handle, generation: generation)
+      }
+    case "disposeNativeOutput":
+      let args = call.arguments as? [String: Any]
+      let handle = Int64((args?["handle"] as? String) ?? "") ?? -1
+      let generation = args?["generation"] as? Int
+      nativeSurfaceOutput.dispose(handle: handle, generation: generation)
+      result(nil)
     case "VideoOutputManager.Create":
       handleCreateMethodCall(call.arguments, result)
     case "VideoOutputManager.SetSize":
@@ -64,6 +109,18 @@ public class MediaKitVideoPlugin: NSObject, FlutterPlugin {
     default:
       result(FlutterMethodNotImplemented)
     }
+  }
+
+  private func handleNativeOutput(
+    _ arguments: Any?,
+    result: @escaping FlutterResult,
+    operation: (Int64, Int, [String: Any]) -> [String: Any]
+  ) {
+    let args = arguments as? [String: Any]
+    let handle = Int64((args?["handle"] as? String) ?? "") ?? -1
+    let generation = args?["generation"] as? Int ?? 0
+    let configuration = args?["configuration"] as? [String: Any] ?? [:]
+    result(operation(handle, generation, configuration))
   }
 
   private func handleCreateMethodCall(

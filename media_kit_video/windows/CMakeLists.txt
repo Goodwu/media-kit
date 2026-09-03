@@ -28,6 +28,7 @@ if(MEDIA_KIT_VIDEO_LIBS_AVAILABLE)
   add_library(
     ${PLUGIN_NAME} SHARED
     "d3d11_renderer.cc"
+    "d3d11_native_surface_backend.cc"
     "mailbox_swap_chain.cc"
     "media_kit_video_plugin_c_api.cc"
     "media_kit_video_plugin.cc"

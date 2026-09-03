@@ -33,7 +33,23 @@ static void media_kit_video_plugin_handle_method_call(
     FlMethodCall* method_call) {
   g_autoptr(FlMethodResponse) response = NULL;
   const gchar* method = fl_method_call_get_name(method_call);
-  if (g_strcmp0(method, "VideoOutputManager.Create") == 0) {
+  if (g_strcmp0(method, "createNativeOutput") == 0 ||
+      g_strcmp0(method, "configureHdrOutput") == 0 ||
+      g_strcmp0(method, "resetHdrOutput") == 0) {
+    FlValue* result = fl_value_new_map();
+    fl_value_set_string_take(result, "backend",
+                             fl_value_new_string("wayland-native-surface"));
+    fl_value_set_string_take(result, "capable", fl_value_new_bool(FALSE));
+    fl_value_set_string_take(result, "active", fl_value_new_bool(FALSE));
+    fl_value_set_string_take(
+        result, "failureReason",
+        fl_value_new_string("native HDR surface probe unavailable"));
+    fl_value_set_string_take(result, "generation", fl_value_new_int(0));
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(result));
+  } else if (g_strcmp0(method, "disposeNativeOutput") == 0) {
+    response = FL_METHOD_RESPONSE(
+        fl_method_success_response_new(fl_value_new_null()));
+  } else if (g_strcmp0(method, "VideoOutputManager.Create") == 0) {
     FlValue* arguments = fl_method_call_get_args(method_call);
     FlValue* handle = fl_value_lookup_string(arguments, "handle");
     FlValue* configuration = fl_value_lookup_string(arguments, "configuration");

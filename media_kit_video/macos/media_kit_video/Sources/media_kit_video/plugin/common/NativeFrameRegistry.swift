@@ -1,0 +1,1 @@
+../../../../../../common/darwin/Classes/plugin/NativeFrameRegistry.swift

@@ -9,6 +9,7 @@
 #include "utils.h"
 
 #include <Windows.h>
+#include <vector>
 
 namespace media_kit_video {
 
@@ -101,7 +102,29 @@ void MediaKitVideoPlugin::ProcessMainThreadTasks() {
 void MediaKitVideoPlugin::HandleMethodCall(
     const flutter::MethodCall<flutter::EncodableValue>& method_call,
     std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
-  if (method_call.method_name().compare("VideoOutputManager.Create") == 0) {
+  // Cross-platform native-output contract. This backend remains fail-closed
+  // until a verified D3D11 flip-model HDR surface is attached.
+  if (method_call.method_name().compare("createNativeOutput") == 0 ||
+      method_call.method_name().compare("configureHdrOutput") == 0 ||
+      method_call.method_name().compare("resetHdrOutput") == 0) {
+    result->Success(flutter::EncodableValue(flutter::EncodableMap{
+        {flutter::EncodableValue("backend"), flutter::EncodableValue("d3d11-native-surface")},
+        {flutter::EncodableValue("capable"), flutter::EncodableValue(false)},
+        {flutter::EncodableValue("active"), flutter::EncodableValue(false)},
+        {flutter::EncodableValue("failureReason"), flutter::EncodableValue("native HDR surface probe unavailable")},
+        {flutter::EncodableValue("supportedInputFormats"), flutter::EncodableValue(std::vector<flutter::EncodableValue>{flutter::EncodableValue("sdr"), flutter::EncodableValue("hdr10"), flutter::EncodableValue("hlg")})},
+        {flutter::EncodableValue("supportedOutputFormats"), flutter::EncodableValue(std::vector<flutter::EncodableValue>{})},
+        {flutter::EncodableValue("sourceProcessing"), flutter::EncodableValue("tone-mapped")},
+        {flutter::EncodableValue("outputEncoding"), flutter::EncodableValue("texture-sdr")},
+        {flutter::EncodableValue("dynamicMetadataApplied"), flutter::EncodableValue(false)},
+        {flutter::EncodableValue("pixelFormat"), flutter::EncodableValue("unknown")},
+        {flutter::EncodableValue("colorSpace"), flutter::EncodableValue("sdr")},
+        {flutter::EncodableValue("headroom"), flutter::EncodableValue(1.0)},
+        {flutter::EncodableValue("generation"), flutter::EncodableValue(int64_t(0))},
+    }));
+  } else if (method_call.method_name().compare("disposeNativeOutput") == 0) {
+    result->Success(flutter::EncodableValue(std::monostate{}));
+  } else if (method_call.method_name().compare("VideoOutputManager.Create") == 0) {
     auto arguments = std::get<flutter::EncodableMap>(*method_call.arguments());
     auto handle =
         std::get<std::string>(arguments[flutter::EncodableValue("handle")]);

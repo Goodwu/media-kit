@@ -45,6 +45,20 @@ public class OpenGLESHelpers {
     return pixelBuffer!
   }
 
+  static public func createHalfFloatPixelBuffer(_ size: CGSize) -> CVPixelBuffer {
+    var pixelBuffer: CVPixelBuffer?
+    let attrs = [
+      kCVPixelBufferMetalCompatibilityKey: true,
+      kCVPixelBufferOpenGLESCompatibilityKey: true,
+    ] as CFDictionary
+    let cvret = CVPixelBufferCreate(
+      kCFAllocatorDefault, Int(size.width), Int(size.height),
+      kCVPixelFormatType_64RGBAHalf, attrs, &pixelBuffer
+    )
+    assert(cvret == kCVReturnSuccess, "CVPixelBufferCreate half-float")
+    return pixelBuffer!
+  }
+
   static public func createTexture(
     _ textureCache: CVOpenGLESTextureCache,
     _ pixelBuffer: CVPixelBuffer,
@@ -71,6 +85,21 @@ public class OpenGLESHelpers {
       "CVOpenGLESTextureCacheCreateTextureFromImage"
     )
 
+    return texture!
+  }
+
+  static public func createHalfFloatTexture(
+    _ textureCache: CVOpenGLESTextureCache,
+    _ pixelBuffer: CVPixelBuffer,
+    _ size: CGSize
+  ) -> CVOpenGLESTexture {
+    var texture: CVOpenGLESTexture?
+    let cvret = CVOpenGLESTextureCacheCreateTextureFromImage(
+      kCFAllocatorDefault, textureCache, pixelBuffer, nil,
+      GLenum(GL_TEXTURE_2D), Int32(0x881A), GLsizei(size.width),
+      GLsizei(size.height), GLenum(GL_RGBA), GLenum(0x140B), 0, &texture
+    )
+    assert(cvret == kCVReturnSuccess, "CVOpenGLESTextureCacheCreateTextureFromImage half-float")
     return texture!
   }
 

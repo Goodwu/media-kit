@@ -59,6 +59,22 @@ export default class MediaKitVideoPlugin implements FlutterPlugin, MethodCallHan
 
   onMethodCall(call: MethodCall, result: MethodResult): void {
     switch (call.method) {
+      case "createNativeOutput":
+      case "configureHdrOutput":
+      case "resetHdrOutput": {
+        result.success({
+          backend: "ohos-native-window",
+          capable: false,
+          active: false,
+          failureReason: "native HDR surface probe unavailable",
+          generation: 0
+        });
+        break;
+      }
+      case "disposeNativeOutput": {
+        result.success(null);
+        break;
+      }
       case "VideoOutputManager.Create": {
         const handle = parseInt(call.argument("handle"));
         if (this.videoOutputManager == null) {

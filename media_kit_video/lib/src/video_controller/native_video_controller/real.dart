@@ -50,6 +50,7 @@ class NativeVideoController extends PlatformVideoController {
   /// [Lock] used to synchronize [onLoadHooks], [onUnloadHooks] & [subscription].
   final lock = Lock();
   bool _disposed = false;
+  Map<String, dynamic>? _lastNativeConfiguration;
 
   NativePlayer get platform => player.platform as NativePlayer;
 
@@ -147,6 +148,9 @@ class NativeVideoController extends PlatformVideoController {
       player,
       configuration,
     );
+    controller.nativeHandle = handle;
+    controller.nativeSurfaceGeneration = (_surfaceGenerations[handle] ?? 0) + 1;
+    _surfaceGenerations[handle] = controller.nativeSurfaceGeneration;
 
     // Register [_dispose] for execution upon [Player.dispose].
     player.platform?.release.add(controller._dispose);
@@ -161,6 +165,32 @@ class NativeVideoController extends PlatformVideoController {
         'vid': 'auto',
       },
     );
+
+    if (configuration.useNativeSurface &&
+        configuration.enableHardwareAcceleration &&
+        (Platform.isIOS || Platform.isMacOS)) {
+      // Keep the native candidate in a stable extended-linear BT.2020 target
+      // across SDR/HDR source changes; promotion still requires native probes.
+      await controller.setProperties({
+        'target-colorspace': 'bt.2020',
+        'target-trc': 'linear',
+      });
+    }
+
+    if (configuration.useNativeSurface &&
+        configuration.enableHardwareAcceleration &&
+        (Platform.isIOS || Platform.isMacOS)) {
+      try {
+        final nativeResult = await controller.createNativeOutput();
+        controller.nativeSurfaceCandidate =
+            nativeResult is Map && nativeResult['capable'] == true;
+        controller.nativeSurfaceActive =
+            nativeResult is Map && nativeResult['active'] == true;
+      } catch (_) {
+        // Missing native plugin/renderer is a normal fail-closed fallback.
+        controller.nativeSurfaceActive = false;
+      }
+    }
 
     // Wait until first texture ID is received.
     // We are not waiting on the native-side itself because it will block the UI thread.
@@ -184,6 +214,7 @@ class NativeVideoController extends PlatformVideoController {
           'height': configuration.height.toString(),
           'enableHardwareAcceleration':
               configuration.enableHardwareAcceleration,
+          'useNativeSurface': configuration.useNativeSurface,
         },
       },
     );
@@ -236,6 +267,87 @@ class NativeVideoController extends PlatformVideoController {
     }
   }
 
+  @override
+  Future<dynamic> createNativeOutput(
+      {String? surfaceId, int? windowHandle}) async {
+    final handle = nativeHandle ?? await player.handle;
+    return (await _channel.invokeMethod<Map<dynamic, dynamic>>(
+              'createNativeOutput',
+              {
+                'handle': handle.toString(),
+                'generation': nativeSurfaceGeneration
+              },
+            ) ??
+            const <dynamic, dynamic>{})
+        .cast<String, dynamic>();
+  }
+
+  @override
+  Future<dynamic> configureHdrOutput(dynamic configuration) async {
+    final handle = nativeHandle ?? await player.handle;
+    final payload = Map<String, dynamic>.from(
+      configuration is Map<String, dynamic>
+          ? configuration
+          : (configuration as dynamic).toMap(),
+    );
+    if (this.configuration.useNativeSurface) {
+      // Keep the native surface contract explicit: the mpv target must be
+      // extended-linear BT.2020 before a layer can be promoted to HDR.
+      payload['target-colorspace'] = 'bt.2020';
+      payload['target-trc'] = 'linear';
+      try {
+        final colorspace = await player.getProperty(
+          'target-colorspace',
+          waitForInitialization: false,
+        );
+        final transfer = await player.getProperty(
+          'target-trc',
+          waitForInitialization: false,
+        );
+        payload['playerTargetVerified'] =
+            colorspace == 'bt.2020' && transfer == 'linear';
+      } catch (_) {
+        payload['playerTargetVerified'] = false;
+      }
+    }
+    _lastNativeConfiguration = payload.cast<String, dynamic>();
+    return (await _channel.invokeMethod<Map<dynamic, dynamic>>(
+              'configureHdrOutput',
+              {
+                'handle': handle.toString(),
+                'generation': nativeSurfaceGeneration,
+                'configuration': payload,
+              },
+            ) ??
+            const <dynamic, dynamic>{})
+        .cast<String, dynamic>();
+  }
+
+  @override
+  Future<Map<String, dynamic>> resetHdrOutput() async {
+    final handle = nativeHandle ?? await player.handle;
+    return (await _channel.invokeMethod<Map<dynamic, dynamic>>(
+              'resetHdrOutput',
+              {
+                'handle': handle.toString(),
+                'generation': nativeSurfaceGeneration
+              },
+            ) ??
+            const <dynamic, dynamic>{})
+        .cast<String, dynamic>();
+  }
+
+  @override
+  Future<void> disposeNativeOutput() async {
+    final handle = nativeHandle ?? await player.handle;
+    try {
+      await _channel.invokeMethod('disposeNativeOutput', {
+        'handle': handle.toString(),
+        'generation': nativeSurfaceGeneration,
+      });
+    } catch (_) {}
+  }
+
   /// Disposes the instance. Releases allocated resources back to the system.
   @override
   Future<void> disposeForRebuild() => _dispose();
@@ -245,6 +357,7 @@ class NativeVideoController extends PlatformVideoController {
     if (_disposed) return;
     _disposed = true;
     super.dispose();
+    await disposeNativeOutput();
     await videoParamsSubscription?.cancel();
     final handle = await player.handle;
     _controllers.remove(handle);
@@ -259,6 +372,7 @@ class NativeVideoController extends PlatformVideoController {
   /// Currently created [NativeVideoController]s.
   /// This is used to notify about updated texture IDs & [Rect]s through [_channel].
   static final _controllers = HashMap<int, NativeVideoController>();
+  static final _surfaceGenerations = HashMap<int, int>();
 
   /// [MethodChannel] for invoking platform specific native implementation.
   static final _channel =
@@ -292,6 +406,37 @@ class NativeVideoController extends PlatformVideoController {
                     }
                     break;
                   }
+                case 'NativeSurface.Ready':
+                  final handle = call.arguments['handle'] as int;
+                  final controller = _controllers[handle];
+                  final generation = call.arguments['generation'] as int?;
+                  final hasRendererState =
+                      call.arguments is Map &&
+                      (call.arguments as Map).containsKey('rendererReady');
+                  final rendererReady = call.arguments['rendererReady'] == true;
+                  if (controller != null &&
+                      generation == controller.nativeSurfaceGeneration) {
+                    // A failed native renderer must immediately return to the
+                    // Flutter texture path; do not leave a black platform view.
+                    if (hasRendererState) {
+                      controller.nativeSurfaceCandidate = rendererReady;
+                    }
+                    if (!hasRendererState && call.arguments['active'] is bool) {
+                      controller.nativeSurfaceActive =
+                          call.arguments['active'] == true;
+                    }
+                  }
+                  final configuration = controller?._lastNativeConfiguration;
+                  if (controller != null &&
+                      rendererReady &&
+                      generation == controller.nativeSurfaceGeneration &&
+                      configuration != null) {
+                    final result =
+                        await controller.configureHdrOutput(configuration);
+                    controller.nativeSurfaceActive =
+                        result is Map && result['active'] == true;
+                  }
+                  break;
                 default:
                   {
                     break;

@@ -4,12 +4,13 @@
 /// All rights reserved.
 /// Use of this source code is governed by MIT license that can be found in the LICENSE file.
 import 'package:flutter/foundation.dart';
+import 'dart:io';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-/// A widget that displays a video player using a platform view on Android.
+/// A widget that displays a video player using a native platform surface.
 class PlatformViewVideo extends StatelessWidget {
   /// Creates a new instance of [PlatformViewVideo].
   const PlatformViewVideo({
@@ -18,6 +19,7 @@ class PlatformViewVideo extends StatelessWidget {
     required this.width,
     required this.height,
     this.useHCPP = false,
+    this.generation = 1,
   });
 
   /// The handle (player ID) of the video player.
@@ -25,15 +27,36 @@ class PlatformViewVideo extends StatelessWidget {
   final int width;
   final int height;
   final bool useHCPP;
+  final int generation;
 
   @override
   Widget build(BuildContext context) {
-    const String viewType = 'com.alexmercerind/media_kit_video_platform_view';
+    final String viewType = (Platform.isIOS || Platform.isMacOS)
+        ? 'com.alexmercerind/media_kit_video/native_surface'
+        : 'com.alexmercerind/media_kit_video_platform_view';
     final Map<String, dynamic> creationParams = {
       'handle': handle,
       'width': width,
       'height': height,
+      'generation': generation,
     };
+
+    if (Platform.isIOS) {
+      return UiKitView(
+        viewType: viewType,
+        creationParams: creationParams,
+        creationParamsCodec: const StandardMessageCodec(),
+        hitTestBehavior: PlatformViewHitTestBehavior.transparent,
+      );
+    }
+    if (Platform.isMacOS) {
+      return AppKitView(
+        viewType: viewType,
+        creationParams: creationParams,
+        creationParamsCodec: const StandardMessageCodec(),
+        hitTestBehavior: PlatformViewHitTestBehavior.transparent,
+      );
+    }
 
     // IgnorePointer so that GestureDetector can be used above the platform view.
     return IgnorePointer(
@@ -43,29 +66,30 @@ class PlatformViewVideo extends StatelessWidget {
             (BuildContext context, PlatformViewController controller) {
           return AndroidViewSurface(
             controller: controller as AndroidViewController,
-            gestureRecognizers:
-                const <Factory<OneSequenceGestureRecognizer>>{},
+            gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
             hitTestBehavior: PlatformViewHitTestBehavior.opaque,
           );
         },
         onCreatePlatformView: (PlatformViewCreationParams params) {
-          return useHCPP ? PlatformViewsService.initHybridAndroidView(
-            id: params.id,
-            viewType: viewType,
-            layoutDirection:
-                Directionality.maybeOf(context) ?? TextDirection.ltr,
-            creationParams: creationParams,
-            creationParamsCodec: const StandardMessageCodec(),
-            onFocus: () => params.onFocusChanged(true),
-          ) : PlatformViewsService.initSurfaceAndroidView(
-            id: params.id,
-            viewType: viewType,
-            layoutDirection:
-                Directionality.maybeOf(context) ?? TextDirection.ltr,
-            creationParams: creationParams,
-            creationParamsCodec: const StandardMessageCodec(),
-            onFocus: () => params.onFocusChanged(true),
-          )
+          return useHCPP
+              ? PlatformViewsService.initHybridAndroidView(
+                  id: params.id,
+                  viewType: viewType,
+                  layoutDirection:
+                      Directionality.maybeOf(context) ?? TextDirection.ltr,
+                  creationParams: creationParams,
+                  creationParamsCodec: const StandardMessageCodec(),
+                  onFocus: () => params.onFocusChanged(true),
+                )
+              : PlatformViewsService.initSurfaceAndroidView(
+                  id: params.id,
+                  viewType: viewType,
+                  layoutDirection:
+                      Directionality.maybeOf(context) ?? TextDirection.ltr,
+                  creationParams: creationParams,
+                  creationParamsCodec: const StandardMessageCodec(),
+                  onFocus: () => params.onFocusChanged(true),
+                )
             ..addOnPlatformViewCreatedListener(params.onPlatformViewCreated)
             ..create();
         },
@@ -73,4 +97,3 @@ class PlatformViewVideo extends StatelessWidget {
     );
   }
 }
-

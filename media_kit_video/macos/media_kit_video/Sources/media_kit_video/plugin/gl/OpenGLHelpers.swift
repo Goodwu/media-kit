@@ -79,6 +79,20 @@ public class OpenGLHelpers {
     return pixelBuffer!
   }
 
+  static public func createHalfFloatPixelBuffer(_ size: CGSize) -> CVPixelBuffer {
+    var pixelBuffer: CVPixelBuffer?
+    let attrs = [
+      kCVPixelBufferMetalCompatibilityKey: true,
+      kCVPixelBufferOpenGLCompatibilityKey: true,
+    ] as CFDictionary
+    let cvret = CVPixelBufferCreate(
+      kCFAllocatorDefault, Int(size.width), Int(size.height),
+      kCVPixelFormatType_64RGBAHalf, attrs, &pixelBuffer
+    )
+    assert(cvret == kCVReturnSuccess, "CVPixelBufferCreate half-float")
+    return pixelBuffer!
+  }
+
   static public func createTexture(
     _ textureCache: CVOpenGLTextureCache,
     _ pixelBuffer: CVPixelBuffer

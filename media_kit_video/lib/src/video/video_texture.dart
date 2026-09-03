@@ -410,15 +410,34 @@ class VideoState extends State<Video> with WidgetsBindingObserver {
                                             const SizedBox(),
                                             Positioned.fill(
                                               child:
-                                                  // Check if PlatformView should be used (Android only)
-                                                  Platform.isAndroid &&
-                                                          notifier.configuration
-                                                              .usePlatformView
+                                                  // Native surfaces are opt-in and fail closed on Darwin.
+                                                  ((Platform.isAndroid &&
+                                                              notifier
+                                                                  .configuration
+                                                                  .usePlatformView) ||
+                                                          ((Platform.isIOS ||
+                                                                  Platform
+                                                                      .isMacOS) &&
+                                                              notifier
+                                                                  .configuration
+                                                                  .useNativeSurface &&
+                                                              notifier
+                                                                  .nativeSurfaceCandidate &&
+                                                              notifier.nativeHandle !=
+                                                                  null))
                                                       ? PlatformViewVideo(
-                                                          handle: id,
-                                                          width: rect.width.toInt(),
-                                                          height: rect.height.toInt(),
-                                                          useHCPP: notifier.configuration.useHCPP,
+                                                          handle: notifier
+                                                                  .nativeHandle ??
+                                                              id,
+                                                          width: rect.width
+                                                              .toInt(),
+                                                          height: rect.height
+                                                              .toInt(),
+                                                          useHCPP: notifier
+                                                              .configuration
+                                                              .useHCPP,
+                                                          generation: notifier
+                                                              .nativeSurfaceGeneration,
                                                         )
                                                       : Texture(
                                                           textureId: id,

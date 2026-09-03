@@ -11,6 +11,9 @@ import 'package:media_kit/media_kit.dart';
 
 import 'package:media_kit_video/src/video_controller/video_controller.dart';
 
+/// Rendering topology selected for a video output.
+enum VideoOutputSurfaceKind { texture, nativeSurface }
+
 /// {@template platform_video_controller}
 ///
 /// PlatformVideoController
@@ -35,6 +38,17 @@ abstract class PlatformVideoController {
   /// [Rect] of the video output, received from the native implementation.
   final ValueNotifier<Rect?> rect = ValueNotifier<Rect?>(null);
 
+  /// Stable player handle used by native platform surfaces.
+  int? nativeHandle;
+
+  /// Increments whenever a native output topology is rebuilt.
+  int nativeSurfaceGeneration = 0;
+
+  /// True only after the native surface and player output are both verified.
+  bool nativeSurfaceActive = false;
+  /// Candidate surface is mounted before HDR promotion so SDR and HDR keep topology.
+  bool nativeSurfaceCandidate = false;
+
   /// {@macro platform_video_controller}
   PlatformVideoController(this.player, this.configuration);
 
@@ -45,6 +59,31 @@ abstract class PlatformVideoController {
   /// * “Premature optimization is the root of all evil”
   /// * “With great power comes great responsibility”
   Future<void> setSize({int? width, int? height});
+
+  /// Creates/configures the optional native output. Implementations must fail closed.
+  Future<dynamic> createNativeOutput(
+          {String? surfaceId, int? windowHandle}) async =>
+      const <String, dynamic>{
+        'capable': false,
+        'active': false,
+        'failureReason': 'unsupported platform',
+      };
+
+  Future<dynamic> configureHdrOutput(dynamic configuration) async =>
+      const <String, dynamic>{
+        'capable': false,
+        'active': false,
+        'failureReason': 'unsupported platform',
+      };
+
+  Future<Map<String, dynamic>> resetHdrOutput() async =>
+      const <String, dynamic>{
+        'capable': false,
+        'active': false,
+        'failureReason': 'unsupported platform',
+      };
+
+  Future<void> disposeNativeOutput() async {}
 
   /// A [Future] that completes when the first video frame has been rendered.
   Future<void> get waitUntilFirstFrameRendered =>
@@ -76,6 +115,10 @@ abstract class PlatformVideoController {
 ///
 /// {@endtemplate}
 class VideoControllerConfiguration {
+  /// Selects the Darwin native surface when the platform can prove HDR output.
+  /// Failed probes and unsupported platforms always fall back to Texture.
+  final bool useNativeSurface;
+
   /// Sets the [`--vo`](https://mpv.io/manual/stable/#options-vo) property on native backend.
   ///
   /// Default: Platform specific.
@@ -158,6 +201,7 @@ class VideoControllerConfiguration {
     this.androidAttachSurfaceAfterVideoParameters,
     this.usePlatformView = false,
     this.useHCPP = false,
+    this.useNativeSurface = false,
   });
 
   /// Returns a copy of this class with the given fields replaced by the new values.
@@ -172,20 +216,23 @@ class VideoControllerConfiguration {
     bool? androidAttachSurfaceAfterVideoParameters,
     bool? usePlatformView,
     bool? useHCPP,
-  }) => VideoControllerConfiguration(
-    vo: vo ?? this.vo,
-    hwdec: hwdec ?? this.hwdec,
-    scale: scale ?? this.scale,
-    width: width ?? this.width,
-    height: height ?? this.height,
-    enableHardwareAcceleration:
-        enableHardwareAcceleration ?? this.enableHardwareAcceleration,
-    enableAndroidSurfaceProducer:
-        enableAndroidSurfaceProducer ?? this.enableAndroidSurfaceProducer,
-    androidAttachSurfaceAfterVideoParameters:
-        androidAttachSurfaceAfterVideoParameters ??
-        this.androidAttachSurfaceAfterVideoParameters,
-    usePlatformView: usePlatformView ?? this.usePlatformView,
-    useHCPP: useHCPP ?? this.useHCPP,
-  );
+    bool? useNativeSurface,
+  }) =>
+      VideoControllerConfiguration(
+        vo: vo ?? this.vo,
+        hwdec: hwdec ?? this.hwdec,
+        scale: scale ?? this.scale,
+        width: width ?? this.width,
+        height: height ?? this.height,
+        enableHardwareAcceleration:
+            enableHardwareAcceleration ?? this.enableHardwareAcceleration,
+        enableAndroidSurfaceProducer:
+            enableAndroidSurfaceProducer ?? this.enableAndroidSurfaceProducer,
+        androidAttachSurfaceAfterVideoParameters:
+            androidAttachSurfaceAfterVideoParameters ??
+                this.androidAttachSurfaceAfterVideoParameters,
+        usePlatformView: usePlatformView ?? this.usePlatformView,
+        useHCPP: useHCPP ?? this.useHCPP,
+        useNativeSurface: useNativeSurface ?? this.useNativeSurface,
+      );
 }

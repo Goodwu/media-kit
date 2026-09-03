@@ -10,6 +10,7 @@ public class TextureHW: NSObject, FlutterTexture, ResizableTextureProtocol {
 
   private let handle: OpaquePointer
   private let updateCallback: UpdateCallback
+  private let nativeSurface: Bool
   private let context: EAGLContext
   private let textureCache: CVOpenGLESTextureCache
   private var renderContext: OpaquePointer?
@@ -17,22 +18,33 @@ public class TextureHW: NSObject, FlutterTexture, ResizableTextureProtocol {
     objects: [],
     skipCheckArgs: true
   )
+  private var useHalfFloatOutput = false
+  private let registryHandle: Int64
 
   init(
     handle: OpaquePointer,
+    nativeSurface: Bool = false,
     updateCallback: @escaping UpdateCallback
   ) {
     self.handle = handle
+    self.nativeSurface = nativeSurface
+    self.registryHandle = Int64(Int(bitPattern: handle))
     self.updateCallback = updateCallback
     self.context = OpenGLESHelpers.createContext()
     self.textureCache = OpenGLESHelpers.createTextureCache(context)
 
     super.init()
 
+    NativeFrameRegistry.register(handle: registryHandle) { [weak self] in
+      self?.textureContexts.current?.pixelBuffer
+    }
+    NativeFrameRegistry.setFloatFormat(handle: registryHandle, enabled: false)
+
     self.initMPV()
   }
 
   deinit {
+    NativeFrameRegistry.unregister(handle: registryHandle)
     disposePixelBuffer()
     disposeMPV()
     OpenGLESHelpers.deleteTextureCache(textureCache)
@@ -123,27 +135,28 @@ public class TextureHW: NSObject, FlutterTexture, ResizableTextureProtocol {
 
   private func createPixelBuffer(_ size: CGSize) {
     disposePixelBuffer()
-
-    textureContexts.reinit(
-      objects: [
+    func makeContexts(halfFloat: Bool) -> [TextureGLESContext] {
+      (0..<3).compactMap { _ in
         TextureGLESContext(
           context: context,
           textureCache: textureCache,
-          size: size
-        ),
-        TextureGLESContext(
-          context: context,
-          textureCache: textureCache,
-          size: size
-        ),
-        TextureGLESContext(
-          context: context,
-          textureCache: textureCache,
-          size: size
-        ),
-      ],
-      skipCheckArgs: true
+          size: size,
+          halfFloat: halfFloat
+        )
+      }
+    }
+    var contexts = makeContexts(halfFloat: nativeSurface)
+    useHalfFloatOutput = nativeSurface && contexts.count >= 3
+    NativeFrameRegistry.setFloatFormat(
+      handle: registryHandle,
+      enabled: useHalfFloatOutput
     )
+    if contexts.count < 3 && nativeSurface {
+      NSLog("TextureHW: half-float surface unavailable; falling back to 8-bit texture")
+      contexts = makeContexts(halfFloat: false)
+      useHalfFloatOutput = false
+    }
+    textureContexts.reinit(objects: contexts, skipCheckArgs: true)
   }
 
   private func disposePixelBuffer() {
@@ -171,7 +184,7 @@ public class TextureHW: NSObject, FlutterTexture, ResizableTextureProtocol {
       fbo: Int32(textureContext!.frameBuffer),
       w: Int32(size.width),
       h: Int32(size.height),
-      internal_format: 0
+      internal_format: useHalfFloatOutput ? Int32(0x881A) : 0
     )
     let fboPtr = withUnsafeMutablePointer(to: &fbo) { $0 }
 

@@ -7,10 +7,11 @@ public class TextureGLESContext {
   public let texture: CVOpenGLESTexture
   public let pixelBuffer: CVPixelBuffer
 
-  init(
+  init?(
     context: EAGLContext,
     textureCache: CVOpenGLESTextureCache,
-    size: CGSize
+    size: CGSize,
+    halfFloat: Bool = false
   ) {
     self.context = context
 
@@ -21,13 +22,13 @@ public class TextureGLESContext {
     // So we have to try several times to create a frameBuffer valid.
     // This is usually the case after the second attempt.
     for index in 0...3 {
-      let pixelBuffer = OpenGLESHelpers.createPixelBuffer(size)
+      let pixelBuffer = halfFloat
+        ? OpenGLESHelpers.createHalfFloatPixelBuffer(size)
+        : OpenGLESHelpers.createPixelBuffer(size)
 
-      let texture = OpenGLESHelpers.createTexture(
-        textureCache,
-        pixelBuffer,
-        size
-      )
+      let texture = halfFloat
+        ? OpenGLESHelpers.createHalfFloatTexture(textureCache, pixelBuffer, size)
+        : OpenGLESHelpers.createTexture(textureCache, pixelBuffer, size)
 
       let frameBuffer = try? OpenGLESHelpers.createFrameBuffer(
         context: context,
@@ -46,7 +47,7 @@ public class TextureGLESContext {
     }
 
     NSLog("TextureGLESContext: init: unable to create a valid frameBuffer")
-    exit(1)
+    return nil
   }
 
   deinit {
