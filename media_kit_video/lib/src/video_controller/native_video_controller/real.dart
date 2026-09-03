@@ -172,7 +172,7 @@ class NativeVideoController extends PlatformVideoController {
       // Keep the native candidate in a stable extended-linear BT.2020 target
       // across SDR/HDR source changes; promotion still requires native probes.
       await controller.setProperties({
-        'target-colorspace': 'bt.2020',
+        'target-prim': 'bt.2020',
         'target-trc': 'linear',
       });
     }
@@ -296,8 +296,16 @@ class NativeVideoController extends PlatformVideoController {
       payload['target-colorspace'] = 'bt.2020';
       payload['target-trc'] = 'linear';
       try {
+        // The app may have applied its conservative SDR parameters after the
+        // controller was created. Re-assert the native target immediately
+        // before reading it back, so verification observes the actual mpv
+        // state rather than only the configuration payload.
+        await setProperties({
+          'target-prim': 'bt.2020',
+          'target-trc': 'linear',
+        });
         final colorspace = await player.getProperty(
-          'target-colorspace',
+          'target-prim',
           waitForInitialization: false,
         );
         final transfer = await player.getProperty(
