@@ -76,6 +76,7 @@ final class NativeSurfaceOutput {
     let hdrInput = transfer == "pq" || transfer == "hlg"
     state.active = state.capable && hdrInput && targetVerified(configurations[handle]) && layerReady[handle] == state.generation &&
       NativeFrameRegistry.hasFloatProvider(handle: handle) && headroom > 1.0
+    NativeFrameRegistry.setSurfaceActive(handle: handle, enabled: state.active)
     state.failureReason = state.active ? "" : "surface, frame provider, or HDR target probe incomplete"
     states[handle] = state
     return report(handle: handle)
@@ -118,6 +119,7 @@ final class NativeSurfaceOutput {
     let hdrInput = transfer == "pq" || transfer == "hlg"
     state.active = state.capable && hdrInput && targetVerified(configuration) && layerReady[handle] == generation &&
       NativeFrameRegistry.hasFloatProvider(handle: handle) && headroom > 1.0
+    NativeFrameRegistry.setSurfaceActive(handle: handle, enabled: state.active)
     state.failureReason = state.active ? "" : "surface, frame provider, or HDR target probe incomplete"
     states[handle] = state
     return report(handle: handle)
@@ -130,6 +132,7 @@ final class NativeSurfaceOutput {
     }
     state.active = false
     states[handle] = state
+    NativeFrameRegistry.setSurfaceActive(handle: handle, enabled: false)
     return report(handle: handle)
   }
 
@@ -139,6 +142,7 @@ final class NativeSurfaceOutput {
     states.removeValue(forKey: handle)
     configurations.removeValue(forKey: handle)
     layerReady.removeValue(forKey: handle)
+    NativeFrameRegistry.setSurfaceActive(handle: handle, enabled: false)
   }
 
   private func refreshAll() {
@@ -150,6 +154,7 @@ final class NativeSurfaceOutput {
       let hdrInput = transfer == "pq" || transfer == "hlg"
       state.active = state.capable && hdrInput && targetVerified(configurations[handle]) && layerReady[handle] == state.generation &&
         NativeFrameRegistry.hasFloatProvider(handle: handle) && headroom > 1.0
+      NativeFrameRegistry.setSurfaceActive(handle: handle, enabled: state.active)
       state.failureReason = state.active ? "" : "surface, frame provider, or HDR target probe incomplete"
       states[handle] = state
       return report(handle: handle)

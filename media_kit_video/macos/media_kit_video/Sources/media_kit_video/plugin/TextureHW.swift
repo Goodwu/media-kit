@@ -45,6 +45,9 @@ public class TextureHW: NSObject, FlutterTexture, ResizableTextureProtocol {
     NativeFrameRegistry.register(handle: registryHandle) { [weak self] in
       self?.nativeTextureContexts.current?.pixelBuffer
     }
+    NativeFrameRegistry.observeSurfaceActive(handle: registryHandle) { [weak self] handle in
+      self?.useHalfFloatOutput = NativeFrameRegistry.isSurfaceActive(handle: handle)
+    }
     NativeFrameRegistry.setFloatFormat(handle: registryHandle, enabled: false)
 
     self.initMPV()
@@ -194,8 +197,8 @@ public class TextureHW: NSObject, FlutterTexture, ResizableTextureProtocol {
     } else {
       nativeTextureContexts.reinit(objects: [], skipCheckArgs: true)
     }
-    useHalfFloatOutput = nativeSurface
-    NativeFrameRegistry.setFloatFormat(handle: registryHandle, enabled: useHalfFloatOutput)
+    useHalfFloatOutput = NativeFrameRegistry.isSurfaceActive(handle: registryHandle)
+    NativeFrameRegistry.setFloatFormat(handle: registryHandle, enabled: nativeSurface)
   }
 
   private func disposePixelBuffer() {
@@ -204,20 +207,18 @@ public class TextureHW: NSObject, FlutterTexture, ResizableTextureProtocol {
   }
 
   public func render(_ size: CGSize) {
-    let textureContext = textureContexts.nextAvailable()
-    if textureContext == nil {
-      return
-    }
-
-    render(textureContext!, size: size, halfFloat: false)
-
-    textureContexts.pushAsReady(textureContext!)
-
-    if useHalfFloatOutput,
-      let nativeTextureContext = nativeTextureContexts.nextAvailable()
-    {
+    if useHalfFloatOutput {
+      guard let nativeTextureContext = nativeTextureContexts.nextAvailable() else {
+        return
+      }
       render(nativeTextureContext, size: size, halfFloat: true)
       nativeTextureContexts.pushAsReady(nativeTextureContext)
+    } else {
+      guard let textureContext = textureContexts.nextAvailable() else {
+        return
+      }
+      render(textureContext, size: size, halfFloat: false)
+      textureContexts.pushAsReady(textureContext)
     }
   }
 
