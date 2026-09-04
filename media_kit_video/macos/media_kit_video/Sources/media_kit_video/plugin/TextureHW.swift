@@ -20,6 +20,10 @@ public class TextureHW: NSObject, FlutterTexture, ResizableTextureProtocol {
     objects: [],
     skipCheckArgs: true
   )
+  private var nativeTextureContexts = SwappableObjectManager<TextureGLContext>(
+    objects: [],
+    skipCheckArgs: true
+  )
   private var useHalfFloatOutput = false
   private let registryHandle: Int64
 
@@ -39,7 +43,7 @@ public class TextureHW: NSObject, FlutterTexture, ResizableTextureProtocol {
     super.init()
 
     NativeFrameRegistry.register(handle: registryHandle) { [weak self] in
-      self?.textureContexts.current?.pixelBuffer
+      self?.nativeTextureContexts.current?.pixelBuffer
     }
     NativeFrameRegistry.setFloatFormat(handle: registryHandle, enabled: false)
 
@@ -146,29 +150,57 @@ public class TextureHW: NSObject, FlutterTexture, ResizableTextureProtocol {
           context: context,
           textureCache: textureCache,
           size: size,
-          halfFloat: nativeSurface
+          halfFloat: false
         ),
         TextureGLContext(
           context: context,
           textureCache: textureCache,
           size: size,
-          halfFloat: nativeSurface
+          halfFloat: false
         ),
         TextureGLContext(
           context: context,
           textureCache: textureCache,
           size: size,
-          halfFloat: nativeSurface
+          halfFloat: false
         ),
       ],
       skipCheckArgs: true
     )
+    if nativeSurface {
+      nativeTextureContexts.reinit(
+        objects: [
+          TextureGLContext(
+            context: context,
+            textureCache: textureCache,
+            size: size,
+            halfFloat: true
+          ),
+          TextureGLContext(
+            context: context,
+            textureCache: textureCache,
+            size: size,
+            halfFloat: true
+          ),
+          TextureGLContext(
+            context: context,
+            textureCache: textureCache,
+            size: size,
+            halfFloat: true
+          ),
+        ],
+        skipCheckArgs: true
+      )
+    } else {
+      nativeTextureContexts.reinit(objects: [], skipCheckArgs: true)
+    }
     useHalfFloatOutput = nativeSurface
     NativeFrameRegistry.setFloatFormat(handle: registryHandle, enabled: useHalfFloatOutput)
   }
 
   private func disposePixelBuffer() {
     textureContexts.reinit(objects: [], skipCheckArgs: true)
+    nativeTextureContexts.reinit(objects: [], skipCheckArgs: true)
   }
 
   public func render(_ size: CGSize) {
@@ -177,22 +209,39 @@ public class TextureHW: NSObject, FlutterTexture, ResizableTextureProtocol {
       return
     }
 
+    render(textureContext!, size: size, halfFloat: false)
+
+    textureContexts.pushAsReady(textureContext!)
+
+    if useHalfFloatOutput,
+      let nativeTextureContext = nativeTextureContexts.nextAvailable()
+    {
+      render(nativeTextureContext, size: size, halfFloat: true)
+      nativeTextureContexts.pushAsReady(nativeTextureContext)
+    }
+  }
+
+  private func render(
+    _ textureContext: TextureGLContext,
+    size: CGSize,
+    halfFloat: Bool
+  ) {
     CGLSetCurrentContext(context)
     defer {
       OpenGLHelpers.checkError("render")
       CGLSetCurrentContext(nil)
     }
 
-    glBindFramebuffer(GLenum(GL_FRAMEBUFFER), textureContext!.frameBuffer)
+    glBindFramebuffer(GLenum(GL_FRAMEBUFFER), textureContext.frameBuffer)
     defer {
       glBindFramebuffer(GLenum(GL_FRAMEBUFFER), 0)
     }
 
     var fbo = mpv_opengl_fbo(
-      fbo: Int32(textureContext!.frameBuffer),
+      fbo: Int32(textureContext.frameBuffer),
       w: Int32(size.width),
       h: Int32(size.height),
-      internal_format: useHalfFloatOutput ? Int32(0x881A) : 0
+      internal_format: halfFloat ? Int32(0x881A) : 0
     )
     let fboPtr = withUnsafeMutablePointer(to: &fbo) { $0 }
 
@@ -201,10 +250,7 @@ public class TextureHW: NSObject, FlutterTexture, ResizableTextureProtocol {
       mpv_render_param(type: MPV_RENDER_PARAM_INVALID, data: nil),
     ]
     mpv_render_context_render(renderContext, &params)
-
     glFlush()
-
-    textureContexts.pushAsReady(textureContext!)
   }
 
   static private func getProcAddress(
