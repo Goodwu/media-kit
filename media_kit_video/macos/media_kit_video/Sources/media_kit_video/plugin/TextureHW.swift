@@ -213,17 +213,18 @@ public class TextureHW: NSObject, FlutterTexture, ResizableTextureProtocol {
   }
 
   public func render(_ size: CGSize) {
-    // Keep the regular texture populated while the native surface is active;
-    // it remains the Flutter fallback and also prevents a transient black
-    // frame while the Metal surface is being promoted.
-    if let textureContext = textureContexts.nextAvailable() {
-      render(textureContext, size: size, halfFloat: false)
-      textureContexts.pushAsReady(textureContext)
-    }
-    if useHalfFloatOutput,
-       let nativeTextureContext = nativeTextureContexts.nextAvailable() {
+    // Render exactly one target per mpv update. Rendering both the Flutter
+    // texture and the native surface doubles the expensive libplacebo pass and
+    // causes visible cadence jitter on high-resolution HDR streams.
+    if useHalfFloatOutput {
+      guard let nativeTextureContext = nativeTextureContexts.nextAvailable() else {
+        return
+      }
       render(nativeTextureContext, size: size, halfFloat: true)
       nativeTextureContexts.pushAsReady(nativeTextureContext)
+    } else if let textureContext = textureContexts.nextAvailable() {
+      render(textureContext, size: size, halfFloat: false)
+      textureContexts.pushAsReady(textureContext)
     }
   }
 
