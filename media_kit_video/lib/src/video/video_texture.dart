@@ -422,7 +422,7 @@ class VideoState extends State<Video> with WidgetsBindingObserver {
                                                                   .configuration
                                                                   .useNativeSurface &&
                                                               notifier
-                                                                  .nativeSurfaceActive &&
+                                                                  .nativeSurfaceCandidate &&
                                                               notifier.nativeHandle !=
                                                                   null))
                                                       ? PlatformViewVideo(

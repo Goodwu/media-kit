@@ -43,7 +43,13 @@ public class TextureHW: NSObject, FlutterTexture, ResizableTextureProtocol {
     super.init()
 
     NativeFrameRegistry.register(handle: registryHandle) { [weak self] in
-      self?.nativeTextureContexts.current?.pixelBuffer
+      guard let self else { return nil }
+      // The native surface is mounted before HDR promotion. Until the Metal
+      // layer is verified active, feed it the regular BGRA frame so the
+      // candidate surface cannot flash black while it waits for EDR proof.
+      return self.useHalfFloatOutput
+          ? self.nativeTextureContexts.current?.pixelBuffer
+          : self.textureContexts.current?.pixelBuffer
     }
     NativeFrameRegistry.observeSurfaceActive(handle: registryHandle) { [weak self] handle in
       self?.useHalfFloatOutput = NativeFrameRegistry.isSurfaceActive(handle: handle)
@@ -207,18 +213,17 @@ public class TextureHW: NSObject, FlutterTexture, ResizableTextureProtocol {
   }
 
   public func render(_ size: CGSize) {
-    if useHalfFloatOutput {
-      guard let nativeTextureContext = nativeTextureContexts.nextAvailable() else {
-        return
-      }
-      render(nativeTextureContext, size: size, halfFloat: true)
-      nativeTextureContexts.pushAsReady(nativeTextureContext)
-    } else {
-      guard let textureContext = textureContexts.nextAvailable() else {
-        return
-      }
+    // Keep the regular texture populated while the native surface is active;
+    // it remains the Flutter fallback and also prevents a transient black
+    // frame while the Metal surface is being promoted.
+    if let textureContext = textureContexts.nextAvailable() {
       render(textureContext, size: size, halfFloat: false)
       textureContexts.pushAsReady(textureContext)
+    }
+    if useHalfFloatOutput,
+       let nativeTextureContext = nativeTextureContexts.nextAvailable() {
+      render(nativeTextureContext, size: size, halfFloat: true)
+      nativeTextureContexts.pushAsReady(nativeTextureContext)
     }
   }
 

@@ -125,7 +125,8 @@ final class NativeSurfaceView: NSObject {
   let nativeView: NSView
   private let metalLayer: CAMetalLayer
   private var blitter: MetalSurfaceBlitter?
-  private var timer: Timer?
+  private var timer: DispatchSourceTimer?
+  private var drawDiagnosticsRemaining = 8
   private let handle: Int64
 
   init(frame: NSRect, args: Any?, onLayerReady: ((Int64, Int, Bool) -> Void)? = nil) {
@@ -156,13 +157,19 @@ final class NativeSurfaceView: NSObject {
       self?.apply(configuration: configuration)
     }
     onLayerReady?(handle, generation, blitter?.supportsFloatSource == true)
-    timer = Timer.scheduledTimer(withTimeInterval: 1.0 / 60.0, repeats: true) { [weak self] _ in self?.drawFrame() }
+    NSLog("NativeSurfaceView macOS init handle=\(handle) generation=\(generation) frame=\(nativeView.frame)")
+    let timer = DispatchSource.makeTimerSource(queue: .main)
+    timer.schedule(deadline: .now(), repeating: 1.0 / 60.0)
+    timer.setEventHandler { [weak self] in self?.drawFrame() }
+    self.timer = timer
+    timer.resume()
+    NSLog("NativeSurfaceView macOS timer started handle=\(handle)")
   }
 
   func view() -> NSView { nativeView }
 
   deinit {
-    timer?.invalidate()
+    timer?.cancel()
     NativeSurfaceViewRegistry.unregister(handle: handle)
   }
 
@@ -202,18 +209,35 @@ final class NativeSurfaceView: NSObject {
       width: max(1, nativeView.bounds.width * scale),
       height: max(1, nativeView.bounds.height * scale)
     )
-    guard let pixelBuffer = NativeFrameRegistry.copyFrame(handle: handle),
-          let blitter, let drawable = metalLayer.nextDrawable() else { return }
-    _ = blitter.draw(pixelBuffer: pixelBuffer, to: drawable)
+    let pixelBuffer = NativeFrameRegistry.copyFrame(handle: handle)
+    let drawable = metalLayer.nextDrawable()
+    guard let blitter, let pixelBuffer, let drawable else {
+      if drawDiagnosticsRemaining > 0 {
+        drawDiagnosticsRemaining -= 1
+        NSLog("NativeSurfaceView macOS draw skipped handle=\(handle) pixel=\(pixelBuffer != nil) drawable=\(drawable != nil) bounds=\(nativeView.bounds) drawableSize=\(metalLayer.drawableSize)")
+      }
+      return
+    }
+    let drawn = blitter.draw(pixelBuffer: pixelBuffer, to: drawable)
+    if drawDiagnosticsRemaining > 0 {
+      drawDiagnosticsRemaining -= 1
+      NSLog("NativeSurfaceView macOS draw handle=\(handle) drawn=\(drawn) pixelFormat=\(CVPixelBufferGetPixelFormatType(pixelBuffer)) size=\(CVPixelBufferGetWidth(pixelBuffer))x\(CVPixelBufferGetHeight(pixelBuffer)) bounds=\(nativeView.bounds) drawableSize=\(metalLayer.drawableSize)")
+    }
   }
 }
 
 final class NativeSurfaceViewFactory: NSObject, FlutterPlatformViewFactory {
   private let onLayerReady: ((Int64, Int, Bool) -> Void)?
+  // Keep the platform-view owner alive; otherwise returning only `view()`
+  // releases the timer and frame registry immediately.
+  private var surfaces = [Int64: NativeSurfaceView]()
   init(onLayerReady: ((Int64, Int, Bool) -> Void)? = nil) { self.onLayerReady = onLayerReady }
   func createArgsCodec() -> FlutterMessageCodec & NSObjectProtocol { FlutterStandardMessageCodec.sharedInstance() }
   func create(withViewIdentifier viewId: Int64, arguments args: Any?) -> NSView {
-    NativeSurfaceView(frame: .zero, args: args, onLayerReady: onLayerReady).view()
+    let surface = NativeSurfaceView(frame: .zero, args: args, onLayerReady: onLayerReady)
+    let handle = Int64((args as? [String: Any])?["handle"] as? Int ?? -1)
+    surfaces[handle] = surface
+    return surface.view()
   }
 }
 #endif

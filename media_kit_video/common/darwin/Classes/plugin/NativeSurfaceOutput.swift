@@ -52,7 +52,10 @@ final class NativeSurfaceOutput {
     }
   }
 
-  private var headroom: Double {
+  /// Current EDR headroom is content-dependent and remains 1.0 until an EDR
+  /// layer is already presenting. It is useful as runtime evidence, but must
+  /// not gate the first activation of that layer.
+  private var currentHeadroom: Double {
     #if canImport(UIKit)
       if #available(iOS 16.0, *) { return Double(UIScreen.main.potentialEDRHeadroom) }
       return 1.0
@@ -60,6 +63,20 @@ final class NativeSurfaceOutput {
       return Double(NSScreen.main?.maximumExtendedDynamicRangeColorComponentValue ?? 1.0)
     #else
       return 1.0
+    #endif
+  }
+
+  private var displaySupportsEdr: Bool {
+    #if canImport(UIKit)
+      if #available(iOS 16.0, *) { return UIScreen.main.potentialEDRHeadroom > 1.0 }
+      return false
+    #elseif canImport(AppKit)
+      if #available(macOS 10.15, *) {
+        return (NSScreen.main?.maximumPotentialExtendedDynamicRangeColorComponentValue ?? 1.0) > 1.0
+      }
+      return false
+    #else
+      return false
     #endif
   }
 
@@ -75,7 +92,7 @@ final class NativeSurfaceOutput {
     let transfer = configurations[handle]?["transfer"] as? String
     let hdrInput = transfer == "pq" || transfer == "hlg"
     state.active = state.capable && hdrInput && targetVerified(configurations[handle]) && layerReady[handle] == state.generation &&
-      NativeFrameRegistry.hasFloatProvider(handle: handle) && headroom > 1.0
+      NativeFrameRegistry.hasFloatProvider(handle: handle) && displaySupportsEdr
     NativeFrameRegistry.setSurfaceActive(handle: handle, enabled: state.active)
     state.failureReason = state.active ? "" : "surface, frame provider, or HDR target probe incomplete"
     states[handle] = state
@@ -118,7 +135,7 @@ final class NativeSurfaceOutput {
     let transfer = configuration["transfer"] as? String
     let hdrInput = transfer == "pq" || transfer == "hlg"
     state.active = state.capable && hdrInput && targetVerified(configuration) && layerReady[handle] == generation &&
-      NativeFrameRegistry.hasFloatProvider(handle: handle) && headroom > 1.0
+      NativeFrameRegistry.hasFloatProvider(handle: handle) && displaySupportsEdr
     NativeFrameRegistry.setSurfaceActive(handle: handle, enabled: state.active)
     state.failureReason = state.active ? "" : "surface, frame provider, or HDR target probe incomplete"
     states[handle] = state
@@ -153,7 +170,7 @@ final class NativeSurfaceOutput {
       let transfer = configurations[handle]?["transfer"] as? String
       let hdrInput = transfer == "pq" || transfer == "hlg"
       state.active = state.capable && hdrInput && targetVerified(configurations[handle]) && layerReady[handle] == state.generation &&
-        NativeFrameRegistry.hasFloatProvider(handle: handle) && headroom > 1.0
+        NativeFrameRegistry.hasFloatProvider(handle: handle) && displaySupportsEdr
       NativeFrameRegistry.setSurfaceActive(handle: handle, enabled: state.active)
       state.failureReason = state.active ? "" : "surface, frame provider, or HDR target probe incomplete"
       states[handle] = state
@@ -183,7 +200,8 @@ final class NativeSurfaceOutput {
       "active": state.active,
       "pixelFormat": "rgba16Float",
       "colorSpace": "extended-linear-bt2020",
-      "headroom": headroom,
+      "headroom": currentHeadroom,
+      "potentialHeadroom": displaySupportsEdr ? 2.0 : 1.0,
       "failureReason": state.failureReason,
       "generation": state.generation,
       "handle": handle
