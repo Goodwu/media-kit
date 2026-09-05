@@ -79,6 +79,15 @@ class VideoController {
   /// [Rect] of the video output, received from the native implementation.
   final ValueNotifier<Rect?> rect = ValueNotifier<Rect?>(null);
 
+  /// Whether the platform implementation has mounted a native-surface
+  /// candidate. This is false on platforms which do not expose one.
+  bool get nativeSurfaceCandidate =>
+      notifier.value?.nativeSurfaceCandidate ?? false;
+
+  /// Whether the platform implementation has an active native video surface.
+  /// This remains false until the platform reports that the surface is ready.
+  bool get nativeSurfaceActive => notifier.value?.nativeSurfaceActive ?? false;
+
   /// {@macro video_controller}
   VideoController(
     this.player, {

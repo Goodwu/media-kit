@@ -291,10 +291,12 @@ class NativeVideoController extends PlatformVideoController {
           : (configuration as dynamic).toMap(),
     );
     if (this.configuration.useNativeSurface) {
-      // Keep the native surface contract explicit: the mpv target must be
-      // extended-linear BT.2020 before a layer can be promoted to HDR.
+      // Keep the native surface contract explicit: the mpv target must keep
+      // the HDR transfer function carried by the source.  Advertising linear
+      // while the OHOS NativeWindow is PQ/HLG makes the display interpret
+      // linear samples as HDR code values, producing a gray, dim picture.
       payload['target-colorspace'] = 'bt.2020';
-      payload['target-trc'] = 'linear';
+      payload['target-trc'] = payload['transfer'] == 'hlg' ? 'hlg' : 'pq';
       try {
         // The app may have applied its conservative SDR parameters after the
         // controller was created. Re-assert the native target immediately
@@ -302,7 +304,7 @@ class NativeVideoController extends PlatformVideoController {
         // state rather than only the configuration payload.
         await setProperties({
           'target-prim': 'bt.2020',
-          'target-trc': 'linear',
+          'target-trc': payload['target-trc'] as String,
         });
         final colorspace = await player.getProperty(
           'target-prim',
@@ -313,7 +315,7 @@ class NativeVideoController extends PlatformVideoController {
           waitForInitialization: false,
         );
         payload['playerTargetVerified'] =
-            colorspace == 'bt.2020' && transfer == 'linear';
+            colorspace == 'bt.2020' && transfer == payload['target-trc'];
       } catch (_) {
         payload['playerTargetVerified'] = false;
       }
@@ -418,8 +420,7 @@ class NativeVideoController extends PlatformVideoController {
                   final handle = call.arguments['handle'] as int;
                   final controller = _controllers[handle];
                   final generation = call.arguments['generation'] as int?;
-                  final hasRendererState =
-                      call.arguments is Map &&
+                  final hasRendererState = call.arguments is Map &&
                       (call.arguments as Map).containsKey('rendererReady');
                   final rendererReady = call.arguments['rendererReady'] == true;
                   if (controller != null &&

@@ -18,11 +18,13 @@ import {
 } from '@ohos/flutter_ohos';
 import { Utils } from './Utils';
 import { VideoOutputManager } from './VideoOutputManager';
+import { OhosNativeSurfaceFactory, OHOS_NATIVE_SURFACE_VIEW_TYPE } from './OhosNativeSurface';
 import { common } from '@kit.AbilityKit';
 
 export default class MediaKitVideoPlugin implements FlutterPlugin, MethodCallHandler, AbilityAware {
   private channel: MethodChannel | null = null;
   private videoOutputManager: VideoOutputManager | null = null;
+  private nativeSurfaceEvents: MethodChannel | null = null;
   binding: FlutterPluginBinding | null = null;
   context: common.UIAbilityContext | null = null;
 
@@ -44,6 +46,14 @@ export default class MediaKitVideoPlugin implements FlutterPlugin, MethodCallHan
   onAttachedToEngine(binding: FlutterPluginBinding): void {
     this.channel = new MethodChannel(binding.getBinaryMessenger(), "com.alexmercerind/media_kit_video");
     this.channel.setMethodCallHandler(this);
+    this.nativeSurfaceEvents = new MethodChannel(
+      binding.getBinaryMessenger(),
+      "com.alexmercerind/media_kit_video/native_surface_events"
+    );
+    binding.getPlatformViewRegistry().registerViewFactory(
+      OHOS_NATIVE_SURFACE_VIEW_TYPE,
+      new OhosNativeSurfaceFactory(this.nativeSurfaceEvents)
+    );
     this.binding = binding;
   }
 
@@ -53,6 +63,7 @@ export default class MediaKitVideoPlugin implements FlutterPlugin, MethodCallHan
     }
     this.videoOutputManager?.disposeAll();
     this.videoOutputManager = null;
+    this.nativeSurfaceEvents = null;
     this.channel = null;
     this.binding = null;
   }
@@ -88,8 +99,19 @@ export default class MediaKitVideoPlugin implements FlutterPlugin, MethodCallHan
         const handle = parseInt(call.argument("handle"));
         const width = parseInt(call.argument("width"));
         const height = parseInt(call.argument("height"));
-        this.videoOutputManager?.setSurfaceSize(handle, width, height);
-        result.success(null);
+        const force = call.argument("force") === true;
+        result.success(this.videoOutputManager?.setSurfaceSize(handle, width, height, force) ?? null);
+        break;
+      }
+      case "VideoOutputManager.SuspendTexture": {
+        const handle = parseInt(call.argument("handle"));
+        this.videoOutputManager?.suspendTexture(handle);
+        result.success(true);
+        break;
+      }
+      case "VideoOutputManager.ResumeTexture": {
+        const handle = parseInt(call.argument("handle"));
+        result.success(this.videoOutputManager?.resumeTexture(handle) ?? null);
         break;
       }
       case "VideoOutputManager.Dispose": {
