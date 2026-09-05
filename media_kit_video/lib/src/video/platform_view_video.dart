@@ -33,7 +33,9 @@ class PlatformViewVideo extends StatelessWidget {
   Widget build(BuildContext context) {
     final String viewType = (Platform.isIOS || Platform.isMacOS)
         ? 'com.alexmercerind/media_kit_video/native_surface'
-        : 'com.alexmercerind/media_kit_video_platform_view';
+        : Platform.operatingSystem == 'ohos'
+            ? 'com.alexmercerind/media_kit_video/ohos_native_surface'
+            : 'com.alexmercerind/media_kit_video_platform_view';
     final Map<String, dynamic> creationParams = {
       'handle': handle,
       'width': width,

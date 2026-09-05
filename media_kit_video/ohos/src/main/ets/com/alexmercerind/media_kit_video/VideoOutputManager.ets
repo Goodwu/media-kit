@@ -8,7 +8,7 @@
 
 import Log from '@ohos/flutter_ohos/src/main/ets/util/Log';
 import { TextureRegistry } from '@ohos/flutter_ohos';
-import { VideoOutput } from './VideoOutput';
+import { SurfaceSize, VideoOutput } from './VideoOutput';
 import { SizeData } from './Utils';
 
 const TAG = "VideoOutputManager";
@@ -50,11 +50,25 @@ export class VideoOutputManager {
     this.videoOutputs.clear();
   }
 
-  setSurfaceSize(handle: number, width: number, height: number): void {
-    Log.i(TAG, `com.alexmercerind.media_kit_video.VideoOutputManager.setSurfaceSize: ${handle} ${width} ${height}`);
+  setSurfaceSize(handle: number, width: number, height: number, force: boolean = false): SurfaceSize | null {
+    Log.i(TAG, `com.alexmercerind.media_kit_video.VideoOutputManager.setSurfaceSize: ${handle} ${width} ${height} force=${force}`);
 
     if (this.videoOutputs.has(handle)) {
-      this.videoOutputs.get(handle)?.setSurfaceSize(width, height);
+      return this.videoOutputs.get(handle)!.setSurfaceSize(width, height, force);
     }
+    return null;
+  }
+
+  suspendTexture(handle: number): void {
+    Log.i(TAG, `com.alexmercerind.media_kit_video.VideoOutputManager.SuspendTexture: ${handle}`);
+    this.videoOutputs.get(handle)?.suspendTexture();
+  }
+
+  resumeTexture(handle: number): SizeData | null {
+    Log.i(TAG, `com.alexmercerind.media_kit_video.VideoOutputManager.ResumeTexture: ${handle}`);
+    const output = this.videoOutputs.get(handle);
+    if (!output) return null;
+    output.resumeTexture();
+    return output.getSizeData(handle);
   }
 }

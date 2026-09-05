@@ -53,7 +53,7 @@ set(LIBMPV "libmpv_aarch64.zip")
 
 # Download URL & SHA256 hash of the libmpv archive.
 set(LIBMPV_URL "https://github.com/ErBWs/libmpv-ohos-build/releases/download/20260811/${LIBMPV}")
-set(LIBMPV_SHA "2bfb9844a7552c450694581b315b26cdf6202eaa57724e9f70f3facfad75163b")
+set(LIBMPV_SHA "999bfba12b9da030b5560ce62188da49cc3be48353d37b56b4167a609be50029")
 
 # Download location of the libmpv archive.
 set(LIBMPV_ARCHIVE "${CMAKE_CURRENT_SOURCE_DIR}/${LIBMPV}")
@@ -84,5 +84,8 @@ project(mediakit_libs_ohos)
 
 set(LIBS
     ${CMAKE_CURRENT_SOURCE_DIR}/../../../libs/arm64-v8a/libmpv.so.2)
+
+add_library(mediakit_ohos_hdr SHARED hdr_output.cc)
+target_link_libraries(mediakit_ohos_hdr PUBLIC native_window)
 
 link_libraries(DART_SHARED_LIB ${LIBS})

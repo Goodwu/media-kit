@@ -46,6 +46,7 @@ abstract class PlatformVideoController {
 
   /// True only after the native surface and player output are both verified.
   bool nativeSurfaceActive = false;
+
   /// Candidate surface is mounted before HDR promotion so SDR and HDR keep topology.
   bool nativeSurfaceCandidate = false;
 
@@ -59,6 +60,12 @@ abstract class PlatformVideoController {
   /// * “Premature optimization is the root of all evil”
   /// * “With great power comes great responsibility”
   Future<void> setSize({int? width, int? height});
+
+  /// Recalculates a native output's display-scaled buffer after a window
+  /// metrics/orientation change. Texture-backed implementations have nothing
+  /// to refresh.
+  Future<void> refreshSurfaceSize(
+      {double? viewportWidth, double? viewportHeight}) async {}
 
   /// Creates/configures the optional native output. Implementations must fail closed.
   Future<dynamic> createNativeOutput(
