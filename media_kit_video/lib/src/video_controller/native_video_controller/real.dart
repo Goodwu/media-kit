@@ -51,6 +51,7 @@ class NativeVideoController extends PlatformVideoController {
   final lock = Lock();
   bool _disposed = false;
   Map<String, dynamic>? _lastNativeConfiguration;
+  Map<String, dynamic>? _nativeWindowAttachment;
 
   NativePlayer get platform => player.platform as NativePlayer;
 
@@ -74,6 +75,9 @@ class NativeVideoController extends PlatformVideoController {
     super.configuration,
   )   : width = configuration.width,
         height = configuration.height {
+    // Native-window mode can skip createNativeOutput, so force installation
+    // of the platform-channel handler before the PlatformView emits Ready.
+    _channel;
     videoParamsSubscription = player.stream.videoParams.listen(
       (event) => lock.synchronized(() async {
         if ([0, null].contains(event.dw) || [0, null].contains(event.dh)) {
@@ -100,14 +104,28 @@ class NativeVideoController extends PlatformVideoController {
         videoParamsWidth = width;
         videoParamsHeight = height;
 
-        await _channel.invokeMethod(
-          'VideoOutputManager.SetSize',
-          {
-            'handle': handle.toString(),
-            'width': width.toString(),
-            'height': height.toString(),
-          },
-        );
+        if (configuration.useNativeWindow && Platform.isMacOS) {
+          // The mpv-owned window has no Flutter texture ID. Use the stable
+          // player handle only as a PlatformView mount signal; it is never a
+          // native window handle and is never written to mpv's --wid.
+          id.value ??= handle;
+          rect.value = Rect.fromLTWH(
+            0,
+            0,
+            width.toDouble(),
+            height.toDouble(),
+          );
+          if (!waitUntilFirstFrameRenderedCompleter.isCompleted) {
+            waitUntilFirstFrameRenderedCompleter.complete();
+          }
+          return;
+        }
+
+        await _channel.invokeMethod('VideoOutputManager.SetSize', {
+          'handle': handle.toString(),
+          'width': width.toString(),
+          'height': height.toString(),
+        });
       }),
     );
   }
@@ -117,9 +135,13 @@ class NativeVideoController extends PlatformVideoController {
     Player player,
     VideoControllerConfiguration configuration,
   ) async {
+    final nativeWindowMode = configuration.useNativeWindow && Platform.isMacOS;
+
     // Update [configuration] to have default values.
     configuration = configuration.copyWith(
-      vo: configuration.vo ?? 'libmpv',
+      // W1 is specifically the gpu-next window experiment. Do not let the
+      // normal Darwin `libmpv` default silently change the experiment into A.
+      vo: nativeWindowMode ? 'gpu-next' : (configuration.vo ?? 'libmpv'),
       hwdec: configuration.hwdec ?? 'auto',
     );
 
@@ -158,23 +180,25 @@ class NativeVideoController extends PlatformVideoController {
     // Store the [NativeVideoController] in the [_controllers].
     _controllers[handle] = controller;
 
-    await controller.setProperties(
-      {
-        'vo': configuration.vo!,
-        'hwdec': configuration.hwdec!,
-        'vid': 'auto',
-      },
-    );
+    await controller.setProperties({
+      // The window backend must be detached before its NSView exists.
+      'vo': nativeWindowMode ? 'null' : configuration.vo!,
+      'hwdec': configuration.hwdec!,
+      'vid': 'auto',
+    });
 
-    if (configuration.useNativeSurface &&
-        configuration.enableHardwareAcceleration &&
-        (Platform.isIOS || Platform.isMacOS)) {
-      // Keep the native candidate in a stable extended-linear BT.2020 target
-      // across SDR/HDR source changes; promotion still requires native probes.
+    if (nativeWindowMode) {
+      // W1 is intentionally opt-in and does not create VideoOutput/Texture.
+      // The external gpu-next experiment must select an HDR target explicitly;
+      // the source transfer alone does not make mpv's output target HDR.
       await controller.setProperties({
         'target-prim': 'bt.2020',
         'target-trc': 'linear',
       });
+      // The PlatformView mount is driven by the first video-params event.
+      controller.nativeSurfaceCandidate = true;
+      controller.setNativeSurfaceActive(false);
+      return controller;
     }
 
     if (configuration.useNativeSurface &&
@@ -184,11 +208,11 @@ class NativeVideoController extends PlatformVideoController {
         final nativeResult = await controller.createNativeOutput();
         controller.nativeSurfaceCandidate =
             nativeResult is Map && nativeResult['capable'] == true;
-        controller.nativeSurfaceActive =
-            nativeResult is Map && nativeResult['active'] == true;
+        controller.setNativeSurfaceActive(
+            nativeResult is Map && nativeResult['active'] == true);
       } catch (_) {
         // Missing native plugin/renderer is a normal fail-closed fallback.
-        controller.nativeSurfaceActive = false;
+        controller.setNativeSurfaceActive(false);
       }
     }
 
@@ -291,19 +315,24 @@ class NativeVideoController extends PlatformVideoController {
           : (configuration as dynamic).toMap(),
     );
     if (this.configuration.useNativeSurface) {
-      // Keep the native surface contract explicit: the mpv target must keep
-      // the HDR transfer function carried by the source.  Advertising linear
-      // while the OHOS NativeWindow is PQ/HLG makes the display interpret
-      // linear samples as HDR code values, producing a gray, dim picture.
-      payload['target-colorspace'] = 'bt.2020';
-      payload['target-trc'] = payload['transfer'] == 'hlg' ? 'hlg' : 'pq';
+      // Darwin's native surface consumes extended-linear BT.2020 samples.
+      // Keep the source transfer in the payload for EDR metadata, but do not
+      // ask mpv to emit PQ/HLG code values into that linear surface.
+      final darwinNative = Platform.isMacOS || Platform.isIOS;
+      final transfer = payload['transfer'] as String?;
+      final hdrInput = transfer == 'pq' || transfer == 'hlg';
+      payload['target-prim'] = hdrInput ? 'bt.2020' : 'bt.709';
+      payload['target-colorspace'] = payload['target-prim'];
+      payload['target-trc'] = hdrInput && darwinNative
+          ? 'linear'
+          : (hdrInput ? (transfer == 'hlg' ? 'hlg' : 'pq') : 'bt.1886');
       try {
         // The app may have applied its conservative SDR parameters after the
         // controller was created. Re-assert the native target immediately
         // before reading it back, so verification observes the actual mpv
         // state rather than only the configuration payload.
         await setProperties({
-          'target-prim': 'bt.2020',
+          'target-prim': payload['target-prim'] as String,
           'target-trc': payload['target-trc'] as String,
         });
         final colorspace = await player.getProperty(
@@ -315,7 +344,8 @@ class NativeVideoController extends PlatformVideoController {
           waitForInitialization: false,
         );
         payload['playerTargetVerified'] =
-            colorspace == 'bt.2020' && transfer == payload['target-trc'];
+            colorspace == payload['target-prim'] &&
+                transfer == payload['target-trc'];
       } catch (_) {
         payload['playerTargetVerified'] = false;
       }
@@ -358,6 +388,136 @@ class NativeVideoController extends PlatformVideoController {
     } catch (_) {}
   }
 
+  /// Attaches the generation-scoped Cocoa view after the Flutter PlatformView
+  /// exists. W0 only observes the view; W1's opt-in native-window mode uses
+  /// the returned handle for one immediate `wid` binding.
+  Future<Map<String, dynamic>> attachNativeWindow() async {
+    if (!Platform.isMacOS ||
+        (!configuration.useNativeSurface && !configuration.useNativeWindow)) {
+      return const <String, dynamic>{
+        'capable': false,
+        'attached': false,
+        'failureReason': 'not a macOS native-surface output',
+      };
+    }
+    final handle = nativeHandle ?? await player.handle;
+    final result = (await _channel.invokeMethod<Map<dynamic, dynamic>>(
+              'NativeWindow.Attach',
+              {
+                'handle': handle.toString(),
+                'generation': nativeSurfaceGeneration,
+              },
+            ) ??
+            const <dynamic, dynamic>{})
+        .cast<String, dynamic>();
+    if (result['capable'] == true && result['attached'] == true) {
+      // Keep lifecycle state only. Never retain the native view address in
+      // the controller after the immediate W1 bind call has consumed it.
+      _nativeWindowAttachment = {
+        'attached': true,
+        'handle': result['handle'],
+        'generation': result['generation'],
+      };
+    }
+    return result;
+  }
+
+  /// Invalidates the W0 Cocoa view token before the controller is disposed.
+  Future<void> detachNativeWindow() async {
+    if (_nativeWindowAttachment == null) return;
+    if (configuration.useNativeWindow && Platform.isMacOS) {
+      try {
+        await platform.command(
+          ['set', 'vo', 'null'],
+          waitForInitialization: false,
+        );
+        await platform.command(
+          ['set', 'wid', '0'],
+          waitForInitialization: false,
+        );
+      } catch (_) {}
+    }
+    final handle = nativeHandle ?? await player.handle;
+    try {
+      await _channel.invokeMethod(
+        'NativeWindow.Detach',
+        {
+          'handle': handle.toString(),
+          'generation': nativeSurfaceGeneration,
+        },
+      );
+    } catch (_) {}
+    _nativeWindowAttachment = null;
+    // Detaching invalidates any previously observed output. A later bind must
+    // receive fresh renderer/frame evidence before this can become active.
+    setNativeSurfaceActive(false);
+  }
+
+  /// Reads the native Cocoa view frame without treating the video resolution
+  /// as the PlatformView layout size.
+  Future<Map<String, dynamic>> nativeWindowState() async {
+    if (!Platform.isMacOS ||
+        (!configuration.useNativeSurface && !configuration.useNativeWindow)) {
+      return const <String, dynamic>{
+        'capable': false,
+        'attached': false,
+        'failureReason': 'not a macOS native-surface output',
+      };
+    }
+    final handle = nativeHandle ?? await player.handle;
+    final result = (await _channel.invokeMethod<Map<dynamic, dynamic>>(
+              'NativeWindow.State',
+              {
+                'handle': handle.toString(),
+                'generation': nativeSurfaceGeneration,
+              },
+            ) ??
+            const <dynamic, dynamic>{})
+        .cast<String, dynamic>();
+    return result;
+  }
+
+  /// W1-only bridge: consume the native view address immediately and do not
+  /// retain it after the `wid` property has been sent to mpv.
+  ///
+  /// A successful return means that the attachment was accepted and the
+  /// asynchronous mpv transition was issued. It does not mean that gpu-next
+  /// has initialized, rendered a frame, or produced visible pixels. Those
+  /// facts must be established by native/player/output evidence separately.
+  Future<bool> bindExperimentalNativeWindow(
+    Map<String, dynamic> attachment,
+  ) async {
+    if (!Platform.isMacOS || !configuration.useNativeWindow) return false;
+    final nativeViewHandle = attachment['nativeViewHandle'];
+    if (nativeViewHandle is! num || nativeViewHandle == 0) return false;
+    await lock.synchronized(() async {
+      // A synchronous mpv_set_property can wait in vo_create while Cocoa
+      // needs the Flutter main thread. Use mpv_command_async for the
+      // mpv-owned window transition so the main thread remains pumpable.
+      await platform.command(
+        ['set', 'vo', 'null'],
+        waitForInitialization: false,
+      );
+      await platform.command(
+        ['set', 'wid', nativeViewHandle.toInt().toString()],
+        waitForInitialization: false,
+      );
+      await platform.command(
+        ['set', 'gpu-api', 'vulkan'],
+        waitForInitialization: false,
+      );
+      await platform.command(
+        ['set', 'vo', configuration.vo ?? 'gpu-next'],
+        waitForInitialization: false,
+      );
+    });
+    // Do not promote `nativeSurfaceActive` here. Sending `vo`, `wid`, and
+    // `gpu-api` is only a setup request; mpv's async command completion does
+    // not prove renderer initialization or a visible frame.
+    setNativeSurfaceActive(false);
+    return true;
+  }
+
   /// Disposes the instance. Releases allocated resources back to the system.
   @override
   Future<void> disposeForRebuild() => _dispose();
@@ -367,16 +527,19 @@ class NativeVideoController extends PlatformVideoController {
     if (_disposed) return;
     _disposed = true;
     super.dispose();
+    await detachNativeWindow();
     await disposeNativeOutput();
     await videoParamsSubscription?.cancel();
     final handle = await player.handle;
     _controllers.remove(handle);
-    await _channel.invokeMethod(
-      'VideoOutputManager.Dispose',
-      {
-        'handle': handle.toString(),
-      },
-    );
+    if (!(configuration.useNativeWindow && Platform.isMacOS)) {
+      await _channel.invokeMethod(
+        'VideoOutputManager.Dispose',
+        {
+          'handle': handle.toString(),
+        },
+      );
+    }
   }
 
   /// Currently created [NativeVideoController]s.
@@ -429,21 +592,53 @@ class NativeVideoController extends PlatformVideoController {
                     // Flutter texture path; do not leave a black platform view.
                     if (hasRendererState) {
                       controller.nativeSurfaceCandidate = rendererReady;
+                      if (!rendererReady) {
+                        controller.setNativeSurfaceActive(false);
+                      }
                     }
                     if (!hasRendererState && call.arguments['active'] is bool) {
-                      controller.nativeSurfaceActive =
-                          call.arguments['active'] == true;
+                      controller.setNativeSurfaceActive(
+                          call.arguments['active'] == true);
                     }
                   }
                   final configuration = controller?._lastNativeConfiguration;
                   if (controller != null &&
                       rendererReady &&
                       generation == controller.nativeSurfaceGeneration &&
+                      Platform.isMacOS) {
+                    final attachment = await controller.attachNativeWindow();
+                    if (attachment['attached'] == true) {
+                      final state = await controller.nativeWindowState();
+                      debugPrint('NativeWindow.State: $state');
+                      if (controller.configuration.useNativeWindow) {
+                        final bound = await controller
+                            .bindExperimentalNativeWindow(attachment);
+                        debugPrint('NativeWindow.Bind: bound=$bound');
+                      }
+                    }
+                  }
+                  if (controller != null &&
+                      rendererReady &&
+                      generation == controller.nativeSurfaceGeneration &&
                       configuration != null) {
                     final result =
                         await controller.configureHdrOutput(configuration);
-                    controller.nativeSurfaceActive =
-                        result is Map && result['active'] == true;
+                    if (controller.configuration.useNativeWindow) {
+                      // W1's mpv-owned window has no verified visible-frame
+                      // callback yet. NativeSurfaceOutput readiness alone
+                      // must not promote the separate child-window path.
+                      controller.setNativeSurfaceActive(false);
+                    } else {
+                      controller.setNativeSurfaceActive(
+                          result is Map && result['active'] == true);
+                    }
+                  }
+                  break;
+                case 'NativeWindow.Frame':
+                  if (call.arguments is Map) {
+                    debugPrint(
+                      'NativeWindow.Frame: ${call.arguments}',
+                    );
                   }
                   break;
                 default:

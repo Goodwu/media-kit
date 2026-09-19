@@ -20,6 +20,7 @@ import { Utils } from './Utils';
 import { VideoOutputManager } from './VideoOutputManager';
 import { OhosNativeSurfaceFactory, OHOS_NATIVE_SURFACE_VIEW_TYPE } from './OhosNativeSurface';
 import { common } from '@kit.AbilityKit';
+import { BusinessError } from '@kit.BasicServicesKit';
 
 export default class MediaKitVideoPlugin implements FlutterPlugin, MethodCallHandler, AbilityAware {
   private channel: MethodChannel | null = null;
@@ -100,7 +101,9 @@ export default class MediaKitVideoPlugin implements FlutterPlugin, MethodCallHan
         const width = parseInt(call.argument("width"));
         const height = parseInt(call.argument("height"));
         const force = call.argument("force") === true;
-        result.success(this.videoOutputManager?.setSurfaceSize(handle, width, height, force) ?? null);
+        const updateTextureBuffer = call.argument("updateTextureBuffer") !== false;
+        result.success(this.videoOutputManager?.setSurfaceSize(
+          handle, width, height, force, updateTextureBuffer) ?? null);
         break;
       }
       case "VideoOutputManager.SuspendTexture": {
@@ -125,13 +128,37 @@ export default class MediaKitVideoPlugin implements FlutterPlugin, MethodCallHan
         break;
       }
       case "Utils.EnterNativeFullscreen": {
-        Utils.enterFullScreen(this.context!);
-        result.success(null);
+        const requestId: string = call.argument("requestId") ?? "none";
+        console.info(`[MediaKitVideo] fullscreen handler enter requestId=${requestId} context=${this.context != null}`);
+        if (this.context == null) {
+          result.error("unavailable", "MediaKitVideoPlugin is not attached to an ability.", null);
+          break;
+        }
+        const landscape = call.argument("landscape") !== false;
+        Utils.enterFullScreen(this.context, landscape, requestId).then(() => {
+          console.info(`[MediaKitVideo] fullscreen handler enter result=success requestId=${requestId}`);
+          result.success(null);
+        }).catch((error: BusinessError) => {
+          console.error(`[MediaKitVideo] fullscreen handler enter result=error requestId=${requestId} error=${JSON.stringify(error)}`);
+          result.error("fullscreen_failed", JSON.stringify(error), null);
+        });
         break;
       }
       case "Utils.ExitNativeFullscreen": {
-        Utils.exitFullScreen(this.context!);
-        result.success(null);
+        const requestId: string = call.argument("requestId") ?? "none";
+        console.info(`[MediaKitVideo] fullscreen handler exit requestId=${requestId} context=${this.context != null}`);
+        if (this.context == null) {
+          result.error("unavailable", "MediaKitVideoPlugin is not attached to an ability.", null);
+          break;
+        }
+        const allowLandscape = call.argument("allowLandscape") === true;
+        Utils.exitFullScreen(this.context, allowLandscape, requestId).then(() => {
+          console.info(`[MediaKitVideo] fullscreen handler exit result=success requestId=${requestId}`);
+          result.success(null);
+        }).catch((error: BusinessError) => {
+          console.error(`[MediaKitVideo] fullscreen handler exit result=error requestId=${requestId} error=${JSON.stringify(error)}`);
+          result.error("fullscreen_failed", JSON.stringify(error), null);
+        });
         break;
       }
       default: {

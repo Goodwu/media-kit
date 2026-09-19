@@ -5,6 +5,7 @@
 /// Use of this source code is governed by MIT license that can be found in the LICENSE file.
 import 'dart:io';
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:media_kit_video/media_kit_video_controls/media_kit_video_controls.dart';
@@ -149,8 +150,20 @@ class VideoState extends State<Video> with WidgetsBindingObserver {
   late int? _height = widget.controller.player.state.height;
   late bool _visible = (_width ?? 0) > 0 && (_height ?? 0) > 0;
   Size? _lastNativeSurfaceViewport;
+  String? _lastOhosCompositionTrace;
+  bool _ohosNativeSurfaceMounted = false;
 
   bool _pauseDueToPauseUponEnteringBackgroundMode = false;
+
+  void _traceOhosComposition(String value) {
+    if (!kDebugMode ||
+        Platform.operatingSystem != 'ohos' ||
+        _lastOhosCompositionTrace == value) {
+      return;
+    }
+    _lastOhosCompositionTrace = value;
+    debugPrint('[OhosPlatformViewTrace] composition $value');
+  }
 
   // Public API:
   bool isFullscreen() {
@@ -235,6 +248,19 @@ class VideoState extends State<Video> with WidgetsBindingObserver {
   void didUpdateWidget(Video oldWidget) {
     super.didUpdateWidget(oldWidget);
 
+    if (kDebugMode &&
+        Platform.operatingSystem == 'ohos' &&
+        !identical(oldWidget.controller, widget.controller)) {
+      debugPrint(
+        '[OhosPlatformViewTrace] Video controller changed '
+        'old=${oldWidget.controller.hashCode} new=${widget.controller.hashCode}',
+      );
+    }
+    if (!identical(oldWidget.controller, widget.controller)) {
+      _ohosNativeSurfaceMounted = false;
+      _lastNativeSurfaceViewport = null;
+    }
+
     final currentParams = videoViewParametersNotifier.value;
 
     final newParams = currentParams.copyWith(
@@ -295,6 +321,12 @@ class VideoState extends State<Video> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    if (kDebugMode && Platform.operatingSystem == 'ohos') {
+      debugPrint(
+        '[OhosPlatformViewTrace] VideoState init '
+        'controller=${widget.controller.hashCode}',
+      );
+    }
     WidgetsBinding.instance.addObserver(this);
     // --------------------------------------------------
     // Do not show the video frame until width & height are available.
@@ -346,6 +378,12 @@ class VideoState extends State<Video> with WidgetsBindingObserver {
 
   @override
   void dispose() {
+    if (kDebugMode && Platform.operatingSystem == 'ohos') {
+      debugPrint(
+        '[OhosPlatformViewTrace] VideoState dispose '
+        'controller=${widget.controller.hashCode}',
+      );
+    }
     WidgetsBinding.instance.removeObserver(this);
     _wakelock.disable();
     for (final subscription in _subscriptions) {
@@ -387,172 +425,245 @@ class VideoState extends State<Video> with WidgetsBindingObserver {
                       child: ValueListenableBuilder<PlatformVideoController?>(
                         valueListenable: widget.controller.notifier,
                         builder: (context, notifier, _) => notifier == null
-                            ? const SizedBox.shrink()
-                            : ValueListenableBuilder<int?>(
-                                valueListenable: notifier.id,
-                                builder: (context, id, _) {
-                                  return ValueListenableBuilder<Rect?>(
-                                    valueListenable: notifier.rect,
-                                    builder: (context, rect, _) {
-                                      if (id != null &&
-                                          rect != null &&
-                                          _visible) {
-                                        final nativeSurface = (Platform
-                                                    .isAndroid &&
-                                                notifier.configuration
-                                                    .usePlatformView) ||
-                                            ((Platform.isIOS ||
-                                                    Platform.isMacOS) &&
-                                                notifier.configuration
-                                                    .useNativeSurface &&
-                                                notifier
-                                                    .nativeSurfaceCandidate &&
-                                                notifier.nativeHandle !=
-                                                    null) ||
-                                            (Platform.operatingSystem ==
+                            ? (() {
+                                _traceOhosComposition('notifier=null');
+                                return const SizedBox.shrink();
+                              })()
+                            : ValueListenableBuilder<bool>(
+                                valueListenable:
+                                    notifier.nativeSurfaceActiveNotifier,
+                                builder: (context, _, __) =>
+                                    ValueListenableBuilder<int?>(
+                                  valueListenable: notifier.id,
+                                  builder: (context, id, _) {
+                                    return ValueListenableBuilder<Rect?>(
+                                      valueListenable: notifier.rect,
+                                      builder: (context, rect, _) {
+                                        _traceOhosComposition(
+                                          'visible=$_visible id=$id '
+                                          'rect=$rect candidate=${notifier.nativeSurfaceCandidate} '
+                                          'active=${notifier.nativeSurfaceActive} '
+                                          'generation=${notifier.nativeSurfaceGeneration}',
+                                        );
+                                        final ohosNativeSurfaceCandidate =
+                                            Platform.operatingSystem ==
                                                     'ohos' &&
                                                 notifier.configuration
                                                     .useNativeSurface &&
-                                                notifier
-                                                    .nativeSurfaceCandidate);
-                                        final nativeOhosSurface =
-                                            nativeSurface &&
-                                                Platform.operatingSystem ==
-                                                    'ohos';
-                                        if (nativeOhosSurface &&
-                                            viewportConstraints
-                                                .hasBoundedWidth &&
-                                            viewportConstraints
-                                                .hasBoundedHeight) {
-                                          final viewportSize = Size(
-                                            viewportConstraints.maxWidth,
-                                            viewportConstraints.maxHeight,
-                                          );
-                                          if (_lastNativeSurfaceViewport ==
-                                              null) {
-                                            // The initial surface size is set
-                                            // by the video-params path. Avoid
-                                            // rebuilding the HDR swapchain a
-                                            // second time on first mount.
-                                            _lastNativeSurfaceViewport =
-                                                viewportSize;
-                                          } else if (_lastNativeSurfaceViewport !=
-                                              viewportSize) {
-                                            _lastNativeSurfaceViewport =
-                                                viewportSize;
-                                            WidgetsBinding.instance
-                                                .addPostFrameCallback((_) {
-                                              if (mounted) {
-                                                notifier.refreshSurfaceSize(
-                                                  viewportWidth:
-                                                      viewportSize.width,
-                                                  viewportHeight:
-                                                      viewportSize.height,
-                                                );
-                                              }
-                                            });
+                                                notifier.nativeSurfaceCandidate;
+                                        final keepMountedNativeSurface =
+                                            ohosNativeSurfaceCandidate &&
+                                                _ohosNativeSurfaceMounted;
+                                        if (id != null &&
+                                            rect != null &&
+                                            (_visible ||
+                                                keepMountedNativeSurface)) {
+                                          final nativeSurfaceCandidate = (Platform
+                                                      .isAndroid &&
+                                                  notifier.configuration
+                                                      .usePlatformView) ||
+                                              ((Platform.isIOS ||
+                                                      Platform.isMacOS) &&
+                                                  (notifier.configuration
+                                                          .useNativeSurface ||
+                                                      notifier.configuration
+                                                          .useNativeWindow) &&
+                                                  (notifier.configuration
+                                                          .useNativeWindow
+                                                      ? notifier
+                                                          .nativeSurfaceCandidate
+                                                      : notifier
+                                                          .nativeSurfaceCandidate) &&
+                                                  notifier
+                                                          .nativeHandle !=
+                                                      null) ||
+                                              (Platform
+                                                          .operatingSystem ==
+                                                      'ohos' &&
+                                                  notifier.configuration
+                                                      .useNativeSurface &&
+                                                  notifier
+                                                      .nativeSurfaceCandidate);
+                                          final nativeSurface =
+                                              nativeSurfaceCandidate &&
+                                                  (notifier.configuration
+                                                          .useNativeWindow
+                                                      ? notifier
+                                                          .nativeSurfaceCandidate
+                                                      : notifier
+                                                          .nativeSurfaceActive);
+                                          final nativeOhosSurface =
+                                              nativeSurface &&
+                                                  Platform.operatingSystem ==
+                                                      'ohos';
+                                          final nativeOhosCandidate =
+                                              nativeSurfaceCandidate &&
+                                                  Platform.operatingSystem ==
+                                                      'ohos';
+                                          if (nativeOhosCandidate && _visible) {
+                                            _ohosNativeSurfaceMounted = true;
                                           }
-                                        }
-                                        final viewportWidth =
-                                            viewportConstraints.hasBoundedWidth
-                                                ? viewportConstraints.maxWidth
-                                                : (videoViewParameters.width ??
-                                                    rect.width);
-                                        final viewportHeight =
-                                            viewportConstraints.hasBoundedHeight
-                                                ? viewportConstraints.maxHeight
-                                                : (videoViewParameters.height ??
-                                                    rect.height);
-                                        var surfaceWidth = viewportWidth;
-                                        var surfaceHeight = viewportHeight;
-                                        if (nativeOhosSurface &&
-                                            rect.width > 0 &&
-                                            rect.height > 0) {
-                                          final aspect =
-                                              rect.width / rect.height;
-                                          final widthForHeight =
-                                              viewportHeight * aspect;
-                                          if (widthForHeight <= viewportWidth) {
-                                            surfaceWidth = widthForHeight;
-                                          } else {
-                                            surfaceHeight =
-                                                viewportWidth / aspect;
+                                          if (nativeOhosSurface &&
+                                              viewportConstraints
+                                                  .hasBoundedWidth &&
+                                              viewportConstraints
+                                                  .hasBoundedHeight) {
+                                            final viewportSize = Size(
+                                              viewportConstraints.maxWidth,
+                                              viewportConstraints.maxHeight,
+                                            );
+                                            if (_lastNativeSurfaceViewport ==
+                                                null) {
+                                              // The initial surface size is set
+                                              // by the video-params path. Avoid
+                                              // rebuilding the HDR swapchain a
+                                              // second time on first mount.
+                                              _lastNativeSurfaceViewport =
+                                                  viewportSize;
+                                            } else if (_lastNativeSurfaceViewport !=
+                                                viewportSize) {
+                                              _lastNativeSurfaceViewport =
+                                                  viewportSize;
+                                              WidgetsBinding.instance
+                                                  .addPostFrameCallback((_) {
+                                                if (mounted) {
+                                                  notifier.refreshSurfaceSize(
+                                                    viewportWidth:
+                                                        viewportSize.width,
+                                                    viewportHeight:
+                                                        viewportSize.height,
+                                                  );
+                                                }
+                                              });
+                                            }
                                           }
-                                        }
-                                        final nativeVideo = PlatformViewVideo(
-                                          handle: notifier.nativeHandle ?? id,
-                                          width: rect.width.toInt(),
-                                          height: rect.height.toInt(),
-                                          useHCPP:
-                                              notifier.configuration.useHCPP,
-                                          generation:
-                                              notifier.nativeSurfaceGeneration,
-                                        );
-                                        return SizedBox(
-                                          // Native OHOS surfaces must receive
-                                          // the viewport size, not the decoder
-                                          // rect. Platform views do not inherit
-                                          // the scale produced by FittedBox.
-                                          width: nativeOhosSurface &&
-                                                  viewportConstraints
+                                          final viewportWidth =
+                                              viewportConstraints
                                                       .hasBoundedWidth
-                                              ? viewportConstraints.maxWidth
-                                              : nativeOhosSurface
-                                                  ? videoViewParameters.width
-                                                  : videoViewParameters
-                                                              .aspectRatio ==
-                                                          null
-                                                      ? rect.width
-                                                      : rect.height *
-                                                          videoViewParameters
-                                                              .aspectRatio!,
-                                          height: nativeOhosSurface &&
-                                                  viewportConstraints
+                                                  ? viewportConstraints.maxWidth
+                                                  : (videoViewParameters
+                                                          .width ??
+                                                      rect.width);
+                                          final viewportHeight =
+                                              viewportConstraints
                                                       .hasBoundedHeight
-                                              ? viewportConstraints.maxHeight
-                                              : nativeOhosSurface
-                                                  ? videoViewParameters.height
-                                                  : rect.height,
-                                          child: Stack(
-                                            children: [
-                                              const SizedBox(),
-                                              Positioned.fill(
-                                                child: nativeSurface
-                                                    ? nativeOhosSurface
-                                                        ? Center(
-                                                            child: SizedBox(
-                                                              width:
-                                                                  surfaceWidth,
-                                                              height:
-                                                                  surfaceHeight,
-                                                              child:
-                                                                  nativeVideo,
-                                                            ),
-                                                          )
-                                                        : nativeVideo
-                                                    : Texture(
-                                                        textureId: id,
-                                                        filterQuality:
+                                                  ? viewportConstraints
+                                                      .maxHeight
+                                                  : (videoViewParameters
+                                                          .height ??
+                                                      rect.height);
+                                          var surfaceWidth = viewportWidth;
+                                          var surfaceHeight = viewportHeight;
+                                          if (nativeOhosSurface &&
+                                              rect.width > 0 &&
+                                              rect.height > 0) {
+                                            final aspect =
+                                                rect.width / rect.height;
+                                            final widthForHeight =
+                                                viewportHeight * aspect;
+                                            if (widthForHeight <=
+                                                viewportWidth) {
+                                              surfaceWidth = widthForHeight;
+                                            } else {
+                                              surfaceHeight =
+                                                  viewportWidth / aspect;
+                                            }
+                                          }
+                                          final nativeVideo = PlatformViewVideo(
+                                            handle: notifier.nativeHandle ?? id,
+                                            width: rect.width.toInt(),
+                                            height: rect.height.toInt(),
+                                            useHCPP:
+                                                notifier.configuration.useHCPP,
+                                            generation: notifier
+                                                .nativeSurfaceGeneration,
+                                            mpvWindow: Platform.isMacOS &&
+                                                notifier.configuration
+                                                    .useNativeWindow,
+                                          );
+                                          return SizedBox(
+                                            // Native OHOS surfaces must receive
+                                            // the viewport size, not the decoder
+                                            // rect. Platform views do not inherit
+                                            // the scale produced by FittedBox.
+                                            width: nativeOhosSurface &&
+                                                    viewportConstraints
+                                                        .hasBoundedWidth
+                                                ? viewportConstraints.maxWidth
+                                                : nativeOhosSurface
+                                                    ? videoViewParameters.width
+                                                    : videoViewParameters
+                                                                .aspectRatio ==
+                                                            null
+                                                        ? rect.width
+                                                        : rect.height *
                                                             videoViewParameters
-                                                                .filterQuality,
+                                                                .aspectRatio!,
+                                            height: nativeOhosSurface &&
+                                                    viewportConstraints
+                                                        .hasBoundedHeight
+                                                ? viewportConstraints.maxHeight
+                                                : nativeOhosSurface
+                                                    ? videoViewParameters.height
+                                                    : rect.height,
+                                            child: Stack(
+                                              children: [
+                                                const SizedBox(),
+                                                if (nativeSurfaceCandidate)
+                                                  Positioned.fill(
+                                                    // Keep the native candidate in
+                                                    // one stable, painted element.
+                                                    // When it is only a candidate,
+                                                    // the Texture below remains the
+                                                    // visual output until native
+                                                    // activation. Zero-opacity or
+                                                    // offstage wrappers would
+                                                    // suppress the platform-view
+                                                    // paint needed for renderer
+                                                    // readiness on Darwin too.
+                                                    child: Center(
+                                                      child: SizedBox(
+                                                        width: nativeOhosSurface
+                                                            ? surfaceWidth
+                                                            : viewportWidth,
+                                                        height: nativeOhosSurface
+                                                            ? surfaceHeight
+                                                            : viewportHeight,
+                                                        child: nativeVideo,
                                                       ),
-                                              ),
-                                              if (rect.width <= 1.0 &&
-                                                  rect.height <= 1.0)
-                                                Positioned.fill(
-                                                  child: Container(
-                                                    color: videoViewParameters
-                                                        .fill,
+                                                    ),
                                                   ),
-                                                ),
-                                            ],
-                                          ),
-                                        );
-                                      }
-                                      return const SizedBox.shrink();
-                                    },
-                                  );
-                                },
+                                                if (!nativeSurface)
+                                                  Positioned.fill(
+                                                    child: Texture(
+                                                      textureId: id,
+                                                      filterQuality:
+                                                          videoViewParameters
+                                                              .filterQuality,
+                                                    ),
+                                                  ),
+                                                if (nativeSurface &&
+                                                    !nativeOhosCandidate)
+                                                  Positioned.fill(
+                                                    child: nativeVideo,
+                                                  ),
+                                                if (rect.width <= 1.0 &&
+                                                    rect.height <= 1.0)
+                                                  Positioned.fill(
+                                                    child: Container(
+                                                      color: videoViewParameters
+                                                          .fill,
+                                                    ),
+                                                  ),
+                                              ],
+                                            ),
+                                          );
+                                        }
+                                        return const SizedBox.shrink();
+                                      },
+                                    );
+                                  },
+                                ),
                               ),
                       ),
                     ),
@@ -616,6 +727,9 @@ Future<void> defaultEnterNativeFullscreen() async {
   } catch (exception, stacktrace) {
     debugPrint(exception.toString());
     debugPrint(stacktrace.toString());
+    if (Platform.operatingSystem == 'ohos') {
+      rethrow;
+    }
   }
 }
 
@@ -646,6 +760,9 @@ Future<void> defaultExitNativeFullscreen() async {
   } catch (exception, stacktrace) {
     debugPrint(exception.toString());
     debugPrint(stacktrace.toString());
+    if (Platform.operatingSystem == 'ohos') {
+      rethrow;
+    }
   }
 }
 // --------------------------------------------------

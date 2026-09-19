@@ -47,11 +47,24 @@ abstract class PlatformVideoController {
   /// True only after the native surface and player output are both verified.
   bool nativeSurfaceActive = false;
 
+  /// Notifies the video widget when native output promotion changes the
+  /// visible output topology. The bool above is intentionally kept as the
+  /// state owner; this notifier only makes the state transition observable.
+  final ValueNotifier<bool> nativeSurfaceActiveNotifier =
+      ValueNotifier<bool>(false);
+
   /// Candidate surface is mounted before HDR promotion so SDR and HDR keep topology.
   bool nativeSurfaceCandidate = false;
 
   /// {@macro platform_video_controller}
   PlatformVideoController(this.player, this.configuration);
+
+  @protected
+  void setNativeSurfaceActive(bool value) {
+    if (nativeSurfaceActive == value) return;
+    nativeSurfaceActive = value;
+    nativeSurfaceActiveNotifier.value = value;
+  }
 
   /// Sets the required size of the video output.
   /// This may yield substantial performance improvements if a small [width] & [height] is specified.
@@ -104,6 +117,7 @@ abstract class PlatformVideoController {
   void dispose() {
     id.dispose();
     rect.dispose();
+    nativeSurfaceActiveNotifier.dispose();
   }
 
   /// Releases this controller before creating another output for the same
@@ -125,6 +139,13 @@ class VideoControllerConfiguration {
   /// Selects the Darwin native surface when the platform can prove HDR output.
   /// Failed probes and unsupported platforms always fall back to Texture.
   final bool useNativeSurface;
+
+  /// Experimental macOS mpv-owned Cocoa window output.
+  ///
+  /// This is deliberately independent from [useNativeSurface] and defaults
+  /// to `false`. It is only a W1 integration probe for `wid + vo=gpu-next`;
+  /// it is not an HDR/DV capability switch.
+  final bool useNativeWindow;
 
   /// Sets the [`--vo`](https://mpv.io/manual/stable/#options-vo) property on native backend.
   ///
@@ -209,6 +230,7 @@ class VideoControllerConfiguration {
     this.usePlatformView = false,
     this.useHCPP = false,
     this.useNativeSurface = false,
+    this.useNativeWindow = false,
   });
 
   /// Returns a copy of this class with the given fields replaced by the new values.
@@ -224,6 +246,7 @@ class VideoControllerConfiguration {
     bool? usePlatformView,
     bool? useHCPP,
     bool? useNativeSurface,
+    bool? useNativeWindow,
   }) =>
       VideoControllerConfiguration(
         vo: vo ?? this.vo,
@@ -241,5 +264,6 @@ class VideoControllerConfiguration {
         usePlatformView: usePlatformView ?? this.usePlatformView,
         useHCPP: useHCPP ?? this.useHCPP,
         useNativeSurface: useNativeSurface ?? this.useNativeSurface,
+        useNativeWindow: useNativeWindow ?? this.useNativeWindow,
       );
 }

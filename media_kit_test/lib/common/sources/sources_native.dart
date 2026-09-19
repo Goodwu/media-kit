@@ -5,9 +5,22 @@ import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart' as path;
 
 /// List of sample videos available for playback.
-final sources = <String>[];
+final sources = <String>[
+  if (Platform.isMacOS)
+    const String.fromEnvironment('MEDIA_KIT_AUTO_SOURCE').isNotEmpty
+        ? const String.fromEnvironment('MEDIA_KIT_AUTO_SOURCE')
+        : (bool.fromEnvironment('MEDIA_KIT_AUTO_HDR')
+            ? '/Users/wuweiwei1/Downloads/test-clips/luna-pq-six-bands.mp4'
+            : '/Users/wuweiwei1/Downloads/test-clips/luna-sdr-720p-bt709-control.mp4'),
+];
 
 Future<void> prepareSources() async {
+  if (sources.isNotEmpty) {
+    progress.value = bool.fromEnvironment('MEDIA_KIT_AUTO_HDR')
+        ? 'Using local Luna PQ HDR10 test clip'
+        : 'Using local Luna SDR control clip';
+    return;
+  }
   final uris = [
     'https://user-images.githubusercontent.com/28951144/229373695-22f88f13-d18f-4288-9bf1-c3e078d83722.mp4',
     'https://user-images.githubusercontent.com/28951144/229373709-603a7a89-2105-4e1b-a5a5-a6c3567c9a59.mp4',

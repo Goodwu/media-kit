@@ -43,6 +43,11 @@ final class NativeSurfaceOutput {
         object: nil,
         queue: .main
       ) { [weak self] _ in self?.refreshAll() })
+      displayObservers.append(NotificationCenter.default.addObserver(
+        forName: NSWindow.didChangeScreenNotification,
+        object: nil,
+        queue: .main
+      ) { [weak self] _ in self?.refreshAll() })
     #endif
   }
 
@@ -52,12 +57,14 @@ final class NativeSurfaceOutput {
     }
   }
 
-  /// Current EDR headroom is content-dependent and remains 1.0 until an EDR
-  /// layer is already presenting. It is useful as runtime evidence, but must
-  /// not gate the first activation of that layer.
-  private var currentHeadroom: Double {
+  /// Current EDR headroom is the compositor's observed runtime value. It may
+  /// remain 1.0 until an EDR layer has requested content, so it is diagnostic
+  /// evidence rather than the pre-activation gate.
+  private func currentHeadroom(handle: Int64) -> Double {
+    let metrics = NativeSurfaceViewRegistry.metrics(handle: handle)
+    if let value = metrics["currentHeadroom"] { return value }
     #if canImport(UIKit)
-      if #available(iOS 16.0, *) { return Double(UIScreen.main.potentialEDRHeadroom) }
+      if #available(iOS 16.0, *) { return Double(UIScreen.main.currentEDRHeadroom) }
       return 1.0
     #elseif canImport(AppKit)
       return Double(NSScreen.main?.maximumExtendedDynamicRangeColorComponentValue ?? 1.0)
@@ -66,17 +73,26 @@ final class NativeSurfaceOutput {
     #endif
   }
 
-  private var displaySupportsEdr: Bool {
+  private func displaySupportsEdr(handle: Int64) -> Bool {
+    // Potential headroom proves that the current display mode can attempt EDR.
+    // Actual current headroom and a visible frame are still required for
+    // acceptance; using currentHeadroom here would deadlock first activation.
+    return potentialHeadroom(handle: handle) > 1.0
+  }
+
+  private func potentialHeadroom(handle: Int64) -> Double {
+    let metrics = NativeSurfaceViewRegistry.metrics(handle: handle)
+    if let value = metrics["potentialHeadroom"] { return value }
     #if canImport(UIKit)
-      if #available(iOS 16.0, *) { return UIScreen.main.potentialEDRHeadroom > 1.0 }
-      return false
+      if #available(iOS 16.0, *) { return Double(UIScreen.main.potentialEDRHeadroom) }
+      return 1.0
     #elseif canImport(AppKit)
       if #available(macOS 10.15, *) {
-        return (NSScreen.main?.maximumPotentialExtendedDynamicRangeColorComponentValue ?? 1.0) > 1.0
+        return Double(NSScreen.main?.maximumPotentialExtendedDynamicRangeColorComponentValue ?? 1.0)
       }
-      return false
+      return 1.0
     #else
-      return false
+      return 1.0
     #endif
   }
 
@@ -92,7 +108,7 @@ final class NativeSurfaceOutput {
     let transfer = configurations[handle]?["transfer"] as? String
     let hdrInput = transfer == "pq" || transfer == "hlg"
     state.active = state.capable && hdrInput && targetVerified(configurations[handle]) && layerReady[handle] == state.generation &&
-      NativeFrameRegistry.hasFloatProvider(handle: handle) && displaySupportsEdr
+      NativeFrameRegistry.hasFloatProvider(handle: handle) && displaySupportsEdr(handle: handle)
     NativeFrameRegistry.setSurfaceActive(handle: handle, enabled: state.active)
     state.failureReason = state.active ? "" : "surface, frame provider, or HDR target probe incomplete"
     states[handle] = state
@@ -135,7 +151,7 @@ final class NativeSurfaceOutput {
     let transfer = configuration["transfer"] as? String
     let hdrInput = transfer == "pq" || transfer == "hlg"
     state.active = state.capable && hdrInput && targetVerified(configuration) && layerReady[handle] == generation &&
-      NativeFrameRegistry.hasFloatProvider(handle: handle) && displaySupportsEdr
+      NativeFrameRegistry.hasFloatProvider(handle: handle) && displaySupportsEdr(handle: handle)
     NativeFrameRegistry.setSurfaceActive(handle: handle, enabled: state.active)
     state.failureReason = state.active ? "" : "surface, frame provider, or HDR target probe incomplete"
     states[handle] = state
@@ -149,6 +165,10 @@ final class NativeSurfaceOutput {
     }
     state.active = false
     states[handle] = state
+    // Clear display-side HDR metadata as well as the producer mode. The next
+    // configure call may restore PQ/HLG; leaving the old CAEDRMetadata active
+    // would make an inactive/SDR edge indistinguishable from an HDR output.
+    NativeSurfaceViewRegistry.configure(handle: handle, configuration: ["transfer": "sdr"])
     NativeFrameRegistry.setSurfaceActive(handle: handle, enabled: false)
     return report(handle: handle)
   }
@@ -170,7 +190,7 @@ final class NativeSurfaceOutput {
       let transfer = configurations[handle]?["transfer"] as? String
       let hdrInput = transfer == "pq" || transfer == "hlg"
       state.active = state.capable && hdrInput && targetVerified(configurations[handle]) && layerReady[handle] == state.generation &&
-        NativeFrameRegistry.hasFloatProvider(handle: handle) && displaySupportsEdr
+        NativeFrameRegistry.hasFloatProvider(handle: handle) && displaySupportsEdr(handle: handle)
       NativeFrameRegistry.setSurfaceActive(handle: handle, enabled: state.active)
       state.failureReason = state.active ? "" : "surface, frame provider, or HDR target probe incomplete"
       states[handle] = state
@@ -191,17 +211,24 @@ final class NativeSurfaceOutput {
     let state = states[handle] ?? State()
     return [
       "backend": "darwin-cametal-layer",
-      "supportedInputFormats": ["sdr", "hdr10", "hlg", "dolby-vision-p5", "dolby-vision-p7"],
+      // Profile 8 is verified through the HLG-compatible single-layer test
+      // asset. This list describes the accepted input contract for the
+      // conversion surface; it does not claim native Dolby Vision metadata
+      // passthrough to the display.
+      "supportedInputFormats": ["sdr", "hdr10", "hlg", "dolby-vision-p5", "dolby-vision-p7", "dolby-vision-p8"],
       "supportedOutputFormats": ["extended-linear-bt2020"],
-      "sourceProcessing": "mpv-libplacebo",
+      // The shipped Darwin libmpv artifact is not guaranteed to include
+      // libplacebo. Report the verified render boundary instead of claiming
+      // a backend feature from the Dart/native contract alone.
+      "sourceProcessing": "mpv-gpu-native-surface",
       "outputEncoding": "rgba16Float",
       "dynamicMetadataApplied": false,
       "capable": state.capable,
       "active": state.active,
       "pixelFormat": "rgba16Float",
       "colorSpace": "extended-linear-bt2020",
-      "headroom": currentHeadroom,
-      "potentialHeadroom": displaySupportsEdr ? 2.0 : 1.0,
+      "headroom": currentHeadroom(handle: handle),
+      "potentialHeadroom": potentialHeadroom(handle: handle),
       "failureReason": state.failureReason,
       "generation": state.generation,
       "handle": handle

@@ -9,7 +9,7 @@ function(download_and_verify url sha locationForArchive)
     # If SHA256 doesn't match, delete the archive to download again.
     if(NOT sha STREQUAL ARCHIVE_SHA)
       file(REMOVE "${locationForArchive}")
-      message(STATUS "MD5 mismatch. File deleted.")
+      message(STATUS "SHA256 mismatch. File deleted.")
     endif()
   endif()
 
@@ -53,7 +53,10 @@ set(LIBMPV "libmpv_aarch64.zip")
 
 # Download URL & SHA256 hash of the libmpv archive.
 set(LIBMPV_URL "https://github.com/ErBWs/libmpv-ohos-build/releases/download/20260811/${LIBMPV}")
-set(LIBMPV_SHA "999bfba12b9da030b5560ce62188da49cc3be48353d37b56b4167a609be50029")
+# This archive contains the OHOS color-contract and output-mapping diagnostics
+# used by the current real-device investigation.  Keep the checksum strict:
+# replacing the archive without updating this provenance record must fail.
+set(LIBMPV_SHA "2f9d1f591149c6c99d8476bfd5c208e0120a1fa272ad8044039994bd55564df7")
 
 # Download location of the libmpv archive.
 set(LIBMPV_ARCHIVE "${CMAKE_CURRENT_SOURCE_DIR}/${LIBMPV}")
@@ -65,19 +68,11 @@ download_and_verify(
   ${LIBMPV_ARCHIVE}
 )
 
-check_directory_exists_and_not_empty(${LIBMPV_SRC} LIBMPV_SRC_VALID)
-
-# Extract the libmpv archive.
-if(NOT LIBMPV_SRC_VALID)
-  message(STATUS "Extracting ${LIBMPV}...")
-  make_directory("${LIBMPV_SRC}")
-  add_custom_target("LIBMPV_EXTRACT" ALL)
-  add_custom_command(
-    TARGET "LIBMPV_EXTRACT"
-    COMMAND "${CMAKE_COMMAND}" -E tar -xf "${LIBMPV_ARCHIVE}"
-    WORKING_DIRECTORY "${LIBMPV_SRC}"
-  )
-endif()
+# The native archive is consumed through the shared libs/arm64-v8a directory.
+# Do not remove that directory during configure: another CMake/HAP invocation
+# may be reading it, and an interrupted configure would leave it empty. Make
+# extraction an explicit build step with an archive dependency instead.
+set(LIBMPV_EXTRACT_STAMP "${CMAKE_CURRENT_BINARY_DIR}/libmpv-extract.stamp")
 # ------------------------------------------------------------------------------
 
 project(mediakit_libs_ohos)
@@ -87,5 +82,18 @@ set(LIBS
 
 add_library(mediakit_ohos_hdr SHARED hdr_output.cc)
 target_link_libraries(mediakit_ohos_hdr PUBLIC native_window)
+
+add_custom_command(
+  OUTPUT "${LIBMPV_EXTRACT_STAMP}"
+  COMMAND "${CMAKE_COMMAND}" -E rm -rf "${LIBMPV_SRC}"
+  COMMAND "${CMAKE_COMMAND}" -E make_directory "${LIBMPV_SRC}"
+  COMMAND "${CMAKE_COMMAND}" -E chdir "${LIBMPV_SRC}"
+          "${CMAKE_COMMAND}" -E tar -xf "${LIBMPV_ARCHIVE}"
+  COMMAND "${CMAKE_COMMAND}" -E touch "${LIBMPV_EXTRACT_STAMP}"
+  DEPENDS "${LIBMPV_ARCHIVE}"
+  VERBATIM
+)
+add_custom_target("LIBMPV_EXTRACT" ALL DEPENDS "${LIBMPV_EXTRACT_STAMP}")
+add_dependencies(mediakit_ohos_hdr "LIBMPV_EXTRACT")
 
 link_libraries(DART_SHARED_LIB ${LIBS})
