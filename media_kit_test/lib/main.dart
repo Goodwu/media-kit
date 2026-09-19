@@ -31,7 +31,41 @@ Future<void> main() async {
   );
   runApp(const MyApp(DownloadingScreen()));
   await prepareSources();
-  runApp(const MyApp(PrimaryScreen()));
+  runApp(
+    MyApp(
+      const bool.fromEnvironment('MEDIA_KIT_AUTO_SINGLE_PLAYER')
+          ? const SinglePlayerSingleVideoScreen()
+          : const bool.fromEnvironment('MEDIA_KIT_AUTO_RESIZE')
+              ? const AutoLifecycleScreen()
+              : const PrimaryScreen(),
+    ),
+  );
+}
+
+class AutoLifecycleScreen extends StatefulWidget {
+  const AutoLifecycleScreen({super.key});
+
+  @override
+  State<AutoLifecycleScreen> createState() => _AutoLifecycleScreenState();
+}
+
+class _AutoLifecycleScreenState extends State<AutoLifecycleScreen> {
+  int generation = 1;
+
+  @override
+  void initState() {
+    super.initState();
+    Future<void>.delayed(const Duration(seconds: 14), () {
+      if (!mounted) return;
+      setState(() => generation++);
+      debugPrint('AUTO_LIFECYCLE_RECREATE generation=$generation');
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SinglePlayerSingleVideoScreen(key: ValueKey(generation));
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -86,7 +120,8 @@ class PrimaryScreen extends StatelessWidget {
                     usePlatformView: !value.usePlatformView,
                   );
                 },
-                child: Text(value.usePlatformView ? 'PlatformView' : 'TextureView'),
+                child: Text(
+                    value.usePlatformView ? 'PlatformView' : 'TextureView'),
               ),
             ),
           const SizedBox(width: 16.0),

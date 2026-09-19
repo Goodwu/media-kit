@@ -29,23 +29,44 @@ public class MediaKitVideoPlugin: NSObject, FlutterPlugin {
     )
     registrar.addMethodCallDelegate(instance, channel: channel)
     #if canImport(Flutter)
-      registrar.register(NativeSurfaceViewFactory(onLayerReady: { handle, generation, rendererReady in
+      let nativeSurfaceViewFactory = NativeSurfaceViewFactory(onLayerReady: { handle, generation, rendererReady in
         let report = instance.nativeSurfaceOutput.attachLayer(handle: handle, generation: generation, rendererReady: rendererReady)
         var event: [String: Any] = report
         event["handle"] = handle
         event["generation"] = generation
         event["rendererReady"] = rendererReady
         instance.channel.invokeMethod("NativeSurface.Ready", arguments: event)
-      }), withId: "com.alexmercerind/media_kit_video/native_surface")
+      })
+      instance.nativeSurfaceViewFactory = nativeSurfaceViewFactory
+      registrar.register(nativeSurfaceViewFactory, withId: "com.alexmercerind/media_kit_video/native_surface")
     #elseif canImport(FlutterMacOS)
-      registrar.register(NativeSurfaceViewFactory(onLayerReady: { handle, generation, rendererReady in
-        let report = instance.nativeSurfaceOutput.attachLayer(handle: handle, generation: generation, rendererReady: rendererReady)
-        var event: [String: Any] = report
-        event["handle"] = handle
-        event["generation"] = generation
-        event["rendererReady"] = rendererReady
-        instance.channel.invokeMethod("NativeSurface.Ready", arguments: event)
-      }), withId: "com.alexmercerind/media_kit_video/native_surface")
+      let nativeSurfaceViewFactory = NativeSurfaceViewFactory(
+        onLayerReady: { handle, generation, rendererReady in
+          let report = instance.nativeSurfaceOutput.attachLayer(handle: handle, generation: generation, rendererReady: rendererReady)
+          var event: [String: Any] = report
+          event["handle"] = handle
+          event["generation"] = generation
+          event["rendererReady"] = rendererReady
+          instance.channel.invokeMethod("NativeSurface.Ready", arguments: event)
+        },
+        onFrameChanged: { handle, generation, frame in
+          instance.channel.invokeMethod(
+            "NativeWindow.Frame",
+            arguments: [
+              "handle": handle,
+              "generation": generation,
+              "frame": [
+                "x": Double(frame.origin.x),
+                "y": Double(frame.origin.y),
+                "width": Double(frame.size.width),
+                "height": Double(frame.size.height),
+              ],
+            ] as [String: Any]
+          )
+        }
+      )
+      instance.nativeSurfaceViewFactory = nativeSurfaceViewFactory
+      registrar.register(nativeSurfaceViewFactory, withId: "com.alexmercerind/media_kit_video/native_surface")
     #endif
   }
 
@@ -53,6 +74,7 @@ public class MediaKitVideoPlugin: NSObject, FlutterPlugin {
   private let videoOutputManager: VideoOutputManager
   private let nativeSurfaceOutput = NativeSurfaceOutput()
   private let utils: UtilsProtocol?
+  private var nativeSurfaceViewFactory: NativeSurfaceViewFactory?
 
   init(
     registry: FlutterTextureRegistry,
@@ -78,6 +100,38 @@ public class MediaKitVideoPlugin: NSObject, FlutterPlugin {
     result: @escaping FlutterResult
   ) {
     switch call.method {
+    case "NativeWindow.Attach":
+      #if canImport(AppKit)
+        let args = call.arguments as? [String: Any]
+        let handle = Int64((args?["handle"] as? String) ?? "") ?? -1
+        let generation = args?["generation"] as? Int ?? 0
+        let attachment = DarwinViewTokenRegistry.attach(handle: handle, generation: generation)
+        NSLog("NativeWindow.Attach handle=\(handle) generation=\(generation) result=\(attachment)")
+        result(attachment)
+      #else
+        result(["capable": false, "attached": false, "failureReason": "Cocoa window backend unavailable"])
+      #endif
+    case "NativeWindow.Detach":
+      #if canImport(AppKit)
+        let args = call.arguments as? [String: Any]
+        let handle = Int64((args?["handle"] as? String) ?? "") ?? -1
+        let generation = args?["generation"] as? Int ?? 0
+        let detachment = DarwinViewTokenRegistry.detach(handle: handle, generation: generation)
+        self.nativeSurfaceViewFactory?.release(handle: handle)
+        NSLog("NativeWindow.Detach handle=\(handle) generation=\(generation) result=\(detachment)")
+        result(detachment)
+      #else
+        result(["capable": false, "detached": false, "failureReason": "Cocoa window backend unavailable"])
+      #endif
+    case "NativeWindow.State":
+      #if canImport(AppKit)
+        let args = call.arguments as? [String: Any]
+        let handle = Int64((args?["handle"] as? String) ?? "") ?? -1
+        let generation = args?["generation"] as? Int ?? 0
+        result(DarwinViewTokenRegistry.state(handle: handle, generation: generation))
+      #else
+        result(["capable": false, "attached": false, "failureReason": "Cocoa window backend unavailable"])
+      #endif
     case "createNativeOutput":
       handleNativeOutput(call.arguments, result: result) { handle, generation, _ in
         return self.nativeSurfaceOutput.create(handle: handle, generation: generation)

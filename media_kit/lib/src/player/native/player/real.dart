@@ -72,6 +72,32 @@ void nativeEnsureInitialized({String? libmpv}) {
 ///
 /// {@endtemplate}
 class NativePlayer extends PlatformPlayer {
+  final Stopwatch _bufferingTraceClock = Stopwatch()..start();
+
+  void _traceBufferingProperty(String source, bool value) {
+    // Keep the source of the derived buffering stream observable. This is
+    // intentionally a low-level diagnostic marker; the app still consumes
+    // the single buffering stream and does not maintain a second state.
+    print(
+      '[MediaKitBufferTrace] t=${_bufferingTraceClock.elapsedMicroseconds} '
+      'source=$source value=$value',
+    );
+  }
+
+  void _traceBufferingMetric(String source, double value) {
+    print(
+      '[MediaKitBufferTrace] t=${_bufferingTraceClock.elapsedMicroseconds} '
+      'source=$source value=${value.toStringAsFixed(3)}',
+    );
+  }
+
+  /// Whether [dispose] is currently executing registered release callbacks.
+  ///
+  /// Native video controllers use this read-only view to select the release
+  /// safe property path without reaching through [PlatformPlayer]'s protected
+  /// implementation detail.
+  bool get isReleaseCallbacksActive => releaseCallbacksActive;
+
   /// Compatibility view for media_kit_video's platform-specific controllers.
   /// The application-facing `Player` typedef points directly to this class.
   PlatformPlayer? get platform => this;
@@ -85,7 +111,8 @@ class NativePlayer extends PlatformPlayer {
   }
 
   /// {@macro native_player}
-  NativePlayer({PlayerConfiguration configuration = const PlayerConfiguration()})
+  NativePlayer(
+      {PlayerConfiguration configuration = const PlayerConfiguration()})
       : mpv = generated.MPV(DynamicLibrary.open(NativeLibrary.path)),
         super(configuration: configuration) {
     future = _create()
@@ -111,13 +138,27 @@ class NativePlayer extends PlatformPlayer {
 
       disposed = true;
 
-      await super.dispose();
-
-      Initializer(mpv).dispose(ctx);
-
-      Future.delayed(const Duration(seconds: 5), () {
-        mpv.mpv_terminate_destroy(ctx);
-      });
+      Object? cleanupError;
+      StackTrace? cleanupStack;
+      try {
+        await super.dispose();
+      } catch (error, stack) {
+        cleanupError = error;
+        cleanupStack = stack;
+      } finally {
+        try {
+          Initializer(mpv).dispose(ctx);
+        } catch (error, stack) {
+          cleanupError ??= error;
+          cleanupStack ??= stack;
+        }
+        Future.delayed(const Duration(seconds: 5), () {
+          mpv.mpv_terminate_destroy(ctx);
+        });
+      }
+      if (cleanupError != null) {
+        Error.throwWithStackTrace(cleanupError!, cleanupStack!);
+      }
     }
 
     if (synchronized) {
@@ -1236,24 +1277,29 @@ class NativePlayer extends PlatformPlayer {
     String value, {
     bool waitForInitialization = true,
   }) async {
-    if (disposed) {
-      throw AssertionError('[Player] has been disposed');
-    }
-
-    if (waitForInitialization) {
-      await waitForPlayerInitialization;
-      await waitForVideoControllerInitializationIfAttached;
-    }
-
-    final name = property.toNativeUtf8();
-    final data = value.toNativeUtf8();
-    mpv.mpv_set_property_string(
-      ctx,
-      name.cast(),
-      data.cast(),
+    await _setPropertyStringDirect(
+      property,
+      value,
+      waitForInitialization: waitForInitialization,
     );
-    calloc.free(name);
-    calloc.free(data);
+  }
+
+  /// Sets a property from the active release callback after [dispose] marks
+  /// the player disposed but before libmpv is terminated. Video-output
+  /// release is a lifecycle barrier: the VO must stop before its Flutter
+  /// consumer is released.
+  Future<void> setPropertyForRelease(String property, String value) async {
+    if (!disposed || !releaseCallbacksActive) {
+      throw AssertionError(
+        '[Player] release property is only available during disposal',
+      );
+    }
+    await _setPropertyStringDirect(
+      property,
+      value,
+      allowDisposed: true,
+      waitForInitialization: false,
+    );
   }
 
   /// Retrieves the value of a property from the internal libmpv instance of this [Player].
@@ -1517,6 +1563,10 @@ class NativePlayer extends PlatformPlayer {
       final prop = event.ref.data.cast<generated.mpv_event_property>();
       if (prop.ref.name.cast<Utf8>().toDartString() == 'pause' &&
           prop.ref.format == generated.mpv_format.MPV_FORMAT_FLAG) {
+        _traceBufferingProperty(
+          'pause',
+          prop.ref.data.cast<Int8>().value == 1,
+        );
         final playing = prop.ref.data.cast<Int8>().value == 0;
         if (isPlayingStateChangeAllowed) {
           state = state.copyWith(playing: playing);
@@ -1529,6 +1579,7 @@ class NativePlayer extends PlatformPlayer {
           prop.ref.format == generated.mpv_format.MPV_FORMAT_FLAG) {
         // Check for [isBufferingStateChangeAllowed] because `pause` causes `core-idle` to be fired.
         final buffering = prop.ref.data.cast<Int8>().value == 1;
+        _traceBufferingProperty('core-idle', buffering);
         if (buffering) {
           if (isBufferingStateChangeAllowed) {
             state = state.copyWith(buffering: true);
@@ -1547,6 +1598,7 @@ class NativePlayer extends PlatformPlayer {
       if (prop.ref.name.cast<Utf8>().toDartString() == 'paused-for-cache' &&
           prop.ref.format == generated.mpv_format.MPV_FORMAT_FLAG) {
         final buffering = prop.ref.data.cast<Int8>().value == 1;
+        _traceBufferingProperty('paused-for-cache', buffering);
         state = state.copyWith(buffering: buffering);
         if (!bufferingController.isClosed) {
           bufferingController.add(buffering);
@@ -1557,6 +1609,8 @@ class NativePlayer extends PlatformPlayer {
         final buffer = Duration(
           microseconds: prop.ref.data.cast<Double>().value * 1e6 ~/ 1,
         );
+        _traceBufferingMetric(
+            'demuxer-cache-time', buffer.inMicroseconds / 1e6);
         state = state.copyWith(buffer: buffer);
         if (!bufferController.isClosed) {
           bufferController.add(buffer);
@@ -1566,6 +1620,7 @@ class NativePlayer extends PlatformPlayer {
               'cache-buffering-state' &&
           prop.ref.format == generated.mpv_format.MPV_FORMAT_DOUBLE) {
         final bufferingPercentage = prop.ref.data.cast<Double>().value;
+        _traceBufferingMetric('cache-buffering-state', bufferingPercentage);
 
         state = state.copyWith(bufferingPercentage: bufferingPercentage);
         if (!bufferingPercentageController.isClosed) {
@@ -2225,17 +2280,11 @@ class NativePlayer extends PlatformPlayer {
 
             if (start != null) {
               try {
-                final property = 'start'.toNativeUtf8();
-                final value = (start.inMilliseconds / 1000)
-                    .toStringAsFixed(3)
-                    .toNativeUtf8();
-                mpv.mpv_set_property_string(
-                  ctx,
-                  property.cast(),
-                  value.cast(),
+                await _setPropertyStringDirect(
+                  'start',
+                  (start.inMilliseconds / 1000).toStringAsFixed(3),
+                  waitForInitialization: false,
                 );
-                calloc.free(property);
-                calloc.free(value);
               } catch (exception, stacktrace) {
                 print(exception);
                 print(stacktrace);
@@ -2244,17 +2293,11 @@ class NativePlayer extends PlatformPlayer {
 
             if (end != null) {
               try {
-                final property = 'end'.toNativeUtf8();
-                final value = (end.inMilliseconds / 1000)
-                    .toStringAsFixed(3)
-                    .toNativeUtf8();
-                mpv.mpv_set_property_string(
-                  ctx,
-                  property.cast(),
-                  value.cast(),
+                await _setPropertyStringDirect(
+                  'end',
+                  (end.inMilliseconds / 1000).toStringAsFixed(3),
+                  waitForInitialization: false,
                 );
-                calloc.free(property);
-                calloc.free(value);
               } catch (exception, stacktrace) {
                 print(exception);
                 print(stacktrace);
@@ -2298,29 +2341,21 @@ class NativePlayer extends PlatformPlayer {
         }
         // Set start & end position as [generated.mpv_format.MPV_FORMAT_NONE] [generated.mpv_node].
         try {
-          final property = 'start'.toNativeUtf8();
-          final value = 'none'.toNativeUtf8();
-          mpv.mpv_set_property_string(
-            ctx,
-            property.cast(),
-            value.cast(),
+          await _setPropertyStringDirect(
+            'start',
+            'none',
+            waitForInitialization: false,
           );
-          calloc.free(property);
-          calloc.free(value);
         } catch (exception, stacktrace) {
           print(exception);
           print(stacktrace);
         }
         try {
-          final property = 'end'.toNativeUtf8();
-          final value = 'none'.toNativeUtf8();
-          mpv.mpv_set_property_string(
-            ctx,
-            property.cast(),
-            value.cast(),
+          await _setPropertyStringDirect(
+            'end',
+            'none',
+            waitForInitialization: false,
           );
-          calloc.free(property);
-          calloc.free(value);
         } catch (exception, stacktrace) {
           print(exception);
           print(stacktrace);
@@ -2633,6 +2668,41 @@ class NativePlayer extends PlatformPlayer {
     );
     calloc.free(ptr);
     calloc.free(string);
+  }
+
+  Future<void> _setPropertyStringDirect(
+    String property,
+    String value, {
+    bool allowDisposed = false,
+    bool waitForInitialization = true,
+  }) async {
+    if (disposed && !allowDisposed) {
+      throw AssertionError('[Player] has been disposed');
+    }
+    if (waitForInitialization) {
+      await waitForPlayerInitialization;
+      await waitForVideoControllerInitializationIfAttached;
+    }
+
+    final name = property.toNativeUtf8();
+    final data = value.toNativeUtf8();
+    try {
+      final result = mpv.mpv_set_property_string(
+        ctx,
+        name.cast(),
+        data.cast(),
+      );
+      _throwIfMpvError(result, 'mpv_set_property_string($property)');
+    } finally {
+      calloc.free(name);
+      calloc.free(data);
+    }
+  }
+
+  void _throwIfMpvError(int result, String operation) {
+    if (result >= 0) return;
+    final message = mpv.mpv_error_string(result).cast<Utf8>().toDartString();
+    throw StateError('$operation failed ($result): $message');
   }
 
   Future<void> _command(List<String> args) async {

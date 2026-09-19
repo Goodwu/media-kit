@@ -15,6 +15,18 @@ import 'package:media_kit/media_kit.dart';
 
 import 'package:media_kit_video/src/video_controller/platform_video_controller.dart';
 
+enum _OhosHdrOutputMode { sdr, pq, hlg }
+
+class _PendingHdrConfiguration {
+  const _PendingHdrConfiguration({
+    required this.configuration,
+    required this.revision,
+  });
+
+  final Map<dynamic, dynamic> configuration;
+  final int revision;
+}
+
 /// {@template ohos_video_controller}
 ///
 /// OhosVideoController
@@ -26,6 +38,27 @@ import 'package:media_kit_video/src/video_controller/platform_video_controller.d
 class OhosVideoController extends PlatformVideoController {
   /// Whether [OhosVideoController] is supported on the current platform or not.
   static bool get supported => Platform.operatingSystem == 'ohos';
+
+  // Diagnostic-only experiment. It keeps Flutter/XComponent geometry and the
+  // HDR/VO lifecycle unchanged, while holding the extent submitted to mpv
+  // constant across orientation changes. Production builds leave this off.
+  static const bool _fixedProducerExtent = bool.fromEnvironment(
+    'OHOS_DIAGNOSTIC_FIXED_PRODUCER_EXTENT',
+    defaultValue: false,
+  );
+  static const int _fixedProducerWidth = int.fromEnvironment(
+    'OHOS_DIAGNOSTIC_FIXED_PRODUCER_WIDTH',
+    defaultValue: 2520,
+  );
+  static const int _fixedProducerHeight = int.fromEnvironment(
+    'OHOS_DIAGNOSTIC_FIXED_PRODUCER_HEIGHT',
+    defaultValue: 1260,
+  );
+  static const bool _diagnosticSkipMpvSurfaceSizeProperty =
+      bool.fromEnvironment(
+    'OHOS_DIAGNOSTIC_SKIP_MPV_SURFACE_SIZE_PROPERTY',
+    defaultValue: false,
+  );
 
   /// Pointer address to the global object reference of `OHNativeWindow`.
   final ValueNotifier<int?> wid = ValueNotifier<int?>(null);
@@ -50,12 +83,24 @@ class OhosVideoController extends PlatformVideoController {
   /// [Lock] used to synchronize [onLoadHooks], [onUnloadHooks] & [subscription].
   final lock = Lock();
   bool _disposed = false;
+  Future<void>? _disposeFuture;
   int? _hdrTransfer;
+  int _hdrConfigRevision = 0;
+  int? _nativeViewId;
+  _PendingHdrConfiguration? _pendingHdrConfiguration;
+  _OhosHdrOutputMode? _appliedHdrOutputMode;
+  int? _appliedHdrSurfaceId;
+  int? _appliedHdrGeneration;
+  bool _sdrTargetAppliedWithoutSurface = false;
 
   NativePlayer get platform => player.platform as NativePlayer;
 
   Future<void> setProperty(String key, String value) async {
     await platform.setProperty(key, value, waitForInitialization: false);
+  }
+
+  Future<void> _setPropertyForRelease(String key, String value) async {
+    await platform.setPropertyForRelease(key, value);
   }
 
   Future<void> setProperties(Map<String, String> properties) async {
@@ -69,9 +114,16 @@ class OhosVideoController extends PlatformVideoController {
       {String? surfaceId, int? windowHandle}) async {
     // The XComponent PlatformView reports its surface asynchronously. Do
     // not claim native output until that surface has attached and mpv has
-    // been switched to it by [_attachNativeSurface].
+    // been switched to it by [_attachNativeSurfaceLocked].
     final id = wid.value;
     if (!nativeSurfaceActive || id == null || id == 0) {
+      if (nativeSurfaceCandidate) {
+        return const <String, dynamic>{
+          'capable': true,
+          'active': false,
+          'failureReason': 'ohos-native-surface-awaiting-ready',
+        };
+      }
       return const <String, dynamic>{
         'capable': false,
         'active': false,
@@ -89,67 +141,350 @@ class OhosVideoController extends PlatformVideoController {
 
   @override
   Future<dynamic> configureHdrOutput(dynamic configuration) async {
+    return lock.synchronized(() async {
+      if (_disposed) {
+        return const <String, dynamic>{
+          'capable': false,
+          'active': false,
+          'failureReason': 'ohos-video-controller-disposed',
+        };
+      }
+      final revision = ++_hdrConfigRevision;
+      return _configureHdrOutputLocked(configuration, revision: revision);
+    });
+  }
+
+  Future<dynamic> _configureHdrOutputLocked(
+    dynamic configuration, {
+    required int revision,
+  }) async {
+    if (_disposed || revision != _hdrConfigRevision) {
+      return const <String, dynamic>{
+        'capable': false,
+        'active': false,
+        'failureReason': 'stale-hdr-config-revision',
+      };
+    }
+    final values =
+        configuration is Map ? configuration : const <dynamic, dynamic>{};
+    final transfer = values['transfer'] == 'hlg' ? 1 : 0;
+    final mode = _hdrModeForTransfer(transfer);
+    final copiedConfiguration = configuration is Map
+        ? Map<dynamic, dynamic>.from(configuration)
+        : <dynamic, dynamic>{};
+    final pending = _PendingHdrConfiguration(
+      configuration: copiedConfiguration,
+      revision: revision,
+    );
+    // The pending value and its revision form one transaction. Reset clears
+    // both and increments the revision, so an old ready callback cannot
+    // re-submit the superseded HDR target.
+    _hdrTransfer = transfer;
+    _pendingHdrConfiguration = pending;
+    _sdrTargetAppliedWithoutSurface = false;
+
     final id = wid.value;
     if (!nativeSurfaceActive || id == null || id == 0) {
+      if (nativeSurfaceCandidate) {
+        return const <String, dynamic>{
+          'capable': true,
+          'active': false,
+          'failureReason': 'ohos-native-surface-awaiting-ready',
+        };
+      }
       return const <String, dynamic>{
         'capable': false,
         'active': false,
         'failureReason': 'ohos-native-surface-not-ready',
       };
     }
-    final values =
-        configuration is Map ? configuration : const <dynamic, dynamic>{};
-    final transfer = values['transfer'] == 'hlg' ? 1 : 0;
-    _hdrTransfer = transfer;
-    // The NativeWindow is configured with the source HDR transfer below. Keep
-    // mpv's target transfer identical; forcing linear here makes the display
-    // treat linear samples as PQ/HLG code values and produces a gray, dim
-    // image on real HDR panels.
-    final targetTrc = values['transfer'] == 'hlg' ? 'hlg' : 'pq';
+    final generation = nativeSurfaceGeneration;
+    if (_hasAppliedHdrMode(id, generation, mode)) {
+      _pendingHdrConfiguration = null;
+      return <String, dynamic>{
+        'backend': 'ohos-xcomponent-native-window',
+        'capable': true,
+        'active': true,
+        'surfaceId': id,
+        'generation': generation,
+        'transfer': values['transfer'],
+        'target-trc': transfer == 1 ? 'hlg' : 'pq',
+      };
+    }
+
+    // FFI owns static format/gamut/source setup and the valid SDR reference
+    // while the VO is stopped. The VO is then initialized with the target
+    // properties and becomes the sole writer of dynamic color space and
+    // metadata state.
+    await _stopVideoOutputForReconfigure();
+    if (!_isCurrentHdrConfiguration(id, generation, revision)) {
+      return const <String, dynamic>{
+        'capable': false,
+        'active': false,
+        'failureReason': 'stale-hdr-config-revision',
+      };
+    }
+    final result = _configureHdr(id, transfer);
+    if (result != 0) {
+      final recoveryFailure = await _recoverSdrAfterHdrFailure(id);
+      return <String, dynamic>{
+        'backend': 'ohos-xcomponent-native-window',
+        'capable': false,
+        'active': false,
+        'surfaceId': id,
+        'generation': generation,
+        'transfer': values['transfer'],
+        'target-trc': transfer == 1 ? 'hlg' : 'pq',
+        'failureReason': 'native-window-configure-$result',
+        if (recoveryFailure != null) 'recoveryFailureReason': recoveryFailure,
+      };
+    }
+    try {
+      await _applyHdrMpvProperties(transfer);
+      if (!_isCurrentHdrConfiguration(id, generation, revision)) {
+        return const <String, dynamic>{
+          'capable': false,
+          'active': false,
+          'failureReason': 'stale-hdr-config-revision',
+        };
+      }
+      await setProperty('vo', 'gpu-next');
+    } catch (error) {
+      final recoveryFailure = await _recoverSdrAfterHdrFailure(id);
+      return <String, dynamic>{
+        'backend': 'ohos-xcomponent-native-window',
+        'capable': false,
+        'active': false,
+        'surfaceId': id,
+        'generation': generation,
+        'transfer': values['transfer'],
+        'target-trc': transfer == 1 ? 'hlg' : 'pq',
+        'failureReason': 'hdr-output-property-$error',
+        if (recoveryFailure != null) 'recoveryFailureReason': recoveryFailure,
+      };
+    }
+    if (!_isCurrentHdrConfiguration(id, generation, revision)) {
+      return const <String, dynamic>{
+        'capable': false,
+        'active': false,
+        'failureReason': 'stale-hdr-config-revision',
+      };
+    }
+    _recordAppliedHdrMode(id, generation, mode);
+    _pendingHdrConfiguration = null;
+    return <String, dynamic>{
+      'backend': 'ohos-xcomponent-native-window',
+      'capable': true,
+      'active': true,
+      'surfaceId': id,
+      'generation': generation,
+      'transfer': values['transfer'],
+      'target-trc': transfer == 1 ? 'hlg' : 'pq',
+      'failureReason': null,
+    };
+  }
+
+  bool _isCurrentHdrConfiguration(
+    int surfaceId,
+    int generation,
+    int revision,
+  ) {
+    return !_disposed &&
+        revision == _hdrConfigRevision &&
+        _pendingHdrConfiguration?.revision == revision &&
+        wid.value == surfaceId &&
+        nativeSurfaceGeneration == generation &&
+        nativeSurfaceActive;
+  }
+
+  Future<dynamic> _replayPendingHdrConfiguration(
+    _PendingHdrConfiguration pending,
+  ) {
+    return lock.synchronized(() async {
+      if (_disposed ||
+          !identical(_pendingHdrConfiguration, pending) ||
+          pending.revision != _hdrConfigRevision) {
+        return const <String, dynamic>{
+          'capable': false,
+          'active': false,
+          'failureReason': 'stale-hdr-config-revision',
+        };
+      }
+      return _configureHdrOutputLocked(
+        pending.configuration,
+        revision: pending.revision,
+      );
+    });
+  }
+
+  Future<dynamic> _replayLatestHdrConfiguration() {
+    return lock.synchronized(() async {
+      if (_disposed || _hdrTransfer == null) {
+        return const <String, dynamic>{
+          'capable': false,
+          'active': false,
+          'failureReason': 'no-pending-hdr-configuration',
+        };
+      }
+      final revision = ++_hdrConfigRevision;
+      return _configureHdrOutputLocked({
+        'transfer': _hdrTransfer == 1 ? 'hlg' : 'pq',
+      }, revision: revision);
+    });
+  }
+
+  Future<void> _applyHdrMpvProperties(int transfer) async {
+    final targetTrc = transfer == 1 ? 'hlg' : 'pq';
     await setProperties({
       'target-prim': 'bt.2020',
       'target-trc': targetTrc,
       // gpu-next otherwise leaves the swapchain color space at its default,
       // allowing the OHOS compositor to interpret PQ/HLG samples as SDR.
       'target-colorspace-hint': 'yes',
+      'tone-mapping': 'auto',
+      'target-peak': 'auto',
     });
-    final result = _configureHdr(id, transfer);
-    final active = result == 0;
-    return <String, dynamic>{
-      'backend': 'ohos-xcomponent-native-window',
-      'capable': active,
-      'active': active,
-      'surfaceId': id,
-      'generation': nativeSurfaceGeneration,
-      'transfer': values['transfer'],
-      'target-trc': targetTrc,
-      'failureReason': active ? null : 'native-window-configure-$result',
-    };
+  }
+
+  Future<void> _applySdrMpvProperties() async {
+    await setProperties({
+      'target-prim': 'bt.709',
+      'target-trc': 'bt.1886',
+      'target-colorspace-hint': 'auto',
+      'tone-mapping': 'bt.2390',
+      'target-peak': 'auto',
+    });
+  }
+
+  List<int> _producerExtent({
+    required int geometryWidth,
+    required int geometryHeight,
+    required bool nativeActive,
+  }) {
+    if (_fixedProducerExtent &&
+        nativeActive &&
+        _fixedProducerWidth > 0 &&
+        _fixedProducerHeight > 0) {
+      return <int>[_fixedProducerWidth, _fixedProducerHeight];
+    }
+    return <int>[geometryWidth, geometryHeight];
+  }
+
+  _OhosHdrOutputMode _hdrModeForTransfer(int transfer) {
+    return transfer == 1 ? _OhosHdrOutputMode.hlg : _OhosHdrOutputMode.pq;
+  }
+
+  bool _hasAppliedHdrMode(
+    int surfaceId,
+    int generation,
+    _OhosHdrOutputMode mode,
+  ) {
+    return _appliedHdrSurfaceId == surfaceId &&
+        _appliedHdrGeneration == generation &&
+        _appliedHdrOutputMode == mode;
+  }
+
+  void _recordAppliedHdrMode(
+    int surfaceId,
+    int generation,
+    _OhosHdrOutputMode mode,
+  ) {
+    _appliedHdrSurfaceId = surfaceId;
+    _appliedHdrGeneration = generation;
+    _appliedHdrOutputMode = mode;
+    _sdrTargetAppliedWithoutSurface = false;
+  }
+
+  void _clearAppliedHdrMode() {
+    _appliedHdrSurfaceId = null;
+    _appliedHdrGeneration = null;
+    _appliedHdrOutputMode = null;
+    _sdrTargetAppliedWithoutSurface = false;
+  }
+
+  /// Invalidates the mode cache before the old VO is destroyed.
+  ///
+  /// A successful SDR/HDR transaction is only valid for the VO instance that
+  /// was restarted by that transaction. Keeping the record while setting
+  /// `vo=null` lets a later reset incorrectly treat a stopped VO as already
+  /// configured.
+  Future<void> _stopVideoOutputForReconfigure() async {
+    _clearAppliedHdrMode();
+    await setProperty('vo', 'null');
+  }
+
+  Future<String?> _recoverSdrAfterHdrFailure(int surfaceId) async {
+    _pendingHdrConfiguration = null;
+    _hdrTransfer = null;
+    _clearAppliedHdrMode();
+    try {
+      final resetResult = _resetHdr(surfaceId);
+      await _applySdrMpvProperties();
+      await setProperty('vo', 'gpu-next');
+      if (resetResult != 0) {
+        return 'native-window-sdr-recovery-$resetResult';
+      }
+    } catch (error) {
+      return 'sdr-recovery-$error';
+    }
+    // Do not record this as an idempotent applied mode. The caller may still
+    // issue resetHdrOutput() after the failed HDR attempt; it must perform a
+    // real SDR VO restart rather than trust the pre-failure cache.
+    return null;
   }
 
   @override
   Future<Map<String, dynamic>> resetHdrOutput() async {
-    final id = wid.value;
-    if (id == null || id == 0) {
+    final result = await lock.synchronized(() async {
+      if (_disposed) return null;
+      _hdrConfigRevision++;
+      _pendingHdrConfiguration = null;
+      _hdrTransfer = null;
+      final id = wid.value;
+      final generation = nativeSurfaceGeneration;
+      if (id == null || id == 0 || !nativeSurfaceActive) {
+        // A reset must still restore mpv's SDR target when the native surface
+        // is temporarily absent. Returning before this write leaves the old
+        // HDR target armed for the next output.
+        if (!_sdrTargetAppliedWithoutSurface) {
+          await _applySdrMpvProperties();
+          _clearAppliedHdrMode();
+          _sdrTargetAppliedWithoutSurface = true;
+        }
+        return null;
+      }
+      if (_hasAppliedHdrMode(id, generation, _OhosHdrOutputMode.sdr)) {
+        return <String, int>{'id': id, 'generation': generation, 'result': 0};
+      }
+      await _stopVideoOutputForReconfigure();
+      final resetResult = _resetHdr(id);
+      await _applySdrMpvProperties();
+      await setProperty('vo', 'gpu-next');
+      if (resetResult == 0) {
+        _recordAppliedHdrMode(id, generation, _OhosHdrOutputMode.sdr);
+      }
+      return <String, int>{
+        'id': id,
+        'generation': generation,
+        'result': resetResult,
+      };
+    });
+    if (result == null) {
       return const <String, dynamic>{
         'capable': false,
         'active': false,
         'failureReason': 'ohos-surface-id-unavailable',
       };
     }
-    final result = await lock.synchronized(() async {
-      await setProperty('vo', 'null');
-      final resetResult = _resetHdr(id);
-      await setProperty('vo', 'gpu-next');
-      return resetResult;
-    });
     return <String, dynamic>{
       'backend': 'ohos-native-window',
-      'capable': result == 0,
+      'capable': result['result'] == 0,
       'active': false,
-      'surfaceId': id,
-      'generation': nativeSurfaceGeneration,
-      'failureReason': result == 0 ? null : 'native-window-reset-$result',
+      'surfaceId': result['id'],
+      'generation': result['generation'],
+      'failureReason': result['result'] == 0
+          ? null
+          : 'native-window-reset-${result['result']}',
     };
   }
 
@@ -162,6 +497,11 @@ class OhosVideoController extends PlatformVideoController {
   double? _lastRefreshViewportWidth;
   double? _lastRefreshViewportHeight;
   bool _refreshingSurfaceSize = false;
+  int _surfaceResizeSerial = 0;
+  int? _queuedSurfaceWidth;
+  int? _queuedSurfaceHeight;
+  double? _queuedViewportWidth;
+  double? _queuedViewportHeight;
 
   @override
   Future<void> refreshSurfaceSize({
@@ -170,10 +510,14 @@ class OhosVideoController extends PlatformVideoController {
   }) async {
     final width = _lastRequestedSurfaceWidth;
     final height = _lastRequestedSurfaceHeight;
-    if (_disposed ||
-        width == null ||
-        height == null ||
-        _refreshingSurfaceSize) {
+    if (_disposed || width == null || height == null) {
+      return;
+    }
+    if (_refreshingSurfaceSize) {
+      _queuedSurfaceWidth = width;
+      _queuedSurfaceHeight = height;
+      _queuedViewportWidth = viewportWidth;
+      _queuedViewportHeight = viewportHeight;
       return;
     }
     if (viewportWidth != null &&
@@ -183,63 +527,162 @@ class OhosVideoController extends PlatformVideoController {
       return;
     }
     _refreshingSurfaceSize = true;
+    final resizeSerial = ++_surfaceResizeSerial;
+    final requestViewId = _nativeViewId;
+    final requestSurfaceId = wid.value;
+    final requestGeneration = nativeSurfaceGeneration;
+    final requestConfigRevision = _hdrConfigRevision;
+    debugPrint(
+      '[OhosPlaybackTrace] refreshSurfaceSize begin serial=$resizeSerial '
+      'viewport=${viewportWidth}x$viewportHeight requested=${width}x$height '
+      'active=$nativeSurfaceActive generation=$requestGeneration '
+      'surface=$requestSurfaceId',
+    );
+    bool isCurrentOutput() =>
+        !_disposed &&
+        requestViewId == _nativeViewId &&
+        requestSurfaceId == wid.value &&
+        requestGeneration == nativeSurfaceGeneration &&
+        requestConfigRevision == _hdrConfigRevision;
     try {
       final handle = await player.handle;
-      final outputSize = await _channel.invokeMethod<dynamic>(
-        'VideoOutputManager.SetSurfaceSize',
-        {
-          'handle': handle.toString(),
-          'width': width.toString(),
-          'height': height.toString(),
-          'force': true,
-        },
-      );
+      final nativeActive = nativeSurfaceActive;
+      final outputSize = await lock.synchronized(() async {
+        if (!isCurrentOutput()) return null;
+        return _channel.invokeMethod<dynamic>(
+          'VideoOutputManager.SetSurfaceSize',
+          {
+            'handle': handle.toString(),
+            'width': width.toString(),
+            'height': height.toString(),
+            'force': true,
+            // Once the XComponent is active, mpv submits directly to that
+            // surface. Resizing the unused Flutter Texture in parallel creates
+            // a second BufferQueue allocation during rotation on OHOS.
+            'updateTextureBuffer': !nativeActive,
+          },
+        );
+      });
+      if (outputSize == null || !isCurrentOutput()) {
+        return;
+      }
       final effectiveWidth = outputSize is Map && outputSize['width'] is num
           ? (outputSize['width'] as num).toInt()
           : width;
       final effectiveHeight = outputSize is Map && outputSize['height'] is num
           ? (outputSize['height'] as num).toInt()
           : height;
-      if (effectiveWidth <= 0 || effectiveHeight <= 0 || _disposed) return;
+      if (effectiveWidth <= 0 || effectiveHeight <= 0 || !isCurrentOutput()) {
+        debugPrint(
+          '[OhosVideoController] discarded stale surface resize: '
+          'serial=$resizeSerial requestView=$requestViewId currentView=$_nativeViewId '
+          'requestSurface=$requestSurfaceId currentSurface=${wid.value} '
+          'requestGeneration=$requestGeneration currentGeneration=$nativeSurfaceGeneration',
+        );
+        return;
+      }
       if (effectiveWidth == _lastRefreshedSurfaceWidth &&
           effectiveHeight == _lastRefreshedSurfaceHeight) {
         return;
       }
+      var applied = false;
       await lock.synchronized(() async {
-        await setProperties({
-          'ohos-surface-size': '${effectiveWidth}x$effectiveHeight',
-        });
-        // Resizing gpu-next can recreate the native swapchain. Reapply the
-        // native window HDR contract after that recreation so fullscreen does
-        // not silently fall back to an SDR interpretation.
-        final transfer = _hdrTransfer;
-        if (transfer != null) {
-          final id = wid.value;
-          if (id != null && id != 0) {
-            final hdrResult = _configureHdr(id, transfer);
-            debugPrint(
-              '[OhosVideoController] reapplied HDR after surface resize: '
-              'result=$hdrResult transfer=$transfer',
-            );
-          }
+        if (!isCurrentOutput()) return;
+        final producerExtent = _producerExtent(
+          geometryWidth: effectiveWidth,
+          geometryHeight: effectiveHeight,
+          nativeActive: nativeActive,
+        );
+        final currentSurfaceId = wid.value;
+        if (_diagnosticSkipMpvSurfaceSizeProperty) {
+          debugPrint(
+            '[OhosVideoController] diagnostic skipped mpv surface-size '
+            'property serial=$resizeSerial producerExtent='
+            '${producerExtent[0]}x${producerExtent[1]}',
+          );
+        } else {
+          debugPrint(
+            '[OhosPlaybackTrace] set ohos-surface-size serial=$resizeSerial '
+            'extent=${producerExtent[0]}x${producerExtent[1]} '
+            'active=$nativeActive surface=$currentSurfaceId',
+          );
+          await setProperties({
+            'ohos-surface-size': '${producerExtent[0]}x${producerExtent[1]}',
+          });
         }
+        // A swapchain resize can discard VO-owned dynamic color state before
+        // mpv's next frame reaches its color callback. Restore only the VO
+        // target properties here; static format/gamut is initialized by FFI
+        // while the VO is stopped and is never written during resize.
+        final transfer = _hdrTransfer;
+        if (transfer != null &&
+            currentSurfaceId != null &&
+            currentSurfaceId != 0 &&
+            isCurrentOutput()) {
+          // ohos-surface-size invalidates mpv's swapchain/color cache. Do not
+          // call the HDR FFI here: it writes static producer state and is
+          // reserved for the explicit stopped-VO init boundary.
+          await _applyHdrMpvProperties(transfer);
+          debugPrint(
+            '[OhosVideoController] reapplied VO HDR target after surface resize: '
+            'transfer=$transfer targetTrc='
+            '${transfer == 1 ? 'hlg' : 'pq'} serial=$resizeSerial '
+            'surface=$currentSurfaceId producerExtent='
+            '${producerExtent[0]}x${producerExtent[1]}',
+          );
+        }
+        debugPrint(
+          '[OhosVideoController] resized native surface geometry; '
+          'HDR color contract reapplied for producer extent '
+          '${producerExtent[0]}x${producerExtent[1]}; '
+          'serial=$resizeSerial view=$_nativeViewId surface=${wid.value} '
+          'nativeActive=$nativeActive updateTextureBuffer=${!nativeActive}',
+        );
         rect.value = Rect.fromLTWH(
           0,
           0,
           effectiveWidth.toDouble(),
           effectiveHeight.toDouble(),
         );
+        applied = true;
       });
+      if (!applied) {
+        debugPrint(
+          '[OhosVideoController] skipped resize after output changed: '
+          'serial=$resizeSerial requestView=$requestViewId currentView=$_nativeViewId '
+          'requestSurface=$requestSurfaceId currentSurface=${wid.value}',
+        );
+        return;
+      }
       _lastRefreshedSurfaceWidth = effectiveWidth;
       _lastRefreshedSurfaceHeight = effectiveHeight;
       _lastRefreshViewportWidth = viewportWidth;
       _lastRefreshViewportHeight = viewportHeight;
       debugPrint(
         '[OhosVideoController] refreshed native surface size: '
-        '${width}x$height -> ${effectiveWidth}x$effectiveHeight',
+        '${width}x$height -> ${effectiveWidth}x$effectiveHeight '
+        'serial=$resizeSerial view=$_nativeViewId surface=${wid.value}',
       );
     } finally {
       _refreshingSurfaceSize = false;
+      final queuedWidth = _queuedSurfaceWidth;
+      final queuedHeight = _queuedSurfaceHeight;
+      final queuedViewportWidth = _queuedViewportWidth;
+      final queuedViewportHeight = _queuedViewportHeight;
+      _queuedSurfaceWidth = null;
+      _queuedSurfaceHeight = null;
+      _queuedViewportWidth = null;
+      _queuedViewportHeight = null;
+      if (!_disposed && queuedWidth != null && queuedHeight != null) {
+        _lastRequestedSurfaceWidth = queuedWidth;
+        _lastRequestedSurfaceHeight = queuedHeight;
+        scheduleMicrotask(() {
+          refreshSurfaceSize(
+            viewportWidth: queuedViewportWidth,
+            viewportHeight: queuedViewportHeight,
+          );
+        });
+      }
     }
   }
 
@@ -254,6 +697,7 @@ class OhosVideoController extends PlatformVideoController {
     }
     videoParamsSubscription = player.stream.videoParams.listen(
       (event) => lock.synchronized(() async {
+        if (_disposed) return;
         final int width;
         final int height;
         if (event.rotate == 0 || event.rotate == 180) {
@@ -277,7 +721,11 @@ class OhosVideoController extends PlatformVideoController {
           return;
         }
 
+        final requestViewId = _nativeViewId;
+        final requestSurfaceId = wid.value;
+        final requestGeneration = nativeSurfaceGeneration;
         final handle = await player.handle;
+        if (_disposed) return;
 
         final outputSize = await _channel.invokeMethod<dynamic>(
           'VideoOutputManager.SetSurfaceSize',
@@ -285,6 +733,7 @@ class OhosVideoController extends PlatformVideoController {
             'handle': handle.toString(),
             'width': width.toString(),
             'height': height.toString(),
+            'updateTextureBuffer': !nativeSurfaceActive,
           },
         );
         final effectiveWidth = outputSize is Map && outputSize['width'] is num
@@ -296,11 +745,53 @@ class OhosVideoController extends PlatformVideoController {
         if (effectiveWidth <= 0 || effectiveHeight <= 0) {
           return;
         }
+        if (_disposed ||
+            requestViewId != _nativeViewId ||
+            requestSurfaceId != wid.value ||
+            requestGeneration != nativeSurfaceGeneration) {
+          debugPrint(
+            '[OhosVideoController] discarded stale video params resize: '
+            'requestView=$requestViewId currentView=$_nativeViewId '
+            'requestSurface=$requestSurfaceId currentSurface=${wid.value}',
+          );
+          return;
+        }
+        if (_disposed) return;
         _lastRequestedSurfaceWidth = width;
         _lastRequestedSurfaceHeight = height;
+        debugPrint(
+          '[OhosVideoController] videoParams surface request: '
+          '${width}x$height view=$_nativeViewId surface=${wid.value} '
+          'nativeActive=$nativeSurfaceActive '
+          'updateTextureBuffer=${!nativeSurfaceActive}',
+        );
         await setProperties({
-          'ohos-surface-size': [effectiveWidth, effectiveHeight].join('x'),
+          'ohos-surface-size': _producerExtent(
+            geometryWidth: effectiveWidth,
+            geometryHeight: effectiveHeight,
+            nativeActive: nativeSurfaceActive,
+          ).join('x'),
         });
+        if (_disposed ||
+            requestViewId != _nativeViewId ||
+            requestSurfaceId != wid.value ||
+            requestGeneration != nativeSurfaceGeneration) {
+          return;
+        }
+        final transfer = _hdrTransfer;
+        final currentSurfaceId = wid.value;
+        if (nativeSurfaceActive &&
+            transfer != null &&
+            currentSurfaceId != null &&
+            currentSurfaceId != 0) {
+          await _applyHdrMpvProperties(transfer);
+          debugPrint(
+            '[OhosVideoController] reapplied VO HDR target after video params resize: '
+            'transfer=$transfer targetTrc='
+            '${transfer == 1 ? 'hlg' : 'pq'} surface=$currentSurfaceId '
+            'view=$_nativeViewId generation=$nativeSurfaceGeneration',
+          );
+        }
 
         rect.value = Rect.fromLTWH(
           0.0,
@@ -314,6 +805,15 @@ class OhosVideoController extends PlatformVideoController {
         }
       }),
     );
+  }
+
+  void _advanceNativeSurfaceGeneration() {
+    nativeSurfaceGeneration++;
+    final handle = nativeHandle;
+    if (handle != null &&
+        (_surfaceGenerations[handle] ?? 0) < nativeSurfaceGeneration) {
+      _surfaceGenerations[handle] = nativeSurfaceGeneration;
+    }
   }
 
   static Future<dynamic> _handleNativeSurfaceEvent(MethodCall call) async {
@@ -334,93 +834,172 @@ class OhosVideoController extends PlatformVideoController {
         }
       }
     }
-    if (controller == null) {
+    final target = controller;
+    if (target == null) {
       debugPrint(
           '[OhosVideoController] no controller for native handle $handle');
       return null;
     }
     if (call.method == 'nativeSurfaceReady') {
+      final rawViewId = args['viewId'];
+      final viewId =
+          rawViewId is num ? rawViewId.toInt() : int.tryParse('$rawViewId');
       final rawSurfaceId = args['surfaceId'];
       final surfaceId = rawSurfaceId is num
           ? rawSurfaceId.toInt()
           : int.tryParse('$rawSurfaceId');
+      final rawGeneration = args['generation'];
+      final generation = rawGeneration is num
+          ? rawGeneration.toInt()
+          : int.tryParse('$rawGeneration');
       debugPrint('[OhosVideoController] parsed native surface id: $surfaceId');
-      if (surfaceId != null && surfaceId != 0) {
-        // Stop Flutter's consumer before redirecting mpv away from the
-        // texture-backed NativeWindow. Redirecting first leaves the old
-        // external texture with an empty BufferQueue and causes repeated
-        // OH_NativeImage_AcquireNativeWindowBuffer() 40601000 errors while
-        // Flutter drains frames from the stale surface.
-        await controller._suspendTextureOutput();
-        await controller._attachNativeSurface(surfaceId);
+      if (viewId == null ||
+          surfaceId == null ||
+          surfaceId == 0 ||
+          generation == null) {
+        debugPrint(
+            '[OhosVideoController] ignoring incomplete native surface ready');
+        return null;
+      }
+      _PendingHdrConfiguration? pending;
+      await target.lock.synchronized(() async {
+        if (target._disposed ||
+            generation != target.nativeSurfaceGeneration ||
+            (target._nativeViewId != null && target._nativeViewId != viewId)) {
+          debugPrint(
+            '[OhosVideoController] ignoring stale native surface ready: '
+            'view=$viewId currentView=${target._nativeViewId} '
+            'surface=$surfaceId currentSurface=${target.wid.value} '
+            'generation=$generation currentGeneration=${target.nativeSurfaceGeneration}',
+          );
+          return;
+        }
+        if (target._nativeViewId == viewId &&
+            target.wid.value == surfaceId &&
+            target.nativeSurfaceActive) {
+          return;
+        }
+        // Validate the complete creation identity before either native side
+        // effect. The lock covers suspend and attach as one handoff: a stale
+        // ready event cannot update identity and then redirect mpv.
+        await target._suspendTextureOutputLocked();
+        await target._attachNativeSurfaceLocked(surfaceId);
+        target._nativeViewId = viewId;
+        pending = target._pendingHdrConfiguration;
+      });
+      if (pending != null && !target._disposed) {
+        final result = await target._replayPendingHdrConfiguration(pending!);
+        debugPrint(
+            '[OhosVideoController] applied pending HDR configuration: $result');
+      } else if (target._hdrTransfer != null && !target._disposed) {
+        final result = await target._replayLatestHdrConfiguration();
+        debugPrint(
+            '[OhosVideoController] reapplied HDR after native surface attach: $result');
       }
     } else if (call.method == 'nativeSurfaceDestroyed') {
-      controller.nativeSurfaceActive = false;
-      controller.nativeSurfaceCandidate = false;
-      await controller._resumeTextureOutput();
+      final rawViewId = args['viewId'];
+      final viewId =
+          rawViewId is num ? rawViewId.toInt() : int.tryParse('$rawViewId');
+      final rawSurfaceId = args['surfaceId'];
+      final surfaceId = rawSurfaceId is num
+          ? rawSurfaceId.toInt()
+          : int.tryParse('$rawSurfaceId');
+      final rawGeneration = args['generation'];
+      final generation = rawGeneration is num
+          ? rawGeneration.toInt()
+          : int.tryParse('$rawGeneration');
+      var current = false;
+      await target.lock.synchronized(() async {
+        if (target._disposed) return;
+        if (viewId == null ||
+            surfaceId == null ||
+            generation == null ||
+            target._nativeViewId != viewId ||
+            target.wid.value != surfaceId ||
+            target.nativeSurfaceGeneration != generation) {
+          debugPrint(
+              '[OhosVideoController] ignoring stale native surface destroy: '
+              'view=$viewId currentView=${target._nativeViewId} '
+              'surface=$surfaceId currentSurface=${target.wid.value} '
+              'generation=$generation currentGeneration=${target.nativeSurfaceGeneration}');
+          return;
+        }
+        // The native window is gone, but the mpv VO may still carry the last
+        // PQ/HLG target. Stop that VO and clear the dynamic HDR target before
+        // exposing the Flutter Texture again; otherwise the consumer topology
+        // becomes Texture/SDR while the producer remains configured as HDR.
+        await target._stopVideoOutputForReconfigure();
+        try {
+          final resetResult = _resetHdr(surfaceId);
+          if (resetResult != 0) {
+            debugPrint(
+                '[OhosVideoController] native surface destroy HDR reset failed: '
+                '$resetResult surface=$surfaceId');
+          }
+        } catch (error) {
+          debugPrint(
+              '[OhosVideoController] native surface destroy HDR reset error: '
+              '$error');
+        }
+        target._hdrConfigRevision++;
+        target._hdrTransfer = null;
+        target._advanceNativeSurfaceGeneration();
+        target._nativeViewId = null;
+        target.wid.value = null;
+        target._pendingHdrConfiguration = null;
+        target._clearAppliedHdrMode();
+        target.setNativeSurfaceActive(false);
+        // Keep the native-surface candidate alive for a controller that is
+        // still mounted. The XComponent will be rebuilt with the advanced
+        // generation and can report a new ready event; clearing this flag
+        // permanently would make a surface-loss recovery fall back to Texture
+        // forever and could never restore the native HDR path.
+        target.nativeSurfaceCandidate = target.configuration.useNativeSurface;
+        current = true;
+      });
+      if (!current || target._disposed) return null;
+      // A native XComponent can be destroyed as part of the same layout or
+      // orientation transaction that creates its replacement.  Do not switch
+      // the player to the Flutter Texture in this gap: that requires a second
+      // VO restart, changes the producer to SDR, and can make mpv report a
+      // pause/buffering transition (or reset the current position) even while
+      // the player is still meant to be playing.  The next nativeSurfaceReady
+      // event owns the handoff and reattaches the native VO directly.
+      // Keeping the texture suspended also prevents two BufferQueues from
+      // competing during the native-surface replacement.
     }
     return null;
   }
 
-  Future<void> _attachNativeSurface(int surfaceId) async {
+  Future<void> _attachNativeSurfaceLocked(int surfaceId) async {
     debugPrint(
         '[OhosVideoController] attaching native XComponent surface $surfaceId');
-    await lock.synchronized(() async {
-      if (_disposed || wid.value == surfaceId) return;
-      final previous = wid.value;
-      await setProperty('vo', 'null');
-      wid.value = surfaceId;
-      await setProperties({
-        'wid': surfaceId.toString(),
-        if (rect.value != null)
-          'ohos-surface-size':
-              '${rect.value!.width.toInt()}x${rect.value!.height.toInt()}',
-      });
-      await setProperty('vo', configuration.vo ?? 'gpu-next');
-      nativeSurfaceCandidate = true;
-      nativeSurfaceActive = true;
-      debugPrint(
-        '[OhosVideoController] native XComponent surface attached: '
-        'previous=$previous surface=$surfaceId',
-      );
-    });
-  }
-
-  Future<void> _suspendTextureOutput() async {
-    final handle = await player.handle;
-    await _channel.invokeMethod('VideoOutputManager.SuspendTexture', {
-      'handle': handle.toString(),
-    });
-  }
-
-  Future<void> _resumeTextureOutput() async {
     if (_disposed) return;
-    final handle = await player.handle;
-    final data = await _channel.invokeMethod<dynamic>(
-      'VideoOutputManager.ResumeTexture',
-      {'handle': handle.toString()},
-    );
-    if (data is! Map) return;
-    final nextId = (data['id'] as num?)?.toInt();
-    final nextWid = (data['wid'] as num?)?.toInt();
-    final nextRect = data['rect'];
-    if (nextId == null || nextWid == null || nextRect is! Map) return;
-    id.value = nextId;
-    wid.value = nextWid;
-    rect.value = Rect.fromLTWH(
-      ((nextRect['left'] as num?) ?? 0).toDouble(),
-      ((nextRect['top'] as num?) ?? 0).toDouble(),
-      ((nextRect['width'] as num?) ?? 1).toDouble(),
-      ((nextRect['height'] as num?) ?? 1).toDouble(),
-    );
-    await lock.synchronized(() async {
-      await setProperty('vo', 'null');
-      await setProperties({
-        'wid': nextWid.toString(),
+    final previous = wid.value;
+    await _stopVideoOutputForReconfigure();
+    wid.value = surfaceId;
+    await setProperties({
+      'wid': surfaceId.toString(),
+      if (rect.value != null)
         'ohos-surface-size':
             '${rect.value!.width.toInt()}x${rect.value!.height.toInt()}',
-      });
-      await setProperty('vo', configuration.vo ?? 'gpu-next');
+    });
+    await setProperty('vo', configuration.vo ?? 'gpu-next');
+    nativeSurfaceCandidate = true;
+    setNativeSurfaceActive(true);
+    debugPrint(
+      '[OhosVideoController] native XComponent surface attached: '
+      'previous=$previous surface=$surfaceId view=$_nativeViewId '
+      'generation=$nativeSurfaceGeneration',
+    );
+  }
+
+  Future<void> _suspendTextureOutputLocked() async {
+    if (_disposed) return;
+    final handle = nativeHandle ?? await player.handle;
+    if (_disposed) return;
+    await _channel.invokeMethod('VideoOutputManager.SuspendTexture', {
+      'handle': handle.toString(),
     });
   }
 
@@ -451,9 +1030,19 @@ class OhosVideoController extends PlatformVideoController {
 
     // Retrieve the native handle of the [Player].
     final handle = await player.handle;
-    // Return the existing [VideoController] if it's already created.
-    if (_controllers.containsKey(handle)) {
-      return _controllers[handle]!;
+    // Return the existing [VideoController] if it's already created. A
+    // controller that is disposing remains cached until the native dispose
+    // call completes, so a concurrent create must wait for that barrier.
+    final existing = _controllers[handle];
+    if (existing != null) {
+      final disposal = existing._disposeFuture;
+      if (disposal != null) {
+        await disposal;
+        final current = _controllers[handle];
+        if (current != null) return current;
+      } else {
+        return existing;
+      }
     }
 
     // Creation:
@@ -492,9 +1081,9 @@ class OhosVideoController extends PlatformVideoController {
     controller.rect.value = rect;
     controller.wid.value = wid;
     controller.nativeHandle = handle;
-    // Mount the XComponent once so its onLoad callback can provide the native
-    // surface ID. After destruction the flag is cleared and the widget falls
-    // back to the resumed Flutter Texture until a new candidate is mounted.
+    // Mount the XComponent so its onLoad callback can provide the native
+    // surface ID. After destruction a live controller keeps the candidate
+    // enabled and the widget can mount a new generation; dispose clears it.
     controller.nativeSurfaceCandidate = configuration.useNativeSurface;
     controller.nativeSurfaceGeneration = (_surfaceGenerations[handle] ?? 0) + 1;
     _surfaceGenerations[handle] = controller.nativeSurfaceGeneration;
@@ -548,23 +1137,87 @@ class OhosVideoController extends PlatformVideoController {
 
   /// Disposes the instance. Releases allocated resources back to the system.
   @override
-  Future<void> disposeForRebuild() => _dispose();
+  Future<void> disposeForRebuild() =>
+      _disposeFuture ??= _disposeOnce(playerReleasing: false);
 
   /// Disposes the instance. Releases allocated resources back to the system.
-  Future<void> _dispose() async {
-    if (_disposed) return;
+  Future<void> _dispose() =>
+      _disposeFuture ??= _disposeOnce(playerReleasing: true);
+
+  Future<void> _disposeOnce({required bool playerReleasing}) async {
     _disposed = true;
-    await videoParamsSubscription?.cancel();
-    final handle = await player.handle;
-    _controllers.remove(handle);
-    await _channel.invokeMethod(
-      'VideoOutputManager.Dispose',
-      {
-        'handle': handle.toString(),
-      },
-    );
-    wid.dispose();
-    super.dispose();
+    _hdrConfigRevision++;
+    _advanceNativeSurfaceGeneration();
+    _surfaceResizeSerial++;
+    _queuedSurfaceWidth = null;
+    _queuedSurfaceHeight = null;
+    _queuedViewportWidth = null;
+    _queuedViewportHeight = null;
+
+    Object? cleanupError;
+    StackTrace? cleanupStack;
+    void recordFailure(Object error, StackTrace stack) {
+      cleanupError ??= error;
+      cleanupStack ??= stack;
+    }
+
+    final subscription = videoParamsSubscription;
+    videoParamsSubscription = null;
+    try {
+      await subscription?.cancel();
+    } catch (error, stack) {
+      recordFailure(error, stack);
+    }
+
+    int? handle = nativeHandle;
+    try {
+      await lock.synchronized(() async {
+        handle ??= await player.handle;
+        if (handle == null) return;
+        // Stop mpv's producer before releasing the Flutter texture consumer.
+        // If this fails, the native dispose call is intentionally not issued;
+        // the error is reported to the caller instead of hiding the ordering
+        // failure behind an unregister operation.
+        // A rebuild and Player.dispose can overlap. The cached dispose future
+        // must use the release-safe setter when the callback is active, even
+        // if the rebuild call created the future first.
+        if (playerReleasing || platform.isReleaseCallbacksActive) {
+          await _setPropertyForRelease('vo', 'null');
+        } else {
+          await setProperty('vo', 'null');
+        }
+        await _channel.invokeMethod(
+          'VideoOutputManager.Dispose',
+          {
+            'handle': handle.toString(),
+          },
+        );
+      });
+    } catch (error, stack) {
+      recordFailure(error, stack);
+    } finally {
+      if (handle != null && identical(_controllers[handle], this)) {
+        _controllers.remove(handle);
+      }
+      _pendingHdrConfiguration = null;
+      _nativeViewId = null;
+      nativeSurfaceCandidate = false;
+      setNativeSurfaceActive(false);
+      wid.value = null;
+      try {
+        wid.dispose();
+      } catch (error, stack) {
+        recordFailure(error, stack);
+      }
+      try {
+        super.dispose();
+      } catch (error, stack) {
+        recordFailure(error, stack);
+      }
+    }
+    if (cleanupError != null) {
+      Error.throwWithStackTrace(cleanupError!, cleanupStack!);
+    }
   }
 
   /// Currently created [OhosVideoController]s.

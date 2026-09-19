@@ -24,8 +24,24 @@ public class TextureHW: NSObject, FlutterTexture, ResizableTextureProtocol {
     objects: [],
     skipCheckArgs: true
   )
+  private let outputModeLock = NSLock()
   private var useHalfFloatOutput = false
   private let registryHandle: Int64
+
+  private var isHalfFloatOutput: Bool {
+    outputModeLock.lock()
+    defer { outputModeLock.unlock() }
+    return useHalfFloatOutput
+  }
+
+  @discardableResult
+  private func setHalfFloatOutput(_ enabled: Bool) -> Bool {
+    outputModeLock.lock()
+    defer { outputModeLock.unlock() }
+    let changed = useHalfFloatOutput != enabled
+    useHalfFloatOutput = enabled
+    return changed
+  }
 
   init(
     handle: OpaquePointer,
@@ -47,12 +63,23 @@ public class TextureHW: NSObject, FlutterTexture, ResizableTextureProtocol {
       // The native surface is mounted before HDR promotion. Until the Metal
       // layer is verified active, feed it the regular BGRA frame so the
       // candidate surface cannot flash black while it waits for EDR proof.
-      return self.useHalfFloatOutput
+      return self.isHalfFloatOutput
           ? self.nativeTextureContexts.current?.pixelBuffer
           : self.textureContexts.current?.pixelBuffer
     }
     NativeFrameRegistry.observeSurfaceActive(handle: registryHandle) { [weak self] handle in
-      self?.useHalfFloatOutput = NativeFrameRegistry.isSurfaceActive(handle: handle)
+      guard let self else { return }
+      let active = NativeFrameRegistry.isSurfaceActive(handle: handle)
+      let changed = self.setHalfFloatOutput(active)
+      // Surface activation can happen after mpv has already rendered the current
+      // frame. Schedule one normal VideoOutput update on either edge so the
+      // selected pool is published without changing mpv's render API or doing
+      // a second render target per frame.
+      if changed {
+        DispatchQueue.main.async { [weak self] in
+          self?.updateCallback()
+        }
+      }
     }
     NativeFrameRegistry.setFloatFormat(handle: registryHandle, enabled: false)
 
@@ -203,7 +230,7 @@ public class TextureHW: NSObject, FlutterTexture, ResizableTextureProtocol {
     } else {
       nativeTextureContexts.reinit(objects: [], skipCheckArgs: true)
     }
-    useHalfFloatOutput = NativeFrameRegistry.isSurfaceActive(handle: registryHandle)
+    setHalfFloatOutput(NativeFrameRegistry.isSurfaceActive(handle: registryHandle))
     NativeFrameRegistry.setFloatFormat(handle: registryHandle, enabled: nativeSurface)
   }
 
@@ -216,7 +243,7 @@ public class TextureHW: NSObject, FlutterTexture, ResizableTextureProtocol {
     // Render exactly one target per mpv update. Rendering both the Flutter
     // texture and the native surface doubles the expensive libplacebo pass and
     // causes visible cadence jitter on high-resolution HDR streams.
-    if useHalfFloatOutput {
+    if isHalfFloatOutput {
       guard let nativeTextureContext = nativeTextureContexts.nextAvailable() else {
         return
       }

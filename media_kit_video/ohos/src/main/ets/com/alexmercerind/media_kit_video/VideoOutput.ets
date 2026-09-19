@@ -45,48 +45,42 @@ export class VideoOutput {
       return;
     }
 
-    try {
-      Log.i(TAG, `dispose: textureId=${this.id}, surfaceId=${this.wid}`);
-      if (!this.textureSuspended) {
-        this.textureRegistry.unregisterTexture(this.id);
-      }
-      this.disposed = true;
-      this.id = 0;
-      this.wid = 0;
-      this.w = 0;
-      this.h = 0;
-    } catch (e) {
-      Log.e(TAG, `dispose: ${e}`);
+    Log.i(TAG, `dispose: textureId=${this.id}, surfaceId=${this.wid}`);
+    // Dart stops mpv's VO before invoking VideoOutputManager.Dispose. Do not
+    // swallow an unregister failure: reporting it preserves the producer /
+    // consumer ordering contract and leaves this object retryable.
+    if (!this.textureSuspended) {
+      this.textureRegistry.unregisterTexture(this.id);
     }
+    this.disposed = true;
+    this.id = 0;
+    this.wid = 0;
+    this.w = 0;
+    this.h = 0;
   }
 
   suspendTexture(): void {
     if (this.disposed || this.textureSuspended) return;
-    try {
-      Log.i(TAG, `suspendTexture: textureId=${this.id}`);
-      this.textureRegistry.unregisterTexture(this.id);
-      this.textureSuspended = true;
-    } catch (e) {
-      Log.e(TAG, `suspendTexture: ${e}`);
-    }
+    Log.i(TAG, `suspendTexture: textureId=${this.id}`);
+    // The native-surface handoff must not redirect mpv if Flutter's consumer
+    // was not actually released. Let the bridge report an unregister error.
+    this.textureRegistry.unregisterTexture(this.id);
+    this.textureSuspended = true;
   }
 
   resumeTexture(): void {
     if (this.disposed || !this.textureSuspended) return;
-    try {
-      const textureId = this.textureRegistry.getTextureId();
-      this.surfaceProducer = this.textureRegistry.registerTexture(textureId);
-      this.id = this.surfaceProducer.getTextureId();
-      this.wid = this.surfaceProducer.getSurfaceId();
-      this.textureSuspended = false;
-      Log.i(TAG, `resumeTexture: textureId=${this.id}, surfaceId=${this.wid}`);
-      this.setSurfaceSize(this.requestedW, this.requestedH, true);
-    } catch (e) {
-      Log.e(TAG, `resumeTexture: ${e}`);
-    }
+    const textureId = this.textureRegistry.getTextureId();
+    this.surfaceProducer = this.textureRegistry.registerTexture(textureId);
+    this.id = this.surfaceProducer.getTextureId();
+    this.wid = this.surfaceProducer.getSurfaceId();
+    this.textureSuspended = false;
+    Log.i(TAG, `resumeTexture: textureId=${this.id}, surfaceId=${this.wid}`);
+    this.setSurfaceSize(this.requestedW, this.requestedH, true);
   }
 
-  setSurfaceSize(width: number, height: number, force: boolean = false): SurfaceSize {
+  setSurfaceSize(width: number, height: number, force: boolean = false,
+    updateTextureBuffer: boolean = true): SurfaceSize {
     try {
       if (!force && this.requestedW == width && this.requestedH == height) {
         return { width: this.w, height: this.h };
@@ -97,10 +91,10 @@ export class VideoOutput {
       const size = this.fitToDisplay(width, height);
       this.w = size.width;
       this.h = size.height;
-      if (!this.textureSuspended) {
+      if (!this.textureSuspended && updateTextureBuffer) {
         this.textureRegistry.setTextureBufferSize(this.id, this.w, this.h);
       }
-      Log.i(TAG, `setSurfaceSize: requested=${width}x${height}, actual=${this.w}x${this.h}`);
+      Log.i(TAG, `setSurfaceSize: requested=${width}x${height}, actual=${this.w}x${this.h} updateTextureBuffer=${updateTextureBuffer}`);
       return { width: this.w, height: this.h };
     } catch (e) {
       Log.e(TAG, `setSurfaceSize error: ${e}`);

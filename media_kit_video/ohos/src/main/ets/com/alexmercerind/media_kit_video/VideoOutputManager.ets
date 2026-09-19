@@ -50,11 +50,12 @@ export class VideoOutputManager {
     this.videoOutputs.clear();
   }
 
-  setSurfaceSize(handle: number, width: number, height: number, force: boolean = false): SurfaceSize | null {
-    Log.i(TAG, `com.alexmercerind.media_kit_video.VideoOutputManager.setSurfaceSize: ${handle} ${width} ${height} force=${force}`);
+  setSurfaceSize(handle: number, width: number, height: number, force: boolean = false,
+    updateTextureBuffer: boolean = true): SurfaceSize | null {
+    Log.i(TAG, `com.alexmercerind.media_kit_video.VideoOutputManager.setSurfaceSize: ${handle} ${width} ${height} force=${force} updateTextureBuffer=${updateTextureBuffer}`);
 
     if (this.videoOutputs.has(handle)) {
-      return this.videoOutputs.get(handle)!.setSurfaceSize(width, height, force);
+      return this.videoOutputs.get(handle)!.setSurfaceSize(width, height, force, updateTextureBuffer);
     }
     return null;
   }

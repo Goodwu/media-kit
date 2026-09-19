@@ -148,13 +148,23 @@ abstract class PlatformPlayer {
         errorController.close(),
       ],
     );
-    for (final callback in release) {
-      try {
-        await callback.call();
-      } catch (exception, stacktrace) {
-        print(exception.toString());
-        print(stacktrace.toString());
+    _releaseCallbacksActive = true;
+    Object? releaseError;
+    StackTrace? releaseStackTrace;
+    try {
+      for (final callback in release) {
+        try {
+          await callback.call();
+        } catch (exception, stacktrace) {
+          releaseError ??= exception;
+          releaseStackTrace ??= stacktrace;
+        }
       }
+    } finally {
+      _releaseCallbacksActive = false;
+    }
+    if (releaseError != null) {
+      Error.throwWithStackTrace(releaseError, releaseStackTrace!);
     }
   }
 
@@ -435,6 +445,15 @@ abstract class PlatformPlayer {
 
   /// Publicly defined clean-up [Function]s which must be called before [dispose].
   final List<Future<void> Function()> release = [];
+
+  /// True only while [dispose] is invoking registered release callbacks.
+  ///
+  /// Native implementations may use this narrow window for the final
+  /// producer/consumer handoff after the player has marked itself disposed.
+  @protected
+  bool get releaseCallbacksActive => _releaseCallbacksActive;
+
+  bool _releaseCallbacksActive = false;
 }
 
 /// {@template player_configuration}

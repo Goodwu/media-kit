@@ -16,14 +16,18 @@ export const OHOS_NATIVE_SURFACE_VIEW_TYPE =
 export class OhosNativeSurfaceView extends PlatformView {
   readonly viewId: number;
   readonly handle: number;
+  readonly generation: number;
   readonly controller: XComponentController = new XComponentController();
   private readonly events: MethodChannel;
   private disposed: boolean = false;
+  private destroyEventSent: boolean = false;
+  private surfaceId: string | null = null;
 
-  constructor(viewId: number, handle: number, events: MethodChannel) {
+  constructor(viewId: number, handle: number, generation: number, events: MethodChannel) {
     super();
     this.viewId = viewId;
     this.handle = handle;
+    this.generation = generation;
     this.events = events;
   }
 
@@ -36,20 +40,31 @@ export class OhosNativeSurfaceView extends PlatformView {
       return;
     }
     const surfaceId = this.controller.getXComponentSurfaceId();
+    this.surfaceId = surfaceId;
     console.info(`[${TAG}] onLoad view=${this.viewId} handle=${this.handle} surface=${surfaceId}`);
     this.events.invokeMethod('nativeSurfaceReady', {
       viewId: this.viewId,
       handle: this.handle,
+      generation: this.generation,
       surfaceId: surfaceId,
     });
   }
 
   onDestroy(): void {
+    // PlatformView.dispose() may run before XComponent.onDestroy(). Keep a
+    // separate guard so that framework disposal cannot suppress the identity
+    // event Dart needs to release the current output.
+    if (this.destroyEventSent) {
+      return;
+    }
+    this.destroyEventSent = true;
     this.disposed = true;
     console.info(`[${TAG}] onDestroy view=${this.viewId} handle=${this.handle}`);
     this.events.invokeMethod('nativeSurfaceDestroyed', {
       viewId: this.viewId,
       handle: this.handle,
+      generation: this.generation,
+      surfaceId: this.surfaceId,
     });
   }
 
@@ -106,9 +121,11 @@ export class OhosNativeSurfaceFactory extends PlatformViewFactory {
     // every native surface creation to fail before the XComponent is loaded.
     const values = args as Map<string, number>;
     const handle: number = values.get('handle') as number;
-    if (!Number.isFinite(handle) || handle < 0) {
-      throw new Error('OHOS native surface requires a valid player handle');
+    const generation: number = values.get('generation') as number;
+    if (!Number.isFinite(handle) || handle < 0 ||
+        !Number.isFinite(generation) || generation < 1) {
+      throw new Error('OHOS native surface requires valid handle and generation');
     }
-    return new OhosNativeSurfaceView(viewId, handle, this.events);
+    return new OhosNativeSurfaceView(viewId, handle, generation, this.events);
   }
 }

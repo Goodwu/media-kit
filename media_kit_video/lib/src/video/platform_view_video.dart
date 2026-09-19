@@ -20,6 +20,7 @@ class PlatformViewVideo extends StatelessWidget {
     required this.height,
     this.useHCPP = false,
     this.generation = 1,
+    this.mpvWindow = false,
   });
 
   /// The handle (player ID) of the video player.
@@ -29,18 +30,20 @@ class PlatformViewVideo extends StatelessWidget {
   final bool useHCPP;
   final int generation;
 
+  /// Whether the Darwin native view should be bound as mpv's window.
+  final bool mpvWindow;
+
   @override
   Widget build(BuildContext context) {
     final String viewType = (Platform.isIOS || Platform.isMacOS)
         ? 'com.alexmercerind/media_kit_video/native_surface'
-        : Platform.operatingSystem == 'ohos'
-            ? 'com.alexmercerind/media_kit_video/ohos_native_surface'
-            : 'com.alexmercerind/media_kit_video_platform_view';
+        : 'com.alexmercerind/media_kit_video_platform_view';
     final Map<String, dynamic> creationParams = {
       'handle': handle,
       'width': width,
       'height': height,
       'generation': generation,
+      'mpvWindow': mpvWindow,
     };
 
     if (Platform.isIOS) {
