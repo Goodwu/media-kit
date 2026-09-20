@@ -1,6 +1,10 @@
 # TASKS.md
 
 ## Now（当前推进，最多 3 条）
+- [x] 切换 OHOS libmpv 二进制发布来源至 Goodwu 20260920
+  - status: done
+  - context: archives/conversations/ohos-libmpv-release-20260920.md
+  - acceptance: CMake 下载地址与 SHA-256 均匹配指定 GitHub release；归档记录可复核的 release/资产校验；静态配置检查通过
 - [x] 修复跨平台 native video output 重建与释放生命周期
   - status: done
   - context: archives/conversations/native-output-rebuild-20260920.md
