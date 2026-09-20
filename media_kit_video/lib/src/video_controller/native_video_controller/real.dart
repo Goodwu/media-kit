@@ -52,6 +52,12 @@ class NativeVideoController extends PlatformVideoController {
   bool _disposed = false;
   Map<String, dynamic>? _lastNativeConfiguration;
   Map<String, dynamic>? _nativeWindowAttachment;
+  int _nativeOutputTransaction = 0;
+  int? _lastNativeOutputEpoch;
+  int? _invalidatedNativeOutputEpoch;
+  int? _nativeOutputEpochGeneration;
+  bool _nativeOutputResetInFlight = false;
+  Future<Map<String, dynamic>>? _nativeOutputResetFuture;
 
   NativePlayer get platform => player.platform as NativePlayer;
 
@@ -294,8 +300,16 @@ class NativeVideoController extends PlatformVideoController {
   @override
   Future<dynamic> createNativeOutput(
       {String? surfaceId, int? windowHandle}) async {
+    // Only a genuinely new surface generation starts a new epoch namespace.
+    // Repeated create calls during HDR reconfiguration are idempotent on the
+    // native side and must retain the old-event rejection boundary.
+    if (_nativeOutputEpochGeneration != nativeSurfaceGeneration) {
+      _lastNativeOutputEpoch = null;
+      _invalidatedNativeOutputEpoch = null;
+      _nativeOutputEpochGeneration = nativeSurfaceGeneration;
+    }
     final handle = nativeHandle ?? await player.handle;
-    return (await _channel.invokeMethod<Map<dynamic, dynamic>>(
+    final result = (await _channel.invokeMethod<Map<dynamic, dynamic>>(
               'createNativeOutput',
               {
                 'handle': handle.toString(),
@@ -304,11 +318,16 @@ class NativeVideoController extends PlatformVideoController {
             ) ??
             const <dynamic, dynamic>{})
         .cast<String, dynamic>();
+    return result;
   }
 
   @override
   Future<dynamic> configureHdrOutput(dynamic configuration) async {
+    final transaction = _nativeOutputTransaction;
     final handle = nativeHandle ?? await player.handle;
+    if (transaction != _nativeOutputTransaction || _nativeOutputResetInFlight) {
+      return const <String, dynamic>{'active': false, 'stale': true};
+    }
     final payload = Map<String, dynamic>.from(
       configuration is Map<String, dynamic>
           ? configuration
@@ -350,8 +369,11 @@ class NativeVideoController extends PlatformVideoController {
         payload['playerTargetVerified'] = false;
       }
     }
+    if (transaction != _nativeOutputTransaction) {
+      return const <String, dynamic>{'active': false, 'stale': true};
+    }
     _lastNativeConfiguration = payload.cast<String, dynamic>();
-    return (await _channel.invokeMethod<Map<dynamic, dynamic>>(
+    final result = (await _channel.invokeMethod<Map<dynamic, dynamic>>(
               'configureHdrOutput',
               {
                 'handle': handle.toString(),
@@ -361,20 +383,55 @@ class NativeVideoController extends PlatformVideoController {
             ) ??
             const <dynamic, dynamic>{})
         .cast<String, dynamic>();
+    if (transaction != _nativeOutputTransaction) {
+      return const <String, dynamic>{'active': false, 'stale': true};
+    }
+    final epoch = result['outputEpoch'];
+    if (epoch is int) _lastNativeOutputEpoch = epoch;
+    return result;
   }
 
   @override
   Future<Map<String, dynamic>> resetHdrOutput() async {
-    final handle = nativeHandle ?? await player.handle;
-    return (await _channel.invokeMethod<Map<dynamic, dynamic>>(
-              'resetHdrOutput',
-              {
-                'handle': handle.toString(),
-                'generation': nativeSurfaceGeneration
-              },
-            ) ??
-            const <dynamic, dynamic>{})
-        .cast<String, dynamic>();
+    final existing = _nativeOutputResetFuture;
+    if (existing != null) return existing;
+    // Invalidate the Dart-side replay payload before crossing the channel.
+    // A late renderer-ready callback must not reconfigure a reset generation.
+    _lastNativeConfiguration = null;
+    _invalidatedNativeOutputEpoch = _lastNativeOutputEpoch;
+    _nativeOutputTransaction++;
+    _nativeOutputResetInFlight = true;
+    setNativeSurfaceActive(false);
+    late Future<Map<String, dynamic>> resetFuture;
+    var resetSucceeded = false;
+    resetFuture = () async {
+      try {
+        final handle = nativeHandle ?? await player.handle;
+        final result = (await _channel.invokeMethod<Map<dynamic, dynamic>>(
+                  'resetHdrOutput',
+                  {
+                    'handle': handle.toString(),
+                    'generation': nativeSurfaceGeneration
+                  },
+                ) ??
+                const <dynamic, dynamic>{})
+            .cast<String, dynamic>();
+        final resetEpoch = result['outputEpoch'];
+        if (resetEpoch is int) {
+          _invalidatedNativeOutputEpoch = resetEpoch;
+          _lastNativeOutputEpoch = resetEpoch;
+          resetSucceeded = true;
+        }
+        return result;
+      } finally {
+        if (identical(_nativeOutputResetFuture, resetFuture)) {
+          _nativeOutputResetFuture = null;
+          if (resetSucceeded) _nativeOutputResetInFlight = false;
+        }
+      }
+    }();
+    _nativeOutputResetFuture = resetFuture;
+    return resetFuture;
   }
 
   @override
@@ -548,108 +605,129 @@ class NativeVideoController extends PlatformVideoController {
   static final _surfaceGenerations = HashMap<int, int>();
 
   /// [MethodChannel] for invoking platform specific native implementation.
-  static final _channel =
-      const MethodChannel('com.alexmercerind/media_kit_video')
-        ..setMethodCallHandler(
-          (MethodCall call) async {
-            try {
-              debugPrint(call.method.toString());
-              debugPrint(call.arguments.toString());
-              switch (call.method) {
-                case 'VideoOutput.Resize':
-                  {
-                    // Notify about updated texture ID & [Rect].
-                    final int handle = call.arguments['handle'];
-                    final Rect rect = Rect.fromLTWH(
-                      call.arguments['rect']['left'] * 1.0,
-                      call.arguments['rect']['top'] * 1.0,
-                      call.arguments['rect']['width'] * 1.0,
-                      call.arguments['rect']['height'] * 1.0,
-                    );
-                    final int id = call.arguments['id'];
-                    _controllers[handle]?.rect.value = rect;
-                    _controllers[handle]?.id.value = id;
-                    // Notify about the first frame being rendered.
-                    if (rect.width > 0 && rect.height > 0) {
-                      final completer = _controllers[handle]
-                          ?.waitUntilFirstFrameRenderedCompleter;
-                      if (!(completer?.isCompleted ?? true)) {
-                        completer?.complete();
-                      }
-                    }
-                    break;
+  static final _channel = const MethodChannel(
+      'com.alexmercerind/media_kit_video')
+    ..setMethodCallHandler(
+      (MethodCall call) async {
+        try {
+          debugPrint(call.method.toString());
+          debugPrint(call.arguments.toString());
+          switch (call.method) {
+            case 'VideoOutput.Resize':
+              {
+                // Notify about updated texture ID & [Rect].
+                final int handle = call.arguments['handle'];
+                final Rect rect = Rect.fromLTWH(
+                  call.arguments['rect']['left'] * 1.0,
+                  call.arguments['rect']['top'] * 1.0,
+                  call.arguments['rect']['width'] * 1.0,
+                  call.arguments['rect']['height'] * 1.0,
+                );
+                final int id = call.arguments['id'];
+                _controllers[handle]?.rect.value = rect;
+                _controllers[handle]?.id.value = id;
+                // Notify about the first frame being rendered.
+                if (rect.width > 0 && rect.height > 0) {
+                  final completer = _controllers[handle]
+                      ?.waitUntilFirstFrameRenderedCompleter;
+                  if (!(completer?.isCompleted ?? true)) {
+                    completer?.complete();
                   }
-                case 'NativeSurface.Ready':
-                  final handle = call.arguments['handle'] as int;
-                  final controller = _controllers[handle];
-                  final generation = call.arguments['generation'] as int?;
-                  final hasRendererState = call.arguments is Map &&
-                      (call.arguments as Map).containsKey('rendererReady');
-                  final rendererReady = call.arguments['rendererReady'] == true;
-                  if (controller != null &&
-                      generation == controller.nativeSurfaceGeneration) {
-                    // A failed native renderer must immediately return to the
-                    // Flutter texture path; do not leave a black platform view.
-                    if (hasRendererState) {
-                      controller.nativeSurfaceCandidate = rendererReady;
-                      if (!rendererReady) {
-                        controller.setNativeSurfaceActive(false);
-                      }
-                    }
-                    if (!hasRendererState && call.arguments['active'] is bool) {
-                      controller.setNativeSurfaceActive(
-                          call.arguments['active'] == true);
-                    }
-                  }
-                  final configuration = controller?._lastNativeConfiguration;
-                  if (controller != null &&
-                      rendererReady &&
-                      generation == controller.nativeSurfaceGeneration &&
-                      Platform.isMacOS) {
-                    final attachment = await controller.attachNativeWindow();
-                    if (attachment['attached'] == true) {
-                      final state = await controller.nativeWindowState();
-                      debugPrint('NativeWindow.State: $state');
-                      if (controller.configuration.useNativeWindow) {
-                        final bound = await controller
-                            .bindExperimentalNativeWindow(attachment);
-                        debugPrint('NativeWindow.Bind: bound=$bound');
-                      }
-                    }
-                  }
-                  if (controller != null &&
-                      rendererReady &&
-                      generation == controller.nativeSurfaceGeneration &&
-                      configuration != null) {
-                    final result =
-                        await controller.configureHdrOutput(configuration);
-                    if (controller.configuration.useNativeWindow) {
-                      // W1's mpv-owned window has no verified visible-frame
-                      // callback yet. NativeSurfaceOutput readiness alone
-                      // must not promote the separate child-window path.
-                      controller.setNativeSurfaceActive(false);
-                    } else {
-                      controller.setNativeSurfaceActive(
-                          result is Map && result['active'] == true);
-                    }
-                  }
-                  break;
-                case 'NativeWindow.Frame':
-                  if (call.arguments is Map) {
-                    debugPrint(
-                      'NativeWindow.Frame: ${call.arguments}',
-                    );
-                  }
-                  break;
-                default:
-                  {
-                    break;
-                  }
+                }
+                break;
               }
-            } catch (exception, stacktrace) {
-              debugPrint(exception.toString());
-              debugPrint(stacktrace.toString());
-            }
-          },
-        );
+            case 'NativeSurface.Ready':
+              final handle = call.arguments['handle'] as int;
+              final controller = _controllers[handle];
+              final generation = call.arguments['generation'] as int?;
+              final transaction = controller?._nativeOutputTransaction;
+              final hasRendererState = call.arguments is Map &&
+                  (call.arguments as Map).containsKey('rendererReady');
+              final rendererReady = call.arguments['rendererReady'] == true;
+              final eventEpoch = call.arguments['outputEpoch'];
+              if (controller?._nativeOutputResetInFlight == true) {
+                return;
+              }
+              if (eventEpoch is int &&
+                  controller?._invalidatedNativeOutputEpoch is int &&
+                  eventEpoch <= controller!._invalidatedNativeOutputEpoch!) {
+                return;
+              }
+              if (controller != null &&
+                  generation == controller.nativeSurfaceGeneration) {
+                // A failed native renderer must immediately return to the
+                // Flutter texture path; do not leave a black platform view.
+                if (hasRendererState) {
+                  controller.nativeSurfaceCandidate = rendererReady;
+                  if (!rendererReady) {
+                    controller.setNativeSurfaceActive(false);
+                  }
+                }
+                if (!hasRendererState && call.arguments['active'] is bool) {
+                  controller
+                      .setNativeSurfaceActive(call.arguments['active'] == true);
+                }
+              }
+              final configuration = controller?._lastNativeConfiguration;
+              if (controller != null &&
+                  rendererReady &&
+                  generation == controller.nativeSurfaceGeneration &&
+                  Platform.isMacOS) {
+                final attachment = await controller.attachNativeWindow();
+                if (transaction != controller._nativeOutputTransaction) {
+                  return;
+                }
+                if (attachment['attached'] == true) {
+                  final state = await controller.nativeWindowState();
+                  debugPrint('NativeWindow.State: $state');
+                  if (controller.configuration.useNativeWindow) {
+                    final bound = await controller
+                        .bindExperimentalNativeWindow(attachment);
+                    debugPrint('NativeWindow.Bind: bound=$bound');
+                  }
+                }
+              }
+              if (controller != null &&
+                  rendererReady &&
+                  generation == controller.nativeSurfaceGeneration &&
+                  transaction == controller._nativeOutputTransaction &&
+                  configuration != null) {
+                final result =
+                    await controller.configureHdrOutput(configuration);
+                if (transaction != controller._nativeOutputTransaction ||
+                    result is Map && result['stale'] == true) {
+                  // A reset or newer output transaction superseded this
+                  // Ready callback. Never publish its false result over a
+                  // newer active native surface.
+                  return;
+                }
+                if (controller.configuration.useNativeWindow) {
+                  // W1's mpv-owned window has no verified visible-frame
+                  // callback yet. NativeSurfaceOutput readiness alone
+                  // must not promote the separate child-window path.
+                  controller.setNativeSurfaceActive(false);
+                } else {
+                  controller.setNativeSurfaceActive(
+                      result is Map && result['active'] == true);
+                }
+              }
+              break;
+            case 'NativeWindow.Frame':
+              if (call.arguments is Map) {
+                debugPrint(
+                  'NativeWindow.Frame: ${call.arguments}',
+                );
+              }
+              break;
+            default:
+              {
+                break;
+              }
+          }
+        } catch (exception, stacktrace) {
+          debugPrint(exception.toString());
+          debugPrint(stacktrace.toString());
+        }
+      },
+    );
 }

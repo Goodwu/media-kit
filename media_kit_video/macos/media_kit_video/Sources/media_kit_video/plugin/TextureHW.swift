@@ -67,19 +67,20 @@ public class TextureHW: NSObject, FlutterTexture, ResizableTextureProtocol {
           ? self.nativeTextureContexts.current?.pixelBuffer
           : self.textureContexts.current?.pixelBuffer
     }
-    NativeFrameRegistry.observeSurfaceActive(handle: registryHandle) { [weak self] handle in
+    NativeFrameRegistry.observeFloatOutput(handle: registryHandle) { [weak self] handle, enabled in
       guard let self else { return }
-      let active = NativeFrameRegistry.isSurfaceActive(handle: handle)
-      let changed = self.setHalfFloatOutput(active)
-      // Surface activation can happen after mpv has already rendered the current
-      // frame. Schedule one normal VideoOutput update on either edge so the
-      // selected pool is published without changing mpv's render API or doing
-      // a second render target per frame.
+      let changed = self.setHalfFloatOutput(enabled)
       if changed {
         DispatchQueue.main.async { [weak self] in
           self?.updateCallback()
         }
       }
+    }
+    NativeFrameRegistry.observeSurfaceActive(handle: registryHandle) { [weak self] _ in
+      // Active is a post-presentation fact. Notify the output owner on either
+      // edge without changing the producer mode here; float-output permission
+      // is controlled independently by NativeSurfaceOutput.
+      DispatchQueue.main.async { [weak self] in self?.updateCallback() }
     }
     NativeFrameRegistry.setFloatFormat(handle: registryHandle, enabled: false)
 
@@ -230,7 +231,7 @@ public class TextureHW: NSObject, FlutterTexture, ResizableTextureProtocol {
     } else {
       nativeTextureContexts.reinit(objects: [], skipCheckArgs: true)
     }
-    setHalfFloatOutput(NativeFrameRegistry.isSurfaceActive(handle: registryHandle))
+    setHalfFloatOutput(NativeFrameRegistry.isFloatOutputEnabled(handle: registryHandle))
     NativeFrameRegistry.setFloatFormat(handle: registryHandle, enabled: nativeSurface)
   }
 
@@ -260,6 +261,7 @@ public class TextureHW: NSObject, FlutterTexture, ResizableTextureProtocol {
     size: CGSize,
     halfFloat: Bool
   ) {
+    let outputEpoch = NativeFrameRegistry.currentOutputEpoch(handle: registryHandle)
     CGLSetCurrentContext(context)
     defer {
       OpenGLHelpers.checkError("render")
@@ -284,7 +286,17 @@ public class TextureHW: NSObject, FlutterTexture, ResizableTextureProtocol {
       mpv_render_param(type: MPV_RENDER_PARAM_INVALID, data: nil),
     ]
     mpv_render_context_render(renderContext, &params)
-    glFlush()
+    // mpv renders through the OpenGL producer, while the native surface
+    // consumes the resulting IOSurface through Metal. A flush only queues the
+    // commands; it does not establish that the producer has finished writing
+    // before Metal samples the buffer. Keep this explicit completion fence
+    // until the two APIs are connected by a native shared-event path.
+    glFinish()
+    NativeFrameRegistry.markProduced(
+      handle: registryHandle,
+      pixelBuffer: textureContext.pixelBuffer,
+      epoch: outputEpoch
+    )
   }
 
   static private func getProcAddress(

@@ -123,6 +123,20 @@ final class MetalSurfaceBlitter {
     }
     command.present(drawable)
     command.commit()
+    // TextureHW may return this CVPixelBuffer to the GL producer immediately
+    // after the render call. Wait for the Metal read to finish before the
+    // three-buffer pool is allowed to recycle it. This is intentionally
+    // conservative: correctness across the GL -> CVPixelBuffer -> Metal
+    // boundary is required before optimizing with explicit GPU fences.
+    command.waitUntilCompleted()
+    guard command.status == .completed else {
+      let errorDescription = command.error?.localizedDescription ?? "unknown"
+      NSLog(
+        "HDR frame output failed status=\(command.status.rawValue) " +
+        "error=\(errorDescription)"
+      )
+      return false
+    }
     return true
   }
 
