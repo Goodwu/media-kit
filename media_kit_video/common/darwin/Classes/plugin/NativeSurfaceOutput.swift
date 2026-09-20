@@ -26,6 +26,9 @@ final class NativeSurfaceOutput {
     NativeFrameRegistry.observeFloatFormat(handle: -1) { [weak self] _ in
       self?.refreshAll()
     }
+    NativeFrameRegistry.observeFramePresented(handle: -1) { [weak self] handle in
+      self?.promoteAfterPresentedFrame(handle: handle)
+    }
     #if canImport(UIKit)
       displayObservers.append(NotificationCenter.default.addObserver(
         forName: UIScreen.didConnectNotification,
@@ -104,13 +107,13 @@ final class NativeSurfaceOutput {
     } else {
       layerReady.removeValue(forKey: handle)
     }
+    NativeFrameRegistry.clearPresented(handle: handle)
     guard var state = states[handle] else { return report(handle: handle) }
-    let transfer = configurations[handle]?["transfer"] as? String
-    let hdrInput = transfer == "pq" || transfer == "hlg"
-    state.active = state.capable && hdrInput && targetVerified(configurations[handle]) && layerReady[handle] == state.generation &&
-      NativeFrameRegistry.hasFloatProvider(handle: handle) && displaySupportsEdr(handle: handle)
+    let candidate = canProduceFloat(handle: handle, configuration: configurations[handle], state: state)
+    NativeFrameRegistry.setFloatOutputEnabled(handle: handle, enabled: candidate)
+    state.active = candidate && NativeFrameRegistry.hasPresentedFrame(handle: handle)
     NativeFrameRegistry.setSurfaceActive(handle: handle, enabled: state.active)
-    state.failureReason = state.active ? "" : "surface, frame provider, or HDR target probe incomplete"
+    state.failureReason = state.active ? "" : candidate ? "awaiting-first-float-frame" : "surface, frame provider, or HDR target probe incomplete"
     states[handle] = state
     return report(handle: handle)
   }
@@ -118,6 +121,8 @@ final class NativeSurfaceOutput {
   func detachLayer(handle: Int64) {
     lock.lock(); defer { lock.unlock() }
     layerReady.removeValue(forKey: handle)
+    NativeFrameRegistry.setFloatOutputEnabled(handle: handle, enabled: false)
+    NativeFrameRegistry.setSurfaceActive(handle: handle, enabled: false)
   }
 
   func create(handle: Int64, generation: Int) -> [String: Any] {
@@ -147,13 +152,14 @@ final class NativeSurfaceOutput {
       return ["capable": false, "active": false, "failureReason": "stale surface generation", "generation": generation]
     }
     configurations[handle] = configuration
+    NativeFrameRegistry.advanceOutputEpoch(handle: handle)
+    NativeFrameRegistry.clearPresented(handle: handle)
     NativeSurfaceViewRegistry.configure(handle: handle, configuration: configuration)
-    let transfer = configuration["transfer"] as? String
-    let hdrInput = transfer == "pq" || transfer == "hlg"
-    state.active = state.capable && hdrInput && targetVerified(configuration) && layerReady[handle] == generation &&
-      NativeFrameRegistry.hasFloatProvider(handle: handle) && displaySupportsEdr(handle: handle)
+    let candidate = canProduceFloat(handle: handle, configuration: configuration, state: state)
+    NativeFrameRegistry.setFloatOutputEnabled(handle: handle, enabled: candidate)
+    state.active = candidate && NativeFrameRegistry.hasPresentedFrame(handle: handle)
     NativeFrameRegistry.setSurfaceActive(handle: handle, enabled: state.active)
-    state.failureReason = state.active ? "" : "surface, frame provider, or HDR target probe incomplete"
+    state.failureReason = state.active ? "" : candidate ? "awaiting-first-float-frame" : "surface, frame provider, or HDR target probe incomplete"
     states[handle] = state
     return report(handle: handle)
   }
@@ -165,10 +171,17 @@ final class NativeSurfaceOutput {
     }
     state.active = false
     states[handle] = state
+    // A reset invalidates the whole output transaction. Do not retain the
+    // previous player-target proof: a later display refresh must not
+    // re-promote the producer before a fresh configure call.
+    configurations.removeValue(forKey: handle)
+    NativeFrameRegistry.advanceOutputEpoch(handle: handle)
     // Clear display-side HDR metadata as well as the producer mode. The next
     // configure call may restore PQ/HLG; leaving the old CAEDRMetadata active
     // would make an inactive/SDR edge indistinguishable from an HDR output.
     NativeSurfaceViewRegistry.configure(handle: handle, configuration: ["transfer": "sdr"])
+    NativeFrameRegistry.clearPresented(handle: handle)
+    NativeFrameRegistry.setFloatOutputEnabled(handle: handle, enabled: false)
     NativeFrameRegistry.setSurfaceActive(handle: handle, enabled: false)
     return report(handle: handle)
   }
@@ -179,6 +192,8 @@ final class NativeSurfaceOutput {
     states.removeValue(forKey: handle)
     configurations.removeValue(forKey: handle)
     layerReady.removeValue(forKey: handle)
+    NativeFrameRegistry.setFloatOutputEnabled(handle: handle, enabled: false)
+    NativeFrameRegistry.clearPresented(handle: handle)
     NativeFrameRegistry.setSurfaceActive(handle: handle, enabled: false)
   }
 
@@ -187,12 +202,12 @@ final class NativeSurfaceOutput {
     let handles = Array(states.keys)
     let reports = handles.map { handle -> [String: Any] in
       guard var state = states[handle] else { return report(handle: handle) }
-      let transfer = configurations[handle]?["transfer"] as? String
-      let hdrInput = transfer == "pq" || transfer == "hlg"
-      state.active = state.capable && hdrInput && targetVerified(configurations[handle]) && layerReady[handle] == state.generation &&
-        NativeFrameRegistry.hasFloatProvider(handle: handle) && displaySupportsEdr(handle: handle)
+      NativeFrameRegistry.clearPresented(handle: handle)
+      let candidate = canProduceFloat(handle: handle, configuration: configurations[handle], state: state)
+      NativeFrameRegistry.setFloatOutputEnabled(handle: handle, enabled: candidate)
+      state.active = candidate && NativeFrameRegistry.hasPresentedFrame(handle: handle)
       NativeFrameRegistry.setSurfaceActive(handle: handle, enabled: state.active)
-      state.failureReason = state.active ? "" : "surface, frame provider, or HDR target probe incomplete"
+      state.failureReason = state.active ? "" : candidate ? "awaiting-first-float-frame" : "surface, frame provider, or HDR target probe incomplete"
       states[handle] = state
       return report(handle: handle)
     }
@@ -205,6 +220,28 @@ final class NativeSurfaceOutput {
     return configuration["playerTargetVerified"] as? Bool == true &&
       configuration["target-colorspace"] as? String == "bt.2020" &&
       configuration["target-trc"] as? String == "linear"
+  }
+
+  private func canProduceFloat(handle: Int64, configuration: [String: Any]?, state: State) -> Bool {
+    let transfer = configuration?["transfer"] as? String
+    let hdrInput = transfer == "pq" || transfer == "hlg"
+    return state.capable && hdrInput && targetVerified(configuration) &&
+      layerReady[handle] == state.generation &&
+      NativeFrameRegistry.hasFloatProvider(handle: handle) &&
+      displaySupportsEdr(handle: handle)
+  }
+
+  private func promoteAfterPresentedFrame(handle: Int64) {
+    lock.lock()
+    guard var state = states[handle] else { lock.unlock(); return }
+    let candidate = canProduceFloat(handle: handle, configuration: configurations[handle], state: state)
+    state.active = candidate && NativeFrameRegistry.hasPresentedFrame(handle: handle)
+    state.failureReason = state.active ? "" : candidate ? "awaiting-first-float-frame" : "surface, frame provider, or HDR target probe incomplete"
+    states[handle] = state
+    NativeFrameRegistry.setSurfaceActive(handle: handle, enabled: state.active)
+    let result = report(handle: handle)
+    lock.unlock()
+    onStateChanged?(result)
   }
 
   private func report(handle: Int64) -> [String: Any] {
@@ -225,6 +262,16 @@ final class NativeSurfaceOutput {
       "dynamicMetadataApplied": false,
       "capable": state.capable,
       "active": state.active,
+      "floatOutputEnabled": NativeFrameRegistry.isFloatOutputEnabled(handle: handle),
+      "framePresented": NativeFrameRegistry.hasPresentedFrame(handle: handle),
+      "outputEpoch": NativeFrameRegistry.currentOutputEpoch(handle: handle),
+      "hasFloatProvider": NativeFrameRegistry.hasFloatProvider(handle: handle),
+      "layerReady": layerReady[handle] == state.generation,
+      "targetVerified": targetVerified(configurations[handle]),
+      "targetPrim": configurations[handle]?["target-prim"] as? String ?? "",
+      "targetTrc": configurations[handle]?["target-trc"] as? String ?? "",
+      "activationStage": state.active ? "presented-float-frame" :
+        (NativeFrameRegistry.isFloatOutputEnabled(handle: handle) ? "awaiting-float-frame" : "candidate-not-ready"),
       "pixelFormat": "rgba16Float",
       "colorSpace": "extended-linear-bt2020",
       "headroom": currentHeadroom(handle: handle),

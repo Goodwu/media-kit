@@ -109,7 +109,12 @@ final class NativeSurfaceView: NSObject, FlutterPlatformView {
           let blitter,
           let drawable = metalLayer.nextDrawable()
     else { return }
-    _ = blitter.draw(pixelBuffer: pixelBuffer, to: drawable)
+    let drawn = blitter.draw(pixelBuffer: pixelBuffer, to: drawable)
+    if drawn && CVPixelBufferGetPixelFormatType(pixelBuffer) == kCVPixelFormatType_64RGBAHalf {
+      NativeFrameRegistry.markPresented(handle: handle, pixelBuffer: pixelBuffer)
+    } else if !drawn {
+      NativeFrameRegistry.markPresentationFailed(handle: handle, pixelBuffer: pixelBuffer)
+    }
   }
 }
 
@@ -211,6 +216,16 @@ final class NativeSurfaceView: NSObject {
     blitter = MetalSurfaceBlitter(device: metalLayer.device)
     NativeSurfaceViewRegistry.register(handle: handle) { [weak self] configuration in
       self?.apply(configuration: configuration)
+    } displayMetrics: { [weak self] in
+      guard let self else { return ["currentHeadroom": 1.0, "potentialHeadroom": 1.0] }
+      let screen = self.nativeView.window?.screen ?? NSScreen.main
+      if #available(macOS 10.15, *) {
+        return [
+          "currentHeadroom": Double(screen?.maximumExtendedDynamicRangeColorComponentValue ?? 1.0),
+          "potentialHeadroom": Double(screen?.maximumPotentialExtendedDynamicRangeColorComponentValue ?? 1.0),
+        ]
+      }
+      return ["currentHeadroom": 1.0, "potentialHeadroom": 1.0]
     }
     onLayerReady?(handle, generation, blitter?.supportsFloatSource == true)
     NSLog("NativeSurfaceView macOS token registered handle=\(handle) generation=\(generation) token=\(viewToken.rawValue)")
@@ -234,17 +249,13 @@ final class NativeSurfaceView: NSObject {
 
   private func apply(configuration: [String: Any]) {
     let transfer = configuration["transfer"] as? String
-    if #available(macOS 10.15, *), transfer == "pq" {
-      let metadata = configuration["masteringMetadata"] as? [String: Any]
-      let minLuminance = Self.luminance(metadata, keys: ["minLuminance", "min-nits"]) ?? 0.005
-      let maxLuminance = Self.luminance(metadata, keys: ["maxLuminance", "max-nits"]) ?? 1_000.0
-      let opticalOutputScale = Self.number(configuration["opticalOutputScale"]) ?? 100.0
-      metalLayer.edrMetadata = CAEDRMetadata.hdr10(
-        minLuminance: Float(minLuminance),
-        maxLuminance: Float(maxLuminance),
-        opticalOutputScale: Float(opticalOutputScale)
-      )
-    } else if #available(macOS 10.15, *) {
+    // The producer contract is extended-linear BT.2020 (target-trc=linear),
+    // not PQ code values. CAEDRMetadata.hdr10 describes PQ mastering data and
+    // attaching it to this linear RGBA16F layer applies the wrong optical
+    // scale, which presents as an immediate white/overexposed frame after the
+    // regular BGRA texture is promoted. Keep EDR enabled, but leave HDR10
+    // metadata unset until the producer explicitly supplies PQ-encoded output.
+    if #available(macOS 10.15, *) {
       metalLayer.edrMetadata = nil
     }
     if #available(macOS 10.14.3, *) {
@@ -298,6 +309,11 @@ final class NativeSurfaceView: NSObject {
       return
     }
     let drawn = blitter.draw(pixelBuffer: pixelBuffer, to: drawable)
+    if drawn && CVPixelBufferGetPixelFormatType(pixelBuffer) == kCVPixelFormatType_64RGBAHalf {
+      NativeFrameRegistry.markPresented(handle: handle, pixelBuffer: pixelBuffer)
+    } else if !drawn {
+      NativeFrameRegistry.markPresentationFailed(handle: handle, pixelBuffer: pixelBuffer)
+    }
     if drawDiagnosticsRemaining > 0 {
       drawDiagnosticsRemaining -= 1
       NSLog("NativeSurfaceView macOS draw handle=\(handle) drawn=\(drawn) pixelFormat=\(CVPixelBufferGetPixelFormatType(pixelBuffer)) size=\(CVPixelBufferGetWidth(pixelBuffer))x\(CVPixelBufferGetHeight(pixelBuffer)) bounds=\(nativeView.bounds) drawableSize=\(metalLayer.drawableSize)")
