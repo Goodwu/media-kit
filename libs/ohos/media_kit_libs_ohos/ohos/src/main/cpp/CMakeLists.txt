@@ -52,11 +52,11 @@ endfunction()
 set(LIBMPV "libmpv_aarch64.zip")
 
 # Download URL & SHA256 hash of the libmpv archive.
-set(LIBMPV_URL "https://github.com/ErBWs/libmpv-ohos-build/releases/download/20260811/${LIBMPV}")
+set(LIBMPV_URL "https://github.com/Goodwu/libmpv-ohos-build/releases/download/20260920/${LIBMPV}")
 # This archive contains the OHOS color-contract and output-mapping diagnostics
 # used by the current real-device investigation.  Keep the checksum strict:
 # replacing the archive without updating this provenance record must fail.
-set(LIBMPV_SHA "2f9d1f591149c6c99d8476bfd5c208e0120a1fa272ad8044039994bd55564df7")
+set(LIBMPV_SHA "29b8bd4de54bb61c6fbb549022af5d9082d7b057a5901a1d388597ff15114191")
 
 # Download location of the libmpv archive.
 set(LIBMPV_ARCHIVE "${CMAKE_CURRENT_SOURCE_DIR}/${LIBMPV}")
