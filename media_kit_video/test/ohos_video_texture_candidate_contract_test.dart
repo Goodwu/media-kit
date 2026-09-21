@@ -16,7 +16,9 @@ void main() {
 
   final candidateBranch = source.substring(candidate, textureFallback);
   _require(
-      candidateBranch.contains('child: nativeVideo') &&
+      RegExp(r'child:\s*nativeVideo').hasMatch(candidateBranch) &&
+          candidateBranch.contains('Center(') &&
+          candidateBranch.contains('SizedBox(') &&
           !candidateBranch.contains('Opacity(') &&
           !candidateBranch.contains('Offstage(') &&
           !candidateBranch.contains('opacity:'),
@@ -25,8 +27,10 @@ void main() {
   _require(
       source.contains('if (!nativeSurface)') &&
           source.contains('child: Texture(') &&
-          RegExp(r'if \(nativeSurface\s*&&\s*!nativeOhosCandidate\)')
-              .hasMatch(source),
+          RegExp(
+            r'if \(nativeSurface\s*&&\s*!nativeOhosCandidate\s*&&\s*'
+            r'!nativeMacosCandidate\)',
+          ).hasMatch(source),
       'Texture must remain the inactive fallback while active native output '
       'keeps its native rendering path');
 }

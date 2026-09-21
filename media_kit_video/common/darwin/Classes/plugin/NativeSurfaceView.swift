@@ -169,12 +169,139 @@ private final class FrameReportingView: NSView {
   }
 }
 
+private final class FramePacingDiagnostics {
+  private static let tickLimit = 900
+  private static let durationLimit: CFTimeInterval = 15.0
+
+  static func make(handle: Int64, generation: Int) -> FramePacingDiagnostics? {
+    let enabled = ProcessInfo.processInfo.environment[
+      "PILIPLUSX_FRAME_PACING_DIAGNOSTICS"
+    ] == "1"
+    return enabled ? FramePacingDiagnostics(handle: handle, generation: generation) : nil
+  }
+
+  private let handle: Int64
+  private let generation: Int
+  private var startedAt: CFTimeInterval?
+  private var lastTickAt: CFTimeInterval?
+  private var tickIntervals = [CFTimeInterval]()
+  private var cpuWaitDurations = [CFTimeInterval]()
+  private var gpuDurations = [CFTimeInterval]()
+  private var tickCount = 0
+  private var drawableAvailableCount = 0
+  private var bufferObservationCount = 0
+  private var consecutiveBufferReuseCount = 0
+  private var lastBufferIdentity: ObjectIdentifier?
+  private var metalFrameCount = 0
+  private var completedMetalFrameCount = 0
+  private var firstSequence: Int?
+  private var lastSequence: Int?
+  private var sequenceGapCount = 0
+  private var finished = false
+
+  var isFinished: Bool { finished }
+
+  private init(handle: Int64, generation: Int) {
+    self.handle = handle
+    self.generation = generation
+    tickIntervals.reserveCapacity(Self.tickLimit - 1)
+    cpuWaitDurations.reserveCapacity(Self.tickLimit)
+    gpuDurations.reserveCapacity(Self.tickLimit)
+  }
+
+  func recordTick(
+    at timestamp: CFTimeInterval,
+    drawableAvailable: Bool,
+    pixelBuffer: CVPixelBuffer?
+  ) {
+    // Do not spend the bounded diagnostic window while the player is idle or
+    // still starting. The first available video buffer defines the baseline.
+    guard !finished, pixelBuffer != nil else { return }
+    startedAt = startedAt ?? timestamp
+    if let lastTickAt {
+      tickIntervals.append(timestamp - lastTickAt)
+    }
+    self.lastTickAt = timestamp
+    tickCount += 1
+    if drawableAvailable {
+      drawableAvailableCount += 1
+    }
+    if let pixelBuffer {
+      let identity = ObjectIdentifier(pixelBuffer)
+      bufferObservationCount += 1
+      if identity == lastBufferIdentity {
+        consecutiveBufferReuseCount += 1
+      }
+      lastBufferIdentity = identity
+    }
+  }
+
+  func recordMetal(_ timing: MetalSurfaceFrameTiming) {
+    guard !finished else { return }
+    metalFrameCount += 1
+    if timing.completed {
+      completedMetalFrameCount += 1
+    }
+    cpuWaitDurations.append(timing.cpuWaitSeconds)
+    if let duration = timing.gpuDurationSeconds {
+      gpuDurations.append(duration)
+    }
+    firstSequence = firstSequence ?? timing.sequence
+    if let previous = lastSequence, timing.sequence > previous + 1 {
+      sequenceGapCount += timing.sequence - previous - 1
+    }
+    lastSequence = timing.sequence
+  }
+
+  func completeTick(at timestamp: CFTimeInterval) {
+    guard !finished, let startedAt else { return }
+    if tickCount >= Self.tickLimit {
+      finish(reason: "tick-limit")
+    } else if timestamp - startedAt >= Self.durationLimit {
+      finish(reason: "duration-limit")
+    }
+  }
+
+  func finish(reason: String) {
+    guard !finished, tickCount > 0 else { return }
+    finished = true
+    NSLog(
+      "FramePacingDiagnostics macOS summary " +
+      "handle=\(handle) generation=\(generation) reason=\(reason) " +
+      "ticks=\(tickCount) tickMs={\(Self.describe(tickIntervals))} " +
+      "drawable=\(drawableAvailableCount)/\(tickCount) " +
+      "buffers=\(bufferObservationCount) consecutiveReuse=\(consecutiveBufferReuseCount) " +
+      "metal=\(metalFrameCount) completed=\(completedMetalFrameCount) " +
+      "sequence=\(firstSequence ?? -1)...\(lastSequence ?? -1) gaps=\(sequenceGapCount) " +
+      "cpuWaitMs={\(Self.describe(cpuWaitDurations))} " +
+      "gpuMs={\(Self.describe(gpuDurations))}"
+    )
+  }
+
+  private static func describe(_ values: [CFTimeInterval]) -> String {
+    guard !values.isEmpty else { return "count=0" }
+    let sorted = values.sorted()
+    func percentile(_ fraction: Double) -> Double {
+      let index = min(Int(Double(sorted.count - 1) * fraction), sorted.count - 1)
+      return sorted[index] * 1_000.0
+    }
+    return String(
+      format: "count=%d,p50=%.3f,p95=%.3f,max=%.3f",
+      sorted.count,
+      percentile(0.50),
+      percentile(0.95),
+      (sorted.last ?? 0) * 1_000.0
+    )
+  }
+}
+
 final class NativeSurfaceView: NSObject {
   let nativeView: NSView
   private let metalLayer: CAMetalLayer
   private var blitter: MetalSurfaceBlitter?
   private var timer: DispatchSourceTimer?
   private var drawDiagnosticsRemaining = 8
+  private var framePacingDiagnostics: FramePacingDiagnostics?
   private let handle: Int64
   private let generation: Int
   private let viewToken: DarwinViewTokenRegistry.Token
@@ -192,6 +319,10 @@ final class NativeSurfaceView: NSObject {
     generation = (args as? [String: Any])?["generation"] as? Int ?? 0
     viewToken = DarwinViewTokenRegistry.register(view: nativeView, handle: handle, generation: generation)
     super.init()
+    framePacingDiagnostics = FramePacingDiagnostics.make(
+      handle: handle,
+      generation: generation
+    )
     frameView.onFrameChanged = { [weak self] frame in
       guard let self else { return }
       onFrameChanged?(self.handle, self.generation, frame)
@@ -242,6 +373,7 @@ final class NativeSurfaceView: NSObject {
 
   deinit {
     timer?.cancel()
+    framePacingDiagnostics?.finish(reason: "view-deinit")
     NSLog("NativeSurfaceView macOS deinit handle=\(handle) generation=\(generation) token=\(viewToken.rawValue)")
     DarwinViewTokenRegistry.unregister(viewToken, handle: handle, generation: generation)
     NativeSurfaceViewRegistry.unregister(handle: handle)
@@ -299,8 +431,18 @@ final class NativeSurfaceView: NSObject {
       width: max(1, nativeView.bounds.width * scale),
       height: max(1, nativeView.bounds.height * scale)
     )
+    if framePacingDiagnostics?.isFinished == true {
+      framePacingDiagnostics = nil
+    }
     let pixelBuffer = NativeFrameRegistry.copyFrame(handle: handle)
     let drawable = metalLayer.nextDrawable()
+    let diagnostics = framePacingDiagnostics
+    diagnostics?.recordTick(
+      at: CACurrentMediaTime(),
+      drawableAvailable: drawable != nil,
+      pixelBuffer: pixelBuffer
+    )
+    defer { diagnostics?.completeTick(at: CACurrentMediaTime()) }
     guard let blitter, let pixelBuffer, let drawable else {
       if drawDiagnosticsRemaining > 0 {
         drawDiagnosticsRemaining -= 1
@@ -308,7 +450,17 @@ final class NativeSurfaceView: NSObject {
       }
       return
     }
-    let drawn = blitter.draw(pixelBuffer: pixelBuffer, to: drawable)
+    let timingHandler: ((MetalSurfaceFrameTiming) -> Void)?
+    if let diagnostics {
+      timingHandler = { timing in diagnostics.recordMetal(timing) }
+    } else {
+      timingHandler = nil
+    }
+    let drawn = blitter.draw(
+      pixelBuffer: pixelBuffer,
+      to: drawable,
+      timingHandler: timingHandler
+    )
     if drawn && CVPixelBufferGetPixelFormatType(pixelBuffer) == kCVPixelFormatType_64RGBAHalf {
       NativeFrameRegistry.markPresented(handle: handle, pixelBuffer: pixelBuffer)
     } else if !drawn {
