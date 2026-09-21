@@ -23,6 +23,10 @@
   - status: done
   - context: archives/conversations/native-output-rebuild-20260920.md
   - acceptance: 代码变更通过 diff 检查并完成 Git 提交
+- [x] 清理本地工作树忽略项
+  - status: done
+  - context: archives/conversations/native-output-rebuild-20260920.md
+  - acceptance: 本地产物加入 `.gitignore`，其余本地修改完成提交
 
 ## Next（近期候选，最多 10 条）
 - [ ] 在真实 macOS/OHOS 设备上继续验证 native output 生命周期

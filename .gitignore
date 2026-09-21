@@ -34,3 +34,10 @@ build/
 /pubspec.lock
 
 AGENTS.md
+
+# Local AI worktree guidance and generated OHOS native artifacts.
+AGENTS.local.md
+AI_WORK_OS.md
+CLAUDE.md
+archives/conversations/.gitkeep
+libs/ohos/media_kit_libs_ohos/ohos/libs/
