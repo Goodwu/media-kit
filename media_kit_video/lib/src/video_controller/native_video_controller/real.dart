@@ -50,6 +50,7 @@ class NativeVideoController extends PlatformVideoController {
   /// [Lock] used to synchronize [onLoadHooks], [onUnloadHooks] & [subscription].
   final lock = Lock();
   bool _disposed = false;
+  Future<void>? _disposeFuture;
   Map<String, dynamic>? _lastNativeConfiguration;
   Map<String, dynamic>? _nativeWindowAttachment;
   int _nativeOutputTransaction = 0;
@@ -86,11 +87,13 @@ class NativeVideoController extends PlatformVideoController {
     _channel;
     videoParamsSubscription = player.stream.videoParams.listen(
       (event) => lock.synchronized(() async {
+        if (_disposed) return;
         if ([0, null].contains(event.dw) || [0, null].contains(event.dh)) {
           return;
         }
 
         final int handle = await player.handle;
+        if (_disposed) return;
 
         final int width;
         final int height;
@@ -437,19 +440,18 @@ class NativeVideoController extends PlatformVideoController {
   @override
   Future<void> disposeNativeOutput() async {
     final handle = nativeHandle ?? await player.handle;
-    try {
-      await _channel.invokeMethod('disposeNativeOutput', {
-        'handle': handle.toString(),
-        'generation': nativeSurfaceGeneration,
-      });
-    } catch (_) {}
+    await _channel.invokeMethod('disposeNativeOutput', {
+      'handle': handle.toString(),
+      'generation': nativeSurfaceGeneration,
+    });
   }
 
   /// Attaches the generation-scoped Cocoa view after the Flutter PlatformView
   /// exists. W0 only observes the view; W1's opt-in native-window mode uses
   /// the returned handle for one immediate `wid` binding.
   Future<Map<String, dynamic>> attachNativeWindow() async {
-    if (!Platform.isMacOS ||
+    if (_disposed ||
+        !Platform.isMacOS ||
         (!configuration.useNativeSurface && !configuration.useNativeWindow)) {
       return const <String, dynamic>{
         'capable': false,
@@ -457,31 +459,63 @@ class NativeVideoController extends PlatformVideoController {
         'failureReason': 'not a macOS native-surface output',
       };
     }
-    final handle = nativeHandle ?? await player.handle;
-    final result = (await _channel.invokeMethod<Map<dynamic, dynamic>>(
-              'NativeWindow.Attach',
-              {
-                'handle': handle.toString(),
-                'generation': nativeSurfaceGeneration,
-              },
-            ) ??
-            const <dynamic, dynamic>{})
-        .cast<String, dynamic>();
-    if (result['capable'] == true && result['attached'] == true) {
-      // Keep lifecycle state only. Never retain the native view address in
-      // the controller after the immediate W1 bind call has consumed it.
-      _nativeWindowAttachment = {
-        'attached': true,
-        'handle': result['handle'],
-        'generation': result['generation'],
-      };
-    }
-    return result;
+    return lock.synchronized(() async {
+      if (_disposed) {
+        return const <String, dynamic>{
+          'capable': false,
+          'attached': false,
+          'failureReason': 'controller disposed',
+        };
+      }
+      final handle = nativeHandle ?? await player.handle;
+      final result = (await _channel.invokeMethod<Map<dynamic, dynamic>>(
+                'NativeWindow.Attach',
+                {
+                  'handle': handle.toString(),
+                  'generation': nativeSurfaceGeneration,
+                },
+              ) ??
+              const <dynamic, dynamic>{})
+          .cast<String, dynamic>();
+      if (_disposed) {
+        if (result['attached'] == true) {
+          await _channel.invokeMethod(
+            'NativeWindow.Detach',
+            {
+              'handle': handle.toString(),
+              'generation': nativeSurfaceGeneration,
+            },
+          );
+        }
+        return const <String, dynamic>{
+          'capable': false,
+          'attached': false,
+          'failureReason': 'controller disposed',
+        };
+      }
+      if (result['capable'] == true && result['attached'] == true) {
+        // Keep lifecycle state only. Never retain the native view address in
+        // the controller after the immediate W1 bind call has consumed it.
+        _nativeWindowAttachment = {
+          'attached': true,
+          'handle': result['handle'],
+          'generation': result['generation'],
+        };
+      }
+      return result;
+    });
   }
 
   /// Invalidates the W0 Cocoa view token before the controller is disposed.
   Future<void> detachNativeWindow() async {
     if (_nativeWindowAttachment == null) return;
+    Object? cleanupError;
+    StackTrace? cleanupStack;
+    void recordFailure(Object error, StackTrace stack) {
+      cleanupError ??= error;
+      cleanupStack ??= stack;
+    }
+
     if (configuration.useNativeWindow && Platform.isMacOS) {
       try {
         await platform.command(
@@ -492,10 +526,12 @@ class NativeVideoController extends PlatformVideoController {
           ['set', 'wid', '0'],
           waitForInitialization: false,
         );
-      } catch (_) {}
+      } catch (error, stack) {
+        recordFailure(error, stack);
+      }
     }
-    final handle = nativeHandle ?? await player.handle;
     try {
+      final handle = nativeHandle ?? await player.handle;
       await _channel.invokeMethod(
         'NativeWindow.Detach',
         {
@@ -503,11 +539,18 @@ class NativeVideoController extends PlatformVideoController {
           'generation': nativeSurfaceGeneration,
         },
       );
-    } catch (_) {}
-    _nativeWindowAttachment = null;
-    // Detaching invalidates any previously observed output. A later bind must
-    // receive fresh renderer/frame evidence before this can become active.
-    setNativeSurfaceActive(false);
+    } catch (error, stack) {
+      recordFailure(error, stack);
+    } finally {
+      _nativeWindowAttachment = null;
+      // Detaching invalidates any previously observed output. A later bind
+      // must receive fresh renderer/frame evidence before this can become
+      // active.
+      setNativeSurfaceActive(false);
+    }
+    if (cleanupError != null) {
+      Error.throwWithStackTrace(cleanupError!, cleanupStack!);
+    }
   }
 
   /// Reads the native Cocoa view frame without treating the video resolution
@@ -544,10 +587,14 @@ class NativeVideoController extends PlatformVideoController {
   Future<bool> bindExperimentalNativeWindow(
     Map<String, dynamic> attachment,
   ) async {
-    if (!Platform.isMacOS || !configuration.useNativeWindow) return false;
+    if (_disposed || !Platform.isMacOS || !configuration.useNativeWindow) {
+      return false;
+    }
     final nativeViewHandle = attachment['nativeViewHandle'];
     if (nativeViewHandle is! num || nativeViewHandle == 0) return false;
+    var bound = false;
     await lock.synchronized(() async {
+      if (_disposed) return;
       // A synchronous mpv_set_property can wait in vo_create while Cocoa
       // needs the Flutter main thread. Use mpv_command_async for the
       // mpv-owned window transition so the main thread remains pumpable.
@@ -567,7 +614,9 @@ class NativeVideoController extends PlatformVideoController {
         ['set', 'vo', configuration.vo ?? 'gpu-next'],
         waitForInitialization: false,
       );
+      bound = !_disposed;
     });
+    if (!bound) return false;
     // Do not promote `nativeSurfaceActive` here. Sending `vo`, `wid`, and
     // `gpu-api` is only a setup request; mpv's async command completion does
     // not prove renderer initialization or a visible frame.
@@ -580,23 +629,89 @@ class NativeVideoController extends PlatformVideoController {
   Future<void> disposeForRebuild() => _dispose();
 
   /// Disposes the instance. Releases allocated resources back to the system.
-  Future<void> _dispose() async {
-    if (_disposed) return;
+  Future<void> _dispose() => _disposeFuture ??= _disposeOnce();
+
+  Future<void> _disposeOnce() async {
     _disposed = true;
-    super.dispose();
-    await detachNativeWindow();
-    await disposeNativeOutput();
-    await videoParamsSubscription?.cancel();
-    final handle = await player.handle;
-    _controllers.remove(handle);
-    if (!(configuration.useNativeWindow && Platform.isMacOS)) {
-      await _channel.invokeMethod(
-        'VideoOutputManager.Dispose',
-        {
-          'handle': handle.toString(),
-        },
-      );
+    _nativeOutputTransaction++;
+    _lastNativeConfiguration = null;
+    nativeSurfaceCandidate = false;
+    // Publish the inactive edge while the notifier is still alive. All later
+    // callbacks observe [_disposed] and must not write to disposed notifiers.
+    super.setNativeSurfaceActive(false);
+
+    Object? cleanupError;
+    StackTrace? cleanupStack;
+    void recordFailure(Object error, StackTrace stack) {
+      cleanupError ??= error;
+      cleanupStack ??= stack;
     }
+
+    final subscription = videoParamsSubscription;
+    videoParamsSubscription = null;
+    try {
+      await subscription?.cancel();
+    } catch (error, stack) {
+      recordFailure(error, stack);
+    }
+
+    // Stream callbacks and native-window binds use this lock. Drain any work
+    // that started before [_disposed] was published before releasing native
+    // objects referenced by that work.
+    try {
+      await lock.synchronized(() async {});
+    } catch (error, stack) {
+      recordFailure(error, stack);
+    }
+
+    try {
+      await detachNativeWindow();
+    } catch (error, stack) {
+      recordFailure(error, stack);
+    }
+    try {
+      await disposeNativeOutput();
+    } catch (error, stack) {
+      recordFailure(error, stack);
+    }
+
+    final handle = nativeHandle;
+    if (!(configuration.useNativeWindow && Platform.isMacOS) &&
+        handle != null) {
+      try {
+        // Darwin completes this method only after VideoOutput disposal has
+        // released its mpv render context. Awaiting it is the barrier that
+        // keeps Player teardown from terminating libmpv too early.
+        await _channel.invokeMethod(
+          'VideoOutputManager.Dispose',
+          {
+            'handle': handle.toString(),
+          },
+        );
+      } catch (error, stack) {
+        recordFailure(error, stack);
+      }
+    }
+
+    if (cleanupError != null) {
+      // Keep the notifier and controller registration alive for a later
+      // caller to retry the render-context barrier. Destroying either here
+      // would make a failed output release unrecoverable while libmpv is
+      // still required to stay alive.
+      _disposeFuture = null;
+      Error.throwWithStackTrace(cleanupError!, cleanupStack!);
+    }
+    _controllers.removeWhere((_, controller) => identical(controller, this));
+    _nativeWindowAttachment = null;
+    _nativeOutputResetFuture = null;
+    _nativeOutputResetInFlight = false;
+    super.dispose();
+  }
+
+  @override
+  void setNativeSurfaceActive(bool value) {
+    if (_disposed) return;
+    super.setNativeSurfaceActive(value);
   }
 
   /// Currently created [NativeVideoController]s.
@@ -617,6 +732,7 @@ class NativeVideoController extends PlatformVideoController {
               {
                 // Notify about updated texture ID & [Rect].
                 final int handle = call.arguments['handle'];
+                if (_controllers[handle]?._disposed ?? true) break;
                 final Rect rect = Rect.fromLTWH(
                   call.arguments['rect']['left'] * 1.0,
                   call.arguments['rect']['top'] * 1.0,
@@ -639,6 +755,7 @@ class NativeVideoController extends PlatformVideoController {
             case 'NativeSurface.Ready':
               final handle = call.arguments['handle'] as int;
               final controller = _controllers[handle];
+              if (controller?._disposed ?? true) return;
               final generation = call.arguments['generation'] as int?;
               final transaction = controller?._nativeOutputTransaction;
               final hasRendererState = call.arguments is Map &&
@@ -674,7 +791,8 @@ class NativeVideoController extends PlatformVideoController {
                   generation == controller.nativeSurfaceGeneration &&
                   Platform.isMacOS) {
                 final attachment = await controller.attachNativeWindow();
-                if (transaction != controller._nativeOutputTransaction) {
+                if (controller._disposed ||
+                    transaction != controller._nativeOutputTransaction) {
                   return;
                 }
                 if (attachment['attached'] == true) {
@@ -694,7 +812,8 @@ class NativeVideoController extends PlatformVideoController {
                   configuration != null) {
                 final result =
                     await controller.configureHdrOutput(configuration);
-                if (transaction != controller._nativeOutputTransaction ||
+                if (controller._disposed ||
+                    transaction != controller._nativeOutputTransaction ||
                     result is Map && result['stale'] == true) {
                   // A reset or newer output transaction superseded this
                   // Ready callback. Never publish its false result over a

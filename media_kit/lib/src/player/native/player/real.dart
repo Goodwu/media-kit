@@ -1277,6 +1277,21 @@ class NativePlayer extends PlatformPlayer {
     String value, {
     bool waitForInitialization = true,
   }) async {
+    // A direct mpv_set_property_string call can wait on the decoder or video
+    // output lock.  PlayerConfiguration.async already selects the nonblocking
+    // property protocol for the internal setters; public callers must use the
+    // same protocol as well, otherwise a Flutter input callback can stall the
+    // Android platform thread long enough to trigger an ANR after re-entry.
+    // Keep the explicit synchronous configuration behavior intact for callers
+    // that deliberately opt out of the async backend.
+    if (configuration.async) {
+      if (waitForInitialization) {
+        await waitForPlayerInitialization;
+        await waitForVideoControllerInitializationIfAttached;
+      }
+      await _setPropertyString(property, value);
+      return;
+    }
     await _setPropertyStringDirect(
       property,
       value,
@@ -2777,8 +2792,12 @@ class NativePlayer extends PlatformPlayer {
   /// The methods which must execute synchronously before playback of a source can end.
   final List<Future<void> Function()> onUnloadHooks = [];
 
-  /// Synchronization & mutual exclusion between methods of this class.
-  static final Lock lock = Lock();
+  /// Synchronization & mutual exclusion between methods of this player.
+  ///
+  /// libmpv contexts are independent. Keeping this lock process-wide lets a
+  /// previous page's asynchronous teardown block the next page from creating
+  /// its own player, which leaves Android re-entry without a video output.
+  final Lock lock = Lock();
 
   /// [HashMap] for retrieving previously fetched audio-bitrate(s).
   static final HashMap<String, double> audioBitrateCache =

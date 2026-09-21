@@ -500,6 +500,9 @@ class VideoState extends State<Video> with WidgetsBindingObserver {
                                               nativeSurfaceCandidate &&
                                                   Platform.operatingSystem ==
                                                       'ohos';
+                                          final nativeMacosCandidate =
+                                              nativeSurfaceCandidate &&
+                                                  Platform.isMacOS;
                                           if (nativeOhosCandidate && _visible) {
                                             _ohosNativeSurfaceMounted = true;
                                           }
@@ -621,17 +624,22 @@ class VideoState extends State<Video> with WidgetsBindingObserver {
                                                     // suppress the platform-view
                                                     // paint needed for renderer
                                                     // readiness on Darwin too.
-                                                    child: Center(
-                                                      child: SizedBox(
-                                                        width: nativeOhosSurface
-                                                            ? surfaceWidth
-                                                            : viewportWidth,
-                                                        height: nativeOhosSurface
-                                                            ? surfaceHeight
-                                                            : viewportHeight,
-                                                        child: nativeVideo,
-                                                      ),
-                                                    ),
+                                                    // macOS already inherits the
+                                                    // fitted outer video box.
+                                                    child: nativeMacosCandidate
+                                                        ? nativeVideo
+                                                        : Center(
+                                                            child: SizedBox(
+                                                              width: nativeOhosSurface
+                                                                  ? surfaceWidth
+                                                                  : viewportWidth,
+                                                              height: nativeOhosSurface
+                                                                  ? surfaceHeight
+                                                                  : viewportHeight,
+                                                              child:
+                                                                  nativeVideo,
+                                                            ),
+                                                          ),
                                                   ),
                                                 if (!nativeSurface)
                                                   Positioned.fill(
@@ -643,7 +651,8 @@ class VideoState extends State<Video> with WidgetsBindingObserver {
                                                     ),
                                                   ),
                                                 if (nativeSurface &&
-                                                    !nativeOhosCandidate)
+                                                    !nativeOhosCandidate &&
+                                                    !nativeMacosCandidate)
                                                   Positioned.fill(
                                                     child: nativeVideo,
                                                   ),

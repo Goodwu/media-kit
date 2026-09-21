@@ -3,6 +3,13 @@ import Foundation
 import Metal
 import QuartzCore
 
+struct MetalSurfaceFrameTiming {
+  let sequence: Int
+  let cpuWaitSeconds: CFTimeInterval
+  let gpuDurationSeconds: CFTimeInterval?
+  let completed: Bool
+}
+
 /// Converts the Metal-compatible BGRA frame produced by mpv's GL path into
 /// the CAMetalLayer pixel format (normally rgba16Float).
 final class MetalSurfaceBlitter {
@@ -87,8 +94,13 @@ final class MetalSurfaceBlitter {
     }
   }
 
-  func draw(pixelBuffer: CVPixelBuffer, to drawable: CAMetalDrawable) -> Bool {
+  func draw(
+    pixelBuffer: CVPixelBuffer,
+    to drawable: CAMetalDrawable,
+    timingHandler: ((MetalSurfaceFrameTiming) -> Void)? = nil
+  ) -> Bool {
     frameNumber += 1
+    let frameSequence = frameNumber
     let shouldSample = sampleEnabled && frameNumber % sampleInterval == 0
     if shouldSample {
       sampleInput(pixelBuffer: pixelBuffer, frame: frameNumber)
@@ -128,7 +140,25 @@ final class MetalSurfaceBlitter {
     // three-buffer pool is allowed to recycle it. This is intentionally
     // conservative: correctness across the GL -> CVPixelBuffer -> Metal
     // boundary is required before optimizing with explicit GPU fences.
+    let waitStarted = timingHandler == nil ? nil : CACurrentMediaTime()
     command.waitUntilCompleted()
+    if let timingHandler, let waitStarted {
+      let cpuWaitSeconds = CACurrentMediaTime() - waitStarted
+      let gpuDurationSeconds: CFTimeInterval?
+      if command.gpuStartTime > 0 && command.gpuEndTime >= command.gpuStartTime {
+        gpuDurationSeconds = command.gpuEndTime - command.gpuStartTime
+      } else {
+        gpuDurationSeconds = nil
+      }
+      timingHandler(
+        MetalSurfaceFrameTiming(
+          sequence: frameSequence,
+          cpuWaitSeconds: cpuWaitSeconds,
+          gpuDurationSeconds: gpuDurationSeconds,
+          completed: command.status == .completed
+        )
+      )
+    }
     guard command.status == .completed else {
       let errorDescription = command.error?.localizedDescription ?? "unknown"
       NSLog(
