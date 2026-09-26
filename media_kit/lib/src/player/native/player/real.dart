@@ -102,6 +102,8 @@ class NativePlayer extends PlatformPlayer {
   /// implementation detail.
   bool get isReleaseCallbacksActive => releaseCallbacksActive;
 
+  bool get isPreTerminationCallbacksActive => preTerminationCallbacksActive;
+
   bool get isTerminated => _mpvTerminated;
 
   bool get isDisposing => _disposeInProgress;
@@ -109,6 +111,8 @@ class NativePlayer extends PlatformPlayer {
   bool _mpvTerminated = false;
   bool _disposeInProgress = false;
   Future<void>? _disposeFuture;
+  bool _nativeReferenceRemovedForDispose = false;
+  bool _playerStoppedForDispose = false;
 
   /// Cleanup callbacks that are safe only after [mpv_terminate_destroy] has
   /// returned. Native-output owners use this terminal barrier when their
@@ -174,21 +178,52 @@ class NativePlayer extends PlatformPlayer {
   /// Disposes the [Player] instance & releases the resources.
   @override
   Future<void> dispose({bool synchronized = true}) {
+    final darwin = Platform.isMacOS || Platform.isIOS;
+    if (darwin) {
+      // Close admission synchronously, before the first await or lock wait.
+      closePreTerminationOwnerAdmission();
+    }
     final existing = _disposeFuture;
     if (existing != null) return existing;
 
     Future<void> function() async {
+      var reachedTerminalPhase = false;
       try {
-        if (disposed) {
+        if (_mpvTerminated || (disposed && !_playerStoppedForDispose)) {
           throw AssertionError('[Player] has been disposed');
         }
         await waitForPlayerInitialization;
-        await waitForVideoControllerInitializationIfAttached;
+        if (darwin) {
+          // Every admitted owner has either registered its teardown callback
+          // or finished without creating an output before the snapshot runs.
+          await waitForPreTerminationOwnerCreations();
+        } else {
+          await waitForVideoControllerInitializationIfAttached;
+        }
 
-        await NativeReferenceHolder.instance.remove(ctx);
-        await stop(notify: false, synchronized: false);
+        if (!_nativeReferenceRemovedForDispose) {
+          await NativeReferenceHolder.instance.remove(ctx);
+          _nativeReferenceRemovedForDispose = true;
+        }
+        if (!_playerStoppedForDispose) {
+          await stop(
+            notify: false,
+            synchronized: false,
+            waitForVideoControllerInitialization: !darwin,
+          );
+          _playerStoppedForDispose = true;
+        }
 
+        // Playback APIs must stay closed if the barrier fails and disposal
+        // needs another attempt. The event pump remains alive for that retry.
         disposed = true;
+        // A native render context must be freed while the mpv event pump and
+        // handle are still alive. Keep failed callbacks registered and let a
+        // later dispose retry this phase without repeating stop or reference
+        // removal.
+        await runPreTerminationCallbacks();
+
+        reachedTerminalPhase = true;
 
         Object? cleanupError;
         StackTrace? cleanupStack;
@@ -231,6 +266,9 @@ class NativePlayer extends PlatformPlayer {
         }
       } finally {
         _disposeInProgress = false;
+        if (!reachedTerminalPhase) {
+          _disposeFuture = null;
+        }
       }
     }
 
@@ -367,13 +405,16 @@ class NativePlayer extends PlatformPlayer {
     bool open = false,
     bool notify = true,
     bool synchronized = true,
+    bool waitForVideoControllerInitialization = true,
   }) async {
     Future<void> function() async {
       if (disposed) {
         throw AssertionError('[Player] has been disposed');
       }
       await waitForPlayerInitialization;
-      await waitForVideoControllerInitializationIfAttached;
+      if (waitForVideoControllerInitialization) {
+        await waitForVideoControllerInitializationIfAttached;
+      }
 
       isShuffleEnabled = false;
       isPlayingStateChangeAllowed = false;
@@ -1408,6 +1449,41 @@ class NativePlayer extends PlatformPlayer {
       throw AssertionError('[Player] has been disposed');
     }
     await _setPropertyStringStrict(property, value);
+  }
+
+  /// Strict, acknowledged property write that never blocks the Dart/Cocoa
+  /// thread in mpv_set_property, even if PlayerConfiguration.async is false.
+  Future<void> setPropertyStrictAsync(
+    String property,
+    String value, {
+    bool waitForInitialization = true,
+  }) async {
+    if (disposed || _disposeInProgress || _mpvTerminated) {
+      throw AssertionError('[Player] has been disposed');
+    }
+    if (waitForInitialization) {
+      await waitForPlayerInitialization;
+      await waitForVideoControllerInitializationIfAttached;
+    }
+    if (disposed || _disposeInProgress || _mpvTerminated) {
+      throw AssertionError('[Player] has been disposed');
+    }
+    await _setPropertyStringStrict(property, value, forceAsync: true);
+  }
+
+  /// The same Cocoa-safe write while a pre-termination owner is releasing.
+  Future<void> setPropertyStrictAsyncForPreTermination(
+    String property,
+    String value,
+  ) async {
+    if (!_disposeInProgress ||
+        !preTerminationCallbacksActive ||
+        _mpvTerminated) {
+      throw AssertionError(
+        '[Player] pre-termination property is only available during disposal',
+      );
+    }
+    await _setPropertyStringStrict(property, value, forceAsync: true);
   }
 
   /// Release-callback variant of [setPropertyStrict]. The event pump is still
@@ -2799,7 +2875,11 @@ class NativePlayer extends PlatformPlayer {
     calloc.free(string);
   }
 
-  Future<void> _setPropertyStringStrict(String name, String value) async {
+  Future<void> _setPropertyStringStrict(
+    String name,
+    String value, {
+    bool forceAsync = false,
+  }) async {
     final string = value.toNativeUtf8();
     final ptr = calloc<Pointer<Void>>(1);
     ptr.value = Pointer.fromAddress(string.address);
@@ -2808,6 +2888,7 @@ class NativePlayer extends PlatformPlayer {
         name,
         generated.mpv_format.MPV_FORMAT_STRING,
         ptr.cast(),
+        forceAsync: forceAsync,
       );
     } finally {
       calloc.free(ptr);
@@ -2818,11 +2899,12 @@ class NativePlayer extends PlatformPlayer {
   Future<void> _setPropertyStrict(
     String name,
     int format,
-    Pointer<Void> data,
-  ) async {
+    Pointer<Void> data, {
+    bool forceAsync = false,
+  }) async {
     final namePtr = name.toNativeUtf8();
     try {
-      if (configuration.async) {
+      if (configuration.async || forceAsync) {
         final requestNumber = _asyncRequestNumber++;
         final completer =
             _setPropertyRequests[requestNumber] = Completer<int>();
