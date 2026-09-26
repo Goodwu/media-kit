@@ -45,7 +45,7 @@
   - status: queued
   - context: archives/conversations/android-hdr-dv-display-plan-20260922.md
   - acceptance: 对实际输出逐帧核对 RPU 对应关系，覆盖 seek/flush/重开；以明确的参考母版、目标空间和映射策略做同 PTS 数值比较，并把独立色彩结论与用户观感分开。
-  - latest: 10431 两段实际输出均匹配已附 RPU；第二段 48 次错误计数与未显示的预卷输入淘汰相符。独立参考比较仍有母版同版身份与映射差异，不能据用户观感宣布色准通过。
+  - latest: 10431 两段实际输出均匹配已附 RPU；第二段 48 次错误计数与未显示的预卷输入淘汰相符。10440 在真横屏、自动亮度下对官方 P5 源前跳至184.232秒再后跳至46.058秒，实际产生4次flush；退出汇总`inputs=2346 outputs=2321 matched=2321 errors=0 discarded=25`，RPU与实际输出全数匹配，AImage2310/2310且retire归零。详见`archives/experiments/android-p5-rpu-seek-10440-20260927.md`。同进程重开及独立色准仍未验收，参考比较尚有母版同版身份与映射差异。
 
 - [ ] 排查 Android HDR 天空渐变层纹
   - status: queued

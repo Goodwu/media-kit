@@ -2,6 +2,7 @@
 
 ## Current State
 
+- 2026-09-27 无需人工观察的P5 RPU边界补证：10440官方1080p24源、真横屏、自动亮度，播放中前跳184.232秒和后跳46.058秒，4次flush后退出汇总2321/2321实际输出RPU匹配、errors0，AImage2310/2310、retire held0；同进程重开与独立颜色仍开放。APK/JAR/源SHA及完整过滤日志见`archives/experiments/android-p5-rpu-seek-10440-20260927.md`。手机已恢复原10420/自动亮度1设置37/属性0。
 - 2026-09-27 用户强调防止手机长期最高亮度和静态画面。即时回读LYA-AL00在线、屏幕ON、亮度为自动模式1/设置37、应用为原versionCode10420、P5 direct与SurfaceControl诊断属性均0。后续最高亮度仅在用户正在人工观察的短轮内使用，轮次结束立即恢复原亮度；非观察阶段不让测试画面长时间常亮。
 - 2026-09-27 用户新增后续优先任务：当前 Android HDR/P5 工作完成后立即优化手机“打开视频→实际出图”耗时，目标2秒内、争取1秒内；`TASKS.md`列为Next首项。当前缺同口径基线，不能用尺寸ACK或`waitUntilFirstFrameRendered`现有完成信号当真实present；需先建可靠可见首帧时间戳，并分段定位媒体打开、探测/解码、Surface/GPU和系统呈现耗时，覆盖SDR/HDR10/P8.4/P5冷/热启动，避免仅优化单一诊断样本。
 - 2026-09-27 整理任务入口：原`TASKS.md`的580行完整快照保存于`archives/experiments/tasks-ledger-snapshot-20260927.md`（原文件与快照SHA-256均`fa2558465826140158763ddbe7311d410ac0449043f82ef39f8bab76d6728fd8`）。原Android显示条目混入性能、RPU/色彩、Surface生命周期约500行实验流水，且重复出现status/acceptance；现将它们分别列成显示、Glass性能、生命周期、RPU/色彩任务，天空层纹保持用户要求的暂缓状态。旧完成项移至Recently Done，macOS render context与OHOS实体机生命周期分开。旧逐轮证据可查快照及本conversation/experiments；新TASKS只表达当前验收边界，不代表未验项已完成。
