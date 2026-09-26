@@ -1,0 +1,48 @@
+         1790466540.215 17770 17770 I VideoOutputManager: com.alexmercerind.media_kit_video.VideoOutputManager.create: 530898296400
+         1790466541.605 17770 17770 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=requested elapsed_us=1
+         1790466541.605 17770 17770 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=sample_ready elapsed_us=324
+         1790466541.605 17770 17770 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=queue_entered elapsed_us=349
+         1790466541.810 17770 17770 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=validated elapsed_us=205485
+         1790466541.812 17770 17770 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=previous_output_stopped elapsed_us=207155
+         1790466541.812 17770 17770 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=configuration_reset elapsed_us=207195
+         1790466541.814 17770 17770 I VideoOutputManager: com.alexmercerind.media_kit_video.VideoOutputManager.dispose: 530898296400
+         1790466541.829 17770 17770 I VideoOutputManager: com.alexmercerind.media_kit_video.VideoOutputManager.create: 530898296400
+         1790466541.840 17770 17770 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=output_prepared elapsed_us=234847
+         1790466541.847 17770 17770 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=configured elapsed_us=242393
+         1790466541.847 17770 17770 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=output_ready elapsed_us=242457
+         1790466541.855 17770 17770 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=media_opened elapsed_us=249754
+         1790466542.131 17770 17770 I VideoOutputManager: com.alexmercerind.media_kit_video.VideoOutputManager.setSurfaceSize: 530898296400 3840 2160
+         1790466543.064 17770 17770 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=track_verified elapsed_us=1458625
+         1790466543.240 17770 17923 E P5_RAW_STAGE: P5_IMAGE_COUNT acquired=1 deleted=0 current_image=1 retired=0 callbacks=1 empty_acquires=0 retire=1 pts=0.233566667
+         1790466548.642 18020 18020 I VideoOutputManager: com.alexmercerind.media_kit_video.VideoOutputManager.create: 530489920080
+         1790466550.093 18020 18020 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=requested elapsed_us=1
+         1790466550.093 18020 18020 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=sample_ready elapsed_us=372
+         1790466550.093 18020 18020 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=queue_entered elapsed_us=402
+         1790466550.298 18020 18020 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=validated elapsed_us=205528
+         1790466550.302 18020 18020 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=previous_output_stopped elapsed_us=209801
+         1790466550.302 18020 18020 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=configuration_reset elapsed_us=209880
+         1790466550.305 18020 18020 I VideoOutputManager: com.alexmercerind.media_kit_video.VideoOutputManager.dispose: 530489920080
+         1790466550.318 18020 18020 I VideoOutputManager: com.alexmercerind.media_kit_video.VideoOutputManager.create: 530489920080
+         1790466550.334 18020 18020 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=output_prepared elapsed_us=241809
+         1790466550.341 18020 18020 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=configured elapsed_us=248903
+         1790466550.341 18020 18020 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=output_ready elapsed_us=248976
+         1790466550.351 18020 18020 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=media_opened elapsed_us=258484
+         1790466550.656 18020 18020 I VideoOutputManager: com.alexmercerind.media_kit_video.VideoOutputManager.setSurfaceSize: 530489920080 3840 2160
+         1790466551.640 18020 18020 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=track_verified elapsed_us=1547632
+         1790466551.851 18020 18152 E P5_RAW_STAGE: P5_IMAGE_COUNT acquired=1 deleted=0 current_image=1 retired=0 callbacks=1 empty_acquires=0 retire=1 pts=0.283616667
+         1790466556.131 18241 18241 I VideoOutputManager: com.alexmercerind.media_kit_video.VideoOutputManager.create: 530499642960
+         1790466557.534 18241 18241 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=requested elapsed_us=1
+         1790466557.534 18241 18241 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=sample_ready elapsed_us=315
+         1790466557.534 18241 18241 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=queue_entered elapsed_us=350
+         1790466557.739 18241 18241 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=validated elapsed_us=205230
+         1790466557.741 18241 18241 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=previous_output_stopped elapsed_us=207246
+         1790466557.741 18241 18241 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=configuration_reset elapsed_us=207326
+         1790466557.746 18241 18241 I VideoOutputManager: com.alexmercerind.media_kit_video.VideoOutputManager.dispose: 530499642960
+         1790466557.761 18241 18241 I VideoOutputManager: com.alexmercerind.media_kit_video.VideoOutputManager.create: 530499642960
+         1790466557.778 18241 18241 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=output_prepared elapsed_us=244700
+         1790466557.785 18241 18241 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=configured elapsed_us=251402
+         1790466557.785 18241 18241 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=output_ready elapsed_us=251475
+         1790466557.799 18241 18241 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=media_opened elapsed_us=265132
+         1790466558.065 18241 18241 I VideoOutputManager: com.alexmercerind.media_kit_video.VideoOutputManager.setSurfaceSize: 530499642960 3840 2160
+         1790466559.066 18241 18241 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=track_verified elapsed_us=1532910
+         1790466559.296 18241 18369 E P5_RAW_STAGE: P5_IMAGE_COUNT acquired=1 deleted=0 current_image=1 retired=0 callbacks=1 empty_acquires=0 retire=1 pts=0.316983333
