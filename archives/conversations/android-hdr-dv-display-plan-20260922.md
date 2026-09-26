@@ -2,6 +2,8 @@
 
 ## Current State
 
+- 2026-09-27 双视图存活Surface回退修复已补齐有界释放/绑定重试并通过独立V1复审；10456 P8.4实机重复A→A+B→B→A+B→B，最后移除当前A后B重绑且5秒截图变化。10457一次性释放失败注入触发后，重复destroy回调使B恢复；定时重试未被隔离验证，P5/SDR与engine detach资源闭合仍待做。注入源码已移除，设备恢复原10420与自动亮度1/37。详见`archives/experiments/android-p84-dual-view-10456-10457-20260927.md`。
+- 2026-09-27 10455 P8.4双视图回退候选正常路径：A→A+B→B→A+B→B，最后A停止producer并Release/ACK后重新绑定存活B，后续MediaCodec/HLG及HWC HLG，间隔5秒画面不同。独立V1审查指出A Release/ACK失败或B属性bind失败时没有受控自动重试，故代码未过审、未提交为产品修复。见`archives/experiments/android-p84-dual-view-10455-20260927.md`。测试后恢复原10420和自动亮度1/37，删除临时副本。
 - 2026-09-27 10453/10454稳定外层key双视图对照：10453移除备用B后A继续可见；10454移除当前A仅留B后无B重绑，媒体时间继续但视频区域相隔5秒逐像素完全相同，证明冻结。10452初版key混杂，不作最终定因依据。需保留存活Surface owner并实现当前消失后的回退，且核对HDR色空间路由。见`archives/experiments/android-p84-dual-view-10453-10454-20260927.md`。设备已恢复原10420/自动亮度1设置37，副本已删。
 - 2026-09-27 10452 P8.4同一控制器双Video轮换A→A+B→B→A+B→A，提前停轨开关开启。最后移除当前B后未为页面上剩余A再bind；媒体t90继续到40.176秒但设备截图黑屏。当前需核实测试页是否实际保留A的PlatformView identity，不能把它直接归因于控制器；双视图验收失败。见`archives/experiments/android-p84-dual-view-10452-20260927.md`。已恢复10420、自动亮度1/37，删除测试副本。
 - 2026-09-27 10451 HDR10完整源、默认发布libmpv、提前停轨诊断开关开启的双Home→返回：两次`vid=no`完成均早于`vo=null`，持续MediaCodec BT.2020/PQ且系统SF/HWC回读PQ，POC0、无后台软件格式切换；t90媒体61.228秒、VO23、decoder0。见`archives/experiments/android-hdr10-detach-10451-20260927.md`。切换瞬间真人流畅仍未验收，候选保持默认关闭。测试后恢复原10420和自动亮度1/37。
