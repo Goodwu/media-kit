@@ -2,6 +2,7 @@
 
 ## Current State
 
+- 2026-09-27 正常Android Back生命周期：10461无等待的根页面退出在engine detach时保留原handle三个Surface owner，见`archives/experiments/android-sdr-engine-detach-10461-20260927.md`。10462测试页先await Player.dispose再退出，同进程两轮重入没有保留告警；10463用自动停止与Back并发验证共享Future屏障，V1复审PASS，见`archives/experiments/android-sdr-engine-exit-10462-20260927.md`。此改动仅保证显式诊断根页的正常退出；任意宿主直接FlutterEngine.destroy仍需native生命周期仲裁。设备恢复原10420、自动亮度1/37。
 - 2026-09-27 10461普通SDR H.264测试片启用同一稳定key双视图轮换；移除当前A后B重绑，5秒截图继续变化，SF无HDR元数据。测试页仅在显式诊断开关下为非HDR本地打开启动轮换。见`archives/experiments/android-sdr-dual-view-10461-20260927.md`。设备恢复原10420、自动亮度1/37，测试副本已删。
 - 2026-09-27 10460固定HDR10完整源双视图回退：移除当前A后存活B重绑，间隔5秒截图画面变化，HWC回读PQ及HDR元数据类型3。见`archives/experiments/android-hdr10-dual-view-10460-20260927.md`。设备恢复原10420、自动亮度1/37、删除测试源。
 - 2026-09-27 10459临时注入存活B回退绑定的一次失败，约250ms后的定时重试绑定成功，5秒截图视频区域变化；注入已撤销，产品代码与`b1c97ec`一致。仍需其它源、属性部分成功及engine detach覆盖，见`archives/experiments/android-p84-dual-view-10456-10457-20260927.md`。设备恢复原10420、自动亮度1/37、删除测试源。
