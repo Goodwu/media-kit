@@ -30,6 +30,8 @@ public class PlatformVideoViewFactory extends PlatformViewFactory {
     private final MethodChannel channel;
     private final ConcurrentHashMap<Long, PlatformVideoView> views = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<SurfaceOwner, PlatformVideoView> surfaceOwners = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<SurfaceOwner, Integer> liveSurfaceGenerations =
+            new ConcurrentHashMap<>();
     private final java.util.Set<ControllerOwner> terminatedControllers =
             java.util.Collections.newSetFromMap(new ConcurrentHashMap<ControllerOwner, Boolean>());
     // An engine detach is not proof that libmpv stopped using a Surface. Keep
@@ -88,8 +90,19 @@ public class PlatformVideoViewFactory extends PlatformViewFactory {
     }
 
     public boolean setColorSpace(long handle, String transfer) {
-        final PlatformVideoView view = views.get(handle);
-        return view != null && view.setColorSpace(transfer);
+        // Every live view for a controller has the same output transfer. A
+        // previously selected view may disappear before Dart rebinds a
+        // survivor, so apply the policy to all live Surfaces.
+        boolean found = false;
+        boolean applied = true;
+        for (java.util.Map.Entry<SurfaceOwner, Integer> entry : liveSurfaceGenerations.entrySet()) {
+            if (entry.getKey().handle != handle) continue;
+            final PlatformVideoView view = surfaceOwners.get(entry.getKey());
+            if (view == null) continue;
+            found = true;
+            applied &= view.setColorSpace(transfer);
+        }
+        return found && applied;
     }
 
     public String releaseSurface(
@@ -130,6 +143,7 @@ public class PlatformVideoViewFactory extends PlatformViewFactory {
             final PlatformVideoView view = entry.getValue();
             if (view.releaseAllSurfacesAfterProducerTermination()) {
                 surfaceOwners.remove(owner, view);
+                liveSurfaceGenerations.remove(owner);
                 views.remove(handle, view);
             } else {
                 released = false;
@@ -199,6 +213,7 @@ public class PlatformVideoViewFactory extends PlatformViewFactory {
             if (terminatedControllers.contains(new ControllerOwner(handle, generation))) {
                 if (view.releaseAllSurfacesAfterProducerTermination()) {
                     surfaceOwners.remove(owner, view);
+                    liveSurfaceGenerations.remove(owner);
                     views.remove(handle, view);
                 } else {
                     Log.e(TAG, "Terminal Surface release failed: handle=" + handle
@@ -216,7 +231,12 @@ public class PlatformVideoViewFactory extends PlatformViewFactory {
             // before either receives a Surface. Publish the view that actually
             // acquired a Surface; Dart resolves competing owners by view and
             // Surface generation, and explicitly stops the prior producer.
-            if (!surfaceEvent.destroyed) views.put(handle, view);
+            if (surfaceEvent.destroyed) {
+                liveSurfaceGenerations.remove(owner, surfaceEvent.generation);
+            } else {
+                liveSurfaceGenerations.put(owner, surfaceEvent.generation);
+                views.put(handle, view);
+            }
             final boolean cleanup = surfaceEvent.destroyed;
             channel.invokeMethod(
                 cleanup ? "PlatformVideoView.SurfaceDestroyed" : "PlatformVideoView.SurfaceAvailable",
