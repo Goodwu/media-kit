@@ -45,7 +45,7 @@
   - status: queued
   - context: archives/conversations/android-hdr-dv-display-plan-20260922.md
   - acceptance: 对实际输出逐帧核对 RPU 对应关系，覆盖 seek/flush/重开；以明确的参考母版、目标空间和映射策略做同 PTS 数值比较，并把独立色彩结论与用户观感分开。
-  - latest: 10440 官方 P5 前后跳共4次flush，实际输出 RPU 匹配2321/2321、errors0。10442 去除旧自动入口干扰后同进程重建：旧段 RPU 197/197，前后两段 AImage 196/196、750/750 且无 abort；新段仍用硬解播放约31秒，却没有任何 RPU 探针记录，不能宣布重开后的 RPU 正确。详见`archives/experiments/android-p5-rpu-seek-10440-20260927.md`、`archives/experiments/android-p5-rpu-recreate-10441-20260927.md`、`archives/experiments/android-p5-rpu-recreate-10442-20260927.md`。下一步定位第二段探针失声；独立色准仍有母版身份和映射差异。
+  - latest: 10440 官方 P5 前后跳共4次flush，实际输出 RPU 匹配2321/2321、errors0。10442 去除旧自动入口干扰后同进程重建：旧段 RPU 197/197，前后 AImage 196/196、750/750 且无 abort；新段仍用硬解播放约31秒，却没有任何 RPU 探针记录。同包重复结果相同，重建后属性仍为 RPU=2/raw_yuv=1，排除属性清零。详见`archives/experiments/android-p5-rpu-seek-10440-20260927.md`及`archives/experiments/android-p5-rpu-recreate-10442-20260927.md`。下一步定位第二段探针失声；独立色准仍有母版身份和映射差异。
 
 - [ ] 排查 Android HDR 天空渐变层纹
   - status: queued
