@@ -39,6 +39,9 @@ class _SinglePlayerSingleVideoScreenState
   static const _autoSinglePlayer = bool.fromEnvironment(
     'MEDIA_KIT_AUTO_SINGLE_PLAYER',
   );
+  static const _androidRecoverySources = String.fromEnvironment(
+    'MEDIA_KIT_ANDROID_RECOVERY_SOURCES',
+  );
   int _dualViewPhase = 0;
   bool _dualViewProbeScheduled = false;
   Future<void>? _dualViewExitFuture;
@@ -698,10 +701,32 @@ class _SinglePlayerSingleVideoScreenState
     if (Platform.isAndroid && _androidNoMediaProbe) {
       debugPrint('ANDROID_NO_MEDIA_PROBE PlatformView mounted without open');
     } else {
-      unawaited(
-          _openInitialSource().catchError((Object error, StackTrace stack) {
+      unawaited(_openInitialSource()
+          .catchError((Object error, StackTrace stack) async {
         debugPrint('AUTO_SOURCE ERROR=$error');
         debugPrintStack(stackTrace: stack);
+        if (!Platform.isAndroid ||
+            !_androidHdrTransaction ||
+            _androidRecoverySources.isEmpty) {
+          return;
+        }
+        for (final source in _androidRecoverySources.split(',')) {
+          if (!mounted || source.isEmpty) {
+            break;
+          }
+          try {
+            final result = await _openHdrSource(source);
+            debugPrint(
+                'ANDROID_HDR_RECOVERY_OPEN sample=${result.identity.sample} '
+                'path=$source');
+            await Future<void>.delayed(const Duration(seconds: 5));
+          } catch (recoveryError, recoveryStack) {
+            debugPrint('ANDROID_HDR_RECOVERY_ERROR source=$source '
+                'error=$recoveryError');
+            debugPrintStack(stackTrace: recoveryStack);
+            break;
+          }
+        }
       }));
     }
     if (const bool.fromEnvironment('MEDIA_KIT_AUTO_RESIZE')) {

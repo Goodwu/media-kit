@@ -55,17 +55,30 @@ public final class PlatformVideoView implements PlatformView {
         final long wid;
         final int generation;
         final boolean destroyed;
+        final boolean failed;
+        @Nullable final String failureReason;
 
         SurfaceEvent(long wid, int generation, boolean destroyed) {
             this.wid = wid;
             this.generation = generation;
             this.destroyed = destroyed;
+            this.failed = false;
+            this.failureReason = null;
+        }
+
+        SurfaceEvent(int generation, @NonNull String failureReason) {
+            this.wid = 0;
+            this.generation = generation;
+            this.destroyed = false;
+            this.failed = true;
+            this.failureReason = failureReason;
         }
     }
 
     private Consumer<SurfaceEvent> onSurfaceEvent;
     private Runnable onDispose = () -> {};
     private int surfaceGeneration = 0;
+    private int activeSurfaceGeneration = 0;
     private final HashMap<Integer, Long> surfaceReferences = new HashMap<>();
     private final HashMap<Integer, Long> releasedSurfaceReferences = new HashMap<>();
     private final HashMap<Integer, Long> acknowledgedSurfaceReferences = new HashMap<>();
@@ -139,6 +152,10 @@ public final class PlatformVideoView implements PlatformView {
             public void surfaceCreated(@NonNull SurfaceHolder holder) {
                 Log.i(TAG, "surfaceCreated: handle=" + handle + ", width=" + width + ", height=" + height);
                 if (!disposed && holder.getSurface() != null) {
+                    // Count every creation attempt, including one rejected
+                    // before a WID exists, so its failure cannot be confused
+                    // with an older successful Surface from this view.
+                    final int generation = ++surfaceGeneration;
                     if (initialDataSpace != null) {
                         final boolean applied = setColorSpace(holder.getSurface(), initialDataSpace);
                         Log.i(TAG, "surfaceCreated initial dataspace: handle=" + handle +
@@ -146,13 +163,15 @@ public final class PlatformVideoView implements PlatformView {
                         if (!applied) {
                             // Do not publish a WID for a Surface generation
                             // whose HDR dataspace could not be applied.
+                            onSurfaceEvent.accept(new SurfaceEvent(
+                                    generation, "initialDataSpaceRejected"));
                             return;
                         }
                     }
                     // Each Surface generation owns its JNI reference until Dart has
                     // detached the native producer and explicitly acknowledges it.
                     wid = GlobalObjectRefManager.newGlobalObjectRef(holder.getSurface());
-                    final int generation = ++surfaceGeneration;
+                    activeSurfaceGeneration = generation;
                     surfaceReferences.put(generation, wid);
                     Log.i(TAG, "surfaceCreated: created new wid=" + wid);
                     onSurfaceEvent.accept(new SurfaceEvent(wid, generation, false));
@@ -178,7 +197,7 @@ public final class PlatformVideoView implements PlatformView {
                 Log.i(TAG, "surfaceDestroyed: handle=" + handle + ", wid=" + wid);
                 final long destroyedWid = wid;
                 if (destroyedWid != 0) {
-                    onSurfaceEvent.accept(new SurfaceEvent(destroyedWid, surfaceGeneration, true));
+                    onSurfaceEvent.accept(new SurfaceEvent(destroyedWid, activeSurfaceGeneration, true));
                     wid = 0;
                 }
             }
@@ -206,7 +225,7 @@ public final class PlatformVideoView implements PlatformView {
         // Suppress the later SurfaceHolder destroy callback for that already
         // acknowledged generation; otherwise Dart would see a duplicate
         // destroy after the tombstone has legitimately been removed.
-        if (surfaceGeneration == generation && wid == reference) {
+        if (activeSurfaceGeneration == generation && wid == reference) {
             wid = 0;
         }
         return "released";

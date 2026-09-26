@@ -1,0 +1,14 @@
+09-27 04:20:39.780 12111 12111 I flutter : PlatformVideoView.ViewCreated
+09-27 04:20:39.817 12111 12111 I PlatformVideoView: surfaceChanged: handle=530489985616, format=4, width=1440, height=810, wid=11158
+09-27 04:20:45.454 12111 12111 I flutter : PlatformVideoView.ViewCreated
+09-27 04:20:45.496 12111 12111 I media_kit_hdr_bridge: setBuffersDataSpace symbol=resolved dataspace=163971072 result=-22 srgbProbe=0 resetUnknown=0 format=43 size=1440x810 actualDataspace=0
+09-27 04:20:45.496 12111 12111 I PlatformVideoView: surfaceCreated initial dataspace: handle=530489985616, transfer=pq, applied=false
+09-27 04:20:45.497 12111 12111 I flutter : PlatformVideoView.SurfaceFailed
+09-27 04:20:45.497 12111 12111 I PlatformVideoView: surfaceChanged: handle=530489985616, format=43, width=1440, height=810, wid=0
+09-27 04:20:45.575 12111 12111 I flutter : AUTO_SOURCE ERROR=Bad state: Android PlatformView Surface failed: generation=2, viewId=1, attempt=1, reason=initialDataSpaceRejected
+09-27 04:21:08.193 12111 12111 I flutter : PlatformVideoView.ViewCreated
+09-27 04:21:08.244 12111 12111 I media_kit_hdr_bridge: setBuffersDataSpace symbol=resolved dataspace=163971072 result=-22 srgbProbe=0 resetUnknown=0 format=43 size=1440x810 actualDataspace=0
+09-27 04:21:08.244 12111 12111 I PlatformVideoView: surfaceCreated initial dataspace: handle=530489985616, transfer=pq, applied=false
+09-27 04:21:08.244 12111 12111 I flutter : PlatformVideoView.SurfaceFailed
+09-27 04:21:08.245 12111 12111 I PlatformVideoView: surfaceChanged: handle=530489985616, format=43, width=1440, height=810, wid=0
+09-27 04:21:08.392 12111 12111 I flutter : ANDROID_HDR_RECOVERY_ERROR source=/data/local/tmp/media-kit-hdr10-full.mp4 error=Bad state: Android PlatformView Surface failed: generation=3, viewId=2, attempt=1, reason=initialDataSpaceRejected

@@ -1,0 +1,14 @@
+09-27 04:16:29.065 10595 10595 I flutter : PlatformVideoView.ViewCreated
+09-27 04:16:29.100 10595 10595 I PlatformVideoView: surfaceChanged: handle=530490077776, format=4, width=1440, height=810, wid=11158
+09-27 04:16:35.131 10595 10595 I flutter : PlatformVideoView.ViewCreated
+09-27 04:16:35.181 10595 10595 I media_kit_hdr_bridge: setBuffersDataSpace symbol=resolved dataspace=163971072 result=-22 srgbProbe=0 resetUnknown=0 format=43 size=1440x810 actualDataspace=0
+09-27 04:16:35.182 10595 10595 I PlatformVideoView: surfaceCreated initial dataspace: handle=530490077776, transfer=pq, applied=false
+09-27 04:16:35.182 10595 10595 I flutter : PlatformVideoView.SurfaceFailed
+09-27 04:16:35.183 10595 10595 I PlatformVideoView: surfaceChanged: handle=530490077776, format=43, width=1440, height=810, wid=0
+09-27 04:16:35.258 10595 10595 I flutter : AUTO_SOURCE ERROR=Bad state: Android PlatformView Surface failed: generation=2, viewId=1, attempt=1, reason=initialDataSpaceRejected
+09-27 04:16:57.275 10595 10595 I flutter : PlatformVideoView.ViewCreated
+09-27 04:16:57.349 10595 10595 I PlatformVideoView: surfaceChanged: handle=530490077776, format=4, width=1440, height=810, wid=10474
+09-27 04:16:57.793 10595 10595 I flutter : ANDROID_HDR_OPEN sample=AndroidHdrSample.hdr10 presentationVerified=false gpuPlatformHdr=false simulateNoHlgForP84=false
+09-27 04:16:57.793 10595 10595 I flutter : ANDROID_HDR_RECOVERY_OPEN sample=AndroidHdrSample.hdr10 path=/data/local/tmp/media-kit-hdr10-full.mp4
+09-27 04:17:54.723 10595 10595 I flutter : ANDROID_HDR_OPEN sample=AndroidHdrSample.dolbyVisionP84 presentationVerified=false gpuPlatformHdr=false simulateNoHlgForP84=false
+09-27 04:17:54.723 10595 10595 I flutter : ANDROID_HDR_RECOVERY_OPEN sample=AndroidHdrSample.dolbyVisionP84 path=/data/local/tmp/media-kit-p84-full.mp4

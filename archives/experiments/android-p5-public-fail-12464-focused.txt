@@ -1,0 +1,26 @@
+09-27 03:50:05.073  6029  6029 I flutter : ANDROID_CAPABILITIES [omitted full device capability payload]
+09-27 03:50:05.086  6029  6029 I PlatformVideoViewFactory: Creating PlatformVideoView for handle: 530481935440
+09-27 03:50:05.124  6029  6029 I PlatformVideoView: surfaceCreated: handle=530481935440, width=360, height=203
+09-27 03:50:05.125  6029  6029 I PlatformVideoView: surfaceCreated: created new wid=11158
+09-27 03:50:05.125  6029  6029 I flutter : PlatformVideoView.SurfaceAvailable
+09-27 03:50:05.125  6029  6029 I PlatformVideoView: surfaceChanged: handle=530481935440, format=4, width=1440, height=810, wid=11158
+09-27 03:50:11.316  6029  6029 I flutter : AUTO_SOURCE ERROR=Bad state: P5 RPU attachment and raw YUV pipeline are not enabled
+09-27 03:50:30.230  6293  6293 I flutter : ANDROID_CAPABILITIES [omitted full device capability payload]
+09-27 03:50:30.244  6293  6293 I PlatformVideoViewFactory: Creating PlatformVideoView for handle: 530499700816
+09-27 03:50:30.278  6293  6293 I PlatformVideoView: surfaceCreated: handle=530499700816, width=360, height=203
+09-27 03:50:30.279  6293  6293 I PlatformVideoView: surfaceCreated: created new wid=11158
+09-27 03:50:30.279  6293  6293 I flutter : PlatformVideoView.SurfaceAvailable
+09-27 03:50:30.279  6293  6293 I PlatformVideoView: surfaceChanged: handle=530499700816, format=4, width=1440, height=810, wid=11158
+09-27 03:50:35.691  6293  6293 I flutter : ANDROID_HDR_CAPABILITY reported={2, 3} simulateNoHlgForP84=false
+09-27 03:50:35.724  6293  6293 I GlobalObjectRefManager: deleteGlobalObjectRef: ref = 11158
+09-27 03:50:35.745  6293  6293 I PlatformVideoView: surfaceDestroyed: handle=530499700816, wid=0
+09-27 03:50:35.747  6293  6293 I PlatformVideoView: dispose: handle=530499700816
+09-27 03:50:35.773  6293  6293 I PlatformVideoViewFactory: Creating PlatformVideoView for handle: 530499700816
+09-27 03:50:35.813  6293  6293 I PlatformVideoView: surfaceCreated: handle=530499700816, width=360, height=203
+09-27 03:50:35.815   774   988 E SurfaceFlinger: Permission Denial: can't access SurfaceFlinger pid=6293, uid=10227
+09-27 03:50:35.815  6293  6293 E SurfaceFlinger: getHdrCapabilities failed to transact: -1
+09-27 03:50:35.816  6293  6293 I PlatformVideoView: surfaceCreated initial dataspace: handle=530499700816, transfer=pq, applied=false
+09-27 03:50:35.816  6293  6293 I PlatformVideoView: surfaceChanged: handle=530499700816, format=43, width=1440, height=810, wid=0
+09-27 03:50:45.792  6293  6293 I PlatformVideoView: surfaceDestroyed: handle=530499700816, wid=0
+09-27 03:50:45.795  6293  6293 I PlatformVideoView: dispose: handle=530499700816
+09-27 03:50:45.832  6293  6293 I flutter : AUTO_SOURCE ERROR=TimeoutException after 0:00:10.000000: Future not completed
