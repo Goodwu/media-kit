@@ -2,6 +2,8 @@
 
 ## Current State
 
+- 2026-09-26 提交交接：`media-kit` 当前分支 `fix/darwin-video-output-rebuild-barrier` 本地新增 `5cf24d7`（HDR输出/生命周期）、`c11e6c3`（测试应用回放与工具）、`99b0831`（实验原始证据）；未push。外部fork已push：libplacebo `c9fd879`、mpv正式硬解元数据 `a81978b`/实验渲染 `63a0aa9`、配套构建仓库 `d585494`。默认Gradle仍依赖既有发布JAR；新通用候选为显式opt-in且实验分支启用，未通过2560默认电池模式性能门禁，也未取得独立颜色/可见播放准入。`media-kit`工作树只余自动截图`mpv-shot0001.jpg`未提交；构建仓库余未纳入正式分支的诊断补丁。任务继续保持in_progress。
+
 - 2026-09-26 代码通用化及跨仓库提交：`Goodwu/libplacebo` 的 `optimize/dovi-linear-decode` 已 push 至 `c9fd879`，以跨平台显式 opt-in 替代 Android/P5 属性门控，保留安全回退；`Goodwu/mpv` 的正式硬解元数据分支 `feature/android-dv-native` 至 `a81978b`，实验渲染分支至 `63a0aa9` 并启用新参数；`Goodwu/libmpv-android-video-build-dv-experiment` 构建分支至 `d585494` 固定 fork SHA。libplacebo/mpv arm64 编译链接通过，通用化组合尚未实机复测，2560 默认电池模式性能门禁仍未通过；实验渲染分支含探针，不是产品准入。具体链接、证据和边界见 `archives/experiments/android-p5-glass-policy-10418-10419-20260926.md`。
 
 - 2026-09-26 2560抖动诊断收束：同包 PQ 数据流候选下仅切抖动关闭→开启→关闭，EOS VO465/1298/2859、decoder0，稳态新增336/980/1965，均不达门槛。频率近似配对的208MHz末30秒窗口，开启/关闭分别掉487/492，关闭抖动无明显收益且损害8-bit渐变，不作为产品改动。三轮结构与资源关闭通过，原始日志/1Hz频率在`archives/experiments/android-p5-glass-policy-10418-10419-20260926.md`。设备恢复原10420与诊断属性0。用户要求停止此优化方向、将有效代码通用化并提交；外部libplacebo/mpv已fork至Goodwu，后续按库分离有效实现与诊断探针。
