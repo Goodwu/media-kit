@@ -2,7 +2,7 @@
 
 ## Current State
 
-- 2026-09-27 按用户指定 Glass P5 片源做首次可见内容计时：同机同文件 SHA `afb24b…4177c`，原测试页整片哈希复制路径单次截图上界16.695秒，其中准备10.390秒；默认关闭的临时预验证固定文件探针跳过复制后，三次冷 Player/页面为6.283/5.981/6.640秒，探针源码已撤销。片源自身约0.05–2.052秒为黑场，首个原生图像获取在请求后约1.69秒，但仍无屏幕实际呈现黑色视频帧的证据；首次可见非黑内容与首个呈现帧须分开。当前设备为强停的12481诊断包、自动亮度1、屏幕OFF、P5属性0；原10420字节包暂不可用。详见`archives/experiments/android-p5-glass-first-visible-12480-12481-20260927.md`。
+- 2026-09-27 按用户指定 Glass P5 片源做首次可见内容计时：同机同文件 SHA `afb24b…4177c`，原测试页整片哈希复制路径单次截图上界16.695秒，其中准备10.390秒；临时预验证固定文件探针跳过复制后三次为6.283/5.981/6.640秒，诊断性从片内3.5秒起播后三次仍为5.914/5.486/5.669秒。片源自身约0.05–2.052秒为黑场，原时间线首个原生图像获取约1.69秒，但无屏幕呈现黑色视频帧的证据；首次可见非黑内容与首个呈现帧须分开。两个临时探针均已撤销。当前设备为强停的12482诊断包、自动亮度1、屏幕OFF、P5属性0；原10420字节包暂不可用。详见`archives/experiments/android-p5-glass-first-visible-12480-12482-20260927.md`。
 
 - 2026-09-27 任意宿主直接 `FlutterEngine.destroy()` 方案复核：现有 10462/10463 只覆盖诊断页主动等待 `Player.dispose()`；Dart `NativeCallable` mpv wakeup callback、截图 isolate 裸 handle、Factory `PlayerTerminated` 通知和两类 Flutter Texture owner 均依赖 Dart/Engine 存活。当前 Flutter 源码销毁顺序为 `onEngineWillDestroy → pluginRegistry.destroy → PlatformViews detach → Dart/JNI teardown`，插件可在销毁起点关原生调用入口，但不能只在 detach 删除 JNI 引用或裸调 `mpv_terminate_destroy`。实施需共享 Android 原生 owner broker：进程唯一 engine/player token；所有 mpv 调用在单次原生边界内持有 owner；原生 event pump 复制事件数据投递 Dart port；关闭时撤销 Dart endpoint、继续挂起 hook、等待在途调用并唯一终止 producer，确认终止后才回收 Surface/JNI 资源；Texture consumer 另按 Flutter 主线程生命周期处理。最小顺序为无视频 Player 直接 destroy → SDR PlatformView → SurfaceProducer/SurfaceTexture → HDR/P5 与双视图；每段实机记录终止次数、global-ref/线程/registry 归零及新 Engine 播放。受控宿主的 `await Player.dispose(); engine.destroy()` 可继续使用，但不关闭任意直接销毁门槛。此轮为源码/Flutter SDK 只读架构复核，尚无 broker 实现或实机验收。
 

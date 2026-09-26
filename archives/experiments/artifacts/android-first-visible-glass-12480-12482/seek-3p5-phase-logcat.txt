@@ -1,0 +1,48 @@
+09-27 07:32:13.756 I/flutter (13293): ANDROID_HDR_OPEN_PHASE generation=1 phase=requested elapsed_us=1
+09-27 07:32:13.757 I/flutter (13293): ANDROID_PREVERIFIED_LOCAL_SAMPLE sha256=afb24b77733a3ca9071f0cfea0d0f7871670a7b6119eb44a314cba974541477c path=/data/local/tmp/media-kit-p5-glassblowing2-4k5994.mp4
+09-27 07:32:13.757 I/flutter (13293): ANDROID_HDR_OPEN_PHASE generation=1 phase=sample_ready elapsed_us=924
+09-27 07:32:13.757 I/flutter (13293): ANDROID_HDR_OPEN_PHASE generation=1 phase=queue_entered elapsed_us=961
+09-27 07:32:13.962 I/flutter (13293): ANDROID_HDR_OPEN_PHASE generation=1 phase=validated elapsed_us=205678
+09-27 07:32:13.964 I/flutter (13293): ANDROID_HDR_OPEN_PHASE generation=1 phase=previous_output_stopped elapsed_us=208143
+09-27 07:32:13.964 I/flutter (13293): ANDROID_HDR_OPEN_PHASE generation=1 phase=configuration_reset elapsed_us=208186
+09-27 07:32:13.999 I/flutter (13293): ANDROID_HDR_OPEN_PHASE generation=1 phase=output_prepared elapsed_us=242187
+09-27 07:32:14.005 I/flutter (13293): ANDROID_HDR_OPEN_PHASE generation=1 phase=configured elapsed_us=248507
+09-27 07:32:14.005 I/flutter (13293): ANDROID_HDR_OPEN_PHASE generation=1 phase=output_ready elapsed_us=248592
+09-27 07:32:14.018 I/flutter (13293): ANDROID_HDR_OPEN_PHASE generation=1 phase=media_opened elapsed_us=261378
+09-27 07:32:16.584 I/flutter (13293): ANDROID_HDR_OPEN_PHASE generation=1 phase=track_verified elapsed_us=2827362
+09-27 07:32:16.584 I/flutter (13293): ANDROID_HDR_OPEN sample=AndroidHdrSample.dolbyVisionP5 presentationVerified=false gpuPlatformHdr=false simulateNoHlgForP84=false
+09-27 07:32:17.652 E/P5_RAW_STAGE(13293): P5_IMAGE_COUNT acquired=1 deleted=0 current_image=1 retired=0 callbacks=1 empty_acquires=0 retire=1 pts=3.503500000
+09-27 07:32:18.053 E/P5_RAW_STAGE(13293): P5_IMAGE_COUNT acquired=2 deleted=1 current_image=1 retired=0 callbacks=2 empty_acquires=20 retire=1 pts=3.520183333
+09-27 07:32:18.171 E/P5_RAW_STAGE(13293): P5_IMAGE_COUNT acquired=3 deleted=2 current_image=1 retired=0 callbacks=3 empty_acquires=20 retire=1 pts=3.670333333
+09-27 07:32:22.088 I/flutter (13607): ANDROID_HDR_OPEN_PHASE generation=1 phase=requested elapsed_us=1
+09-27 07:32:22.089 I/flutter (13607): ANDROID_PREVERIFIED_LOCAL_SAMPLE sha256=afb24b77733a3ca9071f0cfea0d0f7871670a7b6119eb44a314cba974541477c path=/data/local/tmp/media-kit-p5-glassblowing2-4k5994.mp4
+09-27 07:32:22.090 I/flutter (13607): ANDROID_HDR_OPEN_PHASE generation=1 phase=sample_ready elapsed_us=1395
+09-27 07:32:22.090 I/flutter (13607): ANDROID_HDR_OPEN_PHASE generation=1 phase=queue_entered elapsed_us=1500
+09-27 07:32:22.300 I/flutter (13607): ANDROID_HDR_OPEN_PHASE generation=1 phase=validated elapsed_us=211629
+09-27 07:32:22.303 I/flutter (13607): ANDROID_HDR_OPEN_PHASE generation=1 phase=previous_output_stopped elapsed_us=214640
+09-27 07:32:22.303 I/flutter (13607): ANDROID_HDR_OPEN_PHASE generation=1 phase=configuration_reset elapsed_us=214733
+09-27 07:32:22.349 I/flutter (13607): ANDROID_HDR_OPEN_PHASE generation=1 phase=output_prepared elapsed_us=260522
+09-27 07:32:22.361 I/flutter (13607): ANDROID_HDR_OPEN_PHASE generation=1 phase=configured elapsed_us=272542
+09-27 07:32:22.361 I/flutter (13607): ANDROID_HDR_OPEN_PHASE generation=1 phase=output_ready elapsed_us=272691
+09-27 07:32:22.378 I/flutter (13607): ANDROID_HDR_OPEN_PHASE generation=1 phase=media_opened elapsed_us=289286
+09-27 07:32:24.811 I/flutter (13607): ANDROID_HDR_OPEN_PHASE generation=1 phase=track_verified elapsed_us=2722710
+09-27 07:32:24.811 I/flutter (13607): ANDROID_HDR_OPEN sample=AndroidHdrSample.dolbyVisionP5 presentationVerified=false gpuPlatformHdr=false simulateNoHlgForP84=false
+09-27 07:32:25.943 E/P5_RAW_STAGE(13607): P5_IMAGE_COUNT acquired=1 deleted=0 current_image=1 retired=0 callbacks=1 empty_acquires=0 retire=1 pts=3.503500000
+09-27 07:32:26.248 E/P5_RAW_STAGE(13607): P5_IMAGE_COUNT acquired=2 deleted=1 current_image=1 retired=0 callbacks=2 empty_acquires=20 retire=1 pts=3.520183333
+09-27 07:32:26.401 E/P5_RAW_STAGE(13607): P5_IMAGE_COUNT acquired=3 deleted=2 current_image=1 retired=0 callbacks=3 empty_acquires=20 retire=1 pts=3.703700000
+09-27 07:32:29.868 I/flutter (13872): ANDROID_HDR_OPEN_PHASE generation=1 phase=requested elapsed_us=1
+09-27 07:32:29.869 I/flutter (13872): ANDROID_PREVERIFIED_LOCAL_SAMPLE sha256=afb24b77733a3ca9071f0cfea0d0f7871670a7b6119eb44a314cba974541477c path=/data/local/tmp/media-kit-p5-glassblowing2-4k5994.mp4
+09-27 07:32:29.869 I/flutter (13872): ANDROID_HDR_OPEN_PHASE generation=1 phase=sample_ready elapsed_us=710
+09-27 07:32:29.869 I/flutter (13872): ANDROID_HDR_OPEN_PHASE generation=1 phase=queue_entered elapsed_us=768
+09-27 07:32:30.074 I/flutter (13872): ANDROID_HDR_OPEN_PHASE generation=1 phase=validated elapsed_us=205756
+09-27 07:32:30.076 I/flutter (13872): ANDROID_HDR_OPEN_PHASE generation=1 phase=previous_output_stopped elapsed_us=207265
+09-27 07:32:30.076 I/flutter (13872): ANDROID_HDR_OPEN_PHASE generation=1 phase=configuration_reset elapsed_us=207318
+09-27 07:32:30.107 I/flutter (13872): ANDROID_HDR_OPEN_PHASE generation=1 phase=output_prepared elapsed_us=238715
+09-27 07:32:30.115 I/flutter (13872): ANDROID_HDR_OPEN_PHASE generation=1 phase=configured elapsed_us=246285
+09-27 07:32:30.115 I/flutter (13872): ANDROID_HDR_OPEN_PHASE generation=1 phase=output_ready elapsed_us=246383
+09-27 07:32:30.129 I/flutter (13872): ANDROID_HDR_OPEN_PHASE generation=1 phase=media_opened elapsed_us=261010
+09-27 07:32:32.638 I/flutter (13872): ANDROID_HDR_OPEN_PHASE generation=1 phase=track_verified elapsed_us=2769140
+09-27 07:32:32.638 I/flutter (13872): ANDROID_HDR_OPEN sample=AndroidHdrSample.dolbyVisionP5 presentationVerified=false gpuPlatformHdr=false simulateNoHlgForP84=false
+09-27 07:32:33.513 E/P5_RAW_STAGE(13872): P5_IMAGE_COUNT acquired=1 deleted=0 current_image=1 retired=0 callbacks=1 empty_acquires=0 retire=1 pts=3.503500000
+09-27 07:32:33.880 E/P5_RAW_STAGE(13872): P5_IMAGE_COUNT acquired=2 deleted=1 current_image=1 retired=0 callbacks=2 empty_acquires=20 retire=1 pts=3.520183333
+09-27 07:32:34.000 E/P5_RAW_STAGE(13872): P5_IMAGE_COUNT acquired=3 deleted=2 current_image=1 retired=0 callbacks=3 empty_acquires=20 retire=1 pts=3.670333333
