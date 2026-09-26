@@ -2,6 +2,8 @@
 
 ## Current State
 
+- 2026-09-27 12475 SDR 受控 ACK 回复延迟：旧 A 的真实引用删除一次，首次 Release 返回`released`且 Java ACK=true；首次 ACK 回复晚于 Dart 2 秒等待，重试返回`alreadyReleased`、ACK=true。phase2 仅 B 的截图有视频，稍后右半屏 B 画面变化；临时注入已撤销，手机恢复10420/自动亮度/熄屏。见`archives/experiments/android-sdr-release-ack-loss-12475-20260927.md`。
+- 2026-09-27 12474 SDR 受控交错：B SurfaceAvailable 后，旧 A 的真实 Destroy 重复事件均延迟1.5秒送达；本轮只见 A global ref 删除一次，放行后仅 B 的截图有视频。采图慢于延迟窗口，缺放行前画面及连续帧证据。临时诊断补丁已撤销、手机恢复10420/自动亮度/熄屏。见`archives/experiments/android-sdr-old-a-destroy-late-12474-20260927.md`。
 - 2026-09-27 12473 SDR 受控交错：初始双视图中旧 A 的真实 SurfaceAvailable 延迟 1.5 秒，在新 B 事件和出图后才送 Dart；本轮日志只观察到旧 A global ref 删除一次，B 在放行前后两个截图采样点均有不同的视频。V1复核未见窄范围结论阻断；无独立mpv WID回读或两截图之间逐帧证据。临时诊断补丁已撤销，设备恢复10420/自动亮度/熄屏。只覆盖晚到 Available；Failed/Destroy/ACK 回复丢失及 P5 仍未验。见`archives/experiments/android-sdr-old-a-late-12473-20260927.md`。
 - 2026-09-27 12471 同进程 P5 公开 PQ 失败→原生 HDR10/P8.4→SDR，SDR 视频层回到 BT.709、HDR metadata types=0，3秒间隔截图变化；仅覆盖原生 HDR 输出。12472 热页面 SDR 三次录屏点击反馈到可见出图约133/100/100ms，尚非真实输入事件起点或全屏冷启动门槛。见`archives/experiments/android-hdr-sdr-recovery-12471-20260927.md`和`archives/experiments/android-sdr-first-visible-12472-20260927.md`。
 - 2026-09-27首帧探索：12469固定SDR直开（无整片暂存）触发到Surface绑定106ms、媒体命令再16ms；这些仅为内部信号。12470稳定页面ADB点击后短录屏里，点击反馈PTS4.065s、视频区PTS4.144s仍黑、PTS4.165s首次出现可辨认画面；录屏和logcat缺统一时钟、录屏有负载，不能判正式2秒门槛。证据见`archives/experiments/android-sdr-first-visible-12469-12470-20260927.md`。设备恢复10420、属性0、自动亮度、屏幕OFF。下一步测冷/热多轮、HDR源和全屏并建立统一时钟。
