@@ -39,8 +39,8 @@
   - status: queued
   - context: archives/conversations/android-hdr-dv-display-plan-20260922.md
   - acceptance: Surface 重建、Home→前台、退出/重入、oldA→newB 交错和失败重试时，播放器位置与持续可见帧正确，资源最终释放；晚到 Create、Release ACK 丢失及 engine detach 有明确 owner/屏障，不以构建或单次 EOS 代替生命周期验收。
-  - latest: P8.4/HDR10/SDR 的 Home→返回、双视图存活 B 回退、一次或两次释放失败及一次绑定失败重试已有实机可见画面证据；诊断根页 Back 与自动停止并发时已等待 Player.dispose。12473/12474/12475 受控 SDR 交错分别核验旧 A 的 Available 晚到、Destroy 晚到及释放 ACK 回复超时后重试：本轮旧 A 引用均只见一次删除，B 在指定采样点仍可见。详见对应`archives/experiments/android-sdr-old-a-late-12473-20260927.md`、`android-sdr-old-a-destroy-late-12474-20260927.md`、`android-sdr-release-ack-loss-12475-20260927.md`及本条 context；临时注入均已撤销。提前停轨仍默认关闭。
-  - next: 验晚到 Failed、任意宿主直接 FlutterEngine.destroy 的 native owner 仲裁、失败 disposal 与 global-ref 定量闭合、P5 双视图和属性序列中途故障；补连续可见帧与 mpv WID 回读，再决定提前停轨默认值。
+  - latest: P8.4/HDR10/SDR 的 Home→返回、双视图存活 B 回退、释放/绑定失败重试已有实机可见画面证据；诊断根页 Back 与自动停止并发时已等待 Player.dispose。12473/12474/12475 受控 SDR 交错核验旧 A 的 Available/Destroy 晚到与 ACK 回复超时后重试。12477 在正式 HDR10 输出的第2代控制器中注入明确标记的旧 A Failed，B 尚无 Surface 时未提前拒绝打开，B 放行后 HDR10 成功且两张相位轮换前截图有变化；见`archives/experiments/android-hdr10-old-surface-failed-12476-12477-20260927.md`。注入均已撤销，提前停轨仍默认关闭；完整历史见本条 context。
+  - next: 验任意宿主直接 FlutterEngine.destroy 的 native owner 仲裁、失败 disposal 与 global-ref 定量闭合、P5 双视图和属性序列中途故障；补连续可见帧与 mpv WID 回读，再决定提前停轨默认值。
 
 - [ ] P5 RPU 边界与独立色彩核验
   - status: queued

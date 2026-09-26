@@ -2,6 +2,7 @@
 
 ## Current State
 
+- 2026-09-27 12476/12477 旧失败交错：12476只命中暂存前的初始 controller，不能作正式 HDR 等待验收；12477 将合成且明确标记的旧 A SurfaceFailed 注入第2代 HDR10 controller，A 真实引用先按原接口释放，B ViewCreated 后、B Available 前收到旧失败，约510ms后 B 真 Surface 放行，HDR10 打开成功。相位轮换前右侧 B 两张截图均有变化，另一轮同 APK 后续相位系统 PQ 元数据类型3。诊断补丁已撤销、手机恢复10420/自动亮度/熄屏。见`archives/experiments/android-hdr10-old-surface-failed-12476-12477-20260927.md`。
 - 2026-09-27 12475 SDR 受控 ACK 回复延迟：旧 A 的真实引用删除一次，首次 Release 返回`released`且 Java ACK=true；首次 ACK 回复晚于 Dart 2 秒等待，重试返回`alreadyReleased`、ACK=true。phase2 仅 B 的截图有视频，稍后右半屏 B 画面变化；临时注入已撤销，手机恢复10420/自动亮度/熄屏。见`archives/experiments/android-sdr-release-ack-loss-12475-20260927.md`。
 - 2026-09-27 12474 SDR 受控交错：B SurfaceAvailable 后，旧 A 的真实 Destroy 重复事件均延迟1.5秒送达；本轮只见 A global ref 删除一次，放行后仅 B 的截图有视频。采图慢于延迟窗口，缺放行前画面及连续帧证据。临时诊断补丁已撤销、手机恢复10420/自动亮度/熄屏。见`archives/experiments/android-sdr-old-a-destroy-late-12474-20260927.md`。
 - 2026-09-27 12473 SDR 受控交错：初始双视图中旧 A 的真实 SurfaceAvailable 延迟 1.5 秒，在新 B 事件和出图后才送 Dart；本轮日志只观察到旧 A global ref 删除一次，B 在放行前后两个截图采样点均有不同的视频。V1复核未见窄范围结论阻断；无独立mpv WID回读或两截图之间逐帧证据。临时诊断补丁已撤销，设备恢复10420/自动亮度/熄屏。只覆盖晚到 Available；Failed/Destroy/ACK 回复丢失及 P5 仍未验。见`archives/experiments/android-sdr-old-a-late-12473-20260927.md`。
