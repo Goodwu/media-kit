@@ -9,7 +9,7 @@
   - context: archives/conversations/android-hdr-dv-display-plan-20260922.md
   - acceptance: 固定素材身份与设备能力；PlatformView 对 HDR10/P8.4/P5 分别输出 PQ/HLG/PQ，Texture 明确转换到 SDR；核对实际后端、Surface 格式、系统 HDR 合成、SDR 复位和全屏可见画面。P8.4 的无 HLG 路径、P5 DV 元数据处理及原生 DV 能力须单独说明，不能以 PQ 转换冒充原生 DV。最高亮度仅用于短时人工观察，每轮结束立即恢复原自动亮度，不长时间停留静态画面。
   - latest: HDR10、P8.4 已获用户真全屏画质/流畅性好评；10436/10437 P5 同页全屏画面良好，10437 的 SF/HWC 为 10 位 BT.2020/PQ，但依赖精确固件私有探针。此固件普通应用 GPU producer 的已试公开 PQ 出口均失败，11009 AHardwareBuffer 同样因 HDR 能力权限拒绝 SIGABRT。12464 正确 P5 JAR 短轮的 PQ Surface 拒绝且 `wid=0`，Dart 10 秒后超时；12465/12466 的失败 ACK 在拒绝后约 76/78 ms 报具体错误。12466 强制 GPU PQ 时 HDR10 也被拒绝；12468 P5 失败后同进程原生 `mediacodec_embed` HDR10/P8.4 依次恢复，SF/HWC 为 BT.2020/PQ(metadata types=3)/HLG(types=0)，两源各相隔3秒的视频区截图均变化。12471 再接 SDR 时视频层复位 BT.709、HDR metadata types=0，间隔3秒截图视频区域变化；仅覆盖原生 HDR 路径，见`archives/experiments/android-hdr-sdr-recovery-12471-20260927.md`。默认产品 P5 PQ、静态元数据、独立色准及全屏双视图一致性仍开放。
-  - next: 复核同进程 SDR 信令复位、全屏可见画面及旧 A→新 B 交错；停止此固件重复公开 PQ 探针。P5 Texture SDR 仅作明确标示的降级，不关闭 PQ 任务。
+  - next: 原生 HDR→SDR 信令复位已有短轮证据；继续真全屏可见画面、GPU HDR→SDR Surface 复位及 P5 PQ 路径。停止此固件重复公开 PQ 探针。P5 Texture SDR 仅作明确标示的降级，不关闭 PQ 任务。
 
 - [ ] P5 Glass 4K59.94 真全屏性能门槛
   - status: in_progress
@@ -40,7 +40,7 @@
   - context: archives/conversations/android-hdr-dv-display-plan-20260922.md
   - acceptance: Surface 重建、Home→前台、退出/重入、oldA→newB 交错和失败重试时，播放器位置与持续可见帧正确，资源最终释放；晚到 Create、Release ACK 丢失及 engine detach 有明确 owner/屏障，不以构建或单次 EOS 代替生命周期验收。
   - latest: P8.4 10447开/10448关/10449开双 Home→返回对照：提前停轨两轮POC0、无后台软解格式；关闭轮POC34，VO仍有掉帧。10450暂停后返回保持暂停；10451 HDR10双返回持续MediaCodec/PQ、POC0且系统PQ合成。稳定key双视图10453移除备用仍可见，10454移除当前后剩余B冻结。10455存活owner保留与回退候选在同场景中成功重绑B；补齐有界释放/绑定重试后，独立V1复审通过，10456实机正常路径再次恢复B且5秒截图变化。10457一次释放失败由重复destroy回调恢复；10458连续两次释放失败后由250ms定时重试恢复B；10459一次B绑定失败后由250ms定时重试恢复B，5秒截图均有画面变化。10460 HDR10 同序列 B 恢复持续出图，HWC PQ 合成。10461 普通 SDR 同序列 B 恢复持续出图、SF 无 HDR 元数据。见`archives/experiments/android-p84-dual-view-10453-10454-20260927.md`、`archives/experiments/android-p84-dual-view-10455-20260927.md`、`archives/experiments/android-p84-dual-view-10456-10457-20260927.md`、`archives/experiments/android-hdr10-dual-view-10460-20260927.md`、`archives/experiments/android-sdr-dual-view-10461-20260927.md`。提前停轨开关仍默认关闭。
-  - next: 10461正常Android Back后engine先detach，Factory为原handle保留viewId 0/1/2且无PlayerTerminated证明；同进程重入可出图但旧owner回收未证实。10462根诊断页等待Player dispose后退出，同进程两轮返回/重入无保留告警；10463补共享Future后V1复审通过，自动停止与Back并发时退出确实等到Player销毁完成。见`archives/experiments/android-sdr-engine-detach-10461-20260927.md`及`archives/experiments/android-sdr-engine-exit-10462-20260927.md`。任意宿主直接FlutterEngine.destroy仍缺native生命周期仲裁，失败disposal重试和owner/global-ref定量计数未验；随后再验P5、oldA→newB交错及属性序列中途故障，最后决定提前停轨默认开启。
+  - next: 10461正常Android Back后engine先detach，Factory为原handle保留viewId 0/1/2且无PlayerTerminated证明；同进程重入可出图但旧owner回收未证实。10462根诊断页等待Player dispose后退出，同进程两轮返回/重入无保留告警；10463补共享Future后V1复审通过，自动停止与Back并发时退出确实等到Player销毁完成。12473 临时受控 SDR 双视图让旧 A 的真实 SurfaceAvailable 晚于新 B 1.5 秒到达：本轮日志仅见 A 引用删除一次，B 在前后两个采样点均出图且画面变化；诊断补丁已撤销，见`archives/experiments/android-sdr-old-a-late-12473-20260927.md`。10461/10462/10463 见`archives/experiments/android-sdr-engine-detach-10461-20260927.md`及`archives/experiments/android-sdr-engine-exit-10462-20260927.md`。任意宿主直接FlutterEngine.destroy仍缺native生命周期仲裁；晚到 Failed/Destroy、ACK 回复丢失、失败disposal定量计数、P5及属性序列中途故障待验，最后决定提前停轨默认开启。
 
 - [ ] P5 RPU 边界与独立色彩核验
   - status: queued
