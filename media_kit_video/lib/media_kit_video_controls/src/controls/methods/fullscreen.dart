@@ -13,11 +13,21 @@ import 'package:media_kit_video/media_kit_video_controls/src/controls/widgets/vi
 
 /// Whether a [Video] present in the current [BuildContext] is in fullscreen or not.
 bool isFullscreen(BuildContext context) =>
-    FullscreenInheritedWidget.maybeOf(context) != null;
+    VideoFullscreenScope.maybeOf(context)?.isFullscreen ??
+    (FullscreenInheritedWidget.maybeOf(context) != null);
 
 /// Makes the [Video] present in the current [BuildContext] enter fullscreen.
 Future<void> enterFullscreen(BuildContext context) {
   return lock.synchronized(() async {
+    if (!context.mounted) return;
+    final scope = VideoFullscreenScope.maybeOf(context);
+    if (scope != null) {
+      await scope.enter(
+        onEnterFullscreen: state(context).widget.onEnterFullscreen,
+        onExitFullscreen: state(context).widget.onExitFullscreen,
+      );
+      return;
+    }
     if (!isFullscreen(context)) {
       if (context.mounted) {
         final stateValue = state(context);
@@ -90,6 +100,12 @@ Future<void> enterFullscreen(BuildContext context) {
 /// Makes the [Video] present in the current [BuildContext] exit fullscreen.
 Future<void> exitFullscreen(BuildContext context) {
   return lock.synchronized(() async {
+    if (!context.mounted) return;
+    final scope = VideoFullscreenScope.maybeOf(context);
+    if (scope != null) {
+      await scope.exit();
+      return;
+    }
     if (isFullscreen(context)) {
       if (context.mounted) {
         await Navigator.of(context).maybePop();

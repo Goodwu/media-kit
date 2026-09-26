@@ -7,6 +7,8 @@
  */
 package com.alexmercerind.media_kit_video.platformview;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import android.content.Context;
@@ -19,6 +21,7 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.SurfaceControl;
 import android.hardware.DataSpace;
+import android.graphics.PixelFormat;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
@@ -26,6 +29,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import io.flutter.plugin.platform.PlatformView;
 
@@ -36,15 +40,52 @@ import com.alexmercerind.media_kit_video.GlobalObjectRefManager;
  */
 public final class PlatformVideoView implements PlatformView {
     private static final String TAG = "PlatformVideoView";
-    private static final Handler handler = new Handler(Looper.getMainLooper());
     private static final Executor transactionExecutor = Runnable::run;
     @NonNull
     private final SurfaceView surfaceView;
     private final long handle;
     private final int width;
     private final int height;
+    @Nullable
+    private final String initialDataSpace;
+    @Nullable
+    private final String initialPixelFormat;
     private long wid = 0;
-    private final Consumer<Long> onSurfaceAvailable;
+    static final class SurfaceEvent {
+        final long wid;
+        final int generation;
+        final boolean destroyed;
+
+        SurfaceEvent(long wid, int generation, boolean destroyed) {
+            this.wid = wid;
+            this.generation = generation;
+            this.destroyed = destroyed;
+        }
+    }
+
+    private Consumer<SurfaceEvent> onSurfaceEvent;
+    private Runnable onDispose = () -> {};
+    private int surfaceGeneration = 0;
+    private final HashMap<Integer, Long> surfaceReferences = new HashMap<>();
+    private final HashMap<Integer, Long> releasedSurfaceReferences = new HashMap<>();
+    private final HashMap<Integer, Long> acknowledgedSurfaceReferences = new HashMap<>();
+    private boolean disposed = false;
+    private static final boolean nativeDataSpaceBridgeLoaded;
+
+    static {
+        boolean loaded = false;
+        try {
+            System.loadLibrary("media_kit_video_hdr_bridge");
+            loaded = true;
+        } catch (Throwable error) {
+            Log.w(TAG, "Unable to load native Surface dataspace bridge", error);
+        }
+        nativeDataSpaceBridgeLoaded = loaded;
+    }
+
+    private static native boolean setSurfaceDataSpace(
+            @NonNull android.view.Surface surface, int dataSpace, boolean probeSrgbOnFailure);
+    private static native void probeLatePqDataSpace(@NonNull android.view.Surface surface);
 
     /**
      * Constructs a new PlatformVideoView.
@@ -60,12 +101,20 @@ public final class PlatformVideoView implements PlatformView {
             long handle,
             int width,
             int height,
-            @NonNull Consumer<Long> onSurfaceAvailable) {
+            @Nullable String initialDataSpace,
+            @Nullable String initialPixelFormat,
+            @NonNull Consumer<SurfaceEvent> onSurfaceEvent) {
         this.handle = handle;
         this.width = width;
         this.height = height;
-        this.onSurfaceAvailable = onSurfaceAvailable;
+        this.initialDataSpace = initialDataSpace;
+        this.initialPixelFormat = initialPixelFormat;
+        this.onSurfaceEvent = onSurfaceEvent;
         this.surfaceView = new SurfaceView(context);
+        if ("rgba1010102".equals(initialPixelFormat)) {
+            surfaceView.getHolder().setFormat(PixelFormat.RGBA_1010102);
+            Log.i(TAG, "requested holder format RGBA_1010102: handle=" + handle);
+        }
 
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.N_MR1) {
             // Avoid blank space instead of a video on Android versions below 8 by adjusting video's
@@ -76,44 +125,123 @@ public final class PlatformVideoView implements PlatformView {
         setupSurface();
     }
 
+    void setOnSurfaceEvent(@NonNull Consumer<SurfaceEvent> callback) {
+        onSurfaceEvent = callback;
+    }
+
+    void setOnDispose(@NonNull Runnable callback) {
+        onDispose = callback;
+    }
+
     private void setupSurface() {
         surfaceView.getHolder().addCallback(new SurfaceHolder.Callback() {
             @Override
             public void surfaceCreated(@NonNull SurfaceHolder holder) {
                 Log.i(TAG, "surfaceCreated: handle=" + handle + ", width=" + width + ", height=" + height);
-                if (holder.getSurface() != null) {
-                    // Clean up old wid if it exists
-                    if (wid != 0) {
-                        Log.i(TAG, "surfaceCreated: cleaning up old wid=" + wid);
-                        GlobalObjectRefManager.deleteGlobalObjectRef(wid);
-                        wid = 0;
+                if (!disposed && holder.getSurface() != null) {
+                    if (initialDataSpace != null) {
+                        final boolean applied = setColorSpace(holder.getSurface(), initialDataSpace);
+                        Log.i(TAG, "surfaceCreated initial dataspace: handle=" + handle +
+                                ", transfer=" + initialDataSpace + ", applied=" + applied);
+                        if (!applied) {
+                            // Do not publish a WID for a Surface generation
+                            // whose HDR dataspace could not be applied.
+                            return;
+                        }
                     }
-                    // Get global reference to the Surface only once when it's first created
+                    // Each Surface generation owns its JNI reference until Dart has
+                    // detached the native producer and explicitly acknowledges it.
                     wid = GlobalObjectRefManager.newGlobalObjectRef(holder.getSurface());
+                    final int generation = ++surfaceGeneration;
+                    surfaceReferences.put(generation, wid);
                     Log.i(TAG, "surfaceCreated: created new wid=" + wid);
-                    holder.setFixedSize(width, height);
-                    // Notify Dart side about the PlatformView Surface availability
-                    onSurfaceAvailable.accept(wid);
+                    onSurfaceEvent.accept(new SurfaceEvent(wid, generation, false));
+                    if (initialDataSpace == null && "rgba1010102".equals(initialPixelFormat)) {
+                        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                            if (!disposed && surfaceGeneration == generation && wid != 0 &&
+                                    holder.getSurface().isValid() && nativeDataSpaceBridgeLoaded) {
+                                probeLatePqDataSpace(holder.getSurface());
+                            }
+                        }, 8000);
+                    }
                 }
             }
 
             @Override
             public void surfaceChanged(
                     @NonNull SurfaceHolder holder, int format, int width, int height) {
-                Log.i(TAG, String.format("surfaceChanged: handle=%d, width=%d, height=%d, wid=%d", handle, width, height, wid));
+                Log.i(TAG, String.format("surfaceChanged: handle=%d, format=%d, width=%d, height=%d, wid=%d", handle, format, width, height, wid));
             }
 
             @Override
             public void surfaceDestroyed(@NonNull SurfaceHolder holder) {
                 Log.i(TAG, "surfaceDestroyed: handle=" + handle + ", wid=" + wid);
-                onSurfaceAvailable.accept(0L);
-                if (wid != 0) {
-                    final long widReference = wid;
-                    handler.postDelayed(() -> GlobalObjectRefManager.deleteGlobalObjectRef(widReference), 5000);
+                final long destroyedWid = wid;
+                if (destroyedWid != 0) {
+                    onSurfaceEvent.accept(new SurfaceEvent(destroyedWid, surfaceGeneration, true));
                     wid = 0;
                 }
             }
         });
+    }
+
+    synchronized String releaseSurface(int generation, long reference) {
+        final Long ownedReference = surfaceReferences.get(generation);
+        if (ownedReference == null) {
+            final Long releasedReference = releasedSurfaceReferences.get(generation);
+            return releasedReference != null && releasedReference.longValue() == reference
+                    ? "alreadyReleased"
+                    : "generationMissing";
+        }
+        if (ownedReference.longValue() != reference) {
+            return "identityMismatch";
+        }
+        if (!GlobalObjectRefManager.deleteGlobalObjectRef(reference)) {
+            return "deleteFailed";
+        }
+        surfaceReferences.remove(generation);
+        releasedSurfaceReferences.put(generation, reference);
+        // A generation may be proactively released while Flutter still owns
+        // the SurfaceView (for example, A is stopped before B is promoted).
+        // Suppress the later SurfaceHolder destroy callback for that already
+        // acknowledged generation; otherwise Dart would see a duplicate
+        // destroy after the tombstone has legitimately been removed.
+        if (surfaceGeneration == generation && wid == reference) {
+            wid = 0;
+        }
+        return "released";
+    }
+
+    synchronized boolean acknowledgeSurfaceRelease(int generation, long reference) {
+        final Long releasedReference = releasedSurfaceReferences.get(generation);
+        if (releasedReference != null && releasedReference.longValue() == reference) {
+            // Receiving this method call is Dart's explicit ACK. Retain both
+            // the release tombstone and ACK receipt until the matching player
+            // epoch reaches its producer-termination barrier. If the method
+            // reply is lost, Dart can repeat ReleaseSurface + this ACK without
+            // observing a false generationMissing result.
+            acknowledgedSurfaceReferences.put(generation, reference);
+            return true;
+        }
+        final Long acknowledgedReference = acknowledgedSurfaceReferences.get(generation);
+        return acknowledgedReference != null && acknowledgedReference.longValue() == reference;
+    }
+
+    synchronized boolean releaseAllSurfacesAfterProducerTermination() {
+        boolean released = true;
+        for (Map.Entry<Integer, Long> reference : new HashMap<>(surfaceReferences).entrySet()) {
+            if (GlobalObjectRefManager.deleteGlobalObjectRef(reference.getValue())) {
+                surfaceReferences.remove(reference.getKey());
+            } else {
+                released = false;
+            }
+        }
+        if (released) {
+            releasedSurfaceReferences.clear();
+            acknowledgedSurfaceReferences.clear();
+        }
+        wid = 0;
+        return released;
     }
 
     /**
@@ -127,22 +255,32 @@ public final class PlatformVideoView implements PlatformView {
         return surfaceView;
     }
 
-    /** Applies the display dataspace only after the decoder has identified HDR. */
-    public boolean setColorSpace(@NonNull String transfer) {
-        // HCPP is gated at API 34 by the app. Keep this method equally strict:
-        // DataSpace/SurfaceControl dataspace support must never be resolved on
-        // older Android runtimes.
-        if (Build.VERSION.SDK_INT < 34 ||
-                !surfaceView.isAttachedToWindow()) {
+    private static int dataSpaceFor(@NonNull String transfer) {
+        if ("pq-itu".equals(transfer)) {
+            // BT.2020 / SMPTE ST 2084 / limited range: the HDR10 MediaCodec
+            // direct-output layer on this device reports this exact dataspace.
+            return 0x11c60000;
+        } else if ("pq".equals(transfer)) {
+            return DataSpace.DATASPACE_BT2020_PQ;
+        } else if ("hlg".equals(transfer)) {
+            return DataSpace.DATASPACE_BT2020_HLG;
+        } else {
+            return DataSpace.DATASPACE_SRGB;
+        }
+    }
+
+    private boolean setColorSpace(
+            @NonNull android.view.Surface surface, @NonNull String transfer) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
             return false;
         }
-        final int dataSpace;
-        if ("pq".equals(transfer)) {
-            dataSpace = DataSpace.DATASPACE_BT2020_PQ;
-        } else if ("hlg".equals(transfer)) {
-            dataSpace = DataSpace.DATASPACE_BT2020_HLG;
-        } else {
-            dataSpace = DataSpace.DATASPACE_SRGB;
+        final int dataSpace = dataSpaceFor(transfer);
+        if (Build.VERSION.SDK_INT < 34) {
+            return nativeDataSpaceBridgeLoaded && setSurfaceDataSpace(
+                    surface, dataSpace, "rgba1010102".equals(initialPixelFormat));
+        }
+        if (!surfaceView.isAttachedToWindow()) {
+            return false;
         }
         final SurfaceControl surfaceControl = surfaceView.getSurfaceControl();
         if (!surfaceControl.isValid()) {
@@ -175,13 +313,26 @@ public final class PlatformVideoView implements PlatformView {
         }
     }
 
+    /** Applies the display dataspace only after the decoder has identified HDR. */
+    public boolean setColorSpace(@NonNull String transfer) {
+        final android.view.Surface surface = surfaceView.getHolder().getSurface();
+        return surface != null && setColorSpace(surface, transfer);
+    }
+
     /** Disposes of the resources used by this PlatformView. */
     @Override
-    public void dispose() {
+    public synchronized void dispose() {
         Log.i(TAG, "dispose: handle=" + handle);
-        PlatformVideoViewFactory.remove(handle);
-        if (surfaceView.getHolder().getSurface() != null) {
-            surfaceView.getHolder().getSurface().release();
+        if (disposed) return;
+        disposed = true;
+        // Flutter may dispose a PlatformView without delivering
+        // SurfaceHolder.surfaceDestroyed first. Keep every JNI reference alive
+        // until Dart has stopped the matching mpv producer (when still active)
+        // and acknowledges the exact generation through ReleaseSurface.
+        for (Map.Entry<Integer, Long> reference : new HashMap<>(surfaceReferences).entrySet()) {
+            onSurfaceEvent.accept(new SurfaceEvent(reference.getValue(), reference.getKey(), true));
         }
+        wid = 0;
+        onDispose.run();
     }
 }

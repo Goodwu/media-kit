@@ -14,6 +14,30 @@ import 'package:media_kit_video/src/video_controller/video_controller.dart';
 /// Rendering topology selected for a video output.
 enum VideoOutputSurfaceKind { texture, nativeSurface }
 
+/// The physical viewport requested by one mounted Video widget.
+class TextureOutputLayout {
+  final Size viewport;
+  final BoxFit fit;
+
+  const TextureOutputLayout(this.viewport, this.fit);
+}
+
+/// Combines layout requests from VideoController wrappers sharing one output.
+class TextureOutputLayoutRegistry {
+  final _byController = <Object, List<TextureOutputLayout>>{};
+
+  void update(Object controller, List<TextureOutputLayout> layouts) {
+    if (layouts.isEmpty) {
+      _byController.remove(controller);
+    } else {
+      _byController[controller] = List<TextureOutputLayout>.of(layouts);
+    }
+  }
+
+  List<TextureOutputLayout> get layouts =>
+      _byController.values.expand((layouts) => layouts).toList(growable: false);
+}
+
 /// {@template platform_video_controller}
 ///
 /// PlatformVideoController
@@ -80,6 +104,13 @@ abstract class PlatformVideoController {
   Future<void> refreshSurfaceSize(
       {double? viewportWidth, double? viewportHeight}) async {}
 
+  /// Optional Android SurfaceTexture output sizing from the painted viewport.
+  /// Other backends keep their existing source-sized output.
+  /// [owner] identifies one VideoController wrapper. Multiple wrappers may
+  /// share this platform controller for the same Player.
+  Future<void> updateTextureLayouts(
+      Object owner, List<TextureOutputLayout> layouts) async {}
+
   /// Creates/configures the optional native output. Implementations must fail closed.
   Future<dynamic> createNativeOutput(
           {String? surfaceId, int? windowHandle}) async =>
@@ -108,6 +139,22 @@ abstract class PlatformVideoController {
   /// A [Future] that completes when the first video frame has been rendered.
   Future<void> get waitUntilFirstFrameRendered =>
       waitUntilFirstFrameRenderedCompleter.future;
+
+  /// Completes once the initial output required to open media has bound.
+  ///
+  /// Texture-backed controllers do not require a separate mount barrier. An
+  /// Android PlatformView overrides this so a caller that opens media during
+  /// its first build can wait until the native Surface bind command chain has
+  /// completed, rather than opening with `vid=no`. This is a one-time mount
+  /// barrier; it does not assert a later rebuilt Surface remains available or
+  /// that the display has presented a frame.
+  Future<void> get waitUntilInitialOutputBound => Future<void>.value();
+
+  /// Waits for the output that is bound now, or for a later bind after a
+  /// detach. This is an output-availability barrier, not a frame-presentation
+  /// acknowledgement. Platforms without a separate output use the initial
+  /// barrier.
+  Future<void> get waitUntilCurrentOutputBound => waitUntilInitialOutputBound;
 
   /// [Completer] used to signal the decoding & rendering of the first video frame.
   /// Use [waitUntilFirstFrameRendered] to wait for the first frame to be rendered.
@@ -162,6 +209,13 @@ class VideoControllerConfiguration {
   /// * Android: `auto-safe`
   final String? hwdec;
 
+  /// Android gpu-next API selection. Null keeps the platform default.
+  final String? androidGpuApi;
+
+  /// Android PlatformView Surface creation hints for HDR experiments.
+  final String? androidSurfaceTransfer;
+  final String? androidSurfacePixelFormat;
+
   /// The scale for the video output.
   /// This may be used for performance reasons. Specifying this option will cause [width] & [height] to be ignored.
   ///
@@ -197,6 +251,11 @@ class VideoControllerConfiguration {
   /// Default: `true`
   final bool enableAndroidSurfaceProducer;
 
+  /// Size Android SurfaceTexture output from the active Video widget's
+  /// physical viewport. This is opt-in and has no effect on SurfaceProducer
+  /// or PlatformView output.
+  final bool matchAndroidTextureOutputToLayout;
+
   /// Whether to attach `android.view.Surface` after video parameters are known.
   ///
   /// Default:
@@ -221,11 +280,15 @@ class VideoControllerConfiguration {
   const VideoControllerConfiguration({
     this.vo,
     this.hwdec,
+    this.androidGpuApi,
+    this.androidSurfaceTransfer,
+    this.androidSurfacePixelFormat,
     this.width,
     this.height,
     this.scale = 1.0,
     this.enableHardwareAcceleration = true,
     this.enableAndroidSurfaceProducer = true,
+    this.matchAndroidTextureOutputToLayout = false,
     this.androidAttachSurfaceAfterVideoParameters,
     this.usePlatformView = false,
     this.useHCPP = false,
@@ -237,11 +300,16 @@ class VideoControllerConfiguration {
   VideoControllerConfiguration copyWith({
     String? vo,
     String? hwdec,
+    String? androidGpuApi,
+    bool clearAndroidGpuApi = false,
+    String? androidSurfaceTransfer,
+    String? androidSurfacePixelFormat,
     double? scale,
     int? width,
     int? height,
     bool? enableHardwareAcceleration,
     bool? enableAndroidSurfaceProducer,
+    bool? matchAndroidTextureOutputToLayout,
     bool? androidAttachSurfaceAfterVideoParameters,
     bool? usePlatformView,
     bool? useHCPP,
@@ -251,6 +319,12 @@ class VideoControllerConfiguration {
       VideoControllerConfiguration(
         vo: vo ?? this.vo,
         hwdec: hwdec ?? this.hwdec,
+        androidGpuApi:
+            clearAndroidGpuApi ? null : androidGpuApi ?? this.androidGpuApi,
+        androidSurfaceTransfer:
+            androidSurfaceTransfer ?? this.androidSurfaceTransfer,
+        androidSurfacePixelFormat:
+            androidSurfacePixelFormat ?? this.androidSurfacePixelFormat,
         scale: scale ?? this.scale,
         width: width ?? this.width,
         height: height ?? this.height,
@@ -258,6 +332,8 @@ class VideoControllerConfiguration {
             enableHardwareAcceleration ?? this.enableHardwareAcceleration,
         enableAndroidSurfaceProducer:
             enableAndroidSurfaceProducer ?? this.enableAndroidSurfaceProducer,
+        matchAndroidTextureOutputToLayout: matchAndroidTextureOutputToLayout ??
+            this.matchAndroidTextureOutputToLayout,
         androidAttachSurfaceAfterVideoParameters:
             androidAttachSurfaceAfterVideoParameters ??
                 this.androidAttachSurfaceAfterVideoParameters,

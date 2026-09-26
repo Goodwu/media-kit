@@ -11,4 +11,5 @@ export 'package:media_kit_video/media_kit_video_controls/src/controls/cupertino.
 export 'package:media_kit_video/media_kit_video_controls/src/controls/material_desktop.dart';
 export 'package:media_kit_video/media_kit_video_controls/src/controls/methods/fullscreen.dart';
 export 'package:media_kit_video/media_kit_video_controls/src/controls/widgets/fullscreen_inherited_widget.dart';
+export 'package:media_kit_video/media_kit_video_controls/src/controls/widgets/video_fullscreen_scope.dart';
 export 'package:media_kit_video/media_kit_video_controls/src/controls/widgets/video_state_inherited_widget.dart';

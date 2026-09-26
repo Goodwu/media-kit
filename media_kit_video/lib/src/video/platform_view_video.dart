@@ -10,6 +10,13 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+// Test-only creation parameter used to verify that a PlatformView surface can
+// receive its output dataspace before libmpv starts dequeuing buffers.
+const _androidPlatformViewDataSpace =
+    String.fromEnvironment('MEDIA_KIT_ANDROID_PLATFORM_VIEW_DATASPACE');
+const _androidPlatformViewPixelFormat =
+    String.fromEnvironment('MEDIA_KIT_ANDROID_PLATFORM_VIEW_PIXEL_FORMAT');
+
 /// A widget that displays a video player using a native platform surface.
 class PlatformViewVideo extends StatelessWidget {
   /// Creates a new instance of [PlatformViewVideo].
@@ -21,6 +28,8 @@ class PlatformViewVideo extends StatelessWidget {
     this.useHCPP = false,
     this.generation = 1,
     this.mpvWindow = false,
+    this.androidSurfaceTransfer,
+    this.androidSurfacePixelFormat,
   });
 
   /// The handle (player ID) of the video player.
@@ -32,6 +41,8 @@ class PlatformViewVideo extends StatelessWidget {
 
   /// Whether the Darwin native view should be bound as mpv's window.
   final bool mpvWindow;
+  final String? androidSurfaceTransfer;
+  final String? androidSurfacePixelFormat;
 
   @override
   Widget build(BuildContext context) {
@@ -44,6 +55,19 @@ class PlatformViewVideo extends StatelessWidget {
       'height': height,
       'generation': generation,
       'mpvWindow': mpvWindow,
+      if (Platform.isAndroid && (androidSurfaceTransfer?.isNotEmpty ?? false))
+        'dataspace': androidSurfaceTransfer,
+      if (Platform.isAndroid &&
+          androidSurfaceTransfer == null &&
+          _androidPlatformViewDataSpace.isNotEmpty)
+        'dataspace': _androidPlatformViewDataSpace,
+      if (Platform.isAndroid &&
+          (androidSurfacePixelFormat?.isNotEmpty ?? false))
+        'pixelFormat': androidSurfacePixelFormat,
+      if (Platform.isAndroid &&
+          androidSurfacePixelFormat == null &&
+          _androidPlatformViewPixelFormat.isNotEmpty)
+        'pixelFormat': _androidPlatformViewPixelFormat,
     };
 
     if (Platform.isIOS) {
@@ -86,7 +110,11 @@ class PlatformViewVideo extends StatelessWidget {
                   creationParamsCodec: const StandardMessageCodec(),
                   onFocus: () => params.onFocusChanged(true),
                 )
-              : PlatformViewsService.initSurfaceAndroidView(
+              // On API 29 the explicit, documented ordinary Hybrid
+              // Composition entry is required. initSurfaceAndroidView first
+              // attempts TLHC, which makes the composition contract depend on
+              // a runtime fallback and obscures the HDR experiment topology.
+              : PlatformViewsService.initExpensiveAndroidView(
                   id: params.id,
                   viewType: viewType,
                   layoutDirection:

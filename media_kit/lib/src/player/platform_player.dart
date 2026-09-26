@@ -31,12 +31,57 @@ import 'package:media_kit/src/models/player_stream.dart';
 /// The subclasses are then used in composition with the [Player] class, based on the platform the application is running on.
 ///
 /// {@endtemplate}
+class FileLoadedRecord {
+  const FileLoadedRecord(this.epoch, this.playlistEntryId);
+
+  final int epoch;
+  final int playlistEntryId;
+}
+
 abstract class PlatformPlayer {
   /// {@macro platform_player}
   PlatformPlayer({required this.configuration});
 
   /// User defined configuration for [Player].
   final PlayerConfiguration configuration;
+
+  /// Monotonic native file-loaded event count. It is a media-load boundary,
+  /// not a decoded or presented-frame signal. Web backends do not emit it.
+  int fileLoadedEpoch = 0;
+  int? _loadingPlaylistEntryId;
+  final List<FileLoadedRecord> _recentFileLoaded = [];
+  final StreamController<FileLoadedRecord> fileLoadedEpochController =
+      StreamController<FileLoadedRecord>.broadcast(sync: true);
+
+  @protected
+  void recordFileStarted(int playlistEntryId) {
+    _loadingPlaylistEntryId = playlistEntryId;
+  }
+
+  @protected
+  void recordFileLoaded() {
+    final entryId = _loadingPlaylistEntryId;
+    if (entryId == null || fileLoadedEpochController.isClosed) return;
+    final record = FileLoadedRecord(++fileLoadedEpoch, entryId);
+    _recentFileLoaded.add(record);
+    if (_recentFileLoaded.length > 16) _recentFileLoaded.removeAt(0);
+    fileLoadedEpochController.add(record);
+  }
+
+  Future<FileLoadedRecord> waitForFileLoadedEntryAfter(
+    int playlistEntryId,
+    int epoch,
+  ) {
+    for (final record in _recentFileLoaded) {
+      if (record.epoch > epoch && record.playlistEntryId == playlistEntryId) {
+        return Future<FileLoadedRecord>.value(record);
+      }
+    }
+    return fileLoadedEpochController.stream.firstWhere(
+      (record) =>
+          record.epoch > epoch && record.playlistEntryId == playlistEntryId,
+    );
+  }
 
   /// Current state of the player.
   late PlayerState state = PlayerState();
@@ -146,6 +191,7 @@ abstract class PlatformPlayer {
         subtitleController.close(),
         logController.close(),
         errorController.close(),
+        fileLoadedEpochController.close(),
       ],
     );
     _releaseCallbacksActive = true;

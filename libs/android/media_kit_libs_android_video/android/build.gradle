@@ -64,6 +64,25 @@ task downloadDependencies(type: Exec) {
             ["url": "https://github.com/Predidit/libmpv-android-video-build/releases/download/v1.2.7/default-x86.jar", "sha256": "9269643264a1c9689116467f313d5e1b23ea56a68d338ab940c5e8fcf07061c6", "destination": file("$buildDir/v1.2.7/default-x86.jar")]
         ]
 
+        // An explicit local jar lets the Android test app validate a rebuilt
+        // arm64 libmpv without changing the pinned release for normal builds.
+        def localArm64JarPath = project.findProperty("mediaKitLocalArm64Jar")
+        if (localArm64JarPath) {
+            filesToDownload.removeAll { it.destination.name == "default-arm64-v8a.jar" }
+            def localArm64Jar = file(localArm64JarPath)
+            if (!localArm64Jar.isFile()) {
+                throw new GradleException("Local arm64 libmpv jar is missing: ${localArm64Jar}")
+            }
+            def localSha256 = MessageDigest.getInstance("SHA-256")
+                    .digest(Files.readAllBytes(localArm64Jar.toPath())).encodeHex().toString()
+            println "Using local arm64 libmpv jar SHA-256: ${localSha256}"
+            copy {
+                from localArm64Jar
+                into outputDir
+                rename { "local-arm64-v8a.jar" }
+            }
+        }
+
         filesToDownload.each { fileInfo ->
             def destFile = fileInfo.destination
             if (destFile.exists()) {

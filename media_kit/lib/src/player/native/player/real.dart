@@ -72,9 +72,12 @@ void nativeEnsureInitialized({String? libmpv}) {
 ///
 /// {@endtemplate}
 class NativePlayer extends PlatformPlayer {
+  static const bool _bufferingTraceEnabled =
+      bool.fromEnvironment('MEDIA_KIT_BUFFER_TRACE');
   final Stopwatch _bufferingTraceClock = Stopwatch()..start();
 
   void _traceBufferingProperty(String source, bool value) {
+    if (!_bufferingTraceEnabled) return;
     // Keep the source of the derived buffering stream observable. This is
     // intentionally a low-level diagnostic marker; the app still consumes
     // the single buffering stream and does not maintain a second state.
@@ -85,6 +88,7 @@ class NativePlayer extends PlatformPlayer {
   }
 
   void _traceBufferingMetric(String source, double value) {
+    if (!_bufferingTraceEnabled) return;
     print(
       '[MediaKitBufferTrace] t=${_bufferingTraceClock.elapsedMicroseconds} '
       'source=$source value=${value.toStringAsFixed(3)}',
@@ -97,6 +101,50 @@ class NativePlayer extends PlatformPlayer {
   /// safe property path without reaching through [PlatformPlayer]'s protected
   /// implementation detail.
   bool get isReleaseCallbacksActive => releaseCallbacksActive;
+
+  bool get isTerminated => _mpvTerminated;
+
+  bool get isDisposing => _disposeInProgress;
+
+  bool _mpvTerminated = false;
+  bool _disposeInProgress = false;
+  Future<void>? _disposeFuture;
+
+  /// Cleanup callbacks that are safe only after [mpv_terminate_destroy] has
+  /// returned. Native-output owners use this terminal barrier when their
+  /// normal producer-stop acknowledgement failed during [dispose].
+  final List<Future<void> Function()> postTermination = [];
+
+  final Lock _postTerminationLock = Lock();
+
+  /// Retries terminal cleanup callbacks after the native producer has stopped.
+  ///
+  /// A callback is removed only after it succeeds. Channel timeouts therefore
+  /// leave an explicit retry path without permitting two retries to release
+  /// the same platform owner concurrently.
+  Future<void> retryPostTerminationCallbacks() {
+    if (!_mpvTerminated) {
+      throw StateError(
+        'Post-termination cleanup requires mpv_terminate_destroy to return.',
+      );
+    }
+    return _postTerminationLock.synchronized(() async {
+      Object? cleanupError;
+      StackTrace? cleanupStack;
+      for (final callback in postTermination.toList()) {
+        try {
+          await callback();
+          postTermination.remove(callback);
+        } catch (error, stack) {
+          cleanupError ??= error;
+          cleanupStack ??= stack;
+        }
+      }
+      if (cleanupError != null) {
+        Error.throwWithStackTrace(cleanupError, cleanupStack!);
+      }
+    });
+  }
 
   /// Compatibility view for media_kit_video's platform-specific controllers.
   /// The application-facing `Player` typedef points directly to this class.
@@ -126,46 +174,70 @@ class NativePlayer extends PlatformPlayer {
   /// Disposes the [Player] instance & releases the resources.
   @override
   Future<void> dispose({bool synchronized = true}) {
+    final existing = _disposeFuture;
+    if (existing != null) return existing;
+
     Future<void> function() async {
-      if (disposed) {
-        throw AssertionError('[Player] has been disposed');
-      }
-      await waitForPlayerInitialization;
-      await waitForVideoControllerInitializationIfAttached;
-
-      await NativeReferenceHolder.instance.remove(ctx);
-      await stop(notify: false, synchronized: false);
-
-      disposed = true;
-
-      Object? cleanupError;
-      StackTrace? cleanupStack;
       try {
-        await super.dispose();
-      } catch (error, stack) {
-        cleanupError = error;
-        cleanupStack = stack;
-      } finally {
-        try {
-          Initializer(mpv).dispose(ctx);
-        } catch (error, stack) {
-          cleanupError ??= error;
-          cleanupStack ??= stack;
+        if (disposed) {
+          throw AssertionError('[Player] has been disposed');
         }
-        Future.delayed(const Duration(seconds: 5), () {
-          mpv.mpv_terminate_destroy(ctx);
-        });
-      }
-      if (cleanupError != null) {
-        Error.throwWithStackTrace(cleanupError!, cleanupStack!);
+        await waitForPlayerInitialization;
+        await waitForVideoControllerInitializationIfAttached;
+
+        await NativeReferenceHolder.instance.remove(ctx);
+        await stop(notify: false, synchronized: false);
+
+        disposed = true;
+
+        Object? cleanupError;
+        StackTrace? cleanupStack;
+        try {
+          await super.dispose();
+        } catch (error, stack) {
+          cleanupError = error;
+          cleanupStack = stack;
+        } finally {
+          try {
+            Initializer(mpv).dispose(ctx);
+          } catch (error, stack) {
+            cleanupError ??= error;
+            cleanupStack ??= stack;
+          }
+          // Preserve the existing grace period, but make termination an
+          // awaited lifecycle barrier. A retained native-output reference may
+          // be released only after this call returns.
+          await Future.delayed(const Duration(seconds: 5));
+          var terminated = false;
+          try {
+            mpv.mpv_terminate_destroy(ctx);
+            _mpvTerminated = true;
+            terminated = true;
+          } catch (error, stack) {
+            cleanupError ??= error;
+            cleanupStack ??= stack;
+          }
+          if (terminated) {
+            try {
+              await retryPostTerminationCallbacks();
+            } catch (error, stack) {
+              cleanupError ??= error;
+              cleanupStack ??= stack;
+            }
+          }
+        }
+        if (cleanupError != null) {
+          Error.throwWithStackTrace(cleanupError, cleanupStack!);
+        }
+      } finally {
+        _disposeInProgress = false;
       }
     }
 
-    if (synchronized) {
-      return lock.synchronized(function);
-    } else {
-      return function();
-    }
+    _disposeInProgress = true;
+    final future = synchronized ? lock.synchronized(function) : function();
+    _disposeFuture = future;
+    return future;
   }
 
   /// Opens a [Media] or [Playlist] into the [Player].
@@ -1317,6 +1389,41 @@ class NativePlayer extends PlatformPlayer {
     );
   }
 
+  /// Sets a property and throws for both an immediate libmpv rejection and a
+  /// negative asynchronous reply. This is reserved for lifecycle barriers
+  /// whose callers must not treat logging as acknowledgement.
+  Future<void> setPropertyStrict(
+    String property,
+    String value, {
+    bool waitForInitialization = true,
+  }) async {
+    if (disposed || _disposeInProgress || _mpvTerminated) {
+      throw AssertionError('[Player] has been disposed');
+    }
+    if (waitForInitialization) {
+      await waitForPlayerInitialization;
+      await waitForVideoControllerInitializationIfAttached;
+    }
+    if (disposed || _disposeInProgress || _mpvTerminated) {
+      throw AssertionError('[Player] has been disposed');
+    }
+    await _setPropertyStringStrict(property, value);
+  }
+
+  /// Release-callback variant of [setPropertyStrict]. The event pump is still
+  /// alive in this window, so asynchronous reply codes remain authoritative.
+  Future<void> setPropertyStrictForRelease(
+    String property,
+    String value,
+  ) async {
+    if (!disposed || !releaseCallbacksActive || _mpvTerminated) {
+      throw AssertionError(
+        '[Player] strict release property is only available during disposal',
+      );
+    }
+    await _setPropertyStringStrict(property, value);
+  }
+
   /// Retrieves the value of a property from the internal libmpv instance of this [Player].
   /// Please use this method only if you know what you are doing, existing methods in [Player] implementation are suited for the most use cases.
   ///
@@ -1538,6 +1645,10 @@ class NativePlayer extends PlatformPlayer {
     );
 
     if (event.ref.event_id == generated.mpv_event_id.MPV_EVENT_START_FILE) {
+      recordFileStarted(event.ref.data
+          .cast<generated.mpv_event_start_file>()
+          .ref
+          .playlist_entry_id);
       if (isPlayingStateChangeAllowed) {
         state = state.copyWith(
           playing: true,
@@ -1554,6 +1665,9 @@ class NativePlayer extends PlatformPlayer {
       if (!bufferingController.isClosed) {
         bufferingController.add(true);
       }
+    }
+    if (event.ref.event_id == generated.mpv_event_id.MPV_EVENT_FILE_LOADED) {
+      recordFileLoaded();
     }
     // NOTE: Now, --keep-open=yes is used. Thus, eof-reached property is used instead of this.
     // if (event.ref.event_id == generated.mpv_event_id.MPV_EVENT_END_FILE) {
@@ -2683,6 +2797,69 @@ class NativePlayer extends PlatformPlayer {
     );
     calloc.free(ptr);
     calloc.free(string);
+  }
+
+  Future<void> _setPropertyStringStrict(String name, String value) async {
+    final string = value.toNativeUtf8();
+    final ptr = calloc<Pointer<Void>>(1);
+    ptr.value = Pointer.fromAddress(string.address);
+    try {
+      await _setPropertyStrict(
+        name,
+        generated.mpv_format.MPV_FORMAT_STRING,
+        ptr.cast(),
+      );
+    } finally {
+      calloc.free(ptr);
+      calloc.free(string);
+    }
+  }
+
+  Future<void> _setPropertyStrict(
+    String name,
+    int format,
+    Pointer<Void> data,
+  ) async {
+    final namePtr = name.toNativeUtf8();
+    try {
+      if (configuration.async) {
+        final requestNumber = _asyncRequestNumber++;
+        final completer =
+            _setPropertyRequests[requestNumber] = Completer<int>();
+        final immediate = mpv.mpv_set_property_async(
+          ctx,
+          requestNumber,
+          namePtr.cast(),
+          format,
+          data,
+        );
+        if (immediate < 0) {
+          _setPropertyRequests.remove(requestNumber);
+          _throwIfMpvError(immediate, 'mpv_set_property_async($name)');
+        }
+        try {
+          final reply = await completer.future.timeout(
+            const Duration(seconds: 5),
+            onTimeout: () => throw TimeoutException(
+              'mpv_set_property_async($name) reply timed out',
+            ),
+          );
+          _throwIfMpvError(reply, 'mpv_set_property_async($name) reply');
+        } finally {
+          _setPropertyRequests.remove(requestNumber);
+        }
+      } else {
+        final result = mpv.mpv_set_property(
+          ctx,
+          namePtr.cast(),
+          format,
+          data,
+        );
+        _throwIfMpvError(result, 'mpv_set_property($name)');
+      }
+    } finally {
+      calloc.free(namePtr);
+    }
   }
 
   Future<void> _setPropertyStringDirect(

@@ -25,7 +25,7 @@ Widget MaterialVideoControls(VideoState state) {
 
 /// [MaterialVideoControlsThemeData] available in this [context].
 MaterialVideoControlsThemeData _theme(BuildContext context) =>
-    FullscreenInheritedWidget.maybeOf(context) == null
+    !isFullscreen(context)
         ? MaterialVideoControlsTheme.maybeOf(context)?.normal ??
             kDefaultMaterialVideoControlsThemeData
         : MaterialVideoControlsTheme.maybeOf(context)?.fullscreen ??
