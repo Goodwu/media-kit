@@ -1,0 +1,5 @@
+287360.311 16862 16862 I flutter : ANDROID_DIRECT_OPEN awaiting_tap
+287367.353 17004 17004 I MK_CAPTURE: TAP_V3
+287367.659 16862 16862 I flutter : ANDROID_DIRECT_OPEN trigger path=/data/local/tmp/media-kit-sdr-control.mp4
+287367.659 16862 16862 I flutter : ANDROID_DIRECT_OPEN media_command
+287367.709 16862 16862 I flutter : ANDROID_DIRECT_OPEN media_returned
