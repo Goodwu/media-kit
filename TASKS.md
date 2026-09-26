@@ -39,8 +39,8 @@
   - status: queued
   - context: archives/conversations/android-hdr-dv-display-plan-20260922.md
   - acceptance: Surface 重建、Home→前台、退出/重入、oldA→newB 交错和失败重试时，播放器位置与持续可见帧正确，资源最终释放；晚到 Create、Release ACK 丢失及 engine detach 有明确 owner/屏障，不以构建或单次 EOS 代替生命周期验收。
-  - latest: P8.4 10447开/10448关/10449开双 Home→返回对照：提前停轨两轮POC0、无后台软解格式；关闭轮POC34，VO仍有掉帧。10450暂停后返回保持暂停；10451 HDR10双返回持续MediaCodec/PQ、POC0且系统PQ合成。稳定key双视图10453移除备用仍可见，10454移除当前后剩余B冻结。10455存活owner保留与回退候选在同场景中成功重绑B；补齐有界释放/绑定重试后，独立V1复审通过，10456实机正常路径再次恢复B且5秒截图变化。10457一次释放失败由重复destroy回调恢复；10458连续两次释放失败后由250ms定时重试恢复B，5秒截图画面变化。见`archives/experiments/android-p84-dual-view-10453-10454-20260927.md`、`archives/experiments/android-p84-dual-view-10455-20260927.md`、`archives/experiments/android-p84-dual-view-10456-10457-20260927.md`。提前停轨开关仍默认关闭。
-  - next: 隔离验证B绑定失败重试；随后实机复验P5/SDR、oldA→newB交错及engine detach资源闭合，再决定提前停轨默认开启。
+  - latest: P8.4 10447开/10448关/10449开双 Home→返回对照：提前停轨两轮POC0、无后台软解格式；关闭轮POC34，VO仍有掉帧。10450暂停后返回保持暂停；10451 HDR10双返回持续MediaCodec/PQ、POC0且系统PQ合成。稳定key双视图10453移除备用仍可见，10454移除当前后剩余B冻结。10455存活owner保留与回退候选在同场景中成功重绑B；补齐有界释放/绑定重试后，独立V1复审通过，10456实机正常路径再次恢复B且5秒截图变化。10457一次释放失败由重复destroy回调恢复；10458连续两次释放失败后由250ms定时重试恢复B；10459一次B绑定失败后由250ms定时重试恢复B，5秒截图均有画面变化。见`archives/experiments/android-p84-dual-view-10453-10454-20260927.md`、`archives/experiments/android-p84-dual-view-10455-20260927.md`、`archives/experiments/android-p84-dual-view-10456-10457-20260927.md`。提前停轨开关仍默认关闭。
+  - next: 实机复验P5/SDR、oldA→newB交错、属性序列中途故障及engine detach资源闭合，再决定提前停轨默认开启。
 
 - [ ] P5 RPU 边界与独立色彩核验
   - status: queued
