@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:file_picker/file_picker.dart';
@@ -69,6 +71,26 @@ class AutoLifecycleScreen extends StatefulWidget {
 
 class _AutoLifecycleScreenState extends State<AutoLifecycleScreen> {
   int generation = 1;
+  Player? _logRebinder;
+  StreamSubscription? _logRebinderSubscription;
+
+  Future<void> _rebindFfmpegLog() async {
+    if (!mounted || _logRebinder != null) return;
+    final rebinder = Player(
+      configuration: const PlayerConfiguration(logLevel: MPVLogLevel.v),
+    );
+    _logRebinder = rebinder;
+    _logRebinderSubscription = rebinder.stream.log.listen(
+      (log) => debugPrint('AUTO_LIFECYCLE_REBIND_LOG '
+          '[${log.prefix}] ${log.level}: ${log.text}'),
+    );
+    try {
+      final handle = await rebinder.handle;
+      debugPrint('AUTO_LIFECYCLE_REBIND_READY handle=$handle');
+    } catch (error) {
+      debugPrint('AUTO_LIFECYCLE_REBIND_ERROR $error');
+    }
+  }
 
   @override
   void initState() {
@@ -77,7 +99,22 @@ class _AutoLifecycleScreenState extends State<AutoLifecycleScreen> {
       if (!mounted) return;
       setState(() => generation++);
       debugPrint('AUTO_LIFECYCLE_RECREATE generation=$generation');
+      if (const bool.fromEnvironment('MEDIA_KIT_AUTO_LIFECYCLE_LOG_REBIND')) {
+        Future<void>.delayed(
+          const Duration(seconds: 9),
+          _rebindFfmpegLog,
+        );
+      }
     });
+  }
+
+  @override
+  void dispose() {
+    final subscription = _logRebinderSubscription;
+    if (subscription != null) unawaited(subscription.cancel());
+    final rebinder = _logRebinder;
+    if (rebinder != null) unawaited(rebinder.dispose());
+    super.dispose();
   }
 
   @override
