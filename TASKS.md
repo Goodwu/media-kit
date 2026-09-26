@@ -39,7 +39,8 @@
   - status: queued
   - context: archives/conversations/android-hdr-dv-display-plan-20260922.md
   - acceptance: Surface 重建、Home→前台、退出/重入、oldA→newB 交错和失败重试时，播放器位置与持续可见帧正确，资源最终释放；晚到 Create、Release ACK 丢失及 engine detach 有明确 owner/屏障，不以构建或单次 EOS 代替生命周期验收。
-  - latest: 当前代码/默认发布 libmpv 的10446固定 P8.4 双 Home→返回轮，均只开源一次，原生 HLG、同会话位置恢复并持续出图；t90/t120/t150媒体40.607/66.500/92.392秒，VO掉帧0/30/62，后台过渡有33条 HEVC POC 错误。相隔6秒截图场景改变，排除持续冻结，切换瞬间可见顿挫仍未验收。见`archives/experiments/android-p84-home-resume-10446-20260927.md`。mpv全局日志接管已由 Goodwu/mpv `9acfeff` 修复；Create/Release竞态与双视图交错仍缺。
+  - latest: 当前代码/默认发布 libmpv 的10446固定 P8.4 双 Home→返回轮，均只开源一次，原生 HLG、同会话位置恢复并持续出图；后台过渡有33条 HEVC POC 错误，VO掉帧0/30/62。10447默认关闭的“先vid=no再vo=null”诊断轮，双返回 POC 0、无软件格式切换，但 VO 0/48/57，尚不能判定流畅性收益。见`archives/experiments/android-p84-home-resume-10446-20260927.md`与`archives/experiments/android-p84-detach-10447-20260927.md`。切换瞬间可见顿挫、Create/Release竞态与双视图交错仍缺；mpv全局日志接管已由 Goodwu/mpv `9acfeff` 修复。
+  - next: 用相同计时口径做该解绑顺序开/关/开 A/B/A，并覆盖手动暂停后 Home→前台；若 POC 消失但 VO 掉帧不降，继续定位 Surface 销毁前的 producer 停止屏障。
 
 - [ ] P5 RPU 边界与独立色彩核验
   - status: queued
