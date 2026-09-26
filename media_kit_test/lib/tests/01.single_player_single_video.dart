@@ -33,6 +33,11 @@ class _SinglePlayerSingleVideoScreenState
   static const _androidHdrTransaction = bool.fromEnvironment(
     'MEDIA_KIT_ANDROID_HDR_TRANSACTION',
   );
+  static const _androidDualViewLifecycleProbe = bool.fromEnvironment(
+    'MEDIA_KIT_ANDROID_DUAL_VIEW_LIFECYCLE_PROBE',
+  );
+  int _dualViewPhase = 0;
+  bool _dualViewProbeScheduled = false;
   static const _androidP5RpuPipelineBuilt = bool.fromEnvironment(
     'MEDIA_KIT_ANDROID_P5_RPU_PIPELINE_BUILT',
   );
@@ -206,6 +211,10 @@ class _SinglePlayerSingleVideoScreenState
           'presentationVerified=${result.presentationVerified} '
           'gpuPlatformHdr=$_androidGpuPlatformHdr '
           'simulateNoHlgForP84=$_androidForceP84PqFallback');
+      if (_androidDualViewLifecycleProbe && !_dualViewProbeScheduled) {
+        _dualViewProbeScheduled = true;
+        unawaited(_runDualViewLifecycleProbe());
+      }
       if (_androidHdrPauseAtMediaSeconds >= 0) {
         final snapshot = _hdrIntent.snapshot();
         unawaited(() async {
@@ -213,8 +222,8 @@ class _SinglePlayerSingleVideoScreenState
             final target = Duration(seconds: _androidHdrPauseAtMediaSeconds);
             await player.stream.position
                 .firstWhere((position) => position >= target)
-                .timeout(Duration(
-                    seconds: _androidHdrPauseAtMediaSeconds + 30));
+                .timeout(
+                    Duration(seconds: _androidHdrPauseAtMediaSeconds + 30));
             if (!mounted || !_hdrIntent.mayResume(snapshot)) return;
             await player.pause();
             await player.seek(target);
@@ -243,6 +252,17 @@ class _SinglePlayerSingleVideoScreenState
     } catch (_) {
       _hdrIntent.fail(request);
       rethrow;
+    }
+  }
+
+  Future<void> _runDualViewLifecycleProbe() async {
+    for (final phase in const [1, 2, 3, 4]) {
+      await Future<void>.delayed(const Duration(seconds: 5));
+      if (!mounted || _autoPlayerDisposed) return;
+      setState(() => _dualViewPhase = phase);
+      debugPrint('ANDROID_DUAL_VIEW phase=$phase '
+          'position=${player.state.position.inMilliseconds} '
+          'playing=${player.state.playing}');
     }
   }
 
@@ -1387,9 +1407,41 @@ class _SinglePlayerSingleVideoScreenState
     final diagnosticVideoKey = displayController == null
         ? null
         : GlobalObjectKey<VideoState>(displayController);
-    final videoKey = (_androidP5PlatformSdrDiagnostic || _androidP5ScopeFullscreen)
-        ? diagnosticVideoKey
-        : ObjectKey(displayController);
+    final videoKey =
+        (_androidP5PlatformSdrDiagnostic || _androidP5ScopeFullscreen)
+            ? diagnosticVideoKey
+            : ObjectKey(displayController);
+    if (_androidDualViewLifecycleProbe) {
+      final showA = _dualViewPhase != 2 && _dualViewPhase != 4;
+      final showB = _dualViewPhase == 1 ||
+          _dualViewPhase == 2 ||
+          _dualViewPhase == 3 ||
+          _dualViewPhase == 4;
+      return Scaffold(
+        body: Row(children: [
+          if (showA)
+            Expanded(
+              key: const ValueKey('android-dual-slot-a'),
+              child: displayController == null
+                  ? const ColoredBox(color: Colors.black)
+                  : Video(
+                      key: const ValueKey('android-dual-view-a'),
+                      controller: displayController,
+                    ),
+            ),
+          if (showB)
+            Expanded(
+              key: const ValueKey('android-dual-slot-b'),
+              child: displayController == null
+                  ? const ColoredBox(color: Colors.black)
+                  : Video(
+                      key: const ValueKey('android-dual-view-b'),
+                      controller: displayController,
+                    ),
+            ),
+        ]),
+      );
+    }
     if (_androidP5ScopeFullscreen) {
       final viewHeight = MediaQuery.of(context).size.width * 9 / 16;
       return VideoFullscreenScope(

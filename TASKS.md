@@ -39,8 +39,8 @@
   - status: queued
   - context: archives/conversations/android-hdr-dv-display-plan-20260922.md
   - acceptance: Surface 重建、Home→前台、退出/重入、oldA→newB 交错和失败重试时，播放器位置与持续可见帧正确，资源最终释放；晚到 Create、Release ACK 丢失及 engine detach 有明确 owner/屏障，不以构建或单次 EOS 代替生命周期验收。
-  - latest: P8.4完整源、默认发布libmpv的10447开/10448关/10449开双 Home→返回对照：开启“先vid=no再vo=null”时两轮 POC 0、无后台软解格式；关闭轮 POC 34、两次转`yuv420p10` DolbyVision/PQ。t90 VO 开/关/开为48/67/28，媒体位置不同，不能当严格掉帧收益；开启时仍有VO掉帧。10450暂停后切后台，返回保持暂停。10451 HDR10 同开关双返回，持续 MediaCodec/PQ、POC0、t90 VO23且系统PQ合成。详见`archives/experiments/android-p84-detach-aba-10448-10450-20260927.md`与`archives/experiments/android-hdr10-detach-10451-20260927.md`。开关仍默认关闭；切换瞬间可见顿挫、Create/Release竞态与双视图交错仍缺。
-  - next: 验证提前停轨的双视图/失败重试及 P5/SDR 路径，确认没有seek、自动恢复或资源释放回归，再决定默认开启；同时定位剩余VO掉帧和切换瞬间停顿。
+  - latest: P8.4 10447开/10448关/10449开双 Home→返回对照：提前停轨两轮POC0、无后台软解格式；关闭轮POC34，VO仍有掉帧。10450暂停后返回保持暂停；10451 HDR10双返回持续MediaCodec/PQ、POC0且系统PQ合成。稳定外层key的双视图10453 A→A+B→B→A+B→A，移除备用后当前仍可见；10454最后改为只留B，移除当前A后无B重绑，媒体时间继续但两张相隔5秒截图的视频区域完全相同，双视图验收失败。10452初版存在key混杂，不作定因依据。见`archives/experiments/android-p84-dual-view-10453-10454-20260927.md`。提前停轨开关仍默认关闭。
+  - next: 保留存活备用Surface的完整owner，修复移除当前视图后的B重绑与HDR色空间路由；实机复验双视图、失败重试及P5/SDR路径，再决定提前停轨默认开启。
 
 - [ ] P5 RPU 边界与独立色彩核验
   - status: queued
