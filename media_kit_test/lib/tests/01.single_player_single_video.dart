@@ -276,6 +276,22 @@ class _SinglePlayerSingleVideoScreenState
     }
   }
 
+  Future<void> _openDirectSdrAfterHdr(String source) async {
+    final coordinator = _hdrCoordinatorFuture;
+    if (coordinator == null) {
+      throw StateError('No HDR coordinator for SDR recovery');
+    }
+    // Invalidate delayed HDR pause/seek/resume callbacks before yielding to
+    // coordinator disposal or opening the SDR source.
+    final supersedingRequest = _hdrIntent.begin();
+    _hdrIntent.fail(supersedingRequest);
+    await (await coordinator).dispose();
+    await player.open(Media(source));
+    debugPrint('ANDROID_HDR_SDR_RECOVERY_OPEN path=$source '
+        'vo=${await player.getProperty('vo')} '
+        'hwdec=${await player.getProperty('hwdec-current')}');
+  }
+
   Future<void> _runDualViewLifecycleProbe() async {
     for (final phase in const [1, 2, 3, 4]) {
       await Future<void>.delayed(const Duration(seconds: 5));
@@ -738,6 +754,10 @@ class _SinglePlayerSingleVideoScreenState
             break;
           }
           try {
+            if (source.startsWith('sdr:')) {
+              await _openDirectSdrAfterHdr(source.substring(4));
+              break;
+            }
             final result = await _openHdrSource(source);
             debugPrint(
                 'ANDROID_HDR_RECOVERY_OPEN sample=${result.identity.sample} '

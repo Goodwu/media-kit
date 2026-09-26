@@ -75,6 +75,7 @@ class AndroidHdrOpenCoordinator {
   // could roll them back. The next queued request owns that cleanup, even if
   // its own policy validation fails.
   bool _pendingRollback = false;
+  bool _activeMedia = false;
 
   List<Object> get cleanupFailures =>
       List<Object>.unmodifiable(_cleanupFailures);
@@ -150,6 +151,7 @@ class AndroidHdrOpenCoordinator {
           _attachedStaged = null;
           await backend.resetOwnedConfiguration();
           _pendingRollback = false;
+          _activeMedia = false;
           _check(generation);
           mark('rollback_complete');
         }
@@ -165,6 +167,7 @@ class AndroidHdrOpenCoordinator {
         mark('previous_output_stopped');
         await backend.resetOwnedConfiguration();
         _check(generation);
+        _activeMedia = false;
         mark('configuration_reset');
         await backend.prepareOutput(identity);
         _check(generation);
@@ -183,6 +186,7 @@ class AndroidHdrOpenCoordinator {
         _check(generation);
         mark('track_verified');
         _pendingRollback = false;
+        _activeMedia = true;
         result.complete(AndroidHdrOpenResult(identity, generation));
       } catch (error, stack) {
         mark('open_failed');
@@ -196,6 +200,7 @@ class AndroidHdrOpenCoordinator {
             _attachedStaged = null;
             await backend.resetOwnedConfiguration();
             _pendingRollback = false;
+            _activeMedia = false;
           } catch (_) {
             // Preserve the failure that caused this transaction to abort.
           }
@@ -251,14 +256,13 @@ class AndroidHdrOpenCoordinator {
     ++_generation;
     await Future.wait(_preparations.toList());
     await _tail;
-    if (_attachedStaged != null || _pendingRollback) {
+    if (_activeMedia || _attachedStaged != null || _pendingRollback) {
       await backend.stop();
       await _attachedStaged?.dispose();
       _attachedStaged = null;
-      if (_pendingRollback) {
-        await backend.resetOwnedConfiguration();
-        _pendingRollback = false;
-      }
+      await backend.resetOwnedConfiguration();
+      _pendingRollback = false;
+      _activeMedia = false;
     }
   }
 }
