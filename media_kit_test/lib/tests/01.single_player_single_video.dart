@@ -45,6 +45,12 @@ class _SinglePlayerSingleVideoScreenState
   static const _androidOpenPhaseTrace = bool.fromEnvironment(
     'MEDIA_KIT_ANDROID_OPEN_PHASE_TRACE',
   );
+  static const _androidDirectOpenTrace = bool.fromEnvironment(
+    'MEDIA_KIT_ANDROID_DIRECT_OPEN_TRACE',
+  );
+  static const _androidOpenOnTap = bool.fromEnvironment(
+    'MEDIA_KIT_ANDROID_OPEN_ON_TAP',
+  );
   int _dualViewPhase = 0;
   bool _dualViewProbeScheduled = false;
   Future<void>? _dualViewExitFuture;
@@ -305,7 +311,14 @@ class _SinglePlayerSingleVideoScreenState
       if (Platform.isAndroid && _androidHdrTransaction) {
         await _openHdrSource(source);
       } else {
+        if (Platform.isAndroid && _androidDirectOpenTrace) {
+          debugPrint('ANDROID_DIRECT_OPEN trigger path=$source');
+          debugPrint('ANDROID_DIRECT_OPEN media_command');
+        }
         await player.open(Media(source));
+        if (Platform.isAndroid && _androidDirectOpenTrace) {
+          debugPrint('ANDROID_DIRECT_OPEN media_returned');
+        }
       }
     } catch (error) {
       debugPrint('OPEN_SELECTED_SOURCE error=$error');
@@ -706,7 +719,9 @@ class _SinglePlayerSingleVideoScreenState
         ),
       );
     }
-    if (Platform.isAndroid && _androidNoMediaProbe) {
+    if (Platform.isAndroid && _androidOpenOnTap) {
+      debugPrint('ANDROID_DIRECT_OPEN awaiting_tap');
+    } else if (Platform.isAndroid && _androidNoMediaProbe) {
       debugPrint('ANDROID_NO_MEDIA_PROBE PlatformView mounted without open');
     } else {
       unawaited(_openInitialSource()
@@ -1028,6 +1043,9 @@ class _SinglePlayerSingleVideoScreenState
   }
 
   Future<void> _openInitialSource() async {
+    if (Platform.isAndroid && _androidDirectOpenTrace) {
+      debugPrint('ANDROID_DIRECT_OPEN trigger path=${sources[0]}');
+    }
     if (Platform.isAndroid && _androidHdrTransaction) {
       if (_androidLoopSource) {
         await player.setPlaylistMode(PlaylistMode.single);
@@ -1065,6 +1083,9 @@ class _SinglePlayerSingleVideoScreenState
     // media, otherwise a first launch can initialize vo before any Surface.
     final output = await controller.platform.future;
     await output.waitUntilInitialOutputBound;
+    if (Platform.isAndroid && _androidDirectOpenTrace) {
+      debugPrint('ANDROID_DIRECT_OPEN surface_bound');
+    }
     debugPrint('AUTO_SOURCE path=${sources[0]}');
     if (Platform.isAndroid && _androidP84BaseLayerProbe) {
       if (!sources[0].contains('DV-P8.4') &&
@@ -1208,6 +1229,9 @@ class _SinglePlayerSingleVideoScreenState
       await player.setPlaylistMode(PlaylistMode.single);
       debugPrint('ANDROID_LOOP_SOURCE mode=single');
     }
+    if (Platform.isAndroid && _androidDirectOpenTrace) {
+      debugPrint('ANDROID_DIRECT_OPEN media_command');
+    }
     await player.open(Media(
       sources[0],
       start: requestedStartSeconds != null && requestedStartSeconds >= 0.0
@@ -1218,6 +1242,9 @@ class _SinglePlayerSingleVideoScreenState
             )
           : null,
     ));
+    if (Platform.isAndroid && _androidDirectOpenTrace) {
+      debugPrint('ANDROID_DIRECT_OPEN media_returned');
+    }
     if (Platform.isAndroid &&
         _androidDualViewLifecycleProbe &&
         !_dualViewProbeScheduled) {
