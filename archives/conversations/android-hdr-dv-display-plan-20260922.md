@@ -2,6 +2,7 @@
 
 ## Current State
 
+- 2026-09-27 10444 在原同进程重叠重建场景中，旧实例销毁后创建不播放的临时 Player 重新接管 mpv 的全局 FFmpeg 日志；新播放段的 RPU 汇总由临时日志流取得，为227/227实际输出匹配、errors0，旧段206/206，双方图像资源归零。10442第二段无日志属于全局日志路由失声，不能视为RPU丢失。见`archives/experiments/android-p5-rpu-rebind-10444-20260927.md`。手机恢复原10420/自动亮度1设置37/诊断属性0。
 - 2026-09-27 10442 同包重跑确认重建后属性RPU=2/raw_yuv=1，第二段 MediaCodec 硬解、AImage613/613仍无RPU记录；属性清零不是解释，需检查二次解码器初始化/探针激活。记录并入`archives/experiments/android-p5-rpu-recreate-10442-20260927.md`。测试后再次恢复原10420、自动亮度1设置37、诊断属性0。
 - 2026-09-27 增加独立 `MEDIA_KIT_AUTO_LIFECYCLE` 测试入口并用10442重跑同进程重建：旧段 RPU 197/197、errors0；第二段硬解 P5 播放约31秒、图像750/750归零，却无 RPU 探针记录，故重开 RPU 仍未验收。见`archives/experiments/android-p5-rpu-recreate-10442-20260927.md`。磁盘构建受 Flutter 生成缓存5.5GB影响，清除此可再生目录后构建成功；设备恢复原10420、自动亮度1设置37、诊断属性0。
 - 2026-09-27 10441 同进程重建短轮：原播放段 RPU 实际输出88/88匹配，重建 generation2 后第二段图像资源61/61归零、无abort，但未得到第二段 RPU 逐帧或汇总；自动入口同时触发与重建无关的窗口缩放 MissingPluginException，故重开验收仍开放。详见`archives/experiments/android-p5-rpu-recreate-10441-20260927.md`。结束已恢复原10420/自动亮度1设置37/诊断属性0。
