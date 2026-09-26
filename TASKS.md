@@ -43,6 +43,7 @@
 ## Next（近期候选，最多 10 条）
 - [ ] Android HDR10 / DV P8.4 / P5 显示闭环与双视图一致性
   - status: in_progress
+  - latest: 2026-09-26 本轮保存与提交完成：`media-kit`本地提交`5cf24d7`（Android HDR核心）、`c11e6c3`（回放/诊断工具）、`99b0831`（710份实验归档）；外部fork分支与SHA见下一条及conversation顶部。`media-kit`未push，默认Gradle仍使用既有发布JAR，通用化候选只在fork构建分支可用。工作树仅剩自动截图`mpv-shot0001.jpg`，未纳入有效代码。用户决定停止抖动方向；HDR/DV显示闭环、2560性能门槛、独立颜色及连续可见播放仍未完成。
   - latest: 2026-09-26 有效跨库代码已按归属提交并push：`Goodwu/libplacebo`通用显式opt-in DV线性解码及外部YUV支持至`c9fd879`；`Goodwu/mpv`硬解/DV元数据正式分支至`a81978b`、含原生P5诊断的实验渲染分支至`63a0aa9`；`Goodwu/libmpv-android-video-build-dv-experiment`构建分支至`d585494`，固定两fork SHA。通用化组合arm64编译链接通过但尚未实机复测，2560性能门槛/独立色彩/可见播放仍待验；实验分支不是产品准入。详情见`archives/experiments/android-p5-glass-policy-10418-10419-20260926.md`。
   - latest: 2026-09-26 抖动成本同包全片关闭→开启→关闭：PQ数据流分支均命中，EOS VO465/1298/2859、decoder0；208MHz近似配对的末30秒，开启/关闭新增掉帧487/492，无明显低频收益，且禁用抖动损害8-bit渐变。停止抖动优化方向，保留原配置；三轮结构/资源关闭通过，原10420与属性0已恢复。用户要求通用化并提交所有有效改动，已fork libplacebo/mpv至Goodwu，正分离通用代码与诊断探针。详见`archives/experiments/android-p5-glass-policy-10418-10419-20260926.md`。
   - latest: 2026-09-26 2560剩余色彩路径静态核对：当前P5/SDR策略的`gamut=clip`在libplacebo为noop，`need_gamut_map=false`，故配置的48×32×256 gamut 3D LUT不会进入逐像素采样；不能把低频掉帧归因于该LUT。PQ数据流分支后仍有BT.2390必需的IPT/PQ转换、tone LUT、目标编码/抖动；下步对此取证分段成本，当前只是源码推导而非GPU耗时测量。见`archives/experiments/android-p5-glass-policy-10418-10419-20260926.md`。
