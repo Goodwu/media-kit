@@ -7,7 +7,7 @@
 - [ ] Android HDR10 / DV P8.4 / P5 显示闭环
   - status: in_progress
   - context: archives/conversations/android-hdr-dv-display-plan-20260922.md
-  - acceptance: 固定素材身份与设备能力；PlatformView 对 HDR10/P8.4/P5 分别输出 PQ/HLG/PQ，Texture 明确转换到 SDR；核对实际后端、Surface 格式、系统 HDR 合成、SDR 复位和全屏可见画面。P8.4 的无 HLG 路径、P5 DV 元数据处理及原生 DV 能力须单独说明，不能以 PQ 转换冒充原生 DV。
+  - acceptance: 固定素材身份与设备能力；PlatformView 对 HDR10/P8.4/P5 分别输出 PQ/HLG/PQ，Texture 明确转换到 SDR；核对实际后端、Surface 格式、系统 HDR 合成、SDR 复位和全屏可见画面。P8.4 的无 HLG 路径、P5 DV 元数据处理及原生 DV 能力须单独说明，不能以 PQ 转换冒充原生 DV。最高亮度仅用于短时人工观察，每轮结束立即恢复原自动亮度，不长时间停留静态画面。
   - latest: HDR10、P8.4 已在真横屏/最高亮度下获得用户的亮暗、颜色和流畅性好评；10436 P5 全片与 10437 4K59.94 吹玻璃源用同页全屏消除了旧页印记，用户均确认画面良好。10437 同包复播的 SF/HWC 回读为 10 位 BT.2020/PQ；10436 没有同轮 HWC 回读。LYA-AL00/API29 的 P5 PQ 仍依赖精确固件、属性门控的私有 ABI 探针，默认产品路径未通过；10439 公开 SurfaceControl PQ 色层实验因 HDR 能力查询权限拒绝而崩溃，代码已撤销。静态 HDR 元数据、独立色准、P5 通用输出及双视图一致性仍开放。
   - next: 从支持的公开输出机制或设备能力边界确定可交付的 P5 路径；在不依赖私有探针的包上复核实际 HDR/SDR 切换。保留已通过的同页全屏体验。
 
