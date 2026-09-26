@@ -15,6 +15,7 @@ class FakeBackend implements AndroidHdrOpenBackend {
   bool failConfigure = false;
   bool removeStagedOnConfigureFailure = false;
   bool failStopOnce = false;
+  bool failResetOnce = false;
   bool failValidate = false;
 
   @override
@@ -32,7 +33,14 @@ class FakeBackend implements AndroidHdrOpenBackend {
   }
 
   @override
-  Future<void> resetOwnedConfiguration() async => calls.add('reset');
+  Future<void> resetOwnedConfiguration() async {
+    calls.add('reset');
+    if (failResetOnce) {
+      failResetOnce = false;
+      throw StateError('reset failed');
+    }
+  }
+
   @override
   Future<void> prepareOutput(AndroidHdrSampleIdentity identity) async {
     calls.add('prepare:${identity.path}');
@@ -77,6 +85,28 @@ AndroidHdrSampleIdentity identity(String path) => AndroidHdrSampleIdentity(
     AndroidHdrSample.dolbyVisionP84, 'test-hash', path);
 
 void main() {
+  test('successful direct open is stopped and reset on coordinator dispose',
+      () async {
+    final backend = FakeBackend();
+    final coordinator = AndroidHdrOpenCoordinator(backend,
+        verifier: (source, _) async => identity(source));
+    await coordinator.openSource('A');
+    final before = backend.calls.length;
+    await coordinator.dispose();
+    expect(backend.calls.skip(before), ['stop', 'reset']);
+  });
+
+  test('dispose retries reset after a successful open', () async {
+    final backend = FakeBackend();
+    final coordinator = AndroidHdrOpenCoordinator(backend,
+        verifier: (source, _) async => identity(source));
+    await coordinator.openSource('A');
+    backend.failResetOnce = true;
+    await expectLater(coordinator.dispose(), throwsStateError);
+    await coordinator.dispose();
+    expect(backend.calls.where((call) => call == 'reset').length, 3);
+  });
+
   test('slow verification cannot open after a newer request', () async {
     final aVerified = Completer<AndroidHdrSampleIdentity>();
     final backend = FakeBackend();
@@ -166,8 +196,8 @@ void main() {
   test('preparation failure of successor still rolls back partial config',
       () async {
     final backend = FakeBackend()..heldConfigure = Completer<void>();
-    final coordinator = AndroidHdrOpenCoordinator(backend,
-        verifier: (source, _) async {
+    final coordinator =
+        AndroidHdrOpenCoordinator(backend, verifier: (source, _) async {
       if (source == 'B') throw StateError('unknown sample');
       return identity(source);
     });
