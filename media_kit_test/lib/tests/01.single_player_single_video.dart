@@ -1387,7 +1387,7 @@ class _SinglePlayerSingleVideoScreenState
     final diagnosticVideoKey = displayController == null
         ? null
         : GlobalObjectKey<VideoState>(displayController);
-    final videoKey = _androidP5PlatformSdrDiagnostic
+    final videoKey = (_androidP5PlatformSdrDiagnostic || _androidP5ScopeFullscreen)
         ? diagnosticVideoKey
         : ObjectKey(displayController);
     if (_androidP5ScopeFullscreen) {
