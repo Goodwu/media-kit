@@ -39,13 +39,13 @@
   - status: queued
   - context: archives/conversations/android-hdr-dv-display-plan-20260922.md
   - acceptance: Surface 重建、Home→前台、退出/重入、oldA→newB 交错和失败重试时，播放器位置与持续可见帧正确，资源最终释放；晚到 Create、Release ACK 丢失及 engine detach 有明确 owner/屏障，不以构建或单次 EOS 代替生命周期验收。
-  - latest: 历史 P8.4 PlatformView Home→前台复现 HEVC POC 错误和画面冻结；同页全屏改善了 P5 UI 印记及部分 Surface 重建，但不覆盖后台恢复。Create/Release 竞态曾有代码修正与静态验证，故障注入和真实交错仍缺。
+  - latest: 历史 P8.4 PlatformView Home→前台复现 HEVC POC 错误和画面冻结；同页全屏改善了 P5 UI 印记及部分 Surface 重建，但不覆盖后台恢复。mpv 全局 FFmpeg 日志在重叠重建后失声已由 Goodwu/mpv `9acfeff` 修复，10445 实机第二段正常收到 RPU 汇总；这只闭合日志接管，不替代 Create/Release 竞态和持续画面验收。
 
 - [ ] P5 RPU 边界与独立色彩核验
   - status: queued
   - context: archives/conversations/android-hdr-dv-display-plan-20260922.md
   - acceptance: 对实际输出逐帧核对 RPU 对应关系，覆盖 seek/flush/重开；以明确的参考母版、目标空间和映射策略做同 PTS 数值比较，并把独立色彩结论与用户观感分开。
-  - latest: 10440 前后跳共4次flush，实际输出 RPU 匹配2321/2321、errors0。10444 同进程重建后用临时 mpv 实例恢复全局 FFmpeg 日志，前后两段实际输出分别206/206、227/227匹配、errors0，AImage和retire均归零；10442 第二段的探针失声是日志路由问题，未证明 RPU 丢失。见`archives/experiments/android-p5-rpu-seek-10440-20260927.md`与`archives/experiments/android-p5-rpu-rebind-10444-20260927.md`。长期重开和独立色准仍待核验，后者有母版身份及映射差异。
+  - latest: 10440 前后跳共4次flush，实际输出 RPU 匹配2321/2321、errors0。10444 用临时 mpv 实例恢复日志后，重建前后实际输出206/206、227/227匹配。10445 用已修复的 mpv 日志接管且不需临时实例，前后201/201、225/225匹配、errors0，图像资源归零。10442 探针失声源自全局日志路由。见`archives/experiments/android-p5-rpu-seek-10440-20260927.md`、`archives/experiments/android-p5-rpu-rebind-10444-20260927.md`、`archives/experiments/android-mpv-ffmpeg-log-handoff-10445-20260927.md`。长期重开和独立色准仍待核验，后者有母版身份及映射差异。
 
 - [ ] 排查 Android HDR 天空渐变层纹
   - status: queued
