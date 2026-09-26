@@ -39,8 +39,8 @@
   - status: queued
   - context: archives/conversations/android-hdr-dv-display-plan-20260922.md
   - acceptance: Surface 重建、Home→前台、退出/重入、oldA→newB 交错和失败重试时，播放器位置与持续可见帧正确，资源最终释放；晚到 Create、Release ACK 丢失及 engine detach 有明确 owner/屏障，不以构建或单次 EOS 代替生命周期验收。
-  - latest: 当前代码/默认发布 libmpv 的10446固定 P8.4 双 Home→返回轮，均只开源一次，原生 HLG、同会话位置恢复并持续出图；后台过渡有33条 HEVC POC 错误，VO掉帧0/30/62。10447默认关闭的“先vid=no再vo=null”诊断轮，双返回 POC 0、无软件格式切换，但 VO 0/48/57，尚不能判定流畅性收益。见`archives/experiments/android-p84-home-resume-10446-20260927.md`与`archives/experiments/android-p84-detach-10447-20260927.md`。切换瞬间可见顿挫、Create/Release竞态与双视图交错仍缺；mpv全局日志接管已由 Goodwu/mpv `9acfeff` 修复。
-  - next: 用相同计时口径做该解绑顺序开/关/开 A/B/A，并覆盖手动暂停后 Home→前台；若 POC 消失但 VO 掉帧不降，继续定位 Surface 销毁前的 producer 停止屏障。
+  - latest: P8.4完整源、默认发布libmpv的10447开/10448关/10449开双 Home→返回对照：开启“先vid=no再vo=null”时两轮 POC 0、无后台软解格式；关闭轮 POC 34、两次转`yuv420p10` DolbyVision/PQ。t90 VO 开/关/开为48/67/28，媒体位置不同，不能当严格掉帧收益；开启时仍有VO掉帧。10450播放12秒后暂停再切后台，返回保持暂停。详见`archives/experiments/android-p84-detach-aba-10448-10450-20260927.md`。开关仍默认关闭；切换瞬间可见顿挫、Create/Release竞态与双视图交错仍缺；mpv全局日志接管已由 Goodwu/mpv `9acfeff` 修复。
+  - next: 用HDR10、P5及SDR与双视图/失败重试验证提前停轨，确认没有seek、自动恢复或资源释放回归，再决定默认开启；同时定位剩余VO掉帧和切换瞬间停顿。
 
 - [ ] P5 RPU 边界与独立色彩核验
   - status: queued
