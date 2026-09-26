@@ -2,6 +2,8 @@
 
 ## Current State
 
+- 2026-09-27 12473 SDR 受控交错：初始双视图中旧 A 的真实 SurfaceAvailable 延迟 1.5 秒，在新 B 事件和出图后才送 Dart；本轮日志只观察到旧 A global ref 删除一次，B 在放行前后两个截图采样点均有不同的视频。V1复核未见窄范围结论阻断；无独立mpv WID回读或两截图之间逐帧证据。临时诊断补丁已撤销，设备恢复10420/自动亮度/熄屏。只覆盖晚到 Available；Failed/Destroy/ACK 回复丢失及 P5 仍未验。见`archives/experiments/android-sdr-old-a-late-12473-20260927.md`。
+- 2026-09-27 12471 同进程 P5 公开 PQ 失败→原生 HDR10/P8.4→SDR，SDR 视频层回到 BT.709、HDR metadata types=0，3秒间隔截图变化；仅覆盖原生 HDR 输出。12472 热页面 SDR 三次录屏点击反馈到可见出图约133/100/100ms，尚非真实输入事件起点或全屏冷启动门槛。见`archives/experiments/android-hdr-sdr-recovery-12471-20260927.md`和`archives/experiments/android-sdr-first-visible-12472-20260927.md`。
 - 2026-09-27首帧探索：12469固定SDR直开（无整片暂存）触发到Surface绑定106ms、媒体命令再16ms；这些仅为内部信号。12470稳定页面ADB点击后短录屏里，点击反馈PTS4.065s、视频区PTS4.144s仍黑、PTS4.165s首次出现可辨认画面；录屏和logcat缺统一时钟、录屏有负载，不能判正式2秒门槛。证据见`archives/experiments/android-sdr-first-visible-12469-12470-20260927.md`。设备恢复10420、属性0、自动亮度、屏幕OFF。下一步测冷/热多轮、HDR源和全屏并建立统一时钟。
 - 2026-09-27 12468同进程原生HDR恢复：P5公开PQ失败后，HDR10/P8.4按`mediacodec_embed`依次恢复；SF/HWC分别回读BT.2020/PQ(metadata types=3)与HLG(types=0)，视频区域相隔3秒像素变化，设备恢复10420/三属性0/自动亮度/屏幕OFF。诊断阶段计时将整片哈希+复制与播放器阶段分开：HDR10/P8.4暂存21.908/51.095秒，素材就绪后至轨道确认0.449/0.587秒。不能以轨道确认代表屏幕首帧；全屏、SDR复位及交错仍待验。见`archives/experiments/android-p5-native-recovery-12468-20260927.md`。
 - 2026-09-27 首帧耗时口径提醒：12465 P5失败后HDR10/P8.4恢复分别约22/57秒才报`ANDROID_HDR_RECOVERY_OPEN`，但测试页`AndroidHdrOpenCoordinator.staged`调用`stageAndroidHdrSample`，对518MB/1.1GB源逐块哈希并复制到私有目录后才进入播放器配置。现有日志未单独标出暂存结束时刻，不能把这两个耗时当成播放器出首帧，更不能代表产品路径；下一轮加阶段计时并测屏幕真实呈现。
