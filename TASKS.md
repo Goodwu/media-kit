@@ -39,7 +39,7 @@
   - status: queued
   - context: archives/conversations/android-hdr-dv-display-plan-20260922.md
   - acceptance: Surface 重建、Home→前台、退出/重入、oldA→newB 交错和失败重试时，播放器位置与持续可见帧正确，资源最终释放；晚到 Create、Release ACK 丢失及 engine detach 有明确 owner/屏障，不以构建或单次 EOS 代替生命周期验收。
-  - latest: 历史 P8.4 PlatformView Home→前台复现 HEVC POC 错误和画面冻结；同页全屏改善了 P5 UI 印记及部分 Surface 重建，但不覆盖后台恢复。mpv 全局 FFmpeg 日志在重叠重建后失声已由 Goodwu/mpv `9acfeff` 修复，10445 实机第二段正常收到 RPU 汇总；这只闭合日志接管，不替代 Create/Release 竞态和持续画面验收。
+  - latest: 当前代码/默认发布 libmpv 的10446固定 P8.4 双 Home→返回轮，均只开源一次，原生 HLG、同会话位置恢复并持续出图；t90/t120/t150媒体40.607/66.500/92.392秒，VO掉帧0/30/62，后台过渡有33条 HEVC POC 错误。相隔6秒截图场景改变，排除持续冻结，切换瞬间可见顿挫仍未验收。见`archives/experiments/android-p84-home-resume-10446-20260927.md`。mpv全局日志接管已由 Goodwu/mpv `9acfeff` 修复；Create/Release竞态与双视图交错仍缺。
 
 - [ ] P5 RPU 边界与独立色彩核验
   - status: queued
