@@ -32,7 +32,7 @@
   - priority: 当前 Android HDR/P5 工作完成后立即启动，先于其它 Next 项
   - context: archives/conversations/android-hdr-dv-display-plan-20260922.md
   - acceptance: 在真实手机上，以用户触发打开视频为起点、屏幕实际呈现首个视频帧为终点计时；覆盖当前支持的 SDR、HDR10、P8.4、P5 代表素材及冷/热启动，重复记录分布与最慢样本，正常播放达到 2 秒内，争取 1 秒内。视频尺寸或 Surface ACK 不能冒充实际出图；同时保持画质、音画同步、全屏及退出/重入正确。
-  - latest: 12468阶段计时证明诊断页同进程HDR10/P8.4的整片哈希+复制耗时21.908/51.095秒；素材就绪到轨道确认仅0.449/0.587秒，但仍不是屏幕首帧。12469直开SDR日志触发→Surface绑定106ms、媒体命令返回再16ms；12470同源稳定页面点击短录屏中，点击可见反馈到首个视频画面约100ms。这是单次热页面、有录屏负载且录屏/logcat未统一时钟的探索结果，不能据此宣布2秒门槛通过。见`archives/experiments/android-sdr-first-visible-12469-12470-20260927.md`。
+  - latest: 12468阶段计时证明诊断页同进程HDR10/P8.4的整片哈希+复制耗时21.908/51.095秒；素材就绪到轨道确认仅0.449/0.587秒，但仍不是屏幕首帧。12469直开SDR日志触发→Surface绑定106ms、媒体命令返回再16ms；12470同源稳定页面单次点击录屏反馈到首画面约100ms。12472 同一录屏时间轴三次热页 SDR 点击反馈→视频区出图约133/100/100ms；录屏反馈晚于真实触摸，尚非正式触发口径，见`archives/experiments/android-sdr-first-visible-12469-12470-20260927.md`、`archives/experiments/android-sdr-first-visible-12472-20260927.md`。
   - next: 建立同一时钟的用户触发→真实屏幕首帧测量，覆盖冷/热多轮与SDR、HDR10、P8.4、P5及全屏路径；产品路径不应计入诊断页整片复制。再按测得的最大阶段瓶颈优化并复测。
 
 - [ ] Android native output / 双视图生命周期回归
