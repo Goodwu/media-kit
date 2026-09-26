@@ -2,6 +2,7 @@
 
 ## Current State
 
+- 2026-09-27 mpv 多实例 FFmpeg 日志接管修复已在 Goodwu/mpv `fix/ffmpeg-log-owner-handoff` 提交并推送`9acfeff`，单文件 Android arm64 编译、独立V1审查与10445实体机重建短轮通过。无临时重绑 Player 时第二段普通日志直接出现RPU225/225匹配、errors0，两段AImage归零；该诊断lib由较早隔离对象链接，不能覆盖正式renderer画质/性能。见`archives/experiments/android-mpv-ffmpeg-log-handoff-10445-20260927.md`。设备恢复原10420/自动亮度1设置37/诊断属性0。
 - 2026-09-27 10444 在原同进程重叠重建场景中，旧实例销毁后创建不播放的临时 Player 重新接管 mpv 的全局 FFmpeg 日志；新播放段的 RPU 汇总由临时日志流取得，为227/227实际输出匹配、errors0，旧段206/206，双方图像资源归零。10442第二段无日志属于全局日志路由失声，不能视为RPU丢失。见`archives/experiments/android-p5-rpu-rebind-10444-20260927.md`。手机恢复原10420/自动亮度1设置37/诊断属性0。
 - 2026-09-27 10442 同包重跑确认重建后属性RPU=2/raw_yuv=1，第二段 MediaCodec 硬解、AImage613/613仍无RPU记录；属性清零不是解释，需检查二次解码器初始化/探针激活。记录并入`archives/experiments/android-p5-rpu-recreate-10442-20260927.md`。测试后再次恢复原10420、自动亮度1设置37、诊断属性0。
 - 2026-09-27 增加独立 `MEDIA_KIT_AUTO_LIFECYCLE` 测试入口并用10442重跑同进程重建：旧段 RPU 197/197、errors0；第二段硬解 P5 播放约31秒、图像750/750归零，却无 RPU 探针记录，故重开 RPU 仍未验收。见`archives/experiments/android-p5-rpu-recreate-10442-20260927.md`。磁盘构建受 Flutter 生成缓存5.5GB影响，清除此可再生目录后构建成功；设备恢复原10420、自动亮度1设置37、诊断属性0。
