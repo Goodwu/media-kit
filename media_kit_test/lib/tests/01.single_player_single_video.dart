@@ -1161,6 +1161,12 @@ class _SinglePlayerSingleVideoScreenState
             )
           : null,
     ));
+    if (Platform.isAndroid &&
+        _androidDualViewLifecycleProbe &&
+        !_dualViewProbeScheduled) {
+      _dualViewProbeScheduled = true;
+      unawaited(_runDualViewLifecycleProbe());
+    }
     if (playingStartSeconds != null && playingStartSeconds >= 0.0) {
       debugPrint('ANDROID_PLAYING_START seconds=$playingStartSeconds');
     }
