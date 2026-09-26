@@ -353,6 +353,9 @@ class AndroidVideoController extends PlatformVideoController {
   static const bool _surfaceTimeline = bool.fromEnvironment(
     'MEDIA_KIT_ANDROID_SURFACE_TIMELINE',
   );
+  static const bool _stopVideoBeforePlatformDetach = bool.fromEnvironment(
+    'MEDIA_KIT_ANDROID_STOP_VIDEO_BEFORE_PLATFORM_DETACH',
+  );
 
   void _traceSurface(String event) {
     if (_surfaceTimeline) {
@@ -411,6 +414,15 @@ class AndroidVideoController extends PlatformVideoController {
     final voValue = widValue == '0' ? 'null' : configuration.vo!;
     final vidValue = widValue == '0' ? 'no' : 'auto';
     _traceSurface('apply begin wid=$widValue vo=$voValue vid=$vidValue');
+    final stopVideoFirst = _stopVideoBeforePlatformDetach &&
+        configuration.usePlatformView &&
+        configuration.vo == 'mediacodec_embed' &&
+        widValue == '0';
+    if (stopVideoFirst) {
+      _traceSurface('property begin vid=no before vo=null');
+      await _setOutputProperty('vid', 'no');
+      _traceSurface('property complete vid=no before vo=null');
+    }
     // It is important to re-initialize --vo after --android-surface-size.
     await _setOutputProperty('vo', 'null');
     _traceSurface('property complete vo=null');
