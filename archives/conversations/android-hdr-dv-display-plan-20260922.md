@@ -2,6 +2,7 @@
 
 ## Current State
 
+- 2026-09-27 10451 HDR10完整源、默认发布libmpv、提前停轨诊断开关开启的双Home→返回：两次`vid=no`完成均早于`vo=null`，持续MediaCodec BT.2020/PQ且系统SF/HWC回读PQ，POC0、无后台软件格式切换；t90媒体61.228秒、VO23、decoder0。见`archives/experiments/android-hdr10-detach-10451-20260927.md`。切换瞬间真人流畅仍未验收，候选保持默认关闭。测试后恢复原10420和自动亮度1/37。
 - 2026-09-27 10447开/10448关/10449开 P8.4 解绑顺序对照：先严格停`vid=no`的两轮均无后台软件格式切换与POC错误，关闭轮POC34、两次转`yuv420p10` DolbyVision/PQ；t90 VO开/关/开48/67/28，媒体位置并不一致，不能视为严格性能结论。10450主动暂停后Home→返回保持`pause=yes`。详见`archives/experiments/android-p84-detach-aba-10448-10450-20260927.md`。诊断开关保持默认关闭，待其它素材、双视图及失败路径验证。实验结束已恢复10420、自动亮度1/37、删测试源。
 - 2026-09-27 10447 P8.4 双 Home→返回诊断：仅在 PlatformView/`mediacodec_embed` 解绑时、默认关闭开关下先严格等待`vid=no`再执行原`vo=null`。时间线证明两次均先停轨；本轮 POC 0、无后台软件格式切换，返回后继续 HLG 播放，VO累计0/48/57，尚不能认定流畅性收益。截图证明画面继续变化；需同口径 A/B/A 与手动暂停回归，候选尚非产品修复。证据与包SHA见`archives/experiments/android-p84-detach-10447-20260927.md`。结束恢复原10420、自动亮度1/37，删除临时测试源。
 - 2026-09-27 10446当前默认发布libmpv P8.4完整源双 Home→返回：一次HDR_OPEN/原生HLG，恢复后位置继续前进，第二次后相隔6秒视频截图不同；后台过渡共33条HEVC POC错误，VO掉帧由0增30再62，故仅证明没有持续冻结，切换瞬间流畅仍待修/验。APK/源/截图/日志SHA见`archives/experiments/android-p84-home-resume-10446-20260927.md`。结束恢复原10420、自动亮度1设置37，临时1.1GB副本已清理。
