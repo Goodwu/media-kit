@@ -18,22 +18,21 @@
   - latest: 同 APK、2560×1440 输出的系统性能模式开/关/开 EOS VO 掉帧为 17/5051/19，decoder 为 0；默认模式门槛未过。1920×1080 也出现伴随 GPU 低频的后段失速；关闭抖动无明显低频收益，已停止该方向。用户最近确认 10437 的 1440 宽 P5 吹玻璃画面流畅，但这不覆盖 2560 默认模式全片门槛。
   - next: 在同一正式全屏路径、固定输出尺寸和默认电池模式下分离低频时的 GPU 渲染与提交/合成等待，再对有效改动做同帧颜色及全片 A/B/A 复核。
 
-- [ ] 修复 macOS modern mpv 销毁时未释放 render context 的崩溃
+- [ ] 将手机视频打开到首个可见画面缩短至 2 秒内（争取 1 秒）
   - status: in_progress
+  - context: archives/conversations/android-hdr-dv-display-plan-20260922.md
+  - acceptance: 在真实手机上，以用户触发打开视频为起点、屏幕实际呈现首个视频帧为终点计时；覆盖当前支持的 SDR、HDR10、P8.4、P5 代表素材及冷/热启动，重复记录分布与最慢样本，正常播放达到 2 秒内，争取 1 秒内。视频尺寸或 Surface ACK 不能冒充实际出图；同时保持画质、音画同步、全屏及退出/重入正确。
+  - latest: 12472 热页面 SDR 点击反馈→画面约133/100/100ms，但不含触摸到反馈。12479 在同机以点击命令发出前到非黑截图完成作保守上界，五次冷 SDR 为1.48–1.56秒。按用户指定 Glass P5 源复测：12480诊断整片哈希+复制一次至可见内容上界16.695秒，其中样本准备10.390秒；12481临时预验证固定文件、跳过复制后三次为6.283/5.981/6.640秒。片源自身黑场到约2.052秒，需把实际视频帧呈现与首次非黑内容分开；12481首个原生图像获取约1.69秒但不是屏幕呈现证明。见`archives/experiments/android-p5-glass-first-visible-12480-12481-20260927.md`。
+  - next: 按用户确认的片头黑场口径继续 Glass 真正屏幕首帧测量；将诊断整片复制与产品本地打开分开。定位无复制路径的剩余首帧等待，覆盖冷/热、全屏及 SDR/HDR10/P8.4，复测画质与退出/重入。不能把仅适用于外部预验证固定文件的探针作为通用优化。
+
+## Next（近期候选，最多 10 条）
+
+- [ ] 修复 macOS modern mpv 销毁时未释放 render context 的崩溃
+  - status: queued
   - context: archives/conversations/native-output-rebuild-20260920.md
   - acceptance: 同一控制器的并发 dispose 共用完成屏障；Player 销毁前完成 native output/render context 释放，dispose 后不再写 active notifier。用 modern mpv 实际播放后退出、快速重入和输出重建，均无 `mpv_render_context_free() not called` abort。
   - latest: Darwin Player preTermination 屏障、创建/销毁仲裁及失败重试已通过 V2 静态复审。隔离 Goodwu mpv 0.41 W0 测试包完成 SDR 出图→重建→第二次出图→定时移除：两个 Surface 均有释放记录，两次 Player dispose 完成，进程未见 render-context abort，见 `archives/experiments/macos-w0-remove-20260927.md`。PiliPlusX 当前 Debug 和未改动 final16 包在此桌面环境均无可操作窗口，产品调用链仍未验收。
   - next: 定位 PiliPlusX 窗口不可访问的环境/应用状态，再验证产品调用链有序退出、快速重入、seek、输出重建及 HDR 长播；测试页的定时移除证据不能替代这些场景。
-
-## Next（近期候选，最多 10 条）
-
-- [ ] 将手机视频打开到首个可见画面缩短至 2 秒内（争取 1 秒）
-  - status: queued
-  - priority: 当前 Android HDR/P5 工作完成后立即启动，先于其它 Next 项
-  - context: archives/conversations/android-hdr-dv-display-plan-20260922.md
-  - acceptance: 在真实手机上，以用户触发打开视频为起点、屏幕实际呈现首个视频帧为终点计时；覆盖当前支持的 SDR、HDR10、P8.4、P5 代表素材及冷/热启动，重复记录分布与最慢样本，正常播放达到 2 秒内，争取 1 秒内。视频尺寸或 Surface ACK 不能冒充实际出图；同时保持画质、音画同步、全屏及退出/重入正确。
-  - latest: 12468阶段计时证明诊断页同进程HDR10/P8.4的整片哈希+复制耗时21.908/51.095秒；素材就绪到轨道确认仅0.449/0.587秒，但仍不是屏幕首帧。12469直开SDR日志触发→Surface绑定106ms、媒体命令返回再16ms；12470同源稳定页面单次点击录屏反馈到首画面约100ms。12472 同一录屏时间轴三次热页 SDR 点击反馈→视频区出图约133/100/100ms；录屏反馈晚于真实触摸，尚非正式触发口径，见`archives/experiments/android-sdr-first-visible-12469-12470-20260927.md`、`archives/experiments/android-sdr-first-visible-12472-20260927.md`。
-  - next: 建立同一时钟的用户触发→真实屏幕首帧测量，覆盖冷/热多轮与SDR、HDR10、P8.4、P5及全屏路径；产品路径不应计入诊断页整片复制。再按测得的最大阶段瓶颈优化并复测。
 
 - [ ] Android native output / 双视图生命周期回归
   - status: queued
