@@ -2,6 +2,7 @@
 
 ## Current State
 
+- 2026-09-27 12468同进程原生HDR恢复：P5公开PQ失败后，HDR10/P8.4按`mediacodec_embed`依次恢复；SF/HWC分别回读BT.2020/PQ(metadata types=3)与HLG(types=0)，视频区域相隔3秒像素变化，设备恢复10420/三属性0/自动亮度/屏幕OFF。诊断阶段计时将整片哈希+复制与播放器阶段分开：HDR10/P8.4暂存21.908/51.095秒，素材就绪后至轨道确认0.449/0.587秒。不能以轨道确认代表屏幕首帧；全屏、SDR复位及交错仍待验。见`archives/experiments/android-p5-native-recovery-12468-20260927.md`。
 - 2026-09-27 首帧耗时口径提醒：12465 P5失败后HDR10/P8.4恢复分别约22/57秒才报`ANDROID_HDR_RECOVERY_OPEN`，但测试页`AndroidHdrOpenCoordinator.staged`调用`stageAndroidHdrSample`，对518MB/1.1GB源逐块哈希并复制到私有目录后才进入播放器配置。现有日志未单独标出暂存结束时刻，不能把这两个耗时当成播放器出首帧，更不能代表产品路径；下一轮加阶段计时并测屏幕真实呈现。
 - 2026-09-27 12466 GPU PlatformView对照：P5公开PQ拒绝后约78ms报错；同进程HDR10新PQ Surface也因公开dataspace失败而`wid=0`并即时返回，恢复循环因此未试P8.4。12465恢复策略实际是原生`mediacodec_embed`，并非Texture SDR；12466强制GPU失败不能替代历史HDR10/P8.4原生后端阳性验收。两轮证据见`archives/experiments/android-p5-public-fail-12464-20260927.md`；设备均恢复10420、三属性0、自动亮度、屏幕OFF。下一步按原生后端复核同进程系统HDR及SDR复位。
 - 2026-09-27 12465失败ACK：P5 PQ setter首次拒绝时`wid=0`，原生04:16:35.182发`SurfaceFailed`，Dart04:16:35.258即报身份完整的`initialDataSpaceRejected`，较12464的10秒超时缩短为约76ms。V6独立静态审查通过交叠View的身份/等待/释放规则；实机尚未覆盖A→B事件交错。随后同进程HDR10与P8.4分别报打开成功，但该包`gpuPlatformHdr=false`的恢复输出未取得同步SF/HWC与可见帧证据，不能仅由`ANDROID_HDR_OPEN`判定Texture SDR或系统HDR实际出图。详细见`archives/experiments/android-p5-public-fail-12464-20260927.md`及12465聚焦日志。结束恢复原10420、三属性0、自动亮度、屏幕OFF。下一步按原生`mediacodec_embed`后端复核HDR10/P8.4与SDR复位，调查恢复阶段耗时。

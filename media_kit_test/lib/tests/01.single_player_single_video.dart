@@ -42,6 +42,9 @@ class _SinglePlayerSingleVideoScreenState
   static const _androidRecoverySources = String.fromEnvironment(
     'MEDIA_KIT_ANDROID_RECOVERY_SOURCES',
   );
+  static const _androidOpenPhaseTrace = bool.fromEnvironment(
+    'MEDIA_KIT_ANDROID_OPEN_PHASE_TRACE',
+  );
   int _dualViewPhase = 0;
   bool _dualViewProbeScheduled = false;
   Future<void>? _dualViewExitFuture;
@@ -198,6 +201,11 @@ class _SinglePlayerSingleVideoScreenState
         },
       ),
       privateRoot,
+      onPhase: _androidOpenPhaseTrace
+          ? (generation, phase, elapsedMicros) => debugPrint(
+              'ANDROID_HDR_OPEN_PHASE generation=$generation phase=$phase '
+              'elapsed_us=$elapsedMicros')
+          : null,
     );
   }
 

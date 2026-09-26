@@ -41,6 +41,7 @@ class AndroidHdrOpenResult {
 class AndroidHdrOpenCoordinator {
   AndroidHdrOpenCoordinator(this.backend,
       {SampleVerifier? verifier,
+      this.onPhase,
       this.outputTimeout = const Duration(seconds: 10)})
       : privateRoot = null,
         knownSha256 = androidHdrSampleSha256,
@@ -54,6 +55,7 @@ class AndroidHdrOpenCoordinator {
     Directory this.privateRoot, {
     this.outputTimeout = const Duration(seconds: 10),
     this.knownSha256 = androidHdrSampleSha256,
+    this.onPhase,
   }) : _verifier = null;
 
   final AndroidHdrOpenBackend backend;
@@ -61,6 +63,7 @@ class AndroidHdrOpenCoordinator {
   final Directory? privateRoot;
   final Map<String, AndroidHdrSample> knownSha256;
   final Duration outputTimeout;
+  final void Function(int generation, String phase, int elapsedMicros)? onPhase;
   Future<void> _tail = Future<void>.value();
   StagedAndroidHdrSample? _attachedStaged;
   final Set<Future<void>> _preparations = {};
@@ -98,6 +101,16 @@ class AndroidHdrOpenCoordinator {
   }) async {
     if (_disposed) throw StateError('Open coordinator is disposed');
     final generation = ++_generation;
+    final elapsed = Stopwatch()..start();
+    void mark(String phase) {
+      try {
+        onPhase?.call(generation, phase, elapsed.elapsedMicroseconds);
+      } catch (_) {
+        // Diagnostic timing must not affect playback or rollback.
+      }
+    }
+
+    mark('requested');
     final preparationDone = Completer<void>();
     _preparations.add(preparationDone.future);
     StagedAndroidHdrSample? staged;
@@ -115,7 +128,9 @@ class AndroidHdrOpenCoordinator {
         identity = await _verifier!(source, () => _invalid(generation));
       }
       _check(generation);
+      mark('sample_ready');
     } catch (error, stack) {
+      mark('sample_failed');
       await _cleanupWithoutMasking(staged);
       Error.throwWithStackTrace(error, stack);
     } finally {
@@ -128,6 +143,7 @@ class AndroidHdrOpenCoordinator {
       var switching = false;
       try {
         _check(generation);
+        mark('queue_entered');
         if (_pendingRollback) {
           await backend.stop();
           await _attachedStaged?.dispose();
@@ -135,31 +151,41 @@ class AndroidHdrOpenCoordinator {
           await backend.resetOwnedConfiguration();
           _pendingRollback = false;
           _check(generation);
+          mark('rollback_complete');
         }
         await backend.validate(identity);
         _check(generation);
+        mark('validated');
         switching = true;
         _pendingRollback = true;
         await backend.stop();
         await _attachedStaged?.dispose();
         _attachedStaged = null;
         _check(generation);
+        mark('previous_output_stopped');
         await backend.resetOwnedConfiguration();
         _check(generation);
+        mark('configuration_reset');
         await backend.prepareOutput(identity);
         _check(generation);
+        mark('output_prepared');
         await backend.configure(identity);
         _check(generation);
+        mark('configured');
         await backend.waitForOutput(identity).timeout(outputTimeout);
         _check(generation);
+        mark('output_ready');
         _attachedStaged = staged;
         await backend.open(identity, start: start, play: play);
         _check(generation);
+        mark('media_opened');
         await backend.verifyTrack(identity);
         _check(generation);
+        mark('track_verified');
         _pendingRollback = false;
         result.complete(AndroidHdrOpenResult(identity, generation));
       } catch (error, stack) {
+        mark('open_failed');
         // This callback still owns the side-effect queue even when a newer
         // request has invalidated it. Roll back here so a successor that fails
         // during preparation cannot leave partial native configuration behind.
