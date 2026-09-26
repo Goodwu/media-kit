@@ -1,0 +1,105 @@
+--- a/video/out/vo_gpu_next.c
++++ b/video/out/vo_gpu_next.c
+@@ -133,6 +133,15 @@
+ #endif
+ }
+ 
++#ifdef __ANDROID__
++static int64_t p5_thread_cpu_ns(void)
++{
++    struct timespec ts;
++    return clock_gettime(CLOCK_THREAD_CPUTIME_ID, &ts) == 0
++        ? (int64_t)ts.tv_sec * 1000000000LL + ts.tv_nsec : 0;
++}
++#endif
++
+ struct cache {
+     struct mp_log *log;
+     struct mpv_global *global;
+@@ -176,6 +185,13 @@
+     bool frame_pending;
+     bool p5_vo_perf;
+     uint64_t p5_vo_perf_seq;
++#ifdef __ANDROID__
++    bool p5_vo_cpu_wall;
++    uint64_t p5_vo_cpu_wall_frames;
++    int64_t p5_draw_wall_sum_ns, p5_draw_cpu_sum_ns;
++    int64_t p5_flip_wall_sum_ns, p5_flip_cpu_sum_ns;
++    int64_t p5_draw_wall_max_ns, p5_flip_wall_max_ns;
++#endif
+ #if HAVE_GL && defined(PL_HAVE_OPENGL) && defined(__ANDROID__)
+     bool p5_offscreen, p5_offscreen_check, p5_offscreen_half, p5_offscreen_ready;
+     pl_tex p5_offscreen_tex;
+@@ -1197,6 +1213,10 @@
+ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
+ {
+     struct priv *p = vo->priv;
++#ifdef __ANDROID__
++    int64_t p5_wall_start_ns = p->p5_vo_cpu_wall ? mp_time_ns() : 0;
++    int64_t p5_cpu_start_ns = p->p5_vo_cpu_wall ? p5_thread_cpu_ns() : 0;
++#endif
+ #if HAVE_GL && defined(PL_HAVE_OPENGL) && defined(__ANDROID__)
+     p5_gpu_timer_init(p);
+     p5_gpu_timer_poll(p);
+@@ -1770,12 +1790,25 @@
+                 (mp_time_ns() - p5_flush_start_ns) / 1000);
+     }
+     p->frame_pending = true;
++#ifdef __ANDROID__
++    if (p->p5_vo_cpu_wall && p5_cpu_start_ns) {
++        int64_t wall_ns = mp_time_ns() - p5_wall_start_ns;
++        int64_t cpu_ns = p5_thread_cpu_ns() - p5_cpu_start_ns;
++        p->p5_draw_wall_sum_ns += wall_ns;
++        p->p5_draw_cpu_sum_ns += cpu_ns;
++        p->p5_draw_wall_max_ns = MPMAX(p->p5_draw_wall_max_ns, wall_ns);
++    }
++#endif
+     return VO_TRUE;
+ }
+ 
+ static void flip_page(struct vo *vo)
+ {
+     struct priv *p = vo->priv;
++#ifdef __ANDROID__
++    int64_t p5_wall_start_ns = p->p5_vo_cpu_wall ? mp_time_ns() : 0;
++    int64_t p5_cpu_start_ns = p->p5_vo_cpu_wall ? p5_thread_cpu_ns() : 0;
++#endif
+ #if HAVE_GL && defined(PL_HAVE_OPENGL) && defined(__ANDROID__)
+     if (p->p5_offscreen)
+         return;
+@@ -1791,6 +1824,24 @@
+ 
+     int64_t p5_submit_end_ns = p->p5_vo_perf ? mp_time_ns() : 0;
+     sw->fns->swap_buffers(sw);
++#ifdef __ANDROID__
++    if (p->p5_vo_cpu_wall && p5_cpu_start_ns) {
++        int64_t wall_ns = mp_time_ns() - p5_wall_start_ns;
++        int64_t cpu_ns = p5_thread_cpu_ns() - p5_cpu_start_ns;
++        p->p5_flip_wall_sum_ns += wall_ns;
++        p->p5_flip_cpu_sum_ns += cpu_ns;
++        p->p5_flip_wall_max_ns = MPMAX(p->p5_flip_wall_max_ns, wall_ns);
++        if (++p->p5_vo_cpu_wall_frames % 250 == 0) {
++            p5_vo_log("P5_VO_CPU_WALL", "frames=250 draw_wall_us=%"PRId64" draw_cpu_us=%"PRId64" draw_wall_max_us=%"PRId64" flip_wall_us=%"PRId64" flip_cpu_us=%"PRId64" flip_wall_max_us=%"PRId64,
++                      p->p5_draw_wall_sum_ns / 1000, p->p5_draw_cpu_sum_ns / 1000,
++                      p->p5_draw_wall_max_ns / 1000, p->p5_flip_wall_sum_ns / 1000,
++                      p->p5_flip_cpu_sum_ns / 1000, p->p5_flip_wall_max_ns / 1000);
++            p->p5_draw_wall_sum_ns = p->p5_draw_cpu_sum_ns = 0;
++            p->p5_flip_wall_sum_ns = p->p5_flip_cpu_sum_ns = 0;
++            p->p5_draw_wall_max_ns = p->p5_flip_wall_max_ns = 0;
++        }
++    }
++#endif
+     if (p->p5_vo_perf &&
+         (p->p5_vo_perf_seq <= 20 || p->p5_vo_perf_seq % 50 == 0))
+         p5_vo_log("P5_VO_FLIP", "frame=%"PRIu64" submit_us=%"PRId64" swap_us=%"PRId64,
+@@ -2483,6 +2534,10 @@
+ {
+     struct priv *p = vo->priv;
+ #ifdef __ANDROID__
++    char p5_cpu_wall_property[PROP_VALUE_MAX] = {0};
++    p->p5_vo_cpu_wall = __system_property_get("debug.media_kit.p5_vo_cpu_wall",
++                                              p5_cpu_wall_property) > 0 &&
++                         !strcmp(p5_cpu_wall_property, "1");
+     char p5_perf_property[PROP_VALUE_MAX] = {0};
+     p->p5_vo_perf = __system_property_get("debug.media_kit.p5_vo_perf",
+                                          p5_perf_property) > 0 &&

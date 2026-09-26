@@ -1,0 +1,19 @@
+diff --git a/video/out/vo_gpu_next.c b/video/out/vo_gpu_next.c
+index 3f0b18f..c04eef2 100644
+--- a/video/out/vo_gpu_next.c
++++ b/video/out/vo_gpu_next.c
+@@ -656,6 +656,14 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
+         }
+ 
+         par = p->hwdec_mapper->dst_params;
++        static bool logged_oes_repr;
++        if (!logged_oes_repr) {
++            logged_oes_repr = true;
++            MP_ERR(vo, "OES_REPR imgfmt=%d sample=%d color=%d shift=%d sys=%d levels=%d\n",
++                   par.imgfmt, par.repr.bits.sample_depth,
++                   par.repr.bits.color_depth, par.repr.bits.bit_shift,
++                   par.repr.sys, par.repr.levels);
++        }
+     }
+ 
+     mp_image_params_guess_csp(&par);

@@ -1,0 +1,19 @@
+software_frame=0 pts_us=0
+  x=0.1: gpu=(154, 497, 518) software=(154, 496, 516) delta=(0, 1, 2) scaled_delta=(0, 0, 0)
+  x=0.3: gpu=(217, 481, 516) software=(216, 480, 514) delta=(1, 1, 2) scaled_delta=(0, 0, 0)
+  x=0.5: gpu=(218, 486, 534) software=(217, 485, 532) delta=(1, 1, 2) scaled_delta=(0, 0, 0)
+  x=0.7: gpu=(224, 473, 534) software=(223, 472, 532) delta=(1, 1, 2) scaled_delta=(0, 0, 0)
+  x=0.9: gpu=(246, 482, 529) software=(245, 481, 527) delta=(1, 1, 2) scaled_delta=(0, 0, 0)
+software_frame=103 pts_us=3437000
+  x=0.1: gpu=(379, 449, 533) software=(378, 448, 531) delta=(1, 1, 2) scaled_delta=(0, 0, 0)
+  x=0.3: gpu=(190, 495, 533) software=(189, 494, 531) delta=(1, 1, 2) scaled_delta=(0, 0, 0)
+  x=0.5: gpu=(372, 494, 513) software=(371, 493, 511) delta=(1, 1, 2) scaled_delta=(0, 0, 0)
+  x=0.7: gpu=(217, 455, 535) software=(216, 454, 533) delta=(1, 1, 2) scaled_delta=(0, 0, 0)
+  x=0.9: gpu=(167, 482, 529) software=(167, 481, 527) delta=(0, 1, 2) scaled_delta=(0, 0, 0)
+software_frame=205 pts_us=6840000
+  x=0.1: gpu=(235, 506, 520) software=(234, 505, 518) delta=(1, 1, 2) scaled_delta=(0, 0, 0)
+  x=0.3: gpu=(454, 514, 515) software=(453, 512, 513) delta=(1, 2, 2) scaled_delta=(0, 0, 0)
+  x=0.5: gpu=(442, 490, 529) software=(441, 489, 527) delta=(1, 1, 2) scaled_delta=(0, 0, 0)
+  x=0.7: gpu=(722, 517, 513) software=(720, 515, 511) delta=(2, 2, 2) scaled_delta=(0, 0, 0)
+  x=0.9: gpu=(441, 513, 519) software=(440, 511, 517) delta=(1, 2, 2) scaled_delta=(0, 0, 0)
+components=45 raw_delta=[0, 1, 2] scaled_delta=[0]

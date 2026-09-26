@@ -1,0 +1,17 @@
+--- a/video/out/vo_gpu_next.c
++++ b/video/out/vo_gpu_next.c
+@@ -1749,6 +1749,14 @@
+         p5_render_start_ns = mp_time_ns();
+ #if HAVE_GL && defined(PL_HAVE_OPENGL) && defined(__ANDROID__)
+     p5_gpu_slot = p5_gpu_timer_begin(p);
++    struct pl_color_map_params p5_sdr_color_map;
++    if (frame->current && frame->current->params.repr.dovi &&
++        target.color.transfer == PL_COLOR_TRC_BT_1886 &&
++        params.color_map_params) {
++        p5_sdr_color_map = *params.color_map_params;
++        p5_sdr_color_map.gamut_mapping = &pl_gamut_map_clip;
++        params.color_map_params = &p5_sdr_color_map;
++    }
+ #endif
+     p5_render_ok = pl_render_image_mix(p->rr, &mix, &target, &params);
+ #if HAVE_GL && defined(PL_HAVE_OPENGL) && defined(__ANDROID__)

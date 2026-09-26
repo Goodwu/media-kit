@@ -1,0 +1,164 @@
+diff --git a/video/out/hwdec/hwdec_aimagereader.c b/video/out/hwdec/hwdec_aimagereader.c
+index 83c2ea8..45264ab 100644
+--- a/video/out/hwdec/hwdec_aimagereader.c
++++ b/video/out/hwdec/hwdec_aimagereader.c
+@@ -19,6 +19,7 @@
+ 
+ #include <assert.h>
+ #include <dlfcn.h>
++#include <sys/system_properties.h>
+ #include <EGL/egl.h>
+ #include <media/NdkImageReader.h>
+ #include <android/native_window_jni.h>
+@@ -51,6 +52,7 @@ struct priv_owner {
+     media_status_t (*AImageReader_acquireLatestImage)(AImageReader *, AImage **);
+     void (*AImageReader_delete)(AImageReader *);
+     media_status_t (*AImage_getHardwareBuffer)(const AImage *, AHardwareBuffer **);
++    media_status_t (*AImage_getTimestamp)(const AImage *, int64_t *);
+     void (*AImage_delete)(AImage *);
+     void (*AHardwareBuffer_describe)(const AHardwareBuffer *, AHardwareBuffer_Desc *);
+     jobject (*ANativeWindow_toSurface)(JNIEnv *, ANativeWindow *);
+@@ -82,6 +84,7 @@ static const struct { const char *symbol; int offset; } lib_functions[] = {
+     { "AImageReader_acquireLatestImage", offsetof(struct priv_owner, AImageReader_acquireLatestImage) },
+     { "AImageReader_delete", offsetof(struct priv_owner, AImageReader_delete) },
+     { "AImage_getHardwareBuffer", offsetof(struct priv_owner, AImage_getHardwareBuffer) },
++    { "AImage_getTimestamp", offsetof(struct priv_owner, AImage_getTimestamp) },
+     { "AImage_delete", offsetof(struct priv_owner, AImage_delete) },
+     { "AHardwareBuffer_describe", offsetof(struct priv_owner, AHardwareBuffer_describe) },
+     { "ANativeWindow_toSurface", offsetof(struct priv_owner, ANativeWindow_toSurface) },
+@@ -156,7 +159,7 @@ static int init(struct ra_hwdec *hw)
+     // dummy dimensions, AImageReader only transports hardware buffers
+     media_status_t ret = p->AImageReader_newWithUsage(16, 16,
+         AIMAGE_FORMAT_PRIVATE, AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE,
+-        5, &p->reader);
++        3, &p->reader);
+     if (ret != AMEDIA_OK) {
+         MP_ERR(hw, "newWithUsage failed: %d\n", ret);
+         return -1;
+@@ -364,6 +367,18 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
+     // Update texture size since it may differ
+     AHardwareBuffer_Desc d;
+     o->AHardwareBuffer_describe(hwbuf, &d);
++    static int logged_images;
++    char probe_enabled[PROP_VALUE_MAX] = {0};
++    int64_t image_timestamp_ns = 0;
++    if (logged_images < 3 &&
++        __system_property_get("debug.media_kit.oes_sample_probe", probe_enabled) > 0 &&
++        probe_enabled[0] == '1' &&
++        o->AImage_getTimestamp(p->image, &image_timestamp_ns) == AMEDIA_OK) {
++        logged_images++;
++        MP_ERR(mapper, "OES_IMAGE src_pts=%.9f image_timestamp_ns=%lld format=%u size=%ux%u\n",
++               mapper->src->pts, (long long) image_timestamp_ns,
++               d.format, d.width, d.height);
++    }
+     if (mapper->tex[0]->params.w != d.width || mapper->tex[0]->params.h != d.height) {
+         MP_VERBOSE(p, "Texture dimensions changed to %dx%d\n", d.width, d.height);
+         mapper->tex[0]->params.w = d.width;
+diff --git a/video/out/vo_gpu_next.c b/video/out/vo_gpu_next.c
+index 3f0b18f..9f34b7c 100644
+--- a/video/out/vo_gpu_next.c
++++ b/video/out/vo_gpu_next.c
+@@ -21,8 +21,10 @@
+ #include <time.h>
+ 
+ #include <libplacebo/colorspace.h>
++#include <libplacebo/dispatch.h>
+ #include <libplacebo/options.h>
+ #include <libplacebo/renderer.h>
++#include <libplacebo/shaders/sampling.h>
+ #include <libplacebo/shaders/lut.h>
+ #include <libplacebo/shaders/icc.h>
+ #include <libplacebo/utils/libav.h>
+@@ -54,6 +56,10 @@
+ #include "video/out/opengl/ra_gl.h"
+ #endif
+ 
++#if defined(__ANDROID__)
++#include <sys/system_properties.h>
++#endif
++
+ #if HAVE_D3D11 && defined(PL_HAVE_D3D11)
+ #include <libplacebo/d3d11.h>
+ #include "video/out/d3d11/ra_d3d11.h"
+@@ -584,6 +590,72 @@ static pl_tex hwdec_get_tex(struct priv *p, int n)
+     return false;
+ }
+ 
++static void probe_oes_sample(struct priv *p, pl_gpu gpu, struct pl_frame *frame,
++                             struct mp_image *mpi)
++{
++#if defined(__ANDROID__)
++    static int sampled_images;
++    static bool have_last_pts;
++    static double last_pts;
++    char enabled[PROP_VALUE_MAX] = {0};
++    if (sampled_images >= 3 || (have_last_pts && mpi->pts == last_pts) ||
++        __system_property_get("debug.media_kit.oes_sample_probe", enabled) <= 0 ||
++        enabled[0] != '1' || frame->num_planes != 1)
++        return;
++    sampled_images++;
++    have_last_pts = true;
++    last_pts = mpi->pts;
++
++    pl_tex src = frame->planes[0].texture;
++    const enum pl_fmt_caps caps = PL_FMT_CAP_RENDERABLE | PL_FMT_CAP_HOST_READABLE;
++    pl_fmt fmt = pl_find_fmt(gpu, PL_FMT_FLOAT, 4, 16, 16, caps);
++    if (!src || !fmt) {
++        MP_ERR(p, "OES_SAMPLE pts=%.9f unavailable src=%d fmt=%d\n",
++               mpi->pts, !!src, !!fmt);
++        return;
++    }
++
++    pl_tex dst = pl_tex_create(gpu, &(struct pl_tex_params) {
++        .w = 1, .h = 1, .format = fmt,
++        .renderable = true, .host_readable = true,
++    });
++    pl_dispatch dp = pl_dispatch_create(p->pllog, gpu);
++    if (!dst || !dp) {
++        MP_ERR(p, "OES_SAMPLE pts=%.9f setup-failed dst=%d dp=%d fmt=%s\n",
++               mpi->pts, !!dst, !!dp, fmt->name);
++        goto done;
++    }
++
++    int y = src->params.h / 2;
++    for (int i = 0; i < 5; i++) {
++        int x = (int) ((2 * i + 1) * src->params.w / 10);
++        pl_shader sh = pl_dispatch_begin(dp);
++        bool sampled = pl_shader_sample_direct(sh, pl_sample_src(
++            .tex = src,
++            .rect = {x, y, x + 1, y + 1},
++            .new_w = 1, .new_h = 1,
++        ));
++        bool rendered = sampled && pl_dispatch_finish(dp, pl_dispatch_params(
++            .shader = &sh, .target = dst,
++        ));
++        uint16_t rgba[4] = {0};
++        bool read = rendered && pl_tex_download(gpu, pl_tex_transfer_params(
++            .tex = dst, .ptr = rgba,
++        ));
++        MP_ERR(p, "OES_SAMPLE pts=%.9f xy=%d,%d size=%dx%d fmt=%s ok=%d%d%d "
++                  "half=%04x,%04x,%04x,%04x\n",
++               mpi->pts, x, y, src->params.w, src->params.h, fmt->name,
++               sampled, rendered, read, rgba[0], rgba[1], rgba[2], rgba[3]);
++        if (!read)
++            break;
++    }
++
++done:
++    pl_dispatch_destroy(&dp);
++    pl_tex_destroy(gpu, &dst);
++#endif
++}
++
+ static bool hwdec_acquire(pl_gpu gpu, struct pl_frame *frame)
+ {
+     struct mp_image *mpi = frame->user_data;
+@@ -602,6 +674,8 @@ static bool hwdec_acquire(pl_gpu gpu, struct pl_frame *frame)
+             return false;
+     }
+ 
++    probe_oes_sample(p, gpu, frame, mpi);
++
+     return true;
+ }
+ 

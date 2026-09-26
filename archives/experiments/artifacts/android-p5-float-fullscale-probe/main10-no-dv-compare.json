@@ -1,0 +1,49 @@
+{
+  "fixture": "ordinary HEVC Main10 lossless, no Dolby Vision metadata",
+  "fixture_sha256": "98a8e2c63fee029c32f1ddd5473414ef47f23cab5ea2e5981cbb0d770eb01bc5",
+  "frame_count": 24,
+  "software_decode_exactly_matches_preencode_yuv": true,
+  "source_y_at_y10": {
+    "233": 1011,
+    "234": 1020,
+    "236": 1023
+  },
+  "runs": [
+    {
+      "file": "main10-no-dv-run.txt",
+      "sha256": "232902167b3891cdefa21cbe7d9d7efc79237c3f74065256d447e42725f5fea5",
+      "first_image_timestamp_ns": 0,
+      "actual_color_format_805": true,
+      "float_fbo_complete": true,
+      "raw_gl_error_zero": true,
+      "raw_float_y": {
+        "233": 0.991210938,
+        "234": 1.0,
+        "236": 1.0
+      },
+      "raw_packed10_y": {
+        "233": 1014,
+        "234": 1023,
+        "236": 1023
+      }
+    },
+    {
+      "file": "main10-no-dv-run-2.txt",
+      "sha256": "dab4aef75c0b817e2baa0dd2ff6abdc0b822ddcaa422b181210389db68eaade1",
+      "first_image_timestamp_ns": 0,
+      "actual_color_format_805": true,
+      "float_fbo_complete": true,
+      "raw_gl_error_zero": true,
+      "raw_float_y": {
+        "233": 0.991210938,
+        "234": 1.0,
+        "236": 1.0
+      },
+      "raw_packed10_y": {
+        "233": 1014,
+        "234": 1023,
+        "236": 1023
+      }
+    }
+  ]
+}

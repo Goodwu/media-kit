@@ -1,0 +1,109 @@
+{
+  "log": "/tmp/media-kit-p5-dither-b2-logcat.txt",
+  "output_sizes": [
+    [
+      2560,
+      1440
+    ]
+  ],
+  "source_output_sizes": [
+    [
+      3840,
+      2160,
+      2560,
+      1440
+    ]
+  ],
+  "p5_open_observed": true,
+  "p5_open_count": 1,
+  "app_event_pids": {
+    "perf": [
+      "14486"
+    ],
+    "source_size": [
+      "14486"
+    ],
+    "output_size": [
+      "14486"
+    ],
+    "p5_open": [
+      "14486"
+    ],
+    "cache": [
+      "14486"
+    ],
+    "fullscreen": [
+      "14486"
+    ],
+    "retire_final": [
+      "14486"
+    ],
+    "image_final": [
+      "14486"
+    ]
+  },
+  "cache_enabled": [
+    1
+  ],
+  "fullscreen_log_observed": true,
+  "physical_window_at_perf": {
+    "8": null,
+    "18": null,
+    "28": null,
+    "60": [
+      3120,
+      1440,
+      90
+    ],
+    "90": [
+      3120,
+      1440,
+      90
+    ],
+    "120": [
+      3120,
+      1440,
+      90
+    ],
+    "150": [
+      3120,
+      1440,
+      90
+    ],
+    "180": [
+      3120,
+      1440,
+      90
+    ],
+    "210": [
+      3120,
+      1440,
+      90
+    ]
+  },
+  "vo_drops": {
+    "60": 704,
+    "90": 1192,
+    "120": 1683,
+    "150": 2177,
+    "180": 2669,
+    "210": 2859
+  },
+  "decoder_drops_eos": "0",
+  "media_time_eos": "178.032394",
+  "image_final": [
+    7601,
+    7601
+  ],
+  "retire_final_held_fallbacks": [
+    0,
+    0
+  ],
+  "diagnostic_render_paths": [
+    "P5_PERF_MAP_VARIANT"
+  ],
+  "errors": [
+    "diagnostic render path is not a playback gate: ['P5_PERF_MAP_VARIANT']"
+  ],
+  "vo_drops_t60_to_t180": 1965
+}

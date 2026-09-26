@@ -1,0 +1,64 @@
+{
+  "host": {
+    "path": "/private/tmp/media-kit-p5-host-pts1000-7365-gbrpf32le.bin",
+    "sha256": "b3c58d4be3f3db9580c8829605e8466937cfb2cd90f17f79c46b281424510d36",
+    "format": "gbrpf32le",
+    "origin": "top-left"
+  },
+  "phone": {
+    "path": "/private/tmp/media-kit-p5-chroma-left-8372-pts1000.rgba16f",
+    "sha256": "5e2f9b44230d73fc704acffed38273183dfb0981dc0a31b401ef4f57863ffd0a",
+    "format": "rgba16f-le",
+    "origin": "bottom-left"
+  },
+  "width": 3840,
+  "height": 2160,
+  "comparison": "same coordinates after vertical origin conversion",
+  "channels": {
+    "R": {
+      "mae": 0.00034469929006364613,
+      "median": 0.000244140625,
+      "p95": 0.000732421875,
+      "p99": 0.0009765625,
+      "max": 0.09423828125,
+      "max_xy": [
+        2577,
+        938
+      ],
+      "max_host": 0.319091796875,
+      "max_phone": 0.413330078125,
+      "above_0_01": 4403,
+      "above_0_05": 14
+    },
+    "G": {
+      "mae": 0.00020941405741060958,
+      "median": 0.000244140625,
+      "p95": 0.00048828125,
+      "p99": 0.00048828125,
+      "max": 0.1766350269317627,
+      "max_xy": [
+        2577,
+        938
+      ],
+      "max_host": 7.152557373046875e-07,
+      "max_phone": 0.1766357421875,
+      "above_0_01": 10258,
+      "above_0_05": 10
+    },
+    "B": {
+      "mae": 0.0004637342593977573,
+      "median": 0.00048828125,
+      "p95": 0.0009765625,
+      "p99": 0.0009765625,
+      "max": 0.3156731128692627,
+      "max_xy": [
+        1985,
+        1002
+      ],
+      "max_host": 7.152557373046875e-07,
+      "max_phone": 0.315673828125,
+      "above_0_01": 2047,
+      "above_0_05": 176
+    }
+  }
+}

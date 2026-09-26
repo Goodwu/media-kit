@@ -1,0 +1,71 @@
+{
+  "P5_SECTION_MAP": {
+    "batches": 28,
+    "acquire_wall_us": {
+      "median_per_item_us": 127.84,
+      "min": 102.84,
+      "max": 147.99
+    },
+    "acquire_cpu_us": {
+      "median_per_item_us": 33.44,
+      "min": 29.14,
+      "max": 41.42
+    },
+    "create_wall_us": {
+      "median_per_item_us": 1461.11,
+      "min": 1145.05,
+      "max": 1598.81
+    },
+    "create_cpu_us": {
+      "median_per_item_us": 1272.36,
+      "min": 1015.37,
+      "max": 1378.27
+    },
+    "bind_wall_us": {
+      "median_per_item_us": 415.65,
+      "min": 306.74,
+      "max": 467.47
+    },
+    "bind_cpu_us": {
+      "median_per_item_us": 383.62,
+      "min": 288.92,
+      "max": 424.68
+    },
+    "finish_wall_us": {
+      "median_per_item_us": 5577.93,
+      "min": 5196.72,
+      "max": 5910.15
+    },
+    "finish_cpu_us": {
+      "median_per_item_us": 99.62,
+      "min": 88.77,
+      "max": 104.11
+    }
+  },
+  "P5_SECTION_RENDER": {
+    "batches": 14,
+    "wall_us": {
+      "median_per_item_us": 16666.13,
+      "min": 16309.16,
+      "max": 17042.78
+    },
+    "cpu_us": {
+      "median_per_item_us": 4663.7,
+      "min": 4298.96,
+      "max": 4897.13
+    }
+  },
+  "t28": {
+    "time-pos": "13.763750",
+    "frame-drop-count": "96",
+    "decoder-frame-drop-count": "0",
+    "thermal-status": "1"
+  },
+  "t60": {
+    "time-pos": "45.762383",
+    "frame-drop-count": "314",
+    "decoder-frame-drop-count": "0",
+    "thermal-status": "1"
+  },
+  "log_sha256": "3850e5d0d6460831185237970a60eb7379dfb60d8c79c03a8ef557efdc74824d"
+}

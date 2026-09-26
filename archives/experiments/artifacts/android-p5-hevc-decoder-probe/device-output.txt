@@ -1,0 +1,82 @@
+codec=OMX.hisi.video.decoder.hevc hardware=true
+profile=1 level=1
+profile=1 level=4
+profile=1 level=16
+profile=1 level=64
+profile=1 level=256
+profile=1 level=1024
+profile=1 level=4096
+profile=1 level=16384
+profile=1 level=65536
+profile=2 level=1
+profile=2 level=4
+profile=2 level=16
+profile=2 level=64
+profile=2 level=256
+profile=2 level=1024
+profile=2 level=4096
+profile=2 level=16384
+profile=2 level=65536
+profile=4096 level=1
+profile=4096 level=4
+profile=4096 level=16
+profile=4096 level=64
+profile=4096 level=256
+profile=4096 level=1024
+profile=4096 level=4096
+profile=4096 level=16384
+profile=4096 level=65536
+colorFormat=0x7f420888
+colorFormat=0x15
+colorFormat=0x7f000001
+sizeRate=3840x2160@50 supported=false
+codec=OMX.hisi.video.decoder.hevc.secure hardware=true
+profile=1 level=1
+profile=1 level=4
+profile=1 level=16
+profile=1 level=64
+profile=1 level=256
+profile=1 level=1024
+profile=1 level=4096
+profile=1 level=16384
+profile=1 level=65536
+profile=2 level=1
+profile=2 level=4
+profile=2 level=16
+profile=2 level=64
+profile=2 level=256
+profile=2 level=1024
+profile=2 level=4096
+profile=2 level=16384
+profile=2 level=65536
+profile=4096 level=1
+profile=4096 level=4
+profile=4096 level=16
+profile=4096 level=64
+profile=4096 level=256
+profile=4096 level=1024
+profile=4096 level=4096
+profile=4096 level=16384
+profile=4096 level=65536
+colorFormat=0x7f420888
+colorFormat=0x15
+colorFormat=0x7f000001
+sizeRate=3840x2160@50 supported=false
+codec=c2.android.hevc.decoder hardware=false
+profile=1 level=524288
+profile=4 level=524288
+colorFormat=0x7f420888
+colorFormat=0x13
+colorFormat=0x15
+colorFormat=0x14
+colorFormat=0x27
+sizeRate=3840x2160@50 supported=false
+codec=OMX.google.hevc.decoder hardware=false
+profile=1 level=524288
+profile=4 level=524288
+colorFormat=0x7f420888
+colorFormat=0x13
+colorFormat=0x15
+colorFormat=0x14
+colorFormat=0x27
+sizeRate=3840x2160@50 supported=false

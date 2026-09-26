@@ -1,0 +1,125 @@
+{
+  "on": {
+    "log_sha256": "0ba0639e7eed342022f6bbef5575114775ed6e721bd22d386b7857f001670397",
+    "t18": {
+      "time-pos": "4.154150",
+      "frame-drop-count": "5",
+      "decoder-frame-drop-count": "0",
+      "thermal-status": "1"
+    },
+    "t28": {
+      "time-pos": "14.147467",
+      "frame-drop-count": "5",
+      "decoder-frame-drop-count": "0",
+      "thermal-status": "1"
+    },
+    "t60": {
+      "time-pos": "46.146100",
+      "frame-drop-count": "5",
+      "decoder-frame-drop-count": "0",
+      "thermal-status": "1"
+    },
+    "t90": {
+      "time-pos": "76.142733",
+      "frame-drop-count": "7",
+      "decoder-frame-drop-count": "0",
+      "thermal-status": "1"
+    },
+    "t120": {
+      "time-pos": "106.139367",
+      "frame-drop-count": "24",
+      "decoder-frame-drop-count": "0",
+      "thermal-status": "1"
+    },
+    "last_retire": {
+      "map": "9150",
+      "held": "0",
+      "reaped": "9148",
+      "waits": "66",
+      "wait_us_total": "17062",
+      "fallbacks": "0"
+    }
+  },
+  "off": {
+    "log_sha256": "28aa61504d904d0461996684ab560ea0e86175b8fb9784f6ab6b363885c61129",
+    "t18": {
+      "time-pos": "3.019683",
+      "frame-drop-count": "16",
+      "decoder-frame-drop-count": "0",
+      "thermal-status": "1"
+    },
+    "t28": {
+      "time-pos": "13.013000",
+      "frame-drop-count": "93",
+      "decoder-frame-drop-count": "0",
+      "thermal-status": "1"
+    },
+    "t60": {
+      "time-pos": "45.011633",
+      "frame-drop-count": "326",
+      "decoder-frame-drop-count": "0",
+      "thermal-status": "1"
+    },
+    "t90": {
+      "time-pos": "75.008267",
+      "frame-drop-count": "537",
+      "decoder-frame-drop-count": "0",
+      "thermal-status": "1"
+    },
+    "t120": {
+      "time-pos": "105.021583",
+      "frame-drop-count": "745",
+      "decoder-frame-drop-count": "0",
+      "thermal-status": "1"
+    }
+  },
+  "on2": {
+    "log_sha256": "3d64968f820936822a5529c7ed2c0522e074be19f680c55f73a74214cf3b910d",
+    "t18": {
+      "time-pos": "3.003000",
+      "frame-drop-count": "0",
+      "decoder-frame-drop-count": "0",
+      "thermal-status": "1"
+    },
+    "t28": {
+      "time-pos": "12.996317",
+      "frame-drop-count": "0",
+      "decoder-frame-drop-count": "0",
+      "thermal-status": "1"
+    },
+    "t60": {
+      "time-pos": "44.994950",
+      "frame-drop-count": "0",
+      "decoder-frame-drop-count": "0",
+      "thermal-status": "1"
+    },
+    "t90": {
+      "time-pos": "74.991583",
+      "frame-drop-count": "0",
+      "decoder-frame-drop-count": "0",
+      "thermal-status": "1"
+    },
+    "t120": {
+      "time-pos": "105.004900",
+      "frame-drop-count": "4",
+      "decoder-frame-drop-count": "0",
+      "thermal-status": "1"
+    },
+    "last_retire": {
+      "map": "10000",
+      "held": "1",
+      "reaped": "9997",
+      "waits": "40",
+      "wait_us_total": "9767",
+      "fallbacks": "0"
+    }
+  },
+  "on_l2c": {
+    "bytes": 66355200,
+    "sha256": "43558b9ed8079db58d06f064261c07e3929296dc20c20af4d9ffb013f6f6d971"
+  },
+  "off_l2c": {
+    "bytes": 66355200,
+    "sha256": "43558b9ed8079db58d06f064261c07e3929296dc20c20af4d9ffb013f6f6d971"
+  }
+}

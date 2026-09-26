@@ -1,0 +1,105 @@
+{
+  "log": "/tmp/media-kit-p5-1920-corrected-b1-logcat.txt",
+  "output_sizes": [
+    [
+      1920,
+      1080
+    ]
+  ],
+  "source_output_sizes": [
+    [
+      3840,
+      2160,
+      1920,
+      1080
+    ]
+  ],
+  "p5_open_observed": true,
+  "p5_open_count": 1,
+  "app_event_pids": {
+    "perf": [
+      "7038"
+    ],
+    "source_size": [
+      "7038"
+    ],
+    "output_size": [
+      "7038"
+    ],
+    "p5_open": [
+      "7038"
+    ],
+    "cache": [
+      "7038"
+    ],
+    "fullscreen": [
+      "7038"
+    ],
+    "retire_final": [
+      "7038"
+    ],
+    "image_final": [
+      "7038"
+    ]
+  },
+  "cache_enabled": [
+    1
+  ],
+  "fullscreen_log_observed": true,
+  "physical_window_at_perf": {
+    "8": null,
+    "18": null,
+    "28": null,
+    "60": [
+      3120,
+      1440,
+      90
+    ],
+    "90": [
+      3120,
+      1440,
+      90
+    ],
+    "120": [
+      3120,
+      1440,
+      90
+    ],
+    "150": [
+      3120,
+      1440,
+      90
+    ],
+    "180": [
+      3120,
+      1440,
+      90
+    ],
+    "210": [
+      3120,
+      1440,
+      90
+    ]
+  },
+  "vo_drops": {
+    "60": 37,
+    "90": 44,
+    "120": 54,
+    "150": 66,
+    "180": 67,
+    "210": 70
+  },
+  "decoder_drops_eos": "0",
+  "media_time_eos": "177.783178",
+  "image_final": [
+    10404,
+    10404
+  ],
+  "retire_final_held_fallbacks": [
+    0,
+    0
+  ],
+  "diagnostic_render_paths": [],
+  "errors": [],
+  "vo_drops_t60_to_t180": 30
+}

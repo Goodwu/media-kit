@@ -1,0 +1,117 @@
+--------- beginning of main
+--------- beginning of system
+D/AndroidRuntime(17520): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+I/AndroidRuntime(17520): Using default boot image
+I/AndroidRuntime(17520): Leaving lock profiling enabled
+D/AndroidRuntime(17520): Calling main entry com.android.commands.input.Input
+D/AndroidRuntime(17520): Shutting down VM
+E/P5_RAW_STAGE(17435): code_scale_1020_to_1023_enabled
+E/P5_RAW_STAGE(17435): enter_state
+E/P5_RAW_STAGE(17435): state_captured
+E/P5_RAW_STAGE(17435): textures_captured
+E/P5_RAW_STAGE(17435): blend_off
+E/P5_RAW_STAGE(17435): dither_off
+E/P5_RAW_STAGE(17435): scissor_off
+E/P5_RAW_STAGE(17435): depth_off
+E/P5_RAW_STAGE(17435): stencil_off
+E/P5_RAW_STAGE(17435): cull_off
+E/P5_RAW_STAGE(17435): discard_off
+E/P5_RAW_STAGE(17435): program_bound
+E/P5_RAW_STAGE(17435): vao_bound
+E/P5_RAW_STAGE(17435): oes_bound
+E/P5_RAW_STAGE(17435): image_uniform
+E/P5_RAW_STAGE(17435): size_uniform
+E/P5_RAW_STAGE(17435): crop_uniform
+E/P5_RAW_STAGE(17435): draw_setup
+E/P5_RAW_STAGE(17435): draw_mrt
+E/P5_RAW_STAGE(17435): draw_mrt_done
+E/P5_RAW_STAGE(17435): before_restore
+E/P5_RAW_STAGE(17435): restored
+E/P5_RAW_STAGE(17435): enter_state
+E/P5_RAW_STAGE(17435): state_captured
+E/P5_RAW_STAGE(17435): textures_captured
+E/P5_RAW_STAGE(17435): blend_off
+E/P5_RAW_STAGE(17435): dither_off
+E/P5_RAW_STAGE(17435): scissor_off
+E/P5_RAW_STAGE(17435): depth_off
+E/P5_RAW_STAGE(17435): stencil_off
+E/P5_RAW_STAGE(17435): cull_off
+E/P5_RAW_STAGE(17435): discard_off
+E/P5_RAW_STAGE(17435): program_bound
+E/P5_RAW_STAGE(17435): vao_bound
+E/P5_RAW_STAGE(17435): oes_bound
+E/P5_RAW_STAGE(17435): image_uniform
+E/P5_RAW_STAGE(17435): size_uniform
+E/P5_RAW_STAGE(17435): crop_uniform
+E/P5_RAW_STAGE(17435): draw_setup
+E/P5_RAW_STAGE(17435): draw_mrt
+E/P5_RAW_STAGE(17435): draw_mrt_done
+E/P5_RAW_STAGE(17435): before_restore
+E/P5_RAW_STAGE(17435): restored
+E/P5_RAW_STAGE(17435): enter_state
+E/P5_RAW_STAGE(17435): state_captured
+E/P5_RAW_STAGE(17435): textures_captured
+E/P5_RAW_STAGE(17435): blend_off
+E/P5_RAW_STAGE(17435): dither_off
+E/P5_RAW_STAGE(17435): scissor_off
+E/P5_RAW_STAGE(17435): depth_off
+E/P5_RAW_STAGE(17435): stencil_off
+E/P5_RAW_STAGE(17435): cull_off
+E/P5_RAW_STAGE(17435): discard_off
+E/P5_RAW_STAGE(17435): program_bound
+E/P5_RAW_STAGE(17435): vao_bound
+E/P5_RAW_STAGE(17435): oes_bound
+E/P5_RAW_STAGE(17435): image_uniform
+E/P5_RAW_STAGE(17435): size_uniform
+E/P5_RAW_STAGE(17435): crop_uniform
+E/P5_RAW_STAGE(17435): draw_setup
+E/P5_RAW_STAGE(17435): draw_mrt
+E/P5_RAW_STAGE(17435): draw_mrt_done
+E/P5_RAW_STAGE(17435): before_restore
+E/P5_RAW_STAGE(17435): restored
+E/P5_RAW_STAGE(17435): enter_state
+E/P5_RAW_STAGE(17435): state_captured
+E/P5_RAW_STAGE(17435): textures_captured
+E/P5_RAW_STAGE(17435): blend_off
+E/P5_RAW_STAGE(17435): dither_off
+E/P5_RAW_STAGE(17435): scissor_off
+E/P5_RAW_STAGE(17435): depth_off
+E/P5_RAW_STAGE(17435): stencil_off
+E/P5_RAW_STAGE(17435): cull_off
+E/P5_RAW_STAGE(17435): discard_off
+E/P5_RAW_STAGE(17435): program_bound
+E/P5_RAW_STAGE(17435): vao_bound
+E/P5_RAW_STAGE(17435): oes_bound
+E/P5_RAW_STAGE(17435): image_uniform
+E/P5_RAW_STAGE(17435): size_uniform
+E/P5_RAW_STAGE(17435): crop_uniform
+E/P5_RAW_STAGE(17435): draw_setup
+E/P5_RAW_STAGE(17435): draw_mrt
+E/P5_RAW_STAGE(17435): draw_mrt_done
+E/P5_RAW_STAGE(17435): before_restore
+E/P5_RAW_STAGE(17435): restored
+E/P5_RAW_STAGE(17435): enter_state
+E/P5_RAW_STAGE(17435): state_captured
+E/P5_RAW_STAGE(17435): textures_captured
+E/P5_RAW_STAGE(17435): blend_off
+E/P5_RAW_STAGE(17435): dither_off
+E/P5_RAW_STAGE(17435): scissor_off
+E/P5_RAW_STAGE(17435): depth_off
+E/P5_RAW_STAGE(17435): stencil_off
+E/P5_RAW_STAGE(17435): cull_off
+E/P5_RAW_STAGE(17435): discard_off
+E/P5_RAW_STAGE(17435): program_bound
+E/P5_RAW_STAGE(17435): vao_bound
+E/P5_RAW_STAGE(17435): oes_bound
+E/P5_RAW_STAGE(17435): image_uniform
+E/P5_RAW_STAGE(17435): size_uniform
+E/P5_RAW_STAGE(17435): crop_uniform
+E/P5_RAW_STAGE(17435): draw_setup
+E/P5_RAW_STAGE(17435): draw_mrt
+E/P5_RAW_STAGE(17435): draw_mrt_done
+E/P5_RAW_STAGE(17435): before_restore
+E/P5_RAW_STAGE(17435): restored
+E/P5_RAW_STAGE(17435): P5_RPU_ID pts=10.000000000 size=206 hash=907c8b42
+E/P5_L2C_RGB(17435): pts=10.000000000 w=3840 h=2160 fmt=rgba16hf texel=8 bytes=66355200 written=66355200 download=1 repr_sys=12 repr_levels=2 bits_color=10 bits_sample=10 primaries=6 transfer=12 rect=0.000,0.000,3840.000,2160.000
+E/P5_GAMUT_TARGET(17435): pts=10.000000000 rendered=1 source_count=1 source_prim=6 source_trc=12 source_lut=0 source_lut_type=0 param_lut=0 param_lut_type=0 color_map=1 target_sys=12 target_prim=6 target_trc=12
+E/P5_POST_RPU_FULL(17435): pts=10.000000000 w=3840 h=2160 format=rgba16f bytes=66355200 download_ok=1 written=66355200

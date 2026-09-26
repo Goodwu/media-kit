@@ -1,0 +1,83 @@
+{
+  "engineering_policy_id": "sha256:11ddc0ad4f52b16cd90a0c53b16e71f377373c3522c235d7161f42f5b5f58da5",
+  "policy_occurrences": 1,
+  "contract": {
+    "schema": "p5-engineering-policy-v2",
+    "source_sha256": "afb24b77733a3ca9071f0cfea0d0f7871670a7b6119eb44a314cba974541477c",
+    "apk_sha256": "d7115ba5aec1a96e053a02b884114262ec1ca0a0635c0506dd6a8235bf23949f",
+    "libmpv_sha256": "f1985ce3d9c759369ef7989565e726c7fe4ba7278ec5fdf4e005f73a9fee71ef",
+    "target_id": "LYA-AL00_API29_Texture_2560x1440_BT709_BT1886",
+    "observed": {
+      "color": {
+        "source_sys": "8",
+        "source_prim": "6",
+        "source_trc": "12",
+        "source_hdr_min": "0.00504",
+        "source_hdr_max": "3999.72168",
+        "source_max_cll": "0.00000",
+        "source_nominal_nits": "0.00504:1976.33557",
+        "target_prim": "3",
+        "target_trc": "1",
+        "target_hdr_min": "0.00000",
+        "target_hdr_max": "0.00000",
+        "target_nominal_nits": "0.20300:203.00000"
+      },
+      "map": {
+        "tone": "bt2390",
+        "tone_param": "0.00000",
+        "gamut": "clip",
+        "gamut_mode": "0",
+        "intent": "0",
+        "metadata": "0",
+        "lut_size": "256",
+        "lut3d": "48,32,256",
+        "tricubic": "0",
+        "gamut_expansion": "0",
+        "inverse": "0",
+        "contrast_recovery": "0.00000",
+        "contrast_smoothness": "3.50000",
+        "force_lut": "0",
+        "visualize": "0",
+        "show_clipping": "0"
+      },
+      "tone_constants": {
+        "knee_adaptation": "0.40000",
+        "knee_minimum": "0.10000",
+        "knee_maximum": "0.80000",
+        "knee_default": "0.40000",
+        "knee_offset": "1.00000",
+        "slope_tuning": "1.50000",
+        "slope_offset": "0.20000",
+        "spline_contrast": "0.50000",
+        "reinhard_contrast": "0.50000",
+        "linear_knee": "0.30000",
+        "exposure": "1.00000"
+      },
+      "gamut_constants": {
+        "perceptual_deadzone": "0.30000",
+        "perceptual_strength": "0.80000",
+        "colorimetric_gamma": "1.80000",
+        "softclip_knee": "0.70000",
+        "softclip_desat": "0.35000",
+        "peak_enabled": "1",
+        "peak_smoothing": "20.00000",
+        "peak_scene_low": "1.00000",
+        "peak_scene_high": "3.00000",
+        "peak_percentile": "0.00000",
+        "peak_black_cutoff": "1.00000",
+        "peak_delayed": "0"
+      },
+      "render": {
+        "dither_enabled": "1",
+        "dither_method": "0",
+        "dither_lut": "6",
+        "dither_temporal": "0",
+        "dither_transfer": "0",
+        "error_diffusion": "0",
+        "target_bits_color": "8",
+        "target_bits_sample": "8"
+      }
+    }
+  },
+  "reference_level": "observed-engineering-policy; not Dolby conformance"
+}

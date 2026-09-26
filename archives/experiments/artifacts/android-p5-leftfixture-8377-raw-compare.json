@@ -1,0 +1,30 @@
+{
+  "reference_sha256": "8d7ab503f92a4715d1dbe1b6f3442ac8c24dc54af1aa92589e05d1f54092bd79",
+  "off_sha256": "05e54caa35747f0db1e99df6226b75bd49faccd159b594851c0b978cb4a7cebc",
+  "on_sha256": "bf3d37ce50b0285a1431dc1da5d2c0db24a6a582eae23b5662d3cecbbbedfb20",
+  "frame": 0,
+  "width": 256,
+  "height": 144,
+  "expected_y": "min(pre_encode_y, 1020) for this vendor OES/code-scale path",
+  "off_mismatch_y_cb_cr": [
+    0,
+    0,
+    0
+  ],
+  "on_mismatch_y_cb_cr": [
+    0,
+    0,
+    0
+  ],
+  "on_vs_off_y_differences": 0,
+  "on_vs_off_even_cb_cr_differences": [
+    0,
+    0
+  ],
+  "on_vs_off_odd_cb_cr_differences": [
+    502,
+    504
+  ],
+  "unscaled_y_difference_count": 1440,
+  "pass": true
+}

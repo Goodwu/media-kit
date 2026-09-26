@@ -1,0 +1,201 @@
+--- a/src/dispatch.c
++++ b/src/dispatch.c
+@@ -21,6 +21,9 @@
+ #include "dispatch.h"
+ #include "gpu.h"
+ #include "pl_thread.h"
++#ifdef __ANDROID__
++#include <sys/system_properties.h>
++#endif
+ 
+ // Maximum number of passes to keep around at once. If full, passes older than
+ // MIN_AGE are evicted to make room. (Failing that, the passes array doubles)
+@@ -323,7 +326,8 @@
+ 
+     // Enable all extensions needed for different types of input
+     bool has_ssbo = false, has_ubo = false, has_img = false, has_texel = false,
+-         has_ext = false, has_nofmt = false, has_gather = false;
++         has_ext = false, has_ext_yuv = false, has_nofmt = false,
++         has_gather = false;
+     for (int i = 0; i < sh->descs.num; i++) {
+         switch (sh->descs.elem[i].desc.type) {
+         case PL_DESC_BUF_UNIFORM: has_ubo = true; break;
+@@ -348,6 +352,7 @@
+             case PL_SAMPLER_NORMAL: break;
+             case PL_SAMPLER_RECT: break;
+             case PL_SAMPLER_EXTERNAL: has_ext = true; break;
++            case PL_SAMPLER_EXTERNAL_YUV: has_ext_yuv = true; break;
+             case PL_SAMPLER_TYPE_COUNT: pl_unreachable();
+             }
+             break;
+@@ -374,6 +379,8 @@
+             ADD(pre, "#extension GL_OES_EGL_image_external : enable\n");
+         }
+     }
++    if (has_ext_yuv)
++        ADD(pre, "#extension GL_EXT_YUV_target : require\n");
+     if (has_nofmt)
+         ADD(pre, "#extension GL_EXT_shader_image_load_formatted : enable\n");
+     if (has_gather && !gpu->glsl.gles)
+@@ -467,6 +474,7 @@
+                 [PL_SAMPLER_NORMAL][3]  = "sampler3D",
+                 [PL_SAMPLER_RECT][2]    = "sampler2DRect",
+                 [PL_SAMPLER_EXTERNAL][2] = "samplerExternalOES",
++                [PL_SAMPLER_EXTERNAL_YUV][2] = "highp __samplerExternal2DY2YEXT",
+             };
+ 
+             pl_tex tex = sd->binding.object;
+@@ -911,6 +919,37 @@
+     pl_str glsl = pl_str_builder_exec(glsl_builder);
+     params.glsl_shader = (char *) glsl.buf;
+ 
++#ifdef __ANDROID__
++    char p5_pass_property[PROP_VALUE_MAX] = {0};
++    if (__system_property_get("debug.media_kit.p5_pass_identity",
++                              p5_pass_property) > 0 &&
++        !strcmp(p5_pass_property, "1")) {
++        PL_ERR(dp, "P5_PASS_CREATE signature=%016llx glsl_bytes=%zu",
++                (unsigned long long)pass->signature, strlen(params.glsl_shader));
++        const char *eotf = strstr(params.glsl_shader, "// P5_DOVI_PQ_EOTF");
++        const char *oetf = strstr(params.glsl_shader, "// P5_DOVI_PQ_OETF");
++        const char *linear = strstr(params.glsl_shader, "// pl_shader_linearize");
++        PL_ERR(dp, "P5_GLSL_STAGE signature=%016llx dovi_eotf=%td dovi_oetf=%td linearize=%td",
++               (unsigned long long)pass->signature,
++               eotf ? eotf - params.glsl_shader : -1,
++               oetf ? oetf - params.glsl_shader : -1,
++               linear ? linear - params.glsl_shader : -1);
++        if (oetf && linear && linear > oetf) {
++            char gap[512];
++            size_t gap_len = (size_t)(linear - oetf);
++            size_t n = PL_MIN(gap_len, sizeof(gap) - 1);
++            memcpy(gap, oetf, n);
++            gap[n] = '\0';
++            for (size_t i = 0; i < n; i++) {
++                if (gap[i] == '\n' || gap[i] == '\r')
++                    gap[i] = '|';
++            }
++            PL_ERR(dp, "P5_GLSL_GAP signature=%016llx bytes=%zu captured=%zu text=%s",
++                   (unsigned long long)pass->signature, gap_len, n, gap);
++        }
++    }
++#endif
++
+     // Turn all shader identifiers into actual strings before passing it
+     // to the `pl_gpu`
+ #define FIX_IDENT(name) \
+--- a/src/opengl/gpu_pass.c
++++ b/src/opengl/gpu_pass.c
+@@ -19,6 +19,9 @@
+ #include "cache.h"
+ #include "formats.h"
+ #include "utils.h"
++#ifdef __ANDROID__
++#include <sys/system_properties.h>
++#endif
+ 
+ int gl_desc_namespace(pl_gpu gpu, enum pl_desc_type type)
+ {
+@@ -238,10 +241,28 @@
+     // Load/Compile program
+     if ((pass_gl->program = load_cached_program(gpu, cache, &obj))) {
+         PL_DEBUG(gpu, "Using cached GL program");
++#ifdef __ANDROID__
++        char p5_pass_property[PROP_VALUE_MAX] = {0};
++        if (__system_property_get("debug.media_kit.p5_pass_identity",
++                                  p5_pass_property) > 0 &&
++            !strcmp(p5_pass_property, "1"))
++            PL_ERR(gpu, "P5_GL_PROGRAM cache=hit glsl_bytes=%zu",
++                    strlen(params->glsl_shader));
++#endif
+     } else {
+         pl_clock_t start = pl_clock_now();
+         pass_gl->program = gl_compile_program(gpu, params);
+         pl_log_cpu_time(gpu->log, start, pl_clock_now(), "compiling shader");
++#ifdef __ANDROID__
++        char p5_pass_property[PROP_VALUE_MAX] = {0};
++        if (__system_property_get("debug.media_kit.p5_pass_identity",
++                                  p5_pass_property) > 0 &&
++            !strcmp(p5_pass_property, "1"))
++            PL_ERR(gpu, "P5_GL_PROGRAM cache=miss compiled=%d ms=%.3f glsl_bytes=%zu",
++                    pass_gl->program != 0,
++                    1000.0 * pl_clock_diff(pl_clock_now(), start),
++                    strlen(params->glsl_shader));
++#endif
+     }
+ 
+     if (!pass_gl->program)
+--- a/src/shaders/colorspace.c
++++ b/src/shaders/colorspace.c
+@@ -406,7 +406,8 @@
+         });
+ 
+         // PQ EOTF
+-        GLSL("color.rgb = pow(max(color.rgb, 0.0), vec3(1.0/%f));   \n"
++        GLSL("// P5_DOVI_PQ_EOTF \n"
++             "color.rgb = pow(max(color.rgb, 0.0), vec3(1.0/%f));   \n"
+              "color.rgb = max(color.rgb - vec3(%f), 0.0)            \n"
+              "             / (vec3(%f) - vec3(%f) * color.rgb);     \n"
+              "color.rgb = pow(color.rgb, vec3(1.0/%f));             \n",
+@@ -414,7 +415,8 @@
+         // LMS matrix
+         GLSL("color.rgb = "$" * color.rgb; \n", mat);
+         // PQ OETF
+-        GLSL("color.rgb = pow(max(color.rgb, 0.0), vec3(%f));       \n"
++        GLSL("// P5_DOVI_PQ_OETF \n"
++             "color.rgb = pow(max(color.rgb, 0.0), vec3(%f));       \n"
+              "color.rgb = (vec3(%f) + vec3(%f) * color.rgb)         \n"
+              "             / (vec3(1.0) + vec3(%f) * color.rgb);    \n"
+              "color.rgb = pow(color.rgb, vec3(%f));                 \n",
+@@ -1754,7 +1756,10 @@
+ 
+     pl_fmt gamut_fmt = pl_find_fmt(SH_GPU(sh), PL_FMT_UNORM, 4, 16, 16, PL_FMT_CAP_LINEAR);
+     if (!gamut_fmt) {
+-        gamut.function = &pl_gamut_map_saturation;
++        // Honor an explicit clip choice when the 3D LUT format is unavailable.
++        // Other modes retain the historical saturation fallback.
++        if (gamut.function != &pl_gamut_map_clip)
++            gamut.function = &pl_gamut_map_saturation;
+         can_fast = true;
+     }
+ 
+--- a/src/renderer.c
++++ b/src/renderer.c
+@@ -16,6 +16,9 @@
+  */
+ 
+ #include <math.h>
++#ifdef __ANDROID__
++#include <sys/system_properties.h>
++#endif
+ 
+ #include "common.h"
+ #include "filters.h"
+@@ -2013,6 +2016,28 @@
+         }
+     }
+ 
++#ifdef __ANDROID__
++    // Diagnostic only: record the actual main-scaler decision on a few frames.
++    static int p5_scale_logs;
++    if (p5_scale_logs < 8) {
++        char enabled[PROP_VALUE_MAX] = {0};
++        __system_property_get("debug.media_kit.p5_pass_identity", enabled);
++        if (enabled[0] == '1') {
++            const char *branch = info.dir == SAMPLER_NOOP && !need_fbo ? "noop" :
++                info.type == SAMPLER_DIRECT && !need_fbo ? "direct" : "resample";
++            PL_ERR(rr, "P5_MAIN_SCALE frame=%d branch=%s src=%dx%d dst=%dx%d "
++                   "sampler_dir=%d sampler_type=%d need_fbo=%d linear=%d "
++                   "sigmoid=%d hooks=%d alpha=%d transfer=%d gamma=%.6f "
++                   "image_icc=%d image_lut=%d render_lut=%d target_icc=%d",
++                   ++p5_scale_logs, branch, img->w, img->h, src.new_w, src.new_h,
++                   info.dir, info.type, need_fbo, use_linear, use_sigmoid,
++                   params->num_hooks, img->repr.alpha, img->color.transfer,
++                   params->color_adjustment ? params->color_adjustment->gamma : 1.0,
++                   !!image->icc, !!image->lut, !!params->lut, !!pass->target.icc);
++        }
++    }
++#endif
++
+     if (info.dir == SAMPLER_NOOP && !need_fbo) {
+         pl_assert(src.new_w == img->w && src.new_h == img->h);
+         PL_TRACE(rr, "Skipping main scaler (would be no-op)");

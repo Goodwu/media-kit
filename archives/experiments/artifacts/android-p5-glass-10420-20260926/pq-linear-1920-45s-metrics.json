@@ -1,0 +1,26 @@
+{
+  "media_time_seconds": 45.011633,
+  "video_crop_xyxy": [
+    280,
+    0,
+    2840,
+    1440
+  ],
+  "baseline_apk_sha256": "24edf23134ebddb4683f708c7cc3780dbf942ceaca88dafe7626f1746a953353",
+  "candidate_apk_sha256": "20082aff2805f1f5d051d60d9f65da65b223cf9a50d2bd34903fc9495a79b137",
+  "native_lib_sha256": "10504c9811c50e49c936ede59c65e07010a7637594ff48d0d8d830369da8864a",
+  "a_png_sha256": "ad4384ec9357c013eaf39255eaaea261c9f45176086385faed4d55f9ab17941f",
+  "a_log_gzip_sha256": "03728e789a405e56f4f1ec935342d657c696d29a496e98ef844bb117e820077d",
+  "b_png_sha256": "7a6a5933947133385748589d79a1e1eb7429831d18bddb96ca6853d8f649ee42",
+  "b_log_gzip_sha256": "9f3a92b2fd8d8cc8f1b7e3251af3f5ab52564951c9824a7ae7af26c3da465917",
+  "pixel_difference": {
+    "mae_8bit": 0.2349802879050926,
+    "max_channel_diff_8bit": 2,
+    "identical_pixel_fraction": 0.49615098741319447,
+    "any_channel_gt1_fraction": 1.736111111111111e-05,
+    "any_channel_gt5_fraction": 0.0
+  },
+  "non_signature_changed": [
+    "lib/arm64-v8a/libmpv.so"
+  ]
+}

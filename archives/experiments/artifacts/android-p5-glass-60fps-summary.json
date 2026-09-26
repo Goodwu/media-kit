@@ -1,0 +1,72 @@
+{
+  "direct": {
+    "log_sha256": "39624af0566d668e260f7d74da7c5113861dc8b87567ab426ed17984e3ca5201",
+    "metrics": {
+      "18": {
+        "time-pos": "3.036367",
+        "frame-drop-count": "12",
+        "decoder-frame-drop-count": "0",
+        "thermal-status": "1"
+      },
+      "28": {
+        "time-pos": "13.013000",
+        "frame-drop-count": "74",
+        "decoder-frame-drop-count": "0",
+        "thermal-status": "1"
+      },
+      "60": {
+        "time-pos": "45.011633",
+        "frame-drop-count": "329",
+        "decoder-frame-drop-count": "0",
+        "thermal-status": "1"
+      },
+      "90": {
+        "time-pos": "75.024950",
+        "frame-drop-count": "517",
+        "decoder-frame-drop-count": "0",
+        "thermal-status": "1"
+      },
+      "120": {
+        "time-pos": "105.021583",
+        "frame-drop-count": "718",
+        "decoder-frame-drop-count": "0",
+        "thermal-status": "1"
+      }
+    }
+  },
+  "prepass": {
+    "log_sha256": "9687b5efa8ea365edb33e9559551b55e53042604be7cf22f9127a6cb4558d3a9",
+    "metrics": {
+      "18": {
+        "time-pos": "4.070733",
+        "frame-drop-count": "37",
+        "decoder-frame-drop-count": "0",
+        "thermal-status": "1"
+      },
+      "28": {
+        "time-pos": "14.064050",
+        "frame-drop-count": "132",
+        "decoder-frame-drop-count": "0",
+        "thermal-status": "1"
+      },
+      "60": {
+        "time-pos": "46.062683",
+        "frame-drop-count": "419",
+        "decoder-frame-drop-count": "0",
+        "thermal-status": "1"
+      },
+      "90": {
+        "time-pos": "76.059317",
+        "frame-drop-count": "669",
+        "decoder-frame-drop-count": "0",
+        "thermal-status": "1"
+      },
+      "120": {
+        "time-pos": "106.072633",
+        "frame-drop-count": "936",
+        "decoder-frame-drop-count": "0",
+        "thermal-status": "1"
+      }
+    }
+  }
+}

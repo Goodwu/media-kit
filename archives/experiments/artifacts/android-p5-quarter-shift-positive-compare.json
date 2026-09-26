@@ -1,0 +1,29 @@
+{
+  "width": 3840,
+  "height": 2160,
+  "reference_quantization": "software10 >> 2",
+  "Y": {
+    "samples": 8294400,
+    "bytebuffer8_vs_software10_shift2_mismatches": 0,
+    "gpu10_vs_software10_mismatches": 1735758,
+    "gpu10_shift2_vs_bytebuffer8_mismatches": 1061653,
+    "gpu10_shift2_vs_bytebuffer8_max_abs_code_error": 104,
+    "gpu10_shift2_vs_bytebuffer8_mean_abs_code_error": 0.5740024594907407
+  },
+  "Cb": {
+    "samples": 2073600,
+    "bytebuffer8_vs_software10_shift2_mismatches": 0,
+    "gpu10_vs_software10_mismatches": 340284,
+    "gpu10_shift2_vs_bytebuffer8_mismatches": 189751,
+    "gpu10_shift2_vs_bytebuffer8_max_abs_code_error": 52,
+    "gpu10_shift2_vs_bytebuffer8_mean_abs_code_error": 0.1586453510802469
+  },
+  "Cr": {
+    "samples": 2073600,
+    "bytebuffer8_vs_software10_shift2_mismatches": 0,
+    "gpu10_vs_software10_mismatches": 380774,
+    "gpu10_shift2_vs_bytebuffer8_mismatches": 238945,
+    "gpu10_shift2_vs_bytebuffer8_max_abs_code_error": 69,
+    "gpu10_shift2_vs_bytebuffer8_mean_abs_code_error": 0.2872164351851852
+  }
+}

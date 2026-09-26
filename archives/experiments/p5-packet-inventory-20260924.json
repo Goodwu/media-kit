@@ -1,0 +1,20 @@
+{
+  "source_path": "/tmp/media-kit-DV-P5.mp4",
+  "source_sha256": "328cae5c78ba9b8e579e7352edcfb8f3e9e0c0670849fc8773a8b028d2d1d03e",
+  "method": "ffprobe video packet pts,size,pos; read each packet at pos and parse four-byte big-endian NAL lengths; count HEVC NAL type 62",
+  "video_time_base": "1/50",
+  "video_packet_count": 6609,
+  "pts_missing": 0,
+  "pts_duplicate_values": 0,
+  "pts_min": 0,
+  "pts_max": 6608,
+  "pts_nonmonotonic_adjacent_decode_packets": 3170,
+  "pts_minus_decode_packet_index_min": -2,
+  "pts_minus_decode_packet_index_max": 4,
+  "dts_nonmonotonic": 0,
+  "rpu_nal_count_per_packet": {"1": 6609},
+  "rpu_payload_bytes_min": 206,
+  "rpu_payload_bytes_max": 207,
+  "nal_parse_errors": 0,
+  "boundary": "Input file evidence only; MediaCodec output PTS, side-data attachment, visible playback, color, and HDR require device validation."
+}

@@ -1,0 +1,5 @@
+09-25 10:51:42.581 I/flutter (11994): ANDROID_HDR_CAPABILITY reported={2, 3} simulateNoHlgForP84=false
+09-25 10:51:42.908 I/PlatformVideoView(11994): requested holder format RGBA_1010102: handle=532489943632
+09-25 10:51:42.956 E/SurfaceFlinger(11994): getHdrCapabilities failed to transact: -1
+09-25 10:51:42.957 I/PlatformVideoView(11994): surfaceCreated initial dataspace: handle=532489943632, transfer=pq, applied=false
+09-25 10:51:53.064 I/flutter (11994): AUTO_SOURCE ERROR=TimeoutException after 0:00:10.000000: Future not completed

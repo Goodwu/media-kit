@@ -1,0 +1,209 @@
+{
+  "pts_us": 10000000,
+  "output_ordinal": 500,
+  "run_count": 2,
+  "points": [
+    {
+      "x": 203,
+      "y": 1105,
+      "software_yuv": [
+        726,
+        559,
+        818
+      ],
+      "mpv_y": 666,
+      "gpu_raw_yuv": [
+        668,
+        565,
+        810
+      ],
+      "software_scaled_y": 728,
+      "mpv_scaled_y": 668,
+      "gpu_y_matches_mpv": true,
+      "gpu_y_matches_software": false,
+      "repeat_identical": true
+    },
+    {
+      "x": 384,
+      "y": 1080,
+      "software_yuv": [
+        421,
+        502,
+        463
+      ],
+      "mpv_y": 421,
+      "gpu_raw_yuv": [
+        422,
+        503,
+        464
+      ],
+      "software_scaled_y": 422,
+      "mpv_scaled_y": 422,
+      "gpu_y_matches_mpv": true,
+      "gpu_y_matches_software": true,
+      "repeat_identical": true
+    },
+    {
+      "x": 1762,
+      "y": 939,
+      "software_yuv": [
+        706,
+        561,
+        825
+      ],
+      "mpv_y": 648,
+      "gpu_raw_yuv": [
+        650,
+        575,
+        791
+      ],
+      "software_scaled_y": 708,
+      "mpv_scaled_y": 650,
+      "gpu_y_matches_mpv": true,
+      "gpu_y_matches_software": false,
+      "repeat_identical": true
+    },
+    {
+      "x": 1785,
+      "y": 963,
+      "software_yuv": [
+        708,
+        541,
+        814
+      ],
+      "mpv_y": 654,
+      "gpu_raw_yuv": [
+        656,
+        552,
+        789
+      ],
+      "software_scaled_y": 710,
+      "mpv_scaled_y": 656,
+      "gpu_y_matches_mpv": true,
+      "gpu_y_matches_software": false,
+      "repeat_identical": true
+    },
+    {
+      "x": 1920,
+      "y": 1080,
+      "software_yuv": [
+        415,
+        514,
+        508
+      ],
+      "mpv_y": 415,
+      "gpu_raw_yuv": [
+        416,
+        516,
+        509
+      ],
+      "software_scaled_y": 416,
+      "mpv_scaled_y": 416,
+      "gpu_y_matches_mpv": true,
+      "gpu_y_matches_software": true,
+      "repeat_identical": true
+    },
+    {
+      "x": 2215,
+      "y": 1113,
+      "software_yuv": [
+        728,
+        594,
+        807
+      ],
+      "mpv_y": 671,
+      "gpu_raw_yuv": [
+        673,
+        596,
+        809
+      ],
+      "software_scaled_y": 730,
+      "mpv_scaled_y": 673,
+      "gpu_y_matches_mpv": true,
+      "gpu_y_matches_software": false,
+      "repeat_identical": true
+    },
+    {
+      "x": 2576,
+      "y": 1221,
+      "software_yuv": [
+        193,
+        762,
+        787
+      ],
+      "mpv_y": 279,
+      "gpu_raw_yuv": [
+        280,
+        764,
+        789
+      ],
+      "software_scaled_y": 194,
+      "mpv_scaled_y": 280,
+      "gpu_y_matches_mpv": true,
+      "gpu_y_matches_software": false,
+      "repeat_identical": true
+    },
+    {
+      "x": 2577,
+      "y": 1220,
+      "software_yuv": [
+        334,
+        762,
+        787
+      ],
+      "mpv_y": 338,
+      "gpu_raw_yuv": [
+        339,
+        764,
+        789
+      ],
+      "software_scaled_y": 335,
+      "mpv_scaled_y": 339,
+      "gpu_y_matches_mpv": true,
+      "gpu_y_matches_software": false,
+      "repeat_identical": true
+    },
+    {
+      "x": 2577,
+      "y": 1221,
+      "software_yuv": [
+        182,
+        762,
+        787
+      ],
+      "mpv_y": 275,
+      "gpu_raw_yuv": [
+        276,
+        764,
+        789
+      ],
+      "software_scaled_y": 183,
+      "mpv_scaled_y": 276,
+      "gpu_y_matches_mpv": true,
+      "gpu_y_matches_software": false,
+      "repeat_identical": true
+    },
+    {
+      "x": 2577,
+      "y": 1222,
+      "software_yuv": [
+        120,
+        534,
+        522
+      ],
+      "mpv_y": 120,
+      "gpu_raw_yuv": [
+        120,
+        536,
+        524
+      ],
+      "software_scaled_y": 120,
+      "mpv_scaled_y": 120,
+      "gpu_y_matches_mpv": true,
+      "gpu_y_matches_software": true,
+      "repeat_identical": true
+    }
+  ],
+  "all_gpu_y_match_mpv": true,
+  "all_repeats_identical": true
+}

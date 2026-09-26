@@ -1,0 +1,11 @@
+09-25 20:55:01.845  6068  6085 W ACodec  : forcing OMX state to Idle when received shutdown in ExecutingState
+09-25 20:55:01.884  6068  6084 I MediaCodec: start process kWhatStopCompleted
+09-25 20:55:01.884  6068  6084 D SurfaceUtils: disconnecting from surface 0x7ca2e70010, reason disconnectFromSurface
+09-25 20:55:01.890  1072  1198 I VIDEO   : VIDEO-[OMX_FreeHandle]:[211]unload (OMX.hisi.video.decoder.hevc) success, component type : normal_dec, num : 2
+09-25 20:55:15.019  1056  6194 I MediaCodec: MediaCodec will operate in async mode
+09-25 20:55:15.737  1056  6194 I MediaCodec: kWhatFlush processing is complete
+09-25 20:55:15.738  1056  6194 I MediaCodec: Start Processing kWhatFlushCompleted
+09-25 20:54:02.739  5961  5961 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 5961 (main), pid 5961 (main)
+09-25 20:54:02.806  5992  5992 F DEBUG   : pid: 5961, tid: 5961, name: main  >>> app_process <<<
+09-25 20:54:02.806  5992  5992 F DEBUG   : Abort message: 'JNI DETECTED ERROR IN APPLICATION: non-zero capacity for nullptr pointer: 1
+09-25 20:54:02.948  5992  5992 F DEBUG   :       #06 pc 00000000000379a8  /system/lib64/libmedia_jni.so (Image_createSurfacePlanes(_JNIEnv*, _jobject*, int, int)+588) (BuildId: 1fe7780eea36842f1f32b62b7e1921ac)

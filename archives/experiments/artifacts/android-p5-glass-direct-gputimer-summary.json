@@ -1,0 +1,38 @@
+{
+  "gpu_render": {
+    "n": 791,
+    "median_us": 1048,
+    "p95_us": 2097,
+    "max_us": 2097,
+    "bins": {
+      "0": 308,
+      "1048": 357,
+      "2097": 126
+    }
+  },
+  "cpu_wall_batches": {
+    "n": 21,
+    "draw_wall_per_frame_us": 17335.82,
+    "draw_cpu_per_frame_us": 5103.052,
+    "flip_wall_per_frame_us": 585.0
+  },
+  "log_sha256": "d7b7a54950a0fc75309078ffa9a9a77746fb6304ae60014c86b833b307ddfc51",
+  "t28": {
+    "time-pos": "15.231883",
+    "frame-drop-count": "108",
+    "decoder-frame-drop-count": "0",
+    "thermal-status": "1"
+  },
+  "t60": {
+    "time-pos": "47.230517",
+    "frame-drop-count": "361",
+    "decoder-frame-drop-count": "0",
+    "thermal-status": "1"
+  },
+  "t90": {
+    "time-pos": "77.243833",
+    "frame-drop-count": "613",
+    "decoder-frame-drop-count": "0",
+    "thermal-status": "1"
+  }
+}

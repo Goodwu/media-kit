@@ -1,0 +1,13 @@
+diff --git a/video/out/vo_gpu_next.c b/video/out/vo_gpu_next.c
+index 3f0b18f..016506d 100644
+--- a/video/out/vo_gpu_next.c
++++ b/video/out/vo_gpu_next.c
+@@ -560,6 +560,8 @@ static pl_tex hwdec_get_tex(struct priv *p, int n)
+         ra_gl_get_format(ratex->params.format, &par.iformat,
+                          &(GLenum){0}, &(GLenum){0});
+         ra_gl_get_raw_tex(ra, ratex, &par.texture, &par.target);
++        if (ratex->params.external_oes)
++            par.iformat = GL_RGB10_A2;
+         return pl_opengl_wrap(p->gpu, &par);
+     }
+ #endif

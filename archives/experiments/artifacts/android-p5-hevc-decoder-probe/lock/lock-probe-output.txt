@@ -1,0 +1,8 @@
+input={max-bitrate=7193320, track-id=1, level=65536, mime=video/hevc, frame-count=512, profile=2, bitrate=3999152, language=und, color-standard=0, display-width=3840, color-transfer=0, durationUs=10360000, display-height=2160, width=3840, color-range=1, max-input-size=276181, frame-rate=49, height=2160, csd-0=java.nio.HeapByteBuffer[pos=0 lim=102 cap=102]}
+configured={crop-right=3839, color-format=781, slice-height=2160, mime=video/raw, hdr-static-info=java.nio.HeapByteBuffer[pos=0 lim=25 cap=25], stride=3840, color-standard=6, color-transfer=3, crop-bottom=2159, crop-left=0, width=3840, color-range=1, crop-top=0, height=2160}
+changed={crop-right=3839, color-format=805, slice-height=2160, mime=video/raw, hdr-static-info=java.nio.HeapByteBuffer[pos=0 lim=25 cap=25], stride=3840, color-standard=6, color-transfer=3, crop-bottom=2159, crop-left=0, width=3840, color-range=1, crop-top=0, height=2160}
+frame=1 PTS=0 imageNs=0 format=34 bufferFormat=805 crop=Rect(0, 0 - 3840, 2160)
+native=format=805 size=3840x2160 stride=3840 layers=1 usage=10498 lockStatus=0 planeCount=1 plane0RowStride=0 plane0PixelStride=0 plane0First16=00100010001000100010001000100010 unlockStatus=0
+frame=501 PTS=10000000 imageNs=10000000000 format=34 bufferFormat=805 crop=Rect(0, 0 - 3840, 2160)
+native=format=805 size=3840x2160 stride=3840 layers=1 usage=10498 lockStatus=0 planeCount=1 plane0RowStride=0 plane0PixelStride=0 plane0First16=00680068006800680068006800680068 unlockStatus=0
+frames=501

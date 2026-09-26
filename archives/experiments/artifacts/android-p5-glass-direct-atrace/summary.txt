@@ -1,0 +1,12 @@
+decoded_bytes=53238080 unclosed=0 unmatched=0
+eglSwapBuffers parent=<root> count=516 median_ms=0.602 p95_ms=0.950 max_ms=2.374
+queueBuffer parent=eglSwapBuffers count=516 median_ms=0.260 p95_ms=0.355 max_ms=0.674
+queueBuffer parent=queueBuffer count=516 median_ms=0.190 p95_ms=0.270 max_ms=0.468
+waitForever parent=queueBuffer count=516 median_ms=0.014 p95_ms=0.019 max_ms=0.169
+dequeueBuffer parent=<root> count=517 median_ms=0.107 p95_ms=0.168 max_ms=0.470
+mali_dma_fence_signal events=1514 wait_ends_with_prior_event_0.5ms=498/516 within_1ms=516/516
+hisi_display_fence_signal events=996 wait_ends_with_prior_event_0.5ms=15/516 within_1ms=31/516
+vo_thread_wakeup events=5129 wait_ends_with_prior_event_0.5ms=500/516 within_1ms=515/516
+paired_mali_fences=1513 init_to_signal_median_ms=0.009
+near_wait_mali_signals=498 fence_init_to_signal_median_ms=0.005 fence_init_to_wait_start_median_ms=0.314
+raster_updateTexImage=498 interval_median_ms=16.449 next_after_wait_median_ms=8.020 queue_level_counts={0: 498, 1: 516}

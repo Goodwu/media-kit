@@ -1,0 +1,20 @@
+{
+  "file": "archives/experiments/artifacts/android-p5-left-patterns-loop-20260925.mp4",
+  "sha256": "74c2cfb6b28095c4bb3b95a57507de699bb8141d62feaedbcb20b964d51a0a98",
+  "stream": {
+    "codec_tag_string": "dvh1",
+    "width": 256,
+    "height": 144,
+    "pix_fmt": "yuv420p10le",
+    "chroma_location": "left",
+    "duration": "13.000000",
+    "nb_frames": "312",
+    "side_data_list": [
+      {}
+    ]
+  },
+  "dv_metadata_frames": 312,
+  "decoded_yuv_all_frames_equal_repeating_original_24": true,
+  "decoded_yuv_sha256": "29194248d5ce97864e556411518d71021a06ad8035cff0b78dc24fd56ad47087",
+  "frame240_pts": "10.000000"
+}

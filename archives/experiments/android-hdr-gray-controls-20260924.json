@@ -1,0 +1,58 @@
+{
+  "purpose": "deterministic encoded-input PQ positive and SDR negative controls",
+  "limit": "does not prove display HDR activation, output color, or optical luminance",
+  "geometry": "1920x1080",
+  "fps": 30,
+  "duration_seconds": 6,
+  "grayscale_bands_left_to_right_nits": [
+    0,
+    1,
+    10,
+    100,
+    203,
+    400,
+    1000
+  ],
+  "quantized_pq_band_nits": [
+    0.0,
+    0.992,
+    10.067,
+    99.913,
+    203.703,
+    401.455,
+    1004.192
+  ],
+  "max_cll_nits_rounded_up": 1005,
+  "max_frame_average_nits_rounded_up": 247,
+  "sdr_mapping": "display-referred ideal gamma 2.4, 100 nit clip; not BT.709 camera OETF",
+  "luma_range": "10-bit limited 64..940",
+  "chroma_code": 512,
+  "clips": {
+    "pq": {
+      "path": "/tmp/media-kit-hdr-gray-controls-20260924/pq-gray-1920x1080-6s.mp4",
+      "sha256": "748719e5d3c1336411d33963ca1b147cb7b1e97363773bfd5a32be1304d1342d",
+      "y10_codes": [
+        64,
+        195,
+        327,
+        509,
+        573,
+        636,
+        723
+      ]
+    },
+    "sdr": {
+      "path": "/tmp/media-kit-hdr-gray-controls-20260924/sdr-gray-1920x1080-6s.mp4",
+      "sha256": "d6e5e8c5979cd31e91cc1abdbc0c406c87b69e7fe0e4a8944b0a42bb2c3b8df5",
+      "y10_codes": [
+        64,
+        193,
+        400,
+        940,
+        940,
+        940,
+        940
+      ]
+    }
+  }
+}

@@ -1,0 +1,9 @@
+# P5 VO 线程调度与下采样滤镜对照（2026-09-24）
+
+继续用同一华为机、同一 SHA 为 `328cae5c78ba9b8e579e7352edcfb8f3e9e0c0670849fc8773a8b028d2d1d03e` 的 P5 4K50 输入、MediaCodec/RPU/厂商 raw `0x325`/MRT、SurfaceTexture 1440×810、VO 逐帧汇总关闭。两轮视频位置约实时、decoder drops 0、thermal status 1；均无真人连续流畅或独立色彩验收。
+
+6306 复用 6303 APK SHA `a55890b2751870ee0dcaa75919ce9faa28e7e6b2e9f286e0261366e800c18652`，不改播放器，只在主机每秒通过 ADB 读取 P5 raw 日志关联的 VO 线程 `/proc/6937/task/7118/schedstat` 和 GPU 当前频率。t18/28/60 VO 累计掉帧 49/104/387，t28→60 新增 283；Flutter 不同 Texture 时间戳 794→2093，增 1299。采样从设备播放约 t42 到 t74，32.51 秒内 VO 线程累计 CPU 运行 6.514 秒、可运行但等待调度 0.248 秒、调度片段增加 10559；分成三个约 10.5 秒窗口，调度等待分别 0.078/0.079/0.081 秒，GPU 当前频率中位数均 277 MHz。0.248 秒约占窗口 0.76%，不支持“VO 线程长期抢不到 CPU”作为主要掉速解释；`schedstat` 不含主动等待、EGL/GPU fence、驱动阻塞、BufferQueue 等，不能由此指认 GPU 或显示根因。原始逐秒采样 `/tmp/media-kit-6306-p5-vosched.jsonl` SHA `243062d775c0345e6bb49351991ee4e0c788e94b06eb7b44adccfaa149957544`，完整日志 `/tmp/media-kit-6306-p5-vosched-logcat.txt` SHA `ae45501d2b2132b6f82b88b5b79fc2cb00e8ad594003ace59fa352a224d4d7b3`。测试页 75 秒切 `vo=null`，采样随线程结束终止。
+
+源码核对锁定 mpv gpu-next 默认 `dscale=hermite`，既有 R16F 中间纹理 6258 曾更慢且未验精度，故没有重复缩格式试验。测试页把已有 scaler 诊断参数移入 HDR 事务与普通入口共用的、设后读回方法；未设置时不写属性。6307 只指定 `MEDIA_KIT_ANDROID_DSCALE=bilinear`，其他 P5 配置/原生库与 6303 相同，运行中读回 `ANDROID_SCALER dscale=bilinear`。APK SHA `2ecee0d7753cd6ac8db4896765676e124ba6e84fd99b9d8e71acbf281a37da24`、versionCode 8307，验签及 arm64 构建通过；日志 `/tmp/media-kit-6307-p5-dscale-bilinear-logcat.txt` SHA `ebe6488c44a698df850798a1bc2760b4518503c9020e8e2bd7560a38c903e45b`。t18/28/60 VO 累计掉 43/83/344，t28→60 新增 261；Flutter 不同 Texture 时间戳 793→2102，增 1309。相对 6306 默认滤镜的 283/1299，差异小且非同温/同起点配对，不能声称可靠优化；仍明显不达 ≤1% 掉帧门禁。bilinear 更可能影响重采样画质，未做参考对照，不进入正式路径。
+
+`dart analyze` 目标页只有既有 `use_super_parameters` info，`git diff --check` 通过。手机当前装 8307 测试包，应用已在 75 秒主动停止 VO。下一步保留正确 1440 输出和 DV 处理，在无热路径计时条件下找实际 GPU/驱动等待证据或做等价资源布局优化；不继续重复早已否定的半浮点/盲目下采样选项。

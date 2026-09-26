@@ -1,0 +1,18 @@
+09-25 20:37:06.686 I/flutter (32080): ANDROID_HDR_OPEN sample=AndroidHdrSample.dolbyVisionP5 presentationVerified=false gpuPlatformHdr=false simulateNoHlgForP84=false
+09-25 20:37:16.694 E/P5_GAMUT_SOURCE(32080): pts=10.000000000 src_fmt=1025 src_sys=8 src_prim=6 src_trc=12 src_dovi=1 mapped_fmt=1045 mapped_sys=8 mapped_prim=6 mapped_trc=12 mapped_dovi=1
+09-25 20:37:16.871 E/P5_RAW_STAGE(32080): P5_RAW_FULL pts=10.000000000 size=1920x1080 bytes=8294400 written=8294400 error=0x0 crop=0,0,3840,2160 buffer=3840,2160 chroma_left_probe=0
+09-25 20:38:23.916 I/flutter (32534): ANDROID_HDR_OPEN sample=AndroidHdrSample.dolbyVisionP5 presentationVerified=false gpuPlatformHdr=false simulateNoHlgForP84=false
+09-25 20:38:33.913 E/P5_GAMUT_SOURCE(32534): pts=10.000000000 src_fmt=1025 src_sys=8 src_prim=6 src_trc=12 src_dovi=1 mapped_fmt=1045 mapped_sys=8 mapped_prim=6 mapped_trc=12 mapped_dovi=1
+09-25 20:38:34.083 E/P5_RAW_STAGE(32534): P5_RAW_FULL pts=10.000000000 size=1920x1080 bytes=8294400 written=8294400 error=0x0 crop=0,0,3840,2160 buffer=3840,2160 chroma_left_probe=0
+09-25 20:39:35.534 I/flutter ( 1613): ANDROID_HDR_OPEN sample=AndroidHdrSample.dolbyVisionP5 presentationVerified=false gpuPlatformHdr=false simulateNoHlgForP84=false
+09-25 20:39:45.547 E/P5_GAMUT_SOURCE( 1613): pts=10.000000000 src_fmt=1025 src_sys=8 src_prim=6 src_trc=12 src_dovi=1 mapped_fmt=1045 mapped_sys=8 mapped_prim=6 mapped_trc=12 mapped_dovi=1
+09-25 20:39:45.737 E/P5_RAW_STAGE( 1613): P5_RAW_FULL pts=10.000000000 size=1920x1080 bytes=8294400 written=8294400 error=0x0 crop=0,0,3840,2160 buffer=3840,2160 chroma_left_probe=0
+09-25 20:40:12.791 I/flutter ( 3038): ANDROID_HDR_OPEN sample=AndroidHdrSample.dolbyVisionP5 presentationVerified=false gpuPlatformHdr=false simulateNoHlgForP84=false
+09-25 20:40:22.786 E/P5_GAMUT_SOURCE( 3038): pts=10.000000000 src_fmt=1025 src_sys=8 src_prim=6 src_trc=12 src_dovi=1 mapped_fmt=1045 mapped_sys=8 mapped_prim=6 mapped_trc=12 mapped_dovi=1
+09-25 20:40:22.964 E/P5_RAW_STAGE( 3038): P5_RAW_FULL pts=10.000000000 size=1920x1080 bytes=8294400 written=8294400 error=0x0 crop=0,0,3840,2160 buffer=3840,2160 chroma_left_probe=0
+09-25 20:40:51.711 I/flutter ( 3538): ANDROID_HDR_OPEN sample=AndroidHdrSample.dolbyVisionP5 presentationVerified=false gpuPlatformHdr=false simulateNoHlgForP84=false
+09-25 20:41:01.725 E/P5_GAMUT_SOURCE( 3538): pts=10.000000000 src_fmt=1025 src_sys=8 src_prim=6 src_trc=12 src_dovi=1 mapped_fmt=1045 mapped_sys=8 mapped_prim=6 mapped_trc=12 mapped_dovi=1
+09-25 20:41:01.908 E/P5_RAW_STAGE( 3538): P5_RAW_FULL pts=10.000000000 size=1920x1080 bytes=8294400 written=8294400 error=0x0 crop=0,0,3840,2160 buffer=3840,2160 chroma_left_probe=0
+09-25 20:42:28.978 I/flutter ( 4446): ANDROID_HDR_OPEN sample=AndroidHdrSample.dolbyVisionP5 presentationVerified=false gpuPlatformHdr=false simulateNoHlgForP84=false
+09-25 20:42:38.983 E/P5_GAMUT_SOURCE( 4446): pts=10.000000000 src_fmt=1025 src_sys=8 src_prim=6 src_trc=12 src_dovi=1 mapped_fmt=1045 mapped_sys=8 mapped_prim=6 mapped_trc=12 mapped_dovi=1
+09-25 20:42:39.157 E/P5_RAW_STAGE( 4446): P5_RAW_FULL pts=10.000000000 size=1920x1080 bytes=8294400 written=8294400 error=0x0 crop=0,0,3840,2160 buffer=3840,2160 chroma_left_probe=0

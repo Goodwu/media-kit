@@ -1,0 +1,56 @@
+09-25 23:03:15.138 I/flutter (20039): ANDROID_HDR_OPEN sample=AndroidHdrSample.dolbyVisionP5 presentationVerified=false gpuPlatformHdr=false simulateNoHlgForP84=false
+09-25 23:03:15.164 E/P5_RAW_GL(20039): after_import error=0x0 ctx=0x7b83334a00 format=0x325
+09-25 23:03:15.316 E/P5_RAW_GL(20039): after_import error=0x0 ctx=0x7b83334a00 format=0x325
+09-25 23:03:15.343 E/P5_RAW_GL(20039): after_import error=0x0 ctx=0x7b83334a00 format=0x325
+09-25 23:03:15.387 E/P5_RAW_GL(20039): after_import error=0x0 ctx=0x7b83334a00 format=0x325
+09-25 23:03:15.423 E/P5_RAW_GL(20039): after_import error=0x0 ctx=0x7b83334a00 format=0x325
+09-25 23:03:16.433 I/flutter (20039): PERF t=8 time-pos=1.208333
+09-25 23:03:16.433 I/flutter (20039): PERF t=8 frame-drop-count=0
+09-25 23:03:16.433 I/flutter (20039): PERF t=8 decoder-frame-drop-count=0
+09-25 23:03:16.434 I/flutter (20039): PERF t=8 avsync=
+09-25 23:03:16.434 I/flutter (20039): PERF t=8 container-fps=24.000000
+09-25 23:03:16.434 I/flutter (20039): PERF t=8 pause=no
+09-25 23:03:16.434 I/flutter (20039): PERF t=8 eof-reached=no
+09-25 23:03:16.434 I/flutter (20039): PERF t=8 idle-active=no
+09-25 23:03:16.438 I/flutter (20039): PERF t=8 thermal-status=1
+09-25 23:03:16.440 I/flutter (20039): PERF t=8 texture-consumer={reason: surface_producer, scope: flutter_surface_texture_update_tex_image_callback, enabled: false}
+09-25 23:03:26.433 I/flutter (20039): PERF t=18 time-pos=11.208333
+09-25 23:03:26.433 I/flutter (20039): PERF t=18 frame-drop-count=0
+09-25 23:03:26.433 I/flutter (20039): PERF t=18 decoder-frame-drop-count=0
+09-25 23:03:26.433 I/flutter (20039): PERF t=18 avsync=
+09-25 23:03:26.434 I/flutter (20039): PERF t=18 container-fps=24.000000
+09-25 23:03:26.434 I/flutter (20039): PERF t=18 pause=no
+09-25 23:03:26.434 I/flutter (20039): PERF t=18 eof-reached=no
+09-25 23:03:26.434 I/flutter (20039): PERF t=18 idle-active=no
+09-25 23:03:26.436 I/flutter (20039): PERF t=18 thermal-status=1
+09-25 23:03:26.438 I/flutter (20039): PERF t=18 texture-consumer={reason: surface_producer, scope: flutter_surface_texture_update_tex_image_callback, enabled: false}
+09-25 23:03:36.433 I/flutter (20039): PERF t=28 time-pos=21.208333
+09-25 23:03:36.433 I/flutter (20039): PERF t=28 frame-drop-count=0
+09-25 23:03:36.433 I/flutter (20039): PERF t=28 decoder-frame-drop-count=0
+09-25 23:03:36.433 I/flutter (20039): PERF t=28 avsync=
+09-25 23:03:36.434 I/flutter (20039): PERF t=28 container-fps=24.000000
+09-25 23:03:36.434 I/flutter (20039): PERF t=28 pause=no
+09-25 23:03:36.434 I/flutter (20039): PERF t=28 eof-reached=no
+09-25 23:03:36.434 I/flutter (20039): PERF t=28 idle-active=no
+09-25 23:03:36.436 I/flutter (20039): PERF t=28 thermal-status=1
+09-25 23:03:36.438 I/flutter (20039): PERF t=28 texture-consumer={reason: surface_producer, scope: flutter_surface_texture_update_tex_image_callback, enabled: false}
+09-25 23:04:08.433 I/flutter (20039): PERF t=60 time-pos=53.208333
+09-25 23:04:08.433 I/flutter (20039): PERF t=60 frame-drop-count=0
+09-25 23:04:08.433 I/flutter (20039): PERF t=60 decoder-frame-drop-count=0
+09-25 23:04:08.433 I/flutter (20039): PERF t=60 avsync=
+09-25 23:04:08.434 I/flutter (20039): PERF t=60 container-fps=24.000000
+09-25 23:04:08.434 I/flutter (20039): PERF t=60 pause=no
+09-25 23:04:08.434 I/flutter (20039): PERF t=60 eof-reached=no
+09-25 23:04:08.434 I/flutter (20039): PERF t=60 idle-active=no
+09-25 23:04:08.437 I/flutter (20039): PERF t=60 thermal-status=1
+09-25 23:04:08.438 I/flutter (20039): PERF t=60 texture-consumer={reason: surface_producer, scope: flutter_surface_texture_update_tex_image_callback, enabled: false}
+09-25 23:04:38.433 I/flutter (20039): PERF t=90 time-pos=83.208333
+09-25 23:04:38.433 I/flutter (20039): PERF t=90 frame-drop-count=0
+09-25 23:04:38.433 I/flutter (20039): PERF t=90 decoder-frame-drop-count=0
+09-25 23:04:38.433 I/flutter (20039): PERF t=90 avsync=
+09-25 23:04:38.434 I/flutter (20039): PERF t=90 container-fps=24.000000
+09-25 23:04:38.434 I/flutter (20039): PERF t=90 pause=no
+09-25 23:04:38.434 I/flutter (20039): PERF t=90 eof-reached=no
+09-25 23:04:38.434 I/flutter (20039): PERF t=90 idle-active=no
+09-25 23:04:38.436 I/flutter (20039): PERF t=90 thermal-status=1
+09-25 23:04:38.438 I/flutter (20039): PERF t=90 texture-consumer={reason: surface_producer, scope: flutter_surface_texture_update_tex_image_callback, enabled: false}

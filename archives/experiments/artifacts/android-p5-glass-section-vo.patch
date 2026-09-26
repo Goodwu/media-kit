@@ -1,0 +1,47 @@
+--- a/video/out/vo_gpu_next.c
++++ b/video/out/vo_gpu_next.c
+@@ -190,6 +190,9 @@
+     uint64_t p5_vo_perf_seq;
+ #ifdef __ANDROID__
+     bool p5_vo_cpu_wall;
++    bool p5_section_perf;
++    uint64_t p5_section_frames;
++    int64_t p5_render_wall_sum_ns, p5_render_cpu_sum_ns;
+     uint64_t p5_vo_cpu_wall_frames;
+     int64_t p5_draw_wall_sum_ns, p5_draw_cpu_sum_ns;
+     int64_t p5_flip_wall_sum_ns, p5_flip_cpu_sum_ns;
+@@ -1864,7 +1867,23 @@
+         }
+     }
+ #endif
++#ifdef __ANDROID__
++    int64_t p5_section_wall_start = p->p5_section_perf ? mp_time_ns() : 0;
++    int64_t p5_section_cpu_start = p->p5_section_perf ? p5_thread_cpu_ns() : 0;
++#endif
+     p5_render_ok = pl_render_image_mix(p->rr, &mix, &target, &params);
++#ifdef __ANDROID__
++    if (p->p5_section_perf) {
++        p->p5_render_wall_sum_ns += mp_time_ns() - p5_section_wall_start;
++        p->p5_render_cpu_sum_ns += p5_thread_cpu_ns() - p5_section_cpu_start;
++        if (++p->p5_section_frames % 250 == 0) {
++            p5_vo_log("P5_SECTION_RENDER", "frames=250 wall_us=%"PRId64" cpu_us=%"PRId64,
++                      p->p5_render_wall_sum_ns / 1000,
++                      p->p5_render_cpu_sum_ns / 1000);
++            p->p5_render_wall_sum_ns = p->p5_render_cpu_sum_ns = 0;
++        }
++    }
++#endif
+ #if HAVE_GL && defined(PL_HAVE_OPENGL) && defined(__ANDROID__)
+     talloc_free(p5_l2c_hooks);
+ #endif
+@@ -2803,6 +2822,10 @@
+ {
+     struct priv *p = vo->priv;
+ #ifdef __ANDROID__
++    char p5_section_property[PROP_VALUE_MAX] = {0};
++    p->p5_section_perf = __system_property_get("debug.media_kit.p5_section_perf",
++                                              p5_section_property) > 0 &&
++                         !strcmp(p5_section_property, "1");
+     char p5_cpu_wall_property[PROP_VALUE_MAX] = {0};
+     p->p5_vo_cpu_wall = __system_property_get("debug.media_kit.p5_vo_cpu_wall",
+                                               p5_cpu_wall_property) > 0 &&

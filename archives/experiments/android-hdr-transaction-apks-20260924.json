@@ -1,0 +1,210 @@
+{
+  "date": "2026-09-24",
+  "target": "LYA-AL00 / Android API 29 / arm64-v8a",
+  "nativeJar": {
+    "path": "/tmp/media-kit-p5-raw-perf-2217-arm64.jar",
+    "sha256": "e7b4cfefed60052277519a39d4834eb33d35f08342c59610279232878d1036bd",
+    "unstrippedLibmpvSha256": "e5d1c5d09c7b0e03a440a1cf50fc59261c1c0fa123df8ca927ae792ba5bf20bd",
+    "apkStrippedLibmpvSha256": "4cb1ff78873d793b68619f07a33e323477fe083395f17ba5a522ce6b8c481bab"
+  },
+  "commonBuild": {
+    "jdk": "OpenJDK 17",
+    "flutterFlags": [
+      "--release",
+      "--target-platform=android-arm64",
+      "--split-per-abi"
+    ],
+    "gradleProperty": "ORG_GRADLE_PROJECT_mediaKitLocalArm64Jar=/tmp/media-kit-p5-raw-perf-2217-arm64.jar",
+    "dartDefines": {
+      "MEDIA_KIT_ANDROID_HDR_TRANSACTION": "true",
+      "MEDIA_KIT_ANDROID_PLATFORM_VIEW": "true",
+      "MEDIA_KIT_ANDROID_VO": "mediacodec_embed",
+      "MEDIA_KIT_ANDROID_HWDEC": "mediacodec"
+    }
+  },
+  "candidates": [
+    {
+      "versionCode": 6233,
+      "apk": "/tmp/media-kit-hdr10-platform-transaction-6233-arm64.apk",
+      "sha256": "930c4a0d26ebf6d9d9a6a57865752e3442e1313070073d97a85e48efcb126d06",
+      "fixedSource": "/data/local/tmp/media-kit-hdr10-full.mp4",
+      "extraDartDefines": {},
+      "scope": "HDR10 and natural-capability P8.4 transaction routing; P5 build gate disabled",
+      "buildNumber": 4233,
+      "gpuApi": "opengl when transaction selects gpu-next; cleared for mediacodec_embed"
+    },
+    {
+      "versionCode": 6234,
+      "apk": "/tmp/media-kit-p5-platform-transaction-gated-6234-arm64.apk",
+      "sha256": "ebe19f6cf4ced350b1bf0133f68c51b0c6664e95d30868f9cfcb493be9c889a2",
+      "fixedSource": "/data/local/tmp/media-kit-p5-full.mp4",
+      "extraDartDefines": {
+        "MEDIA_KIT_ANDROID_P5_RPU_PIPELINE_BUILT": "true"
+      },
+      "runtimeRequirements": {
+        "debug.media_kit.p5_rpu_probe": "2",
+        "debug.media_kit.p5_raw_yuv": "1"
+      },
+      "scope": "P5 experimental RPU attachment and raw-YUV reshape path",
+      "buildNumber": 4234,
+      "gpuApi": "opengl when transaction selects gpu-next; cleared for mediacodec_embed"
+    },
+    {
+      "versionCode": 6235,
+      "apk": "/tmp/media-kit-p84-forced-pq-platform-transaction-6235-arm64.apk",
+      "sha256": "c42eeb250f23ad30af62c5b9e5368d88b3eb62af6db57ce7dadab22719e761b4",
+      "fixedSource": "/data/local/tmp/media-kit-p84-full.mp4",
+      "extraDartDefines": {
+        "MEDIA_KIT_ANDROID_FORCE_P84_PQ_FALLBACK": "true"
+      },
+      "scope": "Simulated no-HLG policy branch on an HLG-capable device; actual HDR10 support is still required",
+      "acceptanceLimit": "Does not validate a device that genuinely lacks HLG",
+      "buildNumber": 4235,
+      "gpuApi": "opengl when transaction selects gpu-next; cleared for mediacodec_embed"
+    },
+    {
+      "versionCode": 6236,
+      "apk": "/tmp/media-kit-p84-natural-hlg-platform-transaction-6236-arm64.apk",
+      "sha256": "cfda587aacc61282af210949691566dd69eb4408b3a889ad8d098d131491289e",
+      "fixedSource": "/data/local/tmp/media-kit-p84-full.mp4",
+      "extraDartDefines": {},
+      "scope": "Natural HLG-capability PlatformView path on the same device; comparison for 4222",
+      "buildNumber": 4236,
+      "gpuApi": "opengl when transaction selects gpu-next; cleared for mediacodec_embed"
+    }
+  ],
+  "supersededUninstalled": [
+    {
+      "versionCode": 4219,
+      "sha256": "13d64a2f412309ffac34b2c60ffe8a3258a6782b77957d4b1a09eb66cdc44fb2",
+      "reason": "P5 runtime properties were not gated"
+    },
+    {
+      "versionCode": 4221,
+      "sha256": "7a64f410812e3b9cbcc5b19ce05c14d3772880a0ca5dbec78a2e1a53980a9d77",
+      "reason": "Simulated capability condition was not logged with the actual display report"
+    },
+    {
+      "versionCode": 4224,
+      "sha256": "7008d1a07e4b0e92dcaf99348127ba59e64598a1ac6b5ad3b628f3ab1ecdfdb6",
+      "reason": "Texture GPU API not explicitly OpenGL"
+    },
+    {
+      "versionCode": 4225,
+      "sha256": "43bd4ae336161e7c55d3b14951af09af6ac5d3890157a8b2c54c2008cae8211e",
+      "reason": "Texture GPU API not explicitly OpenGL"
+    },
+    {
+      "versionCode": 4226,
+      "sha256": "1542183e51a997b17fa216d6b65e8287d48d26e84cc92bd75002f0e9c22c4701",
+      "reason": "Texture GPU API not explicitly OpenGL"
+    },
+    {
+      "versionCode": 4218,
+      "sha256": "834a9c503886f91f606e040d6b37f864201e508e47a8f3079a530578d78046ad",
+      "reason": "Built before explicit OpenGL selection and GPU API clearing for transaction VO switch"
+    },
+    {
+      "versionCode": 4220,
+      "sha256": "67f18dbf48bc4431cbab3c8486bd0a38b267ecb55d4f2d035f2efb99070616af",
+      "reason": "Built before explicit OpenGL selection and GPU API clearing for transaction VO switch"
+    },
+    {
+      "versionCode": 4222,
+      "sha256": "7be5857509f17c816144d796110a6808c307cd3f90787926c60378debea2ca82",
+      "reason": "Built before explicit OpenGL selection and GPU API clearing for transaction VO switch"
+    },
+    {
+      "versionCode": 4223,
+      "sha256": "24587a413f2702f147951d9a0d4a1ad9bb49140d4fddef4f0ba9143153cb91d1",
+      "reason": "Built before explicit OpenGL selection and GPU API clearing for transaction VO switch"
+    }
+  ],
+  "deviceState": "No current native, Texture, or GPU PlatformView candidate installed or run; no debug property changed. Runtime and visual acceptance remain open.",
+  "textureCommonBuild": {
+    "jdk": "OpenJDK 17",
+    "flutterFlags": [
+      "--release",
+      "--target-platform=android-arm64",
+      "--split-per-abi"
+    ],
+    "gradleProperty": "ORG_GRADLE_PROJECT_mediaKitLocalArm64Jar=/tmp/media-kit-p5-raw-perf-2217-arm64.jar",
+    "dartDefines": {
+      "MEDIA_KIT_ANDROID_HDR_TRANSACTION": "true",
+      "MEDIA_KIT_ANDROID_PLATFORM_VIEW": "false",
+      "MEDIA_KIT_ANDROID_VO": "gpu-next",
+      "MEDIA_KIT_ANDROID_HWDEC": "mediacodec"
+    },
+    "gpuApi": "opengl selected by runtime controller configuration for gpu-next"
+  },
+  "textureCandidates": [
+    {
+      "versionCode": 6230,
+      "buildNumber": 4230,
+      "apk": "/tmp/media-kit-hdr10-texture-transaction-6230-arm64.apk",
+      "sha256": "b4905f5517902a86505fac0b5307e081ed309313c7871f33716966f9b693a5ee",
+      "fixedSource": "/data/local/tmp/media-kit-hdr10-full.mp4",
+      "extraDartDefines": {},
+      "scope": "HDR10 Texture SDR transaction; display HDR activation not expected"
+    },
+    {
+      "versionCode": 6231,
+      "buildNumber": 4231,
+      "apk": "/tmp/media-kit-p84-texture-transaction-6231-arm64.apk",
+      "sha256": "756349bedf70322f76c3b6f0ffaa0f5749094bb5b28ce6cc57096d5f2dbc6a10",
+      "fixedSource": "/data/local/tmp/media-kit-p84-full.mp4",
+      "extraDartDefines": {},
+      "scope": "P8.4 Texture SDR baseline-filter path; RPU is not applied"
+    },
+    {
+      "versionCode": 6232,
+      "buildNumber": 4232,
+      "apk": "/tmp/media-kit-p5-texture-transaction-gated-6232-arm64.apk",
+      "sha256": "2206378c44d035c3097eb76f2c1f5c1fa1e0010d286c1dca421fbd6d3d0f522b",
+      "fixedSource": "/data/local/tmp/media-kit-p5-full.mp4",
+      "extraDartDefines": {
+        "MEDIA_KIT_ANDROID_P5_RPU_PIPELINE_BUILT": "true"
+      },
+      "runtimeRequirements": {
+        "debug.media_kit.p5_rpu_probe": "2",
+        "debug.media_kit.p5_raw_yuv": "1"
+      },
+      "scope": "P5 Texture SDR experimental RPU/raw-YUV path; pixel correctness and sustained playback unverified"
+    }
+  ],
+  "gpuPlatformCommonBuild": {
+    "jdk": "OpenJDK 17",
+    "flutterFlags": [
+      "--release",
+      "--target-platform=android-arm64",
+      "--split-per-abi"
+    ],
+    "gradleProperty": "ORG_GRADLE_PROJECT_mediaKitLocalArm64Jar=/tmp/media-kit-p5-raw-perf-2217-arm64.jar",
+    "dartDefines": {
+      "MEDIA_KIT_ANDROID_HDR_TRANSACTION": "true",
+      "MEDIA_KIT_ANDROID_PLATFORM_VIEW": "true",
+      "MEDIA_KIT_ANDROID_GPU_PLATFORM_HDR": "true",
+      "MEDIA_KIT_ANDROID_VO": "mediacodec_embed",
+      "MEDIA_KIT_ANDROID_HWDEC": "mediacodec"
+    },
+    "scope": "Default-off T1/T2 GPU PlatformView experiment only; hard decode enabled"
+  },
+  "gpuPlatformCandidates": [
+    {
+      "versionCode": 6237,
+      "buildNumber": 4237,
+      "apk": "/tmp/media-kit-hdr10-gpu-platform-pq-6237-arm64.apk",
+      "sha256": "ee1f575226c40afba404290fecad9ad853bcffa7aa1df8cb79493baf0b467757",
+      "fixedSource": "/data/local/tmp/media-kit-hdr10-full.mp4",
+      "route": "T1 HDR10 gpu-next to PlatformView BT.2020/PQ"
+    },
+    {
+      "versionCode": 6238,
+      "buildNumber": 4238,
+      "apk": "/tmp/media-kit-p84-gpu-platform-hlg-6238-arm64.apk",
+      "sha256": "48d302de5457bab8eadb736c0291e7763842b4f8286e660da6ffb5a2fdbc31c6",
+      "fixedSource": "/data/local/tmp/media-kit-p84-full.mp4",
+      "route": "T2 P8.4 HLG base layer with dolbyvision=no, gpu-next to PlatformView BT.2020/HLG"
+    }
+  ]
+}

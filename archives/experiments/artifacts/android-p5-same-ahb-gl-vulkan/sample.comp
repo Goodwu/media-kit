@@ -1,0 +1,26 @@
+#version 450
+layout(local_size_x = 1) in;
+layout(set = 0, binding = 0) uniform sampler2D image_input;
+layout(set = 0, binding = 1, std430) buffer Output { vec4 pixels[10]; } output_data;
+layout(push_constant) uniform Dimensions { ivec2 size; } dimensions;
+
+void main() {
+    uint index = gl_GlobalInvocationID.x;
+    ivec2 point;
+    if (dimensions.size.x == 256) {
+        const ivec2 pattern[10] = ivec2[10](
+            ivec2(233, 10), ivec2(234, 10), ivec2(236, 10),
+            ivec2(232, 10), ivec2(235, 10), ivec2(237, 10),
+            ivec2(233, 11), ivec2(234, 11), ivec2(236, 11), ivec2(128, 72));
+        point = pattern[index];
+    } else {
+        const ivec2 original[10] = ivec2[10](
+            ivec2(2577, 1221), ivec2(2576, 1221), ivec2(203, 1105),
+            ivec2(1762, 939), ivec2(2215, 1113), ivec2(1785, 963),
+            ivec2(2577, 1220), ivec2(2577, 1222), ivec2(384, 1080),
+            ivec2(1920, 1080));
+        point = original[index];
+    }
+    vec2 uv = (vec2(point) + vec2(0.5)) / vec2(dimensions.size);
+    output_data.pixels[index] = textureLod(image_input, uv, 0.0);
+}

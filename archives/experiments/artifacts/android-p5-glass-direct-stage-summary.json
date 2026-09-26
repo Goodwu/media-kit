@@ -1,0 +1,49 @@
+{
+  "P5_VO_TIME": {
+    "prep_us": {
+      "n": 50,
+      "median_us": 122.5,
+      "p95_us": 254,
+      "max_us": 366,
+      "over_16683": 0
+    },
+    "render_us": {
+      "n": 50,
+      "median_us": 17958.5,
+      "p95_us": 21056,
+      "max_us": 22828,
+      "over_16683": 30
+    },
+    "after_render_us": {
+      "n": 50,
+      "median_us": 13.0,
+      "p95_us": 16,
+      "max_us": 18,
+      "over_16683": 0
+    },
+    "flush_us": {
+      "n": 50,
+      "median_us": 6.0,
+      "p95_us": 7,
+      "max_us": 58,
+      "over_16683": 0
+    }
+  },
+  "P5_RAW_TIME": {
+    "submit_us": {
+      "n": 50,
+      "median_us": 4.0,
+      "p95_us": 6,
+      "max_us": 6,
+      "over_16683": 0
+    },
+    "release_wait_us": {
+      "n": 50,
+      "median_us": 11284.5,
+      "p95_us": 12614,
+      "max_us": 14172,
+      "over_16683": 0
+    }
+  },
+  "log_sha256": "4e7977d146393d4a8e251a6c4a5cccfaae9084647a574d982e56c9219d989ac1"
+}

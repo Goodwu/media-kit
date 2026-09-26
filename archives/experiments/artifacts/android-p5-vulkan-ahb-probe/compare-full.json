@@ -1,0 +1,146 @@
+{
+  "range": "full",
+  "rows": [
+    {
+      "x": 2577,
+      "y": 1221,
+      "software_y": 182,
+      "gl_raw_y": 276,
+      "vulkan_identity_y": [
+        0.269607842,
+        0.269607842
+      ],
+      "vulkan_code": [
+        276,
+        276
+      ]
+    },
+    {
+      "x": 2576,
+      "y": 1221,
+      "software_y": 193,
+      "gl_raw_y": 280,
+      "vulkan_identity_y": [
+        0.27352941,
+        0.27352941
+      ],
+      "vulkan_code": [
+        280,
+        280
+      ]
+    },
+    {
+      "x": 203,
+      "y": 1105,
+      "software_y": 726,
+      "gl_raw_y": 668,
+      "vulkan_identity_y": [
+        0.652941167,
+        0.652941167
+      ],
+      "vulkan_code": [
+        668,
+        668
+      ]
+    },
+    {
+      "x": 1762,
+      "y": 939,
+      "software_y": 706,
+      "gl_raw_y": 650,
+      "vulkan_identity_y": [
+        0.635294139,
+        0.635294139
+      ],
+      "vulkan_code": [
+        650,
+        650
+      ]
+    },
+    {
+      "x": 2215,
+      "y": 1113,
+      "software_y": 728,
+      "gl_raw_y": 673,
+      "vulkan_identity_y": [
+        0.657843113,
+        0.657843113
+      ],
+      "vulkan_code": [
+        673,
+        673
+      ]
+    },
+    {
+      "x": 1785,
+      "y": 963,
+      "software_y": 708,
+      "gl_raw_y": 656,
+      "vulkan_identity_y": [
+        0.641176462,
+        0.641176462
+      ],
+      "vulkan_code": [
+        656,
+        656
+      ]
+    },
+    {
+      "x": 2577,
+      "y": 1220,
+      "software_y": 334,
+      "gl_raw_y": 339,
+      "vulkan_identity_y": [
+        0.331372559,
+        0.331372559
+      ],
+      "vulkan_code": [
+        339,
+        339
+      ]
+    },
+    {
+      "x": 2577,
+      "y": 1222,
+      "software_y": 120,
+      "gl_raw_y": 120,
+      "vulkan_identity_y": [
+        0.117647059,
+        0.117647059
+      ],
+      "vulkan_code": [
+        120,
+        120
+      ]
+    },
+    {
+      "x": 384,
+      "y": 1080,
+      "software_y": 421,
+      "gl_raw_y": 422,
+      "vulkan_identity_y": [
+        0.412745088,
+        0.412745088
+      ],
+      "vulkan_code": [
+        422,
+        422
+      ]
+    },
+    {
+      "x": 1920,
+      "y": 1080,
+      "software_y": 415,
+      "gl_raw_y": 416,
+      "vulkan_identity_y": [
+        0.406862736,
+        0.406862736
+      ],
+      "vulkan_code": [
+        416,
+        416
+      ]
+    }
+  ],
+  "runs_equal": true
+}

@@ -1,0 +1,370 @@
+{
+  "a1": {
+    "variant": 0,
+    "perf_checkpoints": {
+      "60": {
+        "utc": "2026-09-26T13:30:38.567000+00:00",
+        "time-pos": "43.676967",
+        "frame-drop-count": "37",
+        "decoder-frame-drop-count": "0",
+        "eof-reached": "no",
+        "thermal-status": "1"
+      },
+      "90": {
+        "utc": "2026-09-26T13:31:08.540000+00:00",
+        "time-pos": "73.640233",
+        "frame-drop-count": "454",
+        "decoder-frame-drop-count": "0",
+        "eof-reached": "no",
+        "thermal-status": "1"
+      },
+      "120": {
+        "utc": "2026-09-26T13:31:38.540000+00:00",
+        "time-pos": "103.636867",
+        "frame-drop-count": "1096",
+        "decoder-frame-drop-count": "0",
+        "eof-reached": "no",
+        "thermal-status": "1"
+      },
+      "150": {
+        "utc": "2026-09-26T13:32:08.570000+00:00",
+        "time-pos": "133.650183",
+        "frame-drop-count": "1774",
+        "decoder-frame-drop-count": "0",
+        "eof-reached": "no",
+        "thermal-status": "1"
+      },
+      "180": {
+        "utc": "2026-09-26T13:32:38.541000+00:00",
+        "time-pos": "163.646817",
+        "frame-drop-count": "2459",
+        "decoder-frame-drop-count": "0",
+        "eof-reached": "no",
+        "thermal-status": "1"
+      },
+      "210": {
+        "utc": "2026-09-26T13:33:08.540000+00:00",
+        "time-pos": "177.783521",
+        "frame-drop-count": "2708",
+        "decoder-frame-drop-count": "0",
+        "eof-reached": "yes",
+        "thermal-status": "1"
+      }
+    },
+    "windows": [
+      {
+        "from_t": 60,
+        "to_t": 90,
+        "vo_drop_delta": 417,
+        "vo_drops_per_s": 13.913,
+        "gpu_samples": 30,
+        "gpu_median_mhz": 304.5,
+        "gpu_min_mhz": 277.0,
+        "gpu_max_mhz": 644.0,
+        "gpu_le_332_mhz_count": 17,
+        "gpu_freq_counts_mhz": {
+          "277": 15,
+          "332": 2,
+          "538": 1,
+          "586": 11,
+          "644": 1
+        }
+      },
+      {
+        "from_t": 90,
+        "to_t": 120,
+        "vo_drop_delta": 642,
+        "vo_drops_per_s": 21.4,
+        "gpu_samples": 30,
+        "gpu_median_mhz": 332.0,
+        "gpu_min_mhz": 208.0,
+        "gpu_max_mhz": 332.0,
+        "gpu_le_332_mhz_count": 30,
+        "gpu_freq_counts_mhz": {
+          "208": 1,
+          "277": 8,
+          "332": 21
+        }
+      },
+      {
+        "from_t": 120,
+        "to_t": 150,
+        "vo_drop_delta": 678,
+        "vo_drops_per_s": 22.577,
+        "gpu_samples": 30,
+        "gpu_median_mhz": 277.0,
+        "gpu_min_mhz": 139.0,
+        "gpu_max_mhz": 332.0,
+        "gpu_le_332_mhz_count": 30,
+        "gpu_freq_counts_mhz": {
+          "139": 1,
+          "277": 19,
+          "332": 10
+        }
+      },
+      {
+        "from_t": 150,
+        "to_t": 180,
+        "vo_drop_delta": 685,
+        "vo_drops_per_s": 22.855,
+        "gpu_samples": 30,
+        "gpu_median_mhz": 277.0,
+        "gpu_min_mhz": 277.0,
+        "gpu_max_mhz": 332.0,
+        "gpu_le_332_mhz_count": 30,
+        "gpu_freq_counts_mhz": {
+          "277": 22,
+          "332": 8
+        }
+      }
+    ],
+    "steady_vo_drops": 2422,
+    "eos_vo_drops": 2708,
+    "decoder_drops_eos": 0,
+    "gpu_sample_count": 220
+  },
+  "b1": {
+    "variant": 1,
+    "perf_checkpoints": {
+      "60": {
+        "utc": "2026-09-26T13:34:53.020000+00:00",
+        "time-pos": "43.610233",
+        "frame-drop-count": "124",
+        "decoder-frame-drop-count": "0",
+        "eof-reached": "no",
+        "thermal-status": "1"
+      },
+      "90": {
+        "utc": "2026-09-26T13:35:23.006000+00:00",
+        "time-pos": "73.606867",
+        "frame-drop-count": "234",
+        "decoder-frame-drop-count": "0",
+        "eof-reached": "no",
+        "thermal-status": "1"
+      },
+      "120": {
+        "utc": "2026-09-26T13:35:53.006000+00:00",
+        "time-pos": "103.586817",
+        "frame-drop-count": "372",
+        "decoder-frame-drop-count": "0",
+        "eof-reached": "no",
+        "thermal-status": "1"
+      },
+      "150": {
+        "utc": "2026-09-26T13:36:23.080000+00:00",
+        "time-pos": "133.666867",
+        "frame-drop-count": "504",
+        "decoder-frame-drop-count": "0",
+        "eof-reached": "no",
+        "thermal-status": "1"
+      },
+      "180": {
+        "utc": "2026-09-26T13:36:53.014000+00:00",
+        "time-pos": "163.596767",
+        "frame-drop-count": "687",
+        "decoder-frame-drop-count": "0",
+        "eof-reached": "no",
+        "thermal-status": "1"
+      },
+      "210": {
+        "utc": "2026-09-26T13:37:23.006000+00:00",
+        "time-pos": "177.783416",
+        "frame-drop-count": "735",
+        "decoder-frame-drop-count": "0",
+        "eof-reached": "yes",
+        "thermal-status": "1"
+      }
+    },
+    "windows": [
+      {
+        "from_t": 60,
+        "to_t": 90,
+        "vo_drop_delta": 110,
+        "vo_drops_per_s": 3.668,
+        "gpu_samples": 30,
+        "gpu_median_mhz": 277.0,
+        "gpu_min_mhz": 208.0,
+        "gpu_max_mhz": 332.0,
+        "gpu_le_332_mhz_count": 30,
+        "gpu_freq_counts_mhz": {
+          "208": 1,
+          "277": 21,
+          "332": 8
+        }
+      },
+      {
+        "from_t": 90,
+        "to_t": 120,
+        "vo_drop_delta": 138,
+        "vo_drops_per_s": 4.6,
+        "gpu_samples": 30,
+        "gpu_median_mhz": 277.0,
+        "gpu_min_mhz": 208.0,
+        "gpu_max_mhz": 332.0,
+        "gpu_le_332_mhz_count": 30,
+        "gpu_freq_counts_mhz": {
+          "208": 2,
+          "277": 23,
+          "332": 5
+        }
+      },
+      {
+        "from_t": 120,
+        "to_t": 150,
+        "vo_drop_delta": 132,
+        "vo_drops_per_s": 4.389,
+        "gpu_samples": 30,
+        "gpu_median_mhz": 277.0,
+        "gpu_min_mhz": 208.0,
+        "gpu_max_mhz": 332.0,
+        "gpu_le_332_mhz_count": 30,
+        "gpu_freq_counts_mhz": {
+          "208": 6,
+          "277": 21,
+          "332": 3
+        }
+      },
+      {
+        "from_t": 150,
+        "to_t": 180,
+        "vo_drop_delta": 183,
+        "vo_drops_per_s": 6.113,
+        "gpu_samples": 30,
+        "gpu_median_mhz": 277.0,
+        "gpu_min_mhz": 208.0,
+        "gpu_max_mhz": 332.0,
+        "gpu_le_332_mhz_count": 30,
+        "gpu_freq_counts_mhz": {
+          "208": 2,
+          "277": 26,
+          "332": 2
+        }
+      }
+    ],
+    "steady_vo_drops": 563,
+    "eos_vo_drops": 735,
+    "decoder_drops_eos": 0,
+    "gpu_sample_count": 220
+  },
+  "a2": {
+    "variant": 0,
+    "perf_checkpoints": {
+      "60": {
+        "utc": "2026-09-26T13:39:31.761000+00:00",
+        "time-pos": "43.493450",
+        "frame-drop-count": "862",
+        "decoder-frame-drop-count": "0",
+        "eof-reached": "no",
+        "thermal-status": "1"
+      },
+      "90": {
+        "utc": "2026-09-26T13:40:01.768000+00:00",
+        "time-pos": "73.506767",
+        "frame-drop-count": "1485",
+        "decoder-frame-drop-count": "0",
+        "eof-reached": "no",
+        "thermal-status": "1"
+      },
+      "120": {
+        "utc": "2026-09-26T13:40:31.761000+00:00",
+        "time-pos": "103.486717",
+        "frame-drop-count": "2132",
+        "decoder-frame-drop-count": "0",
+        "eof-reached": "no",
+        "thermal-status": "1"
+      },
+      "150": {
+        "utc": "2026-09-26T13:41:01.770000+00:00",
+        "time-pos": "133.516717",
+        "frame-drop-count": "2774",
+        "decoder-frame-drop-count": "0",
+        "eof-reached": "no",
+        "thermal-status": "1"
+      },
+      "180": {
+        "utc": "2026-09-26T13:41:31.764000+00:00",
+        "time-pos": "163.513350",
+        "frame-drop-count": "3432",
+        "decoder-frame-drop-count": "0",
+        "eof-reached": "no",
+        "thermal-status": "1"
+      },
+      "210": {
+        "utc": "2026-09-26T13:42:01.761000+00:00",
+        "time-pos": "177.783080",
+        "frame-drop-count": "3688",
+        "decoder-frame-drop-count": "0",
+        "eof-reached": "yes",
+        "thermal-status": "1"
+      }
+    },
+    "windows": [
+      {
+        "from_t": 60,
+        "to_t": 90,
+        "vo_drop_delta": 623,
+        "vo_drops_per_s": 20.762,
+        "gpu_samples": 30,
+        "gpu_median_mhz": 332.0,
+        "gpu_min_mhz": 277.0,
+        "gpu_max_mhz": 332.0,
+        "gpu_le_332_mhz_count": 30,
+        "gpu_freq_counts_mhz": {
+          "277": 6,
+          "332": 24
+        }
+      },
+      {
+        "from_t": 90,
+        "to_t": 120,
+        "vo_drop_delta": 647,
+        "vo_drops_per_s": 21.572,
+        "gpu_samples": 30,
+        "gpu_median_mhz": 332.0,
+        "gpu_min_mhz": 208.0,
+        "gpu_max_mhz": 332.0,
+        "gpu_le_332_mhz_count": 30,
+        "gpu_freq_counts_mhz": {
+          "208": 1,
+          "277": 12,
+          "332": 17
+        }
+      },
+      {
+        "from_t": 120,
+        "to_t": 150,
+        "vo_drop_delta": 642,
+        "vo_drops_per_s": 21.394,
+        "gpu_samples": 30,
+        "gpu_median_mhz": 332.0,
+        "gpu_min_mhz": 208.0,
+        "gpu_max_mhz": 332.0,
+        "gpu_le_332_mhz_count": 30,
+        "gpu_freq_counts_mhz": {
+          "208": 1,
+          "277": 9,
+          "332": 20
+        }
+      },
+      {
+        "from_t": 150,
+        "to_t": 180,
+        "vo_drop_delta": 658,
+        "vo_drops_per_s": 21.938,
+        "gpu_samples": 30,
+        "gpu_median_mhz": 277.0,
+        "gpu_min_mhz": 277.0,
+        "gpu_max_mhz": 332.0,
+        "gpu_le_332_mhz_count": 30,
+        "gpu_freq_counts_mhz": {
+          "277": 18,
+          "332": 12
+        }
+      }
+    ],
+    "steady_vo_drops": 2570,
+    "eos_vo_drops": 3688,
+    "decoder_drops_eos": 0,
+    "gpu_sample_count": 220
+  }
+}

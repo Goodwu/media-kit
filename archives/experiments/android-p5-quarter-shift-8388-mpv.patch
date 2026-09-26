@@ -1,0 +1,51 @@
+--- /tmp/media-kit-p5-hwdec-before-quarter-shift-20260925.c	2026-09-25 20:35:31.703589036 +0800
++++ /tmp/media-kit-mpv-clean-2194/video/out/hwdec/hwdec_aimagereader.c	2026-09-25 20:35:31.703902370 +0800
+@@ -91,6 +91,7 @@
+     bool raw_packed10;
+     bool raw_420_sidecar;
+     bool raw_code_scale;
++    int raw_sample_shift;
+     bool raw_chroma_left_probe;
+     bool raw_full_dump;
+     bool raw_full_dump_done;
+@@ -385,10 +386,11 @@
+     "uniform vec4 crop;\n"
+     "uniform vec2 size;\n"
+     "uniform float code_scale;\n"
++    "uniform vec2 sample_shift;\n"
+     "uniform float chroma_left_probe;\n"
+     "layout(location=0) out highp vec4 yuv_value;\n"
+     "void main() {\n"
+-    "  vec2 uv = crop.xy + (gl_FragCoord.xy / size) * crop.zw;\n"
++    "  vec2 uv = crop.xy + ((gl_FragCoord.xy + sample_shift) / size) * crop.zw;\n"
+     "  vec3 yuv = texture(image, uv).rgb;\n"
+     "  if (chroma_left_probe > 0.5 && mod(floor(gl_FragCoord.x), 2.0) > 0.5) {\n"
+     "    vec2 chroma_uv = uv + vec2(crop.z / size.x, 0.0);\n"
+@@ -848,6 +850,12 @@
+     if (p->raw_packed10) {
+         gl->Uniform1f(gl->GetUniformLocation(p->raw_program, "code_scale"),
+                       p->raw_code_scale ? 1020.0f / 1023.0f : 1.0f);
++        float sample_dx = p->raw_sample_shift == 1 ? 0.25f :
++                          p->raw_sample_shift == 2 ? -0.25f : 0.0f;
++        float sample_dy = p->raw_sample_shift == 3 ? 0.25f :
++                          p->raw_sample_shift == 4 ? -0.25f : 0.0f;
++        gl->Uniform2f(gl->GetUniformLocation(p->raw_program, "sample_shift"),
++                      sample_dx, sample_dy);
+         gl->Uniform1f(gl->GetUniformLocation(p->raw_program, "chroma_left_probe"),
+                       p->raw_chroma_left_probe ? 1.0f : 0.0f);
+     }
+@@ -964,6 +972,14 @@
+     p->raw_code_scale = p->raw_packed10 &&
+         __system_property_get("debug.media_kit.p5_raw_code_scale", code_scale_property) > 0 &&
+         !strcmp(code_scale_property, "1");
++    char shift_property[PROP_VALUE_MAX] = {0};
++    if (p->raw_packed10 &&
++        __system_property_get("debug.media_kit.p5_raw_sample_shift",
++                              shift_property) > 0) {
++        int mode = atoi(shift_property);
++        if (mode >= 1 && mode <= 4)
++            p->raw_sample_shift = mode;
++    }
+     char chroma_left_property[PROP_VALUE_MAX] = {0};
+     p->raw_chroma_left_probe = p->raw_packed10 &&
+         __system_property_get("debug.media_kit.p5_raw_chroma_left_probe",

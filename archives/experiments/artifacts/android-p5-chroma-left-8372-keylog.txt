@@ -1,0 +1,7 @@
+E/P5_RAW_STAGE(25431): code_scale_1020_to_1023_enabled
+E/P5_RAW_STAGE(25431): P5_RPU_ID pts=10.000000000 size=206 hash=907c8b42
+E/P5_POST_RPU_FULL(25431): pts=10.000000000 w=3840 h=2160 format=rgba16f bytes=66355200 download_ok=1 written=66355200
+E/P5_RAW_STAGE( 1770): code_scale_1020_to_1023_enabled
+E/P5_RAW_STAGE( 5493): code_scale_1020_to_1023_enabled
+E/P5_RAW_STAGE( 5493): P5_RPU_ID pts=10.000000000 size=206 hash=907c8b42
+E/P5_POST_RPU_FULL( 5493): pts=10.000000000 w=3840 h=2160 format=rgba16f bytes=66355200 download_ok=1 written=66355200

@@ -1,0 +1,3 @@
+0 monotonic=699236.539 frame_counter=4282
+1 monotonic=699241.637 frame_counter=4435
+2 monotonic=699246.744 frame_counter=4589

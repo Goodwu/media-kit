@@ -1,0 +1,50 @@
+--- a/video/out/vo_gpu_next.c
++++ b/video/out/vo_gpu_next.c
+@@ -190,6 +190,8 @@
+     uint64_t p5_vo_cpu_wall_frames;
+     int64_t p5_draw_wall_sum_ns, p5_draw_cpu_sum_ns;
+     int64_t p5_flip_wall_sum_ns, p5_flip_cpu_sum_ns;
++    int64_t p5_submit_wall_sum_ns, p5_submit_cpu_sum_ns;
++    int64_t p5_swap_wall_sum_ns, p5_swap_cpu_sum_ns;
+     int64_t p5_draw_wall_max_ns, p5_flip_wall_max_ns;
+ #endif
+ #if HAVE_GL && defined(PL_HAVE_OPENGL) && defined(__ANDROID__)
+@@ -1823,21 +1825,34 @@
+     }
+ 
+     int64_t p5_submit_end_ns = p->p5_vo_perf ? mp_time_ns() : 0;
++#ifdef __ANDROID__
++    int64_t p5_mid_wall_ns = p->p5_vo_cpu_wall ? mp_time_ns() : 0;
++    int64_t p5_mid_cpu_ns = p->p5_vo_cpu_wall ? p5_thread_cpu_ns() : 0;
++#endif
+     sw->fns->swap_buffers(sw);
+ #ifdef __ANDROID__
+     if (p->p5_vo_cpu_wall && p5_cpu_start_ns) {
+-        int64_t wall_ns = mp_time_ns() - p5_wall_start_ns;
+-        int64_t cpu_ns = p5_thread_cpu_ns() - p5_cpu_start_ns;
++        int64_t end_wall_ns = mp_time_ns(), end_cpu_ns = p5_thread_cpu_ns();
++        int64_t wall_ns = end_wall_ns - p5_wall_start_ns;
++        int64_t cpu_ns = end_cpu_ns - p5_cpu_start_ns;
+         p->p5_flip_wall_sum_ns += wall_ns;
+         p->p5_flip_cpu_sum_ns += cpu_ns;
++        p->p5_submit_wall_sum_ns += p5_mid_wall_ns - p5_wall_start_ns;
++        p->p5_submit_cpu_sum_ns += p5_mid_cpu_ns - p5_cpu_start_ns;
++        p->p5_swap_wall_sum_ns += end_wall_ns - p5_mid_wall_ns;
++        p->p5_swap_cpu_sum_ns += end_cpu_ns - p5_mid_cpu_ns;
+         p->p5_flip_wall_max_ns = MPMAX(p->p5_flip_wall_max_ns, wall_ns);
+         if (++p->p5_vo_cpu_wall_frames % 250 == 0) {
+-            p5_vo_log("P5_VO_CPU_WALL", "frames=250 draw_wall_us=%"PRId64" draw_cpu_us=%"PRId64" draw_wall_max_us=%"PRId64" flip_wall_us=%"PRId64" flip_cpu_us=%"PRId64" flip_wall_max_us=%"PRId64,
++            p5_vo_log("P5_VO_CPU_WALL", "frames=250 draw_wall_us=%"PRId64" draw_cpu_us=%"PRId64" draw_wall_max_us=%"PRId64" flip_wall_us=%"PRId64" flip_cpu_us=%"PRId64" flip_wall_max_us=%"PRId64" submit_wall_us=%"PRId64" submit_cpu_us=%"PRId64" swap_wall_us=%"PRId64" swap_cpu_us=%"PRId64,
+                       p->p5_draw_wall_sum_ns / 1000, p->p5_draw_cpu_sum_ns / 1000,
+                       p->p5_draw_wall_max_ns / 1000, p->p5_flip_wall_sum_ns / 1000,
+-                      p->p5_flip_cpu_sum_ns / 1000, p->p5_flip_wall_max_ns / 1000);
++                      p->p5_flip_cpu_sum_ns / 1000, p->p5_flip_wall_max_ns / 1000,
++                      p->p5_submit_wall_sum_ns / 1000, p->p5_submit_cpu_sum_ns / 1000,
++                      p->p5_swap_wall_sum_ns / 1000, p->p5_swap_cpu_sum_ns / 1000);
+             p->p5_draw_wall_sum_ns = p->p5_draw_cpu_sum_ns = 0;
+             p->p5_flip_wall_sum_ns = p->p5_flip_cpu_sum_ns = 0;
++            p->p5_submit_wall_sum_ns = p->p5_submit_cpu_sum_ns = 0;
++            p->p5_swap_wall_sum_ns = p->p5_swap_cpu_sum_ns = 0;
+             p->p5_draw_wall_max_ns = p->p5_flip_wall_max_ns = 0;
+         }
+     }

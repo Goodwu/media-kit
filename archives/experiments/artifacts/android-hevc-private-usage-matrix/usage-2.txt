@@ -1,0 +1,12 @@
+input={max-bitrate=472952, track-id=1, level=16, mime=video/hevc, frame-count=24, profile=2, language=und, display-width=640, durationUs=1000000, display-height=360, width=640, max-input-size=7954, frame-rate=24, height=360, csd-0=java.nio.HeapByteBuffer[pos=0 lim=2404 cap=2404]}
+requestedUsage=2
+output={crop-right=639, color-format=805, slice-height=368, mime=video/raw, hdr-static-info=java.nio.HeapByteBuffer[pos=0 lim=25 cap=25], stride=640, color-standard=4, color-transfer=3, crop-bottom=359, crop-left=0, width=640, color-range=2, crop-top=0, height=368}
+frame=1 pts=0 imageNs=0 imageFormat=34 hbFormat=805 usage=10498 stride=640x368
+frame=2 pts=41666 imageNs=41666000 imageFormat=34 hbFormat=805 usage=10498 stride=640x368
+frame=3 pts=83333 imageNs=83333000 imageFormat=34 hbFormat=805 usage=10498 stride=640x368
+frame=4 pts=125000 imageNs=125000000 imageFormat=34 hbFormat=805 usage=10498 stride=640x368
+frame=5 pts=166666 imageNs=166666000 imageFormat=34 hbFormat=805 usage=10498 stride=640x368
+frame=6 pts=208333 imageNs=208333000 imageFormat=34 hbFormat=805 usage=10498 stride=640x368
+frame=7 pts=250000 imageNs=250000000 imageFormat=34 hbFormat=805 usage=10498 stride=640x368
+frame=8 pts=291666 imageNs=291666000 imageFormat=34 hbFormat=805 usage=10498 stride=640x368
+frames=8

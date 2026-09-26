@@ -1,0 +1,35 @@
+{
+  "phone_pts_seconds": 10.0,
+  "frame_comparisons": [
+    {
+      "frame_index": 498,
+      "Y_mismatches": 7039837,
+      "Cb_mismatches": 1790341,
+      "Cr_mismatches": 1743419
+    },
+    {
+      "frame_index": 499,
+      "Y_mismatches": 5584910,
+      "Cb_mismatches": 1505766,
+      "Cr_mismatches": 1544437
+    },
+    {
+      "frame_index": 500,
+      "Y_mismatches": 24348,
+      "Cb_mismatches": 6017,
+      "Cr_mismatches": 6313
+    },
+    {
+      "frame_index": 501,
+      "Y_mismatches": 7857695,
+      "Cb_mismatches": 1643927,
+      "Cr_mismatches": 1198097
+    },
+    {
+      "frame_index": 502,
+      "Y_mismatches": 7877012,
+      "Cb_mismatches": 1645108,
+      "Cr_mismatches": 1194364
+    }
+  ]
+}

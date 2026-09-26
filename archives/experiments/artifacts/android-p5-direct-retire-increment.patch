@@ -1,0 +1,95 @@
+--- a/video/out/hwdec/hwdec_aimagereader.c
++++ b/video/out/hwdec/hwdec_aimagereader.c
+@@ -81,6 +81,7 @@
+     EGLDisplay display;
+     GLsync fence;
+     GLuint texture;
++    struct ra_tex *wrapped_tex;
+ };
+ 
+ struct priv {
+@@ -116,6 +117,7 @@
+     bool raw_split;
+     bool raw_early_fence;
+     bool raw_retire;
++    bool direct_retire;
+     GLsync raw_sample_fence;
+     struct retired_image retired[2];
+     int retired_count;
+@@ -1081,8 +1083,17 @@
+     char retire_property[PROP_VALUE_MAX] = {0};
+     p->raw_retire = p->raw_early_fence &&
+                     __system_property_get("debug.media_kit.p5_raw_retire",
+-                                          retire_property) > 0 &&
++                                              retire_property) > 0 &&
+                     !strcmp(retire_property, "1");
++    char direct_retire_property[PROP_VALUE_MAX] = {0};
++    p->direct_retire = p->direct_yuv &&
++        __system_property_get("debug.media_kit.p5_dr_retire",
++                              direct_retire_property) > 0 &&
++        !strcmp(direct_retire_property, "1") &&
++        gl->FenceSync && gl->ClientWaitSync && gl->DeleteSync && gl->Flush;
++    p->raw_retire |= p->direct_retire;
++    p5_section_log("P5_DIRECT_RETIRE", "enabled=%d property=%s",
++                   p->direct_retire, direct_retire_property);
+     char vo_timer_property[PROP_VALUE_MAX] = {0};
+     bool vo_gpu_timer = __system_property_get("debug.media_kit.p5_vo_gpu_timer",
+                                                vo_timer_property) > 0 &&
+@@ -1214,6 +1225,8 @@
+     GL *gl = ra_gl_get(mapper->ra);
+     struct retired_image image = p->retired[index];
+     gl->DeleteSync(image.fence);
++    if (image.wrapped_tex)
++        ra_tex_free(mapper->ra, &image.wrapped_tex);
+     gl->DeleteTextures(1, &image.texture);
+     p->DestroyImageKHR(image.display, image.egl_image);
+     o->AImage_delete(image.image);
+@@ -1323,6 +1336,13 @@
+     struct priv *p = mapper->priv;
+     struct priv_owner *o = mapper->owner->priv;
+ 
++    if (p->direct_retire && p->image && p->egl_image &&
++        p->raw_submitted && p->gl_texture && mapper->tex[0]) {
++        GL *gl = ra_gl_get(mapper->ra);
++        p->raw_sample_fence = gl->FenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
++        if (p->raw_sample_fence)
++            gl->Flush();
++    }
+     if (p->raw_retire && p->image && p->egl_image &&
+         p->raw_submitted && p->raw_sample_fence && p->gl_texture) {
+         if (p->retired_count >= MP_ARRAY_SIZE(p->retired))
+@@ -1334,7 +1354,10 @@
+             .display = eglGetCurrentDisplay(),
+             .fence = p->raw_sample_fence,
+             .texture = p->gl_texture,
++            .wrapped_tex = p->direct_retire ? mapper->tex[0] : NULL,
+         };
++        if (p->direct_retire)
++            mapper->tex[0] = NULL;
+         p->image = NULL;
+         p->egl_image = NULL;
+         p->raw_sample_fence = NULL;
+@@ -1475,6 +1498,23 @@
+         }
+         if (!p->gl_texture && !raw_create_next_external_texture(mapper))
+             return -1;
++        if (p->direct_retire && !mapper->tex[0]) {
++            struct ra_tex_params params = {
++                .dimensions = 2,
++                .w = mapper->src_params.w,
++                .h = mapper->src_params.h,
++                .d = 1,
++                .format = ra_find_unorm_format(mapper->ra, 1, 4),
++                .render_src = true,
++                .src_linear = true,
++                .external_oes = true,
++                .external_yuv = true,
++            };
++            mapper->tex[0] = ra_create_wrapped_tex(mapper->ra, &params,
++                                                    p->gl_texture);
++            if (!mapper->tex[0])
++                return -1;
++        }
+     }
+ 
+     if (p->raw_yuv &&

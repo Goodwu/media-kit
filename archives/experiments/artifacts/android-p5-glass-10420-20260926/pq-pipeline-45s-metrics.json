@@ -1,0 +1,39 @@
+{
+  "package_sha256": "0be28e009c3a65c3c378963c405ffd76f02d64bc799448fe5b3aedcf37dfd5a6",
+  "media_time_seconds": 45.011633,
+  "video_crop_xyxy": [
+    280,
+    0,
+    2840,
+    1440
+  ],
+  "pairs": {
+    "ab": {
+      "mae_8bit": 0.307500904224537,
+      "max_channel_diff_8bit": 2,
+      "identical_pixel_fraction": 0.43712483723958334,
+      "any_channel_gt1_fraction": 6.944444444444444e-05,
+      "any_channel_gt5_fraction": 0.0
+    },
+    "ac": {
+      "mae_8bit": 0.31637604890046295,
+      "max_channel_diff_8bit": 2,
+      "identical_pixel_fraction": 0.4248866102430556,
+      "any_channel_gt1_fraction": 8.382161458333333e-05,
+      "any_channel_gt5_fraction": 0.0
+    },
+    "bc": {
+      "mae_8bit": 0.3147471788194444,
+      "max_channel_diff_8bit": 2,
+      "identical_pixel_fraction": 0.4285587565104167,
+      "any_channel_gt1_fraction": 1.0036892361111111e-05,
+      "any_channel_gt5_fraction": 0.0
+    }
+  },
+  "a_png_sha256": "58166e38389c4cb07271693e0bf28e5f5f97875404de2ca811438d8dec396aaf",
+  "a_log_gzip_sha256": "23ede3b30f29772a15cd61f081cfd2ac120de7d8e51d8f5b9eb7d16369719133",
+  "b_png_sha256": "45dd840db38491444089d2c4c0203b7c5e66a9741b7654b05048e05029f294da",
+  "b_log_gzip_sha256": "59cedf2cc0ca4f33e0f1f355711e256c5b8a40ce2c14f199f8b62549b1296376",
+  "c_png_sha256": "f38d92ab2312a167f75e23d2a6578c7b43184c1f7adea8d1e184abf839fcac67",
+  "c_log_gzip_sha256": "fc6799b259e470a24ecbe4f4b485993fbf416026c9a36414586f5334a1151a1e"
+}

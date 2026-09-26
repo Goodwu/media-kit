@@ -1,0 +1,152 @@
+--- a/video/out/hwdec/hwdec_aimagereader.c
++++ b/video/out/hwdec/hwdec_aimagereader.c
+@@ -21,7 +21,9 @@
+ #include <dlfcn.h>
+ #include <math.h>
+ #include <stdatomic.h>
++#include <stdarg.h>
+ #include <stdio.h>
++#include <time.h>
+ #include <sys/system_properties.h>
+ #include <EGL/egl.h>
+ #include <EGL/eglext.h>
+@@ -105,6 +107,12 @@
+     unsigned raw_peak_done;
+     void (GLAPIENTRY *DrawBuffers)(GLsizei, const GLenum *);
+     bool raw_perf;
++    bool section_perf;
++    uint64_t section_frames;
++    int64_t section_acquire_wall_ns, section_acquire_cpu_ns;
++    int64_t section_create_wall_ns, section_create_cpu_ns;
++    int64_t section_bind_wall_ns, section_bind_cpu_ns;
++    int64_t section_finish_wall_ns, section_finish_cpu_ns;
+     bool raw_split;
+     bool raw_early_fence;
+     bool raw_retire;
+@@ -150,6 +158,28 @@
+     void (EGLAPIENTRY *EGLImageTargetTexture2DOES)(GLenum, GLeglImageOES);
+ };
+ 
++static int64_t p5_mapper_cpu_ns(void)
++{
++    struct timespec ts = {0};
++    clock_gettime(CLOCK_THREAD_CPUTIME_ID, &ts);
++    return (int64_t)ts.tv_sec * 1000000000 + ts.tv_nsec;
++}
++
++static void p5_section_log(const char *tag, const char *fmt, ...)
++{
++    void *lib = dlopen("liblog.so", RTLD_NOW | RTLD_LOCAL);
++    typedef int (*vprint_fn)(int, const char *, const char *, va_list);
++    vprint_fn vprint = lib ? dlsym(lib, "__android_log_vprint") : NULL;
++    if (vprint) {
++        va_list args;
++        va_start(args, fmt);
++        vprint(6, tag, fmt, args);
++        va_end(args);
++    }
++    if (lib)
++        dlclose(lib);
++}
++
+ static const struct { const char *symbol; int offset; } lib_functions[] = {
+     { "AImageReader_newWithUsage", offsetof(struct priv_owner, AImageReader_newWithUsage) },
+     { "AImageReader_getWindow", offsetof(struct priv_owner, AImageReader_getWindow) },
+@@ -944,6 +974,12 @@
+     char property[PROP_VALUE_MAX] = {0};
+     p->raw_yuv = __system_property_get("debug.media_kit.p5_raw_yuv", property) > 0 &&
+                  !strcmp(property, "1");
++    char section_property[PROP_VALUE_MAX] = {0};
++    p->section_perf = p->raw_yuv &&
++        __system_property_get("debug.media_kit.p5_section_perf", section_property) > 0 &&
++        !strcmp(section_property, "1");
++    p5_section_log("P5_SECTION_INIT", "raw=%d enabled=%d property=%s",
++                   p->raw_yuv, p->section_perf, section_property);
+     char direct_property[PROP_VALUE_MAX] = {0};
+     p->direct_yuv = p->raw_yuv &&
+         __system_property_get("debug.media_kit.p5_direct_yuv", direct_property) > 0 &&
+@@ -1324,8 +1360,15 @@
+             sample_complete = wait_result == GL_ALREADY_SIGNALED ||
+                               wait_result == GL_CONDITION_SATISFIED;
+         }
+-        if (!sample_complete)
++        if (!sample_complete) {
++            int64_t section_wall = p->section_perf ? mp_time_ns() : 0;
++            int64_t section_cpu = p->section_perf ? p5_mapper_cpu_ns() : 0;
+             gl->Finish();
++            if (p->section_perf) {
++                p->section_finish_wall_ns += mp_time_ns() - section_wall;
++                p->section_finish_cpu_ns += p5_mapper_cpu_ns() - section_cpu;
++            }
++        }
+         if (p->raw_sample_fence) {
+             gl->DeleteSync(p->raw_sample_fence);
+             p->raw_sample_fence = NULL;
+@@ -1393,6 +1436,17 @@
+         p->image = NULL;
+     }
+     p->raw_submitted = false;
++    if (p->section_perf && ++p->section_frames % 250 == 0) {
++        p5_section_log("P5_SECTION_MAP", "frames=250 acquire_wall_us=%"PRId64" acquire_cpu_us=%"PRId64" create_wall_us=%"PRId64" create_cpu_us=%"PRId64" bind_wall_us=%"PRId64" bind_cpu_us=%"PRId64" finish_wall_us=%"PRId64" finish_cpu_us=%"PRId64,
++                p->section_acquire_wall_ns / 1000, p->section_acquire_cpu_ns / 1000,
++                p->section_create_wall_ns / 1000, p->section_create_cpu_ns / 1000,
++                p->section_bind_wall_ns / 1000, p->section_bind_cpu_ns / 1000,
++                p->section_finish_wall_ns / 1000, p->section_finish_cpu_ns / 1000);
++        p->section_acquire_wall_ns = p->section_acquire_cpu_ns = 0;
++        p->section_create_wall_ns = p->section_create_cpu_ns = 0;
++        p->section_bind_wall_ns = p->section_bind_cpu_ns = 0;
++        p->section_finish_wall_ns = p->section_finish_cpu_ns = 0;
++    }
+ }
+ 
+ static int mapper_map(struct ra_hwdec_mapper *mapper)
+@@ -1465,6 +1519,8 @@
+     // A queued callback does not guarantee an image is still available.
+     // Retry this transient state without spinning the VO.
+     media_status_t ret = AMEDIA_IMGREADER_NO_BUFFER_AVAILABLE;
++    int64_t acquire_wall = p->section_perf ? mp_time_ns() : 0;
++    int64_t acquire_cpu = p->section_perf ? p5_mapper_cpu_ns() : 0;
+     for (int attempt = 0; attempt < 10; attempt++) {
+         mp_mutex_lock(&p->lock);
+         if (!p->image_available)
+@@ -1476,6 +1532,10 @@
+         if (ret != AMEDIA_IMGREADER_NO_BUFFER_AVAILABLE)
+             break;
+     }
++    if (p->section_perf) {
++        p->section_acquire_wall_ns += mp_time_ns() - acquire_wall;
++        p->section_acquire_cpu_ns += p5_mapper_cpu_ns() - acquire_cpu;
++    }
+     if (ret != AMEDIA_OK) {
+         MP_ERR(mapper, "acquireLatestImage failed after retry: %d\n", ret);
+         return -1;
+@@ -1556,9 +1616,15 @@
+ 
+     const EGLint basic_attribs[] = {EGL_NONE};
+     const EGLint raw_attribs[] = {EGL_IMAGE_PRESERVED_KHR, EGL_TRUE, EGL_NONE};
++    int64_t create_wall = p->section_perf ? mp_time_ns() : 0;
++    int64_t create_cpu = p->section_perf ? p5_mapper_cpu_ns() : 0;
+     p->egl_image = p->CreateImageKHR(eglGetCurrentDisplay(),
+         EGL_NO_CONTEXT, EGL_NATIVE_BUFFER_ANDROID, buf,
+         p->raw_yuv ? raw_attribs : basic_attribs);
++    if (p->section_perf) {
++        p->section_create_wall_ns += mp_time_ns() - create_wall;
++        p->section_create_cpu_ns += p5_mapper_cpu_ns() - create_cpu;
++    }
+     if (!p->egl_image)
+         return -1;
+ 
+@@ -1572,7 +1638,13 @@
+         gl->ActiveTexture(GL_TEXTURE0);
+         gl->GetIntegerv(GL_TEXTURE_BINDING_EXTERNAL_OES, &old_external);
+         gl->BindTexture(GL_TEXTURE_EXTERNAL_OES, p->gl_texture);
++        int64_t bind_wall = p->section_perf ? mp_time_ns() : 0;
++        int64_t bind_cpu = p->section_perf ? p5_mapper_cpu_ns() : 0;
+         p->EGLImageTargetTexture2DOES(GL_TEXTURE_EXTERNAL_OES, p->egl_image);
++        if (p->section_perf) {
++            p->section_bind_wall_ns += mp_time_ns() - bind_wall;
++            p->section_bind_cpu_ns += p5_mapper_cpu_ns() - bind_cpu;
++        }
+         if (p->raw_logged <= 5)
+             MP_WARN(mapper, "P5_RAW_GL after_import ctx=%p egl_error=%x\n",
+                     eglGetCurrentContext(), eglGetError());

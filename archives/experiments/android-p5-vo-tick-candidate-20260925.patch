@@ -1,0 +1,53 @@
+--- a/video/out/vo.c
++++ b/video/out/vo.c
+@@ -24,6 +24,7 @@
+ #include <stdlib.h>
+ #include <string.h>
+ #ifdef __ANDROID__
++#include <android/log.h>
+ #include <sys/system_properties.h>
+ #endif
+ 
+@@ -1010,6 +1011,22 @@
+                 summary->expired_between_queue_and_vo++;
+             p5_vo_time_add(&summary->queue_wait,
+                            dequeue_now - in->p5_frame_queued_at_ns);
++            if (summary->queued_frames % 240 == 0) {
++                __android_log_print(ANDROID_LOG_INFO, "P5_VO_TICK",
++                    "queued=%"PRId64" draw=%"PRId64" deadline_drop=%"PRId64
++                    " other_drop=%"PRId64" expired_at_queue=%"PRId64
++                    " expired_before_vo=%"PRId64" draw_ms=%"PRId64
++                    " draw_max_ms=%"PRId64" wait_ms=%"PRId64
++                    " flip_ms=%"PRId64,
++                    summary->queued_frames, summary->accepted_draws,
++                    summary->deadline_drops, summary->other_drops,
++                    summary->expired_at_queue,
++                    summary->expired_between_queue_and_vo,
++                    summary->draw.total_ns / MP_TIME_MS_TO_NS(1),
++                    summary->draw.max_ns / MP_TIME_MS_TO_NS(1),
++                    summary->wait.total_ns / MP_TIME_MS_TO_NS(1),
++                    summary->flip.total_ns / MP_TIME_MS_TO_NS(1));
++            }
+         }
+ #endif
+         talloc_free(in->current_frame);
+@@ -1360,6 +1377,19 @@
+ #ifdef __ANDROID__
+     const struct p5_vo_summary *p5 = &in->p5_summary;
+     if (p5->enabled) {
++        __android_log_print(ANDROID_LOG_INFO, "P5_VO_TICK",
++            "final queued=%"PRId64" draw=%"PRId64" deadline_drop=%"PRId64
++            " other_drop=%"PRId64" expired_at_queue=%"PRId64
++            " expired_before_vo=%"PRId64" draw_ms=%"PRId64
++            " draw_max_ms=%"PRId64" wait_ms=%"PRId64
++            " flip_ms=%"PRId64,
++            p5->queued_frames, p5->accepted_draws,
++            p5->deadline_drops, p5->other_drops,
++            p5->expired_at_queue, p5->expired_between_queue_and_vo,
++            p5->draw.total_ns / MP_TIME_MS_TO_NS(1),
++            p5->draw.max_ns / MP_TIME_MS_TO_NS(1),
++            p5->wait.total_ns / MP_TIME_MS_TO_NS(1),
++            p5->flip.total_ns / MP_TIME_MS_TO_NS(1));
+         MP_ERR(vo, "P5_VO_SUMMARY diagnostic CPU-wall-ns (not GPU/display): "
+                 "queued=%"PRId64" expired_at_queue=%"PRId64
+                 " expired_queue_to_vo=%"PRId64

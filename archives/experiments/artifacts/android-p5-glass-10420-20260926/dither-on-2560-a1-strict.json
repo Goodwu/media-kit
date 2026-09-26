@@ -1,0 +1,108 @@
+{
+  "log": "/tmp/media-kit-p5-dither-a1-logcat.txt",
+  "output_sizes": [
+    [
+      2560,
+      1440
+    ]
+  ],
+  "source_output_sizes": [
+    [
+      3840,
+      2160,
+      2560,
+      1440
+    ]
+  ],
+  "p5_open_observed": true,
+  "p5_open_count": 1,
+  "app_event_pids": {
+    "perf": [
+      "13090"
+    ],
+    "source_size": [
+      "13090"
+    ],
+    "output_size": [
+      "13090"
+    ],
+    "p5_open": [
+      "13090"
+    ],
+    "cache": [
+      "13090"
+    ],
+    "fullscreen": [
+      "13090"
+    ],
+    "retire_final": [
+      "13090"
+    ],
+    "image_final": [
+      "13090"
+    ]
+  },
+  "cache_enabled": [
+    1
+  ],
+  "fullscreen_log_observed": true,
+  "physical_window_at_perf": {
+    "8": null,
+    "18": null,
+    "28": null,
+    "60": [
+      3120,
+      1440,
+      90
+    ],
+    "90": [
+      3120,
+      1440,
+      90
+    ],
+    "120": [
+      3120,
+      1440,
+      90
+    ],
+    "150": [
+      3120,
+      1440,
+      90
+    ],
+    "180": [
+      3120,
+      1440,
+      90
+    ],
+    "210": [
+      3120,
+      1440,
+      90
+    ]
+  },
+  "vo_drops": {
+    "60": 118,
+    "90": 277,
+    "120": 446,
+    "150": 611,
+    "180": 1098,
+    "210": 1298
+  },
+  "decoder_drops_eos": "0",
+  "media_time_eos": "177.783258",
+  "image_final": [
+    9162,
+    9162
+  ],
+  "retire_final_held_fallbacks": [
+    0,
+    0
+  ],
+  "diagnostic_render_paths": [],
+  "errors": [
+    "steady VO drops 980 exceed limit 72",
+    "total VO drops 1298 exceed limit 107"
+  ],
+  "vo_drops_t60_to_t180": 980
+}

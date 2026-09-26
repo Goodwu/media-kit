@@ -1,0 +1,66 @@
+--- a/video/out/hwdec/hwdec_aimagereader.c
++++ b/video/out/hwdec/hwdec_aimagereader.c
+@@ -83,6 +83,7 @@
+     bool raw_yuv;
+     bool raw_mrt;
+     bool raw_half;
++    bool raw_norm16;
+     void (GLAPIENTRY *DrawBuffers)(GLsizei, const GLenum *);
+     bool raw_perf;
+     bool raw_split;
+@@ -303,6 +304,16 @@
+     .component_size = {16}, .component_depth = {16}, .pixel_size = 2,
+     .renderable = true,
+ };
++static const struct gl_format raw_gl_format_norm16 = {
++    .name = "r16", .internal_format = GL_R16,
++    .format = GL_RED, .type = GL_UNSIGNED_SHORT, .flags = F_CR | F_ES3 | F_EXT16,
++};
++static const struct ra_format raw_ra_format_norm16 = {
++    .name = "r16", .priv = (void *)&raw_gl_format_norm16,
++    .ctype = RA_CTYPE_UNORM, .ordered = true, .num_components = 1,
++    .component_size = {16}, .component_depth = {16}, .pixel_size = 2,
++    .renderable = true,
++};
+ 
+ static const char raw_vertex_shader[] =
+     "#version 300 es\n"
+@@ -437,8 +448,10 @@
+         gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+         gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+         gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+-        gl->TexImage2D(GL_TEXTURE_2D, 0, p->raw_half ? GL_R16F : GL_R32F,
++        gl->TexImage2D(GL_TEXTURE_2D, 0,
++                       p->raw_norm16 ? GL_R16 : p->raw_half ? GL_R16F : GL_R32F,
+                        w, h, 0, GL_RED,
++                       p->raw_norm16 ? GL_UNSIGNED_SHORT :
+                        p->raw_half ? GL_HALF_FLOAT : GL_FLOAT, NULL);
+         if (!p->raw_mrt) {
+             gl->GenFramebuffers(1, &p->raw_fbo[n]);
+@@ -455,7 +468,8 @@
+         }
+         struct ra_tex_params params = {
+             .dimensions = 2, .w = w, .h = h, .d = 1,
+-            .format = p->raw_half ? &raw_ra_format_half : &raw_ra_format,
++            .format = p->raw_norm16 ? &raw_ra_format_norm16 :
++                      p->raw_half ? &raw_ra_format_half : &raw_ra_format,
+             .render_src = true,
+         };
+         mapper->tex[n] = ra_create_wrapped_tex(mapper->ra, &params,
+@@ -660,6 +674,16 @@
+     p->raw_half = p->raw_mrt &&
+                   __system_property_get("debug.media_kit.p5_raw_half", half_property) > 0 &&
+                   !strcmp(half_property, "1");
++    char norm16_property[PROP_VALUE_MAX] = {0};
++    p->raw_norm16 = p->raw_mrt && !p->raw_half &&
++                    __system_property_get("debug.media_kit.p5_raw_norm16",
++                                          norm16_property) > 0 &&
++                    !strcmp(norm16_property, "1");
++    if (p->raw_norm16 &&
++        !gl_check_extension(gl->extensions, "GL_EXT_texture_norm16")) {
++        MP_ERR(mapper, "P5 raw R16 UNORM requires GL_EXT_texture_norm16\n");
++        return -1;
++    }
+     if (p->raw_half &&
+         !gl_check_extension(gl->extensions, "GL_EXT_color_buffer_half_float") &&
+         gl->es < 320) {

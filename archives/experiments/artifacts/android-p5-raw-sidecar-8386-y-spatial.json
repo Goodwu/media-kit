@@ -1,0 +1,197 @@
+{
+  "contract": "packed Y low 10 bits vs yuv420p10le Y; same PTS and orientation",
+  "width": 3840,
+  "height": 2160,
+  "packed_y_sha256": "b04220ef51629371d77e5d5eccd9ca773ae063e462d1c3499fcb5a37f048e81f",
+  "reference_sha256": "8a41d06c8b14a313864d04907bf3cca667d6f732fa2b2db281d105c3b833fe44",
+  "mismatch_pixels": 24348,
+  "positive_delta_pixels": 23813,
+  "negative_delta_pixels": 535,
+  "component_connectivity": 4,
+  "component_count": 934,
+  "singleton_components": 232,
+  "components_at_least_10_pixels": 290,
+  "pixels_in_components_at_least_10": 22363,
+  "largest_components": [
+    {
+      "pixels": 5536,
+      "bbox_xyxy": [
+        2659,
+        1192,
+        2879,
+        1245
+      ],
+      "mean_signed_code_delta": 8.249097,
+      "min_code_delta": 1,
+      "max_code_delta": 22
+    },
+    {
+      "pixels": 3542,
+      "bbox_xyxy": [
+        3037,
+        1187,
+        3173,
+        1245
+      ],
+      "mean_signed_code_delta": 7.243083,
+      "min_code_delta": 1,
+      "max_code_delta": 23
+    },
+    {
+      "pixels": 799,
+      "bbox_xyxy": [
+        3092,
+        1060,
+        3237,
+        1070
+      ],
+      "mean_signed_code_delta": 3.989987,
+      "min_code_delta": 1,
+      "max_code_delta": 11
+    },
+    {
+      "pixels": 723,
+      "bbox_xyxy": [
+        3610,
+        1218,
+        3667,
+        1247
+      ],
+      "mean_signed_code_delta": 10.73029,
+      "min_code_delta": 1,
+      "max_code_delta": 24
+    },
+    {
+      "pixels": 641,
+      "bbox_xyxy": [
+        2516,
+        1202,
+        2555,
+        1244
+      ],
+      "mean_signed_code_delta": 7.187207,
+      "min_code_delta": 1,
+      "max_code_delta": 18
+    },
+    {
+      "pixels": 509,
+      "bbox_xyxy": [
+        3016,
+        1196,
+        3038,
+        1243
+      ],
+      "mean_signed_code_delta": 8.320236,
+      "min_code_delta": 1,
+      "max_code_delta": 21
+    },
+    {
+      "pixels": 500,
+      "bbox_xyxy": [
+        3216,
+        1215,
+        3253,
+        1245
+      ],
+      "mean_signed_code_delta": 7.726,
+      "min_code_delta": 1,
+      "max_code_delta": 19
+    },
+    {
+      "pixels": 391,
+      "bbox_xyxy": [
+        3752,
+        1234,
+        3808,
+        1247
+      ],
+      "mean_signed_code_delta": 7.138107,
+      "min_code_delta": 1,
+      "max_code_delta": 19
+    },
+    {
+      "pixels": 303,
+      "bbox_xyxy": [
+        3735,
+        1204,
+        3766,
+        1228
+      ],
+      "mean_signed_code_delta": 7.09571,
+      "min_code_delta": 1,
+      "max_code_delta": 22
+    },
+    {
+      "pixels": 294,
+      "bbox_xyxy": [
+        2984,
+        1202,
+        3013,
+        1227
+      ],
+      "mean_signed_code_delta": 5.595238,
+      "min_code_delta": 1,
+      "max_code_delta": 15
+    },
+    {
+      "pixels": 289,
+      "bbox_xyxy": [
+        3684,
+        1234,
+        3723,
+        1247
+      ],
+      "mean_signed_code_delta": 10.847751,
+      "min_code_delta": 1,
+      "max_code_delta": 22
+    },
+    {
+      "pixels": 233,
+      "bbox_xyxy": [
+        3525,
+        920,
+        3598,
+        925
+      ],
+      "mean_signed_code_delta": 2.04721,
+      "min_code_delta": 1,
+      "max_code_delta": 6
+    },
+    {
+      "pixels": 231,
+      "bbox_xyxy": [
+        2788,
+        1174,
+        2812,
+        1193
+      ],
+      "mean_signed_code_delta": 6.852814,
+      "min_code_delta": 1,
+      "max_code_delta": 16
+    },
+    {
+      "pixels": 217,
+      "bbox_xyxy": [
+        2362,
+        1210,
+        2379,
+        1243
+      ],
+      "mean_signed_code_delta": 6.101382,
+      "min_code_delta": 1,
+      "max_code_delta": 14
+    },
+    {
+      "pixels": 211,
+      "bbox_xyxy": [
+        3542,
+        928,
+        3598,
+        934
+      ],
+      "mean_signed_code_delta": 2.208531,
+      "min_code_delta": 1,
+      "max_code_delta": 6
+    }
+  ]
+}

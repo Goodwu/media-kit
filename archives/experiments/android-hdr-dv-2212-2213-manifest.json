@@ -1,0 +1,124 @@
+{
+  "date": "2026-09-24",
+  "device": {
+    "serial": "3EP7N18C28016072",
+    "model": "LYA-AL00",
+    "api": 29,
+    "installed_version_code_at_preflight": 4154
+  },
+  "source_commits": {
+    "mpv": "32a164cc017acab50389f2194f720ccfd0b01a28",
+    "ffmpeg": "f46e514491172d15bd74b4abb1814cd2f05a763e",
+    "libplacebo": "d4624cbfb37fdef337a7da5794b66202671a89cd"
+  },
+  "shared_mpv_patches_sha256": {
+    "mpv_lavc_set_java_vm.patch": "74651643ea54899ef2b3271068356725adbe4b5f6b67128c0d9d968900b240f0",
+    "mpv_fence_leak-fix.patch": "a8082ccaa19c3ebf0b870ac991ad80b9122e30d4ec9f596f6fa406fbd9a876b4",
+    "mpv_aimagereader_max_images3.patch": "ea5bad3d673a5b471c8df9e928c6a13de55ea1938e2986c6d7770ef9ed18152d",
+    "mpv_android_mediacodec_opaque_one_frame.patch": "37119881bcaf5944157c2b00cff52e6b5afc669c4dbadfda3724a422650c42fc",
+    "mpv_aimagereader_bounded_acquire_retry.patch": "075cb463172f5a7d6402811629ab1bd66806cf3d4146733c3925fbe56393fce5"
+  },
+  "p5_texture_sdr_2212": {
+    "media_sha256": "328cae5c78ba9b8e579e7352edcfb8f3e9e0c0670849fc8773a8b028d2d1d03e",
+    "additional_patches_sha256": {
+      "ffmpeg_mediacodec_p5_dovi_frame_probe.patch": "10605e86aef32567484fc7e1ddae84a39f96f73cda8eebbdda4d08879f273180",
+      "libplacebo_gles_r32f_p5.patch": "4f953d8b488bd8cb21b7ae0fea07aa7250f414f6b116663ad0af4b57051a4ba5",
+      "mpv_p5_renderer_mapping_probe.patch": "8325e2fbcf708518e25500550cef94747ac3a7183a1fc872d7b21242f73cad3a",
+      "mpv_aimagereader_p5_raw_yuv_prepass.patch": "e114db33052c09d95e4da5d475cbb8b185ecdfc60976989e49c31256761d096b"
+    },
+    "ffmpeg_libavcodec_sha256": "1b03b16ca7ceb2092eb0eefff051e72144de616ac2c4824340c0753d4574397a",
+    "libplacebo_archive_sha256": "b5cd872f61c521ee5537e5bbb92b37cb918c928b377dad74673528af71a76fa8",
+    "libmpv_unstripped_sha256": "0f843a94da2ca693f22f297c4f73f944cbd4b359118345b83a688a0f185b0e40",
+    "jar_sha256": "3512253d166691b392473e4a3023e7da460aee48beb1d91cd9936c0e9b2e4048",
+    "apk": "/tmp/media-kit-p5-raw-texture-perf-2212-arm64.apk",
+    "apk_sha256": "96d174f31fbf7f62429b316f2dc0ce5e382122f4659593ca84c69a0519462afa",
+    "apk_version_code": 4212,
+    "apk_libmpv_stripped_sha256": "7ebf1b91829ce7e2768599bc522996557b5925c1a7e1564c5fcb0684e2d771e9",
+    "known_limit": "FFmpeg probe stops attaching DOVI side data after 250 output frames and registering inputs after 320; unsuitable for continuous P5 validation",
+    "runtime_properties_required": {
+      "debug.media_kit.p5_rpu_probe": "2",
+      "debug.media_kit.p5_raw_yuv": "1"
+    },
+    "status": "built_only_not_installed"
+  },
+  "p84_texture_sdr_2213": {
+    "media_sha256": "7626cac28819ffd1377a712b56c7cc4bbf8677f5db4b39fb0c83f92e58d74443",
+    "ffmpeg_libavcodec_sha256": "e608393c748e0881b3b7bcd65caee58dba72e8052b1ad0c68ef5546276d2cd0b",
+    "libplacebo_archive_sha256": "f1bb74bfb94dac03a1d693d7a9c4803afaffdf3d5238e618fb54265758ac6872",
+    "libmpv_unstripped_sha256": "19be0aeefb75c36f1baf0cb61ecedafa452277cd74c7035009f0d3949a89da0a",
+    "jar_sha256": "d6222f24642b4413a6011206551d3baf6637ec00a7a0c9d8717e5e64e1fc1d33",
+    "apk": "/tmp/media-kit-p84-clean-retry-thermal-2213-arm64.apk",
+    "apk_sha256": "38ef0e372e7514ef1e98c330f6c3a58d21d2e3e9d8025ff6ebc023b70d52eb23",
+    "apk_version_code": 4213,
+    "apk_libmpv_stripped_sha256": "93a1a0a6d8ada7122f02565216f62cac600df1103a6b3b7a5cd138fc388240d9",
+    "comparison_boundary": "same pinned source and five patches as 4204; old 4204 JAR/APK unavailable, so binary identity is not established",
+    "status": "built_only_not_installed"
+  },
+  "p84_direct_start_600s_2214": {
+    "same_library_jar_as_2213": true,
+    "dart_define_difference_from_2213": "MEDIA_KIT_ANDROID_PLAYING_START_SECONDS=600",
+    "apk": "/tmp/media-kit-p84-600s-direct-start-2214-arm64.apk",
+    "apk_sha256": "07b25460d46c0473d5fa6c9e4f4f0636a22cc19eff7647a803e3409a94e8e989",
+    "apk_version_code": 4214,
+    "apk_libmpv_stripped_sha256": "93a1a0a6d8ada7122f02565216f62cac600df1103a6b3b7a5cd138fc388240d9",
+    "comparison_boundary": "Directly starts playing at source time 600s; thermal state still needs measurement and control before comparing with a full run.",
+    "status": "built_only_not_installed"
+  },
+  "p5_fullstream_texture_sdr_2215": {
+    "media_sha256": "328cae5c78ba9b8e579e7352edcfb8f3e9e0c0670849fc8773a8b028d2d1d03e",
+    "ffmpeg_fullstream_patch_sha256": "7b4873b92cd4cef43d3f013af1679ee2330e5c3b53501b0ac0dfd3b30f87dcc0",
+    "ffmpeg_libavcodec_sha256": "717817c16fdf52a3c6ce867b20147e5fe1b7764f9407c6ac503f9da6",
+    "libplacebo_archive_sha256": "b5cd872f61c521ee5537e5bbb92b37cb918c928b377dad74673528af71a76fa8",
+    "libmpv_unstripped_sha256": "fc34b9ea2da59774e49161e397c1a1723b6bd3441c023ad6bec2e89904ba9d29",
+    "jar_sha256": "e7281a7a3f26c4822020a7fbcc4198e28d269ee876c0d926732fe454c2f01056",
+    "apk": "/tmp/media-kit-p5-fullstream-2215-arm64.apk",
+    "apk_sha256": "e659486f2597f15664c36112e5aaa186d478b6964d1ffdc951452bd0b5f3cad9",
+    "apk_version_code": 4215,
+    "apk_libmpv_stripped_sha256": "906c64551ecd6d1f1d739545d3f8e18f37268e300d3261a52bef46063ad57992",
+    "runtime_properties_required": {
+      "debug.media_kit.p5_rpu_probe": "2",
+      "debug.media_kit.p5_raw_yuv": "1"
+    },
+    "status": "invalid_build_not_installed_artifacts_removed",
+    "invalid_reason": "Copied FFmpeg build directory retained src symlink to the old clean worktree; the libavcodec archive and APK omit the fullstream patch despite their filenames. Do not use for fullstream validation.",
+    "artifact_availability": "The historical 2215 APK, JAR, and libmpv copies were hash-checked then removed to free disk space; hashes and source diagnosis are retained for audit."
+  },
+  "p5_fullstream_texture_sdr_2216": {
+    "media_sha256": "328cae5c78ba9b8e579e7352edcfb8f3e9e0c0670849fc8773a8b028d2d1d03e",
+    "ffmpeg_fullstream_patch_sha256": "1f4d98ee1974aa5f417250c591c0c96e77f9474311050496a2b3fa2b30bcb136",
+    "ffmpeg_libavcodec_sha256": "24c2dda3f53f6252d5ac3ff939f2dc853db7aa8bda983ec447f480f01ba5b503",
+    "libplacebo_archive_sha256": "b5cd872f61c521ee5537e5bbb92b37cb918c928b377dad74673528af71a76fa8",
+    "libmpv_unstripped_sha256": "fdf20c3dce509cd2301b7cb8f42a8e2a044ba727c65f1a360385f2703eee42b8",
+    "jar_sha256": "82640fdced9a984b628d2261ded74548edaf3f0c2e694d7bad5fc05a1d0b2942",
+    "apk": "/tmp/media-kit-p5-fullstream-2216-arm64.apk",
+    "apk_sha256": "0762e99a94b7b94dfc19b1164ada3e3f71fae3914d4a1c2386db87dab97eaf0d",
+    "apk_version_code": 4216,
+    "apk_libmpv_stripped_sha256": "58a283f2f451978a54c3b80db1e150223a3063c3d61f99c17031ed145c94733a",
+    "binary_marker": "MEDIA_KIT_P5_RPU stale eviction epoch=%u input_seq=%u held_seq=%u discarded=%u",
+    "runtime_properties_required": {
+      "debug.media_kit.p5_rpu_probe": "2",
+      "debug.media_kit.p5_raw_yuv": "1"
+    },
+    "status": "built_only_not_installed"
+  },
+  "p5_raw_perf_texture_sdr_2217": {
+    "same_source_and_media_as_2216": true,
+    "mpv_raw_mapper_perf_patch_sha256": "4391b70df3781807a52535b40b7e12d57a633c6b099da7299fef08d0f6c19a20",
+    "ffmpeg_libavcodec_sha256": "24c2dda3f53f6252d5ac3ff939f2dc853db7aa8bda983ec447f480f01ba5b503",
+    "libplacebo_archive_sha256": "b5cd872f61c521ee5537e5bbb92b37cb918c928b377dad74673528af71a76fa8",
+    "libmpv_unstripped_sha256": "e5d1c5d09c7b0e03a440a1cf50fc59261c1c0fa123df8ca927ae792ba5bf20bd",
+    "jar_sha256": "e7b4cfefed60052277519a39d4834eb33d35f08342c59610279232878d1036bd",
+    "apk": "/tmp/media-kit-p5-raw-perf-2217-arm64.apk",
+    "apk_sha256": "b0dd74d4c61454388b2c2fe14be4865af362183899f5994b413ace740dfe2cfa",
+    "apk_version_code": 4217,
+    "apk_libmpv_stripped_sha256": "4cb1ff78873d793b68619f07a33e323477fe083395f17ba5a522ce6b8c481bab",
+    "runtime_properties_required": {
+      "debug.media_kit.p5_rpu_probe": "2",
+      "debug.media_kit.p5_raw_yuv": "1"
+    },
+    "additional_runtime_property_for_timing": {"debug.media_kit.p5_raw_perf": "1"},
+    "timing_boundary": "map_submit_cpu measures CPU submission after image acquisition; unmap_finish_wait may include gpu-next rendering and is not raw-prepass-only GPU time",
+    "status": "built_only_not_installed"
+  },
+  "acceptance_boundary": "No APK installed or run from this manifest; builds and static checks do not prove playback, color, HDR activation, or performance."
+}

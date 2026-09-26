@@ -1,0 +1,6 @@
+09-25 23:21:12.863 E/P5_RAW_GL(23985): after_import error=0x0 ctx=0x7c0582b580 format=0x325
+09-25 23:21:12.888 E/P5_RAW_GL(23985): after_import error=0x0 ctx=0x7c0582b580 format=0x325
+09-25 23:21:12.892 I/flutter (23985): ANDROID_HDR_OPEN sample=AndroidHdrSample.dolbyVisionP5 presentationVerified=false gpuPlatformHdr=false simulateNoHlgForP84=false
+09-25 23:21:12.900 E/P5_RAW_GL(23985): after_import error=0x0 ctx=0x7c0582b580 format=0x325
+09-25 23:21:12.936 E/P5_RAW_GL(23985): after_import error=0x0 ctx=0x7c0582b580 format=0x325
+09-25 23:21:23.110 E/P5_L2C_RGB(23985): pts=10.000000000 w=3840 h=2160 fmt=rgba16hf texel=8 bytes=66355200 written=66355200 download=1 repr_sys=12 repr_levels=2 bits_color=10 bits_sample=10 primaries=6 transfer=12 rect=0.000,0.000,3840.000,2160.000

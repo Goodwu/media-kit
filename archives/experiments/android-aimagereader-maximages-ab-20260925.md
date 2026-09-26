@@ -1,0 +1,7 @@
+# HDR10 Texture 同隔离库 maxImages=2/3 对照（2026-09-25）
+
+为复核11064直MediaCodec成功是否由AImageReader上限3→2造成，在**同一** `/tmp/media-kit-mpv-clean-2194/_build-isolated-arm64` 源码/FFmpeg依赖、同一完整HDR10 3840×1920源、同一1440最大纹理/BT.709/BT.1886/`bt.2390`配置下，只把 `AImageReader_newWithUsage` 的 `maxImages` 从2改回3。2版 libmpv SHA `23bd9a3c0ea521f28240f8a3eb7a2196ec4a993fd55e982d1c6a6e464d4792d8`，JAR SHA `0763b095983cf2b98e4363320d8d69baa4580c9c4a4c436f883075fa29d454f8`，APK 11064 SHA `6408fa79bc72e9ae74098842784dc5e763f88ea9c974bad246060ae63f116a75`；3版 libmpv SHA `dfd5a97d5bfeac37623fde297b255f8e45430639ee1e78a87bf891b0c11fcd4a`，JAR SHA `5afaecf01e1c66e7061a80a57ef2e0b887f5cfed51338ec7e815d866ff819568`，APK 11066 SHA `11654e2513c260f13a257237df6634f900810567930c7932d7656be155fc1d71`。
+
+**两轮都成功**进入`pixelformat=mediacodec`、BT.2020/PQ并持续播放：11064 t28/60/90视频0.967/32.966/62.963秒，11066为0.734/32.766/62.762秒，采样VO与decoder掉帧均0。2版重配置请求19、18槽被`-1010`拒，最后17槽成功；3版请求20、19、18槽被拒，最后也以17槽成功。两轮开头各有一次`acquireLatestImage ... -30001`，之后采样窗口无重复错误；3版至少到视频62.762秒。11064两张视频ROI截图不同，11066本轮未取截图，故11066只报告进度与播放器侧计数，不将其说成独立可见播放验收。
+
+这一严格同库对照**否定了“maxImages=2是打开HDR10的必要条件”**。Reader上限确实改变了初始请求槽数，却都回落到17槽；先前11057/11058 pinned库失败与11064隔离库成功，可能与隔离库其他差异或时序/资源状态相关，现不能判因。下一步应先对 pinned与隔离库的MediaCodec/Reader配置和输出端口协商日志做同条件A/B，或逐项缩小库差异；不要把maxImages=2作为已验证修复并入产品。Opaque直解仍未证明10-bit像素和最终颜色。原11064/11066日志见 `artifacts/android-hdr10-reader-max2-20260925/`、`artifacts/android-hdr10-reader-max3-20260925/`。设备恢复官方10369；隔离源码已回到maxImages=3。

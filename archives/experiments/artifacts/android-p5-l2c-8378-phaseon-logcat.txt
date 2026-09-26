@@ -1,0 +1,39 @@
+--------- beginning of main
+--------- beginning of system
+D/AndroidRuntime(16832): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+I/AndroidRuntime(16832): Using default boot image
+I/AndroidRuntime(16832): Leaving lock profiling enabled
+D/AndroidRuntime(16832): Calling main entry com.android.commands.input.Input
+D/AndroidRuntime(16832): Shutting down VM
+E/P5_OFFSCREEN(16599): target crop=0,0,1,1 repr=12 primaries=3 transfer=0
+E/P5_OFFSCREEN(16599): target crop=0,0,1,1 repr=12 primaries=3 transfer=0
+E/P5_OFFSCREEN(16599): target crop=0,0,1,1 repr=12 primaries=3 transfer=1
+E/P5_OFFSCREEN(16599): target crop=0,0,1,1 repr=12 primaries=3 transfer=1
+E/P5_OFFSCREEN(16599): bootstrap window_w=1 window_h=1 off_w=3840 off_h=2160 window_fmt=fbo window_depth=8 off_fmt=rgba16hf dst=0,0,1,1 flipped=1
+E/P5_OFFSCREEN(16599): target crop=0,0,3840,2160 repr=12 primaries=6 transfer=12
+E/P5_OFFSCREEN(16599): frame=1 valid=1 finish_us=3
+E/P5_OFFSCREEN(16599): frame=2 valid=1 finish_us=2
+E/P5_OFFSCREEN(16599): frame=3 valid=1 finish_us=4
+E/P5_OFFSCREEN(16599): frame=4 valid=1 finish_us=3
+E/P5_OFFSCREEN(16599): frame=5 valid=1 finish_us=2
+E/P5_OFFSCREEN(16599): frame=6 valid=1 finish_us=4
+E/P5_OFFSCREEN(16599): frame=7 valid=1 finish_us=3
+E/P5_OFFSCREEN(16599): frame=8 valid=1 finish_us=4
+E/P5_OFFSCREEN(16599): frame=9 valid=1 finish_us=5
+E/P5_OFFSCREEN(16599): frame=10 valid=1 finish_us=3
+E/P5_OFFSCREEN(16599): frame=11 valid=1 finish_us=4
+E/P5_OFFSCREEN(16599): frame=12 valid=1 finish_us=5
+E/P5_OFFSCREEN(16599): frame=13 valid=1 finish_us=4
+E/P5_OFFSCREEN(16599): frame=14 valid=1 finish_us=3
+E/P5_OFFSCREEN(16599): frame=15 valid=1 finish_us=3
+E/P5_OFFSCREEN(16599): frame=16 valid=1 finish_us=3
+E/P5_OFFSCREEN(16599): frame=17 valid=1 finish_us=3
+E/P5_OFFSCREEN(16599): frame=18 valid=1 finish_us=3
+E/P5_OFFSCREEN(16599): frame=19 valid=1 finish_us=3
+E/P5_OFFSCREEN(16599): frame=20 valid=1 finish_us=4
+E/P5_OFFSCREEN(16599): frame=50 valid=1 finish_us=3
+E/P5_OFFSCREEN(16599): frame=100 valid=1 finish_us=3
+E/P5_OFFSCREEN(16599): frame=150 valid=1 finish_us=3
+E/P5_L2C_RGB(16599): pts=10.000000000 w=3840 h=2160 fmt=rgba16hf texel=8 bytes=66355200 written=66355200 download=1 repr_sys=12 repr_levels=2 bits_color=10 bits_sample=10 primaries=6 transfer=12 rect=0.000,0.000,3840.000,2160.000
+E/P5_GAMUT_TARGET(16599): pts=10.000000000 rendered=1 source_count=1 source_prim=6 source_trc=12 source_lut=0 source_lut_type=0 param_lut=0 param_lut_type=0 color_map=1 target_sys=12 target_prim=6 target_trc=12
+E/P5_POST_RPU_FULL(16599): pts=10.000000000 w=3840 h=2160 format=rgba16f bytes=66355200 download_ok=1 written=66355200

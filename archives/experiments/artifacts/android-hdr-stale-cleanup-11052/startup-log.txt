@@ -1,0 +1,2 @@
+09-25 11:15:08.241 I/flutter (15223): ANDROID_HDR_STALE_SESSIONS removed=1
+09-25 11:15:32.079 I/flutter (15223): ANDROID_HDR_OPEN sample=AndroidHdrSample.hdr10 presentationVerified=false gpuPlatformHdr=false simulateNoHlgForP84=false

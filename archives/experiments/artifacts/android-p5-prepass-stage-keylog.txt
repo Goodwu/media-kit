@@ -1,0 +1,212 @@
+09-25 23:18:24.928 E/P5_VO_TIME(23710): frame=1 prep_us=182 render_us=3703 after_render_us=9 flush_us=5
+09-25 23:18:24.929 E/P5_VO_FLIP(23710): frame=1 submit_us=5 swap_us=290
+09-25 23:18:34.915 E/P5_VO_TIME(23710): frame=2 prep_us=58 render_us=3189 after_render_us=6 flush_us=8
+09-25 23:18:34.917 E/P5_VO_FLIP(23710): frame=2 submit_us=6 swap_us=1214
+09-25 23:18:34.919 E/P5_VO_TIME(23710): frame=3 prep_us=43 render_us=297 after_render_us=4 flush_us=6
+09-25 23:18:34.921 E/P5_VO_FLIP(23710): frame=3 submit_us=4 swap_us=852
+09-25 23:18:34.923 E/P5_VO_TIME(23710): frame=4 prep_us=38 render_us=255 after_render_us=3 flush_us=8
+09-25 23:18:34.924 E/P5_VO_FLIP(23710): frame=4 submit_us=5 swap_us=230
+09-25 23:18:35.253 E/P5_RAW_TIME(23710): init perf=1 property=1
+09-25 23:18:35.429 E/P5_RAW_TIME(23710): frame=1 submit_us=22096 pre_finish_us=0 release_wait_us=1679 wait_result=0xffffffff fence=0 gpu_draw_us=0 disjoint=865
+09-25 23:18:35.430 E/P5_VO_TIME(23710): frame=5 prep_us=48921 render_us=130740 after_render_us=9 flush_us=3
+09-25 23:18:35.431 E/P5_VO_FLIP(23710): frame=5 submit_us=2 swap_us=183
+09-25 23:18:35.433 I/flutter (23710): ANDROID_HDR_OPEN sample=AndroidHdrSample.dolbyVisionP5 presentationVerified=false gpuPlatformHdr=false simulateNoHlgForP84=false
+09-25 23:18:35.458 E/P5_RAW_TIME(23710): frame=2 submit_us=14614 pre_finish_us=0 release_wait_us=5322 wait_result=0xffffffff fence=0 gpu_draw_us=409 disjoint=0
+09-25 23:18:35.459 E/P5_VO_TIME(23710): frame=6 prep_us=48 render_us=26554 after_render_us=9 flush_us=3
+09-25 23:18:35.460 E/P5_VO_FLIP(23710): frame=6 submit_us=2 swap_us=206
+09-25 23:18:35.497 E/P5_RAW_TIME(23710): frame=3 submit_us=13578 pre_finish_us=0 release_wait_us=8645 wait_result=0xffffffff fence=0 gpu_draw_us=505 disjoint=0
+09-25 23:18:35.498 E/P5_VO_TIME(23710): frame=7 prep_us=402 render_us=36970 after_render_us=9 flush_us=3
+09-25 23:18:35.498 E/P5_VO_FLIP(23710): frame=7 submit_us=2 swap_us=306
+09-25 23:18:35.534 E/P5_RAW_TIME(23710): frame=4 submit_us=15143 pre_finish_us=0 release_wait_us=9972 wait_result=0xffffffff fence=0 gpu_draw_us=485 disjoint=0
+09-25 23:18:35.534 E/P5_VO_TIME(23710): frame=8 prep_us=54 render_us=35410 after_render_us=9 flush_us=4
+09-25 23:18:35.535 E/P5_VO_FLIP(23710): frame=8 submit_us=2 swap_us=314
+09-25 23:18:35.569 E/P5_RAW_TIME(23710): frame=5 submit_us=12838 pre_finish_us=0 release_wait_us=16195 wait_result=0xffffffff fence=0 gpu_draw_us=1219 disjoint=0
+09-25 23:18:35.570 E/P5_VO_TIME(23710): frame=9 prep_us=55 render_us=33581 after_render_us=8 flush_us=3
+09-25 23:18:35.571 E/P5_VO_FLIP(23710): frame=9 submit_us=1 swap_us=607
+09-25 23:18:35.591 E/P5_RAW_TIME(23710): frame=6 submit_us=208 pre_finish_us=0 release_wait_us=8036 wait_result=0xffffffff fence=0 gpu_draw_us=390 disjoint=0
+09-25 23:18:35.591 E/P5_VO_TIME(23710): frame=10 prep_us=59 render_us=18917 after_render_us=9 flush_us=4
+09-25 23:18:35.593 E/P5_VO_FLIP(23710): frame=10 submit_us=4 swap_us=684
+09-25 23:18:35.617 E/P5_RAW_TIME(23710): frame=7 submit_us=211 pre_finish_us=0 release_wait_us=17227 wait_result=0xffffffff fence=0 gpu_draw_us=1311 disjoint=0
+09-25 23:18:35.617 E/P5_VO_TIME(23710): frame=11 prep_us=91 render_us=23609 after_render_us=9 flush_us=3
+09-25 23:18:35.618 E/P5_VO_FLIP(23710): frame=11 submit_us=3 swap_us=352
+09-25 23:18:35.638 E/P5_RAW_TIME(23710): frame=8 submit_us=206 pre_finish_us=0 release_wait_us=14757 wait_result=0xffffffff fence=0 gpu_draw_us=1106 disjoint=0
+09-25 23:18:35.639 E/P5_VO_TIME(23710): frame=12 prep_us=68 render_us=20007 after_render_us=10 flush_us=4
+09-25 23:18:35.641 E/P5_VO_FLIP(23710): frame=12 submit_us=2 swap_us=552
+09-25 23:18:35.661 E/P5_RAW_TIME(23710): frame=9 submit_us=414 pre_finish_us=0 release_wait_us=12343 wait_result=0xffffffff fence=0 gpu_draw_us=1035 disjoint=0
+09-25 23:18:35.662 E/P5_VO_TIME(23710): frame=13 prep_us=121 render_us=20235 after_render_us=13 flush_us=5
+09-25 23:18:35.664 E/P5_VO_FLIP(23710): frame=13 submit_us=5 swap_us=659
+09-25 23:18:35.682 E/P5_RAW_TIME(23710): frame=10 submit_us=326 pre_finish_us=0 release_wait_us=11782 wait_result=0xffffffff fence=0 gpu_draw_us=994 disjoint=0
+09-25 23:18:35.683 E/P5_VO_TIME(23710): frame=14 prep_us=108 render_us=18081 after_render_us=11 flush_us=4
+09-25 23:18:35.685 E/P5_VO_FLIP(23710): frame=14 submit_us=4 swap_us=600
+09-25 23:18:35.705 E/P5_RAW_TIME(23710): frame=11 submit_us=450 pre_finish_us=0 release_wait_us=10944 wait_result=0xffffffff fence=0 gpu_draw_us=945 disjoint=0
+09-25 23:18:35.706 E/P5_VO_TIME(23710): frame=15 prep_us=105 render_us=20103 after_render_us=11 flush_us=5
+09-25 23:18:35.707 E/P5_VO_FLIP(23710): frame=15 submit_us=5 swap_us=500
+09-25 23:18:35.731 E/P5_RAW_TIME(23710): frame=12 submit_us=448 pre_finish_us=0 release_wait_us=13170 wait_result=0xffffffff fence=0 gpu_draw_us=1099 disjoint=0
+09-25 23:18:35.732 E/P5_VO_TIME(23710): frame=16 prep_us=116 render_us=23676 after_render_us=12 flush_us=6
+09-25 23:18:35.734 E/P5_VO_FLIP(23710): frame=16 submit_us=4 swap_us=630
+09-25 23:18:35.762 E/P5_RAW_TIME(23710): frame=13 submit_us=681 pre_finish_us=0 release_wait_us=14294 wait_result=0xffffffff fence=0 gpu_draw_us=1063 disjoint=0
+09-25 23:18:35.764 E/P5_VO_TIME(23710): frame=17 prep_us=111 render_us=27848 after_render_us=16 flush_us=6
+09-25 23:18:35.765 E/P5_VO_FLIP(23710): frame=17 submit_us=5 swap_us=662
+09-25 23:18:35.789 E/P5_RAW_TIME(23710): frame=14 submit_us=446 pre_finish_us=0 release_wait_us=14017 wait_result=0xffffffff fence=0 gpu_draw_us=1166 disjoint=0
+09-25 23:18:35.790 E/P5_VO_TIME(23710): frame=18 prep_us=124 render_us=23336 after_render_us=13 flush_us=5
+09-25 23:18:35.791 E/P5_VO_FLIP(23710): frame=18 submit_us=4 swap_us=472
+09-25 23:18:35.817 E/P5_RAW_TIME(23710): frame=15 submit_us=456 pre_finish_us=0 release_wait_us=12475 wait_result=0xffffffff fence=0 gpu_draw_us=1080 disjoint=0
+09-25 23:18:35.818 E/P5_VO_TIME(23710): frame=19 prep_us=118 render_us=24401 after_render_us=11 flush_us=6
+09-25 23:18:35.819 E/P5_VO_FLIP(23710): frame=19 submit_us=5 swap_us=600
+09-25 23:18:35.847 E/P5_RAW_TIME(23710): frame=16 submit_us=890 pre_finish_us=0 release_wait_us=15316 wait_result=0xffffffff fence=0 gpu_draw_us=1072 disjoint=0
+09-25 23:18:35.848 E/P5_VO_TIME(23710): frame=20 prep_us=108 render_us=27627 after_render_us=13 flush_us=6
+09-25 23:18:35.850 E/P5_VO_FLIP(23710): frame=20 submit_us=6 swap_us=693
+09-25 23:18:35.873 E/P5_RAW_TIME(23710): frame=17 submit_us=407 pre_finish_us=0 release_wait_us=12676 wait_result=0xffffffff fence=0 gpu_draw_us=907 disjoint=0
+09-25 23:18:35.897 E/P5_RAW_TIME(23710): frame=18 submit_us=472 pre_finish_us=0 release_wait_us=11880 wait_result=0xffffffff fence=0 gpu_draw_us=953 disjoint=0
+09-25 23:18:35.921 E/P5_RAW_TIME(23710): frame=19 submit_us=426 pre_finish_us=0 release_wait_us=15014 wait_result=0xffffffff fence=0 gpu_draw_us=1149 disjoint=0
+09-25 23:18:35.947 E/P5_RAW_TIME(23710): frame=20 submit_us=430 pre_finish_us=0 release_wait_us=14143 wait_result=0xffffffff fence=0 gpu_draw_us=1113 disjoint=0
+09-25 23:18:36.512 E/P5_VO_TIME(23710): frame=50 prep_us=127 render_us=18808 after_render_us=13 flush_us=5
+09-25 23:18:36.514 E/P5_VO_FLIP(23710): frame=50 submit_us=5 swap_us=515
+09-25 23:18:36.585 E/P5_RAW_TIME(23710): frame=50 submit_us=577 pre_finish_us=0 release_wait_us=10800 wait_result=0xffffffff fence=0 gpu_draw_us=858 disjoint=0
+09-25 23:18:37.525 E/P5_VO_TIME(23710): frame=100 prep_us=130 render_us=16685 after_render_us=15 flush_us=5
+09-25 23:18:37.528 E/P5_VO_FLIP(23710): frame=100 submit_us=6 swap_us=1504
+09-25 23:18:37.608 E/P5_RAW_TIME(23710): frame=100 submit_us=450 pre_finish_us=0 release_wait_us=13276 wait_result=0xffffffff fence=0 gpu_draw_us=1075 disjoint=0
+09-25 23:18:38.490 E/P5_VO_TIME(23710): frame=150 prep_us=113 render_us=16223 after_render_us=11 flush_us=4
+09-25 23:18:38.493 E/P5_VO_FLIP(23710): frame=150 submit_us=6 swap_us=1057
+09-25 23:18:38.572 E/P5_RAW_TIME(23710): frame=150 submit_us=401 pre_finish_us=0 release_wait_us=13570 wait_result=0xffffffff fence=0 gpu_draw_us=1059 disjoint=0
+09-25 23:18:39.512 E/P5_VO_TIME(23710): frame=200 prep_us=111 render_us=24161 after_render_us=13 flush_us=5
+09-25 23:18:39.513 E/P5_VO_FLIP(23710): frame=200 submit_us=5 swap_us=571
+09-25 23:18:39.593 E/P5_RAW_TIME(23710): frame=200 submit_us=577 pre_finish_us=0 release_wait_us=15761 wait_result=0xffffffff fence=0 gpu_draw_us=1054 disjoint=0
+09-25 23:18:40.547 E/P5_VO_TIME(23710): frame=250 prep_us=136 render_us=19082 after_render_us=11 flush_us=5
+09-25 23:18:40.549 E/P5_VO_FLIP(23710): frame=250 submit_us=4 swap_us=571
+09-25 23:18:40.625 E/P5_RAW_TIME(23710): frame=250 submit_us=456 pre_finish_us=0 release_wait_us=10629 wait_result=0xffffffff fence=0 gpu_draw_us=806 disjoint=0
+09-25 23:18:41.567 E/P5_VO_TIME(23710): frame=300 prep_us=117 render_us=15369 after_render_us=15 flush_us=6
+09-25 23:18:41.569 E/P5_VO_FLIP(23710): frame=300 submit_us=5 swap_us=744
+09-25 23:18:41.647 E/P5_RAW_TIME(23710): frame=300 submit_us=466 pre_finish_us=0 release_wait_us=10337 wait_result=0xffffffff fence=0 gpu_draw_us=800 disjoint=0
+09-25 23:18:42.566 E/P5_VO_TIME(23710): frame=350 prep_us=172 render_us=19410 after_render_us=15 flush_us=6
+09-25 23:18:42.568 E/P5_VO_FLIP(23710): frame=350 submit_us=5 swap_us=783
+09-25 23:18:42.649 E/P5_RAW_TIME(23710): frame=350 submit_us=186 pre_finish_us=0 release_wait_us=13933 wait_result=0xffffffff fence=0 gpu_draw_us=1056 disjoint=0
+09-25 23:18:43.566 E/P5_VO_TIME(23710): frame=400 prep_us=146 render_us=18109 after_render_us=14 flush_us=6
+09-25 23:18:43.568 E/P5_VO_FLIP(23710): frame=400 submit_us=5 swap_us=721
+09-25 23:18:43.655 E/P5_RAW_TIME(23710): frame=400 submit_us=398 pre_finish_us=0 release_wait_us=11000 wait_result=0xffffffff fence=0 gpu_draw_us=870 disjoint=0
+09-25 23:18:44.596 E/P5_VO_TIME(23710): frame=450 prep_us=127 render_us=15434 after_render_us=11 flush_us=4
+09-25 23:18:44.598 E/P5_VO_FLIP(23710): frame=450 submit_us=5 swap_us=356
+09-25 23:18:44.684 E/P5_RAW_TIME(23710): frame=450 submit_us=384 pre_finish_us=0 release_wait_us=13285 wait_result=0xffffffff fence=0 gpu_draw_us=926 disjoint=0
+09-25 23:18:45.669 E/P5_VO_TIME(23710): frame=500 prep_us=123 render_us=18812 after_render_us=13 flush_us=5
+09-25 23:18:45.670 E/P5_VO_FLIP(23710): frame=500 submit_us=5 swap_us=551
+09-25 23:18:45.751 E/P5_RAW_TIME(23710): frame=500 submit_us=367 pre_finish_us=0 release_wait_us=10489 wait_result=0xffffffff fence=0 gpu_draw_us=813 disjoint=0
+09-25 23:18:46.710 E/P5_VO_TIME(23710): frame=550 prep_us=182 render_us=18489 after_render_us=12 flush_us=5
+09-25 23:18:46.713 E/P5_VO_FLIP(23710): frame=550 submit_us=6 swap_us=853
+09-25 23:18:46.793 E/P5_RAW_TIME(23710): frame=550 submit_us=478 pre_finish_us=0 release_wait_us=10667 wait_result=0xffffffff fence=0 gpu_draw_us=839 disjoint=0
+09-25 23:18:47.697 E/P5_VO_TIME(23710): frame=600 prep_us=122 render_us=14528 after_render_us=15 flush_us=4
+09-25 23:18:47.700 E/P5_VO_FLIP(23710): frame=600 submit_us=5 swap_us=788
+09-25 23:18:47.775 E/P5_RAW_TIME(23710): frame=600 submit_us=366 pre_finish_us=0 release_wait_us=10645 wait_result=0xffffffff fence=0 gpu_draw_us=831 disjoint=0
+09-25 23:18:48.696 E/P5_VO_TIME(23710): frame=650 prep_us=114 render_us=20026 after_render_us=13 flush_us=4
+09-25 23:18:48.698 E/P5_VO_FLIP(23710): frame=650 submit_us=5 swap_us=811
+09-25 23:18:48.780 E/P5_RAW_TIME(23710): frame=650 submit_us=219 pre_finish_us=0 release_wait_us=11320 wait_result=0xffffffff fence=0 gpu_draw_us=839 disjoint=0
+09-25 23:18:49.693 E/P5_VO_TIME(23710): frame=700 prep_us=125 render_us=19275 after_render_us=12 flush_us=4
+09-25 23:18:49.694 E/P5_VO_FLIP(23710): frame=700 submit_us=5 swap_us=599
+09-25 23:18:49.771 E/P5_RAW_TIME(23710): frame=700 submit_us=209 pre_finish_us=0 release_wait_us=10731 wait_result=0xffffffff fence=0 gpu_draw_us=823 disjoint=0
+09-25 23:18:50.689 E/P5_VO_TIME(23710): frame=750 prep_us=111 render_us=15377 after_render_us=12 flush_us=5
+09-25 23:18:50.692 E/P5_VO_FLIP(23710): frame=750 submit_us=6 swap_us=839
+09-25 23:18:50.778 E/P5_RAW_TIME(23710): frame=750 submit_us=455 pre_finish_us=0 release_wait_us=11363 wait_result=0xffffffff fence=0 gpu_draw_us=897 disjoint=0
+09-25 23:18:51.698 E/P5_VO_TIME(23710): frame=800 prep_us=110 render_us=18717 after_render_us=14 flush_us=4
+09-25 23:18:51.700 E/P5_VO_FLIP(23710): frame=800 submit_us=5 swap_us=453
+09-25 23:18:51.773 E/P5_RAW_TIME(23710): frame=800 submit_us=456 pre_finish_us=0 release_wait_us=12383 wait_result=0xffffffff fence=0 gpu_draw_us=966 disjoint=0
+09-25 23:18:52.692 E/P5_VO_TIME(23710): frame=850 prep_us=173 render_us=19502 after_render_us=13 flush_us=5
+09-25 23:18:52.694 E/P5_VO_FLIP(23710): frame=850 submit_us=5 swap_us=534
+09-25 23:18:52.790 E/P5_RAW_TIME(23710): frame=850 submit_us=426 pre_finish_us=0 release_wait_us=15725 wait_result=0xffffffff fence=0 gpu_draw_us=1067 disjoint=0
+09-25 23:18:53.707 E/P5_VO_TIME(23710): frame=900 prep_us=124 render_us=16021 after_render_us=10 flush_us=4
+09-25 23:18:53.708 E/P5_VO_FLIP(23710): frame=900 submit_us=4 swap_us=493
+09-25 23:18:53.800 E/P5_RAW_TIME(23710): frame=900 submit_us=216 pre_finish_us=0 release_wait_us=12096 wait_result=0xffffffff fence=0 gpu_draw_us=901 disjoint=0
+09-25 23:18:54.710 E/P5_VO_TIME(23710): frame=950 prep_us=105 render_us=19772 after_render_us=15 flush_us=5
+09-25 23:18:54.713 E/P5_VO_FLIP(23710): frame=950 submit_us=5 swap_us=1999
+09-25 23:18:54.795 E/P5_RAW_TIME(23710): frame=950 submit_us=360 pre_finish_us=0 release_wait_us=11558 wait_result=0xffffffff fence=0 gpu_draw_us=880 disjoint=0
+09-25 23:18:55.698 E/P5_VO_TIME(23710): frame=1000 prep_us=109 render_us=21235 after_render_us=13 flush_us=5
+09-25 23:18:55.700 E/P5_VO_FLIP(23710): frame=1000 submit_us=5 swap_us=596
+09-25 23:18:55.769 E/P5_RAW_TIME(23710): frame=1000 submit_us=163 pre_finish_us=0 release_wait_us=11613 wait_result=0xffffffff fence=0 gpu_draw_us=867 disjoint=0
+09-25 23:18:56.690 E/P5_VO_TIME(23710): frame=1050 prep_us=111 render_us=16566 after_render_us=11 flush_us=4
+09-25 23:18:56.692 E/P5_VO_FLIP(23710): frame=1050 submit_us=5 swap_us=508
+09-25 23:18:56.781 E/P5_RAW_TIME(23710): frame=1050 submit_us=497 pre_finish_us=0 release_wait_us=11675 wait_result=0xffffffff fence=0 gpu_draw_us=916 disjoint=0
+09-25 23:18:57.724 E/P5_VO_TIME(23710): frame=1100 prep_us=129 render_us=18682 after_render_us=13 flush_us=5
+09-25 23:18:57.726 E/P5_VO_FLIP(23710): frame=1100 submit_us=4 swap_us=548
+09-25 23:18:57.827 E/P5_RAW_TIME(23710): frame=1100 submit_us=375 pre_finish_us=0 release_wait_us=11010 wait_result=0xffffffff fence=0 gpu_draw_us=869 disjoint=0
+09-25 23:18:58.714 E/P5_VO_TIME(23710): frame=1150 prep_us=147 render_us=17478 after_render_us=11 flush_us=4
+09-25 23:18:58.716 E/P5_VO_FLIP(23710): frame=1150 submit_us=4 swap_us=456
+09-25 23:18:58.792 E/P5_RAW_TIME(23710): frame=1150 submit_us=326 pre_finish_us=0 release_wait_us=11376 wait_result=0xffffffff fence=0 gpu_draw_us=885 disjoint=0
+09-25 23:18:59.735 E/P5_VO_TIME(23710): frame=1200 prep_us=66 render_us=20586 after_render_us=13 flush_us=6
+09-25 23:18:59.737 E/P5_VO_FLIP(23710): frame=1200 submit_us=5 swap_us=618
+09-25 23:18:59.815 E/P5_RAW_TIME(23710): frame=1200 submit_us=372 pre_finish_us=0 release_wait_us=11408 wait_result=0xffffffff fence=0 gpu_draw_us=896 disjoint=0
+09-25 23:19:00.719 E/P5_VO_TIME(23710): frame=1250 prep_us=148 render_us=25209 after_render_us=15 flush_us=7
+09-25 23:19:00.721 E/P5_VO_FLIP(23710): frame=1250 submit_us=7 swap_us=937
+09-25 23:19:00.802 E/P5_RAW_TIME(23710): frame=1250 submit_us=656 pre_finish_us=0 release_wait_us=11578 wait_result=0xffffffff fence=0 gpu_draw_us=909 disjoint=0
+09-25 23:19:01.712 E/P5_VO_TIME(23710): frame=1300 prep_us=205 render_us=15376 after_render_us=14 flush_us=5
+09-25 23:19:01.714 E/P5_VO_FLIP(23710): frame=1300 submit_us=4 swap_us=470
+09-25 23:19:01.790 E/P5_RAW_TIME(23710): frame=1300 submit_us=351 pre_finish_us=0 release_wait_us=10561 wait_result=0xffffffff fence=0 gpu_draw_us=830 disjoint=0
+09-25 23:19:02.729 E/P5_VO_TIME(23710): frame=1350 prep_us=115 render_us=16156 after_render_us=13 flush_us=5
+09-25 23:19:02.731 E/P5_VO_FLIP(23710): frame=1350 submit_us=5 swap_us=528
+09-25 23:19:02.806 E/P5_RAW_TIME(23710): frame=1350 submit_us=370 pre_finish_us=0 release_wait_us=10676 wait_result=0xffffffff fence=0 gpu_draw_us=844 disjoint=0
+09-25 23:19:03.712 E/P5_VO_TIME(23710): frame=1400 prep_us=116 render_us=17120 after_render_us=13 flush_us=5
+09-25 23:19:03.713 E/P5_VO_FLIP(23710): frame=1400 submit_us=5 swap_us=519
+09-25 23:19:03.810 E/P5_RAW_TIME(23710): frame=1400 submit_us=422 pre_finish_us=0 release_wait_us=13769 wait_result=0xffffffff fence=0 gpu_draw_us=1077 disjoint=0
+09-25 23:19:04.719 E/P5_VO_TIME(23710): frame=1450 prep_us=351 render_us=18548 after_render_us=13 flush_us=5
+09-25 23:19:04.721 E/P5_VO_FLIP(23710): frame=1450 submit_us=5 swap_us=582
+09-25 23:19:04.793 E/P5_RAW_TIME(23710): frame=1450 submit_us=239 pre_finish_us=0 release_wait_us=13772 wait_result=0xffffffff fence=0 gpu_draw_us=1035 disjoint=0
+09-25 23:19:05.745 E/P5_VO_TIME(23710): frame=1500 prep_us=118 render_us=18106 after_render_us=13 flush_us=5
+09-25 23:19:05.747 E/P5_VO_FLIP(23710): frame=1500 submit_us=5 swap_us=615
+09-25 23:19:05.829 E/P5_RAW_TIME(23710): frame=1500 submit_us=389 pre_finish_us=0 release_wait_us=13642 wait_result=0xffffffff fence=0 gpu_draw_us=1072 disjoint=0
+09-25 23:19:06.801 E/P5_VO_TIME(23710): frame=1550 prep_us=115 render_us=23797 after_render_us=15 flush_us=5
+09-25 23:19:06.803 E/P5_VO_FLIP(23710): frame=1550 submit_us=5 swap_us=704
+09-25 23:19:06.892 E/P5_RAW_TIME(23710): frame=1550 submit_us=431 pre_finish_us=0 release_wait_us=12194 wait_result=0xffffffff fence=0 gpu_draw_us=885 disjoint=0
+09-25 23:19:07.798 E/P5_VO_TIME(23710): frame=1600 prep_us=110 render_us=18998 after_render_us=14 flush_us=5
+09-25 23:19:07.799 E/P5_VO_FLIP(23710): frame=1600 submit_us=5 swap_us=513
+09-25 23:19:07.884 E/P5_RAW_TIME(23710): frame=1600 submit_us=405 pre_finish_us=0 release_wait_us=11967 wait_result=0xffffffff fence=0 gpu_draw_us=893 disjoint=0
+09-25 23:19:08.791 E/P5_VO_TIME(23710): frame=1650 prep_us=109 render_us=18305 after_render_us=13 flush_us=4
+09-25 23:19:08.793 E/P5_VO_FLIP(23710): frame=1650 submit_us=4 swap_us=515
+09-25 23:19:08.874 E/P5_RAW_TIME(23710): frame=1650 submit_us=211 pre_finish_us=0 release_wait_us=17209 wait_result=0xffffffff fence=0 gpu_draw_us=1275 disjoint=0
+09-25 23:19:09.793 E/P5_VO_TIME(23710): frame=1700 prep_us=129 render_us=18960 after_render_us=17 flush_us=5
+09-25 23:19:09.795 E/P5_VO_FLIP(23710): frame=1700 submit_us=5 swap_us=465
+09-25 23:19:09.870 E/P5_RAW_TIME(23710): frame=1700 submit_us=345 pre_finish_us=0 release_wait_us=10384 wait_result=0xffffffff fence=0 gpu_draw_us=794 disjoint=0
+09-25 23:19:10.797 E/P5_VO_TIME(23710): frame=1750 prep_us=113 render_us=16963 after_render_us=13 flush_us=6
+09-25 23:19:10.799 E/P5_VO_FLIP(23710): frame=1750 submit_us=5 swap_us=494
+09-25 23:19:10.882 E/P5_RAW_TIME(23710): frame=1750 submit_us=388 pre_finish_us=0 release_wait_us=10128 wait_result=0xffffffff fence=0 gpu_draw_us=803 disjoint=0
+09-25 23:19:11.815 E/P5_VO_TIME(23710): frame=1800 prep_us=119 render_us=19698 after_render_us=16 flush_us=6
+09-25 23:19:11.817 E/P5_VO_FLIP(23710): frame=1800 submit_us=5 swap_us=655
+09-25 23:19:11.892 E/P5_RAW_TIME(23710): frame=1800 submit_us=453 pre_finish_us=0 release_wait_us=10709 wait_result=0xffffffff fence=0 gpu_draw_us=851 disjoint=0
+09-25 23:19:12.819 E/P5_VO_TIME(23710): frame=1850 prep_us=133 render_us=16704 after_render_us=12 flush_us=4
+09-25 23:19:12.821 E/P5_VO_FLIP(23710): frame=1850 submit_us=5 swap_us=552
+09-25 23:19:12.901 E/P5_RAW_TIME(23710): frame=1850 submit_us=514 pre_finish_us=0 release_wait_us=11511 wait_result=0xffffffff fence=0 gpu_draw_us=808 disjoint=0
+09-25 23:19:13.833 E/P5_VO_TIME(23710): frame=1900 prep_us=119 render_us=16497 after_render_us=14 flush_us=4
+09-25 23:19:13.835 E/P5_VO_FLIP(23710): frame=1900 submit_us=5 swap_us=914
+09-25 23:19:13.916 E/P5_RAW_TIME(23710): frame=1900 submit_us=613 pre_finish_us=0 release_wait_us=14304 wait_result=0xffffffff fence=0 gpu_draw_us=1101 disjoint=0
+09-25 23:19:14.833 E/P5_VO_TIME(23710): frame=1950 prep_us=119 render_us=16473 after_render_us=15 flush_us=5
+09-25 23:19:14.834 E/P5_VO_FLIP(23710): frame=1950 submit_us=5 swap_us=538
+09-25 23:19:14.912 E/P5_RAW_TIME(23710): frame=1950 submit_us=394 pre_finish_us=0 release_wait_us=11119 wait_result=0xffffffff fence=0 gpu_draw_us=824 disjoint=0
+09-25 23:19:15.836 E/P5_VO_TIME(23710): frame=2000 prep_us=120 render_us=15198 after_render_us=13 flush_us=4
+09-25 23:19:15.838 E/P5_VO_FLIP(23710): frame=2000 submit_us=5 swap_us=483
+09-25 23:19:15.915 E/P5_RAW_TIME(23710): frame=2000 submit_us=454 pre_finish_us=0 release_wait_us=11669 wait_result=0xffffffff fence=0 gpu_draw_us=793 disjoint=0
+09-25 23:19:16.840 E/P5_VO_TIME(23710): frame=2050 prep_us=130 render_us=20475 after_render_us=16 flush_us=5
+09-25 23:19:16.841 E/P5_VO_FLIP(23710): frame=2050 submit_us=5 swap_us=606
+09-25 23:19:16.920 E/P5_RAW_TIME(23710): frame=2050 submit_us=505 pre_finish_us=0 release_wait_us=10516 wait_result=0xffffffff fence=0 gpu_draw_us=841 disjoint=0
+09-25 23:19:17.832 E/P5_VO_TIME(23710): frame=2100 prep_us=129 render_us=17814 after_render_us=13 flush_us=4
+09-25 23:19:17.833 E/P5_VO_FLIP(23710): frame=2100 submit_us=5 swap_us=574
+09-25 23:19:17.908 E/P5_RAW_TIME(23710): frame=2100 submit_us=419 pre_finish_us=0 release_wait_us=9804 wait_result=0xffffffff fence=0 gpu_draw_us=796 disjoint=0
+09-25 23:19:18.853 E/P5_VO_TIME(23710): frame=2150 prep_us=123 render_us=20984 after_render_us=15 flush_us=4
+09-25 23:19:18.854 E/P5_VO_FLIP(23710): frame=2150 submit_us=5 swap_us=522
+09-25 23:19:18.926 E/P5_RAW_TIME(23710): frame=2150 submit_us=172 pre_finish_us=0 release_wait_us=11308 wait_result=0xffffffff fence=0 gpu_draw_us=853 disjoint=0
+09-25 23:19:19.861 E/P5_VO_TIME(23710): frame=2200 prep_us=128 render_us=14988 after_render_us=15 flush_us=5
+09-25 23:19:19.863 E/P5_VO_FLIP(23710): frame=2200 submit_us=5 swap_us=591
+09-25 23:19:19.948 E/P5_RAW_TIME(23710): frame=2200 submit_us=347 pre_finish_us=0 release_wait_us=10767 wait_result=0xffffffff fence=0 gpu_draw_us=858 disjoint=0
+09-25 23:19:20.880 E/P5_VO_TIME(23710): frame=2250 prep_us=204 render_us=14432 after_render_us=10 flush_us=4
+09-25 23:19:20.881 E/P5_VO_FLIP(23710): frame=2250 submit_us=4 swap_us=364
+09-25 23:19:20.964 E/P5_RAW_TIME(23710): frame=2250 submit_us=337 pre_finish_us=0 release_wait_us=13135 wait_result=0xffffffff fence=0 gpu_draw_us=973 disjoint=0
+09-25 23:19:21.877 E/P5_VO_TIME(23710): frame=2300 prep_us=239 render_us=20457 after_render_us=13 flush_us=5
+09-25 23:19:21.878 E/P5_VO_FLIP(23710): frame=2300 submit_us=5 swap_us=486
+09-25 23:19:21.947 E/P5_RAW_TIME(23710): frame=2300 submit_us=171 pre_finish_us=0 release_wait_us=11326 wait_result=0xffffffff fence=0 gpu_draw_us=843 disjoint=0
+09-25 23:19:22.870 E/P5_VO_TIME(23710): frame=2350 prep_us=109 render_us=16947 after_render_us=13 flush_us=5
+09-25 23:19:22.872 E/P5_VO_FLIP(23710): frame=2350 submit_us=5 swap_us=525
+09-25 23:19:22.957 E/P5_RAW_TIME(23710): frame=2350 submit_us=336 pre_finish_us=0 release_wait_us=11500 wait_result=0xffffffff fence=0 gpu_draw_us=898 disjoint=0
+09-25 23:19:23.886 E/P5_VO_TIME(23710): frame=2400 prep_us=114 render_us=23057 after_render_us=16 flush_us=5
+09-25 23:19:23.887 E/P5_VO_FLIP(23710): frame=2400 submit_us=5 swap_us=639
+09-25 23:19:23.960 E/P5_RAW_TIME(23710): frame=2400 submit_us=179 pre_finish_us=0 release_wait_us=12184 wait_result=0xffffffff fence=0 gpu_draw_us=918 disjoint=0
+09-25 23:19:24.875 E/P5_VO_TIME(23710): frame=2450 prep_us=113 render_us=19971 after_render_us=13 flush_us=5
+09-25 23:19:24.877 E/P5_VO_FLIP(23710): frame=2450 submit_us=4 swap_us=454
+09-25 23:19:24.964 E/P5_RAW_TIME(23710): frame=2450 submit_us=349 pre_finish_us=0 release_wait_us=11011 wait_result=0xffffffff fence=0 gpu_draw_us=856 disjoint=0
+09-25 23:19:25.933 E/P5_VO_TIME(23710): frame=2500 prep_us=108 render_us=20161 after_render_us=13 flush_us=5
+09-25 23:19:25.935 E/P5_VO_FLIP(23710): frame=2500 submit_us=5 swap_us=571
+09-25 23:19:26.009 E/P5_RAW_TIME(23710): frame=2500 submit_us=363 pre_finish_us=0 release_wait_us=11615 wait_result=0xffffffff fence=0 gpu_draw_us=868 disjoint=0

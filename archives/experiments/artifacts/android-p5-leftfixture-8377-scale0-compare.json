@@ -1,0 +1,31 @@
+{
+  "input_mp4_sha256": "74c2cfb6b28095c4bb3b95a57507de699bb8141d62feaedbcb20b964d51a0a98",
+  "reference_npz_sha256": "8d7ab503f92a4715d1dbe1b6f3442ac8c24dc54af1aa92589e05d1f54092bd79",
+  "scale0_readback_sha256": "bb9c3ff7189d1a37ae9655ac096bb2f6ce47ef8a2617be4c4231eada37d1b7ae",
+  "frame": 0,
+  "pts_seconds": 10.0,
+  "dimensions": [
+    256,
+    144
+  ],
+  "unscaled_model": "round(min(code,1020)*1023/1020)",
+  "model_mismatch_y_cb_cr": [
+    0,
+    0,
+    0
+  ],
+  "source_y_1020_count": 144,
+  "source_y_1023_count": 1440,
+  "scale0_y_for_source_1020": [
+    1023
+  ],
+  "scale0_y_for_source_1023": [
+    1023
+  ],
+  "scale1_y_for_source_1020": [
+    1020
+  ],
+  "scale1_y_for_source_1023": [
+    1020
+  ]
+}

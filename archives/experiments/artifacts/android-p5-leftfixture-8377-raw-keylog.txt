@@ -1,0 +1,2 @@
+09-25 18:28:43.021 12010 12414 E P5_RAW_STAGE: P5_RAW_FULL pts=10.000000000 size=256x144 bytes=147456 written=147456 error=0x0 crop=0,0,256,144 buffer=256,144 chroma_left_probe=1
+09-25 18:29:21.541 12493 12639 E P5_RAW_STAGE: P5_RAW_FULL pts=10.000000000 size=256x144 bytes=147456 written=147456 error=0x0 crop=0,0,256,144 buffer=256,144 chroma_left_probe=0

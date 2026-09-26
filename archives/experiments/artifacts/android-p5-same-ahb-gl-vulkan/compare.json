@@ -1,0 +1,196 @@
+[
+  {
+    "file": "archives/experiments/artifacts/android-p5-same-ahb-gl-vulkan/original-run.txt",
+    "ordinal": 500,
+    "rows": [
+      {
+        "xy": [
+          2577,
+          1221
+        ],
+        "gl_y": 276,
+        "vulkan_y": 0.269607842,
+        "vulkan_y_10bit": 276
+      },
+      {
+        "xy": [
+          2576,
+          1221
+        ],
+        "gl_y": 280,
+        "vulkan_y": 0.27352941,
+        "vulkan_y_10bit": 280
+      },
+      {
+        "xy": [
+          203,
+          1105
+        ],
+        "gl_y": 668,
+        "vulkan_y": 0.652941167,
+        "vulkan_y_10bit": 668
+      },
+      {
+        "xy": [
+          1762,
+          939
+        ],
+        "gl_y": 650,
+        "vulkan_y": 0.635294139,
+        "vulkan_y_10bit": 650
+      },
+      {
+        "xy": [
+          2215,
+          1113
+        ],
+        "gl_y": 673,
+        "vulkan_y": 0.657843113,
+        "vulkan_y_10bit": 673
+      },
+      {
+        "xy": [
+          1785,
+          963
+        ],
+        "gl_y": 656,
+        "vulkan_y": 0.641176462,
+        "vulkan_y_10bit": 656
+      },
+      {
+        "xy": [
+          2577,
+          1220
+        ],
+        "gl_y": 339,
+        "vulkan_y": 0.331372559,
+        "vulkan_y_10bit": 339
+      },
+      {
+        "xy": [
+          2577,
+          1222
+        ],
+        "gl_y": 120,
+        "vulkan_y": 0.117647059,
+        "vulkan_y_10bit": 120
+      },
+      {
+        "xy": [
+          384,
+          1080
+        ],
+        "gl_y": 422,
+        "vulkan_y": 0.412745088,
+        "vulkan_y_10bit": 422
+      },
+      {
+        "xy": [
+          1920,
+          1080
+        ],
+        "gl_y": 416,
+        "vulkan_y": 0.406862736,
+        "vulkan_y_10bit": 416
+      }
+    ],
+    "all_y_equal": true
+  },
+  {
+    "file": "archives/experiments/artifacts/android-p5-same-ahb-gl-vulkan/pattern-run.txt",
+    "ordinal": 240,
+    "rows": [
+      {
+        "xy": [
+          233,
+          10
+        ],
+        "gl_y": 1014,
+        "vulkan_y": 0.991176486,
+        "vulkan_y_10bit": 1014
+      },
+      {
+        "xy": [
+          234,
+          10
+        ],
+        "gl_y": 1023,
+        "vulkan_y": 1.0,
+        "vulkan_y_10bit": 1023
+      },
+      {
+        "xy": [
+          236,
+          10
+        ],
+        "gl_y": 1023,
+        "vulkan_y": 1.0,
+        "vulkan_y_10bit": 1023
+      },
+      {
+        "xy": [
+          232,
+          10
+        ],
+        "gl_y": 1014,
+        "vulkan_y": 0.991176486,
+        "vulkan_y_10bit": 1014
+      },
+      {
+        "xy": [
+          235,
+          10
+        ],
+        "gl_y": 1023,
+        "vulkan_y": 1.0,
+        "vulkan_y_10bit": 1023
+      },
+      {
+        "xy": [
+          237,
+          10
+        ],
+        "gl_y": 1023,
+        "vulkan_y": 1.0,
+        "vulkan_y_10bit": 1023
+      },
+      {
+        "xy": [
+          233,
+          11
+        ],
+        "gl_y": 1014,
+        "vulkan_y": 0.991176486,
+        "vulkan_y_10bit": 1014
+      },
+      {
+        "xy": [
+          234,
+          11
+        ],
+        "gl_y": 1023,
+        "vulkan_y": 1.0,
+        "vulkan_y_10bit": 1023
+      },
+      {
+        "xy": [
+          236,
+          11
+        ],
+        "gl_y": 1023,
+        "vulkan_y": 1.0,
+        "vulkan_y_10bit": 1023
+      },
+      {
+        "xy": [
+          128,
+          72
+        ],
+        "gl_y": 91,
+        "vulkan_y": 0.089215688,
+        "vulkan_y_10bit": 91
+      }
+    ],
+    "all_y_equal": true
+  }
+]

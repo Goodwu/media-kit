@@ -1,0 +1,8 @@
+09-25 18:16:14.718  9697  9697 I flutter : ANDROID_HDR_OPEN sample=AndroidHdrSample.dolbyVisionP5 presentationVerified=false gpuPlatformHdr=false simulateNoHlgForP84=false
+09-25 18:16:14.740  9697 10079 E P5_OFFSCREEN: bootstrap window_w=256 window_h=144 off_w=256 off_h=144 window_fmt=fbo window_depth=8 off_fmt=rgba16hf dst=0,0,256,144 flipped=1
+09-25 18:16:24.740  9697 10079 E P5_RAW_STAGE: P5_RPU_ID pts=10.000000000 size=237 hash=969415b7
+09-25 18:16:24.760  9697 10079 E P5_POST_RPU_FULL: pts=10.000000000 w=256 h=144 format=rgba16f bytes=294912 download_ok=1 written=294912
+09-25 18:16:55.018 10167 10167 I flutter : ANDROID_HDR_OPEN sample=AndroidHdrSample.dolbyVisionP5 presentationVerified=false gpuPlatformHdr=false simulateNoHlgForP84=false
+09-25 18:16:55.042 10167 10323 E P5_OFFSCREEN: bootstrap window_w=256 window_h=144 off_w=256 off_h=144 window_fmt=fbo window_depth=8 off_fmt=rgba16hf dst=0,0,256,144 flipped=1
+09-25 18:17:04.983 10167 10323 E P5_RAW_STAGE: P5_RPU_ID pts=10.000000000 size=237 hash=969415b7
+09-25 18:17:05.000 10167 10323 E P5_POST_RPU_FULL: pts=10.000000000 w=256 h=144 format=rgba16f bytes=294912 download_ok=1 written=294912

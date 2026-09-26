@@ -1,0 +1,10 @@
+input={max-bitrate=4046017, track-id=1, level=65536, mime=video/hevc, frame-count=512, profile=2, bitrate=4046017, language=und, color-standard=0, display-width=3840, color-transfer=0, durationUs=10240000, display-height=2160, width=3840, color-range=1, max-input-size=276181, frame-rate=50, height=2160, csd-0=java.nio.HeapByteBuffer[pos=0 lim=102 cap=102]}
+configured={crop-right=3839, color-format=21, slice-height=2160, image-data=java.nio.HeapByteBuffer[pos=0 lim=104 cap=104], mime=video/raw, hdr-static-info=java.nio.HeapByteBuffer[pos=0 lim=25 cap=25], stride=3840, crop-bottom=2159, crop-left=0, width=3840, color-range=1, crop-top=0, height=2160}
+changed={crop-right=3839, color-format=21, slice-height=2160, image-data=java.nio.HeapByteBuffer[pos=0 lim=104 cap=104], mime=video/raw, hdr-static-info=java.nio.HeapByteBuffer[pos=0 lim=25 cap=25], stride=3840, crop-bottom=2159, crop-left=0, width=3840, color-range=1, crop-top=0, height=2160}
+firstPTS=0 size=12441600
+firstImageFormat=35 YUV420_888=35 planes=3
+plane=0 rowStride=3840 pixelStride=1 capacity=8294400
+plane=1 rowStride=3840 pixelStride=2 capacity=4147199
+plane=2 rowStride=3840 pixelStride=2 capacity=4147199
+capturedPTS=10000000 ordinal=500 path=/sdcard/Download/media-kit-p5-bytebuffer-n500.yuv
+frames=501 finalOutput={crop-right=3839, color-format=21, slice-height=2160, image-data=java.nio.HeapByteBuffer[pos=0 lim=104 cap=104], mime=video/raw, hdr-static-info=java.nio.HeapByteBuffer[pos=0 lim=25 cap=25], stride=3840, crop-bottom=2159, crop-left=0, width=3840, color-range=1, crop-top=0, height=2160}

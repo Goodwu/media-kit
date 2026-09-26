@@ -1,0 +1,25 @@
+{
+  "source": "GlassBlowing2 P5 3840x2160 59.94fps",
+  "baseline_apk_sha256": "6c041ac5282571564eb1882b05e1eb550a95225c7277dec6de7363121ffe8131",
+  "candidate_apk_sha256": "e1cbc66824ce835c48df4ec55ad1e83672840028fc2b0562b14f5f8b05dc40fb",
+  "baseline_time_pos": "90.000000",
+  "candidate_time_pos": "90.000000",
+  "paused": true,
+  "full_screenshot_shape": [
+    3120,
+    1440
+  ],
+  "video_crop_xyxy": [
+    280,
+    0,
+    2840,
+    1440
+  ],
+  "video_pixels": 3686400,
+  "rgb_mae_8bit": 0.3107417353877315,
+  "rgb_max_abs_8bit": 2,
+  "exact_rgb_pixel_fraction": 0.43322726779513887,
+  "pixel_any_channel_gt1_fraction": 4.937065972222222e-05,
+  "pixel_any_channel_gt5_fraction": 0.0,
+  "method": "PIL RGB decode; absolute per-channel pixel difference; no alignment, filtering, or color transform"
+}

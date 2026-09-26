@@ -1,0 +1,64 @@
+{
+  "host": {
+    "path": "/private/tmp/media-kit-p5-leftfixture-host-pts1000-gbrpf32le.bin",
+    "sha256": "acef44b3745f4a00328e731a09e884ceca3354e1d458c2d00fe8fcb48f8bc563",
+    "format": "gbrpf32le",
+    "origin": "top-left"
+  },
+  "phone": {
+    "path": "/private/tmp/media-kit-p5-leftfixture-8375-off-pts1000.rgba16f",
+    "sha256": "7fb14dbf1e41d0888fc753a8b8bbce8847081587b70391395ed2086864c7fe30",
+    "format": "rgba16f-le",
+    "origin": "bottom-left"
+  },
+  "width": 256,
+  "height": 144,
+  "comparison": "same coordinates after vertical origin conversion",
+  "channels": {
+    "R": {
+      "mae": 0.0054429951641294695,
+      "median": 0.002197265625,
+      "p95": 0.01025390625,
+      "p99": 0.067626953125,
+      "max": 0.406982421875,
+      "max_xy": [
+        63,
+        0
+      ],
+      "max_host": 0.432861328125,
+      "max_phone": 0.83984375,
+      "above_0_01": 5186,
+      "above_0_05": 402
+    },
+    "G": {
+      "mae": 0.004542786214086745,
+      "median": 0.001220703125,
+      "p95": 0.009765625,
+      "p99": 0.058928221464157104,
+      "max": 0.28662109375,
+      "max_xy": [
+        159,
+        4
+      ],
+      "max_host": 0.51220703125,
+      "max_phone": 0.798828125,
+      "above_0_01": 1278,
+      "above_0_05": 393
+    },
+    "B": {
+      "mae": 0.004747806323899163,
+      "median": 0.0009765625,
+      "p95": 0.00921630859375,
+      "p99": 0.037077635526657104,
+      "max": 0.4833984375,
+      "max_xy": [
+        127,
+        0
+      ],
+      "max_host": 0.3564453125,
+      "max_phone": 0.83984375,
+      "above_0_01": 1366,
+      "above_0_05": 324
+    }
+  }
+}

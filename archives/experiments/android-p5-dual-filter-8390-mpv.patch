@@ -1,0 +1,73 @@
+--- a/video/out/hwdec/hwdec_aimagereader.c
++++ b/video/out/hwdec/hwdec_aimagereader.c
+@@ -94,6 +94,7 @@
+     bool raw_chroma_left_probe;
+     bool raw_full_dump;
+     bool raw_full_dump_done;
++    bool raw_dual_filter;
+     bool raw_pixel_probe;
+     bool raw_spatial_probe;
+     bool raw_peak_probe;
+@@ -895,6 +896,50 @@
+         gl->EndQuery(GL_TIME_ELAPSED);
+     raw_probe_pixels(mapper);
+     raw_dump_full(mapper, crop, buffer_w, buffer_h);
++    if (p->raw_dual_filter && p->raw_full_dump_done &&
++        mapper->src->pts >= 10.0 && mapper->src->pts < 10.02) {
++        const char *dir = "/sdcard/Android/data/com.example.media_kit_test/files/";
++        char src[256], dst[256];
++        snprintf(src, sizeof(src), "%sp5-raw-420-y-packed10.bin", dir);
++        snprintf(dst, sizeof(dst), "%sp5-raw-420-y-nearest.bin", dir);
++        int y_nearest = rename(src, dst);
++        snprintf(src, sizeof(src), "%sp5-raw-420-uv-packed10.bin", dir);
++        snprintf(dst, sizeof(dst), "%sp5-raw-420-uv-nearest.bin", dir);
++        int uv_nearest = rename(src, dst);
++        gl->BindTexture(GL_TEXTURE_EXTERNAL_OES, p->gl_texture);
++        gl->TexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
++        gl->TexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
++        gl->BindFramebuffer(GL_FRAMEBUFFER, p->raw_fbo[0]);
++        gl->DrawArrays(GL_TRIANGLES, 0, 3);
++        gl->BindFramebuffer(GL_READ_FRAMEBUFFER, p->raw_fbo[0]);
++        gl->ReadBuffer(GL_COLOR_ATTACHMENT0);
++        gl->BindFramebuffer(GL_DRAW_FRAMEBUFFER, p->raw_fbo[1]);
++        gl->BlitFramebuffer(0, 0, p->raw_w, p->raw_h,
++                            0, 0, p->raw_w / 2, p->raw_h / 2,
++                            GL_COLOR_BUFFER_BIT, GL_NEAREST);
++        p->raw_full_dump_done = false;
++        raw_dump_full(mapper, crop, buffer_w, buffer_h);
++        snprintf(src, sizeof(src), "%sp5-raw-420-y-packed10.bin", dir);
++        snprintf(dst, sizeof(dst), "%sp5-raw-420-y-linear.bin", dir);
++        int y_linear = rename(src, dst);
++        snprintf(src, sizeof(src), "%sp5-raw-420-uv-packed10.bin", dir);
++        snprintf(dst, sizeof(dst), "%sp5-raw-420-uv-linear.bin", dir);
++        int uv_linear = rename(src, dst);
++        gl->TexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
++        gl->TexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
++        gl->BindFramebuffer(GL_FRAMEBUFFER, p->raw_fbo[0]);
++        gl->DrawArrays(GL_TRIANGLES, 0, 3);
++        gl->BindFramebuffer(GL_READ_FRAMEBUFFER, p->raw_fbo[0]);
++        gl->ReadBuffer(GL_COLOR_ATTACHMENT0);
++        gl->BindFramebuffer(GL_DRAW_FRAMEBUFFER, p->raw_fbo[1]);
++        gl->BlitFramebuffer(0, 0, p->raw_w, p->raw_h,
++                            0, 0, p->raw_w / 2, p->raw_h / 2,
++                            GL_COLOR_BUFFER_BIT, GL_NEAREST);
++        MP_WARN(mapper, "P5_DUAL_FILTER pts=%.9f nearest=%d,%d linear=%d,%d error=0x%x\n",
++                mapper->src->pts, y_nearest, uv_nearest, y_linear, uv_linear,
++                gl->GetError());
++        p->raw_full_dump_done = true;
++    }
+     GLenum err = gl->GetError();
+     if (p->raw_logged <= 5) raw_stage("before_restore");
+ 
+@@ -979,6 +1024,11 @@
+         __system_property_get("debug.media_kit.p5_raw_full_dump",
+                               full_dump_property) > 0 &&
+         !strcmp(full_dump_property, "1");
++    char dual_filter_property[PROP_VALUE_MAX] = {0};
++    p->raw_dual_filter = p->raw_420_sidecar && p->raw_full_dump &&
++        __system_property_get("debug.media_kit.p5_raw_dual_filter",
++                              dual_filter_property) > 0 &&
++        !strcmp(dual_filter_property, "1");
+     if (p->raw_code_scale)
+         raw_stage("code_scale_1020_to_1023_enabled");
+     char pixel_property[PROP_VALUE_MAX] = {0};

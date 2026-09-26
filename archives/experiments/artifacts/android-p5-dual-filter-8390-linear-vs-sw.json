@@ -1,0 +1,43 @@
+{
+  "width": 3840,
+  "height": 2160,
+  "orientation": "readback rows as stored; no vertical flip",
+  "Y": {
+    "mismatch_count": 163951,
+    "sample_count": 8294400,
+    "mean_abs_code_error": 0.03636839313271605,
+    "max_abs_code_error": 93,
+    "mismatch_bbox_xyxy": [
+      0,
+      750,
+      3839,
+      1250
+    ]
+  },
+  "Cb": {
+    "mismatch_count": 233863,
+    "sample_count": 2073600,
+    "mean_abs_code_error": 0.2654021990740741,
+    "max_abs_code_error": 91,
+    "mismatch_bbox_xyxy": [
+      0,
+      3,
+      1919,
+      1078
+    ]
+  },
+  "Cr": {
+    "mismatch_count": 282333,
+    "sample_count": 2073600,
+    "mean_abs_code_error": 0.49972511574074074,
+    "max_abs_code_error": 101,
+    "mismatch_bbox_xyxy": [
+      0,
+      0,
+      1919,
+      1072
+    ]
+  },
+  "Y_vertically_flipped_mismatch_count": 8254642,
+  "Cb_vertically_flipped_mismatch_count": 2058621
+}

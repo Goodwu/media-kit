@@ -1,0 +1,26 @@
+{
+  "Y": {
+    "sample_count": 8294400,
+    "nearest_vs_linear_changed": 140011,
+    "nearest_wrong_linear_correct": 3,
+    "nearest_correct_linear_wrong": 139606,
+    "both_wrong": 24345,
+    "both_correct": 8130446
+  },
+  "Cb": {
+    "sample_count": 2073600,
+    "nearest_vs_linear_changed": 231842,
+    "nearest_wrong_linear_correct": 407,
+    "nearest_correct_linear_wrong": 228253,
+    "both_wrong": 5610,
+    "both_correct": 1839330
+  },
+  "Cr": {
+    "sample_count": 2073600,
+    "nearest_vs_linear_changed": 280661,
+    "nearest_wrong_linear_correct": 85,
+    "nearest_correct_linear_wrong": 276105,
+    "both_wrong": 6228,
+    "both_correct": 1791182
+  }
+}

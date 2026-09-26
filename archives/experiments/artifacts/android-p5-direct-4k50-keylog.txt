@@ -1,0 +1,74 @@
+09-25 23:06:07.047 I/flutter (20985): PERF t=8 time-pos=
+09-25 23:06:07.047 I/flutter (20985): PERF t=8 frame-drop-count=
+09-25 23:06:07.047 I/flutter (20985): PERF t=8 decoder-frame-drop-count=
+09-25 23:06:07.047 I/flutter (20985): PERF t=8 avsync=
+09-25 23:06:07.047 I/flutter (20985): PERF t=8 container-fps=
+09-25 23:06:07.047 I/flutter (20985): PERF t=8 pause=yes
+09-25 23:06:07.048 I/flutter (20985): PERF t=8 eof-reached=
+09-25 23:06:07.048 I/flutter (20985): PERF t=8 idle-active=yes
+09-25 23:06:07.052 I/flutter (20985): PERF t=8 thermal-status=1
+09-25 23:06:07.053 I/flutter (20985): PERF t=8 texture-consumer={windowDuplicateAdjacentTimestamps: 0, totalCallbacks: 0, callbackElapsedRealtimeIntervalNs: {count: 0}, textureTimestampIntervalNs: {count: 0}, windowSamples: 0, clock: elapsedRealtimeNanos for callback intervals; SurfaceTexture timestamp deltas are reported without assuming an absolute clock mapping., enabled: true, readErrors: 0, windowCapacity: 4096, scope: flutter_surface_texture_update_tex_image_callback, windowDistinctTextureTimestamps: 0, windowRegressedTimestamps: 0, limitations: Counts Flutter texture-consumption callbacks only; not mpv submissions, SurfaceFlinger presentation, display scanout, or visible frame cadence.}
+09-25 23:06:09.217 E/P5_RAW_GL(20985): after_import error=0x0 ctx=0x7b829b6000 format=0x325
+09-25 23:06:09.263 I/flutter (20985): ANDROID_HDR_OPEN sample=AndroidHdrSample.dolbyVisionP5 presentationVerified=false gpuPlatformHdr=false simulateNoHlgForP84=false
+09-25 23:06:09.269 E/P5_RAW_GL(20985): after_import error=0x0 ctx=0x7b829b6000 format=0x325
+09-25 23:06:09.328 E/P5_RAW_GL(20985): after_import error=0x0 ctx=0x7b829b6000 format=0x325
+09-25 23:06:17.046 I/flutter (20985): PERF t=18 time-pos=7.820000
+09-25 23:06:17.046 I/flutter (20985): PERF t=18 frame-drop-count=0
+09-25 23:06:17.046 I/flutter (20985): PERF t=18 decoder-frame-drop-count=0
+09-25 23:06:17.046 I/flutter (20985): PERF t=18 avsync=
+09-25 23:06:17.046 I/flutter (20985): PERF t=18 container-fps=50.000000
+09-25 23:06:17.047 I/flutter (20985): PERF t=18 pause=no
+09-25 23:06:17.047 I/flutter (20985): PERF t=18 eof-reached=no
+09-25 23:06:17.047 I/flutter (20985): PERF t=18 idle-active=no
+09-25 23:06:17.048 I/flutter (20985): PERF t=18 thermal-status=1
+09-25 23:06:17.056 I/flutter (20985): PERF t=18 texture-consumer={windowDuplicateAdjacentTimestamps: 10, totalCallbacks: 394, callbackElapsedRealtimeIntervalNs: {min: 5304167, median: 16580208, max: 35978125, mean: 19694873, count: 393, p95: 32805208}, textureTimestampIntervalNs: {min: 12618229, median: 19997917, max: 39951562, mean: 20210302, count: 383, p95: 25559896}, windowSamples: 394, clock: elapsedRealtimeNanos for callback intervals; SurfaceTexture timestamp deltas are reported without assuming an absolute clock mapping., enabled: true, readErrors: 0, windowCapacity: 4096, scope: flutter_surface_texture_update_tex_image_callback, windowDistinctTextureTimestamps: 384, lastTextureTimestampNs: 180426831852156, lastCallbackElapsedRealtimeNs: 188678611604066, windowRegressedTimestamps: 0, limitations: Counts Flutter texture-consumption callbacks only; not mpv submissions, SurfaceFlinger presentation, display scanout, or visible frame cadence.}
+09-25 23:06:27.046 I/flutter (20985): PERF t=28 time-pos=17.800000
+09-25 23:06:27.046 I/flutter (20985): PERF t=28 frame-drop-count=0
+09-25 23:06:27.046 I/flutter (20985): PERF t=28 decoder-frame-drop-count=0
+09-25 23:06:27.046 I/flutter (20985): PERF t=28 avsync=
+09-25 23:06:27.046 I/flutter (20985): PERF t=28 container-fps=50.000000
+09-25 23:06:27.047 I/flutter (20985): PERF t=28 pause=no
+09-25 23:06:27.047 I/flutter (20985): PERF t=28 eof-reached=no
+09-25 23:06:27.047 I/flutter (20985): PERF t=28 idle-active=no
+09-25 23:06:27.049 I/flutter (20985): PERF t=28 thermal-status=1
+09-25 23:06:27.056 I/flutter (20985): PERF t=28 texture-consumer={windowDuplicateAdjacentTimestamps: 16, totalCallbacks: 898, callbackElapsedRealtimeIntervalNs: {min: 5304167, median: 16572396, max: 65700521, mean: 19784421, count: 897, p95: 32805208}, textureTimestampIntervalNs: {min: 12618229, median: 19988021, max: 53961980, mean: 20144330, count: 881, p95: 25082292}, windowSamples: 898, clock: elapsedRealtimeNanos for callback intervals; SurfaceTexture timestamp deltas are reported without assuming an absolute clock mapping., enabled: true, readErrors: 0, windowCapacity: 4096, scope: flutter_surface_texture_update_tex_image_callback, windowDistinctTextureTimestamps: 882, lastTextureTimestampNs: 180436838461529, lastCallbackElapsedRealtimeNs: 188688618144689, windowRegressedTimestamps: 0, limitations: Counts Flutter texture-consumption callbacks only; not mpv submissions, SurfaceFlinger presentation, display scanout, or visible frame cadence.}
+09-25 23:06:59.046 I/flutter (20985): PERF t=60 time-pos=49.820000
+09-25 23:06:59.046 I/flutter (20985): PERF t=60 frame-drop-count=0
+09-25 23:06:59.046 I/flutter (20985): PERF t=60 decoder-frame-drop-count=0
+09-25 23:06:59.046 I/flutter (20985): PERF t=60 avsync=
+09-25 23:06:59.046 I/flutter (20985): PERF t=60 container-fps=50.000000
+09-25 23:06:59.046 I/flutter (20985): PERF t=60 pause=no
+09-25 23:06:59.047 I/flutter (20985): PERF t=60 eof-reached=no
+09-25 23:06:59.047 I/flutter (20985): PERF t=60 idle-active=no
+09-25 23:06:59.048 I/flutter (20985): PERF t=60 thermal-status=1
+09-25 23:06:59.060 I/flutter (20985): PERF t=60 texture-consumer={windowDuplicateAdjacentTimestamps: 16, totalCallbacks: 2480, callbackElapsedRealtimeIntervalNs: {min: 5304167, median: 16614063, max: 65700521, mean: 20060892, count: 2479, p95: 32790625}, textureTimestampIntervalNs: {min: 12618229, median: 19989063, max: 57006771, mean: 20194902, count: 2463, p95: 25655729}, windowSamples: 2480, clock: elapsedRealtimeNanos for callback intervals; SurfaceTexture timestamp deltas are reported without assuming an absolute clock mapping., enabled: true, readErrors: 0, windowCapacity: 4096, scope: flutter_surface_texture_update_tex_image_callback, windowDistinctTextureTimestamps: 2464, lastTextureTimestampNs: 180468831351108, lastCallbackElapsedRealtimeNs: 188720602470205, windowRegressedTimestamps: 0, limitations: Counts Flutter texture-consumption callbacks only; not mpv submissions, SurfaceFlinger presentation, display scanout, or visible frame cadence.}
+09-25 23:07:29.047 I/flutter (20985): PERF t=90 time-pos=79.820000
+09-25 23:07:29.047 I/flutter (20985): PERF t=90 frame-drop-count=0
+09-25 23:07:29.048 I/flutter (20985): PERF t=90 decoder-frame-drop-count=0
+09-25 23:07:29.048 I/flutter (20985): PERF t=90 avsync=
+09-25 23:07:29.048 I/flutter (20985): PERF t=90 container-fps=50.000000
+09-25 23:07:29.048 I/flutter (20985): PERF t=90 pause=no
+09-25 23:07:29.048 I/flutter (20985): PERF t=90 eof-reached=no
+09-25 23:07:29.048 I/flutter (20985): PERF t=90 idle-active=no
+09-25 23:07:29.050 I/flutter (20985): PERF t=90 thermal-status=1
+09-25 23:07:29.069 I/flutter (20985): PERF t=90 texture-consumer={windowDuplicateAdjacentTimestamps: 16, totalCallbacks: 3967, callbackElapsedRealtimeIntervalNs: {min: 5304167, median: 16617188, max: 65700521, mean: 20108719, count: 3966, p95: 32794271}, textureTimestampIntervalNs: {min: 11522917, median: 19991146, max: 57006771, mean: 20192445, count: 3950, p95: 25559896}, windowSamples: 3967, clock: elapsedRealtimeNanos for callback intervals; SurfaceTexture timestamp deltas are reported without assuming an absolute clock mapping., enabled: true, readErrors: 0, windowCapacity: 4096, scope: flutter_surface_texture_update_tex_image_callback, windowDistinctTextureTimestamps: 3951, lastTextureTimestampNs: 180498851465166, lastCallbackElapsedRealtimeNs: 188750622700930, windowRegressedTimestamps: 0, limitations: Counts Flutter texture-consumption callbacks only; not mpv submissions, SurfaceFlinger presentation, display scanout, or visible frame cadence.}
+09-25 23:07:59.046 I/flutter (20985): PERF t=120 time-pos=109.820000
+09-25 23:07:59.046 I/flutter (20985): PERF t=120 frame-drop-count=1
+09-25 23:07:59.046 I/flutter (20985): PERF t=120 decoder-frame-drop-count=0
+09-25 23:07:59.046 I/flutter (20985): PERF t=120 avsync=
+09-25 23:07:59.047 I/flutter (20985): PERF t=120 container-fps=50.000000
+09-25 23:07:59.047 I/flutter (20985): PERF t=120 pause=no
+09-25 23:07:59.047 I/flutter (20985): PERF t=120 eof-reached=no
+09-25 23:07:59.047 I/flutter (20985): PERF t=120 idle-active=no
+09-25 23:07:59.049 I/flutter (20985): PERF t=120 thermal-status=1
+09-25 23:07:59.070 I/flutter (20985): PERF t=120 texture-consumer={windowDuplicateAdjacentTimestamps: 0, totalCallbacks: 5444, callbackElapsedRealtimeIntervalNs: {min: 11886980, median: 16626563, max: 81988542, mean: 20217446, count: 4095, p95: 32809375}, textureTimestampIntervalNs: {min: 11522917, median: 19992708, max: 75815625, mean: 20218306, count: 4095, p95: 25696875}, windowSamples: 4096, clock: elapsedRealtimeNanos for callback intervals; SurfaceTexture timestamp deltas are reported without assuming an absolute clock mapping., enabled: true, readErrors: 0, windowCapacity: 4096, scope: flutter_surface_texture_update_tex_image_callback, windowDistinctTextureTimestamps: 4096, lastTextureTimestampNs: 180528832983911, lastCallbackElapsedRealtimeNs: 188780608368112, windowRegressedTimestamps: 0, limitations: Counts Flutter texture-consumption callbacks only; not mpv submissions, SurfaceFlinger presentation, display scanout, or visible frame cadence.}
+09-25 23:08:29.046 I/flutter (20985): PERF t=150 time-pos=132.100000
+09-25 23:08:29.047 I/flutter (20985): PERF t=150 frame-drop-count=1
+09-25 23:08:29.047 I/flutter (20985): PERF t=150 decoder-frame-drop-count=0
+09-25 23:08:29.047 I/flutter (20985): PERF t=150 avsync=
+09-25 23:08:29.047 I/flutter (20985): PERF t=150 container-fps=50.000000
+09-25 23:08:29.047 I/flutter (20985): PERF t=150 pause=yes
+09-25 23:08:29.047 I/flutter (20985): PERF t=150 eof-reached=yes
+09-25 23:08:29.048 I/flutter (20985): PERF t=150 idle-active=no
+09-25 23:08:29.049 I/flutter (20985): PERF t=150 thermal-status=1
+09-25 23:08:29.069 I/flutter (20985): PERF t=150 texture-consumer={windowDuplicateAdjacentTimestamps: 0, totalCallbacks: 6551, callbackElapsedRealtimeIntervalNs: {min: 12242708, median: 16634896, max: 114583854, mean: 20252094, count: 4095, p95: 32793229}, textureTimestampIntervalNs: {min: 11522917, median: 19994271, max: 103582292, mean: 20250154, count: 4095, p95: 25414583}, windowSamples: 4096, clock: elapsedRealtimeNanos for callback intervals; SurfaceTexture timestamp deltas are reported without assuming an absolute clock mapping., enabled: true, readErrors: 0, windowCapacity: 4096, scope: flutter_surface_texture_update_tex_image_callback, windowDistinctTextureTimestamps: 4096, lastTextureTimestampNs: 180551275711512, lastCallbackElapsedRealtimeNs: 188803059856651, windowRegressedTimestamps: 0, limitations: Counts Flutter texture-consumption callbacks only; not mpv submissions, SurfaceFlinger presentation, display scanout, or visible frame cadence.}
