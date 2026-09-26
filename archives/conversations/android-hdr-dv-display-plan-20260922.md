@@ -2,6 +2,7 @@
 
 ## Current State
 
+- 2026-09-27 10459临时注入存活B回退绑定的一次失败，约250ms后的定时重试绑定成功，5秒截图视频区域变化；注入已撤销，产品代码与`b1c97ec`一致。仍需其它源、属性部分成功及engine detach覆盖，见`archives/experiments/android-p84-dual-view-10456-10457-20260927.md`。设备恢复原10420、自动亮度1/37、删除测试源。
 - 2026-09-27 10458临时注入当前A连续两次ReleaseSurface失败，两个即时detach均失败；约250ms后的定时重试释放A并绑定存活B，5秒截图证实继续出图。临时注入已撤销，产品代码与`b1c97ec`一致；B属性bind失败及其它路径仍待核验。实验见`archives/experiments/android-p84-dual-view-10456-10457-20260927.md`。设备已恢复原10420、自动亮度1/37、删除测试源。
 - 2026-09-27 双视图存活Surface回退修复已补齐有界释放/绑定重试并通过独立V1复审；10456 P8.4实机重复A→A+B→B→A+B→B，最后移除当前A后B重绑且5秒截图变化。10457一次性释放失败注入触发后，重复destroy回调使B恢复；定时重试未被隔离验证，P5/SDR与engine detach资源闭合仍待做。注入源码已移除，设备恢复原10420与自动亮度1/37。详见`archives/experiments/android-p84-dual-view-10456-10457-20260927.md`。
 - 2026-09-27 10455 P8.4双视图回退候选正常路径：A→A+B→B→A+B→B，最后A停止producer并Release/ACK后重新绑定存活B，后续MediaCodec/HLG及HWC HLG，间隔5秒画面不同。独立V1审查指出A Release/ACK失败或B属性bind失败时没有受控自动重试，故代码未过审、未提交为产品修复。见`archives/experiments/android-p84-dual-view-10455-20260927.md`。测试后恢复原10420和自动亮度1/37，删除临时副本。
