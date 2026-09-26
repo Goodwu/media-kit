@@ -1,0 +1,36 @@
+09-27 04:29:06.613 13389 13389 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=requested elapsed_us=1
+09-27 04:29:06.654 13389 13389 I flutter : PlatformVideoView.SurfaceAvailable
+09-27 04:29:12.010 13389 13389 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=sample_ready elapsed_us=5396594
+09-27 04:29:12.010 13389 13389 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=queue_entered elapsed_us=5396788
+09-27 04:29:12.225 13389 13389 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=validated elapsed_us=5611565
+09-27 04:29:12.226 13389 13389 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=previous_output_stopped elapsed_us=5613427
+09-27 04:29:12.226 13389 13389 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=configuration_reset elapsed_us=5613480
+09-27 04:29:12.317 13389 13389 I PlatformVideoView: surfaceCreated initial dataspace: handle=530441514064, transfer=pq, applied=false
+09-27 04:29:12.318 13389 13389 I flutter : PlatformVideoView.SurfaceFailed
+09-27 04:29:12.332 13389 13389 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=open_failed elapsed_us=5719472
+09-27 04:29:12.375 13389 13389 I flutter : AUTO_SOURCE ERROR=Bad state: Android PlatformView Surface failed: generation=2, viewId=1, attempt=1, reason=initialDataSpaceRejected
+09-27 04:29:12.376 13389 13389 I flutter : ANDROID_HDR_OPEN_PHASE generation=2 phase=requested elapsed_us=1
+09-27 04:29:34.284 13389 13389 I flutter : ANDROID_HDR_OPEN_PHASE generation=2 phase=sample_ready elapsed_us=21908397
+09-27 04:29:34.285 13389 13389 I flutter : ANDROID_HDR_OPEN_PHASE generation=2 phase=queue_entered elapsed_us=21908656
+09-27 04:29:34.289 13389 13389 I flutter : ANDROID_HDR_OPEN_PHASE generation=2 phase=validated elapsed_us=21912539
+09-27 04:29:34.290 13389 13389 I flutter : ANDROID_HDR_OPEN_PHASE generation=2 phase=previous_output_stopped elapsed_us=21914038
+09-27 04:29:34.290 13389 13389 I flutter : ANDROID_HDR_OPEN_PHASE generation=2 phase=configuration_reset elapsed_us=21914075
+09-27 04:29:34.387 13389 13389 I flutter : PlatformVideoView.SurfaceAvailable
+09-27 04:29:34.414 13389 13389 I flutter : ANDROID_HDR_OPEN_PHASE generation=2 phase=output_prepared elapsed_us=22038299
+09-27 04:29:34.416 13389 13389 I flutter : ANDROID_HDR_OPEN_PHASE generation=2 phase=configured elapsed_us=22040041
+09-27 04:29:34.416 13389 13389 I flutter : ANDROID_HDR_OPEN_PHASE generation=2 phase=output_ready elapsed_us=22040153
+09-27 04:29:34.435 13389 13389 I flutter : ANDROID_HDR_OPEN_PHASE generation=2 phase=media_opened elapsed_us=22059027
+09-27 04:29:34.734 13389 13389 I flutter : ANDROID_HDR_OPEN_PHASE generation=2 phase=track_verified elapsed_us=22357634
+09-27 04:29:34.734 13389 13389 I flutter : ANDROID_HDR_RECOVERY_OPEN sample=AndroidHdrSample.hdr10 path=/data/local/tmp/media-kit-hdr10-full.mp4
+09-27 04:29:39.735 13389 13389 I flutter : ANDROID_HDR_OPEN_PHASE generation=3 phase=requested elapsed_us=2
+09-27 04:30:30.830 13389 13389 I flutter : ANDROID_HDR_OPEN_PHASE generation=3 phase=sample_ready elapsed_us=51095297
+09-27 04:30:30.830 13389 13389 I flutter : ANDROID_HDR_OPEN_PHASE generation=3 phase=queue_entered elapsed_us=51095596
+09-27 04:30:30.840 13389 13389 I flutter : ANDROID_HDR_OPEN_PHASE generation=3 phase=validated elapsed_us=51105846
+09-27 04:30:30.977 13389 13389 I flutter : ANDROID_HDR_OPEN_PHASE generation=3 phase=previous_output_stopped elapsed_us=51242476
+09-27 04:30:30.979 13389 13389 I flutter : ANDROID_HDR_OPEN_PHASE generation=3 phase=configuration_reset elapsed_us=51244169
+09-27 04:30:30.979 13389 13389 I flutter : ANDROID_HDR_OPEN_PHASE generation=3 phase=output_prepared elapsed_us=51244466
+09-27 04:30:30.983 13389 13389 I flutter : ANDROID_HDR_OPEN_PHASE generation=3 phase=configured elapsed_us=51248302
+09-27 04:30:30.983 13389 13389 I flutter : ANDROID_HDR_OPEN_PHASE generation=3 phase=output_ready elapsed_us=51248488
+09-27 04:30:31.009 13389 13389 I flutter : ANDROID_HDR_OPEN_PHASE generation=3 phase=media_opened elapsed_us=51274785
+09-27 04:30:31.417 13389 13389 I flutter : ANDROID_HDR_OPEN_PHASE generation=3 phase=track_verified elapsed_us=51682690
+09-27 04:30:31.417 13389 13389 I flutter : ANDROID_HDR_RECOVERY_OPEN sample=AndroidHdrSample.dolbyVisionP84 path=/data/local/tmp/media-kit-p84-full.mp4

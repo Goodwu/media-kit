@@ -1,0 +1,40 @@
++ BufferLayer (SurfaceView - com.example.media_kit_test/com.example.media_kit_test.MainActivity#1)
+  Region TransparentRegion (this=0 count=0)
+  Region VisibleRegion (this=0 count=1)
+    [  0, 360, 1440, 1170]
+  Region SurfaceDamageRegion (this=0 count=0)
+      layerStack=   0, z=       -2, pos=(0,360), size=(1440, 810), crop=[  0,   0, 1440, 810], cornerRadius=0.000000, isProtected=0, isOpaque=1, invalidate=0, dataspace=BT2020 SMPTE 2084 Limited range, defaultPixelFormat=RGB_565, color=(0.000,0.000,0.000,1.000), flags=0x00000002, tr=[0.00, 0.00][0.00, 0.00]
+      parent=com.example.media_kit_test/com.example.media_kit_test.MainActivity#0
+      zOrderRelativeOf=none
+      activeBuffer=[3840x1920:3840,Unknown 0x000325], tr=[0.00, 0.00][0.00, 0.00] queued-frames=0, mRefreshPending=0, metadata={}
+  InputWindowInfo={layoutParamsFlags = 0, layoutParamsType = 0, frame = [  0,   0,   0,   0]
+    Region touchableRegion (this=0 count=0)
+      surfaceInset = 0, visible = 0, canReceiveKeys = 0, hasFocus = 0, hasWallpaper = 0, globalScaleFactor = 0.0000, windowXScale = 0.0000, windowYScale = 0.0000
+      cropLayerId = 0, replaceTouchableRegionWithCrop = 0, touchableRegionCrop = [  0,   0,   0,   0]}
++ BufferLayer (com.example.media_kit_test/com.example.media_kit_test.MainActivity#0)
+  Region TransparentRegion (this=0 count=4)
+    [  0, 360, 1440, 681]
+    [  0, 681, 636, 849]
+    [804, 681, 1440, 849]
+    [  0, 849, 1440, 1170]
+  Region VisibleRegion (this=0 count=1)
+* compositionengine::Layer 0x70ae444598 (SurfaceView - com.example.media_kit_test/com.example.media_kit_test.MainActivity#1)
+    frontend:
+      isSecure=false geomUsesSourceCrop=true geomBufferUsesDisplayInverseTransform=false geomLayerTransform 0x00000000 (ROT_0 ) 0x01 (TRANSLATE )
+    1.0000  0.0000  0.0000
+    0.0000  1.0000  360.0000
+    0.0000  0.0000  1.0000
+
+      geomBufferSize=[0 0 1440 810] geomContentCrop=[0 0 3840 1920] geomCrop=[0 0 1440 810] geomBufferTransform=0
+        Region geomActiveTransparentRegion (this=0x70ae444668, count=1)
+    [  0,   0,   0,   0]
+      geomLayerBounds=[0.000000 0.000000 1440.000000 810.000000]
+      blend=NONE (1) alpha=1.000000
+      type=1 appId=10227 composition type=DEVICE (2)
+      buffer: buffer=0x70ad21b500 slot=7
+      sideband stream=0x0
+      color=[56 2 0]
+      dataspace=BT2020_ITU_PQ (298188800) hdr metadata types=3 colorTransform=[[1.000,0.000,0.000,0.000][0.000,1.000,0.000,0.000][0.000,0.000,1.000,0.000][0.000,0.000,0.000,1.000]]
+* compositionengine::Layer 0x70ad2f4698 (com.example.media_kit_test/com.example.media_kit_test.MainActivity#0)
+    frontend:
+      isSecure=false geomUsesSourceCrop=true geomBufferUsesDisplayInverseTransform=false geomLayerTransform 0x00000000 (ROT_0 ) 0x00 (IDENTITY )
