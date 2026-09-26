@@ -1,0 +1,54 @@
+09-27 07:13:36.718 I/flutter ( 9352): ANDROID_HDR_OPEN_PHASE generation=1 phase=requested elapsed_us=1
+09-27 07:13:47.108 I/flutter ( 9352): ANDROID_HDR_OPEN_PHASE generation=1 phase=sample_ready elapsed_us=10389688
+09-27 07:13:47.108 I/flutter ( 9352): ANDROID_HDR_OPEN_PHASE generation=1 phase=queue_entered elapsed_us=10389890
+09-27 07:13:47.320 I/flutter ( 9352): ANDROID_HDR_OPEN_PHASE generation=1 phase=validated elapsed_us=10601344
+09-27 07:13:47.321 I/flutter ( 9352): ANDROID_HDR_OPEN_PHASE generation=1 phase=previous_output_stopped elapsed_us=10602770
+09-27 07:13:47.321 I/flutter ( 9352): ANDROID_HDR_OPEN_PHASE generation=1 phase=configuration_reset elapsed_us=10602795
+09-27 07:13:47.345 I/flutter ( 9352): ANDROID_HDR_OPEN_PHASE generation=1 phase=output_prepared elapsed_us=10626289
+09-27 07:13:47.356 I/flutter ( 9352): ANDROID_HDR_OPEN_PHASE generation=1 phase=configured elapsed_us=10637570
+09-27 07:13:47.356 I/flutter ( 9352): ANDROID_HDR_OPEN_PHASE generation=1 phase=output_ready elapsed_us=10637709
+09-27 07:13:47.375 I/flutter ( 9352): ANDROID_HDR_OPEN_PHASE generation=1 phase=media_opened elapsed_us=10657031
+09-27 07:13:49.086 I/flutter ( 9352): ANDROID_HDR_OPEN_PHASE generation=1 phase=track_verified elapsed_us=12368114
+09-27 07:13:49.087 I/flutter ( 9352): ANDROID_HDR_OPEN sample=AndroidHdrSample.dolbyVisionP5 presentationVerified=false gpuPlatformHdr=false simulateNoHlgForP84=false
+09-27 07:18:14.011 I/flutter (11217): ANDROID_HDR_OPEN_PHASE generation=1 phase=requested elapsed_us=1
+09-27 07:18:14.012 I/flutter (11217): ANDROID_PREVERIFIED_LOCAL_SAMPLE sha256=afb24b77733a3ca9071f0cfea0d0f7871670a7b6119eb44a314cba974541477c path=/data/local/tmp/media-kit-p5-glassblowing2-4k5994.mp4
+09-27 07:18:14.012 I/flutter (11217): ANDROID_HDR_OPEN_PHASE generation=1 phase=sample_ready elapsed_us=578
+09-27 07:18:14.012 I/flutter (11217): ANDROID_HDR_OPEN_PHASE generation=1 phase=queue_entered elapsed_us=606
+09-27 07:18:14.225 I/flutter (11217): ANDROID_HDR_OPEN_PHASE generation=1 phase=validated elapsed_us=213471
+09-27 07:18:14.228 I/flutter (11217): ANDROID_HDR_OPEN_PHASE generation=1 phase=previous_output_stopped elapsed_us=216411
+09-27 07:18:14.228 I/flutter (11217): ANDROID_HDR_OPEN_PHASE generation=1 phase=configuration_reset elapsed_us=216522
+09-27 07:18:14.268 I/flutter (11217): ANDROID_HDR_OPEN_PHASE generation=1 phase=output_prepared elapsed_us=256719
+09-27 07:18:14.278 I/flutter (11217): ANDROID_HDR_OPEN_PHASE generation=1 phase=configured elapsed_us=266927
+09-27 07:18:14.278 I/flutter (11217): ANDROID_HDR_OPEN_PHASE generation=1 phase=output_ready elapsed_us=267072
+09-27 07:18:14.294 I/flutter (11217): ANDROID_HDR_OPEN_PHASE generation=1 phase=media_opened elapsed_us=282780
+09-27 07:18:15.589 I/flutter (11217): ANDROID_HDR_OPEN_PHASE generation=1 phase=track_verified elapsed_us=1577419
+09-27 07:18:15.589 I/flutter (11217): ANDROID_HDR_OPEN sample=AndroidHdrSample.dolbyVisionP5 presentationVerified=false gpuPlatformHdr=false simulateNoHlgForP84=false
+09-27 07:18:15.697 E/P5_RAW_STAGE(11217): P5_IMAGE_COUNT acquired=1 deleted=0 current_image=1 retired=0 callbacks=1 empty_acquires=0 retire=1 pts=0.233566667
+09-27 07:18:16.039 E/P5_RAW_STAGE(11217): P5_IMAGE_COUNT acquired=2 deleted=1 current_image=1 retired=0 callbacks=2 empty_acquires=20 retire=1 pts=0.233566667
+09-27 07:18:16.173 E/P5_RAW_STAGE(11217): P5_IMAGE_COUNT acquired=3 deleted=1 current_image=1 retired=1 callbacks=3 empty_acquires=20 retire=1 pts=0.250250000
+09-27 07:18:22.614 I/flutter (11447): ANDROID_HDR_OPEN_PHASE generation=1 phase=requested elapsed_us=1
+09-27 07:18:22.614 I/flutter (11447): ANDROID_PREVERIFIED_LOCAL_SAMPLE sha256=afb24b77733a3ca9071f0cfea0d0f7871670a7b6119eb44a314cba974541477c path=/data/local/tmp/media-kit-p5-glassblowing2-4k5994.mp4
+09-27 07:18:22.614 I/flutter (11447): ANDROID_HDR_OPEN_PHASE generation=1 phase=sample_ready elapsed_us=336
+09-27 07:18:22.614 I/flutter (11447): ANDROID_HDR_OPEN_PHASE generation=1 phase=queue_entered elapsed_us=360
+09-27 07:18:22.823 I/flutter (11447): ANDROID_HDR_OPEN_PHASE generation=1 phase=validated elapsed_us=208455
+09-27 07:18:22.828 I/flutter (11447): ANDROID_HDR_OPEN_PHASE generation=1 phase=previous_output_stopped elapsed_us=213635
+09-27 07:18:22.828 I/flutter (11447): ANDROID_HDR_OPEN_PHASE generation=1 phase=configuration_reset elapsed_us=213718
+09-27 07:18:22.873 I/flutter (11447): ANDROID_HDR_OPEN_PHASE generation=1 phase=output_prepared elapsed_us=258361
+09-27 07:18:22.883 I/flutter (11447): ANDROID_HDR_OPEN_PHASE generation=1 phase=configured elapsed_us=269274
+09-27 07:18:22.884 I/flutter (11447): ANDROID_HDR_OPEN_PHASE generation=1 phase=output_ready elapsed_us=269403
+09-27 07:18:22.896 I/flutter (11447): ANDROID_HDR_OPEN_PHASE generation=1 phase=media_opened elapsed_us=281952
+09-27 07:18:24.227 I/flutter (11447): ANDROID_HDR_OPEN_PHASE generation=1 phase=track_verified elapsed_us=1612765
+09-27 07:18:24.227 I/flutter (11447): ANDROID_HDR_OPEN sample=AndroidHdrSample.dolbyVisionP5 presentationVerified=false gpuPlatformHdr=false simulateNoHlgForP84=false
+09-27 07:18:30.873 I/flutter (11651): ANDROID_HDR_OPEN_PHASE generation=1 phase=requested elapsed_us=1
+09-27 07:18:30.873 I/flutter (11651): ANDROID_PREVERIFIED_LOCAL_SAMPLE sha256=afb24b77733a3ca9071f0cfea0d0f7871670a7b6119eb44a314cba974541477c path=/data/local/tmp/media-kit-p5-glassblowing2-4k5994.mp4
+09-27 07:18:30.873 I/flutter (11651): ANDROID_HDR_OPEN_PHASE generation=1 phase=sample_ready elapsed_us=860
+09-27 07:18:30.874 I/flutter (11651): ANDROID_HDR_OPEN_PHASE generation=1 phase=queue_entered elapsed_us=889
+09-27 07:18:31.079 I/flutter (11651): ANDROID_HDR_OPEN_PHASE generation=1 phase=validated elapsed_us=206384
+09-27 07:18:31.080 I/flutter (11651): ANDROID_HDR_OPEN_PHASE generation=1 phase=previous_output_stopped elapsed_us=207757
+09-27 07:18:31.080 I/flutter (11651): ANDROID_HDR_OPEN_PHASE generation=1 phase=configuration_reset elapsed_us=207817
+09-27 07:18:31.105 I/flutter (11651): ANDROID_HDR_OPEN_PHASE generation=1 phase=output_prepared elapsed_us=232632
+09-27 07:18:31.110 I/flutter (11651): ANDROID_HDR_OPEN_PHASE generation=1 phase=configured elapsed_us=237231
+09-27 07:18:31.110 I/flutter (11651): ANDROID_HDR_OPEN_PHASE generation=1 phase=output_ready elapsed_us=237290
+09-27 07:18:31.120 I/flutter (11651): ANDROID_HDR_OPEN_PHASE generation=1 phase=media_opened elapsed_us=247016
+09-27 07:18:32.431 I/flutter (11651): ANDROID_HDR_OPEN_PHASE generation=1 phase=track_verified elapsed_us=1558359
+09-27 07:18:32.431 I/flutter (11651): ANDROID_HDR_OPEN sample=AndroidHdrSample.dolbyVisionP5 presentationVerified=false gpuPlatformHdr=false simulateNoHlgForP84=false
