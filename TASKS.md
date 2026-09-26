@@ -27,6 +27,14 @@
 
 ## Next（近期候选，最多 10 条）
 
+- [ ] 将手机视频打开到首个可见画面缩短至 2 秒内（争取 1 秒）
+  - status: queued
+  - priority: 当前 Android HDR/P5 工作完成后立即启动，先于其它 Next 项
+  - context: archives/conversations/android-hdr-dv-display-plan-20260922.md
+  - acceptance: 在真实手机上，以用户触发打开视频为起点、屏幕实际呈现首个视频帧为终点计时；覆盖当前支持的 SDR、HDR10、P8.4、P5 代表素材及冷/热启动，重复记录分布与最慢样本，正常播放达到 2 秒内，争取 1 秒内。视频尺寸或 Surface ACK 不能冒充实际出图；同时保持画质、音画同步、全屏及退出/重入正确。
+  - latest: 用户反馈目前从打开到出图较慢；尚无同一计时口径的实机基线，不能把此前约 6–11 秒的粗略观察当作当前版本数据。
+  - next: 先建立真实首帧呈现信号与冷/热启动基线，再分解媒体打开、探测/解码、Surface 创建、GPU 首帧提交和系统呈现各阶段耗时，按最大瓶颈优化并复测。
+
 - [ ] Android native output / 双视图生命周期回归
   - status: queued
   - context: archives/conversations/android-hdr-dv-display-plan-20260922.md
