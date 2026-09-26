@@ -4,6 +4,7 @@
 - 背景: 当前分支包含 macOS native surface、OHOS HDR surface 和播放器释放路径的协同修改。
 - 目标: 提交本轮代码及对应契约测试，保留未纳入范围的协作文档和本地产物。
 - 当前状态: 跨平台生命周期修复与 macOS 首帧呈现 gating 已分别提交。
+- 2026-09-27 进展: Darwin Player 新增 preTermination 屏障及创建/销毁仲裁；隔离 Goodwu mpv 0.41 的 W0 测试包完成 SDR 首次出图、旧 Surface 释放、重建出图和 Player dispose，无 render-context abort。应用 Quit 未提供第二个 Surface 释放 ACK；真实 PiliPlusX 的有序退出、快速重入、seek 与 HDR 长播仍待验收。证据见 `archives/experiments/macos-w0-modern-20260927.md`。
 - 关键结论:
   - native output 重建、释放和跨平台入口变更属于同一代码切片。
   - 新增 3 个契约测试覆盖 OHOS 生命周期、候选渲染分支和 platform-view 入口隔离。

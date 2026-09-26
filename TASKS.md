@@ -22,8 +22,8 @@
   - status: in_progress
   - context: archives/conversations/native-output-rebuild-20260920.md
   - acceptance: 同一控制器的并发 dispose 共用完成屏障；Player 销毁前完成 native output/render context 释放，dispose 后不再写 active notifier。用 modern mpv 实际播放后退出、快速重入和输出重建，均无 `mpv_render_context_free() not called` abort。
-  - latest: 释放屏障、单一 candidate view 和画面尺寸修正已有代码审查、构建及定向检查；final16 实机平移播放用户报告无明显卡顿，15 秒 Metal sequence gaps=0。完整退出/快速重入/输出重建、HDR 亮度及长播仍未验收。
-  - next: 在真实 macOS 播放中执行退出、快速重入、seek 和输出重建，记录无 abort 与释放顺序；再判定本项是否完成。
+  - latest: 新增 Darwin Player preTermination 释放屏障、创建/销毁仲裁及失败重试，V2 静态复审通过。隔离的 Goodwu mpv 0.41 W0 测试包实际播放 SDR：首个 native Surface 出图并释放，重建的第二个 Surface 再次出图，Player dispose 完成，进程未出现 render-context abort；见 `archives/experiments/macos-w0-modern-20260927.md`。应用 Quit 未打印第二个 Surface 的释放 ACK，不能据此判定完整退出合格。
+  - next: 用真实 PiliPlusX modern mpv 验证有序退出、快速重入、seek、输出重建和 HDR 长播；取得第二个 Surface 与 render context 释放顺序后再关闭本项。
 
 ## Next（近期候选，最多 10 条）
 
