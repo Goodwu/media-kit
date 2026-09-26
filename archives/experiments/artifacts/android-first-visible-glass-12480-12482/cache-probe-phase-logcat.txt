@@ -1,0 +1,44 @@
+         1790466146.795 15370 15370 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=requested elapsed_us=1
+         1790466146.796 15370 15370 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=sample_ready elapsed_us=573
+         1790466146.796 15370 15370 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=queue_entered elapsed_us=599
+         1790466147.001 15370 15370 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=validated elapsed_us=205540
+         1790466147.002 15370 15370 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=previous_output_stopped elapsed_us=207272
+         1790466147.002 15370 15370 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=configuration_reset elapsed_us=207316
+         1790466147.031 15370 15370 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=output_prepared elapsed_us=236061
+         1790466147.038 15370 15370 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=configured elapsed_us=242656
+         1790466147.038 15370 15370 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=output_ready elapsed_us=242760
+         1790466147.054 15370 15370 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=media_opened elapsed_us=259409
+         1790466148.423 15370 15370 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=track_verified elapsed_us=1628421
+         1790466148.769 15370 15612 E P5_RAW_STAGE: P5_IMAGE_COUNT acquired=1 deleted=0 current_image=1 retired=0 callbacks=1 empty_acquires=0 retire=1 pts=0.216883333
+         1790466149.161 15370 15612 E P5_RAW_STAGE: P5_IMAGE_COUNT acquired=2 deleted=1 current_image=1 retired=0 callbacks=2 empty_acquires=20 retire=1 pts=0.233566667
+         1790466149.286 15370 15612 E P5_RAW_STAGE: P5_IMAGE_COUNT acquired=3 deleted=2 current_image=1 retired=0 callbacks=3 empty_acquires=20 retire=1 pts=0.400400000
+         1790466155.655 15701 15701 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=requested elapsed_us=0
+         1790466155.656 15701 15701 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=sample_ready elapsed_us=375
+         1790466155.656 15701 15701 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=queue_entered elapsed_us=414
+         1790466155.861 15701 15701 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=validated elapsed_us=206026
+         1790466155.865 15701 15701 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=previous_output_stopped elapsed_us=209455
+         1790466155.865 15701 15701 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=configuration_reset elapsed_us=209544
+         1790466155.907 15701 15701 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=output_prepared elapsed_us=251391
+         1790466155.919 15701 15701 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=configured elapsed_us=263304
+         1790466155.919 15701 15701 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=output_ready elapsed_us=263458
+         1790466155.939 15701 15701 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=media_opened elapsed_us=283342
+         1790466157.224 15701 15701 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=track_verified elapsed_us=1568332
+         1790466157.328 15701 15857 E P5_RAW_STAGE: P5_IMAGE_COUNT acquired=1 deleted=0 current_image=1 retired=0 callbacks=1 empty_acquires=0 retire=1 pts=0.200200000
+         1790466157.593 15701 15857 E P5_RAW_STAGE: P5_IMAGE_COUNT acquired=2 deleted=1 current_image=1 retired=0 callbacks=2 empty_acquires=20 retire=1 pts=0.200200000
+         1790466157.691 15701 15857 E P5_RAW_STAGE: P5_IMAGE_COUNT acquired=3 deleted=2 current_image=1 retired=0 callbacks=3 empty_acquires=20 retire=1 pts=0.216883333
+         1790466164.047 15936 15936 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=requested elapsed_us=1
+         1790466164.047 15936 15936 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=sample_ready elapsed_us=435
+         1790466164.047 15936 15936 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=queue_entered elapsed_us=501
+         1790466164.253 15936 15936 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=validated elapsed_us=206095
+         1790466164.254 15936 15936 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=previous_output_stopped elapsed_us=207846
+         1790466164.254 15936 15936 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=configuration_reset elapsed_us=207887
+         1790466164.285 15936 15936 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=output_prepared elapsed_us=238061
+         1790466164.293 15936 15936 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=configured elapsed_us=246320
+         1790466164.293 15936 15936 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=output_ready elapsed_us=246385
+         1790466164.309 15936 15936 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=media_opened elapsed_us=262860
+         1790466165.599 15936 15936 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=track_verified elapsed_us=1551931
+         1790466165.683 15936 16069 E P5_RAW_STAGE: P5_IMAGE_COUNT acquired=1 deleted=0 current_image=1 retired=0 callbacks=1 empty_acquires=0 retire=1 pts=0.183516667
+         1790466165.915 15936 16069 E P5_RAW_STAGE: P5_IMAGE_COUNT acquired=2 deleted=1 current_image=1 retired=0 callbacks=2 empty_acquires=20 retire=1 pts=0.183516667
+         1790466166.007 15936 16069 E P5_RAW_STAGE: P5_IMAGE_COUNT acquired=3 deleted=2 current_image=1 retired=0 callbacks=3 empty_acquires=20 retire=1 pts=0.200200000
+         1790466172.507 15936 16069 E P5_RAW_STAGE: P5_IMAGE_COUNT acquired=250 deleted=248 current_image=1 retired=1 callbacks=250 empty_acquires=20 retire=1 pts=6.673333333
+         1790466178.764 15936 16069 E P5_RAW_STAGE: P5_IMAGE_COUNT acquired=500 deleted=498 current_image=1 retired=1 callbacks=500 empty_acquires=20 retire=1 pts=12.929583333

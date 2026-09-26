@@ -26,3 +26,9 @@
 同一文件、同一预验证固定路径、P5 policy 和 Texture SDR，仅让测试页点击时从媒体 3.5 秒开始播放；这会改变正常播放时间线，**只用于拆分耗时，不能算原片头首帧验收或产品优化**。APK SHA-256 `3b7e277f313abd7af9c9dabb51d224a00fd507a46722d9bffaf773a16190839c`。三次冷 Player/页面的实际 Glass 非黑内容截图上界为 **5.914/5.486/5.669 秒**，均为第 8 次截屏；画面已目视确认。`track_verified` 在请求后约2.72–2.83秒，首个原生图像获取约3.76–3.90秒、PTS 3.5035秒。相对 12481 从片头播放，跳过黑场并未把这条路径降到 2 秒，且 seek 增加了解码定位等待；不能把两包差值单独当作片源黑场长度。
 
 同一 artifacts 目录留存 `seek-3p5-first-visible.png`、`seek-3p5-phase-logcat.txt` 与 `preverified-seek-3p5-probe.patch.gz`。临时源码再次撤销，设备为已强停的 12482 诊断包、自动亮度1、屏幕OFF、P5属性0。下一步仍须建立屏幕实际呈现首个视频帧的证据，并针对解码/呈现阶段而非样本复制做优化。
+
+## 12483 显式着色器缓存目录对照
+
+在 12481 的原片头直开、临时固定文件预验证、P5 Texture SDR 配置上，仅为 `PlayerConfiguration.options` 加入 `gpu-shader-cache=yes` 和 `/data/user/0/com.example.media_kit_test/cache/media-kit-shader-cache-probe-12483`。使用同一 JAR，APK SHA-256 `1647448c3e5a7cf3358799b14cf70dd8e2c7b133728c9274604ac85e20f6fda7`。三次新进程冷 Player/页面，第一次新目录、随后保留目录，吹玻璃首次非黑画面截图完成上界为 **6.520 / 6.060 / 5.975 秒**，均是第9次截屏；已检查第2次截图确为视频场景。首次原生 AImage 相对请求约1.974秒，随后约1.673/1.636秒；这是获取而非屏幕呈现。此前不显式指定缓存目录的 12481 三次为6.283/5.981/6.640秒，两组区间重叠，不能归因显式缓存有稳定收益。当前日志没有缓存文件/命中记录；未确认空目录实际上写入、后两轮实际命中，也未做清空后的回摆轮。
+
+同目录 `cache-empty-first-visible.png`、`cache-warm-first-visible.png`、`cache-probe-phase-logcat.txt` 和 `shader-cache-probe.patch.gz` 留存证据及临时改动。诊断代码已撤销，不把仅基于固定应用包名路径的探针默认化。设备测试后强停12483诊断包、恢复 P5 属性0、自动亮度1、屏幕OFF；原10420字节包仍不可用。下一步若再测缓存，应先加入实际缓存写入/命中证据并做空→热→空回摆，同时以真实全屏路径验证；本轮优先追踪首个 AImage 到 Flutter 消费、屏幕呈现的延迟。
