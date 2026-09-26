@@ -54,6 +54,40 @@ import 'package:media_kit_video/src/video_controller/web_video_controller/web_vi
 ///
 /// {@endtemplate}
 class VideoController {
+  Future<void> Function()? _forwarderReleaseCallback;
+  Future<void>? _disposeForRebuildFuture;
+  final _textureLayoutOwners = <Object, TextureOutputLayout>{};
+
+  /// The native output covers every mounted Video's physical pixel demand.
+  /// A later thumbnail update cannot shrink an existing fullscreen output.
+  void updateTextureLayoutOwner(
+      Object owner, Size physicalViewport, BoxFit fit) {
+    _textureLayoutOwners[owner] = TextureOutputLayout(physicalViewport, fit);
+    _publishTextureLayouts();
+  }
+
+  void removeTextureLayoutOwner(Object owner) {
+    if (_textureLayoutOwners.remove(owner) != null) {
+      _publishTextureLayouts();
+    }
+  }
+
+  void _publishTextureLayouts() {
+    final output = notifier.value;
+    if (output == null ||
+        !output.configuration.matchAndroidTextureOutputToLayout ||
+        output.configuration.usePlatformView ||
+        output.configuration.enableAndroidSurfaceProducer) {
+      return;
+    }
+    unawaited(output
+        .updateTextureLayouts(this,
+            List<TextureOutputLayout>.unmodifiable(_textureLayoutOwners.values))
+        .catchError((Object error, StackTrace stack) {
+      debugPrint('Android Texture layout resize failed: $error\n$stack');
+    }));
+  }
+
   static Future<VideoController> create(
     Player player, {
     VideoControllerConfiguration configuration =
@@ -135,6 +169,7 @@ class VideoController {
         if (platform.isCompleted) {
           // Populate [id] & [rect] [ValueNotifier]s with the values from [platform] implementation of [PlatformVideoController].
           final controller = await platform.future;
+          _publishTextureLayouts();
           // Add listeners.
           void fn0() => id.value = controller.id.value;
           void fn1() => rect.value = controller.rect.value;
@@ -143,10 +178,13 @@ class VideoController {
           controller.id.addListener(fn0);
           controller.rect.addListener(fn1);
           // Remove listeners upon [Player.dispose].
-          player.platform?.release.add(() async {
+          Future<void> releaseForwarders() async {
             controller.id.removeListener(fn0);
             controller.rect.removeListener(fn1);
-          });
+          }
+
+          _forwarderReleaseCallback = releaseForwarders;
+          player.platform?.release.add(releaseForwarders);
         } else {
           platform.completeError(
             UnimplementedError(
@@ -187,5 +225,40 @@ class VideoController {
   Future<void> get waitUntilFirstFrameRendered async {
     final instance = await platform.future;
     return instance.waitUntilFirstFrameRendered;
+  }
+
+  /// Releases this wrapper and its platform output before another controller
+  /// for the same Player is created. A failed platform release is retryable.
+  Future<void> disposeForRebuild() =>
+      _disposeForRebuildFuture ??= _disposeForRebuildOnce().catchError(
+        (Object error, StackTrace stack) {
+          _disposeForRebuildFuture = null;
+          Error.throwWithStackTrace(error, stack);
+        },
+      );
+
+  Future<void> _disposeForRebuildOnce() async {
+    _textureLayoutOwners.clear();
+    PlatformVideoController? output;
+    try {
+      output = await platform.future;
+    } catch (_) {
+      // Platform creation already reconciles its native resources (or keeps
+      // a failed controller registered for retry). This wrapper was never
+      // published and has no platform listeners to detach.
+    }
+    if (output != null) {
+      await output.updateTextureLayouts(this, const []);
+      await output.disposeForRebuild();
+    }
+    final releaseForwarders = _forwarderReleaseCallback;
+    if (releaseForwarders != null) {
+      await releaseForwarders();
+      player.platform?.release.remove(releaseForwarders);
+      _forwarderReleaseCallback = null;
+    }
+    id.dispose();
+    rect.dispose();
+    notifier.dispose();
   }
 }

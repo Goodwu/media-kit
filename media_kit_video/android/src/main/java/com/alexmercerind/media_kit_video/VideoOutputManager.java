@@ -26,13 +26,14 @@ public class VideoOutputManager {
         this.textureRegistryReference = textureRegistryReference;
     }
 
-    public void create(long handle, boolean enableSurfaceProducer, TextureUpdateCallback textureUpdateCallback) {
+    public java.util.Map<String, Object> create(long handle, boolean enableSurfaceProducer, TextureUpdateCallback textureUpdateCallback) {
         synchronized (lock) {
             Log.i(TAG, String.format(Locale.ENGLISH, "com.alexmercerind.media_kit_video.VideoOutputManager.create: %d", handle));
             if (!videoOutputs.containsKey(handle)) {
                 final VideoOutput videoOutput = new VideoOutput(textureRegistryReference, enableSurfaceProducer, textureUpdateCallback);
                 videoOutputs.put(handle, videoOutput);
             }
+            return Objects.requireNonNull(videoOutputs.get(handle)).initialSurface();
         }
     }
 
@@ -46,12 +47,24 @@ public class VideoOutputManager {
         }
     }
 
-    public void setSurfaceSize(long handle, int width, int height) {
+    public java.util.Map<String, Object> setSurfaceSize(long handle, int width, int height) {
         synchronized (lock) {
             Log.i(TAG, String.format(Locale.ENGLISH, "com.alexmercerind.media_kit_video.VideoOutputManager.setSurfaceSize: %d %d %d", handle, width, height));
-            if (videoOutputs.containsKey(handle)) {
-                Objects.requireNonNull(videoOutputs.get(handle)).setSurfaceSize(width, height);
+            final VideoOutput output = videoOutputs.get(handle);
+            if (output == null) {
+                throw new IllegalStateException("Video output is unavailable: " + handle);
             }
+            return output.setSurfaceSize(width, height);
+        }
+    }
+
+    public java.util.Map<String, Object> consumerStats(long handle) {
+        synchronized (lock) {
+            final VideoOutput output = videoOutputs.get(handle);
+            if (output == null) {
+                throw new IllegalStateException("Video output is unavailable: " + handle);
+            }
+            return output.consumerStats();
         }
     }
 }

@@ -24,7 +24,13 @@ apply plugin: 'com.android.library'
 android {
     namespace 'com.alexmercerind.media_kit_video'
 
+    buildFeatures {
+        buildConfig true
+    }
+
+
     compileSdkVersion 36
+    ndkVersion '28.2.13676358'
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -33,6 +39,23 @@ android {
 
     defaultConfig {
         minSdkVersion 16
+        buildConfigField 'int', 'MEDIA_KIT_TEXTURE_MAX_WIDTH',
+                (project.findProperty('mediaKitTextureMaxWidth') ?: '0').toString()
+        buildConfigField 'boolean', 'MEDIA_KIT_TEXTURE_CONSUMER_STATS',
+                (project.findProperty('mediaKitTextureConsumerStats') ?: 'false').toString()
         consumerProguardFiles 'proguard-rules.pro'
+
+        externalNativeBuild {
+            cmake {
+                cppFlags '-std=c++17'
+            }
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path file('src/main/cpp/CMakeLists.txt')
+            version '3.22.1'
+        }
     }
 }

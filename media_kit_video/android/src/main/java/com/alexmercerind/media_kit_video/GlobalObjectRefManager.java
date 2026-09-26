@@ -23,7 +23,11 @@ public class GlobalObjectRefManager {
     private static final String TAG = "GlobalObjectRefManager";
     private static final Method newGlobalObjectRefMethod;
     private static final Method deleteGlobalObjectRefMethod;
-    private static final HashSet<Long> deletedGlobalObjectRefs = new HashSet<>();
+    // Track live allocations, not historical pointer values. JNI may reuse a
+    // deleted global-reference address; a history set would then suppress the
+    // legitimate delete for the newer allocation. Owners remain responsible
+    // for exactly-once release of each allocation generation.
+    private static final HashSet<Long> activeGlobalObjectRefs = new HashSet<>();
 
     static {
         try {
@@ -46,10 +50,14 @@ public class GlobalObjectRefManager {
      * @param object The object to create a global reference for.
      * @return The global reference ID, or 0 if creation failed.
      */
-    public static long newGlobalObjectRef(Object object) {
+    public static synchronized long newGlobalObjectRef(Object object) {
         Log.i(TAG, String.format(Locale.ENGLISH, "newGlobalRef: object = %s", object));
         try {
-            return (long) Objects.requireNonNull(newGlobalObjectRefMethod.invoke(null, object));
+            final long reference = (long) Objects.requireNonNull(newGlobalObjectRefMethod.invoke(null, object));
+            if (reference != 0) {
+                activeGlobalObjectRefs.add(reference);
+            }
+            return reference;
         } catch (Throwable e) {
             Log.e(TAG, "newGlobalRef", e);
             return 0;
@@ -57,26 +65,25 @@ public class GlobalObjectRefManager {
     }
 
     /**
-     * Deletes a global reference by its ID.
-     * This method tracks deleted references to prevent double deletion.
+     * Deletes a live global reference by its ID.
+     * Owners provide generation-aware exactly-once release; this live set
+     * rejects duplicate deletes without retaining reusable pointer values.
      *
      * @param ref The global reference ID to delete.
      */
-    public static void deleteGlobalObjectRef(long ref) {
-        if (deletedGlobalObjectRefs.contains(ref)) {
-            Log.i(TAG, String.format(Locale.ENGLISH, "deleteGlobalObjectRef: ref = %d ALREADY DELETED", ref));
-            return;
+    public static synchronized boolean deleteGlobalObjectRef(long ref) {
+        if (!activeGlobalObjectRefs.contains(ref)) {
+            Log.i(TAG, String.format(Locale.ENGLISH, "deleteGlobalObjectRef: ref = %d NOT ACTIVE", ref));
+            return false;
         }
-        if (deletedGlobalObjectRefs.size() > 100) {
-            deletedGlobalObjectRefs.clear();
-        }
-        deletedGlobalObjectRefs.add(ref);
         Log.i(TAG, String.format(Locale.ENGLISH, "deleteGlobalObjectRef: ref = %d", ref));
         try {
             deleteGlobalObjectRefMethod.invoke(null, ref);
+            activeGlobalObjectRefs.remove(ref);
+            return true;
         } catch (Throwable e) {
             Log.e(TAG, "deleteGlobalObjectRef", e);
+            return false;
         }
     }
 }
-
