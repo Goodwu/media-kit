@@ -5,6 +5,13 @@ import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart' as path;
 
 /// List of sample videos available for playback.
+///
+/// Android HDR experiments opt in to an already-probed local file.  Without
+/// this define, the normal test application retains its public-sample flow.
+const _androidLocalSource = String.fromEnvironment(
+  'MEDIA_KIT_ANDROID_LOCAL_SOURCE',
+);
+
 final sources = <String>[
   if (Platform.isMacOS)
     const String.fromEnvironment('MEDIA_KIT_AUTO_SOURCE').isNotEmpty
@@ -12,13 +19,16 @@ final sources = <String>[
         : (bool.fromEnvironment('MEDIA_KIT_AUTO_HDR')
             ? '/Users/wuweiwei1/Downloads/test-clips/luna-pq-six-bands.mp4'
             : '/Users/wuweiwei1/Downloads/test-clips/luna-sdr-720p-bt709-control.mp4'),
+  if (Platform.isAndroid && _androidLocalSource.isNotEmpty) _androidLocalSource,
 ];
 
 Future<void> prepareSources() async {
   if (sources.isNotEmpty) {
-    progress.value = bool.fromEnvironment('MEDIA_KIT_AUTO_HDR')
-        ? 'Using local Luna PQ HDR10 test clip'
-        : 'Using local Luna SDR control clip';
+    progress.value = Platform.isAndroid
+        ? 'Using fixed Android local source: $_androidLocalSource'
+        : bool.fromEnvironment('MEDIA_KIT_AUTO_HDR')
+            ? 'Using local Luna PQ HDR10 test clip'
+            : 'Using local Luna SDR control clip';
     return;
   }
   final uris = [

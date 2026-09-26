@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:universal_platform/universal_platform.dart';
@@ -22,7 +23,23 @@ import 'tests/13.android_surface_texture.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  const diagnostics = bool.fromEnvironment(
+    'MEDIA_KIT_DIAGNOSTICS',
+    defaultValue: true,
+  );
+  if (!diagnostics) {
+    // L0 disables Dart/Flutter debugPrint generation before any test screen or
+    // package callback is created. It does not change playback configuration.
+    debugPrint = (String? _, {int? wrapWidth}) {};
+  }
   MediaKit.ensureInitialized();
+  if (UniversalPlatform.isAndroid) {
+    try {
+      await FilePicker.clearTemporaryFiles();
+    } catch (error) {
+      debugPrint('ANDROID_FILE_PICKER_CACHE_CLEANUP error=$error');
+    }
+  }
   await SystemChrome.setPreferredOrientations(
     [
       DeviceOrientation.portraitUp,

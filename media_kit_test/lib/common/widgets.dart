@@ -277,19 +277,38 @@ class _SeekBarState extends State<SeekBar> {
   }
 }
 
-Future<void> showFilePicker(BuildContext context, Player player) async {
+typedef OpenSelectedSource = Future<void> Function(String source);
+
+Future<void> showFilePicker(
+  BuildContext context,
+  Player player, {
+  OpenSelectedSource? openSource,
+}) async {
   final result = await FilePicker.pickFiles(type: FileType.any);
   if (result.isNotEmpty) {
     final file = result.first;
     if (kIsWeb) {
-      await player.open(Media(convertBytesToURL(await file.readAsBytes())));
+      final source = convertBytesToURL(await file.readAsBytes());
+      if (openSource != null) {
+        await openSource(source);
+      } else {
+        await player.open(Media(source));
+      }
     } else {
-      await player.open(Media(file.path!));
+      if (openSource != null) {
+        await openSource(file.path!);
+      } else {
+        await player.open(Media(file.path!));
+      }
     }
   }
 }
 
-Future<void> showURIPicker(BuildContext context, Player player) async {
+Future<void> showURIPicker(
+  BuildContext context,
+  Player player, {
+  OpenSelectedSource? openSource,
+}) async {
   final key = GlobalKey<FormState>();
   final src = TextEditingController();
   await showModalBottomSheet(
@@ -324,7 +343,11 @@ Future<void> showURIPicker(BuildContext context, Player player) async {
                 child: ElevatedButton(
                   onPressed: () {
                     if (key.currentState!.validate()) {
-                      player.open(Media(src.text));
+                      if (openSource != null) {
+                        unawaited(openSource(src.text));
+                      } else {
+                        unawaited(player.open(Media(src.text)));
+                      }
                       Navigator.of(context).maybePop();
                     }
                   },
