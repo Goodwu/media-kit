@@ -143,7 +143,32 @@ class NativeVideoController extends PlatformVideoController {
   static Future<PlatformVideoController> create(
     Player player,
     VideoControllerConfiguration configuration,
+  ) {
+    final darwin = Platform.isMacOS || Platform.isIOS;
+    final admission = darwin
+        ? (player.platform as NativePlayer).reservePreTerminationOwnerCreation()
+        : null;
+    if (darwin && admission == null) {
+      throw StateError(
+          'Cannot create native output while player is disposing.');
+    }
+    return _createAdmitted(player, configuration, admission)
+        .whenComplete(() => admission?.release());
+  }
+
+  static Future<PlatformVideoController> _createAdmitted(
+    Player player,
+    VideoControllerConfiguration configuration,
+    PreTerminationOwnerReservation? admission,
   ) async {
+    void ensureAdmissionOpen() {
+      if (admission != null &&
+          (player.platform as NativePlayer)
+              .isPreTerminationOwnerAdmissionClosed) {
+        throw StateError('Native-output creation was canceled by disposal.');
+      }
+    }
+
     final nativeWindowMode = configuration.useNativeWindow && Platform.isMacOS;
 
     // Update [configuration] to have default values.
@@ -156,6 +181,7 @@ class NativeVideoController extends PlatformVideoController {
 
     // Retrieve the native handle of the [Player].
     final handle = await player.handle;
+    ensureAdmissionOpen();
     // Return the existing [VideoController] if it's already created.
     if (_controllers.containsKey(handle)) {
       return _controllers[handle]!;
@@ -166,12 +192,19 @@ class NativeVideoController extends PlatformVideoController {
     //
     // Search for common H264 decoder to check if video support is available.
     final decoders = await queryDecoders(handle);
+    ensureAdmissionOpen();
     if (!decoders.contains('h264')) {
       throw UnsupportedError(
         '[VideoController] is not available.'
         ' '
         'Please use media_kit_libs_***_video instead of media_kit_libs_***_audio.',
       );
+    }
+
+    // A concurrent caller may have published the controller while decoder
+    // discovery was in flight. Reuse that owner rather than registering two.
+    if (_controllers.containsKey(handle)) {
+      return _controllers[handle]!;
     }
 
     // Creation:
@@ -183,8 +216,14 @@ class NativeVideoController extends PlatformVideoController {
     controller.nativeSurfaceGeneration = (_surfaceGenerations[handle] ?? 0) + 1;
     _surfaceGenerations[handle] = controller.nativeSurfaceGeneration;
 
-    // Register [_dispose] for execution upon [Player.dispose].
-    player.platform?.release.add(controller._dispose);
+    // Darwin's native output can own an mpv render context. Its disposal must
+    // complete before the player's event pump and mpv handle are destroyed.
+    // Other platforms retain their existing release-callback ordering.
+    if (Platform.isMacOS || Platform.isIOS) {
+      admission!.register(controller._dispose);
+    } else {
+      player.platform?.release.add(controller._dispose);
+    }
 
     // Store the [NativeVideoController] in the [_controllers].
     _controllers[handle] = controller;
@@ -195,6 +234,7 @@ class NativeVideoController extends PlatformVideoController {
       'hwdec': configuration.hwdec!,
       'vid': 'auto',
     });
+    ensureAdmissionOpen();
 
     if (nativeWindowMode) {
       // W1 is intentionally opt-in and does not create VideoOutput/Texture.
@@ -204,6 +244,7 @@ class NativeVideoController extends PlatformVideoController {
         'target-prim': 'bt.2020',
         'target-trc': 'linear',
       });
+      ensureAdmissionOpen();
       // The PlatformView mount is driven by the first video-params event.
       controller.nativeSurfaceCandidate = true;
       controller.setNativeSurfaceActive(false);
@@ -223,6 +264,7 @@ class NativeVideoController extends PlatformVideoController {
         // Missing native plugin/renderer is a normal fail-closed fallback.
         controller.setNativeSurfaceActive(false);
       }
+      ensureAdmissionOpen();
     }
 
     // Wait until first texture ID is received.
@@ -230,7 +272,7 @@ class NativeVideoController extends PlatformVideoController {
     final completer = Completer<void>();
     void listener() {
       final value = controller.id.value;
-      if (value != null) {
+      if (value != null && !completer.isCompleted) {
         debugPrint('NativeVideoController: Texture ID: $value');
         completer.complete();
       }
@@ -238,22 +280,34 @@ class NativeVideoController extends PlatformVideoController {
 
     controller.id.addListener(listener);
 
-    await _channel.invokeMethod(
-      'VideoOutputManager.Create',
-      {
-        'handle': handle.toString(),
-        'configuration': {
-          'width': configuration.width.toString(),
-          'height': configuration.height.toString(),
-          'enableHardwareAcceleration':
-              configuration.enableHardwareAcceleration,
-          'useNativeSurface': configuration.useNativeSurface,
+    try {
+      ensureAdmissionOpen();
+      await _channel.invokeMethod(
+        'VideoOutputManager.Create',
+        {
+          'handle': handle.toString(),
+          'configuration': {
+            'width': configuration.width.toString(),
+            'height': configuration.height.toString(),
+            'enableHardwareAcceleration':
+                configuration.enableHardwareAcceleration,
+            'useNativeSurface': configuration.useNativeSurface,
+          },
         },
-      },
-    );
-
-    await completer.future;
-    controller.id.removeListener(listener);
+      );
+      ensureAdmissionOpen();
+      if (admission == null) {
+        await completer.future;
+      } else {
+        await Future.any<void>([
+          completer.future,
+          (player.platform as NativePlayer).preTerminationOwnerAdmissionClosed,
+        ]);
+      }
+      ensureAdmissionOpen();
+    } finally {
+      controller.id.removeListener(listener);
+    }
 
     // Return the [VideoController].
     return controller;
@@ -509,48 +563,36 @@ class NativeVideoController extends PlatformVideoController {
   /// Invalidates the W0 Cocoa view token before the controller is disposed.
   Future<void> detachNativeWindow() async {
     if (_nativeWindowAttachment == null) return;
-    Object? cleanupError;
-    StackTrace? cleanupStack;
-    void recordFailure(Object error, StackTrace stack) {
-      cleanupError ??= error;
-      cleanupStack ??= stack;
-    }
+    // A failed mpv stop or channel detachment must leave the attachment
+    // available for a later disposal attempt.
+    setNativeSurfaceActive(false);
 
     if (configuration.useNativeWindow && Platform.isMacOS) {
-      try {
-        await platform.command(
-          ['set', 'vo', 'null'],
-          waitForInitialization: false,
-        );
-        await platform.command(
-          ['set', 'wid', '0'],
-          waitForInitialization: false,
-        );
-      } catch (error, stack) {
-        recordFailure(error, stack);
-      }
+      Future<void> setOutputProperty(String property, String value) =>
+          platform.isPreTerminationCallbacksActive
+              ? platform.setPropertyStrictAsyncForPreTermination(
+                  property,
+                  value,
+                )
+              : platform.setPropertyStrictAsync(
+                  property,
+                  value,
+                  waitForInitialization: false,
+                );
+      // These mpv-owned window transitions must receive successful async
+      // replies before Cocoa is allowed to release the NSView.
+      await setOutputProperty('vo', 'null');
+      await setOutputProperty('wid', '0');
     }
-    try {
-      final handle = nativeHandle ?? await player.handle;
-      await _channel.invokeMethod(
-        'NativeWindow.Detach',
-        {
-          'handle': handle.toString(),
-          'generation': nativeSurfaceGeneration,
-        },
-      );
-    } catch (error, stack) {
-      recordFailure(error, stack);
-    } finally {
-      _nativeWindowAttachment = null;
-      // Detaching invalidates any previously observed output. A later bind
-      // must receive fresh renderer/frame evidence before this can become
-      // active.
-      setNativeSurfaceActive(false);
-    }
-    if (cleanupError != null) {
-      Error.throwWithStackTrace(cleanupError!, cleanupStack!);
-    }
+    final handle = nativeHandle ?? await player.handle;
+    await _channel.invokeMethod(
+      'NativeWindow.Detach',
+      {
+        'handle': handle.toString(),
+        'generation': nativeSurfaceGeneration,
+      },
+    );
+    _nativeWindowAttachment = null;
   }
 
   /// Reads the native Cocoa view frame without treating the video resolution

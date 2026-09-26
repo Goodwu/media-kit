@@ -38,6 +38,31 @@ class FileLoadedRecord {
   final int playlistEntryId;
 }
 
+/// Synchronous admission for a native output that may own an mpv render
+/// context. A disposal started after this reservation must wait until the
+/// owner either registers its teardown callback or finishes without an owner.
+class PreTerminationOwnerReservation {
+  PreTerminationOwnerReservation._(this._player);
+
+  final PlatformPlayer _player;
+  bool _released = false;
+
+  void register(Future<void> Function() callback) {
+    if (_released) throw StateError('Native-output reservation was released.');
+    _player.preTermination.add(callback);
+  }
+
+  void release() {
+    if (_released) return;
+    _released = true;
+    _player._preTerminationOwnerCreations--;
+    if (_player._preTerminationOwnerCreations == 0) {
+      _player._preTerminationOwnerCreationsDrained?.complete();
+      _player._preTerminationOwnerCreationsDrained = null;
+    }
+  }
+}
+
 abstract class PlatformPlayer {
   /// {@macro platform_player}
   PlatformPlayer({required this.configuration});
@@ -211,6 +236,72 @@ abstract class PlatformPlayer {
     }
     if (releaseError != null) {
       Error.throwWithStackTrace(releaseError, releaseStackTrace!);
+    }
+  }
+
+  /// Releases native-output owners that must be gone before the player event
+  /// pump or libmpv handle is destroyed. Failed callbacks stay registered so
+  /// a caller can retry disposal while the native player is still alive.
+  final List<Future<void> Function()> preTermination = [];
+
+  bool _preTerminationOwnerAdmissionClosed = false;
+  int _preTerminationOwnerCreations = 0;
+  Completer<void>? _preTerminationOwnerCreationsDrained;
+  final Completer<void> _preTerminationOwnerAdmissionClosedSignal =
+      Completer<void>();
+
+  /// Reserve admission before the first asynchronous step of owner creation.
+  /// A null result means disposal has closed admission.
+  PreTerminationOwnerReservation? reservePreTerminationOwnerCreation() {
+    if (_preTerminationOwnerAdmissionClosed) return null;
+    if (_preTerminationOwnerCreations++ == 0) {
+      _preTerminationOwnerCreationsDrained = Completer<void>();
+    }
+    return PreTerminationOwnerReservation._(this);
+  }
+
+  bool get isPreTerminationOwnerAdmissionClosed =>
+      _preTerminationOwnerAdmissionClosed;
+
+  Future<void> get preTerminationOwnerAdmissionClosed =>
+      _preTerminationOwnerAdmissionClosedSignal.future;
+
+  @protected
+  void closePreTerminationOwnerAdmission() {
+    if (_preTerminationOwnerAdmissionClosed) return;
+    _preTerminationOwnerAdmissionClosed = true;
+    _preTerminationOwnerAdmissionClosedSignal.complete();
+  }
+
+  @protected
+  Future<void> waitForPreTerminationOwnerCreations() =>
+      _preTerminationOwnerCreationsDrained?.future ?? Future<void>.value();
+
+  @protected
+  bool get preTerminationCallbacksActive => _preTerminationCallbacksActive;
+
+  bool _preTerminationCallbacksActive = false;
+
+  @protected
+  Future<void> runPreTerminationCallbacks() async {
+    Object? cleanupError;
+    StackTrace? cleanupStack;
+    _preTerminationCallbacksActive = true;
+    try {
+      for (final callback in preTermination.toList()) {
+        try {
+          await callback();
+          preTermination.remove(callback);
+        } catch (error, stack) {
+          cleanupError ??= error;
+          cleanupStack ??= stack;
+        }
+      }
+    } finally {
+      _preTerminationCallbacksActive = false;
+    }
+    if (cleanupError != null) {
+      Error.throwWithStackTrace(cleanupError, cleanupStack!);
     }
   }
 
