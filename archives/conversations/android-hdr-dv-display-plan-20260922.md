@@ -2,6 +2,8 @@
 
 ## Current State
 
+- 2026-09-27 增加独立 `MEDIA_KIT_AUTO_LIFECYCLE` 测试入口并用10442重跑同进程重建：旧段 RPU 197/197、errors0；第二段硬解 P5 播放约31秒、图像750/750归零，却无 RPU 探针记录，故重开 RPU 仍未验收。见`archives/experiments/android-p5-rpu-recreate-10442-20260927.md`。磁盘构建受 Flutter 生成缓存5.5GB影响，清除此可再生目录后构建成功；设备恢复原10420、自动亮度1设置37、诊断属性0。
+- 2026-09-27 10441 同进程重建短轮：原播放段 RPU 实际输出88/88匹配，重建 generation2 后第二段图像资源61/61归零、无abort，但未得到第二段 RPU 逐帧或汇总；自动入口同时触发与重建无关的窗口缩放 MissingPluginException，故重开验收仍开放。详见`archives/experiments/android-p5-rpu-recreate-10441-20260927.md`。结束已恢复原10420/自动亮度1设置37/诊断属性0。
 - 2026-09-27 无需人工观察的P5 RPU边界补证：10440官方1080p24源、真横屏、自动亮度，播放中前跳184.232秒和后跳46.058秒，4次flush后退出汇总2321/2321实际输出RPU匹配、errors0，AImage2310/2310、retire held0；同进程重开与独立颜色仍开放。APK/JAR/源SHA及完整过滤日志见`archives/experiments/android-p5-rpu-seek-10440-20260927.md`。手机已恢复原10420/自动亮度1设置37/属性0。
 - 2026-09-27 用户强调防止手机长期最高亮度和静态画面。即时回读LYA-AL00在线、屏幕ON、亮度为自动模式1/设置37、应用为原versionCode10420、P5 direct与SurfaceControl诊断属性均0。后续最高亮度仅在用户正在人工观察的短轮内使用，轮次结束立即恢复原亮度；非观察阶段不让测试画面长时间常亮。
 - 2026-09-27 用户新增后续优先任务：当前 Android HDR/P5 工作完成后立即优化手机“打开视频→实际出图”耗时，目标2秒内、争取1秒内；`TASKS.md`列为Next首项。当前缺同口径基线，不能用尺寸ACK或`waitUntilFirstFrameRendered`现有完成信号当真实present；需先建可靠可见首帧时间戳，并分段定位媒体打开、探测/解码、Surface/GPU和系统呈现耗时，覆盖SDR/HDR10/P8.4/P5冷/热启动，避免仅优化单一诊断样本。

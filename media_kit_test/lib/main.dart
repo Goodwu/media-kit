@@ -52,7 +52,8 @@ Future<void> main() async {
     MyApp(
       const bool.fromEnvironment('MEDIA_KIT_AUTO_SINGLE_PLAYER')
           ? const SinglePlayerSingleVideoScreen()
-          : const bool.fromEnvironment('MEDIA_KIT_AUTO_RESIZE')
+          : (const bool.fromEnvironment('MEDIA_KIT_AUTO_LIFECYCLE') ||
+                  const bool.fromEnvironment('MEDIA_KIT_AUTO_RESIZE'))
               ? const AutoLifecycleScreen()
               : const PrimaryScreen(),
     ),
