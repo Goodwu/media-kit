@@ -8,8 +8,8 @@
   - status: in_progress
   - context: archives/conversations/android-hdr-dv-display-plan-20260922.md
   - acceptance: 固定素材身份与设备能力；PlatformView 对 HDR10/P8.4/P5 分别输出 PQ/HLG/PQ，Texture 明确转换到 SDR；核对实际后端、Surface 格式、系统 HDR 合成、SDR 复位和全屏可见画面。P8.4 的无 HLG 路径、P5 DV 元数据处理及原生 DV 能力须单独说明，不能以 PQ 转换冒充原生 DV。最高亮度仅用于短时人工观察，每轮结束立即恢复原自动亮度，不长时间停留静态画面。
-  - latest: HDR10、P8.4 已获用户真全屏亮暗、颜色、流畅性好评；10436/10437 P5 同页全屏印记消失、画面良好，10437 同包 SF/HWC 为 10 位 BT.2020/PQ。当前 LYA-AL00/API29 固件的普通应用 GPU producer 上，公开 NDK setter、EGL、Vulkan、SurfaceControl 色层及 10-bit AHardwareBuffer PQ 均无可交付路径；11009 AHardwareBuffer 路径实际已测且因 HDR 能力查询权限失败 SIGABRT，不能再列为未试候选。私有 ABI 的 10437 PQ 阳性仅证明该设备合成能力，不证明公开路径可用；默认产品 P5 PQ、静态元数据、独立色准和双视图一致性仍开放。
-  - next: 保留 P5 PQ 未通过状态，停止在此固件重复已失败的公开探针。属性全关时验证正式 P5 PQ 请求安全失败、及时释放且不发布无 PQ 标记的 WID；再同进程复核 HDR10、P8.4、SDR 出图和信令复位。P5 Texture SDR 仅能作为明确标示的降级路径，不能关闭 PQ 任务。
+  - latest: HDR10、P8.4 已获用户真全屏画质/流畅性好评；10436/10437 P5 同页全屏画面良好，10437 的 SF/HWC 为 10 位 BT.2020/PQ，但依赖精确固件私有探针。此固件普通应用 GPU producer 的已试公开 PQ 出口均失败，11009 AHardwareBuffer 同样因 HDR 能力权限拒绝 SIGABRT。12464 正确 P5 JAR 短轮的 PQ Surface 拒绝且 `wid=0`，Dart 10 秒后超时；12465/12466 的失败 ACK 在拒绝后约 76/78 ms 报具体错误。12465 同进程 HDR10/P8.4 以原生 `mediacodec_embed` 报打开成功，但未同步核对SF/HWC及可见帧；12466 强制 GPU PlatformView HDR 时 HDR10 新 PQ Surface 同样被拒绝，P8.4 未试。见`archives/experiments/android-p5-public-fail-12464-20260927.md`。默认产品 P5 PQ、静态元数据、独立色准和双视图一致性仍开放。
+  - next: 按已验证的原生后端同进程复核 HDR10/P8.4 系统HDR输出、SDR 复位、可见帧及旧 A→新 B 交错；确认失败清理耗时来源。停止此固件重复公开 PQ 探针；P5 Texture SDR 仅作明确标示的降级，不关闭 PQ 任务。
 
 - [ ] P5 Glass 4K59.94 真全屏性能门槛
   - status: in_progress

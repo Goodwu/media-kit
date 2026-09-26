@@ -32,6 +32,8 @@ public class PlatformVideoViewFactory extends PlatformViewFactory {
     private final ConcurrentHashMap<SurfaceOwner, PlatformVideoView> surfaceOwners = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<SurfaceOwner, Integer> liveSurfaceGenerations =
             new ConcurrentHashMap<>();
+    private final java.util.concurrent.atomic.AtomicInteger nextViewCreationSerial =
+            new java.util.concurrent.atomic.AtomicInteger();
     private final java.util.Set<ControllerOwner> terminatedControllers =
             java.util.Collections.newSetFromMap(new ConcurrentHashMap<ControllerOwner, Boolean>());
     // An engine detach is not proof that libmpv stopped using a Surface. Keep
@@ -202,6 +204,7 @@ public class PlatformVideoViewFactory extends PlatformViewFactory {
         final int height = ((Number) Objects.requireNonNull(params.get("height"))).intValue();
         final String initialDataSpace = (String) params.get("dataspace");
         final String initialPixelFormat = (String) params.get("pixelFormat");
+        final int creationSerial = nextViewCreationSerial.incrementAndGet();
 
         Log.i(TAG, "Creating PlatformVideoView for handle: " + handle);
         final PlatformVideoView view = new PlatformVideoView(context, handle, width, height, initialDataSpace,
@@ -226,7 +229,15 @@ public class PlatformVideoViewFactory extends PlatformViewFactory {
             event.put("wid", surfaceEvent.wid);
             event.put("generation", generation);
             event.put("viewId", id);
+            event.put("creationSerial", creationSerial);
             event.put("surfaceGeneration", surfaceEvent.generation);
+            if (surfaceEvent.failed) {
+                // The view remains registered for a later creation attempt,
+                // but no Surface/WID became live for this failed attempt.
+                event.put("reason", surfaceEvent.failureReason);
+                channel.invokeMethod("PlatformVideoView.SurfaceFailed", event);
+                return;
+            }
             // Fullscreen transitions may construct more than one PlatformView
             // before either receives a Surface. Publish the view that actually
             // acquired a Surface; Dart resolves competing owners by view and
@@ -243,6 +254,16 @@ public class PlatformVideoViewFactory extends PlatformViewFactory {
                 event);
         });
         view.setOnDispose(() -> remove(handle, view));
+        final HashMap<String, Object> created = new HashMap<>();
+        created.put("handle", handle);
+        created.put("generation", generation);
+        created.put("viewId", id);
+        created.put("creationSerial", creationSerial);
+        created.put("dataspace", initialDataSpace);
+        created.put("pixelFormat", initialPixelFormat);
+        // Creation is the pending-view intent. It must precede any Surface
+        // callback so a late failure from an older view cannot fail its wait.
+        channel.invokeMethod("PlatformVideoView.ViewCreated", created);
         return view;
     }
 }
