@@ -1,0 +1,190 @@
+
+/tmp/media-kit-lya-libandroid.so:	file format elf64-littleaarch64
+
+Disassembly of section .text:
+
+00000000000171a0 <ASurfaceTransaction_setBufferDataSpace>:
+   171a0: d10103ff     	sub	sp, sp, #0x40
+   171a4: f9000bf5     	str	x21, [sp, #0x10]
+   171a8: a9024ff4     	stp	x20, x19, [sp, #0x20]
+   171ac: a9037bfd     	stp	x29, x30, [sp, #0x30]
+   171b0: 9100c3fd     	add	x29, sp, #0x30
+   171b4: d53bd055     	mrs	x21, TPIDR_EL0
+   171b8: f94016a9     	ldr	x9, [x21, #0x28]
+   171bc: f90007e9     	str	x9, [sp, #0x8]
+   171c0: b40003c0     	cbz	x0, 0x17238 <ASurfaceTransaction_setBufferDataSpace+0x98>
+   171c4: aa0103e8     	mov	x8, x1
+   171c8: b4000441     	cbz	x1, 0x17250 <ASurfaceTransaction_setBufferDataSpace+0xb0>
+   171cc: aa0003f4     	mov	x20, x0
+   171d0: 910003e1     	mov	x1, sp
+   171d4: aa0803e0     	mov	x0, x8
+   171d8: 2a0203f3     	mov	w19, w2
+   171dc: f90003e8     	str	x8, [sp]
+   171e0: 94001c04     	bl	0x1e1f0 <_ZNK7android7RefBase9incStrongEPKv@plt>
+   171e4: 910003e0     	mov	x0, sp
+   171e8: 2a1303e1     	mov	w1, w19
+   171ec: 94000026     	bl	0x17284 <ASurfaceTransaction_setBufferDataSpace+0xe4>
+   171f0: 360003c0     	tbz	w0, #0x0, 0x17268 <ASurfaceTransaction_setBufferDataSpace+0xc8>
+   171f4: 910003e1     	mov	x1, sp
+   171f8: aa1403e0     	mov	x0, x20
+   171fc: 2a1303e2     	mov	w2, w19
+   17200: 94001ea4     	bl	0x1ec90 <_ZN7android21SurfaceComposerClient11Transaction12setDataspaceERKNS_2spINS_14SurfaceControlEEENS_8hardware8graphics6common4V1_29DataspaceE@plt>
+   17204: f94003e0     	ldr	x0, [sp]
+   17208: b4000060     	cbz	x0, 0x17214 <ASurfaceTransaction_setBufferDataSpace+0x74>
+   1720c: 910003e1     	mov	x1, sp
+   17210: 94001c08     	bl	0x1e230 <_ZNK7android7RefBase9decStrongEPKv@plt>
+   17214: f94016a8     	ldr	x8, [x21, #0x28]
+   17218: f94007e9     	ldr	x9, [sp, #0x8]
+   1721c: eb09011f     	cmp	x8, x9
+   17220: 54000301     	b.ne	0x17280 <ASurfaceTransaction_setBufferDataSpace+0xe0>
+   17224: a9437bfd     	ldp	x29, x30, [sp, #0x30]
+   17228: a9424ff4     	ldp	x20, x19, [sp, #0x20]
+   1722c: f9400bf5     	ldr	x21, [sp, #0x10]
+   17230: 910103ff     	add	sp, sp, #0x40
+   17234: d65f03c0     	ret
+   17238: d0ffffa0     	adrp	x0, 0xd000
+   1723c: d0ffffa2     	adrp	x2, 0xd000
+   17240: 9100f800     	add	x0, x0, #0x3e
+   17244: 913cc842     	add	x2, x2, #0xf32
+   17248: aa1f03e1     	mov	x1, xzr
+   1724c: 94001d91     	bl	0x1e890 <__android_log_assert@plt>
+   17250: d0ffffa0     	adrp	x0, 0xd000
+   17254: f0ffffa2     	adrp	x2, 0xe000
+   17258: 910e8c00     	add	x0, x0, #0x3a3
+   1725c: 91006442     	add	x2, x2, #0x19
+   17260: aa1f03e1     	mov	x1, xzr
+   17264: 94001d8b     	bl	0x1e890 <__android_log_assert@plt>
+   17268: d0ffffa0     	adrp	x0, 0xd000
+   1726c: b0ffffa2     	adrp	x2, 0xc000
+   17270: 91017400     	add	x0, x0, #0x5d
+   17274: 91254c42     	add	x2, x2, #0x953
+   17278: aa1f03e1     	mov	x1, xzr
+   1727c: 94001d85     	bl	0x1e890 <__android_log_assert@plt>
+   17280: 94001bb4     	bl	0x1e150 <__stack_chk_fail@plt>
+   17284: d10183ff     	sub	sp, sp, #0x60
+   17288: a9044ff4     	stp	x20, x19, [sp, #0x40]
+   1728c: a9057bfd     	stp	x29, x30, [sp, #0x50]
+   17290: 910143fd     	add	x29, sp, #0x50
+   17294: d53bd054     	mrs	x20, TPIDR_EL0
+   17298: f9401688     	ldr	x8, [x20, #0x28]
+   1729c: 12bec749     	mov	w9, #0x9c5ffff          // =163971071
+   172a0: 6b09003f     	cmp	w1, w9
+   172a4: f81e83a8     	stur	x8, [x29, #-0x18]
+   172a8: 5400014c     	b.gt	0x172d0 <ASurfaceTransaction_setBufferDataSpace+0x130>
+   172ac: 320003f3     	orr	w19, wzr, #0x1
+   172b0: 34000d41     	cbz	w1, 0x17458 <ASurfaceTransaction_setBufferDataSpace+0x2b8>
+   172b4: 52a11028     	mov	w8, #0x8810000          // =142671872
+   172b8: 6b08003f     	cmp	w1, w8
+   172bc: 54000ce0     	b.eq	0x17458 <ASurfaceTransaction_setBufferDataSpace+0x2b8>
+   172c0: 52a11148     	mov	w8, #0x88a0000          // =143261696
+   172c4: 6b08003f     	cmp	w1, w8
+   172c8: 54000160     	b.eq	0x172f4 <ASurfaceTransaction_setBufferDataSpace+0x154>
+   172cc: 14000042     	b	0x173d4 <ASurfaceTransaction_setBufferDataSpace+0x234>
+   172d0: 52a138c8     	mov	w8, #0x9c60000          // =163971072
+   172d4: 6b08003f     	cmp	w1, w8
+   172d8: 540004e0     	b.eq	0x17374 <ASurfaceTransaction_setBufferDataSpace+0x1d4>
+   172dc: 52a31028     	mov	w8, #0x18810000         // =411107328
+   172e0: 6b08003f     	cmp	w1, w8
+   172e4: 54000080     	b.eq	0x172f4 <ASurfaceTransaction_setBufferDataSpace+0x154>
+   172e8: 52a30828     	mov	w8, #0x18410000         // =406913024
+   172ec: 6b08003f     	cmp	w1, w8
+   172f0: 54000721     	b.ne	0x173d4 <ASurfaceTransaction_setBufferDataSpace+0x234>
+   172f4: f9400000     	ldr	x0, [x0]
+   172f8: 910043e8     	add	x8, sp, #0x10
+   172fc: 94001ded     	bl	0x1eab0 <_ZNK7android14SurfaceControl9getClientEv@plt>
+   17300: 910023e8     	add	x8, sp, #0x8
+   17304: 94001e67     	bl	0x1eca0 <_ZN7android21SurfaceComposerClient23getInternalDisplayTokenEv@plt>
+   17308: f94007e8     	ldr	x8, [sp, #0x8]
+   1730c: b4000128     	cbz	x8, 0x17330 <ASurfaceTransaction_setBufferDataSpace+0x190>
+   17310: 910023e0     	add	x0, sp, #0x8
+   17314: 910003e1     	mov	x1, sp
+   17318: 390003ff     	strb	wzr, [sp]
+   1731c: 94001e65     	bl	0x1ecb0 <_ZN7android21SurfaceComposerClient18isWideColorDisplayERKNS_2spINS_7IBinderEEEPb@plt>
+   17320: 340005e0     	cbz	w0, 0x173dc <ASurfaceTransaction_setBufferDataSpace+0x23c>
+   17324: b0ffffa2     	adrp	x2, 0xc000
+   17328: 911b0042     	add	x2, x2, #0x6c0
+   1732c: 14000003     	b	0x17338 <ASurfaceTransaction_setBufferDataSpace+0x198>
+   17330: b0ffffa2     	adrp	x2, 0xc000
+   17334: 91108042     	add	x2, x2, #0x420
+   17338: 321f07e0     	orr	w0, wzr, #0x6
+   1733c: aa1f03e1     	mov	x1, xzr
+   17340: 94001bb8     	bl	0x1e220 <__android_log_print@plt>
+   17344: 2a1f03f3     	mov	w19, wzr
+   17348: f94007e8     	ldr	x8, [sp, #0x8]
+   1734c: b40000c8     	cbz	x8, 0x17364 <ASurfaceTransaction_setBufferDataSpace+0x1c4>
+   17350: f9400109     	ldr	x9, [x8]
+   17354: 910023e1     	add	x1, sp, #0x8
+   17358: f85e8129     	ldur	x9, [x9, #-0x18]
+   1735c: 8b090100     	add	x0, x8, x9
+   17360: 94001bb4     	bl	0x1e230 <_ZNK7android7RefBase9decStrongEPKv@plt>
+   17364: f9400be0     	ldr	x0, [sp, #0x10]
+   17368: b4000780     	cbz	x0, 0x17458 <ASurfaceTransaction_setBufferDataSpace+0x2b8>
+   1736c: 910043e1     	add	x1, sp, #0x10
+   17370: 14000039     	b	0x17454 <ASurfaceTransaction_setBufferDataSpace+0x2b4>
+   17374: f9400000     	ldr	x0, [x0]
+   17378: 910023e8     	add	x8, sp, #0x8
+   1737c: 94001dcd     	bl	0x1eab0 <_ZNK7android14SurfaceControl9getClientEv@plt>
+   17380: 910003e8     	mov	x8, sp
+   17384: 94001e47     	bl	0x1eca0 <_ZN7android21SurfaceComposerClient23getInternalDisplayTokenEv@plt>
+   17388: f94003e8     	ldr	x8, [sp]
+   1738c: b4000348     	cbz	x8, 0x173f4 <ASurfaceTransaction_setBufferDataSpace+0x254>
+   17390: 0f07f600     	fmov	v0.2s, #-1.00000000
+   17394: 52b7f008     	mov	w8, #-0x40800000        // =-1082130432
+   17398: 910003e0     	mov	x0, sp
+   1739c: 910043e1     	add	x1, sp, #0x10
+   173a0: a901ffff     	stp	xzr, xzr, [sp, #0x18]
+   173a4: f9000bff     	str	xzr, [sp, #0x10]
+   173a8: fd0017e0     	str	d0, [sp, #0x28]
+   173ac: b90033e8     	str	w8, [sp, #0x30]
+   173b0: 94001e44     	bl	0x1ecc0 <_ZN7android21SurfaceComposerClient18getHdrCapabilitiesERKNS_2spINS_7IBinderEEEPNS_15HdrCapabilitiesE@plt>
+   173b4: 34000320     	cbz	w0, 0x17418 <ASurfaceTransaction_setBufferDataSpace+0x278>
+   173b8: b0ffffa2     	adrp	x2, 0xc000
+   173bc: 9108c842     	add	x2, x2, #0x232
+   173c0: 321f07e0     	orr	w0, wzr, #0x6
+   173c4: aa1f03e1     	mov	x1, xzr
+   173c8: 94001b96     	bl	0x1e220 <__android_log_print@plt>
+   173cc: 2a1f03f3     	mov	w19, wzr
+   173d0: 14000015     	b	0x17424 <ASurfaceTransaction_setBufferDataSpace+0x284>
+   173d4: 2a1f03f3     	mov	w19, wzr
+   173d8: 14000020     	b	0x17458 <ASurfaceTransaction_setBufferDataSpace+0x2b8>
+   173dc: 394003e8     	ldrb	w8, [sp]
+   173e0: 7100011f     	cmp	w8, #0x0
+   173e4: 1a9f07f3     	cset	w19, ne
+   173e8: f94007e8     	ldr	x8, [sp, #0x8]
+   173ec: b5fffb28     	cbnz	x8, 0x17350 <ASurfaceTransaction_setBufferDataSpace+0x1b0>
+   173f0: 17ffffdd     	b	0x17364 <ASurfaceTransaction_setBufferDataSpace+0x1c4>
+   173f4: b0ffffa2     	adrp	x2, 0xc000
+   173f8: 9114c042     	add	x2, x2, #0x530
+   173fc: 321f07e0     	orr	w0, wzr, #0x6
+   17400: aa1f03e1     	mov	x1, xzr
+   17404: 94001b87     	bl	0x1e220 <__android_log_print@plt>
+   17408: 2a1f03f3     	mov	w19, wzr
+   1740c: f94003e8     	ldr	x8, [sp]
+   17410: b5000128     	cbnz	x8, 0x17434 <ASurfaceTransaction_setBufferDataSpace+0x294>
+   17414: 1400000d     	b	0x17448 <ASurfaceTransaction_setBufferDataSpace+0x2a8>
+   17418: a94123e9     	ldp	x9, x8, [sp, #0x10]
+   1741c: eb08013f     	cmp	x9, x8
+   17420: 1a9f07f3     	cset	w19, ne
+   17424: 910043e0     	add	x0, sp, #0x10
+   17428: 94001e2a     	bl	0x1ecd0 <_ZN7android15HdrCapabilitiesD1Ev@plt>
+   1742c: f94003e8     	ldr	x8, [sp]
+   17430: b40000c8     	cbz	x8, 0x17448 <ASurfaceTransaction_setBufferDataSpace+0x2a8>
+   17434: f9400109     	ldr	x9, [x8]
+   17438: 910003e1     	mov	x1, sp
+   1743c: f85e8129     	ldur	x9, [x9, #-0x18]
+   17440: 8b090100     	add	x0, x8, x9
+   17444: 94001b7b     	bl	0x1e230 <_ZNK7android7RefBase9decStrongEPKv@plt>
+   17448: f94007e0     	ldr	x0, [sp, #0x8]
+   1744c: b4000060     	cbz	x0, 0x17458 <ASurfaceTransaction_setBufferDataSpace+0x2b8>
+   17450: 910023e1     	add	x1, sp, #0x8
+   17454: 94001b77     	bl	0x1e230 <_ZNK7android7RefBase9decStrongEPKv@plt>
+   17458: f9401688     	ldr	x8, [x20, #0x28]
+   1745c: f85e83a9     	ldur	x9, [x29, #-0x18]
+   17460: eb09011f     	cmp	x8, x9
+   17464: 540000c1     	b.ne	0x1747c <ASurfaceTransaction_setBufferDataSpace+0x2dc>
+   17468: 2a1303e0     	mov	w0, w19
+   1746c: a9457bfd     	ldp	x29, x30, [sp, #0x50]
+   17470: a9444ff4     	ldp	x20, x19, [sp, #0x40]
+   17474: 910183ff     	add	sp, sp, #0x60
+   17478: d65f03c0     	ret
+   1747c: 94001b35     	bl	0x1e150 <__stack_chk_fail@plt>

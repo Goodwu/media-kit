@@ -6,6 +6,8 @@
 
 真机APK `/tmp/media-kit-surface-control-hdr-probe-11009-arm64.apk` SHA-256 `0c5820ffee9b353224b7ff3d98a05e5a3df66831c201be6818a9c8fcdd6503f8`，启动日志 `/tmp/media-kit-surface-control-hdr-probe-11009-logcat.txt` SHA-256 `c85b15b2f9c5aed1e80bcd5ae3b1cec95bf1d618eee7b7c5f243e96fcd51beae`。03:45:07.991源已打开；03:45:10.922调用事务 dataspace 时，SurfaceFlinger记录应用 UID 10227访问拒绝及 `getHdrCapabilities failed to transact: -1`，紧接着进程以 `Abort message: 'invalid dataspace'` 发生 SIGABRT。堆栈落在 `PlatformVideoView_createHdrSurfaceControlProbe` 的事务调用。探针的“submitted”日志未出现；没有成功显示的PQ子层，不得用本轮声明HDR输出。
 
+2026-09-27 复核：上述原始日志、APK和反汇编的SHA-256均未变化。为避免`/tmp`证据丢失，关键崩溃行另存 `android-surface-control-11009-failure.txt.gz`，完整`ASurfaceTransaction_setBufferDataSpace`反汇编复制为`android-surface-control-11009-disasm.txt`；原APK没有复制入仓库。
+
 只读反汇编目标 `libandroid.so` 的 `ASurfaceTransaction_setBufferDataSpace`：它在 `SurfaceComposerClient::Transaction::setDataspace` 前先调用内部 dataspace 合法性函数，PQ分支再调用 `SurfaceComposerClient::getHdrCapabilities`；失败则返回false，公开C包装器触发 `invalid dataspace` 断言。反汇编 `/tmp/media-kit-lya-surface-transaction-dataspace-disasm.txt` SHA-256 `0aca4e34a11707a1a15f39611a446e6dbfb967f1c1656d0997c42a4cc0b82805`。因此这条公开事务API虽存在，**在当前普通应用 UID 与固件组合下同样卡在HDR能力/权限前置门禁**，而且拒绝方式比NDK window setter更严重；此固件不能把它当安全fallback。不能推广到其他Android版本或推断面板/HWC不支持HDR，原生MediaCodec直出PQ/HLG有独立阳性证据。
 
 实验后强停崩溃应用，`surface_control_hdr_probe`/`late_pq_probe` 回读0，移除设备本轮SDR临时文件，`adb install -r -d` 恢复10369基线包并核对versionCode。隔离子层/native接口代码已从工作树撤下；仅保留日志、APK和此证据。后续GPU HDR若继续，必须找到正常应用可用且能实际提交HDR buffer的生产路径；不能只依据API导出或设备支持HDR类型作承诺。
