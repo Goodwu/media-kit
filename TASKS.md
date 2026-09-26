@@ -8,8 +8,8 @@
   - status: in_progress
   - context: archives/conversations/android-hdr-dv-display-plan-20260922.md
   - acceptance: 固定素材身份与设备能力；PlatformView 对 HDR10/P8.4/P5 分别输出 PQ/HLG/PQ，Texture 明确转换到 SDR；核对实际后端、Surface 格式、系统 HDR 合成、SDR 复位和全屏可见画面。P8.4 的无 HLG 路径、P5 DV 元数据处理及原生 DV 能力须单独说明，不能以 PQ 转换冒充原生 DV。最高亮度仅用于短时人工观察，每轮结束立即恢复原自动亮度，不长时间停留静态画面。
-  - latest: HDR10、P8.4 已获用户真全屏画质/流畅性好评；10436/10437 P5 同页全屏画面良好，10437 的 SF/HWC 为 10 位 BT.2020/PQ，但依赖精确固件私有探针。此固件普通应用 GPU producer 的已试公开 PQ 出口均失败，11009 AHardwareBuffer 同样因 HDR 能力权限拒绝 SIGABRT。12464 正确 P5 JAR 短轮的 PQ Surface 拒绝且 `wid=0`，Dart 10 秒后超时；12465/12466 的失败 ACK 在拒绝后约 76/78 ms 报具体错误。12465 同进程 HDR10/P8.4 以原生 `mediacodec_embed` 报打开成功，但未同步核对SF/HWC及可见帧；12466 强制 GPU PlatformView HDR 时 HDR10 新 PQ Surface 同样被拒绝，P8.4 未试。见`archives/experiments/android-p5-public-fail-12464-20260927.md`。默认产品 P5 PQ、静态元数据、独立色准和双视图一致性仍开放。
-  - next: 按已验证的原生后端同进程复核 HDR10/P8.4 系统HDR输出、SDR 复位、可见帧及旧 A→新 B 交错；确认失败清理耗时来源。停止此固件重复公开 PQ 探针；P5 Texture SDR 仅作明确标示的降级，不关闭 PQ 任务。
+  - latest: HDR10、P8.4 已获用户真全屏画质/流畅性好评；10436/10437 P5 同页全屏画面良好，10437 的 SF/HWC 为 10 位 BT.2020/PQ，但依赖精确固件私有探针。此固件普通应用 GPU producer 的已试公开 PQ 出口均失败，11009 AHardwareBuffer 同样因 HDR 能力权限拒绝 SIGABRT。12464 正确 P5 JAR 短轮的 PQ Surface 拒绝且 `wid=0`，Dart 10 秒后超时；12465/12466 的失败 ACK 在拒绝后约 76/78 ms 报具体错误。12466 强制 GPU PQ 时 HDR10 也被拒绝；12468 P5 失败后同进程原生 `mediacodec_embed` HDR10/P8.4 依次恢复，SF/HWC 为 BT.2020/PQ(metadata types=3)/HLG(types=0)，两源各相隔3秒的视频区截图均变化。见`archives/experiments/android-p5-native-recovery-12468-20260927.md`。默认产品 P5 PQ、静态元数据、独立色准及全屏双视图一致性仍开放。
+  - next: 复核同进程 SDR 信令复位、全屏可见画面及旧 A→新 B 交错；停止此固件重复公开 PQ 探针。P5 Texture SDR 仅作明确标示的降级，不关闭 PQ 任务。
 
 - [ ] P5 Glass 4K59.94 真全屏性能门槛
   - status: in_progress
@@ -32,7 +32,7 @@
   - priority: 当前 Android HDR/P5 工作完成后立即启动，先于其它 Next 项
   - context: archives/conversations/android-hdr-dv-display-plan-20260922.md
   - acceptance: 在真实手机上，以用户触发打开视频为起点、屏幕实际呈现首个视频帧为终点计时；覆盖当前支持的 SDR、HDR10、P8.4、P5 代表素材及冷/热启动，重复记录分布与最慢样本，正常播放达到 2 秒内，争取 1 秒内。视频尺寸或 Surface ACK 不能冒充实际出图；同时保持画质、音画同步、全屏及退出/重入正确。
-  - latest: 用户反馈目前从打开到出图较慢；尚无同一计时口径的实机基线，不能把此前约 6–11 秒的粗略观察当作当前版本数据。12465失败后诊断页同进程恢复HDR10/P8.4分别约22/57秒才报打开；该诊断页每次先逐块SHA-256并复制完整518MB/1.1GB媒体到私有目录，属于测试前处理，不能当成播放器首帧耗时。
+  - latest: 用户反馈目前从打开到出图较慢；尚无同一计时口径的实机基线，不能把此前约 6–11 秒的粗略观察当作当前版本数据。12468阶段计时证明诊断页同进程HDR10/P8.4在逐块SHA-256并复制518MB/1.1GB素材上耗时21.908/51.095秒；素材就绪到轨道确认仅0.449/0.587秒，但仍不是实际首帧呈现。见`archives/experiments/android-p5-native-recovery-12468-20260927.md`。
   - next: 先为诊断页分别计量素材暂存与实际打开/首帧，建立用户触发到真实呈现的冷/热启动基线；产品路径不应计入测试页整片复制。再分解探测/解码、Surface 创建、GPU 首帧提交和系统呈现各阶段耗时，按最大瓶颈优化并复测。
 
 - [ ] Android native output / 双视图生命周期回归
