@@ -71,6 +71,7 @@ class AutoLifecycleScreen extends StatefulWidget {
 
 class _AutoLifecycleScreenState extends State<AutoLifecycleScreen> {
   int generation = 1;
+  bool _removed = false;
   Player? _logRebinder;
   StreamSubscription? _logRebinderSubscription;
 
@@ -96,7 +97,7 @@ class _AutoLifecycleScreenState extends State<AutoLifecycleScreen> {
   void initState() {
     super.initState();
     Future<void>.delayed(const Duration(seconds: 14), () {
-      if (!mounted) return;
+      if (!mounted || _removed) return;
       setState(() => generation++);
       debugPrint('AUTO_LIFECYCLE_RECREATE generation=$generation');
       if (const bool.fromEnvironment('MEDIA_KIT_AUTO_LIFECYCLE_LOG_REBIND')) {
@@ -106,6 +107,17 @@ class _AutoLifecycleScreenState extends State<AutoLifecycleScreen> {
         );
       }
     });
+    const terminateSeconds = int.fromEnvironment(
+      'MEDIA_KIT_AUTO_LIFECYCLE_REMOVE_SECONDS',
+      defaultValue: -1,
+    );
+    if (terminateSeconds >= 0) {
+      Future<void>.delayed(Duration(seconds: terminateSeconds), () {
+        if (!mounted || _removed) return;
+        setState(() => _removed = true);
+        debugPrint('AUTO_LIFECYCLE_REMOVE');
+      });
+    }
   }
 
   @override
@@ -119,7 +131,9 @@ class _AutoLifecycleScreenState extends State<AutoLifecycleScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SinglePlayerSingleVideoScreen(key: ValueKey(generation));
+    return _removed
+        ? const SizedBox.shrink()
+        : SinglePlayerSingleVideoScreen(key: ValueKey(generation));
   }
 }
 

@@ -22,8 +22,8 @@
   - status: in_progress
   - context: archives/conversations/native-output-rebuild-20260920.md
   - acceptance: 同一控制器的并发 dispose 共用完成屏障；Player 销毁前完成 native output/render context 释放，dispose 后不再写 active notifier。用 modern mpv 实际播放后退出、快速重入和输出重建，均无 `mpv_render_context_free() not called` abort。
-  - latest: 新增 Darwin Player preTermination 释放屏障、创建/销毁仲裁及失败重试，V2 静态复审通过。隔离的 Goodwu mpv 0.41 W0 测试包实际播放 SDR：首个 native Surface 出图并释放，重建的第二个 Surface 再次出图，Player dispose 完成，进程未出现 render-context abort；见 `archives/experiments/macos-w0-modern-20260927.md`。应用 Quit 未打印第二个 Surface 的释放 ACK，不能据此判定完整退出合格。
-  - next: PiliPlusX 本地 path override 使用当前 media-kit 的 macOS Debug 包已构建，并与 final16 的 Goodwu mpv 0.41 框架组成独立测试包；进程启动且 Dart/网络初始化，但未创建可操作窗口，因此未进入播放验收，见 `archives/experiments/piliplusx-macos-3a4fcaa-launch-20260927.md`。先查明测试包无窗口的原因，再验证有序退出、快速重入、seek、输出重建和 HDR 长播；取得第二个 Surface 与 render context 释放顺序后关闭本项。
+  - latest: Darwin Player preTermination 屏障、创建/销毁仲裁及失败重试已通过 V2 静态复审。隔离 Goodwu mpv 0.41 W0 测试包完成 SDR 出图→重建→第二次出图→定时移除：两个 Surface 均有释放记录，两次 Player dispose 完成，进程未见 render-context abort，见 `archives/experiments/macos-w0-remove-20260927.md`。PiliPlusX 当前 Debug 和未改动 final16 包在此桌面环境均无可操作窗口，产品调用链仍未验收。
+  - next: 定位 PiliPlusX 窗口不可访问的环境/应用状态，再验证产品调用链有序退出、快速重入、seek、输出重建及 HDR 长播；测试页的定时移除证据不能替代这些场景。
 
 ## Next（近期候选，最多 10 条）
 
