@@ -63,6 +63,13 @@ task downloadDependencies(type: Exec) {
             ["url": "https://github.com/Predidit/libmpv-android-video-build/releases/download/v1.2.7/default-x86_64.jar", "sha256": "aed0fffc99e5e554d48e1af90bc700133c25fbc02615bf1bf17db9299365c481", "destination": file("$buildDir/v1.2.7/default-x86_64.jar")],
             ["url": "https://github.com/Predidit/libmpv-android-video-build/releases/download/v1.2.7/default-x86.jar", "sha256": "9269643264a1c9689116467f313d5e1b23ea56a68d338ab940c5e8fcf07061c6", "destination": file("$buildDir/v1.2.7/default-x86.jar")]
         ]
+        // The Android test app currently packages only arm64. Keep normal
+        // library builds multi-ABI unless the caller opts into this property.
+        if (project.findProperty("mediaKitArm64Only")?.toString() == "true") {
+            filesToDownload.removeAll {
+                it.destination.name != "default-arm64-v8a.jar"
+            }
+        }
 
         // An explicit local jar lets the Android test app validate a rebuilt
         // arm64 libmpv without changing the pinned release for normal builds.

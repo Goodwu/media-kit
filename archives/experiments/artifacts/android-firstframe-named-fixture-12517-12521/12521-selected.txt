@@ -1,0 +1,17 @@
+         1790511976.291 18706 18706 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=requested elapsed_us=1
+         1790511976.292 18706 18706 I flutter : ANDROID_NAMED_LOCAL_SAMPLE sample=AndroidHdrSample.dolbyVisionP5 path=/data/local/tmp/media-kit-p5-glassblowing2-4k5994.mp4
+         1790511976.292 18706 18706 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=sample_ready elapsed_us=1084
+         1790511976.292 18706 18706 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=queue_entered elapsed_us=1154
+         1790511976.499 18706 18706 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=validated elapsed_us=207838
+         1790511976.501 18706 18706 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=previous_output_stopped elapsed_us=210039
+         1790511976.501 18706 18706 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=configuration_reset elapsed_us=210106
+         1790511976.520 18706 18706 I VideoOutputManager: com.alexmercerind.media_kit_video.VideoOutputManager.setSurfaceSize: 530444326992 2984 1440
+         1790511976.609 18706 18706 I flutter : ANDROID_TEXTURE_PREPARED layoutBound=true
+         1790511976.610 18706 18706 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=output_prepared elapsed_us=318721
+         1790511976.627 18706 18706 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=configured elapsed_us=336272
+         1790511976.627 18706 18706 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=output_ready elapsed_us=336380
+         1790511976.637 18706 18706 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=media_opened elapsed_us=346314
+         1790511976.668  1072  1072 I OMXMaster: makeComponentInstance(OMX.hisi.video.decoder.hevc) in android.hardwar process
+         1790511976.975 18706 19018 E P5_RAW_STAGE: P5_IMAGE_COUNT acquired=1 deleted=0 current_image=1 retired=0 callbacks=1 empty_acquires=0 retire=1 pts=0.050050000
+         1790511977.057 18706 18706 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=track_verified elapsed_us=766327
+         1790511977.059 18706 18706 I VideoOutputManager: com.alexmercerind.media_kit_video.VideoOutputManager.setSurfaceSize: 530444326992 3840 2160
