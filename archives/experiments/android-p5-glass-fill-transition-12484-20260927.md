@@ -2,6 +2,8 @@
 
 ## Current State
 
+后续12485同一 SurfaceProducer 链路的设备单调时钟证据显示，洋红转黑**早于首个原生AImage**；该转换是初始化黑色画面，不能再作为首个视频帧候选。详见`android-p5-glass-pixel-copy-startup-12485-20260927.md`。
+
 2026-09-27，华为 LYA-AL00/API29，自动亮度、纵屏诊断页。同一 Glass P5 3840×2160/59.94 文件 SHA-256 `afb24b77733a3ca9071f0cfea0d0f7871670a7b6119eb44a314cba974541477c`，同一正确 arm64 JAR SHA-256 `5b9495f72893b8b62bb9085c67c9e87707b04f5910d3f09e9a79df82efcfd2e2`。12484 APK SHA-256 `fec11a2c22d5d2fdf4cd67a76c4af77fd0e14560de1212b434ed145628cbb3f5`。使用 HDR transaction、P5 RPU 和 Texture SDR，原始媒体时间线从0播放；临时固定文件预验证探针避开测试页331 MB整片复制。只把测试页 Video 的等待底色改成洋红色，以截图区分等待画面和后续黑色视频区；这个探针不改变视频像素、媒体时间线或产品库默认值。
 
 点击前截图确认视频区域为均匀洋红色。以主机发出 `adb shell input tap` 前的单调时间为起点，连续 `screencap`，在远离加载圆圈的左侧视频区域判断洋红消失和首次出现实际场景。三次全新进程/冷 Player 的截图采集完成上界：
