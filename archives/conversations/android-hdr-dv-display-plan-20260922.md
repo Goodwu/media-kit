@@ -2,6 +2,8 @@
 
 ## Current State
 
+- 2026-09-28 P0映射器精简12573：隔离mpv删除可选同帧缓存、EGL缓存及高频日志，保留默认P5退休队列同帧复用与普通OES回退；V1复核发现非direct实验分支计数回归，已限次修复，资源所有权复核无新阻断。arm64编译链接与Mystery Box短轮成功，t8 VO3、decoder0、实际画面、零AImage/render错误；退出AImage1513/1513、retired0、Player完成。历史日志门禁`--cache`改为可选。手机恢复12492、自动亮度、熄屏。剩非默认FBO/PACK10和探针收敛、精简版全片、seek/重入及真人观感。见 `archives/experiments/android-p5-product-mapper-prune-12573-20260928.md`。
+
 - 2026-09-28 P0非P5 HDR回退短轮：与12569/12570同版自建arm64 JAR，12571 HDR10及12572 P8.4均在横屏Texture→SDR真实出画，t8 VO/decoder0，P5专用退休路径未激活（`retire=0`），退出AImage分别543/543与761/761、Player完成，无AImage/render错误。仅验证当前手机短轮回退，不等同原生HDR验收。手机恢复12492、自动亮度、熄屏。见 `archives/experiments/android-p5-product-nonp5-fallback-12571-12572-20260928.md`。
 
 - 2026-09-28 P0修复版Glass全片12570：与12569同版arm64 JAR，真正 `gpu-next`/`mediacodec`、Texture2560×1440、默认电池/自动亮度，从片头到显式EOS；t180媒体177.48秒VO41、decoder0，GPU190样本中位415MHz，片尾截图为正常DV logo、无紫屏，全片零AImage/render错误。正常退出AImage acquired/deleted=10433/10433、retired0、Player完成。手机恢复12492、属性0、自动亮度、熄屏。P0剩非P5 HDR回退、seek/重入、真人动态观感及mpv诊断收敛；片尾偶发紫屏根因仍属P3。见 `archives/experiments/android-p5-glass-product-12570-20260928.md`。
