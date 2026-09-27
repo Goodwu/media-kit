@@ -1,6 +1,8 @@
 # Android HDR10 / DV P8.4 / P5、视图定位与原生 DV 能力计划（2026-09-22）
 
 ## Current State
+
+- 2026-09-27 12530将通用Texture预绑定接入普通列表点击打开路径；已挂载Video的P8.4 Texture SDR四独立进程PixelCopy内容0.681/0.462/0.449/0.454秒，四轮`layoutBound=true`，间隔截图有不同视频帧。计时从回调内开始、页面竖屏非全屏；重复点击旧帧污染首帧探针，不计重入。真全屏、输入起点、音画、色彩和重入仍需验，之后才进入原生PQ/HLG时延。手机恢复12492、属性0、自动亮度、熄屏。见`archives/experiments/android-p84-normal-texture-firstframe-12530-20260927.md`。
 - 2026-09-27 TASKS相似项复核：将Texture SDR与原生HDR首帧按先后阶段合成一项，将P5 RPU/独立色准作为HDR/DV显示闭环必过子门槛；开放项由10减为8，天空层纹标记用户暂缓，其余因根因或平台验收不同保留。见`archives/experiments/tasks-consolidation-20260927.md`。
 - 2026-09-27 用户要求P8.4 Texture SDR验收完成后，继续测量并优化原生HDR首帧；已在TASKS Next新增独立任务，目标HDR10 PQ/P8.4 HLG真全屏，不能以Texture SDR短轮代替。
 - 2026-09-27 P5尾段map环形轨迹12527诊断包在首次播放初始化即`info_callback`递归SIGSEGV，未进入尾段，作废；手机恢复12492/自动亮度/熄屏，隔离AImageReader源码比对后恢复，失败JAR删除。见`archives/experiments/android-p5-tail-map-trace-12527-failed-20260927.md`。
