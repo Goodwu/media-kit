@@ -27,6 +27,13 @@
 
 ## Next（近期候选，最多 10 条）
 
+- [ ] 完成P8.4 Texture SDR验收后测量并优化原生HDR播放首帧
+  - status: queued_after_sdr
+  - context: archives/conversations/android-hdr-dv-display-plan-20260922.md
+  - acceptance: SDR验收完成后，以同一手机、固定HDR10和P8.4素材，在实际原生PQ/HLG输出及真全屏路径，分别测用户触发到首次可见HDR画面；记录冷/热启动分布、最慢样本、输出Surface dataspace/系统合成与视频持续播放。超过2秒时做同包对照定位并优化，不能以Texture→SDR的0.4–0.9秒结果代替。P5原生PQ仍受显示路径任务约束，须单独说明。
+  - latest: 用户2026-09-27指定“完成SDR验收后，测试并优化HDR的播放时延”；目前仅有HDR素材经Texture→SDR的首帧数据，原生HDR时延未测。
+  - next: 等P8.4 Texture SDR正常入口验收后，先测P8.4原生HLG与HDR10原生PQ的首帧和Surface合成，再针对主要耗时做A/B。
+
 - [ ] 修复 macOS modern mpv 销毁时未释放 render context 的崩溃
   - status: queued
   - context: archives/conversations/native-output-rebuild-20260920.md
@@ -59,6 +66,7 @@
   - acceptance: 同源重复到EOS，区分片源最后一帧、mpv end-file状态、Texture/Surface释放与Flutter呈现；片尾显示符合明确策略（保留末帧或清黑），重入无残影，HDR10/SDR回归正常。
   - latest: 12492指定Glass P5竖屏长播，媒体PTS174.874700秒的同进程日志直接报AImageReader `-30001`、硬解Surface映射失败和VO渲染失败；约1.14秒后的视频区域为纯RGB(128,0,255)，源末帧不是该色。隔离mpv源码的无效渲染分支恰用此紫色清空目标，但与现用JAR未重建到同字节；旧实验支持重复release同一Buffer为优先候选，12492缺身份与EOS证据，根因未定。见`archives/experiments/android-p5-glass-eos-purple-12492-20260927.md`。
   - tail_repro: 12526受控 `Media(start=170s)` 真全屏Texture短轮两独立进程：第一轮PTS174.958再现AImageReader `-30001`、渲染失败及整块紫色；第二轮尾部无第二次错误且保留视频末帧。两轮PTS170.003均有一次起播取图失败并恢复，不能与尾部混同。尚缺同刻end-file和codec buffer身份，根因未定。见`archives/experiments/android-p5-tail-repro-12526-20260927.md`。
+  - failed_probe: 12527尝试在隔离AImageReader加最近16次map身份轨迹，但自建诊断包首次播放初始化即`info_callback`重复递归SIGSEGV，未进入尾段，不能作为紫屏根因证据；临时源码已恢复、失败JAR已删。见`archives/experiments/android-p5-tail-map-trace-12527-failed-20260927.md`。
   - next: 在尾段失败时输出最近map的reader代次、源帧/codec buffer身份、PTS、release与callback；先用尾段起播缩短复现，若不复现改为整片。确认同因后设计兼容延退的同帧所有权，并以完整Glass EOF、暂停重绘、seek及退出重入验证。
 
 - [ ] 在真实 OHOS 设备上继续验证 native output 生命周期
