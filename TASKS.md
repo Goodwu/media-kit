@@ -2,6 +2,16 @@
 
 任务事实源：这里只保留当前状态、验收门槛和下一步。2026-09-27 清理前的完整实验流水保存在 `archives/experiments/tasks-ledger-snapshot-20260927.md`；按各项 `context` 查看持续更新的依据。
 
+## P5 当前优先级（2026-09-28）
+
+后续 P5 主验收素材改为 `/Users/wuweiwei1/Downloads/test-clips/Mystery Box Dolby Vision Profile 5.mp4`，SHA-256 `3e610d3b1b11e9b802da66d69bd97f6371a2b114ee464a7e8517fe31d706cc9f`；HEVC Main 10、3840×2160、60000/1001 fps、DV Profile 5/RPU、98.944 秒。用户确认片头无黑场。旧 Glass 片的掉帧数字保留为历史对照；旧片仍用于已发现的片尾紫屏定点复现。
+
+1. **P0 P5→PQ 产品输出和首帧**：以新片确认正常入口横屏全屏出画、10 位 BT.2020/PQ 合成及点击到可见内容；将精确固件私有诊断路径与可交付的产品路径分开，解决公开出口阻断。首帧探针绑定当前 Surface 代次，不借旧片黑场推断延迟。
+2. **P1 P5→PQ 全片性能**：新片在默认电池模式、明确输出尺寸下播至 EOS，逐段记录 VO/decoder 掉帧、GPU 频率、温度及持续画面；据此优化 PQ 路径。既有 Texture SDR 优化收益不能外推。
+3. **P2 P5→Texture SDR 优化默认开启**：把已保存的通用 `optimize_dovi_linear_decode` 候选接入支持条件下的默认路径，保留不匹配场景回退；验证构建确实含该优化并命中，新片短轮画质/资源和全片观感。用户认为既有观感基本良好，暂不继续追逐原 Glass 严格掉帧门槛。
+4. **P3 P5 生命周期及片尾问题**：覆盖退出重入、Surface/双视图切换、Engine 销毁；旧 Glass 紫屏继续按定点故障复现，新片仅作正常 EOF 回归。
+5. **P4 独立色彩数值验收**：用户已看过 P5 画面，认为颜色基本正常；保留 RPU 逐帧/seek/flush 及独立同 PTS 数值比较，排在输出、性能和生命周期之后。
+
 ## Now（当前推进，最多 3 条）
 
 - [ ] Android HDR10 / DV P8.4 / P5 显示闭环
@@ -9,16 +19,16 @@
   - context: archives/conversations/android-hdr-dv-display-plan-20260922.md
   - acceptance: 固定素材身份与设备能力；PlatformView 对 HDR10/P8.4/P5 分别输出 PQ/HLG/PQ，Texture 明确转换到 SDR；核对实际后端、Surface 格式、系统 HDR 合成、SDR 复位和全屏可见画面。P8.4 的无 HLG 路径、P5 DV 元数据处理及原生 DV 能力须单独说明，不能以 PQ 转换冒充原生 DV。最高亮度仅用于短时人工观察，每轮结束立即恢复原自动亮度，不长时间停留静态画面。
   - latest: HDR10、P8.4 已获用户真全屏画质/流畅性好评；10436/10437 P5 同页全屏画面良好。12542/12543 在精确固件私有探针开启时再次得到 P5 `gpu-next`/`mediacodec`、10 位 BT.2020/PQ 视频层、HWC PQ 合成和全屏实际画面；这是本机诊断路径成功，不是通用产品路径通过。12539 仅是关闭探针的公开 Surface PQ 设置失败（`wid=0`）。此固件普通应用 GPU producer 的已试公开 PQ 出口均失败，11009 AHardwareBuffer 同样因 HDR 能力权限拒绝 SIGABRT。12541 私有设置成功却被旧 Surface 的颜色空间 ACK 错误拦住，12542 通用修复后出画。12468 P5 失败后同进程原生 `mediacodec_embed` HDR10/P8.4 依次恢复；12471 再接 SDR 时视频层复位 BT.709、HDR metadata types=0，见`archives/experiments/android-hdr-sdr-recovery-12471-20260927.md`、`archives/experiments/android-p5-private-pq-firstframe-12541-12543-20260927.md`。默认产品 P5 PQ、静态元数据、独立色准及全屏双视图一致性仍开放。
-  - P5_RPU_color_gate: 对实际输出逐帧核对RPU与画面，覆盖seek/flush/重开；以明确参考母版、目标空间和映射策略做同PTS独立数值色彩比较，并与用户观感分开。10440前后跳4次flush匹配2321/2321；12512预建路径两次重开匹配626/626、622/622，errors0/unconsumed0。长期重开、该布局seek/flush和独立色准仍开放，见`archives/experiments/android-p5-glass-rpu-reopen-12486-20260927.md`、`archives/experiments/android-p5-glass-prebind-rpu-12512-20260927.md`。
+  - P5_RPU_color_gate: 用户已观察 P5 画面并认为颜色基本正常，独立色彩数值验收降至 P4；仍需对实际输出逐帧核对RPU与画面，覆盖seek/flush/重开，并以明确参考母版、目标空间和映射策略做同PTS独立比较。10440前后跳4次flush匹配2321/2321；12512预建路径两次重开匹配626/626、622/622，errors0/unconsumed0。长期重开、该布局seek/flush和独立色准仍开放，见`archives/experiments/android-p5-glass-rpu-reopen-12486-20260927.md`、`archives/experiments/android-p5-glass-prebind-rpu-12512-20260927.md`。
   - next: 原生 HDR→SDR 信令复位已有短轮证据；继续真全屏可见画面、GPU HDR→SDR Surface 复位及 P5 PQ 路径，同时完成上方RPU/色准子门槛。停止此固件重复公开 PQ 探针。P5 Texture SDR 仅作明确标示的降级，不关闭 PQ 任务。
 
-- [ ] P5 Glass 4K59.94 真全屏性能门槛
+- [ ] P5 性能：先 PQ 全片，再将 Texture SDR 候选默认开启
   - status: in_progress
   - context: archives/conversations/android-hdr-dv-display-plan-20260922.md
-  - acceptance: 使用指定 Glass P5 源（SHA-256 `afb24b77733a3ca9071f0cfea0d0f7871670a7b6119eb44a314cba974541477c`）在原生屏幕尺寸、默认电池模式下真横屏播至 EOS；记录实际输出尺寸、每 30 秒 VO/decoder 掉帧、媒体时间、GPU 频率和温度，并以真人可见流畅度单独验收。性能模式和降低输出分辨率的结果不得替代默认配置门槛。
+  - acceptance: 使用上方 Mystery Box P5 新片，在原生屏幕尺寸、默认电池模式下分别核验 PQ 与 Texture SDR 真横屏全片；逐段记录实际输出尺寸、VO/decoder 掉帧、媒体时间、GPU 频率和温度，以真人可见流畅度单独验收。PQ 路径先建立同包基线并针对其瓶颈优化；SDR 将通用候选在支持条件下默认开启、保留安全回退并确认实际命中和观感。旧 Glass 严格门槛及性能模式数字只作历史记录，不替代新片验收。
   - latest: 同 APK、2560×1440 输出的系统性能模式开/关/开 EOS VO 掉帧为 17/5051/19，decoder 为 0；默认模式门槛未过。1920×1080 也出现伴随 GPU 低频的后段失速；关闭抖动无明显低频收益，已停止该方向。用户最近确认 10437 的 1440 宽 P5 吹玻璃画面流畅，但这不覆盖 2560 默认模式全片门槛。
   - output_scope: 既有 `p5_pq_pipeline` A/B/A 在 **P5→Texture SDR BT.1886、2560×1440** 下取得 EOS VO 2607/516/3626，严格门槛仍失败；其分支明确要求 SDR 目标，不能用于 P5→PQ Surface。12542–12544 的 P5→PQ 使用自建 JAR `f745146...`，其中没有该分支，短轮只证出画与合成，尚无同配置全片掉帧数据。原生 PQ 的性能须单独定目标尺寸和默认电池模式，用同一正式输出路径播至 EOS 记录 VO/decoder、GPU 频率及真人流畅度，不能沿用 Texture SDR 数字。
-  - next: 在同一正式全屏路径、固定输出尺寸和默认电池模式下分离低频时的 GPU 渲染与提交/合成等待，再对有效改动做同帧颜色及全片 A/B/A 复核。
+  - next: 先用新片测 P5→PQ 全片基线，区分 GPU 渲染与提交/合成等待并优化；随后把已提交到 Goodwu/libplacebo 的 `optimize_dovi_linear_decode` 通过受支持的 P5→Texture SDR 策略默认启用，构建自有 arm64 JAR 并验证命中、回退、资源和实际观感。旧 Glass SDR 掉帧继续优化暂缓。
 
 - [ ] Android 视频首帧时延验收：先 P8.4 Texture SDR，后原生 HDR
   - status: sdr_accepted_hdr_in_progress
@@ -31,7 +41,7 @@
   - touchdown_reentry_sdr: 12533三独立进程触摸按下至横屏全屏明显内容0.767/0.789/0.681秒；12535同PID先销毁播放页、回主菜单，再新建播放页并出图，第二次按下至内容0.656秒，旧帧不再污染。仅系统读回短轮，仍缺光学、独立色准、音画同步与冷/热统计。见`archives/experiments/android-p84-touchdown-and-reentry-12533-12535-20260927.md`。
   - sdr_acceptance: 12535 P8.4 Texture→SDR 真横屏全屏人工观察：用户认为轻微偏淡但可接受，画面流畅、声画同步；单独从竖屏列表 Video 0 点击，用户感受约1秒内出实际画面，同轮触摸按下至明显内容 PixelCopy 为0.844秒。此前一次约2秒竖屏黑屏反馈含脚本故意等待2秒，不能归因于播放器。此设备/素材/路径的用户验收通过；未做独立色度仪或面板光学时间测量。见`archives/experiments/android-p84-sdr-human-acceptance-20260927.md`。
   - latest_hdr: 12537 P8.4原生HLG三独立进程触摸按下→视频Surface读回内容0.670/0.676/0.623秒；12538 HDR10原生PQ为0.653/0.648/0.630秒。各有真横屏全屏截图，SF视频层分别BT.2020 HLG(types0)/PQ(types3)。12539 是关闭私有探针的公开 P5 PQ 设置失败，`wid=0`，请求→明确失败0.422秒。12542/12543 在精确固件私有探针开启时成功输出 P5 PQ 并出实际画面；12543 三独立进程触摸按下→读回可辨内容3.953/4.009/4.079秒，含片源黑场，且首次探针采样曾命中旧 Surface，尚不能当作精准首个解码帧时间。2秒时视频层已有 PQ activeBuffer，截图仍是片头黑场。视频Surface读回可作自动化时延门槛，但不能单独证明系统合成或面板显示。见`archives/experiments/android-native-hdr-firstframe-12537-12539-20260927.md`、`archives/experiments/android-p5-private-pq-firstframe-12541-12543-20260927.md`。
-  - next: 12544 全屏尺寸筛选排除了旧 `1440×810` Surface，P5 私有 PQ 路径触摸按下→可辨画面读回3.967秒，仍含片头黑场；但同尺寸不足以证明当前 Surface owner，见`archives/experiments/android-p5-private-pq-probe-target-12544-20260928.md`。后续把探针绑定当前 View/Surface generation，区分首个 HDR buffer 与可辨画面；评估可支持的产品出口，不重复已证实失败的公开 PQ 探针。扩充 HDR 冷/热、重入、连续画面和输出切换统计；面板光学及独立色度仪仍是精度限制。
+  - next: P5 改用上方无片头黑场的 Mystery Box 样片重测 PQ 点击到可见内容；12544 的3.967秒属于旧片，不能沿用。探针绑定当前 View/Surface generation，区分首个 HDR buffer 与可辨画面；评估可支持的产品出口，不重复已证实失败的公开 PQ 探针。扩充 HDR 冷/热、重入、连续画面和输出切换统计；面板光学及独立色度仪仍是精度限制。
 
 ## Next（近期候选，最多 10 条）
 
@@ -64,6 +74,7 @@
   - tail_repro: 12526受控 `Media(start=170s)` 真全屏Texture短轮两独立进程：第一轮PTS174.958再现AImageReader `-30001`、渲染失败及整块紫色；第二轮尾部无第二次错误且保留视频末帧。两轮PTS170.003均有一次起播取图失败并恢复，不能与尾部混同。尚缺同刻end-file和codec buffer身份，根因未定。见`archives/experiments/android-p5-tail-repro-12526-20260927.md`。
   - failed_probe: 12527尝试在隔离AImageReader加最近16次map身份轨迹，但自建诊断包首次播放初始化即`info_callback`重复递归SIGSEGV，未进入尾段，不能作为紫屏根因证据；临时源码已恢复、失败JAR已删。见`archives/experiments/android-p5-tail-map-trace-12527-failed-20260927.md`。
   - next: 在尾段失败时输出最近map的reader代次、源帧/codec buffer身份、PTS、release与callback；先用尾段起播缩短复现，若不复现改为整片。确认同因后设计兼容延退的同帧所有权，并以完整Glass EOF、暂停重绘、seek及退出重入验证。
+  - source_scope: 旧 Glass 片仍保留作为 PTS≈175 秒紫屏的定点复现素材；新的 Mystery Box P5 片时长约99秒，先用于正常 EOF 回归，不能代替旧片的故障复现。
 
 ## Blocked（等待输入或外部条件）
 
