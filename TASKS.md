@@ -17,6 +17,7 @@
   - context: archives/conversations/android-hdr-dv-display-plan-20260922.md
   - acceptance: 使用指定 Glass P5 源（SHA-256 `afb24b77733a3ca9071f0cfea0d0f7871670a7b6119eb44a314cba974541477c`）在原生屏幕尺寸、默认电池模式下真横屏播至 EOS；记录实际输出尺寸、每 30 秒 VO/decoder 掉帧、媒体时间、GPU 频率和温度，并以真人可见流畅度单独验收。性能模式和降低输出分辨率的结果不得替代默认配置门槛。
   - latest: 同 APK、2560×1440 输出的系统性能模式开/关/开 EOS VO 掉帧为 17/5051/19，decoder 为 0；默认模式门槛未过。1920×1080 也出现伴随 GPU 低频的后段失速；关闭抖动无明显低频收益，已停止该方向。用户最近确认 10437 的 1440 宽 P5 吹玻璃画面流畅，但这不覆盖 2560 默认模式全片门槛。
+  - output_scope: 既有 `p5_pq_pipeline` A/B/A 在 **P5→Texture SDR BT.1886、2560×1440** 下取得 EOS VO 2607/516/3626，严格门槛仍失败；其分支明确要求 SDR 目标，不能用于 P5→PQ Surface。12542–12544 的 P5→PQ 使用自建 JAR `f745146...`，其中没有该分支，短轮只证出画与合成，尚无同配置全片掉帧数据。原生 PQ 的性能须单独定目标尺寸和默认电池模式，用同一正式输出路径播至 EOS 记录 VO/decoder、GPU 频率及真人流畅度，不能沿用 Texture SDR 数字。
   - next: 在同一正式全屏路径、固定输出尺寸和默认电池模式下分离低频时的 GPU 渲染与提交/合成等待，再对有效改动做同帧颜色及全片 A/B/A 复核。
 
 - [ ] Android 视频首帧时延验收：先 P8.4 Texture SDR，后原生 HDR
