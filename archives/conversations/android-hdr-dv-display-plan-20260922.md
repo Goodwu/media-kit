@@ -1,6 +1,7 @@
 # Android HDR10 / DV P8.4 / P5、视图定位与原生 DV 能力计划（2026-09-22）
 
 ## Current State
+- 2026-09-27 核对通用入口：`VideoController.prepareAndroidTextureOutput()` 仅在 Android SurfaceProducer Texture 且有已挂载、有界 Video 布局时预建并绑定；无布局/Surface 返回 false，调用方继续常规打开。实验页先横屏全屏是为了使该布局取到真实物理窗口，不应把诊断洋红 `Video.fill` 带入正式界面。已在`media_kit_video/README.md`说明调用顺序、限制和降级。
 - 2026-09-27 12516同APK物理横屏3120×1440 Glass P5布局预建开/关/开，去除加载控件并改取上方ROI后，点击至首个内容PixelCopy样本3.892/5.349/3.986秒；开轮均值早1.410秒。`media_opened→OMX HEVC创建`33/1005/33ms，收益主要与避免硬解重配等待同步；仅一轮关闭样本，且非光学首帧/未过2秒。洋红是诊断Video占位，16:9画面在3120宽屏上左右各留约280像素；先全屏为取得真实布局尺寸。12514/12515中央ROI受加载图标污染，计时作废。手机已恢复12492、五项属性0、自动亮度与旋转、熄屏；见`archives/experiments/android-p5-glass-prebind-physical-aba-12516-20260927.md`。
 - 2026-09-27 首帧显著收益但仍为隔离诊断：12500固定4K预建SurfaceProducer并等非零wid/gpu-next，首个AImage约0.735秒、固定区域首次非零3.003秒。12501同APK关闭→开启→关闭回摆，AImage2.485/1.177/2.550秒、非零4.718/3.476/5.137秒，`media_opened→OMX创建`0.996/0.031/1.269秒。支持当前Texture测试链“Surface未就绪→软件HEVC/VO null→硬解”是约1秒启动损耗方向；固定源尺寸不通用，RPU/颜色、退出重入、全片及物理屏幕未验，未合产品。手机恢复12492、诊断属性0、自动亮度1、屏幕OFF，见`archives/experiments/android-p5-glass-texture-presize-12500-12501-20260927.md`。
 - 2026-09-27 12499同源详细日志冷开：12498/12499点击回调至固定区域首个非零像素均约4.22秒，至旧明显内容阈值均约4.45秒；12498细分为打开返回0.341秒、返回至OMX创建0.974秒、创建至首个AImage0.670秒、AImage至首个非零2.234秒（含片源黑场）。mpv事件顺序为硬解设备首次不可用→9线程软件HEVC/VO null→后来硬解/VO gpu-next；这是待验证的约0.97秒候选。mpv消息经Dart异步转发，POC的logcat时戳不能与原生OMX行直接比较。原12492/属性0/自动亮度1/屏幕OFF已恢复，见`archives/experiments/android-p5-glass-verbose-startup-12499-20260927.md`。
