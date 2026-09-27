@@ -51,6 +51,9 @@ class _SinglePlayerSingleVideoScreenState
   static const _androidOpenOnTap = bool.fromEnvironment(
     'MEDIA_KIT_ANDROID_OPEN_ON_TAP',
   );
+  static const _androidTapFullscreenBeforeOpen = bool.fromEnvironment(
+    'MEDIA_KIT_ANDROID_TAP_FULLSCREEN_BEFORE_OPEN',
+  );
   static const _androidPreopenFullscreen = bool.fromEnvironment(
     'MEDIA_KIT_ANDROID_PREOPEN_FULLSCREEN',
   );
@@ -382,6 +385,16 @@ class _SinglePlayerSingleVideoScreenState
         final started = await _flutterSurfaceProbeChannel
             .invokeMapMethod<String, dynamic>('StartFirstFrameProbe');
         debugPrint('FIRST_FRAME_PIXEL_COPY started=$started');
+      }
+      if (Platform.isAndroid && _androidTapFullscreenBeforeOpen) {
+        if (!_androidP5ScopeFullscreen) {
+          throw StateError('Tap fullscreen requires VideoFullscreenScope');
+        }
+        await _toggleDiagnosticFullscreen(
+          GlobalObjectKey<VideoState>(_initialController),
+        );
+        await SchedulerBinding.instance.endOfFrame;
+        debugPrint('ANDROID_TAP_FULLSCREEN_LAYOUT_READY');
       }
       if (Platform.isAndroid && _androidHdrTransaction) {
         await _openHdrSource(source);
