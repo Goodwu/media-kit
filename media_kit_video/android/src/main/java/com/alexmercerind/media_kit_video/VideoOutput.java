@@ -154,10 +154,12 @@ public class VideoOutput implements TextureRegistry.SurfaceProducer.Callback {
         }
     }
 
-    private static Map<String, Object> actualSize(int width, int height) {
+    private Map<String, Object> actualSize(int width, int height) {
         final Map<String, Object> size = new HashMap<>();
         size.put("width", width);
         size.put("height", height);
+        size.put("id", id);
+        size.put("wid", wid);
         return size;
     }
 

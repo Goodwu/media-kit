@@ -57,17 +57,21 @@ class VideoController {
   Future<void> Function()? _forwarderReleaseCallback;
   Future<void>? _disposeForRebuildFuture;
   final _textureLayoutOwners = <Object, TextureOutputLayout>{};
+  Completer<void>? _textureLayoutReady;
 
   /// The native output covers every mounted Video's physical pixel demand.
   /// A later thumbnail update cannot shrink an existing fullscreen output.
   void updateTextureLayoutOwner(
       Object owner, Size physicalViewport, BoxFit fit) {
     _textureLayoutOwners[owner] = TextureOutputLayout(physicalViewport, fit);
+    final ready = _textureLayoutReady;
+    if (ready != null && !ready.isCompleted) ready.complete();
     _publishTextureLayouts();
   }
 
   void removeTextureLayoutOwner(Object owner) {
     if (_textureLayoutOwners.remove(owner) != null) {
+      if (_textureLayoutOwners.isEmpty) _textureLayoutReady = null;
       _publishTextureLayouts();
     }
   }
@@ -75,9 +79,9 @@ class VideoController {
   void _publishTextureLayouts() {
     final output = notifier.value;
     if (output == null ||
-        !output.configuration.matchAndroidTextureOutputToLayout ||
         output.configuration.usePlatformView ||
-        output.configuration.enableAndroidSurfaceProducer) {
+        (!output.configuration.matchAndroidTextureOutputToLayout &&
+            !output.configuration.enableAndroidSurfaceProducer)) {
       return;
     }
     unawaited(output
@@ -86,6 +90,23 @@ class VideoController {
         .catchError((Object error, StackTrace stack) {
       debugPrint('Android Texture layout resize failed: $error\n$stack');
     }));
+  }
+
+  /// Prepares a mounted Android SurfaceProducer Texture before opening media.
+  /// Returns false if no Video has reported a bounded layout yet.
+  Future<bool> prepareAndroidTextureOutput() async {
+    final output = await platform.future;
+    if (output.configuration.usePlatformView ||
+        !output.configuration.enableAndroidSurfaceProducer) {
+      return false;
+    }
+    if (_textureLayoutOwners.isEmpty) {
+      await (_textureLayoutReady ??= Completer<void>())
+          .future
+          .timeout(const Duration(milliseconds: 250), onTimeout: () {});
+    }
+    return output.prepareAndroidTextureOutput(this,
+        List<TextureOutputLayout>.unmodifiable(_textureLayoutOwners.values));
   }
 
   static Future<VideoController> create(
