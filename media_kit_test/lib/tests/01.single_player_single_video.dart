@@ -380,10 +380,11 @@ class _SinglePlayerSingleVideoScreenState
     try {
       if (Platform.isAndroid &&
           _androidPreopenFirstFrameProbe &&
-          !_androidPreopenFullscreen &&
-          !configuration.value.usePlatformView) {
+          !_androidPreopenFullscreen) {
         final started = await _flutterSurfaceProbeChannel
-            .invokeMapMethod<String, dynamic>('StartFirstFrameProbe');
+            .invokeMapMethod<String, dynamic>('StartFirstFrameProbe', {
+          'target': configuration.value.usePlatformView ? 'platform' : 'flutter',
+        });
         debugPrint('FIRST_FRAME_PIXEL_COPY started=$started');
       }
       if (Platform.isAndroid && _androidTapFullscreenBeforeOpen) {

@@ -29,8 +29,8 @@
   - touch_to_content_sdr: 12532 Activity触摸抬手至横屏全屏PixelCopy明显内容三独立进程0.792/0.699/0.670秒，均通用预绑定成功；仍不含按下至抬手及面板光学呈现。见`archives/experiments/android-p84-touch-to-content-12532-20260927.md`。
   - touchdown_reentry_sdr: 12533三独立进程触摸按下至横屏全屏明显内容0.767/0.789/0.681秒；12535同PID先销毁播放页、回主菜单，再新建播放页并出图，第二次按下至内容0.656秒，旧帧不再污染。仅系统读回短轮，仍缺光学、独立色准、音画同步与冷/热统计。见`archives/experiments/android-p84-touchdown-and-reentry-12533-12535-20260927.md`。
   - sdr_acceptance: 12535 P8.4 Texture→SDR 真横屏全屏人工观察：用户认为轻微偏淡但可接受，画面流畅、声画同步；单独从竖屏列表 Video 0 点击，用户感受约1秒内出实际画面，同轮触摸按下至明显内容 PixelCopy 为0.844秒。此前一次约2秒竖屏黑屏反馈含脚本故意等待2秒，不能归因于播放器。此设备/素材/路径的用户验收通过；未做独立色度仪或面板光学时间测量。见`archives/experiments/android-p84-sdr-human-acceptance-20260927.md`。
-  - latest_hdr: 原生HDR10 PQ/P8.4 HLG首帧未测；现有HDR素材0.4–0.9秒记录是Texture转SDR，不作为原生HDR证据。
-  - next: 测原生P8.4 HLG与HDR10 PQ真全屏首帧，定位超2秒环节；单独测P5自身转PQ HDR输出的成功或权限拒绝时延。保留SDR面板光学与独立色度仪测量为精度限制，不撤销用户已通过的主观验收。
+  - latest_hdr: 12537 P8.4原生HLG三独立进程触摸按下→视频Surface读回内容0.670/0.676/0.623秒；12538 HDR10原生PQ为0.653/0.648/0.630秒。各有真横屏全屏截图，SF视频层分别BT.2020 HLG(types0)/PQ(types3)。12539 P5自身转PQ在当前固件公开Surface设置被拒，`wid=0`，请求→明确失败0.422秒、无首帧。视频Surface读回可作为自动化时延门槛，但不能单独证明系统合成或面板显示，须配合同层SF/HWC、全屏画面及真人观察。见`archives/experiments/android-native-hdr-firstframe-12537-12539-20260927.md`。
+  - next: 扩充原生HDR冷/热及同进程重入、连续画面和输出切换统计；维持P5 PQ未通过状态，待有受支持的PQ出口或其它设备再验真实首帧。保留面板光学与独立色度仪测量为精度限制。
 
 ## Next（近期候选，最多 10 条）
 
