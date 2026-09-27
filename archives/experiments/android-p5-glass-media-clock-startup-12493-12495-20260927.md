@@ -17,6 +17,8 @@
 
 **播放器 `stream.position` 是媒体时钟，不是已显示帧PTS。** 12494 run2 的位置221ms日志发生在首个AImage之前约0.95秒，直接证明不能以位置事件宣称该帧已经解码/提交/显示。4轮在位置首次达到约2.1秒后0.30–0.36秒才由PixelCopy检出内容，这只限定了时钟事件至当前Flutter Surface buffer可见内容的时间；还包含位置通知延迟、PixelCopy采样间隔和视频/显示队列，不能归因到Flutter或GPU。run2起播有FFmpeg `Could not find ref with POC`错误及ImageReader累计20次空取图，尚未证明其与所有轮的延迟有关。
 
+再次从设备logcat回收同源四轮的启动错误：在首个AImage前后，每轮均有FFmpeg HEVC `Could not find ref with POC`，四个进程分别18/17/17/17行；主机当前FFmpeg对同SHA原文件从片头解码前3秒未打印warning。两边FFmpeg版本、P5补丁和解码路径不同，不能据此认定源损坏或这些错误导致延迟；但它们是稳定可复现的启动阶段线索，后续要关联每次报错的解码器/包PTS、恢复点与首个实际输出帧。原始设备错误摘录在`poc-startup-errors.txt.gz`，SHA `95c5b7654d8cdac83bc8bbbc82702176dd0bdc86bcdd63758c89002ee00120c0`。
+
 下一步在保持同JAR基线或重新建立A/B基线的前提下，记录VO实际mix PTS、同序号提交成功及Flutter Surface消费；并分开量化 `media_opened` 到首个decoder release/AImage 的约1–2秒。仍须真全屏、物理屏幕可见、无高频探针的冷/热多轮验收，以及HDR10/P8.4/SDR对照。不能据此宣称2秒首帧已达标或已有产品性能收益。
 
 原始日志：`artifacts/android-firstframe-media-clock-12493/run1-logcat.txt.gz` SHA `a77d053b402c0854c68acfca84fb5d018abd02ff3d583d4880b85d284170ebf2`；`run2-throttled-logcat.txt.gz` SHA `8020a98fd39484637cb8a6511a108b843c918433af759752721ee742ec6ee577`；`run2-startup-details.txt.gz` SHA `74ff5b4dbe8d2d8967d68c0ca0fd0baec9328e0c13040fd342931ea74653fe6c`；`run3-80ms-logcat.txt.gz` SHA `9092f80901c2b5e8b2005d8cf68b1003339c05a99110fa2fbd1b0640b613a7f4`；`run4-80ms-logcat.txt.gz` SHA `4d59d2a5259e6d735f0779eeccb9276faa590d48984e038c27a22a836ac24078`。隔离诊断补丁 `diagnostic-80ms.patch.gz` SHA `0f9fdd1fd7366a39275d0aa251a740f0598d52ad145c55d628ece4a0846de75c`；12493/12494分别为该补丁的逐帧日志/20ms取样变体，未进入产品代码。
