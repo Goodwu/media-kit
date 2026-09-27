@@ -8,6 +8,7 @@ import android.os.Looper
 import android.os.PowerManager
 import android.os.SystemClock
 import android.view.PixelCopy
+import android.view.MotionEvent
 import android.view.SurfaceView
 import android.view.View
 import android.view.ViewGroup
@@ -20,6 +21,14 @@ import java.util.concurrent.TimeUnit
 
 class MainActivity : FlutterActivity() {
     private var firstFrameProbeGeneration = 0
+    private var lastTouchUpNs = 0L
+
+    override fun dispatchTouchEvent(event: MotionEvent): Boolean {
+        if (event.actionMasked == MotionEvent.ACTION_UP) {
+            lastTouchUpNs = SystemClock.elapsedRealtimeNanos()
+        }
+        return super.dispatchTouchEvent(event)
+    }
 
     private fun startFirstFrameProbe(): Map<String, Any> {
         check(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) { "PixelCopy requires API 26" }
@@ -37,11 +46,13 @@ class MainActivity : FlutterActivity() {
         check(surface.isValid) { "Flutter Surface invalid" }
         val generation = ++firstFrameProbeGeneration
         val startedNs = SystemClock.elapsedRealtimeNanos()
+        val touchUpNs = lastTouchUpNs.takeIf { startedNs - it in 0L..2_000_000_000L }
         val handler = Handler(Looper.getMainLooper())
         var samples = 0
         var nonblackLogged = false
         var contentLogged = false
-        Log.i("FirstFramePixelCopy", "start generation=$generation ns=$startedNs rect=$rect")
+        Log.i("FirstFramePixelCopy", "start generation=$generation ns=$startedNs " +
+            "touchUpNs=$touchUpNs rect=$rect")
 
         fun sample() {
             if (generation != firstFrameProbeGeneration || contentLogged ||
@@ -90,8 +101,12 @@ class MainActivity : FlutterActivity() {
                     }
                     if (!contentLogged && mean > 20.0 && spread > 10.0) {
                         contentLogged = true
+                        val touchToContentMs = touchUpNs?.let {
+                            (capturedNs - it) / 1_000_000.0
+                        }
                         Log.i("FirstFramePixelCopy", "first_content generation=$generation " +
-                            "elapsedMs=$elapsedMs sample=$samples mean=$mean spread=$spread")
+                            "elapsedMs=$elapsedMs touchToContentMs=$touchToContentMs " +
+                            "sample=$samples mean=$mean spread=$spread")
                     }
                     handler.postDelayed({ sample() }, 80)
                 }, handler)
