@@ -2,6 +2,8 @@
 
 ## Current State
 
+- 2026-09-28 12544 P5→PQ 探针缩小目标：横屏选择最大可见视频 Surface 且宽度至少窗口一半，有效轮 baseline 和首个可辨内容均为 `2984×1440`，触摸按下→内容3.967秒，全屏7秒截图有真实片头画面；私有 PQ 回读成功、`gpu-next`/`mediacodec`。排除了12543的旧小Surface，但媒体打开前同尺寸已存在，仍缺与实际 Surface owner/generation 的绑定，不能宣称精确首 buffer 时间。错误设置 RPU属性1 的前置策略失败轮已剔除；原12492、属性0、自动亮度和熄屏恢复。见`archives/experiments/android-p5-private-pq-probe-target-12544-20260928.md`。
+
 - 2026-09-27 P5→PQ 口径纠正：12539 是关闭私有探针后的公开 setter 失败，不代表 P5 整体无法出帧。12541 私有设置回读成功，但旧无效 Surface 参与颜色空间 ACK 使配置误失败；12542/12543 跳过无效旧 View 后，精确固件探针路径再次得到 `gpu-next`/`mediacodec`、10 位 BT.2020/PQ 视频层、HWC PQ 和全屏实际画面。12543 三独立进程触摸按下→可辨画面读回3.953–4.079秒，含黑色片头；约2秒已有 PQ activeBuffer，不能以可辨画面时间推断首个解码帧。尚非通用产品出口或本轮人工观感验收。测试后原12492、诊断属性0、自动亮度及熄屏已恢复。见`archives/experiments/android-p5-private-pq-firstframe-12541-12543-20260927.md`。
 
 - 2026-09-27 原生HDR首帧短轮：P8.4 HLG三独立进程Video 0触摸按下→视频Surface内容0.670/0.676/0.623秒，HDR10 PQ为0.653/0.648/0.630秒；各有真横屏截图及SF HLG/PQ视频层。P5自身转PQ在公开Surface设置处拒绝，`wid=0`，请求→失败0.422秒、无首帧。PixelCopy视频Surface可作自动化时延门槛，仍需SF/HWC和真实画面佐证系统合成，不能充当面板光学测量。实验后恢复12492、P5属性0、自动亮度并熄屏。见`archives/experiments/android-native-hdr-firstframe-12537-12539-20260927.md`。

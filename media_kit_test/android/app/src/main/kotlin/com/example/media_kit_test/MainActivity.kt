@@ -56,7 +56,9 @@ class MainActivity : FlutterActivity() {
             val target = if (platformVideo) findPlatformVideoSurface(window.decorView)
                 else findFlutterSurface(window.decorView)
             if (target == null || !target.holder.surface.isValid ||
-                target.width < 400 || target.height < 250) {
+                target.width < 400 || target.height < 250 ||
+                (platformVideo && (window.decorView.width <= window.decorView.height ||
+                    target.width < window.decorView.width / 2))) {
                 handler.postDelayed({ sample() }, 40)
                 return
             }
@@ -124,7 +126,8 @@ class MainActivity : FlutterActivity() {
                         Log.i("FirstFramePixelCopy", "first_content generation=$generation " +
                             "elapsedMs=$elapsedMs touchToContentMs=$touchToContentMs " +
                             "touchDownToContentMs=$touchDownToContentMs " +
-                            "sample=$samples mean=$mean spread=$spread")
+                            "sample=$samples mean=$mean spread=$spread " +
+                            "target=${target.javaClass.name} rect=$rect")
                     }
                     handler.postDelayed({ sample() }, 80)
                 }, handler)
@@ -161,13 +164,17 @@ class MainActivity : FlutterActivity() {
     }
 
     private fun findPlatformVideoSurface(view: View): SurfaceView? {
-        if (view is SurfaceView && view.javaClass.name == "android.view.SurfaceView") return view
+        var best: SurfaceView? = null
+        if (view is SurfaceView && view.javaClass.name == "android.view.SurfaceView" &&
+            view.isShown) best = view
         if (view is ViewGroup) {
             for (i in 0 until view.childCount) {
-                findPlatformVideoSurface(view.getChildAt(i))?.let { return it }
+                val candidate = findPlatformVideoSurface(view.getChildAt(i)) ?: continue
+                if (best == null || candidate.width * candidate.height >
+                    best.width * best.height) best = candidate
             }
         }
-        return null
+        return best
     }
 
     private fun pixelHash(bitmap: Bitmap): String {
