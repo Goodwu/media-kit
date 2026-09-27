@@ -17,8 +17,8 @@ P5→PQ 输出、首帧和性能使用 `/Users/wuweiwei1/Downloads/test-clips/My
 
 - [ ] status: queued_after_P0；context: archives/conversations/android-hdr-dv-display-plan-20260922.md
 - acceptance: 以 Mystery Box 从正常入口横屏全屏出真实画面，确认 `gpu-next`/`mediacodec`、10 位 BT.2020/PQ 视频层、HDR 静态元数据、系统 HDR 合成和退出后 SDR 复位；触摸到可辨内容小于2秒、争取1秒，探针绑定当前 View/Surface 代次，并以真人观察佐证。公开 Android 输出链路优先；精确固件私有探针仅在公开方案确实不可行时作为受限备选。
-- latest: 12542–12544 私有探针得到 PQ 实际画面及系统合成，但不是产品链路；12539 公开 Surface PQ 设置失败，`wid=0`。旧 Glass 片头黑场使12543/12544约4秒可辨内容读回不能作为新片首帧结论；12544探针仍未绑定实际 Surface generation。见 `archives/experiments/android-p5-private-pq-probe-target-12544-20260928.md`。
-- next: 研究受支持的公开 PQ 出口，避免原样重复已失败 setter；用 Mystery Box 和代次绑定探针测首帧、持续画面、合成及 SDR 复位。
+- latest: 12542–12544 精确固件私有探针得到 PQ 实际画面及系统合成，但不是产品链路；12539 公开 Surface PQ 设置失败，`wid=0`。旧 Glass 片头黑场使12543/12544约4秒可辨内容读回不能作为新片首帧结论；12544探针仍未绑定实际 Surface generation。只读复核确认本固件公开NDK setter受SF权限/能力门禁阻断，EGL/Vulkan没有可用PQ Surface协商，公开SurfaceControl PQ事务SIGABRT；API29 ImageWriter未提供可用的公开PQ dataspace出口。没有值得原样重试的公开GPU PQ路径，但不推广为Android整体不支持。见 `archives/experiments/android-p5-private-pq-probe-target-12544-20260928.md`、`archives/experiments/android-p5-public-pq-route-assessment-20260928.md`。
+- next: P0真人观感闭环后，以用户允许的精确固件受限兼容链路推进产品P5→PQ：先尝试公开接口，只在已核指纹/ABI下回退，失败关闭；绑定当前View/Surface代次，以Mystery Box测真实首帧、10-bit/PQ buffer和元数据、SF/HWC、持续画面及退出SDR复位。
 
 ### P2 · P5→PQ 全片性能
 
