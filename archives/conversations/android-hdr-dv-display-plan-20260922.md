@@ -1,6 +1,7 @@
 # Android HDR10 / DV P8.4 / P5、视图定位与原生 DV 能力计划（2026-09-22）
 
 ## Current State
+- 2026-09-27 对指定Glass P5原文件再次做0–5秒10fps主机RGB抽样：0–2.0秒均匀黑，2.1秒左侧大范围也有明显内容，降低12485设备PixelCopy因ROI错过片头场景的可能性；手机裁切与色调映射尚未精确复现。按首个AImage PTS和匀速播放只能估算尚有约0.5–1.0秒待定位，需同设备时钟关联实际媒体时间、mix PTS与提交。见`archives/experiments/android-p5-glass-pixel-copy-startup-12485-20260927.md`。
 - 2026-09-27 补取12492同轮设备logcat：指定Glass P5在媒体PTS174.874700秒、接近视频流175.008秒终点时，AImageReader报`-30001`，随即VO映射及渲染失败；约1.14秒后截图视频区域纯紫。原始三行日志已归档。EOS事件和Buffer身份仍缺，紫色具体分支/根因待核。见`archives/experiments/android-p5-glass-eos-purple-12492-20260927.md`。
 
 - 2026-09-27 最终12492同包Glass P5长播：前后两张实际画面不同，AImage至媒体PTS164.765秒；Back前输出释放、Player完成、Activity退出依次发生。相同进程PID5729重入再次出图，第二次退出仍有序，无SIGSEGV。墙钟时间超过视频流标称时长后区域变纯紫色RGB(128,0,255)，源末帧非此色；独立任务排查。四项P5属性已复位0、自动亮度1、屏幕OFF。见`archives/experiments/android-auto-player-exit-12491-12492-20260927.md`和`archives/experiments/android-p5-glass-eos-purple-12492-20260927.md`。
