@@ -1,0 +1,9 @@
+         1790513642.411 23989 23989 I FirstFramePixelCopy: start generation=1 ns=353543984905720 rect=Rect(1360, 235 - 1760, 485)
+         1790513642.455 23989 23989 I FirstFramePixelCopy: baseline generation=1 elapsedMs=43.703646 mean=0.0 spread=0.0
+         1790513642.456 23989 23989 I VideoOutputManager: com.alexmercerind.media_kit_video.VideoOutputManager.setSurfaceSize: 530807896656 3120 1440
+         1790513642.555 23989 23989 I flutter : ANDROID_DIRECT_TEXTURE_PREPARED layoutBound=true
+         1790513642.673 23989 24672 E P5_RAW_STAGE: P5_IMAGE_COUNT acquired=1 deleted=0 current_image=1 retired=0 callbacks=1 empty_acquires=0 retire=0 pts=0.000000000
+         1790513642.695 23989 23989 I VideoOutputManager: com.alexmercerind.media_kit_video.VideoOutputManager.setSurfaceSize: 530807896656 854 480
+         1790513642.720 23989 23989 I FirstFramePixelCopy: first_nonblack generation=1 elapsedMs=309.1 sample=4 mean=55.537369791666514 spread=3.071117584997494
+         1790513643.171 23989 23989 I FirstFramePixelCopy: first_content generation=1 elapsedMs=759.508333 sample=9 mean=56.85742187499991 spread=12.410104933656266
+         1790513643.250 23989 23989 I FirstFramePixelCopy: finish generation=1 samples=9 nonblack=true content=true
