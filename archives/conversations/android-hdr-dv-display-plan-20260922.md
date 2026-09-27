@@ -2,6 +2,8 @@
 
 ## Current State
 
+- 2026-09-28 P1 12582修订协议独立静态复审：10秒后持续每秒监测、同代PQ失效事件与stop→ReleaseSurface→ACK、等待错误保留及新Surface重试均未见新增代码阻断；这是静态结论，检测间隔内不保证逐帧PQ，仍须实机注入重设失败、stop/ACK重试、旧新代交错和超过10秒producer重建。P0 Glass真人动态观感仍未完成；12582未安装或播放。见 `archives/experiments/android-p5-pq-product-candidate-12582-20260928.md`。
+
 - 2026-09-28 P1隔离产品候选12582：公开NDK PQ setter优先，仅在其返回-22、arm64/API29/精确固件/10-bit PQ门禁下回退已核ABI；对目标PQ Surface持续检查 dataspace，同代运行中失效新增明确错误及 stop→release→ACK 通知。首轮独立审核指出10秒监测截止和失败后永久pending两个阻断项，已修改，修订协议还待复审/故障注入。隔离Dart静态分析、原生语法/Java编译通过，自建JAR SHA `eac6514f...` 的12582 arm64 APK SHA `3f9c180f...` 构建成功；未安装/播放，不能据此声称P5→PQ出画或首帧。P0 Glass真人动态画质仍待用户方便时观察，设备保持12492、自动亮度、熄屏。见 `archives/experiments/android-p5-pq-product-candidate-12582-20260928.md`。
 
 - 2026-09-28 P1公开PQ路线只读复核：目标固件普通UID的公开NDK PQ setter在HDR support/SF权限门禁返回-22；公开SurfaceControl事务因同门禁SIGABRT；已有EGL/Vulkan同Surface没有PQ格式，Main10硬编码桥无支持证据。新查Android10 ImageWriter不转交dataspace/HDR metadata，API29也无公开Image.setDataSpace；本机当前无值得直接实测的新公开GPU PQ出口，不能外推所有Android设备。P0人工动态观感后，按用户允许的精确固件受限兼容链路推进P1，公开接口优先、失败关闭并做同代Surface/HDR/首帧验证。见 `archives/experiments/android-p5-public-pq-route-assessment-20260928.md`。
