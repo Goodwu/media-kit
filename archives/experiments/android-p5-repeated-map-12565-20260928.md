@@ -6,4 +6,4 @@ mpv候选修订：退休项持有源帧引用；在回收前按codec buffer身�
 
 Glass预建横屏全屏2560×1440短播约9秒，截图有真实画面，VO1、decoder0。正常按返回后 `P5_RETIRE_FINAL maps=590 reaped=588 held_after=0`、`P5_IMAGE_FINAL acquired=588 deleted=588 retired=0 empty_acquires=0`，Player dispose完成；全量日志中 `acquireLatestImage failed` 和 `Failed rendering frame!` 均为0。maps比acquired多2，吻合两次复用；这只是短轮证据，仍须全片/重入/seek及非P5回退验证。测试结束恢复原12492、全部相关属性0、自动亮度和熄屏。
 
-证据在 `artifacts/android-p5-repeated-map-12565/`：原身份证明日志、修复短轮日志、截图及修订补丁。
+证据在 `artifacts/android-p5-repeated-map-12565/`：原身份证明日志、修复短轮日志和截图。修订源码已提交并推送到 Goodwu/mpv `feature/android-p5-sdr-direct-yuv` 的 `aa8bd10`。
