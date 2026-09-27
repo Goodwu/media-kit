@@ -192,8 +192,7 @@ class AndroidVideoController extends PlatformVideoController {
     }
   }
 
-  void _markPlatformViewCreated(
-      int generation, int viewId, int creationSerial,
+  void _markPlatformViewCreated(int generation, int viewId, int creationSerial,
       String? dataspace, String? pixelFormat) {
     if (_disposed || _fullyDisposed || nativeSurfaceGeneration != generation) {
       return;
@@ -239,8 +238,7 @@ class AndroidVideoController extends PlatformVideoController {
   bool _promoteCompatibleBoundFallback() {
     if (_inFlightSurfaceOwner != null) return false;
     for (final owner in _liveSurfaceOwners) {
-      if (!_isBoundSurfaceOwner(owner) ||
-          !_isCompatibleWithLatestView(owner)) {
+      if (!_isBoundSurfaceOwner(owner) || !_isCompatibleWithLatestView(owner)) {
         continue;
       }
       if (_queuedSurfaceBinds.any((queued) =>
@@ -274,8 +272,7 @@ class AndroidVideoController extends PlatformVideoController {
 
   bool _mayPublishPlatformSurface(
       _AndroidPlatformSurfaceOwner owner, int outputIntentSerial) {
-    return _viewCreationSerialById[owner.viewId] ==
-            _latestViewCreationSerial ||
+    return _viewCreationSerialById[owner.viewId] == _latestViewCreationSerial ||
         _authorizedFallbackIntentSerials.contains(outputIntentSerial);
   }
 
@@ -336,9 +333,8 @@ class AndroidVideoController extends PlatformVideoController {
     }
   }
 
-  void _markPlatformSurfaceFailed(
-      int generation, int viewId, int creationSerial, int attempt,
-      String reason) {
+  void _markPlatformSurfaceFailed(int generation, int viewId,
+      int creationSerial, int attempt, String reason) {
     // A newer view may already be mounted but still have no Surface. Its
     // ViewCreated event is the pending output intent that rejects this stale
     // failure, even though no newer SurfaceAvailable event exists yet.
@@ -457,7 +453,8 @@ class AndroidVideoController extends PlatformVideoController {
   _AndroidPlatformSurfaceOwner? get _newestLiveSurfaceOwner =>
       _liveSurfaceOwners.isEmpty ? null : _liveSurfaceOwners.last;
   final Set<_AndroidPlatformSurfaceOwner> _pendingSurfaceReleases = {};
-  final Map<_AndroidPlatformSurfaceOwner, int> _pendingFallbackIntentSerials = {};
+  final Map<_AndroidPlatformSurfaceOwner, int> _pendingFallbackIntentSerials =
+      {};
   final Set<int> _authorizedFallbackIntentSerials = {};
   final Set<_AndroidPlatformSurfaceOwner> _queuedSurfaceBinds = {};
   final Set<_AndroidPlatformSurfaceOwner> _failedSurfaceBinds = {};
@@ -494,7 +491,9 @@ class AndroidVideoController extends PlatformVideoController {
     _AndroidPlatformSurfaceOwner owner,
     int? fallbackIntentSerial,
   ) {
-    if (_disposed || _fullyDisposed || _playerTerminated ||
+    if (_disposed ||
+        _fullyDisposed ||
+        _playerTerminated ||
         _detachRetryTimers.containsKey(owner)) return;
     final attempts = _detachRetryAttempts[owner] ?? 0;
     if (attempts >= _maxPlatformSurfaceRetries) {
@@ -524,7 +523,9 @@ class AndroidVideoController extends PlatformVideoController {
     _AndroidPlatformSurfaceOwner owner,
     int outputIntentSerial,
   ) {
-    if (_disposed || _fullyDisposed || _playerTerminated ||
+    if (_disposed ||
+        _fullyDisposed ||
+        _playerTerminated ||
         !_liveSurfaceOwners.contains(owner) ||
         !_outputIntent.isCurrent(owner, outputIntentSerial) ||
         _bindRetryTimers.containsKey(owner)) return;
@@ -540,7 +541,9 @@ class AndroidVideoController extends PlatformVideoController {
       Duration(milliseconds: 250 * (attempts + 1)),
       () async {
         _bindRetryTimers.remove(owner);
-        if (_disposed || _fullyDisposed || _playerTerminated ||
+        if (_disposed ||
+            _fullyDisposed ||
+            _playerTerminated ||
             !_liveSurfaceOwners.contains(owner) ||
             !_outputIntent.isCurrent(owner, outputIntentSerial)) {
           _cancelPlatformBindRetry(owner);
@@ -562,6 +565,7 @@ class AndroidVideoController extends PlatformVideoController {
       },
     );
   }
+
   Size? _sourceDisplaySize;
   final _textureLayoutRegistry = TextureOutputLayoutRegistry();
   Size? _appliedVideoSizeRequest;
@@ -574,11 +578,90 @@ class AndroidVideoController extends PlatformVideoController {
   @override
   Future<void> updateTextureLayouts(
       Object owner, List<TextureOutputLayout> layouts) {
-    if (!_layoutSizedTexture) return Future<void>.value();
+    if (configuration.usePlatformView ||
+        (!_layoutSizedTexture && !configuration.enableAndroidSurfaceProducer)) {
+      return Future<void>.value();
+    }
     return lock.synchronized(() async {
       if (_disposed || _fullyDisposed) return;
       _textureLayoutRegistry.update(owner, layouts);
-      await _applyVideoSizeLocked();
+      if (_layoutSizedTexture) await _applyVideoSizeLocked();
+    });
+  }
+
+  @override
+  Future<bool> prepareAndroidTextureOutput(
+      Object owner, List<TextureOutputLayout> layouts) {
+    if (configuration.usePlatformView ||
+        !configuration.enableAndroidSurfaceProducer) {
+      return Future<bool>.value(false);
+    }
+    return lock.synchronized(() async {
+      if (_disposed || _fullyDisposed) {
+        throw StateError('Android Texture output is disposed');
+      }
+      _textureLayoutRegistry.update(owner, layouts);
+      final candidates = _textureLayoutRegistry.layouts
+          .where((layout) =>
+              layout.viewport.width.isFinite &&
+              layout.viewport.height.isFinite &&
+              layout.viewport.width > 0 &&
+              layout.viewport.height > 0)
+          .toList(growable: false);
+      if (candidates.isEmpty) return false;
+      final viewport = candidates
+          .reduce((a, b) => a.viewport.width * a.viewport.height >=
+                  b.viewport.width * b.viewport.height
+              ? a
+              : b)
+          .viewport;
+      final handle = await player.handle;
+      if (_disposed || _fullyDisposed) {
+        throw StateError('Android Texture output is disposed');
+      }
+      // The native ACK includes the Surface identity created by setSize.
+      // Bind that identity under this lock before the caller opens media.
+      wid.removeListener(widListener);
+      try {
+        final actual = await _channel.invokeMapMethod<String, dynamic>(
+          'VideoOutputManager.SetSurfaceSize',
+          {
+            'handle': handle.toString(),
+            'width': viewport.width.ceil().toString(),
+            'height': viewport.height.ceil().toString(),
+          },
+        );
+        final width = (actual?['width'] as num?)?.toInt();
+        final height = (actual?['height'] as num?)?.toInt();
+        final textureId = (actual?['id'] as num?)?.toInt();
+        final textureWid = (actual?['wid'] as num?)?.toInt();
+        if (width == null ||
+            width <= 0 ||
+            height == null ||
+            height <= 0 ||
+            textureId == null ||
+            textureId < 0 ||
+            textureWid == null) {
+          throw StateError('SurfaceProducer did not return a bound Surface');
+        }
+        _appliedVideoSizeRequest = null;
+        // A cleaned-up Surface can keep its dimensions while its wid is zero.
+        // The later availability callback owns binding in that case.
+        if (textureWid == 0) return false;
+        if (_disposed || _fullyDisposed) {
+          throw StateError('Android Texture output is disposed');
+        }
+        rect.value = Rect.fromLTWH(0, 0, width.toDouble(), height.toDouble());
+        await _applyWidLocked(widValueOverride: textureWid.toString());
+        if (_disposed || _fullyDisposed) {
+          throw StateError('Android Texture output is disposed');
+        }
+        id.value = textureId;
+        wid.value = textureWid;
+        return true;
+      } finally {
+        if (!_disposed && !_fullyDisposed) wid.addListener(widListener);
+      }
     });
   }
 
@@ -1122,10 +1205,12 @@ class AndroidVideoController extends PlatformVideoController {
           _currentPlatformOutputUnavailable = !isExpectedOutput;
           _traceSurface(
               'bind complete wid=$widValue surfaceGeneration=$surfaceGeneration');
-          if (isExpectedOutput && !_currentPlatformViewOutputBound.isCompleted) {
+          if (isExpectedOutput &&
+              !_currentPlatformViewOutputBound.isCompleted) {
             _currentPlatformViewOutputBound.complete();
           }
-          if (isExpectedOutput && !_initialPlatformViewOutputBound.isCompleted) {
+          if (isExpectedOutput &&
+              !_initialPlatformViewOutputBound.isCompleted) {
             _initialPlatformViewOutputBound.complete();
           }
           if (!isExpectedOutput) {
@@ -1143,7 +1228,8 @@ class AndroidVideoController extends PlatformVideoController {
               _failCurrentOutputBound(error, stackTrace);
               _currentPlatformViewOutputBound = Completer<void>();
               if (!_initialPlatformViewOutputBound.isCompleted) {
-                _initialPlatformViewOutputBound.completeError(error, stackTrace);
+                _initialPlatformViewOutputBound.completeError(
+                    error, stackTrace);
                 unawaited(_initialPlatformViewOutputBound.future
                     .catchError((Object _) {}));
               }
@@ -1831,12 +1917,12 @@ class AndroidVideoController extends PlatformVideoController {
               } else {
                 final fallbackIntentSerial =
                     controller._markSurfaceDestroyedBeforeDetach(
-                      handle,
-                      wid,
-                      generation,
-                      viewId,
-                      surfaceGeneration,
-                    );
+                  handle,
+                  wid,
+                  generation,
+                  viewId,
+                  surfaceGeneration,
+                );
                 await controller._detachPlatformSurface(
                   wid,
                   generation,

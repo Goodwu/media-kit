@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 
@@ -122,6 +123,12 @@ class AndroidHdrPlayerBackend implements AndroidHdrOpenBackend {
       outputFormat: gpuPlatform ? 'rgb10_a2' : null,
       surfaceTransfer: policy.surfaceTransfer,
     );
+    if (!usePlatformView && policy.vo == 'gpu-next') {
+      final prepared = await outputSlot.current!.prepareAndroidTextureOutput();
+      debugPrint(prepared
+          ? 'ANDROID_TEXTURE_PREPARED layoutBound=true'
+          : 'ANDROID_TEXTURE_PREPARED fallback=surface_or_layout_unavailable');
+    }
   }
 
   @override

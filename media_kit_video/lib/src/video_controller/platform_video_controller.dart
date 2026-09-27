@@ -104,12 +104,19 @@ abstract class PlatformVideoController {
   Future<void> refreshSurfaceSize(
       {double? viewportWidth, double? viewportHeight}) async {}
 
-  /// Optional Android SurfaceTexture output sizing from the painted viewport.
-  /// Other backends keep their existing source-sized output.
+  /// Reports mounted Android Texture viewports. SurfaceTexture may use these
+  /// for playback buffer sizing; SurfaceProducer may use them for pre-open
+  /// Surface preparation while keeping source-sized playback buffers.
   /// [owner] identifies one VideoController wrapper. Multiple wrappers may
   /// share this platform controller for the same Player.
   Future<void> updateTextureLayouts(
       Object owner, List<TextureOutputLayout> layouts) async {}
+
+  /// Binds a mounted Android SurfaceProducer Texture before media is opened.
+  /// Returns false when no usable mounted layout is available.
+  Future<bool> prepareAndroidTextureOutput(
+          Object owner, List<TextureOutputLayout> layouts) async =>
+      false;
 
   /// Creates/configures the optional native output. Implementations must fail closed.
   Future<dynamic> createNativeOutput(
@@ -251,9 +258,9 @@ class VideoControllerConfiguration {
   /// Default: `true`
   final bool enableAndroidSurfaceProducer;
 
-  /// Size Android SurfaceTexture output from the active Video widget's
-  /// physical viewport. This is opt-in and has no effect on SurfaceProducer
-  /// or PlatformView output.
+  /// Size Android SurfaceTexture playback output from the active Video widget's
+  /// physical viewport. This is opt-in; SurfaceProducer pre-open preparation
+  /// uses mounted viewports separately and keeps source-sized playback output.
   final bool matchAndroidTextureOutputToLayout;
 
   /// Whether to attach `android.view.Surface` after video parameters are known.

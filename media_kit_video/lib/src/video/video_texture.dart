@@ -421,9 +421,9 @@ class VideoState extends State<Video> with WidgetsBindingObserver {
     PlatformVideoController notifier,
   ) {
     if (!Platform.isAndroid ||
-        !notifier.configuration.matchAndroidTextureOutputToLayout ||
         notifier.configuration.usePlatformView ||
-        notifier.configuration.enableAndroidSurfaceProducer ||
+        (!notifier.configuration.matchAndroidTextureOutputToLayout &&
+            !notifier.configuration.enableAndroidSurfaceProducer) ||
         !constraints.hasBoundedWidth ||
         !constraints.hasBoundedHeight) {
       return;
