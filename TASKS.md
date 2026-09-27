@@ -10,8 +10,8 @@ P5→PQ 输出、首帧和性能使用 `/Users/wuweiwei1/Downloads/test-clips/My
 
 - [ ] status: in_progress；context: archives/conversations/android-hdr-dv-display-plan-20260922.md
 - acceptance: 在支持的 P5→Texture SDR 条件下默认启用通用 `optimize_dovi_linear_decode`，其他场景安全回退；自建 arm64 JAR 确认包含并命中优化。Glass 真横屏 2560×1440、默认电池模式全片到 EOS，画质、资源和真人观感正常，VO 与既有优化轮 EOS 516、t90→t180 新增342相近即可，不再追逐旧严格门槛。Mystery Box 同配置复测，与自身未优化基准比较，记录 GPU 频率。
-- latest: 旧 Glass 同配置诊断 A/B/A 的 Texture SDR EOS VO 为2607/516/3626，不能代表 PQ；Mystery Box 未优化自建 JAR 全片 VO54、decoder0，GPU中位586MHz、热状态1，因频率不同不能直接同 Glass 数字比较。见 `archives/experiments/android-p5-mystery-sdr-baseline-12546-20260928.md`。
-- next: 接入受支持条件下的默认策略，构建并核验 arm64 JAR；用 Glass 验证命中、回退、全片性能及观感，再以 Mystery Box 同片复测。完成后转 P1，不继续旧 Glass SDR 掉帧调优。
+- latest: 旧 Glass 同配置诊断 A/B/A 的 Texture SDR EOS VO 为2607/516/3626，不能代表 PQ；Mystery Box 未优化自建 JAR 全片 VO54、decoder0，GPU中位586MHz、热状态1，因频率不同不能直接同 Glass 数字比较。2026-09-28 将默认启用候选接到干净 mpv 产品分支并完成 arm64 编译；12549 Glass 全屏短轮出画，但12550 命中探针无 `P5_LINEAR_DECODE_HIT`，同轮 `r16u` 纹理缺线性采样能力，且复用旧 FFmpeg 曾因诊断符号缺失导致12548启动失败。未达到实际命中/性能验收；见 `archives/experiments/android-p5-mystery-sdr-baseline-12546-20260928.md`、`archives/experiments/android-p5-sdr-default-integration-20260928.md`。
+- next: 从一致的清洁 arm64 依赖和已证有效的外部 YUV/缓冲路径提取生产实现，先证明 P5→SDR direct/down 优化真实命中及安全回退；再用 Glass 验证全片性能与观感、Mystery Box 同片复测。完成后转 P1，不继续旧 Glass SDR 掉帧调优。
 
 ### P1 · P5→PQ 公开产品输出与首帧
 
