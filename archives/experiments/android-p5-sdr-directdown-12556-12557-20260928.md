@@ -8,7 +8,7 @@
 
 ## 短轮命中与画面
 
-- 12556 的 libplacebo 一次性日志同时有 `P5_LINEAR_DECODE_HIT` 和 **`P5_LINEAR_DECODE_FULL_HIT dst=2560x1440`**；输入 `sys=DolbyVision`、PQ、有 RPU，渲染目标 BT.709/BT.1886。视频区截图是实际吹玻璃画面，无洋红残影；媒体 17.384 秒 VO 累计 19、decoder 0。初始 1×1 阶段两次 `acquireLatestImage -30001` / `Failed rendering frame!`，之后持续出画；不能把此短轮判为零错误稳定验收。
+- 12556 的 libplacebo 一次性日志同时有 `P5_LINEAR_DECODE_HIT` 和 **`P5_LINEAR_DECODE_FULL_HIT dst=2560x1440`**；输入 `sys=DolbyVision`、PQ、有 RPU，渲染目标 BT.709/BT.1886。视频区截图是实际吹玻璃画面，无洋红残影；媒体 17.384 秒 VO 累计 19、decoder 0。开头两次 `acquireLatestImage -30001` / `Failed rendering frame!`，之后持续出画；其与初始1×1尺寸的因果关系未证，不能把此短轮判为零错误稳定验收。
 - 一次性命中探针只证明该 renderer 曾以 2560×1440 进入优化分支，不证明每帧都命中；对直接降采样的画质目前只有屏幕截图，尚无人眼动态验收或同 PTS 数值比较。
 
 ## 低日志 Glass 全片
@@ -16,7 +16,7 @@
 - 12557 保持同一自建 arm64 JAR SHA-256 `944e5f04e69ffce12eacbb84ae80dbd1020dcce9a203d57d042615d418d61d89`，关闭 mpv verbose，保留每10秒 Dart 计数。APK SHA-256 `ee9c3b99c9bd34706542196d6ce196daacd55a6e38337304c0b25f9bfa6dbf3c`；APK 的实际 `versionCode` 仍为 12553，12557 只是实验轮次标签。
 - 媒体 7.69/87.70/167.70/177.78 秒的 VO 累计掉帧分别为 9/16/32/34，decoder 均为0；最后时间停在 177.783 秒，连续三次10秒采样保持不变。约 t87→末端新增18，显著低于旧优化轮 t90→t180 的342，但不同构建、日志与设备频率，不能单独将差异归因于线性解码。没有显式 `end-file` 事件，严格 EOS 仍待补证。
 - GPU 频率每2秒采样95次，中位415MHz、范围208–415MHz；此前 Mystery Box 未优化轮中位586MHz，不应跨片比较。片尾截图为 Dolby Vision logo，不是先前紫色清屏；只覆盖这一轮，片尾故障尚未排除。
-- 初始 1×1 阶段仍有两次 `acquireLatestImage -30001` / 渲染失败，之后无同类报错或 GL OOM。片尾只有单张截图，缺连续帧与真人观感。不能据此关闭 P0 或 P3。
+- 开头仍有两次 `acquireLatestImage -30001` / 渲染失败，之后无同类报错或 GL OOM；12561日志进一步提示同一PTS重复映射且无新AImage，不能从现有记录归因于1×1。片尾只有单张截图，缺连续帧与真人观感。不能据此关闭 P0 或 P3。
 
 ## 证据与收束
 
