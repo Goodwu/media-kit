@@ -2,6 +2,8 @@
 
 ## Current State
 
+- 2026-09-28 P0源码及资源补轮：FFmpeg逐帧RPU产品候选 `fff3ee7` 已推送 Goodwu/FFmpeg `feature/android-mediacodec-p5-rpu`；mpv外部YUV候选`6758565`已推送Goodwu/mpv `feature/android-p5-sdr-direct-yuv`，后者仍带大量诊断。12563正常退出短轮mapper AImage acquired/deleted=564/564、退休队列0且Player dispose完成；没有FFmpeg RPU终结汇总，不外推为整体资源闭合。原12492、属性0、自动亮度、熄屏。见 `archives/experiments/android-p5-mystery-sdr-product-12563-20260928.md`。
+
 - 2026-09-28 P0隔离产品化候选12563：清洁FFmpeg源单文件arm64编译、合成静态库并与隔离Goodwu/mpv源链接；自建arm64 JAR/APK横屏预建全屏2560×1440 Mystery Box从0到显式EOS，VO11、decoder0、GPU中位415MHz，中段截图有实画面；旧同片未优化VO54、GPU中位586MHz。仍需去除mpv大量诊断、解决PTS0重复映射无新AImage两次报错，Glass同路径全片、回退、资源及真人动态画质验收。已恢复12492、属性0、自动亮度、熄屏。见 `archives/experiments/android-p5-mystery-sdr-product-12563-20260928.md`。
 
 - 2026-09-28 P0产品化隔离编译：从实验 mpv 向清洁 Goodwu/mpv `a81978b` 分支接入外部YUV格式、采样参数、AImageReader直接采样/退休与 P5 SDR color-map/downscaler 策略；能力缺失时回退普通OES，arm64 `ninja` 编译链接通过。当前 AImageReader 文件仍含大量诊断代码，FFmpeg仅创建清洁产品 worktree，尚未形成可交付JAR。复核12561日志发现PTS0首次AImage导入成功后重复映射时两次无新图像，2560×1440输出设置在映射之前；此前“1×1导致错误”是无证据推断，需按重复映射处理。设备保持12492、自动亮度、熄屏。
