@@ -6,10 +6,12 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.PowerManager
+import android.os.SystemClock
 import android.view.PixelCopy
 import android.view.SurfaceView
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.util.Log
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -17,6 +19,91 @@ import io.flutter.plugin.common.MethodChannel
 import java.util.concurrent.TimeUnit
 
 class MainActivity : FlutterActivity() {
+    private var firstFrameProbeGeneration = 0
+
+    private fun startFirstFrameProbe(): Map<String, Any> {
+        check(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) { "PixelCopy requires API 26" }
+        val flutterSurface = findFlutterSurface(window.decorView)
+            ?: throw IllegalStateException("Flutter SurfaceView unavailable")
+        val rect = Rect(
+            flutterSurface.width / 2 - 200, flutterSurface.height / 4 - 125,
+            flutterSurface.width / 2 + 200, flutterSurface.height / 4 + 125
+        )
+        check(rect.left >= 0 && rect.top >= 0 &&
+            rect.right <= flutterSurface.width && rect.bottom <= flutterSurface.height) {
+            "Probe rectangle outside Flutter surface: $rect"
+        }
+        val surface = flutterSurface.holder.surface
+        check(surface.isValid) { "Flutter Surface invalid" }
+        val generation = ++firstFrameProbeGeneration
+        val startedNs = SystemClock.elapsedRealtimeNanos()
+        val handler = Handler(Looper.getMainLooper())
+        var samples = 0
+        var nonblackLogged = false
+        var contentLogged = false
+        Log.i("FirstFramePixelCopy", "start generation=$generation ns=$startedNs rect=$rect")
+
+        fun sample() {
+            if (generation != firstFrameProbeGeneration || contentLogged ||
+                SystemClock.elapsedRealtimeNanos() - startedNs > 9_000_000_000L) {
+                Log.i("FirstFramePixelCopy", "finish generation=$generation samples=$samples " +
+                    "nonblack=$nonblackLogged content=$contentLogged")
+                return
+            }
+            val bitmap = Bitmap.createBitmap(64, 40, Bitmap.Config.ARGB_8888)
+            try {
+                PixelCopy.request(surface, rect, bitmap, { status ->
+                    val capturedNs = SystemClock.elapsedRealtimeNanos()
+                    if (status != PixelCopy.SUCCESS) {
+                        Log.w("FirstFramePixelCopy", "copy_failed generation=$generation " +
+                            "status=$status samples=$samples")
+                        bitmap.recycle()
+                        return@request
+                    }
+                    val pixels = IntArray(bitmap.width * bitmap.height)
+                    bitmap.getPixels(pixels, 0, bitmap.width, 0, 0,
+                        bitmap.width, bitmap.height)
+                    bitmap.recycle()
+                    var sum = 0.0
+                    var sumSquares = 0.0
+                    for (pixel in pixels) {
+                        val r = (pixel ushr 16) and 255
+                        val g = (pixel ushr 8) and 255
+                        val b = pixel and 255
+                        val brightness = (r + g + b) / 3.0
+                        sum += brightness
+                        sumSquares += brightness * brightness
+                    }
+                    samples++
+                    val mean = sum / pixels.size
+                    val spread = kotlin.math.sqrt(
+                        (sumSquares / pixels.size - mean * mean).coerceAtLeast(0.0))
+                    val elapsedMs = (capturedNs - startedNs) / 1_000_000.0
+                    if (samples == 1) {
+                        Log.i("FirstFramePixelCopy", "baseline generation=$generation " +
+                            "elapsedMs=$elapsedMs mean=$mean spread=$spread")
+                    }
+                    if (!nonblackLogged && mean > 1.0 && spread > 1.0) {
+                        nonblackLogged = true
+                        Log.i("FirstFramePixelCopy", "first_nonblack generation=$generation " +
+                            "elapsedMs=$elapsedMs sample=$samples mean=$mean spread=$spread")
+                    }
+                    if (!contentLogged && mean > 20.0 && spread > 10.0) {
+                        contentLogged = true
+                        Log.i("FirstFramePixelCopy", "first_content generation=$generation " +
+                            "elapsedMs=$elapsedMs sample=$samples mean=$mean spread=$spread")
+                    }
+                    handler.postDelayed({ sample() }, 80)
+                }, handler)
+            } catch (error: Exception) {
+                bitmap.recycle()
+                Log.w("FirstFramePixelCopy", "copy_exception generation=$generation $error")
+            }
+        }
+        sample()
+        return mapOf("generation" to generation, "startedElapsedRealtimeNs" to startedNs)
+    }
+
     private fun readSystemProperty(key: String): String {
         val process = ProcessBuilder("/system/bin/getprop", key).start()
         if (!process.waitFor(2, TimeUnit.SECONDS)) {
@@ -73,6 +160,24 @@ class MainActivity : FlutterActivity() {
             }
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "media_kit_test/flutter_surface_probe")
             .setMethodCallHandler { call, result ->
+                if (call.method == "SetShortEdges") {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                        val attributes = window.attributes
+                        attributes.layoutInDisplayCutoutMode =
+                            WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+                        window.attributes = attributes
+                    }
+                    result.success(null)
+                    return@setMethodCallHandler
+                }
+                if (call.method == "StartFirstFrameProbe") {
+                    try {
+                        result.success(startFirstFrameProbe())
+                    } catch (error: Exception) {
+                        result.error("PROBE_FAILED", error.toString(), null)
+                    }
+                    return@setMethodCallHandler
+                }
                 if (call.method == "GetThermalStatus") {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                         val power = getSystemService(POWER_SERVICE) as PowerManager

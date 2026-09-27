@@ -54,6 +54,9 @@ class _SinglePlayerSingleVideoScreenState
   static const _androidPreopenFullscreen = bool.fromEnvironment(
     'MEDIA_KIT_ANDROID_PREOPEN_FULLSCREEN',
   );
+  static const _androidPreopenFirstFrameProbe = bool.fromEnvironment(
+    'MEDIA_KIT_ANDROID_PREOPEN_FIRST_FRAME_PROBE',
+  );
   // Diagnostic only: classify controlled local fixtures by their names.
   // Normal HDR opens keep their content-verified private copy.
   static const _androidNamedLocalSource = bool.fromEnvironment(
@@ -1608,13 +1611,21 @@ class _SinglePlayerSingleVideoScreenState
               onTap: () {
                 if (_preopenFullscreenStarted || _autoPlayerDisposed) return;
                 _preopenFullscreenStarted = true;
-                unawaited(_openInitialSource().catchError(
-                  (Object error, StackTrace stack) {
+                unawaited(() async {
+                  try {
+                    if (_androidPreopenFirstFrameProbe) {
+                      final started = await _flutterSurfaceProbeChannel
+                          .invokeMapMethod<String, dynamic>(
+                              'StartFirstFrameProbe');
+                      debugPrint('FIRST_FRAME_PIXEL_COPY started=$started');
+                    }
+                    await _openInitialSource();
+                  } catch (error, stack) {
                     _preopenFullscreenStarted = false;
                     debugPrint('PREOPEN_FULLSCREEN_OPEN error=$error');
                     debugPrintStack(stackTrace: stack);
-                  },
-                ));
+                  }
+                }());
               },
             ),
           ],

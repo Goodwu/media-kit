@@ -1,0 +1,20 @@
+         1790512782.976 20676 20676 I FirstFramePixelCopy: start generation=1 ns=352684550496997 rect=Rect(1360, 235 - 1760, 485)
+         1790512783.025 20676 20676 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=requested elapsed_us=1
+         1790512783.026 20676 20676 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=sample_ready elapsed_us=1285
+         1790512783.027 20676 20676 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=queue_entered elapsed_us=1336
+         1790512783.028 20676 20676 I FirstFramePixelCopy: baseline generation=1 elapsedMs=50.896354 mean=0.0 spread=0.0
+         1790512783.235 20676 20676 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=validated elapsed_us=209891
+         1790512783.238 20676 20676 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=previous_output_stopped elapsed_us=212430
+         1790512783.238 20676 20676 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=configuration_reset elapsed_us=212505
+         1790512783.267 20676 20676 I VideoOutputManager: com.alexmercerind.media_kit_video.VideoOutputManager.setSurfaceSize: 530427797072 3120 1440
+         1790512783.368 20676 20676 I flutter : ANDROID_TEXTURE_PREPARED layoutBound=true
+         1790512783.368 20676 20676 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=output_prepared elapsed_us=342538
+         1790512783.407 20676 20676 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=configured elapsed_us=382082
+         1790512783.408 20676 20676 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=output_ready elapsed_us=382412
+         1790512783.425 20676 20676 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=media_opened elapsed_us=399493
+         1790512783.847 20676 21034 E P5_RAW_STAGE: P5_IMAGE_COUNT acquired=1 deleted=0 current_image=1 retired=0 callbacks=1 empty_acquires=0 retire=1 pts=0.050050000
+         1790512783.962 20676 20676 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=track_verified elapsed_us=936380
+         1790512784.002 20676 20676 I VideoOutputManager: com.alexmercerind.media_kit_video.VideoOutputManager.setSurfaceSize: 530427797072 3840 2160
+         1790512786.261 20676 20676 I FirstFramePixelCopy: first_nonblack generation=1 elapsedMs=3284.024999 sample=23 mean=17.13971354166665 spread=2.3775321124482613
+         1790512786.521 20676 20676 I FirstFramePixelCopy: first_content generation=1 elapsedMs=3543.158332 sample=25 mean=93.94869791666687 spread=16.368098313540607
+         1790512786.601 20676 20676 I FirstFramePixelCopy: finish generation=1 samples=25 nonblack=true content=true
