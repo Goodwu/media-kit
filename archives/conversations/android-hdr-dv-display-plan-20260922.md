@@ -2,6 +2,8 @@
 
 ## Current State
 
+- 2026-09-27 12486 P5长播后重入曾在Flutter SurfaceTexture finalizer release栈SIGSEGV；现把受控测试页普通自动单播放器Back也接入共享Player/HDR清理屏障。12491 P5到媒体PTS158.7秒后Back，VideoOutput dispose→Player完成→Activity退出；同进程重入无崩。修订失败重试、清理期点选和原地全屏路径后，最终包12492短播/未播Back也证此顺序，V1复审无阻断；任意FlutterEngine直接destroy与12492长播仍未验。见`archives/experiments/android-auto-player-exit-12491-12492-20260927.md`。
+- 2026-09-27 12489 同一 Glass P5/正确 JAR、临时预验证固定文件路径，在点击 Video 0 的HDR协调器入口诊断性 `Media(start=3.5s)`；设备时钟PixelCopy三次首次非黑约4.034/4.245/3.966秒、轨道确认后仍约1.5–1.6秒。相较12485原片头约4.30–4.55秒，仅小幅提前；不能把跳过黑场当产品优化。未证首帧PTS/物理屏幕呈现，诊断补丁已撤销、手机强停/属性0/自动亮度/熄屏。见`archives/experiments/android-p5-glass-start35-12489-20260927.md`。
 - 2026-09-27 12486 用指定 Glass P5/正确 JAR，在同一 Player 三次打开均完成轨道确认；前两段关闭时 RPU 实际输出518/518与596/596匹配、errors0/unconsumed0，第三段无终结汇总，不算完整核验。此前一次长播后重新进入在尚未再次打开媒体时发生 Flutter SurfaceTexture finalizer release SIGSEGV，归因未明；新进程可启动。仅诊断 verbose/预验证固定文件入口，临时 Dart 补丁已撤销；手机自动亮度1、熄屏、四项P5属性0。见`archives/experiments/android-p5-glass-rpu-reopen-12486-20260927.md`。
 - 2026-09-27 12485现用JAR新增开启既有 `p5_vo_perf/p5_image_timeline` 的Glass短轮：media_opened后约1.01秒首个MediaCodec release，2–3毫秒后首个AImage；VO frame1早于AImage，frame2 render约76.7毫秒且外层swap约0.2毫秒，无mix PTS不能认定帧身份。连续PixelCopy首次有内容约4.064秒（高频日志轮，不与无日志轮作严格A/B）。归档累计补丁+隔离Android重编链接通过但lib SHA与JAR不一致，已清理隔离目录；未装新库。手机强停12485、P5六属性0、自动亮度1、屏幕OFF。见`archives/experiments/android-p5-glass-vo-startup-12485-20260927.md`。
 - 2026-09-27 12485 同一 Glass P5/SurfaceProducer Texture SDR 路径做设备时钟连续 PixelCopy：三轮洋红等待底色转黑约1.621–1.651秒，首个原生AImage约1.793–2.012秒，故12484的黑色转换是初始化画面，不能算真实首帧。Flutter Surface中首次非黑视频内容约4.296/4.482/4.554秒（点击回调内探针起点），PixelCopy不证明物理面板扫描显示且可能有扰动。临时Dart/Kotlin已撤销；手机强停12485包、自动亮度1、屏幕OFF、P5属性0。见`archives/experiments/android-p5-glass-pixel-copy-startup-12485-20260927.md`。
