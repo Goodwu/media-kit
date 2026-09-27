@@ -25,8 +25,9 @@
   - acceptance: 第一阶段以用户指定、片头有画面的 P8.4 全片，从用户触发正常打开至手机实际显示视频内容小于2秒、争取1秒；记录冷/热分布与最慢样本，验证全屏、Texture→SDR色彩/音画同步、退出重入。第二阶段在第一阶段完成后，独立测固定HDR10/P8.4的原生PQ/HLG真全屏首帧、Surface dataspace/系统合成和持续画面，超2秒则同包对照并优化。两种输出路径不互相代替；P5原生PQ须等显示链路可用后单独说明。
   - latest_sdr: 12528同APK物理全屏Texture→SDR、独立进程关→开→关→开→关→开，点击回调内PixelCopy明显内容关闭2.049/1.697/1.740秒、开启0.884/0.892/0.894秒；另一次开启0.814秒并截图确认视频。同包预绑定三对均值差约0.939秒。受控短轮不覆盖触摸/面板光学、正常入口、音画及重入，见`archives/experiments/android-p84-firstframe-prebind-ab-12528-20260927.md`。
   - normal_entry_sdr: 12530已挂载Video的普通竖屏列表入口，独立进程四轮点击回调内PixelCopy明显内容0.681/0.462/0.449/0.454秒；四轮通用Texture预绑定均为layoutBound=true，间隔截图证明连续画面。重复点击的首个探针采样为旧帧，不能算重开时延。仍缺触摸起点、真全屏、音画和有效重入，见`archives/experiments/android-p84-normal-texture-firstframe-12530-20260927.md`。
+  - tap_fullscreen_sdr: 12531普通列表点击后，同一Video进入物理横屏全屏、布局完成再预绑定并打开；独立进程四轮点击回调内PixelCopy明显内容0.863/0.664/0.656/0.663秒，均layoutBound=true，间隔3秒截图为不同视频帧。全屏Back后再次打开可重新出图，但旧帧污染重入计时。仍缺触摸派发/光学、独立色彩、音画同步与有效重入首帧，见`archives/experiments/android-p84-tap-fullscreen-firstframe-12531-20260927.md`。
   - latest_hdr: 原生HDR10 PQ/P8.4 HLG首帧未测；现有HDR素材0.4–0.9秒记录是Texture转SDR，不作为原生HDR证据。
-  - next: 先验已挂载Video的正常P8.4 Texture SDR打开、冷/热与退出重入、连续画面和音画；通过后测原生P8.4 HLG与HDR10 PQ首帧，定位超2秒环节。
+  - next: 补P8.4 Texture SDR触摸派发/光学、独立色彩与音画同步；重入用新旧帧身份排除旧帧污染并测冷/热分布。SDR阶段通过后测原生P8.4 HLG与HDR10 PQ首帧，定位超2秒环节。
 
 ## Next（近期候选，最多 10 条）
 
