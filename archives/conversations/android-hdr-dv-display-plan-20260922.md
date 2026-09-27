@@ -2,6 +2,10 @@
 
 ## Current State
 
+- 2026-09-28 P0最终JAR seek/同播放器重开12580：测试App新增默认关闭的定时seek/重开探针，静态分析及arm64构建通过。Mystery Box横屏Texture→SDR在媒体8秒seek至45秒后继续出帧，同一Player重开后重新出帧；两次截图均有实际画面，退出AImage2539/2539、retired0。但seek开始的旧PTS8.008仍报一次AImageReader无图像/渲染失败，之后恢复；P3边界故障尚未解决。手机恢复12492、自动亮度、熄屏。P0待真人动态画质。详见 `archives/experiments/android-p5-product-seek-reopen-12580-20260928.md`。
+
+- 2026-09-28 P0最终JAR非P5回退12577–12579：普通SDR、HDR10和P8.4各自固定本地源在预建横屏Texture→SDR实画，t8 VO/decoder0；P5专用退休均未激活，退出AImage分别642/642、742/742、764/764，无AImage/渲染错误。每轮恢复原12492、自动亮度、熄屏。仍缺最终版P5 seek/重入与真人动态画质；这三轮不构成原生HDR验收。见 `archives/experiments/android-p5-product-final-fallback-12577-12579-20260928.md`。
+
 - 2026-09-28 P0原始读回实验分支清理12574–12576：隔离mpv删除非默认FBO/MRT/PACK10、sidecar与像素读回探针，保留默认外部YUV/10-bit DOVI、退休/同帧复用和普通OES回退；arm64编译及独立审查通过。12574 Mystery Box 短轮实画、AImage1483/1483；12575 Mystery Box 全片完成，t90 VO34、decoder0、GPU104样本中位415MHz、AImage5886/5886；12576 Glass 全片完成，t180 VO22、decoder0、片尾截图正常、AImage10454/10454，但 PTS174.958 仍发生一次 AImageReader 无图像/渲染失败，属于P3未闭环尾段问题。主机空间满使12576 GPU只采37秒并阻断首次日志导出/自动恢复；补取环形日志并手动恢复12492、自动亮度、熄屏。P0尚缺最终版非P5回退、seek/重入及真人动态画质。详见 `archives/experiments/android-p5-product-raw-prune-12574-12576-20260928.md`。
 
 - 2026-09-28 P0映射器精简12573：隔离mpv删除可选同帧缓存、EGL缓存及高频日志，保留默认P5退休队列同帧复用与普通OES回退；V1复核发现非direct实验分支计数回归，已限次修复，资源所有权复核无新阻断。arm64编译链接与Mystery Box短轮成功，t8 VO3、decoder0、实际画面、零AImage/render错误；退出AImage1513/1513、retired0、Player完成。历史日志门禁`--cache`改为可选。手机恢复12492、自动亮度、熄屏。剩非默认FBO/PACK10和探针收敛、精简版全片、seek/重入及真人观感。见 `archives/experiments/android-p5-product-mapper-prune-12573-20260928.md`。

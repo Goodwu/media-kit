@@ -477,6 +477,18 @@ class _SinglePlayerSingleVideoScreenState
   );
   static const _autoTexture = bool.fromEnvironment('MEDIA_KIT_AUTO_TEXTURE');
   static const _autoSdr = bool.fromEnvironment('MEDIA_KIT_AUTO_SDR');
+  static const _androidAutoSeekAtSeconds = int.fromEnvironment(
+    'MEDIA_KIT_ANDROID_AUTO_SEEK_AT_SECONDS',
+    defaultValue: -1,
+  );
+  static const _androidAutoSeekTargetSeconds = int.fromEnvironment(
+    'MEDIA_KIT_ANDROID_AUTO_SEEK_TARGET_SECONDS',
+    defaultValue: -1,
+  );
+  static const _androidAutoReopenAfterSeek = bool.fromEnvironment(
+    'MEDIA_KIT_ANDROID_AUTO_REOPEN_AFTER_SEEK',
+  );
+  bool _autoSeekReopenScheduled = false;
   static const _autoStartSeconds = String.fromEnvironment(
     'MEDIA_KIT_AUTO_START_SECONDS',
   );
@@ -1363,6 +1375,12 @@ class _SinglePlayerSingleVideoScreenState
             )
           : null,
     ));
+    if (Platform.isAndroid &&
+        _androidAutoSeekAtSeconds >= 0 &&
+        !_autoSeekReopenScheduled) {
+      _autoSeekReopenScheduled = true;
+      unawaited(_runAutoSeekReopenProbe());
+    }
     if (Platform.isAndroid && _androidDirectOpenTrace) {
       debugPrint('ANDROID_DIRECT_OPEN media_returned');
     }
@@ -1427,6 +1445,46 @@ class _SinglePlayerSingleVideoScreenState
           debugPrint('AUTO_NATIVE_EDGE ERROR=$error');
         }
       });
+    }
+  }
+
+  Future<void> _runAutoSeekReopenProbe() async {
+    try {
+      if (!_autoTexture || _androidAutoSeekTargetSeconds < 0) {
+        throw StateError('Auto seek probe requires Texture and a target');
+      }
+      final start = Duration(seconds: _androidAutoSeekAtSeconds);
+      final target = Duration(seconds: _androidAutoSeekTargetSeconds);
+      await player.stream.position
+          .firstWhere((position) => position >= start)
+          .timeout(Duration(seconds: _androidAutoSeekAtSeconds + 30));
+      if (!mounted || _autoPlayerDisposed) return;
+      debugPrint(
+          'AUTO_SEEK_REOPEN seek_begin position=${player.state.position} '
+          'target=$target');
+      await player.seek(target);
+      await player.stream.position
+          .firstWhere(
+              (position) => position >= target + const Duration(seconds: 2))
+          .timeout(const Duration(seconds: 20));
+      if (!mounted || _autoPlayerDisposed) return;
+      debugPrint(
+          'AUTO_SEEK_REOPEN seek_playing position=${player.state.position}');
+      if (!_androidAutoReopenAfterSeek) return;
+      debugPrint(
+          'AUTO_SEEK_REOPEN reopen_begin position=${player.state.position}');
+      await player.open(Media(sources[0]));
+      await player.stream.position
+          .firstWhere((position) =>
+              position >= const Duration(seconds: 2) &&
+              position < const Duration(seconds: 10))
+          .timeout(const Duration(seconds: 20));
+      if (!mounted || _autoPlayerDisposed) return;
+      debugPrint(
+          'AUTO_SEEK_REOPEN reopen_playing position=${player.state.position}');
+    } catch (error, stack) {
+      debugPrint('AUTO_SEEK_REOPEN error=$error');
+      debugPrintStack(stackTrace: stack);
     }
   }
 
