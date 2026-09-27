@@ -100,7 +100,9 @@ public class PlatformVideoViewFactory extends PlatformViewFactory {
         for (java.util.Map.Entry<SurfaceOwner, Integer> entry : liveSurfaceGenerations.entrySet()) {
             if (entry.getKey().handle != handle) continue;
             final PlatformVideoView view = surfaceOwners.get(entry.getKey());
-            if (view == null) continue;
+            // A replaced view can retain an ACK owner after its Surface is
+            // destroyed. Only bound Surfaces participate in this policy gate.
+            if (view == null || !view.hasLiveSurface()) continue;
             found = true;
             applied &= view.setColorSpace(transfer);
         }

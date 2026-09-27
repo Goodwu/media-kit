@@ -1,6 +1,7 @@
 # native output rebuild lifecycle
 
 ## Current State
+- 2026-09-27 macOS 窗口复核：对现有 `/Users/wuweiwei1/src/PiliPlusX/build/macos/Build/Products/Debug/PiliPlusX.app` 执行 LaunchServices `open -n` 后，AppleScript 枚举到 1180×720 Aqua 窗口。此前“当前桌面环境无可操作窗口”已非持续阻断；尚未核对该包对应的 mpv 0.41 产品播放链、seek、重入、输出重建及 HDR 长播。
 - 2026-09-27 OHOS 实机验收入口核验：当前主机 `hdc list targets` 返回 `[Empty]`，无可连接实体机；TASKS 将该项移至 Blocked，设备接入后重新核验身份、包与运行状态。
 - 背景: 当前分支包含 macOS native surface、OHOS HDR surface 和播放器释放路径的协同修改。
 - 目标: 提交本轮代码及对应契约测试，保留未纳入范围的协作文档和本地产物。
