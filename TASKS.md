@@ -30,7 +30,7 @@
   - touchdown_reentry_sdr: 12533三独立进程触摸按下至横屏全屏明显内容0.767/0.789/0.681秒；12535同PID先销毁播放页、回主菜单，再新建播放页并出图，第二次按下至内容0.656秒，旧帧不再污染。仅系统读回短轮，仍缺光学、独立色准、音画同步与冷/热统计。见`archives/experiments/android-p84-touchdown-and-reentry-12533-12535-20260927.md`。
   - sdr_acceptance: 12535 P8.4 Texture→SDR 真横屏全屏人工观察：用户认为轻微偏淡但可接受，画面流畅、声画同步；单独从竖屏列表 Video 0 点击，用户感受约1秒内出实际画面，同轮触摸按下至明显内容 PixelCopy 为0.844秒。此前一次约2秒竖屏黑屏反馈含脚本故意等待2秒，不能归因于播放器。此设备/素材/路径的用户验收通过；未做独立色度仪或面板光学时间测量。见`archives/experiments/android-p84-sdr-human-acceptance-20260927.md`。
   - latest_hdr: 12537 P8.4原生HLG三独立进程触摸按下→视频Surface读回内容0.670/0.676/0.623秒；12538 HDR10原生PQ为0.653/0.648/0.630秒。各有真横屏全屏截图，SF视频层分别BT.2020 HLG(types0)/PQ(types3)。12539 是关闭私有探针的公开 P5 PQ 设置失败，`wid=0`，请求→明确失败0.422秒。12542/12543 在精确固件私有探针开启时成功输出 P5 PQ 并出实际画面；12543 三独立进程触摸按下→读回可辨内容3.953/4.009/4.079秒，含片源黑场，且首次探针采样曾命中旧 Surface，尚不能当作精准首个解码帧时间。2秒时视频层已有 PQ activeBuffer，截图仍是片头黑场。视频Surface读回可作自动化时延门槛，但不能单独证明系统合成或面板显示。见`archives/experiments/android-native-hdr-firstframe-12537-12539-20260927.md`、`archives/experiments/android-p5-private-pq-firstframe-12541-12543-20260927.md`。
-  - next: 以已成功的私有 P5→PQ 路径为对照，区分首个 HDR buffer 与素材可辨画面的时刻，修正探针只采当前全屏 Surface；评估可支持的产品出口，不重复已证实失败的公开 PQ 探针。扩充 HDR 冷/热、重入、连续画面和输出切换统计；面板光学及独立色度仪仍是精度限制。
+  - next: 12544 全屏尺寸筛选排除了旧 `1440×810` Surface，P5 私有 PQ 路径触摸按下→可辨画面读回3.967秒，仍含片头黑场；但同尺寸不足以证明当前 Surface owner，见`archives/experiments/android-p5-private-pq-probe-target-12544-20260928.md`。后续把探针绑定当前 View/Surface generation，区分首个 HDR buffer 与可辨画面；评估可支持的产品出口，不重复已证实失败的公开 PQ 探针。扩充 HDR 冷/热、重入、连续画面和输出切换统计；面板光学及独立色度仪仍是精度限制。
 
 ## Next（近期候选，最多 10 条）
 
