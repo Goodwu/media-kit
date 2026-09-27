@@ -38,14 +38,14 @@
   - status: queued
   - context: archives/conversations/android-hdr-dv-display-plan-20260922.md
   - acceptance: Surface 重建、Home→前台、退出/重入、oldA→newB 交错和失败重试时，播放器位置与持续可见帧正确，资源最终释放；晚到 Create、Release ACK 丢失及 engine detach 有明确 owner/屏障，不以构建或单次 EOS 代替生命周期验收。
-  - latest: P8.4/HDR10/SDR 的 Home→返回、双视图存活 B 回退、释放/绑定失败重试已有实机可见画面证据；诊断根页 Back 与自动停止并发时已等待 Player.dispose。12473/12474/12475 受控 SDR 交错核验旧 A 的 Available/Destroy 晚到与 ACK 回复超时后重试。12477 在正式 HDR10 输出的第2代控制器中注入明确标记的旧 A Failed，B 尚无 Surface 时未提前拒绝打开，B 放行后 HDR10 成功且两张相位轮换前截图有变化；见`archives/experiments/android-hdr10-old-surface-failed-12476-12477-20260927.md`。注入均已撤销，提前停轨仍默认关闭；完整历史见本条 context。
+  - latest: P8.4/HDR10/SDR 的 Home→返回、双视图存活 B 回退、释放/绑定失败重试已有实机可见画面证据；诊断根页 Back 与自动停止并发时已等待 Player.dispose。12473/12474/12475 受控 SDR 交错核验旧 A 的 Available/Destroy 晚到与 ACK 回复超时后重试。12477 在正式 HDR10 输出的第2代控制器中注入明确标记的旧 A Failed，B 尚无 Surface 时未提前拒绝打开，B 放行后 HDR10 成功且两张相位轮换前截图有变化；见`archives/experiments/android-hdr10-old-surface-failed-12476-12477-20260927.md`。12486 一次 P5 长播后重新进入、尚未再次开媒体时，Flutter SurfaceTexture finalizer 在系统 release/abandon 栈 SIGSEGV；新进程可启动，归因未明，见`archives/experiments/android-p5-glass-rpu-reopen-12486-20260927.md`。注入均已撤销，提前停轨仍默认关闭；完整历史见本条 context。
   - next: 任意宿主直接 FlutterEngine.destroy 需先做独立于 Dart 的 Android 原生播放器 owner broker，统一 mpv 调用、事件/hook、终止和视频输出引用；先以无视频 Player 实机直接 destroy 证明终态，再接 SDR PlatformView、两种 Texture、HDR/P5，详见本条 context。继续失败 disposal/global-ref 定量闭合、P5 双视图和属性序列中途故障；补连续可见帧与 mpv WID 回读，再决定提前停轨默认值。
 
 - [ ] P5 RPU 边界与独立色彩核验
   - status: queued
   - context: archives/conversations/android-hdr-dv-display-plan-20260922.md
   - acceptance: 对实际输出逐帧核对 RPU 对应关系，覆盖 seek/flush/重开；以明确的参考母版、目标空间和映射策略做同 PTS 数值比较，并把独立色彩结论与用户观感分开。
-  - latest: 10440 前后跳共4次flush，实际输出 RPU 匹配2321/2321、errors0。10444 用临时 mpv 实例恢复日志后，重建前后实际输出206/206、227/227匹配。10445 用已修复的 mpv 日志接管且不需临时实例，前后201/201、225/225匹配、errors0，图像资源归零。10442 探针失声源自全局日志路由。见`archives/experiments/android-p5-rpu-seek-10440-20260927.md`、`archives/experiments/android-p5-rpu-rebind-10444-20260927.md`、`archives/experiments/android-mpv-ffmpeg-log-handoff-10445-20260927.md`。长期重开和独立色准仍待核验，后者有母版身份及映射差异。
+  - latest: 10440 前后跳共4次flush，实际输出 RPU 匹配2321/2321、errors0。10444/10445 的重建前后短轮亦全匹配。12486 使用指定 Glass 原片头，同一 Player/进程连续三次打开均完成轨道确认；前两次关闭时实际输出 RPU 分别518/518、596/596匹配，errors0、unconsumed0，第三段退出无 summary，见`archives/experiments/android-p5-glass-rpu-reopen-12486-20260927.md`。10442 探针失声源自全局日志路由；见本条 context。长期重开和独立色准仍待核验，后者有母版身份及映射差异。
 
 - [ ] 排查 Android HDR 天空渐变层纹
   - status: queued
