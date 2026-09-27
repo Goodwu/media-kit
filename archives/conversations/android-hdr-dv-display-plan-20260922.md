@@ -1,6 +1,7 @@
 # Android HDR10 / DV P8.4 / P5、视图定位与原生 DV 能力计划（2026-09-22）
 
 ## Current State
+- 2026-09-27 12524/12525物理全屏预建Texture短轮：HDR10三次明显内容0.685/0.424/0.423秒，P8.4三次0.669/0.538/0.446秒，独立进程、Flutter Surface PixelCopy，截图显示相应视频。均为Texture SDR诊断，非原生HDR或触摸到面板验收；P5仍超2秒。手机恢复12492、属性0、自动亮度、熄屏。见`archives/experiments/android-hdr-texture-firstframe-12524-12525-20260927.md`。
 - 2026-09-27 12523 SDR控制源物理全屏黑底独立进程三轮，直接Texture路径在已挂载布局调用通用预建入口均绑定成功；Flutter Surface PixelCopy明显内容0.760/0.754/0.724秒。仅该受控诊断入口达到1秒探针上界，未测触摸到回调、面板光学或关闭预建A/B，不代替HDR10/P8.4/P5及普通入口验收。手机已恢复12492、属性0、自动亮度、熄屏。见`archives/experiments/android-sdr-preopen-firstframe-12523-20260927.md`。
 - 2026-09-27 12522受控Glass P5黑底真物理全屏，三独立进程Flutter Surface PixelCopy首次非黑3.284/3.060/3.350秒、明显内容3.543/3.374/3.625秒；同轮首个AImage约0.871/0.690/0.761秒。原片头约2.052秒黑场，读回不等于光学首帧；2秒可辨内容目标仍未过。预建3120×1440、arm64单架构，自建JAR；手机恢复12492/属性0/自动亮度/熄屏，见`archives/experiments/android-p5-glass-black-roi-firstframe-12522-20260927.md`。
 - 2026-09-27 首帧固定Glass入口12517暴露331MB复制/哈希耗时14.525秒；依用户反馈，12519/12521诊断开关按受控文件名分类，点击时不再复制或哈希。12521素材准备约1ms、媒体打开0.346秒、首个AImage约0.684秒，5秒截图实际出图；仍非物理首帧2秒证据。测试APK仅arm64-v8a，未下载其它ABI JAR，原下载构建缓存已清；原12492 APK、属性0、自动亮度、熄屏恢复。见`archives/experiments/android-p5-glass-named-fixture-arm64-12517-12521-20260927.md`。
