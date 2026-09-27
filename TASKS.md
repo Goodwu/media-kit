@@ -11,7 +11,7 @@ P5→PQ 输出、首帧和性能使用 `/Users/wuweiwei1/Downloads/test-clips/My
 - [ ] status: in_progress；context: archives/conversations/android-hdr-dv-display-plan-20260922.md
 - acceptance: 在支持的 P5→Texture SDR 条件下默认启用通用 `optimize_dovi_linear_decode`，其他场景安全回退；自建 arm64 JAR 确认包含并命中优化。Glass 真横屏 2560×1440、默认电池模式全片到 EOS，画质、资源和真人观感正常，VO 与既有优化轮 EOS 516、t90→t180 新增342相近即可，不再追逐旧严格门槛。Mystery Box 同配置复测，与自身未优化基准比较，记录 GPU 频率。
 - latest: 旧 Glass 同配置诊断 A/B/A 的 Texture SDR EOS VO 为2607/516/3626；Mystery Box 未优化全片 VO54、decoder0，GPU中位586MHz。FFmpeg `fff3ee7`、libplacebo `c9fd879` 已推送Goodwu fork。mpv `aa8bd10`修同帧复用、`91554aa`修普通 OES 回退、`33a212e`删可选缓存与高频日志，均已推送。12569真正 `gpu-next`/`mediacodec`、2560×1440 Mystery Box 全片 EOS VO2、decoder0、GPU中位415MHz、AImage5928/5928；12570 Glass 全片 EOS VO41、decoder0、GPU中位415MHz、AImage10433/10433、片尾正常。12567普通 SDR、12571 HDR10、12572 P8.4 同版短轮均实际出画且资源对齐（后两者仅 Texture→SDR 回退）。12573 清理版 Mystery Box 短轮 t8 VO3、decoder0、AImage1513/1513。最新隔离 mpv 再删原始 YUV FBO/MRT/PACK10、sidecar 和读回探针，arm64 编译及独立审查通过；12574 Mystery Box 短轮实画、AImage1483/1483；12575 Mystery Box 全片完成，t90 VO34、decoder0、GPU104样本中位415MHz、AImage5886/5886；12576 Glass 全片完成，t180 VO22、decoder0、片尾截图正常、AImage10454/10454，但 PTS174.958 仍有一次 AImageReader 无图像/渲染失败，属 P3 尾段故障。12576主机空间满使GPU只采37秒，且两条全片均未取得精确 EOS VO 快照。见 `archives/experiments/android-p5-product-raw-prune-12574-12576-20260928.md` 及前述各版本实验记录。
-- next: 清理版 mpv `8e7c23e` 已推送 Goodwu fork；最终版补普通 SDR/HDR10/P8.4 回退、seek/重入和真人动态画质，核资源所有权。完成后转P1，不继续旧Glass SDR掉帧调优；Glass 尾段偶发故障继续在P3处理。
+- next: 清理版 mpv `8e7c23e` 已推送 Goodwu fork；12577普通SDR、12578 HDR10、12579 P8.4同JAR短轮均实际出画、t8 VO/decoder0、P5专用退休关闭、退出AImage分别642/642、742/742、764/764，见 `archives/experiments/android-p5-product-final-fallback-12577-12579-20260928.md`。12580 Mystery Box 8→45秒 seek 后继续出画、同播放器重开后再次出画，退出AImage2539/2539；seek边界一次AImageReader取图失败，纳入P3，见 `archives/experiments/android-p5-product-seek-reopen-12580-20260928.md`。P0尚缺最终版真人动态画质；完成后转P1，不继续旧Glass SDR掉帧调优。
 
 ### P1 · P5→PQ 公开产品输出与首帧
 
@@ -31,7 +31,7 @@ P5→PQ 输出、首帧和性能使用 `/Users/wuweiwei1/Downloads/test-clips/My
 
 - [ ] status: queued；context: archives/conversations/android-hdr-dv-display-plan-20260922.md
 - acceptance: 退出重入、Surface/双视图切换、失败重试、直接 Engine 销毁后资源正确释放且持续出帧；旧 Glass 片尾紫屏根因查明并修复，完整 EOF、暂停重绘、seek 与重入无残影；Mystery Box 用于正常 EOF 回归。
-- latest: 12492 P5 播至 PTS164.8 后退出重入成功，直接 Engine.destroy 仍未验。Glass 尾段 PTS约175 曾有 AImageReader `-30001`、渲染失败及紫屏；12526 两轮中一轮复现、一轮保留末帧，缺 end-file 与 buffer 身份，根因未定。见 `archives/experiments/android-p5-tail-repro-12526-20260927.md`。
+- latest: 12492 P5 播至 PTS164.8 后退出重入成功，直接 Engine.destroy 仍未验。Glass 尾段 PTS约175 曾有 AImageReader `-30001`、渲染失败及紫屏；12526 两轮中一轮复现、一轮保留末帧，缺 end-file 与 buffer 身份，根因未定。清理版12576在片尾PTS174.958再次出现一次同类取图/渲染失败，但片尾截图正常、播放完成；12580在Mystery Box seek开始的旧PTS8.008也出现一次，之后45秒处继续播放并同播放器重开成功、资源闭合。见 `archives/experiments/android-p5-tail-repro-12526-20260927.md`、`archives/experiments/android-p5-product-seek-reopen-12580-20260928.md`。
 - next: 按当前 owner/代次追踪退出与 Surface 交错；尾段短轮记录 reader、codec buffer、PTS、release 与 callback 身份，确认同因后修复并完成 Glass EOF 回归。
 
 ### P4 · 独立色彩数值验收
