@@ -627,23 +627,19 @@ class AndroidVideoController extends PlatformVideoController {
           'height': height.toString(),
         },
       );
-      if (_layoutSizedTexture) {
-        final actualWidth = (actual?['width'] as num?)?.toInt();
-        final actualHeight = (actual?['height'] as num?)?.toInt();
-        if (actualWidth == null ||
-            actualWidth <= 0 ||
-            actualHeight == null ||
-            actualHeight <= 0) {
-          throw StateError('SurfaceTexture resize had no valid size ACK.');
-        }
-        width = actualWidth;
-        height = actualHeight;
+      final actualWidth = (actual?['width'] as num?)?.toInt();
+      final actualHeight = (actual?['height'] as num?)?.toInt();
+      if (actualWidth == null ||
+          actualWidth <= 0 ||
+          actualHeight == null ||
+          actualHeight <= 0) {
+        throw StateError('Android Texture resize had no valid size ACK.');
       }
+      width = actualWidth;
+      height = actualHeight;
     }
     if (_disposed || _fullyDisposed) return;
-    if (wid.value != null &&
-        (configuration.usePlatformView ||
-            !configuration.enableAndroidSurfaceProducer)) {
+    if (wid.value != null) {
       // The Surface identity is unchanged. A dynamic size property avoids a
       // VO rebind and the seek that belongs only to a new Surface.
       await _setOutputProperty('android-surface-size', '${width}x$height');
