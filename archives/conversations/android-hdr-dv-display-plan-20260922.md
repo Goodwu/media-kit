@@ -2,6 +2,8 @@
 
 ## Current State
 
+- 2026-09-28 Mystery Box 的 P5→Texture SDR 全片基准12546：优化未编入的自建 arm64 JAR，真横屏2560×1440、`gpu-next`/`mediacodec`，媒体正常从0到EOS约98.87秒；VO累计掉帧54、decoder0，媒体2.47/34.47/64.46/94.48秒分别45/47/51/54。播放起点后100个GPU频率样本中位586MHz、76个586MHz/19个644MHz，故与旧Glass低频优化轮不可直接比。截图有实际画面，无真人流畅度/独立色彩验收。已恢复12492、诊断属性0、自动亮度和熄屏。见`archives/experiments/android-p5-mystery-sdr-baseline-12546-20260928.md`。
+
 - 2026-09-28 P5 素材/性能口径纠正：用户指定 P5→Texture SDR 默认优化验收继续使用原 Glass P5 4K59.94（SHA `afb24b...`），真横屏2560×1440、默认电池模式与既有优化轮对齐；以前 EOS VO516、t90→t180新增342 为性能参照，性能相近且观感良好即可，不再追旧严格门槛。Mystery Box（SHA `3e610d...`）专用于 P5→PQ 输出/首帧/性能；不同片长和画面复杂度的掉帧数不互比。旧 Glass 仍作紫屏定点复现。见`TASKS.md` P5当前优先级。
 
 - 2026-09-28 P5 顺序再调整：先把已提交的 `optimize_dovi_linear_decode` 在受支持的 P5→Texture SDR 路径默认启用并用新 Mystery Box 样片确认构建、命中、回退、画质与资源，建立可复用代码基线；然后打通公开 P5→PQ 产品输出/首帧，最后测 PQ 全片性能并针对性优化。这是有限集成验证，不重启旧 Glass SDR 严格掉帧调优；SDR 优化不构成 PQ 输出可用或 PQ 性能收益的证明。
