@@ -63,14 +63,13 @@
   - failed_probe: 12527尝试在隔离AImageReader加最近16次map身份轨迹，但自建诊断包首次播放初始化即`info_callback`重复递归SIGSEGV，未进入尾段，不能作为紫屏根因证据；临时源码已恢复、失败JAR已删。见`archives/experiments/android-p5-tail-map-trace-12527-failed-20260927.md`。
   - next: 在尾段失败时输出最近map的reader代次、源帧/codec buffer身份、PTS、release与callback；先用尾段起播缩短复现，若不复现改为整片。确认同因后设计兼容延退的同帧所有权，并以完整Glass EOF、暂停重绘、seek及退出重入验证。
 
-- [ ] 在真实 OHOS 设备上继续验证 native output 生命周期
-  - status: queued
-  - context: archives/conversations/native-output-rebuild-20260920.md
-  - acceptance: 原生输出实际呈现、后台/前台、退出/重入及 Surface 重建后持续播放且资源闭合；区分实体机、模拟器与静态检查证据。
-
 ## Blocked（等待输入或外部条件）
 
-- （暂无；以上未完成项仍可继续推进）
+- [ ] 在真实 OHOS 设备上继续验证 native output 生命周期
+  - status: blocked_waiting_for_device
+  - context: archives/conversations/native-output-rebuild-20260920.md
+  - acceptance: 原生输出实际呈现、后台/前台、退出/重入及 Surface 重建后持续播放且资源闭合；区分实体机、模拟器与静态检查证据。
+  - latest: 2026-09-27 当前主机 `hdc list targets` 返回 `[Empty]`，没有可连接的真实 OHOS 设备；待设备接入后重新核验身份、包与运行状态，再继续实机验收。
 
 ## Closed（结案，未达原门槛）
 
