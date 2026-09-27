@@ -53,7 +53,7 @@ class _SinglePlayerSingleVideoScreenState
   );
   int _dualViewPhase = 0;
   bool _dualViewProbeScheduled = false;
-  Future<void>? _dualViewExitFuture;
+  Future<void>? _autoPlayerExitFuture;
   static const _androidP5RpuPipelineBuilt = bool.fromEnvironment(
     'MEDIA_KIT_ANDROID_P5_RPU_PIPELINE_BUILT',
   );
@@ -303,10 +303,10 @@ class _SinglePlayerSingleVideoScreenState
     }
   }
 
-  Future<void> _exitDualViewAfterPlayerDisposal() =>
-      _dualViewExitFuture ??= _exitDualViewAfterPlayerDisposalOnce();
+  Future<void> _exitAutoPlayerAfterDisposal() =>
+      _autoPlayerExitFuture ??= _exitAutoPlayerAfterDisposalOnce();
 
-  Future<void> _exitDualViewAfterPlayerDisposalOnce() async {
+  Future<void> _exitAutoPlayerAfterDisposalOnce() async {
     try {
       await _disposeTestPlayer();
       if (Platform.isAndroid &&
@@ -314,15 +314,20 @@ class _SinglePlayerSingleVideoScreenState
           _hdrLastDisposeReport?.clean != true) {
         throw StateError('Android HDR resource disposal is incomplete');
       }
-      debugPrint('ANDROID_DUAL_VIEW exit player disposed');
+      debugPrint('ANDROID_AUTO_PLAYER exit player disposed');
       await SystemNavigator.pop();
     } catch (error, stack) {
-      debugPrint('ANDROID_DUAL_VIEW exit blocked: $error');
+      debugPrint('ANDROID_AUTO_PLAYER exit blocked: $error');
       debugPrintStack(stackTrace: stack);
+      _autoPlayerExitFuture = null;
     }
   }
 
   Future<void> _openSelectedSource(String source) async {
+    if (_autoPlayerDisposed) {
+      debugPrint('OPEN_SELECTED_SOURCE ignored: player disposal started');
+      return;
+    }
     try {
       if (Platform.isAndroid && _androidHdrTransaction) {
         await _openHdrSource(source);
@@ -1343,8 +1348,18 @@ class _SinglePlayerSingleVideoScreenState
     }
   }
 
-  Future<void> _disposeTestPlayer() =>
-      _autoPlayerDisposeFuture ??= _disposeTestPlayerOnce();
+  Future<void> _disposeTestPlayer() {
+    final existing = _autoPlayerDisposeFuture;
+    if (existing != null) return existing;
+    final attempt = _disposeTestPlayerOnce();
+    _autoPlayerDisposeFuture = attempt;
+    unawaited(attempt.then<void>((_) {}, onError: (Object _, StackTrace __) {
+      if (identical(_autoPlayerDisposeFuture, attempt)) {
+        _autoPlayerDisposeFuture = null;
+      }
+    }));
+    return attempt;
+  }
 
   Future<void> _disposeTestPlayerOnce() async {
     _autoPlayerDisposed = true;
@@ -1385,8 +1400,16 @@ class _SinglePlayerSingleVideoScreenState
     super.dispose();
   }
 
-  Future<void> _disposeHdrPlayer() =>
-      _hdrDisposeFuture ??= _disposeHdrPlayerOnce();
+  Future<void> _disposeHdrPlayer() {
+    final existing = _hdrDisposeFuture;
+    if (existing != null) return existing;
+    final attempt = _disposeHdrPlayerOnce();
+    _hdrDisposeFuture = attempt;
+    unawaited(attempt.then<void>((_) {}, onError: (Object _, StackTrace __) {
+      if (identical(_hdrDisposeFuture, attempt)) _hdrDisposeFuture = null;
+    }));
+    return attempt;
+  }
 
   Future<void> _disposeHdrPlayerOnce() async {
     final coordinator = _hdrCoordinatorFuture;
@@ -1402,6 +1425,7 @@ class _SinglePlayerSingleVideoScreenState
       debugPrint('ANDROID_HDR_DISPOSE coordinator=${report.coordinatorError} '
           'player=${report.playerError} directory=${report.directoryError} '
           'retained=${report.retainedDirectory}');
+      throw StateError('Android HDR resource disposal is incomplete');
     }
   }
 
@@ -1556,7 +1580,7 @@ class _SinglePlayerSingleVideoScreenState
       return PopScope(
         canPop: false,
         onPopInvokedWithResult: (didPop, result) {
-          if (!didPop) unawaited(_exitDualViewAfterPlayerDisposal());
+          if (!didPop) unawaited(_exitAutoPlayerAfterDisposal());
         },
         child: dualViewPage,
       );
@@ -1627,10 +1651,13 @@ class _SinglePlayerSingleVideoScreenState
     if (_androidP5InplaceFullscreen) {
       final viewHeight = MediaQuery.of(context).size.width * 9 / 16;
       return PopScope(
-          canPop: !_inplaceFullscreen,
+          canPop:
+              !_inplaceFullscreen && !(Platform.isAndroid && _autoSinglePlayer),
           onPopInvokedWithResult: (didPop, _) {
             if (!didPop && _inplaceFullscreen) {
               unawaited(_exitInplaceDiagnosticFullscreen());
+            } else if (!didPop && Platform.isAndroid && _autoSinglePlayer) {
+              unawaited(_exitAutoPlayerAfterDisposal());
             }
           },
           child: Scaffold(
@@ -1681,7 +1708,7 @@ class _SinglePlayerSingleVideoScreenState
     }
     final horizontal =
         MediaQuery.of(context).size.width > MediaQuery.of(context).size.height;
-    return Scaffold(
+    final page = Scaffold(
       appBar: AppBar(
         title: const Text('package:media_kit'),
         actions: [
@@ -1797,5 +1824,15 @@ class _SinglePlayerSingleVideoScreenState
               ),
       ),
     );
+    if (Platform.isAndroid && _autoSinglePlayer) {
+      return PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) {
+          if (!didPop) unawaited(_exitAutoPlayerAfterDisposal());
+        },
+        child: page,
+      );
+    }
+    return page;
   }
 }
