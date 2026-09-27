@@ -1301,6 +1301,12 @@ class _SinglePlayerSingleVideoScreenState
       await player.setPlaylistMode(PlaylistMode.single);
       debugPrint('ANDROID_LOOP_SOURCE mode=single');
     }
+    if (Platform.isAndroid &&
+        _androidPreopenFullscreen &&
+        !configuration.value.usePlatformView) {
+      final prepared = await controller.prepareAndroidTextureOutput();
+      debugPrint('ANDROID_DIRECT_TEXTURE_PREPARED layoutBound=$prepared');
+    }
     if (Platform.isAndroid && _androidDirectOpenTrace) {
       debugPrint('ANDROID_DIRECT_OPEN media_command');
     }
