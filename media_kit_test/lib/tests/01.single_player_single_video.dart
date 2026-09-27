@@ -203,14 +203,6 @@ class _SinglePlayerSingleVideoScreenState
             ) ??
             false;
       },
-      readP5RuntimeProperties: () async {
-        final values = await _p5RuntimeGateChannel
-            .invokeMapMethod<String, String>('ReadProperties');
-        if (values == null) {
-          throw StateError('P5 runtime property report is unavailable');
-        }
-        return values;
-      },
     );
     if (_androidNamedLocalSource) {
       if (sources.isEmpty) throw StateError('No named Android sample selected');
