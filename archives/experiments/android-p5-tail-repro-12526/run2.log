@@ -1,0 +1,11 @@
+         1790514738.394 31143 31143 I flutter : AUTO_SOURCE path=/data/local/tmp/media-kit-p5-glassblowing2-4k5994.mp4
+         1790514738.481 31143 31143 I flutter : ANDROID_PLAYING_START seconds=170.0
+         1790514740.072 31143 31315 E P5_SAME_FRAME: enabled=0
+         1790514740.073 31143 31315 E P5_DIRECT_RETIRE: enabled=0 property=
+         1790514740.079 31143 31315 E P5_RAW_STAGE: P5_IMAGE_COUNT acquired=1 deleted=0 current_image=1 retired=0 callbacks=1 empty_acquires=0 retire=0 pts=170.003166667
+         1790514740.225 31143 31143 I flutter : MPVLOG [vo/gpu-next/aimagereader] error: acquireLatestImage failed after retry: -30001 pts=170.003166667 callbacks=1 empty_acquires=10 notification_pending=0 retired=0 maps=0
+         1790514740.225 31143 31143 I flutter : MPVLOG [vo/gpu-next] error: Mapping hardware decoded surface failed.
+         1790514740.225 31143 31143 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+         1790514740.231 31143 31315 E P5_RAW_STAGE: P5_IMAGE_COUNT acquired=2 deleted=1 current_image=1 retired=0 callbacks=2 empty_acquires=10 retire=0 pts=170.019850000
+         1790514740.275 31143 31315 E P5_RAW_STAGE: P5_IMAGE_COUNT acquired=3 deleted=2 current_image=1 retired=0 callbacks=3 empty_acquires=10 retire=0 pts=170.036533333
+         1790514744.473 31143 31315 E P5_RAW_STAGE: P5_IMAGE_COUNT acquired=250 deleted=249 current_image=1 retired=0 callbacks=250 empty_acquires=10 retire=0 pts=174.240733333
