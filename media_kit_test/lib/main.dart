@@ -52,6 +52,8 @@ Future<void> main() async {
   );
   if (preopenFullscreen && UniversalPlatform.isAndroid) {
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    await const MethodChannel('media_kit_test/flutter_surface_probe')
+        .invokeMethod<void>('SetShortEdges');
   }
   runApp(const MyApp(DownloadingScreen()));
   await prepareSources();
