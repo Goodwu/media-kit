@@ -1,6 +1,7 @@
 # Android HDR10 / DV P8.4 / P5、视图定位与原生 DV 能力计划（2026-09-22）
 
 ## Current State
+- 2026-09-27 补取12492同轮设备logcat：指定Glass P5在媒体PTS174.874700秒、接近视频流175.008秒终点时，AImageReader报`-30001`，随即VO映射及渲染失败；约1.14秒后截图视频区域纯紫。原始三行日志已归档。EOS事件和Buffer身份仍缺，紫色具体分支/根因待核。见`archives/experiments/android-p5-glass-eos-purple-12492-20260927.md`。
 
 - 2026-09-27 最终12492同包Glass P5长播：前后两张实际画面不同，AImage至媒体PTS164.765秒；Back前输出释放、Player完成、Activity退出依次发生。相同进程PID5729重入再次出图，第二次退出仍有序，无SIGSEGV。墙钟时间超过视频流标称时长后区域变纯紫色RGB(128,0,255)，源末帧非此色；独立任务排查。四项P5属性已复位0、自动亮度1、屏幕OFF。见`archives/experiments/android-auto-player-exit-12491-12492-20260927.md`和`archives/experiments/android-p5-glass-eos-purple-12492-20260927.md`。
 - 2026-09-27 12486 P5长播后重入曾在Flutter SurfaceTexture finalizer release栈SIGSEGV；现把受控测试页普通自动单播放器Back也接入共享Player/HDR清理屏障。12491 P5到媒体PTS158.7秒后Back，VideoOutput dispose→Player完成→Activity退出；同进程重入无崩。修订失败重试、清理期点选和原地全屏路径后，最终包12492短播/未播Back也证此顺序，V1复审无阻断；任意FlutterEngine直接destroy与12492长播仍未验。见`archives/experiments/android-auto-player-exit-12491-12492-20260927.md`。
