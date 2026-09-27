@@ -1,0 +1,10 @@
+package: name='com.example.media_kit_test' versionCode='12521' versionName='1.0.0' platformBuildVersionName='16' platformBuildVersionCode='36' compileSdkVersion='36' compileSdkVersionCodename='16'
+sdkVersion:'24'
+targetSdkVersion:'36'
+lib/arm64-v8a/libapp.so
+lib/arm64-v8a/libdartjni.so
+lib/arm64-v8a/libflutter.so
+lib/arm64-v8a/libmedia_kit_p5_probe.so
+lib/arm64-v8a/libmedia_kit_video_hdr_bridge.so
+lib/arm64-v8a/libmediakitandroidhelper.so
+lib/arm64-v8a/libmpv.so
