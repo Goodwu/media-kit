@@ -2,6 +2,7 @@
 
 ## Current State
 
+- 2026-09-27 12486 用指定 Glass P5/正确 JAR，在同一 Player 三次打开均完成轨道确认；前两段关闭时 RPU 实际输出518/518与596/596匹配、errors0/unconsumed0，第三段无终结汇总，不算完整核验。此前一次长播后重新进入在尚未再次打开媒体时发生 Flutter SurfaceTexture finalizer release SIGSEGV，归因未明；新进程可启动。仅诊断 verbose/预验证固定文件入口，临时 Dart 补丁已撤销；手机自动亮度1、熄屏、四项P5属性0。见`archives/experiments/android-p5-glass-rpu-reopen-12486-20260927.md`。
 - 2026-09-27 12485现用JAR新增开启既有 `p5_vo_perf/p5_image_timeline` 的Glass短轮：media_opened后约1.01秒首个MediaCodec release，2–3毫秒后首个AImage；VO frame1早于AImage，frame2 render约76.7毫秒且外层swap约0.2毫秒，无mix PTS不能认定帧身份。连续PixelCopy首次有内容约4.064秒（高频日志轮，不与无日志轮作严格A/B）。归档累计补丁+隔离Android重编链接通过但lib SHA与JAR不一致，已清理隔离目录；未装新库。手机强停12485、P5六属性0、自动亮度1、屏幕OFF。见`archives/experiments/android-p5-glass-vo-startup-12485-20260927.md`。
 - 2026-09-27 12485 同一 Glass P5/SurfaceProducer Texture SDR 路径做设备时钟连续 PixelCopy：三轮洋红等待底色转黑约1.621–1.651秒，首个原生AImage约1.793–2.012秒，故12484的黑色转换是初始化画面，不能算真实首帧。Flutter Surface中首次非黑视频内容约4.296/4.482/4.554秒（点击回调内探针起点），PixelCopy不证明物理面板扫描显示且可能有扰动。临时Dart/Kotlin已撤销；手机强停12485包、自动亮度1、屏幕OFF、P5属性0。见`archives/experiments/android-p5-glass-pixel-copy-startup-12485-20260927.md`。
 - 2026-09-27 12484 按用户指定同一 Glass P5 源，诊断页洋红等待底色三次冷 Player 截图：洋红首次被黑色覆盖上界2.245/2.443/2.388秒，首次非黑吹玻璃内容5.897–6.876秒；首个原生图像获取约1.635–1.762秒。黑色可能仍是初始化的 Texture 而非已呈现解码帧，不能宣称首帧或2秒验收通过。默认 SurfaceProducer 不提供现有 SurfaceTexture 消费探针回调，临时 Dart/Java 改动已撤销。设备现为强停的12484诊断包，自动亮度1、屏幕OFF、P5属性0。见`archives/experiments/android-p5-glass-fill-transition-12484-20260927.md`。

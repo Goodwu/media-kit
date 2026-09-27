@@ -1,0 +1,12 @@
+09-27 08:23:49.679 I/ActivityTaskManager( 1576): START u0 {flg=0x10000000 hwFlg=0x10 cmp=com.example.media_kit_test/.MainActivity} from uid 2000
+09-27 08:23:49.914 I/flutter (23671): ANDROID_DIRECT_OPEN awaiting_tap
+09-27 08:23:50.816 F/libc    (23671): Fatal signal 11 (SIGSEGV), code 1 (SEGV_MAPERR), fault addr 0x660 in tid 23685 (FinalizerDaemon), pid 23671 (.media_kit_test)
+09-27 08:23:50.895 F/DEBUG   (24586): pid: 23671, tid: 23685, name: FinalizerDaemon  >>> com.example.media_kit_test <<<
+09-27 08:23:50.895 F/DEBUG   (24586): signal 11 (SIGSEGV), code 1 (SEGV_MAPERR), fault addr 0x660
+09-27 08:23:51.024 F/DEBUG   (24586):       #00 pc 00000000000d0250  /apex/com.android.runtime/lib64/bionic/libc.so (pthread_mutex_lock) (BuildId: b91c775ccc9b0556e91bc575a2511cd0)
+09-27 08:23:51.024 F/DEBUG   (24586):       #01 pc 00000000000ad26c  /system/lib64/libgui.so (android::ConsumerBase::abandon()+24) (BuildId: 1e05ff07d0737f50c378feee07fb7dd3)
+09-27 08:23:51.024 F/DEBUG   (24586):       #02 pc 00000000001c6184  /system/lib64/libandroid_runtime.so (android::SurfaceTexture_release(_JNIEnv*, _jobject*)+80) (BuildId: 4077d9d47e396a6c3d37d4fab9a2a047)
+09-27 08:23:51.024 F/DEBUG   (24586):       #03 pc 00000000002e749c  /system/framework/arm64/boot-framework.oat (art_jni_trampoline+124) (BuildId: b33f7257c2b9b8b54c0b9b01d6239f9531abe146)
+09-27 08:23:51.024 F/DEBUG   (24586):       #04 pc 0000000000510c18  /system/framework/arm64/boot-framework.oat (android.graphics.SurfaceTexture.release+40) (BuildId: b33f7257c2b9b8b54c0b9b01d6239f9531abe146)
+09-27 08:23:51.025 F/DEBUG   (24586):       #11 pc 000000000003f1e2  /data/app/com.example.media_kit_test-gz2b7QhlblL3tqa776Snsg==/oat/arm64/base.vdex (io.flutter.embedding.engine.renderer.SurfaceTextureWrapper.release+14)
+09-27 08:23:51.025 F/DEBUG   (24586):       #20 pc 000000000003ef68  /data/app/com.example.media_kit_test-gz2b7QhlblL3tqa776Snsg==/oat/arm64/base.vdex (io.flutter.embedding.engine.renderer.o.finalize+16)
