@@ -2,6 +2,8 @@
 
 ## Current State
 
+- 2026-09-28 P0 自动路径 Mystery Box 全片12561：隔离 FFmpeg/mpv 自建arm64 JAR在四个P5调试属性均0时默认附加RPU、选择外部YUV/直接消费/缓冲退休；同JAR的12560短轮已命中2560×1440直接线性解码并出画。12561低日志从0到显式EOS，VO23、decoder0、GPU中位415MHz；同片未优化12546 VO54、GPU中位586MHz。启动1×1仍两次映射失败；清洁产品代码、非P5回退、资源及真人动态画质未验。已恢复12492、属性0、自动亮度并熄屏。见 `archives/experiments/android-p5-mystery-sdr-auto-12561-20260928.md`。
+
 - 2026-09-28 P0 隔离路径推进：查明此前 `r16u`/默认 SurfaceProducer 使实际目标为 3840×2160，不能进入直接降采样。以支持外部YUV和逐帧RPU的实验分支，在 P5→Texture SDR 作用域关闭主缩放器、使用布局尺寸2560×1440后，12556有正式尺寸 `P5_LINEAR_DECODE_FULL_HIT` 且全屏出画。12557低日志 Glass 播至媒体177.783秒末端，VO34、decoder0、GPU中位415MHz；片尾截图为正常DV logo。但初始1×1阶段两次映射失败、无显式EOS、无人眼动态画质/资源闭合、Mystery Box同片复测，也尚未抽成清洁产品默认实现。设备已恢复12492、诊断属性0、自动亮度、熄屏。见 `archives/experiments/android-p5-sdr-directdown-12556-12557-20260928.md`。
 
 - 2026-09-28 P0 默认优化首轮集成：隔离干净 Goodwu/libplacebo `c9fd879` 与 Goodwu/mpv 产品分支 `a81978b` arm64 编译、链接通过，mpv 默认启用条件候选已保存补丁；12549 Glass→Texture SDR 全屏短播出画，但12550 一次性命中探针未触发，并报 `r16u` 纹理缺线性采样能力。旧 FFmpeg 静态库的默认关闭探针符号曾导致12548 `dlopen` 失败，临时兼容符号仅用于诊断。尚无实际优化命中、全片性能和真人观感；下一步拆出实验分支的外部 YUV/缓冲生产路径并以清洁一致依赖重建。手机已恢复12492、自动亮度、熄屏。见 `archives/experiments/android-p5-sdr-default-integration-20260928.md`。

@@ -10,8 +10,8 @@ P5→PQ 输出、首帧和性能使用 `/Users/wuweiwei1/Downloads/test-clips/My
 
 - [ ] status: in_progress；context: archives/conversations/android-hdr-dv-display-plan-20260922.md
 - acceptance: 在支持的 P5→Texture SDR 条件下默认启用通用 `optimize_dovi_linear_decode`，其他场景安全回退；自建 arm64 JAR 确认包含并命中优化。Glass 真横屏 2560×1440、默认电池模式全片到 EOS，画质、资源和真人观感正常，VO 与既有优化轮 EOS 516、t90→t180 新增342相近即可，不再追逐旧严格门槛。Mystery Box 同配置复测，与自身未优化基准比较，记录 GPU 频率。
-- latest: 旧 Glass 同配置诊断 A/B/A 的 Texture SDR EOS VO 为2607/516/3626；Mystery Box 未优化自建 JAR 全片 VO54、decoder0，GPU中位586MHz。干净产品分支首轮12550未命中，`r16u`纹理缺线性采样。改用带逐帧RPU的隔离外部YUV路径、2560×1440真实Texture尺寸及直接降采样后，12556有 `P5_LINEAR_DECODE_FULL_HIT dst=2560x1440` 和实际全屏画面。12557低日志Glass至媒体末端177.783秒VO34、decoder0，GPU中位415MHz；片尾截图为正常DV logo，但未采到显式EOS，初始1×1阶段仍有两次AImageReader映射失败。该实验分支依赖诊断属性，尚非清洁产品默认实现或完整资源/真人画质验收。见 `archives/experiments/android-p5-mystery-sdr-baseline-12546-20260928.md`、`archives/experiments/android-p5-sdr-default-integration-20260928.md`、`archives/experiments/android-p5-sdr-directdown-12556-12557-20260928.md`。
-- next: 从一致的清洁 arm64 依赖提取外部 YUV、RPU 与缓冲所有权必要代码，消除诊断属性依赖，并让预建1×1在尺寸就绪前安全跳过；验证非P5/非SDR回退、显式EOS、资源与真人动态画质。再以Mystery Box同配置复测对比自身未优化基准。完成后转P1，不继续旧Glass SDR掉帧调优。
+- latest: 旧 Glass 同配置诊断 A/B/A 的 Texture SDR EOS VO 为2607/516/3626；Mystery Box 未优化全片 VO54、decoder0，GPU中位586MHz。干净产品分支12550未命中，`r16u`纹理缺线性采样。隔离外部YUV/逐帧RPU路径在12556命中2560×1440直接降采样并出画；12557低日志Glass至媒体末端177.783秒VO34、decoder0，GPU中位415MHz，但无显式EOS。四项调试属性均为0的自动路径12561 Mystery Box全片到显式EOS，VO23、decoder0，GPU中位415MHz，优于同片未优化VO54，但仍是实验包；初始1×1阶段有两次AImageReader映射失败，缺清洁产品集成、资源和真人画质验收。见 `archives/experiments/android-p5-mystery-sdr-baseline-12546-20260928.md`、`archives/experiments/android-p5-sdr-default-integration-20260928.md`、`archives/experiments/android-p5-sdr-directdown-12556-12557-20260928.md`、`archives/experiments/android-p5-mystery-sdr-auto-12561-20260928.md`。
+- next: 从一致的清洁 arm64 依赖提取外部 YUV、RPU 与缓冲所有权必要代码，并让预建1×1在尺寸就绪前安全跳过；验证非P5/非SDR回退、资源与真人动态画质。以清洁产品包复测Glass/Mystery Box并确认性能接近实验轮。完成后转P1，不继续旧Glass SDR掉帧调优。
 
 ### P1 · P5→PQ 公开产品输出与首帧
 
