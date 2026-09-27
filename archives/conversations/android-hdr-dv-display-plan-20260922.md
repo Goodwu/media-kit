@@ -2,6 +2,8 @@
 
 ## Current State
 
+- 2026-09-28 P1公开PQ路线只读复核：目标固件普通UID的公开NDK PQ setter在HDR support/SF权限门禁返回-22；公开SurfaceControl事务因同门禁SIGABRT；已有EGL/Vulkan同Surface没有PQ格式，Main10硬编码桥无支持证据。新查Android10 ImageWriter不转交dataspace/HDR metadata，API29也无公开Image.setDataSpace；本机当前无值得直接实测的新公开GPU PQ出口，不能外推所有Android设备。P0人工动态观感后，按用户允许的精确固件受限兼容链路推进P1，公开接口优先、失败关闭并做同代Surface/HDR/首帧验证。见 `archives/experiments/android-p5-public-pq-route-assessment-20260928.md`。
+
 - 2026-09-28 P0最终JAR seek/同播放器重开12580：测试App新增默认关闭的定时seek/重开探针，静态分析及arm64构建通过。Mystery Box横屏Texture→SDR在媒体8秒seek至45秒后继续出帧，同一Player重开后重新出帧；两次截图均有实际画面，退出AImage2539/2539、retired0。但seek开始的旧PTS8.008仍报一次AImageReader无图像/渲染失败，之后恢复；P3边界故障尚未解决。手机恢复12492、自动亮度、熄屏。P0待真人动态画质。详见 `archives/experiments/android-p5-product-seek-reopen-12580-20260928.md`。
 
 - 2026-09-28 P0最终JAR非P5回退12577–12579：普通SDR、HDR10和P8.4各自固定本地源在预建横屏Texture→SDR实画，t8 VO/decoder0；P5专用退休均未激活，退出AImage分别642/642、742/742、764/764，无AImage/渲染错误。每轮恢复原12492、自动亮度、熄屏。仍缺最终版P5 seek/重入与真人动态画质；这三轮不构成原生HDR验收。见 `archives/experiments/android-p5-product-final-fallback-12577-12579-20260928.md`。
