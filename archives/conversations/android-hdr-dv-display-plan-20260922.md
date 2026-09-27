@@ -1,6 +1,8 @@
 # Android HDR10 / DV P8.4 / P5、视图定位与原生 DV 能力计划（2026-09-22）
 
 ## Current State
+- 2026-09-27 用户要求P8.4 Texture SDR验收完成后，继续测量并优化原生HDR首帧；已在TASKS Next新增独立任务，目标HDR10 PQ/P8.4 HLG真全屏，不能以Texture SDR短轮代替。
+- 2026-09-27 P5尾段map环形轨迹12527诊断包在首次播放初始化即`info_callback`递归SIGSEGV，未进入尾段，作废；手机恢复12492/自动亮度/熄屏，隔离AImageReader源码比对后恢复，失败JAR删除。见`archives/experiments/android-p5-tail-map-trace-12527-failed-20260927.md`。
 - 2026-09-27 用户将首帧验收素材改为P8.4全片，不再用Glass P5黑场判断2秒门槛；新任务已在TASKS Now。12528同APK同布局、同素材、独立进程预绑定关/开/关/开/关/开，Texture→SDR PixelCopy内容关闭2.049/1.697/1.740秒、开启0.884/0.892/0.894秒；另一次开启0.814秒并截图见视频。受控短轮支持约0.939秒收益，正常入口/触摸到面板/音画/退出重入及原生HLG尚未验。手机恢复12492、属性0、自动亮度、熄屏；见`archives/experiments/android-p84-firstframe-prebind-ab-12528-20260927.md`。
 - 2026-09-27 首帧结案口径澄清：SDR、HDR10、P8.4小于1秒均为预建全屏Texture转SDR的受控读回；尚无同包关闭预建A/B，亦无原生PQ/HLG的同口径首帧测量，不推论未改版原本达标或原生HDR小于1秒。详见`archives/experiments/android-first-visible-two-second-closure-20260927.md`。
 - 2026-09-27 用户允许目标确实无法达到时明确结论并结束首帧2秒项。指定Glass P5片头约2.052秒黑场，从头原速播放至首个可辨内容的2秒统一门槛在素材时间上不成立；12522三轮物理全屏读回3.543/3.374/3.625秒。SDR/HDR10/P8.4受控Texture SDR均低于1秒，预建约1.41秒收益有效，但不等于全部普通入口/光学验收。TASKS改为结案未达标，见`archives/experiments/android-first-visible-two-second-closure-20260927.md`。

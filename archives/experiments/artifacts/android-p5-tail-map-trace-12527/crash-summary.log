@@ -1,0 +1,5 @@
+         1790515448.689 32480  1037 F libc    : Fatal signal 11 (SIGSEGV), code 1 (SEGV_MAPERR), fault addr 0x0 in tid 1037 (Thread-5), pid 32480 (.media_kit_test)
+         1790515448.827  1152  1152 F DEBUG   :       #00 pc 0000000000000000  <unknown>
+         1790515448.827  1152  1152 F DEBUG   :       #01 pc 00000000007b478c  /data/app/com.example.media_kit_test-klGE4TYT5Y694yKVZriFeQ==/base.apk!libmpv.so (offset 0x11bc000)
+         1790515448.827  1152  1152 F DEBUG   :       #02 pc 000000000076fb64  /data/app/com.example.media_kit_test-klGE4TYT5Y694yKVZriFeQ==/base.apk!libmpv.so (offset 0x11bc000)
+         1790515448.827  1152  1152 F DEBUG   :       #03 pc 000000000079f0c4  /data/app/com.example.media_kit_test-klGE4TYT5Y694yKVZriFeQ==/base.apk!libmpv.so (offset 0x11bc000)
