@@ -2,6 +2,8 @@
 
 ## Current State
 
+- 2026-09-28 P0人工门禁等待：12585 Glass、12586 Mystery Box 已在最终自建JAR、正确Texture尺寸和属性0下完成自动化全片复测；P0明确验收仍要求用户看最终版Glass约20秒动态画质。短播12585包SHA `03578f89...` 与恢复原12492的脚本已备好；已多次询问用户是否方便，尚无回复，不能用截图/PixelCopy替代真人观察。按用户要求依序完成P5优先级，P1设备验收及后续任务暂待P0门禁。设备现为原12492、自动亮度、熄屏；收到用户“现在方便”后立即短播、收取观感并恢复，随后继续P1。
+
 - 2026-09-28 P0 Mystery Box默认入口同片复测12586：与12585同自建JAR、真横屏Texture→SDR2560×1440、`gpu-next`/`mediacodec`，六个P5调试属性0。全片EOS即时读取VO14、decoder0；GPU100样本中位415MHz、退出AImage5909/5909、retired0，无取图/渲染错误，t12实画。旧未优化同片EOS VO54、GPU中位586MHz；本轮VO少40约74%。隔离测试页仅增默认关闭的EOS掉帧读数。原12492、自动亮度、熄屏恢复。P0只余Glass最终真人动态画质；见 `archives/experiments/android-p5-mystery-default-12586-20260928.md`。
 
 - 2026-09-28 P0默认入口与Glass补轮：12583发现测试页旧 `p5_rpu_probe=2`/`p5_raw_yuv=1` 门禁会在属性0时拒绝P5，已移除并保留自建JAR编译门禁，Dart分析及策略10项通过。12584默认SurfaceProducer误跑3840×2160已剔除。12585四属性0、横屏Texture→SDR真2560×1440，`gpu-next`/`mediacodec`、t12实画，媒体到EOS；t90 VO11、t180 VO36/decoder0、t90→t180新增25，退出AImage10450/10450、retired0、Player完成。片尾PTS174.991仍有一次AImageReader -30001/渲染失败，归P3，EOS精确VO未取得。设备恢复12492、自动亮度、熄屏。P0尚缺真人动态画质；见 `archives/experiments/android-p5-glass-default-12581-12585-20260928.md`。
