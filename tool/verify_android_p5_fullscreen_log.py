@@ -134,7 +134,11 @@ def inspect(path: Path, width: int, height: int, expected_cache: int,
     expected_source_size = [3840, 2160, width, height]
     if not source_sizes or any(size != expected_source_size for size in source_sizes):
         errors.append(f"unexpected 4K source/output size: {source_sizes}")
-    if not cache or any(value != expected_cache for value in cache):
+    # The product mapper no longer has the optional EGLImage cache or its
+    # init log. Preserve --cache for historical diagnostic runs only.
+    if expected_cache is not None and (
+        not cache or any(value != expected_cache for value in cache)
+    ):
         errors.append(f"unexpected cache state: {cache}")
     if not perf.get(210, {}).get("eof-reached") == "yes":
         errors.append("missing EOS at t210")
@@ -211,7 +215,10 @@ def main():
     parser.add_argument("log", type=Path)
     parser.add_argument("--width", type=int, required=True)
     parser.add_argument("--height", type=int, required=True)
-    parser.add_argument("--cache", type=int, choices=(0, 1), required=True)
+    parser.add_argument(
+        "--cache", type=int, choices=(0, 1),
+        help="require the cache state marker in historical diagnostic logs",
+    )
     parser.add_argument(
         "--max-steady-vo-drops", type=int, default=72,
         help="maximum drops from t60 to t180; default 72 is an engineering 1%% limit; -1 disables",
