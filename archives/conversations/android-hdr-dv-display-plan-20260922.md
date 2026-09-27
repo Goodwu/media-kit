@@ -2,6 +2,8 @@
 
 ## Current State
 
+- 2026-09-28 P0原始读回实验分支清理12574–12576：隔离mpv删除非默认FBO/MRT/PACK10、sidecar与像素读回探针，保留默认外部YUV/10-bit DOVI、退休/同帧复用和普通OES回退；arm64编译及独立审查通过。12574 Mystery Box 短轮实画、AImage1483/1483；12575 Mystery Box 全片完成，t90 VO34、decoder0、GPU104样本中位415MHz、AImage5886/5886；12576 Glass 全片完成，t180 VO22、decoder0、片尾截图正常、AImage10454/10454，但 PTS174.958 仍发生一次 AImageReader 无图像/渲染失败，属于P3未闭环尾段问题。主机空间满使12576 GPU只采37秒并阻断首次日志导出/自动恢复；补取环形日志并手动恢复12492、自动亮度、熄屏。P0尚缺最终版非P5回退、seek/重入及真人动态画质。详见 `archives/experiments/android-p5-product-raw-prune-12574-12576-20260928.md`。
+
 - 2026-09-28 P0映射器精简12573：隔离mpv删除可选同帧缓存、EGL缓存及高频日志，保留默认P5退休队列同帧复用与普通OES回退；V1复核发现非direct实验分支计数回归，已限次修复，资源所有权复核无新阻断。arm64编译链接与Mystery Box短轮成功，t8 VO3、decoder0、实际画面、零AImage/render错误；退出AImage1513/1513、retired0、Player完成。历史日志门禁`--cache`改为可选。手机恢复12492、自动亮度、熄屏。剩非默认FBO/PACK10和探针收敛、精简版全片、seek/重入及真人观感。见 `archives/experiments/android-p5-product-mapper-prune-12573-20260928.md`。
 
 - 2026-09-28 P0非P5 HDR回退短轮：与12569/12570同版自建arm64 JAR，12571 HDR10及12572 P8.4均在横屏Texture→SDR真实出画，t8 VO/decoder0，P5专用退休路径未激活（`retire=0`），退出AImage分别543/543与761/761、Player完成，无AImage/render错误。仅验证当前手机短轮回退，不等同原生HDR验收。手机恢复12492、自动亮度、熄屏。见 `archives/experiments/android-p5-product-nonp5-fallback-12571-12572-20260928.md`。
