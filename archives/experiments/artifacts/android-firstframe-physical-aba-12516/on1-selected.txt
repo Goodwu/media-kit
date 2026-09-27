@@ -1,0 +1,18 @@
+         1790509820.760 11009 11009 I flutter : DIAG_PREOPEN_FULLSCREEN tap
+         1790509820.797 11009 11009 I FirstFramePixelCopy: baseline generation=1 elapsedMs=34.899479 magenta=1.0 mean=170.0 spread=0.0
+         1790509820.801 11009 11009 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=requested elapsed_us=2
+         1790509820.802 11009 11009 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=sample_ready elapsed_us=874
+         1790509820.802 11009 11009 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=queue_entered elapsed_us=949
+         1790509821.114 11009 11009 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=validated elapsed_us=313155
+         1790509821.117 11009 11009 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=previous_output_stopped elapsed_us=316130
+         1790509821.117 11009 11009 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=configuration_reset elapsed_us=316203
+         1790509821.534 11009 11009 I flutter : ANDROID_TEXTURE_PREPARED comparison=on bound=true
+         1790509821.534 11009 11009 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=output_prepared elapsed_us=732665
+         1790509821.554 11009 11009 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=configured elapsed_us=752729
+         1790509821.554 11009 11009 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=output_ready elapsed_us=752906
+         1790509821.570 11009 11009 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=media_opened elapsed_us=769115
+         1790509821.603  1072  2282 I OMXMaster: makeComponentInstance(OMX.hisi.video.decoder.hevc) in android.hardwar process
+         1790509821.970 11009 11229 E P5_RAW_STAGE: P5_IMAGE_COUNT acquired=1 deleted=0 current_image=1 retired=0 callbacks=1 empty_acquires=0 retire=1 pts=0.050050000
+         1790509822.089 11009 11009 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=track_verified elapsed_us=1288285
+         1790509822.214 11009 11009 I FirstFramePixelCopy: first_non_magenta generation=1 elapsedMs=1453.184375 sample=13 mean=0.0 spread=0.0
+         1790509824.654 11009 11009 I FirstFramePixelCopy: first_content generation=1 elapsedMs=3892.479166 sample=30 mean=77.351953125 spread=13.313681826959856
