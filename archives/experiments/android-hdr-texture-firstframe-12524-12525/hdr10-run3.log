@@ -1,0 +1,10 @@
+         1790514103.990 27558 27558 I FirstFramePixelCopy: start generation=1 ns=354005564394191 rect=Rect(1360, 235 - 1760, 485)
+         1790514103.998 27558 27558 I flutter : AUTO_SOURCE path=/data/local/tmp/media-kit-hdr10-full.mp4
+         1790514104.000 27558 27558 I FirstFramePixelCopy: baseline generation=1 elapsedMs=8.985417 mean=0.0 spread=0.0
+         1790514104.000 27558 27558 I VideoOutputManager: com.alexmercerind.media_kit_video.VideoOutputManager.setSurfaceSize: 530490275920 3120 1440
+         1790514104.046 27558 27558 I flutter : ANDROID_DIRECT_TEXTURE_PREPARED layoutBound=true
+         1790514104.304 27558 27558 I VideoOutputManager: com.alexmercerind.media_kit_video.VideoOutputManager.setSurfaceSize: 530490275920 3840 1920
+         1790514104.322 27558 27663 E P5_RAW_STAGE: P5_IMAGE_COUNT acquired=1 deleted=0 current_image=1 retired=0 callbacks=1 empty_acquires=0 retire=0 pts=0.000000000
+         1790514104.413 27558 27558 I FirstFramePixelCopy: first_nonblack generation=1 elapsedMs=422.982292 sample=6 mean=54.084375 spread=23.989414599022822
+         1790514104.413 27558 27558 I FirstFramePixelCopy: first_content generation=1 elapsedMs=422.982292 sample=6 mean=54.084375 spread=23.989414599022822
+         1790514104.493 27558 27558 I FirstFramePixelCopy: finish generation=1 samples=6 nonblack=true content=true
