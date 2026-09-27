@@ -9,7 +9,8 @@
   - context: archives/conversations/android-hdr-dv-display-plan-20260922.md
   - acceptance: 固定素材身份与设备能力；PlatformView 对 HDR10/P8.4/P5 分别输出 PQ/HLG/PQ，Texture 明确转换到 SDR；核对实际后端、Surface 格式、系统 HDR 合成、SDR 复位和全屏可见画面。P8.4 的无 HLG 路径、P5 DV 元数据处理及原生 DV 能力须单独说明，不能以 PQ 转换冒充原生 DV。最高亮度仅用于短时人工观察，每轮结束立即恢复原自动亮度，不长时间停留静态画面。
   - latest: HDR10、P8.4 已获用户真全屏画质/流畅性好评；10436/10437 P5 同页全屏画面良好，10437 的 SF/HWC 为 10 位 BT.2020/PQ，但依赖精确固件私有探针。此固件普通应用 GPU producer 的已试公开 PQ 出口均失败，11009 AHardwareBuffer 同样因 HDR 能力权限拒绝 SIGABRT。12464 正确 P5 JAR 短轮的 PQ Surface 拒绝且 `wid=0`，Dart 10 秒后超时；12465/12466 的失败 ACK 在拒绝后约 76/78 ms 报具体错误。12466 强制 GPU PQ 时 HDR10 也被拒绝；12468 P5 失败后同进程原生 `mediacodec_embed` HDR10/P8.4 依次恢复，SF/HWC 为 BT.2020/PQ(metadata types=3)/HLG(types=0)，两源各相隔3秒的视频区截图均变化。12471 再接 SDR 时视频层复位 BT.709、HDR metadata types=0，间隔3秒截图视频区域变化；仅覆盖原生 HDR 路径，见`archives/experiments/android-hdr-sdr-recovery-12471-20260927.md`。默认产品 P5 PQ、静态元数据、独立色准及全屏双视图一致性仍开放。
-  - next: 原生 HDR→SDR 信令复位已有短轮证据；继续真全屏可见画面、GPU HDR→SDR Surface 复位及 P5 PQ 路径。停止此固件重复公开 PQ 探针。P5 Texture SDR 仅作明确标示的降级，不关闭 PQ 任务。
+  - P5_RPU_color_gate: 对实际输出逐帧核对RPU与画面，覆盖seek/flush/重开；以明确参考母版、目标空间和映射策略做同PTS独立数值色彩比较，并与用户观感分开。10440前后跳4次flush匹配2321/2321；12512预建路径两次重开匹配626/626、622/622，errors0/unconsumed0。长期重开、该布局seek/flush和独立色准仍开放，见`archives/experiments/android-p5-glass-rpu-reopen-12486-20260927.md`、`archives/experiments/android-p5-glass-prebind-rpu-12512-20260927.md`。
+  - next: 原生 HDR→SDR 信令复位已有短轮证据；继续真全屏可见画面、GPU HDR→SDR Surface 复位及 P5 PQ 路径，同时完成上方RPU/色准子门槛。停止此固件重复公开 PQ 探针。P5 Texture SDR 仅作明确标示的降级，不关闭 PQ 任务。
 
 - [ ] P5 Glass 4K59.94 真全屏性能门槛
   - status: in_progress
@@ -18,21 +19,15 @@
   - latest: 同 APK、2560×1440 输出的系统性能模式开/关/开 EOS VO 掉帧为 17/5051/19，decoder 为 0；默认模式门槛未过。1920×1080 也出现伴随 GPU 低频的后段失速；关闭抖动无明显低频收益，已停止该方向。用户最近确认 10437 的 1440 宽 P5 吹玻璃画面流畅，但这不覆盖 2560 默认模式全片门槛。
   - next: 在同一正式全屏路径、固定输出尺寸和默认电池模式下分离低频时的 GPU 渲染与提交/合成等待，再对有效改动做同帧颜色及全片 A/B/A 复核。
 
-- [ ] P8.4 首个可辨画面 2 秒内（争取 1 秒）的正常播放验收
-  - status: in_progress
+- [ ] Android 视频首帧时延验收：先 P8.4 Texture SDR，后原生 HDR
+  - status: in_progress_sdr_then_hdr
   - context: archives/conversations/android-hdr-dv-display-plan-20260922.md
-  - acceptance: 以用户指定、片头有画面的 P8.4 全片为素材，从用户触发正常打开到手机实际出现视频内容小于2秒，争取1秒；分别记录冷/热启动分布与最慢样本，核对全屏、Texture→SDR色彩/音画同步、退出重入。原生HLG首帧若纳入验收须单独测，不以Texture SDR数字代替。预建收益用同包同素材A/B证明，不能用诊断短轮直接替代正常入口与面板可见验收。
-  - latest: 12528同APK物理全屏Texture→SDR、独立进程关→开→关→开→关→开，点击回调内PixelCopy明显内容关闭2.049/1.697/1.740秒，开启0.884/0.892/0.894秒；另一次开启0.814秒并截图确认实际视频。三对均值差约0.939秒，支持预绑定收益。此为受控入口，不含物理触摸前段/面板光学、正常应用入口或音画/退出重入验收。见`archives/experiments/android-p84-firstframe-prebind-ab-12528-20260927.md`。
-  - next: 将通用预建调用接入正常P8.4打开流程，补冷/热与退出重入、连续画面及音画同步；独立测原生HLG首帧。
+  - acceptance: 第一阶段以用户指定、片头有画面的 P8.4 全片，从用户触发正常打开至手机实际显示视频内容小于2秒、争取1秒；记录冷/热分布与最慢样本，验证全屏、Texture→SDR色彩/音画同步、退出重入。第二阶段在第一阶段完成后，独立测固定HDR10/P8.4的原生PQ/HLG真全屏首帧、Surface dataspace/系统合成和持续画面，超2秒则同包对照并优化。两种输出路径不互相代替；P5原生PQ须等显示链路可用后单独说明。
+  - latest_sdr: 12528同APK物理全屏Texture→SDR、独立进程关→开→关→开→关→开，点击回调内PixelCopy明显内容关闭2.049/1.697/1.740秒、开启0.884/0.892/0.894秒；另一次开启0.814秒并截图确认视频。同包预绑定三对均值差约0.939秒。受控短轮不覆盖触摸/面板光学、正常入口、音画及重入，见`archives/experiments/android-p84-firstframe-prebind-ab-12528-20260927.md`。
+  - latest_hdr: 原生HDR10 PQ/P8.4 HLG首帧未测；现有HDR素材0.4–0.9秒记录是Texture转SDR，不作为原生HDR证据。
+  - next: 先验已挂载Video的正常P8.4 Texture SDR打开、冷/热与退出重入、连续画面和音画；通过后测原生P8.4 HLG与HDR10 PQ首帧，定位超2秒环节。
 
 ## Next（近期候选，最多 10 条）
-
-- [ ] 完成P8.4 Texture SDR验收后测量并优化原生HDR播放首帧
-  - status: queued_after_sdr
-  - context: archives/conversations/android-hdr-dv-display-plan-20260922.md
-  - acceptance: SDR验收完成后，以同一手机、固定HDR10和P8.4素材，在实际原生PQ/HLG输出及真全屏路径，分别测用户触发到首次可见HDR画面；记录冷/热启动分布、最慢样本、输出Surface dataspace/系统合成与视频持续播放。超过2秒时做同包对照定位并优化，不能以Texture→SDR的0.4–0.9秒结果代替。P5原生PQ仍受显示路径任务约束，须单独说明。
-  - latest: 用户2026-09-27指定“完成SDR验收后，测试并优化HDR的播放时延”；目前仅有HDR素材经Texture→SDR的首帧数据，原生HDR时延未测。
-  - next: 等P8.4 Texture SDR正常入口验收后，先测P8.4原生HLG与HDR10原生PQ的首帧和Surface合成，再针对主要耗时做A/B。
 
 - [ ] 修复 macOS modern mpv 销毁时未释放 render context 的崩溃
   - status: queued
@@ -48,14 +43,8 @@
   - latest: P8.4/HDR10/SDR 的 Home→返回、双视图存活 B 回退、释放/绑定失败重试已有实机可见画面证据。12473/12474/12475受控SDR交错核验旧A的Available/Destroy晚到与ACK回复超时；12477旧A Failed注入后B成功出HDR10画面。12486 P5长播后重入在Flutter SurfaceTexture finalizer release栈出现一次SIGSEGV，归因未明。测试页自动单播放器 Back 现等待输出/Player清理；最终包12492 P5推进至媒体PTS164.8秒、早晚截图均有不同实际画面，Back时输出/Player完成早于Activity退出，同一PID重入再次出图且无SIGSEGV；未播及短播返回亦正确，V1复审无阻断，见`archives/experiments/android-auto-player-exit-12491-12492-20260927.md`。片尾另见纯紫色区域，已单列；任意Engine直接destroy仍未验。注入均已撤销，提前停轨仍默认关闭；完整历史见本条 context。
   - next: 核验清理中再次点击、失败重试和全屏组合。任意宿主直接 FlutterEngine.destroy 需先做独立于 Dart 的 Android 原生播放器 owner broker，统一 mpv 调用、事件/hook、终止和视频输出引用；先以无视频 Player 实机直接 destroy 证明终态，再接 SDR PlatformView、两种 Texture、HDR/P5，详见本条 context。继续失败 disposal/global-ref 定量闭合、P5 双视图和属性序列中途故障；补连续可见帧与 mpv WID 回读，再决定提前停轨默认值。
 
-- [ ] P5 RPU 边界与独立色彩核验
-  - status: queued
-  - context: archives/conversations/android-hdr-dv-display-plan-20260922.md
-  - acceptance: 对实际输出逐帧核对 RPU 对应关系，覆盖 seek/flush/重开；以明确的参考母版、目标空间和映射策略做同 PTS 数值比较，并把独立色彩结论与用户观感分开。
-  - latest: 10440 前后跳共4次flush，实际输出 RPU 匹配2321/2321、errors0。10444/10445 的重建前后短轮亦全匹配。12486 使用指定 Glass 原片头，同一 Player/进程连续三次打开均完成轨道确认；前两次关闭时实际输出 RPU 分别518/518、596/596匹配，errors0、unconsumed0，第三段退出无 summary。12512同源、布局预建后同进程三次打开，前两段RPU输出626/626、622/622匹配，errors0、unconsumed0；第三段退出仅有图像对象释放计数，无RPU summary。见`archives/experiments/android-p5-glass-rpu-reopen-12486-20260927.md`及`archives/experiments/android-p5-glass-prebind-rpu-12512-20260927.md`。10442 探针失声源自全局日志路由；12509无摘要则是日志级别error。长期重开、该布局下seek/flush和独立色准仍待核验，后者有母版身份及映射差异。
-
 - [ ] 排查 Android HDR 天空渐变层纹
-  - status: queued
+  - status: deferred_by_user
   - context: archives/conversations/android-hdr-dv-display-plan-20260922.md
   - acceptance: 同 PTS 对照片源、解码/合成、输出位深和屏幕处理；若有可行改法，保持 HDR10/P8.4 的亮暗、颜色与全屏流畅性，再请用户人工确认。
   - latest: 最高亮度全屏验收中 HDR10 天空有层纹、P8.4 较轻，其余画面良好。按用户要求先记录，本轮不修；关闭抖动没有明确性能收益，也不是已验证的层纹修复。
