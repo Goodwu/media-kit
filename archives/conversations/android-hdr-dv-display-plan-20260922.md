@@ -2,6 +2,8 @@
 
 ## Current State
 
+- 2026-09-28 P0 默认优化首轮集成：隔离干净 Goodwu/libplacebo `c9fd879` 与 Goodwu/mpv 产品分支 `a81978b` arm64 编译、链接通过，mpv 默认启用条件候选已保存补丁；12549 Glass→Texture SDR 全屏短播出画，但12550 一次性命中探针未触发，并报 `r16u` 纹理缺线性采样能力。旧 FFmpeg 静态库的默认关闭探针符号曾导致12548 `dlopen` 失败，临时兼容符号仅用于诊断。尚无实际优化命中、全片性能和真人观感；下一步拆出实验分支的外部 YUV/缓冲生产路径并以清洁一致依赖重建。手机已恢复12492、自动亮度、熄屏。见 `archives/experiments/android-p5-sdr-default-integration-20260928.md`。
+
 - 2026-09-28 按用户指定的“P5 当前优先级”整理 `TASKS.md`：P0 Texture SDR 默认优化、P1 公开 PQ 产品输出/首帧、P2 PQ 全片性能、P3 生命周期及 Glass 尾段紫屏、P4 独立色准成为唯一的 P5 待办入口。原显示、性能、首帧和片尾条目的 P5 重复描述已归位；HDR10/P8.4 保留独立任务。此轮仅整理任务，没有新增构建或设备验收。
 
 - 2026-09-28 Mystery Box 的 P5→Texture SDR 全片基准12546：优化未编入的自建 arm64 JAR，真横屏2560×1440、`gpu-next`/`mediacodec`，媒体正常从0到EOS约98.87秒；VO累计掉帧54、decoder0，媒体2.47/34.47/64.46/94.48秒分别45/47/51/54。播放起点后100个GPU频率样本中位586MHz、76个586MHz/19个644MHz，故与旧Glass低频优化轮不可直接比。截图有实际画面，无真人流畅度/独立色彩验收。已恢复12492、诊断属性0、自动亮度和熄屏。见`archives/experiments/android-p5-mystery-sdr-baseline-12546-20260928.md`。
