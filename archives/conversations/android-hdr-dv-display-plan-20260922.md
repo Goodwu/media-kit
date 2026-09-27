@@ -2,6 +2,8 @@
 
 ## Current State
 
+- 2026-09-28 P0同帧重复映射短轮12565：时间线确认同一PTS0、同一mp_image与MediaCodecBuffer重复map，后两次没有新AImage。mpv退休项现持有源帧引用，重复请求按buffer+PTS取回同一纹理；arm64编译链接及Glass横屏短播成功，零AImage/render错误，正常退出AImage acquired/deleted=588/588、退休队列0、Player完成。全片及非P5回退未验，mpv大段诊断仍待收敛。手机恢复12492、相关属性0、自动亮度、熄屏。见 `archives/experiments/android-p5-repeated-map-12565-20260928.md`。
+
 - 2026-09-28 P0 Glass全片12564：同12563自建依赖、四属性0、预建横屏全屏2560×1440，从片头至显式EOS；t180媒体177.48秒VO20、decoder0，GPU180样本中位415MHz，片尾截图正常DV logo。完成约0.24秒后，未取得精确EOS VO；旧同片优化轮EOS VO516。开头PTS0.05005重复映射两次无新AImage错误，完整资源/非P5回退/真人动态画质仍待验。已恢复12492、属性0、自动亮度、熄屏。见 `archives/experiments/android-p5-glass-sdr-product-12564-20260928.md`。
 
 - 2026-09-28 P0源码及资源补轮：FFmpeg逐帧RPU产品候选 `fff3ee7` 已推送 Goodwu/FFmpeg `feature/android-mediacodec-p5-rpu`；mpv外部YUV候选`6758565`已推送Goodwu/mpv `feature/android-p5-sdr-direct-yuv`，后者仍带大量诊断。12563正常退出短轮mapper AImage acquired/deleted=564/564、退休队列0且Player dispose完成；没有FFmpeg RPU终结汇总，不外推为整体资源闭合。原12492、属性0、自动亮度、熄屏。见 `archives/experiments/android-p5-mystery-sdr-product-12563-20260928.md`。
