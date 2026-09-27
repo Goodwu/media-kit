@@ -2,6 +2,8 @@
 
 ## Current State
 
+- 2026-09-27 12532在Activity记录触摸抬手，P8.4普通列表到横屏全屏Texture SDR明显内容三独立进程PixelCopy为0.792/0.699/0.670秒；仍不含按下时长、面板光学、色彩/音画和有效重入。SDR尚未完全验收，原生HDR首帧未测。手机恢复12492、属性0、自动亮度、熄屏。见`archives/experiments/android-p84-touch-to-content-12532-20260927.md`。
+
 - 2026-09-27 12531列表点击后同一Video先切横屏沉浸式全屏、等布局、通用预绑定、再打开P8.4 Texture SDR；四独立进程点击回调内PixelCopy明显内容0.863/0.664/0.656/0.663秒，`layoutBound=true`，相隔3秒截图为不同视频帧。Back再点可重新出图，但旧帧污染重入计时；触摸/光学、独立色彩、音画和有效重入仍缺，暂不开始原生HDR首帧。手机恢复12492、属性0、自动亮度、熄屏。见`archives/experiments/android-p84-tap-fullscreen-firstframe-12531-20260927.md`。
 
 - 2026-09-27 12530将通用Texture预绑定接入普通列表点击打开路径；已挂载Video的P8.4 Texture SDR四独立进程PixelCopy内容0.681/0.462/0.449/0.454秒，四轮`layoutBound=true`，间隔截图有不同视频帧。计时从回调内开始、页面竖屏非全屏；重复点击旧帧污染首帧探针，不计重入。真全屏、输入起点、音画、色彩和重入仍需验，之后才进入原生PQ/HLG时延。手机恢复12492、属性0、自动亮度、熄屏。见`archives/experiments/android-p84-normal-texture-firstframe-12530-20260927.md`。
