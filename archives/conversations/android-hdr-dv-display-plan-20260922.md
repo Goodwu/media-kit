@@ -2,6 +2,8 @@
 
 ## Current State
 
+- 2026-09-28 P5 顺序再调整：先把已提交的 `optimize_dovi_linear_decode` 在受支持的 P5→Texture SDR 路径默认启用并用新 Mystery Box 样片确认构建、命中、回退、画质与资源，建立可复用代码基线；然后打通公开 P5→PQ 产品输出/首帧，最后测 PQ 全片性能并针对性优化。这是有限集成验证，不重启旧 Glass SDR 严格掉帧调优；SDR 优化不构成 PQ 输出可用或 PQ 性能收益的证明。
+
 - 2026-09-28 P5 路线补充：用户明确要求 P5→PQ 以公开 Android 输出链路打通为主，精确固件私有方式只是公开方式无法实现时的备选。P5→Texture SDR 的 `optimize_dovi_linear_decode` 可提供 DV/RPU 解码后直接线性 RGB、跳过冗余 PQ 编解码、严格渲染条件和回退机制作为 PQ 性能候选的共用基础；当前 Goodwu/libplacebo 通用分支不再硬编码 BT.1886 目标，但 PQ 目标尚无命中、色彩或收益证据，旧 SDR A/B/A 数字不能外推。先完成公开 PQ 输出，再按同片同尺寸同包对照验证 PQ 优化。见 `TASKS.md` P5 优先级及 `archives/experiments/android-p5-glass-policy-10418-10419-20260926.md`。
 
 - 2026-09-28 P5 工作重排：用户指定 `/Users/wuweiwei1/Downloads/test-clips/Mystery Box Dolby Vision Profile 5.mp4` 为后续 P5 主样片，SHA-256 `3e610d3b1b11e9b802da66d69bd97f6371a2b114ee464a7e8517fe31d706cc9f`；ffprobe 证实 HEVC Main10、3840×2160、60000/1001 fps、DV Profile5/RPU、98.944秒，用户称片头无黑场。优先级改为 P0 PQ产品输出/首帧、P1 PQ全片性能测试优化、P2 将既有P5→Texture SDR线性解码候选在支持路径默认启用（暂不继续追逐旧Glass严格掉帧门槛）、P3生命周期/片尾、P4独立色彩数值比较。用户已看过P5颜色，认为基本正常；旧Glass只保留紫屏PTS≈175秒定点复现及历史对照。此前Glass首帧和性能数字不可搬到新片。见`TASKS.md`的P5当前优先级。
