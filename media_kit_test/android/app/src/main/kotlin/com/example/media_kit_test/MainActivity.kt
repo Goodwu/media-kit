@@ -21,11 +21,13 @@ import java.util.concurrent.TimeUnit
 
 class MainActivity : FlutterActivity() {
     private var firstFrameProbeGeneration = 0
+    private var lastTouchDownNs = 0L
     private var lastTouchUpNs = 0L
 
     override fun dispatchTouchEvent(event: MotionEvent): Boolean {
-        if (event.actionMasked == MotionEvent.ACTION_UP) {
-            lastTouchUpNs = SystemClock.elapsedRealtimeNanos()
+        when (event.actionMasked) {
+            MotionEvent.ACTION_DOWN -> lastTouchDownNs = SystemClock.elapsedRealtimeNanos()
+            MotionEvent.ACTION_UP -> lastTouchUpNs = SystemClock.elapsedRealtimeNanos()
         }
         return super.dispatchTouchEvent(event)
     }
@@ -46,13 +48,14 @@ class MainActivity : FlutterActivity() {
         check(surface.isValid) { "Flutter Surface invalid" }
         val generation = ++firstFrameProbeGeneration
         val startedNs = SystemClock.elapsedRealtimeNanos()
+        val touchDownNs = lastTouchDownNs.takeIf { startedNs - it in 0L..2_000_000_000L }
         val touchUpNs = lastTouchUpNs.takeIf { startedNs - it in 0L..2_000_000_000L }
         val handler = Handler(Looper.getMainLooper())
         var samples = 0
         var nonblackLogged = false
         var contentLogged = false
         Log.i("FirstFramePixelCopy", "start generation=$generation ns=$startedNs " +
-            "touchUpNs=$touchUpNs rect=$rect")
+            "touchDownNs=$touchDownNs touchUpNs=$touchUpNs rect=$rect")
 
         fun sample() {
             if (generation != firstFrameProbeGeneration || contentLogged ||
@@ -104,8 +107,12 @@ class MainActivity : FlutterActivity() {
                         val touchToContentMs = touchUpNs?.let {
                             (capturedNs - it) / 1_000_000.0
                         }
+                        val touchDownToContentMs = touchDownNs?.let {
+                            (capturedNs - it) / 1_000_000.0
+                        }
                         Log.i("FirstFramePixelCopy", "first_content generation=$generation " +
                             "elapsedMs=$elapsedMs touchToContentMs=$touchToContentMs " +
+                            "touchDownToContentMs=$touchDownToContentMs " +
                             "sample=$samples mean=$mean spread=$spread")
                     }
                     handler.postDelayed({ sample() }, 80)
