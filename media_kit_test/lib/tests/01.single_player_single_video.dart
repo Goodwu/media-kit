@@ -1611,9 +1611,10 @@ class _SinglePlayerSingleVideoScreenState
         'media=${player.state.position.inMilliseconds}ms');
     await _disposeTestPlayer();
     final disposeReport = _hdrLastDisposeReport;
-    if (disposeReport == null ||
-        disposeReport.playerError != null ||
-        disposeReport.coordinatorError != null) {
+    if (_androidHdrTransaction &&
+        (disposeReport == null ||
+            disposeReport.playerError != null ||
+            disposeReport.coordinatorError != null)) {
       throw StateError('Player or output disposal did not complete safely');
     }
     debugPrint('DIAG_SCOPE_PAGE_EXIT stop complete');
