@@ -1,0 +1,40 @@
+         1790482472.032 17778 17778 I flutter : DIAG_PREOPEN_FULLSCREEN tap
+         1790482472.034 17778 17778 I FirstFramePixelCopy: start generation=1 ns=322373607937311 rect=Rect(1360, 595 - 1760, 845)
+         1790482472.089 17778 17778 I FirstFramePixelCopy: baseline generation=1 elapsedMs=53.704688 magenta=1.0 mean=170.0 spread=0.0
+         1790482472.093 17778 17778 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=requested elapsed_us=2
+         1790482472.094 17778 17778 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=sample_ready elapsed_us=1005
+         1790482472.094 17778 17778 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=queue_entered elapsed_us=1090
+         1790482472.406 17778 17778 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=validated elapsed_us=313120
+         1790482472.410 17778 17778 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=previous_output_stopped elapsed_us=317201
+         1790482472.410 17778 17778 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=configuration_reset elapsed_us=317297
+         1790482472.722 17778 17778 I VideoOutputManager: com.alexmercerind.media_kit_video.VideoOutputManager.setSurfaceSize: 530509118032 3120 1440
+         1790482472.723 17778 17778 I VideoOutput: onSurfaceAvailable: id=0, wid=0, width=3120, height=1440
+         1790482472.826 17778 17778 I flutter : ANDROID_TEXTURE_PREPARED comparison=on bound=true
+         1790482472.826 17778 17778 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=output_prepared elapsed_us=732866
+         1790482472.855 17778 17778 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=configured elapsed_us=762570
+         1790482472.856 17778 17778 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=output_ready elapsed_us=762770
+         1790482472.887 17778 17778 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=media_opened elapsed_us=794114
+         1790482473.590 17778 17778 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=track_verified elapsed_us=1496760
+         1790482473.610 17778 17778 I VideoOutputManager: com.alexmercerind.media_kit_video.VideoOutputManager.setSurfaceSize: 530509118032 3840 2160
+         1790482473.613 17778 17778 I VideoOutput: onSurfaceAvailable: id=0, wid=10774, width=3840, height=2160
+         1790482473.689 17778 17778 I FirstFramePixelCopy: first_non_magenta generation=1 elapsedMs=1653.819271 sample=13 mean=0.0 spread=0.0
+         1790482473.689 17778 17778 I FirstFramePixelCopy: pre_content generation=1 elapsedMs=1653.819271 sample=13 mean=0.0 spread=0.0
+         1790482473.824 17778 17778 I FirstFramePixelCopy: pre_content generation=1 elapsedMs=1790.591667 sample=14 mean=0.0 spread=0.0
+         1790482473.951 17778 17778 I FirstFramePixelCopy: pre_content generation=1 elapsedMs=1916.48125 sample=15 mean=0.0 spread=0.0
+         1790482474.099 17778 17778 I FirstFramePixelCopy: pre_content generation=1 elapsedMs=2065.058854 sample=16 mean=0.0 spread=0.0
+         1790482474.236 17778 17778 I FirstFramePixelCopy: pre_content generation=1 elapsedMs=2201.704166 sample=17 mean=0.0 spread=0.0
+         1790482474.403 17778 17778 I FirstFramePixelCopy: pre_content generation=1 elapsedMs=2368.711979 sample=18 mean=0.0 spread=0.0
+         1790482474.561 17778 17778 I FirstFramePixelCopy: pre_content generation=1 elapsedMs=2526.75 sample=19 mean=0.0 spread=0.0
+         1790482474.726 17778 17778 I FirstFramePixelCopy: pre_content generation=1 elapsedMs=2692.231771 sample=20 mean=0.0 spread=0.0
+         1790482474.859 17778 17778 I FirstFramePixelCopy: pre_content generation=1 elapsedMs=2825.357812 sample=21 mean=0.0 spread=0.0
+         1790482475.005 17778 17778 I FirstFramePixelCopy: pre_content generation=1 elapsedMs=2971.383854 sample=22 mean=0.0 spread=0.0
+         1790482475.132 17778 17778 I FirstFramePixelCopy: pre_content generation=1 elapsedMs=3097.4875 sample=23 mean=0.0 spread=0.0
+         1790482475.261 17778 17778 I FirstFramePixelCopy: pre_content generation=1 elapsedMs=3227.211979 sample=24 mean=0.0 spread=0.0
+         1790482475.387 17778 17778 I FirstFramePixelCopy: pre_content generation=1 elapsedMs=3352.3375 sample=25 mean=0.0 spread=0.0
+         1790482475.533 17778 17778 I FirstFramePixelCopy: pre_content generation=1 elapsedMs=3499.222395 sample=26 mean=0.0 spread=0.0
+         1790482475.660 17778 17778 I FirstFramePixelCopy: pre_content generation=1 elapsedMs=3625.192187 sample=27 mean=0.0 spread=0.0
+         1790482475.786 17778 17778 I FirstFramePixelCopy: pre_content generation=1 elapsedMs=3751.757291 sample=28 mean=5.517578124999999 spread=1.523469189262446
+         1790482475.913 17778 17778 I FirstFramePixelCopy: pre_content generation=1 elapsedMs=3878.672395 sample=29 mean=23.131380208333336 spread=5.535888717598656
+         1790482476.060 17778 17778 I FirstFramePixelCopy: pre_content generation=1 elapsedMs=4025.221875 sample=30 mean=48.878125000000054 spread=12.573056949989798
+         1790482476.060 17778 17778 I FirstFramePixelCopy: first_content generation=1 elapsedMs=4025.221875 sample=30 mean=48.878125000000054 spread=12.573056949989798
+         1790482476.141 17778 17778 I FirstFramePixelCopy: finish generation=1 samples=30 replacement=true content=true
