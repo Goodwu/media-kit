@@ -42,12 +42,17 @@ Future<void> main() async {
       debugPrint('ANDROID_FILE_PICKER_CACHE_CLEANUP error=$error');
     }
   }
-  await SystemChrome.setPreferredOrientations(
-    [
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ],
+  const preopenFullscreen = bool.fromEnvironment(
+    'MEDIA_KIT_ANDROID_PREOPEN_FULLSCREEN',
   );
+  await SystemChrome.setPreferredOrientations(
+    preopenFullscreen && UniversalPlatform.isAndroid
+        ? const [DeviceOrientation.landscapeLeft]
+        : const [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown],
+  );
+  if (preopenFullscreen && UniversalPlatform.isAndroid) {
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+  }
   runApp(const MyApp(DownloadingScreen()));
   await prepareSources();
   runApp(

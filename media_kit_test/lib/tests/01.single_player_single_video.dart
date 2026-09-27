@@ -51,6 +51,15 @@ class _SinglePlayerSingleVideoScreenState
   static const _androidOpenOnTap = bool.fromEnvironment(
     'MEDIA_KIT_ANDROID_OPEN_ON_TAP',
   );
+  static const _androidPreopenFullscreen = bool.fromEnvironment(
+    'MEDIA_KIT_ANDROID_PREOPEN_FULLSCREEN',
+  );
+  // Diagnostic only: classify controlled local fixtures by their names.
+  // Normal HDR opens keep their content-verified private copy.
+  static const _androidNamedLocalSource = bool.fromEnvironment(
+    'MEDIA_KIT_ANDROID_NAMED_LOCAL_SOURCE',
+  );
+  bool _preopenFullscreenStarted = false;
   int _dualViewPhase = 0;
   bool _dualViewProbeScheduled = false;
   Future<void>? _autoPlayerExitFuture;
@@ -154,6 +163,82 @@ class _SinglePlayerSingleVideoScreenState
       _hdrCoordinatorFuture ??= _createHdrCoordinator();
 
   Future<AndroidHdrOpenCoordinator> _createHdrCoordinator() async {
+    final backend = AndroidHdrPlayerBackend(
+      player: player,
+      outputSlot: _hdrOutputSlot,
+      usePlatformView: configuration.value.usePlatformView,
+      p5RpuPipelineBuilt: _androidP5RpuPipelineBuilt,
+      p5PlatformSdrDiagnostic: _androidP5PlatformSdrDiagnostic,
+      textureCopyDiagnostic: _androidTextureCopyDiagnostic,
+      forceP84PqFallback: _androidForceP84PqFallback,
+      gpuPlatformHdrExperiment: _androidHdrTransaction &&
+          configuration.value.usePlatformView &&
+          _androidGpuPlatformHdr,
+      readDisplayHdrTypes: () async {
+        final capabilities = await _videoChannel
+            .invokeMapMethod<String, dynamic>('Android.Capabilities');
+        final raw = capabilities?['displayHdrTypes'];
+        if (raw is! List || raw.any((value) => value is! int)) {
+          throw StateError('Invalid display HDR capability report: $raw');
+        }
+        final reported = raw.cast<int>().toSet();
+        debugPrint('ANDROID_HDR_CAPABILITY reported=$reported '
+            'simulateNoHlgForP84=$_androidForceP84PqFallback');
+        return reported;
+      },
+      applySurfaceTransfer: (transfer) async {
+        final handle = await player.handle;
+        return await _videoChannel.invokeMethod<bool>(
+              'PlatformVideoView.SetColorSpace',
+              {
+                'handle': handle.toString(),
+                'transfer': _surfaceTransferForProbe(transfer),
+              },
+            ) ??
+            false;
+      },
+      readP5RuntimeProperties: () async {
+        final values = await _p5RuntimeGateChannel
+            .invokeMapMethod<String, String>('ReadProperties');
+        if (values == null) {
+          throw StateError('P5 runtime property report is unavailable');
+        }
+        return values;
+      },
+    );
+    if (_androidNamedLocalSource) {
+      if (sources.isEmpty) throw StateError('No named Android sample selected');
+      return AndroidHdrOpenCoordinator(
+        backend,
+        verifier: (source, cancelled) async {
+          if (cancelled() || source != sources.first) {
+            throw StateError('Named source is no longer selected');
+          }
+          final name = RegExp(
+                  r'^/data/local/tmp/media-kit-(hdr10|hlg|p84|p5)-[a-z0-9][a-z0-9._-]*\.mp4$')
+              .firstMatch(source);
+          if (name == null ||
+              await FileSystemEntity.type(source, followLinks: false) !=
+                  FileSystemEntityType.file) {
+            throw StateError('Named source does not match a regular fixture');
+          }
+          final sample = switch (name.group(1)) {
+            'hdr10' => AndroidHdrSample.hdr10,
+            'hlg' => AndroidHdrSample.hlgBaseControl,
+            'p84' => AndroidHdrSample.dolbyVisionP84,
+            'p5' => AndroidHdrSample.dolbyVisionP5,
+            _ => throw StateError('Unknown named Android sample'),
+          };
+          debugPrint('ANDROID_NAMED_LOCAL_SAMPLE sample=$sample path=$source');
+          return AndroidHdrSampleIdentity(sample, '', source);
+        },
+        onPhase: _androidOpenPhaseTrace
+            ? (generation, phase, elapsedMicros) => debugPrint(
+                'ANDROID_HDR_OPEN_PHASE generation=$generation phase=$phase '
+                'elapsed_us=$elapsedMicros')
+            : null,
+      );
+    }
     final support = await path_provider.getApplicationSupportDirectory();
     final parent = Directory('${support.path}/android-hdr-staged');
     await parent.create(recursive: true);
@@ -163,49 +248,7 @@ class _SinglePlayerSingleVideoScreenState
     final privateRoot = await parent.createTemp('session-$pid-');
     _hdrPrivateRoot = privateRoot;
     return AndroidHdrOpenCoordinator.staged(
-      AndroidHdrPlayerBackend(
-        player: player,
-        outputSlot: _hdrOutputSlot,
-        usePlatformView: configuration.value.usePlatformView,
-        p5RpuPipelineBuilt: _androidP5RpuPipelineBuilt,
-        p5PlatformSdrDiagnostic: _androidP5PlatformSdrDiagnostic,
-        textureCopyDiagnostic: _androidTextureCopyDiagnostic,
-        forceP84PqFallback: _androidForceP84PqFallback,
-        gpuPlatformHdrExperiment: _androidHdrTransaction &&
-            configuration.value.usePlatformView &&
-            _androidGpuPlatformHdr,
-        readDisplayHdrTypes: () async {
-          final capabilities = await _videoChannel
-              .invokeMapMethod<String, dynamic>('Android.Capabilities');
-          final raw = capabilities?['displayHdrTypes'];
-          if (raw is! List || raw.any((value) => value is! int)) {
-            throw StateError('Invalid display HDR capability report: $raw');
-          }
-          final reported = raw.cast<int>().toSet();
-          debugPrint('ANDROID_HDR_CAPABILITY reported=$reported '
-              'simulateNoHlgForP84=$_androidForceP84PqFallback');
-          return reported;
-        },
-        applySurfaceTransfer: (transfer) async {
-          final handle = await player.handle;
-          return await _videoChannel.invokeMethod<bool>(
-                'PlatformVideoView.SetColorSpace',
-                {
-                  'handle': handle.toString(),
-                  'transfer': _surfaceTransferForProbe(transfer),
-                },
-              ) ??
-              false;
-        },
-        readP5RuntimeProperties: () async {
-          final values = await _p5RuntimeGateChannel
-              .invokeMapMethod<String, String>('ReadProperties');
-          if (values == null) {
-            throw StateError('P5 runtime property report is unavailable');
-          }
-          return values;
-        },
-      ),
+      backend,
       privateRoot,
       onPhase: _androidOpenPhaseTrace
           ? (generation, phase, elapsedMicros) => debugPrint(
@@ -740,7 +783,8 @@ class _SinglePlayerSingleVideoScreenState
         ),
       );
     }
-    if (Platform.isAndroid && _androidOpenOnTap) {
+    if (Platform.isAndroid &&
+        (_androidOpenOnTap || _androidPreopenFullscreen)) {
       debugPrint('ANDROID_DIRECT_OPEN awaiting_tap');
     } else if (Platform.isAndroid && _androidNoMediaProbe) {
       debugPrint('ANDROID_NO_MEDIA_PROBE PlatformView mounted without open');
@@ -1546,6 +1590,45 @@ class _SinglePlayerSingleVideoScreenState
         (_androidP5PlatformSdrDiagnostic || _androidP5ScopeFullscreen)
             ? diagnosticVideoKey
             : ObjectKey(displayController);
+    if (Platform.isAndroid && _androidPreopenFullscreen) {
+      final page = Scaffold(
+        backgroundColor: Colors.black,
+        body: Stack(
+          fit: StackFit.expand,
+          children: [
+            if (displayController != null)
+              Video(
+                key: videoKey,
+                controller: displayController,
+                fill: Colors.black,
+                controls: null,
+              ),
+            GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onTap: () {
+                if (_preopenFullscreenStarted || _autoPlayerDisposed) return;
+                _preopenFullscreenStarted = true;
+                unawaited(_openInitialSource().catchError(
+                  (Object error, StackTrace stack) {
+                    _preopenFullscreenStarted = false;
+                    debugPrint('PREOPEN_FULLSCREEN_OPEN error=$error');
+                    debugPrintStack(stackTrace: stack);
+                  },
+                ));
+              },
+            ),
+          ],
+        ),
+      );
+      if (!_autoSinglePlayer) return page;
+      return PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, result) {
+          if (!didPop) unawaited(_exitAutoPlayerAfterDisposal());
+        },
+        child: page,
+      );
+    }
     if (_androidDualViewLifecycleProbe) {
       final showA = _dualViewPhase != 2 && _dualViewPhase != 4;
       final showB = _dualViewPhase == 1 ||

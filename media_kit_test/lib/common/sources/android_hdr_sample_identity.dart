@@ -65,6 +65,8 @@ class AndroidHdrSampleIdentity {
   const AndroidHdrSampleIdentity(this.sample, this.sha256, this.path);
 
   final AndroidHdrSample sample;
+
+  /// Empty only for the opt-in, filename-classified diagnostic fixture.
   final String sha256;
   final String path;
 }
