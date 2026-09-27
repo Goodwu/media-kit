@@ -2,6 +2,8 @@
 
 ## Current State
 
+- 2026-09-28 P0 Mystery Box默认入口同片复测12586：与12585同自建JAR、真横屏Texture→SDR2560×1440、`gpu-next`/`mediacodec`，六个P5调试属性0。全片EOS即时读取VO14、decoder0；GPU100样本中位415MHz、退出AImage5909/5909、retired0，无取图/渲染错误，t12实画。旧未优化同片EOS VO54、GPU中位586MHz；本轮VO少40约74%。隔离测试页仅增默认关闭的EOS掉帧读数。原12492、自动亮度、熄屏恢复。P0只余Glass最终真人动态画质；见 `archives/experiments/android-p5-mystery-default-12586-20260928.md`。
+
 - 2026-09-28 P0默认入口与Glass补轮：12583发现测试页旧 `p5_rpu_probe=2`/`p5_raw_yuv=1` 门禁会在属性0时拒绝P5，已移除并保留自建JAR编译门禁，Dart分析及策略10项通过。12584默认SurfaceProducer误跑3840×2160已剔除。12585四属性0、横屏Texture→SDR真2560×1440，`gpu-next`/`mediacodec`、t12实画，媒体到EOS；t90 VO11、t180 VO36/decoder0、t90→t180新增25，退出AImage10450/10450、retired0、Player完成。片尾PTS174.991仍有一次AImageReader -30001/渲染失败，归P3，EOS精确VO未取得。设备恢复12492、自动亮度、熄屏。P0尚缺真人动态画质；见 `archives/experiments/android-p5-glass-default-12581-12585-20260928.md`。
 
 - 2026-09-28 P1 12582修订协议独立静态复审：10秒后持续每秒监测、同代PQ失效事件与stop→ReleaseSurface→ACK、等待错误保留及新Surface重试均未见新增代码阻断；这是静态结论，检测间隔内不保证逐帧PQ，仍须实机注入重设失败、stop/ACK重试、旧新代交错和超过10秒producer重建。P0 Glass真人动态观感仍未完成；12582未安装或播放。见 `archives/experiments/android-p5-pq-product-candidate-12582-20260928.md`。
