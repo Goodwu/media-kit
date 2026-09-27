@@ -10,7 +10,7 @@
 | on1 | 开 | 2.138 s | 4.385 s | 0.250250 s | 17 |
 | off2 | 关 | 2.606 s | 4.975 s | 0.050050 s | 18 |
 
-开启探针一轮，在相同 logcat 设备时钟下，`media_opened` 是采样开始后约 0.313 s，首个 AImage 约 2.020 s；VO `queue` 第一个有效 mix 帧 PTS 0.250250 在约 2.010 s。媒体 PTS 2.102100 的 `seq=61` 在 logcat epoch `1790475149.396` 进入 mix，`draw_done` 在 `.399` 且 `render_ok=1 valid=1`，`flip` 在 `.415` 且 `submit_called=1 submit_ok=1 swap_returned=1`。PixelCopy 在 `.693` 才于固定区域检出内容，即相对该 `flip` 约 278 ms。此时 VO 已推进到 PTS 2.4 s；**采样区是否在源 PTS 2.1 s 就有足够非黑内容尚未按设备裁切精确核对**，不能把 278 ms 直接算作 GPU/显示延迟。`flip` 返回也不证明物理面板呈现。
+开启探针一轮，在相同 logcat 设备时钟下，`media_opened` 是采样开始后约 0.313 s，首个 AImage 约 2.020 s；VO `queue` 第一个有效 mix 帧 PTS 0.250250 在约 2.010 s。媒体 PTS 2.102100 的 `seq=61` 在 logcat epoch `1790475149.396` 进入 mix，`draw_done` 在 `.399` 且 `render_ok=1 valid=1`，`flip` 在 `.415` 且 `submit_called=1 submit_ok=1 swap_returned=1`。PixelCopy 在 `.693` 才于固定区域超过旧内容阈值，即相对该 `flip` 约 278 ms。**12497逐次采样已证实旧阈值显著晚于首个非零像素**，这个差值不能作为 GPU/显示延迟；见`android-p5-glass-precontent-12497-20260927.md`。`flip` 返回也不证明物理面板呈现。
 
 探针开启轮 4.385 s 落在此前同 JAR 四轮 4.282–4.525 s 区间内；off2 的 4.975 s 显示轮间变动，不支持把差异解释为探针性能收益。三轮 POC 错误仍复现，尚无错误与输出等待的因果证据。此实验已经排除“`stream.position` 等于已呈现帧 PTS”的错误口径，确认 VO 实际拿到 PTS 2.102 s 并完成本地提交调用；首帧瓶颈仍需继续拆成打开至首个解码输出、VO 至 Flutter Surface 消费、片源采样区域三部分。
 
