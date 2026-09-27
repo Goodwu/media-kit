@@ -1,0 +1,9 @@
+         1790515975.870  5547  5547 I FirstFramePixelCopy: start generation=1 ns=355877445031926 rect=Rect(1360, 235 - 1760, 485)
+         1790515975.892  5547  5547 I flutter : AUTO_SOURCE path=/data/local/tmp/media-kit-p84-full.mp4
+         1790515975.896  5547  5547 I FirstFramePixelCopy: baseline generation=1 elapsedMs=22.954688 mean=0.0 spread=0.0
+         1790515976.207  5547  5547 I flutter : ANDROID_DIRECT_TEXTURE_PREBIND enabled=false
+         1790515976.492  5547  5547 I VideoOutputManager: com.alexmercerind.media_kit_video.VideoOutputManager.setSurfaceSize: 530490124368 3840 1920
+         1790515977.493  5547  5689 E P5_RAW_STAGE: P5_IMAGE_COUNT acquired=1 deleted=0 current_image=1 retired=0 callbacks=1 empty_acquires=0 retire=0 pts=0.200200000
+         1790515977.611  5547  5547 I FirstFramePixelCopy: first_nonblack generation=1 elapsedMs=1740.282292 sample=20 mean=152.29231770833238 spread=30.651893124143214
+         1790515977.612  5547  5547 I FirstFramePixelCopy: first_content generation=1 elapsedMs=1740.282292 sample=20 mean=152.29231770833238 spread=30.651893124143214
+         1790515977.692  5547  5547 I FirstFramePixelCopy: finish generation=1 samples=20 nonblack=true content=true
