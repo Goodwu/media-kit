@@ -32,20 +32,8 @@ class MainActivity : FlutterActivity() {
         return super.dispatchTouchEvent(event)
     }
 
-    private fun startFirstFrameProbe(): Map<String, Any> {
+    private fun startFirstFrameProbe(platformVideo: Boolean): Map<String, Any> {
         check(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) { "PixelCopy requires API 26" }
-        val flutterSurface = findFlutterSurface(window.decorView)
-            ?: throw IllegalStateException("Flutter SurfaceView unavailable")
-        val rect = Rect(
-            flutterSurface.width / 2 - 200, flutterSurface.height / 4 - 125,
-            flutterSurface.width / 2 + 200, flutterSurface.height / 4 + 125
-        )
-        check(rect.left >= 0 && rect.top >= 0 &&
-            rect.right <= flutterSurface.width && rect.bottom <= flutterSurface.height) {
-            "Probe rectangle outside Flutter surface: $rect"
-        }
-        val surface = flutterSurface.holder.surface
-        check(surface.isValid) { "Flutter Surface invalid" }
         val generation = ++firstFrameProbeGeneration
         val startedNs = SystemClock.elapsedRealtimeNanos()
         val touchDownNs = lastTouchDownNs.takeIf { startedNs - it in 0L..2_000_000_000L }
@@ -55,7 +43,8 @@ class MainActivity : FlutterActivity() {
         var nonblackLogged = false
         var contentLogged = false
         Log.i("FirstFramePixelCopy", "start generation=$generation ns=$startedNs " +
-            "touchDownNs=$touchDownNs touchUpNs=$touchUpNs rect=$rect")
+            "touchDownNs=$touchDownNs touchUpNs=$touchUpNs " +
+            "target=${if (platformVideo) "platform" else "flutter"}")
 
         fun sample() {
             if (generation != firstFrameProbeGeneration || contentLogged ||
@@ -64,14 +53,31 @@ class MainActivity : FlutterActivity() {
                     "nonblack=$nonblackLogged content=$contentLogged")
                 return
             }
+            val target = if (platformVideo) findPlatformVideoSurface(window.decorView)
+                else findFlutterSurface(window.decorView)
+            if (target == null || !target.holder.surface.isValid ||
+                target.width < 400 || target.height < 250) {
+                handler.postDelayed({ sample() }, 40)
+                return
+            }
+            val rect = Rect(
+                target.width / 2 - 200, target.height / 4 - 125,
+                target.width / 2 + 200, target.height / 4 + 125
+            )
+            if (rect.left < 0 || rect.top < 0 || rect.right > target.width ||
+                rect.bottom > target.height) {
+                handler.postDelayed({ sample() }, 40)
+                return
+            }
             val bitmap = Bitmap.createBitmap(64, 40, Bitmap.Config.ARGB_8888)
             try {
-                PixelCopy.request(surface, rect, bitmap, { status ->
+                PixelCopy.request(target.holder.surface, rect, bitmap, { status ->
                     val capturedNs = SystemClock.elapsedRealtimeNanos()
                     if (status != PixelCopy.SUCCESS) {
                         Log.w("FirstFramePixelCopy", "copy_failed generation=$generation " +
                             "status=$status samples=$samples")
                         bitmap.recycle()
+                        handler.postDelayed({ sample() }, 40)
                         return@request
                     }
                     val pixels = IntArray(bitmap.width * bitmap.height)
@@ -95,7 +101,8 @@ class MainActivity : FlutterActivity() {
                     val elapsedMs = (capturedNs - startedNs) / 1_000_000.0
                     if (samples == 1) {
                         Log.i("FirstFramePixelCopy", "baseline generation=$generation " +
-                            "elapsedMs=$elapsedMs mean=$mean spread=$spread")
+                            "elapsedMs=$elapsedMs mean=$mean spread=$spread " +
+                            "target=${target.javaClass.name} rect=$rect")
                     }
                     if (!nonblackLogged && mean > 1.0 && spread > 1.0) {
                         nonblackLogged = true
@@ -120,6 +127,7 @@ class MainActivity : FlutterActivity() {
             } catch (error: Exception) {
                 bitmap.recycle()
                 Log.w("FirstFramePixelCopy", "copy_exception generation=$generation $error")
+                handler.postDelayed({ sample() }, 40)
             }
         }
         sample()
@@ -143,6 +151,16 @@ class MainActivity : FlutterActivity() {
         if (view is ViewGroup) {
             for (i in 0 until view.childCount) {
                 findFlutterSurface(view.getChildAt(i))?.let { return it }
+            }
+        }
+        return null
+    }
+
+    private fun findPlatformVideoSurface(view: View): SurfaceView? {
+        if (view is SurfaceView && view.javaClass.name == "android.view.SurfaceView") return view
+        if (view is ViewGroup) {
+            for (i in 0 until view.childCount) {
+                findPlatformVideoSurface(view.getChildAt(i))?.let { return it }
             }
         }
         return null
@@ -196,7 +214,7 @@ class MainActivity : FlutterActivity() {
                 }
                 if (call.method == "StartFirstFrameProbe") {
                     try {
-                        result.success(startFirstFrameProbe())
+                        result.success(startFirstFrameProbe(call.argument<String>("target") == "platform"))
                     } catch (error: Exception) {
                         result.error("PROBE_FAILED", error.toString(), null)
                     }
