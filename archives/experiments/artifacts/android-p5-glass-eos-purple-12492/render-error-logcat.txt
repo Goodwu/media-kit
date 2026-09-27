@@ -1,0 +1,3 @@
+         1790470839.860  5729  5729 I flutter : MPVLOG [vo/gpu-next/aimagereader] error: acquireLatestImage failed after retry: -30001 pts=174.874700000 callbacks=4425 empty_acquires=30 notification_pending=0 retired=0 maps=4428
+         1790470839.861  5729  5729 I flutter : MPVLOG [vo/gpu-next] error: Mapping hardware decoded surface failed.
+         1790470839.861  5729  5729 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
