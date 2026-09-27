@@ -22,7 +22,7 @@
   - status: in_progress
   - context: archives/conversations/android-hdr-dv-display-plan-20260922.md
   - acceptance: 在真实手机上，以用户触发打开视频为起点、屏幕实际呈现首个视频帧为终点计时；覆盖当前支持的 SDR、HDR10、P8.4、P5 代表素材及冷/热启动，重复记录分布与最慢样本，正常播放达到 2 秒内，争取 1 秒内。视频尺寸或 Surface ACK 不能冒充实际出图；同时保持画质、音画同步、全屏及退出/重入正确。
-  - latest: 12472 热页面 SDR 点击反馈→画面约133/100/100ms，但不含触摸到反馈。12479 同机五次冷 SDR 非黑截图上界1.48–1.56秒。用户指定 Glass P5：12480测试页整片哈希复制一次至内容上界16.695秒，准备占10.390秒；12481临时预验证直开三次6.283/5.981/6.640秒；12482诊断性从3.5秒起播三次5.914/5.486/5.669秒；12483显式GPU缓存目录三次6.520/6.060/5.975秒，与无显式缓存重叠且无命中证据。12484洋红转黑截图上界约2.25–2.44秒。12485同一SurfaceProducer链设备时钟取样证明洋红转黑可发生在首个AImage**之前**，属于初始化黑画面；Flutter Surface首次有内容约4.30–4.55秒，片源自身黑场约2.052秒。12485同JAR开启既有VO/取图探针短轮：media_opened→首个decoder release约1.01秒，release→ImageReader仅毫秒级，首轮VO交换短；仍无实际mix PTS/首帧身份。重建同字节JAR基线未成功，不用重建库作单变量结论。详见`archives/experiments/android-p5-glass-pixel-copy-startup-12485-20260927.md`及`archives/experiments/android-p5-glass-vo-startup-12485-20260927.md`。
+  - latest: 12472 热页面 SDR 点击反馈→画面约133/100/100ms，但不含触摸到反馈。12479 同机五次冷 SDR 非黑截图上界1.48–1.56秒。用户指定 Glass P5：12480测试页整片哈希复制一次至内容上界16.695秒，准备占10.390秒；12481临时预验证直开三次6.283/5.981/6.640秒；12483显式GPU缓存目录无命中/收益证据。12485同一SurfaceProducer链设备时钟取样证明洋红转黑早于首个AImage，是初始化黑画面；首次非黑内容约4.30–4.55秒，片源黑场约2.052秒。12485同JAR VO短轮 media_opened→首个decoder release约1.01秒，release→ImageReader仅毫秒级。12489诊断性从3.5秒起播三次首次非黑约4.034/4.245/3.966秒，轨道确认后仍约1.5–1.6秒；跳过黑场无明显达标收益，且不计为产品优化。仍无实际mix PTS/首帧身份；重建同字节JAR基线未成功。详见`archives/experiments/android-p5-glass-pixel-copy-startup-12485-20260927.md`、`archives/experiments/android-p5-glass-vo-startup-12485-20260927.md`、`archives/experiments/android-p5-glass-start35-12489-20260927.md`。
   - next: 按用户确认的片头黑场口径继续 Glass 真正屏幕首帧测量；将诊断整片复制与产品本地打开分开。在正式 SurfaceProducer 拓扑下追踪首个实际提交的图像、mix PTS及Flutter/屏幕呈现；量化连续PixelCopy扰动，覆盖冷/热、全屏及 SDR/HDR10/P8.4，复测画质与退出/重入。增补native PTS探针前须恢复与现用JAR同字节基线，或重新建立两包A/B基线。显式缓存若再验证须先证明写入/命中并做空→热→空回摆；不能把外部预验证固定文件探针作为通用优化。
 
 ## Next（近期候选，最多 10 条）
@@ -38,8 +38,8 @@
   - status: queued
   - context: archives/conversations/android-hdr-dv-display-plan-20260922.md
   - acceptance: Surface 重建、Home→前台、退出/重入、oldA→newB 交错和失败重试时，播放器位置与持续可见帧正确，资源最终释放；晚到 Create、Release ACK 丢失及 engine detach 有明确 owner/屏障，不以构建或单次 EOS 代替生命周期验收。
-  - latest: P8.4/HDR10/SDR 的 Home→返回、双视图存活 B 回退、释放/绑定失败重试已有实机可见画面证据；诊断根页 Back 与自动停止并发时已等待 Player.dispose。12473/12474/12475 受控 SDR 交错核验旧 A 的 Available/Destroy 晚到与 ACK 回复超时后重试。12477 在正式 HDR10 输出的第2代控制器中注入明确标记的旧 A Failed，B 尚无 Surface 时未提前拒绝打开，B 放行后 HDR10 成功且两张相位轮换前截图有变化；见`archives/experiments/android-hdr10-old-surface-failed-12476-12477-20260927.md`。12486 一次 P5 长播后重新进入、尚未再次开媒体时，Flutter SurfaceTexture finalizer 在系统 release/abandon 栈 SIGSEGV；新进程可启动，归因未明，见`archives/experiments/android-p5-glass-rpu-reopen-12486-20260927.md`。注入均已撤销，提前停轨仍默认关闭；完整历史见本条 context。
-  - next: 任意宿主直接 FlutterEngine.destroy 需先做独立于 Dart 的 Android 原生播放器 owner broker，统一 mpv 调用、事件/hook、终止和视频输出引用；先以无视频 Player 实机直接 destroy 证明终态，再接 SDR PlatformView、两种 Texture、HDR/P5，详见本条 context。继续失败 disposal/global-ref 定量闭合、P5 双视图和属性序列中途故障；补连续可见帧与 mpv WID 回读，再决定提前停轨默认值。
+  - latest: P8.4/HDR10/SDR 的 Home→返回、双视图存活 B 回退、释放/绑定失败重试已有实机可见画面证据。12473/12474/12475受控SDR交错核验旧A的Available/Destroy晚到与ACK回复超时；12477旧A Failed注入后B成功出HDR10画面。12486 P5长播后重入在Flutter SurfaceTexture finalizer release栈出现一次SIGSEGV，归因未明。测试页自动单播放器 Back 现等待输出/Player清理；12491 P5播到媒体PTS158.7秒后释放完成早于Activity退出，同进程重入未崩；最终源码包12492短播与未播返回顺序亦正确，V1复审无阻断，见`archives/experiments/android-auto-player-exit-12491-12492-20260927.md`。此为受控测试页修复，任意Engine直接destroy及最终包长播未验。注入均已撤销，提前停轨仍默认关闭；完整历史见本条 context。
+  - next: 复测最终包12492长播、清理中再次点击及失败重试/全屏组合。任意宿主直接 FlutterEngine.destroy 需先做独立于 Dart 的 Android 原生播放器 owner broker，统一 mpv 调用、事件/hook、终止和视频输出引用；先以无视频 Player 实机直接 destroy 证明终态，再接 SDR PlatformView、两种 Texture、HDR/P5，详见本条 context。继续失败 disposal/global-ref 定量闭合、P5 双视图和属性序列中途故障；补连续可见帧与 mpv WID 回读，再决定提前停轨默认值。
 
 - [ ] P5 RPU 边界与独立色彩核验
   - status: queued
