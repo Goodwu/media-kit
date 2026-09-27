@@ -2,6 +2,8 @@
 
 ## Current State
 
+- 2026-09-28 P5 工作重排：用户指定 `/Users/wuweiwei1/Downloads/test-clips/Mystery Box Dolby Vision Profile 5.mp4` 为后续 P5 主样片，SHA-256 `3e610d3b1b11e9b802da66d69bd97f6371a2b114ee464a7e8517fe31d706cc9f`；ffprobe 证实 HEVC Main10、3840×2160、60000/1001 fps、DV Profile5/RPU、98.944秒，用户称片头无黑场。优先级改为 P0 PQ产品输出/首帧、P1 PQ全片性能测试优化、P2 将既有P5→Texture SDR线性解码候选在支持路径默认启用（暂不继续追逐旧Glass严格掉帧门槛）、P3生命周期/片尾、P4独立色彩数值比较。用户已看过P5颜色，认为基本正常；旧Glass只保留紫屏PTS≈175秒定点复现及历史对照。此前Glass首帧和性能数字不可搬到新片。见`TASKS.md`的P5当前优先级。
+
 - 2026-09-28 P5 性能适用范围复核：过去 `p5_pq_pipeline` 减少 VO 掉帧的全片 A/B/A 为 P5→Texture SDR BT.1886/2560×1440，分支门控不覆盖 P5→PQ Surface。12542–12544 使用的自建 JAR SHA `f745146...` 链接原基线 libplacebo 静态库 SHA `60187c61...`，二进制无 `P5_PQ_PIPELINE`/`p5_pq_pipeline` 字符串；这三包只证明 P5→PQ 短轮出画与 HDR 合成，不提供原生 PQ 性能结论。后续将 PQ 输出性能作为独立同配置全片门槛，不能把 SDR 的 2607/516/3626 数字搬过去。见`archives/experiments/android-p5-glass-policy-10418-10419-20260926.md`、`archives/experiments/android-p5-private-pq-firstframe-12541-12543-20260927.md`。
 
 - 2026-09-28 12544 P5→PQ 探针缩小目标：横屏选择最大可见视频 Surface 且宽度至少窗口一半，有效轮 baseline 和首个可辨内容均为 `2984×1440`，触摸按下→内容3.967秒，全屏7秒截图有真实片头画面；私有 PQ 回读成功、`gpu-next`/`mediacodec`。排除了12543的旧小Surface，但媒体打开前同尺寸已存在，仍缺与实际 Surface owner/generation 的绑定，不能宣称精确首 buffer 时间。错误设置 RPU属性1 的前置策略失败轮已剔除；原12492、属性0、自动亮度和熄屏恢复。见`archives/experiments/android-p5-private-pq-probe-target-12544-20260928.md`。
