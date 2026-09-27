@@ -375,12 +375,24 @@ class _SinglePlayerSingleVideoScreenState
       return;
     }
     try {
+      if (Platform.isAndroid &&
+          _androidPreopenFirstFrameProbe &&
+          !_androidPreopenFullscreen &&
+          !configuration.value.usePlatformView) {
+        final started = await _flutterSurfaceProbeChannel
+            .invokeMapMethod<String, dynamic>('StartFirstFrameProbe');
+        debugPrint('FIRST_FRAME_PIXEL_COPY started=$started');
+      }
       if (Platform.isAndroid && _androidHdrTransaction) {
         await _openHdrSource(source);
       } else {
         if (Platform.isAndroid && _androidDirectOpenTrace) {
           debugPrint('ANDROID_DIRECT_OPEN trigger path=$source');
           debugPrint('ANDROID_DIRECT_OPEN media_command');
+        }
+        if (Platform.isAndroid && !configuration.value.usePlatformView) {
+          final prepared = await controller.prepareAndroidTextureOutput();
+          debugPrint('ANDROID_SELECTED_TEXTURE_PREPARED layoutBound=$prepared');
         }
         await player.open(Media(source));
         if (Platform.isAndroid && _androidDirectOpenTrace) {
