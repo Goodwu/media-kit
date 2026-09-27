@@ -11,10 +11,10 @@ P0 Texture→SDR 的真人动态画质确认仍待进行；本轮只准备 P1 �
 
 ## 静态与打包证据
 
-- NDK arm64 C++ 语法、Java 目标编译及 `git diff --check` 通过；隔离 Dart 控制器分析只有原有 5 条 info，测试页四个相关 Dart 文件分析无问题。独立 V2 初审指出监测 10 秒结束和运行中失败只发 destroy 两个阻断项；已修改，修订后的协议仍待最终复审与设备故障注入。
+- NDK arm64 C++ 语法、Java 目标编译及 `git diff --check` 通过；隔离 Dart 控制器分析只有原有 5 条 info，测试页四个相关 Dart 文件分析无问题。独立 V2 初审指出监测 10 秒结束和运行中失败只发 destroy 两个阻断项；修订后独立静态复审未发现新增阻断，确认错误事件会保存原因、按同代 owner 走 stop→ReleaseSurface→ACK，失败保留引用重试，后续等待者仍能收到错误。实机故障注入未做；每秒监测不能保证检测间隔内逐帧PQ正确。
 - 使用自建 arm64 JAR SHA-256 `eac6514fd1b3409574f0b77014c9b29989e0d0868d40048cc199a822d94c660f`、隔离代码拷贝和 `MEDIA_KIT_ANDROID_PLATFORM_VIEW=true`、HDR transaction、P5 RPU build flag、预建横屏全屏、命名本地 Mystery Box 源，离线 Gradle release 构建成功。12582 APK SHA-256 `3f9c180fa55df10d0df5b80e9d2a7b8de8e2dec1ab5a34d964834e0bdb700a64`；APK 只含 arm64 native 库，HDR bridge 二进制有新 fallback 日志符号。APK 内 strip 后 libmpv SHA-256 `3350c910d9de2d38838bb3874f23a84ea5ecf764b8d18162b065bbe2b209fa75`。
 - `flutter test --no-pub` 首轮在主机剩余约 117 MiB 时因 Objective-C native asset 链接 `No space left on device` 未运行测试体；清理生成中间文件后补轮，起初隔离构建目录仍使用旧测试文件而编译失败，复制同候选的策略测试文件后 `flutter test --no-pub test/android_hdr_playback_policy_test.dart` 通过 10 项。构建、策略测试与静态检查均不证明 PQ 出画、真实首帧或资源释放。
 
 ## 下一步
 
-按既定顺序先完成 P0 Glass 真人动态观察。之后先复审修订协议，再用 12582 Mystery Box 做同代 Surface/PQ/10-bit/HDR 元数据与 SF/HWC、真实内容、首帧和退出 SDR 复位验证；若发现问题，在隔离分支修正并重建，不把旧私有探针结果算作产品验收。
+按既定顺序先完成 P0 Glass 真人动态观察。之后用 12582 Mystery Box 做同代 Surface/PQ/10-bit/HDR 元数据与 SF/HWC、真实内容、首帧和退出 SDR 复位验证；故障注入覆盖 PQ 重设失败、stop/ACK 首次失败后重试、旧代失败与新代交错、超过 10 秒 producer 重建。若发现问题，在隔离分支修正并重建，不把旧私有探针结果算作产品验收。
