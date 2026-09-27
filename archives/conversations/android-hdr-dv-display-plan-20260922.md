@@ -2,6 +2,8 @@
 
 ## Current State
 
+- 2026-09-27 12535退出清理约5.1秒已从日志和当前NativePlayer.dispose源码定位为刻意等待5秒再`mpv_terminate_destroy`的既有宽限期，非新解码卡顿；保持生命周期屏障，不以缩短等待冒充首帧优化。见`archives/experiments/android-p84-touchdown-and-reentry-12533-12535-20260927.md`。
+
 - 2026-09-27 12533 P8.4普通列表触摸按下至横屏全屏Texture SDR明显内容三独立进程0.767/0.789/0.681秒。12534同PID退出播放页被测试页误用HDR报告拦住，12535修复后完成全屏播放→双Back销毁页→主菜单→新页全屏再出图，第二次按下至内容0.656秒，旧帧无污染；退出清理约5.1秒待分段。仅系统读回，光学、独立色彩、音画、冷/热分布仍开放。手机恢复12492、属性0、自动亮度、熄屏。见`archives/experiments/android-p84-touchdown-and-reentry-12533-12535-20260927.md`。
 
 - 2026-09-27 12532在Activity记录触摸抬手，P8.4普通列表到横屏全屏Texture SDR明显内容三独立进程PixelCopy为0.792/0.699/0.670秒；仍不含按下时长、面板光学、色彩/音画和有效重入。SDR尚未完全验收，原生HDR首帧未测。手机恢复12492、属性0、自动亮度、熄屏。见`archives/experiments/android-p84-touch-to-content-12532-20260927.md`。
