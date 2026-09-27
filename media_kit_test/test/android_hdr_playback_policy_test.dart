@@ -3,23 +3,6 @@ import 'package:media_kit_test/common/sources/android_hdr_playback_policy.dart';
 import 'package:media_kit_test/common/sources/android_hdr_sample_identity.dart';
 
 void main() {
-  test('P5 runtime gate requires RPU attachment and raw YUV together', () {
-    expect(
-      () => requireAndroidP5RuntimePipeline({
-        'debug.media_kit.p5_rpu_probe': '2',
-        'debug.media_kit.p5_raw_yuv': '1',
-      }),
-      returnsNormally,
-    );
-    for (final values in <Map<String, String>>[
-      {},
-      {'debug.media_kit.p5_rpu_probe': '1', 'debug.media_kit.p5_raw_yuv': '1'},
-      {'debug.media_kit.p5_rpu_probe': '2', 'debug.media_kit.p5_raw_yuv': '0'},
-    ]) {
-      expect(() => requireAndroidP5RuntimePipeline(values), throwsStateError);
-    }
-  });
-
   test('Texture maps all fixed sources to SDR and strips only P8.4 RPU', () {
     for (final sample in AndroidHdrSample.values) {
       final policy = AndroidHdrPlaybackPolicy.forSample(

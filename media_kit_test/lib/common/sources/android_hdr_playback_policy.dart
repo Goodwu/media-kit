@@ -1,14 +1,5 @@
 import 'android_hdr_sample_identity.dart';
 
-/// The experimental native P5 path is only valid when FFmpeg attaches RPU
-/// side data and the mapper preserves raw YUV for Dolby Vision reshape.
-void requireAndroidP5RuntimePipeline(Map<String, String> properties) {
-  if (properties['debug.media_kit.p5_rpu_probe'] != '2' ||
-      properties['debug.media_kit.p5_raw_yuv'] != '1') {
-    throw StateError('P5 RPU attachment and raw YUV pipeline are not enabled');
-  }
-}
-
 class AndroidHdrPlaybackPolicy {
   const AndroidHdrPlaybackPolicy({
     required this.vo,

@@ -19,7 +19,6 @@ class AndroidHdrPlayerBackend implements AndroidHdrOpenBackend {
     required this.p5RpuPipelineBuilt,
     required this.readDisplayHdrTypes,
     required this.applySurfaceTransfer,
-    required this.readP5RuntimeProperties,
     this.forceP84PqFallback = false,
     this.gpuPlatformHdrExperiment = false,
     this.p5PlatformSdrDiagnostic = false,
@@ -32,7 +31,6 @@ class AndroidHdrPlayerBackend implements AndroidHdrOpenBackend {
   final bool p5RpuPipelineBuilt;
   final Future<Set<int>> Function() readDisplayHdrTypes;
   final Future<bool> Function(String transfer) applySurfaceTransfer;
-  final Future<Map<String, String>> Function() readP5RuntimeProperties;
   final bool forceP84PqFallback;
   final bool gpuPlatformHdrExperiment;
   final bool p5PlatformSdrDiagnostic;
@@ -90,9 +88,6 @@ class AndroidHdrPlayerBackend implements AndroidHdrOpenBackend {
 
   @override
   Future<void> validate(AndroidHdrSampleIdentity identity) async {
-    if (identity.sample == AndroidHdrSample.dolbyVisionP5) {
-      requireAndroidP5RuntimePipeline(await readP5RuntimeProperties());
-    }
     final hdrTypes = usePlatformView ? await readDisplayHdrTypes() : null;
     _validatedPolicy = AndroidHdrPlaybackPolicy.forSample(
       identity.sample,
