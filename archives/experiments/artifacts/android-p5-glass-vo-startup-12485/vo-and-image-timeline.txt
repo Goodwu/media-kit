@@ -1,0 +1,207 @@
+         1790467534.190 21441 21441 I FirstFramePixelCopy: start generation=1 ns=307435764608340 rect=Rect(200, 450 - 600, 700)
+         1790467534.213 21441 21441 I FirstFramePixelCopy: baseline generation=1 elapsedMs=21.527084 magenta=1.0 mean=170.0 spread=0.0
+         1790467534.216 21441 21441 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=requested elapsed_us=1
+         1790467534.217 21441 21441 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=sample_ready elapsed_us=321
+         1790467534.217 21441 21441 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=queue_entered elapsed_us=353
+         1790467534.421 21441 21441 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=validated elapsed_us=205206
+         1790467534.423 21441 21441 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=previous_output_stopped elapsed_us=206594
+         1790467534.423 21441 21441 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=configuration_reset elapsed_us=206657
+         1790467534.449 21441 21441 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=output_prepared elapsed_us=233079
+         1790467534.454 21441 21441 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=configured elapsed_us=237808
+         1790467534.454 21441 21441 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=output_ready elapsed_us=237881
+         1790467534.466 21441 21441 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=media_opened elapsed_us=249452
+         1790467535.194 21441 21581 E P5_VO_TIME: frame=1 prep_us=30 render_us=4985 after_render_us=6 flush_us=3
+         1790467535.194 21441 21581 E P5_VO_FLIP: frame=1 submit_us=2 swap_us=200
+         1790467535.476 21441 21581 E P5_TIMELINE: release_begin pts=0.050050000 mono_us=2734029
+         1790467535.477 21441 21581 E P5_TIMELINE: release_end pts=0.050050000 src=0x7b629f22d0 codec_buffer=0x7c012b5760 ret=0 mono_us=2734693
+         1790467535.477 21441 21582 E P5_TIMELINE: callback n=1 mono_us=2734964
+         1790467535.478 21441 21581 E P5_TIMELINE: acquire attempt=1 pts=0.050050000 start_us=2735626 end_us=2735672 ret=0 callbacks=1
+         1790467535.478 21441 21581 E P5_TIMELINE: acquire_ok target_pts=0.050050000 image_ts_ns=50050000 ts_ret=0 mono_us=2736481 prior_failed_pts=0.000000000 since_failed_us=-1
+         1790467535.479 21441 21581 E P5_RAW_STAGE: P5_IMAGE_COUNT acquired=1 deleted=0 current_image=1 retired=0 callbacks=1 empty_acquires=0 retire=1 pts=0.050050000
+         1790467535.549 21441 21581 E P5_VO_TIME: frame=2 prep_us=4334 render_us=76718 after_render_us=7 flush_us=1
+         1790467535.550 21441 21581 E P5_VO_FLIP: frame=2 submit_us=1 swap_us=218
+         1790467535.550 21441 21441 I flutter : ANDROID_HDR_OPEN_PHASE generation=1 phase=track_verified elapsed_us=1334201
+         1790467535.565 21441 21581 E P5_TIMELINE: release_begin pts=0.050050000 mono_us=2822788
+         1790467535.565 21441 21581 E P5_TIMELINE: release_end pts=0.050050000 src=0x7b629f22d0 codec_buffer=0x7c012b5760 ret=0 mono_us=2823242
+         1790467535.576 21441 21581 E P5_TIMELINE: acquire attempt=1 pts=0.050050000 start_us=2833742 end_us=2833752 ret=-30001 callbacks=1
+         1790467535.586 21441 21581 E P5_TIMELINE: acquire attempt=2 pts=0.050050000 start_us=2844311 end_us=2844320 ret=-30001 callbacks=1
+         1790467535.597 21441 21581 E P5_TIMELINE: acquire attempt=3 pts=0.050050000 start_us=2854822 end_us=2854827 ret=-30001 callbacks=1
+         1790467535.607 21441 21581 E P5_TIMELINE: acquire attempt=4 pts=0.050050000 start_us=2865339 end_us=2865344 ret=-30001 callbacks=1
+         1790467535.618 21441 21581 E P5_TIMELINE: acquire attempt=5 pts=0.050050000 start_us=2875913 end_us=2875917 ret=-30001 callbacks=1
+         1790467535.627 21441 21441 I FirstFramePixelCopy: first_non_magenta generation=1 elapsedMs=1435.642709 sample=16 mean=0.0 spread=0.0
+         1790467535.628 21441 21581 E P5_TIMELINE: acquire attempt=6 pts=0.050050000 start_us=2886404 end_us=2886409 ret=-30001 callbacks=1
+         1790467535.640 21441 21581 E P5_TIMELINE: acquire attempt=7 pts=0.050050000 start_us=2897149 end_us=2897154 ret=-30001 callbacks=1
+         1790467535.651 21441 21581 E P5_TIMELINE: acquire attempt=8 pts=0.050050000 start_us=2908889 end_us=2908895 ret=-30001 callbacks=1
+         1790467535.661 21441 21581 E P5_TIMELINE: acquire attempt=9 pts=0.050050000 start_us=2919663 end_us=2919670 ret=-30001 callbacks=1
+         1790467535.672 21441 21581 E P5_TIMELINE: acquire attempt=10 pts=0.050050000 start_us=2930222 end_us=2930235 ret=-30001 callbacks=1
+         1790467535.675 21441 21581 E P5_TIMELINE: release_begin pts=0.050050000 mono_us=2932504
+         1790467535.676 21441 21581 E P5_TIMELINE: release_end pts=0.050050000 src=0x7b629f22d0 codec_buffer=0x7c012b5760 ret=0 mono_us=2933536
+         1790467535.687 21441 21581 E P5_TIMELINE: acquire attempt=1 pts=0.050050000 start_us=2944585 end_us=2944598 ret=-30001 callbacks=1
+         1790467535.698 21441 21581 E P5_TIMELINE: acquire attempt=2 pts=0.050050000 start_us=2955639 end_us=2955658 ret=-30001 callbacks=1
+         1790467535.709 21441 21581 E P5_TIMELINE: acquire attempt=3 pts=0.050050000 start_us=2966710 end_us=2966727 ret=-30001 callbacks=1
+         1790467535.720 21441 21581 E P5_TIMELINE: acquire attempt=4 pts=0.050050000 start_us=2977782 end_us=2977795 ret=-30001 callbacks=1
+         1790467535.731 21441 21581 E P5_TIMELINE: acquire attempt=5 pts=0.050050000 start_us=2988827 end_us=2988839 ret=-30001 callbacks=1
+         1790467535.742 21441 21581 E P5_TIMELINE: acquire attempt=6 pts=0.050050000 start_us=3000323 end_us=3000336 ret=-30001 callbacks=1
+         1790467535.753 21441 21581 E P5_TIMELINE: acquire attempt=7 pts=0.050050000 start_us=3011331 end_us=3011343 ret=-30001 callbacks=1
+         1790467535.765 21441 21581 E P5_TIMELINE: acquire attempt=8 pts=0.050050000 start_us=3022378 end_us=3022392 ret=-30001 callbacks=1
+         1790467535.776 21441 21581 E P5_TIMELINE: acquire attempt=9 pts=0.050050000 start_us=3033727 end_us=3033741 ret=-30001 callbacks=1
+         1790467535.789 21441 21581 E P5_TIMELINE: acquire attempt=10 pts=0.050050000 start_us=3044894 end_us=3044907 ret=-30001 callbacks=1
+         1790467535.790 21441 21581 E P5_VO_TIME: frame=3 prep_us=27 render_us=-1 after_render_us=-1 flush_us=13
+         1790467535.793 21441 21581 E P5_VO_FLIP: frame=3 submit_us=11 swap_us=1242
+         1790467535.795 21441 21581 E P5_TIMELINE: release_begin pts=0.050050000 mono_us=3052804
+         1790467535.797 21441 21581 E P5_TIMELINE: release_end pts=0.050050000 src=0x7b629f2050 codec_buffer=0x7c012b52c0 ret=0 mono_us=3054155
+         1790467535.797 21441 21582 E P5_TIMELINE: callback n=2 mono_us=3054445
+         1790467535.798 21441 21581 E P5_TIMELINE: acquire attempt=1 pts=0.050050000 start_us=3056290 end_us=3056334 ret=0 callbacks=2
+         1790467535.799 21441 21581 E P5_TIMELINE: acquire_ok target_pts=0.050050000 image_ts_ns=50050000 ts_ret=0 mono_us=3057280 prior_failed_pts=0.050050000 since_failed_us=9809
+         1790467535.813 21441 21581 E P5_VO_TIME: frame=4 prep_us=151 render_us=18959 after_render_us=23 flush_us=4
+         1790467535.815 21441 21581 E P5_VO_FLIP: frame=4 submit_us=5 swap_us=963
+         1790467535.869 21441 21581 E P5_TIMELINE: release_begin pts=0.066733333 mono_us=3126840
+         1790467535.870 21441 21581 E P5_TIMELINE: release_end pts=0.066733333 src=0x7c01e202d0 codec_buffer=0x7c01fc8640 ret=0 mono_us=3127726
+         1790467535.871 21441 21582 E P5_TIMELINE: callback n=3 mono_us=3128920
+         1790467535.872 21441 21581 E P5_TIMELINE: acquire attempt=1 pts=0.066733333 start_us=3128926 end_us=3129149 ret=0 callbacks=3
+         1790467535.872 21441 21581 E P5_TIMELINE: acquire_ok target_pts=0.066733333 image_ts_ns=66733000 ts_ret=0 mono_us=3130366 prior_failed_pts=0.050050000 since_failed_us=-1
+         1790467535.919 21441 21581 E P5_VO_TIME: frame=5 prep_us=325 render_us=51086 after_render_us=7 flush_us=1
+         1790467535.920 21441 21581 E P5_VO_FLIP: frame=5 submit_us=2 swap_us=460
+         1790467535.921 21441 21581 E P5_TIMELINE: release_begin pts=0.083416667 mono_us=3179502
+         1790467535.924 21441 21581 E P5_TIMELINE: release_end pts=0.083416667 src=0x7c01e24dd0 codec_buffer=0x7b83b5caa0 ret=0 mono_us=3181542
+         1790467535.924 21441 21582 E P5_TIMELINE: callback n=4 mono_us=3182248
+         1790467535.925 21441 21581 E P5_TIMELINE: acquire attempt=1 pts=0.083416667 start_us=3182253 end_us=3182271 ret=0 callbacks=4
+         1790467535.926 21441 21581 E P5_TIMELINE: acquire_ok target_pts=0.083416667 image_ts_ns=83417000 ts_ret=0 mono_us=3183789 prior_failed_pts=0.050050000 since_failed_us=-1
+         1790467535.932 21441 21581 E P5_VO_TIME: frame=6 prep_us=54 render_us=8922 after_render_us=6 flush_us=1
+         1790467535.985 21441 21581 E P5_VO_FLIP: frame=6 submit_us=3 swap_us=50707
+         1790467536.047 21441 21581 E P5_TIMELINE: release_begin pts=0.183516667 mono_us=3305487
+         1790467536.048 21441 21581 E P5_TIMELINE: release_end pts=0.183516667 src=0x7c01e243d0 codec_buffer=0x7b83b5c720 ret=0 mono_us=3306244
+         1790467536.049 21441 21582 E P5_TIMELINE: callback n=5 mono_us=3306857
+         1790467536.049 21441 21581 E P5_TIMELINE: acquire attempt=1 pts=0.183516667 start_us=3306863 end_us=3306888 ret=0 callbacks=5
+         1790467536.050 21441 21581 E P5_TIMELINE: acquire_ok target_pts=0.183516667 image_ts_ns=183517000 ts_ret=0 mono_us=3307943 prior_failed_pts=0.050050000 since_failed_us=-1
+         1790467536.056 21441 21581 E P5_VO_TIME: frame=7 prep_us=71 render_us=9683 after_render_us=11 flush_us=3
+         1790467536.058 21441 21581 E P5_VO_FLIP: frame=7 submit_us=5 swap_us=568
+         1790467536.085 21441 21581 E P5_TIMELINE: release_begin pts=0.233566667 mono_us=3342553
+         1790467536.086 21441 21582 E P5_TIMELINE: callback n=6 mono_us=3343617
+         1790467536.086 21441 21581 E P5_TIMELINE: release_end pts=0.233566667 src=0x7bb0ff2cd0 codec_buffer=0x7c0128da20 ret=0 mono_us=3343860
+         1790467536.087 21441 21581 E P5_TIMELINE: acquire attempt=1 pts=0.233566667 start_us=3345200 end_us=3345239 ret=0 callbacks=6
+         1790467536.088 21441 21581 E P5_TIMELINE: acquire_ok target_pts=0.233566667 image_ts_ns=233567000 ts_ret=0 mono_us=3346024 prior_failed_pts=0.050050000 since_failed_us=-1
+         1790467536.093 21441 21581 E P5_VO_TIME: frame=8 prep_us=125 render_us=9567 after_render_us=12 flush_us=3
+         1790467536.111 21441 21581 E P5_VO_FLIP: frame=8 submit_us=5 swap_us=16924
+         1790467536.114 21441 21581 E P5_TIMELINE: release_begin pts=0.266933333 mono_us=3371565
+         1790467536.115 21441 21582 E P5_TIMELINE: callback n=7 mono_us=3372803
+         1790467536.115 21441 21581 E P5_TIMELINE: release_end pts=0.266933333 src=0x7bb0ff27d0 codec_buffer=0x7b83b5cc20 ret=0 mono_us=3373045
+         1790467536.117 21441 21581 E P5_TIMELINE: acquire attempt=1 pts=0.266933333 start_us=3374594 end_us=3374635 ret=0 callbacks=7
+         1790467536.117 21441 21581 E P5_TIMELINE: acquire_ok target_pts=0.266933333 image_ts_ns=266933000 ts_ret=0 mono_us=3375464 prior_failed_pts=0.050050000 since_failed_us=-1
+         1790467536.120 21441 21581 E P5_VO_TIME: frame=9 prep_us=68 render_us=7584 after_render_us=11 flush_us=3
+         1790467536.163 21441 21581 E P5_VO_FLIP: frame=9 submit_us=5 swap_us=41465
+         1790467536.204 21441 21581 E P5_TIMELINE: release_begin pts=0.350350000 mono_us=3461898
+         1790467536.205 21441 21581 E P5_TIMELINE: release_end pts=0.350350000 src=0x7bb0ff3450 codec_buffer=0x7b83b5c700 ret=0 mono_us=3463054
+         1790467536.206 21441 21582 E P5_TIMELINE: callback n=8 mono_us=3463326
+         1790467536.206 21441 21581 E P5_TIMELINE: acquire attempt=1 pts=0.350350000 start_us=3464309 end_us=3464339 ret=0 callbacks=8
+         1790467536.207 21441 21581 E P5_TIMELINE: acquire_ok target_pts=0.350350000 image_ts_ns=350350000 ts_ret=0 mono_us=3465460 prior_failed_pts=0.050050000 since_failed_us=-1
+         1790467536.211 21441 21581 E P5_VO_TIME: frame=10 prep_us=141 render_us=8051 after_render_us=11 flush_us=1
+         1790467536.213 21441 21581 E P5_VO_FLIP: frame=10 submit_us=7 swap_us=647
+         1790467536.217 21441 21581 E P5_TIMELINE: release_begin pts=0.367033333 mono_us=3474443
+         1790467536.218 21441 21581 E P5_TIMELINE: release_end pts=0.367033333 src=0x7c01e22d50 codec_buffer=0x7b831fff20 ret=0 mono_us=3475979
+         1790467536.218 21441 21582 E P5_TIMELINE: callback n=9 mono_us=3475753
+         1790467536.220 21441 21581 E P5_TIMELINE: acquire attempt=1 pts=0.367033333 start_us=3477217 end_us=3477304 ret=0 callbacks=9
+         1790467536.221 21441 21581 E P5_TIMELINE: acquire_ok target_pts=0.367033333 image_ts_ns=367033000 ts_ret=0 mono_us=3478642 prior_failed_pts=0.050050000 since_failed_us=-1
+         1790467536.224 21441 21581 E P5_VO_TIME: frame=11 prep_us=223 render_us=8160 after_render_us=9 flush_us=3
+         1790467536.256 21441 21581 E P5_VO_FLIP: frame=11 submit_us=3 swap_us=31688
+         1790467536.272 21441 21581 E P5_TIMELINE: release_begin pts=0.417083333 mono_us=3529456
+         1790467536.273 21441 21582 E P5_TIMELINE: callback n=10 mono_us=3530650
+         1790467536.273 21441 21581 E P5_TIMELINE: release_end pts=0.417083333 src=0x7bb0ff36d0 codec_buffer=0x7b83bd3b80 ret=0 mono_us=3530873
+         1790467536.274 21441 21581 E P5_TIMELINE: acquire attempt=1 pts=0.417083333 start_us=3532315 end_us=3532352 ret=0 callbacks=10
+         1790467536.275 21441 21581 E P5_TIMELINE: acquire_ok target_pts=0.417083333 image_ts_ns=417083000 ts_ret=0 mono_us=3533046 prior_failed_pts=0.050050000 since_failed_us=-1
+         1790467536.278 21441 21581 E P5_VO_TIME: frame=12 prep_us=138 render_us=7685 after_render_us=17 flush_us=4
+         1790467536.297 21441 21581 E P5_VO_FLIP: frame=12 submit_us=4 swap_us=17671
+         1790467536.300 21441 21581 E P5_TIMELINE: release_begin pts=0.450450000 mono_us=3557983
+         1790467536.302 21441 21581 E P5_TIMELINE: release_end pts=0.450450000 src=0x7c01e24dd0 codec_buffer=0x7b83b5ca80 ret=0 mono_us=3559735
+         1790467536.302 21441 21582 E P5_TIMELINE: callback n=11 mono_us=3560021
+         1790467536.304 21441 21581 E P5_TIMELINE: acquire attempt=1 pts=0.450450000 start_us=3561094 end_us=3561180 ret=0 callbacks=11
+         1790467536.304 21441 21581 E P5_TIMELINE: acquire_ok target_pts=0.450450000 image_ts_ns=450450000 ts_ret=0 mono_us=3562439 prior_failed_pts=0.050050000 since_failed_us=-1
+         1790467536.308 21441 21581 E P5_VO_TIME: frame=13 prep_us=75 render_us=8477 after_render_us=14 flush_us=4
+         1790467536.332 21441 21581 E P5_VO_FLIP: frame=13 submit_us=6 swap_us=23359
+         1790467536.335 21441 21581 E P5_TIMELINE: release_begin pts=0.483816667 mono_us=3592663
+         1790467536.336 21441 21581 E P5_TIMELINE: release_end pts=0.483816667 src=0x7c01e243d0 codec_buffer=0x7c012b5ae0 ret=0 mono_us=3594446
+         1790467536.337 21441 21581 E P5_TIMELINE: acquire attempt=1 pts=0.483816667 start_us=3595225 end_us=3595255 ret=0 callbacks=12
+         1790467536.338 21441 21581 E P5_TIMELINE: acquire_ok target_pts=0.483816667 image_ts_ns=483817000 ts_ret=0 mono_us=3596056 prior_failed_pts=0.050050000 since_failed_us=-1
+         1790467536.339 21441 21582 E P5_TIMELINE: callback n=12 mono_us=3594461
+         1790467536.341 21441 21581 E P5_VO_TIME: frame=14 prep_us=85 render_us=7210 after_render_us=7 flush_us=2
+         1790467536.369 21441 21581 E P5_VO_FLIP: frame=14 submit_us=5 swap_us=26529
+         1790467536.374 21441 21581 E P5_VO_TIME: frame=15 prep_us=76 render_us=3606 after_render_us=14 flush_us=3
+         1790467536.404 21441 21581 E P5_VO_FLIP: frame=15 submit_us=4 swap_us=28661
+         1790467536.422 21441 21581 E P5_VO_TIME: frame=16 prep_us=80 render_us=4167 after_render_us=15 flush_us=4
+         1790467536.434 21441 21581 E P5_VO_FLIP: frame=16 submit_us=4 swap_us=10866
+         1790467536.438 21441 21581 E P5_VO_TIME: frame=17 prep_us=198 render_us=3545 after_render_us=12 flush_us=3
+         1790467536.465 21441 21581 E P5_VO_FLIP: frame=17 submit_us=4 swap_us=26148
+         1790467536.473 21441 21581 E P5_VO_TIME: frame=18 prep_us=73 render_us=5113 after_render_us=14 flush_us=4
+         1790467536.495 21441 21581 E P5_VO_FLIP: frame=18 submit_us=6 swap_us=20760
+         1790467536.501 21441 21581 E P5_VO_TIME: frame=19 prep_us=75 render_us=3132 after_render_us=8 flush_us=2
+         1790467536.522 21441 21581 E P5_VO_FLIP: frame=19 submit_us=3 swap_us=19639
+         1790467536.530 21441 21581 E P5_VO_TIME: frame=20 prep_us=87 render_us=5639 after_render_us=16 flush_us=4
+         1790467536.550 21441 21581 E P5_VO_FLIP: frame=20 submit_us=4 swap_us=18835
+         1790467537.201 21441 21581 E P5_VO_TIME: frame=50 prep_us=122 render_us=7628 after_render_us=16 flush_us=4
+         1790467537.213 21441 21581 E P5_VO_FLIP: frame=50 submit_us=6 swap_us=11269
+         1790467538.237 21441 21581 E P5_VO_TIME: frame=100 prep_us=114 render_us=4906 after_render_us=11 flush_us=3
+         1790467538.252 21441 21581 E P5_VO_FLIP: frame=100 submit_us=3 swap_us=13982
+         1790467538.254 21441 21441 I FirstFramePixelCopy: first_content generation=1 elapsedMs=4063.664062 sample=60 mean=15.580598958333344 spread=10.376803574272317
+         1790467538.274 21441 21441 I FirstFramePixelCopy: finish generation=1 samples=60 replacement=true content=true
+         1790467539.451 21441 21581 E P5_VO_TIME: frame=150 prep_us=106 render_us=4315 after_render_us=11 flush_us=3
+         1790467539.471 21441 21581 E P5_VO_FLIP: frame=150 submit_us=5 swap_us=18799
+         1790467540.700 21441 21581 E P5_VO_TIME: frame=200 prep_us=114 render_us=4991 after_render_us=11 flush_us=3
+         1790467540.719 21441 21581 E P5_VO_FLIP: frame=200 submit_us=5 swap_us=17832
+         1790467541.946 21441 21581 E P5_VO_TIME: frame=250 prep_us=141 render_us=6289 after_render_us=15 flush_us=3
+         1790467541.965 21441 21581 E P5_VO_FLIP: frame=250 submit_us=5 swap_us=17625
+         1790467543.200 21441 21581 E P5_VO_TIME: frame=300 prep_us=138 render_us=6032 after_render_us=13 flush_us=3
+         1790467543.219 21441 21581 E P5_VO_FLIP: frame=300 submit_us=6 swap_us=17945
+         1790467544.454 21441 21581 E P5_VO_TIME: frame=350 prep_us=128 render_us=4508 after_render_us=13 flush_us=3
+         1790467544.474 21441 21581 E P5_VO_FLIP: frame=350 submit_us=6 swap_us=18742
+         1790467545.713 21441 21581 E P5_VO_TIME: frame=400 prep_us=123 render_us=4529 after_render_us=13 flush_us=3
+         1790467545.731 21441 21581 E P5_VO_FLIP: frame=400 submit_us=6 swap_us=17828
+         1790467546.970 21441 21581 E P5_VO_TIME: frame=450 prep_us=146 render_us=5857 after_render_us=13 flush_us=3
+         1790467546.989 21441 21581 E P5_VO_FLIP: frame=450 submit_us=5 swap_us=18160
+         1790467548.225 21441 21581 E P5_VO_TIME: frame=500 prep_us=113 render_us=5004 after_render_us=14 flush_us=3
+         1790467548.244 21441 21581 E P5_VO_FLIP: frame=500 submit_us=6 swap_us=18008
+         1790467549.481 21441 21581 E P5_VO_TIME: frame=550 prep_us=116 render_us=5820 after_render_us=12 flush_us=3
+         1790467549.498 21441 21581 E P5_VO_FLIP: frame=550 submit_us=5 swap_us=15867
+         1790467550.742 21441 21581 E P5_VO_TIME: frame=600 prep_us=145 render_us=6154 after_render_us=16 flush_us=3
+         1790467550.760 21441 21581 E P5_VO_FLIP: frame=600 submit_us=6 swap_us=17613
+         1790467551.999 21441 21581 E P5_VO_TIME: frame=650 prep_us=107 render_us=4684 after_render_us=12 flush_us=3
+         1790467552.018 21441 21581 E P5_VO_FLIP: frame=650 submit_us=5 swap_us=18339
+         1790467553.242 21441 21581 E P5_VO_TIME: frame=700 prep_us=142 render_us=4647 after_render_us=13 flush_us=3
+         1790467553.263 21441 21581 E P5_VO_FLIP: frame=700 submit_us=5 swap_us=19438
+         1790467554.503 21441 21581 E P5_VO_TIME: frame=750 prep_us=73 render_us=5065 after_render_us=14 flush_us=3
+         1790467554.522 21441 21581 E P5_VO_FLIP: frame=750 submit_us=5 swap_us=17763
+         1790467555.754 21441 21581 E P5_VO_TIME: frame=800 prep_us=124 render_us=5828 after_render_us=13 flush_us=3
+         1790467555.772 21441 21581 E P5_VO_FLIP: frame=800 submit_us=6 swap_us=17618
+         1790467557.009 21441 21581 E P5_VO_TIME: frame=850 prep_us=169 render_us=5856 after_render_us=15 flush_us=3
+         1790467557.028 21441 21581 E P5_VO_FLIP: frame=850 submit_us=5 swap_us=18316
+         1790467558.268 21441 21581 E P5_VO_TIME: frame=900 prep_us=139 render_us=5299 after_render_us=13 flush_us=3
+         1790467558.287 21441 21581 E P5_VO_FLIP: frame=900 submit_us=6 swap_us=17812
+         1790467559.516 21441 21581 E P5_VO_TIME: frame=950 prep_us=136 render_us=4754 after_render_us=12 flush_us=3
+         1790467559.537 21441 21581 E P5_VO_FLIP: frame=950 submit_us=5 swap_us=19933
+         1790467560.740 21441 21581 E P5_VO_TIME: frame=1000 prep_us=405 render_us=5081 after_render_us=13 flush_us=3
+         1790467560.759 21441 21581 E P5_VO_FLIP: frame=1000 submit_us=5 swap_us=17529
+         1790467561.985 21441 21581 E P5_VO_TIME: frame=1050 prep_us=131 render_us=4984 after_render_us=12 flush_us=3
+         1790467562.005 21441 21581 E P5_VO_FLIP: frame=1050 submit_us=5 swap_us=18998
+         1790467563.238 21441 21581 E P5_VO_TIME: frame=1100 prep_us=63 render_us=5059 after_render_us=13 flush_us=3
+         1790467563.257 21441 21581 E P5_VO_FLIP: frame=1100 submit_us=6 swap_us=17558
+         1790467564.498 21441 21581 E P5_VO_TIME: frame=1150 prep_us=66 render_us=7293 after_render_us=13 flush_us=3
+         1790467564.515 21441 21581 E P5_VO_FLIP: frame=1150 submit_us=5 swap_us=16102
+         1790467565.749 21441 21581 E P5_VO_TIME: frame=1200 prep_us=148 render_us=5196 after_render_us=9 flush_us=2
+         1790467565.769 21441 21581 E P5_VO_FLIP: frame=1200 submit_us=4 swap_us=18922
+         1790467567.004 21441 21581 E P5_VO_TIME: frame=1250 prep_us=163 render_us=5288 after_render_us=13 flush_us=3
+         1790467567.024 21441 21581 E P5_VO_FLIP: frame=1250 submit_us=5 swap_us=18510
+         1790467568.263 21441 21581 E P5_VO_TIME: frame=1300 prep_us=130 render_us=5818 after_render_us=15 flush_us=4
+         1790467568.281 21441 21581 E P5_VO_FLIP: frame=1300 submit_us=6 swap_us=16919
+         1790467569.526 21441 21581 E P5_VO_TIME: frame=1350 prep_us=143 render_us=10339 after_render_us=17 flush_us=4
+         1790467569.541 21441 21581 E P5_VO_FLIP: frame=1350 submit_us=5 swap_us=13687
+         1790467570.773 21441 21581 E P5_VO_TIME: frame=1400 prep_us=151 render_us=5830 after_render_us=14 flush_us=3
+         1790467570.792 21441 21581 E P5_VO_FLIP: frame=1400 submit_us=5 swap_us=18303
+         1790467572.031 21441 21581 E P5_VO_TIME: frame=1450 prep_us=120 render_us=4880 after_render_us=12 flush_us=3
+         1790467572.048 21441 21581 E P5_VO_FLIP: frame=1450 submit_us=3 swap_us=15003
+         1790467573.286 21441 21581 E P5_VO_TIME: frame=1500 prep_us=506 render_us=4227 after_render_us=14 flush_us=3
+         1790467573.305 21441 21581 E P5_VO_FLIP: frame=1500 submit_us=5 swap_us=17930
+         1790467574.543 21441 21581 E P5_VO_TIME: frame=1550 prep_us=148 render_us=4635 after_render_us=11 flush_us=3
+         1790467574.564 21441 21581 E P5_VO_FLIP: frame=1550 submit_us=4 swap_us=19435
+         1790467575.804 21441 21581 E P5_VO_TIME: frame=1600 prep_us=122 render_us=4420 after_render_us=14 flush_us=3
+         1790467575.824 21441 21581 E P5_VO_FLIP: frame=1600 submit_us=5 swap_us=18649
+         1790467577.048 21441 21581 E P5_VO_TIME: frame=1650 prep_us=136 render_us=5116 after_render_us=13 flush_us=3
+         1790467577.068 21441 21581 E P5_VO_FLIP: frame=1650 submit_us=5 swap_us=18546
