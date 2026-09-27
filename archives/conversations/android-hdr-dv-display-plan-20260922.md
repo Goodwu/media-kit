@@ -2,6 +2,8 @@
 
 ## Current State
 
+- 2026-09-28 P1隔离产品候选12582：公开NDK PQ setter优先，仅在其返回-22、arm64/API29/精确固件/10-bit PQ门禁下回退已核ABI；对目标PQ Surface持续检查 dataspace，同代运行中失效新增明确错误及 stop→release→ACK 通知。首轮独立审核指出10秒监测截止和失败后永久pending两个阻断项，已修改，修订协议还待复审/故障注入。隔离Dart静态分析、原生语法/Java编译通过，自建JAR SHA `eac6514f...` 的12582 arm64 APK SHA `3f9c180f...` 构建成功；未安装/播放，不能据此声称P5→PQ出画或首帧。P0 Glass真人动态画质仍待用户方便时观察，设备保持12492、自动亮度、熄屏。见 `archives/experiments/android-p5-pq-product-candidate-12582-20260928.md`。
+
 - 2026-09-28 P1公开PQ路线只读复核：目标固件普通UID的公开NDK PQ setter在HDR support/SF权限门禁返回-22；公开SurfaceControl事务因同门禁SIGABRT；已有EGL/Vulkan同Surface没有PQ格式，Main10硬编码桥无支持证据。新查Android10 ImageWriter不转交dataspace/HDR metadata，API29也无公开Image.setDataSpace；本机当前无值得直接实测的新公开GPU PQ出口，不能外推所有Android设备。P0人工动态观感后，按用户允许的精确固件受限兼容链路推进P1，公开接口优先、失败关闭并做同代Surface/HDR/首帧验证。见 `archives/experiments/android-p5-public-pq-route-assessment-20260928.md`。
 
 - 2026-09-28 P0最终JAR seek/同播放器重开12580：测试App新增默认关闭的定时seek/重开探针，静态分析及arm64构建通过。Mystery Box横屏Texture→SDR在媒体8秒seek至45秒后继续出帧，同一Player重开后重新出帧；两次截图均有实际画面，退出AImage2539/2539、retired0。但seek开始的旧PTS8.008仍报一次AImageReader无图像/渲染失败，之后恢复；P3边界故障尚未解决。手机恢复12492、自动亮度、熄屏。P0待真人动态画质。详见 `archives/experiments/android-p5-product-seek-reopen-12580-20260928.md`。
