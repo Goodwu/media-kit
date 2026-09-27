@@ -1,6 +1,7 @@
 # Android HDR10 / DV P8.4 / P5、视图定位与原生 DV 能力计划（2026-09-22）
 
 ## Current State
+- 2026-09-27 12497复核PixelCopy阈值：指定Glass P5屏幕固定采样区在4.497秒仍纯黑，4.625秒已有低亮非零像素，4.877秒才超过此前`spread>10`“内容”阈值；PTS2.102帧的VO flip约早于首次非零采样132ms，含采样间隔和缓冲，不可视为纯显示延迟。按布局推算的源ROI在PTS2.1秒主机抽样明显非黑，设备控件边界尚未实测。原12492、属性0、自动亮度1、屏幕OFF已恢复；见`archives/experiments/android-p5-glass-precontent-12497-20260927.md`。
 - 2026-09-27 Glass P5 首帧 VO mix 同包探针关→开→关：12496 的 Flutter Surface 采样区首次内容为 4.490/4.385/4.975 秒；开启轮实际 PTS 2.102 帧已 `draw_done`、`flip` 返回，约 278 ms 后采样区检出内容。尚未核对该矩形的源像素及物理屏幕消费，不将此差值直接归因于 GPU/显示。三轮起播均有 HEVC 缺参考 POC 错误，因果待核；原 12492、属性0、自动亮度1、屏幕OFF均已恢复。见`archives/experiments/android-p5-glass-vo-mix-startup-12496-20260927.md`。
 - 2026-09-27 首帧探针基线：隔离重建的arm64 `libmpv.so`与当前P5 JAR内库同为50,069,200字节/SHA `b43500e6…`。修正了遗漏的`mp_image.c`探针、FFmpeg库身份及Meson prefix；精确链接仍需复用历史AImageReader object，不能宣称全部源码同字节重编。暂未封包上机；见`archives/experiments/android-p5-jar-exact-baseline-20260927.md`。
 - 2026-09-27 指定Glass P5首帧继续同设备时钟短轮：12493–12495同正确JAR、排除测试页整片复制，四次新进程PixelCopy首次内容4.282–4.525秒；媒体位置到2.1秒后0.30–0.36秒才见内容，但媒体位置曾早于首个AImage约0.95秒，不能当显示帧PTS。80ms和20ms采样结果重叠；四轮首图前后均有FFmpeg HEVC缺参考POC错误，因果待核。仍须VO实际mix PTS/提交和真全屏屏幕验收。已恢复12492、属性0、自动亮度1、屏幕OFF。见`archives/experiments/android-p5-glass-media-clock-startup-12493-12495-20260927.md`。
