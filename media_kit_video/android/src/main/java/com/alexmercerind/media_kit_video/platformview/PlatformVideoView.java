@@ -338,6 +338,11 @@ public final class PlatformVideoView implements PlatformView {
         return surface != null && setColorSpace(surface, transfer);
     }
 
+    public boolean hasLiveSurface() {
+        final android.view.Surface surface = surfaceView.getHolder().getSurface();
+        return !disposed && wid != 0 && surface != null && surface.isValid();
+    }
+
     /** Disposes of the resources used by this PlatformView. */
     @Override
     public synchronized void dispose() {

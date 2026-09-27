@@ -2,6 +2,8 @@
 
 ## Current State
 
+- 2026-09-27 P5→PQ 口径纠正：12539 是关闭私有探针后的公开 setter 失败，不代表 P5 整体无法出帧。12541 私有设置回读成功，但旧无效 Surface 参与颜色空间 ACK 使配置误失败；12542/12543 跳过无效旧 View 后，精确固件探针路径再次得到 `gpu-next`/`mediacodec`、10 位 BT.2020/PQ 视频层、HWC PQ 和全屏实际画面。12543 三独立进程触摸按下→可辨画面读回3.953–4.079秒，含黑色片头；约2秒已有 PQ activeBuffer，不能以可辨画面时间推断首个解码帧。尚非通用产品出口或本轮人工观感验收。测试后原12492、诊断属性0、自动亮度及熄屏已恢复。见`archives/experiments/android-p5-private-pq-firstframe-12541-12543-20260927.md`。
+
 - 2026-09-27 原生HDR首帧短轮：P8.4 HLG三独立进程Video 0触摸按下→视频Surface内容0.670/0.676/0.623秒，HDR10 PQ为0.653/0.648/0.630秒；各有真横屏截图及SF HLG/PQ视频层。P5自身转PQ在公开Surface设置处拒绝，`wid=0`，请求→失败0.422秒、无首帧。PixelCopy视频Surface可作自动化时延门槛，仍需SF/HWC和真实画面佐证系统合成，不能充当面板光学测量。实验后恢复12492、P5属性0、自动亮度并熄屏。见`archives/experiments/android-native-hdr-firstframe-12537-12539-20260927.md`。
 
 - 2026-09-27 P8.4 Texture→SDR 人工验收通过：用户确认轻微偏淡可接受、流畅、声画同步；隔离普通列表点击后实际画面体感约1秒内，同轮触摸按下至PixelCopy明显内容0.844秒。先前约2秒竖屏黑屏含测试脚本故意等待，不算播放延迟。后续转原生P8.4 HLG/HDR10 PQ首帧；用户特别指定P5自身转PQ HDR输出另行测量，当前固件公开PQ权限阻断须记录失败阶段/耗时。详见`archives/experiments/android-p84-sdr-human-acceptance-20260927.md`。
