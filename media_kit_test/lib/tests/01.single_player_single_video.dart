@@ -281,6 +281,16 @@ class _SinglePlayerSingleVideoScreenState
           'presentationVerified=${result.presentationVerified} '
           'gpuPlatformHdr=$_androidGpuPlatformHdr '
           'simulateNoHlgForP84=$_androidForceP84PqFallback');
+      if (_androidOpenPhaseTrace) {
+        unawaited(() async {
+          final vo = await player.getProperty('vo');
+          final hwdec = await player.getProperty('hwdec-current');
+          final path = await player.getProperty('path');
+          debugPrint('ANDROID_HDR_OUTPUT vo=$vo hwdecCurrent=$hwdec path=$path');
+        }().catchError((Object error) {
+          debugPrint('ANDROID_HDR_OUTPUT error=$error');
+        }));
+      }
       if (_androidDualViewLifecycleProbe && !_dualViewProbeScheduled) {
         _dualViewProbeScheduled = true;
         unawaited(_runDualViewLifecycleProbe());

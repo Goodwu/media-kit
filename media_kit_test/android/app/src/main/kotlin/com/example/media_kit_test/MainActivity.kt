@@ -60,10 +60,14 @@ class MainActivity : FlutterActivity() {
                 handler.postDelayed({ sample() }, 40)
                 return
             }
-            val rect = Rect(
-                target.width / 2 - 200, target.height / 4 - 125,
-                target.width / 2 + 200, target.height / 4 + 125
-            )
+            // The native P5 fixture opens on a nearly uniform sky. Sample
+            // its whole video Surface so a center crop cannot miss the first
+            // recognizable picture; keep the Flutter crop free of page UI.
+            val rect = if (platformVideo) Rect(0, 0, target.width, target.height)
+                else Rect(
+                    target.width / 2 - 200, target.height / 4 - 125,
+                    target.width / 2 + 200, target.height / 4 + 125
+                )
             if (rect.left < 0 || rect.top < 0 || rect.right > target.width ||
                 rect.bottom > target.height) {
                 handler.postDelayed({ sample() }, 40)

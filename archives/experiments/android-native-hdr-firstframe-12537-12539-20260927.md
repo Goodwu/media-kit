@@ -1,5 +1,7 @@
 # Android 原生 HDR 首帧与 P5→PQ 输出短轮（2026-09-27）
 
+> 后续复核：这里的 12539 P5 失败仅覆盖**私有探针关闭的公开 Surface setter**。12542/12543 在精确固件私有诊断路径成功输出 P5 PQ 并出画，见[后续记录](android-p5-private-pq-firstframe-12541-12543-20260927.md)。
+
 ## 方法与口径
 
 - 设备 LYA-AL00/API29，物理屏幕 3120×1440；自动亮度，短时打开后熄屏。固定 `/data/local/tmp/media-kit-p84-full.mp4`、`.../media-kit-hdr10-full.mp4`、`.../media-kit-p5-full.mp4`，使用按文件名识别的受控本地入口，不做每次整片哈希与复制。仅支持 arm64，JAR 为本地自建 `f745146332b532d8baeb162b7a33ddefa03ae8dc0a7731f13a9584ef7e6fa3f9`。

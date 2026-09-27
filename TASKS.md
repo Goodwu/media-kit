@@ -8,7 +8,7 @@
   - status: in_progress
   - context: archives/conversations/android-hdr-dv-display-plan-20260922.md
   - acceptance: 固定素材身份与设备能力；PlatformView 对 HDR10/P8.4/P5 分别输出 PQ/HLG/PQ，Texture 明确转换到 SDR；核对实际后端、Surface 格式、系统 HDR 合成、SDR 复位和全屏可见画面。P8.4 的无 HLG 路径、P5 DV 元数据处理及原生 DV 能力须单独说明，不能以 PQ 转换冒充原生 DV。最高亮度仅用于短时人工观察，每轮结束立即恢复原自动亮度，不长时间停留静态画面。
-  - latest: HDR10、P8.4 已获用户真全屏画质/流畅性好评；10436/10437 P5 同页全屏画面良好，10437 的 SF/HWC 为 10 位 BT.2020/PQ，但依赖精确固件私有探针。此固件普通应用 GPU producer 的已试公开 PQ 出口均失败，11009 AHardwareBuffer 同样因 HDR 能力权限拒绝 SIGABRT。12464 正确 P5 JAR 短轮的 PQ Surface 拒绝且 `wid=0`，Dart 10 秒后超时；12465/12466 的失败 ACK 在拒绝后约 76/78 ms 报具体错误。12466 强制 GPU PQ 时 HDR10 也被拒绝；12468 P5 失败后同进程原生 `mediacodec_embed` HDR10/P8.4 依次恢复，SF/HWC 为 BT.2020/PQ(metadata types=3)/HLG(types=0)，两源各相隔3秒的视频区截图均变化。12471 再接 SDR 时视频层复位 BT.709、HDR metadata types=0，间隔3秒截图视频区域变化；仅覆盖原生 HDR 路径，见`archives/experiments/android-hdr-sdr-recovery-12471-20260927.md`。默认产品 P5 PQ、静态元数据、独立色准及全屏双视图一致性仍开放。
+  - latest: HDR10、P8.4 已获用户真全屏画质/流畅性好评；10436/10437 P5 同页全屏画面良好。12542/12543 在精确固件私有探针开启时再次得到 P5 `gpu-next`/`mediacodec`、10 位 BT.2020/PQ 视频层、HWC PQ 合成和全屏实际画面；这是本机诊断路径成功，不是通用产品路径通过。12539 仅是关闭探针的公开 Surface PQ 设置失败（`wid=0`）。此固件普通应用 GPU producer 的已试公开 PQ 出口均失败，11009 AHardwareBuffer 同样因 HDR 能力权限拒绝 SIGABRT。12541 私有设置成功却被旧 Surface 的颜色空间 ACK 错误拦住，12542 通用修复后出画。12468 P5 失败后同进程原生 `mediacodec_embed` HDR10/P8.4 依次恢复；12471 再接 SDR 时视频层复位 BT.709、HDR metadata types=0，见`archives/experiments/android-hdr-sdr-recovery-12471-20260927.md`、`archives/experiments/android-p5-private-pq-firstframe-12541-12543-20260927.md`。默认产品 P5 PQ、静态元数据、独立色准及全屏双视图一致性仍开放。
   - P5_RPU_color_gate: 对实际输出逐帧核对RPU与画面，覆盖seek/flush/重开；以明确参考母版、目标空间和映射策略做同PTS独立数值色彩比较，并与用户观感分开。10440前后跳4次flush匹配2321/2321；12512预建路径两次重开匹配626/626、622/622，errors0/unconsumed0。长期重开、该布局seek/flush和独立色准仍开放，见`archives/experiments/android-p5-glass-rpu-reopen-12486-20260927.md`、`archives/experiments/android-p5-glass-prebind-rpu-12512-20260927.md`。
   - next: 原生 HDR→SDR 信令复位已有短轮证据；继续真全屏可见画面、GPU HDR→SDR Surface 复位及 P5 PQ 路径，同时完成上方RPU/色准子门槛。停止此固件重复公开 PQ 探针。P5 Texture SDR 仅作明确标示的降级，不关闭 PQ 任务。
 
@@ -29,8 +29,8 @@
   - touch_to_content_sdr: 12532 Activity触摸抬手至横屏全屏PixelCopy明显内容三独立进程0.792/0.699/0.670秒，均通用预绑定成功；仍不含按下至抬手及面板光学呈现。见`archives/experiments/android-p84-touch-to-content-12532-20260927.md`。
   - touchdown_reentry_sdr: 12533三独立进程触摸按下至横屏全屏明显内容0.767/0.789/0.681秒；12535同PID先销毁播放页、回主菜单，再新建播放页并出图，第二次按下至内容0.656秒，旧帧不再污染。仅系统读回短轮，仍缺光学、独立色准、音画同步与冷/热统计。见`archives/experiments/android-p84-touchdown-and-reentry-12533-12535-20260927.md`。
   - sdr_acceptance: 12535 P8.4 Texture→SDR 真横屏全屏人工观察：用户认为轻微偏淡但可接受，画面流畅、声画同步；单独从竖屏列表 Video 0 点击，用户感受约1秒内出实际画面，同轮触摸按下至明显内容 PixelCopy 为0.844秒。此前一次约2秒竖屏黑屏反馈含脚本故意等待2秒，不能归因于播放器。此设备/素材/路径的用户验收通过；未做独立色度仪或面板光学时间测量。见`archives/experiments/android-p84-sdr-human-acceptance-20260927.md`。
-  - latest_hdr: 12537 P8.4原生HLG三独立进程触摸按下→视频Surface读回内容0.670/0.676/0.623秒；12538 HDR10原生PQ为0.653/0.648/0.630秒。各有真横屏全屏截图，SF视频层分别BT.2020 HLG(types0)/PQ(types3)。12539 P5自身转PQ在当前固件公开Surface设置被拒，`wid=0`，请求→明确失败0.422秒、无首帧。视频Surface读回可作为自动化时延门槛，但不能单独证明系统合成或面板显示，须配合同层SF/HWC、全屏画面及真人观察。见`archives/experiments/android-native-hdr-firstframe-12537-12539-20260927.md`。
-  - next: 扩充原生HDR冷/热及同进程重入、连续画面和输出切换统计；维持P5 PQ未通过状态，待有受支持的PQ出口或其它设备再验真实首帧。保留面板光学与独立色度仪测量为精度限制。
+  - latest_hdr: 12537 P8.4原生HLG三独立进程触摸按下→视频Surface读回内容0.670/0.676/0.623秒；12538 HDR10原生PQ为0.653/0.648/0.630秒。各有真横屏全屏截图，SF视频层分别BT.2020 HLG(types0)/PQ(types3)。12539 是关闭私有探针的公开 P5 PQ 设置失败，`wid=0`，请求→明确失败0.422秒。12542/12543 在精确固件私有探针开启时成功输出 P5 PQ 并出实际画面；12543 三独立进程触摸按下→读回可辨内容3.953/4.009/4.079秒，含片源黑场，且首次探针采样曾命中旧 Surface，尚不能当作精准首个解码帧时间。2秒时视频层已有 PQ activeBuffer，截图仍是片头黑场。视频Surface读回可作自动化时延门槛，但不能单独证明系统合成或面板显示。见`archives/experiments/android-native-hdr-firstframe-12537-12539-20260927.md`、`archives/experiments/android-p5-private-pq-firstframe-12541-12543-20260927.md`。
+  - next: 以已成功的私有 P5→PQ 路径为对照，区分首个 HDR buffer 与素材可辨画面的时刻，修正探针只采当前全屏 Surface；评估可支持的产品出口，不重复已证实失败的公开 PQ 探针。扩充 HDR 冷/热、重入、连续画面和输出切换统计；面板光学及独立色度仪仍是精度限制。
 
 ## Next（近期候选，最多 10 条）
 
@@ -38,8 +38,8 @@
   - status: queued
   - context: archives/conversations/native-output-rebuild-20260920.md
   - acceptance: 同一控制器的并发 dispose 共用完成屏障；Player 销毁前完成 native output/render context 释放，dispose 后不再写 active notifier。用 modern mpv 实际播放后退出、快速重入和输出重建，均无 `mpv_render_context_free() not called` abort。
-  - latest: Darwin Player preTermination 屏障、创建/销毁仲裁及失败重试已通过 V2 静态复审。隔离 Goodwu mpv 0.41 W0 测试包完成 SDR 出图→重建→第二次出图→定时移除：两个 Surface 均有释放记录，两次 Player dispose 完成，进程未见 render-context abort，见 `archives/experiments/macos-w0-remove-20260927.md`。PiliPlusX 当前 Debug 和未改动 final16 包在此桌面环境均无可操作窗口，产品调用链仍未验收。
-  - next: 定位 PiliPlusX 窗口不可访问的环境/应用状态，再验证产品调用链有序退出、快速重入、seek、输出重建及 HDR 长播；测试页的定时移除证据不能替代这些场景。
+  - latest: Darwin Player preTermination 屏障、创建/销毁仲裁及失败重试已通过 V2 静态复审。隔离 Goodwu mpv 0.41 W0 测试包完成 SDR 出图→重建→第二次出图→定时移除：两个 Surface 均有释放记录，两次 Player dispose 完成，进程未见 render-context abort，见 `archives/experiments/macos-w0-remove-20260927.md`。现有 PiliPlusX Debug app 经 LaunchServices `open -n` 可创建 1180×720 Aqua 窗口；这只解除“没有可操作窗口”的环境判断，产品 mpv 0.41 播放调用链仍未验收。
+  - next: 在已可打开的 PiliPlusX 窗口中验证产品调用链有序退出、快速重入、seek、输出重建及 HDR 长播；测试页的定时移除证据不能替代这些场景。
 
 - [ ] Android native output / 双视图生命周期回归
   - status: queued
