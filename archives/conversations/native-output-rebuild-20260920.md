@@ -1,6 +1,7 @@
 # native output rebuild lifecycle
 
 ## Current State
+- 2026-09-27 OHOS 实机验收入口核验：当前主机 `hdc list targets` 返回 `[Empty]`，无可连接实体机；TASKS 将该项移至 Blocked，设备接入后重新核验身份、包与运行状态。
 - 背景: 当前分支包含 macOS native surface、OHOS HDR surface 和播放器释放路径的协同修改。
 - 目标: 提交本轮代码及对应契约测试，保留未纳入范围的协作文档和本地产物。
 - 当前状态: 跨平台生命周期修复与 macOS 首帧呈现 gating 已分别提交。
