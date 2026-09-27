@@ -1304,8 +1304,15 @@ class _SinglePlayerSingleVideoScreenState
     if (Platform.isAndroid &&
         _androidPreopenFullscreen &&
         !configuration.value.usePlatformView) {
-      final prepared = await controller.prepareAndroidTextureOutput();
-      debugPrint('ANDROID_DIRECT_TEXTURE_PREPARED layoutBound=$prepared');
+      final properties = await _p5RuntimeGateChannel
+          .invokeMapMethod<String, dynamic>('ReadProperties');
+      final prebindEnabled =
+          properties?['debug.media_kit.firstframe_prebind'] != '0';
+      debugPrint('ANDROID_DIRECT_TEXTURE_PREBIND enabled=$prebindEnabled');
+      if (prebindEnabled) {
+        final prepared = await controller.prepareAndroidTextureOutput();
+        debugPrint('ANDROID_DIRECT_TEXTURE_PREPARED layoutBound=$prepared');
+      }
     }
     if (Platform.isAndroid && _androidDirectOpenTrace) {
       debugPrint('ANDROID_DIRECT_OPEN media_command');

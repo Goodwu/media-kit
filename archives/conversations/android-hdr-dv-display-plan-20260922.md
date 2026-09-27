@@ -1,6 +1,7 @@
 # Android HDR10 / DV P8.4 / P5、视图定位与原生 DV 能力计划（2026-09-22）
 
 ## Current State
+- 2026-09-27 用户将首帧验收素材改为P8.4全片，不再用Glass P5黑场判断2秒门槛；新任务已在TASKS Now。12528同APK同布局、同素材、独立进程预绑定关/开/关/开/关/开，Texture→SDR PixelCopy内容关闭2.049/1.697/1.740秒、开启0.884/0.892/0.894秒；另一次开启0.814秒并截图见视频。受控短轮支持约0.939秒收益，正常入口/触摸到面板/音画/退出重入及原生HLG尚未验。手机恢复12492、属性0、自动亮度、熄屏；见`archives/experiments/android-p84-firstframe-prebind-ab-12528-20260927.md`。
 - 2026-09-27 首帧结案口径澄清：SDR、HDR10、P8.4小于1秒均为预建全屏Texture转SDR的受控读回；尚无同包关闭预建A/B，亦无原生PQ/HLG的同口径首帧测量，不推论未改版原本达标或原生HDR小于1秒。详见`archives/experiments/android-first-visible-two-second-closure-20260927.md`。
 - 2026-09-27 用户允许目标确实无法达到时明确结论并结束首帧2秒项。指定Glass P5片头约2.052秒黑场，从头原速播放至首个可辨内容的2秒统一门槛在素材时间上不成立；12522三轮物理全屏读回3.543/3.374/3.625秒。SDR/HDR10/P8.4受控Texture SDR均低于1秒，预建约1.41秒收益有效，但不等于全部普通入口/光学验收。TASKS改为结案未达标，见`archives/experiments/android-first-visible-two-second-closure-20260927.md`。
 - 2026-09-27 12526 Glass P5从170秒起播的两次新进程尾段短轮：第一轮PTS174.958出现AImageReader -30001/渲染失败，随后整块紫屏；第二轮无尾段同类错误，末帧仍显示。两轮起播PTS170.003均有一次取图失败并恢复。根因和end-file事件/Buffer身份未证，需失败环形轨迹。手机恢复12492、诊断属性0、自动亮度、熄屏。见`archives/experiments/android-p5-tail-repro-12526-20260927.md`。

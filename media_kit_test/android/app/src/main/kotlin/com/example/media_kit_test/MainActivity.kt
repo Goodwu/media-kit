@@ -148,7 +148,9 @@ class MainActivity : FlutterActivity() {
                             "debug.media_kit.p5_rpu_probe" to
                                 readSystemProperty("debug.media_kit.p5_rpu_probe"),
                             "debug.media_kit.p5_raw_yuv" to
-                                readSystemProperty("debug.media_kit.p5_raw_yuv")
+                                readSystemProperty("debug.media_kit.p5_raw_yuv"),
+                            "debug.media_kit.firstframe_prebind" to
+                                readSystemProperty("debug.media_kit.firstframe_prebind")
                         )
                         runOnUiThread { result.success(values) }
                     } catch (error: Exception) {
