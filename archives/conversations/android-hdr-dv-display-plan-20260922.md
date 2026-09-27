@@ -2,6 +2,8 @@
 
 ## Current State
 
+- 2026-09-27 原生HDR首帧短轮：P8.4 HLG三独立进程Video 0触摸按下→视频Surface内容0.670/0.676/0.623秒，HDR10 PQ为0.653/0.648/0.630秒；各有真横屏截图及SF HLG/PQ视频层。P5自身转PQ在公开Surface设置处拒绝，`wid=0`，请求→失败0.422秒、无首帧。PixelCopy视频Surface可作自动化时延门槛，仍需SF/HWC和真实画面佐证系统合成，不能充当面板光学测量。实验后恢复12492、P5属性0、自动亮度并熄屏。见`archives/experiments/android-native-hdr-firstframe-12537-12539-20260927.md`。
+
 - 2026-09-27 P8.4 Texture→SDR 人工验收通过：用户确认轻微偏淡可接受、流畅、声画同步；隔离普通列表点击后实际画面体感约1秒内，同轮触摸按下至PixelCopy明显内容0.844秒。先前约2秒竖屏黑屏含测试脚本故意等待，不算播放延迟。后续转原生P8.4 HLG/HDR10 PQ首帧；用户特别指定P5自身转PQ HDR输出另行测量，当前固件公开PQ权限阻断须记录失败阶段/耗时。详见`archives/experiments/android-p84-sdr-human-acceptance-20260927.md`。
 
 - 2026-09-27 12535退出清理约5.1秒已从日志和当前NativePlayer.dispose源码定位为刻意等待5秒再`mpv_terminate_destroy`的既有宽限期，非新解码卡顿；保持生命周期屏障，不以缩短等待冒充首帧优化。见`archives/experiments/android-p84-touchdown-and-reentry-12533-12535-20260927.md`。
