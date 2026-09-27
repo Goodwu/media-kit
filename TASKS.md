@@ -18,20 +18,6 @@
   - latest: 同 APK、2560×1440 输出的系统性能模式开/关/开 EOS VO 掉帧为 17/5051/19，decoder 为 0；默认模式门槛未过。1920×1080 也出现伴随 GPU 低频的后段失速；关闭抖动无明显低频收益，已停止该方向。用户最近确认 10437 的 1440 宽 P5 吹玻璃画面流畅，但这不覆盖 2560 默认模式全片门槛。
   - next: 在同一正式全屏路径、固定输出尺寸和默认电池模式下分离低频时的 GPU 渲染与提交/合成等待，再对有效改动做同帧颜色及全片 A/B/A 复核。
 
-- [ ] 将手机视频打开到首个可见画面缩短至 2 秒内（争取 1 秒）
-  - status: in_progress
-  - context: archives/conversations/android-hdr-dv-display-plan-20260922.md
-  - acceptance: 在真实手机上，以用户触发打开视频为起点、屏幕实际呈现首个视频帧为终点计时；覆盖当前支持的 SDR、HDR10、P8.4、P5 代表素材及冷/热启动，重复记录分布与最慢样本，正常播放达到 2 秒内，争取 1 秒内。视频尺寸或 Surface ACK 不能冒充实际出图；同时保持画质、音画同步、全屏及退出/重入正确。
-  - latest: 12472 热页面 SDR 点击反馈→画面约133/100/100ms，但不含触摸到反馈。12479 同机五次冷 SDR 非黑截图上界1.48–1.56秒。用户指定 Glass P5：12480测试页整片哈希复制一次至内容上界16.695秒，准备占10.390秒；12481临时预验证直开三次6.283/5.981/6.640秒；12483显式GPU缓存目录无命中/收益证据。12485同一SurfaceProducer链设备时钟取样证明洋红转黑早于首个AImage，是初始化黑画面；首次非黑内容约4.30–4.55秒，片源黑场约2.052秒。12485同JAR VO短轮 media_opened→首个decoder release约1.01秒，release→ImageReader仅毫秒级。12489诊断性从3.5秒起播三次首次非黑约4.034/4.245/3.966秒；跳过黑场无明显达标收益。12493–12495同JAR四轮把Flutter Surface首次内容测为4.282–4.525秒，媒体位置到2.1秒后约0.30–0.36秒检出内容；80ms与20ms PixelCopy间隔区间重叠。位置通知曾早于首个AImage约0.95秒，不能当作呈现帧PTS。隔离构建已重链出与JAR逐字节相同的libmpv，但仍需历史AImageReader object。12496同包关→开→关的旧阈值内容时间4.490/4.385/4.975秒；开启轮实际PTS2.102帧已渲染并返回flip，但278ms后才超过旧PixelCopy阈值。12497逐次采样证实该阈值偏晚：首次非零像素约4.625秒，旧阈值在4.877秒；PTS2.102的flip至首个非零采样约132ms，仍含采样间隔与缓冲，不是纯显示耗时。三轮HEVC缺参考POC均复现，无因果结论。见`archives/experiments/android-p5-glass-media-clock-startup-12493-12495-20260927.md`、`archives/experiments/android-p5-jar-exact-baseline-20260927.md`、`archives/experiments/android-p5-glass-vo-mix-startup-12496-20260927.md`及`archives/experiments/android-p5-glass-precontent-12497-20260927.md`。
-  - next: 12507同包关/开/关已确认约1.16秒收益；12516物理全屏同包开/关/开确认约1.41秒收益。继续做冷/热重复分布、P5同PTS画质和实际4K输出；补旋转过程中、后台恢复零wid回退与快速重挂载。12513已证屏幕缺口136像素，允许窗口进入缺口后预建3120×1440；诊断 Activity 修改是否适合产品调用方需另审。12512同进程预建路径已证前两段RPU逐帧对应，仍需独立色准和seek/flush；正常无布局调用应明确降级。分开报告片源黑场、首个真实视频帧与首个非黑画面；以物理屏幕校准，并覆盖 SDR/HDR10/P8.4。原生同单调时钟探针继续确认硬解设备失败、软件解码、VO null与重配，不能把Dart异步MPVLOG或`stream.position`当呈现证据；外部预验证固定文件仅诊断用。
-  - diagnosis: 12497同进程`media_opened`→首个AImage约1.673秒；首个AImage后曾有两次空取图重试。12498同进程首开/重开各一轮：`media_opened→MediaCodec组件创建`约0.974/0.028秒，首开17行POC而重开无；两次OS/缓存状态不同，未证因果。重开PixelCopy首样本是旧画面，不能算新首帧；RPU属性0对照被测试入口拒绝。12499开启mpv详细日志后冷开总阶段几乎复现12498，消息顺序见硬解设备首次不可用→9线程软件HEVC/VO null→重新打开硬解/VO gpu-next；这提示启动解码器切换可能是前0.97秒的可优化点，但Dart异步MPVLOG时间戳不代表原生发生时间，旧POC/OMX行先后不能用作因果证据。见本条12497–12499实验归档。
-  - integration: `VideoController.prepareAndroidTextureOutput()` 已是库的通用入口；调用方须先挂载有界 Video 布局，横屏全屏页须先设窗口方向/模式，再预建并打开媒体。无可用布局或 Surface 时返回 false，走常规打开。用法见`media_kit_video/README.md`；正式页面是否接入及其旋转/重入验证仍待完成。
-  - fixture_probe: 12517固定Glass P5测试入口每次复制并哈希331MB，点击→素材准备14.525秒；按用户要求，12519/12521的受控诊断入口改用`media-kit-{hdr10,hlg,p84,p5}-*.mp4`文件名规则，不逐次读取内容。12521命名识别约1.084ms、媒体打开0.346秒、首个AImage约0.684秒，5秒截图已见画面；仍无屏幕首帧/2秒达标证据。此规则只用于固定测试文件，普通HDR入口及任意文件格式识别另论。测试APK现只含arm64，构建未下载其它架构JAR；旧下载缓存已清理。见`archives/experiments/android-p5-glass-named-fixture-arm64-12517-12521-20260927.md`。
-  - hdr_texture_probe: 12524 HDR10与12525 P8.4固定全片源，在物理全屏已挂载布局上预建Texture，独立进程各三轮点击回调内PixelCopy可辨内容：HDR10 0.685/0.424/0.423秒，P8.4 0.669/0.538/0.446秒；截图证实实际视频画面。仅Texture转SDR诊断路径，不证明原生PQ/HLG、普通入口或触摸/光学首帧。Glass P5仍超2秒。见`archives/experiments/android-hdr-texture-firstframe-12524-12525-20260927.md`。
-  - sdr_probe: 12523独立进程三轮，物理全屏3120×1440黑底 SDR 控制源，已挂载布局 `prepareAndroidTextureOutput()` 均返回 true；点击回调内探针至首次非黑0.309/0.312/0.289秒、明显内容0.760/0.754/0.724秒。仅诊断 SDR 路径，尚非触摸/光学或普通入口验收，也无同包 SDR 关闭预建 A/B；P5仍超2秒。见`archives/experiments/android-sdr-preopen-firstframe-12523-20260927.md`。
-  - first_content_probe: 12522黑底无加载控件、进入屏幕缺口的物理全屏3120×1440，同源三独立进程PixelCopy上方ROI：探针启动至首次非黑3.284/3.060/3.350秒，明显内容3.543/3.374/3.625秒；首个原生AImage约0.871/0.690/0.761秒。片源前约2.052秒黑场，故原生有帧不等于屏幕可辨内容；2秒门槛未过。取样起点在点击回调内，尚非物理光学首帧。见`archives/experiments/android-p5-glass-black-roi-firstframe-12522-20260927.md`。
-  - presize_probe: 12500–12504固定尺寸诊断证实Surface未就绪导致首开硬解重配，且Surface尺寸变化需同步mpv渲染尺寸；见对应实验归档。12506由已挂载Video真实布局1440×810预建并严格绑定，单轮首个AImage约0.795秒、首次非黑3.384秒。12507同APK关→开→关首次非黑4.882/3.658/4.756秒，关闭轮均值4.819秒，开启早约1.161秒；媒体打开→OMX创建约0.934/0.033/0.948秒，三轮最终原生请求4K。12508横屏左栏布局1979×696预建后同wid扩4K、截图可辨认；旧固定ROI误判内容，时延无效。12509同进程三次打开/释放图像对象计数归零；12512相同JAR改开verbose后前两段RPU输出626/626、622/622匹配。12511播放前横屏无AppBar布局三次预建2984×1440（物理屏幕3120×1440，左侧136像素屏幕缺口安全区），中央PixelCopy首个非零像素3.334–3.469秒、旧内容阈值3.628–3.763秒。12513在测试 Activity 允许布局进入缺口后两轮预建3120×1440，中央首个非零3.430/3.752秒、内容阈值3.703/4.025秒；第三轮前设备断连，重连后已恢复原包、属性和休眠。12516同APK物理全屏开/关/开，首次内容样本3.892/5.349/3.986秒，开轮均值早1.410秒；打开→OMX创建33/1005/33ms，指向硬解重配等待。12514/12515中央ROI误认加载图标的计时已作废。仍未证明正式全屏画质、全片或2秒目标。见`archives/experiments/android-p5-glass-layout-aba-12507-12508-20260927.md`、`archives/experiments/android-p5-glass-prebind-reopen-12509-20260927.md`、`archives/experiments/android-p5-glass-preopen-fullscreen-12511-20260927.md`、`archives/experiments/android-p5-glass-prebind-rpu-12512-20260927.md`、`archives/experiments/android-p5-glass-cutout-fullscreen-12513-20260927.md`及`archives/experiments/android-p5-glass-prebind-physical-aba-12516-20260927.md`。
-
 ## Next（近期候选，最多 10 条）
 
 - [ ] 修复 macOS modern mpv 销毁时未释放 render context 的崩溃
@@ -76,6 +62,10 @@
 ## Blocked（等待输入或外部条件）
 
 - （暂无；以上未完成项仍可继续推进）
+
+## Closed（结案，未达原门槛）
+
+- [x] 手机打开至首个可辨画面统一小于2秒：**未达成，按用户指示结案**。指定Glass P5片头约2.052秒黑场，保持从片头原速播放时仅素材时间即超过2秒；物理全屏受控读回可辨内容三轮3.543/3.374/3.625秒。SDR、HDR10 Texture→SDR、P8.4 Texture→SDR受控三轮均低于1秒，但不覆盖普通入口、光学触摸起点或原生HDR。预建通用入口及约1.41秒P5 A/B/A收益保留；详情与证据见`archives/experiments/android-first-visible-two-second-closure-20260927.md`。
 
 ## Recently Done（最近完成）
 

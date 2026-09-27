@@ -1,6 +1,7 @@
 # Android HDR10 / DV P8.4 / P5、视图定位与原生 DV 能力计划（2026-09-22）
 
 ## Current State
+- 2026-09-27 用户允许目标确实无法达到时明确结论并结束首帧2秒项。指定Glass P5片头约2.052秒黑场，从头原速播放至首个可辨内容的2秒统一门槛在素材时间上不成立；12522三轮物理全屏读回3.543/3.374/3.625秒。SDR/HDR10/P8.4受控Texture SDR均低于1秒，预建约1.41秒收益有效，但不等于全部普通入口/光学验收。TASKS改为结案未达标，见`archives/experiments/android-first-visible-two-second-closure-20260927.md`。
 - 2026-09-27 12526 Glass P5从170秒起播的两次新进程尾段短轮：第一轮PTS174.958出现AImageReader -30001/渲染失败，随后整块紫屏；第二轮无尾段同类错误，末帧仍显示。两轮起播PTS170.003均有一次取图失败并恢复。根因和end-file事件/Buffer身份未证，需失败环形轨迹。手机恢复12492、诊断属性0、自动亮度、熄屏。见`archives/experiments/android-p5-tail-repro-12526-20260927.md`。
 - 2026-09-27 12524/12525物理全屏预建Texture短轮：HDR10三次明显内容0.685/0.424/0.423秒，P8.4三次0.669/0.538/0.446秒，独立进程、Flutter Surface PixelCopy，截图显示相应视频。均为Texture SDR诊断，非原生HDR或触摸到面板验收；P5仍超2秒。手机恢复12492、属性0、自动亮度、熄屏。见`archives/experiments/android-hdr-texture-firstframe-12524-12525-20260927.md`。
 - 2026-09-27 12523 SDR控制源物理全屏黑底独立进程三轮，直接Texture路径在已挂载布局调用通用预建入口均绑定成功；Flutter Surface PixelCopy明显内容0.760/0.754/0.724秒。仅该受控诊断入口达到1秒探针上界，未测触摸到回调、面板光学或关闭预建A/B，不代替HDR10/P8.4/P5及普通入口验收。手机已恢复12492、属性0、自动亮度、熄屏。见`archives/experiments/android-sdr-preopen-firstframe-12523-20260927.md`。
