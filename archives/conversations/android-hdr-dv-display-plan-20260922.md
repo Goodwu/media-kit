@@ -2,6 +2,8 @@
 
 ## Current State
 
+- 2026-09-28 P0 Glass全片12564：同12563自建依赖、四属性0、预建横屏全屏2560×1440，从片头至显式EOS；t180媒体177.48秒VO20、decoder0，GPU180样本中位415MHz，片尾截图正常DV logo。完成约0.24秒后，未取得精确EOS VO；旧同片优化轮EOS VO516。开头PTS0.05005重复映射两次无新AImage错误，完整资源/非P5回退/真人动态画质仍待验。已恢复12492、属性0、自动亮度、熄屏。见 `archives/experiments/android-p5-glass-sdr-product-12564-20260928.md`。
+
 - 2026-09-28 P0源码及资源补轮：FFmpeg逐帧RPU产品候选 `fff3ee7` 已推送 Goodwu/FFmpeg `feature/android-mediacodec-p5-rpu`；mpv外部YUV候选`6758565`已推送Goodwu/mpv `feature/android-p5-sdr-direct-yuv`，后者仍带大量诊断。12563正常退出短轮mapper AImage acquired/deleted=564/564、退休队列0且Player dispose完成；没有FFmpeg RPU终结汇总，不外推为整体资源闭合。原12492、属性0、自动亮度、熄屏。见 `archives/experiments/android-p5-mystery-sdr-product-12563-20260928.md`。
 
 - 2026-09-28 P0隔离产品化候选12563：清洁FFmpeg源单文件arm64编译、合成静态库并与隔离Goodwu/mpv源链接；自建arm64 JAR/APK横屏预建全屏2560×1440 Mystery Box从0到显式EOS，VO11、decoder0、GPU中位415MHz，中段截图有实画面；旧同片未优化VO54、GPU中位586MHz。仍需去除mpv大量诊断、解决PTS0重复映射无新AImage两次报错，Glass同路径全片、回退、资源及真人动态画质验收。已恢复12492、属性0、自动亮度、熄屏。见 `archives/experiments/android-p5-mystery-sdr-product-12563-20260928.md`。
