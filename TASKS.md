@@ -4,9 +4,9 @@
 
 ## P5 当前优先级（2026-09-28）
 
-后续 P5 主验收素材改为 `/Users/wuweiwei1/Downloads/test-clips/Mystery Box Dolby Vision Profile 5.mp4`，SHA-256 `3e610d3b1b11e9b802da66d69bd97f6371a2b114ee464a7e8517fe31d706cc9f`；HEVC Main 10、3840×2160、60000/1001 fps、DV Profile 5/RPU、98.944 秒。用户确认片头无黑场。旧 Glass 片的掉帧数字保留为历史对照；旧片仍用于已发现的片尾紫屏定点复现。
+P5→PQ 输出、首帧和性能使用 `/Users/wuweiwei1/Downloads/test-clips/Mystery Box Dolby Vision Profile 5.mp4`，SHA-256 `3e610d3b1b11e9b802da66d69bd97f6371a2b114ee464a7e8517fe31d706cc9f`；HEVC Main 10、3840×2160、60000/1001 fps、DV Profile 5/RPU、98.944 秒。用户确认片头无黑场。P5→Texture SDR 默认优化验收继续使用原 Glass P5 4K59.94（SHA-256 `afb24b77733a3ca9071f0cfea0d0f7871670a7b6119eb44a314cba974541477c`），以既有同片优化结果为性能参照；Glass 也保留作片尾紫屏定点复现。
 
-1. **P0 P5→Texture SDR 优化默认开启并验证**：先把已保存的通用 `optimize_dovi_linear_decode` 候选接入支持条件下的默认路径，保留不匹配场景回退；验证自建 arm64 JAR 确实含优化、新片实际命中、短轮画质/资源和全片观感。以此建立后续 PQ 可复用代码的已验证基线；本阶段不继续追逐旧 Glass 严格掉帧门槛，也不要求 PQ 等待额外的 SDR 调优。
+1. **P0 P5→Texture SDR 优化默认开启并验证**：先把已保存的通用 `optimize_dovi_linear_decode` 候选接入支持条件下的默认路径，保留不匹配场景回退；验证自建 arm64 JAR 确实含优化、Glass 实际命中、短轮画质/资源和全片观感。同片同尺寸默认电池模式的既有优化轮 EOS VO 516、t90→t180 新增342作为参照，新构建性能相近、无明显回退即可，不再追逐旧严格掉帧门槛，也不要求 PQ 等待额外的 SDR 调优。
 2. **P1 P5→PQ 产品输出和首帧**：公开 Android 输出链路为主目标，以新片确认正常入口横屏全屏出画、10 位 BT.2020/PQ 合成及点击到可见内容；精确固件私有方式仅作公开路径确实无法打通后的备选，不将诊断探针直接作为产品完成。首帧探针绑定当前 Surface 代次，不借旧片黑场推断延迟。
 3. **P2 P5→PQ 全片性能**：新片在默认电池模式、明确输出尺寸下播至 EOS，逐段记录 VO/decoder 掉帧、GPU 频率、温度及持续画面；据此优化 PQ 路径。P5→Texture SDR 的 RPU/线性解码及安全回退代码可作为共用候选，但旧门控与实测收益不能外推；先核新通用分支在 PQ 目标的命中/颜色，再同包 A/B 量化收益。
 4. **P3 P5 生命周期及片尾问题**：覆盖退出重入、Surface/双视图切换、Engine 销毁；旧 Glass 紫屏继续按定点故障复现，新片仅作正常 EOF 回归。
@@ -25,7 +25,7 @@
 - [ ] P5 性能：先将 Texture SDR 候选默认开启，再测 PQ 全片
   - status: in_progress
   - context: archives/conversations/android-hdr-dv-display-plan-20260922.md
-  - acceptance: 使用上方 Mystery Box P5 新片，在原生屏幕尺寸、默认电池模式下分别核验 PQ 与 Texture SDR 真横屏全片；逐段记录实际输出尺寸、VO/decoder 掉帧、媒体时间、GPU 频率和温度，以真人可见流畅度单独验收。PQ 路径先建立同包基线并针对其瓶颈优化；SDR 将通用候选在支持条件下默认开启、保留安全回退并确认实际命中和观感。旧 Glass 严格门槛及性能模式数字只作历史记录，不替代新片验收。
+  - acceptance: P5→Texture SDR 使用指定 Glass 片，在与既有优化轮相同的真横屏2560×1440、默认电池模式下播至 EOS，确认通用优化默认命中、回退、资源闭合、画面观感，VO 掉帧与既有优化结果相近；记录GPU频率以避免不同降频条件下误判回退，不再要求旧严格掉帧门槛。P5→PQ 另用 Mystery Box 新片，在明确输出尺寸、默认电池模式下记录逐段 VO/decoder 掉帧、媒体时间、GPU频率、温度及持续可见画面，再定向优化；两片数字不互作基线。
   - latest: 同 APK、2560×1440 输出的系统性能模式开/关/开 EOS VO 掉帧为 17/5051/19，decoder 为 0；默认模式门槛未过。1920×1080 也出现伴随 GPU 低频的后段失速；关闭抖动无明显低频收益，已停止该方向。用户最近确认 10437 的 1440 宽 P5 吹玻璃画面流畅，但这不覆盖 2560 默认模式全片门槛。
   - output_scope: 既有 `p5_pq_pipeline` A/B/A 在 **P5→Texture SDR BT.1886、2560×1440** 下取得 EOS VO 2607/516/3626，严格门槛仍失败；其分支明确要求 SDR 目标，不能用于 P5→PQ Surface。12542–12544 的 P5→PQ 使用自建 JAR `f745146...`，其中没有该分支，短轮只证出画与合成，尚无同配置全片掉帧数据。原生 PQ 的性能须单独定目标尺寸和默认电池模式，用同一正式输出路径播至 EOS 记录 VO/decoder、GPU 频率及真人流畅度，不能沿用 Texture SDR 数字。
   - next: 先把已提交到 Goodwu/libplacebo 的候选通过受支持的 P5→Texture SDR 策略默认启用，构建自有 arm64 JAR 并验证命中、回退、资源和实际观感，不展开旧 Glass SDR 掉帧调优。公开 PQ 产品链路可用后，用新片测全片基线，区分 GPU 渲染与提交/合成等待；复用 `optimize_dovi_linear_decode` 时另核 PQ 目标的真实命中、同PTS颜色和同包 A/B，不能沿用 SDR 掉帧收益。
