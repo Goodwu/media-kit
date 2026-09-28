@@ -2,6 +2,10 @@
 
 ## Current State
 
+- 2026-09-28 P1完成：12602无注入最终代码PQ首图PixelCopy 1.168秒，10秒切SDR后BT.709/BT.1886出画、SF无旧PQ层；12601受控运行中失效后同PID同路重试，新PQ层实际出画；V1独立复核无代码阻断。12598真人同步复看“画面良好，无异常”。静态HDR母版字段源端缺失，SF types=0，不伪造；原生DV直通、光学计时和定量色准未由此证明。原12492、自动亮度、熄屏恢复。隔离分支保存产品实现，下一步P2 Mystery Box正式PQ全片性能，见 `archives/experiments/android-p5-pq-product-candidate-12582-20260928.md`。
+
+- 2026-09-28 P1 同路重试补门禁：12599最终代码自动PQ→SDR短轮，BT.709继续出画且SF无PQ旧层；12600受控运行中PQ失败后同路重试复用了失败输出并立即返回旧错误。12601修通用 `AndroidHdrOutputSlot.ensure`：显式同路重试在waitReady失败后经原有dispose屏障再建新层；受控同一PID第二次PQ出画，SF/HWC恢复10位PQ。临时注入已撤销，产品树仅留通用输出槽修复；待独立复核与无注入最终包，见 `archives/experiments/android-p5-pq-product-candidate-12582-20260928.md`。
+
 - 2026-09-28 隔离产品分支 `feature/android-p5-pq-product` 保存六文件实现：公开PQ setter优先、精确固件回退与读回、持续dataspace监测、运行中失效的stop→ReleaseSurface→ACK、失败层隐藏、当前View首帧探针及PQ→SDR 8位Surface重建。12598无诊断注入APK已获用户真人观感确认；分支代码仍待真正PQ运行中失效后的同进程重试与最终SDR复位，故P1任务保持进行中。
 
 - 2026-09-28 P1同步真人复看通过：用户明确“现在看”后，12598同一无注入APK重播约40秒，播放中用户答复“画面良好，无异常”；前两次未看到的播放不计验收。V1独立代码复核无确定性阻断。12598结束恢复原12492、自动亮度、熄屏。P1剩真正运行中PQ失效后的同进程重试及最终无注入PQ→SDR复位，随后合入；P2全片性能未开始。静态HDR母版字段源端缺失，不伪造，验收条件已改为核清来源与边界。详见 `archives/experiments/android-p5-pq-product-candidate-12582-20260928.md`。
