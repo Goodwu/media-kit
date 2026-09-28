@@ -26,14 +26,15 @@ P5→PQ 输出、首帧和性能使用 `/Users/wuweiwei1/Downloads/test-clips/My
 
 ### P2 · P5→PQ 全片性能
 
-- [ ] status: in_progress；context: archives/conversations/android-hdr-dv-display-plan-20260922.md
+- [x] status: done；context: archives/conversations/android-hdr-dv-display-plan-20260922.md
 - acceptance: Mystery Box 在正式 PQ 输出链路、默认电池模式和明确尺寸下播至 EOS；逐段记录 VO/decoder 掉帧、GPU 频率、温度和持续可见画面，必要时定向优化并同包 A/B 验证。
-- latest: P1正式代码12603 Mystery Box→PQ 3840×2160全片EOS VO2204、decoder0，GPU中位720MHz。12604诊断限宽2560×1440全片EOS VO30、decoder0。12605通用布局自动选2560×1440，PQ全片EOS VO20、decoder0；进一步修正窄视图被拉伸后，12615最终代码严格EOS VO11、decoder0，GPU中位586MHz，电池温度34→37°C，相对4K基线VO少约99.5%。HDR10/P8.4正常路径短轮、竖屏单/双视图布局缩放和全屏PQ已复核，V1无确定性阻断；用户最终真人画质仍待稍后复看。见 `archives/experiments/android-p5-pq-performance-12603-20260928.md`。
-- next: 用户方便时以已备好的同代码12616无性能探针短播包同步复看最终尺寸的锐度、亮暗、颜色和流畅性；完成P2人工门禁。用户已回复“稍后再看”，此包尚未运行。双视图同播放器两个Video并存只见单活动Surface，生命周期归P3；热切源aspect可能短暂沿用上一片参数，随P3输出切换观察。P0线性解码仅在SDR目标默认opt-in，PQ收益来自输出缓冲尺寸。
+- latest: P1正式代码12603 Mystery Box→PQ 3840×2160全片EOS VO2204、decoder0，GPU中位720MHz。12604诊断限宽2560×1440全片EOS VO30、decoder0。12605通用布局自动选2560×1440，PQ全片EOS VO20、decoder0；进一步修正窄视图被拉伸后，12615最终代码严格EOS VO11、decoder0，GPU中位586MHz，电池温度34→37°C，相对4K基线VO少约99.5%。HDR10/P8.4正常路径短轮、竖屏单/双视图布局缩放和全屏PQ已复核，V1无确定性阻断；12616用户真人观感通过。见 `archives/experiments/android-p5-pq-performance-12603-20260928.md`。
+- final_acceptance: 12616无性能探针同代码包，首次因锁屏遮挡未触发打开，不计；解锁后同步重播，日志确认`gpu-next`/`mediacodec`、P5→PQ和2560×1440布局路径。用户现场回复“整体良好，无异常”，涵盖锐度、亮暗、颜色、流畅性与残影/拉伸检查。全片性能以12615严格EOS VO11、decoder0、GPU中位586MHz为依据；短时人眼反馈不替代全片数字。结束恢复原12492、自动亮度、熄屏。双视图单活动Surface和热切源aspect风险转P3。
+- next: 进入P3生命周期与Glass片尾故障。
 
 ### P3 · P5 生命周期及片尾故障
 
-- [ ] status: queued；context: archives/conversations/android-hdr-dv-display-plan-20260922.md
+- [ ] status: in_progress；context: archives/conversations/android-hdr-dv-display-plan-20260922.md
 - acceptance: 退出重入、Surface/双视图切换、失败重试、直接 Engine 销毁后资源正确释放且持续出帧；旧 Glass 片尾紫屏根因查明并修复，完整 EOF、暂停重绘、seek 与重入无残影；Mystery Box 用于正常 EOF 回归。
 - latest: 12492 P5 播至 PTS164.8 后退出重入成功，直接 Engine.destroy 仍未验。Glass 尾段 PTS约175 曾有 AImageReader `-30001`、渲染失败及紫屏；12526 两轮中一轮复现、一轮保留末帧，缺 end-file 与 buffer 身份，根因未定。清理版12576在片尾PTS174.958再次出现一次同类取图/渲染失败，但片尾截图正常、播放完成；12580在Mystery Box seek开始的旧PTS8.008也出现一次，之后45秒处继续播放并同播放器重开成功、资源闭合。12585 Glass属性0全片在PTS174.991再次出现相同取图/渲染失败，随后EOS及资源闭合；仍不能判定紫屏根因。见 `archives/experiments/android-p5-tail-repro-12526-20260927.md`、`archives/experiments/android-p5-product-seek-reopen-12580-20260928.md`、`archives/experiments/android-p5-glass-default-12581-12585-20260928.md`。
 - next: 按当前 owner/代次追踪退出与 Surface 交错；尾段短轮记录 reader、codec buffer、PTS、release 与 callback 身份，确认同因后修复并完成 Glass EOF 回归。
