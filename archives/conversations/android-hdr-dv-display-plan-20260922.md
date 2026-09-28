@@ -2,6 +2,8 @@
 
 ## Current State
 
+- 2026-09-28 P1故障交错与正式候选：12595首次ACK失败后250ms重试成功，失效PQ层隐藏；12597旧PQ Surface释放后迟到故障只ACK旧代，当前SDR继续出画，诊断注入均已撤销。12598无注入Mystery Box正常入口横屏约一分钟，当前PQ Surface触摸→可辨内容1.090秒（PixelCopy，非光学），SF/HWC BT.2020/PQ、RGBA1010102；用户这次人工观感回复待收取。每轮恢复原12492、自动亮度、熄屏。P1仍待真人观感、最终审核和合入，见 `archives/experiments/android-p5-pq-product-candidate-12582-20260928.md`。
+
 - 2026-09-28 P1无故障注入的12594回归：当前PQ Surface触摸→可辨内容1.084秒，10秒后切SDR，实际截图继续出画、视频参数BT.709/BT.1886且SF/HWC无PQ残留。APK仅arm64、自建JAR；原12492、自动亮度、熄屏恢复。P1仍待PQ真人反馈与ACK失败/旧新代交错注入，见 `archives/experiments/android-p5-pq-product-candidate-12582-20260928.md`。
 
 - 2026-09-28 P1续测12587–12593：12589修正首帧探针至当前PQ View，Mystery Box三独立触摸→Surface可辨内容1.144/1.214/1.057秒，非光学；12590揭示P5→PQ转SDR时PQ Surface残留，12591重建无HDR的8位输出后SDR继续出画、SF/HWC PQ层消失。片源无HDR10静态母版元数据，DV RPU为动态，故SF types=0不自行伪造。12593测试包注入运行中PQ失效，证实stop、AImage闭合、ReleaseSurface/ACK与失效层隐藏，注入已撤销；ACK丢失及旧新代交错仍需验。真人PQ观感问题已发出待回复，设备仍是原12492、自动亮度、熄屏。见 `archives/experiments/android-p5-pq-product-candidate-12582-20260928.md`。
