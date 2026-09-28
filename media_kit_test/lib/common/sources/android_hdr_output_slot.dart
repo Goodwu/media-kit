@@ -44,8 +44,14 @@ class AndroidHdrOutputSlot<T> {
           oldVo == vo &&
           _currentOutputFormat == outputFormat &&
           _currentSurfaceTransfer == surfaceTransfer) {
-        await waitReady(old);
-        return;
+        try {
+          await waitReady(old);
+          return;
+        } catch (_) {
+          // An explicit retry of the same route must replace a failed output.
+          // Retire it through the normal producer stop and Surface ACK barrier
+          // before publishing a new controller below.
+        }
       }
       await disposeForRebuild(old);
       _initialPending = false;
