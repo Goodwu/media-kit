@@ -2,6 +2,8 @@
 
 ## Current State
 
+- 2026-09-28 隔离产品分支 `feature/android-p5-pq-product` 保存六文件实现：公开PQ setter优先、精确固件回退与读回、持续dataspace监测、运行中失效的stop→ReleaseSurface→ACK、失败层隐藏、当前View首帧探针及PQ→SDR 8位Surface重建。12598无诊断注入APK已获用户真人观感确认；分支代码仍待真正PQ运行中失效后的同进程重试与最终SDR复位，故P1任务保持进行中。
+
 - 2026-09-28 P1同步真人复看通过：用户明确“现在看”后，12598同一无注入APK重播约40秒，播放中用户答复“画面良好，无异常”；前两次未看到的播放不计验收。V1独立代码复核无确定性阻断。12598结束恢复原12492、自动亮度、熄屏。P1剩真正运行中PQ失效后的同进程重试及最终无注入PQ→SDR复位，随后合入；P2全片性能未开始。静态HDR母版字段源端缺失，不伪造，验收条件已改为核清来源与边界。详见 `archives/experiments/android-p5-pq-product-candidate-12582-20260928.md`。
 
 - 2026-09-28 P1故障交错与正式候选：12595首次ACK失败后250ms重试成功，失效PQ层隐藏；12597旧PQ Surface释放后迟到故障只ACK旧代，当前SDR继续出画，诊断注入均已撤销。12598无注入Mystery Box正常入口横屏约一分钟，当前PQ Surface触摸→可辨内容1.090秒（PixelCopy，非光学），SF/HWC BT.2020/PQ、RGBA1010102；用户这次人工观感回复待收取。每轮恢复原12492、自动亮度、熄屏。P1仍待真人观感、最终审核和合入，见 `archives/experiments/android-p5-pq-product-candidate-12582-20260928.md`。
