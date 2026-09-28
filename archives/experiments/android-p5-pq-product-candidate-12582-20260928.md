@@ -17,4 +17,6 @@ P0 Texture→SDR 的真人动态画质确认仍待进行；本轮只准备 P1 �
 
 ## 下一步
 
-按既定顺序先完成 P0 Glass 真人动态观察。之后用 12582 Mystery Box 做同代 Surface/PQ/10-bit/HDR 元数据与 SF/HWC、真实内容、首帧和退出 SDR 复位验证；故障注入覆盖 PQ 重设失败、stop/ACK 首次失败后重试、旧代失败与新代交错、超过 10 秒 producer 重建。若发现问题，在隔离分支修正并重建，不把旧私有探针结果算作产品验收。
+2026-09-28 P0 Glass 真人动态观察已通过。12582 首次 Mystery Box 实机短轮由正常入口启动，t8/t20 截图都有不同的实际画面；Java 创建当前 `viewId=1`、`generation=2`、RGBA1010102/PQ Surface。公开 setter 返回 `-22`，精确固件回退后回读 `163971072`；播放中 SurfaceFlinger 视频层 `BT2020_PQ (163971072)`、HWC dataspace `0x09c60000`、format `0x2b`、DEVICE 合成，mpv `mediacodec`、目标PQ。系统截图偏淡，不能代替面板真人观感。SF 显示该层 `hdr metadata types=0`；ffprobe 的源视频 side data 仅列 DOVI configuration record，无 HDR10 mastering/content-light 元数据，输出策略及元数据门槛仍待厘清。测试页 FirstFramePixelCopy 选到了已失效的旧 Surface，连续 status=3、samples=0，不能给首帧时间；隔离工作树已将同尺寸候选选择改为较后一个，未重建实测。设备已恢复原12492、自动亮度、熄屏。证据在 `/private/tmp/media-kit-p5-pq-candidate-12582-device.log`、`-sf.txt`、`-t8.png`、`-t20.png`。
+
+下一步：修正并重测当前 View/Surface 首帧探针，核清 P5→PQ 静态元数据的来源与输出策略，测 SDR 复位和运行中故障恢复；故障注入覆盖 PQ 重设失败、stop/ACK 首次失败后重试、旧代失败与新代交错、超过 10 秒 producer 重建。未完成这些门槛前不合入候选。

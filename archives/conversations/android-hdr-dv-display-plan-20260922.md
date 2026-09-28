@@ -2,6 +2,10 @@
 
 ## Current State
 
+- 2026-09-28 P1 12582首次产品候选短轮：正常入口Mystery Box、自动亮度，t8/t20不同实画；公开PQ setter -22，限定固件回退成功，当前View generation2的RGBA1010102/PQ，SF和HWC层均BT.2020/PQ且DEVICE合成。静态HDR metadata types=0、片源仅DOVI配置side data；FirstFramePixelCopy选错旧Surface零样本，尚无首帧时间。设备恢复12492、自动亮度、熄屏。修正探针、元数据政策、SDR复位及失效注入待续；见 `archives/experiments/android-p5-pq-product-candidate-12582-20260928.md`。
+
+- 2026-09-28 P0真人验收完成：最终12585 Glass→Texture SDR在自动亮度、真横屏全屏下重播约28秒，用户现场观察报告“画面良好，无异常”；t28 VO4、decoder0，未见取图/渲染错误。原版12492已恢复，自动亮度、熄屏。P0转done，现推进P1 Mystery Box→PQ公开优先产品候选12582的实机链路、首帧、HDR合成与失效恢复；P3另跟Glass片尾偶发故障。
+
 - 2026-09-28 P0人工门禁等待：12585 Glass、12586 Mystery Box 已在最终自建JAR、正确Texture尺寸和属性0下完成自动化全片复测；P0明确验收仍要求用户看最终版Glass约20秒动态画质。短播12585包SHA `03578f89...` 与恢复原12492的脚本已备好；已多次询问用户是否方便，尚无回复，不能用截图/PixelCopy替代真人观察。按用户要求依序完成P5优先级，P1设备验收及后续任务暂待P0门禁。设备现为原12492、自动亮度、熄屏；收到用户“现在方便”后立即短播、收取观感并恢复，随后继续P1。
 
 - 2026-09-28 P0 Mystery Box默认入口同片复测12586：与12585同自建JAR、真横屏Texture→SDR2560×1440、`gpu-next`/`mediacodec`，六个P5调试属性0。全片EOS即时读取VO14、decoder0；GPU100样本中位415MHz、退出AImage5909/5909、retired0，无取图/渲染错误，t12实画。旧未优化同片EOS VO54、GPU中位586MHz；本轮VO少40约74%。隔离测试页仅增默认关闭的EOS掉帧读数。原12492、自动亮度、熄屏恢复。P0只余Glass最终真人动态画质；见 `archives/experiments/android-p5-mystery-default-12586-20260928.md`。
