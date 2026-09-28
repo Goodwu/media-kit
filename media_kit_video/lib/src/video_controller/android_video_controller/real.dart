@@ -172,6 +172,9 @@ class AndroidVideoController extends PlatformVideoController {
         _inFlightSurfaceOwner == null) {
       return Future<void>.value();
     }
+    // A detach retry may replace an already failed Completer. Preserve the
+    // runtime failure for later waitReady callers until a new Surface attempt.
+    if (_pendingSurfaceFailure != null) _failPlatformSurfaceIfNoAlternative();
     return _currentPlatformViewOutputBound.future;
   }
 
@@ -348,6 +351,36 @@ class AndroidVideoController extends PlatformVideoController {
     _pendingSurfaceFailureStack = StackTrace.current;
     _pendingSurfaceFailureViewSerial = creationSerial;
     _failPlatformSurfaceIfNoAlternative();
+  }
+
+  void _markPlatformSurfaceRuntimeFailedBeforeDetach(
+      int handle,
+      int expectedWid,
+      int generation,
+      int viewId,
+      int creationSerial,
+      int surfaceGeneration,
+      String reason) {
+    final owner = _surfaceOwner(
+      handle: handle,
+      generation: generation,
+      viewId: viewId,
+      surfaceGeneration: surfaceGeneration,
+      wid: expectedWid,
+    );
+    if (!_isCurrentPlatformViewEvent(generation, viewId, creationSerial) ||
+        _latestSurfaceAttemptByViewId[viewId] != surfaceGeneration ||
+        (!_liveSurfaceOwners.contains(owner) &&
+            !_isBoundSurfaceOwner(owner) &&
+            _inFlightSurfaceOwner != owner)) {
+      return;
+    }
+    _pendingSurfaceFailure = StateError(
+        'Android PlatformView PQ Surface failed during playback: '
+        'generation=$generation, viewId=$viewId, '
+        'surfaceGeneration=$surfaceGeneration, wid=$expectedWid, reason=$reason');
+    _pendingSurfaceFailureStack = StackTrace.current;
+    _pendingSurfaceFailureViewSerial = creationSerial;
   }
 
   int? _markSurfaceDestroyedBeforeDetach(
@@ -1891,6 +1924,58 @@ class AndroidVideoController extends PlatformVideoController {
               final String reason = call.arguments['reason'];
               _controllers[handle]?._markPlatformSurfaceFailed(
                   generation, viewId, creationSerial, attempt, reason);
+              break;
+            }
+          case 'PlatformVideoView.SurfaceRuntimeFailed':
+            {
+              final int handle = call.arguments['handle'];
+              final int wid = call.arguments['wid'];
+              final int generation = call.arguments['generation'];
+              final int viewId = call.arguments['viewId'];
+              final int creationSerial = call.arguments['creationSerial'];
+              final int surfaceGeneration = call.arguments['surfaceGeneration'];
+              final String reason = call.arguments['reason'];
+              final controller = _controllers[handle];
+              if (controller == null) {
+                await _releaseOrphanPlatformSurface(_surfaceOwner(
+                  handle: handle,
+                  generation: generation,
+                  viewId: viewId,
+                  surfaceGeneration: surfaceGeneration,
+                  wid: wid,
+                ));
+              } else {
+                controller._markPlatformSurfaceRuntimeFailedBeforeDetach(
+                  handle,
+                  wid,
+                  generation,
+                  viewId,
+                  creationSerial,
+                  surfaceGeneration,
+                  reason,
+                );
+                final fallbackIntentSerial =
+                    controller._markSurfaceDestroyedBeforeDetach(
+                  handle,
+                  wid,
+                  generation,
+                  viewId,
+                  surfaceGeneration,
+                );
+                try {
+                  await controller._detachPlatformSurface(
+                    wid,
+                    generation,
+                    viewId,
+                    surfaceGeneration,
+                    fallbackIntentSerial,
+                  );
+                } finally {
+                  // Detach can recreate the current-output Completer. Keep
+                  // the failure observable until an actual new Surface binds.
+                  controller._failPlatformSurfaceIfNoAlternative();
+                }
+              }
               break;
             }
           case 'PlatformVideoView.SurfaceDestroyed':
