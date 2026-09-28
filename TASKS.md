@@ -8,17 +8,18 @@ P5→PQ 输出、首帧和性能使用 `/Users/wuweiwei1/Downloads/test-clips/My
 
 ### P0 · P5→Texture SDR 优化默认开启并验证
 
-- [ ] status: blocked；等待用户在场观察最终版 Glass 约20秒动态画质；context: archives/conversations/android-hdr-dv-display-plan-20260922.md
+- [x] status: done；最终版 Glass 短播获用户真人确认“画面良好，无异常”；context: archives/conversations/android-hdr-dv-display-plan-20260922.md
 - acceptance: 在支持的 P5→Texture SDR 条件下默认启用通用 `optimize_dovi_linear_decode`，其他场景安全回退；自建 arm64 JAR 确认包含并命中优化。Glass 真横屏 2560×1440、默认电池模式全片到 EOS，画质、资源和真人观感正常，VO 与既有优化轮 EOS 516、t90→t180 新增342相近即可，不再追逐旧严格门槛。Mystery Box 同配置复测，与自身未优化基准比较，记录 GPU 频率。
 - latest: 旧 Glass 同配置诊断 A/B/A 的 Texture SDR EOS VO 为2607/516/3626；Mystery Box 未优化全片 VO54、decoder0，GPU中位586MHz。FFmpeg `fff3ee7`、libplacebo `c9fd879` 已推送Goodwu fork。mpv `aa8bd10`修同帧复用、`91554aa`修普通 OES 回退、`33a212e`删可选缓存与高频日志，均已推送。12569真正 `gpu-next`/`mediacodec`、2560×1440 Mystery Box 全片 EOS VO2、decoder0、GPU中位415MHz、AImage5928/5928；12570 Glass 全片 EOS VO41、decoder0、GPU中位415MHz、AImage10433/10433、片尾正常。12567普通 SDR、12571 HDR10、12572 P8.4 同版短轮均实际出画且资源对齐（后两者仅 Texture→SDR 回退）。12573 清理版 Mystery Box 短轮 t8 VO3、decoder0、AImage1513/1513。最新隔离 mpv 再删原始 YUV FBO/MRT/PACK10、sidecar 和读回探针，arm64 编译及独立审查通过；12574 Mystery Box 短轮实画、AImage1483/1483；12575 Mystery Box 全片完成，t90 VO34、decoder0、GPU104样本中位415MHz、AImage5886/5886；12576 Glass 全片完成，t180 VO22、decoder0、片尾截图正常、AImage10454/10454，但 PTS174.958 仍有一次 AImageReader 无图像/渲染失败，属 P3 尾段故障。12576主机空间满使GPU只采37秒，且两条全片均未取得精确 EOS VO 快照。见 `archives/experiments/android-p5-product-raw-prune-12574-12576-20260928.md` 及前述各版本实验记录。
-- next: 清理版 mpv `8e7c23e` 已推送 Goodwu fork；12577普通SDR、12578 HDR10、12579 P8.4同JAR短轮均实际出画、t8 VO/decoder0、P5专用退休关闭、退出AImage分别642/642、742/742、764/764。12580 Mystery Box 8→45秒 seek 后继续出画、同播放器重开后再次出画，退出AImage2539/2539；seek边界一次AImageReader取图失败，纳入P3。12585移除测试页旧属性门禁后，Glass→Texture SDR 2560×1440 全片到EOS，t90 VO11、t180 VO36/decoder0、t90→t180新增25、AImage10450/10450；PTS174.991仍有一次AImageReader/渲染失败，归P3。12586同JAR、同输出配置、六个P5调试属性0的Mystery Box全片EOS VO14/decoder0、GPU100样本中位415MHz、AImage5909/5909、无渲染错误；未优化同片EOS VO54、GPU中位586MHz。12583属性门禁拒绝及12584误用3840×2160已剔除。见 `archives/experiments/android-p5-product-final-fallback-12577-12579-20260928.md`、`archives/experiments/android-p5-product-seek-reopen-12580-20260928.md`、`archives/experiments/android-p5-glass-default-12581-12585-20260928.md`、`archives/experiments/android-p5-mystery-default-12586-20260928.md`。P0尚缺最终版Glass真人动态画质；完成后转P1，不继续旧Glass SDR掉帧调优。
+- latest_acceptance: 2026-09-28 最终12585 Glass短播复看，用户报告“画面良好，无异常”；t28 VO4/decoder0，无取图/渲染错误。恢复12492、自动亮度、熄屏。全片和回退证据见 `archives/experiments/android-p5-glass-default-12581-12585-20260928.md`、`archives/experiments/android-p5-mystery-default-12586-20260928.md`；片尾偶发故障仍属P3。
 
 ### P1 · P5→PQ 公开产品输出与首帧
 
-- [ ] status: queued_after_P0；context: archives/conversations/android-hdr-dv-display-plan-20260922.md
+- [ ] status: in_progress；context: archives/conversations/android-hdr-dv-display-plan-20260922.md
 - acceptance: 以 Mystery Box 从正常入口横屏全屏出真实画面，确认 `gpu-next`/`mediacodec`、10 位 BT.2020/PQ 视频层、HDR 静态元数据、系统 HDR 合成和退出后 SDR 复位；触摸到可辨内容小于2秒、争取1秒，探针绑定当前 View/Surface 代次，并以真人观察佐证。公开 Android 输出链路优先；精确固件私有探针仅在公开方案确实不可行时作为受限备选。
 - latest: 12542–12544 精确固件私有探针得到 PQ 实际画面及系统合成，但不是产品链路；12539 公开 Surface PQ 设置失败，`wid=0`。旧 Glass 片头黑场使12543/12544约4秒可辨内容读回不能作为新片首帧结论；12544探针仍未绑定实际 Surface generation。只读复核确认本固件公开NDK setter受SF权限/能力门禁阻断，EGL/Vulkan没有可用PQ Surface协商，公开SurfaceControl PQ事务SIGABRT；API29 ImageWriter未提供可用的公开PQ dataspace出口。没有值得原样重试的公开GPU PQ路径，但不推广为Android整体不支持。隔离产品候选已收紧为公开 setter 返回-22、精确固件/格式才回退，持续PQ监测与运行中失败stop→release→ACK；arm64 12582 APK构建成功、只含arm64库，修订协议独立静态复审无新增阻断，尚未安装/出画/故障注入。见 `archives/experiments/android-p5-private-pq-probe-target-12544-20260928.md`、`archives/experiments/android-p5-public-pq-route-assessment-20260928.md`、`archives/experiments/android-p5-pq-product-candidate-12582-20260928.md`。
-- next: P0真人观感闭环后，以Mystery Box实机测当前View/Surface代次、真实首帧、10-bit/PQ buffer和元数据、SF/HWC、持续画面及退出SDR复位；失效注入须证实明确错误、安全回收与旧代隔离。未验证前不合入候选。
+- latest_device: 12582首次正常入口 Mystery Box 短轮：8/20秒截图为不同实际画面；当前View generation2采用RGBA1010102，公开setter -22 后精确固件回退成功，SF与HWC均为BT.2020/PQ、10位DEVICE合成。SF HDR静态元数据类型0；片源ffprobe仅有DOVI配置side data。FirstFramePixelCopy误选旧Surface而零有效样本，首帧尚无时间结论。见 `archives/experiments/android-p5-pq-product-candidate-12582-20260928.md`。
+- next: 修正当前View/Surface首帧探针并实测；厘清P5→PQ静态元数据输出，验证退出SDR复位与持续画面；故障注入须证实明确错误、安全回收与旧代隔离。未验证前不合入候选。
 
 ### P2 · P5→PQ 全片性能
 
