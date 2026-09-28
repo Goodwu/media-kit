@@ -2,6 +2,10 @@
 
 ## Current State
 
+- 2026-09-28 P1无故障注入的12594回归：当前PQ Surface触摸→可辨内容1.084秒，10秒后切SDR，实际截图继续出画、视频参数BT.709/BT.1886且SF/HWC无PQ残留。APK仅arm64、自建JAR；原12492、自动亮度、熄屏恢复。P1仍待PQ真人反馈与ACK失败/旧新代交错注入，见 `archives/experiments/android-p5-pq-product-candidate-12582-20260928.md`。
+
+- 2026-09-28 P1续测12587–12593：12589修正首帧探针至当前PQ View，Mystery Box三独立触摸→Surface可辨内容1.144/1.214/1.057秒，非光学；12590揭示P5→PQ转SDR时PQ Surface残留，12591重建无HDR的8位输出后SDR继续出画、SF/HWC PQ层消失。片源无HDR10静态母版元数据，DV RPU为动态，故SF types=0不自行伪造。12593测试包注入运行中PQ失效，证实stop、AImage闭合、ReleaseSurface/ACK与失效层隐藏，注入已撤销；ACK丢失及旧新代交错仍需验。真人PQ观感问题已发出待回复，设备仍是原12492、自动亮度、熄屏。见 `archives/experiments/android-p5-pq-product-candidate-12582-20260928.md`。
+
 - 2026-09-28 P1 12582首次产品候选短轮：正常入口Mystery Box、自动亮度，t8/t20不同实画；公开PQ setter -22，限定固件回退成功，当前View generation2的RGBA1010102/PQ，SF和HWC层均BT.2020/PQ且DEVICE合成。静态HDR metadata types=0、片源仅DOVI配置side data；FirstFramePixelCopy选错旧Surface零样本，尚无首帧时间。设备恢复12492、自动亮度、熄屏。修正探针、元数据政策、SDR复位及失效注入待续；见 `archives/experiments/android-p5-pq-product-candidate-12582-20260928.md`。
 
 - 2026-09-28 P0真人验收完成：最终12585 Glass→Texture SDR在自动亮度、真横屏全屏下重播约28秒，用户现场观察报告“画面良好，无异常”；t28 VO4、decoder0，未见取图/渲染错误。原版12492已恢复，自动亮度、熄屏。P0转done，现推进P1 Mystery Box→PQ公开优先产品候选12582的实机链路、首帧、HDR合成与失效恢复；P3另跟Glass片尾偶发故障。
