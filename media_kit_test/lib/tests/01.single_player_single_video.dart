@@ -908,7 +908,10 @@ class _SinglePlayerSingleVideoScreenState
     player.stream.error.listen((error) => debugPrint(error));
     if (Platform.isAndroid && _androidPerfProbe) {
       player.stream.completed.listen(
-        (completed) => debugPrint('AUTO_COMPLETED completed=$completed'),
+        (completed) {
+          debugPrint('AUTO_COMPLETED completed=$completed');
+          if (completed) unawaited(_sampleAndroidP5Counters());
+        },
       );
     }
     player.stream.log.listen(

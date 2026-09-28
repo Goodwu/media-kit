@@ -26,10 +26,10 @@ P5→PQ 输出、首帧和性能使用 `/Users/wuweiwei1/Downloads/test-clips/My
 
 ### P2 · P5→PQ 全片性能
 
-- [ ] status: queued_after_P1；context: archives/conversations/android-hdr-dv-display-plan-20260922.md
+- [ ] status: in_progress；context: archives/conversations/android-hdr-dv-display-plan-20260922.md
 - acceptance: Mystery Box 在正式 PQ 输出链路、默认电池模式和明确尺寸下播至 EOS；逐段记录 VO/decoder 掉帧、GPU 频率、温度和持续可见画面，必要时定向优化并同包 A/B 验证。
-- latest: 12542–12544 的 PQ 短轮自建 JAR 未包含线性解码候选，尚无 PQ 全片掉帧数据；Texture SDR 的收益不能外推至 PQ。
-- next: P1 产品路径稳定后测基线；复用 P0 的 RPU/线性解码及回退代码前，先核 PQ 目标真实命中、同 PTS 颜色，再量化性能收益。
+- latest: P1正式代码12603 Mystery Box→PQ 3840×2160全片EOS VO2204、decoder0，GPU中位720MHz。12604诊断限宽2560×1440全片EOS VO30、decoder0。12605通用布局自动选2560×1440，PQ全片EOS VO20、decoder0；进一步修正窄视图被拉伸后，12615最终代码严格EOS VO11、decoder0，GPU中位586MHz，电池温度34→37°C，相对4K基线VO少约99.5%。HDR10/P8.4正常路径短轮、竖屏单/双视图布局缩放和全屏PQ已复核，V1无确定性阻断；用户最终真人画质仍待稍后复看。见 `archives/experiments/android-p5-pq-performance-12603-20260928.md`。
+- next: 用户方便时同步复看最终尺寸的锐度、亮暗、颜色和流畅性；完成P2人工门禁。双视图同播放器两个Video并存只见单活动Surface，生命周期归P3；热切源aspect可能短暂沿用上一片参数，随P3输出切换观察。P0线性解码仅在SDR目标默认opt-in，PQ收益来自输出缓冲尺寸。
 
 ### P3 · P5 生命周期及片尾故障
 
