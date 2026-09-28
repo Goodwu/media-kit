@@ -40,6 +40,8 @@ import com.alexmercerind.media_kit_video.GlobalObjectRefManager;
  */
 public final class PlatformVideoView implements PlatformView {
     private static final String TAG = "PlatformVideoView";
+    private static final String LYA_PQ_FINGERPRINT =
+            "HUAWEI/LYA-AL00/HWLYA:10/HUAWEILYA-AL00/10.1.0.163C00:user/release-keys";
     private static final Executor transactionExecutor = Runnable::run;
     @NonNull
     private final SurfaceView surfaceView;
@@ -50,6 +52,8 @@ public final class PlatformVideoView implements PlatformView {
     private final String initialDataSpace;
     @Nullable
     private final String initialPixelFormat;
+    @Nullable
+    private volatile String appliedDataSpace;
     private long wid = 0;
     static final class SurfaceEvent {
         final long wid;
@@ -73,12 +77,21 @@ public final class PlatformVideoView implements PlatformView {
             this.failed = true;
             this.failureReason = failureReason;
         }
+
+        SurfaceEvent(long wid, int generation, @NonNull String failureReason) {
+            this.wid = wid;
+            this.generation = generation;
+            this.destroyed = true;
+            this.failed = true;
+            this.failureReason = failureReason;
+        }
     }
 
     private Consumer<SurfaceEvent> onSurfaceEvent;
     private Runnable onDispose = () -> {};
     private int surfaceGeneration = 0;
     private int activeSurfaceGeneration = 0;
+    private int failedSurfaceGeneration = 0;
     private final HashMap<Integer, Long> surfaceReferences = new HashMap<>();
     private final HashMap<Integer, Long> releasedSurfaceReferences = new HashMap<>();
     private final HashMap<Integer, Long> acknowledgedSurfaceReferences = new HashMap<>();
@@ -98,7 +111,15 @@ public final class PlatformVideoView implements PlatformView {
 
     private static native boolean setSurfaceDataSpace(
             @NonNull android.view.Surface surface, int dataSpace, boolean probeSrgbOnFailure);
+    private static native int getSurfaceDataSpace(@NonNull android.view.Surface surface);
     private static native void probeLatePqDataSpace(@NonNull android.view.Surface surface);
+
+    private boolean needsPqResetMonitoring() {
+        return Build.VERSION.SDK_INT == Build.VERSION_CODES.Q &&
+                LYA_PQ_FINGERPRINT.equals(Build.FINGERPRINT) &&
+                "pq".equals(initialDataSpace) &&
+                "rgba1010102".equals(initialPixelFormat);
+    }
 
     /**
      * Constructs a new PlatformVideoView.
@@ -133,6 +154,9 @@ public final class PlatformVideoView implements PlatformView {
             // Avoid blank space instead of a video on Android versions below 8 by adjusting video's
             // z-layer within the Android view hierarchy:
             surfaceView.setZOrderMediaOverlay(true);
+        } else if (needsPqResetMonitoring()) {
+            // This firmware otherwise places the video beneath Flutter's UI.
+            surfaceView.setZOrderMediaOverlay(true);
         }
 
         setupSurface();
@@ -150,12 +174,14 @@ public final class PlatformVideoView implements PlatformView {
         surfaceView.getHolder().addCallback(new SurfaceHolder.Callback() {
             @Override
             public void surfaceCreated(@NonNull SurfaceHolder holder) {
-                Log.i(TAG, "surfaceCreated: handle=" + handle + ", width=" + width + ", height=" + height);
+                Log.i(TAG, "surfaceCreated: handle=" + handle + ", width=" + width + ", height=" + height +
+                        ", viewIdentity=" + System.identityHashCode(surfaceView));
                 if (!disposed && holder.getSurface() != null) {
                     // Count every creation attempt, including one rejected
                     // before a WID exists, so its failure cannot be confused
                     // with an older successful Surface from this view.
                     final int generation = ++surfaceGeneration;
+                    appliedDataSpace = null;
                     if (initialDataSpace != null) {
                         final boolean applied = setColorSpace(holder.getSurface(), initialDataSpace);
                         Log.i(TAG, "surfaceCreated initial dataspace: handle=" + handle +
@@ -167,6 +193,7 @@ public final class PlatformVideoView implements PlatformView {
                                     generation, "initialDataSpaceRejected"));
                             return;
                         }
+                        appliedDataSpace = initialDataSpace;
                     }
                     // Each Surface generation owns its JNI reference until Dart has
                     // detached the native producer and explicitly acknowledges it.
@@ -174,7 +201,49 @@ public final class PlatformVideoView implements PlatformView {
                     activeSurfaceGeneration = generation;
                     surfaceReferences.put(generation, wid);
                     Log.i(TAG, "surfaceCreated: created new wid=" + wid);
+                    final long createdWid = wid;
                     onSurfaceEvent.accept(new SurfaceEvent(wid, generation, false));
+                    if (needsPqResetMonitoring()) {
+                        final android.view.Surface createdSurface = holder.getSurface();
+                        final Handler handler = new Handler(Looper.getMainLooper());
+                        handler.postDelayed(new Runnable() {
+                            private int checks;
+
+                            @Override
+                            public void run() {
+                                synchronized (PlatformVideoView.this) {
+                                    if (disposed || surfaceGeneration != generation ||
+                                            activeSurfaceGeneration != generation ||
+                                            wid != createdWid ||
+                                            !"pq".equals(appliedDataSpace) ||
+                                            !createdSurface.isValid()) return;
+                                    checks++;
+                                    final int expected = dataSpaceFor(initialDataSpace);
+                                    final int actual = getSurfaceDataSpace(createdSurface);
+                                    if (actual != expected) {
+                                        final boolean reapplied = actual >= 0 &&
+                                                setColorSpace(createdSurface, initialDataSpace);
+                                        Log.i(TAG, "hdrDataSpaceReset before=" + actual +
+                                                " expected=" + expected + " applied=" + reapplied +
+                                                " generation=" + generation + " wid=" + createdWid +
+                                                " check=" + checks);
+                                        if (!reapplied) {
+                                            // Report the exact live owner to Dart so it
+                                            // can fail the output waiter, then stop the
+                                            // producer and ACK its JNI reference release.
+                                            onSurfaceEvent.accept(new SurfaceEvent(
+                                                    createdWid, generation,
+                                                    "pqDataSpaceLost"));
+                                            failedSurfaceGeneration = generation;
+                                            wid = 0;
+                                            return;
+                                        }
+                                    }
+                                }
+                                handler.postDelayed(this, checks < 50 ? 200 : 1000);
+                            }
+                        }, 200);
+                    }
                     if (initialDataSpace == null && "rgba1010102".equals(initialPixelFormat)) {
                         new Handler(Looper.getMainLooper()).postDelayed(() -> {
                             if (!disposed && surfaceGeneration == generation && wid != 0 &&
@@ -220,6 +289,14 @@ public final class PlatformVideoView implements PlatformView {
         }
         surfaceReferences.remove(generation);
         releasedSurfaceReferences.put(generation, reference);
+        if (failedSurfaceGeneration == generation) {
+            // The producer has stopped before ReleaseSurface. Hide the failed
+            // PQ layer so a stale or wrongly tagged frame cannot remain on
+            // screen while the owner creates a replacement output.
+            surfaceView.setVisibility(View.INVISIBLE);
+        }
+        Log.i(TAG, "releaseSurface generation=" + generation +
+                " wid=" + reference + " result=released");
         // A generation may be proactively released while Flutter still owns
         // the SurfaceView (for example, A is stopped before B is promoted).
         // Suppress the later SurfaceHolder destroy callback for that already
@@ -240,6 +317,8 @@ public final class PlatformVideoView implements PlatformView {
             // reply is lost, Dart can repeat ReleaseSurface + this ACK without
             // observing a false generationMissing result.
             acknowledgedSurfaceReferences.put(generation, reference);
+            Log.i(TAG, "acknowledgeSurfaceRelease generation=" + generation +
+                    " wid=" + reference + " result=acknowledged");
             return true;
         }
         final Long acknowledgedReference = acknowledgedSurfaceReferences.get(generation);
@@ -333,9 +412,11 @@ public final class PlatformVideoView implements PlatformView {
     }
 
     /** Applies the display dataspace only after the decoder has identified HDR. */
-    public boolean setColorSpace(@NonNull String transfer) {
+    public synchronized boolean setColorSpace(@NonNull String transfer) {
         final android.view.Surface surface = surfaceView.getHolder().getSurface();
-        return surface != null && setColorSpace(surface, transfer);
+        final boolean applied = surface != null && setColorSpace(surface, transfer);
+        if (applied) appliedDataSpace = transfer;
+        return applied;
     }
 
     public boolean hasLiveSurface() {

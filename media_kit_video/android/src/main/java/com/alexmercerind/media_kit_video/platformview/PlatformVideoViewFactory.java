@@ -234,10 +234,16 @@ public class PlatformVideoViewFactory extends PlatformViewFactory {
             event.put("creationSerial", creationSerial);
             event.put("surfaceGeneration", surfaceEvent.generation);
             if (surfaceEvent.failed) {
-                // The view remains registered for a later creation attempt,
-                // but no Surface/WID became live for this failed attempt.
                 event.put("reason", surfaceEvent.failureReason);
-                channel.invokeMethod("PlatformVideoView.SurfaceFailed", event);
+                if (surfaceEvent.wid != 0) {
+                    // A running producer owns this WID. Dart must stop it and
+                    // ACK release after receiving the failure identity.
+                    liveSurfaceGenerations.remove(owner, surfaceEvent.generation);
+                    channel.invokeMethod("PlatformVideoView.SurfaceRuntimeFailed", event);
+                } else {
+                    // No Surface/WID became live for this failed attempt.
+                    channel.invokeMethod("PlatformVideoView.SurfaceFailed", event);
+                }
                 return;
             }
             // Fullscreen transitions may construct more than one PlatformView

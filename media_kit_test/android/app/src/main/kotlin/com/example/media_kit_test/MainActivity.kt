@@ -42,6 +42,7 @@ class MainActivity : FlutterActivity() {
         var samples = 0
         var nonblackLogged = false
         var contentLogged = false
+        var selectedIdentity = 0
         Log.i("FirstFramePixelCopy", "start generation=$generation ns=$startedNs " +
             "touchDownNs=$touchDownNs touchUpNs=$touchUpNs " +
             "target=${if (platformVideo) "platform" else "flutter"}")
@@ -61,6 +62,13 @@ class MainActivity : FlutterActivity() {
                     target.width < window.decorView.width / 2))) {
                 handler.postDelayed({ sample() }, 40)
                 return
+            }
+            val identity = System.identityHashCode(target)
+            if (identity != selectedIdentity) {
+                selectedIdentity = identity
+                Log.i("FirstFramePixelCopy", "target_selected generation=$generation " +
+                    "viewIdentity=$identity parent=${target.parent?.javaClass?.name} " +
+                    "size=${target.width}x${target.height}")
             }
             // The native P5 fixture opens on a nearly uniform sky. Sample
             // its whole video Surface so a center crop cannot miss the first
@@ -170,7 +178,9 @@ class MainActivity : FlutterActivity() {
         if (view is ViewGroup) {
             for (i in 0 until view.childCount) {
                 val candidate = findPlatformVideoSurface(view.getChildAt(i)) ?: continue
-                if (best == null || candidate.width * candidate.height >
+                // The fullscreen PlatformView is inserted after Flutter's
+                // SurfaceView; equal-sized views must select the newer one.
+                if (best == null || candidate.width * candidate.height >=
                     best.width * best.height) best = candidate
             }
         }

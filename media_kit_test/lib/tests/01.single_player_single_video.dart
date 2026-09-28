@@ -72,6 +72,10 @@ class _SinglePlayerSingleVideoScreenState
   static const _androidP5RpuPipelineBuilt = bool.fromEnvironment(
     'MEDIA_KIT_ANDROID_P5_RPU_PIPELINE_BUILT',
   );
+  static const _androidAutoSdrAfterP5Seconds = int.fromEnvironment(
+    'MEDIA_KIT_ANDROID_AUTO_SDR_AFTER_P5_SECONDS',
+    defaultValue: -1,
+  );
   static const _androidP5PlatformSdrDiagnostic = bool.fromEnvironment(
     'MEDIA_KIT_ANDROID_P5_PLATFORM_SDR_DIAGNOSTIC',
   );
@@ -148,6 +152,7 @@ class _SinglePlayerSingleVideoScreenState
             : null,
         androidSurfacePixelFormat: configuration.value.usePlatformView
             ? (vo == 'gpu-next' &&
+                    surfaceTransfer != null &&
                     !_androidGpuHdrRgba8888SurfaceProbe &&
                     !_androidP5PlatformSdrDiagnostic
                 ? 'rgba1010102'
@@ -337,6 +342,12 @@ class _SinglePlayerSingleVideoScreenState
     final supersedingRequest = _hdrIntent.begin();
     _hdrIntent.fail(supersedingRequest);
     await (await coordinator).dispose();
+    // Reset the mounted output as well as mpv properties before SDR frames.
+    await _hdrOutputSlot.ensure(
+      'gpu-next',
+      'mediacodec',
+      surfaceTransfer: null,
+    );
     await player.open(Media(source));
     debugPrint('ANDROID_HDR_SDR_RECOVERY_OPEN path=$source '
         'vo=${await player.getProperty('vo')} '
@@ -1184,6 +1195,17 @@ class _SinglePlayerSingleVideoScreenState
                     (seconds * Duration.microsecondsPerSecond).round(),
               ),
       );
+      if (_androidAutoSdrAfterP5Seconds > 0 &&
+          sources[0].contains('/media-kit-p5-')) {
+        await Future<void>.delayed(
+          Duration(seconds: _androidAutoSdrAfterP5Seconds),
+        );
+        if (mounted && !_autoPlayerDisposed) {
+          await _openDirectSdrAfterHdr(
+            '/data/local/tmp/media-kit-sdr-control.mp4',
+          );
+        }
+      }
       if (_androidP5PlatformSdrDiagnostic &&
           _androidP5AutoFullscreenAtSeconds >= 0) {
         unawaited(_autoEnterDiagnosticFullscreen());
@@ -1716,7 +1738,11 @@ class _SinglePlayerSingleVideoScreenState
                     if (_androidPreopenFirstFrameProbe) {
                       final started = await _flutterSurfaceProbeChannel
                           .invokeMapMethod<String, dynamic>(
-                              'StartFirstFrameProbe');
+                              'StartFirstFrameProbe', {
+                        'target': configuration.value.usePlatformView
+                            ? 'platform'
+                            : 'flutter',
+                      });
                       debugPrint('FIRST_FRAME_PIXEL_COPY started=$started');
                     }
                     await _openInitialSource();

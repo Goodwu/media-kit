@@ -1,8 +1,10 @@
 #include <jni.h>
 #include <android/native_window.h>
 #include <android/native_window_jni.h>
+#include <android/hardware_buffer.h>
 #include <android/data_space.h>
 #include <cstdint>
+#include <cerrno>
 #include <dlfcn.h>
 #include <android/log.h>
 #include <EGL/egl.h>
@@ -242,9 +244,47 @@ Java_com_alexmercerind_media_1kit_1video_platformview_PlatformVideoView_setSurfa
       ? nullptr
       : reinterpret_cast<SetBuffersDataSpace>(
           dlsym(library, "ANativeWindow_setBuffersDataSpace"));
-  const int result = set_buffers_dataspace == nullptr
+  int result = set_buffers_dataspace == nullptr
       ? -1
       : set_buffers_dataspace(window, dataspace);
+  const int public_result = result;
+  using GetBuffersDataSpace = int32_t (*)(ANativeWindow*);
+  const auto get_buffers_dataspace = library == nullptr
+      ? nullptr
+      : reinterpret_cast<GetBuffersDataSpace>(
+          dlsym(library, "ANativeWindow_getBuffersDataSpace"));
+  int32_t actual_dataspace = get_buffers_dataspace == nullptr
+      ? -1
+      : get_buffers_dataspace(window);
+
+  // This firmware's public setter rejects PQ during its HDR support query,
+  // before reaching the window setter. The private ABI is confined to the
+  // exact arm64 firmware and 10-bit window proven by the device probe.
+#if defined(__aarch64__)
+  char fingerprint[PROP_VALUE_MAX] = {};
+  char sdk[PROP_VALUE_MAX] = {};
+  if (public_result == -EINVAL && dataspace == ADATASPACE_BT2020_PQ &&
+      get_buffers_dataspace != nullptr &&
+      ANativeWindow_getFormat(window) == AHARDWAREBUFFER_FORMAT_R10G10B10A2_UNORM &&
+      __system_property_get("ro.build.version.sdk", sdk) > 0 &&
+      std::strcmp(sdk, "29") == 0 &&
+      __system_property_get("ro.build.fingerprint", fingerprint) > 0 &&
+      std::strcmp(fingerprint,
+          "HUAWEI/LYA-AL00/HWLYA:10/HUAWEILYA-AL00/10.1.0.163C00:user/release-keys") == 0) {
+    using WindowPerform = int (*)(ANativeWindow*, int, ...);
+    WindowPerform perform = nullptr;
+    std::memcpy(&perform,
+        reinterpret_cast<const char*>(window) + 0x98, sizeof(perform));
+    const int fallback_result = perform == nullptr
+        ? -1 : perform(window, 19, dataspace);
+    actual_dataspace = get_buffers_dataspace(window);
+    __android_log_print(ANDROID_LOG_INFO, "media_kit_hdr_bridge",
+        "p5PqFirmwareFallback perform=%d actual=%d expected=%d",
+        fallback_result, actual_dataspace, dataspace);
+    if (fallback_result == 0 && actual_dataspace == dataspace) result = 0;
+  }
+#endif
+
   int srgb_probe_result = -1;
   int reset_result = -1;
   if (probe_srgb_on_failure == JNI_TRUE && result != 0 &&
@@ -255,21 +295,16 @@ Java_com_alexmercerind_media_1kit_1video_platformview_PlatformVideoView_setSurfa
     }
   }
 
-  using GetBuffersDataSpace = int32_t (*)(ANativeWindow*);
-  const auto get_buffers_dataspace = library == nullptr
-      ? nullptr
-      : reinterpret_cast<GetBuffersDataSpace>(
-          dlsym(library, "ANativeWindow_getBuffersDataSpace"));
-  const int32_t actual_dataspace = get_buffers_dataspace == nullptr
-      ? -1
-      : get_buffers_dataspace(window);
+  actual_dataspace = get_buffers_dataspace == nullptr
+      ? -1 : get_buffers_dataspace(window);
 
   __android_log_print(
       ANDROID_LOG_INFO,
       "media_kit_hdr_bridge",
-      "setBuffersDataSpace symbol=%s dataspace=%d result=%d srgbProbe=%d resetUnknown=%d format=%d size=%dx%d actualDataspace=%d",
+      "setBuffersDataSpace symbol=%s dataspace=%d publicResult=%d result=%d srgbProbe=%d resetUnknown=%d format=%d size=%dx%d actualDataspace=%d",
       set_buffers_dataspace == nullptr ? "missing" : "resolved",
       dataspace,
+      public_result,
       result,
       srgb_probe_result,
       reset_result,
@@ -293,5 +328,24 @@ Java_com_alexmercerind_media_1kit_1video_platformview_PlatformVideoView_setSurfa
 
   ANativeWindow_release(window);
   if (library != nullptr) dlclose(library);
-  return result == 0 ? JNI_TRUE : JNI_FALSE;
+  return result == 0 && (dataspace != ADATASPACE_BT2020_PQ ||
+      actual_dataspace == dataspace) ? JNI_TRUE : JNI_FALSE;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+Java_com_alexmercerind_media_1kit_1video_platformview_PlatformVideoView_getSurfaceDataSpace(
+    JNIEnv* env, jclass, jobject surface) {
+  if (surface == nullptr) return -1;
+  ANativeWindow* window = ANativeWindow_fromSurface(env, surface);
+  if (window == nullptr) return -1;
+  void* library = dlopen("libandroid.so", RTLD_NOW | RTLD_LOCAL);
+  using GetBuffersDataSpace = int32_t (*)(ANativeWindow*);
+  const auto get_buffers_dataspace = library == nullptr ? nullptr
+      : reinterpret_cast<GetBuffersDataSpace>(
+          dlsym(library, "ANativeWindow_getBuffersDataSpace"));
+  const int32_t actual = get_buffers_dataspace == nullptr
+      ? -1 : get_buffers_dataspace(window);
+  if (library != nullptr) dlclose(library);
+  ANativeWindow_release(window);
+  return actual;
 }
