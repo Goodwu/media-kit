@@ -16,11 +16,11 @@ P5→PQ 输出、首帧和性能使用 `/Users/wuweiwei1/Downloads/test-clips/My
 ### P1 · P5→PQ 公开产品输出与首帧
 
 - [ ] status: in_progress；context: archives/conversations/android-hdr-dv-display-plan-20260922.md
-- acceptance: 以 Mystery Box 从正常入口横屏全屏出真实画面，确认 `gpu-next`/`mediacodec`、10 位 BT.2020/PQ 视频层、HDR 静态元数据、系统 HDR 合成和退出后 SDR 复位；触摸到可辨内容小于2秒、争取1秒，探针绑定当前 View/Surface 代次，并以真人观察佐证。公开 Android 输出链路优先；精确固件私有探针仅在公开方案确实不可行时作为受限备选。
+- acceptance: 以 Mystery Box 从正常入口横屏全屏出真实画面，确认 `gpu-next`/`mediacodec`、10 位 BT.2020/PQ 视频层、系统 HDR 合成和退出后 SDR 复位；核清 HDR 静态元数据的来源与缺失边界，片源没有的母版值不可伪造。触摸到可辨内容小于2秒、争取1秒，探针绑定当前 View/Surface 代次，并以真人观察佐证。公开 Android 输出链路优先；精确固件私有探针仅在公开方案确实不可行时作为受限备选。
 - latest: 12542–12544 精确固件私有探针得到 PQ 实际画面及系统合成，但不是产品链路；12539 公开 Surface PQ 设置失败，`wid=0`。旧 Glass 片头黑场使12543/12544约4秒可辨内容读回不能作为新片首帧结论；12544探针仍未绑定实际 Surface generation。只读复核确认本固件公开NDK setter受SF权限/能力门禁阻断，EGL/Vulkan没有可用PQ Surface协商，公开SurfaceControl PQ事务SIGABRT；API29 ImageWriter未提供可用的公开PQ dataspace出口。没有值得原样重试的公开GPU PQ路径，但不推广为Android整体不支持。隔离产品候选已收紧为公开 setter 返回-22、精确固件/格式才回退，持续PQ监测与运行中失败stop→release→ACK；arm64 12582 APK构建成功、只含arm64库，修订协议独立静态复审无新增阻断，尚未安装/出画/故障注入。见 `archives/experiments/android-p5-private-pq-probe-target-12544-20260928.md`、`archives/experiments/android-p5-public-pq-route-assessment-20260928.md`、`archives/experiments/android-p5-pq-product-candidate-12582-20260928.md`。
 - latest_device: 12582首次正常入口 Mystery Box 短轮：8/20秒截图为不同实际画面；当前View generation2采用RGBA1010102，公开setter -22 后精确固件回退成功，SF与HWC均为BT.2020/PQ、10位DEVICE合成。SF HDR静态元数据类型0；片源ffprobe仅有DOVI配置side data。FirstFramePixelCopy误选旧Surface而零有效样本，首帧尚无时间结论。见 `archives/experiments/android-p5-pq-product-candidate-12582-20260928.md`。
-- latest_followup: 12589首帧探针绑定实际PQ View，三独立轮触摸按下→Surface可辨内容1.144/1.214/1.057秒，非面板光学计时；12591修复PQ→SDR时的旧PQ Surface残留，12594无注入回归PQ首图1.084秒并自动切SDR出画。12593受控PQ失效注入验证停解码、AImage闭合、ReleaseSurface/ACK及失效层隐藏；12595首轮ACK失败后重试成功，12597旧PQ层释放五秒后故障事件到达，新SDR层仍继续显示。诊断注入均已从正式代码撤销。12598无注入正常PQ横屏长播，触摸→当前Surface可辨内容1.090秒，SF/HWC为BT.2020/PQ、10位视频层；用户人工观感回复待收取，不能据截图代替。见同一P1实验记录。
-- next: 收取12598 PQ真人观感；复核无注入最终包连续出画、失败后重试及PQ→SDR复位，完成独立代码审核后合入候选。P1未验收前不转P2。
+- latest_followup: 12589首帧探针绑定实际PQ View，三独立轮触摸按下→Surface可辨内容1.144/1.214/1.057秒，非面板光学计时；12591修复PQ→SDR时的旧PQ Surface残留，12594无注入回归PQ首图1.084秒并自动切SDR出画。12593受控PQ失效注入验证停解码、AImage闭合、ReleaseSurface/ACK及失效层隐藏；12595首轮ACK失败后重试成功，12597旧PQ层释放五秒后故障事件到达，新SDR层仍继续显示。诊断注入均已从正式代码撤销。12598无注入正常PQ横屏长播，触摸→当前Surface可辨内容1.090秒，SF/HWC为BT.2020/PQ、10位视频层；用户在同步重播中确认“画面良好，无异常”。V1独立复核无确定性代码阻断。见同一P1实验记录。
+- next: 核验实际运行中PQ失效后的同进程重试；以最终无注入代码复核PQ→SDR复位和连续出画，然后合入产品候选。P1未验收前不转P2。
 
 ### P2 · P5→PQ 全片性能
 
