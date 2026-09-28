@@ -8,6 +8,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
+import 'package:media_kit/media_kit.dart' show VideoParams;
 import 'package:media_kit_video/media_kit_video_controls/media_kit_video_controls.dart';
 
 import 'package:media_kit_video/src/subtitle/subtitle_view.dart';
@@ -420,10 +421,14 @@ class VideoState extends State<Video> with WidgetsBindingObserver {
     BoxFit fit,
     PlatformVideoController notifier,
   ) {
+    final hdrPlatformLayout = notifier.configuration.usePlatformView &&
+        notifier.configuration.vo == 'gpu-next' &&
+        (notifier.configuration.androidSurfaceTransfer?.isNotEmpty ?? false);
     if (!Platform.isAndroid ||
-        notifier.configuration.usePlatformView ||
-        (!notifier.configuration.matchAndroidTextureOutputToLayout &&
-            !notifier.configuration.enableAndroidSurfaceProducer) ||
+        (!hdrPlatformLayout &&
+            (notifier.configuration.usePlatformView ||
+                (!notifier.configuration.matchAndroidTextureOutputToLayout &&
+                    !notifier.configuration.enableAndroidSurfaceProducer))) ||
         !constraints.hasBoundedWidth ||
         !constraints.hasBoundedHeight) {
       return;
@@ -509,23 +514,48 @@ class VideoState extends State<Video> with WidgetsBindingObserver {
                             final height = viewportConstraints.hasBoundedHeight
                                 ? viewportConstraints.maxHeight
                                 : videoViewParameters.height ?? 1.0;
-                            return SizedBox(
-                              width: width,
-                              height: height,
-                              child: PlatformViewVideo(
-                                key: ValueKey(
-                                  'android-platform-view-${notifier.nativeHandle}-${notifier.nativeSurfaceGeneration}',
-                                ),
-                                handle: notifier.nativeHandle!,
-                                width: width.ceil(),
-                                height: height.ceil(),
-                                useHCPP: notifier.configuration.useHCPP,
-                                generation: notifier.nativeSurfaceGeneration,
-                                androidSurfaceTransfer: notifier
-                                    .configuration.androidSurfaceTransfer,
-                                androidSurfacePixelFormat: notifier
-                                    .configuration.androidSurfacePixelFormat,
-                              ),
+                            final hdrPlatformView =
+                                notifier.configuration.vo == 'gpu-next' &&
+                                    (notifier
+                                            .configuration
+                                            .androidSurfaceTransfer
+                                            ?.isNotEmpty ??
+                                        false);
+                            return StreamBuilder<VideoParams>(
+                              stream: hdrPlatformView
+                                  ? widget.controller.player.stream.videoParams
+                                  : null,
+                              builder: (context, snapshot) {
+                                final aspect = snapshot.data?.aspect ??
+                                    widget.controller.player.state.videoParams
+                                        .aspect;
+                                final fittedHeight = hdrPlatformView &&
+                                        aspect != null &&
+                                        aspect.isFinite &&
+                                        aspect > 0
+                                    ? width / aspect
+                                    : height;
+                                return SizedBox(
+                                  width: width,
+                                  height: fittedHeight,
+                                  child: PlatformViewVideo(
+                                    key: ValueKey(
+                                      'android-platform-view-${notifier.nativeHandle}-${notifier.nativeSurfaceGeneration}',
+                                    ),
+                                    handle: notifier.nativeHandle!,
+                                    width: width.ceil(),
+                                    height: fittedHeight.ceil(),
+                                    useHCPP: notifier.configuration.useHCPP,
+                                    generation:
+                                        notifier.nativeSurfaceGeneration,
+                                    androidSurfaceTransfer: notifier
+                                        .configuration.androidSurfaceTransfer,
+                                    androidSurfacePixelFormat: notifier
+                                        .configuration
+                                        .androidSurfacePixelFormat,
+                                  ),
+                                );
+                              },
                             );
                           }
                           return ValueListenableBuilder<bool>(

@@ -608,17 +608,25 @@ class AndroidVideoController extends PlatformVideoController {
       !configuration.usePlatformView &&
       !configuration.enableAndroidSurfaceProducer;
 
+  bool get _layoutSizedHdrPlatformView =>
+      configuration.usePlatformView &&
+      configuration.vo == 'gpu-next' &&
+      (configuration.androidSurfaceTransfer?.isNotEmpty ?? false);
+
   @override
   Future<void> updateTextureLayouts(
       Object owner, List<TextureOutputLayout> layouts) {
-    if (configuration.usePlatformView ||
-        (!_layoutSizedTexture && !configuration.enableAndroidSurfaceProducer)) {
+    if (!_layoutSizedHdrPlatformView &&
+        !_layoutSizedTexture &&
+        !configuration.enableAndroidSurfaceProducer) {
       return Future<void>.value();
     }
     return lock.synchronized(() async {
       if (_disposed || _fullyDisposed) return;
       _textureLayoutRegistry.update(owner, layouts);
-      if (_layoutSizedTexture) await _applyVideoSizeLocked();
+      if (_layoutSizedTexture || _layoutSizedHdrPlatformView) {
+        await _applyVideoSizeLocked();
+      }
     });
   }
 
@@ -704,7 +712,8 @@ class AndroidVideoController extends PlatformVideoController {
     int width = source.width.toInt();
     int height = source.height.toInt();
     final textureLayouts = _textureLayoutRegistry.layouts;
-    if (_layoutSizedTexture && textureLayouts.isNotEmpty) {
+    if ((_layoutSizedTexture || _layoutSizedHdrPlatformView) &&
+        textureLayouts.isNotEmpty) {
       final target =
           calculateAndroidTextureOutputSizeForLayouts(source, textureLayouts);
       width = target.width.toInt();
@@ -732,6 +741,11 @@ class AndroidVideoController extends PlatformVideoController {
     }
     final requestedSize = Size(width.toDouble(), height.toDouble());
     if (_appliedVideoSizeRequest == requestedSize) return;
+    if (_layoutSizedHdrPlatformView && textureLayouts.isNotEmpty) {
+      debugPrint('ANDROID_PLATFORM_LAYOUT_OUTPUT_SIZE source='
+          '${source.width.toInt()}x${source.height.toInt()} '
+          'target=${width}x$height');
+    }
     final handle = await player.handle;
     if (_disposed || _fullyDisposed) return;
     if (!configuration.usePlatformView) {

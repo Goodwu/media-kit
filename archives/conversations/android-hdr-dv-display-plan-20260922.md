@@ -2,6 +2,12 @@
 
 ## Current State
 
+- 2026-09-28 P2最终几何修正与性能：12611发现竖屏HDR PlatformView虽按布局缩小缓冲，画面却被控件拉长；12612按视频aspect参与BoxFit后16:9截图正常、尺寸随视图切换。12613横屏全屏维持2560×1440、10位PQ且居中。12615同最终代码Mystery Box全片严格EOS VO11、decoder0，GPU中位586MHz，较4K PQ基线VO2204少约99.5%；V1复核无确定性阻断。用户回复“稍后再看”，最终尺寸真人画质尚未验收；双视图同时显示及热切源aspect残留归P3继续观察。所有设备轮后恢复原12492、自动亮度、熄屏。详见 `archives/experiments/android-p5-pq-performance-12603-20260928.md`。
+
+- 2026-09-28 P2最新：12605无固定限宽的物理布局PQ全片EOS VO20、decoder0，GPU中位586MHz，较3840×2160基线VO2204减少99.1%；最终2560×1440画质仍待用户同步复看。12606 HDR10同布局代码输出2880×1440，SF/HWC维持10位BT.2020/PQ；12607强制P8.4 gpu-next/HLG的公开dataspace设置遭该机拒绝，12608正常P8.4路径回到mediacodec_embed，SF为BT.2020 HLG、连续两时刻实画，布局改动未介入。三轮均恢复原12492、自动亮度、熄屏。见 `archives/experiments/android-p5-pq-performance-12603-20260928.md`。
+
+- 2026-09-28 P2 PQ全片基线：12603 Mystery Box 4K PQ正式代码到EOS，VO2204/decoder0、GPU110个1Hz样本中位720MHz且82样本720MHz，分段热状态1；约37.7fps粗估，渲染/输出压力显著。先前一轮主机空间不足、一轮设备返回桌面均剔除。12604仅把PQ输出缓冲限到2560×1440，短轮PQ 10位/HWC正确、t18 VO19（4K同阶段321）；全片复测中。见 `archives/experiments/android-p5-pq-performance-12603-20260928.md`。
+
 - 2026-09-28 P1完成：12602无注入最终代码PQ首图PixelCopy 1.168秒，10秒切SDR后BT.709/BT.1886出画、SF无旧PQ层；12601受控运行中失效后同PID同路重试，新PQ层实际出画；V1独立复核无代码阻断。12598真人同步复看“画面良好，无异常”。静态HDR母版字段源端缺失，SF types=0，不伪造；原生DV直通、光学计时和定量色准未由此证明。原12492、自动亮度、熄屏恢复。隔离分支保存产品实现，下一步P2 Mystery Box正式PQ全片性能，见 `archives/experiments/android-p5-pq-product-candidate-12582-20260928.md`。
 
 - 2026-09-28 P1 同路重试补门禁：12599最终代码自动PQ→SDR短轮，BT.709继续出画且SF无PQ旧层；12600受控运行中PQ失败后同路重试复用了失败输出并立即返回旧错误。12601修通用 `AndroidHdrOutputSlot.ensure`：显式同路重试在waitReady失败后经原有dispose屏障再建新层；受控同一PID第二次PQ出画，SF/HWC恢复10位PQ。临时注入已撤销，产品树仅留通用输出槽修复；待独立复核与无注入最终包，见 `archives/experiments/android-p5-pq-product-candidate-12582-20260928.md`。
