@@ -1317,7 +1317,14 @@ class AndroidVideoController extends PlatformVideoController {
           height = event.dw ?? 0;
         }
 
-        if (width <= 0 || height <= 0) return;
+        if (width <= 0 || height <= 0) {
+          // Player emits empty video parameters between sources. A layout
+          // update during that gap must not size the new output using the
+          // previous source's aspect ratio.
+          _sourceDisplaySize = null;
+          _appliedVideoSizeRequest = null;
+          return;
+        }
         _sourceDisplaySize = Size(width.toDouble(), height.toDouble());
         await _applyVideoSizeLocked();
       }),
