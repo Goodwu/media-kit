@@ -292,12 +292,6 @@ class _SinglePlayerSingleVideoScreenState
         _dualViewProbeScheduled = true;
         unawaited(_runDualViewLifecycleProbe());
       }
-      if (Platform.isAndroid &&
-          _androidEngineDestroyAtSeconds >= 0 &&
-          !_engineDestroyScheduled) {
-        _engineDestroyScheduled = true;
-        unawaited(_runEngineDestroyProbe());
-      }
       if (_androidHdrPauseAtMediaSeconds >= 0) {
         final snapshot = _hdrIntent.snapshot();
         unawaited(() async {
@@ -761,6 +755,12 @@ class _SinglePlayerSingleVideoScreenState
   @override
   void initState() {
     super.initState();
+    if (Platform.isAndroid &&
+        _androidEngineDestroyAtSeconds >= 0 &&
+        !_engineDestroyScheduled) {
+      _engineDestroyScheduled = true;
+      unawaited(_runEngineDestroyProbe());
+    }
     if (Platform.isAndroid && _androidP5CounterProbe) {
       _androidP5CounterTimer = Timer.periodic(const Duration(seconds: 10), (_) {
         unawaited(_sampleAndroidP5Counters());
@@ -1571,19 +1571,17 @@ class _SinglePlayerSingleVideoScreenState
     }
   }
 
-  /// Destroys the FlutterEngine directly from the Android side while media is
-  /// playing, bypassing every Dart-side disposal path. The round script then
-  /// checks that the process survives, native players are torn down, and no
-  /// crash follows.
+  /// Destroys the FlutterEngine directly from the Android side, bypassing
+  /// every Dart-side disposal path. The round script then checks that the
+  /// process survives, native players are torn down, and no crash follows.
+  /// Wall-clock based so a no-media Player can be exercised too.
   Future<void> _runEngineDestroyProbe() async {
     try {
-      final start = Duration(seconds: _androidEngineDestroyAtSeconds);
-      await player.stream.position
-          .firstWhere((position) => position >= start)
-          .timeout(Duration(seconds: _androidEngineDestroyAtSeconds + 30));
+      await Future<void>.delayed(
+          Duration(seconds: _androidEngineDestroyAtSeconds));
       if (!mounted) return;
-      debugPrint(
-          'ANDROID_ENGINE_DESTROY requested position=${player.state.position}');
+      debugPrint('ANDROID_ENGINE_DESTROY requested '
+          'position=${player.state.position}');
       unawaited(_engineControlChannel
           .invokeMethod<void>('DestroyEngineNow')
           .then((_) => debugPrint('ANDROID_ENGINE_DESTROY returned'))

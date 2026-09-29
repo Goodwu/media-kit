@@ -206,9 +206,19 @@ class MainActivity : FlutterActivity() {
                 // Reply before destroying: the engine owns the messenger this
                 // reply travels on, and the Dart side may already be torn down.
                 result.success(null)
-                Log.i("EngineControl", "destroy_begin")
-                flutterEngine.destroy()
-                Log.i("EngineControl", "destroy_complete")
+                // Never destroy the engine reentrantly from inside a channel
+                // dispatch. Post the destroy so the current platform message
+                // finishes and queued Dart continuations settle first; tearing
+                // down mid-dispatch races native producers against freed
+                // engine state.
+                Handler(Looper.getMainLooper()).postDelayed(
+                    {
+                        Log.i("EngineControl", "destroy_begin")
+                        flutterEngine.destroy()
+                        Log.i("EngineControl", "destroy_complete")
+                    },
+                    50,
+                )
             }
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "media_kit_test/p5_runtime_gate")
             .setMethodCallHandler { call, result ->

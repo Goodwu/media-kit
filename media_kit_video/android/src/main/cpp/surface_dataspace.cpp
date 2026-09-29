@@ -349,3 +349,33 @@ Java_com_alexmercerind_media_1kit_1video_platformview_PlatformVideoView_getSurfa
   ANativeWindow_release(window);
   return actual;
 }
+
+// Owner broker: clears the mpv wakeup callback from the Java side. A host
+// that destroys the FlutterEngine without Dart-side disposal leaves mpv
+// playing; when the Dart isolate teardown invalidates the NativeCallable
+// trampoline registered as the wakeup callback, the next mpv wakeup would
+// call freed executable memory. Clearing the callback at engine detach
+// removes that native -> Dart edge while the trampoline is still mapped.
+extern "C" JNIEXPORT void JNICALL
+Java_com_alexmercerind_media_1kit_1video_MpvOwnerBroker_nativeClearWakeupCallback(
+    JNIEnv*, jclass, jlong ctx) {
+  void* libmpv = dlopen("libmpv.so", RTLD_NOLOAD | RTLD_NOW | RTLD_LOCAL);
+  if (libmpv == nullptr) {
+    __android_log_print(ANDROID_LOG_WARN, "media_kit_owner_broker",
+                        "clearWakeup: libmpv not loaded");
+    return;
+  }
+  using SetWakeupCallback = void (*)(void*, void (*)(void*), void*);
+  const auto set_wakeup_callback =
+      reinterpret_cast<SetWakeupCallback>(
+          dlsym(libmpv, "mpv_set_wakeup_callback"));
+  if (set_wakeup_callback == nullptr) {
+    __android_log_print(ANDROID_LOG_WARN, "media_kit_owner_broker",
+                        "clearWakeup: mpv_set_wakeup_callback unavailable");
+    return;
+  }
+  set_wakeup_callback(reinterpret_cast<void*>(ctx), nullptr, nullptr);
+  __android_log_print(ANDROID_LOG_INFO, "media_kit_owner_broker",
+                      "clearWakeup: ctx=0x%llx",
+                      static_cast<unsigned long long>(ctx));
+}

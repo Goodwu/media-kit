@@ -16,6 +16,7 @@ import 'package:synchronized/synchronized.dart';
 import 'package:media_kit/media_kit.dart';
 
 import 'package:media_kit_video/src/utils/query_decoders.dart';
+import 'package:media_kit_video/src/utils/mpv_owner_broker.dart';
 import 'package:media_kit_video/src/video_controller/platform_video_controller.dart';
 
 import 'current_output_intent.dart';
@@ -1300,6 +1301,10 @@ class AndroidVideoController extends PlatformVideoController {
   /// {@macro android_video_controller}
   AndroidVideoController._(super.player, super.configuration) {
     _channel; // Access _channel to trigger its initialization when the class is first accessed.
+    // Register existing and future mpv handles with the Android owner
+    // broker so engine teardown without Dart disposal cannot call a dead
+    // NativeCallable trampoline.
+    wireMpvOwnerBroker();
     _postTerminationCallback = _onPlayerTerminated;
     platform.postTermination.add(_postTerminationCallback);
     wid.addListener(widListener);

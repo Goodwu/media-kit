@@ -36,6 +36,35 @@ import com.alexmercerind.media_kit_video.platformview.PlatformVideoViewFactory;
  * MediaKitVideoPlugin
  */
 public class MediaKitVideoPlugin implements FlutterPlugin, MethodCallHandler {
+    /**
+     * Pins the native libraries for the process lifetime.
+     *
+     * media_kit opens libmpv and the Android helper through Dart FFI
+     * {@code DynamicLibrary.open}. When a host destroys the FlutterEngine
+     * without Dart-side disposal, those handles are closed during isolate
+     * teardown, which unmaps the libraries while native player threads are
+     * still executing inside them. A Java-side loader reference keeps the
+     * mappings alive; the leaked player threads then stop safely at the next
+     * teardown boundary instead of crashing the process.
+     */
+    private static boolean nativeLibrariesPinned = false;
+
+    private static void pinNativeLibraries() {
+        if (nativeLibrariesPinned) {
+            return;
+        }
+        nativeLibrariesPinned = true;
+        for (final String library : new String[] {"mpv", "mediakitandroidhelper"}) {
+            try {
+                System.loadLibrary(library);
+            } catch (Throwable e) {
+                android.util.Log.w(
+                    "MediaKitVideoPlugin",
+                    "pinNativeLibraries: " + library + ": " + e);
+            }
+        }
+    }
+
     private MethodChannel channel;
     private VideoOutputManager videoOutputManager;
     private Context applicationContext;
@@ -43,9 +72,38 @@ public class MediaKitVideoPlugin implements FlutterPlugin, MethodCallHandler {
 
     @Override
     public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
+        pinNativeLibraries();
         applicationContext = flutterPluginBinding.getApplicationContext();
         channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "com.alexmercerind/media_kit_video");
         channel.setMethodCallHandler(this);
+
+        // Owner broker registration channel. Served from this plugin because
+        // media_kit itself has no Android code; every app that plays video
+        // through media_kit includes this plugin.
+        new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "media_kit/native_broker")
+            .setMethodCallHandler(
+                (call, result) -> {
+                    final long handle;
+                    try {
+                        handle = Long.parseLong(call.arguments().toString());
+                    } catch (NumberFormatException e) {
+                        result.error("invalid_handle", e.getMessage(), null);
+                        return;
+                    }
+                    switch (call.method) {
+                        case "Register":
+                            MpvOwnerBroker.register(handle);
+                            result.success(null);
+                            break;
+                        case "Unregister":
+                            MpvOwnerBroker.unregister(handle);
+                            result.success(null);
+                            break;
+                        default:
+                            result.notImplemented();
+                            break;
+                    }
+                });
 
         videoOutputManager = new VideoOutputManager(flutterPluginBinding.getTextureRegistry());
 
@@ -159,6 +217,17 @@ public class MediaKitVideoPlugin implements FlutterPlugin, MethodCallHandler {
 
     @Override
     public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
+        // Owner-broker teardown: hosts may destroy the FlutterEngine without
+        // any Dart-side disposal (e.g. FlutterEngine.destroy while playing).
+        // Clear every mpv wakeup callback first, while the NativeCallable
+        // trampolines backing them are still mapped, then release the video
+        // outputs so the raster teardown and any native producer that keeps
+        // running never touch freed surface state together.
+        MpvOwnerBroker.onEngineDetach();
+        if (videoOutputManager != null) {
+            videoOutputManager.disposeAll();
+            videoOutputManager = null;
+        }
         platformVideoViewFactory.onEngineDetached();
         channel.setMethodCallHandler(null);
         applicationContext = null;

@@ -2,6 +2,8 @@
 
 ## Current State
 
+- 2026-09-29 直接Engine销毁崩溃已根因修复（12646–12654）：release 模式 `NativeCallable` wakeup 蹦床随 isolate 拆卸失效、播放中的 mpv 线程调用即崩。owner broker（media_kit_video `onDetachedFromEngine` 经 JNI 清空 wakeup 回调 + Dart 注入钩子注册句柄）落地后播放中直接销毁 4/4 零崩溃（基线 12/14 崩溃），正常 Back 无回归，裸 Player 终态已证。剩余增量：销毁后 mpv 终止（需 JAR/原生扩展）、音频-only 接线。详见 `archives/experiments/android-p5-engine-destroy-12646-20260929.md`。
+
 - 2026-09-29 直接Engine销毁复现确定性崩溃（12646）：新增 engine_control 通道探针，播放中 `flutterEngine.destroy()` 两轮 2/2 于 `mpv_set_property_async+136` SIGSEGV、进程死亡（正常Back路径全批次零崩溃）。P3该项在 owner broker 修复前无法通过；修复归 native-output 任务，已有确定性回归工具。同日切源候选（12641/12642 A/B + 12645 双视图 + 全屏）验收通过并提交 565c9ff。
 
 - 2026-09-29 切源候选A/B实机验收完成（12641/12642）：新增默认关闭的热切探针（`MEDIA_KIT_ANDROID_HOT_SWITCH_TARGET/AT_SECONDS`+100ms布局ping），Glass(16:9)→p84控制源(2.0:1)热切。对照包在空参数间隙复现旧aspect中介`SetSurfaceSize 996×560`/`2560×1440`；候选包间隙零请求、新源参数到达即刻正确`2880×1440`。两轮AImage闭合、EOS、dispose、零错误。real.dart候选与探针一并提交；transaction同控制器热切/SurfaceProducer路径/双视图同时显示仍属P3后续。

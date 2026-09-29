@@ -47,6 +47,23 @@ public class VideoOutputManager {
         }
     }
 
+    /**
+     * Releases every registered video output.
+     *
+     * Owner-broker teardown for hosts that destroy the FlutterEngine without
+     * Dart-side disposal: releasing the SurfaceTexture entries here, at
+     * engine detach, unregisters Flutter's frame callbacks before the raster
+     * side is gone. A native producer still pushing frames afterwards hits
+     * an abandoned buffer queue instead of freed engine memory.
+     */
+    public void disposeAll() {
+        synchronized (lock) {
+            for (final Long handle : new java.util.ArrayList<>(videoOutputs.keySet())) {
+                dispose(handle);
+            }
+        }
+    }
+
     public java.util.Map<String, Object> setSurfaceSize(long handle, int width, int height) {
         synchronized (lock) {
             Log.i(TAG, String.format(Locale.ENGLISH, "com.alexmercerind.media_kit_video.VideoOutputManager.setSurfaceSize: %d %d %d", handle, width, height));

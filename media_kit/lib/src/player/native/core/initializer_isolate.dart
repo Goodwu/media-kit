@@ -48,6 +48,7 @@ class InitializerIsolate {
     final isolate = await Isolate.spawn(
       _mainloop,
       receiver.sendPort,
+      debugName: 'mpv_initializer',
     );
     receiver.listen(
       (message) async {
