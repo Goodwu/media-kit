@@ -2,7 +2,9 @@
 
 ## Current State
 
-- 2026-09-29 直接Engine销毁崩溃已根因修复（12646–12654）：release 模式 `NativeCallable` wakeup 蹦床随 isolate 拆卸失效、播放中的 mpv 线程调用即崩。owner broker（media_kit_video `onDetachedFromEngine` 经 JNI 清空 wakeup 回调 + Dart 注入钩子注册句柄）落地后播放中直接销毁 4/4 零崩溃（基线 12/14 崩溃），正常 Back 无回归，裸 Player 终态已证。剩余增量：销毁后 mpv 终止（需 JAR/原生扩展）、音频-only 接线。详见 `archives/experiments/android-p5-engine-destroy-12646-20260929.md`。
+- 2026-09-30 直接Engine销毁资源闭环完成（12655–12657）：broker 在清空 wakeup 回调（主线程同步）后于专用线程 `mpv_terminate_destroy` 全部注册句柄。播放中直接销毁 3/3 零崩溃且 mpv 线程全部退出（`ps -T` 确认）、P5_IMAGE_FINAL 949/949 由 broker 终止触发、进程存活、destroy 30ms 不阻塞平台线程；正常 Back 零回归（unregister 到达、broker 零活动、2263/2263 闭合）。P3「直接 Engine 销毁后资源正确释放」验收达成；剩余边界：音频-only 宿主接线。详见 `archives/experiments/android-p5-engine-destroy-12646-20260929.md`。
+
+- 2026-09-29 直接Engine销毁崩溃已根因修复（12646–12654）：release 模式 `NativeCallable` wakeup 蹦床随 isolate 拆卸失效、播放中的 mpv 线程调用即崩。owner broker（media_kit_video `onDetachedFromEngine` 经 JNI 清空 wakeup 回调 + Dart 注入钩子注册句柄）落地后播放中直接销毁 4/4 零崩溃（基线 12/14 崩溃），正常 Back 无回归，裸 Player 终态已证。详见 `archives/experiments/android-p5-engine-destroy-12646-20260929.md`。
 
 - 2026-09-29 直接Engine销毁复现确定性崩溃（12646）：新增 engine_control 通道探针，播放中 `flutterEngine.destroy()` 两轮 2/2 于 `mpv_set_property_async+136` SIGSEGV、进程死亡（正常Back路径全批次零崩溃）。P3该项在 owner broker 修复前无法通过；修复归 native-output 任务，已有确定性回归工具。同日切源候选（12641/12642 A/B + 12645 双视图 + 全屏）验收通过并提交 565c9ff。
 
