@@ -96,7 +96,13 @@ public class VideoOutput implements TextureRegistry.SurfaceProducer.Callback {
                 }
                 onSurfaceCleanup();
             } else {
-                textureUpdateCallback.onTextureUpdate(id, 0, 0, 0);
+                // The resize notification may target a Dart channel that is
+                // already gone when this runs from engine-detach teardown.
+                try {
+                    textureUpdateCallback.onTextureUpdate(id, 0, 0, 0);
+                } catch (Throwable e) {
+                    Log.e(TAG, "dispose", e);
+                }
                 if (wid != 0) {
                     GlobalObjectRefManager.deleteGlobalObjectRef(wid);
                     wid = 0;
