@@ -1,0 +1,207 @@
+diff --git a/media_kit_test/android/gradle.properties b/media_kit_test/android/gradle.properties
+index 0e10601..e88a65f 100644
+--- a/media_kit_test/android/gradle.properties
++++ b/media_kit_test/android/gradle.properties
+@@ -10,3 +10,5 @@ android.newDsl=false
+ android.ndk.suppressMinSdkVersionError=21
+ # Current Android device verification uses only arm64-v8a.
+ mediaKitArm64Only=true
++
++org.gradle.offline=true
+diff --git a/media_kit_test/lib/common/sources/android_hdr_playback_policy.dart b/media_kit_test/lib/common/sources/android_hdr_playback_policy.dart
+index 8c135d4..981fc9f 100644
+--- a/media_kit_test/lib/common/sources/android_hdr_playback_policy.dart
++++ b/media_kit_test/lib/common/sources/android_hdr_playback_policy.dart
+@@ -1,14 +1,5 @@
+ import 'android_hdr_sample_identity.dart';
+ 
+-/// The experimental native P5 path is only valid when FFmpeg attaches RPU
+-/// side data and the mapper preserves raw YUV for Dolby Vision reshape.
+-void requireAndroidP5RuntimePipeline(Map<String, String> properties) {
+-  if (properties['debug.media_kit.p5_rpu_probe'] != '2' ||
+-      properties['debug.media_kit.p5_raw_yuv'] != '1') {
+-    throw StateError('P5 RPU attachment and raw YUV pipeline are not enabled');
+-  }
+-}
+-
+ class AndroidHdrPlaybackPolicy {
+   const AndroidHdrPlaybackPolicy({
+     required this.vo,
+diff --git a/media_kit_test/lib/common/sources/android_hdr_player_backend.dart b/media_kit_test/lib/common/sources/android_hdr_player_backend.dart
+index 04f1295..576bc0e 100644
+--- a/media_kit_test/lib/common/sources/android_hdr_player_backend.dart
++++ b/media_kit_test/lib/common/sources/android_hdr_player_backend.dart
+@@ -19,7 +19,6 @@ class AndroidHdrPlayerBackend implements AndroidHdrOpenBackend {
+     required this.p5RpuPipelineBuilt,
+     required this.readDisplayHdrTypes,
+     required this.applySurfaceTransfer,
+-    required this.readP5RuntimeProperties,
+     this.forceP84PqFallback = false,
+     this.gpuPlatformHdrExperiment = false,
+     this.p5PlatformSdrDiagnostic = false,
+@@ -32,7 +31,6 @@ class AndroidHdrPlayerBackend implements AndroidHdrOpenBackend {
+   final bool p5RpuPipelineBuilt;
+   final Future<Set<int>> Function() readDisplayHdrTypes;
+   final Future<bool> Function(String transfer) applySurfaceTransfer;
+-  final Future<Map<String, String>> Function() readP5RuntimeProperties;
+   final bool forceP84PqFallback;
+   final bool gpuPlatformHdrExperiment;
+   final bool p5PlatformSdrDiagnostic;
+@@ -90,9 +88,6 @@ class AndroidHdrPlayerBackend implements AndroidHdrOpenBackend {
+ 
+   @override
+   Future<void> validate(AndroidHdrSampleIdentity identity) async {
+-    if (identity.sample == AndroidHdrSample.dolbyVisionP5) {
+-      requireAndroidP5RuntimePipeline(await readP5RuntimeProperties());
+-    }
+     final hdrTypes = usePlatformView ? await readDisplayHdrTypes() : null;
+     _validatedPolicy = AndroidHdrPlaybackPolicy.forSample(
+       identity.sample,
+diff --git a/media_kit_test/lib/tests/01.single_player_single_video.dart b/media_kit_test/lib/tests/01.single_player_single_video.dart
+index 982dde9..81ba83b 100644
+--- a/media_kit_test/lib/tests/01.single_player_single_video.dart
++++ b/media_kit_test/lib/tests/01.single_player_single_video.dart
+@@ -203,14 +203,6 @@ class _SinglePlayerSingleVideoScreenState
+             ) ??
+             false;
+       },
+-      readP5RuntimeProperties: () async {
+-        final values = await _p5RuntimeGateChannel
+-            .invokeMapMethod<String, String>('ReadProperties');
+-        if (values == null) {
+-          throw StateError('P5 runtime property report is unavailable');
+-        }
+-        return values;
+-      },
+     );
+     if (_androidNamedLocalSource) {
+       if (sources.isEmpty) throw StateError('No named Android sample selected');
+@@ -477,6 +469,18 @@ class _SinglePlayerSingleVideoScreenState
+   );
+   static const _autoTexture = bool.fromEnvironment('MEDIA_KIT_AUTO_TEXTURE');
+   static const _autoSdr = bool.fromEnvironment('MEDIA_KIT_AUTO_SDR');
++  static const _androidAutoSeekAtSeconds = int.fromEnvironment(
++    'MEDIA_KIT_ANDROID_AUTO_SEEK_AT_SECONDS',
++    defaultValue: -1,
++  );
++  static const _androidAutoSeekTargetSeconds = int.fromEnvironment(
++    'MEDIA_KIT_ANDROID_AUTO_SEEK_TARGET_SECONDS',
++    defaultValue: -1,
++  );
++  static const _androidAutoReopenAfterSeek = bool.fromEnvironment(
++    'MEDIA_KIT_ANDROID_AUTO_REOPEN_AFTER_SEEK',
++  );
++  bool _autoSeekReopenScheduled = false;
+   static const _autoStartSeconds = String.fromEnvironment(
+     'MEDIA_KIT_AUTO_START_SECONDS',
+   );
+@@ -892,9 +896,18 @@ class _SinglePlayerSingleVideoScreenState
+     }
+     player.stream.error.listen((error) => debugPrint(error));
+     if (Platform.isAndroid && _androidPerfProbe) {
+-      player.stream.completed.listen(
+-        (completed) => debugPrint('AUTO_COMPLETED completed=$completed'),
+-      );
++      player.stream.completed.listen((completed) async {
++        debugPrint('AUTO_COMPLETED completed=$completed');
++        if (!completed) return;
++        try {
++          final vo = await player.getProperty('frame-drop-count');
++          final decoder = await player.getProperty('decoder-frame-drop-count');
++          debugPrint('AUTO_COMPLETED_PERF frame-drop-count=$vo '
++              'decoder-frame-drop-count=$decoder');
++        } catch (error) {
++          debugPrint('AUTO_COMPLETED_PERF error=$error');
++        }
++      });
+     }
+     player.stream.log.listen(
+       (log) => debugPrint(
+@@ -1363,6 +1376,12 @@ class _SinglePlayerSingleVideoScreenState
+             )
+           : null,
+     ));
++    if (Platform.isAndroid &&
++        _androidAutoSeekAtSeconds >= 0 &&
++        !_autoSeekReopenScheduled) {
++      _autoSeekReopenScheduled = true;
++      unawaited(_runAutoSeekReopenProbe());
++    }
+     if (Platform.isAndroid && _androidDirectOpenTrace) {
+       debugPrint('ANDROID_DIRECT_OPEN media_returned');
+     }
+@@ -1430,6 +1449,46 @@ class _SinglePlayerSingleVideoScreenState
+     }
+   }
+ 
++  Future<void> _runAutoSeekReopenProbe() async {
++    try {
++      if (!_autoTexture || _androidAutoSeekTargetSeconds < 0) {
++        throw StateError('Auto seek probe requires Texture and a target');
++      }
++      final start = Duration(seconds: _androidAutoSeekAtSeconds);
++      final target = Duration(seconds: _androidAutoSeekTargetSeconds);
++      await player.stream.position
++          .firstWhere((position) => position >= start)
++          .timeout(Duration(seconds: _androidAutoSeekAtSeconds + 30));
++      if (!mounted || _autoPlayerDisposed) return;
++      debugPrint(
++          'AUTO_SEEK_REOPEN seek_begin position=${player.state.position} '
++          'target=$target');
++      await player.seek(target);
++      await player.stream.position
++          .firstWhere(
++              (position) => position >= target + const Duration(seconds: 2))
++          .timeout(const Duration(seconds: 20));
++      if (!mounted || _autoPlayerDisposed) return;
++      debugPrint(
++          'AUTO_SEEK_REOPEN seek_playing position=${player.state.position}');
++      if (!_androidAutoReopenAfterSeek) return;
++      debugPrint(
++          'AUTO_SEEK_REOPEN reopen_begin position=${player.state.position}');
++      await player.open(Media(sources[0]));
++      await player.stream.position
++          .firstWhere((position) =>
++              position >= const Duration(seconds: 2) &&
++              position < const Duration(seconds: 10))
++          .timeout(const Duration(seconds: 20));
++      if (!mounted || _autoPlayerDisposed) return;
++      debugPrint(
++          'AUTO_SEEK_REOPEN reopen_playing position=${player.state.position}');
++    } catch (error, stack) {
++      debugPrint('AUTO_SEEK_REOPEN error=$error');
++      debugPrintStack(stackTrace: stack);
++    }
++  }
++
+   Future<void> _resizeTestWindow(
+       {required double width, required double height}) async {
+     try {
+diff --git a/media_kit_test/test/android_hdr_playback_policy_test.dart b/media_kit_test/test/android_hdr_playback_policy_test.dart
+index fad9bad..38b10a5 100644
+--- a/media_kit_test/test/android_hdr_playback_policy_test.dart
++++ b/media_kit_test/test/android_hdr_playback_policy_test.dart
+@@ -3,23 +3,6 @@ import 'package:media_kit_test/common/sources/android_hdr_playback_policy.dart';
+ import 'package:media_kit_test/common/sources/android_hdr_sample_identity.dart';
+ 
+ void main() {
+-  test('P5 runtime gate requires RPU attachment and raw YUV together', () {
+-    expect(
+-      () => requireAndroidP5RuntimePipeline({
+-        'debug.media_kit.p5_rpu_probe': '2',
+-        'debug.media_kit.p5_raw_yuv': '1',
+-      }),
+-      returnsNormally,
+-    );
+-    for (final values in <Map<String, String>>[
+-      {},
+-      {'debug.media_kit.p5_rpu_probe': '1', 'debug.media_kit.p5_raw_yuv': '1'},
+-      {'debug.media_kit.p5_rpu_probe': '2', 'debug.media_kit.p5_raw_yuv': '0'},
+-    ]) {
+-      expect(() => requireAndroidP5RuntimePipeline(values), throwsStateError);
+-    }
+-  });
+-
+   test('Texture maps all fixed sources to SDR and strips only P8.4 RPU', () {
+     for (final sample in AndroidHdrSample.values) {
+       final policy = AndroidHdrPlaybackPolicy.forSample(

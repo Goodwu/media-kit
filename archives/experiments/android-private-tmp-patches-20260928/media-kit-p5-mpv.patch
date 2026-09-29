@@ -1,0 +1,57 @@
+diff --git a/video/out/hwdec/hwdec_aimagereader.c b/video/out/hwdec/hwdec_aimagereader.c
+index db32aeb..34812eb 100644
+--- a/video/out/hwdec/hwdec_aimagereader.c
++++ b/video/out/hwdec/hwdec_aimagereader.c
+@@ -1058,8 +1058,12 @@ static int mapper_init(struct ra_hwdec_mapper *mapper)
+         return -1;
+ 
+     char property[PROP_VALUE_MAX] = {0};
+-    p->raw_yuv = __system_property_get("debug.media_kit.p5_raw_yuv", property) > 0 &&
+-                 !strcmp(property, "1");
++    bool p5_auto_yuv = mapper->src_params.dv_profile == 5 &&
++                       mapper->src_params.repr.sys == PL_COLOR_SYSTEM_DOLBYVISION &&
++                       mapper->src_params.repr.dovi;
++    p->raw_yuv = p5_auto_yuv ||
++                 (__system_property_get("debug.media_kit.p5_raw_yuv", property) > 0 &&
++                  !strcmp(property, "1"));
+     char section_property[PROP_VALUE_MAX] = {0};
+     p->section_perf = p->raw_yuv &&
+         __system_property_get("debug.media_kit.p5_section_perf", section_property) > 0 &&
+@@ -1068,8 +1072,9 @@ static int mapper_init(struct ra_hwdec_mapper *mapper)
+                    p->raw_yuv, p->section_perf, section_property);
+     char direct_property[PROP_VALUE_MAX] = {0};
+     p->direct_yuv = p->raw_yuv &&
+-        __system_property_get("debug.media_kit.p5_direct_yuv", direct_property) > 0 &&
+-        !strcmp(direct_property, "1");
++        (p5_auto_yuv ||
++         (__system_property_get("debug.media_kit.p5_direct_yuv", direct_property) > 0 &&
++          !strcmp(direct_property, "1")));
+     char mrt_property[PROP_VALUE_MAX] = {0};
+     p->raw_mrt = p->raw_yuv &&
+                  __system_property_get("debug.media_kit.p5_raw_mrt", mrt_property) > 0 &&
+@@ -1171,9 +1176,10 @@ static int mapper_init(struct ra_hwdec_mapper *mapper)
+                     !strcmp(retire_property, "1");
+     char direct_retire_property[PROP_VALUE_MAX] = {0};
+     p->direct_retire = p->direct_yuv &&
+-        __system_property_get("debug.media_kit.p5_dr_retire",
+-                              direct_retire_property) > 0 &&
+-        !strcmp(direct_retire_property, "1") &&
++        (p5_auto_yuv ||
++         (__system_property_get("debug.media_kit.p5_dr_retire",
++                                direct_retire_property) > 0 &&
++          !strcmp(direct_retire_property, "1"))) &&
+         gl->FenceSync && gl->ClientWaitSync && gl->DeleteSync && gl->Flush;
+     p->raw_retire |= p->direct_retire;
+     char egl_cache_property[PROP_VALUE_MAX] = {0};
+diff --git a/video/out/vo_gpu_next.c b/video/out/vo_gpu_next.c
+index c25be5a..8ad6ae1 100644
+--- a/video/out/vo_gpu_next.c
++++ b/video/out/vo_gpu_next.c
+@@ -1890,6 +1890,7 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
+         p5_sdr_color_map.gamut_mapping = &pl_gamut_map_clip;
+         params.color_map_params = &p5_sdr_color_map;
+         params.optimize_dovi_linear_decode = true;
++        params.downscaler = NULL;
+     }
+     if (!p->p5_policy_logged && frame->current &&
+         frame->current->params.dv_profile == 5 && mix.num_frames == 1 &&

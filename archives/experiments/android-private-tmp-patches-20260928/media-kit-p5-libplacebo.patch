@@ -1,0 +1,73 @@
+diff --git a/src/renderer.c b/src/renderer.c
+index 449d6ba0..9687f35d 100644
+--- a/src/renderer.c
++++ b/src/renderer.c
+@@ -57,6 +57,10 @@ struct pl_renderer_t {
+     pl_gpu gpu;
+     pl_dispatch dp;
+     pl_log log;
++    bool p5_linear_decode_logged; // Temporary P0 device verification only.
++    bool p5_linear_decode_checked; // Temporary P0 device verification only.
++    bool p5_linear_decode_sample_logged; // Temporary P0 device verification only.
++    bool p5_linear_decode_full_logged; // Temporary P0 device verification only.
+ 
+     // Cached feature checks (inverted)
+     enum pl_render_error errors;
+@@ -1557,6 +1561,17 @@ static bool dovi_linear_decode_candidate(struct pass_state *pass)
+     const struct pl_frame *target = &pass->target;
+     const struct pl_render_params *params = pass->params;
+     const struct img *img = &pass->img;
++    if (!pass->rr->p5_linear_decode_checked) {
++        PL_INFO(pass->rr, "P5_LINEAR_CHECK sys=%d alpha=%d trc=%d field=%d hooks=%d lut=%d icc=%d peak=%d downscaler=%d rect=%.1f,%.1f,%.1f,%.1f dst=%.1f,%.1f,%.1f,%.1f",
++                image->repr.sys, image->repr.alpha, image->color.transfer,
++                image->field, params->num_hooks, !!params->lut,
++                !!image->icc || !!target->icc, !!params->peak_detect_params,
++                !!params->downscaler, img->rect.x0, img->rect.y0,
++                img->rect.x1, img->rect.y1, (double) pass->dst_rect.x0,
++                (double) pass->dst_rect.y0, (double) pass->dst_rect.x1,
++                (double) pass->dst_rect.y1);
++        pass->rr->p5_linear_decode_checked = true;
++    }
+ 
+     // Only use the direct downscaling path with no intermediate color work.
+     if (image->repr.sys != PL_COLOR_SYSTEM_DOLBYVISION ||
+@@ -1587,7 +1602,7 @@ static bool dovi_linear_decode_candidate(struct pass_state *pass)
+     if (!dst_w || !dst_h)
+         return false;
+ 
+-    int out_w, out_h;
++    int out_w = 0, out_h = 0;
+     if (img->sh && pl_shader_output_size(img->sh, &out_w, &out_h) &&
+         (out_w != dst_w || out_h != dst_h))
+         return false;
+@@ -1599,6 +1614,11 @@ static bool dovi_linear_decode_candidate(struct pass_state *pass)
+         .rect = img->rect,
+     };
+     struct sampler_info info = sample_src_info(pass, &src, SAMPLER_MAIN);
++    if (!pass->rr->p5_linear_decode_sample_logged) {
++        PL_INFO(pass->rr, "P5_LINEAR_SAMPLE type=%d dir=%d out=%dx%d dst=%dx%d",
++                info.type, info.dir, out_w, out_h, dst_w, dst_h);
++        pass->rr->p5_linear_decode_sample_logged = true;
++    }
+     return info.type == SAMPLER_DIRECT && info.dir == SAMPLER_DOWN;
+ }
+ 
+@@ -1992,6 +2012,18 @@ static bool pass_read_image(struct pass_state *pass)
+             pass->img.color.transfer = PL_COLOR_TRC_LINEAR;
+         }
+         if (dovi_linear_decode_candidate(pass)) {
++            if (!rr->p5_linear_decode_logged) {
++                PL_INFO(rr, "P5_LINEAR_DECODE_HIT");
++                rr->p5_linear_decode_logged = true;
++            }
++            if (!rr->p5_linear_decode_full_logged &&
++                abs(pl_rect_w(pass->dst_rect)) >= 1000 &&
++                abs(pl_rect_h(pass->dst_rect)) >= 1000) {
++                PL_INFO(rr, "P5_LINEAR_DECODE_FULL_HIT dst=%dx%d",
++                        abs(pl_rect_w(pass->dst_rect)),
++                        abs(pl_rect_h(pass->dst_rect)));
++                rr->p5_linear_decode_full_logged = true;
++            }
+             pl_shader_decode_color_linear_dovi(sh, &pass->img.repr);
+             pass->img.dovi_decode_linear = true;
+         } else

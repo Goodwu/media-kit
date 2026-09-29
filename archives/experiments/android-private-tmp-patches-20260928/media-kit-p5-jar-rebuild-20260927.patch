@@ -1,0 +1,3915 @@
+diff --git a/MPV_VERSION b/MPV_VERSION
+index 80980b0..337163b 100644
+--- a/MPV_VERSION
++++ b/MPV_VERSION
+@@ -1 +1 @@
+-0.41.0-UNKNOWN
++v0.41.0-dev-g32a164cc0-dirty
+diff --git a/common/meson.build b/common/meson.build
+index 077444b..f71ed30 100644
+--- a/common/meson.build
++++ b/common/meson.build
+@@ -19,7 +19,7 @@ except CalledProcessError:
+     describe_cmd += ["--always"]
+     ver = check_output(describe_cmd, stderr=DEVNULL, encoding="UTF-8")
+     ver = f"v{sys.argv[3]}-dev-g{ver}"
+-sys.stdout.write(ver)
++sys.stdout.write("v0.41.0-dev-g32a164cc0-dirty")
+ '''
+ 
+ version_h = vcs_tag(
+diff --git a/meson.build b/meson.build
+index 5ffe559..936b2e9 100644
+--- a/meson.build
++++ b/meson.build
+@@ -1736,7 +1736,7 @@ endif
+ 
+ # Set config.h
+ conf_data = configuration_data()
+-conf_data.set_quoted('CONFIGURATION', meson.build_options())
++conf_data.set_quoted('CONFIGURATION', '')
+ conf_data.set_quoted('DEFAULT_OPTICAL_DEVICE', optical_device)
+ 
+ # Loop over all features in the build, create a define and add them to config.h
+diff --git a/video/img_format.c b/video/img_format.c
+index a79534e..995fef3 100644
+--- a/video/img_format.c
++++ b/video/img_format.c
+@@ -58,6 +58,13 @@ struct mp_imgfmt_entry {
+                               {3 * (a), 0, 32 * (a)} }, }}
+ 
+ static const struct mp_imgfmt_entry mp_imgfmt_list[] = {
++    [IMGFMT_MEDIACODEC_YUV - IMGFMT_CUST_BASE] = {
++        .name = "mediacodec_yuv",
++        .desc = {
++            .flags = MP_IMGFLAG_COLOR_YUV,
++            .comps = { {0, 0, 8}, {0, 8, 8}, {0, 16, 8} },
++        },
++    },
+     // not in ffmpeg
+     [IMGFMT_VDPAU_OUTPUT - IMGFMT_CUST_BASE] = {
+         .name = "vdpau_output",
+@@ -72,6 +79,21 @@ static const struct mp_imgfmt_entry mp_imgfmt_list[] = {
+             .comps = { {0, 20, 10}, {0, 10, 10}, {0, 0, 10} },
+         },
+     },
++    [IMGFMT_YUV444_PACK10 - IMGFMT_CUST_BASE] = {
++        .name = "yuv444_pack10",
++        .desc = {
++            .flags = MP_IMGFLAG_COLOR_YUV,
++            .comps = { {0, 0, 10}, {0, 10, 10}, {0, 20, 10} },
++        },
++    },
++    [IMGFMT_YUV420_PACK10 - IMGFMT_CUST_BASE] = {
++        .name = "yuv420_pack10",
++        .desc = {
++            .flags = MP_IMGFLAG_COLOR_YUV,
++            .chroma_xs = 1, .chroma_ys = 1,
++            .comps = { {0, 0, 10}, {1, 10, 10}, {1, 20, 10} },
++        },
++    },
+     [IMGFMT_YAP8 - IMGFMT_CUST_BASE] = {
+         .name = "yap8",
+         .desc = {
+diff --git a/video/img_format.h b/video/img_format.h
+index 59e614a..556c8fc 100644
+--- a/video/img_format.h
++++ b/video/img_format.h
+@@ -299,6 +299,9 @@ enum mp_imgfmt {
+ 
+     // Accessed with bit-shifts, uint32_t units.
+     IMGFMT_RGB30,               // 2pad 10r 10g 10b (MSB to LSB)
++    IMGFMT_YUV444_PACK10,       // Experimental Y/U/V in RGB10_A2 channels
++    IMGFMT_YUV420_PACK10,       // Experimental full Y plus half-size UV RGB10_A2
++    IMGFMT_MEDIACODEC_YUV,      // External texture sampled as raw Y/U/V
+ 
+     // Fringe formats for fringe RGB format repacking.
+     IMGFMT_Y1,      // gray with 1 bit per pixel
+diff --git a/video/mp_image.c b/video/mp_image.c
+index cec91c1..d850b25 100644
+--- a/video/mp_image.c
++++ b/video/mp_image.c
+@@ -29,6 +29,9 @@
+ #include <libavcodec/avcodec.h>
+ #include <libavutil/mastering_display_metadata.h>
+ #include <libplacebo/utils/libav.h>
++#ifdef __ANDROID__
++#include <android/log.h>
++#endif
+ 
+ #include "mpv_talloc.h"
+ 
+@@ -1193,6 +1196,19 @@ struct mp_image *mp_image_from_av_frame(struct AVFrame *src)
+ #if PL_API_VER >= 343
+             pl_map_avdovi_metadata(&dst->params.color, &dst->params.repr,
+                                    (void *)dst->dovi->data, metadata);
++#ifdef __ANDROID__
++            if (src->best_effort_timestamp == 500) {
++                uint32_t hash = 2166136261U;
++                for (size_t i = 0; i < dovi->size; i++)
++                    hash = (hash ^ dovi->data[i]) * 16777619U;
++                __android_log_print(ANDROID_LOG_ERROR, "P5_DOVI_MAPPED",
++                                    "pts=%"PRId64" size=%zu fnv1a=%08x repr=%d prim=%d trc=%d max_luma=%.6f",
++                                    src->best_effort_timestamp, dovi->size, hash,
++                                    dst->params.repr.sys, dst->params.color.primaries,
++                                    dst->params.color.transfer,
++                                    dst->params.color.hdr.max_luma);
++            }
++#endif
+ #else
+             struct pl_frame frame;
+             frame.repr = dst->params.repr;
+diff --git a/video/out/gpu/ra.h b/video/out/gpu/ra.h
+index d87b566..bd2b8fb 100644
+--- a/video/out/gpu/ra.h
++++ b/video/out/gpu/ra.h
+@@ -146,6 +146,7 @@ struct ra_tex_params {
+     bool non_normalized;    // hack for GL_TEXTURE_RECTANGLE macOS idiocy
+                             // always set to false, except in macOS code
+     bool external_oes;      // hack for GL_TEXTURE_EXTERNAL_OES idiocy
++    bool external_yuv;      // GL_EXT_YUV_target raw Y/Cb/Cr sampling
+     // If non-NULL, the texture will be created with these contents. Using
+     // this does *not* require setting host_mutable. Otherwise, the initial
+     // data is undefined.
+diff --git a/video/out/hwdec/hwdec_aimagereader.c b/video/out/hwdec/hwdec_aimagereader.c
+index 83c2ea8..db32aeb 100644
+--- a/video/out/hwdec/hwdec_aimagereader.c
++++ b/video/out/hwdec/hwdec_aimagereader.c
+@@ -19,7 +19,14 @@
+ 
+ #include <assert.h>
+ #include <dlfcn.h>
++#include <math.h>
++#include <stdatomic.h>
++#include <stdarg.h>
++#include <stdio.h>
++#include <time.h>
++#include <sys/system_properties.h>
+ #include <EGL/egl.h>
++#include <EGL/eglext.h>
+ #include <media/NdkImageReader.h>
+ #include <android/native_window_jni.h>
+ #include <libavcodec/mediacodec.h>
+@@ -30,17 +37,38 @@
+ #include "osdep/threads.h"
+ #include "osdep/timer.h"
+ #include "video/out/gpu/hwdec.h"
++#include "video/mp_image.h"
+ #include "video/out/opengl/ra_gl.h"
++#include "video/out/opengl/formats.h"
+ 
+ typedef void *GLeglImageOES;
+ typedef void *EGLImageKHR;
+ #define EGL_NATIVE_BUFFER_ANDROID 0x3140
++#ifndef GL_TEXTURE_BINDING_EXTERNAL_OES
++#define GL_TEXTURE_BINDING_EXTERNAL_OES 0x8D67
++#endif
++#ifndef GL_GPU_DISJOINT_EXT
++#define GL_GPU_DISJOINT_EXT 0x8FBB
++#endif
++
++// The shared FFmpeg build still references this default-off stage probe flag.
++atomic_bool media_kit_stage_probe_enabled;
+ 
+ struct priv_owner {
+     struct mp_hwdec_ctx hwctx;
+     AImageReader *reader;
+     jobject surface;
+     void *lib_handle;
++    // NDK callbacks may already be queued when a listener is unregistered.
++    // Keep their context alive until the reader (and its looper) is deleted.
++    mp_mutex callback_lock;
++    mp_cond callback_cond;
++    struct priv *callback_mapper;
++    unsigned callbacks_active;
++    bool callback_state_initialized;
++    AHardwareBuffer *removed_buffers[32];
++    int removed_count;
++    bool removed_overflow;
+ 
+     media_status_t (*AImageReader_newWithUsage)(
+         int32_t, int32_t, int32_t, uint64_t, int32_t, AImageReader **);
+@@ -48,18 +76,117 @@ struct priv_owner {
+         AImageReader *, ANativeWindow **);
+     media_status_t (*AImageReader_setImageListener)(
+         AImageReader *, AImageReader_ImageListener *);
++    media_status_t (*AImageReader_setBufferRemovedListener)(
++        AImageReader *, AImageReader_BufferRemovedListener *);
+     media_status_t (*AImageReader_acquireLatestImage)(AImageReader *, AImage **);
+     void (*AImageReader_delete)(AImageReader *);
+     media_status_t (*AImage_getHardwareBuffer)(const AImage *, AHardwareBuffer **);
++    media_status_t (*AImage_getCropRect)(const AImage *, AImageCropRect *);
++    media_status_t (*AImage_getTimestamp)(const AImage *, int64_t *);
+     void (*AImage_delete)(AImage *);
+     void (*AHardwareBuffer_describe)(const AHardwareBuffer *, AHardwareBuffer_Desc *);
+     jobject (*ANativeWindow_toSurface)(JNIEnv *, ANativeWindow *);
+ };
+ 
++struct retired_image {
++    AImage *image;
++    EGLImageKHR egl_image;
++    EGLDisplay display;
++    GLsync fence;
++    GLuint texture;
++    struct ra_tex *wrapped_tex;
++    bool cached_egl;
++};
++
++struct egl_cache_entry {
++    AHardwareBuffer *buffer;
++    EGLImageKHR image;
++    EGLDisplay display;
++    bool removed;
++};
++
+ struct priv {
+     struct mp_log *log;
+ 
+     GLuint gl_texture;
++    bool raw_yuv;
++    bool direct_yuv;
++    bool raw_mrt;
++    bool raw_half;
++    bool raw_packed10;
++    bool raw_420_sidecar;
++    bool raw_code_scale;
++    bool raw_chroma_left_probe;
++    bool raw_full_dump;
++    bool raw_full_dump_done;
++    bool raw_pixel_probe;
++    bool raw_spatial_probe;
++    bool raw_peak_probe;
++    bool raw_local_probe;
++    bool raw_error_probe;
++    bool rpu_hash_logged;
++    int raw_pixel_frames;
++    unsigned raw_peak_done;
++    void (GLAPIENTRY *DrawBuffers)(GLsizei, const GLenum *);
++    bool raw_perf;
++    bool section_perf;
++    uint64_t section_frames;
++    int64_t section_acquire_wall_ns, section_acquire_cpu_ns;
++    int64_t section_create_wall_ns, section_create_cpu_ns;
++    int64_t section_bind_wall_ns, section_bind_cpu_ns;
++    int64_t section_finish_wall_ns, section_finish_cpu_ns;
++    bool raw_split;
++    bool raw_early_fence;
++    bool raw_retire;
++    bool direct_retire;
++    bool egl_cache_enabled;
++    bool current_egl_cached;
++    void *ahb_lib;
++    void (*AHardwareBuffer_acquire)(AHardwareBuffer *);
++    void (*AHardwareBuffer_release)(AHardwareBuffer *);
++    struct egl_cache_entry egl_cache[16];
++    uint64_t egl_cache_hits, egl_cache_misses, egl_cache_bypasses;
++    uint64_t egl_cache_evictions;
++    GLsync raw_sample_fence;
++    struct retired_image retired[2];
++    int retired_count;
++    uint64_t raw_retire_maps, raw_retire_reaped, raw_retire_waits;
++    uint64_t raw_retire_fallbacks;
++    int64_t raw_retire_wait_ns;
++    uint64_t image_callbacks;
++    uint64_t empty_acquires;
++    uint64_t image_acquired;
++    uint64_t image_deleted;
++    bool image_timeline;
++    bool ahb_identity_probe;
++    uint64_t ahb_identity_samples;
++    bool same_frame_cache;
++    struct mp_image *cached_frame;
++    uint64_t same_frame_hits, same_frame_evictions;
++    double timeline_failed_pts;
++    int64_t timeline_failed_us;
++    bool timeline_followup;
++    int64_t raw_perf_split_ns;
++    uint64_t raw_split_frames;
++    bool raw_timer;
++    bool raw_timer_pending;
++    GLuint raw_timer_query;
++    bool raw_format_probe;
++    bool raw_format_probe_logged;
++    bool raw_gl_preimport_probe;
++    bool raw_gl_preimport_probe_logged;
++    bool raw_perf_pending;
++    volatile bool raw_submitted;
++    uint64_t raw_perf_frames, raw_perf_window_frames;
++    int64_t raw_perf_submit_ns, raw_perf_submit_window_sum_ns;
++    int64_t raw_perf_submit_window_max_ns;
++    int64_t raw_perf_finish_window_sum_ns, raw_perf_finish_window_max_ns;
++    GLuint raw_program;
++    GLuint raw_vao;
++    GLuint raw_texture[3];
++    GLuint raw_fbo[3];
++    int raw_w, raw_h;
++    int raw_logged;
+     AImage *image;
+     EGLImageKHR egl_image;
+ 
+@@ -75,6 +202,28 @@ struct priv {
+     void (EGLAPIENTRY *EGLImageTargetTexture2DOES)(GLenum, GLeglImageOES);
+ };
+ 
++static int64_t p5_mapper_cpu_ns(void)
++{
++    struct timespec ts = {0};
++    clock_gettime(CLOCK_THREAD_CPUTIME_ID, &ts);
++    return (int64_t)ts.tv_sec * 1000000000 + ts.tv_nsec;
++}
++
++static void p5_section_log(const char *tag, const char *fmt, ...)
++{
++    void *lib = dlopen("liblog.so", RTLD_NOW | RTLD_LOCAL);
++    typedef int (*vprint_fn)(int, const char *, const char *, va_list);
++    vprint_fn vprint = lib ? dlsym(lib, "__android_log_vprint") : NULL;
++    if (vprint) {
++        va_list args;
++        va_start(args, fmt);
++        vprint(6, tag, fmt, args);
++        va_end(args);
++    }
++    if (lib)
++        dlclose(lib);
++}
++
+ static const struct { const char *symbol; int offset; } lib_functions[] = {
+     { "AImageReader_newWithUsage", offsetof(struct priv_owner, AImageReader_newWithUsage) },
+     { "AImageReader_getWindow", offsetof(struct priv_owner, AImageReader_getWindow) },
+@@ -129,6 +278,10 @@ static int init(struct ra_hwdec *hw)
+ {
+     struct priv_owner *p = hw->priv;
+ 
++    mp_mutex_init(&p->callback_lock);
++    mp_cond_init(&p->callback_cond);
++    p->callback_state_initialized = true;
++
+     if (!ra_is_gl(hw->ra_ctx->ra))
+         return -1;
+     if (!eglGetCurrentContext())
+@@ -156,7 +309,7 @@ static int init(struct ra_hwdec *hw)
+     // dummy dimensions, AImageReader only transports hardware buffers
+     media_status_t ret = p->AImageReader_newWithUsage(16, 16,
+         AIMAGE_FORMAT_PRIVATE, AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE,
+-        5, &p->reader);
++        3, &p->reader);
+     if (ret != AMEDIA_OK) {
+         MP_ERR(hw, "newWithUsage failed: %d\n", ret);
+         return -1;
+@@ -207,6 +360,12 @@ static void uninit(struct ra_hwdec *hw)
+         p->reader = NULL;
+     }
+ 
++    if (p->callback_state_initialized) {
++        mp_cond_destroy(&p->callback_cond);
++        mp_mutex_destroy(&p->callback_lock);
++        p->callback_state_initialized = false;
++    }
++
+     hwdec_devices_remove(hw->devs, &p->hwctx);
+     av_buffer_unref(&p->hwctx.av_device_ref);
+ 
+@@ -218,12 +377,663 @@ static void uninit(struct ra_hwdec *hw)
+ 
+ static void image_callback(void *context, AImageReader *reader)
+ {
+-    struct priv *p = context;
++    struct priv_owner *o = context;
++    mp_mutex_lock(&o->callback_lock);
++    struct priv *p = o->callback_mapper;
++    if (p)
++        o->callbacks_active++;
++    mp_mutex_unlock(&o->callback_lock);
++    if (!p)
++        return;
+ 
+     mp_mutex_lock(&p->lock);
++    p->image_callbacks++;
++    uint64_t callback_number = p->image_callbacks;
++    bool timeline = p->image_timeline;
+     p->image_available = true;
+     mp_cond_signal(&p->cond);
+     mp_mutex_unlock(&p->lock);
++    if (timeline && callback_number <= 12)
++        p5_section_log("P5_TIMELINE", "callback n=%"PRIu64" mono_us=%"PRId64,
++                       callback_number, mp_time_ns() / 1000);
++    mp_mutex_lock(&o->callback_lock);
++    mp_assert(o->callbacks_active > 0);
++    if (--o->callbacks_active == 0)
++        mp_cond_signal(&o->callback_cond);
++    mp_mutex_unlock(&o->callback_lock);
++}
++
++static void buffer_removed_callback(void *context, AImageReader *reader,
++                                    AHardwareBuffer *buffer)
++{
++    struct priv_owner *o = context;
++    mp_mutex_lock(&o->callback_lock);
++    if (o->callback_mapper) {
++        if (o->removed_count < MP_ARRAY_SIZE(o->removed_buffers))
++            o->removed_buffers[o->removed_count++] = buffer;
++        else
++            o->removed_overflow = true;
++    }
++    mp_mutex_unlock(&o->callback_lock);
++}
++
++// The ordinary GLES format table deliberately excludes R32F render targets.
++// This diagnostic path requires EXT_color_buffer_float and checks every FBO.
++static const struct gl_format raw_gl_format = {
++    .name = "r32f", .internal_format = GL_R32F,
++    .format = GL_RED, .type = GL_FLOAT, .flags = F_CR | F_ES3,
++};
++static const struct ra_format raw_ra_format = {
++    .name = "r32f", .priv = (void *)&raw_gl_format,
++    .ctype = RA_CTYPE_FLOAT, .ordered = true, .num_components = 1,
++    .component_size = {32}, .component_depth = {32}, .pixel_size = 4,
++    .renderable = true,
++};
++static const struct gl_format raw_gl_format_half = {
++    .name = "r16f", .internal_format = GL_R16F,
++    .format = GL_RED, .type = GL_HALF_FLOAT, .flags = F_CR | F_ES3,
++};
++static const struct ra_format raw_ra_format_half = {
++    .name = "r16f", .priv = (void *)&raw_gl_format_half,
++    .ctype = RA_CTYPE_FLOAT, .ordered = true, .num_components = 1,
++    .component_size = {16}, .component_depth = {16}, .pixel_size = 2,
++    .renderable = true,
++};
++static const struct gl_format raw_gl_format_packed10 = {
++    .name = "rgb10_a2", .internal_format = GL_RGB10_A2,
++    .format = GL_RGBA, .type = GL_UNSIGNED_INT_2_10_10_10_REV,
++    .flags = F_CR | F_ES3,
++};
++static const struct ra_format raw_ra_format_packed10 = {
++    .name = "rgb10_a2", .priv = (void *)&raw_gl_format_packed10,
++    .ctype = RA_CTYPE_UNORM, .ordered = true, .num_components = 4,
++    .component_size = {10, 10, 10, 2},
++    .component_depth = {10, 10, 10, 2}, .pixel_size = 4,
++    .renderable = true,
++};
++
++static const char raw_vertex_shader[] =
++    "#version 300 es\n"
++    "void main() {\n"
++    "  vec2 p = vec2(float((gl_VertexID << 1) & 2), float(gl_VertexID & 2));\n"
++    "  gl_Position = vec4(p * 2.0 - 1.0, 0.0, 1.0);\n"
++    "}\n";
++static const char raw_fragment_shader[] =
++    "#version 300 es\n"
++    "#extension GL_EXT_YUV_target : require\n"
++    "precision highp float;\n"
++    "precision highp __samplerExternal2DY2YEXT;\n"
++    "uniform __samplerExternal2DY2YEXT image;\n"
++    "uniform vec4 crop;\n"
++    "uniform vec2 size;\n"
++    "uniform int plane;\n"
++    "out highp float value;\n"
++    "void main() {\n"
++    "  vec2 uv = crop.xy + (gl_FragCoord.xy / size) * crop.zw;\n"
++    "  vec3 yuv = texture(image, uv).rgb;\n"
++    "  value = plane == 0 ? yuv.r : (plane == 1 ? yuv.g : yuv.b);\n"
++    "}\n";
++
++static const char raw_fragment_shader_mrt[] =
++    "#version 300 es\n"
++    "#extension GL_EXT_YUV_target : require\n"
++    "precision highp float;\n"
++    "precision highp __samplerExternal2DY2YEXT;\n"
++    "uniform __samplerExternal2DY2YEXT image;\n"
++    "uniform vec4 crop;\n"
++    "uniform vec2 size;\n"
++    "layout(location=0) out highp float y_value;\n"
++    "layout(location=1) out highp float u_value;\n"
++    "layout(location=2) out highp float v_value;\n"
++    "void main() {\n"
++    "  vec2 uv = crop.xy + (gl_FragCoord.xy / size) * crop.zw;\n"
++    "  vec3 yuv = texture(image, uv).rgb;\n"
++    "  y_value = yuv.r;\n"
++    "  u_value = yuv.g;\n"
++    "  v_value = yuv.b;\n"
++    "}\n";
++
++static const char raw_fragment_shader_packed10[] =
++    "#version 300 es\n"
++    "#extension GL_EXT_YUV_target : require\n"
++    "precision highp float;\n"
++    "precision highp __samplerExternal2DY2YEXT;\n"
++    "uniform __samplerExternal2DY2YEXT image;\n"
++    "uniform vec4 crop;\n"
++    "uniform vec2 size;\n"
++    "uniform float code_scale;\n"
++    "uniform float chroma_left_probe;\n"
++    "layout(location=0) out highp vec4 yuv_value;\n"
++    "void main() {\n"
++    "  vec2 uv = crop.xy + (gl_FragCoord.xy / size) * crop.zw;\n"
++    "  vec3 yuv = texture(image, uv).rgb;\n"
++    "  if (chroma_left_probe > 0.5 && mod(floor(gl_FragCoord.x), 2.0) > 0.5) {\n"
++    "    vec2 chroma_uv = uv + vec2(crop.z / size.x, 0.0);\n"
++    "    yuv.gb = texture(image, chroma_uv).gb;\n"
++    "  }\n"
++    "  yuv_value = vec4(yuv * code_scale, 1.0);\n"
++    "}\n";
++
++static GLuint raw_compile_shader(struct ra_hwdec_mapper *mapper, GLenum type,
++                                 const char *source)
++{
++    GL *gl = ra_gl_get(mapper->ra);
++    GLuint shader = gl->CreateShader(type);
++    gl->ShaderSource(shader, 1, &source, NULL);
++    gl->CompileShader(shader);
++    GLint ok = 0;
++    gl->GetShaderiv(shader, GL_COMPILE_STATUS, &ok);
++    if (!ok) {
++        char log[1024] = {0};
++        gl->GetShaderInfoLog(shader, sizeof(log), NULL, log);
++        MP_ERR(mapper, "P5 raw YUV shader compilation failed: %s\n", log);
++        gl->DeleteShader(shader);
++        return 0;
++    }
++    return shader;
++}
++
++static bool raw_create_program(struct ra_hwdec_mapper *mapper)
++{
++    struct priv *p = mapper->priv;
++    GL *gl = ra_gl_get(mapper->ra);
++    GLuint vertex = raw_compile_shader(mapper, GL_VERTEX_SHADER,
++                                       raw_vertex_shader);
++    GLuint fragment = raw_compile_shader(mapper, GL_FRAGMENT_SHADER,
++                                         p->raw_packed10 ? raw_fragment_shader_packed10 :
++                                         p->raw_mrt ? raw_fragment_shader_mrt : raw_fragment_shader);
++    if (vertex && fragment) {
++        p->raw_program = gl->CreateProgram();
++        gl->AttachShader(p->raw_program, vertex);
++        gl->AttachShader(p->raw_program, fragment);
++        gl->LinkProgram(p->raw_program);
++        GLint ok = 0;
++        gl->GetProgramiv(p->raw_program, GL_LINK_STATUS, &ok);
++        if (!ok) {
++            char log[1024] = {0};
++            gl->GetProgramInfoLog(p->raw_program, sizeof(log), NULL, log);
++            MP_ERR(mapper, "P5 raw YUV shader link failed: %s\n", log);
++            gl->DeleteProgram(p->raw_program);
++            p->raw_program = 0;
++        }
++    }
++    if (vertex)
++        gl->DeleteShader(vertex);
++    if (fragment)
++        gl->DeleteShader(fragment);
++    if (p->raw_program)
++        gl->GenVertexArrays(1, &p->raw_vao);
++    return p->raw_program && p->raw_vao;
++}
++
++static void raw_destroy_targets(struct ra_hwdec_mapper *mapper)
++{
++    struct priv *p = mapper->priv;
++    GL *gl = ra_gl_get(mapper->ra);
++    for (int n = 0; n < 3; n++) {
++        ra_tex_free(mapper->ra, &mapper->tex[n]);
++        if (p->raw_fbo[n])
++            gl->DeleteFramebuffers(1, &p->raw_fbo[n]);
++        if (p->raw_texture[n])
++            gl->DeleteTextures(1, &p->raw_texture[n]);
++        p->raw_fbo[n] = p->raw_texture[n] = 0;
++    }
++    p->raw_w = p->raw_h = 0;
++}
++
++static bool raw_create_targets(struct ra_hwdec_mapper *mapper, int w, int h)
++{
++    struct priv *p = mapper->priv;
++    GL *gl = ra_gl_get(mapper->ra);
++    if (p->raw_420_sidecar && ((w | h) & 1)) {
++        MP_ERR(mapper, "P5 420 sidecar requires even dimensions: %dx%d\n", w, h);
++        return false;
++    }
++    if (p->raw_w == w && p->raw_h == h)
++        return true;
++    GLint old_texture, old_draw_fbo, old_read_fbo;
++    gl->GetIntegerv(GL_TEXTURE_BINDING_2D, &old_texture);
++    gl->GetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &old_draw_fbo);
++    gl->GetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &old_read_fbo);
++    for (int n = 0; n < 3; n++) {
++        if (old_texture == p->raw_texture[n])
++            old_texture = 0;
++        if (old_draw_fbo == p->raw_fbo[n])
++            old_draw_fbo = 0;
++        if (old_read_fbo == p->raw_fbo[n])
++            old_read_fbo = 0;
++    }
++    raw_destroy_targets(mapper);
++    for (int n = 0; n < (p->raw_packed10 ? (p->raw_420_sidecar ? 2 : 1) : 3); n++) {
++        int tex_w = p->raw_420_sidecar && n == 1 ? w / 2 : w;
++        int tex_h = p->raw_420_sidecar && n == 1 ? h / 2 : h;
++        gl->GenTextures(1, &p->raw_texture[n]);
++        gl->BindTexture(GL_TEXTURE_2D, p->raw_texture[n]);
++        gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
++        gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
++        gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
++        gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
++        gl->TexImage2D(GL_TEXTURE_2D, 0,
++                       p->raw_packed10 ? GL_RGB10_A2 : p->raw_half ? GL_R16F : GL_R32F,
++                       tex_w, tex_h, 0, p->raw_packed10 ? GL_RGBA : GL_RED,
++                       p->raw_packed10 ? GL_UNSIGNED_INT_2_10_10_10_REV :
++                       p->raw_half ? GL_HALF_FLOAT : GL_FLOAT, NULL);
++        if (!p->raw_mrt) {
++            gl->GenFramebuffers(1, &p->raw_fbo[n]);
++            gl->BindFramebuffer(GL_FRAMEBUFFER, p->raw_fbo[n]);
++            gl->FramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
++                                     GL_TEXTURE_2D, p->raw_texture[n], 0);
++            GLenum status = gl->CheckFramebufferStatus(GL_FRAMEBUFFER);
++            GLenum err = gl->GetError();
++            if (status != GL_FRAMEBUFFER_COMPLETE || err != GL_NO_ERROR) {
++                MP_ERR(mapper, "P5 raw YUV R32F FBO unavailable: plane=%d status=%x error=%x\n",
++                       n, status, err);
++                goto fail;
++            }
++        }
++        struct ra_tex_params params = {
++            .dimensions = 2, .w = tex_w, .h = tex_h, .d = 1,
++            .format = p->raw_packed10 ? &raw_ra_format_packed10 :
++                      p->raw_half ? &raw_ra_format_half : &raw_ra_format,
++            .render_src = true,
++        };
++        mapper->tex[n] = ra_create_wrapped_tex(mapper->ra, &params,
++                                                p->raw_texture[n]);
++        if (!mapper->tex[n])
++            goto fail;
++    }
++    if (p->raw_mrt) {
++        const GLenum attachments[] = {GL_COLOR_ATTACHMENT0,
++                                      GL_COLOR_ATTACHMENT1,
++                                      GL_COLOR_ATTACHMENT2};
++        gl->GenFramebuffers(1, &p->raw_fbo[0]);
++        gl->BindFramebuffer(GL_FRAMEBUFFER, p->raw_fbo[0]);
++        for (int n = 0; n < 3; n++)
++            gl->FramebufferTexture2D(GL_FRAMEBUFFER, attachments[n],
++                                     GL_TEXTURE_2D, p->raw_texture[n], 0);
++        p->DrawBuffers(3, attachments);
++        GLenum status = gl->CheckFramebufferStatus(GL_FRAMEBUFFER);
++        GLenum err = gl->GetError();
++        if (status != GL_FRAMEBUFFER_COMPLETE || err != GL_NO_ERROR) {
++            MP_ERR(mapper, "P5 raw YUV MRT FBO unavailable: status=%x error=%x\n",
++                   status, err);
++            goto fail;
++        }
++    }
++    gl->BindTexture(GL_TEXTURE_2D, old_texture);
++    gl->BindFramebuffer(GL_READ_FRAMEBUFFER, old_read_fbo);
++    gl->BindFramebuffer(GL_DRAW_FRAMEBUFFER, old_draw_fbo);
++    p->raw_w = w;
++    p->raw_h = h;
++    return true;
++fail:
++    gl->BindTexture(GL_TEXTURE_2D, old_texture);
++    gl->BindFramebuffer(GL_READ_FRAMEBUFFER, old_read_fbo);
++    gl->BindFramebuffer(GL_DRAW_FRAMEBUFFER, old_draw_fbo);
++    raw_destroy_targets(mapper);
++    return false;
++}
++
++static void raw_set_enabled(GL *gl, GLenum cap, GLint enabled)
++{
++    if (enabled)
++        gl->Enable(cap);
++    else
++        gl->Disable(cap);
++}
++
++static void raw_stage(const char *stage)
++{
++    void *lib = dlopen("liblog.so", RTLD_NOW | RTLD_LOCAL);
++    typedef int (*log_print_fn)(int, const char *, const char *, ...);
++    log_print_fn log_print = lib ? dlsym(lib, "__android_log_print") : NULL;
++    if (log_print)
++        log_print(6, "P5_RAW_STAGE", "%s", stage);
++    if (lib)
++        dlclose(lib);
++}
++
++static void raw_probe_pixels(struct ra_hwdec_mapper *mapper)
++{
++    struct priv *p = mapper->priv;
++    GL *gl = ra_gl_get(mapper->ra);
++    double pts = mapper->src->pts;
++    if (!p->raw_pixel_probe)
++        return;
++    static const double peak_pts[] = {18.40, 56.62, 62.56};
++    static const int peak_x[] = {1538, 2078, 2388};
++    static const int peak_y[] = {714, 1552, 318};
++    static const int error_x[] = {2217, 2580, 1751, 1985};
++    static const int error_y[] = {1045, 938, 1189, 1002};
++    int peak = -1;
++    if (p->raw_error_probe) {
++        if (pts < 10.0 || pts >= 10.02 || p->raw_pixel_frames)
++            return;
++    } else if (p->raw_peak_probe) {
++        for (int i = 0; i < 3; i++) {
++            if (!(p->raw_peak_done & (1u << i)) &&
++                pts >= peak_pts[i] && pts < peak_pts[i] + 0.20) {
++                peak = i;
++                break;
++            }
++        }
++        if (peak < 0)
++            return;
++        p->raw_peak_done |= 1u << peak;
++    } else if (pts < 10.0 ||
++               pts >= (p->raw_spatial_probe ? 10.02 : 11.0) ||
++               p->raw_pixel_frames >= (p->raw_spatial_probe ? 1 : 60)) {
++        return;
++    }
++    p->raw_pixel_frames++;
++    if (p->raw_pixel_frames == 1)
++        raw_stage("pixel_probe_readback");
++    GLint old_read_buffer = 0, old_read_fbo = 0;
++    gl->GetIntegerv(GL_READ_BUFFER, &old_read_buffer);
++    gl->GetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &old_read_fbo);
++    gl->BindFramebuffer(GL_READ_FRAMEBUFFER, p->raw_fbo[0]);
++    const int y = p->raw_h / 2;
++    for (int i = 0; i < (p->raw_error_probe ? 4 : p->raw_spatial_probe ? 9 : 1); i++) {
++        int x = p->raw_error_probe ? error_x[i] :
++                p->raw_peak_probe ? peak_x[peak] :
++                p->raw_spatial_probe ? (i % 3 + 1) * p->raw_w / 4 : p->raw_w / 2;
++        int sample_y = p->raw_error_probe ? error_y[i] :
++                       p->raw_peak_probe ? peak_y[peak] :
++                       p->raw_spatial_probe ? (i / 3 + 1) * p->raw_h / 4 : y;
++        if (p->raw_packed10) {
++            if (p->raw_error_probe) {
++                uint32_t local[49] = {0};
++                gl->ReadBuffer(GL_COLOR_ATTACHMENT0);
++                gl->ReadPixels(x - 3, sample_y - 3, 7, 7, GL_RGBA,
++                               GL_UNSIGNED_INT_2_10_10_10_REV, local);
++                GLenum local_error = gl->GetError();
++                for (int row = 0; row < 7; row++) {
++                    for (int col = 0; col < 7; col++) {
++                        uint32_t value = local[row * 7 + col];
++                        char line[256];
++                        snprintf(line, sizeof(line),
++                                 "P5_ERROR_RAW pts=%.9f xy=%d,%d yuv=%u,%u,%u error=0x%x",
++                                 pts, x - 3 + col, sample_y - 3 + row,
++                                 value & 1023, (value >> 10) & 1023,
++                                 (value >> 20) & 1023, local_error);
++                        raw_stage(line);
++                    }
++                }
++                if (p->raw_420_sidecar) {
++                    uint32_t uv = 0;
++                    gl->BindFramebuffer(GL_READ_FRAMEBUFFER, p->raw_fbo[1]);
++                    gl->ReadBuffer(GL_COLOR_ATTACHMENT0);
++                    gl->ReadPixels(x / 2, sample_y / 2, 1, 1, GL_RGBA,
++                                   GL_UNSIGNED_INT_2_10_10_10_REV, &uv);
++                    GLenum uv_error = gl->GetError();
++                    char line[256];
++                    snprintf(line, sizeof(line),
++                             "P5_420_UV pts=%.9f xy=%d,%d uv=%u,%u error=0x%x",
++                             pts, x / 2, sample_y / 2,
++                             (uv >> 10) & 1023, (uv >> 20) & 1023, uv_error);
++                    raw_stage(line);
++                    gl->BindFramebuffer(GL_READ_FRAMEBUFFER, p->raw_fbo[0]);
++                    gl->ReadBuffer(GL_COLOR_ATTACHMENT0);
++                }
++            }
++            if (p->raw_peak_probe && p->raw_local_probe && peak != 1) {
++                uint32_t local[49] = {0};
++                gl->ReadBuffer(GL_COLOR_ATTACHMENT0);
++                gl->ReadPixels(x - 3, sample_y - 3, 7, 7, GL_RGBA,
++                               GL_UNSIGNED_INT_2_10_10_10_REV, local);
++                GLenum local_error = gl->GetError();
++                for (int row = 0; row < 7; row++) {
++                    for (int col = 0; col < 7; col++) {
++                        uint32_t value = local[row * 7 + col];
++                        char line[256];
++                        snprintf(line, sizeof(line),
++                                 "P5_LOCAL pts=%.9f xy=%d,%d yuv=%u,%u,%u error=0x%x",
++                                 pts, x - 3 + col, sample_y - 3 + row,
++                                 value & 1023, (value >> 10) & 1023,
++                                 (value >> 20) & 1023, local_error);
++                        raw_stage(line);
++                    }
++                }
++            }
++            uint32_t value = 0;
++            gl->ReadBuffer(GL_COLOR_ATTACHMENT0);
++            gl->ReadPixels(x, sample_y, 1, 1, GL_RGBA,
++                           GL_UNSIGNED_INT_2_10_10_10_REV, &value);
++            GLenum err = gl->GetError();
++            char line[256];
++            snprintf(line, sizeof(line),
++                     "P5_PIXEL pts=%.9f xy=%d,%d format=packed10 yuv=%u,%u,%u error=0x%x",
++                     mapper->src->pts, x, sample_y, value & 1023,
++                     (value >> 10) & 1023, (value >> 20) & 1023, err);
++            raw_stage(line);
++        } else if (p->raw_mrt && !p->raw_half) {
++            float values[3] = {0};
++            GLenum errors[3] = {0};
++            for (int c = 0; c < 3; c++) {
++                gl->ReadBuffer(GL_COLOR_ATTACHMENT0 + c);
++                gl->ReadPixels(x, sample_y, 1, 1, GL_RED, GL_FLOAT, &values[c]);
++                errors[c] = gl->GetError();
++            }
++            char line[256];
++            snprintf(line, sizeof(line),
++                     "P5_PIXEL pts=%.9f xy=%d,%d format=r32f yuv=%.9f,%.9f,%.9f error=0x%x,0x%x,0x%x",
++                     mapper->src->pts, x, sample_y, values[0], values[1], values[2],
++                     errors[0], errors[1], errors[2]);
++            raw_stage(line);
++        }
++    }
++    gl->BindFramebuffer(GL_READ_FRAMEBUFFER, old_read_fbo);
++    gl->ReadBuffer(old_read_buffer);
++}
++
++static void raw_dump_full(struct ra_hwdec_mapper *mapper,
++                          const AImageCropRect *crop, int buffer_w, int buffer_h)
++{
++    struct priv *p = mapper->priv;
++    if (!p->raw_full_dump || p->raw_full_dump_done ||
++        mapper->src->pts < 10.0 || mapper->src->pts >= 10.02 ||
++        (!p->raw_420_sidecar && (p->raw_w > 256 || p->raw_h > 144)))
++        return;
++
++    GL *gl = ra_gl_get(mapper->ra);
++    int dump_w = p->raw_420_sidecar ? p->raw_w / 2 : p->raw_w;
++    int dump_h = p->raw_420_sidecar ? p->raw_h / 2 : p->raw_h;
++    size_t bytes = (size_t)dump_w * dump_h * sizeof(uint32_t);
++    uint32_t *pixels = malloc(bytes);
++    if (!pixels)
++        return;
++    GLint old_read_fbo = 0, old_read_buffer = 0;
++    gl->GetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &old_read_fbo);
++    gl->GetIntegerv(GL_READ_BUFFER, &old_read_buffer);
++    gl->BindFramebuffer(GL_READ_FRAMEBUFFER,
++                        p->raw_fbo[p->raw_420_sidecar ? 1 : 0]);
++    gl->ReadBuffer(GL_COLOR_ATTACHMENT0);
++    gl->ReadPixels(0, 0, dump_w, dump_h, GL_RGBA,
++                   GL_UNSIGNED_INT_2_10_10_10_REV, pixels);
++    GLenum error = gl->GetError();
++    gl->BindFramebuffer(GL_READ_FRAMEBUFFER, old_read_fbo);
++    gl->ReadBuffer(old_read_buffer);
++    size_t written = 0;
++    if (error == GL_NO_ERROR) {
++        FILE *file = fopen(p->raw_420_sidecar ?
++            "/sdcard/Android/data/com.example.media_kit_test/files/p5-raw-420-uv-packed10.bin" :
++            "/sdcard/Android/data/com.example.media_kit_test/files/p5-raw-full-packed10.bin", "wb");
++        if (file) {
++            written = fwrite(pixels, 1, bytes, file);
++            fclose(file);
++        }
++    }
++    if (p->raw_420_sidecar && written == bytes) {
++        size_t y_bytes = (size_t)p->raw_w * p->raw_h * sizeof(uint32_t);
++        uint32_t *y_pixels = malloc(y_bytes);
++        if (y_pixels) {
++            gl->BindFramebuffer(GL_READ_FRAMEBUFFER, p->raw_fbo[0]);
++            gl->ReadBuffer(GL_COLOR_ATTACHMENT0);
++            gl->ReadPixels(0, 0, p->raw_w, p->raw_h, GL_RGBA,
++                           GL_UNSIGNED_INT_2_10_10_10_REV, y_pixels);
++            GLenum y_error = gl->GetError();
++            gl->BindFramebuffer(GL_READ_FRAMEBUFFER, old_read_fbo);
++            gl->ReadBuffer(old_read_buffer);
++            size_t y_written = 0;
++            if (y_error == GL_NO_ERROR) {
++                FILE *y_file = fopen("/sdcard/Android/data/com.example.media_kit_test/files/p5-raw-420-y-packed10.bin", "wb");
++                if (y_file) {
++                    y_written = fwrite(y_pixels, 1, y_bytes, y_file);
++                    fclose(y_file);
++                }
++            }
++            MP_WARN(mapper, "P5_RAW_Y pts=%.9f bytes=%zu written=%zu error=0x%x\n",
++                    mapper->src->pts, y_bytes, y_written, y_error);
++            p->raw_full_dump_done = y_written == y_bytes;
++            free(y_pixels);
++        }
++    } else {
++        p->raw_full_dump_done = written == bytes;
++    }
++    MP_WARN(mapper, "P5_RAW_FULL pts=%.9f w=%d h=%d bytes=%zu written=%zu error=0x%x crop=%d,%d,%d,%d buffer=%d,%d chroma_left_probe=%d\n",
++            mapper->src->pts, dump_w, dump_h, bytes, written, error,
++            crop->left, crop->top, crop->right, crop->bottom,
++            buffer_w, buffer_h, p->raw_chroma_left_probe);
++    char line[256];
++    snprintf(line, sizeof(line),
++             "P5_RAW_FULL pts=%.9f size=%dx%d bytes=%zu written=%zu error=0x%x crop=%d,%d,%d,%d buffer=%d,%d chroma_left_probe=%d",
++             mapper->src->pts, dump_w, dump_h, bytes, written, error,
++             crop->left, crop->top, crop->right, crop->bottom,
++             buffer_w, buffer_h, p->raw_chroma_left_probe);
++    raw_stage(line);
++    free(pixels);
++}
++
++static bool raw_render(struct ra_hwdec_mapper *mapper, const AImageCropRect *crop,
++                       int buffer_w, int buffer_h)
++{
++    struct priv *p = mapper->priv;
++    GL *gl = ra_gl_get(mapper->ra);
++    GLint old_program, old_vao, old_active, old_external, old_texture,
++          old_draw_fbo, old_read_fbo, old_viewport[4];
++    GLint blend, dither, scissor, depth, stencil, cull, discard;
++    GLint write_mask[4];
++    if (p->raw_logged <= 5) raw_stage("enter_state");
++    gl->GetIntegerv(GL_CURRENT_PROGRAM, &old_program);
++    gl->GetIntegerv(GL_VERTEX_ARRAY_BINDING, &old_vao);
++    gl->GetIntegerv(GL_ACTIVE_TEXTURE, &old_active);
++    gl->GetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &old_draw_fbo);
++    gl->GetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &old_read_fbo);
++    gl->GetIntegerv(GL_VIEWPORT, old_viewport);
++    gl->GetIntegerv(GL_BLEND, &blend);
++    gl->GetIntegerv(GL_DITHER, &dither);
++    gl->GetIntegerv(GL_SCISSOR_TEST, &scissor);
++    gl->GetIntegerv(GL_DEPTH_TEST, &depth);
++    gl->GetIntegerv(GL_STENCIL_TEST, &stencil);
++    gl->GetIntegerv(GL_CULL_FACE, &cull);
++    gl->GetIntegerv(GL_RASTERIZER_DISCARD, &discard);
++    gl->GetIntegerv(GL_COLOR_WRITEMASK, write_mask);
++    if (!write_mask[0] || (p->raw_packed10 && (!write_mask[1] || !write_mask[2]))) {
++        MP_ERR(mapper, "P5 raw YUV required channel writes disabled\n");
++        return false;
++    }
++    if (p->raw_logged <= 5) raw_stage("state_captured");
++    gl->ActiveTexture(GL_TEXTURE0);
++    gl->GetIntegerv(GL_TEXTURE_BINDING_EXTERNAL_OES, &old_external);
++    gl->GetIntegerv(GL_TEXTURE_BINDING_2D, &old_texture);
++
++    if (p->raw_logged <= 5) raw_stage("textures_captured");
++    gl->Disable(GL_BLEND);
++    if (p->raw_logged <= 5) raw_stage("blend_off");
++    gl->Disable(GL_DITHER);
++    if (p->raw_logged <= 5) raw_stage("dither_off");
++    gl->Disable(GL_SCISSOR_TEST);
++    if (p->raw_logged <= 5) raw_stage("scissor_off");
++    gl->Disable(GL_DEPTH_TEST);
++    if (p->raw_logged <= 5) raw_stage("depth_off");
++    gl->Disable(GL_STENCIL_TEST);
++    if (p->raw_logged <= 5) raw_stage("stencil_off");
++    gl->Disable(GL_CULL_FACE);
++    if (p->raw_logged <= 5) raw_stage("cull_off");
++    gl->Disable(GL_RASTERIZER_DISCARD);
++    if (p->raw_logged <= 5) raw_stage("discard_off");
++    gl->UseProgram(p->raw_program);
++    if (p->raw_logged <= 5) raw_stage("program_bound");
++    gl->BindVertexArray(p->raw_vao);
++    if (p->raw_logged <= 5) raw_stage("vao_bound");
++    gl->BindTexture(GL_TEXTURE_EXTERNAL_OES, p->gl_texture);
++    if (p->raw_logged <= 5) raw_stage("oes_bound");
++    gl->Uniform1i(gl->GetUniformLocation(p->raw_program, "image"), 0);
++    if (p->raw_logged <= 5) raw_stage("image_uniform");
++    gl->Uniform2f(gl->GetUniformLocation(p->raw_program, "size"),
++                  p->raw_w, p->raw_h);
++    if (p->raw_packed10) {
++        gl->Uniform1f(gl->GetUniformLocation(p->raw_program, "code_scale"),
++                      p->raw_code_scale ? 1020.0f / 1023.0f : 1.0f);
++        gl->Uniform1f(gl->GetUniformLocation(p->raw_program, "chroma_left_probe"),
++                      p->raw_chroma_left_probe ? 1.0f : 0.0f);
++    }
++    if (p->raw_logged <= 5) raw_stage("size_uniform");
++    // GL textures have a bottom-left origin; AImage crop coordinates are top-left.
++    gl->Uniform4f(gl->GetUniformLocation(p->raw_program, "crop"),
++                  (float)crop->left / buffer_w,
++                  (float)(buffer_h - crop->bottom) / buffer_h,
++                  (float)(crop->right - crop->left) / buffer_w,
++                  (float)(crop->bottom - crop->top) / buffer_h);
++    if (p->raw_logged <= 5) raw_stage("crop_uniform");
++    if (p->raw_logged <= 5) raw_stage("draw_setup");
++    if (p->raw_timer) {
++        gl->BeginQuery(GL_TIME_ELAPSED, p->raw_timer_query);
++        p->raw_timer_pending = true;
++    }
++    gl->Viewport(0, 0, p->raw_w, p->raw_h);
++    if (p->raw_mrt || p->raw_packed10) {
++        gl->BindFramebuffer(GL_FRAMEBUFFER, p->raw_fbo[0]);
++        if (p->raw_logged <= 5) raw_stage("draw_mrt");
++        gl->DrawArrays(GL_TRIANGLES, 0, 3);
++        p->raw_submitted = true;
++        if (p->raw_logged <= 5) raw_stage("draw_mrt_done");
++    } else {
++        for (int n = 0; n < 3; n++) {
++            gl->BindFramebuffer(GL_FRAMEBUFFER, p->raw_fbo[n]);
++            gl->Uniform1i(gl->GetUniformLocation(p->raw_program, "plane"), n);
++            if (p->raw_logged <= 5) raw_stage(n == 0 ? "draw_y" : n == 1 ? "draw_u" : "draw_v");
++            gl->DrawArrays(GL_TRIANGLES, 0, 3);
++            p->raw_submitted = true;
++            if (p->raw_logged <= 5) raw_stage(n == 0 ? "draw_y_done" : n == 1 ? "draw_u_done" : "draw_v_done");
++        }
++    }
++    if (p->raw_420_sidecar) {
++        gl->BindFramebuffer(GL_READ_FRAMEBUFFER, p->raw_fbo[0]);
++        gl->ReadBuffer(GL_COLOR_ATTACHMENT0);
++        gl->BindFramebuffer(GL_DRAW_FRAMEBUFFER, p->raw_fbo[1]);
++        gl->BlitFramebuffer(0, 0, p->raw_w, p->raw_h,
++                            0, 0, p->raw_w / 2, p->raw_h / 2,
++                            GL_COLOR_BUFFER_BIT, GL_NEAREST);
++        if (p->raw_logged <= 5)
++            raw_stage("blit_420_sidecar_done");
++    }
++    if (p->raw_timer)
++        gl->EndQuery(GL_TIME_ELAPSED);
++    raw_probe_pixels(mapper);
++    raw_dump_full(mapper, crop, buffer_w, buffer_h);
++    GLenum err = gl->GetError();
++    if (p->raw_logged <= 5) raw_stage("before_restore");
++
++    gl->BindFramebuffer(GL_READ_FRAMEBUFFER, old_read_fbo);
++    gl->BindFramebuffer(GL_DRAW_FRAMEBUFFER, old_draw_fbo);
++    gl->Viewport(old_viewport[0], old_viewport[1], old_viewport[2], old_viewport[3]);
++    gl->BindTexture(GL_TEXTURE_EXTERNAL_OES, old_external);
++    gl->BindTexture(GL_TEXTURE_2D, old_texture);
++    gl->ActiveTexture(old_active);
++    gl->BindVertexArray(old_vao);
++    gl->UseProgram(old_program);
++    raw_set_enabled(gl, GL_BLEND, blend);
++    raw_set_enabled(gl, GL_DITHER, dither);
++    raw_set_enabled(gl, GL_SCISSOR_TEST, scissor);
++    raw_set_enabled(gl, GL_DEPTH_TEST, depth);
++    raw_set_enabled(gl, GL_STENCIL_TEST, stencil);
++    raw_set_enabled(gl, GL_CULL_FACE, cull);
++    raw_set_enabled(gl, GL_RASTERIZER_DISCARD, discard);
++    if (p->raw_logged <= 5) raw_stage("restored");
++    if (err != GL_NO_ERROR)
++        MP_ERR(mapper, "P5 raw YUV render failed: GL error=%x\n", err);
++    return err == GL_NO_ERROR;
+ }
+ 
+ static int mapper_init(struct ra_hwdec_mapper *mapper)
+@@ -247,21 +1057,292 @@ static int mapper_init(struct ra_hwdec_mapper *mapper)
+         !p->GetNativeClientBufferANDROID || !p->EGLImageTargetTexture2DOES)
+         return -1;
+ 
++    char property[PROP_VALUE_MAX] = {0};
++    p->raw_yuv = __system_property_get("debug.media_kit.p5_raw_yuv", property) > 0 &&
++                 !strcmp(property, "1");
++    char section_property[PROP_VALUE_MAX] = {0};
++    p->section_perf = p->raw_yuv &&
++        __system_property_get("debug.media_kit.p5_section_perf", section_property) > 0 &&
++        !strcmp(section_property, "1");
++    p5_section_log("P5_SECTION_INIT", "raw=%d enabled=%d property=%s",
++                   p->raw_yuv, p->section_perf, section_property);
++    char direct_property[PROP_VALUE_MAX] = {0};
++    p->direct_yuv = p->raw_yuv &&
++        __system_property_get("debug.media_kit.p5_direct_yuv", direct_property) > 0 &&
++        !strcmp(direct_property, "1");
++    char mrt_property[PROP_VALUE_MAX] = {0};
++    p->raw_mrt = p->raw_yuv &&
++                 __system_property_get("debug.media_kit.p5_raw_mrt", mrt_property) > 0 &&
++                 !strcmp(mrt_property, "1");
++    char half_property[PROP_VALUE_MAX] = {0};
++    p->raw_half = p->raw_mrt &&
++                  __system_property_get("debug.media_kit.p5_raw_half", half_property) > 0 &&
++                  !strcmp(half_property, "1");
++    char packed_property[PROP_VALUE_MAX] = {0};
++    p->raw_packed10 = p->raw_yuv &&
++        __system_property_get("debug.media_kit.p5_raw_packed10", packed_property) > 0 &&
++        !strcmp(packed_property, "1");
++    char sidecar_property[PROP_VALUE_MAX] = {0};
++    p->raw_420_sidecar = p->raw_packed10 &&
++        __system_property_get("debug.media_kit.p5_raw_420_sidecar",
++                              sidecar_property) > 0 &&
++        !strcmp(sidecar_property, "1");
++    char code_scale_property[PROP_VALUE_MAX] = {0};
++    p->raw_code_scale = p->raw_packed10 &&
++        __system_property_get("debug.media_kit.p5_raw_code_scale", code_scale_property) > 0 &&
++        !strcmp(code_scale_property, "1");
++    char chroma_left_property[PROP_VALUE_MAX] = {0};
++    p->raw_chroma_left_probe = p->raw_packed10 &&
++        __system_property_get("debug.media_kit.p5_raw_chroma_left_probe",
++                              chroma_left_property) > 0 &&
++        !strcmp(chroma_left_property, "1");
++    if (p->raw_420_sidecar && (p->raw_chroma_left_probe ||
++                               !gl->BlitFramebuffer)) {
++        MP_ERR(mapper, "P5 420 sidecar requires GL blit and disables 444 phase probe\n");
++        return -1;
++    }
++    char full_dump_property[PROP_VALUE_MAX] = {0};
++    p->raw_full_dump = p->raw_packed10 &&
++        __system_property_get("debug.media_kit.p5_raw_full_dump",
++                              full_dump_property) > 0 &&
++        !strcmp(full_dump_property, "1");
++    if (p->raw_code_scale)
++        raw_stage("code_scale_1020_to_1023_enabled");
++    char pixel_property[PROP_VALUE_MAX] = {0};
++    p->raw_pixel_probe = p->raw_yuv &&
++        __system_property_get("debug.media_kit.p5_raw_pixel_probe", pixel_property) > 0 &&
++        !strcmp(pixel_property, "1");
++    char spatial_property[PROP_VALUE_MAX] = {0};
++    p->raw_spatial_probe = p->raw_pixel_probe &&
++        __system_property_get("debug.media_kit.p5_raw_spatial_probe", spatial_property) > 0 &&
++        !strcmp(spatial_property, "1");
++    char peak_property[PROP_VALUE_MAX] = {0};
++    p->raw_peak_probe = p->raw_pixel_probe && !p->raw_spatial_probe &&
++        __system_property_get("debug.media_kit.p5_raw_peak_probe", peak_property) > 0 &&
++        !strcmp(peak_property, "1");
++    char local_property[PROP_VALUE_MAX] = {0};
++    p->raw_local_probe = p->raw_peak_probe &&
++        __system_property_get("debug.media_kit.p5_raw_local_probe", local_property) > 0 &&
++        !strcmp(local_property, "1");
++    char error_property[PROP_VALUE_MAX] = {0};
++    p->raw_error_probe = p->raw_pixel_probe && p->raw_packed10 &&
++        __system_property_get("debug.media_kit.p5_raw_error_probe", error_property) > 0 &&
++        !strcmp(error_property, "1");
++    if (p->raw_pixel_probe)
++        raw_stage("pixel_probe_enabled");
++    if (p->raw_packed10 && (p->raw_mrt || p->raw_half)) {
++        MP_ERR(mapper, "P5 packed10 is exclusive with MRT/R16F options\n");
++        return -1;
++    }
++    if (p->raw_half &&
++        !gl_check_extension(gl->extensions, "GL_EXT_color_buffer_half_float") &&
++        gl->es < 320) {
++        MP_ERR(mapper, "P5 raw R16F requires ES3.2 or EXT_color_buffer_half_float\n");
++        return -1;
++    }
++    if (p->raw_mrt) {
++        GLint max_draw_buffers = 0;
++        p->DrawBuffers = (void *)eglGetProcAddress("glDrawBuffers");
++        gl->GetIntegerv(GL_MAX_DRAW_BUFFERS, &max_draw_buffers);
++        if (!p->DrawBuffers || max_draw_buffers < 3) {
++            MP_ERR(mapper, "P5 raw MRT requires three draw buffers: max=%d fn=%p\n",
++                   max_draw_buffers, p->DrawBuffers);
++            return -1;
++        }
++    }
++    char perf_property[PROP_VALUE_MAX] = {0};
++    p->raw_perf = p->raw_yuv &&
++                  __system_property_get("debug.media_kit.p5_raw_perf", perf_property) > 0 &&
++                  !strcmp(perf_property, "1");
++    char split_property[PROP_VALUE_MAX] = {0};
++    p->raw_split = p->raw_perf &&
++                   __system_property_get("debug.media_kit.p5_raw_split", split_property) > 0 &&
++                   !strcmp(split_property, "1");
++    char fence_property[PROP_VALUE_MAX] = {0};
++    p->raw_early_fence = p->raw_yuv && !p->direct_yuv &&
++                         __system_property_get("debug.media_kit.p5_raw_early_fence",
++                                               fence_property) > 0 &&
++                         !strcmp(fence_property, "1") &&
++                         gl->FenceSync && gl->ClientWaitSync && gl->DeleteSync;
++    char retire_property[PROP_VALUE_MAX] = {0};
++    p->raw_retire = p->raw_early_fence &&
++                    __system_property_get("debug.media_kit.p5_raw_retire",
++                                              retire_property) > 0 &&
++                    !strcmp(retire_property, "1");
++    char direct_retire_property[PROP_VALUE_MAX] = {0};
++    p->direct_retire = p->direct_yuv &&
++        __system_property_get("debug.media_kit.p5_dr_retire",
++                              direct_retire_property) > 0 &&
++        !strcmp(direct_retire_property, "1") &&
++        gl->FenceSync && gl->ClientWaitSync && gl->DeleteSync && gl->Flush;
++    p->raw_retire |= p->direct_retire;
++    char egl_cache_property[PROP_VALUE_MAX] = {0};
++    p->egl_cache_enabled = p->direct_retire &&
++        __system_property_get("debug.media_kit.p5_egl_cache",
++                              egl_cache_property) > 0 &&
++        !strcmp(egl_cache_property, "1");
++    if (p->egl_cache_enabled) {
++        o->AImageReader_setBufferRemovedListener = dlsym(
++            o->lib_handle, "AImageReader_setBufferRemovedListener");
++        p->ahb_lib = dlopen("libandroid.so", RTLD_NOW | RTLD_LOCAL);
++        p->AHardwareBuffer_acquire = p->ahb_lib ?
++            dlsym(p->ahb_lib, "AHardwareBuffer_acquire") : NULL;
++        p->AHardwareBuffer_release = p->ahb_lib ?
++            dlsym(p->ahb_lib, "AHardwareBuffer_release") : NULL;
++        if (!o->AImageReader_setBufferRemovedListener ||
++            !p->AHardwareBuffer_acquire || !p->AHardwareBuffer_release) {
++            MP_WARN(mapper, "P5 EGLImage cache unavailable on this device\n");
++            p->egl_cache_enabled = false;
++            if (p->ahb_lib) {
++                dlclose(p->ahb_lib);
++                p->ahb_lib = NULL;
++            }
++        }
++    }
++    char same_frame_property[PROP_VALUE_MAX] = {0};
++    p->same_frame_cache = p->direct_yuv && !p->raw_retire &&
++        __system_property_get("debug.media_kit.p5_same_frame_cache",
++                              same_frame_property) > 0 &&
++        !strcmp(same_frame_property, "1");
++    p5_section_log("P5_SAME_FRAME", "enabled=%d", p->same_frame_cache);
++    char timeline_property[PROP_VALUE_MAX] = {0};
++    p->image_timeline = p->raw_yuv &&
++        __system_property_get("debug.media_kit.p5_image_timeline",
++                              timeline_property) > 0 &&
++        !strcmp(timeline_property, "1");
++    char ahb_identity_property[PROP_VALUE_MAX] = {0};
++    p->ahb_identity_probe = p->direct_yuv &&
++        __system_property_get("debug.media_kit.p5_ahb_identity_probe",
++                              ahb_identity_property) > 0 &&
++        !strcmp(ahb_identity_property, "1");
++    p5_section_log("P5_DIRECT_RETIRE", "enabled=%d property=%s",
++                   p->direct_retire, direct_retire_property);
++    char vo_timer_property[PROP_VALUE_MAX] = {0};
++    bool vo_gpu_timer = __system_property_get("debug.media_kit.p5_vo_gpu_timer",
++                                               vo_timer_property) > 0 &&
++                        !strcmp(vo_timer_property, "1");
++    p->raw_timer = p->raw_perf && !p->direct_yuv && !vo_gpu_timer &&
++                   !p->raw_retire &&
++                   gl_check_extension(gl->extensions, "GL_EXT_disjoint_timer_query") &&
++                   gl->GenQueries && gl->DeleteQueries && gl->BeginQuery &&
++                   gl->EndQuery && gl->GetQueryObjectui64v;
++    if (p->raw_timer) {
++        gl->GenQueries(1, &p->raw_timer_query);
++        p->raw_timer = p->raw_timer_query != 0;
++    }
++    if (p->raw_perf)
++        MP_WARN(mapper, "P5 raw GPU timer available=%d ext=%d query=%u\n",
++                p->raw_timer,
++                gl_check_extension(gl->extensions, "GL_EXT_disjoint_timer_query"),
++                p->raw_timer_query);
++    if (p->raw_yuv) {
++        void *log_lib = dlopen("liblog.so", RTLD_NOW | RTLD_LOCAL);
++        typedef int (*log_print_fn)(int, const char *, const char *, ...);
++        log_print_fn log_print = log_lib ? dlsym(log_lib, "__android_log_print") : NULL;
++        if (log_print)
++            log_print(6, "P5_RAW_TIME", "init perf=%d property=%s", p->raw_perf, perf_property);
++        if (log_lib)
++            dlclose(log_lib);
++    }
++    char format_property[PROP_VALUE_MAX] = {0};
++    p->raw_format_probe = p->raw_yuv &&
++                          __system_property_get("debug.media_kit.p5_raw_format_probe", format_property) > 0 &&
++                          !strcmp(format_property, "1");
++    char gl_probe_property[PROP_VALUE_MAX] = {0};
++    p->raw_gl_preimport_probe = p->raw_yuv &&
++        __system_property_get("debug.media_kit.p5_raw_gl_preimport_probe", gl_probe_property) > 0 &&
++        !strcmp(gl_probe_property, "1");
++    if (p->raw_yuv &&
++        (mapper->src_params.repr.sys != PL_COLOR_SYSTEM_DOLBYVISION ||
++         !mapper->src_params.repr.dovi)) {
++        MP_ERR(mapper, "P5 raw YUV requested without first-frame DOVI metadata\n");
++        return -1;
++    }
++    if (p->raw_yuv) {
++        o->AImage_getCropRect = dlsym(o->lib_handle, "AImage_getCropRect");
++        o->AImage_getTimestamp = dlsym(o->lib_handle, "AImage_getTimestamp");
++        if (gl->es < 300 ||
++            !gl_check_extension(gl->extensions, "GL_EXT_YUV_target") ||
++            (!p->direct_yuv && !p->raw_packed10 &&
++             !gl_check_extension(gl->extensions, "GL_EXT_color_buffer_float")) ||
++            !o->AImage_getCropRect || !o->AImage_getTimestamp ||
++            (!p->direct_yuv &&
++             (!gl->GenVertexArrays || !gl->BindVertexArray ||
++              !raw_create_program(mapper)))) {
++            MP_ERR(mapper, "P5 raw YUV requires ES3, YUV_target, renderable FBO and shader support\n");
++            return -1;
++        }
++    }
++
+     AImageReader_ImageListener listener = {
+-        .context = p,
++        .context = o,
+         .onImageAvailable = image_callback,
+     };
+-    o->AImageReader_setImageListener(o->reader, &listener);
++    mp_mutex_lock(&o->callback_lock);
++    mp_assert(!o->callback_mapper);
++    o->callback_mapper = p;
++    mp_mutex_unlock(&o->callback_lock);
++    media_status_t listener_ret =
++        o->AImageReader_setImageListener(o->reader, &listener);
++    if (listener_ret != AMEDIA_OK) {
++        mp_mutex_lock(&o->callback_lock);
++        o->callback_mapper = NULL;
++        mp_mutex_unlock(&o->callback_lock);
++        MP_ERR(mapper, "AImageReader_setImageListener failed: %d\n", listener_ret);
++        return -1;
++    }
++    if (p->egl_cache_enabled) {
++        AImageReader_BufferRemovedListener removed_listener = {
++            .context = o,
++            .onBufferRemoved = buffer_removed_callback,
++        };
++        media_status_t removed_ret =
++            o->AImageReader_setBufferRemovedListener(o->reader,
++                                                       &removed_listener);
++        if (removed_ret != AMEDIA_OK) {
++            MP_WARN(mapper, "P5 EGLImage cache listener unavailable: %d\n",
++                    removed_ret);
++            p->egl_cache_enabled = false;
++            dlclose(p->ahb_lib);
++            p->ahb_lib = NULL;
++        }
++    }
++    p5_section_log("P5_EGL_CACHE", "enabled=%d property=%s",
++                   p->egl_cache_enabled, egl_cache_property);
+ 
+     mapper->dst_params = mapper->src_params;
+-    mapper->dst_params.imgfmt = IMGFMT_RGB0;
++    mapper->dst_params.imgfmt = p->direct_yuv ? IMGFMT_MEDIACODEC_YUV :
++                                p->raw_420_sidecar ? IMGFMT_YUV420_PACK10 :
++                                p->raw_packed10 ? IMGFMT_YUV444_PACK10 :
++                                p->raw_yuv ? IMGFMT_444PF : IMGFMT_RGB0;
+     mapper->dst_params.hw_subfmt = 0;
++    // The upstream OES wrapper is non-subsampled and mp_image_params_guess()
++    // consequently normalizes its chroma location to CENTER. The sidecar
++    // reconstructs the source 4:2:0 planes, whose HEVC chroma sits LEFT.
++    if (p->raw_420_sidecar)
++        mapper->dst_params.chroma_location = PL_CHROMA_LEFT;
++    if (p->raw_420_sidecar)
++        MP_WARN(mapper, "P5 420 sidecar chroma_location=%d size=%dx%d\n",
++                mapper->dst_params.chroma_location,
++                mapper->dst_params.w, mapper->dst_params.h);
++    if (p->raw_yuv) {
++        // The shader copies normalized 10-bit BL code values, not float32 code words.
++        mapper->dst_params.repr.bits = (struct pl_bit_encoding) {
++            .sample_depth = 10, .color_depth = 10,
++        };
++        MP_WARN(mapper, "P5 raw YUV diagnostic enabled; using %s\n",
++                p->direct_yuv ? "direct external YUV sampler" :
++                p->raw_420_sidecar ? "RGB10_A2 Y plus half-size UV" :
++                p->raw_packed10 ? "one RGB10_A2 YUV texture" : "R32F Y/U/V planes");
++    }
+ 
+     // texture creation
+     gl->GenTextures(1, &p->gl_texture);
+     gl->BindTexture(GL_TEXTURE_EXTERNAL_OES, p->gl_texture);
+-    gl->TexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+-    gl->TexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
++    gl->TexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MIN_FILTER,
++                      p->raw_yuv ? GL_NEAREST : GL_LINEAR);
++    gl->TexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MAG_FILTER,
++                      p->raw_yuv ? GL_NEAREST : GL_LINEAR);
+     gl->TexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+     gl->TexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+     gl->BindTexture(GL_TEXTURE_EXTERNAL_OES, 0);
+@@ -275,31 +1356,257 @@ static int mapper_init(struct ra_hwdec_mapper *mapper)
+         .render_src = true,
+         .src_linear = true,
+         .external_oes = true,
++        .external_yuv = p->direct_yuv,
+     };
+ 
+     if (params.format->ctype != RA_CTYPE_UNORM)
+         return -1;
+ 
+-    mapper->tex[0] = ra_create_wrapped_tex(mapper->ra, &params, p->gl_texture);
+-    if (!mapper->tex[0])
+-        return -1;
++    if (!p->raw_yuv || p->direct_yuv) {
++        mapper->tex[0] = ra_create_wrapped_tex(mapper->ra, &params, p->gl_texture);
++        if (!mapper->tex[0])
++            return -1;
++    }
+ 
+     return 0;
+ }
+ 
++static void raw_retire_release(struct ra_hwdec_mapper *mapper, int index)
++{
++    struct priv *p = mapper->priv;
++    struct priv_owner *o = mapper->owner->priv;
++    GL *gl = ra_gl_get(mapper->ra);
++    struct retired_image image = p->retired[index];
++    gl->DeleteSync(image.fence);
++    if (image.wrapped_tex)
++        ra_tex_free(mapper->ra, &image.wrapped_tex);
++    gl->DeleteTextures(1, &image.texture);
++    if (!image.cached_egl)
++        p->DestroyImageKHR(image.display, image.egl_image);
++    o->AImage_delete(image.image);
++    p->image_deleted++;
++    for (int i = index + 1; i < p->retired_count; i++)
++        p->retired[i - 1] = p->retired[i];
++    p->retired[--p->retired_count] = (struct retired_image){0};
++    p->raw_retire_reaped++;
++}
++
++static void raw_retire_reap(struct ra_hwdec_mapper *mapper, int max_keep)
++{
++    struct priv *p = mapper->priv;
++    GL *gl = ra_gl_get(mapper->ra);
++    for (int i = 0; i < p->retired_count;) {
++        struct retired_image *image = &p->retired[i];
++        GLenum status = gl->ClientWaitSync(image->fence,
++                                           GL_SYNC_FLUSH_COMMANDS_BIT, 0);
++        bool ready = status == GL_ALREADY_SIGNALED ||
++                     status == GL_CONDITION_SATISFIED;
++        if (!ready && p->retired_count > max_keep) {
++            int64_t start_ns = mp_time_ns();
++            status = gl->ClientWaitSync(image->fence,
++                                        GL_SYNC_FLUSH_COMMANDS_BIT,
++                                        1000000000ULL);
++            p->raw_retire_waits++;
++            p->raw_retire_wait_ns += mp_time_ns() - start_ns;
++            ready = status == GL_ALREADY_SIGNALED ||
++                    status == GL_CONDITION_SATISFIED;
++            if (!ready) {
++                gl->Finish();
++                p->raw_retire_fallbacks++;
++                ready = true;
++            }
++        }
++        if (ready)
++            raw_retire_release(mapper, i);
++        else
++            i++;
++    }
++}
++
++static bool raw_create_next_external_texture(struct ra_hwdec_mapper *mapper)
++{
++    struct priv *p = mapper->priv;
++    GL *gl = ra_gl_get(mapper->ra);
++    GLint old_active = 0, old_external = 0;
++    gl->GetIntegerv(GL_ACTIVE_TEXTURE, &old_active);
++    gl->ActiveTexture(GL_TEXTURE0);
++    gl->GetIntegerv(GL_TEXTURE_BINDING_EXTERNAL_OES, &old_external);
++    gl->GenTextures(1, &p->gl_texture);
++    if (!p->gl_texture) {
++        gl->ActiveTexture(old_active);
++        return false;
++    }
++    gl->BindTexture(GL_TEXTURE_EXTERNAL_OES, p->gl_texture);
++    gl->TexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
++    gl->TexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
++    gl->TexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
++    gl->TexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
++    gl->BindTexture(GL_TEXTURE_EXTERNAL_OES, old_external);
++    gl->ActiveTexture(old_active);
++    if (gl->GetError() != GL_NO_ERROR) {
++        gl->DeleteTextures(1, &p->gl_texture);
++        p->gl_texture = 0;
++        return false;
++    }
++    return true;
++}
++
++static bool egl_cache_image_in_flight(struct priv *p, EGLImageKHR image)
++{
++    if (p->egl_image == image)
++        return true;
++    for (int i = 0; i < p->retired_count; i++) {
++        if (p->retired[i].egl_image == image)
++            return true;
++    }
++    return false;
++}
++
++static void egl_cache_reap(struct ra_hwdec_mapper *mapper, bool all)
++{
++    struct priv *p = mapper->priv;
++    struct priv_owner *o = mapper->owner->priv;
++    if (!p->egl_cache_enabled)
++        return;
++
++    AHardwareBuffer *removed[MP_ARRAY_SIZE(o->removed_buffers)];
++    int removed_count = 0;
++    bool overflow = false;
++    mp_mutex_lock(&o->callback_lock);
++    removed_count = o->removed_count;
++    memcpy(removed, o->removed_buffers, removed_count * sizeof(removed[0]));
++    o->removed_count = 0;
++    overflow = o->removed_overflow;
++    o->removed_overflow = false;
++    mp_mutex_unlock(&o->callback_lock);
++
++    for (int i = 0; i < MP_ARRAY_SIZE(p->egl_cache); i++) {
++        struct egl_cache_entry *entry = &p->egl_cache[i];
++        if (!entry->buffer)
++            continue;
++        for (int j = 0; j < removed_count; j++) {
++            if (entry->buffer == removed[j])
++                entry->removed = true;
++        }
++        if (overflow)
++            entry->removed = true;
++        if ((all || entry->removed) &&
++            (all || !egl_cache_image_in_flight(p, entry->image))) {
++            p->DestroyImageKHR(entry->display, entry->image);
++            p->AHardwareBuffer_release(entry->buffer);
++            *entry = (struct egl_cache_entry){0};
++            p->egl_cache_evictions++;
++        }
++    }
++}
++
+ static void mapper_uninit(struct ra_hwdec_mapper *mapper)
+ {
+     struct priv *p = mapper->priv;
+     struct priv_owner *o = mapper->owner->priv;
+     GL *gl = ra_gl_get(mapper->ra);
+ 
++    if (p->raw_sample_fence) {
++        gl->Finish();
++        gl->DeleteSync(p->raw_sample_fence);
++        p->raw_sample_fence = NULL;
++    }
++
+     o->AImageReader_setImageListener(o->reader, NULL);
++    if (p->egl_cache_enabled)
++        o->AImageReader_setBufferRemovedListener(o->reader, NULL);
++    mp_mutex_lock(&o->callback_lock);
++    o->callback_mapper = NULL;
++    while (o->callbacks_active)
++        mp_cond_wait(&o->callback_cond, &o->callback_lock);
++    mp_mutex_unlock(&o->callback_lock);
++    if (p->raw_retire) {
++        int held_before = p->retired_count;
++        raw_retire_reap(mapper, 0);
++        char final_line[256];
++        snprintf(final_line, sizeof(final_line),
++                 "P5_RETIRE_FINAL maps=%"PRIu64" reaped=%"PRIu64
++                 " held_before=%d held_after=%d waits=%"PRIu64
++                 " fallbacks=%"PRIu64" callbacks=%"PRIu64
++                 " empty_acquires=%"PRIu64" current_image=%d current_egl=%d",
++                 p->raw_retire_maps, p->raw_retire_reaped,
++                 held_before, p->retired_count, p->raw_retire_waits,
++                 p->raw_retire_fallbacks, p->image_callbacks,
++                 p->empty_acquires, p->image != NULL, p->egl_image != NULL);
++        raw_stage(final_line);
++        MP_WARN(mapper, "P5_RETIRE_FINAL maps=%"PRIu64" reaped=%"PRIu64
++                " held_before=%d held_after=%d waits=%"PRIu64
++                " fallbacks=%"PRIu64" callbacks=%"PRIu64
++                " empty_acquires=%"PRIu64" current_image=%d current_egl=%d\n",
++                p->raw_retire_maps, p->raw_retire_reaped,
++                held_before, p->retired_count, p->raw_retire_waits,
++                p->raw_retire_fallbacks, p->image_callbacks,
++                p->empty_acquires, p->image != NULL, p->egl_image != NULL);
++    }
+ 
++    if (p->cached_frame) {
++        gl->Finish();
++        if (p->egl_image) {
++            if (!p->current_egl_cached)
++                p->DestroyImageKHR(eglGetCurrentDisplay(), p->egl_image);
++            p->egl_image = NULL;
++            p->current_egl_cached = false;
++        }
++        if (p->image) {
++            o->AImage_delete(p->image);
++            p->image_deleted++;
++            p->image = NULL;
++        }
++        mp_image_unrefp(&p->cached_frame);
++    }
++    p5_section_log("P5_SAME_FRAME",
++                   "final hits=%"PRIu64" evictions=%"PRIu64
++                   " acquired=%"PRIu64" deleted=%"PRIu64,
++                   p->same_frame_hits, p->same_frame_evictions,
++                   p->image_acquired, p->image_deleted);
+     gl->DeleteTextures(1, &p->gl_texture);
+     p->gl_texture = 0;
+ 
+-    ra_tex_free(mapper->ra, &mapper->tex[0]);
++    if (p->raw_yuv && !p->direct_yuv) {
++        if (p->raw_timer_query)
++            gl->DeleteQueries(1, &p->raw_timer_query);
++        raw_destroy_targets(mapper);
++        if (p->raw_vao)
++            gl->DeleteVertexArrays(1, &p->raw_vao);
++        if (p->raw_program)
++            gl->DeleteProgram(p->raw_program);
++    } else {
++        ra_tex_free(mapper->ra, &mapper->tex[0]);
++    }
++    if (p->egl_cache_enabled) {
++        gl->Finish();
++        egl_cache_reap(mapper, true);
++        p5_section_log("P5_EGL_CACHE_FINAL",
++                       "hits=%"PRIu64" misses=%"PRIu64" bypasses=%"PRIu64
++                       " evictions=%"PRIu64,
++                       p->egl_cache_hits, p->egl_cache_misses,
++                       p->egl_cache_bypasses, p->egl_cache_evictions);
++    }
++    if (p->ahb_lib) {
++        dlclose(p->ahb_lib);
++        p->ahb_lib = NULL;
++    }
+ 
++    MP_WARN(mapper, "P5_IMAGE_FINAL acquired=%"PRIu64" deleted=%"PRIu64
++            " current_image=%d retired=%d callbacks=%"PRIu64
++            " empty_acquires=%"PRIu64" retire=%d\n",
++            p->image_acquired, p->image_deleted, p->image != NULL,
++            p->retired_count, p->image_callbacks, p->empty_acquires,
++            p->raw_retire);
++    char image_final_line[256];
++    snprintf(image_final_line, sizeof(image_final_line),
++             "P5_IMAGE_FINAL acquired=%"PRIu64" deleted=%"PRIu64
++             " current_image=%d retired=%d callbacks=%"PRIu64
++             " empty_acquires=%"PRIu64" retire=%d",
++             p->image_acquired, p->image_deleted, p->image != NULL,
++             p->retired_count, p->image_callbacks, p->empty_acquires,
++             p->raw_retire);
++    raw_stage(image_final_line);
+     mp_mutex_destroy(&p->lock);
+     mp_cond_destroy(&p->cond);
+ }
+@@ -309,14 +1616,145 @@ static void mapper_unmap(struct ra_hwdec_mapper *mapper)
+     struct priv *p = mapper->priv;
+     struct priv_owner *o = mapper->owner->priv;
+ 
+-    if (p->egl_image) {
+-        p->DestroyImageKHR(eglGetCurrentDisplay(), p->egl_image);
+-        p->egl_image = 0;
++    if (p->direct_retire && p->image && p->egl_image &&
++        p->raw_submitted && p->gl_texture && mapper->tex[0]) {
++        GL *gl = ra_gl_get(mapper->ra);
++        p->raw_sample_fence = gl->FenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
++        if (p->raw_sample_fence)
++            gl->Flush();
+     }
+-
+-    if (p->image) {
+-        o->AImage_delete(p->image);
++    if (p->raw_retire && p->image && p->egl_image &&
++        p->raw_submitted && p->raw_sample_fence && p->gl_texture) {
++        if (p->retired_count >= MP_ARRAY_SIZE(p->retired))
++            raw_retire_reap(mapper, 1);
++        mp_assert(p->retired_count < MP_ARRAY_SIZE(p->retired));
++        p->retired[p->retired_count++] = (struct retired_image){
++            .image = p->image,
++            .egl_image = p->egl_image,
++            .display = eglGetCurrentDisplay(),
++            .fence = p->raw_sample_fence,
++            .texture = p->gl_texture,
++            .wrapped_tex = p->direct_retire ? mapper->tex[0] : NULL,
++            .cached_egl = p->current_egl_cached,
++        };
++        if (p->direct_retire)
++            mapper->tex[0] = NULL;
+         p->image = NULL;
++        p->egl_image = NULL;
++        p->current_egl_cached = false;
++        p->raw_sample_fence = NULL;
++        p->gl_texture = 0;
++        p->raw_submitted = false;
++        p->raw_perf_pending = false;
++        return;
++    }
++
++    if (p->raw_yuv && p->image && p->raw_submitted) {
++        int64_t start_ns = p->raw_perf && p->raw_perf_pending ? mp_time_ns() : 0;
++        GL *gl = ra_gl_get(mapper->ra);
++        if (!gl->Finish) {
++            raw_stage("finish_pointer_missing");
++            abort();
++        }
++        bool sample_complete = false;
++        int wait_result = -1;
++        if (p->raw_early_fence && p->raw_sample_fence) {
++            wait_result = gl->ClientWaitSync(p->raw_sample_fence,
++                                             GL_SYNC_FLUSH_COMMANDS_BIT,
++                                             1000000000ULL);
++            sample_complete = wait_result == GL_ALREADY_SIGNALED ||
++                              wait_result == GL_CONDITION_SATISFIED;
++        }
++        if (!sample_complete) {
++            int64_t section_wall = p->section_perf ? mp_time_ns() : 0;
++            int64_t section_cpu = p->section_perf ? p5_mapper_cpu_ns() : 0;
++            gl->Finish();
++            if (p->section_perf) {
++                p->section_finish_wall_ns += mp_time_ns() - section_wall;
++                p->section_finish_cpu_ns += p5_mapper_cpu_ns() - section_cpu;
++            }
++        }
++        if (p->raw_sample_fence) {
++            gl->DeleteSync(p->raw_sample_fence);
++            p->raw_sample_fence = NULL;
++        }
++        if (p->raw_perf && p->raw_perf_pending) {
++            int64_t finish_ns = mp_time_ns() - start_ns;
++            GLuint64 gpu_draw_ns = 0;
++            GLint gpu_disjoint = 0;
++            if (p->raw_timer_pending) {
++                gl->GetIntegerv(GL_GPU_DISJOINT_EXT, &gpu_disjoint);
++                if (!gpu_disjoint)
++                    gl->GetQueryObjectui64v(p->raw_timer_query, GL_QUERY_RESULT,
++                                            &gpu_draw_ns);
++                p->raw_timer_pending = false;
++            }
++            p->raw_perf_frames++;
++            if (p->raw_perf_frames <= 20 || p->raw_perf_frames % 50 == 0) {
++                void *log_lib = dlopen("liblog.so", RTLD_NOW | RTLD_LOCAL);
++                typedef int (*log_print_fn)(int, const char *, const char *, ...);
++                log_print_fn log_print = log_lib ? dlsym(log_lib, "__android_log_print") : NULL;
++                if (log_print)
++                    log_print(6, "P5_RAW_TIME", "frame=%"PRIu64" submit_us=%"PRId64" pre_finish_us=%"PRId64" release_wait_us=%"PRId64" wait_result=0x%x fence=%d gpu_draw_us=%"PRIu64" disjoint=%d",
++                              p->raw_perf_frames, p->raw_perf_submit_ns / 1000,
++                              p->raw_perf_split_ns / 1000, finish_ns / 1000,
++                              wait_result, p->raw_early_fence,
++                              (uint64_t)(gpu_draw_ns / 1000),
++                              gpu_disjoint);
++                if (log_lib)
++                    dlclose(log_lib);
++            }
++            p->raw_perf_window_frames++;
++            p->raw_perf_submit_window_sum_ns += p->raw_perf_submit_ns;
++            p->raw_perf_finish_window_sum_ns += finish_ns;
++            p->raw_perf_submit_window_max_ns = MPMAX(p->raw_perf_submit_window_max_ns,
++                                                     p->raw_perf_submit_ns);
++            p->raw_perf_finish_window_max_ns = MPMAX(p->raw_perf_finish_window_max_ns,
++                                                     finish_ns);
++            if (p->raw_perf_frames == 1 || p->raw_perf_frames == 10 ||
++                p->raw_perf_frames == 50 || p->raw_perf_frames % 250 == 0) {
++                MP_WARN(mapper, "P5_RAW_PERF frames=%"PRIu64" window=%"PRIu64" map_submit_cpu_us_avg=%"PRId64" map_submit_cpu_us_max=%"PRId64" unmap_finish_wait_us_avg=%"PRId64" unmap_finish_wait_us_max=%"PRId64"\n",
++                        p->raw_perf_frames, p->raw_perf_window_frames,
++                        p->raw_perf_submit_window_sum_ns /
++                            (int64_t)p->raw_perf_window_frames / 1000,
++                        p->raw_perf_submit_window_max_ns / 1000,
++                        p->raw_perf_finish_window_sum_ns /
++                            (int64_t)p->raw_perf_window_frames / 1000,
++                        p->raw_perf_finish_window_max_ns / 1000);
++                p->raw_perf_window_frames = 0;
++                p->raw_perf_submit_window_sum_ns = 0;
++                p->raw_perf_submit_window_max_ns = 0;
++                p->raw_perf_finish_window_sum_ns = 0;
++                p->raw_perf_finish_window_max_ns = 0;
++            }
++            p->raw_perf_pending = false;
++        }
++    }
++
++    if (!p->same_frame_cache || !p->cached_frame) {
++        if (p->egl_image) {
++            if (!p->current_egl_cached)
++                p->DestroyImageKHR(eglGetCurrentDisplay(), p->egl_image);
++            p->egl_image = 0;
++            p->current_egl_cached = false;
++        }
++        if (p->image) {
++            o->AImage_delete(p->image);
++            p->image_deleted++;
++            p->image = NULL;
++        }
++    }
++    p->raw_submitted = false;
++    if (p->section_perf && ++p->section_frames % 250 == 0) {
++        p5_section_log("P5_SECTION_MAP", "frames=250 acquire_wall_us=%"PRId64" acquire_cpu_us=%"PRId64" create_wall_us=%"PRId64" create_cpu_us=%"PRId64" bind_wall_us=%"PRId64" bind_cpu_us=%"PRId64" finish_wall_us=%"PRId64" finish_cpu_us=%"PRId64,
++                p->section_acquire_wall_ns / 1000, p->section_acquire_cpu_ns / 1000,
++                p->section_create_wall_ns / 1000, p->section_create_cpu_ns / 1000,
++                p->section_bind_wall_ns / 1000, p->section_bind_cpu_ns / 1000,
++                p->section_finish_wall_ns / 1000, p->section_finish_cpu_ns / 1000);
++        p->section_acquire_wall_ns = p->section_acquire_cpu_ns = 0;
++        p->section_create_wall_ns = p->section_create_cpu_ns = 0;
++        p->section_bind_wall_ns = p->section_bind_cpu_ns = 0;
++        p->section_finish_wall_ns = p->section_finish_cpu_ns = 0;
+     }
+ }
+ 
+@@ -325,33 +1763,201 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
+     struct priv *p = mapper->priv;
+     struct priv_owner *o = mapper->owner->priv;
+     GL *gl = ra_gl_get(mapper->ra);
++    p->raw_perf_pending = false;
++    p->raw_submitted = false;
++
++    if (p->raw_retire) {
++        raw_retire_reap(mapper, 1);
++        egl_cache_reap(mapper, false);
++        p->raw_retire_maps++;
++        if (p->raw_retire_maps <= 20 || p->raw_retire_maps % 50 == 0) {
++            void *log_lib = dlopen("liblog.so", RTLD_NOW | RTLD_LOCAL);
++            typedef int (*log_print_fn)(int, const char *, const char *, ...);
++            log_print_fn log_print = log_lib ? dlsym(log_lib, "__android_log_print") : NULL;
++            if (log_print)
++                log_print(6, "P5_RETIRE", "map=%"PRIu64" held=%d reaped=%"PRIu64" waits=%"PRIu64" wait_us_total=%"PRId64" fallbacks=%"PRIu64,
++                          p->raw_retire_maps, p->retired_count,
++                          p->raw_retire_reaped, p->raw_retire_waits,
++                          p->raw_retire_wait_ns / 1000,
++                          p->raw_retire_fallbacks);
++            if (log_lib)
++                dlclose(log_lib);
++        }
++        if (!p->gl_texture && !raw_create_next_external_texture(mapper))
++            return -1;
++        if (p->direct_retire && !mapper->tex[0]) {
++            struct ra_tex_params params = {
++                .dimensions = 2,
++                .w = mapper->src_params.w,
++                .h = mapper->src_params.h,
++                .d = 1,
++                .format = ra_find_unorm_format(mapper->ra, 1, 4),
++                .render_src = true,
++                .src_linear = true,
++                .external_oes = true,
++                .external_yuv = true,
++            };
++            mapper->tex[0] = ra_create_wrapped_tex(mapper->ra, &params,
++                                                    p->gl_texture);
++            if (!mapper->tex[0])
++                return -1;
++        }
++    }
++
++    if (p->raw_yuv &&
++        (mapper->src_params.repr.sys != PL_COLOR_SYSTEM_DOLBYVISION ||
++         !mapper->src_params.repr.dovi || !mapper->src->dovi)) {
++        MP_ERR(mapper, "P5 raw YUV frame lacks DOVI metadata\n");
++        return -1;
++    }
++    if (p->raw_yuv && !p->rpu_hash_logged &&
++        fabs(mapper->src->pts - 10.0) < 0.00001) {
++        char prop[PROP_VALUE_MAX] = {0};
++        if (__system_property_get("debug.media_kit.p5_post_rpu_probe", prop) > 0 &&
++            !strcmp(prop, "1")) {
++            int found = 0;
++            for (int i = 0; i < mapper->src->num_ff_side_data; i++) {
++                struct mp_ff_side_data *sd = &mapper->src->ff_side_data[i];
++                if (sd->type != AV_FRAME_DATA_DOVI_RPU_BUFFER || !sd->buf)
++                    continue;
++                uint32_t hash = 2166136261U;
++                for (size_t j = 0; j < sd->buf->size; j++)
++                    hash = (hash ^ sd->buf->data[j]) * 16777619U;
++                char line[160];
++                snprintf(line, sizeof(line),
++                         "P5_RPU_ID pts=%.9f size=%zu hash=%08x",
++                         mapper->src->pts, sd->buf->size, hash);
++                raw_stage(line);
++                found++;
++            }
++            if (!found)
++                raw_stage("P5_RPU_ID pts=10 missing_raw_side_data");
++            p->rpu_hash_logged = true;
++        }
++    }
+ 
+     {
+         if (mapper->src->imgfmt != IMGFMT_MEDIACODEC)
+             return -1;
+         AVMediaCodecBuffer *buffer = (AVMediaCodecBuffer *)mapper->src->planes[3];
+-        av_mediacodec_release_buffer(buffer, 1);
++        if (p->same_frame_cache && p->cached_frame) {
++            if (p->image && p->egl_image &&
++                p->cached_frame->planes[3] == mapper->src->planes[3] &&
++                p->cached_frame->pts == mapper->src->pts) {
++                p->same_frame_hits++;
++                p->raw_submitted = true;
++                p5_section_log("P5_SAME_FRAME", "hit=%"PRIu64" pts=%.9f",
++                               p->same_frame_hits, mapper->src->pts);
++                return 0;
++            }
++            if (p->egl_image) {
++                p->DestroyImageKHR(eglGetCurrentDisplay(), p->egl_image);
++                p->egl_image = NULL;
++            }
++            if (p->image) {
++                o->AImage_delete(p->image);
++                p->image_deleted++;
++                p->image = NULL;
++            }
++            mp_image_unrefp(&p->cached_frame);
++            p->same_frame_evictions++;
++        }
++        if (p->image_timeline && p->image_acquired < 12)
++            p5_section_log("P5_TIMELINE", "release_begin pts=%.9f mono_us=%"PRId64,
++                           mapper->src->pts, mp_time_ns() / 1000);
++        int release_ret = av_mediacodec_release_buffer(buffer, 1);
++        if (p->image_timeline && p->image_acquired < 12)
++            p5_section_log("P5_TIMELINE",
++                           "release_end pts=%.9f src=%p codec_buffer=%p ret=%d mono_us=%"PRId64,
++                           mapper->src->pts, (void *)mapper->src,
++                           (void *)buffer, release_ret, mp_time_ns() / 1000);
+     }
+ 
+-    bool image_available = false;
+-    mp_mutex_lock(&p->lock);
+-    if (!p->image_available) {
+-        mp_cond_timedwait(&p->cond, &p->lock, MP_TIME_MS_TO_NS(100));
++    // A queued callback does not guarantee an image is still available.
++    // Retry this transient state without spinning the VO.
++    media_status_t ret = AMEDIA_IMGREADER_NO_BUFFER_AVAILABLE;
++    int64_t acquire_wall = p->section_perf ? mp_time_ns() : 0;
++    int64_t acquire_cpu = p->section_perf ? p5_mapper_cpu_ns() : 0;
++    for (int attempt = 0; attempt < 10; attempt++) {
++        mp_mutex_lock(&p->lock);
+         if (!p->image_available)
+-            MP_WARN(mapper, "Waiting for frame timed out!\n");
++            mp_cond_timedwait(&p->cond, &p->lock, MP_TIME_MS_TO_NS(10));
++        p->image_available = false;
++        mp_mutex_unlock(&p->lock);
++
++        int64_t attempt_us = p->image_timeline ? mp_time_ns() / 1000 : 0;
++        ret = o->AImageReader_acquireLatestImage(o->reader, &p->image);
++        if (p->image_timeline && (p->image_acquired < 12 ||
++                                  ret != AMEDIA_OK || p->timeline_followup)) {
++            mp_mutex_lock(&p->lock);
++            uint64_t callbacks_snapshot = p->image_callbacks;
++            mp_mutex_unlock(&p->lock);
++            p5_section_log("P5_TIMELINE",
++                           "acquire attempt=%d pts=%.9f start_us=%"PRId64
++                           " end_us=%"PRId64" ret=%d callbacks=%"PRIu64,
++                           attempt + 1, mapper->src->pts, attempt_us,
++                           mp_time_ns() / 1000, ret, callbacks_snapshot);
++        }
++        if (ret != AMEDIA_IMGREADER_NO_BUFFER_AVAILABLE)
++            break;
++        p->empty_acquires++;
++    }
++    if (p->section_perf) {
++        p->section_acquire_wall_ns += mp_time_ns() - acquire_wall;
++        p->section_acquire_cpu_ns += p5_mapper_cpu_ns() - acquire_cpu;
+     }
+-    image_available = p->image_available;
+-    p->image_available = false;
+-    mp_mutex_unlock(&p->lock);
+-
+-    media_status_t ret = o->AImageReader_acquireLatestImage(o->reader, &p->image);
+     if (ret != AMEDIA_OK) {
+-        MP_ERR(mapper, "acquireLatestImage failed: %d\n", ret);
+-        // If we merely timed out waiting return success anyway to avoid
+-        // flashing frames of render errors.
+-        return image_available ? -1 : 0;
++        if (p->image_timeline) {
++            p->timeline_failed_pts = mapper->src->pts;
++            p->timeline_failed_us = mp_time_ns() / 1000;
++            p->timeline_followup = true;
++        }
++        mp_mutex_lock(&p->lock);
++        uint64_t callbacks = p->image_callbacks;
++        bool notification_pending = p->image_available;
++        mp_mutex_unlock(&p->lock);
++        MP_ERR(mapper, "acquireLatestImage failed after retry: %d pts=%.9f callbacks=%"PRIu64
++               " empty_acquires=%"PRIu64" notification_pending=%d retired=%d maps=%"PRIu64"\n",
++               ret, mapper->src->pts, callbacks, p->empty_acquires,
++               notification_pending, p->retired_count, p->raw_retire_maps);
++        return -1;
+     }
+     mp_assert(p->image);
++    if (p->image_timeline &&
++        (p->image_acquired < 12 || p->timeline_followup)) {
++        int64_t image_ns = -1;
++        media_status_t image_ts_ret = o->AImage_getTimestamp(p->image, &image_ns);
++        p5_section_log("P5_TIMELINE",
++                       "acquire_ok target_pts=%.9f image_ts_ns=%"PRId64
++                       " ts_ret=%d mono_us=%"PRId64
++                       " prior_failed_pts=%.9f since_failed_us=%"PRId64,
++                       mapper->src->pts, image_ns, image_ts_ret,
++                       mp_time_ns() / 1000, p->timeline_failed_pts,
++                       p->timeline_followup ?
++                           mp_time_ns() / 1000 - p->timeline_failed_us : -1);
++        if (p->timeline_followup)
++            p->timeline_followup = false;
++    }
++    p->image_acquired++;
++    if (p->image_acquired <= 3 || p->image_acquired % 250 == 0)
++        MP_WARN(mapper, "P5_IMAGE_COUNT acquired=%"PRIu64" deleted=%"PRIu64
++                " current_image=%d retired=%d callbacks=%"PRIu64
++                " empty_acquires=%"PRIu64" retire=%d pts=%.9f\n",
++                p->image_acquired, p->image_deleted, p->image != NULL,
++                p->retired_count, p->image_callbacks, p->empty_acquires,
++                p->raw_retire, mapper->src->pts);
++
++    if (p->image_acquired <= 3 || p->image_acquired % 250 == 0) {
++        char image_count_line[256];
++        snprintf(image_count_line, sizeof(image_count_line),
++                 "P5_IMAGE_COUNT acquired=%"PRIu64" deleted=%"PRIu64
++                 " current_image=%d retired=%d callbacks=%"PRIu64
++                 " empty_acquires=%"PRIu64" retire=%d pts=%.9f",
++                 p->image_acquired, p->image_deleted, p->image != NULL,
++                 p->retired_count, p->image_callbacks, p->empty_acquires,
++                 p->raw_retire, mapper->src->pts);
++        raw_stage(image_count_line);
++    }
+ 
+     AHardwareBuffer *hwbuf = NULL;
+     ret = o->AImage_getHardwareBuffer(p->image, &hwbuf);
+@@ -360,30 +1966,198 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
+         return -1;
+     }
+     mp_assert(hwbuf);
++    if (p->ahb_identity_probe && ++p->ahb_identity_samples <= 120)
++        p5_section_log("P5_AHB_IDENTITY", "sample=%"PRIu64" pts=%.9f ahb=%p image=%p",
++                       p->ahb_identity_samples, mapper->src->pts,
++                       (void *)hwbuf, (void *)p->image);
+ 
+     // Update texture size since it may differ
+     AHardwareBuffer_Desc d;
+     o->AHardwareBuffer_describe(hwbuf, &d);
+-    if (mapper->tex[0]->params.w != d.width || mapper->tex[0]->params.h != d.height) {
++    if (p->raw_format_probe) {
++        if (!p->raw_format_probe_logged) {
++            MP_ERR(mapper, "P5_RAW_FORMAT width=%u height=%u layers=%u format=0x%x usage=%"PRIu64" stride=%u\n",
++                   d.width, d.height, d.layers, d.format,
++                   (uint64_t)d.usage, d.stride);
++            p->raw_format_probe_logged = true;
++        }
++        return -1;
++    }
++    AImageCropRect crop = {0};
++    if (p->raw_yuv) {
++        int64_t image_ns = 0;
++        media_status_t ts_ret = o->AImage_getTimestamp(p->image, &image_ns);
++        media_status_t crop_ret = o->AImage_getCropRect(p->image, &crop);
++        double frame_ns = mapper->src->pts * 1000000000.0;
++        bool valid_pts = isfinite(frame_ns) && frame_ns >= 0 &&
++                         frame_ns < (double)INT64_MAX && image_ns >= 0 &&
++                         fabs(frame_ns - (double)image_ns) <= 1000.0;
++        bool valid_crop = crop_ret == AMEDIA_OK &&
++                          crop.left >= 0 && crop.top >= 0 &&
++                          crop.right > crop.left && crop.bottom > crop.top &&
++                          crop.right <= d.width && crop.bottom <= d.height &&
++                          crop.right - crop.left == mapper->src_params.w &&
++                          crop.bottom - crop.top == mapper->src_params.h;
++        if (ts_ret != AMEDIA_OK || !valid_pts || !valid_crop) {
++            MP_ERR(mapper, "P5 raw YUV identity/crop mismatch: frame_pts=%.9f image_ns=%"PRId64" ts=%d crop=%d,%d,%d,%d crop_status=%d buffer=%ux%u expected=%dx%d\n",
++                   mapper->src->pts, image_ns, ts_ret,
++                   crop.left, crop.top, crop.right, crop.bottom, crop_ret,
++                   d.width, d.height, mapper->src_params.w,
++                   mapper->src_params.h);
++            return -1;
++        }
++        if (!p->direct_yuv &&
++            !raw_create_targets(mapper, mapper->src_params.w,
++                                mapper->src_params.h))
++            return -1;
++        if (p->raw_gl_preimport_probe) {
++            GLenum err = gl->GetError();
++            if (!p->raw_gl_preimport_probe_logged) {
++                MP_ERR(mapper, "P5_RAW_GL_PREIMPORT error=0x%x context=%p display=%p format=0x%x\n",
++                       err, eglGetCurrentContext(), eglGetCurrentDisplay(), d.format);
++                p->raw_gl_preimport_probe_logged = true;
++            }
++            return -1;
++        }
++        if (p->raw_logged++ < 5)
++            MP_WARN(mapper, "P5 raw YUV frame=%d pts=%.9f image_ns=%"PRId64" crop=%d,%d,%d,%d buffer=%ux%u format=%u\n",
++                    p->raw_logged, mapper->src->pts, image_ns,
++                    crop.left, crop.top, crop.right, crop.bottom,
++                    d.width, d.height, d.format);
++    } else if (mapper->tex[0]->params.w != d.width ||
++               mapper->tex[0]->params.h != d.height) {
+         MP_VERBOSE(p, "Texture dimensions changed to %dx%d\n", d.width, d.height);
+         mapper->tex[0]->params.w = d.width;
+         mapper->tex[0]->params.h = d.height;
+     }
+ 
+-    EGLClientBuffer buf = p->GetNativeClientBufferANDROID(hwbuf);
+-    if (!buf)
+-        return -1;
+-
+-    const int attribs[] = {EGL_NONE};
+-    p->egl_image = p->CreateImageKHR(eglGetCurrentDisplay(),
+-        EGL_NO_CONTEXT, EGL_NATIVE_BUFFER_ANDROID, buf, attribs);
+-    if (!p->egl_image)
+-        return -1;
++    const EGLint basic_attribs[] = {EGL_NONE};
++    const EGLint raw_attribs[] = {EGL_IMAGE_PRESERVED_KHR, EGL_TRUE, EGL_NONE};
++    int64_t create_wall = p->section_perf ? mp_time_ns() : 0;
++    int64_t create_cpu = p->section_perf ? p5_mapper_cpu_ns() : 0;
++    p->current_egl_cached = false;
++    if (p->egl_cache_enabled) {
++        for (int i = 0; i < MP_ARRAY_SIZE(p->egl_cache); i++) {
++            struct egl_cache_entry *entry = &p->egl_cache[i];
++            if (entry->buffer == hwbuf && !entry->removed &&
++                entry->display == eglGetCurrentDisplay()) {
++                p->egl_image = entry->image;
++                p->current_egl_cached = true;
++                p->egl_cache_hits++;
++                break;
++            }
++        }
++    }
++    if (!p->egl_image) {
++        EGLClientBuffer buf = p->GetNativeClientBufferANDROID(hwbuf);
++        if (!buf)
++            return -1;
++        p->egl_image = p->CreateImageKHR(eglGetCurrentDisplay(),
++            EGL_NO_CONTEXT, EGL_NATIVE_BUFFER_ANDROID, buf,
++            p->raw_yuv ? raw_attribs : basic_attribs);
++        if (!p->egl_image)
++            return -1;
++        if (p->egl_cache_enabled) {
++            p->egl_cache_misses++;
++            int slot = -1;
++            for (int i = 0; i < MP_ARRAY_SIZE(p->egl_cache); i++) {
++                if (!p->egl_cache[i].buffer) {
++                    slot = i;
++                    break;
++                }
++            }
++            if (slot >= 0) {
++                p->AHardwareBuffer_acquire(hwbuf);
++                p->egl_cache[slot] = (struct egl_cache_entry){
++                    .buffer = hwbuf,
++                    .image = p->egl_image,
++                    .display = eglGetCurrentDisplay(),
++                };
++                p->current_egl_cached = true;
++            } else {
++                p->egl_cache_bypasses++;
++            }
++        }
++    }
++    if (p->section_perf) {
++        p->section_create_wall_ns += mp_time_ns() - create_wall;
++        p->section_create_cpu_ns += p5_mapper_cpu_ns() - create_cpu;
++    }
+ 
+-    gl->BindTexture(GL_TEXTURE_EXTERNAL_OES, p->gl_texture);
+-    p->EGLImageTargetTexture2DOES(GL_TEXTURE_EXTERNAL_OES, p->egl_image);
+-    gl->BindTexture(GL_TEXTURE_EXTERNAL_OES, 0);
++    if (p->raw_yuv) {
++        GLint old_active, old_external;
++        if (p->raw_logged <= 5)
++            MP_WARN(mapper, "P5_RAW_GL before_import ctx=%p display=%p format=%u usage=%"PRIu64" egl_target=%p gl_error=%p\n",
++                    eglGetCurrentContext(), eglGetCurrentDisplay(), d.format,
++                    (uint64_t)d.usage, p->EGLImageTargetTexture2DOES, gl->GetError);
++        gl->GetIntegerv(GL_ACTIVE_TEXTURE, &old_active);
++        gl->ActiveTexture(GL_TEXTURE0);
++        gl->GetIntegerv(GL_TEXTURE_BINDING_EXTERNAL_OES, &old_external);
++        gl->BindTexture(GL_TEXTURE_EXTERNAL_OES, p->gl_texture);
++        int64_t bind_wall = p->section_perf ? mp_time_ns() : 0;
++        int64_t bind_cpu = p->section_perf ? p5_mapper_cpu_ns() : 0;
++        p->EGLImageTargetTexture2DOES(GL_TEXTURE_EXTERNAL_OES, p->egl_image);
++        if (p->section_perf) {
++            p->section_bind_wall_ns += mp_time_ns() - bind_wall;
++            p->section_bind_cpu_ns += p5_mapper_cpu_ns() - bind_cpu;
++        }
++        if (p->raw_logged <= 5)
++            MP_WARN(mapper, "P5_RAW_GL after_import ctx=%p egl_error=%x\n",
++                    eglGetCurrentContext(), eglGetError());
++        int64_t submit_start_ns = p->raw_perf ? mp_time_ns() : 0;
++        GLenum import_error = gl->GetError();
++        if (p->raw_logged <= 5) {
++            void *log_lib = dlopen("liblog.so", RTLD_NOW | RTLD_LOCAL);
++            typedef int (*log_print_fn)(int, const char *, const char *, ...);
++            log_print_fn log_print = log_lib ? dlsym(log_lib, "__android_log_print") : NULL;
++            if (log_print)
++                log_print(6, "P5_RAW_GL", "after_import error=0x%x ctx=%p format=0x%x",
++                          import_error, eglGetCurrentContext(), d.format);
++            if (log_lib)
++                dlclose(log_lib);
++        }
++        if (p->raw_logged <= 5)
++            MP_WARN(mapper, "P5_RAW_GL after_gl_error error=%x\n", import_error);
++        bool ok = import_error == GL_NO_ERROR &&
++                  (p->direct_yuv || raw_render(mapper, &crop, d.width, d.height));
++        if (ok && p->direct_yuv)
++            p->raw_submitted = true; // unmap waits for libplacebo's later sample
++        if (ok && p->raw_early_fence)
++            p->raw_sample_fence = gl->FenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
++        gl->BindTexture(GL_TEXTURE_EXTERNAL_OES, old_external);
++        gl->ActiveTexture(old_active);
++        if (ok && p->raw_perf) {
++            p->raw_perf_submit_ns = mp_time_ns() - submit_start_ns;
++            p->raw_perf_split_ns = 0;
++            if (p->raw_split) {
++                int64_t split_start_ns = mp_time_ns();
++                gl->Finish();
++                p->raw_perf_split_ns = mp_time_ns() - split_start_ns;
++                p->raw_split_frames++;
++                if (p->raw_split_frames <= 20 || p->raw_split_frames % 50 == 0) {
++                    void *log_lib = dlopen("liblog.so", RTLD_NOW);
++                    void (*log_print)(int, const char *, const char *, ...) =
++                        log_lib ? dlsym(log_lib, "__android_log_print") : NULL;
++                    if (log_print)
++                        log_print(6, "P5_RAW_SPLIT", "frame=%"PRIu64" wait_us=%"PRId64" submit_us=%"PRId64" retire=%d",
++                                  p->raw_split_frames, p->raw_perf_split_ns / 1000,
++                                  p->raw_perf_submit_ns / 1000, p->raw_retire);
++                    if (log_lib)
++                        dlclose(log_lib);
++                }
++            }
++            p->raw_perf_pending = true;
++        }
++        if (!ok)
++            return -1;
++    } else {
++        gl->BindTexture(GL_TEXTURE_EXTERNAL_OES, p->gl_texture);
++        p->EGLImageTargetTexture2DOES(GL_TEXTURE_EXTERNAL_OES, p->egl_image);
++        gl->BindTexture(GL_TEXTURE_EXTERNAL_OES, 0);
++    }
+ 
++    if (p->same_frame_cache && p->direct_yuv && p->image && p->egl_image)
++        p->cached_frame = mp_image_new_ref(mapper->src);
+     return 0;
+ }
+ 
+diff --git a/video/out/opengl/common.c b/video/out/opengl/common.c
+index a5de79c..9fc2701 100644
+--- a/video/out/opengl/common.c
++++ b/video/out/opengl/common.c
+@@ -141,6 +141,7 @@ static const struct gl_functions gl_functions[] = {
+             DEF_FN(Uniform1f),
+             DEF_FN(Uniform2f),
+             DEF_FN(Uniform3f),
++            DEF_FN(Uniform4f),
+             DEF_FN(Uniform1i),
+             DEF_FN(UniformMatrix2fv),
+             DEF_FN(UniformMatrix3fv),
+diff --git a/video/out/opengl/context.c b/video/out/opengl/context.c
+index 86e8d5d..b0b73df 100644
+--- a/video/out/opengl/context.c
++++ b/video/out/opengl/context.c
+@@ -19,6 +19,11 @@
+ #include "context.h"
+ #include "ra_gl.h"
+ #include "utils.h"
++#ifdef __ANDROID__
++#include <dlfcn.h>
++#include <sys/system_properties.h>
++#include "osdep/timer.h"
++#endif
+ 
+ // 0-terminated list of desktop GL versions a backend should try to
+ // initialize. Each entry is the minimum required version.
+@@ -232,7 +237,7 @@ bool ra_gl_ctx_submit_frame(struct ra_swapchain *sw, const struct vo_frame *fram
+     if (p->opts->use_glfinish)
+         gl->Finish();
+ 
+-    if (gl->FenceSync) {
++    if (gl->FenceSync && p->params.swap_buffers) {
+         GLsync fence = gl->FenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+         if (fence)
+             MP_TARRAY_APPEND(p, p->vsync_fences, p->num_vsync_fences, fence);
+@@ -269,8 +274,30 @@ void ra_gl_ctx_swap_buffers(struct ra_swapchain *sw)
+ {
+     struct priv *p = sw->priv;
+     GL *gl = p->gl;
++#ifdef __ANDROID__
++    char p5_swap_prop[PROP_VALUE_MAX] = {0};
++    bool p5_swap_probe = __system_property_get("debug.media_kit.p5_swap_probe",
++                                               p5_swap_prop) > 0 &&
++                         p5_swap_prop[0] == '1';
++    char p5_finish_prop[PROP_VALUE_MAX] = {0};
++    bool p5_preswap_finish = p5_swap_probe &&
++        __system_property_get("debug.media_kit.p5_preswap_finish",
++                              p5_finish_prop) > 0 && p5_finish_prop[0] == '1';
++    int64_t p5_finish_start_ns = p5_swap_probe ? mp_time_ns() : 0;
++    int64_t p5_egl_start_ns = p5_finish_start_ns;
++    int64_t p5_egl_end_ns = 0, p5_fence_end_ns = 0;
++    int p5_fences_waited = 0;
++    if (p5_preswap_finish) {
++        gl->Finish();
++        p5_egl_start_ns = mp_time_ns();
++    }
++#endif
+ 
+     p->params.swap_buffers(sw->ctx);
++#ifdef __ANDROID__
++    if (p5_swap_probe)
++        p5_egl_end_ns = mp_time_ns();
++#endif
+     p->frames_rendered++;
+ 
+     if (p->frames_rendered > 5 && !sw->ctx->opts.debug)
+@@ -292,9 +319,32 @@ void ra_gl_ctx_swap_buffers(struct ra_swapchain *sw)
+ 
+     while (p->num_vsync_fences >= sw->ctx->vo->opts->swapchain_depth) {
+         gl->ClientWaitSync(p->vsync_fences[0], GL_SYNC_FLUSH_COMMANDS_BIT, 1e9);
++#ifdef __ANDROID__
++        if (p5_swap_probe)
++            p5_fences_waited++;
++#endif
+         gl->DeleteSync(p->vsync_fences[0]);
+         MP_TARRAY_REMOVE_AT(p->vsync_fences, p->num_vsync_fences, 0);
+     }
++#ifdef __ANDROID__
++    if (p5_swap_probe &&
++        (p->frames_rendered <= 20 || p->frames_rendered % 50 == 0)) {
++        p5_fence_end_ns = mp_time_ns();
++        void *log_lib = dlopen("liblog.so", RTLD_NOW | RTLD_LOCAL);
++        typedef int (*log_print_fn)(int, const char *, const char *, ...);
++        log_print_fn log_print = log_lib ? dlsym(log_lib, "__android_log_print") : NULL;
++        if (log_print)
++            log_print(6, "P5_SWAP_SPLIT",
++                      "frame=%llu finish_us=%lld egl_us=%lld fence_us=%lld fences=%d depth=%d",
++                      (unsigned long long)p->frames_rendered,
++                      (long long)((p5_egl_start_ns - p5_finish_start_ns) / 1000),
++                      (long long)((p5_egl_end_ns - p5_egl_start_ns) / 1000),
++                      (long long)((p5_fence_end_ns - p5_egl_end_ns) / 1000),
++                      p5_fences_waited, sw->ctx->vo->opts->swapchain_depth);
++        if (log_lib)
++            dlclose(log_lib);
++    }
++#endif
+ }
+ 
+ static void ra_gl_ctx_get_vsync(struct ra_swapchain *sw,
+diff --git a/video/out/vo.c b/video/out/vo.c
+index 9593712..6ddd01a 100644
+--- a/video/out/vo.c
++++ b/video/out/vo.c
+@@ -16,12 +16,17 @@
+  */
+ 
+ #include <assert.h>
++#include <inttypes.h>
+ #include <math.h>
+ #include <stdatomic.h>
+ #include <stdbool.h>
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
++#ifdef __ANDROID__
++#include <android/log.h>
++#include <sys/system_properties.h>
++#endif
+ 
+ #include "mpv_talloc.h"
+ 
+@@ -119,6 +124,52 @@ static const struct vo_driver *const video_out_drivers[] =
+     &video_out_lavc,
+ };
+ 
++#ifdef __ANDROID__
++struct p5_vo_time_summary {
++    int64_t count;
++    int64_t total_ns;
++    int64_t min_ns;
++    int64_t max_ns;
++    // CPU wall time buckets: <2, <4, <8, <16, <33, >=33 ms.
++    int64_t buckets[6];
++};
++
++struct p5_vo_summary {
++    bool enabled;
++    int64_t queued_frames;
++    int64_t expired_at_queue;
++    int64_t expired_between_queue_and_vo;
++    struct p5_vo_time_summary queue_wait;
++    int64_t deadline_drops;
++    int64_t other_drops;
++    int64_t accepted_draws;
++    int64_t late_draws;
++    struct p5_vo_time_summary deadline_late;
++    struct p5_vo_time_summary deadline_margin;
++    struct p5_vo_time_summary draw;
++    struct p5_vo_time_summary wait;
++    struct p5_vo_time_summary flip;
++};
++
++static void p5_vo_time_add(struct p5_vo_time_summary *s, int64_t ns)
++{
++    if (ns < 0)
++        return;
++    if (!s->count || ns < s->min_ns)
++        s->min_ns = ns;
++    if (ns > s->max_ns)
++        s->max_ns = ns;
++    s->count++;
++    s->total_ns += ns;
++    int bucket = ns < MP_TIME_MS_TO_NS(2) ? 0 :
++                 ns < MP_TIME_MS_TO_NS(4) ? 1 :
++                 ns < MP_TIME_MS_TO_NS(8) ? 2 :
++                 ns < MP_TIME_MS_TO_NS(16) ? 3 :
++                 ns < MP_TIME_MS_TO_NS(33) ? 4 : 5;
++    s->buckets[bucket]++;
++}
++#endif
++
+ struct vo_internal {
+     mp_thread thread;
+     struct mp_dispatch_queue *dispatch;
+@@ -170,6 +221,10 @@ struct vo_internal {
+ 
+     bool rendering;                 // true if an image is being rendered
+     struct vo_frame *frame_queued;  // should be drawn next
++#ifdef __ANDROID__
++    int64_t p5_frame_queued_at_ns; // protected by lock; sampled only when enabled
++    bool p5_frame_expired_at_queue;
++#endif
+     int req_frames;                 // VO's requested value of num_frames
+     uint64_t current_frame_id;
+ 
+@@ -177,6 +232,9 @@ struct vo_internal {
+     double reported_display_fps;
+ 
+     struct stats_ctx *stats;
++#ifdef __ANDROID__
++    struct p5_vo_summary p5_summary; // written only by the VO thread
++#endif
+ };
+ 
+ extern const struct m_sub_options gl_video_conf;
+@@ -880,6 +938,14 @@ void vo_queue_frame(struct vo *vo, struct vo_frame *frame)
+     mp_assert(vo->config_ok && !in->frame_queued &&
+            (!in->current_frame || in->current_frame->num_vsyncs < 1));
+     in->hasframe = true;
++#ifdef __ANDROID__
++    if (in->p5_summary.enabled) {
++        int64_t queue_now = mp_time_ns();
++        in->p5_frame_queued_at_ns = queue_now;
++        in->p5_frame_expired_at_queue = frame->duration >= 0 &&
++            frame->pts + frame->duration < queue_now;
++    }
++#endif
+     frame->frame_id = ++(in->current_frame_id);
+     in->frame_queued = frame;
+     in->wakeup_pts = frame->display_synced
+@@ -933,6 +999,36 @@ static bool render_frame(struct vo *vo)
+     mp_mutex_lock(&in->lock);
+ 
+     if (in->frame_queued) {
++#ifdef __ANDROID__
++        if (in->p5_summary.enabled) {
++            int64_t dequeue_now = mp_time_ns();
++            struct p5_vo_summary *summary = &in->p5_summary;
++            summary->queued_frames++;
++            if (in->p5_frame_expired_at_queue)
++                summary->expired_at_queue++;
++            else if (in->frame_queued->duration >= 0 &&
++                     in->frame_queued->pts + in->frame_queued->duration < dequeue_now)
++                summary->expired_between_queue_and_vo++;
++            p5_vo_time_add(&summary->queue_wait,
++                           dequeue_now - in->p5_frame_queued_at_ns);
++            if (summary->queued_frames % 240 == 0) {
++                __android_log_print(ANDROID_LOG_INFO, "P5_VO_TICK",
++                    "queued=%"PRId64" draw=%"PRId64" deadline_drop=%"PRId64
++                    " other_drop=%"PRId64" expired_at_queue=%"PRId64
++                    " expired_before_vo=%"PRId64" draw_ms=%"PRId64
++                    " draw_max_ms=%"PRId64" wait_ms=%"PRId64
++                    " flip_ms=%"PRId64,
++                    summary->queued_frames, summary->accepted_draws,
++                    summary->deadline_drops, summary->other_drops,
++                    summary->expired_at_queue,
++                    summary->expired_between_queue_and_vo,
++                    summary->draw.total_ns / MP_TIME_MS_TO_NS(1),
++                    summary->draw.max_ns / MP_TIME_MS_TO_NS(1),
++                    summary->wait.total_ns / MP_TIME_MS_TO_NS(1),
++                    summary->flip.total_ns / MP_TIME_MS_TO_NS(1));
++            }
++        }
++#endif
+         talloc_free(in->current_frame);
+         in->current_frame = in->frame_queued;
+         in->frame_queued = NULL;
+@@ -955,6 +1051,15 @@ static bool render_frame(struct vo *vo)
+     int64_t pts = frame->pts;
+     int64_t duration = frame->duration;
+     int64_t end_time = pts + duration;
++#ifdef __ANDROID__
++    struct p5_vo_summary *p5 = &in->p5_summary;
++    if (p5->enabled && duration >= 0) {
++        if (end_time < now)
++            p5_vo_time_add(&p5->deadline_late, now - end_time);
++        else
++            p5_vo_time_add(&p5->deadline_margin, end_time - now);
++    }
++#endif
+ 
+     // Time at which we should flip_page on the VO.
+     int64_t target = frame->display_synced ? 0 : pts - in->flip_queue_offset;
+@@ -999,8 +1104,23 @@ static bool render_frame(struct vo *vo)
+ 
+     if (in->dropped_frame) {
+         in->drop_count += 1;
++#ifdef __ANDROID__
++        if (p5->enabled) {
++            if (duration >= 0 && end_time < now)
++                p5->deadline_drops++;
++            else
++                p5->other_drops++;
++        }
++#endif
+         wakeup_core(vo);
+     } else {
++#ifdef __ANDROID__
++        if (p5->enabled) {
++            p5->accepted_draws++;
++            if (duration >= 0 && end_time < now)
++                p5->late_draws++;
++        }
++#endif
+         in->rendering = true;
+         in->hasframe_rendered = true;
+         int64_t prev_drop_count = vo->in->drop_count;
+@@ -1015,15 +1135,36 @@ static bool render_frame(struct vo *vo)
+ 
+         stats_time_start(in->stats, "video-draw");
+ 
++#ifdef __ANDROID__
++        int64_t p5_start_ns = p5->enabled ? mp_time_ns() : 0;
++#endif
+         in->visible = vo->driver->draw_frame(vo, frame);
++#ifdef __ANDROID__
++        if (p5->enabled)
++            p5_vo_time_add(&p5->draw, mp_time_ns() - p5_start_ns);
++#endif
+ 
+         stats_time_end(in->stats, "video-draw");
+ 
++#ifdef __ANDROID__
++        p5_start_ns = p5->enabled ? mp_time_ns() : 0;
++#endif
+         wait_until(vo, target);
++#ifdef __ANDROID__
++        if (p5->enabled)
++            p5_vo_time_add(&p5->wait, mp_time_ns() - p5_start_ns);
++#endif
+ 
+         stats_time_start(in->stats, "video-flip");
+ 
++#ifdef __ANDROID__
++        p5_start_ns = p5->enabled ? mp_time_ns() : 0;
++#endif
+         vo->driver->flip_page(vo);
++#ifdef __ANDROID__
++        if (p5->enabled)
++            p5_vo_time_add(&p5->flip, mp_time_ns() - p5_start_ns);
++#endif
+ 
+         struct vo_vsync_info vsync = {
+             .last_queue_display_time = -1,
+@@ -1130,6 +1271,13 @@ static MP_THREAD_VOID vo_thread(void *ptr)
+     bool vo_paused = false;
+ 
+     mp_thread_set_name("vo");
++#ifdef __ANDROID__
++    in->p5_summary = (struct p5_vo_summary){0};
++    char p5_property[PROP_VALUE_MAX] = {0};
++    in->p5_summary.enabled =
++        __system_property_get("debug.media_kit.p5_vo_summary", p5_property) > 0 &&
++        !strcmp(p5_property, "1");
++#endif
+ 
+     if (vo->driver->get_image) {
+         in->dr_helper = dr_helper_create(in->dispatch, get_image_vo, vo);
+@@ -1226,6 +1374,62 @@ static MP_THREAD_VOID vo_thread(void *ptr)
+     talloc_free(in->current_frame);
+     in->current_frame = NULL;
+     vo->driver->uninit(vo);
++#ifdef __ANDROID__
++    const struct p5_vo_summary *p5 = &in->p5_summary;
++    if (p5->enabled) {
++        __android_log_print(ANDROID_LOG_INFO, "P5_VO_TICK",
++            "final queued=%"PRId64" draw=%"PRId64" deadline_drop=%"PRId64
++            " other_drop=%"PRId64" expired_at_queue=%"PRId64
++            " expired_before_vo=%"PRId64" draw_ms=%"PRId64
++            " draw_max_ms=%"PRId64" wait_ms=%"PRId64
++            " flip_ms=%"PRId64,
++            p5->queued_frames, p5->accepted_draws,
++            p5->deadline_drops, p5->other_drops,
++            p5->expired_at_queue, p5->expired_between_queue_and_vo,
++            p5->draw.total_ns / MP_TIME_MS_TO_NS(1),
++            p5->draw.max_ns / MP_TIME_MS_TO_NS(1),
++            p5->wait.total_ns / MP_TIME_MS_TO_NS(1),
++            p5->flip.total_ns / MP_TIME_MS_TO_NS(1));
++        MP_ERR(vo, "P5_VO_SUMMARY diagnostic CPU-wall-ns (not GPU/display): "
++                "queued=%"PRId64" expired_at_queue=%"PRId64
++                " expired_queue_to_vo=%"PRId64
++                " queue_wait=count/total/min/max:%"PRId64"/%"PRId64"/%"PRId64"/%"PRId64
++                " hist:%"PRId64",%"PRId64",%"PRId64",%"PRId64",%"PRId64",%"PRId64
++                " "
++                "deadline_drops=%"PRId64" other_drops=%"PRId64
++                " draw_calls=%"PRId64" late_draws=%"PRId64
++                " late=count/total/max:%"PRId64"/%"PRId64"/%"PRId64
++                " margin=count/total/min:%"PRId64"/%"PRId64"/%"PRId64
++                " draw=count/total/min/max:%"PRId64"/%"PRId64"/%"PRId64"/%"PRId64
++                " hist[<2,<4,<8,<16,<33,>=33ms]:%"PRId64",%"PRId64",%"PRId64",%"PRId64",%"PRId64",%"PRId64
++                " wait=count/total/min/max:%"PRId64"/%"PRId64"/%"PRId64"/%"PRId64
++                " hist:%"PRId64",%"PRId64",%"PRId64",%"PRId64",%"PRId64",%"PRId64
++                " flip=count/total/min/max:%"PRId64"/%"PRId64"/%"PRId64"/%"PRId64
++                " hist:%"PRId64",%"PRId64",%"PRId64",%"PRId64",%"PRId64",%"PRId64"\n",
++                p5->queued_frames, p5->expired_at_queue,
++                p5->expired_between_queue_and_vo, p5->queue_wait.count,
++                p5->queue_wait.total_ns, p5->queue_wait.min_ns,
++                p5->queue_wait.max_ns, p5->queue_wait.buckets[0],
++                p5->queue_wait.buckets[1], p5->queue_wait.buckets[2],
++                p5->queue_wait.buckets[3], p5->queue_wait.buckets[4],
++                p5->queue_wait.buckets[5],
++                p5->deadline_drops, p5->other_drops, p5->accepted_draws,
++                p5->late_draws, p5->deadline_late.count,
++                p5->deadline_late.total_ns, p5->deadline_late.max_ns,
++                p5->deadline_margin.count, p5->deadline_margin.total_ns,
++                p5->deadline_margin.min_ns, p5->draw.count, p5->draw.total_ns,
++                p5->draw.min_ns, p5->draw.max_ns, p5->draw.buckets[0],
++                p5->draw.buckets[1], p5->draw.buckets[2], p5->draw.buckets[3],
++                p5->draw.buckets[4], p5->draw.buckets[5], p5->wait.count,
++                p5->wait.total_ns, p5->wait.min_ns, p5->wait.max_ns,
++                p5->wait.buckets[0], p5->wait.buckets[1], p5->wait.buckets[2],
++                p5->wait.buckets[3], p5->wait.buckets[4], p5->wait.buckets[5],
++                p5->flip.count, p5->flip.total_ns, p5->flip.min_ns,
++                p5->flip.max_ns, p5->flip.buckets[0], p5->flip.buckets[1],
++                p5->flip.buckets[2], p5->flip.buckets[3], p5->flip.buckets[4],
++                p5->flip.buckets[5]);
++    }
++#endif
+ done:
+     TA_FREEP(&in->dr_helper);
+     MP_THREAD_RETURN();
+diff --git a/video/out/vo_gpu_next.c b/video/out/vo_gpu_next.c
+index 3f0b18f..74ca72c 100644
+--- a/video/out/vo_gpu_next.c
++++ b/video/out/vo_gpu_next.c
+@@ -19,12 +19,20 @@
+ 
+ #include <sys/stat.h>
+ #include <time.h>
++#ifdef __ANDROID__
++#include <sys/system_properties.h>
++#include <dlfcn.h>
++#include <stdarg.h>
++#include <stdio.h>
++#include <stdlib.h>
++#endif
+ 
+ #include <libplacebo/colorspace.h>
+ #include <libplacebo/options.h>
+ #include <libplacebo/renderer.h>
+ #include <libplacebo/shaders/lut.h>
+ #include <libplacebo/shaders/icc.h>
++#include <libplacebo/shaders/custom.h>
+ #include <libplacebo/utils/libav.h>
+ #include <libplacebo/utils/frame_queue.h>
+ 
+@@ -36,6 +44,7 @@
+ #include "options/path.h"
+ #include "osdep/io.h"
+ #include "osdep/threads.h"
++#include "osdep/timer.h"
+ #include "stream/stream.h"
+ #include "sub/draw_bmp.h"
+ #include "video/fmt-conversion.h"
+@@ -52,6 +61,15 @@
+ #if HAVE_GL && defined(PL_HAVE_OPENGL)
+ #include <libplacebo/opengl.h>
+ #include "video/out/opengl/ra_gl.h"
++#ifdef __ANDROID__
++#include <EGL/egl.h>
++#endif
++#ifndef GL_QUERY_COUNTER_BITS_EXT
++#define GL_QUERY_COUNTER_BITS_EXT 0x8864
++#endif
++#ifndef GL_GPU_DISJOINT_EXT
++#define GL_GPU_DISJOINT_EXT 0x8FBB
++#endif
+ #endif
+ 
+ #if HAVE_D3D11 && defined(PL_HAVE_D3D11)
+@@ -93,6 +111,40 @@ struct frame_info {
+     struct pl_dispatch_info info[VO_PASS_PERF_MAX];
+ };
+ 
++#if HAVE_GL && defined(PL_HAVE_OPENGL) && defined(__ANDROID__)
++struct p5_gpu_query {
++    GLuint start, end;
++    uint64_t frame;
++    bool pending, render_ok;
++};
++#endif
++
++static void p5_vo_log(const char *tag, const char *fmt, ...)
++{
++#ifdef __ANDROID__
++    void *lib = dlopen("liblog.so", RTLD_NOW | RTLD_LOCAL);
++    typedef int (*log_vprint_fn)(int, const char *, const char *, va_list);
++    log_vprint_fn log_vprint = lib ? dlsym(lib, "__android_log_vprint") : NULL;
++    if (log_vprint) {
++        va_list args;
++        va_start(args, fmt);
++        log_vprint(6, tag, fmt, args);
++        va_end(args);
++    }
++    if (lib)
++        dlclose(lib);
++#endif
++}
++
++#ifdef __ANDROID__
++static int64_t p5_thread_cpu_ns(void)
++{
++    struct timespec ts;
++    return clock_gettime(CLOCK_THREAD_CPUTIME_ID, &ts) == 0
++        ? (int64_t)ts.tv_sec * 1000000000LL + ts.tv_nsec : 0;
++}
++#endif
++
+ struct cache {
+     struct mp_log *log;
+     struct mpv_global *global;
+@@ -134,6 +186,42 @@ struct priv {
+     bool is_interpolated;
+     bool want_reset;
+     bool frame_pending;
++    bool p5_vo_perf;
++    uint64_t p5_vo_perf_seq;
++#ifdef __ANDROID__
++    bool p5_policy_logged;
++    bool p5_vo_mix_trace;
++    uint64_t p5_vo_mix_trace_seq, p5_vo_mix_trace_pending_seq;
++    bool p5_vo_cpu_wall;
++    bool p5_section_perf;
++    uint64_t p5_section_frames;
++    int64_t p5_render_wall_sum_ns, p5_render_cpu_sum_ns;
++    uint64_t p5_vo_cpu_wall_frames;
++    int64_t p5_draw_wall_sum_ns, p5_draw_cpu_sum_ns;
++    int64_t p5_flip_wall_sum_ns, p5_flip_cpu_sum_ns;
++    int64_t p5_submit_wall_sum_ns, p5_submit_cpu_sum_ns;
++    int64_t p5_swap_wall_sum_ns, p5_swap_cpu_sum_ns;
++    int64_t p5_draw_wall_max_ns, p5_flip_wall_max_ns;
++#endif
++#if HAVE_GL && defined(PL_HAVE_OPENGL) && defined(__ANDROID__)
++    bool p5_offscreen, p5_offscreen_check, p5_offscreen_half, p5_offscreen_native, p5_offscreen_float, p5_offscreen_ready;
++    bool p5_target_203, p5_target_pq;
++    bool p5_post_rpu_probe, p5_post_rpu_probe_done;
++    bool p5_post_rpu_full_dump;
++    bool p5_l2c_rgb_dump, p5_l2c_rgb_dump_done;
++    double p5_l2c_dump_pts;
++    struct pl_hook p5_l2c_rgb_hook;
++    pl_tex p5_offscreen_tex;
++    pl_tex p5_two_pass_tex;
++    struct pl_swapchain_frame p5_offscreen_frame;
++    struct mp_rect p5_offscreen_dst;
++    bool p5_offscreen_resize_reported;
++    uint64_t p5_offscreen_frames;
++    bool p5_gpu_timer_checked, p5_gpu_timer, p5_gpu_timer_full;
++    uint64_t p5_gpu_frame_seq, p5_gpu_missed, p5_gpu_disjoint;
++    int p5_gpu_next_slot;
++    struct p5_gpu_query p5_gpu_query[16];
++#endif
+ 
+     pl_options pars;
+     struct m_config_cache *opts_cache;
+@@ -160,6 +248,60 @@ struct priv {
+     struct mp_image_params target_params;
+ };
+ 
++#if HAVE_GL && defined(PL_HAVE_OPENGL) && defined(__ANDROID__)
++static struct pl_hook_res p5_l2c_rgb_hook(void *priv,
++                                         const struct pl_hook_params *params)
++{
++    struct priv *p = priv;
++    struct pl_hook_res unchanged = { .output = PL_HOOK_SIG_NONE };
++    if (p->p5_l2c_rgb_dump_done)
++        return unchanged;
++    pl_tex src = params->tex;
++    if (!src || !src->params.blit_src ||
++        !(src->params.format->caps & PL_FMT_CAP_HOST_READABLE)) {
++        p5_vo_log("P5_L2C_RGB", "unsupported source pts=%.9f tex=%d blit_src=%d fmt=%s host_cap=%d",
++                  p->p5_l2c_dump_pts, !!src, src && src->params.blit_src,
++                  src ? src->params.format->name : "null",
++                  src && !!(src->params.format->caps & PL_FMT_CAP_HOST_READABLE));
++        return unchanged;
++    }
++
++    int w = src->params.w, h = src->params.h;
++    pl_fmt fmt = src->params.format;
++    size_t bytes = (size_t)w * h * fmt->texel_size;
++    pl_tex dst = pl_tex_create(params->gpu, pl_tex_params(
++        .w = w, .h = h, .format = fmt,
++        .host_readable = true, .blit_dst = true,
++    ));
++    void *pixels = bytes ? malloc(bytes) : NULL;
++    bool ok = false;
++    size_t written = 0;
++    if (dst && pixels) {
++        pl_tex_blit(params->gpu, pl_tex_blit_params(.src = src, .dst = dst));
++        ok = pl_tex_download(params->gpu, pl_tex_transfer_params(
++            .tex = dst, .ptr = pixels));
++        if (ok) {
++            FILE *file = fopen("/sdcard/Android/data/com.example.media_kit_test/files/p5-l2c-rgb.bin", "wb");
++            if (file) {
++                written = fwrite(pixels, 1, bytes, file);
++                fclose(file);
++            }
++        }
++    }
++    p5_vo_log("P5_L2C_RGB", "pts=%.9f w=%d h=%d fmt=%s texel=%d bytes=%zu written=%zu download=%d repr_sys=%d repr_levels=%d bits_color=%d bits_sample=%d primaries=%d transfer=%d rect=%.3f,%.3f,%.3f,%.3f",
++              p->p5_l2c_dump_pts, w, h, fmt->name, fmt->texel_size,
++              bytes, written, ok, params->repr.sys, params->repr.levels,
++              params->repr.bits.color_depth, params->repr.bits.sample_depth,
++              params->color.primaries, params->color.transfer,
++              params->rect.x0, params->rect.y0, params->rect.x1, params->rect.y1);
++    p->p5_l2c_rgb_dump_done = written == bytes;
++    free(pixels);
++    if (dst)
++        pl_tex_destroy(params->gpu, &dst);
++    return unchanged;
++}
++#endif
++
+ static void update_render_options(struct vo *vo);
+ static void update_lut(struct priv *p, struct user_lut *lut);
+ 
+@@ -555,6 +697,9 @@ static pl_tex hwdec_get_tex(struct priv *p, int n)
+         struct pl_opengl_wrap_params par = {
+             .width = ratex->params.w,
+             .height = ratex->params.h,
++            .sampler_type = ratex->params.external_yuv
++                          ? PL_SAMPLER_EXTERNAL_YUV
++                          : PL_SAMPLER_NORMAL,
+         };
+ 
+         ra_gl_get_format(ratex->params.format, &par.iformat,
+@@ -660,6 +805,18 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
+ 
+     mp_image_params_guess_csp(&par);
+ 
++#if HAVE_GL && defined(PL_HAVE_OPENGL) && defined(__ANDROID__)
++    static bool p5_gamut_source_logged;
++    if (!p5_gamut_source_logged && mpi->pts >= 10.0) {
++        p5_gamut_source_logged = true;
++        p5_vo_log("P5_GAMUT_SOURCE", "pts=%.9f src_fmt=%d src_sys=%d src_prim=%d src_trc=%d src_dovi=%d mapped_fmt=%d mapped_sys=%d mapped_prim=%d mapped_trc=%d mapped_dovi=%d",
++                  mpi->pts, mpi->params.imgfmt, mpi->params.repr.sys,
++                  mpi->params.color.primaries, mpi->params.color.transfer,
++                  !!mpi->params.repr.dovi, par.imgfmt, par.repr.sys,
++                  par.color.primaries, par.color.transfer, !!par.repr.dovi);
++    }
++#endif
++
+     *frame = (struct pl_frame) {
+         .color = par.color,
+         .repr = par.repr,
+@@ -671,6 +828,22 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
+         .user_data = mpi,
+     };
+ 
++#ifdef __ANDROID__
++    {
++        static int p5_probe_frames;
++        char property[PROP_VALUE_MAX] = { 0 };
++        if (p5_probe_frames < 5 &&
++            __system_property_get("debug.media_kit.p5_renderer_probe", property) > 0 &&
++            !strcmp(property, "1")) {
++            p5_probe_frames++;
++            MP_WARN(vo, "MEDIA_KIT_P5_RENDERER frame=%d source_fmt=%d source_sys=%d dovi=%d mapped_fmt=%d mapped_sys=%d mapped_dovi=%d final_sys=%d\n",
++                    p5_probe_frames, mpi->imgfmt, mpi->params.repr.sys,
++                    !!mpi->dovi, par.imgfmt, par.repr.sys, !!par.repr.dovi,
++                    frame->repr.sys);
++        }
++    }
++#endif
++
+     const struct gl_video_opts *opts = p->opts_cache->opts;
+     if (opts->hdr_reference_white && !pl_color_transfer_is_hdr(frame->color.transfer))
+         frame->color.hdr.max_luma = opts->hdr_reference_white;
+@@ -705,6 +878,21 @@ static bool map_frame(pl_gpu gpu, pl_tex *tex, const struct pl_source_frame *src
+                 map[index] = c;
+             }
+         }
++        if (par.imgfmt == IMGFMT_YUV420_PACK10 && frame->num_planes == 2) {
++            struct pl_plane *uv = &frame->planes[1];
++            // The sidecar is RGB10_A2: R is unused, Cb/Cr occupy G/B.
++            uv->components = 3;
++            uv->component_mapping[0] = -1;
++            uv->component_mapping[1] = 1;
++            uv->component_mapping[2] = 2;
++#if HAVE_GL && defined(PL_HAVE_OPENGL) && defined(__ANDROID__)
++            if (mpi->pts >= 10.0 && mpi->pts < 10.2)
++                p5_vo_log("P5_420_FRAME", "pts=%.9f planes=%d uvmap=%d,%d,%d chroma_location=%d",
++                          mpi->pts, frame->num_planes,
++                          uv->component_mapping[0], uv->component_mapping[1],
++                          uv->component_mapping[2], par.chroma_location);
++#endif
++        }
+ 
+     } else { // swdec
+ 
+@@ -796,6 +984,17 @@ static void info_callback(void *priv, const struct pl_render_info *info)
+     if (info->index >= VO_PASS_PERF_MAX)
+         return; // silently ignore clipped passes, whatever
+ 
++    if (p->p5_vo_perf && info->stage == PL_RENDER_STAGE_FRAME &&
++        (p->p5_vo_perf_seq <= 20 || p->p5_vo_perf_seq % 50 == 0)) {
++        const struct pl_dispatch_info *pass = info->pass;
++        p5_vo_log("P5_GPU_PASS", "frame=%"PRIu64" index=%d samples=%d last_us=%"PRIu64" avg_us=%"PRIu64" peak_us=%"PRIu64" desc=%s",
++                  p->p5_vo_perf_seq, info->index, pass->num_samples,
++                  pass->last / 1000, pass->average / 1000,
++                  pass->peak / 1000,
++                  pass->shader && pass->shader->description
++                    ? pass->shader->description : "unknown");
++    }
++
+     struct frame_info *frame;
+     switch (info->stage) {
+     case PL_RENDER_STAGE_FRAME: frame = &p->perf_fresh; break;
+@@ -998,9 +1197,145 @@ static enum pl_color_primaries get_best_prim_container(const struct pl_raw_prima
+ static void update_hook_opts_dynamic(struct priv *p, const struct pl_hook *hook,
+                                      const struct mp_image *mpi);
+ 
++#if HAVE_GL && defined(PL_HAVE_OPENGL) && defined(__ANDROID__)
++static GL *p5_gpu_timer_gl(struct priv *p)
++{
++    struct ra *ra = p->ra_ctx ? p->ra_ctx->ra : NULL;
++    return ra && ra_is_gl(ra) ? ra_gl_get(ra) : NULL;
++}
++
++static void p5_gpu_timer_init(struct priv *p)
++{
++    if (p->p5_gpu_timer_checked)
++        return;
++    p->p5_gpu_timer_checked = true;
++    char property[PROP_VALUE_MAX] = {0};
++    if (__system_property_get("debug.media_kit.p5_vo_gpu_timer", property) <= 0 ||
++        strcmp(property, "1"))
++        return;
++
++    char full_property[PROP_VALUE_MAX] = {0};
++    p->p5_gpu_timer_full =
++        __system_property_get("debug.media_kit.p5_vo_gpu_timer_full",
++                              full_property) > 0 && !strcmp(full_property, "1");
++
++    GL *gl = p5_gpu_timer_gl(p);
++    typedef void (GLAPIENTRY *get_query_iv_fn)(GLenum, GLenum, GLint *);
++    get_query_iv_fn get_query_iv = (void *)eglGetProcAddress("glGetQueryivEXT");
++    GLint bits = 0;
++    if (gl && gl_check_extension(gl->extensions, "GL_EXT_disjoint_timer_query") &&
++        gl->GenQueries && gl->DeleteQueries && gl->QueryCounter &&
++        gl->GetQueryObjectuiv && gl->GetQueryObjectui64v && get_query_iv)
++        get_query_iv(GL_TIMESTAMP, GL_QUERY_COUNTER_BITS_EXT, &bits);
++    if (bits <= 0) {
++        p5_vo_log("P5_GPU_RANGE", "unavailable timestamp_bits=%d", bits);
++        return;
++    }
++    for (int n = 0; n < MP_ARRAY_SIZE(p->p5_gpu_query); n++) {
++        gl->GenQueries(1, &p->p5_gpu_query[n].start);
++        gl->GenQueries(1, &p->p5_gpu_query[n].end);
++        if (!p->p5_gpu_query[n].start || !p->p5_gpu_query[n].end) {
++            for (int i = 0; i <= n; i++) {
++                if (p->p5_gpu_query[i].start)
++                    gl->DeleteQueries(1, &p->p5_gpu_query[i].start);
++                if (p->p5_gpu_query[i].end)
++                    gl->DeleteQueries(1, &p->p5_gpu_query[i].end);
++                p->p5_gpu_query[i].start = p->p5_gpu_query[i].end = 0;
++            }
++            p5_vo_log("P5_GPU_RANGE", "unavailable query_allocation");
++            return;
++        }
++    }
++    p->p5_gpu_timer = true;
++    p5_vo_log("P5_GPU_RANGE", "enabled timestamp_bits=%d slots=%d scope=%s",
++              bits, (int)MP_ARRAY_SIZE(p->p5_gpu_query),
++              p->p5_gpu_timer_full ? "render_to_flush" : "render_only");
++}
++
++static void p5_gpu_timer_poll(struct priv *p)
++{
++    if (!p->p5_gpu_timer)
++        return;
++    GL *gl = p5_gpu_timer_gl(p);
++    GLint disjoint = 0;
++    gl->GetIntegerv(GL_GPU_DISJOINT_EXT, &disjoint);
++    for (int n = 0; n < MP_ARRAY_SIZE(p->p5_gpu_query); n++) {
++        struct p5_gpu_query *q = &p->p5_gpu_query[n];
++        if (!q->pending)
++            continue;
++        if (disjoint) {
++            q->pending = false;
++            p->p5_gpu_disjoint++;
++            continue;
++        }
++        GLuint available = 0;
++        gl->GetQueryObjectuiv(q->end, GL_QUERY_RESULT_AVAILABLE, &available);
++        if (!available)
++            continue;
++        GLuint64 start = 0, end = 0;
++        gl->GetQueryObjectui64v(q->start, GL_QUERY_RESULT, &start);
++        gl->GetQueryObjectui64v(q->end, GL_QUERY_RESULT, &end);
++        if (q->frame <= 20 || q->frame % 5 == 0)
++            p5_vo_log("P5_GPU_RANGE", "frame=%"PRIu64" gpu_us=%"PRIu64" render_ok=%d missed=%"PRIu64" disjoint=%"PRIu64,
++                      q->frame, end >= start ? (uint64_t)((end - start) / 1000) : 0,
++                      q->render_ok, p->p5_gpu_missed, p->p5_gpu_disjoint);
++        q->pending = false;
++    }
++}
++
++static int p5_gpu_timer_begin(struct priv *p)
++{
++    if (!p->p5_gpu_timer)
++        return -1;
++    GL *gl = p5_gpu_timer_gl(p);
++    for (int i = 0; i < MP_ARRAY_SIZE(p->p5_gpu_query); i++) {
++        int slot = (p->p5_gpu_next_slot + i) % MP_ARRAY_SIZE(p->p5_gpu_query);
++        if (!p->p5_gpu_query[slot].pending) {
++            p->p5_gpu_next_slot = (slot + 1) % MP_ARRAY_SIZE(p->p5_gpu_query);
++            p->p5_gpu_query[slot].frame = ++p->p5_gpu_frame_seq;
++            gl->QueryCounter(p->p5_gpu_query[slot].start, GL_TIMESTAMP);
++            return slot;
++        }
++    }
++    p->p5_gpu_missed++;
++    return -1;
++}
++
++static void p5_gpu_timer_end(struct priv *p, int slot, bool render_ok)
++{
++    if (slot < 0)
++        return;
++    GL *gl = p5_gpu_timer_gl(p);
++    gl->QueryCounter(p->p5_gpu_query[slot].end, GL_TIMESTAMP);
++    p->p5_gpu_query[slot].render_ok = render_ok;
++    p->p5_gpu_query[slot].pending = true;
++}
++#endif
++
+ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
+ {
+     struct priv *p = vo->priv;
++#ifdef __ANDROID__
++    if (p->p5_vo_mix_trace)
++        p->p5_vo_mix_trace_pending_seq = 0;
++    int64_t p5_wall_start_ns = p->p5_vo_cpu_wall ? mp_time_ns() : 0;
++    int64_t p5_cpu_start_ns = p->p5_vo_cpu_wall ? p5_thread_cpu_ns() : 0;
++#endif
++#if HAVE_GL && defined(PL_HAVE_OPENGL) && defined(__ANDROID__)
++    p5_gpu_timer_init(p);
++    p5_gpu_timer_poll(p);
++#endif
++#ifdef __ANDROID__
++    if (!p->p5_vo_perf) {
++        char property[PROP_VALUE_MAX] = {0};
++        p->p5_vo_perf = __system_property_get("debug.media_kit.p5_vo_perf", property) > 0 &&
++                        !strcmp(property, "1");
++    }
++#endif
++    int64_t p5_draw_start_ns = p->p5_vo_perf ? mp_time_ns() : 0;
++    int64_t p5_render_start_ns = 0, p5_render_end_ns = 0;
++    if (p->p5_vo_perf)
++        p->p5_vo_perf_seq++;
+     pl_options pars = p->pars;
+     pl_gpu gpu = p->gpu;
+     update_options(vo);
+@@ -1235,8 +1570,25 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
+     }
+ 
+     struct pl_swapchain_frame swframe;
+-    bool should_draw = sw->fns->start_frame(sw, NULL); // for wayland logic
+-    if (!should_draw || !pl_swapchain_start_frame(p->sw, &swframe)) {
++    bool should_draw = true;
++#if HAVE_GL && defined(PL_HAVE_OPENGL) && defined(__ANDROID__)
++    if (p->p5_offscreen && p->p5_offscreen_ready) {
++        if (!p->p5_offscreen_native &&
++            memcmp(&p->p5_offscreen_dst, &p->dst, sizeof(p->dst))) {
++            if (!p->p5_offscreen_resize_reported)
++                p5_vo_log("P5_OFFSCREEN", "dst_changed; diagnostic invalid after resize");
++            p->p5_offscreen_resize_reported = true;
++            return VO_FALSE;
++        }
++        swframe = p->p5_offscreen_frame;
++    } else
++#endif
++    {
++        should_draw = sw->fns->start_frame(sw, NULL); // for wayland logic
++        if (should_draw)
++            should_draw = pl_swapchain_start_frame(p->sw, &swframe);
++    }
++    if (!should_draw) {
+         if (frame->current) {
+             // Advance the queue state to the current PTS to discard unused frames
+             struct pl_queue_params qparams = *pl_queue_params(
+@@ -1251,15 +1603,86 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
+         }
+         return VO_FALSE;
+     }
++#if HAVE_GL && defined(PL_HAVE_OPENGL) && defined(__ANDROID__)
++    if (p->p5_offscreen && !p->p5_offscreen_ready &&
++        (!p->p5_offscreen_native ||
++         (frame->current && frame->current->params.w >= 256 &&
++          frame->current->params.h >= 144))) {
++        // Pair the one bootstrap start with submit, then stop using the window
++        // swapchain. Rendering below targets a real, host-readable GPU texture.
++        pl_fmt window_fmt = swframe.fbo ? swframe.fbo->params.format : NULL;
++        int depth = window_fmt ? window_fmt->component_depth[0] : 0;
++        bool submitted = pl_swapchain_submit_frame(p->sw);
++        pl_fmt fmt = depth == 8 ? pl_find_fmt(gpu,
++            p->p5_offscreen_float ? PL_FMT_FLOAT : PL_FMT_UNORM, 4,
++            p->p5_offscreen_float ? 16 : 8,
++            p->p5_offscreen_float ? 16 : 8,
++            PL_FMT_CAP_RENDERABLE | PL_FMT_CAP_HOST_READABLE) : NULL;
++        if (!submitted || !fmt) {
++            p5_vo_log("P5_OFFSCREEN", "bootstrap_failed submitted=%d window_fmt=%s depth=%d",
++                      submitted, window_fmt ? window_fmt->name : "unknown", depth);
++            return VO_FALSE;
++        }
++        int off_w = p->p5_offscreen_native && frame->current ? frame->current->params.w :
++                    swframe.fbo->params.w / (p->p5_offscreen_half ? 2 : 1);
++        int off_h = p->p5_offscreen_native && frame->current ? frame->current->params.h :
++                    swframe.fbo->params.h / (p->p5_offscreen_half ? 2 : 1);
++        p->p5_offscreen_tex = pl_tex_create(gpu, pl_tex_params(
++            .w = off_w,
++            .h = off_h,
++            .format = fmt,
++            .renderable = true,
++            .blit_dst = true,
++            .host_readable = true,
++        ));
++        if (!p->p5_offscreen_tex) {
++            p5_vo_log("P5_OFFSCREEN", "create_failed w=%d h=%d fmt=%s",
++                      swframe.fbo->params.w, swframe.fbo->params.h, fmt->name);
++            return VO_FALSE;
++        }
++        p5_vo_log("P5_OFFSCREEN", "bootstrap window_w=%d window_h=%d off_w=%d off_h=%d window_fmt=%s window_depth=%d off_fmt=%s dst=%d,%d,%d,%d flipped=%d",
++                  swframe.fbo->params.w, swframe.fbo->params.h,
++                  p->p5_offscreen_tex->params.w, p->p5_offscreen_tex->params.h,
++                  swframe.fbo->params.format->name, depth, fmt->name,
++                  p->dst.x0, p->dst.y0, p->dst.x1, p->dst.y1,
++                  swframe.flipped);
++        swframe.fbo = p->p5_offscreen_tex;
++        p->p5_offscreen_frame = swframe;
++        p->p5_offscreen_dst = p->dst;
++        p->p5_offscreen_ready = true;
++    }
++#endif
+ 
+     bool valid = false;
+     p->is_interpolated = false;
++#if HAVE_GL && defined(PL_HAVE_OPENGL) && defined(__ANDROID__)
++    int p5_gpu_slot = -1;
++#endif
++    bool p5_render_ok = false;
+ 
+     // Calculate target
+     struct pl_frame target;
+     pl_frame_from_swapchain(&target, &swframe);
+     bool strict_sw_params = target_hint && !pass_colorspace && p->next_opts->target_hint_strict;
+     apply_target_options(p, &target, hint.hdr.min_luma, strict_sw_params);
++#if HAVE_GL && defined(PL_HAVE_OPENGL) && defined(__ANDROID__)
++    if (p->p5_target_203)
++        target.color.hdr.max_luma = 203.0f;
++    if (p->p5_target_pq && frame->current &&
++        frame->current->params.dv_profile == 5) {
++        target.color.primaries = PL_COLOR_PRIM_BT_2020;
++        target.color.transfer = PL_COLOR_TRC_PQ;
++        target.color.hdr.min_luma = 0.0f;
++        target.color.hdr.max_luma = 1000.0f;
++        target.color.hdr.max_cll = 0.0f;
++        target.color.hdr.max_fall = 0.0f;
++    }
++    char p5_target_2020_property[PROP_VALUE_MAX] = {0};
++    if (__system_property_get("debug.media_kit.p5_target_2020",
++                              p5_target_2020_property) > 0 &&
++        !strcmp(p5_target_2020_property, "1"))
++        target.color.primaries = PL_COLOR_PRIM_BT_2020;
++#endif
+     if (target.color.transfer == PL_COLOR_TRC_SRGB && frame->current &&
+         ((opts->sdr_adjust_gamma == 0 && opts->target_trc == PL_COLOR_TRC_UNKNOWN) ||
+          opts->sdr_adjust_gamma == -1))
+@@ -1302,10 +1725,34 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
+     update_overlays(vo, p->osd_res,
+                     (frame->current && opts->blend_subs) ? OSD_DRAW_OSD_ONLY : 0,
+                     PL_OVERLAY_COORDS_DST_FRAME, &p->osd_state, &target, frame->current);
+-    apply_crop(&target, p->dst, swframe.fbo->params.w, swframe.fbo->params.h);
++    struct mp_rect p5_target_dst = p->dst;
++#if HAVE_GL && defined(PL_HAVE_OPENGL) && defined(__ANDROID__)
++    if (p->p5_offscreen && p->p5_offscreen_half) {
++        p5_target_dst.x0 /= 2;
++        p5_target_dst.y0 /= 2;
++        p5_target_dst.x1 /= 2;
++        p5_target_dst.y1 /= 2;
++    }
++    if (p->p5_offscreen && p->p5_offscreen_native) {
++        p5_target_dst = (struct mp_rect){0, 0, swframe.fbo->params.w,
++                                         swframe.fbo->params.h};
++    }
++#endif
++    apply_crop(&target, p5_target_dst, swframe.fbo->params.w, swframe.fbo->params.h);
++#if HAVE_GL && defined(PL_HAVE_OPENGL) && defined(__ANDROID__)
++    if (p->p5_offscreen && p->p5_offscreen_frames == 0)
++        p5_vo_log("P5_OFFSCREEN", "target crop=%.0f,%.0f,%.0f,%.0f repr=%d primaries=%d transfer=%d",
++                  target.crop.x0, target.crop.y0, target.crop.x1, target.crop.y1,
++                  target.repr.sys, target.color.primaries, target.color.transfer);
++#endif
+     update_tm_viz(&pars->color_map_params, &target);
+ 
+     struct pl_frame_mix mix = {0};
++#ifdef __ANDROID__
++    bool p5_trace_draw = false;
++    uint64_t p5_trace_seq = 0;
++    int64_t p5_trace_render_begin_us = 0, p5_trace_render_end_us = 0;
++#endif
+     if (frame->current) {
+         // Update queue state
+         struct pl_queue_params qparams = *pl_queue_params(
+@@ -1399,11 +1846,480 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
+             update_hook_opts_dynamic(p, p->hooks[i], frame->current);
+     }
+ 
++#ifdef __ANDROID__
++    if (p->p5_vo_mix_trace && p->p5_vo_mix_trace_seq < 300) {
++        p5_trace_seq = ++p->p5_vo_mix_trace_seq;
++        const struct mp_image *first = mix.num_frames ?
++            mix.frames[0]->user_data : NULL;
++        const struct mp_image *last = mix.num_frames ?
++            mix.frames[mix.num_frames - 1]->user_data : NULL;
++        double first_pts = first ? first->pts : -1.0;
++        p5_trace_draw = p5_trace_seq <= 16 || p5_trace_seq % 15 == 0 ||
++                        (first_pts >= 1.8 && first_pts <= 2.3);
++        if (p5_trace_draw)
++            p5_vo_log("P5_VO_MIX", "stage=queue seq=%"PRIu64" mono_us=%"PRId64" current_pts=%.9f count=%d first_pts=%.9f last_pts=%.9f first_mpi=%p first_sig=%"PRIu64" last_sig=%"PRIu64,
++                      p5_trace_seq, mp_time_ns() / 1000,
++                      frame->current ? frame->current->pts : -1.0,
++                      mix.num_frames, first_pts, last ? last->pts : -1.0,
++                      (void *)first,
++                      mix.num_frames && mix.signatures ? mix.signatures[0] : 0,
++                      mix.num_frames && mix.signatures ?
++                          mix.signatures[mix.num_frames - 1] : 0);
++    }
++#endif
++
+     // Render frame
+-    if (!pl_render_image_mix(p->rr, &mix, &target, &params)) {
++#ifdef __ANDROID__
++    if (p5_trace_draw)
++        p5_trace_render_begin_us = mp_time_ns() / 1000;
++#endif
++    if (p->p5_vo_perf)
++        p5_render_start_ns = mp_time_ns();
++#if HAVE_GL && defined(PL_HAVE_OPENGL) && defined(__ANDROID__)
++    p5_gpu_slot = p5_gpu_timer_begin(p);
++    struct pl_color_map_params p5_sdr_color_map;
++    if (frame->current && frame->current->params.dv_profile == 5 &&
++        frame->current->params.repr.dovi &&
++        target.color.transfer == PL_COLOR_TRC_BT_1886 &&
++        params.color_map_params) {
++        p5_sdr_color_map = *params.color_map_params;
++        p5_sdr_color_map.gamut_mapping = &pl_gamut_map_clip;
++        params.color_map_params = &p5_sdr_color_map;
++    }
++    if (!p->p5_policy_logged && frame->current &&
++        frame->current->params.dv_profile == 5 && mix.num_frames == 1 &&
++        params.color_map_params) {
++        p->p5_policy_logged = true;
++        const struct pl_frame *source = mix.frames[0];
++        const struct pl_color_map_params *map = params.color_map_params;
++        const struct pl_peak_detect_params *peak = params.peak_detect_params;
++        float source_min = 0, source_max = 0, target_min = 0, target_max = 0;
++        pl_color_space_nominal_luma_ex(pl_nominal_luma_params(
++            .color = &source->color, .metadata = map->metadata,
++            .scaling = PL_HDR_NITS, .out_min = &source_min,
++            .out_max = &source_max));
++        pl_color_space_nominal_luma_ex(pl_nominal_luma_params(
++            .color = &target.color, .metadata = PL_HDR_METADATA_HDR10,
++            .scaling = PL_HDR_NITS, .out_min = &target_min,
++            .out_max = &target_max));
++        p5_vo_log("P5_POLICY", "color source_sys=%d source_prim=%d source_trc=%d source_hdr_min=%.5f source_hdr_max=%.5f source_max_cll=%.5f source_nominal_nits=%.5f:%.5f target_prim=%d target_trc=%d target_hdr_min=%.5f target_hdr_max=%.5f target_nominal_nits=%.5f:%.5f",
++                  source->repr.sys, source->color.primaries,
++                  source->color.transfer, source->color.hdr.min_luma,
++                  source->color.hdr.max_luma, source->color.hdr.max_cll,
++                  source_min, source_max, target.color.primaries,
++                  target.color.transfer, target.color.hdr.min_luma,
++                  target.color.hdr.max_luma, target_min, target_max);
++AV_NOWARN_DEPRECATED(
++        p5_vo_log("P5_POLICY", "map tone=%s tone_param=%.5f gamut=%s gamut_mode=%d intent=%d metadata=%d lut_size=%d lut3d=%d,%d,%d tricubic=%d gamut_expansion=%d inverse=%d contrast_recovery=%.5f contrast_smoothness=%.5f force_lut=%d visualize=%d show_clipping=%d",
++                  map->tone_mapping_function ? map->tone_mapping_function->name : "default",
++                  map->tone_mapping_param,
++                  map->gamut_mapping ? map->gamut_mapping->name : "default",
++                  map->gamut_mode, map->intent, map->metadata,
++                  map->lut_size, map->lut3d_size[0],
++                  map->lut3d_size[1], map->lut3d_size[2],
++                  map->lut3d_tricubic, map->gamut_expansion,
++                  map->inverse_tone_mapping, map->contrast_recovery,
++                  map->contrast_smoothness, map->force_tone_mapping_lut,
++                  map->visualize_lut, map->show_clipping);
++)
++        p5_vo_log("P5_POLICY", "tone_constants knee_adaptation=%.5f knee_minimum=%.5f knee_maximum=%.5f knee_default=%.5f knee_offset=%.5f slope_tuning=%.5f slope_offset=%.5f spline_contrast=%.5f reinhard_contrast=%.5f linear_knee=%.5f exposure=%.5f",
++                  map->tone_constants.knee_adaptation,
++                  map->tone_constants.knee_minimum,
++                  map->tone_constants.knee_maximum,
++                  map->tone_constants.knee_default,
++                  map->tone_constants.knee_offset,
++                  map->tone_constants.slope_tuning,
++                  map->tone_constants.slope_offset,
++                  map->tone_constants.spline_contrast,
++                  map->tone_constants.reinhard_contrast,
++                  map->tone_constants.linear_knee,
++                  map->tone_constants.exposure);
++        p5_vo_log("P5_POLICY", "gamut_constants perceptual_deadzone=%.5f perceptual_strength=%.5f colorimetric_gamma=%.5f softclip_knee=%.5f softclip_desat=%.5f peak_enabled=%d peak_smoothing=%.5f peak_scene_low=%.5f peak_scene_high=%.5f peak_percentile=%.5f peak_black_cutoff=%.5f peak_delayed=%d",
++                  map->gamut_constants.perceptual_deadzone,
++                  map->gamut_constants.perceptual_strength,
++                  map->gamut_constants.colorimetric_gamma,
++                  map->gamut_constants.softclip_knee,
++                  map->gamut_constants.softclip_desat, !!peak,
++                  peak ? peak->smoothing_period : 0.0,
++                  peak ? peak->scene_threshold_low : 0.0,
++                  peak ? peak->scene_threshold_high : 0.0,
++                  peak ? peak->percentile : 0.0,
++                  peak ? peak->black_cutoff : 0.0,
++                  peak && peak->allow_delayed);
++        const struct pl_dither_params *dither = params.dither_params;
++        p5_vo_log("P5_POLICY", "render dither_enabled=%d dither_method=%d dither_lut=%d dither_temporal=%d dither_transfer=%d error_diffusion=%d target_bits_color=%d target_bits_sample=%d",
++                  !!dither, dither ? dither->method : -1,
++                  dither ? dither->lut_size : 0,
++                  dither && dither->temporal,
++                  dither ? dither->transfer : -1,
++                  !!params.error_diffusion,
++                  target.repr.bits.color_depth,
++                  target.repr.bits.sample_depth);
++    }
++#endif
++#if HAVE_GL && defined(PL_HAVE_OPENGL) && defined(__ANDROID__)
++    const struct pl_hook **p5_l2c_hooks = NULL;
++    if (p->p5_l2c_rgb_dump && !p->p5_l2c_rgb_dump_done &&
++        frame->current && frame->current->params.dv_profile == 5 &&
++        frame->current->pts >= 10.0 && frame->current->pts < 10.2) {
++        p5_l2c_hooks = talloc_array(NULL, const struct pl_hook *,
++                                    params.num_hooks + 1);
++        if (p5_l2c_hooks) {
++            if (params.num_hooks)
++                memcpy(p5_l2c_hooks, params.hooks,
++                       params.num_hooks * sizeof(*p5_l2c_hooks));
++            p5_l2c_hooks[params.num_hooks++] = &p->p5_l2c_rgb_hook;
++            params.hooks = p5_l2c_hooks;
++            p->p5_l2c_dump_pts = frame->current->pts;
++        }
++    }
++#endif
++#ifdef __ANDROID__
++    int64_t p5_section_wall_start = p->p5_section_perf ? mp_time_ns() : 0;
++    int64_t p5_section_cpu_start = p->p5_section_perf ? p5_thread_cpu_ns() : 0;
++#endif
++#ifdef __ANDROID__
++    // Diagnostic isolation only: keep decode, queue/map, EGL output and frame
++    // lifetime, but omit external-texture sampling and Dolby rendering.
++    char p5_clear_property[PROP_VALUE_MAX] = {0};
++    bool p5_clear_only = frame->current &&
++        frame->current->params.dv_profile == 5 &&
++        __system_property_get("debug.media_kit.p5_perf_clear_only",
++                              p5_clear_property) > 0 &&
++        !strcmp(p5_clear_property, "1");
++    if (p5_clear_only) {
++        char p5_map_property[PROP_VALUE_MAX] = {0};
++        bool p5_map_only =
++            __system_property_get("debug.media_kit.p5_perf_map_only",
++                                  p5_map_property) > 0 &&
++            !strcmp(p5_map_property, "1");
++        static bool p5_clear_logged;
++        if (!p5_clear_logged) {
++            p5_clear_logged = true;
++            p5_vo_log("P5_PERF_CLEAR_ONLY", "enabled=1 map_only=%d queue_frames=%d",
++                      p5_map_only, mix.num_frames);
++        }
++        struct pl_frame *p5_mapped = NULL;
++        if (p5_map_only) {
++            if (mix.num_frames != 1 || !mix.frames[0]->acquire) {
++                p5_vo_log("P5_PERF_MAP_ONLY", "unsupported queue_frames=%d",
++                          mix.num_frames);
++                p5_render_ok = false;
++            } else {
++                p5_mapped = (struct pl_frame *) mix.frames[0];
++                p5_render_ok = p5_mapped->acquire(gpu, p5_mapped);
++            }
++        } else {
++            p5_render_ok = true;
++        }
++        pl_tex_clear(gpu, swframe.fbo, (float[4]){0.25, 0.25, 0.25, 1.0});
++        if (p5_mapped && p5_render_ok)
++            p5_mapped->release(gpu, p5_mapped);
++    } else {
++        char p5_two_pass_property[PROP_VALUE_MAX] = {0};
++        bool p5_two_pass = frame->current &&
++            frame->current->params.dv_profile == 5 && mix.num_frames == 1 &&
++            __system_property_get("debug.media_kit.p5_perf_two_pass",
++                                  p5_two_pass_property) > 0 &&
++            !strcmp(p5_two_pass_property, "1");
++        char p5_color_stage_property[PROP_VALUE_MAX] = {0};
++        int p5_color_stage = 0;
++        if (frame->current && frame->current->params.dv_profile == 5 &&
++            mix.num_frames == 1 &&
++            __system_property_get("debug.media_kit.p5_perf_color_stage",
++                                  p5_color_stage_property) > 0) {
++            if (!strcmp(p5_color_stage_property, "1"))
++                p5_color_stage = 1; // YUV/PQ to SDR without DV metadata
++            else if (!strcmp(p5_color_stage_property, "2"))
++                p5_color_stage = 2; // DV reconstruction to PQ target
++        }
++        char p5_sample_property[PROP_VALUE_MAX] = {0};
++        bool p5_sample_only = frame->current &&
++            frame->current->params.dv_profile == 5 && mix.num_frames == 1 &&
++            __system_property_get("debug.media_kit.p5_perf_sample_only",
++                                  p5_sample_property) > 0 &&
++            !strcmp(p5_sample_property, "1");
++        if (p5_two_pass) {
++            int w = swframe.fbo->params.w, h = swframe.fbo->params.h;
++            if (p->p5_two_pass_tex &&
++                (p->p5_two_pass_tex->params.w != w ||
++                 p->p5_two_pass_tex->params.h != h))
++                pl_tex_destroy(gpu, &p->p5_two_pass_tex);
++            if (!p->p5_two_pass_tex) {
++                pl_fmt fmt = pl_find_fmt(gpu, PL_FMT_FLOAT, 4, 16, 16,
++                                        PL_FMT_CAP_RENDERABLE | PL_FMT_CAP_SAMPLEABLE);
++                if (fmt)
++                    p->p5_two_pass_tex = pl_tex_create(gpu, pl_tex_params(
++                        .w = w, .h = h, .format = fmt,
++                        .renderable = true, .sampleable = true));
++                p5_vo_log("P5_PERF_TWO_PASS", "create w=%d h=%d fmt=%s ok=%d",
++                          w, h, fmt ? fmt->name : "none", !!p->p5_two_pass_tex);
++            }
++            p5_render_ok = false;
++            if (p->p5_two_pass_tex) {
++                struct pl_frame p5_pq_target = target;
++                p5_pq_target.planes[0].texture = p->p5_two_pass_tex;
++                p5_pq_target.repr.bits = (struct pl_bit_encoding) {0};
++                p5_pq_target.color = mix.frames[0]->color;
++                p5_pq_target.icc = NULL;
++                p5_pq_target.profile = (struct pl_icc_profile) {0};
++                p5_pq_target.lut = NULL;
++                p5_pq_target.num_overlays = 0;
++                struct pl_render_params p5_first_params = params;
++                p5_first_params.dither_params = NULL;
++                p5_first_params.peak_detect_params = NULL;
++                bool first_ok = pl_render_image_mix(p->rr, &mix, &p5_pq_target,
++                                                    &p5_first_params);
++                if (first_ok) {
++                    struct pl_frame p5_pq_source = p5_pq_target;
++                    p5_pq_source.repr.sys = PL_COLOR_SYSTEM_RGB;
++                    p5_pq_source.repr.levels = PL_COLOR_LEVELS_FULL;
++                    p5_pq_source.repr.bits = (struct pl_bit_encoding) {0};
++                    p5_pq_source.num_overlays = 0;
++                    struct pl_render_params p5_second_params = params;
++                    p5_second_params.hooks = NULL;
++                    p5_second_params.num_hooks = 0;
++                    p5_second_params.deband_params = NULL;
++                    p5_second_params.sigmoid_params = NULL;
++                    p5_render_ok = pl_render_image(p->rr, &p5_pq_source,
++                                                   &target, &p5_second_params);
++                }
++                static bool p5_two_pass_logged;
++                if (!p5_two_pass_logged) {
++                    p5_two_pass_logged = true;
++                    p5_vo_log("P5_PERF_TWO_PASS", "first_ok=%d render_ok=%d source_trc=%d pq_target_trc=%d final_target_trc=%d",
++                              first_ok, p5_render_ok, mix.frames[0]->color.transfer,
++                              p5_pq_target.color.transfer, target.color.transfer);
++                }
++            }
++        } else if (p5_color_stage) {
++            struct pl_frame p5_stage_frame = *mix.frames[0];
++            struct pl_frame p5_stage_target = target;
++            const struct pl_frame *p5_stage_frames[1] = { &p5_stage_frame };
++            struct pl_frame_mix p5_stage_mix = mix;
++            p5_stage_mix.frames = p5_stage_frames;
++            if (p5_color_stage == 1) {
++                p5_stage_frame.repr.sys = PL_COLOR_SYSTEM_BT_2020_NC;
++                p5_stage_frame.repr.dovi = NULL;
++            } else {
++                p5_stage_target.color = p5_stage_frame.color;
++            }
++            static int p5_color_stage_logged;
++            if (p5_color_stage_logged != p5_color_stage) {
++                p5_color_stage_logged = p5_color_stage;
++                p5_vo_log("P5_PERF_COLOR_STAGE", "mode=%d source_sys=%d source_trc=%d target_trc=%d width=%d height=%d",
++                          p5_color_stage, p5_stage_frame.repr.sys,
++                          p5_stage_frame.color.transfer,
++                          p5_stage_target.color.transfer,
++                          swframe.fbo->params.w, swframe.fbo->params.h);
++            }
++            p5_render_ok = pl_render_image_mix(p->rr, &p5_stage_mix,
++                                                &p5_stage_target, &params);
++        } else if (p5_sample_only) {
++            char p5_fullparams_property[PROP_VALUE_MAX] = {0};
++            bool p5_fullparams =
++                __system_property_get("debug.media_kit.p5_perf_fullparams",
++                                      p5_fullparams_property) > 0 &&
++                !strcmp(p5_fullparams_property, "1");
++            // Diagnostic only: preserve the external texture acquire/sample,
++            // scaling, target write and release, while bypassing DV and HDR
++            // color processing. YUV channels are intentionally treated as RGB.
++            struct pl_frame p5_sample_frame = *mix.frames[0];
++            p5_sample_frame.repr.sys = PL_COLOR_SYSTEM_RGB;
++            p5_sample_frame.repr.levels = PL_COLOR_LEVELS_FULL;
++            p5_sample_frame.repr.bits = (struct pl_bit_encoding) {0};
++            p5_sample_frame.repr.dovi = NULL;
++            p5_sample_frame.color = target.color;
++            p5_sample_frame.icc = NULL;
++            p5_sample_frame.profile = (struct pl_icc_profile) {0};
++            p5_sample_frame.lut = NULL;
++            const struct pl_frame *p5_sample_frames[1] = { &p5_sample_frame };
++            struct pl_frame_mix p5_sample_mix = mix;
++            p5_sample_mix.frames = p5_sample_frames;
++            struct pl_render_params p5_sample_params = params;
++            if (!p5_fullparams) {
++                p5_sample_params.upscaler = NULL;
++                p5_sample_params.downscaler = NULL;
++                p5_sample_params.frame_mixer = NULL;
++                p5_sample_params.deband_params = NULL;
++                p5_sample_params.sigmoid_params = NULL;
++                p5_sample_params.peak_detect_params = NULL;
++                p5_sample_params.dither_params = NULL;
++                p5_sample_params.hooks = NULL;
++                p5_sample_params.num_hooks = 0;
++                p5_sample_params.skip_caching_single_frame = true;
++            }
++            static bool p5_sample_logged;
++            if (!p5_sample_logged) {
++                p5_sample_logged = true;
++                p5_vo_log("P5_PERF_SAMPLE_ONLY", "enabled=1 fullparams=%d width=%d height=%d",
++                          p5_fullparams, swframe.fbo->params.w, swframe.fbo->params.h);
++            }
++            p5_render_ok = pl_render_image_mix(p->rr, &p5_sample_mix,
++                                                &target, &p5_sample_params);
++        } else if (frame->current && frame->current->params.dv_profile == 5 &&
++                   frame->current->params.repr.dovi && mix.num_frames == 1 &&
++                   target.color.transfer == PL_COLOR_TRC_BT_1886 &&
++                   params.color_map_params) {
++            // Diagnostic only: keep the real DV source and SDR target while
++            // varying one display-mapping cost at a time.
++            char variant_property[PROP_VALUE_MAX] = {0};
++            __system_property_get("debug.media_kit.p5_perf_map_variant",
++                                  variant_property);
++            int variant = !strcmp(variant_property, "1") ? 1 :
++                          !strcmp(variant_property, "2") ? 2 :
++                          !strcmp(variant_property, "3") ? 3 : 0;
++            if (!variant) {
++                p5_render_ok = pl_render_image_mix(p->rr, &mix, &target, &params);
++            } else {
++                struct pl_render_params variant_params = params;
++                struct pl_color_map_params variant_map = *params.color_map_params;
++                if (variant == 1 || variant == 3)
++                    variant_params.peak_detect_params = NULL;
++                if (variant == 2 || variant == 3) {
++                    variant_map.tone_mapping_function = &pl_tone_map_clip;
++                    variant_params.color_map_params = &variant_map;
++                }
++                static int logged_variant = -1;
++                if (logged_variant != variant) {
++                    logged_variant = variant;
++                    p5_vo_log("P5_PERF_MAP_VARIANT",
++                              "mode=%d peak_before=%d clip_before=%d source_sys=%d target_trc=%d width=%d height=%d",
++                              variant, !!params.peak_detect_params,
++                              params.color_map_params->tone_mapping_function == &pl_tone_map_clip,
++                              mix.frames[0]->repr.sys, target.color.transfer,
++                              swframe.fbo->params.w, swframe.fbo->params.h);
++                }
++                p5_render_ok = pl_render_image_mix(p->rr, &mix, &target,
++                                                    &variant_params);
++            }
++        } else {
++            p5_render_ok = pl_render_image_mix(p->rr, &mix, &target, &params);
++        }
++    }
++#else
++    p5_render_ok = pl_render_image_mix(p->rr, &mix, &target, &params);
++#endif
++#ifdef __ANDROID__
++    if (p5_trace_draw)
++        p5_trace_render_end_us = mp_time_ns() / 1000;
++#endif
++#ifdef __ANDROID__
++    if (p->p5_section_perf) {
++        p->p5_render_wall_sum_ns += mp_time_ns() - p5_section_wall_start;
++        p->p5_render_cpu_sum_ns += p5_thread_cpu_ns() - p5_section_cpu_start;
++        if (++p->p5_section_frames % 250 == 0) {
++            p5_vo_log("P5_SECTION_RENDER", "frames=250 wall_us=%"PRId64" cpu_us=%"PRId64,
++                      p->p5_render_wall_sum_ns / 1000,
++                      p->p5_render_cpu_sum_ns / 1000);
++            p->p5_render_wall_sum_ns = p->p5_render_cpu_sum_ns = 0;
++        }
++    }
++#endif
++#if HAVE_GL && defined(PL_HAVE_OPENGL) && defined(__ANDROID__)
++    talloc_free(p5_l2c_hooks);
++#endif
++#if HAVE_GL && defined(PL_HAVE_OPENGL) && defined(__ANDROID__)
++    static bool p5_gamut_target_logged;
++    if (!p5_gamut_target_logged && frame->current && frame->current->pts >= 10.0) {
++        p5_gamut_target_logged = true;
++        const struct pl_frame *p5_source = mix.num_frames ? mix.frames[0] : NULL;
++        p5_vo_log("P5_GAMUT_TARGET", "pts=%.9f rendered=%d source_count=%d source_prim=%d source_trc=%d source_lut=%d source_lut_type=%d param_lut=%d param_lut_type=%d color_map=%d target_sys=%d target_prim=%d target_trc=%d",
++                  frame->current->pts, p5_render_ok, mix.num_frames,
++                  p5_source ? p5_source->color.primaries : -1,
++                  p5_source ? p5_source->color.transfer : -1,
++                  p5_source && p5_source->lut != NULL,
++                  p5_source ? p5_source->lut_type : -1,
++                  params.lut != NULL, params.lut_type,
++                  params.color_map_params != NULL,
++                  target.repr.sys, target.color.primaries, target.color.transfer);
++    }
++#endif
++#if HAVE_GL && defined(PL_HAVE_OPENGL) && defined(__ANDROID__)
++    if (!p->p5_gpu_timer_full)
++        p5_gpu_timer_end(p, p5_gpu_slot, p5_render_ok);
++#endif
++    if (!p5_render_ok) {
+         MP_ERR(vo, "Failed rendering frame!\n");
+         goto done;
+     }
++#if HAVE_GL && defined(PL_HAVE_OPENGL) && defined(__ANDROID__)
++    if (p->p5_post_rpu_probe && !p->p5_post_rpu_probe_done &&
++        frame->current && frame->current->pts >= 10.0) {
++        p->p5_post_rpu_probe_done = true;
++        p5_vo_log("P5_POST_RPU", "pts=%.9f size=%dx%d fmt=%s host_readable=%d target_repr=%d target_primaries=%d target_transfer=%d target_min_luma=%.6f target_max_luma=%.6f target_icc=%d target_lut=%d",
++                  frame->current->pts, swframe.fbo->params.w,
++                  swframe.fbo->params.h,
++                  swframe.fbo->params.format ? swframe.fbo->params.format->name : "null",
++                  swframe.fbo->params.host_readable, target.repr.sys,
++                  target.color.primaries, target.color.transfer,
++                  target.color.hdr.min_luma, target.color.hdr.max_luma,
++                  !!target.icc, !!target.lut);
++        GL *probe_gl = ra_gl_get(p->ra_ctx->ra);
++        GLint read_fbo = -1, draw_fbo = -1;
++        probe_gl->GetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &read_fbo);
++        probe_gl->GetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &draw_fbo);
++        p5_vo_log("P5_POST_RPU", "pts=%.9f read_fbo=%d draw_fbo=%d",
++                  frame->current->pts, read_fbo, draw_fbo);
++        for (int iy = 1; iy <= 3; iy++) {
++            int y = iy * swframe.fbo->params.h / 4;
++            for (int ix = 1; ix <= 3; ix++) {
++                int x = ix * swframe.fbo->params.w / 4;
++                uint8_t rgba[8] = {0};
++                bool download_ok = true;
++                if (p->p5_offscreen_native) {
++                    download_ok = pl_tex_download(gpu, pl_tex_transfer_params(
++                        .tex = p->p5_offscreen_tex,
++                        .rc = {x, y, 0, x + 1, y + 1, 1},
++                        .ptr = rgba,
++                    ));
++                } else {
++                    probe_gl->ReadPixels(x, y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE,
++                                         rgba);
++                }
++                GLenum error = probe_gl->GetError();
++                if (p->p5_offscreen_float) {
++                    uint16_t half[4];
++                    memcpy(half, rgba, sizeof(half));
++                    p5_vo_log("P5_POST_RPU", "pts=%.9f xy=%d,%d download_ok=%d gl_error=0x%x rgba16f=%04x,%04x,%04x,%04x",
++                              frame->current->pts, x, y, download_ok, error,
++                              half[0], half[1], half[2], half[3]);
++                } else {
++                    p5_vo_log("P5_POST_RPU", "pts=%.9f xy=%d,%d download_ok=%d gl_error=0x%x rgba=%u,%u,%u,%u",
++                              frame->current->pts, x, y, download_ok, error,
++                              rgba[0], rgba[1], rgba[2], rgba[3]);
++                }
++            }
++        }
++        if (p->p5_post_rpu_full_dump && p->p5_offscreen_native) {
++            int w = swframe.fbo->params.w, h = swframe.fbo->params.h;
++            size_t bytes = (size_t) w * h * (p->p5_offscreen_float ? 8 : 4);
++            uint8_t *pixels = malloc(bytes);
++            bool download_ok = pixels && pl_tex_download(gpu, pl_tex_transfer_params(
++                .tex = p->p5_offscreen_tex,
++                .rc = {0, 0, 0, w, h, 1},
++                .ptr = pixels,
++            ));
++            size_t written = 0;
++            if (download_ok) {
++                const char *path = p->p5_offscreen_float
++                    ? "/sdcard/Android/data/com.example.media_kit_test/files/p5-post-rpu-full.rgba16f"
++                    : "/sdcard/Android/data/com.example.media_kit_test/files/p5-post-rpu-full.rgba";
++                FILE *file = fopen(path, "wb");
++                if (file) {
++                    written = fwrite(pixels, 1, bytes, file);
++                    fclose(file);
++                }
++            }
++            p5_vo_log("P5_POST_RPU_FULL", "pts=%.9f w=%d h=%d format=%s bytes=%zu download_ok=%d written=%zu",
++                      frame->current->pts, w, h, p->p5_offscreen_float ? "rgba16f" : "rgba8",
++                      bytes, download_ok, written);
++            free(pixels);
++        }
++    }
++#endif
++    if (p->p5_vo_perf)
++        p5_render_end_ns = mp_time_ns();
+ 
+     struct pl_frame ref_frame;
+     pl_frames_infer_mix(p->rr, &mix, &target, &ref_frame);
+@@ -1431,26 +2347,157 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
+     // fall through
+ 
+ done:
++#ifdef __ANDROID__
++    if (p5_trace_draw) {
++        p5_vo_log("P5_VO_MIX", "stage=draw_done seq=%"PRIu64" mono_us=%"PRId64" render_begin_us=%"PRId64" render_end_us=%"PRId64" render_ok=%d valid=%d",
++                  p5_trace_seq, mp_time_ns() / 1000,
++                  p5_trace_render_begin_us, p5_trace_render_end_us,
++                  p5_render_ok, valid);
++        p->p5_vo_mix_trace_pending_seq = p5_trace_seq;
++    }
++#endif
+     if (!valid) // clear with purple to indicate error
+         pl_tex_clear(gpu, swframe.fbo, (float[4]){ 0.5, 0.0, 1.0, 1.0 });
+ 
++    int64_t p5_flush_start_ns = p->p5_vo_perf ? mp_time_ns() : 0;
+     pl_gpu_flush(gpu);
++#if HAVE_GL && defined(PL_HAVE_OPENGL) && defined(__ANDROID__)
++    if (p->p5_gpu_timer_full)
++        p5_gpu_timer_end(p, p5_gpu_slot, p5_render_ok);
++    if (p->p5_offscreen && p->p5_offscreen_ready) {
++        int64_t finish_start_ns = mp_time_ns();
++        pl_gpu_finish(gpu);
++        p->p5_offscreen_frames++;
++        if (p->p5_offscreen_frames <= 20 || p->p5_offscreen_frames % 50 == 0)
++            p5_vo_log("P5_OFFSCREEN", "frame=%"PRIu64" valid=%d finish_us=%"PRId64,
++                      p->p5_offscreen_frames, valid,
++                      (mp_time_ns() - finish_start_ns) / 1000);
++        if (p->p5_offscreen_check && p->p5_offscreen_frames % 50 == 0) {
++            uint8_t pixel[8] = {0};
++            int x = swframe.fbo->params.w / 2, y = swframe.fbo->params.h / 2;
++            bool read_ok = pl_tex_download(gpu, pl_tex_transfer_params(
++                .tex = p->p5_offscreen_tex,
++                .rc = {x, y, 0, x + 1, y + 1, 1},
++                .ptr = pixel,
++            ));
++            if (p->p5_offscreen_float) {
++                uint16_t half[4];
++                memcpy(half, pixel, sizeof(half));
++                p5_vo_log("P5_OFFSCREEN_PIXEL", "frame=%"PRIu64" ok=%d x=%d y=%d rgba16f=%04x,%04x,%04x,%04x",
++                          p->p5_offscreen_frames, read_ok, x, y,
++                          half[0], half[1], half[2], half[3]);
++            } else {
++                p5_vo_log("P5_OFFSCREEN_PIXEL", "frame=%"PRIu64" ok=%d x=%d y=%d rgba=%02x%02x%02x%02x",
++                          p->p5_offscreen_frames, read_ok, x, y,
++                          pixel[0], pixel[1], pixel[2], pixel[3]);
++            }
++        }
++        p->frame_pending = false;
++        return VO_TRUE;
++    }
++#endif
++    if (p->p5_vo_perf &&
++        (p->p5_vo_perf_seq <= 20 || p->p5_vo_perf_seq % 50 == 0)) {
++        p5_vo_log("P5_VO_TIME", "frame=%"PRIu64" prep_us=%"PRId64" render_us=%"PRId64" after_render_us=%"PRId64" flush_us=%"PRId64,
++                p->p5_vo_perf_seq,
++                p5_render_start_ns ? (p5_render_start_ns - p5_draw_start_ns) / 1000 : -1,
++                p5_render_end_ns ? (p5_render_end_ns - p5_render_start_ns) / 1000 : -1,
++                p5_render_end_ns ? (p5_flush_start_ns - p5_render_end_ns) / 1000 : -1,
++                (mp_time_ns() - p5_flush_start_ns) / 1000);
++    }
+     p->frame_pending = true;
++#ifdef __ANDROID__
++    if (p->p5_vo_cpu_wall && p5_cpu_start_ns) {
++        int64_t wall_ns = mp_time_ns() - p5_wall_start_ns;
++        int64_t cpu_ns = p5_thread_cpu_ns() - p5_cpu_start_ns;
++        p->p5_draw_wall_sum_ns += wall_ns;
++        p->p5_draw_cpu_sum_ns += cpu_ns;
++        p->p5_draw_wall_max_ns = MPMAX(p->p5_draw_wall_max_ns, wall_ns);
++    }
++#endif
+     return VO_TRUE;
+ }
+ 
+ static void flip_page(struct vo *vo)
+ {
+     struct priv *p = vo->priv;
++#ifdef __ANDROID__
++    int64_t p5_wall_start_ns = p->p5_vo_cpu_wall ? mp_time_ns() : 0;
++    int64_t p5_cpu_start_ns = p->p5_vo_cpu_wall ? p5_thread_cpu_ns() : 0;
++#endif
++#if HAVE_GL && defined(PL_HAVE_OPENGL) && defined(__ANDROID__)
++    if (p->p5_offscreen && p->p5_offscreen_ready)
++        return;
++#endif
+     struct ra_swapchain *sw = p->ra_ctx->swapchain;
++    int64_t p5_flip_start_ns = p->p5_vo_perf ? mp_time_ns() : 0;
++#ifdef __ANDROID__
++    uint64_t p5_trace_seq = p->p5_vo_mix_trace_pending_seq;
++    int64_t p5_trace_flip_begin_us = p5_trace_seq ? mp_time_ns() / 1000 : 0;
++    bool p5_trace_submitted = false, p5_trace_submit_ok = false;
++#endif
+ 
+     if (p->frame_pending) {
+-        if (!pl_swapchain_submit_frame(p->sw))
++#ifdef __ANDROID__
++        p5_trace_submitted = p5_trace_seq != 0;
++#endif
++        bool submitted = pl_swapchain_submit_frame(p->sw);
++#ifdef __ANDROID__
++        p5_trace_submit_ok = submitted;
++#endif
++        if (!submitted)
+             MP_ERR(vo, "Failed presenting frame!\n");
+         p->frame_pending = false;
+     }
+ 
++    int64_t p5_submit_end_ns = p->p5_vo_perf ? mp_time_ns() : 0;
++#ifdef __ANDROID__
++    int64_t p5_trace_submit_end_us = p5_trace_seq ? mp_time_ns() / 1000 : 0;
++#endif
++#ifdef __ANDROID__
++    int64_t p5_mid_wall_ns = p->p5_vo_cpu_wall ? mp_time_ns() : 0;
++    int64_t p5_mid_cpu_ns = p->p5_vo_cpu_wall ? p5_thread_cpu_ns() : 0;
++#endif
+     sw->fns->swap_buffers(sw);
++#ifdef __ANDROID__
++    if (p5_trace_seq) {
++        p5_vo_log("P5_VO_MIX", "stage=flip seq=%"PRIu64" mono_us=%"PRId64" flip_begin_us=%"PRId64" submit_end_us=%"PRId64" submit_called=%d submit_ok=%d swap_returned=1",
++                  p5_trace_seq, mp_time_ns() / 1000,
++                  p5_trace_flip_begin_us, p5_trace_submit_end_us,
++                  p5_trace_submitted, p5_trace_submit_ok);
++        p->p5_vo_mix_trace_pending_seq = 0;
++    }
++    if (p->p5_vo_cpu_wall && p5_cpu_start_ns) {
++        int64_t end_wall_ns = mp_time_ns(), end_cpu_ns = p5_thread_cpu_ns();
++        int64_t wall_ns = end_wall_ns - p5_wall_start_ns;
++        int64_t cpu_ns = end_cpu_ns - p5_cpu_start_ns;
++        p->p5_flip_wall_sum_ns += wall_ns;
++        p->p5_flip_cpu_sum_ns += cpu_ns;
++        p->p5_submit_wall_sum_ns += p5_mid_wall_ns - p5_wall_start_ns;
++        p->p5_submit_cpu_sum_ns += p5_mid_cpu_ns - p5_cpu_start_ns;
++        p->p5_swap_wall_sum_ns += end_wall_ns - p5_mid_wall_ns;
++        p->p5_swap_cpu_sum_ns += end_cpu_ns - p5_mid_cpu_ns;
++        p->p5_flip_wall_max_ns = MPMAX(p->p5_flip_wall_max_ns, wall_ns);
++        if (++p->p5_vo_cpu_wall_frames % 250 == 0) {
++            p5_vo_log("P5_VO_CPU_WALL", "frames=250 draw_wall_us=%"PRId64" draw_cpu_us=%"PRId64" draw_wall_max_us=%"PRId64" flip_wall_us=%"PRId64" flip_cpu_us=%"PRId64" flip_wall_max_us=%"PRId64" submit_wall_us=%"PRId64" submit_cpu_us=%"PRId64" swap_wall_us=%"PRId64" swap_cpu_us=%"PRId64,
++                      p->p5_draw_wall_sum_ns / 1000, p->p5_draw_cpu_sum_ns / 1000,
++                      p->p5_draw_wall_max_ns / 1000, p->p5_flip_wall_sum_ns / 1000,
++                      p->p5_flip_cpu_sum_ns / 1000, p->p5_flip_wall_max_ns / 1000,
++                      p->p5_submit_wall_sum_ns / 1000, p->p5_submit_cpu_sum_ns / 1000,
++                      p->p5_swap_wall_sum_ns / 1000, p->p5_swap_cpu_sum_ns / 1000);
++            p->p5_draw_wall_sum_ns = p->p5_draw_cpu_sum_ns = 0;
++            p->p5_flip_wall_sum_ns = p->p5_flip_cpu_sum_ns = 0;
++            p->p5_submit_wall_sum_ns = p->p5_submit_cpu_sum_ns = 0;
++            p->p5_swap_wall_sum_ns = p->p5_swap_cpu_sum_ns = 0;
++            p->p5_draw_wall_max_ns = p->p5_flip_wall_max_ns = 0;
++        }
++    }
++#endif
++    if (p->p5_vo_perf &&
++        (p->p5_vo_perf_seq <= 20 || p->p5_vo_perf_seq % 50 == 0))
++        p5_vo_log("P5_VO_FLIP", "frame=%"PRIu64" submit_us=%"PRId64" swap_us=%"PRId64,
++                p->p5_vo_perf_seq, (p5_submit_end_ns - p5_flip_start_ns) / 1000,
++                (mp_time_ns() - p5_submit_end_ns) / 1000);
+ }
+ 
+ static void get_vsync(struct vo *vo, struct vo_vsync_info *info)
+@@ -2076,6 +3123,19 @@ done:
+ static void uninit(struct vo *vo)
+ {
+     struct priv *p = vo->priv;
++#if HAVE_GL && defined(PL_HAVE_OPENGL) && defined(__ANDROID__)
++    if (p->p5_offscreen_tex)
++        pl_tex_destroy(p->gpu, &p->p5_offscreen_tex);
++    if (p->p5_two_pass_tex)
++        pl_tex_destroy(p->gpu, &p->p5_two_pass_tex);
++    if (p->p5_gpu_timer) {
++        GL *gl = p5_gpu_timer_gl(p);
++        for (int n = 0; n < MP_ARRAY_SIZE(p->p5_gpu_query); n++) {
++            gl->DeleteQueries(1, &p->p5_gpu_query[n].start);
++            gl->DeleteQueries(1, &p->p5_gpu_query[n].end);
++        }
++    }
++#endif
+     pl_queue_destroy(&p->queue); // destroy this first
+     for (int i = 0; i < MP_ARRAY_SIZE(p->osd_state.entries); i++)
+         pl_tex_destroy(p->gpu, &p->osd_state.entries[i].tex);
+@@ -2126,12 +3186,90 @@ static void load_hwdec_api(void *ctx, struct hwdec_imgfmt_request *params)
+ static int preinit(struct vo *vo)
+ {
+     struct priv *p = vo->priv;
++#ifdef __ANDROID__
++    char p5_mix_trace_property[PROP_VALUE_MAX] = {0};
++    p->p5_vo_mix_trace = __system_property_get(
++        "debug.media_kit.p5_vo_mix_trace", p5_mix_trace_property) > 0 &&
++        !strcmp(p5_mix_trace_property, "1");
++    char p5_section_property[PROP_VALUE_MAX] = {0};
++    p->p5_section_perf = __system_property_get("debug.media_kit.p5_section_perf",
++                                              p5_section_property) > 0 &&
++                         !strcmp(p5_section_property, "1");
++    char p5_cpu_wall_property[PROP_VALUE_MAX] = {0};
++    p->p5_vo_cpu_wall = __system_property_get("debug.media_kit.p5_vo_cpu_wall",
++                                              p5_cpu_wall_property) > 0 &&
++                         !strcmp(p5_cpu_wall_property, "1");
++    char p5_perf_property[PROP_VALUE_MAX] = {0};
++    p->p5_vo_perf = __system_property_get("debug.media_kit.p5_vo_perf",
++                                         p5_perf_property) > 0 &&
++                    !strcmp(p5_perf_property, "1");
++#if HAVE_GL && defined(PL_HAVE_OPENGL)
++    char p5_post_rpu_property[PROP_VALUE_MAX] = {0};
++    char p5_post_rpu_full_property[PROP_VALUE_MAX] = {0};
++    p->p5_post_rpu_probe = __system_property_get(
++        "debug.media_kit.p5_post_rpu_probe", p5_post_rpu_property) > 0 &&
++        !strcmp(p5_post_rpu_property, "1");
++    p->p5_post_rpu_full_dump = p->p5_post_rpu_probe &&
++        __system_property_get("debug.media_kit.p5_post_rpu_full_dump",
++                              p5_post_rpu_full_property) > 0 &&
++        !strcmp(p5_post_rpu_full_property, "1");
++    char p5_l2c_property[PROP_VALUE_MAX] = {0};
++    p->p5_l2c_rgb_dump = __system_property_get(
++        "debug.media_kit.p5_l2c_rgb_dump", p5_l2c_property) > 0 &&
++        !strcmp(p5_l2c_property, "1");
++    p->p5_l2c_rgb_hook = (struct pl_hook) {
++        .stages = PL_HOOK_RGB,
++        .input = PL_HOOK_SIG_TEX,
++        .priv = p,
++        .hook = p5_l2c_rgb_hook,
++        .signature = 0x50354c3243524742ULL,
++    };
++    char p5_offscreen_property[PROP_VALUE_MAX] = {0};
++    char p5_check_property[PROP_VALUE_MAX] = {0};
++    char p5_half_property[PROP_VALUE_MAX] = {0};
++    char p5_native_property[PROP_VALUE_MAX] = {0};
++    char p5_target_203_property[PROP_VALUE_MAX] = {0};
++    p->p5_offscreen = __system_property_get("debug.media_kit.p5_offscreen",
++                                            p5_offscreen_property) > 0 &&
++                       !strcmp(p5_offscreen_property, "1");
++    p->p5_offscreen_check = p->p5_offscreen &&
++        __system_property_get("debug.media_kit.p5_offscreen_check",
++                              p5_check_property) > 0 &&
++        !strcmp(p5_check_property, "1");
++    p->p5_offscreen_half = p->p5_offscreen &&
++        __system_property_get("debug.media_kit.p5_offscreen_half",
++                              p5_half_property) > 0 &&
++        !strcmp(p5_half_property, "1");
++    p->p5_offscreen_native = p->p5_offscreen &&
++        __system_property_get("debug.media_kit.p5_offscreen_native",
++                              p5_native_property) > 0 &&
++        !strcmp(p5_native_property, "1");
++    char p5_float_property[PROP_VALUE_MAX] = {0};
++    p->p5_offscreen_float = p->p5_offscreen_native &&
++        __system_property_get("debug.media_kit.p5_offscreen_float",
++                              p5_float_property) > 0 &&
++        !strcmp(p5_float_property, "1");
++    p->p5_target_203 = p->p5_offscreen_native &&
++        __system_property_get("debug.media_kit.p5_target_203",
++                              p5_target_203_property) > 0 &&
++        !strcmp(p5_target_203_property, "1");
++    char p5_target_pq_property[PROP_VALUE_MAX] = {0};
++    p->p5_target_pq = p->p5_offscreen_float &&
++        __system_property_get("debug.media_kit.p5_target_pq",
++                              p5_target_pq_property) > 0 &&
++        !strcmp(p5_target_pq_property, "1");
++#endif
++#endif
+     p->opts_cache = m_config_cache_alloc(p, vo->global, &gl_video_conf);
+     p->next_opts_cache = m_config_cache_alloc(p, vo->global, &gl_next_conf);
+     p->next_opts = p->next_opts_cache->opts;
+     p->video_eq = mp_csp_equalizer_create(p, vo->global);
+     p->global = vo->global;
+     p->log = vo->log;
++#ifdef __ANDROID__
++    p5_vo_log("P5_VO_INIT", "enabled=%d property=%s", p->p5_vo_perf,
++              p5_perf_property);
++#endif
+ 
+     struct gl_video_opts *gl_opts = p->opts_cache->opts;
+     struct ra_ctx_opts *ctx_opts = mp_get_config_group(vo, vo->global, &ra_ctx_conf);

@@ -1,0 +1,447 @@
+diff --git a/media_kit_test/android/app/src/main/kotlin/com/example/media_kit_test/MainActivity.kt b/media_kit_test/android/app/src/main/kotlin/com/example/media_kit_test/MainActivity.kt
+index a005d59..2ddc93b 100644
+--- a/media_kit_test/android/app/src/main/kotlin/com/example/media_kit_test/MainActivity.kt
++++ b/media_kit_test/android/app/src/main/kotlin/com/example/media_kit_test/MainActivity.kt
+@@ -8,6 +8,7 @@ import android.os.Looper
+ import android.os.PowerManager
+ import android.os.SystemClock
+ import android.view.PixelCopy
++import android.view.MotionEvent
+ import android.view.SurfaceView
+ import android.view.View
+ import android.view.ViewGroup
+@@ -20,28 +21,30 @@ import java.util.concurrent.TimeUnit
+ 
+ class MainActivity : FlutterActivity() {
+     private var firstFrameProbeGeneration = 0
++    private var lastTouchDownNs = 0L
++    private var lastTouchUpNs = 0L
+ 
+-    private fun startFirstFrameProbe(): Map<String, Any> {
+-        check(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) { "PixelCopy requires API 26" }
+-        val flutterSurface = findFlutterSurface(window.decorView)
+-            ?: throw IllegalStateException("Flutter SurfaceView unavailable")
+-        val rect = Rect(
+-            flutterSurface.width / 2 - 200, flutterSurface.height / 4 - 125,
+-            flutterSurface.width / 2 + 200, flutterSurface.height / 4 + 125
+-        )
+-        check(rect.left >= 0 && rect.top >= 0 &&
+-            rect.right <= flutterSurface.width && rect.bottom <= flutterSurface.height) {
+-            "Probe rectangle outside Flutter surface: $rect"
++    override fun dispatchTouchEvent(event: MotionEvent): Boolean {
++        when (event.actionMasked) {
++            MotionEvent.ACTION_DOWN -> lastTouchDownNs = SystemClock.elapsedRealtimeNanos()
++            MotionEvent.ACTION_UP -> lastTouchUpNs = SystemClock.elapsedRealtimeNanos()
+         }
+-        val surface = flutterSurface.holder.surface
+-        check(surface.isValid) { "Flutter Surface invalid" }
++        return super.dispatchTouchEvent(event)
++    }
++
++    private fun startFirstFrameProbe(platformVideo: Boolean): Map<String, Any> {
++        check(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) { "PixelCopy requires API 26" }
+         val generation = ++firstFrameProbeGeneration
+         val startedNs = SystemClock.elapsedRealtimeNanos()
++        val touchDownNs = lastTouchDownNs.takeIf { startedNs - it in 0L..2_000_000_000L }
++        val touchUpNs = lastTouchUpNs.takeIf { startedNs - it in 0L..2_000_000_000L }
+         val handler = Handler(Looper.getMainLooper())
+         var samples = 0
+         var nonblackLogged = false
+         var contentLogged = false
+-        Log.i("FirstFramePixelCopy", "start generation=$generation ns=$startedNs rect=$rect")
++        Log.i("FirstFramePixelCopy", "start generation=$generation ns=$startedNs " +
++            "touchDownNs=$touchDownNs touchUpNs=$touchUpNs " +
++            "target=${if (platformVideo) "platform" else "flutter"}")
+ 
+         fun sample() {
+             if (generation != firstFrameProbeGeneration || contentLogged ||
+@@ -50,14 +53,37 @@ class MainActivity : FlutterActivity() {
+                     "nonblack=$nonblackLogged content=$contentLogged")
+                 return
+             }
++            val target = if (platformVideo) findPlatformVideoSurface(window.decorView)
++                else findFlutterSurface(window.decorView)
++            if (target == null || !target.holder.surface.isValid ||
++                target.width < 400 || target.height < 250 ||
++                (platformVideo && (window.decorView.width <= window.decorView.height ||
++                    target.width < window.decorView.width / 2))) {
++                handler.postDelayed({ sample() }, 40)
++                return
++            }
++            // The native P5 fixture opens on a nearly uniform sky. Sample
++            // its whole video Surface so a center crop cannot miss the first
++            // recognizable picture; keep the Flutter crop free of page UI.
++            val rect = if (platformVideo) Rect(0, 0, target.width, target.height)
++                else Rect(
++                    target.width / 2 - 200, target.height / 4 - 125,
++                    target.width / 2 + 200, target.height / 4 + 125
++                )
++            if (rect.left < 0 || rect.top < 0 || rect.right > target.width ||
++                rect.bottom > target.height) {
++                handler.postDelayed({ sample() }, 40)
++                return
++            }
+             val bitmap = Bitmap.createBitmap(64, 40, Bitmap.Config.ARGB_8888)
+             try {
+-                PixelCopy.request(surface, rect, bitmap, { status ->
++                PixelCopy.request(target.holder.surface, rect, bitmap, { status ->
+                     val capturedNs = SystemClock.elapsedRealtimeNanos()
+                     if (status != PixelCopy.SUCCESS) {
+                         Log.w("FirstFramePixelCopy", "copy_failed generation=$generation " +
+                             "status=$status samples=$samples")
+                         bitmap.recycle()
++                        handler.postDelayed({ sample() }, 40)
+                         return@request
+                     }
+                     val pixels = IntArray(bitmap.width * bitmap.height)
+@@ -81,7 +107,8 @@ class MainActivity : FlutterActivity() {
+                     val elapsedMs = (capturedNs - startedNs) / 1_000_000.0
+                     if (samples == 1) {
+                         Log.i("FirstFramePixelCopy", "baseline generation=$generation " +
+-                            "elapsedMs=$elapsedMs mean=$mean spread=$spread")
++                            "elapsedMs=$elapsedMs mean=$mean spread=$spread " +
++                            "target=${target.javaClass.name} rect=$rect")
+                     }
+                     if (!nonblackLogged && mean > 1.0 && spread > 1.0) {
+                         nonblackLogged = true
+@@ -90,14 +117,24 @@ class MainActivity : FlutterActivity() {
+                     }
+                     if (!contentLogged && mean > 20.0 && spread > 10.0) {
+                         contentLogged = true
++                        val touchToContentMs = touchUpNs?.let {
++                            (capturedNs - it) / 1_000_000.0
++                        }
++                        val touchDownToContentMs = touchDownNs?.let {
++                            (capturedNs - it) / 1_000_000.0
++                        }
+                         Log.i("FirstFramePixelCopy", "first_content generation=$generation " +
+-                            "elapsedMs=$elapsedMs sample=$samples mean=$mean spread=$spread")
++                            "elapsedMs=$elapsedMs touchToContentMs=$touchToContentMs " +
++                            "touchDownToContentMs=$touchDownToContentMs " +
++                            "sample=$samples mean=$mean spread=$spread " +
++                            "target=${target.javaClass.name} rect=$rect")
+                     }
+                     handler.postDelayed({ sample() }, 80)
+                 }, handler)
+             } catch (error: Exception) {
+                 bitmap.recycle()
+                 Log.w("FirstFramePixelCopy", "copy_exception generation=$generation $error")
++                handler.postDelayed({ sample() }, 40)
+             }
+         }
+         sample()
+@@ -126,6 +163,20 @@ class MainActivity : FlutterActivity() {
+         return null
+     }
+ 
++    private fun findPlatformVideoSurface(view: View): SurfaceView? {
++        var best: SurfaceView? = null
++        if (view is SurfaceView && view.javaClass.name == "android.view.SurfaceView" &&
++            view.isShown) best = view
++        if (view is ViewGroup) {
++            for (i in 0 until view.childCount) {
++                val candidate = findPlatformVideoSurface(view.getChildAt(i)) ?: continue
++                if (best == null || candidate.width * candidate.height >
++                    best.width * best.height) best = candidate
++            }
++        }
++        return best
++    }
++
+     private fun pixelHash(bitmap: Bitmap): String {
+         val pixels = IntArray(bitmap.width * bitmap.height)
+         bitmap.getPixels(pixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
+@@ -148,7 +199,9 @@ class MainActivity : FlutterActivity() {
+                             "debug.media_kit.p5_rpu_probe" to
+                                 readSystemProperty("debug.media_kit.p5_rpu_probe"),
+                             "debug.media_kit.p5_raw_yuv" to
+-                                readSystemProperty("debug.media_kit.p5_raw_yuv")
++                                readSystemProperty("debug.media_kit.p5_raw_yuv"),
++                            "debug.media_kit.firstframe_prebind" to
++                                readSystemProperty("debug.media_kit.firstframe_prebind")
+                         )
+                         runOnUiThread { result.success(values) }
+                     } catch (error: Exception) {
+@@ -172,7 +225,7 @@ class MainActivity : FlutterActivity() {
+                 }
+                 if (call.method == "StartFirstFrameProbe") {
+                     try {
+-                        result.success(startFirstFrameProbe())
++                        result.success(startFirstFrameProbe(call.argument<String>("target") == "platform"))
+                     } catch (error: Exception) {
+                         result.error("PROBE_FAILED", error.toString(), null)
+                     }
+diff --git a/media_kit_test/lib/tests/01.single_player_single_video.dart b/media_kit_test/lib/tests/01.single_player_single_video.dart
+index 78d127f..982dde9 100644
+--- a/media_kit_test/lib/tests/01.single_player_single_video.dart
++++ b/media_kit_test/lib/tests/01.single_player_single_video.dart
+@@ -51,6 +51,9 @@ class _SinglePlayerSingleVideoScreenState
+   static const _androidOpenOnTap = bool.fromEnvironment(
+     'MEDIA_KIT_ANDROID_OPEN_ON_TAP',
+   );
++  static const _androidTapFullscreenBeforeOpen = bool.fromEnvironment(
++    'MEDIA_KIT_ANDROID_TAP_FULLSCREEN_BEFORE_OPEN',
++  );
+   static const _androidPreopenFullscreen = bool.fromEnvironment(
+     'MEDIA_KIT_ANDROID_PREOPEN_FULLSCREEN',
+   );
+@@ -278,6 +281,16 @@ class _SinglePlayerSingleVideoScreenState
+           'presentationVerified=${result.presentationVerified} '
+           'gpuPlatformHdr=$_androidGpuPlatformHdr '
+           'simulateNoHlgForP84=$_androidForceP84PqFallback');
++      if (_androidOpenPhaseTrace) {
++        unawaited(() async {
++          final vo = await player.getProperty('vo');
++          final hwdec = await player.getProperty('hwdec-current');
++          final path = await player.getProperty('path');
++          debugPrint('ANDROID_HDR_OUTPUT vo=$vo hwdecCurrent=$hwdec path=$path');
++        }().catchError((Object error) {
++          debugPrint('ANDROID_HDR_OUTPUT error=$error');
++        }));
++      }
+       if (_androidDualViewLifecycleProbe && !_dualViewProbeScheduled) {
+         _dualViewProbeScheduled = true;
+         unawaited(_runDualViewLifecycleProbe());
+@@ -375,6 +388,25 @@ class _SinglePlayerSingleVideoScreenState
+       return;
+     }
+     try {
++      if (Platform.isAndroid &&
++          _androidPreopenFirstFrameProbe &&
++          !_androidPreopenFullscreen) {
++        final started = await _flutterSurfaceProbeChannel
++            .invokeMapMethod<String, dynamic>('StartFirstFrameProbe', {
++          'target': configuration.value.usePlatformView ? 'platform' : 'flutter',
++        });
++        debugPrint('FIRST_FRAME_PIXEL_COPY started=$started');
++      }
++      if (Platform.isAndroid && _androidTapFullscreenBeforeOpen) {
++        if (!_androidP5ScopeFullscreen) {
++          throw StateError('Tap fullscreen requires VideoFullscreenScope');
++        }
++        await _toggleDiagnosticFullscreen(
++          GlobalObjectKey<VideoState>(_initialController),
++        );
++        await SchedulerBinding.instance.endOfFrame;
++        debugPrint('ANDROID_TAP_FULLSCREEN_LAYOUT_READY');
++      }
+       if (Platform.isAndroid && _androidHdrTransaction) {
+         await _openHdrSource(source);
+       } else {
+@@ -382,6 +414,10 @@ class _SinglePlayerSingleVideoScreenState
+           debugPrint('ANDROID_DIRECT_OPEN trigger path=$source');
+           debugPrint('ANDROID_DIRECT_OPEN media_command');
+         }
++        if (Platform.isAndroid && !configuration.value.usePlatformView) {
++          final prepared = await controller.prepareAndroidTextureOutput();
++          debugPrint('ANDROID_SELECTED_TEXTURE_PREPARED layoutBound=$prepared');
++        }
+         await player.open(Media(source));
+         if (Platform.isAndroid && _androidDirectOpenTrace) {
+           debugPrint('ANDROID_DIRECT_OPEN media_returned');
+@@ -1301,6 +1337,19 @@ class _SinglePlayerSingleVideoScreenState
+       await player.setPlaylistMode(PlaylistMode.single);
+       debugPrint('ANDROID_LOOP_SOURCE mode=single');
+     }
++    if (Platform.isAndroid &&
++        _androidPreopenFullscreen &&
++        !configuration.value.usePlatformView) {
++      final properties = await _p5RuntimeGateChannel
++          .invokeMapMethod<String, dynamic>('ReadProperties');
++      final prebindEnabled =
++          properties?['debug.media_kit.firstframe_prebind'] != '0';
++      debugPrint('ANDROID_DIRECT_TEXTURE_PREBIND enabled=$prebindEnabled');
++      if (prebindEnabled) {
++        final prepared = await controller.prepareAndroidTextureOutput();
++        debugPrint('ANDROID_DIRECT_TEXTURE_PREPARED layoutBound=$prepared');
++      }
++    }
+     if (Platform.isAndroid && _androidDirectOpenTrace) {
+       debugPrint('ANDROID_DIRECT_OPEN media_command');
+     }
+@@ -1573,9 +1622,10 @@ class _SinglePlayerSingleVideoScreenState
+         'media=${player.state.position.inMilliseconds}ms');
+     await _disposeTestPlayer();
+     final disposeReport = _hdrLastDisposeReport;
+-    if (disposeReport == null ||
+-        disposeReport.playerError != null ||
+-        disposeReport.coordinatorError != null) {
++    if (_androidHdrTransaction &&
++        (disposeReport == null ||
++            disposeReport.playerError != null ||
++            disposeReport.coordinatorError != null)) {
+       throw StateError('Player or output disposal did not complete safely');
+     }
+     debugPrint('DIAG_SCOPE_PAGE_EXIT stop complete');
+diff --git a/media_kit_video/android/src/main/cpp/surface_dataspace.cpp b/media_kit_video/android/src/main/cpp/surface_dataspace.cpp
+index 4031b77..3adfbf9 100644
+--- a/media_kit_video/android/src/main/cpp/surface_dataspace.cpp
++++ b/media_kit_video/android/src/main/cpp/surface_dataspace.cpp
+@@ -17,6 +17,7 @@
+ #define EGL_GL_COLORSPACE_BT2020_PQ_EXT 0x3340
+ #endif
+ 
++
+ static void probe_egl_pq_window(ANativeWindow* window) {
+   void* android_library = dlopen("libandroid.so", RTLD_NOW | RTLD_LOCAL);
+   using GetBuffersDataSpace = int32_t (*)(ANativeWindow*);
+@@ -224,6 +225,24 @@ Java_com_alexmercerind_media_1kit_1video_platformview_PlatformVideoView_probeLat
+   ANativeWindow_release(window);
+ }
+ 
++extern "C" JNIEXPORT jint JNICALL
++Java_com_alexmercerind_media_1kit_1video_platformview_PlatformVideoView_getSurfaceDataSpace(
++    JNIEnv* env, jclass, jobject surface) {
++  if (surface == nullptr) return -1;
++  ANativeWindow* window = ANativeWindow_fromSurface(env, surface);
++  if (window == nullptr) return -1;
++  void* library = dlopen("libandroid.so", RTLD_NOW | RTLD_LOCAL);
++  using GetBuffersDataSpace = int32_t (*)(ANativeWindow*);
++  const auto get_buffers_dataspace = library == nullptr ? nullptr
++      : reinterpret_cast<GetBuffersDataSpace>(
++          dlsym(library, "ANativeWindow_getBuffersDataSpace"));
++  const int32_t actual = get_buffers_dataspace == nullptr
++      ? -1 : get_buffers_dataspace(window);
++  if (library != nullptr) dlclose(library);
++  ANativeWindow_release(window);
++  return actual;
++}
++
+ extern "C" JNIEXPORT jboolean JNICALL
+ Java_com_alexmercerind_media_1kit_1video_platformview_PlatformVideoView_setSurfaceDataSpace(
+     JNIEnv* env, jclass, jobject surface, jint dataspace,
+@@ -242,7 +261,7 @@ Java_com_alexmercerind_media_1kit_1video_platformview_PlatformVideoView_setSurfa
+       ? nullptr
+       : reinterpret_cast<SetBuffersDataSpace>(
+           dlsym(library, "ANativeWindow_setBuffersDataSpace"));
+-  const int result = set_buffers_dataspace == nullptr
++  int result = set_buffers_dataspace == nullptr
+       ? -1
+       : set_buffers_dataspace(window, dataspace);
+   int srgb_probe_result = -1;
+@@ -260,10 +279,35 @@ Java_com_alexmercerind_media_1kit_1video_platformview_PlatformVideoView_setSurfa
+       ? nullptr
+       : reinterpret_cast<GetBuffersDataSpace>(
+           dlsym(library, "ANativeWindow_getBuffersDataSpace"));
+-  const int32_t actual_dataspace = get_buffers_dataspace == nullptr
++  int32_t actual_dataspace = get_buffers_dataspace == nullptr
+       ? -1
+       : get_buffers_dataspace(window);
+ 
++  // Isolated LYA-AL00 probe: the public wrapper rejects PQ before calling
++  // the window's setter. Never enable this private ABI outside the exact
++  // firmware under investigation. A successful perform still requires an
++  // exact dataspace readback; HWC and visible output are separate gates.
++  char direct_probe[PROP_VALUE_MAX] = {};
++  char fingerprint[PROP_VALUE_MAX] = {};
++  if (result != 0 && dataspace == ADATASPACE_BT2020_PQ &&
++      __system_property_get("debug.media_kit.p5_direct_dataspace_probe", direct_probe) > 0 &&
++      std::strcmp(direct_probe, "1") == 0 &&
++      __system_property_get("ro.build.fingerprint", fingerprint) > 0 &&
++      std::strcmp(fingerprint,
++          "HUAWEI/LYA-AL00/HWLYA:10/HUAWEILYA-AL00/10.1.0.163C00:user/release-keys") == 0) {
++    using WindowPerform = int (*)(ANativeWindow*, int, ...);
++    WindowPerform perform = nullptr;
++    std::memcpy(&perform,
++        reinterpret_cast<const char*>(window) + 0x98, sizeof(perform));
++    const int direct_result = perform == nullptr ? -1 : perform(window, 19, dataspace);
++    actual_dataspace = get_buffers_dataspace == nullptr
++        ? -1 : get_buffers_dataspace(window);
++    __android_log_print(ANDROID_LOG_INFO, "media_kit_hdr_bridge",
++        "p5DirectDataSpaceProbe perform=%d actual=%d expected=%d",
++        direct_result, actual_dataspace, dataspace);
++    if (direct_result == 0 && actual_dataspace == dataspace) result = 0;
++  }
++
+   __android_log_print(
+       ANDROID_LOG_INFO,
+       "media_kit_hdr_bridge",
+diff --git a/media_kit_video/android/src/main/java/com/alexmercerind/media_kit_video/platformview/PlatformVideoView.java b/media_kit_video/android/src/main/java/com/alexmercerind/media_kit_video/platformview/PlatformVideoView.java
+index 76cb745..63c001a 100644
+--- a/media_kit_video/android/src/main/java/com/alexmercerind/media_kit_video/platformview/PlatformVideoView.java
++++ b/media_kit_video/android/src/main/java/com/alexmercerind/media_kit_video/platformview/PlatformVideoView.java
+@@ -98,6 +98,7 @@ public final class PlatformVideoView implements PlatformView {
+ 
+     private static native boolean setSurfaceDataSpace(
+             @NonNull android.view.Surface surface, int dataSpace, boolean probeSrgbOnFailure);
++    private static native int getSurfaceDataSpace(@NonNull android.view.Surface surface);
+     private static native void probeLatePqDataSpace(@NonNull android.view.Surface surface);
+ 
+     /**
+@@ -133,6 +134,12 @@ public final class PlatformVideoView implements PlatformView {
+             // Avoid blank space instead of a video on Android versions below 8 by adjusting video's
+             // z-layer within the Android view hierarchy:
+             surfaceView.setZOrderMediaOverlay(true);
++        } else if ("pq".equals(initialDataSpace) &&
++                "rgba1010102".equals(initialPixelFormat) &&
++                "HUAWEI/LYA-AL00/HWLYA:10/HUAWEILYA-AL00/10.1.0.163C00:user/release-keys"
++                        .equals(Build.FINGERPRINT)) {
++            // Keep video above Flutter's SurfaceView while leaving controls visible.
++            surfaceView.setZOrderMediaOverlay(true);
+         }
+ 
+         setupSurface();
+@@ -175,6 +182,36 @@ public final class PlatformVideoView implements PlatformView {
+                     surfaceReferences.put(generation, wid);
+                     Log.i(TAG, "surfaceCreated: created new wid=" + wid);
+                     onSurfaceEvent.accept(new SurfaceEvent(wid, generation, false));
++                    // On API 28-33, an EGL producer can reset a successfully
++                    // configured 10-bit HDR window after the Surface callback.
++                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P &&
++                            Build.VERSION.SDK_INT < 34 &&
++                            "rgba1010102".equals(initialPixelFormat) &&
++                            ("pq".equals(initialDataSpace) ||
++                                    "hlg".equals(initialDataSpace) ||
++                                    "pq-itu".equals(initialDataSpace))) {
++                        final Handler handler = new Handler(Looper.getMainLooper());
++                        handler.post(new Runnable() {
++                            private int checks;
++
++                            @Override
++                            public void run() {
++                                if (disposed || surfaceGeneration != generation || wid == 0 ||
++                                        !holder.getSurface().isValid() || !nativeDataSpaceBridgeLoaded ||
++                                        checks++ >= 50) return;
++                                final int expected = dataSpaceFor(initialDataSpace);
++                                final int actual = getSurfaceDataSpace(holder.getSurface());
++                                if (actual >= 0 && actual != expected) {
++                                    final boolean reapplied =
++                                            setColorSpace(holder.getSurface(), initialDataSpace);
++                                    Log.i(TAG, "hdrDataSpaceReset before=" + actual +
++                                            " expected=" + expected + " applied=" + reapplied +
++                                            " generation=" + generation + " check=" + checks);
++                                }
++                                handler.postDelayed(this, 200);
++                            }
++                        });
++                    }
+                     if (initialDataSpace == null && "rgba1010102".equals(initialPixelFormat)) {
+                         new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                             if (!disposed && surfaceGeneration == generation && wid != 0 &&
+@@ -338,6 +375,11 @@ public final class PlatformVideoView implements PlatformView {
+         return surface != null && setColorSpace(surface, transfer);
+     }
+ 
++    public boolean hasLiveSurface() {
++        final android.view.Surface surface = surfaceView.getHolder().getSurface();
++        return !disposed && wid != 0 && surface != null && surface.isValid();
++    }
++
+     /** Disposes of the resources used by this PlatformView. */
+     @Override
+     public synchronized void dispose() {
+diff --git a/media_kit_video/android/src/main/java/com/alexmercerind/media_kit_video/platformview/PlatformVideoViewFactory.java b/media_kit_video/android/src/main/java/com/alexmercerind/media_kit_video/platformview/PlatformVideoViewFactory.java
+index 8debb8f..9805290 100644
+--- a/media_kit_video/android/src/main/java/com/alexmercerind/media_kit_video/platformview/PlatformVideoViewFactory.java
++++ b/media_kit_video/android/src/main/java/com/alexmercerind/media_kit_video/platformview/PlatformVideoViewFactory.java
+@@ -100,7 +100,9 @@ public class PlatformVideoViewFactory extends PlatformViewFactory {
+         for (java.util.Map.Entry<SurfaceOwner, Integer> entry : liveSurfaceGenerations.entrySet()) {
+             if (entry.getKey().handle != handle) continue;
+             final PlatformVideoView view = surfaceOwners.get(entry.getKey());
+-            if (view == null) continue;
++            // A replaced view can retain an ACK owner after its Surface is
++            // destroyed. Only bound Surfaces participate in this policy gate.
++            if (view == null || !view.hasLiveSurface()) continue;
+             found = true;
+             applied &= view.setColorSpace(transfer);
+         }

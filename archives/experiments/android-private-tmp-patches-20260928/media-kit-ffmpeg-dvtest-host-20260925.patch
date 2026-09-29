@@ -1,0 +1,129 @@
+diff --git a/libavfilter/vf_libplacebo.c b/libavfilter/vf_libplacebo.c
+index 2176a71..26d6298 100644
+--- a/libavfilter/vf_libplacebo.c
++++ b/libavfilter/vf_libplacebo.c
+@@ -16,6 +16,9 @@
+  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+  */
+ 
++#include <stdio.h>
++#include <stdlib.h>
++
+ #include "libavutil/avassert.h"
+ #include "libavutil/eval.h"
+ #include "libavutil/fifo.h"
+@@ -30,10 +33,65 @@
+ #include "scale_eval.h"
+ 
+ #include <libplacebo/renderer.h>
++#include <libplacebo/shaders/custom.h>
+ #include <libplacebo/utils/libav.h>
+ #include <libplacebo/utils/frame_queue.h>
+ #include <libplacebo/vulkan.h>
+ 
++static bool dvtest_l2c_done;
++static double dvtest_l2c_pts;
++
++static struct pl_hook_res dvtest_l2c_rgb_hook(void *priv,
++                                             const struct pl_hook_params *params)
++{
++    struct pl_hook_res unchanged = { .output = PL_HOOK_SIG_NONE };
++    pl_tex src = params->tex;
++    if (dvtest_l2c_done || !src || !src->params.blit_src ||
++        !(src->params.format->caps & PL_FMT_CAP_HOST_READABLE)) {
++        fprintf(stderr, "DVTEST_L2C unsupported pts=%.9f tex=%d blit=%d hostcap=%d\n",
++                dvtest_l2c_pts, !!src, src && src->params.blit_src,
++                src && !!(src->params.format->caps & PL_FMT_CAP_HOST_READABLE));
++        return unchanged;
++    }
++    int w = src->params.w, h = src->params.h;
++    pl_fmt fmt = src->params.format;
++    size_t bytes = (size_t) w * h * fmt->texel_size;
++    pl_tex dst = pl_tex_create(params->gpu, pl_tex_params(
++        .w = w, .h = h, .format = fmt, .host_readable = true, .blit_dst = true));
++    void *pixels = bytes ? malloc(bytes) : NULL;
++    bool ok = false;
++    size_t written = 0;
++    if (dst && pixels) {
++        pl_tex_blit(params->gpu, pl_tex_blit_params(.src = src, .dst = dst));
++        ok = pl_tex_download(params->gpu, pl_tex_transfer_params(
++            .tex = dst, .ptr = pixels));
++        if (ok) {
++            FILE *file = fopen("/tmp/media-kit-p5-host-l2c.rgba16f", "wb");
++            if (file) {
++                written = fwrite(pixels, 1, bytes, file);
++                fclose(file);
++            }
++        }
++    }
++    fprintf(stderr, "DVTEST_L2C pts=%.9f w=%d h=%d fmt=%s texel=%zu bytes=%zu written=%zu download=%d repr=%d levels=%d prim=%d trc=%d rect=%.3f,%.3f,%.3f,%.3f\n",
++            dvtest_l2c_pts, w, h, fmt->name, fmt->texel_size,
++            bytes, written, ok, params->repr.sys, params->repr.levels,
++            params->color.primaries, params->color.transfer,
++            params->rect.x0, params->rect.y0, params->rect.x1, params->rect.y1);
++    dvtest_l2c_done = written == bytes;
++    free(pixels);
++    if (dst)
++        pl_tex_destroy(params->gpu, &dst);
++    return unchanged;
++}
++
++static const struct pl_hook dvtest_l2c_hook = {
++    .stages = PL_HOOK_RGB,
++    .input = PL_HOOK_SIG_TEX,
++    .hook = dvtest_l2c_rgb_hook,
++    .signature = 0x50354c3243524742ULL,
++};
++
+ /* Backwards compatibility with older libplacebo */
+ #if PL_API_VER < 276
+ static inline AVFrame *pl_get_mapped_avframe(const struct pl_frame *frame)
+@@ -880,6 +938,15 @@ static int output_frame(AVFilterContext *ctx, int64_t pts)
+         err = AVERROR_EXTERNAL;
+         goto fail;
+     }
++    if (out->color_trc == AVCOL_TRC_SMPTE2084) {
++        target.color.hdr.min_luma = 0.0f;
++        target.color.hdr.max_luma = 1000.0f;
++    }
++    if (pts == 0)
++        av_log(ctx, AV_LOG_WARNING, "DVTEST target prim=%d trc=%d max_luma=%g min_luma=%g source prim=%d trc=%d\n",
++               target.color.primaries, target.color.transfer,
++               target.color.hdr.max_luma, target.color.hdr.min_luma,
++               ref->color_primaries, ref->color_trc);
+ 
+     /* Draw first frame opaque, others with blending */
+     opts->params.skip_target_clearing = false;
+@@ -893,7 +960,32 @@ static int output_frame(AVFilterContext *ctx, int64_t pts)
+             continue;
+         opts->params.skip_caching_single_frame = high_fps;
+         update_crops(ctx, in, &target, out->pts * av_q2d(outlink->time_base));
++        if (pts == 0 && in->mix.num_frames) {
++            const struct pl_frame *src = in->mix.frames[0];
++            av_log(ctx, AV_LOG_WARNING, "DVTEST mapped source prim=%d trc=%d max_luma=%g min_luma=%g dovi=%d\n",
++                   src->color.primaries, src->color.transfer,
++                   src->color.hdr.max_luma, src->color.hdr.min_luma,
++                   !!src->repr.dovi);
++        }
++        const struct pl_hook *l2c_hooks[3];
++        const struct pl_hook * const *old_hooks = opts->params.hooks;
++        int old_num_hooks = opts->params.num_hooks;
++        double seconds = out->pts * av_q2d(outlink->time_base);
++        bool probe = getenv("MEDIA_KIT_P5_L2C_DUMP") && !dvtest_l2c_done &&
++                     fabs(seconds - 10.0) < 0.00001 &&
++                     av_frame_get_side_data(ref, AV_FRAME_DATA_DOVI_METADATA) &&
++                     old_num_hooks < FF_ARRAY_ELEMS(l2c_hooks);
++        if (probe) {
++            for (int j = 0; j < old_num_hooks; j++)
++                l2c_hooks[j] = old_hooks[j];
++            l2c_hooks[old_num_hooks] = &dvtest_l2c_hook;
++            opts->params.hooks = l2c_hooks;
++            opts->params.num_hooks = old_num_hooks + 1;
++            dvtest_l2c_pts = seconds;
++        }
+         pl_render_image_mix(in->renderer, &in->mix, &target, &opts->params);
++        opts->params.hooks = old_hooks;
++        opts->params.num_hooks = old_num_hooks;
+         opts->params.skip_target_clearing = true;
+         opts->params.blend_params = &pl_alpha_overlay;
+     }

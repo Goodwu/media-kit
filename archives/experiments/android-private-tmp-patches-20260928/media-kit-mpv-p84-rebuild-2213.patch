@@ -1,0 +1,159 @@
+diff --git a/include/mpv/client.h b/include/mpv/client.h
+index 85cff63..e6aa138 100644
+--- a/include/mpv/client.h
++++ b/include/mpv/client.h
+@@ -1730,6 +1730,15 @@ MPV_EXPORT mpv_event *mpv_wait_event(mpv_handle *ctx, double timeout);
+  */
+ MPV_EXPORT void mpv_wakeup(mpv_handle *ctx);
+ 
++/**
++ * Calls av_jni_set_java_vm() with the given JavaVM*.
++ * https://github.com/FFmpeg/FFmpeg/blob/0ba719f726632d73592311615087a0d64aa2fb60/libavcodec/jni.h#L26-L36
++ *
++ * The av_jni_set_java_vm() symbol is not visible when statically linking with libavcodec.
++ * It is important to call this method so that libavcodec can access JNI environment & thus, mediacodec APIs.
++ */
++MPV_EXPORT int mpv_lavc_set_java_vm(void *vm);
++
+ /**
+  * Set a custom function that should be called when there are new events. Use
+  * this if blocking in mpv_wait_event() to wait for new events is not feasible.
+@@ -2012,6 +2021,8 @@ MPV_DEFINE_SYM_PTR(mpv_wait_event)
+ #define mpv_wait_event pfn_mpv_wait_event
+ MPV_DEFINE_SYM_PTR(mpv_wakeup)
+ #define mpv_wakeup pfn_mpv_wakeup
++MPV_DEFINE_SYM_PTR(mpv_lavc_set_java_vm)
++#define mpv_lavc_set_java_vm pfn_mpv_lavc_set_java_vm
+ MPV_DEFINE_SYM_PTR(mpv_set_wakeup_callback)
+ #define mpv_set_wakeup_callback pfn_mpv_set_wakeup_callback
+ MPV_DEFINE_SYM_PTR(mpv_wait_async_requests)
+diff --git a/meson.build b/meson.build
+index 5ffe559..936b2e9 100644
+--- a/meson.build
++++ b/meson.build
+@@ -1736,7 +1736,7 @@ endif
+ 
+ # Set config.h
+ conf_data = configuration_data()
+-conf_data.set_quoted('CONFIGURATION', meson.build_options())
++conf_data.set_quoted('CONFIGURATION', '')
+ conf_data.set_quoted('DEFAULT_OPTICAL_DEVICE', optical_device)
+ 
+ # Loop over all features in the build, create a define and add them to config.h
+diff --git a/player/client.c b/player/client.c
+index e23b98b..7e8b493 100644
+--- a/player/client.c
++++ b/player/client.c
+@@ -22,6 +22,8 @@
+ #include <stdint.h>
+ #include <stdlib.h>
+ 
++#include <libavcodec/jni.h>
++
+ #include "common/common.h"
+ #include "common/global.h"
+ #include "common/msg.h"
+@@ -964,6 +966,11 @@ void mpv_wakeup(mpv_handle *ctx)
+     mp_mutex_unlock(&ctx->lock);
+ }
+ 
++int mpv_lavc_set_java_vm(void *vm)
++{
++    return av_jni_set_java_vm(vm, NULL);
++}
++
+ // map client API types to internal types
+ static const struct m_option type_conv[] = {
+     [MPV_FORMAT_STRING]     = { .type = CONF_TYPE_STRING },
+diff --git a/player/video.c b/player/video.c
+index 05c3954..a2516da 100644
+--- a/player/video.c
++++ b/player/video.c
+@@ -38,6 +38,7 @@
+ #include "stream/stream.h"
+ #include "sub/osd.h"
+ #include "video/hwdec.h"
++#include "video/img_format.h"
+ #include "filters/f_decoder_wrapper.h"
+ #include "video/out/vo.h"
+ 
+@@ -426,6 +427,15 @@ static int get_req_frames(struct MPContext *mpctx, bool eof)
+     if (mpctx->vo_chain && mpctx->vo_chain->is_sparse)
+         return 1;
+ 
++#ifdef __ANDROID__
++    // A MediaCodec frame owns an output slot until the VO maps or drops it.
++    // Waiting for a second frame can exhaust the codec output queue before
++    // the first reaches the VO, leaving both sides waiting indefinitely.
++    if (mpctx->num_next_frames > 0 &&
++        mpctx->next_frames[0]->imgfmt == IMGFMT_MEDIACODEC)
++        return 1;
++#endif
++
+     // Normally require at least 2 frames, so we can compute a frame duration.
+     int min = 2;
+ 
+diff --git a/video/out/hwdec/hwdec_aimagereader.c b/video/out/hwdec/hwdec_aimagereader.c
+index 83c2ea8..d6fbfdb 100644
+--- a/video/out/hwdec/hwdec_aimagereader.c
++++ b/video/out/hwdec/hwdec_aimagereader.c
+@@ -156,7 +156,7 @@ static int init(struct ra_hwdec *hw)
+     // dummy dimensions, AImageReader only transports hardware buffers
+     media_status_t ret = p->AImageReader_newWithUsage(16, 16,
+         AIMAGE_FORMAT_PRIVATE, AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE,
+-        5, &p->reader);
++        3, &p->reader);
+     if (ret != AMEDIA_OK) {
+         MP_ERR(hw, "newWithUsage failed: %d\n", ret);
+         return -1;
+@@ -333,23 +333,23 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
+         av_mediacodec_release_buffer(buffer, 1);
+     }
+ 
+-    bool image_available = false;
+-    mp_mutex_lock(&p->lock);
+-    if (!p->image_available) {
+-        mp_cond_timedwait(&p->cond, &p->lock, MP_TIME_MS_TO_NS(100));
++    // A queued callback does not guarantee an image is still available.
++    // Retry this transient state without spinning the VO.
++    media_status_t ret = AMEDIA_IMGREADER_NO_BUFFER_AVAILABLE;
++    for (int attempt = 0; attempt < 10; attempt++) {
++        mp_mutex_lock(&p->lock);
+         if (!p->image_available)
+-            MP_WARN(mapper, "Waiting for frame timed out!\n");
+-    }
+-    image_available = p->image_available;
+-    p->image_available = false;
+-    mp_mutex_unlock(&p->lock);
++            mp_cond_timedwait(&p->cond, &p->lock, MP_TIME_MS_TO_NS(10));
++        p->image_available = false;
++        mp_mutex_unlock(&p->lock);
+ 
+-    media_status_t ret = o->AImageReader_acquireLatestImage(o->reader, &p->image);
++        ret = o->AImageReader_acquireLatestImage(o->reader, &p->image);
++        if (ret != AMEDIA_IMGREADER_NO_BUFFER_AVAILABLE)
++            break;
++    }
+     if (ret != AMEDIA_OK) {
+-        MP_ERR(mapper, "acquireLatestImage failed: %d\n", ret);
+-        // If we merely timed out waiting return success anyway to avoid
+-        // flashing frames of render errors.
+-        return image_available ? -1 : 0;
++        MP_ERR(mapper, "acquireLatestImage failed after retry: %d\n", ret);
++        return -1;
+     }
+     mp_assert(p->image);
+ 
+diff --git a/video/out/opengl/context.c b/video/out/opengl/context.c
+index 86e8d5d..86e5c79 100644
+--- a/video/out/opengl/context.c
++++ b/video/out/opengl/context.c
+@@ -232,7 +232,7 @@ bool ra_gl_ctx_submit_frame(struct ra_swapchain *sw, const struct vo_frame *fram
+     if (p->opts->use_glfinish)
+         gl->Finish();
+ 
+-    if (gl->FenceSync) {
++    if (gl->FenceSync && p->params.swap_buffers) {
+         GLsync fence = gl->FenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+         if (fence)
+             MP_TARRAY_APPEND(p, p->vsync_fences, p->num_vsync_fences, fence);
