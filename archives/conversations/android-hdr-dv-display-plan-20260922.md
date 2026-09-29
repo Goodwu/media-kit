@@ -2,7 +2,9 @@
 
 ## Current State
 
-- 2026-09-29 P3实机回归批次完成（12627–12640）：ADB恢复后，12627重签包全片×2（EOS+Back闭合、t175/t195正常，故障未触发）；正式重建12632（e0102cf+`c025cbf` JAR+起播170，经12628–12631试错复原define集）片尾短轮3/3命中收敛版相邻帧回退（PTS174.958→174.941）且截图全为正常DV标版；12633 Mystery Box EOF（EOS~99秒、资源闭合5926/5926）；12639 seek边界PTS8.008回退触发、零渲染错误（12580遗留的seek边界渲染错误被消除）、seek/同播放器重开正常；12640暂停重绘帧37秒字节级稳定。截图均由 `proxy/eo/glm-5.3-flash-free` 图像识别逐张判定。`c025cbf` 已独立核验在 Goodwu/mpv 远端 `feature/android-p5-sdr-direct-yuv`；`/private/tmp/media-kit-p5-mpv-product` 按门槛删除，JAR留存。P3剩余：切源候选热切源/双视图回归、双视图/失败重试、直接Engine销毁。详见 `archives/experiments/android-p5-tail-c025cbf-regression-12627-12640-20260929.md`。
+- 2026-09-29 切源候选A/B实机验收完成（12641/12642）：新增默认关闭的热切探针（`MEDIA_KIT_ANDROID_HOT_SWITCH_TARGET/AT_SECONDS`+100ms布局ping），Glass(16:9)→p84控制源(2.0:1)热切。对照包在空参数间隙复现旧aspect中介`SetSurfaceSize 996×560`/`2560×1440`；候选包间隙零请求、新源参数到达即刻正确`2880×1440`。两轮AImage闭合、EOS、dispose、零错误。real.dart候选与探针一并提交；transaction同控制器热切/SurfaceProducer路径/双视图同时显示仍属P3后续。
+
+- 2026-09-29 P3实机回归批次完成（12627–12640）：ADB恢复后，12627重签包全片×2（EOS+Back闭合、t175/t195正常，故障未触发）；正式重建12632（e0102cf+`c025cbf` JAR+起播170，经12628–12631试错复原define集）片尾短轮3/3命中收敛版相邻帧回退（PTS174.958→174.941）且截图全为正常DV标版；12633 Mystery Box EOF（EOS~99秒、资源闭合5926/5926）；12639 seek边界PTS8.008回退触发、零渲染错误（12580遗留的seek边界渲染错误被消除）、seek/同播放器重开正常；12640暂停重绘帧37秒字节级稳定。截图均由 `proxy/eo/glm-5.3-flash-free` 图像识别逐张判定。`c025cbf` 已独立核验在 Goodwu/mpv 远端 `feature/android-p5-sdr-direct-yuv`；`/private/tmp/media-kit-p5-mpv-product` 按门槛删除，JAR留存。P3剩余：双视图同时显示/失败重试、直接Engine销毁。详见 `archives/experiments/android-p5-tail-c025cbf-regression-12627-12640-20260929.md`。
 
 - 2026-09-29 用户要求清理过时文件：按P0/P3既有逐文件判定和正式链路回归，已用精确路径、非强制 `rm -r --` 删除六个旧P5实验工作树：`media-kit-p5-libplacebo`、`media-kit-p5-mpv`、`media-kit-p5-app`、`media-kit-p5-jar-rebuild-20260927`、`media-kit-ffmpeg-p5-stream-2215`、`media-kit-p5-jar-ffmpeg-20260927`。六树补丁仍保存在当前目录，逐目录复查不存在；磁盘从约114MiB回升到约1.2GiB。其他临时工作树保留，须各自回归后再删。`TASKS.md`和临时目录接手索引已更新。
 

@@ -491,7 +491,17 @@ class _SinglePlayerSingleVideoScreenState
   static const _androidAutoReopenAfterSeek = bool.fromEnvironment(
     'MEDIA_KIT_ANDROID_AUTO_REOPEN_AFTER_SEEK',
   );
+  static const _androidHotSwitchTarget = String.fromEnvironment(
+    'MEDIA_KIT_ANDROID_HOT_SWITCH_TARGET',
+  );
+  static const _androidHotSwitchAtSeconds = int.fromEnvironment(
+    'MEDIA_KIT_ANDROID_HOT_SWITCH_AT_SECONDS',
+    defaultValue: -1,
+  );
   bool _autoSeekReopenScheduled = false;
+  bool _hotSwitchScheduled = false;
+  bool _hotSwitchPingActive = false;
+  bool _hotSwitchPingOn = false;
   static const _autoStartSeconds = String.fromEnvironment(
     'MEDIA_KIT_AUTO_START_SECONDS',
   );
@@ -1398,6 +1408,13 @@ class _SinglePlayerSingleVideoScreenState
       _autoSeekReopenScheduled = true;
       unawaited(_runAutoSeekReopenProbe());
     }
+    if (Platform.isAndroid &&
+        _androidHotSwitchTarget.isNotEmpty &&
+        _androidHotSwitchAtSeconds >= 0 &&
+        !_hotSwitchScheduled) {
+      _hotSwitchScheduled = true;
+      unawaited(_runHotSwitchProbe());
+    }
     if (Platform.isAndroid && _androidDirectOpenTrace) {
       debugPrint('ANDROID_DIRECT_OPEN media_returned');
     }
@@ -1501,6 +1518,43 @@ class _SinglePlayerSingleVideoScreenState
           'AUTO_SEEK_REOPEN reopen_playing position=${player.state.position}');
     } catch (error, stack) {
       debugPrint('AUTO_SEEK_REOPEN error=$error');
+      debugPrintStack(stackTrace: stack);
+    }
+  }
+
+  /// Hot-switches to another local source while pinging the video layout, so
+  /// texture-layout updates land inside the empty-VideoParams gap between
+  /// sources. The log then shows whether any interim output size request was
+  /// computed from the previous source's dimensions.
+  Future<void> _runHotSwitchProbe() async {
+    try {
+      final target = _androidHotSwitchTarget;
+      final start = Duration(seconds: _androidHotSwitchAtSeconds);
+      await player.stream.position
+          .firstWhere((position) => position >= start)
+          .timeout(Duration(seconds: _androidHotSwitchAtSeconds + 30));
+      if (!mounted || _autoPlayerDisposed) return;
+      debugPrint('ANDROID_HOT_SWITCH begin position=${player.state.position}');
+      setState(() => _hotSwitchPingActive = true);
+      unawaited(() async {
+        while (_hotSwitchPingActive && mounted) {
+          await Future<void>.delayed(const Duration(milliseconds: 100));
+          if (!_hotSwitchPingActive || !mounted) return;
+          setState(() => _hotSwitchPingOn = !_hotSwitchPingOn);
+        }
+      }());
+      await player.open(Media(target));
+      debugPrint(
+          'ANDROID_HOT_SWITCH switched position=${player.state.position}');
+      await Future<void>.delayed(const Duration(seconds: 3));
+      if (mounted) {
+        setState(() {
+          _hotSwitchPingActive = false;
+          _hotSwitchPingOn = false;
+        });
+      }
+    } catch (error, stack) {
+      debugPrint('ANDROID_HOT_SWITCH error=$error');
       debugPrintStack(stackTrace: stack);
     }
   }
@@ -1725,11 +1779,16 @@ class _SinglePlayerSingleVideoScreenState
           fit: StackFit.expand,
           children: [
             if (displayController != null)
-              Video(
-                key: videoKey,
-                controller: displayController,
-                fill: Colors.black,
-                controls: null,
+              Padding(
+                padding: _hotSwitchPingOn
+                    ? const EdgeInsets.only(bottom: 220)
+                    : EdgeInsets.zero,
+                child: Video(
+                  key: videoKey,
+                  controller: displayController,
+                  fill: Colors.black,
+                  controls: null,
+                ),
               ),
             GestureDetector(
               behavior: HitTestBehavior.translucent,
