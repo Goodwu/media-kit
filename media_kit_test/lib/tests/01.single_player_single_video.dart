@@ -292,6 +292,12 @@ class _SinglePlayerSingleVideoScreenState
         _dualViewProbeScheduled = true;
         unawaited(_runDualViewLifecycleProbe());
       }
+      if (Platform.isAndroid &&
+          _androidOutputFailureAtSeconds >= 0 &&
+          !_outputFailureScheduled) {
+        _outputFailureScheduled = true;
+        unawaited(_runOutputFailureRetryProbe());
+      }
       if (_androidHdrPauseAtMediaSeconds >= 0) {
         final snapshot = _hdrIntent.snapshot();
         unawaited(() async {
@@ -502,11 +508,56 @@ class _SinglePlayerSingleVideoScreenState
     'MEDIA_KIT_ANDROID_ENGINE_DESTROY_AT_SECONDS',
     defaultValue: -1,
   );
+  static const _androidOutputFailureAtSeconds = int.fromEnvironment(
+    'MEDIA_KIT_ANDROID_OUTPUT_FAILURE_AT_SECONDS',
+    defaultValue: -1,
+  );
+  static const _androidDualPlayerView = bool.fromEnvironment(
+    'MEDIA_KIT_ANDROID_DUAL_PLAYER_VIEW',
+  );
+  static const _androidDualPlayerSource = String.fromEnvironment(
+    'MEDIA_KIT_ANDROID_DUAL_PLAYER_SOURCE',
+  );
   bool _autoSeekReopenScheduled = false;
   bool _hotSwitchScheduled = false;
   bool _hotSwitchPingActive = false;
   bool _hotSwitchPingOn = false;
   bool _engineDestroyScheduled = false;
+  bool _outputFailureScheduled = false;
+  Player? _secondPlayer;
+  VideoController? _secondController;
+  Future<void>? _secondPlayerSetup;
+
+  /// Creates an independent second player for the dual-player dual-view
+  /// probe. Both players must show live frames simultaneously; one shared
+  /// player can only ever drive one active surface.
+  Future<void> _ensureSecondPlayer() {
+    return _secondPlayerSetup ??= () async {
+      try {
+        final second = Player();
+        final secondController = VideoController(
+          second,
+          configuration: configuration.value,
+        );
+        await second.setAudioTrack(AudioTrack.no());
+        await second.setPlaylistMode(PlaylistMode.loop);
+        await second.open(Media(_androidDualPlayerSource));
+        debugPrint('ANDROID_DUAL_PLAYER second_open path=$_androidDualPlayerSource '
+            'position=${second.state.position}');
+        if (!mounted) {
+          await second.dispose();
+          return;
+        }
+        setState(() {
+          _secondPlayer = second;
+          _secondController = secondController;
+        });
+      } catch (error, stack) {
+        debugPrint('ANDROID_DUAL_PLAYER setup error=$error');
+        debugPrintStack(stackTrace: stack);
+      }
+    }();
+  }
   static const _engineControlChannel = MethodChannel('media_kit_test/engine_control');
   static const _autoStartSeconds = String.fromEnvironment(
     'MEDIA_KIT_AUTO_START_SECONDS',
@@ -760,6 +811,11 @@ class _SinglePlayerSingleVideoScreenState
         !_engineDestroyScheduled) {
       _engineDestroyScheduled = true;
       unawaited(_runEngineDestroyProbe());
+    }
+    if (Platform.isAndroid &&
+        _androidDualPlayerView &&
+        _androidDualPlayerSource.isNotEmpty) {
+      unawaited(_ensureSecondPlayer());
     }
     if (Platform.isAndroid && _androidP5CounterProbe) {
       _androidP5CounterTimer = Timer.periodic(const Duration(seconds: 10), (_) {
@@ -1594,6 +1650,41 @@ class _SinglePlayerSingleVideoScreenState
     }
   }
 
+  /// Simulates a mid-play output failure by disposing the current texture
+  /// output over the platform channel, then retries on the same path by
+  /// reopening the same source. The output slot must rebuild through its
+  /// dispose barrier and frames must resume.
+  Future<void> _runOutputFailureRetryProbe() async {
+    try {
+      final start = Duration(seconds: _androidOutputFailureAtSeconds);
+      await player.stream.position
+          .firstWhere((position) => position >= start)
+          .timeout(Duration(seconds: _androidOutputFailureAtSeconds + 30));
+      if (!mounted || _autoPlayerDisposed) return;
+      debugPrint(
+          'ANDROID_OUTPUT_FAILURE begin position=${player.state.position}');
+      final handle = await player.handle;
+      await const MethodChannel('com.alexmercerind/media_kit_video')
+          .invokeMethod<void>('VideoOutputManager.Dispose', {
+        'handle': handle.toString(),
+      });
+      debugPrint('ANDROID_OUTPUT_FAILURE output_disposed');
+      await _openHdrSource(sources[0]);
+      debugPrint(
+          'ANDROID_OUTPUT_FAILURE reopened position=${player.state.position}');
+      await player.stream.position
+          .firstWhere((position) =>
+              position >= const Duration(seconds: 2) &&
+              position < const Duration(seconds: 10))
+          .timeout(const Duration(seconds: 20));
+      debugPrint(
+          'ANDROID_OUTPUT_FAILURE recovered position=${player.state.position}');
+    } catch (error, stack) {
+      debugPrint('ANDROID_OUTPUT_FAILURE error=$error');
+      debugPrintStack(stackTrace: stack);
+    }
+  }
+
   Future<void> _resizeTestWindow(
       {required double width, required double height}) async {
     try {
@@ -1638,6 +1729,12 @@ class _SinglePlayerSingleVideoScreenState
         const [DeviceOrientation.portraitUp],
       ));
       unawaited(SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge));
+    }
+    final second = _secondPlayer;
+    if (second != null) {
+      unawaited(second.dispose());
+      _secondPlayer = null;
+      _secondController = null;
     }
     _flutterRepaintTimer?.cancel();
     _androidP5CounterTimer?.cancel();
@@ -1807,6 +1904,39 @@ class _SinglePlayerSingleVideoScreenState
         (_androidP5PlatformSdrDiagnostic || _androidP5ScopeFullscreen)
             ? diagnosticVideoKey
             : ObjectKey(displayController);
+    if (Platform.isAndroid && _androidDualPlayerView) {
+      final second = _secondController;
+      final dualPlayerPage = Scaffold(
+        body: Row(children: [
+          Expanded(
+            key: const ValueKey('android-dual-player-a'),
+            child: displayController == null
+                ? const ColoredBox(color: Colors.black)
+                : Video(
+                    key: const ValueKey('android-dual-player-view-a'),
+                    controller: displayController,
+                  ),
+          ),
+          Expanded(
+            key: const ValueKey('android-dual-player-b'),
+            child: second == null
+                ? const ColoredBox(color: Colors.black)
+                : Video(
+                    key: const ValueKey('android-dual-player-view-b'),
+                    controller: second,
+                  ),
+          ),
+        ]),
+      );
+      if (!_autoSinglePlayer) return dualPlayerPage;
+      return PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, result) {
+          if (!didPop) unawaited(_exitAutoPlayerAfterDisposal());
+        },
+        child: dualPlayerPage,
+      );
+    }
     if (Platform.isAndroid && _androidPreopenFullscreen) {
       final page = Scaffold(
         backgroundColor: Colors.black,
