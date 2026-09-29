@@ -197,6 +197,19 @@ class MainActivity : FlutterActivity() {
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "media_kit_test/engine_control")
+            .setMethodCallHandler { call, result ->
+                if (call.method != "DestroyEngineNow") {
+                    result.notImplemented()
+                    return@setMethodCallHandler
+                }
+                // Reply before destroying: the engine owns the messenger this
+                // reply travels on, and the Dart side may already be torn down.
+                result.success(null)
+                Log.i("EngineControl", "destroy_begin")
+                flutterEngine.destroy()
+                Log.i("EngineControl", "destroy_complete")
+            }
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "media_kit_test/p5_runtime_gate")
             .setMethodCallHandler { call, result ->
                 if (call.method != "ReadProperties") {
