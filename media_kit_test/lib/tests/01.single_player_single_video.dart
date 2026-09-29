@@ -292,6 +292,12 @@ class _SinglePlayerSingleVideoScreenState
         _dualViewProbeScheduled = true;
         unawaited(_runDualViewLifecycleProbe());
       }
+      if (Platform.isAndroid &&
+          _androidEngineDestroyAtSeconds >= 0 &&
+          !_engineDestroyScheduled) {
+        _engineDestroyScheduled = true;
+        unawaited(_runEngineDestroyProbe());
+      }
       if (_androidHdrPauseAtMediaSeconds >= 0) {
         final snapshot = _hdrIntent.snapshot();
         unawaited(() async {
@@ -498,10 +504,16 @@ class _SinglePlayerSingleVideoScreenState
     'MEDIA_KIT_ANDROID_HOT_SWITCH_AT_SECONDS',
     defaultValue: -1,
   );
+  static const _androidEngineDestroyAtSeconds = int.fromEnvironment(
+    'MEDIA_KIT_ANDROID_ENGINE_DESTROY_AT_SECONDS',
+    defaultValue: -1,
+  );
   bool _autoSeekReopenScheduled = false;
   bool _hotSwitchScheduled = false;
   bool _hotSwitchPingActive = false;
   bool _hotSwitchPingOn = false;
+  bool _engineDestroyScheduled = false;
+  static const _engineControlChannel = MethodChannel('media_kit_test/engine_control');
   static const _autoStartSeconds = String.fromEnvironment(
     'MEDIA_KIT_AUTO_START_SECONDS',
   );
@@ -1555,6 +1567,31 @@ class _SinglePlayerSingleVideoScreenState
       }
     } catch (error, stack) {
       debugPrint('ANDROID_HOT_SWITCH error=$error');
+      debugPrintStack(stackTrace: stack);
+    }
+  }
+
+  /// Destroys the FlutterEngine directly from the Android side while media is
+  /// playing, bypassing every Dart-side disposal path. The round script then
+  /// checks that the process survives, native players are torn down, and no
+  /// crash follows.
+  Future<void> _runEngineDestroyProbe() async {
+    try {
+      final start = Duration(seconds: _androidEngineDestroyAtSeconds);
+      await player.stream.position
+          .firstWhere((position) => position >= start)
+          .timeout(Duration(seconds: _androidEngineDestroyAtSeconds + 30));
+      if (!mounted) return;
+      debugPrint(
+          'ANDROID_ENGINE_DESTROY requested position=${player.state.position}');
+      unawaited(_engineControlChannel
+          .invokeMethod<void>('DestroyEngineNow')
+          .then((_) => debugPrint('ANDROID_ENGINE_DESTROY returned'))
+          .catchError((Object error) {
+        debugPrint('ANDROID_ENGINE_DESTROY invoke error=$error');
+      }));
+    } catch (error, stack) {
+      debugPrint('ANDROID_ENGINE_DESTROY error=$error');
       debugPrintStack(stackTrace: stack);
     }
   }
