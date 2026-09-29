@@ -2,6 +2,8 @@
 
 ## Current State
 
+- 2026-09-30 P3 收敛为 done：验收行各项均有实机证据——退出重入/seek（12639）、双视图（12645 同播放器布局 + 12659 双播放器两路同时显示）、失败重试（12661 打开失败→RECOVERY_SOURCES 恢复链 10 秒出帧、退出闭合 2201/2201；12658 输出 Dispose 注入判定为产品不可达形态并记录教训）、直接 Engine 销毁资源闭环（12655×3 broker 终止、mpv 线程退出、进程存活）、片尾紫屏修复（12632×3 命中回退）、EOF（12627×2/12633）、暂停重绘（12640）。本会话六个提交：635424f/565c9ff/43c958c/7883159/736488e/（本轮）。低优先边界另行登记：音频-only broker 接线、transaction 同控制器热切、ACK 丢失注入变体复测。
+
 - 2026-09-30 直接Engine销毁资源闭环完成（12655–12657）：broker 在清空 wakeup 回调（主线程同步）后于专用线程 `mpv_terminate_destroy` 全部注册句柄。播放中直接销毁 3/3 零崩溃且 mpv 线程全部退出（`ps -T` 确认）、P5_IMAGE_FINAL 949/949 由 broker 终止触发、进程存活、destroy 30ms 不阻塞平台线程；正常 Back 零回归（unregister 到达、broker 零活动、2263/2263 闭合）。P3「直接 Engine 销毁后资源正确释放」验收达成；剩余边界：音频-only 宿主接线。详见 `archives/experiments/android-p5-engine-destroy-12646-20260929.md`。
 
 - 2026-09-29 直接Engine销毁崩溃已根因修复（12646–12654）：release 模式 `NativeCallable` wakeup 蹦床随 isolate 拆卸失效、播放中的 mpv 线程调用即崩。owner broker（media_kit_video `onDetachedFromEngine` 经 JNI 清空 wakeup 回调 + Dart 注入钩子注册句柄）落地后播放中直接销毁 4/4 零崩溃（基线 12/14 崩溃），正常 Back 无回归，裸 Player 终态已证。详见 `archives/experiments/android-p5-engine-destroy-12646-20260929.md`。
