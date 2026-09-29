@@ -2,6 +2,28 @@
 
 ## Current State
 
+- 2026-09-29 P3实机回归批次完成（12627–12640）：ADB恢复后，12627重签包全片×2（EOS+Back闭合、t175/t195正常，故障未触发）；正式重建12632（e0102cf+`c025cbf` JAR+起播170，经12628–12631试错复原define集）片尾短轮3/3命中收敛版相邻帧回退（PTS174.958→174.941）且截图全为正常DV标版；12633 Mystery Box EOF（EOS~99秒、资源闭合5926/5926）；12639 seek边界PTS8.008回退触发、零渲染错误（12580遗留的seek边界渲染错误被消除）、seek/同播放器重开正常；12640暂停重绘帧37秒字节级稳定。截图均由 `proxy/eo/glm-5.3-flash-free` 图像识别逐张判定。`c025cbf` 已独立核验在 Goodwu/mpv 远端 `feature/android-p5-sdr-direct-yuv`；`/private/tmp/media-kit-p5-mpv-product` 按门槛删除，JAR留存。P3剩余：切源候选热切源/双视图回归、双视图/失败重试、直接Engine销毁。详见 `archives/experiments/android-p5-tail-c025cbf-regression-12627-12640-20260929.md`。
+
+- 2026-09-29 用户要求清理过时文件：按P0/P3既有逐文件判定和正式链路回归，已用精确路径、非强制 `rm -r --` 删除六个旧P5实验工作树：`media-kit-p5-libplacebo`、`media-kit-p5-mpv`、`media-kit-p5-app`、`media-kit-p5-jar-rebuild-20260927`、`media-kit-ffmpeg-p5-stream-2215`、`media-kit-p5-jar-ffmpeg-20260927`。六树补丁仍保存在当前目录，逐目录复查不存在；磁盘从约114MiB回升到约1.2GiB。其他临时工作树保留，须各自回归后再删。`TASKS.md`和临时目录接手索引已更新。
+
+- 2026-09-28 换 agent 接手先看根目录 `TASKS.md` 顶部“接手快照”，再看 `archives/README.md` 主题导航和临时工作树索引；当前分支`fix/darwin-video-output-rebuild-barrier`、HEAD`e0102cf`，本目录P3候选与交接记录未提交。ADB本环境不能启动、磁盘仅约1.3GiB，设备状态未核。无需从221篇实验记录按文件名猜现状。
+
+- 2026-09-28 用户要求将 `/private/tmp` 每项改动归入 `TASKS.md` 对应任务，优先成熟化、回归，然后删除对应临时目录；同时把零散 `archives` 文件整理纳入计划。已按 P0/P3/P4、HDR首帧和双视图任务登记14个脏工作树及回归/清理门槛，新增归档整理任务。P0两个旧实验源码静态判为冗余且已有正式链路回归；尝试精确 `rm -rf` 删除被自动安全审查拒绝，目录实际仍在。ADB启动也仍因smartsocket权限失败；实机回归未发生。
+
+- 2026-09-28 换 agent 接手索引已补：`archives/experiments/android-private-tmp-handoff-20260928.md`，含 `/private/tmp/media-kit*` 顶层产物清单、21 个工作树的 HEAD/逐文件状态及可控大小的源码补丁快照。14 个工作树仍有未提交状态，未逐项判断为可合入；P3 当前目录候选与记录也仍未提交。接手先查本目录 `git status`、该索引和 `TASKS.md`。
+
+- 2026-09-28 用户报告mpv提交`c025cbf`已手动推送至Goodwu/mpv；当前环境网络受限，未独立查询远端。P3片尾最终12627仍未实机验收，media-kit当前目录的P3记录与热切源候选仍未提交。
+
+- 2026-09-28 P3片尾候选已作为mpv本地提交`c025cbf`，只改`hwdec_aimagereader.c`。这是可恢复的候选快照，不代表12627实机门禁完成；该包仍未安装/运行。按用户此前其它库提交并推送的授权尝试推送Goodwu/mpv，当前代理127.0.0.1:7890不可连接，远端未更新。media-kit当前目录的P3记录与热切源候选仍未提交。详见`archives/experiments/android-p5-glass-tail-12617-12627-20260928.md`。
+
+- 2026-09-28 P3热切源尺寸候选：Player切源发送空`VideoParams`；Android控制器此前略过，保留上一片源尺寸缓存，可能使间隙中的布局更新沿用旧aspect。当前目录已在空参数时清空源尺寸与已应用请求，静态`git diff --check`通过，未实机验收/提交。ADB本地socket权限仍阻断12627及热切源上机；见`archives/experiments/android-p5-source-switch-aspect-20260928.md`。
+
+- 2026-09-28 P3候选：12625正确Texture短轮明确命中相邻帧回退，PTS174.958→174.941、差16.683ms，正常DV logo、Back后AImage288/288；12626 Glass从片头到EOS又命中174.991→174.975，t195画面正常，VO13/decoder0。已去掉高频诊断并简化回退条件；新源码NDK编译通过，但当前受限环境不许Gradle/ADB创建本地socket，12627手工重签验证包未安装/运行，正式构建和回归缺失。候选仍在隔离mpv工作树，未提交；设备上一成功轮已恢复原12492、自动亮度、熄屏。详见 `archives/experiments/android-p5-glass-tail-12617-12627-20260928.md`。
+
+- 2026-09-28 P3再复现：12622身份包在正确Texture路径复现PTS174.974末帧紫屏；Huawei HEVC flush与该帧release同毫秒，release返回0但随后无新callback、10次取图失败。12624实验性相邻PTS前帧复用在另一轮10次取图失败后保住正常DV logo、资源284/284；当时尚缺分支定点日志。当前media-kit目录保有P1/P2产品代码e0102cf及未提交的P3记录，旧实验工作树保留未知改动。详见 `archives/experiments/android-p5-glass-tail-12617-12627-20260928.md`。
+
+- 2026-09-28 P3片尾追踪：12618 SurfaceProducer全片EOS后复现紫屏；12621正确Texture路径在保留上一张AImage的隔离候选上仍于PTS174.958取图`-30001`、紫屏，故该候选未通过。12622增加末帧源帧和codec buffer身份日志，首个短轮未复现，末帧首次release返回0；后续重复轮见上。证据见 `archives/experiments/android-p5-glass-tail-12617-12627-20260928.md`。所有成功轮结束已恢复原12492、自动亮度、熄屏。主目录现在承载已合入的产品代码；隔离mpv候选未提交。
+
 - 2026-09-28 P2完成人工验收：12616无性能探针同代码包首次因锁屏遮挡未打开，不计；解锁后同步重播，日志确认P5→PQ `gpu-next`/`mediacodec`与2560×1440布局。用户现场看约30秒，回复“整体良好，无异常”，锐度、亮暗、颜色、流畅性及拉伸/残影均接受。12615全片严格EOS VO11/decoder0、GPU中位586MHz仍为性能依据。原12492、自动亮度、熄屏恢复。P2转done，按优先级进入P3生命周期及Glass片尾故障。详见 `archives/experiments/android-p5-pq-performance-12603-20260928.md`。
 
 - 2026-09-28 P2人眼门禁准备：用户回复“稍后再看”。已由提交90c7210相同代码构建12616 arm64无性能探针包（SHA `2bcb25d9...`）并准备30秒全屏最高亮度短播脚本，脚本退出恢复原APK、原亮度设置、熄屏；尚未播放，等待用户回复“现在看”。P2未标done，P3尚未开始。
