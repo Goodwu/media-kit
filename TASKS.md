@@ -2,14 +2,12 @@
 
 任务事实源：这里只保留当前状态、验收门槛和下一步。2026-09-27 清理前的完整实验流水保存在 `archives/experiments/tasks-ledger-snapshot-20260927.md`；按各项 `context` 查看持续更新的依据。
 
-## 接手快照（2026-09-28；换 agent 从这里开始）
+## 接手快照（2026-09-30 更新；换 agent 从这里开始）
 
-- **事实源与范围**：本文件是任务状态，`archives/README.md` 是主题导航，`archives/conversations/android-hdr-dv-display-plan-20260922.md` 顶部 `Current State` 是当前 Android 主题上下文；`archives/experiments/android-private-tmp-handoff-20260928.md` 是临时工作树路径及补丁入口。原始日志、APK 与实验过程按各任务的 `context` 和实验链接查。以上均为快照，接手后先重新读 Git/设备状态。
-- **代码状态**：当前目录分支 `fix/darwin-video-output-rebuild-barrier`，HEAD `e0102cf`；P0 Texture SDR、P1 P5→PQ 输出/首帧、P2 P5→PQ 全片性能已验收。P3 片尾/生命周期进行中，P4 色彩数值排后。P3 mpv `c025cbf` 已在独立工作树提交，用户报告手动推送成功，远端未由本环境核验。12627 验证包（重签）已于 2026-09-29 实机全片回归 2 轮；正式重建的 12632（e0102cf + `c025cbf` JAR + 片尾起播170）短轮 3 轮命中相邻帧回退，详见 P3 条目。
-- **当前目录未提交文件**：`TASKS.md`、上述 conversation、`media_kit_video/lib/src/video_controller/android_video_controller/real.dart`（空VideoParams清旧尺寸候选）；未跟踪的P3片尾、切源实验记录与 `android-private-tmp-*` 索引/补丁。`git diff --check` 通过，只是文本检查；尚未提交或进行切源实机回归。接手者不得重置或覆盖这些文件。
-- **临时目录**：2026-09-28快照曾有1566个顶层`media-kit*`产物、21个可读Git工作树/14个脏树。2026-09-29已逐目录删除6个确认冗余的旧P5工作树（见P0/P3），快照中现存15个工作树，其中8个在快照时有未提交状态；逐文件历史状态和源码补丁仍见索引。其余目录按下方对应任务处理，不能因为干净或已有补丁就整批删除。
-- **环境（2026-09-29 更新）**：ADB 已恢复可用，设备 `3EP7N18C28016072`（LYA-AL00）经 USB 连接，实机回归已重新开展（P3 各轮详见任务条目）；每轮结束均恢复原 12492、自动亮度、熄屏。Gradle/JDK17 正式重建在 `/private/tmp/media-kit-p5-pq-product`（e0102cf 干净树）可用。`rm -rf` 曾被自动审查拒绝，精确路径 `rm -r --` 已用于6个确认冗余目录；清理后磁盘约剩1.2 GiB。构建期间曾发生一次 USB 短暂断开（重连后恢复），实机结果以每轮日志为准。最高亮度仅短时人工观察，随后恢复自动亮度、熄屏。
-- **继续顺序**：① 对P3旧源码差异逐项比较并明确迁移/舍弃；② 在可用环境重建和实机回归 `c025cbf`/12627，Glass片尾短轮、全片EOS、Back及Mystery Box EOF；③ 回归当前目录切源候选与双视图、seek/重入、直接Engine销毁；④ 每个临时工作树完成对应回归、记录去向后单独删除；⑤ 整理 `archives` 的主题入口和引用。HDR10/P8.4及P4的相关旧实验见下方各任务。任何改动验收与清理的先后以对应任务门槛为准。
+- **事实源与范围**：本文件是任务状态，`archives/README.md` 是主题导航，`archives/conversations/android-hdr-dv-display-plan-20260922.md` 顶部 `Current State` 是当前 Android 主题上下文；`archives/experiments/android-private-tmp-handoff-20260928.md` 是临时工作树路径及补丁入口。以上均为快照，接手后先重新读 Git/设备状态。
+- **代码状态**：当前目录分支 `fix/darwin-video-output-rebuild-barrier`（工作区干净）。P0/P1/P2 已验收（但 P5 修复后需复跑视觉验收）、P3 已 done、P4 已 done（其 100 倍回归结论被 P5 修正为读回装置缺陷）、P5 颜色回归修复已提交 mpv fork `398d0c3`（在 c025cbf 之上，**未推送**，待正式包重建与 P0-P2 视觉复跑）。
+- **P5 修复要点**：华为硬解输出 8-bit NV12（AHB 0x325），GLES 外部 YUV 采样按 code/255 而 dovi 域按 code/1023 → 1023/1020 缩放偏色；修复为 dovi 元数据就地重标定，验收 (47,50,70)/(50,19,58)/65535 ≤100。读回装置教训：旧前缀 FFmpeg 需 `debug.media_kit.p5_rpu_probe=2`。详见 P5 条目与 `archives/experiments/android-p5-mediacodec-color-fix-20260930.md`。
+- **环境**：ADB 可用（设备 `3EP7N18C28016072` / LYA-AL00），每轮结束恢复原 12492、自动亮度、熄屏。读回构建链：`/tmp/mkmpvsrc`（mpv fork，现含 398d0c3）+ `/tmp/mkp4prefix` + 手工链接需补 `-lc++_shared`（build.ninja 行 1229/1230 提取）；APK 直改重签（lib store + zipalign -p 4096 + debug keystore + NDK 27.2 libc++_shared.so 同步替换）。JDK17 构建、`ORG_GRADLE_PROJECT_mediaKitLocalArm64Jar` 注入 JAR 的正式流程不变。
 
 ## P5 当前优先级（2026-09-28）
 
@@ -68,10 +66,11 @@ P5→PQ 输出、首帧和性能使用 `/Users/wuweiwei1/Downloads/test-clips/My
 
 ### P5 · mediacodec 路径颜色回归修复（2026-09-30 由 P4 发现）
 
-- [ ] status: open；context: archives/experiments/android-p5-numeric-color-20260930.md
-- acceptance: 定位并修复 mediacodec 解码路径的 P5 颜色偏差（子候选：fff3ee7 定制 FFmpeg 的逐帧 RPU 元数据挂载内容 vs MediaCodec 硬解 YUV 输出本身），修复后同 PTS 三方比较（设备↔主机 libplacebo↔DoViBaker）恢复 8370 时代量级（≤100/65535），并复跑 P0/P1/P2 关键视觉验收（此前的真人验收均含此偏差）。
-- evidence: 设备读回轮 12666/12668/12669/12670/12671 与主机参照的完整数据链；软解轮（12671）为阴性对照。
-- next: 在 mediacodec 路径加 verbose RPU 日志核 MATCH 状态；对照 stock hevcdec 的 DOVI 挂载语义逐项 diff fff3ee7 的 `p5_rpu_parse_metadata`；必要时 dump 硬解 YUV 与软解 YUV 逐像素对照。
+- [ ] status: 修复已提交待产品集成（mpv fork `398d0c3`，推送/正式包/P0-P2 视觉复跑待做）；context: archives/experiments/android-p5-mediacodec-color-fix-20260930.md（P4 原记录 `android-p5-numeric-color-20260930.md` 的 100 倍结论已修正）
+- acceptance: 定位并修复 mediacodec 解码路径的 P5 颜色偏差，修复后同 PTS 三方比较恢复 ≤100/65535，并复跑 P0/P1/P2 关键视觉验收。
+- latest: **双重根因均已数值闭环**。① P4 的 100 倍偏差是读回装置缺陷：读回 JAR 链接的旧前缀 FFmpeg（9/24 stage-merged 补丁世代）挂载需 `debug.media_kit.p5_rpu_probe=2` 属性而轮脚本未设（`src_dovi=0`、`direct=0`）；产品 JAR（fff3ee7）挂载正常——产品轮 `direct=1`、f240 挂载 RPU 与码流第 240 帧字节一致（size 245、FNV `d34ff55e` 全流索引核对）。② 真实回归 ~0.3%：华为硬解对 10-bit HEVC 输出 8-bit NV12（AHB 0x325；copy 路径码值对软解 ≤3/1023 铁证），GLES 外部 YUV 采样按 code/255 归一化而 dovi 重塑域按 code/1023 解释 → 信号被放大 1023/1020（9/25 sidecar 时代 `code_scale=1020/1023` 修正被产品化重写丢失）。**修复（`398d0c3`）**：aimagereader 检测 8-bit YUV AHB 格式时对帧 dovi 元数据就地精确重标定（pivot×k、poly/MMR 系数按阶数×k^-d，k=1023/1020；就地修改因 pl_frame 捕获指针早于 mapper_map 且 hwdec_reconfig 每帧覆盖 dst_params）。**验收数值达成**：修复后设备↔主机 Sol f240 **(47,50,70)**、4K50 f501 **(50,19,58)**/65535（修复前 (185,106,72)/(160,91,83)，断链时 (2726,2603,10212)/(4716,876,8388)）；软解阴性对照 (12,13,17) 证链路精确；主机↔DoViBaker 一致性 P4 已证。修复包 Sol t12/t24 截图像素统计正常内容帧。
+- evidence: 读回轮 12672–12679 全链（日志/dump/主机模拟 `/tmp/sim-*.bin`、copy YUV dump `/tmp/p5-yuv-dump-copy-f240.bin`）；软解 (12,13,17) 阴性对照；RPU/码值/排除链详见实验记录。
+- next: ① 推送 mpv fork `398d0c3` 至 Goodwu/mpv（网络受限，用户手动）；② 正式产品 JAR/APK 重建；③ 复跑 P0/P1/P2 关键视觉验收 + 真人确认（产品代码已变）。遗留研究项：9/25 8-bit-vs-10-bit 缓冲之谜（若恢复 10-bit 通路残差可从 ~50 降至 ~(12,13,17)，对照归档 sidecar 补丁排查）；读回轮脚本须设 `p5_rpu_probe=2` 或读回 JAR 改用 fff3ee7 世代 FFmpeg（本轮教训，已记录）。
 
 ## 其他当前任务
 
