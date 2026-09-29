@@ -21,9 +21,15 @@ P4（`android-p5-numeric-color-20260930.md`）报告的「mediacodec 路径约 1
 - 修复构建：libmpv ninja + 手工链接命令补 `-lc++_shared`（build.ninja 的链接行缺该依赖，DT_NEEDED 丢 libc++_shared 会 dlopen 失败——P4 记录的已知事项，本轮以 build.ninja 第 1229/1230 行提取链接命令复现）；APK 直改重签流程（lib store 模式 + zipalign -p 4096 + debug 签名，并同步替换 NDK 27.2 libc++_shared.so）。
 - 修复后视觉核验：12678 包 Sol 播放 t12/t24 截图像素统计判定为正常内容帧（无紫/黑/白屏、色彩多样性正常；当前会话模型不支持读图，由子代理像素统计法判定，非目视确证）。
 
-## 边界与后续
+## 产品集成与视觉复跑（2026-09-30 追加）
 
-- **8-bit 缓冲之谜**：9/25 8386 实验记录 GL 采样 YUV 对软解 10-bit 仅 0.3% 失配点（近 10-bit 精度），而今日同一解码器/同一 reader 参数（PRIVATE+GPU_SAMPLED_IMAGE, maxImages=3）得到 0x325 8-bit。差异载体未定（旧 sidecar 的 GL 读回机制 vs 今日 libplacebo EXTERNAL_YUV 采样的驱动路径差异，或解码会话配置差异）。若可恢复 10-bit 通路，残差可望从 ~50 进一步降到软解量级 (12,13,17)——需对照归档 sidecar 补丁（`android-p5-420-sidecar-8386-mpv-cumulative.patch`）继续排查，本轮未做。
-- mpv fork 提交 `398d0c3`（在 c025cbf 之上）**尚未推送 Goodwu/mpv**；产品 JAR/正式包重建待推送后进行。
-- P0/P1/P2 视觉验收复跑：产品代码已变（新增重标定），正式包重建后应复跑关键视觉轮 + 真人确认；本轮仅做了修复包的自动化截图核验。
+- mpv fork `398d0c3` **已推送 Goodwu/mpv**（`c025cbf..398d0c3`，本环境直接 push 成功）。
+- 正式产品 JAR：fff3ee7 libavcodec（`/tmp/media-kit-p5-product-ffmpeg-lib/libavcodec.a`，14413cd）+ 前缀其余库重链，JAR SHA-256 `dad30ae2…`。**教训：mkp4prefix 的 libavcodec 是旧属性门控版（cd1a08），首版产品 JAR 误链它导致实机 `direct=0`（P4 装置缺陷在产品侧复演），产品链接必须用 fff3ee7 世代 libavcodec。**
+- 正式 APK 三包（e0102cf 产品代码 + 12632/12633 define 集；12682 加 `GPU_PLATFORM_HDR=true`）：12680 Glass SDR `d2534955…`、12681 Mystery SDR `c5ecac0e…`、12682 Mystery PQ `cd9da31d…`。
+- **三轮实机全片视觉验收全部通过（自动判定）**：每轮 `P5_SECTION_INIT direct=1` + `P5_DOVI_RESCALE enabled k=1.002941` + `AUTO_COMPLETED completed=true`（Glass ~178s、Mystery ~99s×2）、零渲染错误/零回退。截图 10 张（Glass t30/90/150/195、Mystery SDR t13/60/110、PQ t13/60/110）像素统计判定全部为正常画面/落版，无紫屏/黑屏/白屏/花屏；PQ 轮 `gpuPlatformHdr=true`，VO drop 2550 属 P2 已知 PQ 全片性能特征；PQ 与 SDR 轮同帧截图 RGB 均值差 ≤0.4（渲染一致）。
+- **真人确认未完成**：实机播放等待用户观看，用户当时不在场无应答。待用户观看确认后关闭 P5；APK 留存 `/tmp/media-kit-p5-colorfix-1268{0,1,2}.apk`。
+
+## 边界与遗留
+
+- **8-bit 缓冲之谜**：9/25 8386 实验记录 GL 采样 YUV 对软解 10-bit 仅 0.3% 失配点（近 10-bit 精度），而今日同一解码器/同一 reader 参数（PRIVATE+GPU_SAMPLED_IMAGE, maxImages=3）得到 0x325 8-bit。差异载体未定（旧 sidecar 的 GL 回读机制 vs 今日 libplacebo EXTERNAL_YUV 采样的驱动路径差异，或解码会话配置差异）。若可恢复 10-bit 通路，残差可望从 ~50 进一步降到软解量级 (12,13,17)——需对照归档 sidecar 补丁（`android-p5-420-sidecar-8386-mpv-cumulative.patch`）继续排查，本轮未做。
 - 读回基础设施改进已留存：VO YUV dump 探针（`debug.media_kit.p5_yuv_dump`，归档于 `android-p5-float-yuvdump-vo-gpu-next-20260930.patch`，基于 398d0c3）、AHB 格式一次性日志（已入产品提交）。读回轮脚本应设 `p5_rpu_probe=2`（本次教训）或改用 fff3ee7 世代 FFmpeg 重建读回 JAR。
