@@ -60,11 +60,18 @@ P5→PQ 输出、首帧和性能使用 `/Users/wuweiwei1/Downloads/test-clips/My
 
 ### P4 · 独立色彩数值验收
 
-- [ ] status: queued_low_priority；context: archives/conversations/android-hdr-dv-display-plan-20260922.md
+- [x] status: done（2026-09-30 比较完成，**结果为发现颜色回归**——修复任务另立）；context: archives/conversations/android-hdr-dv-display-plan-20260922.md
 - acceptance: 对实际 P5 输出逐帧核对 RPU，覆盖 seek/flush/重开；明确参考母版、目标空间和映射策略，做同 PTS 独立数值比较。
-- latest: 用户人工观察认为 P5 颜色基本正常；10440 seek/flush 匹配2321/2321，12512 两次重开匹配626/626与622/622、errors0/unconsumed0，但独立色准未完成。见 `archives/experiments/android-p5-glass-prebind-rpu-12512-20260927.md`。
-- temp_reconcile: `/private/tmp/media-kit-dovibaker-reference` 有 DoViBaker 参考修改、两个未跟踪C++源文件及两个二进制；`media-kit-ffmpeg-dvtest-host-20260925` 有 `vf_libplacebo.c` 修改。其源码快照在 `archives/experiments/android-private-tmp-patches-20260928/`；先核对参考用途和同PTS独立数值比较，再判断是否有可迁移修正，完成P4回归后删除对应目录。二进制未复制，不要在完成参考比对前清理。
-- next: P0–P3 后补长期重开、当前布局 seek/flush 与独立色准。
+- latest: 逐帧 RPU 核对与 seek/flush/重开（10440/12512）此前已完成；2026-09-30 完成同 PTS 独立数值比较：参考母版/目标空间/映射策略明确化（BT.2020/PQ/full/1000nit；DoViBaker 独立实现 + 主机 libplacebo 离屏浮点参照，全程不用 mpv 截图）。**主机↔DoViBaker 两独立实现一致；设备实际渲染输出（GPU 整帧 RGBA16F 读回）为离群方**：Sol Levante 帧240 MAE≈(2726,2603,10212)/65535、4K50 帧500 (4716,876,8388)，而 8370 时代同方法设备↔主机仅 (41,21,53)——**P0/P1 产品化窗口（9/25→9/28）引入约100倍恶化的颜色回归**；隔离到 mediacodec 解码路径（`hwdec=no` 软解时偏差消失、三通道偏置归零）。已排除通道顺序/翻转/错镜头RPU/mpv截图路径。见 `archives/experiments/android-p5-numeric-color-20260930.md`。
+- temp_reconcile_done: DoViBaker 参考（`/private/tmp/media-kit-dovibaker-reference`）与 ffmpeg-dvtest 参照的用途已核清并在 2026-09-30 比较中全部重建使用（输出与 9/25 记录 SHA 逐一相同）；源码快照在 patches 目录。两个目录可按门槛删除。
+- next: 转入新任务「P5 mediacodec 路径颜色回归修复」（见下方）。
+
+### P5 · mediacodec 路径颜色回归修复（2026-09-30 由 P4 发现）
+
+- [ ] status: open；context: archives/experiments/android-p5-numeric-color-20260930.md
+- acceptance: 定位并修复 mediacodec 解码路径的 P5 颜色偏差（子候选：fff3ee7 定制 FFmpeg 的逐帧 RPU 元数据挂载内容 vs MediaCodec 硬解 YUV 输出本身），修复后同 PTS 三方比较（设备↔主机 libplacebo↔DoViBaker）恢复 8370 时代量级（≤100/65535），并复跑 P0/P1/P2 关键视觉验收（此前的真人验收均含此偏差）。
+- evidence: 设备读回轮 12666/12668/12669/12670/12671 与主机参照的完整数据链；软解轮（12671）为阴性对照。
+- next: 在 mediacodec 路径加 verbose RPU 日志核 MATCH 状态；对照 stock hevcdec 的 DOVI 挂载语义逐项 diff fff3ee7 的 `p5_rpu_parse_metadata`；必要时 dump 硬解 YUV 与软解 YUV 逐像素对照。
 
 ## 其他当前任务
 
