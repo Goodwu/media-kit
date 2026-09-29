@@ -40,8 +40,17 @@ release 模式下 `InitializerNativeCallable.create`（`media_kit/lib/src/player
 - 证据：`/private/tmp/media-kit-p5-engine-destroy-{12646,12647,12648,12649*,12650*,12651*,12652*,12653*}-device.log` 与 `/private/tmp/media-kit-p5-normal-back-12654-*`。
 - 探针（已随代码提交）：MainActivity `engine_control` 通道 `DestroyEngineNow`（回执后 post 到主线程销毁，避免在 channel 分发内重入销毁）；测试页 `MEDIA_KIT_ANDROID_ENGINE_DESTROY_AT_SECONDS`（墙钟，无媒体也可用）。
 
+## 终止增量（12655–12657，2026-09-30）
+
+P3「直接 Engine 销毁后资源正确释放」闭环完成：
+
+- 实现：C 侧新增 `MpvOwnerBroker_nativeTerminateDestroy`（dlsym `mpv_terminate_destroy`）；Java `onEngineDetach` 改为——主线程同步清空全部 wakeup 回调（必须先于 isolate 拆卸），随后在专用 broker 线程逐一 `mpv_terminate_destroy`（避免阻塞平台线程，销毁本身 30ms 完成）；注册/注销加日志。
+- **销毁场景 12655 ×3 全过**：`clearWakeup`（主线程）→ broker 线程 `terminate begin` → `destroy_complete`（30ms，平台线程未阻塞）→ **`P5_RETIRE_FINAL`/`P5_IMAGE_FINAL`（949/949、held_after=0、retired=0）由 broker 终止触发** → `terminate complete`（75ms）；销毁后 `ps -T` 确认 mpv 线程（demux/MediaCodec_loop/ImageReader/AudioTrack/Thread-N）全部退出、进程存活（+10s 复核）、零崩溃。
+- **正常 Back 路径 12657**：`register`（初始+回填，幂等）→ Dart dispose 完整执行 → `unregister` 到达 → 引擎拆卸时注册表为空、broker 零活动、`AUTO_PLAYER_DISPOSE completed`、资源闭合 2263/2263。
+- 12656 为脚本失误轮（误装销毁探针包当正常 Back），其时序实际是销毁场景的正确行为，不构成异常证据。
+- 双重释放分析：Dart 的 Unregister 在其 `mpv_terminate_destroy` 前 5 秒发出；若引擎在 dispose 完成前拆卸（messenger 存活、Dart 被杀），broker 终止的是存活句柄（安全）；dispose 完整完成的路径下 messenger 全程存活，Unregister 必然先于拆卸送达。构造上无双重终止窗口。
+
 ## 边界与后续
 
-- 直接销毁后 mpv 句柄仍存活（wakeup 已清、不再调用 Dart，但播放线程继续解码渲染到已弃用表面）——「资源正确释放」的完整闭环仍需计划的下一步：broker 在清空回调后终止 mpv（需 JAR/原生侧扩展 `mpv_terminate_destroy` 通道），以及视频输出引用统一。本轮已消除崩溃并保住进程终态。
 - 音频-only 宿主（无 media_kit_video 插件）不接线，保持原行为——记录在案。
-- 每次 DestroyEngineNow 前的线程 census 实验代码已由 posted-destroy 版本取代。
+- 每轮结束恢复原 12492、自动亮度、熄屏。

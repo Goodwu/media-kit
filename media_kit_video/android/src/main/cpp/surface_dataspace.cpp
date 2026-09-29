@@ -379,3 +379,34 @@ Java_com_alexmercerind_media_1kit_1video_MpvOwnerBroker_nativeClearWakeupCallbac
                       "clearWakeup: ctx=0x%llx",
                       static_cast<unsigned long long>(ctx));
 }
+
+// Owner broker: terminates and frees a native mpv handle from the Java side.
+// Runs on the broker's background thread after the wakeup callback has been
+// cleared, so no native -> Dart edge and no in-flight Dart call exists when
+// mpv joins its own threads and releases the handle.
+extern "C" JNIEXPORT void JNICALL
+Java_com_alexmercerind_media_1kit_1video_MpvOwnerBroker_nativeTerminateDestroy(
+    JNIEnv*, jclass, jlong ctx) {
+  void* libmpv = dlopen("libmpv.so", RTLD_NOLOAD | RTLD_NOW | RTLD_LOCAL);
+  if (libmpv == nullptr) {
+    __android_log_print(ANDROID_LOG_WARN, "media_kit_owner_broker",
+                        "terminate: libmpv not loaded");
+    return;
+  }
+  using TerminateDestroy = void (*)(void*);
+  const auto terminate_destroy =
+      reinterpret_cast<TerminateDestroy>(
+          dlsym(libmpv, "mpv_terminate_destroy"));
+  if (terminate_destroy == nullptr) {
+    __android_log_print(ANDROID_LOG_WARN, "media_kit_owner_broker",
+                        "terminate: mpv_terminate_destroy unavailable");
+    return;
+  }
+  __android_log_print(ANDROID_LOG_INFO, "media_kit_owner_broker",
+                      "terminate begin: ctx=0x%llx",
+                      static_cast<unsigned long long>(ctx));
+  terminate_destroy(reinterpret_cast<void*>(ctx));
+  __android_log_print(ANDROID_LOG_INFO, "media_kit_owner_broker",
+                      "terminate complete: ctx=0x%llx",
+                      static_cast<unsigned long long>(ctx));
+}
