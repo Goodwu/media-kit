@@ -14,6 +14,7 @@ import 'package:synchronized/synchronized.dart';
 import 'package:media_kit/media_kit.dart';
 
 import 'package:media_kit_video/src/video_controller/platform_video_controller.dart';
+import 'package:media_kit_video/src/video_controller/hdr_output_report.dart';
 
 enum _OhosHdrOutputMode { sdr, pq, hlg }
 
@@ -23,7 +24,7 @@ class _PendingHdrConfiguration {
     required this.revision,
   });
 
-  final Map<dynamic, dynamic> configuration;
+  final Map<String, dynamic> configuration;
   final int revision;
 }
 
@@ -35,6 +36,9 @@ class _PendingHdrConfiguration {
 /// The [PlatformVideoController] implementation based on native C/C++ used on Ohos.
 ///
 /// {@endtemplate}
+HdrOutputReport _hdrReport(Map<String, dynamic> map) =>
+    HdrOutputReport.fromMap(map);
+
 class OhosVideoController extends PlatformVideoController {
   /// Whether [OhosVideoController] is supported on the current platform or not.
   static bool get supported => Platform.operatingSystem == 'ohos';
@@ -110,7 +114,7 @@ class OhosVideoController extends PlatformVideoController {
   }
 
   @override
-  Future<dynamic> createNativeOutput(
+  Future<HdrOutputReport> createNativeOutput(
       {String? surfaceId, int? windowHandle}) async {
     // The XComponent PlatformView reports its surface asynchronously. Do
     // not claim native output until that surface has attached and mpv has
@@ -118,44 +122,41 @@ class OhosVideoController extends PlatformVideoController {
     final id = wid.value;
     if (!nativeSurfaceActive || id == null || id == 0) {
       if (nativeSurfaceCandidate) {
-        return const <String, dynamic>{
-          'capable': true,
-          'active': false,
-          'failureReason': 'ohos-native-surface-awaiting-ready',
-        };
+        return const HdrOutputReport(
+          capable: true,
+          failureReason: 'ohos-native-surface-awaiting-ready',
+        );
       }
-      return const <String, dynamic>{
-        'capable': false,
-        'active': false,
-        'failureReason': 'ohos-native-surface-not-ready',
-      };
+      return const HdrOutputReport(
+        failureReason: 'ohos-native-surface-not-ready',
+      );
     }
-    return <String, dynamic>{
+    return _hdrReport(<String, dynamic>{
       'backend': 'ohos-xcomponent-native-window',
       'capable': true,
       'active': true,
       'surfaceId': id,
       'generation': nativeSurfaceGeneration,
-    };
-  }
-
-  @override
-  Future<dynamic> configureHdrOutput(dynamic configuration) async {
-    return lock.synchronized(() async {
-      if (_disposed) {
-        return const <String, dynamic>{
-          'capable': false,
-          'active': false,
-          'failureReason': 'ohos-video-controller-disposed',
-        };
-      }
-      final revision = ++_hdrConfigRevision;
-      return _configureHdrOutputLocked(configuration, revision: revision);
     });
   }
 
-  Future<dynamic> _configureHdrOutputLocked(
-    dynamic configuration, {
+  @override
+  Future<HdrOutputReport> configureHdrOutput(
+      Map<String, dynamic> configuration) async {
+    return lock.synchronized(() async {
+      if (_disposed) {
+        return const HdrOutputReport(
+          failureReason: 'ohos-video-controller-disposed',
+        );
+      }
+      final revision = ++_hdrConfigRevision;
+      return _hdrReport(
+          await _configureHdrOutputLocked(configuration, revision: revision));
+    });
+  }
+
+  Future<Map<String, dynamic>> _configureHdrOutputLocked(
+    Map<String, dynamic> configuration, {
     required int revision,
   }) async {
     if (_disposed || revision != _hdrConfigRevision) {
@@ -165,15 +166,11 @@ class OhosVideoController extends PlatformVideoController {
         'failureReason': 'stale-hdr-config-revision',
       };
     }
-    final values =
-        configuration is Map ? configuration : const <dynamic, dynamic>{};
+    final values = configuration;
     final transfer = values['transfer'] == 'hlg' ? 1 : 0;
     final mode = _hdrModeForTransfer(transfer);
-    final copiedConfiguration = configuration is Map
-        ? Map<dynamic, dynamic>.from(configuration)
-        : <dynamic, dynamic>{};
     final pending = _PendingHdrConfiguration(
-      configuration: copiedConfiguration,
+      configuration: Map<String, dynamic>.from(configuration),
       revision: revision,
     );
     // The pending value and its revision form one transaction. Reset clears
@@ -297,7 +294,7 @@ class OhosVideoController extends PlatformVideoController {
         nativeSurfaceActive;
   }
 
-  Future<dynamic> _replayPendingHdrConfiguration(
+  Future<Map<String, dynamic>> _replayPendingHdrConfiguration(
     _PendingHdrConfiguration pending,
   ) {
     return lock.synchronized(() async {
@@ -317,7 +314,7 @@ class OhosVideoController extends PlatformVideoController {
     });
   }
 
-  Future<dynamic> _replayLatestHdrConfiguration() {
+  Future<Map<String, dynamic>> _replayLatestHdrConfiguration() {
     return lock.synchronized(() async {
       if (_disposed || _hdrTransfer == null) {
         return const <String, dynamic>{
@@ -327,7 +324,7 @@ class OhosVideoController extends PlatformVideoController {
         };
       }
       final revision = ++_hdrConfigRevision;
-      return _configureHdrOutputLocked({
+      return _configureHdrOutputLocked(<String, dynamic>{
         'transfer': _hdrTransfer == 1 ? 'hlg' : 'pq',
       }, revision: revision);
     });
@@ -434,7 +431,7 @@ class OhosVideoController extends PlatformVideoController {
   }
 
   @override
-  Future<Map<String, dynamic>> resetHdrOutput() async {
+  Future<HdrOutputReport> resetHdrOutput() async {
     final result = await lock.synchronized(() async {
       if (_disposed) return null;
       _hdrConfigRevision++;
@@ -470,13 +467,11 @@ class OhosVideoController extends PlatformVideoController {
       };
     });
     if (result == null) {
-      return const <String, dynamic>{
-        'capable': false,
-        'active': false,
-        'failureReason': 'ohos-surface-id-unavailable',
-      };
+      return const HdrOutputReport(
+        failureReason: 'ohos-surface-id-unavailable',
+      );
     }
-    return <String, dynamic>{
+    return _hdrReport(<String, dynamic>{
       'backend': 'ohos-native-window',
       'capable': result['result'] == 0,
       'active': false,
@@ -485,7 +480,7 @@ class OhosVideoController extends PlatformVideoController {
       'failureReason': result['result'] == 0
           ? null
           : 'native-window-reset-${result['result']}',
-    };
+    });
   }
 
   /// [StreamSubscription] for listening to video [Rect].

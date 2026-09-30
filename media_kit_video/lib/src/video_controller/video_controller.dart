@@ -80,16 +80,7 @@ class VideoController {
 
   void _publishTextureLayouts() {
     final output = notifier.value;
-    if (output == null) return;
-    final hdrPlatformLayout = output.configuration.usePlatformView &&
-        output.configuration.vo == 'gpu-next' &&
-        (output.configuration.androidSurfaceTransfer?.isNotEmpty ?? false);
-    if (!hdrPlatformLayout &&
-        (output.configuration.usePlatformView ||
-            (!output.configuration.matchAndroidTextureOutputToLayout &&
-                !output.configuration.enableAndroidSurfaceProducer))) {
-      return;
-    }
+    if (output == null || !output.wantsLayoutReports) return;
     unawaited(output
         .updateTextureLayouts(this,
             List<TextureOutputLayout>.unmodifiable(_textureLayoutOwners.values))
