@@ -20,6 +20,7 @@ import 'package:media_kit_video/src/utils/mpv_owner_broker.dart';
 import 'package:media_kit_video/src/video_controller/platform_video_controller.dart';
 
 import 'current_output_intent.dart';
+import 'platform_surface_release.dart';
 import 'surface_owner_ledger.dart';
 
 // Diagnostic only: keep a 4K input while matching the Texture buffer to the
@@ -95,35 +96,6 @@ Size calculateAndroidTextureOutputSizeForLayouts(
   );
 }
 
-class _AndroidPlatformSurfaceOwner {
-  final int handle;
-  final int generation;
-  final int viewId;
-  final int surfaceGeneration;
-  final int wid;
-
-  const _AndroidPlatformSurfaceOwner({
-    required this.handle,
-    required this.generation,
-    required this.viewId,
-    required this.surfaceGeneration,
-    required this.wid,
-  });
-
-  @override
-  bool operator ==(Object other) =>
-      other is _AndroidPlatformSurfaceOwner &&
-      handle == other.handle &&
-      generation == other.generation &&
-      viewId == other.viewId &&
-      surfaceGeneration == other.surfaceGeneration &&
-      wid == other.wid;
-
-  @override
-  int get hashCode =>
-      Object.hash(handle, generation, viewId, surfaceGeneration, wid);
-}
-
 /// {@template android_video_controller}
 ///
 /// AndroidVideoController
@@ -153,7 +125,7 @@ class AndroidVideoController extends PlatformVideoController {
   Object? _pendingSurfaceFailure;
   StackTrace? _pendingSurfaceFailureStack;
   int? _pendingSurfaceFailureViewSerial;
-  final _outputIntent = CurrentOutputIntent<_AndroidPlatformSurfaceOwner>();
+  final _outputIntent = CurrentOutputIntent<AndroidSurfaceAccountId>();
 
   @override
   Future<void> get waitUntilInitialOutputBound =>
@@ -232,7 +204,7 @@ class AndroidVideoController extends PlatformVideoController {
     }
   }
 
-  bool _isCompatibleWithLatestView(_AndroidPlatformSurfaceOwner owner) {
+  bool _isCompatibleWithLatestView(AndroidSurfaceAccountId owner) {
     final latestViewId = _latestCreatedViewId;
     return latestViewId != null &&
         _viewDataSpaceById[owner.viewId] == _viewDataSpaceById[latestViewId] &&
@@ -273,7 +245,7 @@ class AndroidVideoController extends PlatformVideoController {
   }
 
   bool _mayPublishPlatformSurface(
-      _AndroidPlatformSurfaceOwner owner, int outputIntentSerial) {
+      AndroidSurfaceAccountId owner, int outputIntentSerial) {
     return _viewCreationSerialById[owner.viewId] == _latestViewCreationSerial ||
         _ledger.isAuthorizedFallbackSerial(outputIntentSerial);
   }
@@ -474,20 +446,20 @@ class AndroidVideoController extends PlatformVideoController {
   int _platformSurfaceGeneration = 0;
   // Arrival order is the fallback priority. A replaced view retains its JNI
   // reference until its own destroy event, even while another view is bound.
-  final SurfaceOwnerLedger<_AndroidPlatformSurfaceOwner> _ledger =
+  final SurfaceOwnerLedger<AndroidSurfaceAccountId> _ledger =
       SurfaceOwnerLedger();
   static const int _maxPlatformSurfaceRetries = 3;
-  final Map<_AndroidPlatformSurfaceOwner, int> _detachRetryAttempts = {};
-  final Map<_AndroidPlatformSurfaceOwner, Timer> _detachRetryTimers = {};
-  final Map<_AndroidPlatformSurfaceOwner, int> _bindRetryAttempts = {};
-  final Map<_AndroidPlatformSurfaceOwner, Timer> _bindRetryTimers = {};
+  final Map<AndroidSurfaceAccountId, int> _detachRetryAttempts = {};
+  final Map<AndroidSurfaceAccountId, Timer> _detachRetryTimers = {};
+  final Map<AndroidSurfaceAccountId, int> _bindRetryAttempts = {};
+  final Map<AndroidSurfaceAccountId, Timer> _bindRetryTimers = {};
 
-  void _cancelPlatformDetachRetry(_AndroidPlatformSurfaceOwner owner) {
+  void _cancelPlatformDetachRetry(AndroidSurfaceAccountId owner) {
     _detachRetryTimers.remove(owner)?.cancel();
     _detachRetryAttempts.remove(owner);
   }
 
-  void _cancelPlatformBindRetry(_AndroidPlatformSurfaceOwner owner) {
+  void _cancelPlatformBindRetry(AndroidSurfaceAccountId owner) {
     _bindRetryTimers.remove(owner)?.cancel();
     _bindRetryAttempts.remove(owner);
   }
@@ -506,7 +478,7 @@ class AndroidVideoController extends PlatformVideoController {
   }
 
   void _schedulePlatformDetachRetry(
-    _AndroidPlatformSurfaceOwner owner,
+    AndroidSurfaceAccountId owner,
     int? fallbackIntentSerial,
   ) {
     if (_disposed ||
@@ -538,7 +510,7 @@ class AndroidVideoController extends PlatformVideoController {
   }
 
   void _schedulePlatformBindRetry(
-    _AndroidPlatformSurfaceOwner owner,
+    AndroidSurfaceAccountId owner,
     int outputIntentSerial,
   ) {
     if (_disposed ||
@@ -776,8 +748,6 @@ class AndroidVideoController extends PlatformVideoController {
     }
   }
 
-  static const Duration _surfaceReleaseTimeout = Duration(seconds: 2);
-  static const Duration _surfaceReleaseOwnerAckTimeout = Duration(seconds: 2);
   static const Duration _playerTerminatedTimeout = Duration(seconds: 2);
   static const bool _surfaceTimeline = bool.fromEnvironment(
     'MEDIA_KIT_ANDROID_SURFACE_TIMELINE',
@@ -971,14 +941,14 @@ class AndroidVideoController extends PlatformVideoController {
     }
   }
 
-  bool _isBoundSurfaceOwner(_AndroidPlatformSurfaceOwner owner) {
+  bool _isBoundSurfaceOwner(AndroidSurfaceAccountId owner) {
     return nativeSurfaceGeneration == owner.generation &&
         _platformViewId == owner.viewId &&
         _platformSurfaceGeneration == owner.surfaceGeneration &&
         wid.value == owner.wid;
   }
 
-  _AndroidPlatformSurfaceOwner? _boundSurfaceOwner(int handle) {
+  AndroidSurfaceAccountId? _boundSurfaceOwner(int handle) {
     final widValue = wid.value;
     final viewId = _platformViewId;
     if (widValue == null || viewId == null) return null;
@@ -991,7 +961,7 @@ class AndroidVideoController extends PlatformVideoController {
     );
   }
 
-  void _clearSurfaceOwner(_AndroidPlatformSurfaceOwner owner) {
+  void _clearSurfaceOwner(AndroidSurfaceAccountId owner) {
     if (_isBoundSurfaceOwner(owner)) {
       wid.value = null;
       _platformViewId = null;
@@ -1002,7 +972,7 @@ class AndroidVideoController extends PlatformVideoController {
   }
 
   Future<void> _releaseSurfaceOwnerLocked(
-    _AndroidPlatformSurfaceOwner owner,
+    AndroidSurfaceAccountId owner,
   ) async {
     await _releasePlatformSurfaceReference(owner);
     _ledger.finishRelease(owner);
@@ -1010,7 +980,7 @@ class AndroidVideoController extends PlatformVideoController {
   }
 
   Future<void> _drainPendingSurfaceReleasesLocked({
-    _AndroidPlatformSurfaceOwner? except,
+    AndroidSurfaceAccountId? except,
   }) async {
     for (final owner in _ledger.releasingOwners.toList()) {
       if (owner == except || _ledger.isLive(owner)) continue;
@@ -1018,57 +988,34 @@ class AndroidVideoController extends PlatformVideoController {
     }
   }
 
+  static const Duration _surfaceReleaseTimeout = Duration(seconds: 2);
+  static const Duration _surfaceReleaseOwnerAckTimeout = Duration(seconds: 2);
+
+  /// Two-phase release over an injectable channel: unit tests drive the
+  /// out-of-order, late and failed-ACK interleavings from a fake.
+  static final SurfaceReleaseProtocol _surfaceRelease =
+      SurfaceReleaseProtocol(
+    MethodChannelPlatformSurfaceReleaseChannel(
+      releaseTimeout: _surfaceReleaseTimeout,
+      acknowledgeTimeout: _surfaceReleaseOwnerAckTimeout,
+    ),
+  );
+
   static Future<void> _releasePlatformSurfaceReference(
-    _AndroidPlatformSurfaceOwner owner,
-  ) async {
-    final status = await _channel.invokeMethod<String>(
-      'PlatformVideoView.ReleaseSurface',
-      {
-        'handle': owner.handle.toString(),
-        'generation': owner.generation,
-        'viewId': owner.viewId,
-        'surfaceGeneration': owner.surfaceGeneration,
-        'wid': owner.wid.toString(),
-      },
-    ).timeout(_surfaceReleaseTimeout);
-    if (status != 'released' && status != 'alreadyReleased') {
-      throw StateError(
-        'PlatformVideoView.ReleaseSurface rejected '
-        '${owner.generation}/${owner.viewId}/'
-        '${owner.surfaceGeneration}/${owner.wid}: $status',
-      );
-    }
-    // Keep ReleaseSurface idempotent until its result has reached Dart. The
-    // second call is the explicit Dart ACK that may remove Java's tombstone.
-    // If it fails, retain the Dart pending owner so retry observes
-    // alreadyReleased and can repeat this exact acknowledgement.
-    final acknowledged = await _channel.invokeMethod<bool>(
-      'PlatformVideoView.ReleaseSurfaceOwner',
-      {
-        'handle': owner.handle.toString(),
-        'generation': owner.generation,
-        'viewId': owner.viewId,
-        'surfaceGeneration': owner.surfaceGeneration,
-        'wid': owner.wid.toString(),
-      },
-    ).timeout(_surfaceReleaseOwnerAckTimeout);
-    if (acknowledged != true) {
-      throw StateError(
-        'PlatformVideoView.ReleaseSurfaceOwner did not acknowledge '
-        '${owner.generation}/${owner.viewId}/'
-        '${owner.surfaceGeneration}/${owner.wid}.',
-      );
-    }
+    AndroidSurfaceAccountId owner,
+  ) {
+    return _surfaceRelease.release(owner);
   }
 
+
   static const int _maxOrphanReleaseAttempts = 3;
-  static final Map<_AndroidPlatformSurfaceOwner, int>
+  static final Map<AndroidSurfaceAccountId, int>
       _orphanSurfaceReleaseAttempts = {};
-  static final Map<_AndroidPlatformSurfaceOwner, Timer> _orphanReleaseTimers =
+  static final Map<AndroidSurfaceAccountId, Timer> _orphanReleaseTimers =
       {};
 
   static Future<void> _releaseOrphanPlatformSurface(
-    _AndroidPlatformSurfaceOwner owner,
+    AndroidSurfaceAccountId owner,
   ) async {
     _orphanSurfaceReleaseAttempts.putIfAbsent(owner, () => 0);
     try {
@@ -1082,7 +1029,7 @@ class AndroidVideoController extends PlatformVideoController {
   }
 
   static void _scheduleOrphanSurfaceRetry(
-    _AndroidPlatformSurfaceOwner owner,
+    AndroidSurfaceAccountId owner,
   ) {
     if (_orphanReleaseTimers.containsKey(owner)) return;
     final attempts = _orphanSurfaceReleaseAttempts[owner] ?? 0;
@@ -1108,14 +1055,14 @@ class AndroidVideoController extends PlatformVideoController {
     });
   }
 
-  static _AndroidPlatformSurfaceOwner _surfaceOwner({
+  static AndroidSurfaceAccountId _surfaceOwner({
     required int handle,
     required int generation,
     required int viewId,
     required int surfaceGeneration,
     required int wid,
   }) {
-    return _AndroidPlatformSurfaceOwner(
+    return AndroidSurfaceAccountId(
       handle: handle,
       generation: generation,
       viewId: viewId,
