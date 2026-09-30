@@ -19,7 +19,9 @@ class _AndroidSurfaceTextureScreenState
   late final VideoController controller = VideoController(
     player,
     configuration: configuration.value.copyWith(
-      enableAndroidSurfaceProducer: false,
+      android: configuration.value.android.copyWith(
+        enableSurfaceProducer: false,
+      ),
     ),
   );
 
