@@ -57,3 +57,18 @@ FFmpeg 与 libplacebo fork 各只有一条自定义分支，无需归一。
 - 本地 `remote.origin.fetch` 恢复为全分支通配并 prune 过期 tracking refs。
 
 至此三个自有仓库均为单分支：Goodwu/mpv `media-kit/android`、Goodwu/media-kit `main`；FFmpeg/libplacebo 各自单分支不变。
+
+## 追加：mpv fork 上游跟踪策略（2026-09-30 定）
+
+**结论：跟发布版，不跟 master。**
+
+事实依据（当日核实）：
+- 我方基点 `32a164cc01` 是 v0.41.0 发布后不久的 master 快照，与 v0.41.0 仅差 vo_gpu_next 15 行——当前实质就在 v0.41 世代，无迁移动作待做。
+- 上游 master 领先 982 提交，其中 vo_gpu_next 46 提交/1029 行为 libplacebo v7 API 迁移与新特性（min libplacebo v7.360.1、scRGB、reference white、Wayland set_color 等），与我方 1100+ 行改动正面冲突；aimagereader 仅 2 提交/44 行错误处理改进。
+- **master 未包含我们任何一项修复**：dovi 元数据重标定、外部 YUV 直接采样、片尾相邻帧回退、av_log 多实例接管均无上游对应物；上游 dovi 提交全在 demux 侧（EL+BL 拆分）。maxImages 5→3 双方独立改过（同步时自动消解）。
+
+执行策略：
+- 同步节奏：等 v0.42 发布 → `git merge-tree` 只读试评估（重点 hwdec API 与 vo_gpu_next dovi 路径受 libplacebo v7 迁移冲击面）→ 可接受则整体迁移 + P5 五项实机回归 → 打新发布 tag。
+- 期间个别修复按需 cherry-pick（候选：上游 `14f2d48cbc` aimagereader 错误处理，含 buffer 已释放 ENOENT 假成功 HACK，与我方片尾回退互补不重复）。
+- FFmpeg 安全修复与 mpv 跟踪策略解耦，走 CVE 按需 cherry-pick。
+- 已知欠账：`media-kit/android` tip（`6719532`）的 av_log 修复尚未进产品 JAR（dad30ae2 基于 398d0c3 构建），下个发布周期重建 JAR 时纳入。
