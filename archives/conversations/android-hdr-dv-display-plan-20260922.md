@@ -2,6 +2,8 @@
 
 ## Current State
 
+- 2026-09-30 **两仓库分支归一全部完成 + mpv 上游跟踪策略定案**：Goodwu/media-kit 远端 12 分支清理为仅剩 `main`（4 个已包含直接删、7 个打 `archive/*-202609` tag 后删，清单见归一记录追加节）；mpv fork 维持 `media-kit/android` 单分支。**mpv 跟发布版不跟 master**（基点即 v0.41 世代；master 982 提交的 vo_gpu_next 1029 行是 libplacebo v7 迁移且未含我们任何修复；下次同步等 v0.42 → merge-tree 试评估 → P5 回归；av_log 修复待下周期重建 JAR 纳入）。策略详情见 `archives/experiments/android-mpv-fork-branch-consolidation-20260930.md` 追加节与 TASKS 接手快照。
+
 - 2026-09-30 **media-kit 主仓上游 main 合并全链完成转 done**（`archives/experiments/android-media-kit-main-merge-acceptance-12700-20260930.md`）：合并提交 `a886f556`（63 处冲突分层裁定），我方 Android HDR/P5、dispose 屏障、owner broker、GL 渲染线程、d3d11 全部保留，上游 shuffle 流/isPlaying/playlist 修复/FocusNode/js→web 迁移择优吸收；四包 analyze 通过。**P5 五项实机验收全部通过**（12700 Glass SDR / 12701 Mystery PQ 全片 EOS+direct=1+RESCALE+片尾回退命中+闭合全对等，12702 播放中直接销毁零崩溃+900/900 闭环），APK 库集与已验收 12680 一致。main 已快进为唯一维护线。遗留：上游亮度/音量控件特性未吸收、Linux 侧待环境回归、严格数值读回可按需补跑。
 
 - 2026-09-30 **mpv fork 分支归一与发布基线完成**（`archives/experiments/android-mpv-fork-branch-consolidation-20260930.md`）：4 个自定义分支收敛为 Goodwu/mpv `media-kit/android` 单分支（tip `6719532` = 398d0c3 + av_log 日志接管 cherry-pick `6719532703` + 注释更正 `5379756`，arm64 编译验证）；发布 tag `media-kit-v2026.09`→`398d0c3`（已验收产品状态），实验路线 tag `archive/android-dv-p5-renderer-202609` 归档，旧 4 分支远端已删。发布链三件套固定：mpv `398d0c3` + FFmpeg `fff3ee7` + libplacebo `c9fd879`（均已在 Goodwu fork 核实），对应 JAR SHA-256 `dad30ae23cd75e85c43663959ce9e1c5940ae632adda404fbfe71d4202c2a9f7`。av_log 修复合入后产品 JAR 未重建（下个发布周期事项）；诊断探针 670 行存 `archives/experiments/android-mpv-diagnostic-probes-20260930.patch`。media-kit 主仓：pq-product 分支及工作树已删（全包含），当前分支已推远端；main 合并推迟——unshallow 后发现 main 为上游 236 提交（非浅克隆显示的 1 个），60+ 冲突，已 `merge --abort` 并登记独立任务【同日更新：该任务已按评估执行合并，见顶部条目】。
