@@ -6,11 +6,10 @@ analyzer:
     - windows/**
     - macos/**
     - linux/**
-include: package:flutter_lints/flutter.yaml
-analyzer:
   errors:
     dangling_library_doc_comments: ignore
     unintended_html_in_doc_comment: ignore
+include: package:flutter_lints/flutter.yaml
 
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options

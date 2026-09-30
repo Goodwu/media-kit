@@ -3138,7 +3138,6 @@ Uint8List? _screenshot(_ScreenshotData data) {
   final ctx = Pointer<generated.mpv_handle>.fromAddress(data.ctx);
   // ---------
   final format = data.format;
-  final includeLibassSubtitles = data.includeLibassSubtitles;
   // ---------
 
   // https://mpv.io/manual/stable/#command-interface-screenshot-raw
