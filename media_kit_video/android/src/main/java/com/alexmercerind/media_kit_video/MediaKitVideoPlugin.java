@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
+import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
@@ -79,8 +80,11 @@ public class MediaKitVideoPlugin implements FlutterPlugin, MethodCallHandler {
 
         // Owner broker registration channel. Served from this plugin because
         // media_kit itself has no Android code; every app that plays video
-        // through media_kit includes this plugin.
-        new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "media_kit/native_broker")
+        // through media_kit includes this plugin. Handles are registered
+        // under this engine's messenger so a detach only reclaims the
+        // handles this engine owns.
+        final BinaryMessenger brokerMessenger = flutterPluginBinding.getBinaryMessenger();
+        new MethodChannel(brokerMessenger, "media_kit/native_broker")
             .setMethodCallHandler(
                 (call, result) -> {
                     final long handle;
@@ -92,7 +96,7 @@ public class MediaKitVideoPlugin implements FlutterPlugin, MethodCallHandler {
                     }
                     switch (call.method) {
                         case "Register":
-                            MpvOwnerBroker.register(handle);
+                            MpvOwnerBroker.register(brokerMessenger, handle);
                             result.success(null);
                             break;
                         case "Unregister":
@@ -219,11 +223,13 @@ public class MediaKitVideoPlugin implements FlutterPlugin, MethodCallHandler {
     public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
         // Owner-broker teardown: hosts may destroy the FlutterEngine without
         // any Dart-side disposal (e.g. FlutterEngine.destroy while playing).
-        // Clear every mpv wakeup callback first, while the NativeCallable
-        // trampolines backing them are still mapped, then release the video
-        // outputs so the raster teardown and any native producer that keeps
-        // running never touch freed surface state together.
-        MpvOwnerBroker.onEngineDetach();
+        // Clear this engine's mpv wakeup callbacks first, while the
+        // NativeCallable trampolines backing them are still mapped, then
+        // release the video outputs so the raster teardown and any native
+        // producer that keeps running never touch freed surface state
+        // together. Handles owned by other engines in this process are not
+        // touched.
+        MpvOwnerBroker.onEngineDetach(binding.getBinaryMessenger());
         if (videoOutputManager != null) {
             videoOutputManager.disposeAll();
             videoOutputManager = null;

@@ -5,7 +5,7 @@
 - **任务**：按 `archives/reviews/goodwu-commits-architecture-review-20260930.md`（只读审查，P0×3 / P1×6 / P2×5）整改。整改按审查第 5 节投入产出顺序分批执行，每批独立提交。
 - **批次进度**：
   - [x] 批次A（P2-3 止血）：OHOS 隔离入口 analyzer 排除（analysis_options.yaml 注明 CI 分工）、macos 契约测试缩进无关化修复、ci.yml 恢复 push→main 触发 package tests（手动分发保留按需开关）、ohos.yml 触发分支由已归档分支改为 main。验收：media_kit_video analyze 0 error（18 info/warning，与审查记录一致）、`flutter test` 全过（含先前加载失败的 macos 契约测试）。
-  - [ ] 批次B（P1-4）：owner broker 按引擎分组 + media_kit 公开窄接口。
+  - [x] 批次B（P1-4）：`MpvOwnerBroker` 改为按 BinaryMessenger（引擎）分组登记（`HashMap<BinaryMessenger, HashSet<Long>>`），`onEngineDetach(messenger)` 只终结本引擎句柄，多引擎场景不再误杀；media_kit 新增公开窄接口 `NativeHandleLifecycle`（`observer` + `liveHandleAddresses`，`@internal` 通知方法）并从 `media_kit.dart` 导出，`InitializerNativeCallable` 私有注册字段移除，`mpv_owner_broker.dart` 改走公开 API（implementation_imports 消除）；登记/注销失败改为 debugPrint 显式可见。验收：两包 analyze 0 error、media_kit_video 13 个测试文件全过、JDK17 gradle `compileDebugJavaWithJavac` 通过。遗留（与审查一致）：多引擎行为未实机复验（原 P1-4 即代码路径推断）；音频宿主接线属长期项（需 media_kit_libs_android 原生层钩子）。
   - [ ] 批次C（P0-1/P1-5）：厂商私有回退改可注入扩展点；诊断探针移出库。
   - [ ] 批次D（P0-2）：Goodwu libmpv release 发布并设为默认下载源；lock/CHANGELOG 记录 mpv/FFmpeg/libplacebo commit；CI 校验 JAR 版本标识。
   - [ ] 批次E（P0-3）：HdrOutputPolicy 提炼进 media_kit_video + 单测矩阵。
