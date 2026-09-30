@@ -77,7 +77,7 @@ P5→PQ 输出、首帧和性能使用 `/Users/wuweiwei1/Downloads/test-clips/My
 - [x] media-kit 主仓合并上游 main（236 提交）回归单线
   - status: done（2026-09-30 合并 + 静态验证 + P5 五项实机验收全部通过）；context: archives/experiments/android-media-kit-main-merge-assessment-20260930.md、android-media-kit-main-merge-acceptance-12700-20260930.md
   - acceptance: `fix/darwin-video-output-rebuild-barrier`（或其继任集成分支）合并 origin/main（上游 236 提交）后构建通过，并复跑 P5 关键实机验收（颜色数值、片尾回退、EOS、直接销毁、PQ 首帧）无回归；main 成为唯一维护线。
-  - final_acceptance: 合并提交 `a886f556`，63 处冲突分层裁定（评估报告为蓝本）；四包 analyze 通过（OHOS 既有 4 错误除外）；12700 Glass SDR / 12701 Mystery PQ / 12702 直接销毁三轮实机验收全部通过——两全片轮 direct=1 + RESCALE k=1.002941 + 片尾回退命中 + EOS + 闭合 8376/4483 全对等，销毁轮零崩溃进程存活 900/900 闭环；APK 库集与已验收 12680 一致，native 未变。遗留：上游亮度/音量控件特性未吸收、Linux 侧待 Linux 环境回归、严格数值读回可按需补跑。main 已快进为唯一维护线。
+  - final_acceptance: 合并提交 `a886f556`，63 处冲突分层裁定（评估报告为蓝本）；四包 analyze 通过（OHOS 既有 4 错误除外）；12700 Glass SDR / 12701 Mystery PQ / 12702 直接销毁三轮实机验收全部通过——两全片轮 direct=1 + RESCALE k=1.002941 + 片尾回退命中 + EOS + 闭合 8376/4483 全对等，销毁轮零崩溃进程存活 900/900 闭环；APK 库集与已验收 12680 一致，native 未变。遗留：上游亮度/音量控件特性未吸收、Linux 侧待 Linux 环境回归、严格数值读回可按需补跑。main 已快进为唯一维护线。合并提交漏缴的三处构建后修复（FocusNode 移植/未用变量/analysis_options）以跟进提交补全——实机验收构建自工作区，已含这些修复，验收结论不受影响。
 
 - [ ] Android HDR10 / DV P8.4 显示与原生 HDR 首帧闭环
   - status: in_progress
