@@ -186,8 +186,8 @@ class _SinglePlayerSingleVideoScreenState
           configuration.value.usePlatformView &&
           _androidGpuPlatformHdr,
       readDisplayHdrTypes: () async {
-        final capabilities = await _videoChannel
-            .invokeMapMethod<String, dynamic>('Android.Capabilities');
+        final capabilities = await _capabilitiesChannel
+            .invokeMapMethod<String, dynamic>('Get');
         final raw = capabilities?['displayHdrTypes'];
         if (raw is! List || raw.any((value) => value is! int)) {
           throw StateError('Invalid display HDR capability report: $raw');
@@ -470,6 +470,9 @@ class _SinglePlayerSingleVideoScreenState
   static const _windowChannel = MethodChannel('media_kit_test/window');
   static const _videoChannel = MethodChannel(
     'com.alexmercerind/media_kit_video',
+  );
+  static const _capabilitiesChannel = MethodChannel(
+    'media_kit_test/capabilities',
   );
   static const _flutterSurfaceProbeChannel = MethodChannel(
     'media_kit_test/flutter_surface_probe',
@@ -1221,9 +1224,8 @@ class _SinglePlayerSingleVideoScreenState
   Future<void> _logAndroidCapabilities() async {
     if (!Platform.isAndroid) return;
     try {
-      final capabilities = await _videoChannel.invokeMapMethod<String, dynamic>(
-        'Android.Capabilities',
-      );
+      final capabilities = await _capabilitiesChannel
+          .invokeMapMethod<String, dynamic>('Get');
       debugPrint('ANDROID_CAPABILITIES $capabilities');
     } catch (error) {
       debugPrint('ANDROID_CAPABILITIES ERROR=$error');
