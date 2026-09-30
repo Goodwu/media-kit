@@ -38,6 +38,19 @@ P8.4 全片 1170.7s（~19.5 分钟），两模式各播 300 秒观察窗，未�
 
 - 证据：`/tmp/matrix-round-<tag>-{device.log,sf-t45.txt,t*.png}`、构建日志 `/tmp/matrix-build-<tag>.log`。
 
+## 追加：Mi Note 3（5b79aada）一轮解码测试（2026-09-30，用户指定单轮）
+
+用户换入第三台设备 Mi Note 3（jason，骁龙 660，LineageOS Android 15，arm64-v8a，1080×1920，无 HDR 显示）并要求"进行一轮解码测试"。核验：HWC `hdr10=false hlg=false`（与用户说明一致）；`OMX.qcom.video.decoder.hevc` 标称 **Main/Main10/Main10HDR10 × Main 5.1**（4K 10-bit 在能力表内）。素材 Mystery Box（361,648,124 字节与华为机一致）；复用 12703 SDR 包（SHA `2620de17…`）；轮脚本 `/tmp/matrix-round-jason.sh`（修复 Redmi 暴露的旋转竞态：tap 后验证 `DIRECT_OPEN trigger`，未命中换横/竖坐标重试；本次首轮命中）。
+
+**结果：4K Main10 硬解通过，展示链路掉帧严重，EOS 尾帧紫屏一次。**
+
+- **解码：通过**。无 CodecException；`P5_SECTION_INIT direct=1`（P5 直通管线激活）、vo=gpu-next/hwdec=mediacodec；`decoder-frame-drop-count=0`，EOS `AUTO_COMPLETED completed=true`，媒体时间 ~实时推进（t60→55.5s、t90→83.8s、t120→98.9s）。
+- **展示：掉帧 84%**。EOS 时 `frame-drop-count=4980`（全片约 5937 帧、AImage callbacks 仅 950）——Adreno 512 的 gpu-next 4K 渲染跟不上 60fps，VO 层丢帧但解码与音画时间轴正常（avsync=0）。画面可播但不流畅。
+- **色彩**：无 `P5_DOVI_RESCALE` 行（华为专属 Y2Y /1020 归一化补偿在本机不触发，SD660 输出标准 Main10 布局，符合预期）。t30 截图较华为同片偏暖，但非同 PTS 场景，不作色彩结论。
+- **EOS 尾帧问题（观察项，非本轮判定范围）**：最后帧 PTS 98.915 `acquireLatestImage failed after retry: -30001`（empty_acquires=20、retired=1）→ 1 次 `Failed rendering frame`，**相邻帧回退未触发**（P5_TAIL_FALLBACK 计数 0；华为同片 EOS 位置 98.748 能命中回退），EOS 后画面呈纯紫（未初始化纹理，t115 截图 mean=(128,0,255) var=0）。回退条件在本机 EOS 场景未满足的原因未查（候选：末帧相邻 PTS 间隔或 retired 状态差异），与 P3 片尾任务相关，待后续跟进。
+- **证据缺口**：退出时 `P5_IMAGE_FINAL` 闭合计数未采集——BACK 后 6 秒 grep 时 NativePlayer.dispose 的 5 秒终止宽限期未走完，logcat 先被轮脚本关闭；无 FATAL/SIGSEGV、force-stop 后卸载成功。
+- 收尾：测试包卸载、亮度 50/自动恢复、熄屏。日志 `/tmp/matrix-jason-p5-sdr-device.log`、截图 `/tmp/matrix-jason-p5-sdr-t*.png`。
+
 ## 追加：Redmi Note 5A（a869cea9）尝试（2026-09-30，用户要求中断，未成矩阵）
 
 用户接入第二台设备 Redmi Note 5A（ugg，LineageOS Android 17，arm64-v8a，720×1280@60Hz）要求做同样测试。核验：`displayHdrTypes: []`、HWC `hdr10=false hlg=false`、`hdrOutputType=INVALID`（屏幕无 HDR 输出能力）；三套 4K 素材经华为机中转推送（字节数逐一吻合）。
