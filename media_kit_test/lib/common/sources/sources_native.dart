@@ -12,13 +12,17 @@ const _androidLocalSource = String.fromEnvironment(
   'MEDIA_KIT_ANDROID_LOCAL_SOURCE',
 );
 
+/// Root of the local test-clip directory (no machine-specific paths in the
+/// repo): set `MEDIA_KIT_TEST_CLIPS=/path/to/test-clips` when running.
+final _testClipsRoot = Platform.environment['MEDIA_KIT_TEST_CLIPS'] ?? '';
+
 final sources = <String>[
   if (Platform.isMacOS)
     const String.fromEnvironment('MEDIA_KIT_AUTO_SOURCE').isNotEmpty
         ? const String.fromEnvironment('MEDIA_KIT_AUTO_SOURCE')
         : (bool.fromEnvironment('MEDIA_KIT_AUTO_HDR')
-            ? '/Users/wuweiwei1/Downloads/test-clips/luna-pq-six-bands.mp4'
-            : '/Users/wuweiwei1/Downloads/test-clips/luna-sdr-720p-bt709-control.mp4'),
+            ? '$_testClipsRoot/luna-pq-six-bands.mp4'
+            : '$_testClipsRoot/luna-sdr-720p-bt709-control.mp4'),
   if (Platform.isAndroid && _androidLocalSource.isNotEmpty) _androidLocalSource,
 ];
 

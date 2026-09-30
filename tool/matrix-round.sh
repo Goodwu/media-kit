@@ -3,9 +3,9 @@
 # usage: matrix-round.sh <apk> <tag> <duration_seconds> <sample_enum>
 set -Eeuo pipefail
 apk=${1:?}; tag=${2:?}; dur=${3:?}; sample=${4:?}
-serial=3EP7N18C28016072
-adb="adb -s $serial"
-original=/private/tmp/media-kit-p5-original-12492.apk
+serial=${ANDROID_SERIAL:-}
+adb="adb ${serial:+-s $serial}"
+original=${MEDIA_KIT_ORIGINAL_APK:?set MEDIA_KIT_ORIGINAL_APK to the restore APK}
 base=/tmp/matrix-round-${tag}
 logcat_pid=
 restore() {

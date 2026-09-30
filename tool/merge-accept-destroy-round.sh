@@ -2,7 +2,7 @@
 # 合并验收轮：播放中直接 Engine 销毁（broker 路径零崩溃 + 资源闭环）
 set -Eeuo pipefail
 apk=${1:?}; tag=$2
-original=/private/tmp/media-kit-p5-original-12492.apk
+original=${MEDIA_KIT_ORIGINAL_APK:?set MEDIA_KIT_ORIGINAL_APK to the restore APK}
 base=/tmp/merge-accept-${tag}
 logcat_pid=
 restore() {

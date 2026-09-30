@@ -3,8 +3,8 @@
 # usage: matrix-round-ugg.sh <apk> <tag> <duration_seconds> <sample_enum>
 set -Eeuo pipefail
 apk=${1:?}; tag=${2:?}; dur=${3:?}; sample=${4:?}
-serial=a869cea9
-adb="adb -s $serial"
+serial=${ANDROID_SERIAL:-}
+adb="adb ${serial:+-s $serial}"
 base=/tmp/matrix-ugg-${tag}
 logcat_pid=
 restore() {

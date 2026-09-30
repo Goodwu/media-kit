@@ -1,9 +1,0 @@
-{
-    "files.associations": {
-        "future": "cpp",
-        "any": "cpp",
-        "memory": "cpp",
-        "optional": "cpp",
-        "atomic": "cpp"
-    }
-}
