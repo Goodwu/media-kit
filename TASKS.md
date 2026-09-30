@@ -80,6 +80,11 @@ P5→PQ 输出、首帧和性能使用 `/Users/wuweiwei1/Downloads/test-clips/My
   - acceptance: `fix/darwin-video-output-rebuild-barrier`（或其继任集成分支）合并 origin/main（上游 236 提交）后构建通过，并复跑 P5 关键实机验收（颜色数值、片尾回退、EOS、直接销毁、PQ 首帧）无回归；main 成为唯一维护线。
   - final_acceptance: 合并提交 `a886f556`，63 处冲突分层裁定（评估报告为蓝本）；四包 analyze 通过（OHOS 既有 4 错误除外）；12700 Glass SDR / 12701 Mystery PQ / 12702 直接销毁三轮实机验收全部通过——两全片轮 direct=1 + RESCALE k=1.002941 + 片尾回退命中 + EOS + 闭合 8376/4483 全对等，销毁轮零崩溃进程存活 900/900 闭环；APK 库集与已验收 12680 一致，native 未变。遗留：上游亮度/音量控件特性未吸收、Linux 侧待 Linux 环境回归、严格数值读回可按需补跑。main 已快进为唯一维护线；同日清理 fork 全部 11 个废弃远端分支（4 个已包含直接删、7 个先打 archive/*-202609 tag 再删，见归一记录追加节），Goodwu/media-kit 仅剩 main 单分支。合并提交漏缴的三处构建后修复（FocusNode 移植/未用变量/analysis_options）以跟进提交补全——实机验收构建自工作区，已含这些修复，验收结论不受影响。
 
+- [x] 修复 Mi Note 3 OES 路径花屏（Adreno 512 撕裂/绿色色块）
+  - status: done（2026-09-30 定位、修复、实机 A/B 与真人验收全链闭环）；context: archives/experiments/android-oes-buffer-retire-fix-20260930.md
+  - acceptance: 定位 HDR10 4K30 开场绿色横条/斜线撕裂的根因并修复；修复版同场景实机复验无花屏、P5 direct=1 无回归；用户真人观感确认。
+  - final_acceptance: 根因=OES 导入路径 unmap 立即归还 buffer，无隐式同步驱动上 GL 采样与 codec 重写竞争（抖动为启动收敛丢帧，非缺陷）。修复=mpv fork `5e26cf86`（已推送 Goodwu/mpv）`buffer_retire` 旗标把 retire+fence 持有扩展至 OES 路径。A/B：基线 70 张判定 1 张异常 + 用户现场见花屏；修复版 0 异常 + 用户真人确认"画面没有问题了"；`P5_BUFFER_RETIRE enabled=1` 生效、同窗丢帧 45→28、direct=1 保持（fff3ee7 avcodec 重链正确，重链脚本 `/tmp/mk-relink-product.sh`、JAR `/tmp/media-kit-oes-retire-fix-arm64.jar`）。遗留：产品 JAR 重建周期纳入；华为机回归待下轮顺带。
+
 - [ ] Android HDR10 / DV P8.4 显示与原生 HDR 首帧闭环
   - status: in_progress
   - context: archives/conversations/android-hdr-dv-display-plan-20260922.md
