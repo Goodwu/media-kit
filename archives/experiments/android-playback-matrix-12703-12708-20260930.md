@@ -37,3 +37,12 @@ P8.4 全片 1170.7s（~19.5 分钟），两模式各播 300 秒观察窗，未�
 四仓库归一后的发布链（mpv 398d0c3 + FFmpeg fff3ee7 + libplacebo c9fd879 + media-kit main）在 P5/P8.4/HDR10 三素材 × SDR/HDR 双模式六轮全屏最高亮度播放中全部通过：输出路径与预期一致（P5 SDR 直通重标定、P5 PQ 10 位视频层、HDR10 PQ 直出含静态元数据、P8.4 HLG 直出/剥 RPU SDR），EOS/片尾回退/资源闭合零异常，截图全部正常画面。遗留：P8.4 全片 EOS 与真人观感未在本轮范围（用户此前已认可 P8.4/HDR10 全屏画质与流畅性，12537/12538 及 12616）。
 
 - 证据：`/tmp/matrix-round-<tag>-{device.log,sf-t45.txt,t*.png}`、构建日志 `/tmp/matrix-build-<tag>.log`。
+
+## 追加：Redmi Note 5A（a869cea9）尝试（2026-09-30，用户要求中断，未成矩阵）
+
+用户接入第二台设备 Redmi Note 5A（ugg，LineageOS Android 17，arm64-v8a，720×1280@60Hz）要求做同样测试。核验：`displayHdrTypes: []`、HWC `hdr10=false hlg=false`、`hdrOutputType=INVALID`（屏幕无 HDR 输出能力）；三套 4K 素材经华为机中转推送（字节数逐一吻合）。
+
+- **ugg 第 1 轮（P5 Mystery SDR）**：打开事务在解码器配置处失败——`Failed to configure codec OMX.qcom.video.decoder.hevc (status = -542398533) width=3840 height=2160` → `Could not open codec`（骁龙 425 的 OMX HEVC 解码器不支持 4K）。三套素材实测均为 4K HEVC Main10（Mystery 3840×2160 / HDR10、P8.4 3840×1920），其余五轮必复现同一失败，矩阵在该机不可行；SDR/HDR 双向均被硬件能力阻断（HDR 另有屏幕无 HDR 能力）。
+- **1080p 降级试播（用户明确"只是试试，不作严格判定"）**：Dolby 官方 P5 1080p（1920×1080 Main10 24fps 263s，重命名 `media-kit-p5-official-1080p.mp4` 推送）SDR 包 `cb27fa48…`。无图像，但根因在测试装置而非解码器：`PREOPEN_FULLSCREEN` 触发竖屏→横屏旋转（Transition #127，720×1280→1280×720），轮脚本按竖屏中心 (360,640) 的 tap 落在旋转过渡期内，`awaiting_tap` 未收到点击、素材未打开——该机 1080p 10-bit 硬解能力本轮**未测得**。用户随即要求中断，未重试（修正方向：等旋转稳定后按横屏坐标 (640,360) 点击）。
+- 设备收尾：测试包已卸载、自动亮度恢复、熄屏（用户确认保留自动熄屏特性）。华为机维持 12708 后状态（原 12492、自动亮度、熄屏）。日志：`/tmp/matrix-ugg-p5-sdr-device.log`、`/tmp/matrix-ugg-p5-1080p-device.log`。
+- 教训：轮脚本的 tap 坐标与解锁校验字段（`isKeyguardShowing` vs EMUI 的 `isStatusBarKeyguard`）均按机型硬编码，换设备需适配；应用在打开失败后停留失败状态约两分钟才被脚本清理，手持设备场景下观感为"卡死"。
