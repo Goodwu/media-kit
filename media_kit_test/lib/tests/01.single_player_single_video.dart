@@ -924,6 +924,18 @@ class _SinglePlayerSingleVideoScreenState
     } else if (Platform.isAndroid && _androidNoMediaProbe) {
       debugPrint('ANDROID_NO_MEDIA_PROBE PlatformView mounted without open');
     } else {
+      const autoPauseAtSeconds =
+          int.fromEnvironment('MEDIA_KIT_AUTO_PAUSE_AT_SECONDS');
+      if (autoPauseAtSeconds > 0) {
+        Future<void>.delayed(
+          Duration(seconds: autoPauseAtSeconds),
+          () async {
+            if (!mounted || _autoPlayerDisposed) return;
+            await player.pause();
+            debugPrint('AUTO_PAUSE_AT position=${player.state.position}');
+          },
+        );
+      }
       unawaited(_openInitialSource()
           .catchError((Object error, StackTrace stack) async {
         debugPrint('AUTO_SOURCE ERROR=$error');

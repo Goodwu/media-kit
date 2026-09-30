@@ -5,7 +5,9 @@ import QuartzCore
 
 struct MetalSurfaceFrameTiming {
   let sequence: Int
-  let cpuWaitSeconds: CFTimeInterval
+  /// Seconds from command commit to GPU completion — the frame's in-flight
+  /// duration, which the caller no longer spends blocking the main thread.
+  let inFlightSeconds: CFTimeInterval
   let gpuDurationSeconds: CFTimeInterval?
   let completed: Bool
 }
@@ -101,10 +103,19 @@ final class MetalSurfaceBlitter {
     #endif
   }
 
+  /// Enqueues the blit and returns once the command is committed — the main
+  /// thread never blocks on GPU completion.
+  ///
+  /// The completion outcome arrives through [completionHandler] on the main
+  /// queue: the caller marks the frame presented (or failed) there. While the
+  /// blit is in flight, the source [pixelBuffer] is marked in
+  /// `NativeFrameRegistry`, so the GL producer parks it instead of recycling
+  /// it into the writable pool (see `SwappableObjectManager.releaseHeld`).
   func draw(
     pixelBuffer: CVPixelBuffer,
     to drawable: CAMetalDrawable,
-    timingHandler: ((MetalSurfaceFrameTiming) -> Void)? = nil
+    timingHandler: ((MetalSurfaceFrameTiming) -> Void)? = nil,
+    completionHandler: ((Bool) -> Void)? = nil
   ) -> Bool {
     frameNumber += 1
     let frameSequence = frameNumber
@@ -145,39 +156,40 @@ final class MetalSurfaceBlitter {
     }
     #endif
     command.present(drawable)
-    command.commit()
-    // TextureHW may return this CVPixelBuffer to the GL producer immediately
-    // after the render call. Wait for the Metal read to finish before the
-    // three-buffer pool is allowed to recycle it. This is intentionally
-    // conservative: correctness across the GL -> CVPixelBuffer -> Metal
-    // boundary is required before optimizing with explicit GPU fences.
-    let waitStarted = timingHandler == nil ? nil : CACurrentMediaTime()
-    command.waitUntilCompleted()
-    if let timingHandler, let waitStarted {
-      let cpuWaitSeconds = CACurrentMediaTime() - waitStarted
+    let committedAt = CACurrentMediaTime()
+    // Retain the pixel buffer and its CVMetalTexture binding until the GPU
+    // has finished reading them; this async completion replaces the former
+    // blocking main-thread wait. Metal requires the handler to be
+    // registered before commit.
+    command.addCompletedHandler { commandBuffer in
+      _ = pixelBuffer
+      _ = textureRef
+      let completed = commandBuffer.status == .completed
+      if !completed {
+        let errorDescription = commandBuffer.error?.localizedDescription ?? "unknown"
+        NSLog(
+          "HDR frame output failed status=\(commandBuffer.status.rawValue) " +
+          "error=\(errorDescription)"
+        )
+      }
       let gpuDurationSeconds: CFTimeInterval?
-      if command.gpuStartTime > 0 && command.gpuEndTime >= command.gpuStartTime {
-        gpuDurationSeconds = command.gpuEndTime - command.gpuStartTime
+      if commandBuffer.gpuStartTime > 0 && commandBuffer.gpuEndTime >= commandBuffer.gpuStartTime {
+        gpuDurationSeconds = commandBuffer.gpuEndTime - commandBuffer.gpuStartTime
       } else {
         gpuDurationSeconds = nil
       }
-      timingHandler(
-        MetalSurfaceFrameTiming(
-          sequence: frameSequence,
-          cpuWaitSeconds: cpuWaitSeconds,
-          gpuDurationSeconds: gpuDurationSeconds,
-          completed: command.status == .completed
-        )
+      let timing = MetalSurfaceFrameTiming(
+        sequence: frameSequence,
+        inFlightSeconds: CACurrentMediaTime() - committedAt,
+        gpuDurationSeconds: gpuDurationSeconds,
+        completed: completed
       )
+      DispatchQueue.main.async {
+        timingHandler?(timing)
+        completionHandler?(completed)
+      }
     }
-    guard command.status == .completed else {
-      let errorDescription = command.error?.localizedDescription ?? "unknown"
-      NSLog(
-        "HDR frame output failed status=\(command.status.rawValue) " +
-        "error=\(errorDescription)"
-      )
-      return false
-    }
+    command.commit()
     return true
   }
 

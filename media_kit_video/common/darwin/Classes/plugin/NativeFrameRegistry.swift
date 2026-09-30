@@ -15,6 +15,9 @@ public enum NativeFrameRegistry {
   private static var framePresentedObservers = [Int64: (Int64) -> Void]()
   private static var activeSurfaces = Set<Int64>()
   private static var activeObservers = [Int64: (Int64) -> Void]()
+  private static var inFlightBuffers = [Int64: Set<ObjectIdentifier>]()
+  private static var inFlightDrainedObservers = [Int64: () -> Void]()
+  private static var producedFrameCounts = [Int64: Int64]()
   private static let lock = NSLock()
 
   public static func register(handle: Int64, callback: @escaping () -> CVPixelBuffer?) {
@@ -35,6 +38,63 @@ public enum NativeFrameRegistry {
     framePresentedObservers.removeValue(forKey: handle)
     activeSurfaces.remove(handle)
     activeObservers.removeValue(forKey: handle)
+    inFlightBuffers.removeValue(forKey: handle)
+    inFlightDrainedObservers.removeValue(forKey: handle)
+    producedFrameCounts.removeValue(forKey: handle)
+  }
+
+  /// Counts every frame the provider pushed into its pool. The presentation
+  /// side gates redraws on this counter, not on buffer identity: the pool
+  /// recycles a small set of CVPixelBuffer objects, so identity alone cannot
+  /// distinguish a recycled buffer carrying a new frame from an old one.
+  public static func noteFrameProduced(handle: Int64) {
+    lock.lock(); defer { lock.unlock() }
+    producedFrameCounts[handle, default: 0] += 1
+  }
+
+  public static func producedFrameCount(handle: Int64) -> Int64 {
+    lock.lock(); defer { lock.unlock() }
+    return producedFrameCounts[handle] ?? 0
+  }
+
+  /// Marks a buffer as consumed by an async presenter (in-flight Metal blit).
+  /// The GL producer must not write into an in-flight buffer; consult
+  /// `isInFlight` before recycling a rotated-out pool object.
+  public static func markInFlight(handle: Int64, pixelBuffer: CVPixelBuffer) {
+    lock.lock()
+    let key = ObjectIdentifier(pixelBuffer as AnyObject)
+    var inFlight = inFlightBuffers[handle] ?? []
+    inFlight.insert(key)
+    inFlightBuffers[handle] = inFlight
+    lock.unlock()
+  }
+
+  /// Clears the in-flight mark and, when the handle has no in-flight buffers
+  /// left, notifies the drain observer (e.g. to return held pool objects).
+  public static func completeInFlight(handle: Int64, pixelBuffer: CVPixelBuffer) {
+    lock.lock()
+    let key = ObjectIdentifier(pixelBuffer as AnyObject)
+    var inFlight = inFlightBuffers[handle] ?? []
+    inFlight.remove(key)
+    if inFlight.isEmpty {
+      inFlightBuffers.removeValue(forKey: handle)
+    } else {
+      inFlightBuffers[handle] = inFlight
+    }
+    let observer = inFlight.isEmpty ? inFlightDrainedObservers[handle] : nil
+    lock.unlock()
+    observer?()
+  }
+
+  public static func isInFlight(handle: Int64, pixelBuffer: CVPixelBuffer) -> Bool {
+    lock.lock(); defer { lock.unlock() }
+    guard let inFlight = inFlightBuffers[handle] else { return false }
+    return inFlight.contains(ObjectIdentifier(pixelBuffer as AnyObject))
+  }
+
+  public static func observeInFlightDrained(handle: Int64, observer: @escaping () -> Void) {
+    lock.lock(); defer { lock.unlock() }
+    inFlightDrainedObservers[handle] = observer
   }
 
   public static func copyFrame(handle: Int64) -> CVPixelBuffer? {

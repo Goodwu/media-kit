@@ -4,12 +4,26 @@ import UIKit
 import QuartzCore
 import Metal
 
+/// CADisplayLink retains its target. A weak proxy keeps the view
+/// deallocatable until the link is invalidated. The tick closure itself
+/// captures the view weakly, so the strong reference here is cycle-free.
+private final class DisplayLinkProxy {
+  var onTick: (() -> Void)?
+  @objc func tick() { onTick?() }
+}
+
 @available(iOS 13.0, *)
 final class NativeSurfaceView: NSObject, FlutterPlatformView {
   let nativeView: UIView
   private let metalLayer: CAMetalLayer
   private var blitter: MetalSurfaceBlitter?
-  private var timer: Timer?
+  private var displayLinkProxy: DisplayLinkProxy?
+  private var displayLink: CADisplayLink?
+  private var lastDrawnProducedCount: Int64 = -1
+  private var lastDrawableSize: CGSize = .zero
+  private var lastContentsScale: CGFloat = 0
+  private var needsRedraw = true
+  private var blitInFlight = false
   private let handle: Int64
 
   init(frame: CGRect, args: Any?, onLayerReady: ((Int64, Int, Bool) -> Void)? = nil) {
@@ -38,7 +52,16 @@ final class NativeSurfaceView: NSObject, FlutterPlatformView {
     }
     nativeView.layer.addSublayer(metalLayer)
     blitter = MetalSurfaceBlitter(device: device)
-    timer = Timer.scheduledTimer(withTimeInterval: 1.0 / 60.0, repeats: true) { [weak self] _ in self?.drawFrame() }
+    // Drive the presentation at the display's refresh rate, synchronized
+    // with the compositor. Drawing only happens for new frames (or after a
+    // size/metadata change), so a paused player costs one identity check
+    // per tick instead of a full blit.
+    let proxy = DisplayLinkProxy()
+    proxy.onTick = { [weak self] in self?.drawFrame() }
+    displayLinkProxy = proxy
+    let link = CADisplayLink(target: proxy, selector: #selector(DisplayLinkProxy.tick))
+    link.add(to: .main, forMode: .common)
+    displayLink = link
     NativeSurfaceViewRegistry.register(handle: handle) { [weak self] configuration in
       self?.apply(configuration: configuration)
     } displayMetrics: { [weak self] in
@@ -67,7 +90,7 @@ final class NativeSurfaceView: NSObject, FlutterPlatformView {
   func view() -> UIView { nativeView }
 
   deinit {
-    timer?.invalidate()
+    displayLink?.invalidate()
     NativeSurfaceViewRegistry.unregister(handle: handle)
   }
 
@@ -87,6 +110,8 @@ final class NativeSurfaceView: NSObject, FlutterPlatformView {
       }
     }
     metalLayer.colorspace = CGColorSpace(name: CGColorSpace.extendedLinearITUR_2020)
+    // Colorspace/EDR changes must be re-presented with the current frame.
+    needsRedraw = true
   }
 
   private static func luminance(_ metadata: [String: Any]?, keys: [String]) -> Double? {
@@ -105,16 +130,45 @@ final class NativeSurfaceView: NSObject, FlutterPlatformView {
       width: max(1, nativeView.bounds.width * scale),
       height: max(1, nativeView.bounds.height * scale)
     )
-    guard let pixelBuffer = NativeFrameRegistry.copyFrame(handle: handle),
-          let blitter,
-          let drawable = metalLayer.nextDrawable()
-    else { return }
-    let drawn = blitter.draw(pixelBuffer: pixelBuffer, to: drawable)
-    if drawn && CVPixelBufferGetPixelFormatType(pixelBuffer) == kCVPixelFormatType_64RGBAHalf {
-      NativeFrameRegistry.markPresented(handle: handle, pixelBuffer: pixelBuffer)
-    } else if !drawn {
-      NativeFrameRegistry.markPresentationFailed(handle: handle, pixelBuffer: pixelBuffer)
+    guard let pixelBuffer = NativeFrameRegistry.copyFrame(handle: handle) else { return }
+    // New-frame gating: skip the blit while the produced-frame count, layer
+    // size and metadata are all unchanged. The pool recycles a small set of
+    // CVPixelBuffer objects, so the producer's frame count — not buffer
+    // identity — is the new-frame signal.
+    let producedCount = NativeFrameRegistry.producedFrameCount(handle: handle)
+    let sizeChanged = lastDrawableSize != metalLayer.drawableSize ||
+        lastContentsScale != scale
+    if !needsRedraw && !sizeChanged && producedCount == lastDrawnProducedCount {
+      return
     }
+    guard !blitInFlight, let blitter, let drawable = metalLayer.nextDrawable() else {
+      return
+    }
+    NativeFrameRegistry.markInFlight(handle: handle, pixelBuffer: pixelBuffer)
+    blitInFlight = true
+    let isFloatFrame =
+        CVPixelBufferGetPixelFormatType(pixelBuffer) == kCVPixelFormatType_64RGBAHalf
+    let enqueued = blitter.draw(pixelBuffer: pixelBuffer, to: drawable) {
+      [weak self] completed in
+      guard let self else { return }
+      self.blitInFlight = false
+      NativeFrameRegistry.completeInFlight(handle: self.handle, pixelBuffer: pixelBuffer)
+      if completed && isFloatFrame {
+        NativeFrameRegistry.markPresented(handle: self.handle, pixelBuffer: pixelBuffer)
+      } else if !completed {
+        NativeFrameRegistry.markPresentationFailed(handle: self.handle, pixelBuffer: pixelBuffer)
+      }
+    }
+    if !enqueued {
+      blitInFlight = false
+      NativeFrameRegistry.completeInFlight(handle: handle, pixelBuffer: pixelBuffer)
+      NativeFrameRegistry.markPresentationFailed(handle: handle, pixelBuffer: pixelBuffer)
+      return
+    }
+    lastDrawnProducedCount = producedCount
+    lastDrawableSize = metalLayer.drawableSize
+    lastContentsScale = scale
+    needsRedraw = false
   }
 }
 
@@ -145,6 +199,7 @@ import FlutterMacOS
 import AppKit
 import QuartzCore
 import Metal
+import CoreVideo
 
 private final class FrameReportingView: NSView {
   var onFrameChanged: ((NSRect) -> Void)?
@@ -185,9 +240,11 @@ private final class FramePacingDiagnostics {
   private var startedAt: CFTimeInterval?
   private var lastTickAt: CFTimeInterval?
   private var tickIntervals = [CFTimeInterval]()
-  private var cpuWaitDurations = [CFTimeInterval]()
+  private var inFlightDurations = [CFTimeInterval]()
   private var gpuDurations = [CFTimeInterval]()
   private var tickCount = 0
+  private var idleTickCount = 0
+  private var drawAttemptCount = 0
   private var drawableAvailableCount = 0
   private var bufferObservationCount = 0
   private var consecutiveBufferReuseCount = 0
@@ -205,13 +262,12 @@ private final class FramePacingDiagnostics {
     self.handle = handle
     self.generation = generation
     tickIntervals.reserveCapacity(Self.tickLimit - 1)
-    cpuWaitDurations.reserveCapacity(Self.tickLimit)
+    inFlightDurations.reserveCapacity(Self.tickLimit)
     gpuDurations.reserveCapacity(Self.tickLimit)
   }
 
   func recordTick(
     at timestamp: CFTimeInterval,
-    drawableAvailable: Bool,
     pixelBuffer: CVPixelBuffer?
   ) {
     // Do not spend the bounded diagnostic window while the player is idle or
@@ -223,9 +279,6 @@ private final class FramePacingDiagnostics {
     }
     self.lastTickAt = timestamp
     tickCount += 1
-    if drawableAvailable {
-      drawableAvailableCount += 1
-    }
     if let pixelBuffer {
       let identity = ObjectIdentifier(pixelBuffer)
       bufferObservationCount += 1
@@ -236,13 +289,29 @@ private final class FramePacingDiagnostics {
     }
   }
 
+  /// A display-link tick that produced no new frame and no size change: the
+  /// presentation stays idle instead of re-blitting the same buffer.
+  func recordIdleTick() {
+    guard !finished else { return }
+    idleTickCount += 1
+  }
+
+  /// An actual blit attempt (a new frame, or a size/metadata change).
+  func recordDrawAttempt(drawableAvailable: Bool) {
+    guard !finished else { return }
+    drawAttemptCount += 1
+    if drawableAvailable {
+      drawableAvailableCount += 1
+    }
+  }
+
   func recordMetal(_ timing: MetalSurfaceFrameTiming) {
     guard !finished else { return }
     metalFrameCount += 1
     if timing.completed {
       completedMetalFrameCount += 1
     }
-    cpuWaitDurations.append(timing.cpuWaitSeconds)
+    inFlightDurations.append(timing.inFlightSeconds)
     if let duration = timing.gpuDurationSeconds {
       gpuDurations.append(duration)
     }
@@ -268,12 +337,13 @@ private final class FramePacingDiagnostics {
     NSLog(
       "FramePacingDiagnostics macOS summary " +
       "handle=\(handle) generation=\(generation) reason=\(reason) " +
-      "ticks=\(tickCount) tickMs={\(Self.describe(tickIntervals))} " +
-      "drawable=\(drawableAvailableCount)/\(tickCount) " +
+      "ticks=\(tickCount) idle=\(idleTickCount) attempts=\(drawAttemptCount) " +
+      "tickMs={\(Self.describe(tickIntervals))} " +
+      "drawable=\(drawableAvailableCount)/\(drawAttemptCount) " +
       "buffers=\(bufferObservationCount) consecutiveReuse=\(consecutiveBufferReuseCount) " +
       "metal=\(metalFrameCount) completed=\(completedMetalFrameCount) " +
       "sequence=\(firstSequence ?? -1)...\(lastSequence ?? -1) gaps=\(sequenceGapCount) " +
-      "cpuWaitMs={\(Self.describe(cpuWaitDurations))} " +
+      "inFlightMs={\(Self.describe(inFlightDurations))} " +
       "gpuMs={\(Self.describe(gpuDurations))}"
     )
   }
@@ -295,11 +365,28 @@ private final class FramePacingDiagnostics {
   }
 }
 
+/// CVDisplayLink's output callback runs on a display-link thread and its
+/// context pointer is unmanaged; the box is retained by the link's context
+/// (passRetained) and holds only a weak view reference, so the view stays
+/// deallocatable and the callback never dangles once deinit stops the link.
+private final class DisplayLinkBox {
+  weak var view: NativeSurfaceView?
+  func onTick() {
+    DispatchQueue.main.async { [weak self] in self?.view?.drawFrame() }
+  }
+}
+
 final class NativeSurfaceView: NSObject {
   let nativeView: NSView
   private let metalLayer: CAMetalLayer
   private var blitter: MetalSurfaceBlitter?
-  private var timer: DispatchSourceTimer?
+  private var displayLink: CVDisplayLink?
+  private var displayLinkContext: UnsafeMutableRawPointer?
+  private var lastDrawnProducedCount: Int64 = -1
+  private var lastDrawableSize: CGSize = .zero
+  private var lastContentsScale: CGFloat = 0
+  private var needsRedraw = true
+  private var blitInFlight = false
   private var drawDiagnosticsRemaining = 8
   private var framePacingDiagnostics: FramePacingDiagnostics?
   private let handle: Int64
@@ -361,18 +448,39 @@ final class NativeSurfaceView: NSObject {
     onLayerReady?(handle, generation, blitter?.supportsFloatSource == true)
     NSLog("NativeSurfaceView macOS token registered handle=\(handle) generation=\(generation) token=\(viewToken.rawValue)")
     NSLog("NativeSurfaceView macOS init handle=\(handle) generation=\(generation) frame=\(nativeView.frame)")
-    let timer = DispatchSource.makeTimerSource(queue: .main)
-    timer.schedule(deadline: .now(), repeating: 1.0 / 60.0)
-    timer.setEventHandler { [weak self] in self?.drawFrame() }
-    self.timer = timer
-    timer.resume()
-    NSLog("NativeSurfaceView macOS timer started handle=\(handle)")
+    // Drive the presentation at the display's refresh rate, synchronized
+    // with the compositor (no fixed 60 Hz cap on high-refresh displays).
+    // Drawing only happens for new frames (or after a size/metadata
+    // change), so a paused player costs one identity check per tick
+    // instead of a full blit.
+    var link: CVDisplayLink?
+    CVDisplayLinkCreateWithActiveCGDisplays(&link)
+    if let link {
+      let box = DisplayLinkBox()
+      box.view = self
+      let context = Unmanaged.passRetained(box).toOpaque()
+      CVDisplayLinkSetOutputCallback(link, { _, _, _, _, _, userInfo in
+        guard let userInfo else { return kCVReturnSuccess }
+        let box = Unmanaged<DisplayLinkBox>.fromOpaque(userInfo).takeUnretainedValue()
+        box.onTick()
+        return kCVReturnSuccess
+      }, context)
+      CVDisplayLinkStart(link)
+      displayLink = link
+      displayLinkContext = context
+      NSLog("NativeSurfaceView macOS display link started handle=\(handle)")
+    }
   }
 
   func view() -> NSView { nativeView }
 
   deinit {
-    timer?.cancel()
+    if let displayLink {
+      CVDisplayLinkStop(displayLink)
+    }
+    if let displayLinkContext {
+      Unmanaged<DisplayLinkBox>.fromOpaque(displayLinkContext).release()
+    }
     framePacingDiagnostics?.finish(reason: "view-deinit")
     NSLog("NativeSurfaceView macOS deinit handle=\(handle) generation=\(generation) token=\(viewToken.rawValue)")
     DarwinViewTokenRegistry.unregister(viewToken, handle: handle, generation: generation)
@@ -405,6 +513,8 @@ final class NativeSurfaceView: NSObject {
       metadataApplied = false
     }
     let opticalOutputScale = Self.number(configuration["opticalOutputScale"]) ?? 100.0
+    // Colorspace/EDR changes must be re-presented with the current frame.
+    needsRedraw = true
     NSLog("NativeSurfaceView macOS apply handle=\(handle) transfer=\(transfer ?? "none") edrMetadata=\(metadataApplied) opticalOutputScale=\(opticalOutputScale) wantsEDR=\(metalLayer.wantsExtendedDynamicRangeContent)")
   }
 
@@ -424,7 +534,7 @@ final class NativeSurfaceView: NSObject {
     return nil
   }
 
-  private func drawFrame() {
+  func drawFrame() {
     let scale = nativeView.window?.backingScaleFactor ?? NSScreen.main?.backingScaleFactor ?? 1.0
     metalLayer.contentsScale = scale
     metalLayer.drawableSize = CGSize(
@@ -435,40 +545,79 @@ final class NativeSurfaceView: NSObject {
       framePacingDiagnostics = nil
     }
     let pixelBuffer = NativeFrameRegistry.copyFrame(handle: handle)
-    let drawable = metalLayer.nextDrawable()
     let diagnostics = framePacingDiagnostics
-    diagnostics?.recordTick(
-      at: CACurrentMediaTime(),
-      drawableAvailable: drawable != nil,
-      pixelBuffer: pixelBuffer
-    )
-    defer { diagnostics?.completeTick(at: CACurrentMediaTime()) }
-    guard let blitter, let pixelBuffer, let drawable else {
+    diagnostics?.recordTick(at: CACurrentMediaTime(), pixelBuffer: pixelBuffer)
+    diagnostics?.completeTick(at: CACurrentMediaTime())
+    guard let pixelBuffer else {
       if drawDiagnosticsRemaining > 0 {
         drawDiagnosticsRemaining -= 1
-        NSLog("NativeSurfaceView macOS draw skipped handle=\(handle) pixel=\(pixelBuffer != nil) drawable=\(drawable != nil) bounds=\(nativeView.bounds) drawableSize=\(metalLayer.drawableSize)")
+        NSLog("NativeSurfaceView macOS draw skipped handle=\(handle) pixel=false bounds=\(nativeView.bounds) drawableSize=\(metalLayer.drawableSize)")
       }
       return
     }
+    // New-frame gating: skip the blit while the produced-frame count, layer
+    // size and metadata are all unchanged. The pool recycles a small set of
+    // CVPixelBuffer objects, so the producer's frame count — not buffer
+    // identity — is the new-frame signal. nextDrawable is only probed for
+    // an actual presentation attempt — an unpresented drawable would pin
+    // the CAMetalLayer drawable pool while idle.
+    let producedCount = NativeFrameRegistry.producedFrameCount(handle: handle)
+    let sizeChanged = lastDrawableSize != metalLayer.drawableSize ||
+        lastContentsScale != scale
+    if !needsRedraw && !sizeChanged && producedCount == lastDrawnProducedCount {
+      diagnostics?.recordIdleTick()
+      return
+    }
+    let drawable = metalLayer.nextDrawable()
+    diagnostics?.recordDrawAttempt(drawableAvailable: drawable != nil)
+    guard !blitInFlight, let blitter, let drawable else {
+      if drawDiagnosticsRemaining > 0 {
+        drawDiagnosticsRemaining -= 1
+        NSLog("NativeSurfaceView macOS draw skipped handle=\(handle) inFlight=\(blitInFlight) blitter=\(blitter != nil) drawable=\(drawable != nil) bounds=\(nativeView.bounds) drawableSize=\(metalLayer.drawableSize)")
+      }
+      return
+    }
+    NativeFrameRegistry.markInFlight(handle: handle, pixelBuffer: pixelBuffer)
+    blitInFlight = true
+    let isFloatFrame =
+        CVPixelBufferGetPixelFormatType(pixelBuffer) == kCVPixelFormatType_64RGBAHalf
     let timingHandler: ((MetalSurfaceFrameTiming) -> Void)?
     if let diagnostics {
       timingHandler = { timing in diagnostics.recordMetal(timing) }
     } else {
       timingHandler = nil
     }
-    let drawn = blitter.draw(
+    let enqueued = blitter.draw(
       pixelBuffer: pixelBuffer,
       to: drawable,
       timingHandler: timingHandler
-    )
-    if drawn && CVPixelBufferGetPixelFormatType(pixelBuffer) == kCVPixelFormatType_64RGBAHalf {
-      NativeFrameRegistry.markPresented(handle: handle, pixelBuffer: pixelBuffer)
-    } else if !drawn {
-      NativeFrameRegistry.markPresentationFailed(handle: handle, pixelBuffer: pixelBuffer)
+    ) { [weak self] completed in
+      guard let self else { return }
+      self.blitInFlight = false
+      NativeFrameRegistry.completeInFlight(handle: self.handle, pixelBuffer: pixelBuffer)
+      if completed && isFloatFrame {
+        NativeFrameRegistry.markPresented(handle: self.handle, pixelBuffer: pixelBuffer)
+      } else if !completed {
+        NativeFrameRegistry.markPresentationFailed(handle: self.handle, pixelBuffer: pixelBuffer)
+      }
     }
+    if !enqueued {
+      blitInFlight = false
+      NativeFrameRegistry.completeInFlight(handle: handle, pixelBuffer: pixelBuffer)
+      NativeFrameRegistry.markPresentationFailed(handle: handle, pixelBuffer: pixelBuffer)
+      if drawDiagnosticsRemaining > 0 {
+        drawDiagnosticsRemaining -= 1
+        NSLog("NativeSurfaceView macOS draw enqueue failed handle=\(handle) bounds=\(nativeView.bounds) drawableSize=\(metalLayer.drawableSize)")
+      }
+      return
+    }
+    lastDrawnProducedCount = producedCount
+    lastDrawableSize = metalLayer.drawableSize
+    lastContentsScale = scale
+    needsRedraw = false
     if drawDiagnosticsRemaining > 0 {
       drawDiagnosticsRemaining -= 1
-      NSLog("NativeSurfaceView macOS draw handle=\(handle) drawn=\(drawn) pixelFormat=\(CVPixelBufferGetPixelFormatType(pixelBuffer)) size=\(CVPixelBufferGetWidth(pixelBuffer))x\(CVPixelBufferGetHeight(pixelBuffer)) bounds=\(nativeView.bounds) drawableSize=\(metalLayer.drawableSize)")
+      NSLog("NativeSurfaceView macOS draw handle=\(handle) pixelFormat=\(CVPixelBufferGetPixelFormatType(pixelBuffer)) size=\(CVPixelBufferGetWidth(pixelBuffer))x\(CVPixelBufferGetHeight(pixelBuffer)) bounds=\(nativeView.bounds) drawableSize=\(metalLayer.drawableSize)")
     }
   }
 }

@@ -84,6 +84,10 @@ public class TextureHW: NSObject, FlutterTexture, ResizableTextureProtocol {
     }
     NativeFrameRegistry.setFloatFormat(handle: registryHandle, enabled: false)
 
+    NativeFrameRegistry.observeInFlightDrained(handle: registryHandle) { [weak self] in
+      self?.releaseHeldTextureContexts()
+    }
+
     self.initMPV()
   }
 
@@ -241,6 +245,10 @@ public class TextureHW: NSObject, FlutterTexture, ResizableTextureProtocol {
   }
 
   public func render(_ size: CGSize) {
+    // A pool object parked for an async Metal blit may have drained since
+    // the last render; return it to the writable pool before asking for
+    // the next one.
+    releaseHeldTextureContexts()
     // Render exactly one target per mpv update. Rendering both the Flutter
     // texture and the native surface doubles the expensive libplacebo pass and
     // causes visible cadence jitter on high-resolution HDR streams.
@@ -249,11 +257,28 @@ public class TextureHW: NSObject, FlutterTexture, ResizableTextureProtocol {
         return
       }
       render(nativeTextureContext, size: size, halfFloat: true)
-      nativeTextureContexts.pushAsReady(nativeTextureContext)
+      nativeTextureContexts.pushAsReady(
+        nativeTextureContext,
+        hold: holdForAsyncBlit
+      )
     } else if let textureContext = textureContexts.nextAvailable() {
       render(textureContext, size: size, halfFloat: false)
-      textureContexts.pushAsReady(textureContext)
+      textureContexts.pushAsReady(textureContext, hold: holdForAsyncBlit)
     }
+    NativeFrameRegistry.noteFrameProduced(handle: registryHandle)
+  }
+
+  /// Park predicate for `pushAsReady`: a rotated-out pool object still being
+  /// read by an in-flight Metal blit must not return to the writable pool.
+  private func holdForAsyncBlit(_ context: TextureGLContext) -> Bool {
+    NativeFrameRegistry.isInFlight(handle: registryHandle, pixelBuffer: context.pixelBuffer)
+  }
+
+  /// Returns pool objects parked by the async Metal blit back to the
+  /// writable pool once their in-flight mark has cleared.
+  private func releaseHeldTextureContexts() {
+    textureContexts.releaseHeld(where: { !holdForAsyncBlit($0) })
+    nativeTextureContexts.releaseHeld(where: { !holdForAsyncBlit($0) })
   }
 
   private func render(
