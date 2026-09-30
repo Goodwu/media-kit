@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:universal_platform/universal_platform.dart';
 
 import 'common/globals.dart';
@@ -25,6 +26,9 @@ Future<void> main() async {
   MediaKit.ensureInitialized();
   if (UniversalPlatform.isAndroid) {
     try {
+      // Creates .../Android/data/<pkg>/files on first run; native P5 float
+      // readback diagnostics write their dumps there.
+      await getExternalStorageDirectory();
       await FilePicker.clearTemporaryFiles();
     } catch (error) {
       debugPrint('ANDROID_FILE_PICKER_CACHE_CLEANUP error=$error');

@@ -20,7 +20,7 @@ import io.flutter.plugin.common.MethodChannel
  * belongs in a diagnostics app and not in the library.
  */
 object CapabilitiesChannel {
-    private const val CHANNEL = "media_kit_test/capabilities"
+    private const val CHANNEL = "media_kit_hdr_lab/capabilities"
 
     fun register(activity: Activity, flutterEngine: FlutterEngine) {
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)

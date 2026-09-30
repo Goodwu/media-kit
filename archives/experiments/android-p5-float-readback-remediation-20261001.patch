@@ -1,0 +1,348 @@
+--- /Users/wuweiwei1/src/mpv/video/out/vo_gpu_next.c	2026-10-01 00:36:30.332772324 +0800
++++ /Users/wuweiwei1/src/libmpv-android-video-build-dv-experiment/buildscripts/deps/mpv/video/out/vo_gpu_next.c	2026-10-01 02:20:16.219752844 +0800
+@@ -19,6 +19,13 @@
+ 
+ #include <sys/stat.h>
+ #include <time.h>
++#ifdef __ANDROID__
++#include <sys/system_properties.h>
++#include <dlfcn.h>
++#include <stdarg.h>
++#include <stdio.h>
++#include <stdlib.h>
++#endif
+ 
+ #include <libplacebo/colorspace.h>
+ #include <libplacebo/options.h>
+@@ -158,8 +165,47 @@
+     struct frame_info perf_redraw;
+ 
+     struct mp_image_params target_params;
++
++#if HAVE_GL && defined(PL_HAVE_OPENGL) && defined(__ANDROID__)
++    // P5 float readback diagnostics, all gated on debug.media_kit.* system
++    // properties (never active in normal playback). The offscreen mode
++    // replaces the window swapchain with a host-readable FBO after one
++    // bootstrap frame; post_rpu dumps the first pts>=10 frame of each opened
++    // file as interleaved RGBA (float16 in native+float mode).
++    bool p5_offscreen;
++    bool p5_offscreen_native;
++    bool p5_offscreen_float;
++    bool p5_target_pq;
++    bool p5_post_rpu_probe;
++    bool p5_post_rpu_full_dump;
++    bool p5_offscreen_ready;
++    bool p5_offscreen_resize_reported;
++    bool p5_post_rpu_dumped_this_file;
++    int p5_post_rpu_dump_count;
++    pl_tex p5_offscreen_tex;
++    struct pl_swapchain_frame p5_offscreen_frame;
++    struct mp_rect p5_offscreen_dst;
++    uint64_t p5_offscreen_frames;
++#endif
+ };
+ 
++#if HAVE_GL && defined(PL_HAVE_OPENGL) && defined(__ANDROID__)
++static void p5_vo_log(const char *tag, const char *fmt, ...)
++{
++    void *lib = dlopen("liblog.so", RTLD_NOW | RTLD_LOCAL);
++    typedef int (*log_vprint_fn)(int, const char *, const char *, va_list);
++    log_vprint_fn log_vprint = lib ? dlsym(lib, "__android_log_vprint") : NULL;
++    if (log_vprint) {
++        va_list args;
++        va_start(args, fmt);
++        log_vprint(6, tag, fmt, args);
++        va_end(args);
++    }
++    if (lib)
++        dlclose(lib);
++}
++#endif
++
+ static void update_render_options(struct vo *vo);
+ static void update_lut(struct priv *p, struct user_lut *lut);
+ 
+@@ -688,6 +734,22 @@
+         .user_data = mpi,
+     };
+ 
++#ifdef __ANDROID__
++    {
++        static int p5_probe_frames;
++        char property[PROP_VALUE_MAX] = { 0 };
++        if (p5_probe_frames < 5 &&
++            __system_property_get("debug.media_kit.p5_renderer_probe", property) > 0 &&
++            !strcmp(property, "1")) {
++            p5_probe_frames++;
++            MP_WARN(vo, "MEDIA_KIT_P5_RENDERER frame=%d source_fmt=%d source_sys=%d dovi=%d mapped_fmt=%d mapped_sys=%d mapped_dovi=%d final_sys=%d\n",
++                    p5_probe_frames, mpi->imgfmt, mpi->params.repr.sys,
++                    !!mpi->dovi, par.imgfmt, par.repr.sys, !!par.repr.dovi,
++                    frame->repr.sys);
++        }
++    }
++#endif
++
+     const struct gl_video_opts *opts = p->opts_cache->opts;
+     if (opts->hdr_reference_white && !pl_color_transfer_is_hdr(frame->color.transfer))
+         frame->color.hdr.max_luma = opts->hdr_reference_white;
+@@ -1252,8 +1314,25 @@
+     }
+ 
+     struct pl_swapchain_frame swframe;
+-    bool should_draw = sw->fns->start_frame(sw, NULL); // for wayland logic
+-    if (!should_draw || !pl_swapchain_start_frame(p->sw, &swframe)) {
++    bool should_draw = true;
++#if HAVE_GL && defined(PL_HAVE_OPENGL) && defined(__ANDROID__)
++    if (p->p5_offscreen && p->p5_offscreen_ready) {
++        if (!p->p5_offscreen_native &&
++            memcmp(&p->p5_offscreen_dst, &p->dst, sizeof(p->dst))) {
++            if (!p->p5_offscreen_resize_reported)
++                p5_vo_log("P5_OFFSCREEN", "dst_changed; diagnostic invalid after resize");
++            p->p5_offscreen_resize_reported = true;
++            return VO_FALSE;
++        }
++        swframe = p->p5_offscreen_frame;
++    } else
++#endif
++    {
++        should_draw = sw->fns->start_frame(sw, NULL); // for wayland logic
++        if (should_draw)
++            should_draw = pl_swapchain_start_frame(p->sw, &swframe);
++    }
++    if (!should_draw) {
+         if (frame->current) {
+             // Advance the queue state to the current PTS to discard unused frames
+             struct pl_queue_params qparams = *pl_queue_params(
+@@ -1269,6 +1348,56 @@
+         return VO_FALSE;
+     }
+ 
++#if HAVE_GL && defined(PL_HAVE_OPENGL) && defined(__ANDROID__)
++    if (p->p5_offscreen && !p->p5_offscreen_ready &&
++        (!p->p5_offscreen_native ||
++         (frame->current && frame->current->params.w >= 3840 &&
++          frame->current->params.h >= 2160))) {
++        // Pair the one bootstrap start with submit, then stop using the window
++        // swapchain. Rendering below targets a real, host-readable GPU texture.
++        pl_fmt window_fmt = swframe.fbo ? swframe.fbo->params.format : NULL;
++        int depth = window_fmt ? window_fmt->component_depth[0] : 0;
++        bool submitted = pl_swapchain_submit_frame(p->sw);
++        pl_fmt fmt = depth == 8 ? pl_find_fmt(gpu,
++            p->p5_offscreen_float ? PL_FMT_FLOAT : PL_FMT_UNORM, 4,
++            p->p5_offscreen_float ? 16 : 8,
++            p->p5_offscreen_float ? 16 : 8,
++            PL_FMT_CAP_RENDERABLE | PL_FMT_CAP_HOST_READABLE) : NULL;
++        if (!submitted || !fmt) {
++            p5_vo_log("P5_OFFSCREEN", "bootstrap_failed submitted=%d window_fmt=%s depth=%d",
++                      submitted, window_fmt ? window_fmt->name : "unknown", depth);
++            return VO_FALSE;
++        }
++        int off_w = p->p5_offscreen_native && frame->current ? frame->current->params.w :
++                    swframe.fbo->params.w;
++        int off_h = p->p5_offscreen_native && frame->current ? frame->current->params.h :
++                    swframe.fbo->params.h;
++        p->p5_offscreen_tex = pl_tex_create(gpu, pl_tex_params(
++            .w = off_w,
++            .h = off_h,
++            .format = fmt,
++            .renderable = true,
++            .blit_dst = true,
++            .host_readable = true,
++        ));
++        if (!p->p5_offscreen_tex) {
++            p5_vo_log("P5_OFFSCREEN", "create_failed w=%d h=%d fmt=%s",
++                      swframe.fbo->params.w, swframe.fbo->params.h, fmt->name);
++            return VO_FALSE;
++        }
++        p5_vo_log("P5_OFFSCREEN", "bootstrap window_w=%d window_h=%d off_w=%d off_h=%d window_fmt=%s window_depth=%d off_fmt=%s dst=%d,%d,%d,%d flipped=%d",
++                  swframe.fbo->params.w, swframe.fbo->params.h,
++                  p->p5_offscreen_tex->params.w, p->p5_offscreen_tex->params.h,
++                  swframe.fbo->params.format->name, depth, fmt->name,
++                  p->dst.x0, p->dst.y0, p->dst.x1, p->dst.y1,
++                  swframe.flipped);
++        swframe.fbo = p->p5_offscreen_tex;
++        p->p5_offscreen_frame = swframe;
++        p->p5_offscreen_dst = p->dst;
++        p->p5_offscreen_ready = true;
++    }
++#endif
++
+     bool valid = false;
+     p->is_interpolated = false;
+ 
+@@ -1277,6 +1406,17 @@
+     pl_frame_from_swapchain(&target, &swframe);
+     bool strict_sw_params = target_hint && !pass_colorspace && p->next_opts->target_hint_strict;
+     apply_target_options(p, &target, hint.hdr.min_luma, strict_sw_params);
++#if HAVE_GL && defined(PL_HAVE_OPENGL) && defined(__ANDROID__)
++    if (p->p5_target_pq && frame->current &&
++        frame->current->params.dv_profile == 5) {
++        target.color.primaries = PL_COLOR_PRIM_BT_2020;
++        target.color.transfer = PL_COLOR_TRC_PQ;
++        target.color.hdr.min_luma = 0.0f;
++        target.color.hdr.max_luma = 1000.0f;
++        target.color.hdr.max_cll = 0.0f;
++        target.color.hdr.max_fall = 0.0f;
++    }
++#endif
+     if (target.color.transfer == PL_COLOR_TRC_SRGB && frame->current &&
+         ((opts->sdr_adjust_gamma == 0 && opts->target_trc == PL_COLOR_TRC_UNKNOWN) ||
+          opts->sdr_adjust_gamma == -1))
+@@ -1319,7 +1459,20 @@
+     update_overlays(vo, p->osd_res,
+                     (frame->current && opts->blend_subs) ? OSD_DRAW_OSD_ONLY : 0,
+                     PL_OVERLAY_COORDS_DST_FRAME, &p->osd_state, &target, frame->current);
+-    apply_crop(&target, p->dst, swframe.fbo->params.w, swframe.fbo->params.h);
++    struct mp_rect p5_target_dst = p->dst;
++#if HAVE_GL && defined(PL_HAVE_OPENGL) && defined(__ANDROID__)
++    if (p->p5_offscreen && p->p5_offscreen_native) {
++        p5_target_dst = (struct mp_rect){0, 0, swframe.fbo->params.w,
++                                         swframe.fbo->params.h};
++    }
++#endif
++    apply_crop(&target, p5_target_dst, swframe.fbo->params.w, swframe.fbo->params.h);
++#if HAVE_GL && defined(PL_HAVE_OPENGL) && defined(__ANDROID__)
++    if (p->p5_offscreen && p->p5_offscreen_frames == 0)
++        p5_vo_log("P5_OFFSCREEN", "target crop=%.0f,%.0f,%.0f,%.0f repr=%d primaries=%d transfer=%d",
++                  target.crop.x0, target.crop.y0, target.crop.x1, target.crop.y1,
++                  target.repr.sys, target.color.primaries, target.color.transfer);
++#endif
+     update_tm_viz(&pars->color_map_params, &target);
+ 
+     struct pl_frame_mix mix = {0};
+@@ -1456,6 +1609,55 @@
+         goto done;
+     }
+ 
++#if HAVE_GL && defined(PL_HAVE_OPENGL) && defined(__ANDROID__)
++    if (p->p5_post_rpu_probe && frame->current) {
++        if (frame->current->pts < 10.0) {
++            // A new file (or a seek back) re-arms the one-shot dump.
++            p->p5_post_rpu_dumped_this_file = false;
++        } else if (!p->p5_post_rpu_dumped_this_file) {
++            p->p5_post_rpu_dumped_this_file = true;
++            p5_vo_log("P5_POST_RPU", "pts=%.9f size=%dx%d fmt=%s host_readable=%d target_repr=%d target_primaries=%d target_transfer=%d target_min_luma=%.6f target_max_luma=%.6f target_icc=%d target_lut=%d",
++                      frame->current->pts, swframe.fbo->params.w,
++                      swframe.fbo->params.h,
++                      swframe.fbo->params.format ? swframe.fbo->params.format->name : "null",
++                      swframe.fbo->params.host_readable, target.repr.sys,
++                      target.color.primaries, target.color.transfer,
++                      target.color.hdr.min_luma, target.color.hdr.max_luma,
++                      !!target.icc, !!target.lut);
++            if (p->p5_post_rpu_full_dump && p->p5_offscreen_native) {
++                int w = swframe.fbo->params.w, h = swframe.fbo->params.h;
++                size_t bytes = (size_t) w * h * (p->p5_offscreen_float ? 8 : 4);
++                uint8_t *pixels = malloc(bytes);
++                bool download_ok = pixels && pl_tex_download(gpu, pl_tex_transfer_params(
++                    .tex = p->p5_offscreen_tex,
++                    .rc = {0, 0, 0, w, h, 1},
++                    .ptr = pixels,
++                ));
++                size_t written = 0;
++                if (download_ok) {
++                    char path[128];
++                    snprintf(path, sizeof(path),
++                             "/sdcard/Android/data/com.example.media_kit_hdr_lab/files/p5-post-rpu-full-%d.%s",
++                             ++p->p5_post_rpu_dump_count,
++                             p->p5_offscreen_float ? "rgba16f" : "rgba");
++                    FILE *file = fopen(path, "wb");
++                    if (file) {
++                        written = fwrite(pixels, 1, bytes, file);
++                        fclose(file);
++                    }
++                    p5_vo_log("P5_POST_RPU_FULL", "pts=%.9f w=%d h=%d format=%s bytes=%zu download_ok=%d written=%zu path=%s",
++                              frame->current->pts, w, h,
++                              p->p5_offscreen_float ? "rgba16f" : "rgba8",
++                              bytes, download_ok, written, path);
++                } else {
++                    p5_vo_log("P5_POST_RPU_FULL", "download_failed pts=%.9f", frame->current->pts);
++                }
++                free(pixels);
++            }
++        }
++    }
++#endif
++
+     struct pl_frame ref_frame;
+     pl_frames_infer_mix(p->rr, &mix, &target, &ref_frame);
+ 
+@@ -1486,6 +1688,14 @@
+         pl_tex_clear(gpu, swframe.fbo, (float[4]){ 0.5, 0.0, 1.0, 1.0 });
+ 
+     pl_gpu_flush(gpu);
++#if HAVE_GL && defined(PL_HAVE_OPENGL) && defined(__ANDROID__)
++    if (p->p5_offscreen && p->p5_offscreen_ready) {
++        pl_gpu_finish(gpu);
++        p->p5_offscreen_frames++;
++        p->frame_pending = false;
++        return VO_TRUE;
++    }
++#endif
+     p->frame_pending = true;
+     return VO_TRUE;
+ }
+@@ -1494,6 +1704,10 @@
+ {
+     struct priv *p = vo->priv;
+     struct ra_swapchain *sw = p->ra_ctx->swapchain;
++#if HAVE_GL && defined(PL_HAVE_OPENGL) && defined(__ANDROID__)
++    if (p->p5_offscreen && p->p5_offscreen_ready)
++        return;
++#endif
+ 
+     if (p->frame_pending) {
+         if (!pl_swapchain_submit_frame(p->sw))
+@@ -2127,6 +2341,10 @@
+ static void uninit(struct vo *vo)
+ {
+     struct priv *p = vo->priv;
++#if HAVE_GL && defined(PL_HAVE_OPENGL) && defined(__ANDROID__)
++    if (p->p5_offscreen_tex)
++        pl_tex_destroy(p->gpu, &p->p5_offscreen_tex);
++#endif
+     pl_queue_destroy(&p->queue); // destroy this first
+     for (int i = 0; i < MP_ARRAY_SIZE(p->osd_state.entries); i++)
+         pl_tex_destroy(p->gpu, &p->osd_state.entries[i].tex);
+@@ -2177,6 +2395,42 @@
+ static int preinit(struct vo *vo)
+ {
+     struct priv *p = vo->priv;
++#if HAVE_GL && defined(PL_HAVE_OPENGL) && defined(__ANDROID__)
++    {
++        char property[PROP_VALUE_MAX] = {0};
++        p->p5_offscreen = __system_property_get("debug.media_kit.p5_offscreen",
++                                                property) > 0 &&
++                          !strcmp(property, "1");
++        char native_property[PROP_VALUE_MAX] = {0};
++        p->p5_offscreen_native = p->p5_offscreen &&
++            __system_property_get("debug.media_kit.p5_offscreen_native",
++                                  native_property) > 0 &&
++            !strcmp(native_property, "1");
++        char float_property[PROP_VALUE_MAX] = {0};
++        p->p5_offscreen_float = p->p5_offscreen_native &&
++            __system_property_get("debug.media_kit.p5_offscreen_float",
++                                  float_property) > 0 &&
++            !strcmp(float_property, "1");
++        char pq_property[PROP_VALUE_MAX] = {0};
++        p->p5_target_pq = p->p5_offscreen_float &&
++            __system_property_get("debug.media_kit.p5_target_pq",
++                                  pq_property) > 0 &&
++            !strcmp(pq_property, "1");
++        char post_rpu_property[PROP_VALUE_MAX] = {0};
++        p->p5_post_rpu_probe = __system_property_get(
++            "debug.media_kit.p5_post_rpu_probe", post_rpu_property) > 0 &&
++            !strcmp(post_rpu_property, "1");
++        char full_dump_property[PROP_VALUE_MAX] = {0};
++        p->p5_post_rpu_full_dump = p->p5_post_rpu_probe &&
++            __system_property_get("debug.media_kit.p5_post_rpu_full_dump",
++                                  full_dump_property) > 0 &&
++            !strcmp(full_dump_property, "1");
++        p5_vo_log("P5_VO_INIT", "offscreen=%d native=%d float=%d pq=%d post_rpu=%d full_dump=%d",
++                  p->p5_offscreen, p->p5_offscreen_native,
++                  p->p5_offscreen_float, p->p5_target_pq,
++                  p->p5_post_rpu_probe, p->p5_post_rpu_full_dump);
++    }
++#endif
+     p->opts_cache = m_config_cache_alloc(p, vo->global, &gl_video_conf);
+     p->next_opts_cache = m_config_cache_alloc(p, vo->global, &gl_next_conf);
+     p->next_opts = p->next_opts_cache->opts;
