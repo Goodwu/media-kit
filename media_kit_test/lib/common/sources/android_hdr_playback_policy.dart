@@ -1,5 +1,13 @@
+import 'package:media_kit_video/media_kit_video.dart';
+
 import 'android_hdr_sample_identity.dart';
 
+/// Test-app adapter over the library's [HdrOutputPolicy].
+///
+/// The routing matrix itself lives in media_kit_video and is unit-tested
+/// there; this layer only maps a verified sample identity to its media kind
+/// and applies the test-app-only experiment switches (diagnostic routes and
+/// simulated display capabilities).
 class AndroidHdrPlaybackPolicy {
   const AndroidHdrPlaybackPolicy({
     required this.vo,
@@ -20,6 +28,29 @@ class AndroidHdrPlaybackPolicy {
   final String? surfaceTransfer;
   final bool stripP84Rpu;
 
+  static HdrMediaKind _kindFor(AndroidHdrSample sample) {
+    switch (sample) {
+      case AndroidHdrSample.hdr10:
+        return HdrMediaKind.hdr10;
+      case AndroidHdrSample.hlgBaseControl:
+        return HdrMediaKind.hlg;
+      case AndroidHdrSample.dolbyVisionP84:
+        return HdrMediaKind.dolbyVisionP84;
+      case AndroidHdrSample.dolbyVisionP5:
+        return HdrMediaKind.dolbyVisionP5;
+    }
+  }
+
+  static AndroidHdrPlaybackPolicy _from(HdrOutputPolicy policy) =>
+      AndroidHdrPlaybackPolicy(
+        vo: policy.vo,
+        hwdec: policy.hwdec,
+        targetPrim: policy.targetPrim,
+        targetTrc: policy.targetTrc,
+        surfaceTransfer: policy.surfaceTransfer,
+        stripP84Rpu: policy.stripDvRpu,
+      );
+
   static AndroidHdrPlaybackPolicy forSample(
     AndroidHdrSample sample, {
     required bool usePlatformView,
@@ -33,108 +64,48 @@ class AndroidHdrPlaybackPolicy {
     if (sample == AndroidHdrSample.dolbyVisionP5 && !p5RpuPipelineBuilt) {
       throw StateError('P5 RPU-preserving native pipeline is not built');
     }
+    final kind = _kindFor(sample);
     if (!usePlatformView) {
-      return AndroidHdrPlaybackPolicy(
-        vo: 'gpu-next',
-        hwdec: textureCopyDiagnostic && sample != AndroidHdrSample.dolbyVisionP5
-            ? 'mediacodec-copy'
-            : 'mediacodec',
-        targetPrim: 'bt.709',
-        targetTrc: 'bt.1886',
-        surfaceTransfer: null,
-        stripP84Rpu: sample == AndroidHdrSample.dolbyVisionP84,
-      );
+      final policy = _from(HdrOutputPolicy.decide(
+        kind,
+        usePlatformView: false,
+        p5DoviRescaleAvailable: p5RpuPipelineBuilt,
+      ));
+      if (textureCopyDiagnostic && sample != AndroidHdrSample.dolbyVisionP5) {
+        return AndroidHdrPlaybackPolicy(
+          vo: policy.vo,
+          hwdec: 'mediacodec-copy',
+          targetPrim: policy.targetPrim,
+          targetTrc: policy.targetTrc,
+          surfaceTransfer: policy.surfaceTransfer,
+          stripP84Rpu: policy.stripP84Rpu,
+        );
+      }
+      return policy;
     }
-    // Android Display.HdrCapabilities: HDR10=2, HLG=3. An absent capability
-    // report must not silently select an HDR output route.
     if (displayHdrTypes == null) {
       throw StateError('No display HDR capability report');
     }
     if (sample == AndroidHdrSample.dolbyVisionP5 && p5PlatformSdrDiagnostic) {
-      return const AndroidHdrPlaybackPolicy(
-        vo: 'gpu-next',
-        hwdec: 'mediacodec',
-        targetPrim: 'bt.709',
-        targetTrc: 'bt.1886',
-        surfaceTransfer: null,
-        stripP84Rpu: false,
-      );
+      // Diagnostic: route P5 through the platform view as SDR.
+      return _from(HdrOutputPolicy.decide(
+        kind,
+        usePlatformView: false,
+        p5DoviRescaleAvailable: p5RpuPipelineBuilt,
+      ));
     }
-    if (sample == AndroidHdrSample.hlgBaseControl) {
-      if (!displayHdrTypes.contains(3)) {
-        throw StateError('HLG base control requires display HLG support');
-      }
-      return const AndroidHdrPlaybackPolicy(
-        vo: 'mediacodec_embed',
-        hwdec: 'mediacodec',
-        targetPrim: null,
-        targetTrc: null,
-        surfaceTransfer: null,
-        stripP84Rpu: false,
-      );
-    }
-    if (sample == AndroidHdrSample.dolbyVisionP84) {
-      if (displayHdrTypes.contains(3) && !forceP84PqFallback) {
-        if (gpuPlatformHdrExperiment) {
-          return const AndroidHdrPlaybackPolicy(
-            vo: 'gpu-next',
-            hwdec: 'mediacodec',
-            targetPrim: 'bt.2020',
-            targetTrc: 'hlg',
-            surfaceTransfer: 'hlg',
-            stripP84Rpu: true,
-          );
-        }
-        return const AndroidHdrPlaybackPolicy(
-          vo: 'mediacodec_embed',
-          hwdec: 'mediacodec',
-          targetPrim: null,
-          targetTrc: null,
-          surfaceTransfer: null,
-          stripP84Rpu: false,
-        );
-      }
-      if (displayHdrTypes.contains(2)) {
-        return const AndroidHdrPlaybackPolicy(
-          vo: 'gpu-next',
-          hwdec: 'mediacodec',
-          targetPrim: 'bt.2020',
-          targetTrc: 'pq',
-          surfaceTransfer: 'pq',
-          stripP84Rpu: true,
-        );
-      }
-      throw StateError('P8.4 requires display HLG or HDR10 support');
-    }
-    if (!displayHdrTypes.contains(2)) {
-      throw StateError('PQ output requires display HDR10 support');
-    }
-    if (sample == AndroidHdrSample.dolbyVisionP5) {
-      return const AndroidHdrPlaybackPolicy(
-        vo: 'gpu-next',
-        hwdec: 'mediacodec',
-        targetPrim: 'bt.2020',
-        targetTrc: 'pq',
-        surfaceTransfer: 'pq',
-        stripP84Rpu: false,
-      );
-    }
-    return gpuPlatformHdrExperiment
-        ? const AndroidHdrPlaybackPolicy(
-            vo: 'gpu-next',
-            hwdec: 'mediacodec',
-            targetPrim: 'bt.2020',
-            targetTrc: 'pq',
-            surfaceTransfer: 'pq',
-            stripP84Rpu: false,
-          )
-        : const AndroidHdrPlaybackPolicy(
-            vo: 'mediacodec_embed',
-            hwdec: 'mediacodec',
-            targetPrim: null,
-            targetTrc: null,
-            surfaceTransfer: null,
-            stripP84Rpu: false,
-          );
+    // forceP84PqFallback simulates a display without HLG support.
+    final display = forceP84PqFallback
+        ? displayHdrTypes
+            .where((type) => type != HdrOutputPolicy.displayHdrTypeHlg)
+            .toSet()
+        : displayHdrTypes;
+    return _from(HdrOutputPolicy.decide(
+      kind,
+      usePlatformView: true,
+      p5DoviRescaleAvailable: p5RpuPipelineBuilt,
+      displayHdrTypes: display,
+      preferGpuOutput: gpuPlatformHdrExperiment,
+    ));
   }
 }
