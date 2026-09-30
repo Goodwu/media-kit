@@ -3,7 +3,7 @@
 # usage: round-glass-full.sh <apk> <tag> [duration_seconds]
 set -Eeuo pipefail
 apk=${1:?}; tag=${2:?}; dur=${3:-230}
-original=/private/tmp/media-kit-p5-original-12492.apk
+original=${MEDIA_KIT_ORIGINAL_APK:?set MEDIA_KIT_ORIGINAL_APK to the restore APK}
 base=/tmp/merge-accept-${tag}
 logcat_pid=
 restore() {

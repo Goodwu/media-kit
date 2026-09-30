@@ -2,7 +2,7 @@
 # 三仓库归一后播放矩阵构建：P5/HDR10/P8.4 × SDR/HDR 六包
 # 基础 define 集 = 12632（去起播偏移），HDR 轮加 PLATFORM_VIEW（P5 PQ 另加 GPU_PLATFORM_HDR）
 set -Eeuo pipefail
-cd /Users/wuweiwei1/src/media-kit/media_kit_test
+cd "$(dirname "$0")/../media_kit_test"
 export JAVA_HOME=/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home
 export ORG_GRADLE_PROJECT_mediaKitLocalArm64Jar=/tmp/media-kit-p5-colorfix-398d0c3-arm64.jar
 

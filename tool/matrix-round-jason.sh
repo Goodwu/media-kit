@@ -4,8 +4,8 @@
 # usage: matrix-round-jason.sh <apk> <tag> <duration_seconds> <sample_enum>
 set -Eeuo pipefail
 apk=${1:?}; tag=${2:?}; dur=${3:?}; sample=${4:?}
-serial=5b79aada
-adb="adb -s $serial"
+serial=${ANDROID_SERIAL:-}
+adb="adb ${serial:+-s $serial}"
 base=/tmp/matrix-jason-${tag}
 logcat_pid=
 restore() {
