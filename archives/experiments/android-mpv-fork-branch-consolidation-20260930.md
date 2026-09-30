@@ -72,3 +72,7 @@ FFmpeg 与 libplacebo fork 各只有一条自定义分支，无需归一。
 - 期间个别修复按需 cherry-pick（候选：上游 `14f2d48cbc` aimagereader 错误处理，含 buffer 已释放 ENOENT 假成功 HACK，与我方片尾回退互补不重复）。
 - FFmpeg 安全修复与 mpv 跟踪策略解耦，走 CVE 按需 cherry-pick。
 - 已知欠账：`media-kit/android` tip（`6719532`）的 av_log 修复尚未进产品 JAR（dad30ae2 基于 398d0c3 构建），下个发布周期重建 JAR 时纳入。
+
+## 追加：/tmp 历史实验产物清理（2026-09-30 同日第三批）
+
+用户授权后执行：删除前核查确认（① firstframe-sdr 工作树 5 项未提交改动与归档补丁 `android-private-tmp-patches-20260928/media-kit-firstframe-sdr-20260927.patch` 内容一致（仅 SHA 截断差异）；② mkchk-p5-full 与已持久化 DV-P5.mp4 SHA 相同；③ 各临时工作树补丁均已在该目录归档）。删除约 1300 项历史实验产物（media-kit-12472~12682 各轮截图/日志/构建产物、matrix 轮 APK 与截图、分析脚本、APK 直改工具、ffmpeg/dovibaker/构建脚本的临时展开目录等），磁盘 7.6Gi→19Gi。**留档项**：测试源视频移入 `~/src/media-kit-build/sources/`（DV-P5.mp4、dolby-official-p5-2160p.mp4+RPU bin、p84-rpu-12s-control.mp4——均无 /tmp 外副本）；matrix 设备日志与 SF 快照（21 文件 17M）移入 `~/src/media-kit-build/evidence/playback-matrix-12703-12708/`。仓库内 3 个失效 worktree 注册已 prune。各实验记录中的 /tmp 证据路径除 matrix 记录外保持历史原样（描述当时位置），结论以记录文本为准。
