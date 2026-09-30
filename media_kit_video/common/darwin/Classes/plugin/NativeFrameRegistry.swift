@@ -199,8 +199,12 @@ public enum NativeFrameRegistry {
 
   public static func setSurfaceActive(handle: Int64, enabled: Bool) {
     lock.lock()
+    // Edge-triggered: a re-assertion of the same value must not notify
+    // observers again, or a presented-frame -> promote -> render feedback
+    // loop keeps re-rendering the same frame (even while paused).
+    let changed = activeSurfaces.contains(handle) != enabled
     if enabled { activeSurfaces.insert(handle) } else { activeSurfaces.remove(handle) }
-    let observer = activeObservers[handle]
+    let observer = changed ? activeObservers[handle] : nil
     lock.unlock()
     observer?(handle)
   }
