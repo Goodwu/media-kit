@@ -8,6 +8,7 @@ import 'dart:ffi';
 
 import 'package:media_kit/ffi/ffi.dart';
 import 'package:media_kit/generated/libmpv/bindings.dart' as generated;
+import 'package:media_kit/src/native_handle_lifecycle.dart';
 import 'package:synchronized/synchronized.dart';
 
 /// {@template initializer_native_callable}
@@ -53,29 +54,9 @@ class InitializerNativeCallable {
     _eventCallbacks[ctx.address] = callback;
     _wakeUpNativeCallables[ctx.address] = nativeCallable;
     mpv.mpv_set_wakeup_callback(ctx, nativeFunction.cast(), ctx.cast());
-    _liveHandleAddresses.add(ctx.address);
-    try {
-      ownerBrokerRegistration?.call(ctx.address, unregister: false);
-    } catch (_) {}
+    NativeHandleLifecycle.handleCreated(ctx.address);
     return ctx;
   }
-
-  /// Wired by media_kit_video on Android so this Flutter-free package never
-  /// touches a method channel. The registration lets the Android-side owner
-  /// broker clear the wakeup callback at engine detach, while the
-  /// NativeCallable trampoline backing it is still mapped. Without that, a
-  /// host destroying the FlutterEngine without Dart disposal leaves the next
-  /// mpv wakeup calling trampoline memory that died with the isolate.
-  static void Function(int ctxAddress, {required bool unregister})?
-      ownerBrokerRegistration;
-
-  /// Addresses of handles whose wakeup callback is currently registered.
-  /// Owner-broker wiring uses this to back-fill players that were created
-  /// before the hook was installed.
-  static final Set<int> _liveHandleAddresses = <int>{};
-
-  static List<int> get liveHandleAddresses =>
-      _liveHandleAddresses.toList(growable: false);
 
   /// Disposes [Pointer<mpv_handle>].
   void dispose(Pointer<generated.mpv_handle> ctx) {
@@ -86,15 +67,8 @@ class InitializerNativeCallable {
     // to prevent libmpv from invoking a deleted callback
     mpv.mpv_set_wakeup_callback(ctx, nullptr, nullptr);
 
-    _registerUnregister(ctx);
-    _liveHandleAddresses.remove(ctx.address);
+    NativeHandleLifecycle.handleDisposed(ctx.address);
     _wakeUpNativeCallables.remove(ctx.address)?.close();
-  }
-
-  void _registerUnregister(Pointer<generated.mpv_handle> ctx) {
-    try {
-      ownerBrokerRegistration?.call(ctx.address, unregister: true);
-    } catch (_) {}
   }
 
   void _callback(Pointer<generated.mpv_handle> ctx) {
