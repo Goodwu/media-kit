@@ -58,6 +58,9 @@ class PlayerStream {
   /// Current playlist mode.
   final Stream<PlaylistMode> playlistMode;
 
+  /// Whether playlist is shuffled or not.
+  final Stream<bool> shuffle;
+
   /// Audio parameters of the currently playing [Media].
   /// e.g. sample rate, channels, etc.
   final Stream<AudioParams> audioParams;
@@ -113,6 +116,7 @@ class PlayerStream {
     this.bufferingPercentage,
     this.buffer,
     this.playlistMode,
+    this.shuffle,
     this.audioParams,
     this.videoParams,
     this.audioBitrate,

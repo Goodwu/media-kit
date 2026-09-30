@@ -75,10 +75,10 @@ P5→PQ 输出、首帧和性能使用 `/Users/wuweiwei1/Downloads/test-clips/My
 ## 其他当前任务
 
 - [ ] media-kit 主仓合并上游 main（236 提交）回归单线
-  - status: deferred（冲突评估完成，用户未答复决策询问，按「发布前不追上游」原则默认推迟；待用户授权后按评估报告执行）
+  - status: in_progress（合并已执行并静态验证通过，待 P5 实机验收后合入 main）
   - context: archives/experiments/android-media-kit-main-merge-assessment-20260930.md
   - acceptance: `fix/darwin-video-output-rebuild-barrier`（或其继任集成分支）合并 origin/main（上游 236 提交）后构建通过，并复跑 P5 关键实机验收（颜色数值、片尾回退、EOS、直接销毁、PQ 首帧）无回归；main 成为唯一维护线。
-  - latest: 2026-09-30 冲突策略评估完成（只读 merge-tree，未产生合并提交）：63 处冲突分三层——A 层生成物/版本号约 35 处机械解决；B 层结构性 9 处（OHOS 保留我方、test app groovy→kts 保留我方、ANGLE 文件维持删除）；C 层核心代码 17 文件 74 冲突块，重灾区 `player/native/real.dart` 20 块（双侧同区不同功能，dispose 屏障语义重点核对）。**上游侧重 Android 实际改动很小（a7cec615 仅 17+/54-），重度改动在我方**；d310049 seek 修复落在我方已重写掉的 wid 路径，合并时需确认我方路径无同类问题。估 2–3 个工作日含实机回归。近期发布 v2026.09 不受影响。
+  - latest: 2026-09-30 按评估报告完成合并提交：63 处冲突全部分层裁定（A 层生成物取我方/版本号随上游保留 publish_to none 与 path 依赖；B 层 OHOS 保留、test app kts 保留、ANGLE 维持删除；C 层 74 块——我方 dispose 屏障/owner broker/GL 渲染线程/d3d11 等架构整体保留，上游 shuffle 流/isPlaying 守卫/playlist 修复/FocusNode 特性择优吸收，上游 js→package:web 迁移采纳，上游亮度/音量控件特性暂不吸收）。静态验证：四包 flutter analyze 除 OHOS 既有 4 错误外零 error；上游重复 MainActivity 已移除。待办：构建 + P5 五项实机验收，通过后 main 快进。
 
 - [ ] Android HDR10 / DV P8.4 显示与原生 HDR 首帧闭环
   - status: in_progress
