@@ -75,10 +75,10 @@ P5→PQ 输出、首帧和性能使用 `/Users/wuweiwei1/Downloads/test-clips/My
 ## 其他当前任务
 
 - [ ] media-kit 主仓合并上游 main（236 提交）回归单线
-  - status: blocked_pending_scoping
-  - context: archives/experiments/android-mpv-fork-branch-consolidation-20260930.md
-  - acceptance: `fix/darwin-video-output-rebuild-barrier`（或其继任集成分支）合并 origin/main（上游 236 提交，含 `a7cec615` AndroidVideoController 重构）后构建通过，并复跑 P5 关键实机验收（颜色数值、片尾回退、EOS、直接销毁、PQ 首帧）无回归；main 成为唯一维护线。合并冲突 60+ 文件、核心文件双侧大改，须先做逐文件冲突策略评估再动手。
-  - latest: 2026-09-30 归一时发现浅克隆误导（main 实为上游 236 提交而非 1 个修复），按「版本发布前不追上游」原则中止合并（`git merge --abort`），未产生任何合并提交。
+  - status: pending_decision（冲突评估已完成，待用户决定合并时机）
+  - context: archives/experiments/android-media-kit-main-merge-assessment-20260930.md
+  - acceptance: `fix/darwin-video-output-rebuild-barrier`（或其继任集成分支）合并 origin/main（上游 236 提交）后构建通过，并复跑 P5 关键实机验收（颜色数值、片尾回退、EOS、直接销毁、PQ 首帧）无回归；main 成为唯一维护线。
+  - latest: 2026-09-30 冲突策略评估完成（只读 merge-tree，未产生合并提交）：63 处冲突分三层——A 层生成物/版本号约 35 处机械解决；B 层结构性 9 处（OHOS 保留我方、test app groovy→kts 保留我方、ANGLE 文件维持删除）；C 层核心代码 17 文件 74 冲突块，重灾区 `player/native/real.dart` 20 块（双侧同区不同功能，dispose 屏障语义重点核对）。**上游侧重 Android 实际改动很小（a7cec615 仅 17+/54-），重度改动在我方**；d310049 seek 修复落在我方已重写掉的 wid 路径，合并时需确认我方路径无同类问题。估 2–3 个工作日含实机回归。近期发布 v2026.09 不受影响。
 
 - [ ] Android HDR10 / DV P8.4 显示与原生 HDR 首帧闭环
   - status: in_progress
