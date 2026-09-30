@@ -25,7 +25,7 @@ jobs:
       run:
         working-directory: media_kit
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: "true"
       - uses: subosito/flutter-action@v2
@@ -51,7 +51,7 @@ jobs:
       run:
         working-directory: media_kit
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: "true"
       - run: sudo apt-get update
@@ -73,7 +73,7 @@ jobs:
       run:
         working-directory: media_kit
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: "true"
       - run: sh test/ci/macos/scripts/setup_dylibs.sh
@@ -92,7 +92,7 @@ jobs:
       run:
         working-directory: media_kit
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: "true"
       - run: sudo apt-get update
@@ -105,6 +105,7 @@ jobs:
       - run: rm -r test/src/player/native
       - run: dart pub get
       - run: dart test --platform chrome
+      
 
   windows:
     name: Windows
@@ -113,7 +114,7 @@ jobs:
       run:
         working-directory: media_kit_test
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: "true"
       - uses: subosito/flutter-action@v2
@@ -127,7 +128,7 @@ jobs:
         with:
           name: media_kit_test_win32_x64
           path: media_kit_test/media_kit_test_win32_x64.7z
-      - uses: softprops/action-gh-release@v1
+      - uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
           draft: true
@@ -181,7 +182,7 @@ jobs:
       run:
         working-directory: media_kit_test
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: "true"
       - run: sudo apt-get update
@@ -207,7 +208,7 @@ jobs:
         with:
           name: media_kit_test_linux_x64
           path: media_kit_test/media_kit_test_linux_x64.7z
-      - uses: softprops/action-gh-release@v1
+      - uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
           draft: true
@@ -223,7 +224,7 @@ jobs:
       run:
         working-directory: media_kit_test
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: "true"
       - uses: subosito/flutter-action@v2
@@ -237,7 +238,7 @@ jobs:
         with:
           name: media_kit_test_macos_universal
           path: media_kit_test/media_kit_test_macos_universal.7z
-      - uses: softprops/action-gh-release@v1
+      - uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
           draft: true
@@ -253,7 +254,7 @@ jobs:
       run:
         working-directory: media_kit_test
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: "true"
       - uses: subosito/flutter-action@v2
@@ -267,7 +268,7 @@ jobs:
         with:
           name: media_kit_test_ios_arm64
           path: media_kit_test/media_kit_test_ios_arm64.7z
-      - uses: softprops/action-gh-release@v1
+      - uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
           draft: true
@@ -283,7 +284,7 @@ jobs:
       run:
         working-directory: media_kit_test
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: "true"
       - name: Setup Java
@@ -315,7 +316,7 @@ jobs:
         with:
           name: media_kit_test_android-x86_64
           path: media_kit_test/build/app/outputs/flutter-apk/media_kit_test_android-x86_64.apk
-      - uses: softprops/action-gh-release@v1
+      - uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         with:
           draft: true
@@ -325,6 +326,31 @@ jobs:
             media_kit_test/build/app/outputs/flutter-apk/media_kit_test_android-armeabi-v7a.apk
             media_kit_test/build/app/outputs/flutter-apk/media_kit_test_android-arm64-v8a.apk
             media_kit_test/build/app/outputs/flutter-apk/media_kit_test_android-x86_64.apk
+  build_web:
+    name: Build Flutter Web
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: media_kit_test
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+          cache: true
+
+      - name: Install Flutter Dependencies
+        run: flutter pub get
+
+      - name: Build Flutter Web
+        run: flutter build web --release
+
+      - name: Build Flutter Web WASM
+        run: flutter build web --release --wasm
 
   optional-libs-windows:
     name: Windows (optional libs)
@@ -333,7 +359,7 @@ jobs:
       run:
         working-directory: media_kit_test
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: "true"
       - uses: subosito/flutter-action@v2
@@ -357,7 +383,7 @@ jobs:
       run:
         working-directory: media_kit_test
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: "true"
       - run: sudo apt-get update
@@ -382,7 +408,7 @@ jobs:
       run:
         working-directory: media_kit_test
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: "true"
       - uses: subosito/flutter-action@v2
@@ -405,7 +431,7 @@ jobs:
       run:
         working-directory: media_kit_test
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: "true"
       - uses: subosito/flutter-action@v2
@@ -428,7 +454,7 @@ jobs:
       run:
         working-directory: media_kit_test
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: "true"
       - name: Setup Java
@@ -458,7 +484,7 @@ jobs:
       run:
         working-directory: media_kit_test
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: "true"
       - uses: subosito/flutter-action@v2
@@ -482,7 +508,7 @@ jobs:
       run:
         working-directory: media_kit_test
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: "true"
       - run: sudo apt-get update
@@ -507,7 +533,7 @@ jobs:
       run:
         working-directory: media_kit_test
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: "true"
       - uses: subosito/flutter-action@v2
@@ -530,7 +556,7 @@ jobs:
       run:
         working-directory: media_kit_test
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: "true"
       - uses: subosito/flutter-action@v2
@@ -553,7 +579,7 @@ jobs:
       run:
         working-directory: media_kit_test
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: "true"
       - name: Setup Java
