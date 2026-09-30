@@ -2,6 +2,8 @@
 
 ## Current State
 
+- 2026-09-30 **/tmp 可复用脚本收编入仓（tool/）**：用户要求整理回归。11 个脚本移入 `tool/` 并新增 `tool/README.md` 使用说明——构建链（`matrix-build.sh` 六包矩阵、`mk-pack-jar.sh` JAR 重打包，后者与 `analyze_shots.py` 由一次性硬编码路径参数化）、设备轮次（`matrix-round{,-jason,-ugg}.sh` 三机型播放轮、`decode-probe-round.sh` 纯解码探针、`merge-accept-round.sh`/`merge-accept-destroy-round.sh` 合并验收轮）、分析辅助（`pixel-judge.py` 像素判定、`analyze_shots.py` 绿块/撕裂分析、`resolve_conflicts.py` 冲突批量裁定）。TASKS.md 环境条目、合并验收与播放矩阵两份实验记录的 /tmp 脚本引用已改指 `tool/`。明确不收编：`media-kit-p5-jar-link-object-substitution.sh`（绑定已删除构建树的链接命令快照，流程要点已在 TASKS）、first-frame 一次性测量脚本（主题已完结）、/tmp 散落补丁（对应代码已提交或有归档补丁）。轮次日志/截图等证据文件仍在 /tmp，未归档（体积大，按需人工归档 artifacts/）。
+
 - 2026-09-30 **四仓库归一后播放矩阵六轮实机验收全部通过（12703–12708）**：用户要求编译 demo app 对 DV P5/P8.4、HDR10 做 SDR/HDR 播放测试。六包（发布基线 JAR dad30ae2 + main HEAD a90e6537 一致）全屏、最高亮度 255 下运行——P5 Mystery SDR 全片 EOS（direct=1+RESCALE+闭合 5902/5902）、P5 Mystery PQ 全片 EOS（SF 层 BT2020/PQ RGBA_1010102、片尾回退 98.748 命中、闭合 5423/5423）、HDR10 SDR 全片 EOS（gpu-next bt.1886）、HDR10 HDR 全片 EOS（mediacodec_embed、SF 层 BT2020_ITU_PQ + 静态元数据 types=3）、P8.4 SDR 与 P8.4 HLG 各 5 分钟观察窗（剥 RPU 过滤器生效 / SF 层 BT2020_ITU_HLG）；六轮零渲染错误、截图全部正常画面，结束后均恢复 12492、自动亮度、熄屏。P8.4 全片 19.5 分钟未追 EOS，按需补跑。证据 `archives/experiments/android-playback-matrix-12703-12708-20260930.md`。
 
 - 2026-09-30 **两仓库分支归一全部完成 + mpv 上游跟踪策略定案**：Goodwu/media-kit 远端 12 分支清理为仅剩 `main`（4 个已包含直接删、7 个打 `archive/*-202609` tag 后删，清单见归一记录追加节）；mpv fork 维持 `media-kit/android` 单分支。**mpv 跟发布版不跟 master**（基点即 v0.41 世代；master 982 提交的 vo_gpu_next 1029 行是 libplacebo v7 迁移且未含我们任何修复；下次同步等 v0.42 → merge-tree 试评估 → P5 回归；av_log 修复待下周期重建 JAR 纳入）。策略详情见 `archives/experiments/android-mpv-fork-branch-consolidation-20260930.md` 追加节与 TASKS 接手快照。
