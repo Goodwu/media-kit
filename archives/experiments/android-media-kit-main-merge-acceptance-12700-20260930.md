@@ -22,4 +22,4 @@
 
 合并后构建在五项门槛上均通过产品级实机验收，main 可快进至合并结果成为唯一维护线。遗留：上游亮度/音量控件特性未吸收（评估记录在案）、Linux 侧需 Linux 环境回归、严格数值读回可按需补跑。
 
-- APK 留存：`/tmp/merge-accept-1270{0,1,2}-*.apk`；轮次日志/截图：`/tmp/merge-accept-{glass-full-12700,mystery-pq-12701,engine-destroy-12702}-*`；轮脚本 `/tmp/merge-accept-round.sh`、`/tmp/merge-accept-destroy-round.sh`；像素判定 `/tmp/pixel-judge.py`。
+- APK 留存：`/tmp/merge-accept-1270{0,1,2}-*.apk`；轮次日志/截图：`/tmp/merge-accept-{glass-full-12700,mystery-pq-12701,engine-destroy-12702}-*`；轮脚本 `tool/merge-accept-round.sh`、`tool/merge-accept-destroy-round.sh`；像素判定 `tool/pixel-judge.py`（2026-09-30 自 /tmp 收编入仓）。
