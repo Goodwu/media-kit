@@ -42,3 +42,18 @@ FFmpeg 与 libplacebo fork 各只有一条自定义分支，无需归一。
 - media-kit 主仓侧：`feature/android-p5-pq-product`（139 提交，全包含于 `fix/darwin-video-output-rebuild-barrier`）及其工作树 `/private/tmp/media-kit-p5-pq-product` 已删除；当前分支已推送远端。
 - **media-kit main 合并推迟**：浅克隆曾误导 main 仅领先 1 提交，unshallow 后实为上游 236 提交（含 `a7cec615` AndroidVideoController 重构等），与当前分支 60+ 文件冲突（核心文件双侧大改）。按「版本发布前不追上游」原则中止合并，登记为独立任务，需专门冲突解决 + 实机回归后再合。
 - 遗留临时工作树（未动，HEAD 均已包含于当前分支，但有未提交实验改动）：`/private/tmp/media-kit-firstframe-mix-20260927`、`/private/tmp/media-kit-firstframe-sdr-20260927`；`/private/tmp/media-kit-p5-app` 已 prunable（目录不存在）。
+
+## 追加：Goodwu/media-kit 分支清理（2026-09-30 同日）
+
+远端原有 12 个分支（均为 fork 自建，无上游继承分支），清理后仅剩 `main`（d9be8fdf）：
+
+- **直接删除（内容完整包含于 main）**：`feature/android-p5-pq-product`（139 提交，P1/P2 正式 PQ 产品线）、`integration/piliplusx-hdr-08`、`validation/ohos-dart310-6393db1a`、`version_1.2.5`。
+- **归档 tag 后删除（SHA 独有历史，内容已由 main 等价承载）**：
+  - `archive/integration-piliplusx-hdr-202609`（原始 144 提交集成线，经 squash port 进主线，SHA 不可追溯）
+  - `archive/integration-piliplusx-hdr-public-api-202609`（public-api 变体，含 08b 的 OHOS HAP CI 为祖先；lifecycle 契约 `disposeForRebuild` 与 OHOS CI 已在 main 验证存在）
+  - `archive/source-predidit-main-202609`、`archive/source-predidit-feat-hcpp-202609`（Predidit fork 源快照，供后续上游同步 diff 基准）
+  - `archive/version-1.3.0-predidit-202609`（Predidit v1.3.0 版本快照）
+  - `archive/dev-darwin-xcframeworks-exp-202609`（dev 分支 Darwin xcframeworks 源切换临时实验，melodink v0.6.0 pin，未采纳）
+- 本地 `remote.origin.fetch` 恢复为全分支通配并 prune 过期 tracking refs。
+
+至此三个自有仓库均为单分支：Goodwu/mpv `media-kit/android`、Goodwu/media-kit `main`；FFmpeg/libplacebo 各自单分支不变。
