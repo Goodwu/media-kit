@@ -14,6 +14,7 @@ import 'package:media_kit/media_kit.dart';
 
 import 'package:media_kit_video/src/utils/query_decoders.dart';
 import 'package:media_kit_video/src/video_controller/platform_video_controller.dart';
+import 'package:media_kit_video/src/video_controller/hdr_output_report.dart';
 
 /// {@template native_video_controller}
 ///
@@ -58,7 +59,7 @@ class NativeVideoController extends PlatformVideoController {
   int? _invalidatedNativeOutputEpoch;
   int? _nativeOutputEpochGeneration;
   bool _nativeOutputResetInFlight = false;
-  Future<Map<String, dynamic>>? _nativeOutputResetFuture;
+  Future<HdrOutputReport>? _nativeOutputResetFuture;
 
   NativePlayer get platform => player.platform as NativePlayer;
 
@@ -256,10 +257,8 @@ class NativeVideoController extends PlatformVideoController {
         (Platform.isIOS || Platform.isMacOS)) {
       try {
         final nativeResult = await controller.createNativeOutput();
-        controller.nativeSurfaceCandidate =
-            nativeResult is Map && nativeResult['capable'] == true;
-        controller.setNativeSurfaceActive(
-            nativeResult is Map && nativeResult['active'] == true);
+        controller.nativeSurfaceCandidate = nativeResult.capable;
+        controller.setNativeSurfaceActive(nativeResult.active);
       } catch (_) {
         // Missing native plugin/renderer is a normal fail-closed fallback.
         controller.setNativeSurfaceActive(false);
@@ -355,7 +354,7 @@ class NativeVideoController extends PlatformVideoController {
   }
 
   @override
-  Future<dynamic> createNativeOutput(
+  Future<HdrOutputReport> createNativeOutput(
       {String? surfaceId, int? windowHandle}) async {
     // Only a genuinely new surface generation starts a new epoch namespace.
     // Repeated create calls during HDR reconfiguration are idempotent on the
@@ -375,21 +374,18 @@ class NativeVideoController extends PlatformVideoController {
             ) ??
             const <dynamic, dynamic>{})
         .cast<String, dynamic>();
-    return result;
+    return HdrOutputReport.fromMap(result);
   }
 
   @override
-  Future<dynamic> configureHdrOutput(dynamic configuration) async {
+  Future<HdrOutputReport> configureHdrOutput(
+      Map<String, dynamic> configuration) async {
     final transaction = _nativeOutputTransaction;
     final handle = nativeHandle ?? await player.handle;
     if (transaction != _nativeOutputTransaction || _nativeOutputResetInFlight) {
-      return const <String, dynamic>{'active': false, 'stale': true};
+      return const HdrOutputReport(active: false, stale: true);
     }
-    final payload = Map<String, dynamic>.from(
-      configuration is Map<String, dynamic>
-          ? configuration
-          : (configuration as dynamic).toMap(),
-    );
+    final payload = Map<String, dynamic>.from(configuration);
     if (this.configuration.useNativeSurface) {
       // Darwin's native surface consumes extended-linear BT.2020 samples.
       // Keep the source transfer in the payload for EDR metadata, but do not
@@ -427,7 +423,7 @@ class NativeVideoController extends PlatformVideoController {
       }
     }
     if (transaction != _nativeOutputTransaction) {
-      return const <String, dynamic>{'active': false, 'stale': true};
+      return const HdrOutputReport(active: false, stale: true);
     }
     _lastNativeConfiguration = payload.cast<String, dynamic>();
     final result = (await _channel.invokeMethod<Map<dynamic, dynamic>>(
@@ -441,15 +437,15 @@ class NativeVideoController extends PlatformVideoController {
             const <dynamic, dynamic>{})
         .cast<String, dynamic>();
     if (transaction != _nativeOutputTransaction) {
-      return const <String, dynamic>{'active': false, 'stale': true};
+      return const HdrOutputReport(active: false, stale: true);
     }
     final epoch = result['outputEpoch'];
     if (epoch is int) _lastNativeOutputEpoch = epoch;
-    return result;
+    return HdrOutputReport.fromMap(result);
   }
 
   @override
-  Future<Map<String, dynamic>> resetHdrOutput() async {
+  Future<HdrOutputReport> resetHdrOutput() async {
     final existing = _nativeOutputResetFuture;
     if (existing != null) return existing;
     // Invalidate the Dart-side replay payload before crossing the channel.
@@ -459,7 +455,7 @@ class NativeVideoController extends PlatformVideoController {
     _nativeOutputTransaction++;
     _nativeOutputResetInFlight = true;
     setNativeSurfaceActive(false);
-    late Future<Map<String, dynamic>> resetFuture;
+    late Future<HdrOutputReport> resetFuture;
     var resetSucceeded = false;
     resetFuture = () async {
       try {
@@ -479,7 +475,7 @@ class NativeVideoController extends PlatformVideoController {
           _lastNativeOutputEpoch = resetEpoch;
           resetSucceeded = true;
         }
-        return result;
+        return HdrOutputReport.fromMap(result);
       } finally {
         if (identical(_nativeOutputResetFuture, resetFuture)) {
           _nativeOutputResetFuture = null;
@@ -856,7 +852,7 @@ class NativeVideoController extends PlatformVideoController {
                     await controller.configureHdrOutput(configuration);
                 if (controller._disposed ||
                     transaction != controller._nativeOutputTransaction ||
-                    result is Map && result['stale'] == true) {
+                    result.stale) {
                   // A reset or newer output transaction superseded this
                   // Ready callback. Never publish its false result over a
                   // newer active native surface.
@@ -868,8 +864,7 @@ class NativeVideoController extends PlatformVideoController {
                   // must not promote the separate child-window path.
                   controller.setNativeSurfaceActive(false);
                 } else {
-                  controller.setNativeSurfaceActive(
-                      result is Map && result['active'] == true);
+                  controller.setNativeSurfaceActive(result.active);
                 }
               }
               break;

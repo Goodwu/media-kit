@@ -599,6 +599,13 @@ class AndroidVideoController extends PlatformVideoController {
       (configuration.androidSurfaceTransfer?.isNotEmpty ?? false);
 
   @override
+  bool get wantsLayoutReports =>
+      _layoutSizedHdrPlatformView ||
+      (!configuration.usePlatformView &&
+          (configuration.matchAndroidTextureOutputToLayout ||
+              configuration.enableAndroidSurfaceProducer));
+
+  @override
   Future<void> updateTextureLayouts(
       Object owner, List<TextureOutputLayout> layouts) {
     if (!_layoutSizedHdrPlatformView &&

@@ -9,6 +9,7 @@ import 'package:flutter/widgets.dart';
 
 import 'package:media_kit/media_kit.dart';
 
+import 'package:media_kit_video/src/video_controller/hdr_output_report.dart';
 import 'package:media_kit_video/src/video_controller/video_controller.dart';
 
 /// Rendering topology selected for a video output.
@@ -104,6 +105,12 @@ abstract class PlatformVideoController {
   Future<void> refreshSurfaceSize(
       {double? viewportWidth, double? viewportHeight}) async {}
 
+  /// Whether this controller consumes [updateTextureLayouts] reports.
+  ///
+  /// The controller declares its own layout demand; the wrapper never
+  /// re-derives platform conditions from the configuration.
+  bool get wantsLayoutReports => false;
+
   /// Reports mounted Android Texture viewports. SurfaceTexture may use these
   /// for playback buffer sizing; SurfaceProducer may use them for pre-open
   /// Surface preparation while keeping source-sized playback buffers.
@@ -119,27 +126,24 @@ abstract class PlatformVideoController {
       false;
 
   /// Creates/configures the optional native output. Implementations must fail closed.
-  Future<dynamic> createNativeOutput(
+  Future<HdrOutputReport> createNativeOutput(
           {String? surfaceId, int? windowHandle}) async =>
-      const <String, dynamic>{
-        'capable': false,
-        'active': false,
-        'failureReason': 'unsupported platform',
-      };
+      const HdrOutputReport(
+        failureReason: 'unsupported platform',
+      );
 
-  Future<dynamic> configureHdrOutput(dynamic configuration) async =>
-      const <String, dynamic>{
-        'capable': false,
-        'active': false,
-        'failureReason': 'unsupported platform',
-      };
+  /// Configures the native HDR output from a configuration payload map
+  /// (`transfer`, optional `masteringMetadata`, `opticalOutputScale`, ...).
+  Future<HdrOutputReport> configureHdrOutput(
+          Map<String, dynamic> configuration) async =>
+      const HdrOutputReport(
+        failureReason: 'unsupported platform',
+      );
 
-  Future<Map<String, dynamic>> resetHdrOutput() async =>
-      const <String, dynamic>{
-        'capable': false,
-        'active': false,
-        'failureReason': 'unsupported platform',
-      };
+  Future<HdrOutputReport> resetHdrOutput() async =>
+      const HdrOutputReport(
+        failureReason: 'unsupported platform',
+      );
 
   Future<void> disposeNativeOutput() async {}
 
