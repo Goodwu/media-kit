@@ -133,7 +133,7 @@ class _SinglePlayerSingleVideoScreenState
   late final AndroidHdrOutputSlot<VideoController> _hdrOutputSlot =
       AndroidHdrOutputSlot<VideoController>(
     initial: _initialController,
-    rebuildInitial: configuration.value.usePlatformView,
+    rebuildInitial: configuration.value.android.usePlatformView,
     voOf: (current) async =>
         (await current.platform.future).configuration.vo ?? '',
     disposeForRebuild: (current) => current.disposeForRebuild(),
@@ -142,22 +142,24 @@ class _SinglePlayerSingleVideoScreenState
       configuration: configuration.value.copyWith(
         vo: vo,
         hwdec: hwdec,
-        androidGpuApi: vo == 'gpu-next' ? 'opengl' : null,
-        clearAndroidGpuApi: vo != 'gpu-next',
-        androidSurfaceTransfer: configuration.value.usePlatformView
-            ? (surfaceTransfer == null ||
-                    (vo == 'gpu-next' && _androidGpuHdrLateDataspaceProbe)
-                ? ''
-                : _surfaceTransferForProbe(surfaceTransfer))
-            : null,
-        androidSurfacePixelFormat: configuration.value.usePlatformView
-            ? (vo == 'gpu-next' &&
-                    surfaceTransfer != null &&
-                    !_androidGpuHdrRgba8888SurfaceProbe &&
-                    !_androidP5PlatformSdrDiagnostic
-                ? 'rgba1010102'
-                : '')
-            : null,
+        android: configuration.value.android.copyWith(
+          gpuApi: vo == 'gpu-next' ? 'opengl' : null,
+          clearGpuApi: vo != 'gpu-next',
+          surfaceTransfer: configuration.value.android.usePlatformView
+              ? (surfaceTransfer == null ||
+                      (vo == 'gpu-next' && _androidGpuHdrLateDataspaceProbe)
+                  ? ''
+                  : _surfaceTransferForProbe(surfaceTransfer))
+              : null,
+          surfacePixelFormat: configuration.value.android.usePlatformView
+              ? (vo == 'gpu-next' &&
+                      surfaceTransfer != null &&
+                      !_androidGpuHdrRgba8888SurfaceProbe &&
+                      !_androidP5PlatformSdrDiagnostic
+                  ? 'rgba1010102'
+                  : '')
+              : null,
+        ),
       ),
     ),
     publish: (_) {
@@ -177,13 +179,13 @@ class _SinglePlayerSingleVideoScreenState
     final backend = AndroidHdrPlayerBackend(
       player: player,
       outputSlot: _hdrOutputSlot,
-      usePlatformView: configuration.value.usePlatformView,
+      usePlatformView: configuration.value.android.usePlatformView,
       p5RpuPipelineBuilt: _androidP5RpuPipelineBuilt,
       p5PlatformSdrDiagnostic: _androidP5PlatformSdrDiagnostic,
       textureCopyDiagnostic: _androidTextureCopyDiagnostic,
       forceP84PqFallback: _androidForceP84PqFallback,
       gpuPlatformHdrExperiment: _androidHdrTransaction &&
-          configuration.value.usePlatformView &&
+          configuration.value.android.usePlatformView &&
           _androidGpuPlatformHdr,
       readDisplayHdrTypes: () async {
         final capabilities = await _capabilitiesChannel
@@ -402,7 +404,7 @@ class _SinglePlayerSingleVideoScreenState
           !_androidPreopenFullscreen) {
         final started = await _flutterSurfaceProbeChannel
             .invokeMapMethod<String, dynamic>('StartFirstFrameProbe', {
-          'target': configuration.value.usePlatformView ? 'platform' : 'flutter',
+          'target': configuration.value.android.usePlatformView ? 'platform' : 'flutter',
         });
         debugPrint('FIRST_FRAME_PIXEL_COPY started=$started');
       }
@@ -423,7 +425,7 @@ class _SinglePlayerSingleVideoScreenState
           debugPrint('ANDROID_DIRECT_OPEN trigger path=$source');
           debugPrint('ANDROID_DIRECT_OPEN media_command');
         }
-        if (Platform.isAndroid && !configuration.value.usePlatformView) {
+        if (Platform.isAndroid && !configuration.value.android.usePlatformView) {
           final prepared = await controller.prepareAndroidTextureOutput();
           debugPrint('ANDROID_SELECTED_TEXTURE_PREPARED layoutBound=$prepared');
         }
@@ -1460,7 +1462,7 @@ class _SinglePlayerSingleVideoScreenState
     }
     if (Platform.isAndroid &&
         _androidPreopenFullscreen &&
-        !configuration.value.usePlatformView) {
+        !configuration.value.android.usePlatformView) {
       final properties = await _p5RuntimeGateChannel
           .invokeMapMethod<String, dynamic>('ReadProperties');
       final prebindEnabled =
@@ -1980,7 +1982,7 @@ class _SinglePlayerSingleVideoScreenState
                       final started = await _flutterSurfaceProbeChannel
                           .invokeMapMethod<String, dynamic>(
                               'StartFirstFrameProbe', {
-                        'target': configuration.value.usePlatformView
+                        'target': configuration.value.android.usePlatformView
                             ? 'platform'
                             : 'flutter',
                       });

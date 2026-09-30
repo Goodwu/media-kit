@@ -193,9 +193,101 @@ abstract class PlatformVideoController {
 /// Configurable options for customizing the [VideoController] behavior.
 ///
 /// {@endtemplate}
-class VideoControllerConfiguration {
-  /// Selects the Darwin native surface when the platform can prove HDR output.
-  /// Failed probes and unsupported platforms always fall back to Texture.
+/// Android-specific output options for [VideoControllerConfiguration].
+///
+/// These only have effect on Android (the HCPP flag is additionally read by
+/// the isolated OHOS embedding, which shares the hybrid-composition
+/// concept).
+class AndroidVideoOptions {
+  /// Whether to use PlatformView instead of Texture for video rendering.
+  ///
+  /// PlatformView provides better performance and compatibility for some use
+  /// cases, but may have limitations with certain Flutter features (e.g.,
+  /// transformations).
+  ///
+  /// Default: `false`
+  final bool usePlatformView;
+
+  /// Whether to use Hybrid Composition++ (HCPP) for better PlatformView
+  /// rendering.
+  ///
+  /// Default: `false`
+  final bool useHCPP;
+
+  /// Whether to use Flutter's `SurfaceProducer` API. If disabled, the
+  /// Android implementation uses the `SurfaceTexture` code path instead.
+  /// The `SurfaceTexture` code path is only effective with Android's Skia
+  /// backend.
+  ///
+  /// Default: `true`
+  final bool enableSurfaceProducer;
+
+  /// Size SurfaceTexture playback output from the active Video widget's
+  /// physical viewport. This is opt-in; SurfaceProducer pre-open preparation
+  /// uses mounted viewports separately and keeps source-sized playback
+  /// output.
+  ///
+  /// Default: `false`
+  final bool matchTextureOutputToLayout;
+
+  /// Whether to attach `android.view.Surface` after video parameters are
+  /// known.
+  ///
+  /// Default:
+  /// * [VideoControllerConfiguration.vo] == gpu : `true`
+  /// * [VideoControllerConfiguration.vo] != gpu : `false`
+  final bool? attachSurfaceAfterVideoParameters;
+
+  /// gpu-next API selection (`opengl` / `vulkan`). Null keeps the platform
+  /// default.
+  final String? gpuApi;
+
+  /// PlatformView Surface creation hints for HDR experiments.
+  final String? surfaceTransfer;
+  final String? surfacePixelFormat;
+
+  const AndroidVideoOptions({
+    this.usePlatformView = false,
+    this.useHCPP = false,
+    this.enableSurfaceProducer = true,
+    this.matchTextureOutputToLayout = false,
+    this.attachSurfaceAfterVideoParameters,
+    this.gpuApi,
+    this.surfaceTransfer,
+    this.surfacePixelFormat,
+  });
+
+  AndroidVideoOptions copyWith({
+    bool? usePlatformView,
+    bool? useHCPP,
+    bool? enableSurfaceProducer,
+    bool? matchTextureOutputToLayout,
+    bool? attachSurfaceAfterVideoParameters,
+    String? gpuApi,
+    bool clearGpuApi = false,
+    String? surfaceTransfer,
+    String? surfacePixelFormat,
+  }) =>
+      AndroidVideoOptions(
+        usePlatformView: usePlatformView ?? this.usePlatformView,
+        useHCPP: useHCPP ?? this.useHCPP,
+        enableSurfaceProducer:
+            enableSurfaceProducer ?? this.enableSurfaceProducer,
+        matchTextureOutputToLayout:
+            matchTextureOutputToLayout ?? this.matchTextureOutputToLayout,
+        attachSurfaceAfterVideoParameters: attachSurfaceAfterVideoParameters ??
+            this.attachSurfaceAfterVideoParameters,
+        gpuApi: clearGpuApi ? null : gpuApi ?? this.gpuApi,
+        surfaceTransfer: surfaceTransfer ?? this.surfaceTransfer,
+        surfacePixelFormat: surfacePixelFormat ?? this.surfacePixelFormat,
+      );
+}
+
+/// Darwin-specific output options for [VideoControllerConfiguration].
+class DarwinVideoOptions {
+  /// Selects the Darwin native surface when the platform can prove HDR
+  /// output. Failed probes and unsupported platforms always fall back to
+  /// Texture.
   final bool useNativeSurface;
 
   /// Experimental macOS mpv-owned Cocoa window output.
@@ -205,6 +297,22 @@ class VideoControllerConfiguration {
   /// it is not an HDR/DV capability switch.
   final bool useNativeWindow;
 
+  const DarwinVideoOptions({
+    this.useNativeSurface = false,
+    this.useNativeWindow = false,
+  });
+
+  DarwinVideoOptions copyWith({
+    bool? useNativeSurface,
+    bool? useNativeWindow,
+  }) =>
+      DarwinVideoOptions(
+        useNativeSurface: useNativeSurface ?? this.useNativeSurface,
+        useNativeWindow: useNativeWindow ?? this.useNativeWindow,
+      );
+}
+
+class VideoControllerConfiguration {
   /// Sets the [`--vo`](https://mpv.io/manual/stable/#options-vo) property on native backend.
   ///
   /// Default: Platform specific.
@@ -219,13 +327,6 @@ class VideoControllerConfiguration {
   /// * Windows, GNU/Linux, macOS & iOS, Ohos : `auto`
   /// * Android: `auto-safe`
   final String? hwdec;
-
-  /// Android gpu-next API selection. Null keeps the platform default.
-  final String? androidGpuApi;
-
-  /// Android PlatformView Surface creation hints for HDR experiments.
-  final String? androidSurfaceTransfer;
-  final String? androidSurfacePixelFormat;
 
   /// The scale for the video output.
   /// This may be used for performance reasons. Specifying this option will cause [width] & [height] to be ignored.
@@ -253,104 +354,44 @@ class VideoControllerConfiguration {
   /// Default: `true`
   final bool enableHardwareAcceleration;
 
-  /// Whether to use Flutter's `SurfaceProducer` API on Android.
-  ///
-  /// This option only has effect on Android. If disabled, the Android
-  /// implementation uses the `SurfaceTexture` code path instead. The
-  /// `SurfaceTexture` code path is only effective with Android's Skia backend.
-  ///
-  /// Default: `true`
-  final bool enableAndroidSurfaceProducer;
+  /// Android-specific output options.
+  final AndroidVideoOptions android;
 
-  /// Size Android SurfaceTexture playback output from the active Video widget's
-  /// physical viewport. This is opt-in; SurfaceProducer pre-open preparation
-  /// uses mounted viewports separately and keeps source-sized playback output.
-  final bool matchAndroidTextureOutputToLayout;
-
-  /// Whether to attach `android.view.Surface` after video parameters are known.
-  ///
-  /// Default:
-  /// * [vo] == gpu : `true`
-  /// * [vo] != gpu : `false`
-  final bool? androidAttachSurfaceAfterVideoParameters;
-
-  /// Whether to use PlatformView instead of Texture for video rendering on Android.
-  ///
-  /// PlatformView provides better performance and compatibility for some use cases,
-  /// but may have limitations with certain Flutter features (e.g., transformations).
-  ///
-  /// Default: `false`
-  final bool usePlatformView;
-
-  /// Whether to use Hybrid Composition++ (HCPP) for better PlatformView rendering on Android.
-  ///
-  /// Default: `false`
-  final bool useHCPP;
+  /// Darwin-specific output options.
+  final DarwinVideoOptions darwin;
 
   /// {@macro video_controller_configuration}
   const VideoControllerConfiguration({
     this.vo,
     this.hwdec,
-    this.androidGpuApi,
-    this.androidSurfaceTransfer,
-    this.androidSurfacePixelFormat,
     this.width,
     this.height,
     this.scale = 1.0,
     this.enableHardwareAcceleration = true,
-    this.enableAndroidSurfaceProducer = true,
-    this.matchAndroidTextureOutputToLayout = false,
-    this.androidAttachSurfaceAfterVideoParameters,
-    this.usePlatformView = false,
-    this.useHCPP = false,
-    this.useNativeSurface = false,
-    this.useNativeWindow = false,
+    this.android = const AndroidVideoOptions(),
+    this.darwin = const DarwinVideoOptions(),
   });
 
   /// Returns a copy of this class with the given fields replaced by the new values.
   VideoControllerConfiguration copyWith({
     String? vo,
     String? hwdec,
-    String? androidGpuApi,
-    bool clearAndroidGpuApi = false,
-    String? androidSurfaceTransfer,
-    String? androidSurfacePixelFormat,
     double? scale,
     int? width,
     int? height,
     bool? enableHardwareAcceleration,
-    bool? enableAndroidSurfaceProducer,
-    bool? matchAndroidTextureOutputToLayout,
-    bool? androidAttachSurfaceAfterVideoParameters,
-    bool? usePlatformView,
-    bool? useHCPP,
-    bool? useNativeSurface,
-    bool? useNativeWindow,
+    AndroidVideoOptions? android,
+    DarwinVideoOptions? darwin,
   }) =>
       VideoControllerConfiguration(
         vo: vo ?? this.vo,
         hwdec: hwdec ?? this.hwdec,
-        androidGpuApi:
-            clearAndroidGpuApi ? null : androidGpuApi ?? this.androidGpuApi,
-        androidSurfaceTransfer:
-            androidSurfaceTransfer ?? this.androidSurfaceTransfer,
-        androidSurfacePixelFormat:
-            androidSurfacePixelFormat ?? this.androidSurfacePixelFormat,
         scale: scale ?? this.scale,
         width: width ?? this.width,
         height: height ?? this.height,
         enableHardwareAcceleration:
             enableHardwareAcceleration ?? this.enableHardwareAcceleration,
-        enableAndroidSurfaceProducer:
-            enableAndroidSurfaceProducer ?? this.enableAndroidSurfaceProducer,
-        matchAndroidTextureOutputToLayout: matchAndroidTextureOutputToLayout ??
-            this.matchAndroidTextureOutputToLayout,
-        androidAttachSurfaceAfterVideoParameters:
-            androidAttachSurfaceAfterVideoParameters ??
-                this.androidAttachSurfaceAfterVideoParameters,
-        usePlatformView: usePlatformView ?? this.usePlatformView,
-        useHCPP: useHCPP ?? this.useHCPP,
-        useNativeSurface: useNativeSurface ?? this.useNativeSurface,
-        useNativeWindow: useNativeWindow ?? this.useNativeWindow,
+        android: android ?? this.android,
+        darwin: darwin ?? this.darwin,
       );
 }

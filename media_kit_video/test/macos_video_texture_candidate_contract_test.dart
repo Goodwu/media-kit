@@ -58,7 +58,7 @@ void main() {
   _require(
     RegExp(
           r'Platform\s*\.isAndroid\s*&&\s*notifier\.configuration\s*'
-          r'\.usePlatformView',
+          r'\.android\s*\.usePlatformView',
         ).hasMatch(source) &&
         source.contains('final nativeOhosCandidate ='),
     'Android PlatformView and OHOS native-candidate selection must remain '

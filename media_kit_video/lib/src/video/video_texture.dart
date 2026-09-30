@@ -431,14 +431,14 @@ class VideoState extends State<Video> with WidgetsBindingObserver {
     BoxFit fit,
     PlatformVideoController notifier,
   ) {
-    final hdrPlatformLayout = notifier.configuration.usePlatformView &&
+    final hdrPlatformLayout = notifier.configuration.android.usePlatformView &&
         notifier.configuration.vo == 'gpu-next' &&
-        (notifier.configuration.androidSurfaceTransfer?.isNotEmpty ?? false);
+        (notifier.configuration.android.surfaceTransfer?.isNotEmpty ?? false);
     if (!Platform.isAndroid ||
         (!hdrPlatformLayout &&
-            (notifier.configuration.usePlatformView ||
-                (!notifier.configuration.matchAndroidTextureOutputToLayout &&
-                    !notifier.configuration.enableAndroidSurfaceProducer))) ||
+            (notifier.configuration.android.usePlatformView ||
+                (!notifier.configuration.android.matchTextureOutputToLayout &&
+                    !notifier.configuration.android.enableSurfaceProducer))) ||
         !constraints.hasBoundedWidth ||
         !constraints.hasBoundedHeight) {
       return;
@@ -516,7 +516,7 @@ class VideoState extends State<Video> with WidgetsBindingObserver {
                           // deliberately has no Texture sibling: rendering to
                           // both would create two native consumers.
                           if (Platform.isAndroid &&
-                              notifier.configuration.usePlatformView &&
+                              notifier.configuration.android.usePlatformView &&
                               notifier.nativeHandle != null) {
                             final width = viewportConstraints.hasBoundedWidth
                                 ? viewportConstraints.maxWidth
@@ -528,7 +528,7 @@ class VideoState extends State<Video> with WidgetsBindingObserver {
                                 notifier.configuration.vo == 'gpu-next' &&
                                     (notifier
                                             .configuration
-                                            .androidSurfaceTransfer
+                                            .android.surfaceTransfer
                                             ?.isNotEmpty ??
                                         false);
                             return StreamBuilder<VideoParams>(
@@ -555,14 +555,14 @@ class VideoState extends State<Video> with WidgetsBindingObserver {
                                     handle: notifier.nativeHandle!,
                                     width: width.ceil(),
                                     height: fittedHeight.ceil(),
-                                    useHCPP: notifier.configuration.useHCPP,
+                                    useHCPP: notifier.configuration.android.useHCPP,
                                     generation:
                                         notifier.nativeSurfaceGeneration,
                                     androidSurfaceTransfer: notifier
-                                        .configuration.androidSurfaceTransfer,
+                                        .configuration.android.surfaceTransfer,
                                     androidSurfacePixelFormat: notifier
                                         .configuration
-                                        .androidSurfacePixelFormat,
+                                        .android.surfacePixelFormat,
                                   ),
                                 );
                               },
@@ -587,7 +587,7 @@ class VideoState extends State<Video> with WidgetsBindingObserver {
                                     final ohosNativeSurfaceCandidate =
                                         Platform.operatingSystem == 'ohos' &&
                                             notifier.configuration
-                                                .useNativeSurface &&
+                                                .darwin.useNativeSurface &&
                                             notifier.nativeSurfaceCandidate;
                                     final keepMountedNativeSurface =
                                         ohosNativeSurfaceCandidate &&
@@ -599,14 +599,14 @@ class VideoState extends State<Video> with WidgetsBindingObserver {
                                       final nativeSurfaceCandidate = (Platform
                                                   .isAndroid &&
                                               notifier.configuration
-                                                  .usePlatformView) ||
+                                                  .android.usePlatformView) ||
                                           ((Platform.isIOS || Platform.isMacOS) &&
                                               (notifier.configuration
-                                                      .useNativeSurface ||
+                                                      .darwin.useNativeSurface ||
                                                   notifier.configuration
-                                                      .useNativeWindow) &&
+                                                      .darwin.useNativeWindow) &&
                                               (notifier.configuration
-                                                      .useNativeWindow
+                                                      .darwin.useNativeWindow
                                                   ? notifier
                                                       .nativeSurfaceCandidate
                                                   : notifier
@@ -614,12 +614,12 @@ class VideoState extends State<Video> with WidgetsBindingObserver {
                                               notifier.nativeHandle != null) ||
                                           (Platform.operatingSystem == 'ohos' &&
                                               notifier.configuration
-                                                  .useNativeSurface &&
+                                                  .darwin.useNativeSurface &&
                                               notifier.nativeSurfaceCandidate);
                                       final nativeSurface =
                                           nativeSurfaceCandidate &&
                                               (notifier.configuration
-                                                      .useNativeWindow
+                                                      .darwin.useNativeWindow
                                                   ? notifier
                                                       .nativeSurfaceCandidate
                                                   : notifier
@@ -698,12 +698,12 @@ class VideoState extends State<Video> with WidgetsBindingObserver {
                                         handle: notifier.nativeHandle ?? id,
                                         width: rect.width.toInt(),
                                         height: rect.height.toInt(),
-                                        useHCPP: notifier.configuration.useHCPP,
+                                        useHCPP: notifier.configuration.android.useHCPP,
                                         generation:
                                             notifier.nativeSurfaceGeneration,
                                         mpvWindow: Platform.isMacOS &&
                                             notifier
-                                                .configuration.useNativeWindow,
+                                                .configuration.darwin.useNativeWindow,
                                       );
                                       return SizedBox(
                                         // Native OHOS surfaces must receive

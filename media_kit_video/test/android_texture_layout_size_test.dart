@@ -13,10 +13,15 @@ void main() {
   test('Android Texture layout sizing', () {
     const source = Size(3840, 2160);
     const configuration = VideoControllerConfiguration();
-    if (configuration.matchAndroidTextureOutputToLayout ||
+    if (configuration.android.matchTextureOutputToLayout ||
         !configuration
-            .copyWith(matchAndroidTextureOutputToLayout: true)
-            .matchAndroidTextureOutputToLayout) {
+            .copyWith(
+              android: configuration.android.copyWith(
+                matchTextureOutputToLayout: true,
+              ),
+            )
+            .android
+            .matchTextureOutputToLayout) {
       throw StateError('Layout sizing must be opt-in and copyable.');
     }
     _expectSize(

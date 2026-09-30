@@ -35,24 +35,28 @@ final configuration = ValueNotifier<VideoControllerConfiguration>(
         : 'auto',
     enableHardwareAcceleration: true,
     // W1 macOS-only experiment. Keep this enabled only in the isolated host.
-    useNativeWindow: !_autoTexture && _autoNativeWindow,
-    useNativeSurface: !_autoTexture && !_autoNativeWindow,
+    vo: Platform.isAndroid && _androidVo.isNotEmpty ? _androidVo : null,
+    darwin: DarwinVideoOptions(
+      useNativeWindow: !_autoTexture && _autoNativeWindow,
+      useNativeSurface: !_autoTexture && !_autoNativeWindow,
+    ),
     // Explicit comparison input for Android test builds; it is not a library
     // HDR-capability declaration.
-    usePlatformView: Platform.isAndroid && _androidPlatformView,
-    enableAndroidSurfaceProducer: _androidSurfaceProducer,
-    matchAndroidTextureOutputToLayout:
-        Platform.isAndroid && _androidTextureLayoutSize,
-    vo: Platform.isAndroid && _androidVo.isNotEmpty ? _androidVo : null,
-    androidGpuApi: Platform.isAndroid &&
-            _androidHdrTransaction &&
-            _androidVo == 'gpu-next'
-        ? 'opengl'
-        : null,
-    androidSurfacePixelFormat: Platform.isAndroid &&
-            _androidPlatformView &&
-            _androidGpuSdrTenBitProbe
-        ? 'rgba1010102'
-        : null,
+    android: AndroidVideoOptions(
+      usePlatformView: Platform.isAndroid && _androidPlatformView,
+      enableSurfaceProducer: _androidSurfaceProducer,
+      matchTextureOutputToLayout:
+          Platform.isAndroid && _androidTextureLayoutSize,
+      gpuApi: Platform.isAndroid &&
+              _androidHdrTransaction &&
+              _androidVo == 'gpu-next'
+          ? 'opengl'
+          : null,
+      surfacePixelFormat: Platform.isAndroid &&
+              _androidPlatformView &&
+              _androidGpuSdrTenBitProbe
+          ? 'rgba1010102'
+          : null,
+    ),
   ),
 );

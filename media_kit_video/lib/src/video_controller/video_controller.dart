@@ -93,8 +93,8 @@ class VideoController {
   /// Returns false if no Video has reported a bounded layout yet.
   Future<bool> prepareAndroidTextureOutput() async {
     final output = await platform.future;
-    if (output.configuration.usePlatformView ||
-        !output.configuration.enableAndroidSurfaceProducer) {
+    if (output.configuration.android.usePlatformView ||
+        !output.configuration.android.enableSurfaceProducer) {
       return false;
     }
     if (_textureLayoutOwners.isEmpty) {

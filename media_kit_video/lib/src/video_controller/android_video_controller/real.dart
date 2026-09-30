@@ -157,14 +157,14 @@ class AndroidVideoController extends PlatformVideoController {
 
   @override
   Future<void> get waitUntilInitialOutputBound =>
-      (configuration.usePlatformView ||
-              !configuration.enableAndroidSurfaceProducer)
+      (configuration.android.usePlatformView ||
+              !configuration.android.enableSurfaceProducer)
           ? _initialPlatformViewOutputBound.future
           : Future<void>.value();
 
   @override
   Future<void> get waitUntilCurrentOutputBound {
-    if (!configuration.usePlatformView) return waitUntilInitialOutputBound;
+    if (!configuration.android.usePlatformView) return waitUntilInitialOutputBound;
     if (_disposed || _fullyDisposed) {
       return Future<void>.error(StateError('Android output is disposed'));
     }
@@ -589,28 +589,28 @@ class AndroidVideoController extends PlatformVideoController {
   Size? _appliedVideoSizeRequest;
 
   bool get _layoutSizedTexture =>
-      configuration.matchAndroidTextureOutputToLayout &&
-      !configuration.usePlatformView &&
-      !configuration.enableAndroidSurfaceProducer;
+      configuration.android.matchTextureOutputToLayout &&
+      !configuration.android.usePlatformView &&
+      !configuration.android.enableSurfaceProducer;
 
   bool get _layoutSizedHdrPlatformView =>
-      configuration.usePlatformView &&
+      configuration.android.usePlatformView &&
       configuration.vo == 'gpu-next' &&
-      (configuration.androidSurfaceTransfer?.isNotEmpty ?? false);
+      (configuration.android.surfaceTransfer?.isNotEmpty ?? false);
 
   @override
   bool get wantsLayoutReports =>
       _layoutSizedHdrPlatformView ||
-      (!configuration.usePlatformView &&
-          (configuration.matchAndroidTextureOutputToLayout ||
-              configuration.enableAndroidSurfaceProducer));
+      (!configuration.android.usePlatformView &&
+          (configuration.android.matchTextureOutputToLayout ||
+              configuration.android.enableSurfaceProducer));
 
   @override
   Future<void> updateTextureLayouts(
       Object owner, List<TextureOutputLayout> layouts) {
     if (!_layoutSizedHdrPlatformView &&
         !_layoutSizedTexture &&
-        !configuration.enableAndroidSurfaceProducer) {
+        !configuration.android.enableSurfaceProducer) {
       return Future<void>.value();
     }
     return lock.synchronized(() async {
@@ -625,8 +625,8 @@ class AndroidVideoController extends PlatformVideoController {
   @override
   Future<bool> prepareAndroidTextureOutput(
       Object owner, List<TextureOutputLayout> layouts) {
-    if (configuration.usePlatformView ||
-        !configuration.enableAndroidSurfaceProducer) {
+    if (configuration.android.usePlatformView ||
+        !configuration.android.enableSurfaceProducer) {
       return Future<bool>.value(false);
     }
     return lock.synchronized(() async {
@@ -711,7 +711,7 @@ class AndroidVideoController extends PlatformVideoController {
       width = target.width.toInt();
       height = target.height.toInt();
     }
-    if (!configuration.usePlatformView &&
+    if (!configuration.android.usePlatformView &&
         _textureOutputMaxWidth > 0 &&
         width > _textureOutputMaxWidth) {
       height =
@@ -721,7 +721,7 @@ class AndroidVideoController extends PlatformVideoController {
           '${source.width.toInt()}x${source.height.toInt()} '
           'target=${width}x$height');
     }
-    if (configuration.usePlatformView &&
+    if (configuration.android.usePlatformView &&
         _platformOutputMaxWidth > 0 &&
         width > _platformOutputMaxWidth) {
       height =
@@ -740,7 +740,7 @@ class AndroidVideoController extends PlatformVideoController {
     }
     final handle = await player.handle;
     if (_disposed || _fullyDisposed) return;
-    if (!configuration.usePlatformView) {
+    if (!configuration.android.usePlatformView) {
       final actual = await _channel.invokeMapMethod<String, dynamic>(
         'VideoOutputManager.SetSurfaceSize',
         {
@@ -844,7 +844,7 @@ class AndroidVideoController extends PlatformVideoController {
     final vidValue = widValue == '0' ? 'no' : 'auto';
     _traceSurface('apply begin wid=$widValue vo=$voValue vid=$vidValue');
     final stopVideoFirst = _stopVideoBeforePlatformDetach &&
-        configuration.usePlatformView &&
+        configuration.android.usePlatformView &&
         configuration.vo == 'mediacodec_embed' &&
         widValue == '0';
     if (stopVideoFirst) {
@@ -862,9 +862,9 @@ class AndroidVideoController extends PlatformVideoController {
       'vo': voValue,
       // It is important to re-initialize --vid in-case of --vo=mediacodec_embed.
       // Not doing so causes error "Could not open codec." & video never gets rendered.
-      if (configuration.usePlatformView ||
+      if (configuration.android.usePlatformView ||
           (configuration.vo == 'mediacodec_embed' &&
-              !configuration.usePlatformView))
+              !configuration.android.usePlatformView))
         'vid': vidValue,
     };
     for (final entry in properties.entries) {
@@ -1422,11 +1422,11 @@ class AndroidVideoController extends PlatformVideoController {
         // Texture output must be recorded before the next await so failed
         // initialization can dispose the exact native resource.
         Map<String, dynamic>? initialTextureSurface;
-        if (!configuration.usePlatformView) {
+        if (!configuration.android.usePlatformView) {
           controller._nativeTextureCreation = _channel
               .invokeMapMethod<String, dynamic>('VideoOutputManager.Create', {
             'handle': handle.toString(),
-            'enableSurfaceProducer': configuration.enableAndroidSurfaceProducer,
+            'enableSurfaceProducer': configuration.android.enableSurfaceProducer,
             'generation': controller.nativeSurfaceGeneration,
           }).then((surface) {
             controller._videoOutputCreated = true;
@@ -1436,7 +1436,7 @@ class AndroidVideoController extends PlatformVideoController {
           ensurePlayerActive();
         }
 
-        if (configuration.usePlatformView) {
+        if (configuration.android.usePlatformView) {
           controller.id.value = handle;
         }
 
@@ -1447,10 +1447,10 @@ class AndroidVideoController extends PlatformVideoController {
           // A PlatformView's Surface is created asynchronously by Flutter. Do not
           // let MediaCodec configure before its wid exists; widListener restores
           // vid=auto after it has bound the current Surface generation.
-          'vid': configuration.usePlatformView ? 'no' : 'auto',
+          'vid': configuration.android.usePlatformView ? 'no' : 'auto',
           'force-window': 'yes',
-          'gpu-api': configuration.androidGpuApi != null
-              ? configuration.androidGpuApi!
+          'gpu-api': configuration.android.gpuApi != null
+              ? configuration.android.gpuApi!
               : const String.fromEnvironment('MEDIA_KIT_ANDROID_GPU_API')
                       .isNotEmpty
                   ? const String.fromEnvironment('MEDIA_KIT_ANDROID_GPU_API')
@@ -1459,7 +1459,7 @@ class AndroidVideoController extends PlatformVideoController {
                       : 'auto',
           // An explicit API choice owns its context choice too. A global
           // Vulkan-only probe context must not be paired with OpenGL HDR.
-          if (configuration.androidGpuApi == null &&
+          if (configuration.android.gpuApi == null &&
               const String.fromEnvironment('MEDIA_KIT_ANDROID_GPU_CONTEXT')
                   .isNotEmpty)
             'gpu-context':
@@ -1469,8 +1469,8 @@ class AndroidVideoController extends PlatformVideoController {
           'sub-scale-with-window': 'yes',
           'hwdec-codecs': 'h264,hevc,mpeg4,mpeg2video,vp8,vp9,av1',
         });
-        if (!configuration.usePlatformView &&
-            !configuration.enableAndroidSurfaceProducer) {
+        if (!configuration.android.usePlatformView &&
+            !configuration.android.enableSurfaceProducer) {
           // SurfaceTextureEntry creates its Surface synchronously. Its first
           // MethodChannel callback can arrive before this controller is
           // published, so bind the returned identity before media is opened.
@@ -1626,7 +1626,7 @@ class AndroidVideoController extends PlatformVideoController {
       }
       await lock.synchronized(() async {
         wid.removeListener(widListener);
-        if (configuration.usePlatformView) {
+        if (configuration.android.usePlatformView) {
           final bound = _boundSurfaceOwner(handle!);
           if (wid.value != null && bound == null) {
             throw StateError(
@@ -1698,7 +1698,7 @@ class AndroidVideoController extends PlatformVideoController {
     // initialization barrier has completed. Wait for its native ownership to
     // settle before deciding whether the terminal callback may finalize.
     // Dispose is idempotent on Java even when Create itself returned an error.
-    if (!configuration.usePlatformView && _nativeTextureCreation != null) {
+    if (!configuration.android.usePlatformView && _nativeTextureCreation != null) {
       try {
         await _nativeTextureCreation;
       } catch (_) {
@@ -1725,7 +1725,7 @@ class AndroidVideoController extends PlatformVideoController {
       try {
         await lock.synchronized(() async {
           if (!_fullyDisposed) wid.removeListener(widListener);
-          if (configuration.usePlatformView) {
+          if (configuration.android.usePlatformView) {
             final bound = _fullyDisposed ? null : _boundSurfaceOwner(handle);
             final inFlight = _fullyDisposed ? null : _ledger.inFlightOwner;
             if (!_fullyDisposed) {
@@ -1793,7 +1793,7 @@ class AndroidVideoController extends PlatformVideoController {
     if (handle != null && identical(_failedControllerDisposals[handle], this)) {
       _failedControllerDisposals.remove(handle);
     }
-    if (!configuration.usePlatformView) {
+    if (!configuration.android.usePlatformView) {
       platform.postTermination.remove(_postTerminationCallback);
     }
     wid.removeListener(widListener);

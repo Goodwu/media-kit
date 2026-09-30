@@ -949,7 +949,7 @@ class OhosVideoController extends PlatformVideoController {
         // generation and can report a new ready event; clearing this flag
         // permanently would make a surface-loss recovery fall back to Texture
         // forever and could never restore the native HDR path.
-        target.nativeSurfaceCandidate = target.configuration.useNativeSurface;
+        target.nativeSurfaceCandidate = target.configuration.darwin.useNativeSurface;
         current = true;
       });
       if (!current || target._disposed) return null;
@@ -1079,7 +1079,7 @@ class OhosVideoController extends PlatformVideoController {
     // Mount the XComponent so its onLoad callback can provide the native
     // surface ID. After destruction a live controller keeps the candidate
     // enabled and the widget can mount a new generation; dispose clears it.
-    controller.nativeSurfaceCandidate = configuration.useNativeSurface;
+    controller.nativeSurfaceCandidate = configuration.darwin.useNativeSurface;
     controller.nativeSurfaceGeneration = (_surfaceGenerations[handle] ?? 0) + 1;
     _surfaceGenerations[handle] = controller.nativeSurfaceGeneration;
 
@@ -1105,7 +1105,7 @@ class OhosVideoController extends PlatformVideoController {
       // immediately replaced; after the handoff Flutter can keep consuming
       // that stale BufferQueue and report 40601000 indefinitely.
       if (!(Platform.operatingSystem == 'ohos' &&
-          configuration.useNativeSurface)) {
+          configuration.darwin.useNativeSurface)) {
         await controller.setProperty('vo', configuration.vo!);
       }
     });

@@ -1,3 +1,15 @@
+## Unreleased (fork)
+
+- **BREAKING**(api): `VideoControllerConfiguration` 平台开关收敛为子对象。迁移：
+  - `usePlatformView`/`useHCPP`/`enableAndroidSurfaceProducer`→`android.usePlatformView`/`android.useHCPP`/`android.enableSurfaceProducer`
+  - `matchAndroidTextureOutputToLayout`→`android.matchTextureOutputToLayout`
+  - `androidAttachSurfaceAfterVideoParameters`→`android.attachSurfaceAfterVideoParameters`
+  - `androidGpuApi`→`android.gpuApi`（copyWith 的 `clearAndroidGpuApi`→子对象 `clearGpuApi`）
+  - `androidSurfaceTransfer`/`androidSurfacePixelFormat`→`android.surfaceTransfer`/`android.surfacePixelFormat`
+  - `useNativeSurface`/`useNativeWindow`→`darwin.useNativeSurface`/`darwin.useNativeWindow`
+  - 子对象经 `copyWith(android: config.android.copyWith(...))` 修改。
+- **REFACTOR**(darwin): native surface 由 CVDisplayLink/CADisplayLink 按显示刷新率驱动并按生产帧计数门控重绘；Metal blitter 改单一 pre-commit `addCompletedHandler` 异步完成，buffer 归还经 in-flight 跟踪与池 hold 闭环（主线程不再逐帧阻塞）。
+
 ## 1.3.1
 
 - fix(windows): notify `VideoOutput.Resize` on platform thread
