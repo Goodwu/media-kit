@@ -12,5 +12,11 @@
     <true/>
 	<key>com.apple.security.files.user-selected.read-only</key>
 	<true/>
+	<!-- Debug-only: auto-open flows read local test clips without a file
+	     picker round-trip. Release entitlements stay untouched. -->
+	<key>com.apple.security.temporary-exception.files.absolute-path.read-only</key>
+	<array>
+		<string>/Users/</string>
+	</array>
 </dict>
 </plist>
