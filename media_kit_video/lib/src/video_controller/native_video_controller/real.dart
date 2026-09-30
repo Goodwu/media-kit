@@ -114,7 +114,7 @@ class NativeVideoController extends PlatformVideoController {
         videoParamsWidth = width;
         videoParamsHeight = height;
 
-        if (configuration.useNativeWindow && Platform.isMacOS) {
+        if (configuration.darwin.useNativeWindow && Platform.isMacOS) {
           // The mpv-owned window has no Flutter texture ID. Use the stable
           // player handle only as a PlatformView mount signal; it is never a
           // native window handle and is never written to mpv's --wid.
@@ -170,7 +170,7 @@ class NativeVideoController extends PlatformVideoController {
       }
     }
 
-    final nativeWindowMode = configuration.useNativeWindow && Platform.isMacOS;
+    final nativeWindowMode = configuration.darwin.useNativeWindow && Platform.isMacOS;
 
     // Update [configuration] to have default values.
     configuration = configuration.copyWith(
@@ -252,7 +252,7 @@ class NativeVideoController extends PlatformVideoController {
       return controller;
     }
 
-    if (configuration.useNativeSurface &&
+    if (configuration.darwin.useNativeSurface &&
         configuration.enableHardwareAcceleration &&
         (Platform.isIOS || Platform.isMacOS)) {
       try {
@@ -290,7 +290,7 @@ class NativeVideoController extends PlatformVideoController {
             'height': configuration.height.toString(),
             'enableHardwareAcceleration':
                 configuration.enableHardwareAcceleration,
-            'useNativeSurface': configuration.useNativeSurface,
+            'useNativeSurface': configuration.darwin.useNativeSurface,
           },
         },
       );
@@ -386,7 +386,7 @@ class NativeVideoController extends PlatformVideoController {
       return const HdrOutputReport(active: false, stale: true);
     }
     final payload = Map<String, dynamic>.from(configuration);
-    if (this.configuration.useNativeSurface) {
+    if (this.configuration.darwin.useNativeSurface) {
       // Darwin's native surface consumes extended-linear BT.2020 samples.
       // Keep the source transfer in the payload for EDR metadata, but do not
       // ask mpv to emit PQ/HLG code values into that linear surface.
@@ -502,7 +502,7 @@ class NativeVideoController extends PlatformVideoController {
   Future<Map<String, dynamic>> attachNativeWindow() async {
     if (_disposed ||
         !Platform.isMacOS ||
-        (!configuration.useNativeSurface && !configuration.useNativeWindow)) {
+        (!configuration.darwin.useNativeSurface && !configuration.darwin.useNativeWindow)) {
       return const <String, dynamic>{
         'capable': false,
         'attached': false,
@@ -563,7 +563,7 @@ class NativeVideoController extends PlatformVideoController {
     // available for a later disposal attempt.
     setNativeSurfaceActive(false);
 
-    if (configuration.useNativeWindow && Platform.isMacOS) {
+    if (configuration.darwin.useNativeWindow && Platform.isMacOS) {
       Future<void> setOutputProperty(String property, String value) =>
           platform.isPreTerminationCallbacksActive
               ? platform.setPropertyStrictAsyncForPreTermination(
@@ -595,7 +595,7 @@ class NativeVideoController extends PlatformVideoController {
   /// as the PlatformView layout size.
   Future<Map<String, dynamic>> nativeWindowState() async {
     if (!Platform.isMacOS ||
-        (!configuration.useNativeSurface && !configuration.useNativeWindow)) {
+        (!configuration.darwin.useNativeSurface && !configuration.darwin.useNativeWindow)) {
       return const <String, dynamic>{
         'capable': false,
         'attached': false,
@@ -625,7 +625,7 @@ class NativeVideoController extends PlatformVideoController {
   Future<bool> bindExperimentalNativeWindow(
     Map<String, dynamic> attachment,
   ) async {
-    if (_disposed || !Platform.isMacOS || !configuration.useNativeWindow) {
+    if (_disposed || !Platform.isMacOS || !configuration.darwin.useNativeWindow) {
       return false;
     }
     final nativeViewHandle = attachment['nativeViewHandle'];
@@ -714,7 +714,7 @@ class NativeVideoController extends PlatformVideoController {
     }
 
     final handle = nativeHandle;
-    if (!(configuration.useNativeWindow && Platform.isMacOS) &&
+    if (!(configuration.darwin.useNativeWindow && Platform.isMacOS) &&
         handle != null) {
       try {
         // Darwin completes this method only after VideoOutput disposal has
@@ -836,7 +836,7 @@ class NativeVideoController extends PlatformVideoController {
                 if (attachment['attached'] == true) {
                   final state = await controller.nativeWindowState();
                   debugPrint('NativeWindow.State: $state');
-                  if (controller.configuration.useNativeWindow) {
+                  if (controller.configuration.darwin.useNativeWindow) {
                     final bound = await controller
                         .bindExperimentalNativeWindow(attachment);
                     debugPrint('NativeWindow.Bind: bound=$bound');
@@ -858,7 +858,7 @@ class NativeVideoController extends PlatformVideoController {
                   // newer active native surface.
                   return;
                 }
-                if (controller.configuration.useNativeWindow) {
+                if (controller.configuration.darwin.useNativeWindow) {
                   // W1's mpv-owned window has no verified visible-frame
                   // callback yet. NativeSurfaceOutput readiness alone
                   // must not promote the separate child-window path.

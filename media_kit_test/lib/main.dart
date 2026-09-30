@@ -193,11 +193,14 @@ class PrimaryScreen extends StatelessWidget {
               builder: (context, value, _) => TextButton(
                 onPressed: () {
                   configuration.value = value.copyWith(
-                    usePlatformView: !value.usePlatformView,
+                    android: value.android.copyWith(
+                      usePlatformView: !value.android.usePlatformView,
+                    ),
                   );
                 },
-                child: Text(
-                    value.usePlatformView ? 'PlatformView' : 'TextureView'),
+                child: Text(value.android.usePlatformView
+                    ? 'PlatformView'
+                    : 'TextureView'),
               ),
             ),
           const SizedBox(width: 16.0),
