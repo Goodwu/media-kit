@@ -20,6 +20,7 @@ import 'package:media_kit_video/src/utils/mpv_owner_broker.dart';
 import 'package:media_kit_video/src/video_controller/platform_video_controller.dart';
 
 import 'current_output_intent.dart';
+import 'surface_owner_ledger.dart';
 
 // Diagnostic only: keep a 4K input while matching the Texture buffer to the
 // known 16:9 display region. Production sizing must come from widget layout.
@@ -170,7 +171,7 @@ class AndroidVideoController extends PlatformVideoController {
     if (!_currentPlatformOutputUnavailable &&
         wid.value != null &&
         _platformViewId != null &&
-        _inFlightSurfaceOwner == null) {
+        _ledger.inFlightOwner == null) {
       return Future<void>.value();
     }
     // A detach retry may replace an already failed Completer. Preserve the
@@ -207,7 +208,7 @@ class AndroidVideoController extends PlatformVideoController {
     if (creationSerial > _latestViewCreationSerial) {
       _latestViewCreationSerial = creationSerial;
       _latestCreatedViewId = viewId;
-      _authorizedFallbackIntentSerials.clear();
+      _ledger.clearAuthorizedFallbackSerials();
       // A new view is a new output attempt even before its Surface exists.
       // Its waiter must not inherit the previous view's failed Future.
       _pendingSurfaceFailure = null;
@@ -224,7 +225,7 @@ class AndroidVideoController extends PlatformVideoController {
       // A still-playing SDR view cannot satisfy a newly requested PQ view.
       // Keep the old producer alive until normal strict detach/rebind, but
       // make the new policy's output waiter wait for its own compatible view.
-      final bound = _liveSurfaceOwners.where(_isBoundSurfaceOwner);
+      final bound = _ledger.liveOwners.where(_isBoundSurfaceOwner);
       if (bound.isNotEmpty && !_isCompatibleWithLatestView(bound.first)) {
         _invalidateCurrentOutputBound();
       }
@@ -240,19 +241,16 @@ class AndroidVideoController extends PlatformVideoController {
   }
 
   bool _promoteCompatibleBoundFallback() {
-    if (_inFlightSurfaceOwner != null) return false;
-    for (final owner in _liveSurfaceOwners) {
+    if (_ledger.inFlightOwner != null) return false;
+    for (final owner in _ledger.liveOwners) {
       if (!_isBoundSurfaceOwner(owner) || !_isCompatibleWithLatestView(owner)) {
         continue;
       }
-      if (_queuedSurfaceBinds.any((queued) =>
-          queued != owner &&
-          _liveSurfaceOwners.contains(queued) &&
-          !_failedSurfaceBinds.contains(queued))) {
+      if (_ledger.anyQueuedCandidate((queued) => queued != owner)) {
         continue;
       }
       final serial = _outputIntent.bind(owner);
-      _authorizedFallbackIntentSerials.add(serial);
+      _ledger.authorizeFallbackSerial(serial);
       _currentPlatformOutputUnavailable = false;
       if (!_currentPlatformViewOutputBound.isCompleted) {
         _currentPlatformViewOutputBound.complete();
@@ -277,7 +275,7 @@ class AndroidVideoController extends PlatformVideoController {
   bool _mayPublishPlatformSurface(
       _AndroidPlatformSurfaceOwner owner, int outputIntentSerial) {
     return _viewCreationSerialById[owner.viewId] == _latestViewCreationSerial ||
-        _authorizedFallbackIntentSerials.contains(outputIntentSerial);
+        _ledger.isAuthorizedFallbackSerial(outputIntentSerial);
   }
 
   bool _beginPlatformSurfaceAttempt(int generation, int viewId, int attempt) {
@@ -315,17 +313,13 @@ class AndroidVideoController extends PlatformVideoController {
         _promoteCompatibleBoundFallback()) {
       return;
     }
-    final inFlight = _inFlightSurfaceOwner;
+    final inFlight = _ledger.inFlightOwner;
     if (inFlight != null &&
-        _liveSurfaceOwners.contains(inFlight) &&
-        !_failedSurfaceBinds.contains(inFlight) &&
+        _ledger.isLiveAndNotBindFailed(inFlight) &&
         _isCompatibleWithLatestView(inFlight)) {
       return;
     }
-    if (_queuedSurfaceBinds.any((owner) =>
-        _liveSurfaceOwners.contains(owner) &&
-        !_failedSurfaceBinds.contains(owner) &&
-        _isCompatibleWithLatestView(owner))) {
+    if (_ledger.anyQueuedCandidate(_isCompatibleWithLatestView)) {
       return;
     }
     _failCurrentOutputBound(error, stack);
@@ -371,9 +365,9 @@ class AndroidVideoController extends PlatformVideoController {
     );
     if (!_isCurrentPlatformViewEvent(generation, viewId, creationSerial) ||
         _latestSurfaceAttemptByViewId[viewId] != surfaceGeneration ||
-        (!_liveSurfaceOwners.contains(owner) &&
+        (!_ledger.isLive(owner) &&
             !_isBoundSurfaceOwner(owner) &&
-            _inFlightSurfaceOwner != owner)) {
+            _ledger.inFlightOwner != owner)) {
       return;
     }
     _pendingSurfaceFailure = StateError(
@@ -398,19 +392,19 @@ class AndroidVideoController extends PlatformVideoController {
       surfaceGeneration: surfaceGeneration,
       wid: expectedWid,
     );
-    final pendingFallbackSerial = _pendingFallbackIntentSerials[owner];
-    _liveSurfaceOwners.remove(owner);
+    final pendingFallbackSerial = _ledger.pendingFallbackSerial(owner);
+    _ledger.destroy(owner);
     _cancelPlatformBindRetry(owner);
     if (_disposed || _fullyDisposed || _playerTerminated) return null;
     if (_outputIntent.destroy(owner)) {
       _invalidateCurrentOutputBound();
       _failPlatformSurfaceIfNoAlternative();
-      final fallback = _newestLiveSurfaceOwner;
+      final fallback = _ledger.newestLiveOwner;
       if (fallback != null) {
         _cancelPlatformBindRetry(fallback);
         final serial = _outputIntent.bind(fallback);
-        _authorizedFallbackIntentSerials.add(serial);
-        _pendingFallbackIntentSerials[owner] = serial;
+        _ledger.authorizeFallbackSerial(serial);
+        _ledger.setPendingFallbackSerial(owner, serial);
         return serial;
       }
     } else if (wid.value == expectedWid &&
@@ -420,10 +414,10 @@ class AndroidVideoController extends PlatformVideoController {
       _invalidateCurrentOutputBound();
       _failPlatformSurfaceIfNoAlternative();
       final expected = _outputIntent.expected;
-      if (expected != null && _liveSurfaceOwners.contains(expected)) {
+      if (expected != null && _ledger.isLive(expected)) {
         final serial = _outputIntent.serial;
-        _authorizedFallbackIntentSerials.add(serial);
-        _pendingFallbackIntentSerials[owner] = serial;
+        _ledger.authorizeFallbackSerial(serial);
+        _ledger.setPendingFallbackSerial(owner, serial);
         return serial;
       }
     }
@@ -438,7 +432,7 @@ class AndroidVideoController extends PlatformVideoController {
     int widValue,
   ) {
     _beginPlatformSurfaceAttempt(generation, viewId, surfaceGeneration);
-    _authorizedFallbackIntentSerials.clear();
+    _ledger.clearAuthorizedFallbackSerials();
     final owner = _surfaceOwner(
       handle: handle,
       generation: generation,
@@ -453,8 +447,7 @@ class AndroidVideoController extends PlatformVideoController {
       return _outputIntent.serial;
     }
     if (nativeSurfaceGeneration == generation && !_disposed) {
-      _liveSurfaceOwners.add(owner);
-      _queuedSurfaceBinds.add(owner);
+      _ledger.announceQueuedBind(owner);
     }
     if (nativeSurfaceGeneration == generation &&
         (_platformViewId != viewId ||
@@ -479,19 +472,10 @@ class AndroidVideoController extends PlatformVideoController {
   late final Future<void> Function() _postTerminationCallback;
   int? _platformViewId;
   int _platformSurfaceGeneration = 0;
-  _AndroidPlatformSurfaceOwner? _inFlightSurfaceOwner;
   // Arrival order is the fallback priority. A replaced view retains its JNI
   // reference until its own destroy event, even while another view is bound.
-  final Set<_AndroidPlatformSurfaceOwner> _liveSurfaceOwners =
-      LinkedHashSet<_AndroidPlatformSurfaceOwner>();
-  _AndroidPlatformSurfaceOwner? get _newestLiveSurfaceOwner =>
-      _liveSurfaceOwners.isEmpty ? null : _liveSurfaceOwners.last;
-  final Set<_AndroidPlatformSurfaceOwner> _pendingSurfaceReleases = {};
-  final Map<_AndroidPlatformSurfaceOwner, int> _pendingFallbackIntentSerials =
-      {};
-  final Set<int> _authorizedFallbackIntentSerials = {};
-  final Set<_AndroidPlatformSurfaceOwner> _queuedSurfaceBinds = {};
-  final Set<_AndroidPlatformSurfaceOwner> _failedSurfaceBinds = {};
+  final SurfaceOwnerLedger<_AndroidPlatformSurfaceOwner> _ledger =
+      SurfaceOwnerLedger();
   static const int _maxPlatformSurfaceRetries = 3;
   final Map<_AndroidPlatformSurfaceOwner, int> _detachRetryAttempts = {};
   final Map<_AndroidPlatformSurfaceOwner, Timer> _detachRetryTimers = {};
@@ -560,7 +544,7 @@ class AndroidVideoController extends PlatformVideoController {
     if (_disposed ||
         _fullyDisposed ||
         _playerTerminated ||
-        !_liveSurfaceOwners.contains(owner) ||
+        !_ledger.isLive(owner) ||
         !_outputIntent.isCurrent(owner, outputIntentSerial) ||
         _bindRetryTimers.containsKey(owner)) return;
     final attempts = _bindRetryAttempts[owner] ?? 0;
@@ -578,7 +562,7 @@ class AndroidVideoController extends PlatformVideoController {
         if (_disposed ||
             _fullyDisposed ||
             _playerTerminated ||
-            !_liveSurfaceOwners.contains(owner) ||
+            !_ledger.isLive(owner) ||
             !_outputIntent.isCurrent(owner, outputIntentSerial)) {
           _cancelPlatformBindRetry(owner);
           return;
@@ -910,10 +894,10 @@ class AndroidVideoController extends PlatformVideoController {
       wid: expectedWid,
     );
     final retryFallbackIntentSerial =
-        fallbackIntentSerial ?? _pendingFallbackIntentSerials[owner];
+        fallbackIntentSerial ?? _ledger.pendingFallbackSerial(owner);
     try {
       await lock.synchronized(() async {
-        _pendingSurfaceReleases.add(owner);
+        _ledger.beginRelease(owner);
         if (_fullyDisposed) {
           await _releaseSurfaceOwnerLocked(owner);
           return;
@@ -930,7 +914,7 @@ class AndroidVideoController extends PlatformVideoController {
           return;
         }
         final isCurrentOutput = _isBoundSurfaceOwner(owner);
-        final isInFlightOutput = _inFlightSurfaceOwner == owner;
+        final isInFlightOutput = _ledger.inFlightOwner == owner;
         if (isCurrentOutput || isInFlightOutput) {
           // Do not enqueue a second listener behind this lock: Java may release
           // the JNI reference only after mpv has observed wid=0 and vo=null.
@@ -957,9 +941,9 @@ class AndroidVideoController extends PlatformVideoController {
       _schedulePlatformDetachRetry(owner, retryFallbackIntentSerial);
       rethrow;
     }
-    if (_pendingSurfaceReleases.contains(owner)) return;
+    if (_ledger.isReleasing(owner)) return;
     _cancelPlatformDetachRetry(owner);
-    _pendingFallbackIntentSerials.remove(owner);
+    _ledger.clearPendingFallbackSerial(owner);
     if (_disposed || _fullyDisposed || _playerTerminated) return;
     // The destroyed producer and its Java reference are both gone before a
     // surviving view can become the output. A newer arrival/destroy changes
@@ -967,7 +951,7 @@ class AndroidVideoController extends PlatformVideoController {
     final fallback = _outputIntent.expected;
     if (retryFallbackIntentSerial != null &&
         fallback != null &&
-        _liveSurfaceOwners.contains(fallback) &&
+        _ledger.isLive(fallback) &&
         _outputIntent.isCurrent(fallback, retryFallbackIntentSerial)) {
       await _bindPlatformViewSurface(
         handle: fallback.handle,
@@ -1007,25 +991,22 @@ class AndroidVideoController extends PlatformVideoController {
       _platformSurfaceGeneration = 0;
       _invalidateCurrentOutputBound();
     }
-    if (_inFlightSurfaceOwner == owner) {
-      _inFlightSurfaceOwner = null;
-    }
+    _ledger.clearInFlightIf(owner);
   }
 
   Future<void> _releaseSurfaceOwnerLocked(
     _AndroidPlatformSurfaceOwner owner,
   ) async {
     await _releasePlatformSurfaceReference(owner);
-    _pendingSurfaceReleases.remove(owner);
+    _ledger.finishRelease(owner);
     _cancelPlatformDetachRetry(owner);
-    _pendingFallbackIntentSerials.remove(owner);
   }
 
   Future<void> _drainPendingSurfaceReleasesLocked({
     _AndroidPlatformSurfaceOwner? except,
   }) async {
-    for (final owner in _pendingSurfaceReleases.toList()) {
-      if (owner == except || _liveSurfaceOwners.contains(owner)) continue;
+    for (final owner in _ledger.releasingOwners.toList()) {
+      if (owner == except || _ledger.isLive(owner)) continue;
       await _releaseSurfaceOwnerLocked(owner);
     }
   }
@@ -1153,45 +1134,45 @@ class AndroidVideoController extends PlatformVideoController {
       surfaceGeneration: surfaceGeneration,
       wid: widValue,
     );
-    _queuedSurfaceBinds.add(incoming);
+    _ledger.enqueueBind(incoming);
     try {
       await lock.synchronized(() async {
         if (!_outputIntent.isCurrent(incoming, outputIntentSerial)) {
           if (_outputIntent.expected != incoming ||
-              !_liveSurfaceOwners.contains(incoming)) {
+              !_ledger.isLive(incoming)) {
             _cancelPlatformBindRetry(incoming);
           }
           // A queued bind can lose to a newer view while its Surface remains
           // live. Its destroy event, not intent order, authorizes JNI release.
-          if (!_liveSurfaceOwners.contains(incoming) && !_disposed) {
-            _pendingSurfaceReleases.add(incoming);
+          if (!_ledger.isLive(incoming) && !_disposed) {
+            _ledger.beginRelease(incoming);
             await _releaseSurfaceOwnerLocked(incoming);
           }
           return;
         }
         if (_fullyDisposed) {
-          _pendingSurfaceReleases.add(incoming);
+          _ledger.beginRelease(incoming);
           await _releaseSurfaceOwnerLocked(incoming);
           return;
         }
         if (_disposed) {
-          _pendingSurfaceReleases.add(incoming);
+          _ledger.beginRelease(incoming);
           if (_playerTerminated) {
             await _releaseSurfaceOwnerLocked(incoming);
           }
           return;
         }
-        if (!_liveSurfaceOwners.contains(incoming) ||
+        if (!_ledger.isLive(incoming) ||
             nativeSurfaceGeneration != generation ||
             (_platformViewId == viewId &&
                 surfaceGeneration < _platformSurfaceGeneration)) {
-          _pendingSurfaceReleases.add(incoming);
+          _ledger.beginRelease(incoming);
           await _releaseSurfaceOwnerLocked(incoming);
           return;
         }
         final bound = _boundSurfaceOwner(incoming.handle);
-        if (bound == incoming && _inFlightSurfaceOwner == null) {
-          _failedSurfaceBinds.remove(incoming);
+        if (bound == incoming && _ledger.inFlightOwner == null) {
+          _ledger.clearBindFailed(incoming);
           _cancelPlatformBindRetry(incoming);
           if (_outputIntent.isCurrent(incoming, outputIntentSerial) &&
               _mayPublishPlatformSurface(incoming, outputIntentSerial)) {
@@ -1205,14 +1186,14 @@ class AndroidVideoController extends PlatformVideoController {
         _invalidateCurrentOutputBound();
         // Retain B before attempting to stop A. If the strict stop fails, B has
         // not been promoted but still needs deterministic destroy/dispose cleanup.
-        _pendingSurfaceReleases.add(incoming);
+        _ledger.beginRelease(incoming);
 
         // Apply the native window directly under the same lock before releasing
         // the initial-open barrier. A ValueNotifier listener is asynchronous and
         // would otherwise let player.open race vid=no/vo=null.
         wid.removeListener(widListener);
         try {
-          final previousInFlight = _inFlightSurfaceOwner;
+          final previousInFlight = _ledger.inFlightOwner;
           if (bound != null || previousInFlight != null) {
             // Keep A as the confirmed owner until the strict stop reply succeeds.
             // A failed first vo=null therefore cannot make a late A destroy look
@@ -1225,17 +1206,17 @@ class AndroidVideoController extends PlatformVideoController {
               _clearSurfaceOwner(previousInFlight);
             }
           }
-          if (bound != null && _liveSurfaceOwners.contains(bound)) {
-            _pendingSurfaceReleases.remove(bound);
+          if (bound != null && _ledger.isLive(bound)) {
+            _ledger.cancelRelease(bound);
           }
           if (previousInFlight != null &&
-              _liveSurfaceOwners.contains(previousInFlight)) {
-            _pendingSurfaceReleases.remove(previousInFlight);
+              _ledger.isLive(previousInFlight)) {
+            _ledger.cancelRelease(previousInFlight);
           }
           // From this point B may be visible to a partially completed mpv
           // property sequence. Keep it explicit until every strict write has
           // succeeded; failure paths must stop B before releasing it.
-          _inFlightSurfaceOwner = incoming;
+          _ledger.markInFlight(incoming);
           await _drainPendingSurfaceReleasesLocked(except: incoming);
           // Rebinding vo/wid attaches the current decoder output to this new
           // Surface. Seeking again discards HEVC references during rebuild.
@@ -1243,9 +1224,9 @@ class AndroidVideoController extends PlatformVideoController {
           wid.value = incoming.wid == 0 ? null : incoming.wid;
           _platformViewId = incoming.viewId;
           _platformSurfaceGeneration = incoming.surfaceGeneration;
-          _inFlightSurfaceOwner = null;
-          _failedSurfaceBinds.remove(incoming);
-          _pendingSurfaceReleases.remove(incoming);
+          _ledger.clearInFlight();
+          _ledger.clearBindFailed(incoming);
+          _ledger.cancelRelease(incoming);
           _cancelPlatformBindRetry(incoming);
           final isExpectedOutput = widValue != 0 &&
               _outputIntent.isCurrent(incoming, outputIntentSerial) &&
@@ -1268,7 +1249,7 @@ class AndroidVideoController extends PlatformVideoController {
             _failPlatformSurfaceIfNoAlternative();
           }
         } catch (error, stackTrace) {
-          _failedSurfaceBinds.add(incoming);
+          _ledger.markBindFailed(incoming);
           if (_outputIntent.isCurrent(incoming, outputIntentSerial)) {
             _currentPlatformOutputUnavailable = true;
             if (_pendingSurfaceFailure == null ||
@@ -1290,7 +1271,7 @@ class AndroidVideoController extends PlatformVideoController {
         }
       });
     } finally {
-      _queuedSurfaceBinds.remove(incoming);
+      _ledger.dequeueBind(incoming);
       _failPlatformSurfaceIfNoAlternative();
     }
   }
@@ -1645,10 +1626,10 @@ class AndroidVideoController extends PlatformVideoController {
               'Active Android PlatformView Surface has no view identity.',
             );
           }
-          if (bound != null) _pendingSurfaceReleases.add(bound);
-          final inFlight = _inFlightSurfaceOwner;
-          if (inFlight != null) _pendingSurfaceReleases.add(inFlight);
-          _pendingSurfaceReleases.addAll(_liveSurfaceOwners);
+          if (bound != null) _ledger.beginRelease(bound);
+          final inFlight = _ledger.inFlightOwner;
+          if (inFlight != null) _ledger.beginRelease(inFlight);
+          _ledger.beginReleaseAllLive();
           // Stop mpv while the JNI Surface reference is still valid. The
           // release callback path must use NativePlayer's release-safe setter.
           // Do not mutate the Dart identity until the full stop sequence has
@@ -1656,8 +1637,8 @@ class AndroidVideoController extends PlatformVideoController {
           await _applyWidLocked(widValueOverride: '0');
           if (bound != null) _clearSurfaceOwner(bound);
           if (inFlight != null) _clearSurfaceOwner(inFlight);
-          _liveSurfaceOwners.clear();
-          _pendingFallbackIntentSerials.clear();
+          _ledger.clearLiveOwners();
+          _ledger.clearPendingFallbackSerials();
           await _drainPendingSurfaceReleasesLocked();
         } else {
           // Texture output owns the same producer/consumer ordering contract.
@@ -1739,16 +1720,16 @@ class AndroidVideoController extends PlatformVideoController {
           if (!_fullyDisposed) wid.removeListener(widListener);
           if (configuration.usePlatformView) {
             final bound = _fullyDisposed ? null : _boundSurfaceOwner(handle);
-            final inFlight = _fullyDisposed ? null : _inFlightSurfaceOwner;
+            final inFlight = _fullyDisposed ? null : _ledger.inFlightOwner;
             if (!_fullyDisposed) {
               if (wid.value != null && bound == null) {
                 throw StateError(
                   'Active Android PlatformView Surface has no view identity.',
                 );
               }
-              if (bound != null) _pendingSurfaceReleases.add(bound);
-              if (inFlight != null) _pendingSurfaceReleases.add(inFlight);
-              _pendingSurfaceReleases.addAll(_liveSurfaceOwners);
+              if (bound != null) _ledger.beginRelease(bound);
+              if (inFlight != null) _ledger.beginRelease(inFlight);
+              _ledger.beginReleaseAllLive();
             }
             // mpv_terminate_destroy has returned before this callback starts.
             // Java can now release every generation, including owners that a
@@ -1769,9 +1750,9 @@ class AndroidVideoController extends PlatformVideoController {
             if (!_fullyDisposed) {
               if (bound != null) _clearSurfaceOwner(bound);
               if (inFlight != null) _clearSurfaceOwner(inFlight);
-              _liveSurfaceOwners.clear();
-              _pendingFallbackIntentSerials.clear();
-              _pendingSurfaceReleases.clear();
+              _ledger.clearLiveOwners();
+              _ledger.clearPendingFallbackSerials();
+              _ledger.clearReleasing();
             }
           } else {
             if (_nativeTextureCreation != null) {

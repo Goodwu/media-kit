@@ -10,6 +10,7 @@ import 'package:meta/meta.dart';
 import 'package:collection/collection.dart';
 
 import 'package:media_kit/src/models/track.dart';
+import 'package:media_kit/src/native_output_lifecycle.dart';
 import 'package:media_kit/src/models/playable.dart';
 import 'package:media_kit/src/models/playlist.dart';
 import 'package:media_kit/src/models/player_log.dart';
@@ -270,16 +271,19 @@ abstract class PlatformPlayer {
   Future<void> get preTerminationOwnerAdmissionClosed =>
       _preTerminationOwnerAdmissionClosedSignal.future;
 
-  @protected
   void closePreTerminationOwnerAdmission() {
     if (_preTerminationOwnerAdmissionClosed) return;
     _preTerminationOwnerAdmissionClosed = true;
     _preTerminationOwnerAdmissionClosedSignal.complete();
   }
 
-  @protected
   Future<void> waitForPreTerminationOwnerCreations() =>
       _preTerminationOwnerCreationsDrained?.future ?? Future<void>.value();
+
+  /// Native-output disposal phase scheduler, installed by the attached video
+  /// output when its controller is created. `null` keeps the player's
+  /// conservative defaults (see [NativeOutputLifecycle]).
+  NativeOutputLifecycle? outputLifecycle;
 
   @protected
   bool get preTerminationCallbacksActive => _preTerminationCallbacksActive;

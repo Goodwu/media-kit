@@ -4,6 +4,8 @@
 /// All rights reserved.
 /// Use of this source code is governed by MIT license that can be found in the LICENSE file.
 import 'dart:async';
+import 'dart:io' show Platform;
+
 import 'package:flutter/widgets.dart';
 import 'package:media_kit/media_kit.dart';
 
@@ -154,6 +156,19 @@ class VideoController {
         const VideoControllerConfiguration(),
   }) {
     player.platform?.isVideoControllerAttached = true;
+    if (Platform.isMacOS || Platform.isIOS) {
+      // Darwin's native-output rebuild barrier: disposal closes the owner
+      // admission synchronously and drains admitted creations instead of
+      // waiting for this controller's initialization. Installed before the
+      // first await so a concurrent dispose observes it.
+      player.platform?.outputLifecycle = NativeOutputLifecycle(
+        onCloseOwnerAdmission: () =>
+            player.platform?.closePreTerminationOwnerAdmission(),
+        waitForSettledOwners: () async =>
+            player.platform?.waitForPreTerminationOwnerCreations(),
+        stopWaitsForVideoControllerInitialization: false,
+      );
+    }
 
     () async {
       final completer = Completer();

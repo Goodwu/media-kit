@@ -178,11 +178,9 @@ class NativePlayer extends PlatformPlayer {
   /// Disposes the [Player] instance & releases the resources.
   @override
   Future<void> dispose({bool synchronized = true}) {
-    final darwin = Platform.isMacOS || Platform.isIOS;
-    if (darwin) {
-      // Close admission synchronously, before the first await or lock wait.
-      closePreTerminationOwnerAdmission();
-    }
+    final outputLifecycle = this.outputLifecycle;
+    // Close admission synchronously, before the first await or lock wait.
+    outputLifecycle?.onCloseOwnerAdmission?.call();
     final existing = _disposeFuture;
     if (existing != null) return existing;
 
@@ -193,10 +191,12 @@ class NativePlayer extends PlatformPlayer {
           throw AssertionError('[Player] has been disposed');
         }
         await waitForPlayerInitialization;
-        if (darwin) {
-          // Every admitted owner has either registered its teardown callback
-          // or finished without creating an output before the snapshot runs.
-          await waitForPreTerminationOwnerCreations();
+        // The attached output's lifecycle decides what "in-flight outputs
+        // have settled" means; without one, an attached video controller's
+        // initialization is the barrier.
+        final settledOwners = outputLifecycle?.waitForSettledOwners;
+        if (settledOwners != null) {
+          await settledOwners();
         } else {
           await waitForVideoControllerInitializationIfAttached;
         }
@@ -209,7 +209,9 @@ class NativePlayer extends PlatformPlayer {
           await stop(
             notify: false,
             synchronized: false,
-            waitForVideoControllerInitialization: !darwin,
+            waitForVideoControllerInitialization:
+                outputLifecycle?.stopWaitsForVideoControllerInitialization ??
+                    true,
           );
           _playerStoppedForDispose = true;
         }
