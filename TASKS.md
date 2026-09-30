@@ -5,7 +5,7 @@
 ## 接手快照（2026-09-30 更新；换 agent 从这里开始）
 
 - **事实源与范围**：本文件是任务状态，`archives/README.md` 是主题导航，`archives/conversations/android-hdr-dv-display-plan-20260922.md` 顶部 `Current State` 是当前 Android 主题上下文；`archives/experiments/android-private-tmp-handoff-20260928.md` 是临时工作树路径及补丁入口。以上均为快照，接手后先重新读 Git/设备状态。
-- **代码状态**：当前目录分支 `fix/darwin-video-output-rebuild-barrier`（工作区干净）。P0/P1/P2 已验收、P3 已 done、P4 已 done（其 100 倍回归结论被 P5 修正为读回装置缺陷）、**P5 颜色回归修复已全链闭环转 done（mpv fork `398d0c3` 已推送；正式 JAR `dad30ae2…` + APK 12680/12681/12682 三轮全片验收通过 + 真人确认通过）**。
+- **代码状态**：当前目录分支 `fix/darwin-video-output-rebuild-barrier`（工作区干净，已同步远端）。P0/P1/P2 已验收、P3/P4/P5 已 done。**mpv fork 已归一单分支**（2026-09-30）：全部产品修复集中在 Goodwu/mpv `media-kit/android`（tip `6719532`，含 av_log 日志接管 cherry-pick），发布基线 tag `media-kit-v2026.09`→`398d0c3`，旧 4 分支已删（实验路线 tag 归档）；发布链固定 mpv `398d0c3` + FFmpeg `fff3ee7` + libplacebo `c9fd879`，对应正式 JAR `dad30ae23cd7…` + APK 12680/12681/12682 三轮全片验收 + 真人确认。见 `archives/experiments/android-mpv-fork-branch-consolidation-20260930.md`。
 - **P5 修复要点**：~~华为硬解输出 8-bit NV12（AHB 0x325），GLES 外部 YUV 采样按 code/255~~（**更正 2026-09-30**：0x325 实为 Main10 10-bit 布局、驱动 Y2Y 采样器按 /1020 归一化；copy 路径 8-bit 是 ByteBuffer 另一输出模式不可外推——见 `archives/experiments/android-p5-buffer-bitdepth-mystery-20260930.md`），dovi 域按 code/1023 → 1023/1020 缩放偏色；修复为 dovi 元数据就地重标定（等价于恢复 9/25 sidecar 的 code_scale=1020/1023），数值验收 (47,50,70)/(50,19,58)/65535 ≤100。读回装置教训：旧前缀 FFmpeg 需 `debug.media_kit.p5_rpu_probe=2`；产品链接必须用 fff3ee7 世代 libavcodec（`/tmp/media-kit-p5-product-ffmpeg-lib/`），误链 mkp4prefix 旧版会复演 `direct=0`。详见 P5 条目与 `archives/experiments/android-p5-mediacodec-color-fix-20260930.md`。
 - **环境**：ADB 可用（设备 `3EP7N18C28016072` / LYA-AL00），每轮结束恢复原 12492、自动亮度、熄屏。读回构建链：`/tmp/mkmpvsrc`（mpv fork，现含 398d0c3）+ `/tmp/mkp4prefix` + 手工链接需补 `-lc++_shared`（build.ninja 行 1229/1230 提取）；APK 直改重签（lib store + zipalign -p 4096 + debug keystore + NDK 27.2 libc++_shared.so 同步替换）。JDK17 构建、`ORG_GRADLE_PROJECT_mediaKitLocalArm64Jar` 注入 JAR 的正式流程不变。
 
@@ -70,9 +70,15 @@ P5→PQ 输出、首帧和性能使用 `/Users/wuweiwei1/Downloads/test-clips/My
 - acceptance: 定位并修复 mediacodec 解码路径的 P5 颜色偏差，修复后同 PTS 三方比较恢复 ≤100/65535，并复跑 P0/P1/P2 关键视觉验收。
 - latest: **双重根因均已数值闭环并完成产品集成**。① P4 的 100 倍偏差是读回装置缺陷：读回 JAR 链接的旧前缀 FFmpeg（9/24 stage-merged 补丁世代）挂载需 `debug.media_kit.p5_rpu_probe=2` 属性而轮脚本未设（`src_dovi=0`、`direct=0`）；产品 JAR（fff3ee7）挂载正常——产品轮 `direct=1`、f240 挂载 RPU 与码流第 240 帧字节一致（size 245、FNV `d34ff55e` 全流索引核对）。② 真实回归 ~0.3%：华为硬解对 10-bit HEVC 输出 8-bit NV12（AHB 0x325；copy 路径码值对软解 ≤3/1023 铁证），GLES 外部 YUV 采样按 code/255 归一化而 dovi 重塑域按 code/1023 解释 → 信号被放大 1023/1020（9/25 sidecar 时代 `code_scale=1020/1023` 修正被产品化重写丢失）。**修复（mpv fork `398d0c3`，已推送 Goodwu/mpv）**：aimagereader 检测 8-bit YUV AHB 格式时对帧 dovi 元数据就地精确重标定（pivot×k、poly/MMR 系数按阶数×k^-d，k=1023/1020）。**数值验收达成**：设备↔主机 Sol f240 (47,50,70)、4K50 f501 (50,19,58)/65535 均 ≤100（修复前 (185,106,72)/(160,91,83)，断链时 (2726,2603,10212)/(4716,876,8388)）；软解阴性对照 (12,13,17)。**产品集成与视觉复跑（自动）完成**：正式 JAR（fff3ee7 libavcodec+前缀，`dad30ae2…`；教训：产品链接必须用 fff3ee7 世代 libavcodec，误链 mkp4prefix 旧版会复演 `direct=0`）+ 三正式 APK（12680 Glass SDR/12681 Mystery SDR/12682 Mystery PQ），三轮全片实机验收均 `direct=1`+`P5_DOVI_RESCALE enabled`+EOS、零渲染错误，10 张截图像素统计全部正常画面/落版（PQ 轮 gpuPlatformHdr=true、与 SDR 轮同帧 RGB 均值差 ≤0.4）。
 - evidence: 读回轮 12672–12679 全链与主机模拟（实验记录详列）；三轮产品视觉轮 `/tmp/p5-colorfix-{mystery2-12681,glass-12680,pq-12682}-*`；APK 留存 `/tmp/media-kit-p5-colorfix-1268{0,1,2}.apk`；**真人确认 2026-09-30 通过**（用户现场观看修复版 Glass Texture SDR 播放，答复「画面正常无异常」）。
-- next: 已关闭。遗留研究项（8-bit vs 9/25 10-bit 缓冲之谜）**已于同日判别实验解决**（`archives/experiments/android-p5-buffer-bitdepth-mystery-20260930.md`）：表面缓冲从未变为 8-bit（两代均 0x325 Main10 10-bit、驱动 Y2Y 按 /1020 归一化），变的是产品化丢失 code_scale 补偿（398d0c3 已等价恢复）；post-fix 残差不含量化成分（低于 8-bit 量化噪声量级、与量化误差场零相关），「恢复 10-bit 降残差」期望作废，无需进一步修复。仅 398d0c3 源码注释「0x325 = 8-bit」措辞待后续 fork 提交顺带更正（行为正确）。
+- next: 已关闭。遗留研究项（8-bit vs 9/25 10-bit 缓冲之谜）**已于同日判别实验解决**（`archives/experiments/android-p5-buffer-bitdepth-mystery-20260930.md`）：表面缓冲从未变为 8-bit（两代均 0x325 Main10 10-bit、驱动 Y2Y 按 /1020 归一化），变的是产品化丢失 code_scale 补偿（398d0c3 已等价恢复）；post-fix 残差不含量化成分（低于 8-bit 量化噪声量级、与量化误差场零相关），「恢复 10-bit 降残差」期望作废，无需进一步修复。仅 398d0c3 源码注释「0x325 = 8-bit」措辞待后续 fork 提交顺带更正（行为正确）——**已于同日归一时更正**（`media-kit/android` `5379756`，仅注释、行为不变）。
 
 ## 其他当前任务
+
+- [ ] media-kit 主仓合并上游 main（236 提交）回归单线
+  - status: blocked_pending_scoping
+  - context: archives/experiments/android-mpv-fork-branch-consolidation-20260930.md
+  - acceptance: `fix/darwin-video-output-rebuild-barrier`（或其继任集成分支）合并 origin/main（上游 236 提交，含 `a7cec615` AndroidVideoController 重构）后构建通过，并复跑 P5 关键实机验收（颜色数值、片尾回退、EOS、直接销毁、PQ 首帧）无回归；main 成为唯一维护线。合并冲突 60+ 文件、核心文件双侧大改，须先做逐文件冲突策略评估再动手。
+  - latest: 2026-09-30 归一时发现浅克隆误导（main 实为上游 236 提交而非 1 个修复），按「版本发布前不追上游」原则中止合并（`git merge --abort`），未产生任何合并提交。
 
 - [ ] Android HDR10 / DV P8.4 显示与原生 HDR 首帧闭环
   - status: in_progress
@@ -128,6 +134,8 @@ P5→PQ 输出、首帧和性能使用 `/Users/wuweiwei1/Downloads/test-clips/My
 - [x] 原统一素材范围（含Glass P5）首个可辨画面小于2秒：**未达成并结案；用户现改用P8.4另立上方验收项**。指定Glass P5片头约2.052秒黑场，保持从片头原速播放时仅素材时间即超过2秒；物理全屏受控读回可辨内容三轮3.543/3.374/3.625秒。SDR、HDR10 Texture→SDR、P8.4 Texture→SDR在已预建全屏路径的受控三轮均低于1秒；无同包关闭预建A/B，不能证明未经修改也达标或全部收益来自预建，亦不覆盖普通入口、光学触摸起点或原生HDR。预建通用入口及约1.41秒P5 A/B/A收益保留；详情与证据见`archives/experiments/android-first-visible-two-second-closure-20260927.md`。
 
 ## Recently Done（最近完成）
+
+- [x] mpv fork 分支归一与发布基线：4 自定义分支收敛为 `media-kit/android` 单分支，发布 tag `media-kit-v2026.09`（398d0c3）+ 三件套发布链固定（FFmpeg fff3ee7 / libplacebo c9fd879 / JAR dad30ae2…）；av_log 修复 cherry-pick 入主线，实验路线 tag 归档。`archives/experiments/android-mpv-fork-branch-consolidation-20260930.md`
 
 - [x] 复核 Android HDR10/DV 回退后 Release 卡顿观察；A/B/C 审查完成，日志开销仅是可能诱因。`archives/conversations/android-hdr-release-vs-debug-review-20260922.md`
 - [x] 编译并安装 Android 实机 APK；构建/部署与播放验收分开。`archives/conversations/android-hdr-dv-display-plan-20260922.md`
