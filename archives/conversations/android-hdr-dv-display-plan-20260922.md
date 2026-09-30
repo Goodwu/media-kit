@@ -2,6 +2,8 @@
 
 ## Current State
 
+- 2026-09-30 **四仓库归一后播放矩阵六轮实机验收全部通过（12703–12708）**：用户要求编译 demo app 对 DV P5/P8.4、HDR10 做 SDR/HDR 播放测试。六包（发布基线 JAR dad30ae2 + main HEAD a90e6537 一致）全屏、最高亮度 255 下运行——P5 Mystery SDR 全片 EOS（direct=1+RESCALE+闭合 5902/5902）、P5 Mystery PQ 全片 EOS（SF 层 BT2020/PQ RGBA_1010102、片尾回退 98.748 命中、闭合 5423/5423）、HDR10 SDR 全片 EOS（gpu-next bt.1886）、HDR10 HDR 全片 EOS（mediacodec_embed、SF 层 BT2020_ITU_PQ + 静态元数据 types=3）、P8.4 SDR 与 P8.4 HLG 各 5 分钟观察窗（剥 RPU 过滤器生效 / SF 层 BT2020_ITU_HLG）；六轮零渲染错误、截图全部正常画面，结束后均恢复 12492、自动亮度、熄屏。P8.4 全片 19.5 分钟未追 EOS，按需补跑。证据 `archives/experiments/android-playback-matrix-12703-12708-20260930.md`。
+
 - 2026-09-30 **两仓库分支归一全部完成 + mpv 上游跟踪策略定案**：Goodwu/media-kit 远端 12 分支清理为仅剩 `main`（4 个已包含直接删、7 个打 `archive/*-202609` tag 后删，清单见归一记录追加节）；mpv fork 维持 `media-kit/android` 单分支。**mpv 跟发布版不跟 master**（基点即 v0.41 世代；master 982 提交的 vo_gpu_next 1029 行是 libplacebo v7 迁移且未含我们任何修复；下次同步等 v0.42 → merge-tree 试评估 → P5 回归；av_log 修复待下周期重建 JAR 纳入）。策略详情见 `archives/experiments/android-mpv-fork-branch-consolidation-20260930.md` 追加节与 TASKS 接手快照。
 
 - 2026-09-30 **media-kit 主仓上游 main 合并全链完成转 done**（`archives/experiments/android-media-kit-main-merge-acceptance-12700-20260930.md`）：合并提交 `a886f556`（63 处冲突分层裁定），我方 Android HDR/P5、dispose 屏障、owner broker、GL 渲染线程、d3d11 全部保留，上游 shuffle 流/isPlaying/playlist 修复/FocusNode/js→web 迁移择优吸收；四包 analyze 通过。**P5 五项实机验收全部通过**（12700 Glass SDR / 12701 Mystery PQ 全片 EOS+direct=1+RESCALE+片尾回退命中+闭合全对等，12702 播放中直接销毁零崩溃+900/900 闭环），APK 库集与已验收 12680 一致。main 已快进为唯一维护线。遗留：上游亮度/音量控件特性未吸收、Linux 侧待环境回归、严格数值读回可按需补跑。
