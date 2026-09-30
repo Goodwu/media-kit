@@ -54,6 +54,15 @@ P8.4 全片 1170.7s（~19.5 分钟），两模式各播 300 秒观察窗，未�
 - **用户观感反馈与诊断（HDR10 4K30 轮）**：用户报告开场数个场景画面抖动、绿色横条色块（部分呈左下→右上斜线分隔的撕裂形态），中后段基本正常、偶发绿色色块。截图（t30/90/150/240）逐行绿色检测未捕捉到（瞬态）；日志零渲染失败/零取图错误（OMX set_parameter 报错为各机型通有的良性探测失败）。机制判定：**① 抖动**=开场 29 帧丢失在 30fps 内容上的节奏跳动（启动收敛期，稳态零丢帧后消失），非缺陷；**② 绿块/斜线撕裂**=OES 路径（非 P5 内容 direct=0）缺少 direct 路径的 buffer 生命周期保护——`mapper_unmap` 在 `direct_retire=false` 时既无 sample_fence/retired 持有也无 `gl->Finish()` 屏障，`DestroyImageKHR`+`AImage_delete` 立即归还 buffer；若 GL 异步采样尚未完成而 codec 已重写该 buffer（Adreno 512 无 Mali 式隐式同步），采样读到半写数据→斜线撕裂、读到未初始化区域→绿色（NV12 全零）。时间相关性吻合：开场（丢帧+重绘频繁+buffer 高速循环）密集、稳态干净、偶发重绘触发偶发绿块。待验证区分项：老 Venus 固件启动期前几帧输出本身损坏（codec 问题而非管线竞争）可用探针 `cpuRead` 读回前 30 帧像素区分。修复方向（未实施）：retire+fence 机制扩展到 OES 路径（风险：OES 持有 buffer 延迟 codec 回收，maxImages=3 下需实机 A/B）或 OES unmap 前加 Finish 屏障（有每帧 Finish 开销）。**图像复核（glm-5.3-flash-free 子代理逐张查看，2026-09-30）**：四张定时截图（t30/90/150/240）全部判定正常画面，每张附饱和绿像素扫描交叉验证（命中 0）——t30 为测试片自带的 SDR/HDR 左右分屏演示（片源内容、附文字标注，垂直分割非斜线），t90 绿色帐篷、t150 草地特写均为自然场景内容。瞬态绿块/斜线撕裂未被定时截图捕捉，与"瞬态、集中于开场收敛期"的机制判定一致。素材即矩阵 HDR10 fixture（3840×1920@29.97fps Main10，305s），复用 12705 SDR 包。全片 EOS 准时到达（304.7s 与片长一致）、时间轴 1.0x 无漂移（t270→269.0、t300→299.0）；**全片仅丢 29 帧（~9131 帧的 0.3%），且全部集中在开场前 30 秒的启动收敛期，29s 后至 EOS 零丢帧**；`decoder-frame-drop-count=0`、avsync 全程 ~30 微秒、零渲染失败；截图像素统计全部正常画面（t320 为 EOS 后黑屏）。对比 4K60 P5 轮：30fps 源在解码上限（44–57fps）内且非 dovi 渲染路径更轻，解码与渲染双侧均有余量——**该机 4K30 HEVC Main10 SDR 播放完全可用**。日志 `/tmp/matrix-jason-hdr10-sdr-device.log`。
 - 收尾：测试包卸载、亮度 50/自动恢复、熄屏。日志 `/tmp/matrix-jason-p5-sdr-device.log`、截图 `/tmp/matrix-jason-p5-sdr-t*.png`。
 
+## 追加：华为 P10 Plus（WJX5T17314001484）三视频测试（2026-09-30，全部被解码能力阻断）
+
+用户换入第四台设备 VKY-AL00（P10 Plus，麒麟 960/Mali-G71，EMUI 9.1 Android 9，arm64-v8a，1440×2560 物理/1080×1920 override，`displayHdrTypes: []`）。三套素材推送后用 OES 修复版构建（JAR `7cb87a5c…`，P5/HDR10 复用既有包、P8.4 新建 `e151bec4…`）各跑 ~30 秒短轮：
+
+- **三个视频全部硬解阻断**：`OMX.hisi.video.decoder.hevc` 对 4K HEVC Main10 一律启动失败（P5 3840×2160@59.94 为 `Failed to start codec (status=-542398533)`，HDR10/P8.4 3840×1920@29.97 为 `MediaCodec failed to start`）——该机连 4K30 Main10 也不支持，属海思解码器世代所限（与 LYA 麒麟 980 支持 4K60 Main10 形成对照）。mpv 回退软解：8 秒墙钟仅推进 1.1–2.8 秒媒体时间、avsync 3–5s 漂移，不可用；P8.4 剥 RPU 过滤器正常生效（`vf=@media-kit-p84-base:format=dolbyvision=no`）。软解路径另见 `PL_FMT_CAP_LINEAR` scaler 降级提示（r16u 软纹量不支持线性采样），无害。
+- **OES 修复未在此机得到验证**：无硬解即无 AImageReader 路径，`buffer_retire` 不被触发（三轮均无 `P5_BUFFER_RETIRE`/`P5_SECTION_INIT` 日志，符合预期）。
+- 每轮结束恢复（卸载、亮度 57/自动、熄屏）。日志 `/tmp/vky-{p5,hdr10,p84}-device.log`、轮脚本 `/tmp/vky-round.sh`。
+- 沉淀：四机解码能力谱系——LYA 麒麟 980（4K60 Main10 ✓）、jason SD660（4K30 ✓ / 4K60 ✗）、VKY 麒麟 960 与 ugg SD425（4K Main10 全 ✗）。4K 素材矩阵需麒麟 980 / SD660 级以上 SoC。
+
 ## 追加：Redmi Note 5A（a869cea9）尝试（2026-09-30，用户要求中断，未成矩阵）
 
 用户接入第二台设备 Redmi Note 5A（ugg，LineageOS Android 17，arm64-v8a，720×1280@60Hz）要求做同样测试。核验：`displayHdrTypes: []`、HWC `hdr10=false hlg=false`、`hdrOutputType=INVALID`（屏幕无 HDR 输出能力）；三套 4K 素材经华为机中转推送（字节数逐一吻合）。
