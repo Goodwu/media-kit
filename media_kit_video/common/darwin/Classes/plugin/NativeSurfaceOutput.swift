@@ -234,6 +234,7 @@ final class NativeSurfaceOutput {
   private func promoteAfterPresentedFrame(handle: Int64) {
     lock.lock()
     guard var state = states[handle] else { lock.unlock(); return }
+    let wasActive = state.active
     let candidate = canProduceFloat(handle: handle, configuration: configurations[handle], state: state)
     state.active = candidate && NativeFrameRegistry.hasPresentedFrame(handle: handle)
     state.failureReason = state.active ? "" : candidate ? "awaiting-first-float-frame" : "surface, frame provider, or HDR target probe incomplete"
@@ -241,7 +242,11 @@ final class NativeSurfaceOutput {
     NativeFrameRegistry.setSurfaceActive(handle: handle, enabled: state.active)
     let result = report(handle: handle)
     lock.unlock()
-    onStateChanged?(result)
+    // Edge-triggered: the state-change report must not fire per presented
+    // frame, or the Dart side re-pumps the renderer for the same frame.
+    if state.active != wasActive {
+      onStateChanged?(result)
+    }
   }
 
   private func report(handle: Int64) -> [String: Any] {
