@@ -250,15 +250,15 @@ void main() {
         androidController.contains('Future<void> _applyVideoSizeLocked()') &&
         androidController
             .split('Future<void> _applyVideoSizeLocked()')[1]
-            .split('static const Duration _surfaceReleaseTimeout')[0]
+            .split('static const Duration _playerTerminatedTimeout')[0]
             .contains("_setOutputProperty('android-surface-size'") &&
         !androidController
             .split('Future<void> _applyVideoSizeLocked()')[1]
-            .split('static const Duration _surfaceReleaseTimeout')[0]
+            .split('static const Duration _playerTerminatedTimeout')[0]
             .contains("await setProperty('android-surface-size'") &&
         !androidController
             .split('Future<void> _applyVideoSizeLocked()')[1]
-            .split('static const Duration _surfaceReleaseTimeout')[0]
+            .split('static const Duration _playerTerminatedTimeout')[0]
             .contains('_applyWidLocked('),
     'a size-only reapply or media-less initial bind must not reset the decoder',
   );
@@ -268,9 +268,15 @@ void main() {
         androidController.contains('platform.isReleaseCallbacksActive') &&
         androidController.contains('platform.setPropertyStrictForRelease') &&
         androidController.contains('platform.setPropertyStrict(') &&
-        androidController.contains("'generation': owner.generation") &&
-        androidController.contains("'viewId': owner.viewId") &&
-        androidController.contains('_ledger.finishRelease'),
+        androidController.contains('_ledger.finishRelease') &&
+        File('lib/src/video_controller/android_video_controller/'
+                'platform_surface_release.dart')
+            .readAsStringSync()
+            .contains("'surfaceGeneration': surfaceGeneration,") &&
+        File('lib/src/video_controller/android_video_controller/'
+                'platform_surface_release.dart')
+            .readAsStringSync()
+            .contains("'wid': wid.toString(),"),
     'Android disposal must share one barrier and release the exact Surface owner',
   );
   final detach =
@@ -310,8 +316,11 @@ void main() {
     dispose >= 0 &&
         retryDispose > dispose &&
         unregisterController > retryDispose &&
-        androidController
-            .contains("status != 'released' && status != 'alreadyReleased'"),
+        File('lib/src/video_controller/android_video_controller/'
+                'platform_surface_release.dart')
+            .readAsStringSync()
+            .contains(
+                "status != 'released' && status != 'alreadyReleased'"),
     'failed stop or release must retain retry state and reject ambiguous acknowledgements',
   );
   final terminate = nativePlayer.indexOf('mpv.mpv_terminate_destroy(ctx);');
@@ -341,9 +350,9 @@ void main() {
         androidController.contains('if (platform.isTerminated)') &&
         androidController
             .contains('await platform.retryPostTerminationCallbacks();') &&
-        androidController.contains('.timeout(_surfaceReleaseTimeout)') &&
-        androidController
-            .contains('.timeout(_surfaceReleaseOwnerAckTimeout)') &&
+        androidController.contains('releaseTimeout: _surfaceReleaseTimeout') &&
+        androidController.contains(
+            'acknowledgeTimeout: _surfaceReleaseOwnerAckTimeout') &&
         androidController.contains('.timeout(_playerTerminatedTimeout)') &&
         androidController.contains('void ensurePlayerActive()') &&
         androidController.contains('nativePlayer.isTerminated') &&
@@ -387,9 +396,14 @@ void main() {
         platformView.contains('acknowledgedSurfaceReferences.put(') &&
         !platformView
             .contains('releasedSurfaceReferences.remove(generation)') &&
-        androidController
-            .contains("'surfaceGeneration': owner.surfaceGeneration") &&
-        androidController.contains("'wid': owner.wid.toString()") &&
+        File('lib/src/video_controller/android_video_controller/'
+                'platform_surface_release.dart')
+            .readAsStringSync()
+            .contains("'surfaceGeneration': surfaceGeneration,") &&
+        File('lib/src/video_controller/android_video_controller/'
+                'platform_surface_release.dart')
+            .readAsStringSync()
+            .contains("'wid': wid.toString(),") &&
         !platformViewFactory.contains('if (views.get(handle) != view) return;'),
     'view disposal and replaced-view destroys must retain an acknowledgement path',
   );
