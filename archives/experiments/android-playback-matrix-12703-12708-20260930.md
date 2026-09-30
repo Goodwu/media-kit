@@ -50,6 +50,7 @@ P8.4 全片 1170.7s（~19.5 分钟），两模式各播 300 秒观察窗，未�
 - **色彩**：无 `P5_DOVI_RESCALE` 行（华为专属 Y2Y /1020 归一化补偿在本机不触发，SD660 输出标准 Main10 布局，符合预期）。t30 截图较华为同片偏暖，但非同 PTS 场景，不作色彩结论。
 - **EOS 尾帧问题（观察项，非本轮判定范围）**：最后帧 PTS 98.915 `acquireLatestImage failed after retry: -30001`（empty_acquires=20、retired=1）→ 1 次 `Failed rendering frame`，**相邻帧回退未触发**（P5_TAIL_FALLBACK 计数 0；华为同片 EOS 位置 98.748 能命中回退），EOS 后画面呈纯紫（未初始化纹理，t115 截图 mean=(128,0,255) var=0）。回退条件在本机 EOS 场景未满足的原因未查（候选：末帧相邻 PTS 间隔或 retired 状态差异），与 P3 片尾任务相关，待后续跟进。
 - **证据缺口**：退出时 `P5_IMAGE_FINAL` 闭合计数未采集——BACK 后 6 秒 grep 时 NativePlayer.dispose 的 5 秒终止宽限期未走完，logcat 先被轮脚本关闭；无 FATAL/SIGSEGV、force-stop 后卸载成功。
+- **解码吞吐复测（应用户"不做渲染的解码速度"要求，纯解码探针轮）**：**达不到 60fps，按用户标准终止推进**。测试页 `P5_CODEC_PROBE` 原生探针（`P5CodecProbe.java`，surface 模式 + ImageReader 即取即弃、无渲染无反压），全片 5930 帧+RPU 全量输入（`rpuMatchedOutputs=5930`、`stalled=false`、`inputEos=true`），5931 帧输出耗时 **133.4s，平均 44.4fps**。该数字含探针自身 Java 喂数开销（MediaExtractor 单线程 + 每输入帧 RPU NAL 扫描），为下界；但结合播放轮实测有效解码速率 ~57fps（5930 帧/104s，且该轮还含渲染停顿），**任何测量口径下均低于 60fps**，且播放轮 avsync 全片线性增长（~52-58ms/s ≈ 5% 恒定缺口、无热恢复）证实非暂时性。结论：Venus（SD660）对 4K HEVC Main10 DV P5 的解码吞吐封顶 <60fps，"严格按时间解码 60fps 源"在该机不可达；渲染侧优化（前述 30fps 路径）随之按用户决定不再推进。探针包 SHA `6987a451…`，轮脚本 `/tmp/decode-probe-round.sh`，日志 `/tmp/matrix-jason-decode-probe-device.log`。
 - 收尾：测试包卸载、亮度 50/自动恢复、熄屏。日志 `/tmp/matrix-jason-p5-sdr-device.log`、截图 `/tmp/matrix-jason-p5-sdr-t*.png`。
 
 ## 追加：Redmi Note 5A（a869cea9）尝试（2026-09-30，用户要求中断，未成矩阵）
