@@ -76,6 +76,15 @@ class _SinglePlayerSingleVideoScreenState
     'MEDIA_KIT_ANDROID_AUTO_SDR_AFTER_P5_SECONDS',
     defaultValue: -1,
   );
+  // Same-player second open for per-mapper state verification (P0-1 style
+  // consecutive playback within one process); requires HDR transaction mode.
+  static const _androidAutoSecondSource = String.fromEnvironment(
+    'MEDIA_KIT_ANDROID_AUTO_SECOND_SOURCE',
+  );
+  static const _androidAutoSecondSourceAtSeconds = int.fromEnvironment(
+    'MEDIA_KIT_ANDROID_AUTO_SECOND_SOURCE_AT_SECONDS',
+    defaultValue: -1,
+  );
   static const _androidP5PlatformSdrDiagnostic = bool.fromEnvironment(
     'MEDIA_KIT_ANDROID_P5_PLATFORM_SDR_DIAGNOSTIC',
   );
@@ -216,7 +225,7 @@ class _SinglePlayerSingleVideoScreenState
       return AndroidHdrOpenCoordinator(
         backend,
         verifier: (source, cancelled) async {
-          if (cancelled() || source != sources.first) {
+          if (cancelled()) {
             throw StateError('Named source is no longer selected');
           }
           final name = RegExp(
@@ -1302,6 +1311,20 @@ class _SinglePlayerSingleVideoScreenState
             '/data/local/tmp/media-kit-sdr-control.mp4',
           );
         }
+      }
+      if (_androidAutoSecondSourceAtSeconds > 0 &&
+          _androidAutoSecondSource.isNotEmpty) {
+        unawaited(Future<void>.delayed(
+          Duration(seconds: _androidAutoSecondSourceAtSeconds),
+        ).then((_) async {
+          if (!mounted || _autoPlayerDisposed) return;
+          // Same-player reopen through the HDR coordinator: keeps the VO,
+          // rebuilds the hwdec mapper — exercises per-mapper state (e.g. P5
+          // dovi rescale) on the second file within the same process.
+          final result = await _openHdrSource(_androidAutoSecondSource);
+          debugPrint('AUTO_SECOND_SOURCE sample=${result.identity.sample} '
+              'path=$_androidAutoSecondSource');
+        }));
       }
       if (_androidP5PlatformSdrDiagnostic &&
           _androidP5AutoFullscreenAtSeconds >= 0) {

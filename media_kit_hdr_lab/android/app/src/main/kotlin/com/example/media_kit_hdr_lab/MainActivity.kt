@@ -202,7 +202,7 @@ class MainActivity : FlutterActivity() {
         com.alexmercerind.media_kit_video.platformview.PlatformVideoView
             .setSurfaceDataSpaceExt(LyaPqDataSpaceExt())
         CapabilitiesChannel.register(this, flutterEngine)
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "media_kit_test/engine_control")
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "media_kit_hdr_lab/engine_control")
             .setMethodCallHandler { call, result ->
                 if (call.method != "DestroyEngineNow") {
                     result.notImplemented()
@@ -225,7 +225,7 @@ class MainActivity : FlutterActivity() {
                     50,
                 )
             }
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "media_kit_test/p5_runtime_gate")
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "media_kit_hdr_lab/p5_runtime_gate")
             .setMethodCallHandler { call, result ->
                 if (call.method != "ReadProperties") {
                     result.notImplemented()
@@ -249,7 +249,7 @@ class MainActivity : FlutterActivity() {
                     }
                 }.start()
             }
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "media_kit_test/flutter_surface_probe")
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "media_kit_hdr_lab/flutter_surface_probe")
             .setMethodCallHandler { call, result ->
                 if (call.method == "SetShortEdges") {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -304,7 +304,7 @@ class MainActivity : FlutterActivity() {
                     PixelCopy.request(surface, rect, bitmap, callback, Handler(Looper.getMainLooper()))
                 }
             }
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "media_kit_test/p5_codec_probe")
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "media_kit_hdr_lab/p5_codec_probe")
             .setMethodCallHandler { call, result ->
                 if (call.method != "Run") {
                     result.notImplemented()
