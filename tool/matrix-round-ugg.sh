@@ -10,8 +10,8 @@ logcat_pid=
 restore() {
   set +e
   if [[ -n "$logcat_pid" ]]; then kill "$logcat_pid" 2>/dev/null; wait "$logcat_pid" 2>/dev/null; fi
-  $adb shell am force-stop com.example.media_kit_test
-  $adb uninstall com.example.media_kit_test
+  $adb shell am force-stop com.example.media_kit_hdr_lab
+  $adb uninstall com.example.media_kit_hdr_lab
   $adb shell setprop debug.media_kit.p5_image_timeline 0
   $adb shell settings put system screen_brightness 43
   $adb shell settings put system screen_brightness_mode 1
@@ -36,16 +36,16 @@ $adb shell setprop debug.media_kit.p5_image_timeline 1
 $adb logcat -c
 $adb logcat -v threadtime > "$base-device.log" &
 logcat_pid=$!
-$adb shell am start -n com.example.media_kit_test/.MainActivity
+$adb shell am start -n com.example.media_kit_hdr_lab/.MainActivity
 for attempt in 1 2 3 4 5; do
   sleep 2
-  if $adb shell dumpsys window | grep -q 'mCurrentFocus=.*com.example.media_kit_test' &&
+  if $adb shell dumpsys window | grep -q 'mCurrentFocus=.*com.example.media_kit_hdr_lab' &&
      $adb shell dumpsys window | grep -q 'isKeyguardShowing=false'; then break; fi
   $adb shell input keyevent KEYCODE_WAKEUP
   $adb shell input keyevent KEYCODE_MENU
-  $adb shell am start -n com.example.media_kit_test/.MainActivity
+  $adb shell am start -n com.example.media_kit_hdr_lab/.MainActivity
 done
-$adb shell dumpsys window | grep -q 'mCurrentFocus=.*com.example.media_kit_test'
+$adb shell dumpsys window | grep -q 'mCurrentFocus=.*com.example.media_kit_hdr_lab'
 $adb shell input tap 360 640
 sleep 8
 grep -q "ANDROID_HDR_OPEN sample=$sample " "$base-device.log" && echo "OPEN_OK" || echo "OPEN_MISSING"

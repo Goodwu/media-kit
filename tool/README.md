@@ -1,5 +1,9 @@
 # tool/ 使用说明
 
+## 目标 App（2026-10-01 起）
+
+HDR/验收轮次脚本（`matrix-*`、`merge-accept-*`、`decode-probe-round`）构建并操作 **`media_kit_hdr_lab`**（包名 `com.example.media_kit_hdr_lab`）——诊断 App 拆分自 media_kit_test（见 P2-4 整改）。`media_kit_test` 已还原为上游示例 App，不再承载 AUTO/HDR define 面。
+
 ## 环境变量（脚本不含本机路径/设备序列号）
 
 - `ANDROID_SERIAL` — 目标设备序列号；未设置时使用 `adb` 唯一连接设备。
