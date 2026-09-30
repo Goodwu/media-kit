@@ -270,7 +270,7 @@ void main() {
         androidController.contains('platform.setPropertyStrict(') &&
         androidController.contains("'generation': owner.generation") &&
         androidController.contains("'viewId': owner.viewId") &&
-        androidController.contains('_pendingSurfaceReleases'),
+        androidController.contains('_ledger.finishRelease'),
     'Android disposal must share one barrier and release the exact Surface owner',
   );
   final detach =
@@ -290,7 +290,7 @@ void main() {
   final stopPrevious = androidController.indexOf(
       "await _applyWidLocked(widValueOverride: '0');", bind);
   final retainIncoming =
-      androidController.indexOf('_inFlightSurfaceOwner = incoming;', bind);
+      androidController.indexOf('_ledger.markInFlight(incoming);', bind);
   final promoteIncoming =
       androidController.indexOf('_platformViewId = incoming.viewId;', bind);
   _require(
