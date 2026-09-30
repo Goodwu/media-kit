@@ -8,8 +8,8 @@ logcat_pid=
 restore() {
   set +e
   if [[ -n "$logcat_pid" ]]; then kill "$logcat_pid" 2>/dev/null; wait "$logcat_pid" 2>/dev/null; fi
-  $adb shell am force-stop com.example.media_kit_test
-  $adb uninstall com.example.media_kit_test
+  $adb shell am force-stop com.example.media_kit_hdr_lab
+  $adb uninstall com.example.media_kit_hdr_lab
   $adb shell svc power stayon false
   $adb shell settings put system screen_brightness 50
   $adb shell settings put system screen_brightness_mode 1
@@ -32,14 +32,14 @@ $adb shell svc power stayon usb
 $adb logcat -c
 $adb logcat -v threadtime > "$base-device.log" &
 logcat_pid=$!
-$adb shell am start -n com.example.media_kit_test/.MainActivity
+$adb shell am start -n com.example.media_kit_hdr_lab/.MainActivity
 for attempt in 1 2 3 4 5; do
   sleep 2
-  if $adb shell dumpsys window | grep -q 'mCurrentFocus=.*com.example.media_kit_test' &&
+  if $adb shell dumpsys window | grep -q 'mCurrentFocus=.*com.example.media_kit_hdr_lab' &&
      $adb shell dumpsys window | grep -q 'isKeyguardShowing=false'; then break; fi
-  $adb shell am start -n com.example.media_kit_test/.MainActivity
+  $adb shell am start -n com.example.media_kit_hdr_lab/.MainActivity
 done
-$adb shell dumpsys window | grep -q 'mCurrentFocus=.*com.example.media_kit_test'
+$adb shell dumpsys window | grep -q 'mCurrentFocus=.*com.example.media_kit_hdr_lab'
 echo "probe started, waiting (full-film decode ~2-4min)..."
 # 探针完成标志：P5_CODEC_PROBE outputFps= 行出现
 for i in $(seq 1 100); do

@@ -760,3 +760,23 @@ jobs:
           print('libmpv.so version markers verified: ' + ', '.join(
               m.decode() for m in markers))
           PY
+
+  hdr-lab-analyze:
+    # The HDR diagnostics app (media_kit_hdr_lab) owns the AUTO/HDR define
+    # surface and the acceptance round tooling; keep it compiling.
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.run_package_tests == true }}
+    name: media_kit_hdr_lab analyze & Android build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: media_kit_hdr_lab
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+      - run: flutter pub get
+      - run: flutter analyze --no-pub
+      - name: Build arm64 debug APK (native probes compile check)
+        run: flutter build apk --debug --target-platform android-arm64
