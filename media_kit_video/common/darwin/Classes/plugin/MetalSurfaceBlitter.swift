@@ -19,9 +19,13 @@ final class MetalSurfaceBlitter {
   private let cache: CVMetalTextureCache
   private let pipeline: MTLRenderPipelineState
   private let sampler: MTLSamplerState
+  private var frameNumber = 0
+
+  // Diagnostics-only frame sampling (PILIPLUSX_HDR_SAMPLE=1). Never compiled
+  // into release builds: the production path only draws.
+  #if DEBUG
   private let sampleEnabled: Bool
   private let sampleInterval: Int
-  private var frameNumber = 0
 
   private struct SampleStats {
     let p50: Float
@@ -41,6 +45,7 @@ final class MetalSurfaceBlitter {
     9.0 / 12.0,
     11.0 / 12.0,
   ]
+  #endif
 
   init?(device: MTLDevice?) {
     guard let device, let queue = device.makeCommandQueue() else { return nil }
@@ -80,6 +85,7 @@ final class MetalSurfaceBlitter {
     self.cache = cache
     self.pipeline = pipeline
     self.sampler = sampler
+    #if DEBUG
     let environment = ProcessInfo.processInfo.environment
     sampleEnabled = environment["PILIPLUSX_HDR_SAMPLE"] == "1"
     sampleInterval = max(
@@ -92,6 +98,7 @@ final class MetalSurfaceBlitter {
         "regions=6 format=rgba16Float linear"
       )
     }
+    #endif
   }
 
   func draw(
@@ -101,10 +108,12 @@ final class MetalSurfaceBlitter {
   ) -> Bool {
     frameNumber += 1
     let frameSequence = frameNumber
+    #if DEBUG
     let shouldSample = sampleEnabled && frameNumber % sampleInterval == 0
     if shouldSample {
       sampleInput(pixelBuffer: pixelBuffer, frame: frameNumber)
     }
+    #endif
     var textureRef: CVMetalTexture?
     let width = CVPixelBufferGetWidth(pixelBuffer)
     let height = CVPixelBufferGetHeight(pixelBuffer)
@@ -130,9 +139,11 @@ final class MetalSurfaceBlitter {
     encoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: 3)
     encoder.endEncoding()
 
+    #if DEBUG
     if shouldSample {
       addOutputSample(to: command, from: drawable.texture, frame: frameNumber)
     }
+    #endif
     command.present(drawable)
     command.commit()
     // TextureHW may return this CVPixelBuffer to the GL producer immediately
@@ -170,6 +181,7 @@ final class MetalSurfaceBlitter {
     return true
   }
 
+  #if DEBUG
   private func sampleInput(pixelBuffer: CVPixelBuffer, frame: Int) {
     let pixelFormat = CVPixelBufferGetPixelFormatType(pixelBuffer)
     let stats: [SampleStats]?
@@ -367,4 +379,5 @@ final class MetalSurfaceBlitter {
     }
     return Float(sign * Foundation.pow(2.0, Double(exponent - 15)) * (1.0 + Double(fraction) / 1024.0))
   }
+  #endif
 }

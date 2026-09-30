@@ -197,6 +197,11 @@ class MainActivity : FlutterActivity() {
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        // Vendor dataspace fallback (LYA-AL00 private ABI) and device
+        // capability diagnostics live in the test app, out of the library.
+        com.alexmercerind.media_kit_video.platformview.PlatformVideoView
+            .setSurfaceDataSpaceExt(LyaPqDataSpaceExt())
+        CapabilitiesChannel.register(this, flutterEngine)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "media_kit_test/engine_control")
             .setMethodCallHandler { call, result ->
                 if (call.method != "DestroyEngineNow") {

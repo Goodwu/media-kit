@@ -1835,8 +1835,10 @@ class AndroidVideoController extends PlatformVideoController {
     'com.alexmercerind/media_kit_video',
   )..setMethodCallHandler((MethodCall call) async {
       try {
-        debugPrint(call.method.toString());
-        debugPrint(call.arguments.toString());
+        if (kDebugMode) {
+          debugPrint(call.method.toString());
+          debugPrint(call.arguments.toString());
+        }
         switch (call.method) {
           case 'VideoOutput.Resize':
             {

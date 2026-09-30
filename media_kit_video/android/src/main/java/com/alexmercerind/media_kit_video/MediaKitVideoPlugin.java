@@ -10,18 +10,9 @@ package com.alexmercerind.media_kit_video;
 import androidx.annotation.NonNull;
 
 import android.content.Context;
-import android.media.MediaCodecInfo;
-import android.media.MediaCodecList;
-import android.opengl.EGL14;
-import android.opengl.EGLConfig;
-import android.opengl.EGLDisplay;
 import android.os.Build;
-import android.view.Display;
-import android.view.WindowManager;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.plugin.common.BinaryMessenger;
@@ -208,10 +199,6 @@ public class MediaKitVideoPlugin implements FlutterPlugin, MethodCallHandler {
                 result.success(Utils.isEmulator());
                 break;
             }
-            case "Android.Capabilities": {
-                result.success(androidCapabilities());
-                break;
-            }
             default: {
                 result.notImplemented();
                 break;
@@ -240,125 +227,4 @@ public class MediaKitVideoPlugin implements FlutterPlugin, MethodCallHandler {
         platformVideoViewFactory = null;
     }
 
-    /**
-     * Returns device-reported facts for a reproducible experiment manifest.
-     * A caller must still correlate a playing layer and display state before
-     * treating HDR output as active.
-     */
-    private HashMap<String, Object> androidCapabilities() {
-        final HashMap<String, Object> result = new HashMap<>();
-        result.put("sdkInt", Build.VERSION.SDK_INT);
-        final List<Integer> hdrTypes = new ArrayList<>();
-        if (applicationContext != null) {
-            final WindowManager windowManager = (WindowManager) applicationContext
-                .getSystemService(Context.WINDOW_SERVICE);
-            if (windowManager != null) {
-                final Display display = windowManager.getDefaultDisplay();
-                if (display != null && display.getHdrCapabilities() != null) {
-                    for (int type : display.getHdrCapabilities().getSupportedHdrTypes()) {
-                        hdrTypes.add(type);
-                    }
-                }
-            }
-        }
-        result.put("displayHdrTypes", hdrTypes);
-        result.put("egl", eglCapabilities());
-
-        final List<HashMap<String, Object>> hevcDecoders = new ArrayList<>();
-        for (MediaCodecInfo codec : new MediaCodecList(MediaCodecList.ALL_CODECS).getCodecInfos()) {
-            if (codec.isEncoder()) continue;
-            for (String type : codec.getSupportedTypes()) {
-                if (!"video/hevc".equalsIgnoreCase(type)) continue;
-                final HashMap<String, Object> decoder = new HashMap<>();
-                decoder.put("name", codec.getName());
-                decoder.put("type", type);
-                try {
-                    final MediaCodecInfo.CodecCapabilities caps = codec.getCapabilitiesForType(type);
-                    final List<Integer> profiles = new ArrayList<>();
-                    for (MediaCodecInfo.CodecProfileLevel level : caps.profileLevels) {
-                        profiles.add(level.profile);
-                    }
-                    decoder.put("profiles", profiles);
-                    decoder.put("maxInstances", caps.getMaxSupportedInstances());
-                    final MediaCodecInfo.VideoCapabilities video = caps.getVideoCapabilities();
-                    decoder.put("supports3840x2160p50", video != null &&
-                        video.areSizeAndRateSupported(3840, 2160, 50.0));
-                    decoder.put("supports3840x1920p2997", video != null &&
-                        video.areSizeAndRateSupported(3840, 1920, 30000.0 / 1001.0));
-                } catch (RuntimeException error) {
-                    decoder.put("capabilityError", error.getClass().getSimpleName());
-                }
-                hevcDecoders.add(decoder);
-            }
-        }
-        result.put("hevcDecoders", hevcDecoders);
-        return result;
-    }
-
-    /** A context-free EGL inventory. It does not prove a presentation path. */
-    private HashMap<String, Object> eglCapabilities() {
-        final HashMap<String, Object> result = new HashMap<>();
-        final EGLDisplay display = EGL14.eglGetDisplay(EGL14.EGL_DEFAULT_DISPLAY);
-        if (display == EGL14.EGL_NO_DISPLAY) {
-            result.put("error", "EGL_NO_DISPLAY");
-            return result;
-        }
-        final int[] version = new int[2];
-        if (!EGL14.eglInitialize(display, version, 0, version, 1)) {
-            result.put("error", "eglInitialize failed: " + EGL14.eglGetError());
-            return result;
-        }
-        try {
-            result.put("version", version[0] + "." + version[1]);
-            final String extensions = EGL14.eglQueryString(display, EGL14.EGL_EXTENSIONS);
-            result.put("extensions", extensions);
-            // A high-precision EGLConfig only selects the buffer format. The
-            // Android EGL surface must also advertise a BT.2020 transfer
-            // extension before libmpv can request that colorspace at creation.
-            result.put(
-                "bt2020PqWindowSurface",
-                extensions != null &&
-                    extensions.contains("EGL_EXT_gl_colorspace_bt2020_pq")
-            );
-            result.put(
-                "bt2020HlgWindowSurface",
-                extensions != null &&
-                    extensions.contains("EGL_EXT_gl_colorspace_bt2020_hlg")
-            );
-            final int[] count = new int[1];
-            if (!EGL14.eglGetConfigs(display, null, 0, 0, count, 0)) {
-                result.put("configError", "eglGetConfigs failed: " + EGL14.eglGetError());
-                return result;
-            }
-            final EGLConfig[] configs = new EGLConfig[count[0]];
-            if (!EGL14.eglGetConfigs(display, configs, 0, configs.length, count, 0)) {
-                result.put("configError", "eglGetConfigs list failed: " + EGL14.eglGetError());
-                return result;
-            }
-            final List<HashMap<String, Object>> highPrecision = new ArrayList<>();
-            final int[] value = new int[1];
-            for (int i = 0; i < count[0]; i++) {
-                if (!EGL14.eglGetConfigAttrib(display, configs[i], EGL14.EGL_RED_SIZE, value, 0)) continue;
-                final int red = value[0];
-                if (!EGL14.eglGetConfigAttrib(display, configs[i], EGL14.EGL_GREEN_SIZE, value, 0)) continue;
-                final int green = value[0];
-                if (!EGL14.eglGetConfigAttrib(display, configs[i], EGL14.EGL_BLUE_SIZE, value, 0)) continue;
-                final int blue = value[0];
-                if (!EGL14.eglGetConfigAttrib(display, configs[i], EGL14.EGL_ALPHA_SIZE, value, 0)) continue;
-                final int alpha = value[0];
-                if (red < 10 && green < 10 && blue < 10 && alpha < 16) continue;
-                final HashMap<String, Object> config = new HashMap<>();
-                config.put("index", i);
-                config.put("red", red);
-                config.put("green", green);
-                config.put("blue", blue);
-                config.put("alpha", alpha);
-                highPrecision.add(config);
-            }
-            result.put("highPrecisionConfigs", highPrecision);
-        } finally {
-            EGL14.eglTerminate(display);
-        }
-        return result;
-    }
 }

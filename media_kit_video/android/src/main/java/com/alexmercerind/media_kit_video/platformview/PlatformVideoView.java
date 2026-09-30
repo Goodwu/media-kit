@@ -40,8 +40,55 @@ import com.alexmercerind.media_kit_video.GlobalObjectRefManager;
  */
 public final class PlatformVideoView implements PlatformView {
     private static final String TAG = "PlatformVideoView";
-    private static final String LYA_PQ_FINGERPRINT =
-            "HUAWEI/LYA-AL00/HWLYA:10/HUAWEILYA-AL00/10.1.0.163C00:user/release-keys";
+
+    /**
+     * Vendor/diagnostics extension for Surface dataspace handling.
+     *
+     * The library itself only uses the public NDK dataspace path. An
+     * out-of-tree package or app may register an implementation to retry a
+     * dataspace the public setter rejected with device-specific means (e.g.
+     * a vendor-private ABI on one exact firmware) and to observe dataspace
+     * events for diagnostics. The implementation must confine any private
+     * ABI to the exact device it was validated on.
+     */
+    public interface SurfaceDataSpaceExt {
+        /**
+         * Retries {@code dataSpace} on {@code surface} after the public NDK
+         * setter rejected it.
+         *
+         * @return whether the dataspace is now applied to the surface.
+         */
+        boolean applyDataSpace(@NonNull android.view.Surface surface, int dataSpace);
+
+        /**
+         * Diagnostics hook: called on a live surface that was created without
+         * an initial HDR dataspace, roughly eight seconds after creation.
+         */
+        default void onSurfaceAvailable(@NonNull android.view.Surface surface) {}
+
+        /**
+         * Diagnostics hook: called when a dataspace could not be applied
+         * through any path.
+         */
+        default void onDataSpaceApplyFailed(
+                @NonNull android.view.Surface surface, int dataSpace) {}
+    }
+
+    @Nullable
+    private static volatile SurfaceDataSpaceExt surfaceDataSpaceExt;
+
+    /**
+     * Registers the vendor/diagnostics dataspace extension. Call before the
+     * first platform view is created; pass {@code null} to unregister.
+     */
+    public static void setSurfaceDataSpaceExt(@Nullable SurfaceDataSpaceExt ext) {
+        surfaceDataSpaceExt = ext;
+    }
+
+    static boolean hasSurfaceDataSpaceExt() {
+        return surfaceDataSpaceExt != null;
+    }
+
     private static final Executor transactionExecutor = Runnable::run;
     @NonNull
     private final SurfaceView surfaceView;
@@ -112,13 +159,15 @@ public final class PlatformVideoView implements PlatformView {
     private static native boolean setSurfaceDataSpace(
             @NonNull android.view.Surface surface, int dataSpace, boolean probeSrgbOnFailure);
     private static native int getSurfaceDataSpace(@NonNull android.view.Surface surface);
-    private static native void probeLatePqDataSpace(@NonNull android.view.Surface surface);
 
     private boolean needsPqResetMonitoring() {
+        // The continuous reset monitor only makes sense where the dataspace
+        // was applied through a fragile path, i.e. where the host registered
+        // a vendor dataspace extension for this device.
         return Build.VERSION.SDK_INT == Build.VERSION_CODES.Q &&
-                LYA_PQ_FINGERPRINT.equals(Build.FINGERPRINT) &&
                 "pq".equals(initialDataSpace) &&
-                "rgba1010102".equals(initialPixelFormat);
+                "rgba1010102".equals(initialPixelFormat) &&
+                hasSurfaceDataSpaceExt();
     }
 
     /**
@@ -246,9 +295,13 @@ public final class PlatformVideoView implements PlatformView {
                     }
                     if (initialDataSpace == null && "rgba1010102".equals(initialPixelFormat)) {
                         new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                            if (!disposed && surfaceGeneration == generation && wid != 0 &&
-                                    holder.getSurface().isValid() && nativeDataSpaceBridgeLoaded) {
-                                probeLatePqDataSpace(holder.getSurface());
+                            if (!disposed || surfaceGeneration != generation || wid == 0 ||
+                                    !holder.getSurface().isValid()) {
+                                return;
+                            }
+                            final SurfaceDataSpaceExt ext = surfaceDataSpaceExt;
+                            if (ext != null) {
+                                ext.onSurfaceAvailable(holder.getSurface());
                             }
                         }, 8000);
                     }
@@ -374,8 +427,23 @@ public final class PlatformVideoView implements PlatformView {
         }
         final int dataSpace = dataSpaceFor(transfer);
         if (Build.VERSION.SDK_INT < 34) {
-            return nativeDataSpaceBridgeLoaded && setSurfaceDataSpace(
+            if (!nativeDataSpaceBridgeLoaded) {
+                return false;
+            }
+            boolean applied = setSurfaceDataSpace(
                     surface, dataSpace, "rgba1010102".equals(initialPixelFormat));
+            if (!applied) {
+                final SurfaceDataSpaceExt ext = surfaceDataSpaceExt;
+                if (ext != null) {
+                    applied = ext.applyDataSpace(surface, dataSpace);
+                    Log.i(TAG, "ext dataspace fallback: transfer=" + transfer +
+                            ", applied=" + applied);
+                }
+                if (!applied && ext != null) {
+                    ext.onDataSpaceApplyFailed(surface, dataSpace);
+                }
+            }
+            return applied;
         }
         if (!surfaceView.isAttachedToWindow()) {
             return false;
