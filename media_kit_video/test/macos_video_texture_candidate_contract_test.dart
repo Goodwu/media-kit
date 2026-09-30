@@ -26,12 +26,16 @@ void main() {
     macosCandidate,
   );
   final textureFallback = source.indexOf('if (!nativeSurface)', candidateMount);
-  final activeMount = source.indexOf(
-    'if (nativeSurface &&\n'
-    '                                                    !nativeOhosCandidate &&\n'
-    '                                                    !nativeMacosCandidate)',
-    textureFallback,
-  );
+  // Whitespace-tolerant: the upstream merge re-indented this block, which must
+  // not affect the guarded composition-order contract.
+  final activeMount = source.substring(textureFallback).indexOf(
+        RegExp(
+          r'if \(nativeSurface &&\s*'
+          r'!nativeOhosCandidate &&\s*'
+          r'!nativeMacosCandidate\)',
+        ),
+      ) +
+      textureFallback;
 
   _require(
     nativeSurfaceState >= 0 &&

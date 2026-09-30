@@ -3,8 +3,10 @@ name: Build OHOS unsigned HAP
 on:
   pull_request:
     branches:
-      - ohos
-      - integration/piliplusx-hdr-08b
+      - main
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 concurrency:
