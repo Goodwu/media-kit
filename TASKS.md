@@ -75,6 +75,12 @@ P5→PQ 输出、首帧和性能使用 `/Users/wuweiwei1/Downloads/test-clips/My
 
 ## 其他当前任务
 
+- [ ] 架构审查整改（按 `archives/reviews/goodwu-commits-architecture-review-20260930.md`）
+  - status: in_progress；context: archives/conversations/architecture-review-remediation-20260930.md
+  - acceptance: 审查问题清单按第 5 节投入产出顺序分批整改（A 止血→H 收尾），每批行为等价可验证、analyze/test 回归通过、独立提交；P0-1/P0-2/P0-3 达成"库不含单机型私有 ABI、默认构建含已验收修复、HDR 路由策略进库"；仓库瘦身（filter-repo/LFS）需单独授权不在本任务内。
+  - latest: 批次A（P2-3）完成——OHOS 隔离入口 analyzer 排除并注明 CI 分工、macos 契约测试改缩进无关匹配修复、ci.yml 恢复 push→main 触发 package tests、ohos.yml 触发分支改 main；media_kit_video analyze 0 error、flutter test 全过。
+  - next: 批次B（P1-4）owner broker 按引擎分组 + 公开窄接口。
+
 - [x] media-kit 主仓合并上游 main（236 提交）回归单线
   - status: done（2026-09-30 合并 + 静态验证 + P5 五项实机验收全部通过）；context: archives/experiments/android-media-kit-main-merge-assessment-20260930.md、android-media-kit-main-merge-acceptance-12700-20260930.md
   - acceptance: `fix/darwin-video-output-rebuild-barrier`（或其继任集成分支）合并 origin/main（上游 236 提交）后构建通过，并复跑 P5 关键实机验收（颜色数值、片尾回退、EOS、直接销毁、PQ 首帧）无回归；main 成为唯一维护线。
