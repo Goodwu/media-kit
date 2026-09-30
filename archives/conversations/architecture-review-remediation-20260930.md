@@ -3,6 +3,8 @@
 ## Current State
 
 - **任务**：按 `archives/reviews/goodwu-commits-architecture-review-20260930.md`（只读审查，P0×3 / P1×6 / P2×5）整改。整改按审查第 5 节投入产出顺序分批执行，每批独立提交。
+- **终态（2026-09-30）**：路线图 1–8 项中，可在静态验证下安全完成的全部落地（批次 A–H，8 个提交）；三个 P0 全部达成。全量回归：四包 analyze 0 error、media_kit_video 36 + media_kit_test 84 项测试全过、gradle Java/Kotlin/原生编译链与 Swift parse 通过、默认路径 APK 实测包含 fork 标识。
+- **后续任务清单（按需启动）**：① 实机回归托底（LYA 上 App 扩展路径的 P5 PQ、5e26cf86 华为机回归、多引擎 broker 行为）——批次 C/D 改动的行为等价性已有静态证据，实机复验待设备轮次；② `AndroidVideoOptions/DarwinVideoOptions` 配置子对象收敛（破坏性 API，需 PiliPlus 协调）；③ P1-6 Darwin DisplayLink + blitter 异步完成（并入 TASKS 既有 macOS 任务实机验收）；④ OHOS 销毁协议归一与 Ledger 注入 MethodChannel 的 VM 级交错单测；⑤ P2-4 `media_kit_hdr_lab` 拆分与 `01` 还原上游；⑥ P2-1 仓库瘦身/LFS/证据外置（需单独授权）。
 - **批次进度**：
   - [x] 批次A（P2-3 止血）：OHOS 隔离入口 analyzer 排除（analysis_options.yaml 注明 CI 分工）、macos 契约测试缩进无关化修复、ci.yml 恢复 push→main 触发 package tests（手动分发保留按需开关）、ohos.yml 触发分支由已归档分支改为 main。验收：media_kit_video analyze 0 error（18 info/warning，与审查记录一致）、`flutter test` 全过（含先前加载失败的 macos 契约测试）。
   - [x] 批次B（P1-4）：`MpvOwnerBroker` 改为按 BinaryMessenger（引擎）分组登记（`HashMap<BinaryMessenger, HashSet<Long>>`），`onEngineDetach(messenger)` 只终结本引擎句柄，多引擎场景不再误杀；media_kit 新增公开窄接口 `NativeHandleLifecycle`（`observer` + `liveHandleAddresses`，`@internal` 通知方法）并从 `media_kit.dart` 导出，`InitializerNativeCallable` 私有注册字段移除，`mpv_owner_broker.dart` 改走公开 API（implementation_imports 消除）；登记/注销失败改为 debugPrint 显式可见。验收：两包 analyze 0 error、media_kit_video 13 个测试文件全过、JDK17 gradle `compileDebugJavaWithJavac` 通过。遗留（与审查一致）：多引擎行为未实机复验（原 P1-4 即代码路径推断）；音频宿主接线属长期项（需 media_kit_libs_android 原生层钩子）。
