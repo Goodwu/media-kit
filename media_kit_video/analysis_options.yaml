@@ -6,6 +6,12 @@ analyzer:
     - windows/**
     - macos/**
     - linux/**
+    # Isolated OHOS entry: compiles only under the OHOS Flutter fork SDK
+    # (see .github/workflows/ohos.yml), which provides OhosViewSurface and
+    # the OHOS platform-view factories. The standard Flutter SDK cannot
+    # resolve those APIs; test/platform_view_entry_contract_test.dart guards
+    # that this file stays out of the shared entry.
+    - lib/src/video/platform_view_video_ohos.dart
   errors:
     dangling_library_doc_comments: ignore
     unintended_html_in_doc_comment: ignore
