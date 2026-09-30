@@ -57,7 +57,7 @@ void main() {
   );
   _require(
     view.contains('private var drawDiagnosticsRemaining = 8') &&
-        RegExp(r'drawDiagnosticsRemaining -= 1').allMatches(view).length == 2 &&
+        RegExp(r'drawDiagnosticsRemaining -= 1').allMatches(view).length == 4 &&
         view.contains('NativeSurfaceView macOS draw skipped') &&
         view.contains('NativeSurfaceView macOS draw handle='),
     'the pre-existing bounded draw diagnostics must remain available',
@@ -68,10 +68,12 @@ void main() {
         diagnostics.contains('consecutiveBufferReuseCount') &&
         diagnostics.contains('firstSequence') &&
         diagnostics.contains('lastSequence') &&
-        diagnostics.contains('cpuWaitDurations') &&
+        diagnostics.contains('inFlightDurations') &&
+        diagnostics.contains('idleTickCount') &&
+        diagnostics.contains('drawAttemptCount') &&
         diagnostics.contains('gpuDurations'),
     'summary must cover tick pacing, drawable availability, buffer reuse, '
-    'frame sequence, CPU wait, and GPU duration',
+    'frame sequence, in-flight duration, idle/attempt split, and GPU duration',
   );
   _require(
     !diagnostics.contains('CVPixelBufferLockBaseAddress') &&
@@ -88,20 +90,21 @@ void main() {
     'Metal draw method must remain inspectable',
   );
   final draw = blitter.substring(drawStart, sampleStart);
-  final wait = draw.indexOf('command.waitUntilCompleted()');
+  // The async completion path: one completed handler registered before
+  // commit, outcomes delivered on the main queue, and the main thread never
+  // blocks on the GPU.
   _require(
-    wait >= 0 &&
-        RegExp(r'command\.waitUntilCompleted\(\)').allMatches(draw).length ==
-            1 &&
-        draw.indexOf('let waitStarted = timingHandler == nil') < wait &&
-        draw.indexOf('if let timingHandler, let waitStarted', wait) > wait &&
-        draw.contains('command.gpuStartTime') &&
-        draw.contains('command.gpuEndTime'),
-    'timing must observe the existing Metal wait without adding another wait',
+    draw.indexOf('command.addCompletedHandler') <
+            draw.indexOf('command.commit()') &&
+        RegExp(r'command\.addCompletedHandler').allMatches(draw).length == 1 &&
+        !draw.contains('waitUntilCompleted') &&
+        draw.contains('DispatchQueue.main.async') &&
+        draw.contains('commandBuffer.gpuStartTime') &&
+        draw.contains('commandBuffer.gpuEndTime'),
+    'timing must ride the single pre-commit completion handler',
   );
   _require(
-    !draw.contains('addCompletedHandler') &&
-        !draw.contains('DispatchSemaphore') &&
+    !draw.contains('DispatchSemaphore') &&
         !draw.contains('sleep(') &&
         !draw.contains('getBytes(') &&
         !draw.contains('CVPixelBufferLockBaseAddress'),

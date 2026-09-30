@@ -40,6 +40,10 @@ public class TextureHW: NSObject, FlutterTexture, ResizableTextureProtocol {
     }
     NativeFrameRegistry.setFloatFormat(handle: registryHandle, enabled: false)
 
+    NativeFrameRegistry.observeInFlightDrained(handle: registryHandle) { [weak self] in
+      self?.releaseHeldTextureContexts()
+    }
+
     self.initMPV()
   }
 
@@ -164,6 +168,10 @@ public class TextureHW: NSObject, FlutterTexture, ResizableTextureProtocol {
   }
 
   public func render(_ size: CGSize) {
+    // A pool object parked for an async Metal blit may have drained since
+    // the last render; return it to the writable pool before asking for
+    // the next one.
+    releaseHeldTextureContexts()
     let textureContext = textureContexts.nextAvailable()
     if textureContext == nil {
       return
@@ -197,7 +205,20 @@ public class TextureHW: NSObject, FlutterTexture, ResizableTextureProtocol {
 
     glFlush()
 
-    textureContexts.pushAsReady(textureContext!)
+    textureContexts.pushAsReady(textureContext!, hold: holdForAsyncBlit)
+    NativeFrameRegistry.noteFrameProduced(handle: registryHandle)
+  }
+
+  /// Park predicate for `pushAsReady`: a rotated-out pool object still being
+  /// read by an in-flight Metal blit must not return to the writable pool.
+  private func holdForAsyncBlit(_ context: TextureGLESContext) -> Bool {
+    NativeFrameRegistry.isInFlight(handle: registryHandle, pixelBuffer: context.pixelBuffer)
+  }
+
+  /// Returns pool objects parked by the async Metal blit back to the
+  /// writable pool once their in-flight mark has cleared.
+  private func releaseHeldTextureContexts() {
+    textureContexts.releaseHeld(where: { !holdForAsyncBlit($0) })
   }
 
   static private func getProcAddress(

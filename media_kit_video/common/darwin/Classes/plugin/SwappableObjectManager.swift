@@ -17,6 +17,7 @@ public class SwappableObjectManager<T> {
   private let lock: NSRecursiveLock = NSRecursiveLock()
   private var available: [T]
   private var ready: [T] = []
+  private var held: [T] = []
   private var _current: T?
 
   init(objects: [T], skipCheckArgs: Bool = false) {
@@ -39,6 +40,7 @@ public class SwappableObjectManager<T> {
 
     available = objects
     ready = []
+    held = []
     _current = nil
   }
 
@@ -56,14 +58,40 @@ public class SwappableObjectManager<T> {
     return object
   }
 
-  public func pushAsReady(_ object: T) {
+  /// Pushes a freshly written object as ready.
+  ///
+  /// When the previous current object is rotated out, `hold` decides whether
+  /// it may return to the writable pool immediately. A held object (still
+  /// being read by an async consumer, e.g. an in-flight Metal blit) stays
+  /// parked until `releaseHeld(where:)` observes the hold clearing.
+  public func pushAsReady(_ object: T, hold: ((T) -> Bool)? = nil) {
     lock.lock()
     defer {
       lock.unlock()
     }
 
     ready.append(object)
-    updateCurrent()
+    updateCurrent(hold: hold)
+  }
+
+  /// Returns held objects whose hold predicate has cleared to the writable
+  /// pool. Idempotent; cheap to call speculatively.
+  public func releaseHeld(where predicate: (T) -> Bool) {
+    lock.lock()
+    defer {
+      lock.unlock()
+    }
+
+    guard !held.isEmpty else { return }
+    var stillHeld = [T]()
+    for object in held {
+      if predicate(object) {
+        stillHeld.append(object)
+      } else {
+        available.append(object)
+      }
+    }
+    held = stillHeld
   }
 
   public var current: T? {
@@ -75,7 +103,7 @@ public class SwappableObjectManager<T> {
     return _current
   }
 
-  private func updateCurrent() {
+  private func updateCurrent(hold: ((T) -> Bool)? = nil) {
     lock.lock()
     defer {
       lock.unlock()
@@ -97,7 +125,11 @@ public class SwappableObjectManager<T> {
       return
     }
 
-    available.append(old!)
+    if let old, hold?(old) == true {
+      held.append(old)
+    } else {
+      available.append(old!)
+    }
   }
 
   static private func checkArgs(_ objects: [T]) {
