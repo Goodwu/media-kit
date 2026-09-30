@@ -76,3 +76,9 @@ FFmpeg 与 libplacebo fork 各只有一条自定义分支，无需归一。
 ## 追加：/tmp 历史实验产物清理（2026-09-30 同日第三批）
 
 用户授权后执行：删除前核查确认（① firstframe-sdr 工作树 5 项未提交改动与归档补丁 `android-private-tmp-patches-20260928/media-kit-firstframe-sdr-20260927.patch` 内容一致（仅 SHA 截断差异）；② mkchk-p5-full 与已持久化 DV-P5.mp4 SHA 相同；③ 各临时工作树补丁均已在该目录归档）。删除约 1300 项历史实验产物（media-kit-12472~12682 各轮截图/日志/构建产物、matrix 轮 APK 与截图、分析脚本、APK 直改工具、ffmpeg/dovibaker/构建脚本的临时展开目录等），磁盘 7.6Gi→19Gi。**留档项**：测试源视频移入 `~/src/media-kit-build/sources/`（DV-P5.mp4、dolby-official-p5-2160p.mp4+RPU bin、p84-rpu-12s-control.mp4——均无 /tmp 外副本）；matrix 设备日志与 SF 快照（21 文件 17M）移入 `~/src/media-kit-build/evidence/playback-matrix-12703-12708/`。仓库内 3 个失效 worktree 注册已 prune。各实验记录中的 /tmp 证据路径除 matrix 记录外保持历史原样（描述当时位置），结论以记录文本为准。
+
+## 追加：dv-experiment 构建链内嵌 mpv 副本处置（2026-09-30 同日第四批）
+
+`~/src/libmpv-android-video-build-dv-experiment/buildscripts/deps/mpv` 经核实**无保留必要，已删除**。依据：① 其 git 历史（基点 32a164c 与残留 3 个旧分支）全部在 Goodwu/mpv；② 构建链 `include/download-deps.sh` 可自动重建（clone Goodwu/mpv + checkout `depinfo.sh` 钉定的 `v_mpv=63a0aa9` 并 verify_sha，该提交即归档 tag `archive/android-dv-p5-renderer-202609`）；③ 该工作树实为**过期中间态**——停在基点+940 行未提交层，而构建链钉定的是实验线 tip（其 patch.sh 的 already-applied 反向检查表明 5 个探针补丁已含于 63a0aa9），两者并不对应；④ 唯一独有内容（940 行未提交补丁层）已按字节归档 `android-mpv-dv-experiment-deps-uncommitted-20260930.patch`（其关键功能 `mpv_lavc_set_java_vm`/`direct_yuv` 此前已核实产品化进 media-kit/android）。
+
+**两个遗留提醒（属 dv-experiment 仓，与本次删除无关）**：① `buildscripts/patches/{mpv,ffmpeg,libplacebo}/` 及 `scripts/ffmpeg.sh` 目前是未跟踪状态——构建链的可复现性缺口在这里，应提交进该仓；② `depinfo.sh` 的 mpv 钉定仍为实验线 `63a0aa9`，下个产品 JAR 重建周期若走全量构建链，需先把钉定更新到 `media-kit/android` tip（连同 av_log/OES 修复纳入，见 TASKS 接手快照）。

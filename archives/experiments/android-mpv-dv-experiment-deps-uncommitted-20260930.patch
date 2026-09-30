@@ -1,0 +1,940 @@
+diff --git a/include/mpv/client.h b/include/mpv/client.h
+index 85cff63..e6aa138 100644
+--- a/include/mpv/client.h
++++ b/include/mpv/client.h
+@@ -1730,6 +1730,15 @@ MPV_EXPORT mpv_event *mpv_wait_event(mpv_handle *ctx, double timeout);
+  */
+ MPV_EXPORT void mpv_wakeup(mpv_handle *ctx);
+ 
++/**
++ * Calls av_jni_set_java_vm() with the given JavaVM*.
++ * https://github.com/FFmpeg/FFmpeg/blob/0ba719f726632d73592311615087a0d64aa2fb60/libavcodec/jni.h#L26-L36
++ *
++ * The av_jni_set_java_vm() symbol is not visible when statically linking with libavcodec.
++ * It is important to call this method so that libavcodec can access JNI environment & thus, mediacodec APIs.
++ */
++MPV_EXPORT int mpv_lavc_set_java_vm(void *vm);
++
+ /**
+  * Set a custom function that should be called when there are new events. Use
+  * this if blocking in mpv_wait_event() to wait for new events is not feasible.
+@@ -2012,6 +2021,8 @@ MPV_DEFINE_SYM_PTR(mpv_wait_event)
+ #define mpv_wait_event pfn_mpv_wait_event
+ MPV_DEFINE_SYM_PTR(mpv_wakeup)
+ #define mpv_wakeup pfn_mpv_wakeup
++MPV_DEFINE_SYM_PTR(mpv_lavc_set_java_vm)
++#define mpv_lavc_set_java_vm pfn_mpv_lavc_set_java_vm
+ MPV_DEFINE_SYM_PTR(mpv_set_wakeup_callback)
+ #define mpv_set_wakeup_callback pfn_mpv_set_wakeup_callback
+ MPV_DEFINE_SYM_PTR(mpv_wait_async_requests)
+diff --git a/meson.build b/meson.build
+index 5ffe559..936b2e9 100644
+--- a/meson.build
++++ b/meson.build
+@@ -1736,7 +1736,7 @@ endif
+ 
+ # Set config.h
+ conf_data = configuration_data()
+-conf_data.set_quoted('CONFIGURATION', meson.build_options())
++conf_data.set_quoted('CONFIGURATION', '')
+ conf_data.set_quoted('DEFAULT_OPTICAL_DEVICE', optical_device)
+ 
+ # Loop over all features in the build, create a define and add them to config.h
+diff --git a/player/client.c b/player/client.c
+index e23b98b..7e8b493 100644
+--- a/player/client.c
++++ b/player/client.c
+@@ -22,6 +22,8 @@
+ #include <stdint.h>
+ #include <stdlib.h>
+ 
++#include <libavcodec/jni.h>
++
+ #include "common/common.h"
+ #include "common/global.h"
+ #include "common/msg.h"
+@@ -964,6 +966,11 @@ void mpv_wakeup(mpv_handle *ctx)
+     mp_mutex_unlock(&ctx->lock);
+ }
+ 
++int mpv_lavc_set_java_vm(void *vm)
++{
++    return av_jni_set_java_vm(vm, NULL);
++}
++
+ // map client API types to internal types
+ static const struct m_option type_conv[] = {
+     [MPV_FORMAT_STRING]     = { .type = CONF_TYPE_STRING },
+diff --git a/player/video.c b/player/video.c
+index 05c3954..69b4db4 100644
+--- a/player/video.c
++++ b/player/video.c
+@@ -20,6 +20,15 @@
+ #include <inttypes.h>
+ #include <math.h>
+ #include <assert.h>
++#ifdef __ANDROID__
++#include <stdint.h>
++#include <stdatomic.h>
++extern atomic_bool media_kit_stage_probe_enabled;
++extern atomic_uintptr_t media_kit_identity_queue_first;
++extern atomic_int media_kit_identity_queue_count;
++extern atomic_int media_kit_identity_queue_required;
++extern atomic_uintptr_t media_kit_identity_vo_queued;
++#endif
+ 
+ #include "mpv_talloc.h"
+ 
+@@ -38,6 +47,7 @@
+ #include "stream/stream.h"
+ #include "sub/osd.h"
+ #include "video/hwdec.h"
++#include "video/img_format.h"
+ #include "filters/f_decoder_wrapper.h"
+ #include "video/out/vo.h"
+ 
+@@ -404,6 +414,15 @@ static void shift_frames(struct MPContext *mpctx)
+     for (int n = 0; n < mpctx->num_next_frames - 1; n++)
+         mpctx->next_frames[n] = mpctx->next_frames[n + 1];
+     mpctx->num_next_frames -= 1;
++#ifdef __ANDROID__
++    if (atomic_load_explicit(&media_kit_stage_probe_enabled, memory_order_relaxed)) {
++        atomic_store_explicit(&media_kit_identity_queue_first,
++                              mpctx->num_next_frames ? (uintptr_t)mpctx->next_frames[0]->planes[3] : 0,
++                              memory_order_relaxed);
++        atomic_store_explicit(&media_kit_identity_queue_count, mpctx->num_next_frames,
++                              memory_order_relaxed);
++    }
++#endif
+ }
+ 
+ static bool use_video_lookahead(struct MPContext *mpctx)
+@@ -426,6 +445,15 @@ static int get_req_frames(struct MPContext *mpctx, bool eof)
+     if (mpctx->vo_chain && mpctx->vo_chain->is_sparse)
+         return 1;
+ 
++#ifdef __ANDROID__
++    // A MediaCodec frame owns an output slot until the VO maps or drops it.
++    // Waiting for a second frame can exhaust the codec output queue before
++    // the first reaches the VO, leaving both sides waiting indefinitely.
++    if (mpctx->num_next_frames > 0 &&
++        mpctx->next_frames[0]->imgfmt == IMGFMT_MEDIACODEC)
++        return 1;
++#endif
++
+     // Normally require at least 2 frames, so we can compute a frame duration.
+     int min = 2;
+ 
+@@ -449,6 +477,16 @@ static void add_new_frame(struct MPContext *mpctx, struct mp_image *frame)
+     mp_assert(mpctx->num_next_frames < MP_ARRAY_SIZE(mpctx->next_frames));
+     mp_assert(frame);
+     mpctx->next_frames[mpctx->num_next_frames++] = frame;
++#ifdef __ANDROID__
++    if (atomic_load_explicit(&media_kit_stage_probe_enabled, memory_order_relaxed)) {
++        atomic_store_explicit(&media_kit_identity_queue_first,
++                              (uintptr_t)mpctx->next_frames[0]->planes[3], memory_order_relaxed);
++        atomic_store_explicit(&media_kit_identity_queue_count, mpctx->num_next_frames,
++                              memory_order_relaxed);
++        atomic_store_explicit(&media_kit_identity_queue_required,
++                              get_req_frames(mpctx, false), memory_order_relaxed);
++    }
++#endif
+     if (mpctx->num_next_frames == 1)
+         handle_new_frame(mpctx);
+ }
+@@ -1272,6 +1310,11 @@ void write_video(struct MPContext *mpctx)
+     mpctx->osd_force_update = true;
+     update_osd_msg(mpctx);
+ 
++#ifdef __ANDROID__
++    if (atomic_load_explicit(&media_kit_stage_probe_enabled, memory_order_relaxed))
++        atomic_store_explicit(&media_kit_identity_vo_queued,
++                              (uintptr_t)frame->frames[0]->planes[3], memory_order_relaxed);
++#endif
+     vo_queue_frame(vo, frame);
+ 
+     check_framedrop(mpctx, vo_c);
+diff --git a/video/decode/vd_lavc.c b/video/decode/vd_lavc.c
+index 399e1d5..75ea2bd 100644
+--- a/video/decode/vd_lavc.c
++++ b/video/decode/vd_lavc.c
+@@ -20,6 +20,19 @@
+ #include <stdlib.h>
+ #include <assert.h>
+ #include <stdbool.h>
++#ifdef __ANDROID__
++#include <stdatomic.h>
++extern atomic_bool media_kit_stage_probe_enabled;
++extern atomic_ullong media_kit_send_in, media_kit_send_out;
++extern atomic_ullong media_kit_recv_in, media_kit_recv_out, media_kit_decoded;
++extern atomic_uintptr_t media_kit_identity_decoded;
++#define MEDIA_KIT_PROBE(counter) do { \
++    if (atomic_load_explicit(&media_kit_stage_probe_enabled, memory_order_relaxed)) \
++        atomic_fetch_add_explicit(&(counter), 1, memory_order_relaxed); \
++} while (0)
++#else
++#define MEDIA_KIT_PROBE(counter) ((void)0)
++#endif
+ 
+ #include <libavcodec/avcodec.h>
+ #include <libavformat/version.h>
+@@ -1185,7 +1198,9 @@ static int send_packet(struct mp_filter *vd, struct demux_packet *pkt)
+ 
+     mp_set_av_packet(ctx->avpkt, pkt, &ctx->codec_timebase);
+ 
++    MEDIA_KIT_PROBE(media_kit_send_in);
+     int ret = avcodec_send_packet(avctx, pkt ? ctx->avpkt : NULL);
++    MEDIA_KIT_PROBE(media_kit_send_out);
+     if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
+         return ret;
+ 
+@@ -1228,7 +1243,9 @@ static int decode_frame(struct mp_filter *vd)
+     if (ctx->num_requeue_packets)
+         send_queued_packet(vd);
+ 
++    MEDIA_KIT_PROBE(media_kit_recv_in);
+     int ret = avcodec_receive_frame(avctx, ctx->pic);
++    MEDIA_KIT_PROBE(media_kit_recv_out);
+     if (ret < 0) {
+         if (ret == AVERROR_EOF) {
+             // If flushing was initialized earlier and has ended now, make it
+@@ -1250,12 +1267,17 @@ static int decode_frame(struct mp_filter *vd)
+     // If something was decoded successfully, it must return a frame with valid
+     // data.
+     mp_assert(ctx->pic->buf[0]);
++    MEDIA_KIT_PROBE(media_kit_decoded);
+ 
+     struct mp_image *mpi = mp_image_from_av_frame(ctx->pic);
+     if (!mpi) {
+         av_frame_unref(ctx->pic);
+         return ret;
+     }
++    if (atomic_load_explicit(&media_kit_stage_probe_enabled, memory_order_relaxed) &&
++        mpi->imgfmt == IMGFMT_MEDIACODEC)
++        atomic_store_explicit(&media_kit_identity_decoded,
++                              (uintptr_t)mpi->planes[3], memory_order_relaxed);
+ 
+     if (mpi->imgfmt == IMGFMT_CUDA && !mpi->planes[0]) {
+         MP_ERR(vd, "CUDA frame without data. This is a FFmpeg bug.\n");
+diff --git a/video/img_format.c b/video/img_format.c
+index a79534e..786d09a 100644
+--- a/video/img_format.c
++++ b/video/img_format.c
+@@ -58,6 +58,13 @@ struct mp_imgfmt_entry {
+                               {3 * (a), 0, 32 * (a)} }, }}
+ 
+ static const struct mp_imgfmt_entry mp_imgfmt_list[] = {
++    [IMGFMT_MEDIACODEC_YUV - IMGFMT_CUST_BASE] = {
++        .name = "mediacodec_yuv",
++        .desc = {
++            .flags = MP_IMGFLAG_COLOR_YUV,
++            .comps = { {0, 0, 8}, {0, 8, 8}, {0, 16, 8} },
++        },
++    },
+     // not in ffmpeg
+     [IMGFMT_VDPAU_OUTPUT - IMGFMT_CUST_BASE] = {
+         .name = "vdpau_output",
+diff --git a/video/img_format.h b/video/img_format.h
+index 59e614a..0c55fe8 100644
+--- a/video/img_format.h
++++ b/video/img_format.h
+@@ -316,6 +316,9 @@ enum mp_imgfmt {
+     IMGFMT_VULKAN,          // VKImage
+     IMGFMT_DRMPRIME,        // AVDRMFrameDescriptor
+ 
++    // One external GPU texture sampled as raw Y/Cb/Cr in R/G/B.
++    IMGFMT_MEDIACODEC_YUV,
++
+     // Generic pass-through of AV_PIX_FMT_*. Used for formats which don't have
+     // a corresponding IMGFMT_ value.
+     IMGFMT_AVPIXFMT_START,
+diff --git a/video/out/gpu/ra.h b/video/out/gpu/ra.h
+index d87b566..bd2b8fb 100644
+--- a/video/out/gpu/ra.h
++++ b/video/out/gpu/ra.h
+@@ -146,6 +146,7 @@ struct ra_tex_params {
+     bool non_normalized;    // hack for GL_TEXTURE_RECTANGLE macOS idiocy
+                             // always set to false, except in macOS code
+     bool external_oes;      // hack for GL_TEXTURE_EXTERNAL_OES idiocy
++    bool external_yuv;      // GL_EXT_YUV_target raw Y/Cb/Cr sampling
+     // If non-NULL, the texture will be created with these contents. Using
+     // this does *not* require setting host_mutable. Otherwise, the initial
+     // data is undefined.
+diff --git a/video/out/hwdec/hwdec_aimagereader.c b/video/out/hwdec/hwdec_aimagereader.c
+index 83c2ea8..919449a 100644
+--- a/video/out/hwdec/hwdec_aimagereader.c
++++ b/video/out/hwdec/hwdec_aimagereader.c
+@@ -19,6 +19,12 @@
+ 
+ #include <assert.h>
+ #include <dlfcn.h>
++#include <pthread.h>
++#include <stdatomic.h>
++#include <stdio.h>
++#include <string.h>
++#include <sys/system_properties.h>
++#include <unistd.h>
+ #include <EGL/egl.h>
+ #include <media/NdkImageReader.h>
+ #include <android/native_window_jni.h>
+@@ -36,6 +42,166 @@ typedef void *GLeglImageOES;
+ typedef void *EGLImageKHR;
+ #define EGL_NATIVE_BUFFER_ANDROID 0x3140
+ 
++// Diagnostic only: the watchdog writes directly to Android log, without mpv's
++// event queue or Dart. Counters are process-lifetime so a blocked mapper cannot
++// leave the watchdog holding a pointer to a freed mapper.
++enum stage_probe_phase {
++    ST_CALLBACK, ST_MAP, ST_RELEASE_IN, ST_RELEASE_OUT,
++    ST_ACQUIRE_IN, ST_ACQUIRE_OUT, ST_HWBUF_IN, ST_HWBUF_OUT,
++    ST_CREATE_IN, ST_CREATE_OUT, ST_BIND_IN, ST_BIND_OUT,
++    ST_UNMAP, ST_DESTROY_IN, ST_DESTROY_OUT, ST_DELETE_IN,
++    ST_DELETE_OUT, ST_COUNT,
++};
++
++static atomic_ullong stage_counts[ST_COUNT];
++static atomic_ullong media_kit_map_acquire_failed;
++static atomic_ullong media_kit_map_succeeded;
++static atomic_int last_stage;
++static pthread_once_t stage_watchdog_once = PTHREAD_ONCE_INIT;
++
++// Sampled by this file's watchdog; updated by vd_lavc and vo_gpu_next.
++atomic_bool media_kit_stage_probe_enabled;
++atomic_ullong media_kit_send_in;
++atomic_ullong media_kit_send_out;
++atomic_ullong media_kit_recv_in;
++atomic_ullong media_kit_recv_out;
++atomic_ullong media_kit_decoded;
++atomic_ullong media_kit_draw_in;
++atomic_ullong media_kit_draw_out;
++atomic_ullong media_kit_flip_in;
++atomic_ullong media_kit_flip_out;
++// Opaque MediaCodec buffer identities only. The watchdog never dereferences
++// them; each producer publishes its own latest boundary independently.
++atomic_uintptr_t media_kit_identity_decoded;
++atomic_uintptr_t media_kit_identity_queue_first;
++atomic_int media_kit_identity_queue_count;
++atomic_int media_kit_identity_queue_required;
++atomic_uintptr_t media_kit_identity_vo_queued;
++atomic_uintptr_t media_kit_identity_mapped;
++extern atomic_ullong media_kit_mc_receive_calls;
++extern atomic_ullong media_kit_mc_loop_calls;
++extern atomic_ullong media_kit_mc_input_in, media_kit_mc_input_out;
++extern atomic_ullong media_kit_mc_output_in, media_kit_mc_output_out;
++extern atomic_ullong media_kit_mc_packet_in, media_kit_mc_packet_out;
++extern atomic_ullong media_kit_mc_send_in, media_kit_mc_send_out;
++extern atomic_ullong media_kit_mc_hw_wrapped, media_kit_mc_hw_freed;
++extern atomic_llong media_kit_mc_hw_outstanding;
++extern atomic_ullong media_kit_mc_hw_free_release;
++extern atomic_ullong media_kit_mc_hw_release_call;
++extern atomic_ullong media_kit_mc_hw_release_success;
++extern atomic_ullong media_kit_mc_hw_release_failure;
++extern atomic_int media_kit_draw_phase;
++extern atomic_ullong media_kit_mc_hw_release_duplicate;
++extern atomic_llong media_kit_mc_hw_duplicate_pts_us;
++extern atomic_uintptr_t media_kit_mc_identity_wrapped;
++extern atomic_uintptr_t media_kit_mc_identity_released;
++extern atomic_llong media_kit_mc_identity_pts_us;
++extern atomic_llong media_kit_mc_identity_index;
++extern atomic_int media_kit_mc_identity_serial;
++
++static void stage_probe_record(enum stage_probe_phase phase)
++{
++    atomic_fetch_add_explicit(&stage_counts[phase], 1, memory_order_relaxed);
++    atomic_store_explicit(&last_stage, phase, memory_order_release);
++}
++
++static void *stage_watchdog(void *unused)
++{
++    void *liblog = dlopen("liblog.so", RTLD_NOW | RTLD_LOCAL);
++    int (*android_log_write)(int, const char *, const char *) =
++        liblog ? dlsym(liblog, "__android_log_write") : NULL;
++    if (!android_log_write)
++        return NULL;
++
++    unsigned long long previous_map = 0;
++    unsigned int idle_seconds = 0;
++    for (;;) {
++        sleep(1);
++        unsigned long long n[ST_COUNT];
++        for (int i = 0; i < ST_COUNT; i++)
++            n[i] = atomic_load_explicit(&stage_counts[i], memory_order_relaxed);
++        int phase = atomic_load_explicit(&last_stage, memory_order_acquire);
++        idle_seconds = n[ST_MAP] == previous_map ? idle_seconds + 1 : 0;
++        previous_map = n[ST_MAP];
++        char message[512];
++        snprintf(message, sizeof(message),
++                 "phase=%d idle_s=%u cb=%llu map=%llu rel=%llu/%llu acq=%llu/%llu hw=%llu/%llu create=%llu/%llu bind=%llu/%llu unmap=%llu destroy=%llu/%llu delete=%llu/%llu",
++                 phase, idle_seconds, n[ST_CALLBACK], n[ST_MAP],
++                 n[ST_RELEASE_IN], n[ST_RELEASE_OUT],
++                 n[ST_ACQUIRE_IN], n[ST_ACQUIRE_OUT],
++                 n[ST_HWBUF_IN], n[ST_HWBUF_OUT],
++                 n[ST_CREATE_IN], n[ST_CREATE_OUT],
++                 n[ST_BIND_IN], n[ST_BIND_OUT], n[ST_UNMAP],
++                 n[ST_DESTROY_IN], n[ST_DESTROY_OUT],
++                 n[ST_DELETE_IN], n[ST_DELETE_OUT]);
++        android_log_write(4, "MEDIA_KIT_NATIVE_STAGE", message);
++        snprintf(message, sizeof(message),
++                 "send=%llu/%llu recv=%llu/%llu decoded=%llu draw=%llu/%llu phase=%d flip=%llu/%llu",
++                 atomic_load_explicit(&media_kit_send_in, memory_order_relaxed),
++                 atomic_load_explicit(&media_kit_send_out, memory_order_relaxed),
++                 atomic_load_explicit(&media_kit_recv_in, memory_order_relaxed),
++                 atomic_load_explicit(&media_kit_recv_out, memory_order_relaxed),
++                 atomic_load_explicit(&media_kit_decoded, memory_order_relaxed),
++                 atomic_load_explicit(&media_kit_draw_in, memory_order_relaxed),
++                 atomic_load_explicit(&media_kit_draw_out, memory_order_relaxed),
++                 atomic_load_explicit(&media_kit_draw_phase, memory_order_relaxed),
++                 atomic_load_explicit(&media_kit_flip_in, memory_order_relaxed),
++                 atomic_load_explicit(&media_kit_flip_out, memory_order_relaxed));
++        android_log_write(4, "MEDIA_KIT_NATIVE_UPSTREAM", message);
++        snprintf(message, sizeof(message),
++                 "receive=%llu loop=%llu input=%llu/%llu output=%llu/%llu packet=%llu/%llu send=%llu/%llu",
++                 atomic_load_explicit(&media_kit_mc_receive_calls, memory_order_relaxed),
++                 atomic_load_explicit(&media_kit_mc_loop_calls, memory_order_relaxed),
++                 atomic_load_explicit(&media_kit_mc_input_in, memory_order_relaxed),
++                 atomic_load_explicit(&media_kit_mc_input_out, memory_order_relaxed),
++                 atomic_load_explicit(&media_kit_mc_output_in, memory_order_relaxed),
++                 atomic_load_explicit(&media_kit_mc_output_out, memory_order_relaxed),
++                 atomic_load_explicit(&media_kit_mc_packet_in, memory_order_relaxed),
++                 atomic_load_explicit(&media_kit_mc_packet_out, memory_order_relaxed),
++                 atomic_load_explicit(&media_kit_mc_send_in, memory_order_relaxed),
++                 atomic_load_explicit(&media_kit_mc_send_out, memory_order_relaxed));
++        android_log_write(4, "MEDIA_KIT_NATIVE_CODEC", message);
++        snprintf(message, sizeof(message),
++                 "wrapped=%llu freed=%llu outstanding=%lld free_release=%llu render_release=%llu ok=%llu fail=%llu",
++                 atomic_load_explicit(&media_kit_mc_hw_wrapped, memory_order_relaxed),
++                 atomic_load_explicit(&media_kit_mc_hw_freed, memory_order_relaxed),
++                 atomic_load_explicit(&media_kit_mc_hw_outstanding, memory_order_relaxed),
++                 atomic_load_explicit(&media_kit_mc_hw_free_release, memory_order_relaxed),
++                 atomic_load_explicit(&media_kit_mc_hw_release_call, memory_order_relaxed),
++                 atomic_load_explicit(&media_kit_mc_hw_release_success, memory_order_relaxed),
++                 atomic_load_explicit(&media_kit_mc_hw_release_failure, memory_order_relaxed));
++        android_log_write(4, "MEDIA_KIT_NATIVE_OWNERSHIP", message);
++        snprintf(message, sizeof(message),
++                 "already_released=%llu last_pts_us=%lld acquire_failed=%llu mapped=%llu",
++                 atomic_load_explicit(&media_kit_mc_hw_release_duplicate, memory_order_relaxed),
++                 atomic_load_explicit(&media_kit_mc_hw_duplicate_pts_us, memory_order_relaxed),
++                 atomic_load_explicit(&media_kit_map_acquire_failed, memory_order_relaxed),
++                 atomic_load_explicit(&media_kit_map_succeeded, memory_order_relaxed));
++        android_log_write(4, "MEDIA_KIT_NATIVE_REMAP", message);
++        snprintf(message, sizeof(message),
++                 "wrap=%p pts_us=%lld index=%lld serial=%d released=%p decoded=%p queue=%p count=%d req=%d vo=%p map=%p",
++                 (void *)atomic_load_explicit(&media_kit_mc_identity_wrapped, memory_order_relaxed),
++                 atomic_load_explicit(&media_kit_mc_identity_pts_us, memory_order_relaxed),
++                 atomic_load_explicit(&media_kit_mc_identity_index, memory_order_relaxed),
++                 atomic_load_explicit(&media_kit_mc_identity_serial, memory_order_relaxed),
++                 (void *)atomic_load_explicit(&media_kit_mc_identity_released, memory_order_relaxed),
++                 (void *)atomic_load_explicit(&media_kit_identity_decoded, memory_order_relaxed),
++                 (void *)atomic_load_explicit(&media_kit_identity_queue_first, memory_order_relaxed),
++                 atomic_load_explicit(&media_kit_identity_queue_count, memory_order_relaxed),
++                 atomic_load_explicit(&media_kit_identity_queue_required, memory_order_relaxed),
++                 (void *)atomic_load_explicit(&media_kit_identity_vo_queued, memory_order_relaxed),
++                 (void *)atomic_load_explicit(&media_kit_identity_mapped, memory_order_relaxed));
++        android_log_write(4, "MEDIA_KIT_NATIVE_IDENTITY", message);
++    }
++}
++
++static void start_stage_watchdog(void)
++{
++    pthread_t thread;
++    if (pthread_create(&thread, NULL, stage_watchdog, NULL) == 0)
++        pthread_detach(thread);
++}
++
+ struct priv_owner {
+     struct mp_hwdec_ctx hwctx;
+     AImageReader *reader;
+@@ -51,6 +217,7 @@ struct priv_owner {
+     media_status_t (*AImageReader_acquireLatestImage)(AImageReader *, AImage **);
+     void (*AImageReader_delete)(AImageReader *);
+     media_status_t (*AImage_getHardwareBuffer)(const AImage *, AHardwareBuffer **);
++    media_status_t (*AImage_getTimestamp)(const AImage *, int64_t *);
+     void (*AImage_delete)(AImage *);
+     void (*AHardwareBuffer_describe)(const AHardwareBuffer *, AHardwareBuffer_Desc *);
+     jobject (*ANativeWindow_toSurface)(JNIEnv *, ANativeWindow *);
+@@ -66,6 +233,12 @@ struct priv {
+     mp_mutex lock;
+     mp_cond cond;
+     bool image_available;
++    bool trace_maps;
++    bool stage_probe;
++    bool direct_yuv;
++    unsigned long long map_count;
++    unsigned long long acquired_count;
++    unsigned long long deleted_count;
+ 
+     EGLImageKHR (EGLAPIENTRY *CreateImageKHR)(
+         EGLDisplay, EGLContext, EGLenum, EGLClientBuffer, const EGLint *);
+@@ -82,6 +255,7 @@ static const struct { const char *symbol; int offset; } lib_functions[] = {
+     { "AImageReader_acquireLatestImage", offsetof(struct priv_owner, AImageReader_acquireLatestImage) },
+     { "AImageReader_delete", offsetof(struct priv_owner, AImageReader_delete) },
+     { "AImage_getHardwareBuffer", offsetof(struct priv_owner, AImage_getHardwareBuffer) },
++    { "AImage_getTimestamp", offsetof(struct priv_owner, AImage_getTimestamp) },
+     { "AImage_delete", offsetof(struct priv_owner, AImage_delete) },
+     { "AHardwareBuffer_describe", offsetof(struct priv_owner, AHardwareBuffer_describe) },
+     { "ANativeWindow_toSurface", offsetof(struct priv_owner, ANativeWindow_toSurface) },
+@@ -156,7 +330,7 @@ static int init(struct ra_hwdec *hw)
+     // dummy dimensions, AImageReader only transports hardware buffers
+     media_status_t ret = p->AImageReader_newWithUsage(16, 16,
+         AIMAGE_FORMAT_PRIVATE, AHARDWAREBUFFER_USAGE_GPU_SAMPLED_IMAGE,
+-        5, &p->reader);
++        3, &p->reader);
+     if (ret != AMEDIA_OK) {
+         MP_ERR(hw, "newWithUsage failed: %d\n", ret);
+         return -1;
+@@ -220,6 +394,9 @@ static void image_callback(void *context, AImageReader *reader)
+ {
+     struct priv *p = context;
+ 
++    if (p->stage_probe)
++        stage_probe_record(ST_CALLBACK);
++
+     mp_mutex_lock(&p->lock);
+     p->image_available = true;
+     mp_cond_signal(&p->cond);
+@@ -233,6 +410,28 @@ static int mapper_init(struct ra_hwdec_mapper *mapper)
+     GL *gl = ra_gl_get(mapper->ra);
+ 
+     p->log = mapper->log;
++    char map_trace_property[PROP_VALUE_MAX] = {0};
++    p->trace_maps =
++        __system_property_get("debug.media_kit.map_trace", map_trace_property) > 0 &&
++        strcmp(map_trace_property, "1") == 0;
++    char stage_probe_property[PROP_VALUE_MAX] = {0};
++    p->stage_probe =
++        __system_property_get("debug.media_kit.stage_probe", stage_probe_property) > 0 &&
++        strcmp(stage_probe_property, "1") == 0;
++    char direct_yuv_property[PROP_VALUE_MAX] = {0};
++    p->direct_yuv =
++        __system_property_get("debug.media_kit.p5_direct_yuv", direct_yuv_property) > 0 &&
++        strcmp(direct_yuv_property, "1") == 0;
++    if (p->direct_yuv &&
++        (mapper->src_params.repr.sys != PL_COLOR_SYSTEM_DOLBYVISION ||
++         !gl_check_extension(gl->extensions, "GL_EXT_YUV_target"))) {
++        MP_ERR(mapper, "P5 direct YUV requires Dolby Vision representation and GL_EXT_YUV_target\n");
++        return -1;
++    }
++    if (p->stage_probe)
++        pthread_once(&stage_watchdog_once, start_stage_watchdog);
++    if (p->stage_probe)
++        atomic_store_explicit(&media_kit_stage_probe_enabled, true, memory_order_relaxed);
+     mp_mutex_init(&p->lock);
+     mp_cond_init(&p->cond);
+ 
+@@ -254,8 +453,13 @@ static int mapper_init(struct ra_hwdec_mapper *mapper)
+     o->AImageReader_setImageListener(o->reader, &listener);
+ 
+     mapper->dst_params = mapper->src_params;
+-    mapper->dst_params.imgfmt = IMGFMT_RGB0;
++    mapper->dst_params.imgfmt = p->direct_yuv ? IMGFMT_MEDIACODEC_YUV : IMGFMT_RGB0;
+     mapper->dst_params.hw_subfmt = 0;
++    if (p->direct_yuv) {
++        mapper->dst_params.repr.bits.sample_depth = 10;
++        mapper->dst_params.repr.bits.color_depth = 10;
++        mapper->dst_params.repr.bits.bit_shift = 0;
++    }
+ 
+     // texture creation
+     gl->GenTextures(1, &p->gl_texture);
+@@ -275,6 +479,7 @@ static int mapper_init(struct ra_hwdec_mapper *mapper)
+         .render_src = true,
+         .src_linear = true,
+         .external_oes = true,
++        .external_yuv = p->direct_yuv,
+     };
+ 
+     if (params.format->ctype != RA_CTYPE_UNORM)
+@@ -309,14 +514,26 @@ static void mapper_unmap(struct ra_hwdec_mapper *mapper)
+     struct priv *p = mapper->priv;
+     struct priv_owner *o = mapper->owner->priv;
+ 
++    if (p->stage_probe)
++        stage_probe_record(ST_UNMAP);
++
+     if (p->egl_image) {
++        if (p->stage_probe)
++            stage_probe_record(ST_DESTROY_IN);
+         p->DestroyImageKHR(eglGetCurrentDisplay(), p->egl_image);
++        if (p->stage_probe)
++            stage_probe_record(ST_DESTROY_OUT);
+         p->egl_image = 0;
+     }
+ 
+     if (p->image) {
++        if (p->stage_probe)
++            stage_probe_record(ST_DELETE_IN);
+         o->AImage_delete(p->image);
++        if (p->stage_probe)
++            stage_probe_record(ST_DELETE_OUT);
+         p->image = NULL;
++        p->deleted_count++;
+     }
+ }
+ 
+@@ -325,36 +542,67 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
+     struct priv *p = mapper->priv;
+     struct priv_owner *o = mapper->owner->priv;
+     GL *gl = ra_gl_get(mapper->ra);
++    p->map_count++;
++    if (p->stage_probe)
++        stage_probe_record(ST_MAP);
+ 
+     {
+         if (mapper->src->imgfmt != IMGFMT_MEDIACODEC)
+             return -1;
+         AVMediaCodecBuffer *buffer = (AVMediaCodecBuffer *)mapper->src->planes[3];
+-        av_mediacodec_release_buffer(buffer, 1);
++        if (p->stage_probe)
++            atomic_store_explicit(&media_kit_identity_mapped, (uintptr_t)buffer, memory_order_relaxed);
++        if (p->stage_probe)
++            stage_probe_record(ST_RELEASE_IN);
++        int release_ret = av_mediacodec_release_buffer(buffer, 1);
++        if (p->stage_probe)
++            stage_probe_record(ST_RELEASE_OUT);
++        if (p->trace_maps && release_ret < 0)
++            MP_ERR(mapper, "MEDIA_KIT_MAP release_failed=%d pts=%.6f\n",
++                   release_ret, mapper->src->pts);
+     }
+ 
+-    bool image_available = false;
+-    mp_mutex_lock(&p->lock);
+-    if (!p->image_available) {
+-        mp_cond_timedwait(&p->cond, &p->lock, MP_TIME_MS_TO_NS(100));
++    // A queued callback does not guarantee an image is still available.
++    // Retry this transient state without spinning the VO.
++    media_status_t ret = AMEDIA_IMGREADER_NO_BUFFER_AVAILABLE;
++    for (int attempt = 0; attempt < 10; attempt++) {
++        mp_mutex_lock(&p->lock);
+         if (!p->image_available)
+-            MP_WARN(mapper, "Waiting for frame timed out!\n");
++            mp_cond_timedwait(&p->cond, &p->lock, MP_TIME_MS_TO_NS(10));
++        p->image_available = false;
++        mp_mutex_unlock(&p->lock);
++
++        if (p->stage_probe)
++            stage_probe_record(ST_ACQUIRE_IN);
++        ret = o->AImageReader_acquireLatestImage(o->reader, &p->image);
++        if (p->stage_probe)
++            stage_probe_record(ST_ACQUIRE_OUT);
++        if (ret != AMEDIA_IMGREADER_NO_BUFFER_AVAILABLE)
++            break;
+     }
+-    image_available = p->image_available;
+-    p->image_available = false;
+-    mp_mutex_unlock(&p->lock);
+-
+-    media_status_t ret = o->AImageReader_acquireLatestImage(o->reader, &p->image);
+     if (ret != AMEDIA_OK) {
+-        MP_ERR(mapper, "acquireLatestImage failed: %d\n", ret);
+-        // If we merely timed out waiting return success anyway to avoid
+-        // flashing frames of render errors.
+-        return image_available ? -1 : 0;
++        if (p->stage_probe)
++            atomic_fetch_add_explicit(&media_kit_map_acquire_failed, 1, memory_order_relaxed);
++        MP_ERR(mapper, "acquireLatestImage failed after retry: %d\n", ret);
++        return -1;
+     }
+     mp_assert(p->image);
++    p->acquired_count++;
++    if (p->trace_maps && p->acquired_count % 30 == 0) {
++        int64_t image_timestamp_ns = 0;
++        media_status_t timestamp_ret =
++            o->AImage_getTimestamp(p->image, &image_timestamp_ns);
++        MP_ERR(mapper, "MEDIA_KIT_MAP calls=%llu acquired=%llu deleted=%llu pts=%.6f image_timestamp_ns=%lld timestamp_ret=%d\n",
++               p->map_count, p->acquired_count, p->deleted_count,
++               mapper->src->pts, (long long)image_timestamp_ns, timestamp_ret);
++    }
+ 
+     AHardwareBuffer *hwbuf = NULL;
++    if (p->stage_probe)
++        stage_probe_record(ST_HWBUF_IN);
+     ret = o->AImage_getHardwareBuffer(p->image, &hwbuf);
++    if (p->stage_probe)
++        stage_probe_record(ST_HWBUF_OUT);
+     if (ret != AMEDIA_OK) {
+         MP_ERR(mapper, "getHardwareBuffer failed: %d\n", ret);
+         return -1;
+@@ -375,15 +623,26 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
+         return -1;
+ 
+     const int attribs[] = {EGL_NONE};
++    if (p->stage_probe)
++        stage_probe_record(ST_CREATE_IN);
+     p->egl_image = p->CreateImageKHR(eglGetCurrentDisplay(),
+         EGL_NO_CONTEXT, EGL_NATIVE_BUFFER_ANDROID, buf, attribs);
++    if (p->stage_probe)
++        stage_probe_record(ST_CREATE_OUT);
+     if (!p->egl_image)
+         return -1;
+ 
+     gl->BindTexture(GL_TEXTURE_EXTERNAL_OES, p->gl_texture);
++    if (p->stage_probe)
++        stage_probe_record(ST_BIND_IN);
+     p->EGLImageTargetTexture2DOES(GL_TEXTURE_EXTERNAL_OES, p->egl_image);
++    if (p->stage_probe)
++        stage_probe_record(ST_BIND_OUT);
+     gl->BindTexture(GL_TEXTURE_EXTERNAL_OES, 0);
+ 
++    if (p->stage_probe)
++        atomic_fetch_add_explicit(&media_kit_map_succeeded, 1, memory_order_relaxed);
++
+     return 0;
+ }
+ 
+diff --git a/video/out/opengl/context.c b/video/out/opengl/context.c
+index 86e8d5d..86e5c79 100644
+--- a/video/out/opengl/context.c
++++ b/video/out/opengl/context.c
+@@ -232,7 +232,7 @@ bool ra_gl_ctx_submit_frame(struct ra_swapchain *sw, const struct vo_frame *fram
+     if (p->opts->use_glfinish)
+         gl->Finish();
+ 
+-    if (gl->FenceSync) {
++    if (gl->FenceSync && p->params.swap_buffers) {
+         GLsync fence = gl->FenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+         if (fence)
+             MP_TARRAY_APPEND(p, p->vsync_fences, p->num_vsync_fences, fence);
+diff --git a/video/out/opengl/context_android.c b/video/out/opengl/context_android.c
+index 0a12cf8..0019b0a 100644
+--- a/video/out/opengl/context_android.c
++++ b/video/out/opengl/context_android.c
+@@ -17,23 +17,84 @@
+ 
+ #include <EGL/egl.h>
+ #include <EGL/eglext.h>
++#include <dlfcn.h>
++#include <pthread.h>
++#include <stdatomic.h>
++#include <stdio.h>
++#include <string.h>
++#include <sys/system_properties.h>
++#include <unistd.h>
+ 
+ #include "video/out/android_common.h"
+ #include "egl_helpers.h"
+ #include "common/common.h"
+ #include "context.h"
++#include "osdep/timer.h"
+ 
+ struct priv {
+     struct GL gl;
+     EGLDisplay egl_display;
+     EGLContext egl_context;
+     EGLSurface egl_surface;
++    bool trace_swaps;
++    bool stage_probe;
++    unsigned long long swap_count;
++    unsigned long long swap_failures;
+ };
+ 
++static atomic_ullong stage_swap_in;
++static atomic_ullong stage_swap_out;
++static pthread_once_t swap_watchdog_once = PTHREAD_ONCE_INIT;
++
++static void *swap_watchdog(void *unused)
++{
++    void *liblog = dlopen("liblog.so", RTLD_NOW | RTLD_LOCAL);
++    int (*android_log_write)(int, const char *, const char *) =
++        liblog ? dlsym(liblog, "__android_log_write") : NULL;
++    if (!android_log_write)
++        return NULL;
++    unsigned long long previous_out = 0;
++    unsigned int idle_seconds = 0;
++    for (;;) {
++        sleep(1);
++        unsigned long long in = atomic_load_explicit(&stage_swap_in, memory_order_relaxed);
++        unsigned long long out = atomic_load_explicit(&stage_swap_out, memory_order_relaxed);
++        idle_seconds = out == previous_out ? idle_seconds + 1 : 0;
++        previous_out = out;
++        char message[128];
++        snprintf(message, sizeof(message), "swap_in=%llu swap_out=%llu idle_s=%u",
++                 in, out, idle_seconds);
++        android_log_write(4, "MEDIA_KIT_NATIVE_SWAP", message);
++    }
++}
++
++static void start_swap_watchdog(void)
++{
++    pthread_t thread;
++    if (pthread_create(&thread, NULL, swap_watchdog, NULL) == 0)
++        pthread_detach(thread);
++}
++
+ static void android_swap_buffers(struct ra_ctx *ctx)
+ {
+     struct priv *p = ctx->priv;
+-    eglSwapBuffers(p->egl_display, p->egl_surface);
++    if (p->stage_probe)
++        atomic_fetch_add_explicit(&stage_swap_in, 1, memory_order_relaxed);
++    int64_t start_ns = p->trace_swaps ? mp_time_ns() : 0;
++    EGLBoolean ok = eglSwapBuffers(p->egl_display, p->egl_surface);
++    if (p->stage_probe)
++        atomic_fetch_add_explicit(&stage_swap_out, 1, memory_order_relaxed);
++    if (p->trace_swaps) {
++        p->swap_count++;
++        if (!ok)
++            p->swap_failures++;
++        if (!ok || p->swap_count % 30 == 0) {
++            EGLint error = ok ? EGL_SUCCESS : eglGetError();
++            MP_ERR(ctx, "MEDIA_KIT_SWAP count=%llu failures=%llu ok=%d egl_error=0x%x duration_ms=%.3f\n",
++                   p->swap_count, p->swap_failures, ok, error,
++                   (mp_time_ns() - start_ns) / 1000000.0);
++        }
++    }
+ }
+ 
+ static void android_uninit(struct ra_ctx *ctx)
+@@ -55,6 +116,16 @@ static void android_uninit(struct ra_ctx *ctx)
+ static bool android_init(struct ra_ctx *ctx)
+ {
+     struct priv *p = ctx->priv = talloc_zero(ctx, struct priv);
++    char swap_trace_property[PROP_VALUE_MAX] = {0};
++    p->trace_swaps =
++        __system_property_get("debug.media_kit.swap_trace", swap_trace_property) > 0 &&
++        strcmp(swap_trace_property, "1") == 0;
++    char stage_probe_property[PROP_VALUE_MAX] = {0};
++    p->stage_probe =
++        __system_property_get("debug.media_kit.stage_probe", stage_probe_property) > 0 &&
++        strcmp(stage_probe_property, "1") == 0;
++    if (p->stage_probe)
++        pthread_once(&swap_watchdog_once, start_swap_watchdog);
+ 
+     if (!vo_android_init(ctx->vo))
+         goto fail;
+diff --git a/video/out/vo_gpu_next.c b/video/out/vo_gpu_next.c
+index 3f0b18f..53190bf 100644
+--- a/video/out/vo_gpu_next.c
++++ b/video/out/vo_gpu_next.c
+@@ -19,6 +19,24 @@
+ 
+ #include <sys/stat.h>
+ #include <time.h>
++#ifdef __ANDROID__
++#include <stdatomic.h>
++extern atomic_bool media_kit_stage_probe_enabled;
++extern atomic_ullong media_kit_draw_in, media_kit_draw_out;
++extern atomic_ullong media_kit_flip_in, media_kit_flip_out;
++atomic_int media_kit_draw_phase;
++#define MEDIA_KIT_PROBE(counter) do { \
++    if (atomic_load_explicit(&media_kit_stage_probe_enabled, memory_order_relaxed)) \
++        atomic_fetch_add_explicit(&(counter), 1, memory_order_relaxed); \
++} while (0)
++#define MEDIA_KIT_DRAW_PHASE(value) do { \
++    if (atomic_load_explicit(&media_kit_stage_probe_enabled, memory_order_relaxed)) \
++        atomic_store_explicit(&media_kit_draw_phase, (value), memory_order_relaxed); \
++} while (0)
++#else
++#define MEDIA_KIT_PROBE(counter) ((void)0)
++#define MEDIA_KIT_DRAW_PHASE(value) ((void)0)
++#endif
+ 
+ #include <libplacebo/colorspace.h>
+ #include <libplacebo/options.h>
+@@ -555,6 +573,9 @@ static pl_tex hwdec_get_tex(struct priv *p, int n)
+         struct pl_opengl_wrap_params par = {
+             .width = ratex->params.w,
+             .height = ratex->params.h,
++            .sampler_type = ratex->params.external_yuv
++                          ? PL_SAMPLER_EXTERNAL_YUV
++                          : PL_SAMPLER_NORMAL,
+         };
+ 
+         ra_gl_get_format(ratex->params.format, &par.iformat,
+@@ -1000,10 +1021,13 @@ static void update_hook_opts_dynamic(struct priv *p, const struct pl_hook *hook,
+ 
+ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
+ {
++    MEDIA_KIT_PROBE(media_kit_draw_in);
++    MEDIA_KIT_DRAW_PHASE(1);
+     struct priv *p = vo->priv;
+     pl_options pars = p->pars;
+     pl_gpu gpu = p->gpu;
+     update_options(vo);
++    MEDIA_KIT_DRAW_PHASE(2);
+ 
+     struct pl_render_params params = pars->params;
+     const struct gl_video_opts *opts = p->opts_cache->opts;
+@@ -1079,6 +1103,7 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
+ 
+         p->last_id = id;
+     }
++    MEDIA_KIT_DRAW_PHASE(3);
+ 
+     struct ra_swapchain *sw = p->ra_ctx->swapchain;
+ 
+@@ -1235,6 +1260,7 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
+     }
+ 
+     struct pl_swapchain_frame swframe;
++    MEDIA_KIT_DRAW_PHASE(4);
+     bool should_draw = sw->fns->start_frame(sw, NULL); // for wayland logic
+     if (!should_draw || !pl_swapchain_start_frame(p->sw, &swframe)) {
+         if (frame->current) {
+@@ -1249,8 +1275,11 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
+ #endif
+             pl_queue_update(p->queue, NULL, &qparams);
+         }
++        MEDIA_KIT_PROBE(media_kit_draw_out);
++        MEDIA_KIT_DRAW_PHASE(12);
+         return VO_FALSE;
+     }
++    MEDIA_KIT_DRAW_PHASE(5);
+ 
+     bool valid = false;
+     p->is_interpolated = false;
+@@ -1331,6 +1360,7 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
+         }
+         p->last_pts = qparams.pts;
+ 
++        MEDIA_KIT_DRAW_PHASE(6);
+         switch (pl_queue_update(p->queue, &mix, &qparams)) {
+         case PL_QUEUE_ERR:
+             MP_ERR(vo, "Failed updating frames!\n");
+@@ -1345,6 +1375,7 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
+         case PL_QUEUE_OK:
+             break;
+         }
++        MEDIA_KIT_DRAW_PHASE(7);
+ 
+         // Update source crop and overlays on all existing frames. We
+         // technically own the `pl_frame` struct so this is kosher. This could
+@@ -1400,10 +1431,12 @@ static bool draw_frame(struct vo *vo, struct vo_frame *frame)
+     }
+ 
+     // Render frame
++    MEDIA_KIT_DRAW_PHASE(8);
+     if (!pl_render_image_mix(p->rr, &mix, &target, &params)) {
+         MP_ERR(vo, "Failed rendering frame!\n");
+         goto done;
+     }
++    MEDIA_KIT_DRAW_PHASE(9);
+ 
+     struct pl_frame ref_frame;
+     pl_frames_infer_mix(p->rr, &mix, &target, &ref_frame);
+@@ -1434,13 +1467,18 @@ done:
+     if (!valid) // clear with purple to indicate error
+         pl_tex_clear(gpu, swframe.fbo, (float[4]){ 0.5, 0.0, 1.0, 1.0 });
+ 
++    MEDIA_KIT_DRAW_PHASE(10);
+     pl_gpu_flush(gpu);
++    MEDIA_KIT_DRAW_PHASE(11);
+     p->frame_pending = true;
++    MEDIA_KIT_PROBE(media_kit_draw_out);
++    MEDIA_KIT_DRAW_PHASE(12);
+     return VO_TRUE;
+ }
+ 
+ static void flip_page(struct vo *vo)
+ {
++    MEDIA_KIT_PROBE(media_kit_flip_in);
+     struct priv *p = vo->priv;
+     struct ra_swapchain *sw = p->ra_ctx->swapchain;
+ 
+@@ -1451,6 +1489,7 @@ static void flip_page(struct vo *vo)
+     }
+ 
+     sw->fns->swap_buffers(sw);
++    MEDIA_KIT_PROBE(media_kit_flip_out);
+ }
+ 
+ static void get_vsync(struct vo *vo, struct vo_vsync_info *info)
