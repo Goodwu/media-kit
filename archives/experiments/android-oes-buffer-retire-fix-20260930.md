@@ -23,4 +23,4 @@ Mi Note 3（jason，骁龙 660/Adreno 512，LineageOS Android 15）HDR10 4K30 SD
 
 - 修复在 mpv fork 主线（`5e26cf86`），产品 JAR 重建周期时纳入（连同 av_log 接管 `6719532`）。
 - 华为机（Mali G76，隐式同步）回归未跑——该路径行为由旗标扩展覆盖，理论无差异（buffer_retire 在华为本就随 direct_retire 对 P5 生效；OES 路径新增持有为纯增益），待下轮产品验收顺带覆盖。
-- 截图证据：`/tmp/dense-{baseline,fixed,fixed2}-*.png`、日志 `/tmp/dense-*-device.log`。
+- 截图证据：`~/src/media-kit-build/evidence/oes-buffer-retire-20260930/dense-{baseline,fixed,fixed2}-*.png`、日志同目录 `dense-*-device.log`（/tmp 原件已删除，持久副本为权威）。

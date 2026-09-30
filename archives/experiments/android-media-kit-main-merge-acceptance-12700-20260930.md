@@ -2,7 +2,7 @@
 
 ## 背景
 
-合并提交 `a886f556`（`fix/darwin-video-output-rebuild-barrier` = 96571a92 + 上游 main d310049）后，按登记任务门槛复跑 P5 五项实机验收。三包均注入发布基线 JAR `/tmp/media-kit-p5-colorfix-398d0c3-arm64.jar`（SHA-256 `dad30ae23cd75e85…42c2a9f7`），JDK17 + `ORG_GRADLE_PROJECT_mediaKitLocalArm64Jar` 正式流程，`flutter build apk --release --target-platform android-arm64`。APK 内 native 库集与已验收 12680 逐项一致（libmpv 经 AGP strip，20.5MB），合并差异仅在 Dart/Java 层。设备 `3EP7N18C28016072`（LYA-AL00），每轮结束恢复原 12492、自动亮度、熄屏。
+合并提交 `a886f556`（`fix/darwin-video-output-rebuild-barrier` = 96571a92 + 上游 main d310049）后，按登记任务门槛复跑 P5 五项实机验收。三包均注入发布基线 JAR `~/src/media-kit-build/jars/media-kit-p5-colorfix-398d0c3-arm64.jar`（当时位于 /tmp）（SHA-256 `dad30ae23cd75e85…42c2a9f7`），JDK17 + `ORG_GRADLE_PROJECT_mediaKitLocalArm64Jar` 正式流程，`flutter build apk --release --target-platform android-arm64`。APK 内 native 库集与已验收 12680 逐项一致（libmpv 经 AGP strip，20.5MB），合并差异仅在 Dart/Java 层。设备 `3EP7N18C28016072`（LYA-AL00），每轮结束恢复原 12492、自动亮度、熄屏。
 
 ## 轮次与证据
 
@@ -22,4 +22,4 @@
 
 合并后构建在五项门槛上均通过产品级实机验收，main 可快进至合并结果成为唯一维护线。遗留：上游亮度/音量控件特性未吸收（评估记录在案）、Linux 侧需 Linux 环境回归、严格数值读回可按需补跑。
 
-- APK 留存：`/tmp/merge-accept-1270{0,1,2}-*.apk`；轮次日志/截图：`/tmp/merge-accept-{glass-full-12700,mystery-pq-12701,engine-destroy-12702}-*`；轮脚本 `tool/merge-accept-round.sh`、`tool/merge-accept-destroy-round.sh`；像素判定 `tool/pixel-judge.py`（2026-09-30 自 /tmp 收编入仓）。
+- APK 留存：`~/src/media-kit-build/apks/merge-accept-1270{0,1,2}-*.apk`；轮次日志/截图：`~/src/media-kit-build/evidence/merge-accept-12700-02/`（/tmp 原件已删除，持久副本为权威）；轮脚本 `tool/merge-accept-round.sh`、`tool/merge-accept-destroy-round.sh`；像素判定 `tool/pixel-judge.py`（2026-09-30 自 /tmp 收编入仓）。
