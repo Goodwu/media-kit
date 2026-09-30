@@ -17,10 +17,9 @@ migrate_working_dir/
 .idea/
 .cxx
 
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
+# The .vscode folder contains per-machine launch configuration; the repo
+# carries no editor state. Keep local copies out of version control.
+.vscode/
 
 # Flutter/Dart/Pub related
 # Libraries should not include pubspec.lock, per https://dart.dev/guides/libraries/private-files#pubspeclock.

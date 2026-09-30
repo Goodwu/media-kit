@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # 解码纯吞吐探针轮（Mi Note 3）：全片 surface 模式解码，无渲染；结束卸载、恢复亮度、熄屏
 set -Eeuo pipefail
-serial=5b79aada
-adb="adb -s $serial"
+serial=${ANDROID_SERIAL:-}
+adb="adb ${serial:+-s $serial}"
 base=/tmp/matrix-jason-decode-probe
 logcat_pid=
 restore() {
