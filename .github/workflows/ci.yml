@@ -706,3 +706,57 @@ jobs:
           files: |
             manifest.json
             SHA256SUMS
+
+  libmpv-jar-identity:
+    # The default arm64 libmpv jar must carry the fork's validated fixes.
+    # Parses the pinned URL + SHA-256 out of the libs build.gradle, then
+    # verifies the downloaded jar contains the expected version markers
+    # inside libmpv.so (see the libmpv build lock in that package's
+    # CHANGELOG.md).
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.run_package_tests == true }}
+    name: libmpv jar identity (Android)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download pinned arm64 jar and verify identity
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib
+          import re
+          import subprocess
+          import zipfile
+          from pathlib import Path
+
+          gradle = Path(
+              'libs/android/media_kit_libs_android_video/android/build.gradle'
+          ).read_text()
+          match = re.search(
+              r'"url":\s*"([^"]*arm64-v8a\.jar)",\s*'
+              r'"sha256":\s*"([0-9a-f]{64})"',
+              gradle,
+          )
+          if match is None:
+              raise SystemExit('no pinned arm64-v8a jar found in build.gradle')
+          url, expected = match.groups()
+          print(f'pinned url: {url}')
+          print(f'pinned sha256: {expected}')
+
+          jar = Path('arm64-v8a.jar')
+          subprocess.run(['curl', '-fsSL', url, '-o', str(jar)], check=True)
+          actual = hashlib.sha256(jar.read_bytes()).hexdigest()
+          if actual != expected:
+              raise SystemExit(f'sha256 mismatch: {actual} != {expected}')
+
+          with zipfile.ZipFile(jar) as archive:
+              so = archive.read('lib/arm64-v8a/libmpv.so')
+          # Version markers compiled into the fork's libmpv: the P5 dovi
+          # rescale log tag is present in every fork release; the OES
+          # buffer_retire tag from 5e26cf86 onward.
+          markers = [b'P5_DOVI_RESCALE', b'P5_BUFFER_RETIRE']
+          missing = [m.decode() for m in markers if m not in so]
+          if missing:
+              raise SystemExit(f'libmpv.so missing version markers: {missing}')
+          print('libmpv.so version markers verified: ' + ', '.join(
+              m.decode() for m in markers))
+          PY

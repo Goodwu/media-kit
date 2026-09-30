@@ -57,8 +57,15 @@ task downloadDependencies(type: Exec) {
         outputDir.mkdirs()
 
         // Download all *.jar dependencies & verify their SHA-256 checksums.
+        //
+        // arm64 defaults to the Goodwu media-kit fork build (mpv 5e26cf86 +
+        // FFmpeg fff3ee7 + libplacebo c9fd879) so default builds pick up the
+        // validated P5 dovi rescale, tail fallback, OES buffer_retire and
+        // av_log fixes; provenance and SHA-256s are recorded in this
+        // package's CHANGELOG.md. Other ABIs stay on the upstream Predidit
+        // baseline: the fork's fix chain is validated on arm64 only.
         def filesToDownload = [
-            ["url": "https://github.com/Predidit/libmpv-android-video-build/releases/download/v1.2.7/default-arm64-v8a.jar", "sha256": "13e882d96b8cd235425172b022e4a94dfcae5f07985dff85c8d648e7369fa2d1", "destination": file("$buildDir/v1.2.7/default-arm64-v8a.jar")],
+            ["url": "https://github.com/Goodwu/media-kit/releases/download/libmpv-android-v2026.09/media-kit-5e26cf86-arm64-v8a.jar", "sha256": "7cb87a5ced18570bc74f984a2ab87e1bce15559e705ad0fe2668912b7ffc33f2", "destination": file("$buildDir/libmpv-android-v2026.09/default-arm64-v8a.jar")],
             ["url": "https://github.com/Predidit/libmpv-android-video-build/releases/download/v1.2.7/default-armeabi-v7a.jar", "sha256": "7f522ed762ea6dfeba93a02e3837c5538790030b9965a03ed3a00276adc7b32c", "destination": file("$buildDir/v1.2.7/default-armeabi-v7a.jar")],
             ["url": "https://github.com/Predidit/libmpv-android-video-build/releases/download/v1.2.7/default-x86_64.jar", "sha256": "aed0fffc99e5e554d48e1af90bc700133c25fbc02615bf1bf17db9299365c481", "destination": file("$buildDir/v1.2.7/default-x86_64.jar")],
             ["url": "https://github.com/Predidit/libmpv-android-video-build/releases/download/v1.2.7/default-x86.jar", "sha256": "9269643264a1c9689116467f313d5e1b23ea56a68d338ab940c5e8fcf07061c6", "destination": file("$buildDir/v1.2.7/default-x86.jar")]

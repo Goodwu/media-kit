@@ -1,3 +1,15 @@
+## libmpv build lock（2026-09-30）
+
+默认 arm64 libmpv 来源固定为 Goodwu fork 发布（其余 ABI 维持上游 Predidit v1.2.7 基线）：
+
+- Release: https://github.com/Goodwu/media-kit/releases/tag/libmpv-android-v2026.09
+- mpv: Goodwu/mpv `media-kit/android` @ `5e26cf86`（P5 dovi 重标定、片尾相邻帧回退、OES buffer_retire、av_log 接管）
+- FFmpeg: Goodwu/FFmpeg `feature/android-mediacodec-p5-rpu` @ `fff3ee7`
+- libplacebo: Goodwu/libplacebo `optimize/dovi-linear-decode` @ `c9fd879`
+- `media-kit-5e26cf86-arm64-v8a.jar` SHA-256 `7cb87a5ced18570bc74f984a2ab87e1bce15559e705ad0fe2668912b7ffc33f2`（默认）
+- `media-kit-398d0c3-arm64-v8a.jar` SHA-256 `dad30ae23cd75e85c43663959ce9e1c5940ae632adda404fbfe71d4202c2a9f7`（12700 合并验收所用构建）
+- 版本标识：libmpv.so 内 `P5_DOVI_RESCALE` / `P5_BUFFER_RETIRE` 标记串，CI（ci.yml `libmpv-jar-identity` job）据此校验。
+
 ## 1.3.8
 
 - build: AGP 8.13.0
