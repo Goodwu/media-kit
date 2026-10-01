@@ -29,8 +29,8 @@
   - status: in_progress
   - context: archives/conversations/android-hdr-auto-output-20261002.md；需求 docs/requirements/android-hdr-auto-output.md（v3）；计划 docs/requirements/android-hdr-auto-output-plan.md（S0–S13）；参考实现 media_kit_hdr_lab；实机基线 archives/experiments/android-playback-matrix-12703-12708-20260930.md
   - acceptance: 需求 v3 验收 A1–A8。要点：开播前预测与执行同源；按"源描述 + 策略候选 + 偏好 + 成熟度门禁"选路由，默认先 HDR 输出再 tone-map、HDR 中直出优先；运行时沿候选列表降级，最终 tone-map 继续播放并发事件（P5 管线缺失除外）；路由、候选与状态报告给 App；`HdrVideoSession`/`HdrVideo` 支持控制器替换且全屏跟随；LYA 私有回退做成默认关闭、只读门禁的独立子包；PiliPlusX 只保留策略偏好，无设备代码、无平台决策代码。
-  - latest: 第二轮开工（2026-10-02）：S0 基线冻结完成（基线 f42d39ec，两包测试 43/48 全过）；并行批 S2/S4/S7/S9 代码完成——S2 能力查询+P5 探测、S4 dataspace 四元组回报（V1 Reviewer PASS，4 建议两条已修）、S7 私有回退子包（V2 Critical Reviewer PASS，3 建议两条已修：幂等断言+CI 单测）、S9 样片 6 个入库（真实 P8.2/MEL 缺口，合成替代）。S1 后台实施中。
-  - next: S1 提交 → hdr_lab 实机探针 → LYA 三轮实机验证（S1 分类事实/S2 能力对比/S4 dataspace）→ S3（V1 审核）→ S5。
+  - latest: 第二轮（2026-10-02）S0–S2/S4/S7/S9 代码与审核全部完成并提交：S0 基线（43/48）；S1 分类器+整数缺陷修复（85 测试）；S2 能力查询+P5 探测；S4 dataspace 四元组回报（V1 PASS）；S7 私有回退子包（V2 PASS）；S9 六样片。LYA 实机探针轮 7 轮全过（S1 事实锚点测试固化、S2 三源对比+P5 正负向、S4 有/无扩展回报，全按设备纪律恢复）；证据 `~/src/media-kit-build/evidence/hdr-auto-output-probes-20261002/`。事实冲突已汇报：需求第 6 节注的 `HDR Vivid_HLG` 本地文件实测为 PQ 基层（非 HLG），纯 HLG 用 DVS 样片完成。
+  - next: S3 路由规划（V1 审核）→ S5 会话编排 → S6/S8/S10。
 
 ## Next（近期候选，最多 10 条）
 
