@@ -216,6 +216,13 @@ class MainActivity : FlutterActivity() {
         val vendorExt = vendorPlugin?.registeredExtension() ?: LyaPqDataSpaceExt()
         vendorPlugin?.takeOverSlot()
         PlatformVideoView.setSurfaceDataSpaceExt(LyaDiagnosticsDataSpaceExt(vendorExt))
+        if (BuildConfig.HDR_LAB_UNREGISTER_VENDOR_EXT) {
+            // S4 device-round verification 3: no-extension build (-P
+            // hdrLabUnregisterVendorExt=true). The vendor native library was
+            // never loaded (lazy load on first gate-passing apply only), and
+            // from here on no apply path can reach it.
+            PlatformVideoView.setSurfaceDataSpaceExt(null)
+        }
         CapabilitiesChannel.register(this, flutterEngine)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "media_kit_hdr_lab/engine_control")
             .setMethodCallHandler { call, result ->
