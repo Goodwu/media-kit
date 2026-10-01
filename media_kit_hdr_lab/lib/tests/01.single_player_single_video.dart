@@ -1092,6 +1092,24 @@ class _SinglePlayerSingleVideoScreenState
         } catch (error) {
           debugPrint('HDR_CAP_QUERY ERROR=$error');
         }
+        if (_androidSurfaceTransfer.isNotEmpty) {
+          // S4 device-round probe: the reporting contract alongside the
+          // legacy boolean setter, same handle and transfer, ~5s after the
+          // player is set up (the platform surface is live by then).
+          try {
+            final handle = await player.handle;
+            final report =
+                await _videoChannel.invokeMapMethod<String, dynamic>(
+              'PlatformVideoView.ApplyDataSpace',
+              {'handle': handle.toString(), 'transfer': _androidSurfaceTransfer},
+            );
+            debugPrint(
+              'ANDROID_APPLY_DATASPACE transfer=$_androidSurfaceTransfer report=$report',
+            );
+          } catch (error) {
+            debugPrint('ANDROID_APPLY_DATASPACE ERROR=$error');
+          }
+        }
       });
     }
     if (Platform.isAndroid && _androidPerfProbe) {
