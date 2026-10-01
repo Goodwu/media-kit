@@ -26,11 +26,11 @@
   - temp_reconcile: `/private/tmp/media-kit-firstframe-sdr-20260927` 的5个App/plugin文件、`media-kit-firstframe-mix-20260927` 的9个修改及868个删除状态项尚未与当前代码逐项比较；后者只保存了修改补丁，删除项不可直接重放。先隔离比较真正的首帧/输出行为，再针对SDR、HDR10、P8.4冷/热打开与输出切换做相应实机回归；记录冗余或迁移结论后删除工作树。不要把大量删除当成产品清理。
 
 - [ ] HDR 能力查询、路由执行与报告 API + 设备私有回退子包（PiliPlusX 需求，Phase 1 Android）
-  - status: planned
+  - status: in_progress
   - context: archives/conversations/android-hdr-auto-output-20261002.md；需求 docs/requirements/android-hdr-auto-output.md（v3）；计划 docs/requirements/android-hdr-auto-output-plan.md（S0–S13）；参考实现 media_kit_hdr_lab；实机基线 archives/experiments/android-playback-matrix-12703-12708-20260930.md
   - acceptance: 需求 v3 验收 A1–A8。要点：开播前预测与执行同源；按"源描述 + 策略候选 + 偏好 + 成熟度门禁"选路由，默认先 HDR 输出再 tone-map、HDR 中直出优先；运行时沿候选列表降级，最终 tone-map 继续播放并发事件（P5 管线缺失除外）；路由、候选与状态报告给 App；`HdrVideoSession`/`HdrVideo` 支持控制器替换且全屏跟随；LYA 私有回退做成默认关闭、只读门禁的独立子包；PiliPlusX 只保留策略偏好，无设备代码、无平台决策代码。
-  - latest: 2026-10-02 需求修订为 v3：增加源描述、策略、偏好、成熟度门禁和源 × 策略状态表；原生 DV 预留、另立需求。核实库缺陷：`dolby-vision-profile` 为整数，`classifyMedia` 的 `'8.4'` 分支用真实值时永远不命中（S1 修复）。
-  - next: S0 基线冻结 → S1/S2/S4/S7/S9（样片收集）并行 → S3 → S5。
+  - latest: 第二轮开工（2026-10-02）：S0 基线冻结完成（基线 f42d39ec，两包测试 43/48 全过）；并行批 S2/S4/S7/S9 代码完成——S2 能力查询+P5 探测、S4 dataspace 四元组回报（V1 Reviewer PASS，4 建议两条已修）、S7 私有回退子包（V2 Critical Reviewer PASS，3 建议两条已修：幂等断言+CI 单测）、S9 样片 6 个入库（真实 P8.2/MEL 缺口，合成替代）。S1 后台实施中。
+  - next: S1 提交 → hdr_lab 实机探针 → LYA 三轮实机验证（S1 分类事实/S2 能力对比/S4 dataspace）→ S3（V1 审核）→ S5。
 
 ## Next（近期候选，最多 10 条）
 

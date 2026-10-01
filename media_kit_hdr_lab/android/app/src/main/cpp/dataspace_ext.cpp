@@ -1,8 +1,8 @@
-// Vendor dataspace extension + diagnostics probes for the Huawei LYA-AL00
-// test device. Everything in this file was moved out of the media_kit_video
-// bridge: the library only ships the public NDK dataspace path, and this
-// test-app .so carries the device-specific fallback and the property-gated
-// diagnostics probes.
+// Diagnostics probes for the Huawei LYA-AL00 test device, kept in the
+// hdr_lab test app. The vendor dataspace apply path (private window ABI)
+// moved to the media_kit_android_dataspace_vendor package; this .so only
+// carries the property-gated diagnostics probes (late PQ, EGL HDR, Vulkan
+// HDR) exposed through LyaDiagnosticsDataSpaceExt.
 #include <jni.h>
 #include <android/native_window.h>
 #include <android/native_window_jni.h>
@@ -25,55 +25,8 @@
 #define EGL_GL_COLORSPACE_BT2020_PQ_EXT 0x3340
 #endif
 
-static bool lyaPqWindow(ANativeWindow* window) {
-  char sdk[PROP_VALUE_MAX] = {};
-  char fingerprint[PROP_VALUE_MAX] = {};
-  return ANativeWindow_getFormat(window) == AHARDWAREBUFFER_FORMAT_R10G10B10A2_UNORM &&
-      __system_property_get("ro.build.version.sdk", sdk) > 0 &&
-      std::strcmp(sdk, "29") == 0 &&
-      __system_property_get("ro.build.fingerprint", fingerprint) > 0 &&
-      std::strcmp(fingerprint,
-          "HUAWEI/LYA-AL00/HWLYA:10/HUAWEILYA-AL00/10.1.0.163C00:user/release-keys") == 0;
-}
-
-extern "C" JNIEXPORT jboolean JNICALL
-Java_com_example_media_1kit_1hdr_1lab_LyaPqDataSpaceExt_nativeApplyPqDataSpace(
-    JNIEnv* env, jclass, jobject surface) {
-  if (surface == nullptr) return JNI_FALSE;
-  ANativeWindow* window = ANativeWindow_fromSurface(env, surface);
-  if (window == nullptr) return JNI_FALSE;
-  jboolean applied = JNI_FALSE;
-  if (lyaPqWindow(window)) {
-    void* library = dlopen("libandroid.so", RTLD_NOW | RTLD_LOCAL);
-    using GetBuffersDataSpace = int32_t (*)(ANativeWindow*);
-    const auto get_dataspace = library == nullptr ? nullptr
-        : reinterpret_cast<GetBuffersDataSpace>(
-            dlsym(library, "ANativeWindow_getBuffersDataSpace"));
-    // This firmware's public setter rejects PQ during its HDR support
-    // query, before reaching the window setter. The private ABI is confined
-    // to the exact arm64 firmware and 10-bit window proven by the device
-    // probe.
-#if defined(__aarch64__)
-    using WindowPerform = int (*)(ANativeWindow*, int, ...);
-    WindowPerform perform = nullptr;
-    std::memcpy(&perform,
-        reinterpret_cast<const char*>(window) + 0x98, sizeof(perform));
-    const int fallback_result = perform == nullptr
-        ? -1 : perform(window, 19, ADATASPACE_BT2020_PQ);
-    const int32_t actual = get_dataspace == nullptr ? -1 : get_dataspace(window);
-    __android_log_print(ANDROID_LOG_INFO, "media_kit_vendor_ext",
-        "p5PqFirmwareFallback perform=%d actual=%d expected=%d",
-        fallback_result, actual, ADATASPACE_BT2020_PQ);
-    if (fallback_result == 0 && actual == ADATASPACE_BT2020_PQ) applied = JNI_TRUE;
-#endif
-    if (library != nullptr) dlclose(library);
-  }
-  ANativeWindow_release(window);
-  return applied;
-}
-
 extern "C" JNIEXPORT void JNICALL
-Java_com_example_media_1kit_1hdr_1lab_LyaPqDataSpaceExt_nativeLatePqProbe(
+Java_com_example_media_1kit_1hdr_1lab_LyaDiagnosticsDataSpaceExt_nativeLatePqProbe(
     JNIEnv* env, jclass, jobject surface) {
   char enabled[PROP_VALUE_MAX] = {};
   if (__system_property_get("debug.media_kit.late_pq_probe", enabled) <= 0 ||
@@ -280,7 +233,7 @@ static void probe_vulkan_hdr_window(ANativeWindow* window) {
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_example_media_1kit_1hdr_1lab_LyaPqDataSpaceExt_nativeEglPqProbe(
+Java_com_example_media_1kit_1hdr_1lab_LyaDiagnosticsDataSpaceExt_nativeEglPqProbe(
     JNIEnv* env, jclass, jobject surface) {
   char enabled[PROP_VALUE_MAX] = {};
   if (__system_property_get("debug.media_kit.egl_hdr_probe", enabled) <= 0 ||
@@ -292,7 +245,7 @@ Java_com_example_media_1kit_1hdr_1lab_LyaPqDataSpaceExt_nativeEglPqProbe(
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_example_media_1kit_1hdr_1lab_LyaPqDataSpaceExt_nativeVulkanHdrProbe(
+Java_com_example_media_1kit_1hdr_1lab_LyaDiagnosticsDataSpaceExt_nativeVulkanHdrProbe(
     JNIEnv* env, jclass, jobject surface) {
   char enabled[PROP_VALUE_MAX] = {};
   if (__system_property_get("debug.media_kit.vk_hdr_probe", enabled) <= 0 ||
