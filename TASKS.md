@@ -25,11 +25,12 @@
   - next: 扩充原生 HDR 冷/热、重入、连续帧及 SDR 复位证据；P5 输出和首帧单列于 P1，不以 HDR10/P8.4 代替；P8.4 全片 EOS 按需补跑。
   - temp_reconcile: `/private/tmp/media-kit-firstframe-sdr-20260927` 的5个App/plugin文件、`media-kit-firstframe-mix-20260927` 的9个修改及868个删除状态项尚未与当前代码逐项比较；后者只保存了修改补丁，删除项不可直接重放。先隔离比较真正的首帧/输出行为，再针对SDR、HDR10、P8.4冷/热打开与输出切换做相应实机回归；记录冗余或迁移结论后删除工作树。不要把大量删除当成产品清理。
 
-- [ ] HDR 输出自动决策 API 与设备私有回退封装（PiliPlusX 需求，Phase 1 Android）
-  - status: todo
-  - context: docs/requirements/android-hdr-auto-output.md（需求全文与验收 A1–A5）；参考实现 media_kit_hdr_lab（android_hdr_player_backend/_playback_policy/_output_slot、LyaPqDataSpaceExt）；实机基线 archives/experiments/android-playback-matrix-12703-12708-20260930.md
-  - acceptance: 库内新增 HDR auto 编排入口（分类→拓扑→mpv 属性→dataspace→重建/恢复全部库内驱动，调用方零平台分支与零设备代码）；LYA 厂商 dataspace 回退按 R2 纳入 media-kit 受控交付物（核心库洁净边界由库侧定结构并文档化）；fail-closed 与状态/证据 API 按 R1.2/R3；Phase 1 验收 = 需求文档 A1（hdr_lab 以新 API 复跑矩阵与 12703–12708 一致）+ A2（PiliPlusX 接入后 LYA 实机三路径+SDR 回归）+ A3/A4/A5。
-  - latest: 2026-10-02 由 PiliPlusX 侧提出：app 现有 hdr.dart 只认 HCPP/API≥34，在 LYA（API 29）把 DV fail-closed 到 toneMappedSdr/Texture，未触及库内 HdrOutputPolicy/PlatformVideoView dataspace 链路/bridge .so/P5 管线（均已在该 app 运行时依赖内）；用户决策跨平台 HDR 差异与设备私有 API 全部由 media-kit 封装。注意与 P0-1（库不含单机型私有 ABI）的关系在需求 R2.2 中调和：核心库洁净实质保留，归属改为 media-kit 受控交付物。
+- [ ] HDR 能力查询、路由执行与报告 API + 设备私有回退子包（PiliPlusX 需求，Phase 1 Android）
+  - status: planned
+  - context: archives/conversations/android-hdr-auto-output-20261002.md；需求 docs/requirements/android-hdr-auto-output.md（v3）；计划 docs/requirements/android-hdr-auto-output-plan.md（S0–S13）；参考实现 media_kit_hdr_lab；实机基线 archives/experiments/android-playback-matrix-12703-12708-20260930.md
+  - acceptance: 需求 v3 验收 A1–A8。要点：开播前预测与执行同源；按"源描述 + 策略候选 + 偏好 + 成熟度门禁"选路由，默认先 HDR 输出再 tone-map、HDR 中直出优先；运行时沿候选列表降级，最终 tone-map 继续播放并发事件（P5 管线缺失除外）；路由、候选与状态报告给 App；`HdrVideoSession`/`HdrVideo` 支持控制器替换且全屏跟随；LYA 私有回退做成默认关闭、只读门禁的独立子包；PiliPlusX 只保留策略偏好，无设备代码、无平台决策代码。
+  - latest: 2026-10-02 需求修订为 v3：增加源描述、策略、偏好、成熟度门禁和源 × 策略状态表；原生 DV 预留、另立需求。核实库缺陷：`dolby-vision-profile` 为整数，`classifyMedia` 的 `'8.4'` 分支用真实值时永远不命中（S1 修复）。
+  - next: S0 基线冻结 → S1/S2/S4/S7/S9（样片收集）并行 → S3 → S5。
 
 ## Next（近期候选，最多 10 条）
 
