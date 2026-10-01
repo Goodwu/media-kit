@@ -46,5 +46,6 @@
 
 
 - 基线 (47,50,70) 的全分辨率口径不可复现（12678 读回 JAR 未留存，链接 mkp4prefix 旧 .a + 旧 App）；本报告以系统偏差分量 + 四变体逐位一致 + 8× 降采样全 ≤100 作为 P0-2/P0-1 数值验收依据。
-- 同夜热累积使 4K60 绝对掉帧数不可与 9/30 直接比（3590-4830 vs 2102）；整改与各世代的同夜对照有效。9/28(20-36)→9/30(2102) 负载跃升的归因（主合并 App 侧 vs 其他）待冷机对照轮；review 3.3（dovi 缩放下沉 libplacebo）与 3.1（deleteAsync）仍是中期性能/架构方向。
-- 读回 dump 触发帧受 offscreen bootstrap 影响可能落在 f240 或 f241（ pts≥10 首帧），对照时按日志 pts 选参照帧。
+- 同夜热累积使 4K60 绝对掉帧数不可与 9/30 直接比（3590-4830 vs 2102）；整改与各世代的同夜对照有效。9/28(20-36)→9/30(2102) 负载跃升的归因（主合并 App 侧 vs 其他）待冷机对照轮。
+- 读回 dump 触发帧受 offscreen bootstrap 影响可能落在 f240 或 f241（pts≥10 首帧），对照时按日志 pts 选参照帧。
+- **遗留复核（与用户确认，按实测证据重排）**：不可行三项——3.1 deleteAsync（LYA 无 `EGL_ANDROID_native_fence_sync`，9/26 `android-p5-glass-direct-retire-20260926.md` 已证；当前 fence+有界队列为已验证实现）、maxImages 4~5（OMX.hisi 拒绝，本轮实证）、撤 `get_req_frames` hack（依赖前两项，本机堵死）。可做项价值排序与依据见 conversation `architecture-review-remediation-20260930.md` 遗留复核节（发布闭环 ＞ 4K60 App 侧归因 ＞ 上游化小 PR ＞ 3.3 搭车 ＞ pts 校验降级 ＞ 3.4 ＞ acquireNextImage ＞ 首帧无 RPU）。
