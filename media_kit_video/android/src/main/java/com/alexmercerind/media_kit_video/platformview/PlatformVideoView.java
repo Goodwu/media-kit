@@ -72,6 +72,25 @@ public final class PlatformVideoView implements PlatformView {
          */
         default void onDataSpaceApplyFailed(
                 @NonNull android.view.Surface surface, int dataSpace) {}
+
+        /**
+         * Stable identifier reported through the capability query and the
+         * applied-dataspace report (e.g. the {@code ext:<id>} path label).
+         */
+        default String id() {
+            return "ext";
+        }
+
+        /**
+         * Whether this extension applies to the current device, judged by a
+         * read-only check before registration. An extension that returns
+         * {@code false} must not have been registered at all; the method
+         * exists so the capability query and reports can state applicability
+         * without probing the private API.
+         */
+        default boolean isApplicable() {
+            return true;
+        }
     }
 
     @Nullable
