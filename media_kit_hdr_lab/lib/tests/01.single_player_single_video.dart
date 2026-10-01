@@ -8,6 +8,10 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
+// S2 device-round probe: the library capability query is not exported from
+// the barrel yet, so the diagnostics app imports the library file directly.
+// ignore: implementation_imports
+import 'package:media_kit_video/src/hdr/hdr_capabilities.dart';
 import 'package:path_provider/path_provider.dart' as path_provider;
 
 import '../common/globals.dart';
@@ -1063,6 +1067,33 @@ class _SinglePlayerSingleVideoScreenState
         }
       }
     });
+    if (Platform.isAndroid) {
+      // S2 device-round probe: capture the lab's own capabilities channel,
+      // the library HdrCapabilities.Get channel and the full library query
+      // (including the P5 option probe) in the same session for comparison.
+      Future<void>.delayed(const Duration(seconds: 5), () async {
+        try {
+          final own = await _capabilitiesChannel
+              .invokeMapMethod<String, dynamic>('Get');
+          debugPrint('HDR_CAP_LAB $own');
+        } catch (error) {
+          debugPrint('HDR_CAP_LAB ERROR=$error');
+        }
+        try {
+          final lib = await _videoChannel
+              .invokeMapMethod<String, dynamic>('HdrCapabilities.Get');
+          debugPrint('HDR_CAP_LIB_CHANNEL $lib');
+        } catch (error) {
+          debugPrint('HDR_CAP_LIB_CHANNEL ERROR=$error');
+        }
+        try {
+          final caps = await HdrCapabilities.query(player: player);
+          debugPrint('HDR_CAP_QUERY $caps');
+        } catch (error) {
+          debugPrint('HDR_CAP_QUERY ERROR=$error');
+        }
+      });
+    }
     if (Platform.isAndroid && _androidPerfProbe) {
       for (final second in [
         8,
@@ -1559,6 +1590,15 @@ class _SinglePlayerSingleVideoScreenState
           );
           debugPrint(
             'ANDROID_SURFACE_TRANSFER transfer=$_androidSurfaceTransfer applied=$applied',
+          );
+          // S4 device-round probe: the reporting contract alongside the
+          // legacy boolean setter, same handle and transfer.
+          final report = await _videoChannel.invokeMapMethod<String, dynamic>(
+            'PlatformVideoView.ApplyDataSpace',
+            {'handle': handle.toString(), 'transfer': _androidSurfaceTransfer},
+          );
+          debugPrint(
+            'ANDROID_APPLY_DATASPACE transfer=$_androidSurfaceTransfer report=$report',
           );
         } catch (error) {
           debugPrint('ANDROID_SURFACE_TRANSFER ERROR=$error');
