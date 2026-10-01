@@ -65,7 +65,7 @@ task downloadDependencies(type: Exec) {
         // package's CHANGELOG.md. Other ABIs stay on the upstream Predidit
         // baseline: the fork's fix chain is validated on arm64 only.
         def filesToDownload = [
-            ["url": "https://github.com/Goodwu/media-kit/releases/download/libmpv-android-v2026.09/media-kit-5e26cf86-arm64-v8a.jar", "sha256": "7cb87a5ced18570bc74f984a2ab87e1bce15559e705ad0fe2668912b7ffc33f2", "destination": file("$buildDir/libmpv-android-v2026.09/default-arm64-v8a.jar")],
+            ["url": "https://github.com/Goodwu/media-kit/releases/download/libmpv-android-v2026.10/media-kit-5f9ddf17-arm64-v8a.jar", "sha256": "c0e5d7f0fbca11767b28f030d3d81bef01c5c2295adaf820b2f9d4d8441db9ea", "destination": file("$buildDir/libmpv-android-v2026.10/default-arm64-v8a.jar")],
             ["url": "https://github.com/Predidit/libmpv-android-video-build/releases/download/v1.2.7/default-armeabi-v7a.jar", "sha256": "7f522ed762ea6dfeba93a02e3837c5538790030b9965a03ed3a00276adc7b32c", "destination": file("$buildDir/v1.2.7/default-armeabi-v7a.jar")],
             ["url": "https://github.com/Predidit/libmpv-android-video-build/releases/download/v1.2.7/default-x86_64.jar", "sha256": "aed0fffc99e5e554d48e1af90bc700133c25fbc02615bf1bf17db9299365c481", "destination": file("$buildDir/v1.2.7/default-x86_64.jar")],
             ["url": "https://github.com/Predidit/libmpv-android-video-build/releases/download/v1.2.7/default-x86.jar", "sha256": "9269643264a1c9689116467f313d5e1b23ea56a68d338ab940c5e8fcf07061c6", "destination": file("$buildDir/v1.2.7/default-x86.jar")]
