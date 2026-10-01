@@ -5,6 +5,8 @@
 /// Use of this source code is governed by MIT license that can be found in the LICENSE file.
 import 'package:media_kit/media_kit.dart' show VideoParams;
 
+import 'hdr_source_classifier.dart';
+
 /// {@template hdr_media_kind}
 ///
 /// The HDR classification of the media itself, derived from decoder-reported
@@ -85,6 +87,14 @@ class HdrOutputPolicy {
   static const int displayHdrTypeHlg = 3;
 
   /// Classifies media from decoder-reported metadata.
+  ///
+  /// [dolbyVisionProfile] is the raw `dolby-vision-profile` value. The real
+  /// mpv property is an integer (`5`, `8`, `10`, ...), which is classified
+  /// by [HdrSourceClassifier] using the base-layer transfer function —
+  /// profile `8` with HLG gamma is 8.4, not plain HLG. The historical
+  /// `'5'`/`'8.4'` hint strings keep their legacy meaning so old callers are
+  /// unaffected; any other non-numeric value falls back to gamma-only
+  /// classification.
   static HdrMediaKind classifyMedia({
     VideoParams? videoParams,
     String? dolbyVisionProfile,
@@ -95,12 +105,12 @@ class HdrOutputPolicy {
       case '8.4':
         return HdrMediaKind.dolbyVisionP84;
     }
-    final gamma = videoParams?.gamma;
-    if (gamma == 'hlg') return HdrMediaKind.hlg;
-    if (gamma == 'pq' && videoParams?.primaries == 'bt.2020') {
-      return HdrMediaKind.hdr10;
-    }
-    return HdrMediaKind.sdr;
+    return const HdrSourceClassifier()
+        .classify(
+          videoParams: videoParams,
+          dolbyVisionProfile: int.tryParse(dolbyVisionProfile ?? ''),
+        )
+        .kind;
   }
 
   /// Routes [kind] to mpv properties and output topology.

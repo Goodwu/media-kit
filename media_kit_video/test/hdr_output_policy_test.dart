@@ -12,6 +12,24 @@ void main() {
         ),
         HdrMediaKind.dolbyVisionP5,
       );
+      // The real mpv property is an integer: profile 8 over an HLG base
+      // layer is 8.4, not plain HLG. Regression guard for the defect where
+      // only the legacy '8.4' hint string was recognized.
+      expect(
+        HdrOutputPolicy.classifyMedia(
+          videoParams: const VideoParams(gamma: 'hlg', primaries: 'bt.2020'),
+          dolbyVisionProfile: '8',
+        ),
+        HdrMediaKind.dolbyVisionP84,
+      );
+      expect(
+        HdrOutputPolicy.classifyMedia(
+          videoParams: const VideoParams(gamma: 'pq', primaries: 'bt.2020'),
+          dolbyVisionProfile: '8',
+        ),
+        HdrMediaKind.hdr10,
+      );
+      // Legacy '8.4' hint string keeps its meaning for old callers.
       expect(
         HdrOutputPolicy.classifyMedia(
           videoParams: const VideoParams(gamma: 'hlg', primaries: 'bt.2020'),
