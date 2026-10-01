@@ -38,7 +38,8 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 16
+        // NDK r28 (pinned above for 16 KB page alignment) rejects API < 21.
+        minSdkVersion 21
         buildConfigField 'int', 'MEDIA_KIT_TEXTURE_MAX_WIDTH',
                 (project.findProperty('mediaKitTextureMaxWidth') ?: '0').toString()
         buildConfigField 'boolean', 'MEDIA_KIT_TEXTURE_CONSUMER_STATS',
