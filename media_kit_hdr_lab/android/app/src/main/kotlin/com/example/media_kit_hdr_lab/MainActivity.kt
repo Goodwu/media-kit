@@ -14,6 +14,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.util.Log
+import com.alexmercerind.media_kit_android_dataspace_vendor.LyaPqDataSpaceExt
+import com.alexmercerind.media_kit_android_dataspace_vendor.MediaKitAndroidDataspaceVendorPlugin
+import com.alexmercerind.media_kit_video.platformview.PlatformVideoView
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -197,10 +200,22 @@ class MainActivity : FlutterActivity() {
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
-        // Vendor dataspace fallback (LYA-AL00 private ABI) and device
-        // capability diagnostics live in the test app, out of the library.
-        com.alexmercerind.media_kit_video.platformview.PlatformVideoView
-            .setSurfaceDataSpaceExt(LyaPqDataSpaceExt())
+        // The vendor dataspace fallback (LYA-AL00 private ABI) registers
+        // itself through the media_kit_android_dataspace_vendor plugin
+        // during super.configureFlutterEngine, gated by the plugin's
+        // read-only applicability check. For diagnostics, hdr_lab takes the
+        // single core slot over with a wrapper that chains the three probes
+        // onto the same extension point; apply stays delegated to the
+        // vendor extension. takeOverSlot() tells the plugin the app now
+        // owns the slot so engine detach will not clear the wrapper.
+        // PluginRegistry.get returns the non-generic FlutterPlugin type in
+        // this embedding; narrow it back to the vendor plugin explicitly.
+        val vendorPlugin = flutterEngine.plugins
+            .get(MediaKitAndroidDataspaceVendorPlugin::class.java) as?
+            MediaKitAndroidDataspaceVendorPlugin
+        val vendorExt = vendorPlugin?.registeredExtension() ?: LyaPqDataSpaceExt()
+        vendorPlugin?.takeOverSlot()
+        PlatformVideoView.setSurfaceDataSpaceExt(LyaDiagnosticsDataSpaceExt(vendorExt))
         CapabilitiesChannel.register(this, flutterEngine)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "media_kit_hdr_lab/engine_control")
             .setMethodCallHandler { call, result ->
