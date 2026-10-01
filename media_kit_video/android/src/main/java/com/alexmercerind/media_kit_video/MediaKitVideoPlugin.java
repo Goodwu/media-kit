@@ -10,7 +10,11 @@ package com.alexmercerind.media_kit_video;
 import androidx.annotation.NonNull;
 
 import android.content.Context;
+import android.hardware.display.DisplayManager;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
+import android.view.Display;
 
 import java.util.HashMap;
 
@@ -61,6 +65,8 @@ public class MediaKitVideoPlugin implements FlutterPlugin, MethodCallHandler {
     private VideoOutputManager videoOutputManager;
     private Context applicationContext;
     private PlatformVideoViewFactory platformVideoViewFactory;
+    private DisplayManager displayManager;
+    private DisplayManager.DisplayListener hdrCapabilitiesDisplayListener;
 
     @Override
     public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
@@ -169,6 +175,22 @@ public class MediaKitVideoPlugin implements FlutterPlugin, MethodCallHandler {
                 result.success(platformVideoViewFactory.setColorSpace(handle, transfer));
                 break;
             }
+            case "PlatformVideoView.ApplyDataSpace": {
+                final long handle = Long.parseLong(call.argument("handle"));
+                final String transfer = call.argument("transfer");
+                result.success(platformVideoViewFactory.applyDataSpaceReport(handle, transfer));
+                break;
+            }
+            case "HdrCapabilities.Get": {
+                result.success(HdrCapabilities.get(applicationContext));
+                break;
+            }
+            case "HdrCapabilities.Changed": {
+                final Boolean enable = call.argument("enable");
+                setHdrCapabilitiesChangedEnabled(enable == null || enable);
+                result.success(null);
+                break;
+            }
             case "PlatformVideoView.ReleaseSurface": {
                 final long handle = Long.parseLong(call.argument("handle"));
                 final int generation = call.argument("generation");
@@ -206,6 +228,53 @@ public class MediaKitVideoPlugin implements FlutterPlugin, MethodCallHandler {
         }
     }
 
+    /**
+     * Subscribes (or unsubscribes) Dart to default-display changes, e.g. the
+     * system HDR toggle or a display switch. Every matching change re-sends
+     * the full {@link HdrCapabilities#get} snapshot as a
+     * {@code HdrCapabilities.Changed} method call on the same channel that
+     * serves {@code HdrCapabilities.Get}. Registration is idempotent.
+     */
+    private void setHdrCapabilitiesChangedEnabled(boolean enabled) {
+        final Context context = applicationContext;
+        if (context == null) {
+            return;
+        }
+        if (displayManager == null) {
+            displayManager =
+                    (DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE);
+        }
+        if (enabled) {
+            if (hdrCapabilitiesDisplayListener != null || displayManager == null) {
+                return;
+            }
+            hdrCapabilitiesDisplayListener = new DisplayManager.DisplayListener() {
+                @Override
+                public void onDisplayAdded(int displayId) {}
+
+                @Override
+                public void onDisplayRemoved(int displayId) {}
+
+                @Override
+                public void onDisplayChanged(int displayId) {
+                    final Context current = applicationContext;
+                    final MethodChannel currentChannel = channel;
+                    if (displayId != Display.DEFAULT_DISPLAY ||
+                            current == null || currentChannel == null) {
+                        return;
+                    }
+                    currentChannel.invokeMethod(
+                            "HdrCapabilities.Changed", HdrCapabilities.get(current));
+                }
+            };
+            displayManager.registerDisplayListener(
+                    hdrCapabilitiesDisplayListener, new Handler(Looper.getMainLooper()));
+        } else if (hdrCapabilitiesDisplayListener != null) {
+            displayManager.unregisterDisplayListener(hdrCapabilitiesDisplayListener);
+            hdrCapabilitiesDisplayListener = null;
+        }
+    }
+
     @Override
     public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
         // Owner-broker teardown: hosts may destroy the FlutterEngine without
@@ -217,6 +286,9 @@ public class MediaKitVideoPlugin implements FlutterPlugin, MethodCallHandler {
         // together. Handles owned by other engines in this process are not
         // touched.
         MpvOwnerBroker.onEngineDetach(binding.getBinaryMessenger());
+        setHdrCapabilitiesChangedEnabled(false);
+        hdrCapabilitiesDisplayListener = null;
+        displayManager = null;
         if (videoOutputManager != null) {
             videoOutputManager.disposeAll();
             videoOutputManager = null;

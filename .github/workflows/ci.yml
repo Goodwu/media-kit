@@ -752,10 +752,13 @@ jobs:
               so = archive.read('lib/arm64-v8a/libmpv.so')
           # Version markers compiled into the fork's libmpv since the
           # architecture-review remediation (5f9ddf1777): the mapper's
-          # per-mapper init/fallback log and the dovi rescale factor log.
+          # per-mapper init/fallback log and the dovi rescale factor log,
+          # plus the --dovi-p5-fast-path option name introduced in the same
+          # commit (the P5 pipeline availability proxy probed through
+          # option-info at runtime).
           # (The old P5_DOVI_RESCALE / P5_BUFFER_RETIRE probe tags were
           # removed together with the experiment probes.)
-          markers = [b'P5 direct external YUV sampler enabled', b'dovi rescale k=%.6f']
+          markers = [b'P5 direct external YUV sampler enabled', b'dovi rescale k=%.6f', b'dovi-p5-fast-path']
           missing = [m.decode() for m in markers if m not in so]
           if missing:
               raise SystemExit(f'libmpv.so missing version markers: {missing}')
@@ -780,5 +783,9 @@ jobs:
           cache: true
       - run: flutter pub get
       - run: flutter analyze --no-pub
+      - name: Vendor dataspace subpackage JVM unit tests (private-ABI gate)
+        run: |
+          cd android
+          ./gradlew :media_kit_android_dataspace_vendor:testDebugUnitTest
       - name: Build arm64 debug APK (native probes compile check)
         run: flutter build apk --debug --target-platform android-arm64
