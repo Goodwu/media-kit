@@ -2,7 +2,13 @@
 
 ## Current State
 
-- **2026-10-02 需求定稿 v3，实施计划同步修订（S0–S13），尚未开始实施**。需求：`docs/requirements/android-hdr-auto-output.md`；计划：`docs/requirements/android-hdr-auto-output-plan.md`。下一步从 S0 基线冻结开始。
+- **实施推进中（2026-10-02 第二轮开工）**：S0 基线冻结完成，S1/S2/S4/S7/S9 并行推进，然后 S3。每步完成即更新本节并提交。
+- **S0 基线冻结（2026-10-02，V0）**：
+  - 基线提交：`f42d39ec`（需求 v3 定稿）；media-kit `main` 单线。
+  - 产品 JAR：发布源 `libmpv-android-v2026.10` / `media-kit-5f9ddf17-arm64-v8a.jar`，SHA-256 `c0e5d7f0fbca11767b28f030d3d81bef01c5c2295adaf820b2f9d4d8441db9ea`（钉定于 `libs/android/media_kit_libs_android_video/android/build.gradle:68`；本地构建目录无副本，构建时按 SHA 校验下载）。
+  - hdr_lab 构建参数：applicationId `com.example.media_kit_hdr_lab`；minSdk/targetSdk/compileSdk/ndk 随 Flutter 默认（`flutter.minSdkVersion` 等，仓库层 minSdk 21）；`abiFilters += "arm64-v8a"`；产品 JAR 经 `ORG_GRADLE_PROJECT_mediaKitLocalArm64Jar` 注入（`libs/android/media_kit_libs_android_video/android/build.gradle:83`），JDK17（`/opt/homebrew/opt/openjdk@17`）。
+  - 测试基线（Flutter 3.47.2 stable）：`media_kit_video` `flutter test` **43 通过**（其中 `hdr_output_policy_test` 11 项）；`media_kit_hdr_lab` `flutter test` **48 通过**。两包零失败，作为后续回归基线。
+- **2026-10-02 需求定稿 v3，实施计划同步修订（S0–S13）**。需求：`docs/requirements/android-hdr-auto-output.md`；计划：`docs/requirements/android-hdr-auto-output-plan.md`。
 - **v3 新增（用户决策）**：
   - 同一类源有多种处理方式时，由"源描述 + 策略候选列表 + 偏好配置 + 成熟度门禁"决策。策略分为 nativeDolbyVision（预留）、baseLayerDirect、baseLayerConvert、metadataReshape、toneMapSdr、sdrDirect。
   - **默认偏好：硬件支持时先 HDR 输出，再 tone-map；HDR 输出中直出优先**。
