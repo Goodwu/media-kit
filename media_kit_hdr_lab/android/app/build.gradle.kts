@@ -39,6 +39,18 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
 
+        // S4 device-round verification 3: build with
+        // -PhdrLabUnregisterVendorExt=true (flutter build apk
+        // --android-project-arg) to produce the no-extension APK.
+        buildFeatures {
+            buildConfig = true
+        }
+        buildConfigField(
+            "boolean",
+            "HDR_LAB_UNREGISTER_VENDOR_EXT",
+            (project.findProperty("hdrLabUnregisterVendorExt") ?: "false").toString(),
+        )
+
         ndk {
             abiFilters += "arm64-v8a"
         }
