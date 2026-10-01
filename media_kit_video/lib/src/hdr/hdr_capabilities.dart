@@ -8,6 +8,10 @@ import 'package:flutter/services.dart';
 
 import 'package:media_kit/media_kit.dart' show Player;
 
+import 'hdr_route.dart';
+import 'hdr_route_planner.dart';
+import 'hdr_source_descriptor.dart';
+
 /// Asynchronous libmpv property lookup, e.g. through `Player.getProperty`.
 typedef HdrPropertyReader = Future<String> Function(String property);
 
@@ -177,6 +181,31 @@ class HdrCapabilities {
 
   /// The registered dataspace extension, or null when none is registered.
   final HdrDataSpaceExtInfo? dataSpaceExt;
+
+  /// Predicts how [source] would play on this device, before any media is
+  /// opened (R1.2): the selected candidate, the full candidate list with
+  /// skip reasons, the presentation type, and the confidence.
+  ///
+  /// This is a thin delegation to `HdrRoutePlanner.plan` with this snapshot
+  /// — the exact function the executor uses — so a predicted route and the
+  /// applied route cannot drift apart (R1.3). [width], [height] and [fps]
+  /// are accepted per R1.2 and reserved for decoder size/frame-rate tier
+  /// matching; the Phase 1 planner does not consume them yet.
+  HdrRoutePrediction predict(
+    HdrSourceDescriptor source, {
+    HdrRoutingPolicy policy = HdrRoutingPolicy.defaults,
+    HdrOutputPreference preference = HdrOutputPreference.auto,
+    int? width,
+    int? height,
+    double? fps,
+  }) {
+    return HdrRoutePlanner.plan(
+      source: source,
+      capabilities: this,
+      policy: policy,
+      preference: preference,
+    );
+  }
 
   /// Queries the Android capability snapshot and probes the mpv fork for the
   /// P5 dovi rescale pipeline (R1.1, R1.4).
