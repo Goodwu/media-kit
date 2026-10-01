@@ -108,6 +108,33 @@ public final class PlatformVideoView implements PlatformView {
         return surfaceDataSpaceExt != null;
     }
 
+    /**
+     * Whether the native Surface dataspace bridge loaded in this process.
+     * Read-only fact for the HDR capability query; loading is not attempted
+     * here.
+     */
+    public static boolean isDataSpaceBridgeLoaded() {
+        return nativeDataSpaceBridgeLoaded;
+    }
+
+    /**
+     * {@code id}/{@code isApplicable} of the currently registered dataspace
+     * extension for the capability query and reports, or null when none is
+     * registered. Only the read-only accessors are consulted; the extension's
+     * apply path is never probed from here.
+     */
+    @Nullable
+    public static Map<String, Object> getSurfaceDataSpaceExtInfo() {
+        final SurfaceDataSpaceExt ext = surfaceDataSpaceExt;
+        if (ext == null) {
+            return null;
+        }
+        final Map<String, Object> info = new HashMap<>();
+        info.put("id", ext.id());
+        info.put("isApplicable", ext.isApplicable());
+        return info;
+    }
+
     private static final Executor transactionExecutor = Runnable::run;
     @NonNull
     private final SurfaceView surfaceView;
@@ -251,10 +278,12 @@ public final class PlatformVideoView implements PlatformView {
                     final int generation = ++surfaceGeneration;
                     appliedDataSpace = null;
                     if (initialDataSpace != null) {
-                        final boolean applied = setColorSpace(holder.getSurface(), initialDataSpace);
+                        final String appliedPath =
+                                setColorSpace(holder.getSurface(), initialDataSpace);
                         Log.i(TAG, "surfaceCreated initial dataspace: handle=" + handle +
-                                ", transfer=" + initialDataSpace + ", applied=" + applied);
-                        if (!applied) {
+                                ", transfer=" + initialDataSpace +
+                                ", applied=" + (appliedPath != null));
+                        if (appliedPath == null) {
                             // Do not publish a WID for a Surface generation
                             // whose HDR dataspace could not be applied.
                             onSurfaceEvent.accept(new SurfaceEvent(
@@ -290,7 +319,7 @@ public final class PlatformVideoView implements PlatformView {
                                     final int actual = getSurfaceDataSpace(createdSurface);
                                     if (actual != expected) {
                                         final boolean reapplied = actual >= 0 &&
-                                                setColorSpace(createdSurface, initialDataSpace);
+                                                setColorSpace(createdSurface, initialDataSpace) != null;
                                         Log.i(TAG, "hdrDataSpaceReset before=" + actual +
                                                 " expected=" + expected + " applied=" + reapplied +
                                                 " generation=" + generation + " wid=" + createdWid +
@@ -439,37 +468,48 @@ public final class PlatformVideoView implements PlatformView {
         }
     }
 
-    private boolean setColorSpace(
+    /**
+     * Applies {@code dataSpaceFor(transfer)} to {@code surface} through the
+     * first working path.
+     *
+     * @return the path the dataspace was applied through: {@code ndk} (public
+     *         NDK bridge, API &lt; 34), {@code ext:<id>} (registered extension
+     *         fallback), {@code surfaceControl} (API &ge; 34 transaction) —
+     *         or null when nothing was applied.
+     */
+    @Nullable
+    private String setColorSpace(
             @NonNull android.view.Surface surface, @NonNull String transfer) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
-            return false;
+            return null;
         }
         final int dataSpace = dataSpaceFor(transfer);
         if (Build.VERSION.SDK_INT < 34) {
             if (!nativeDataSpaceBridgeLoaded) {
-                return false;
+                return null;
             }
-            boolean applied = setSurfaceDataSpace(
-                    surface, dataSpace, "rgba1010102".equals(initialPixelFormat));
-            if (!applied) {
-                final SurfaceDataSpaceExt ext = surfaceDataSpaceExt;
-                if (ext != null) {
-                    applied = ext.applyDataSpace(surface, dataSpace);
-                    Log.i(TAG, "ext dataspace fallback: transfer=" + transfer +
-                            ", applied=" + applied);
-                }
-                if (!applied && ext != null) {
-                    ext.onDataSpaceApplyFailed(surface, dataSpace);
-                }
+            if (setSurfaceDataSpace(
+                    surface, dataSpace, "rgba1010102".equals(initialPixelFormat))) {
+                return "ndk";
             }
-            return applied;
+            final SurfaceDataSpaceExt ext = surfaceDataSpaceExt;
+            if (ext != null) {
+                final boolean applied = ext.applyDataSpace(surface, dataSpace);
+                Log.i(TAG, "ext dataspace fallback: transfer=" + transfer +
+                        ", applied=" + applied);
+                if (applied) {
+                    return "ext:" + ext.id();
+                }
+                ext.onDataSpaceApplyFailed(surface, dataSpace);
+            }
+            return null;
         }
         if (!surfaceView.isAttachedToWindow()) {
-            return false;
+            return null;
         }
         final SurfaceControl surfaceControl = surfaceView.getSurfaceControl();
         if (!surfaceControl.isValid()) {
-            return false;
+            return null;
         }
         final CountDownLatch committed = new CountDownLatch(1);
         final AtomicBoolean transactionCommitted = new AtomicBoolean(false);
@@ -483,27 +523,122 @@ public final class PlatformVideoView implements PlatformView {
                     .apply();
             if (!committed.await(500, TimeUnit.MILLISECONDS)) {
                 Log.e(TAG, "setColorSpace: transaction commit timed out: handle=" + handle);
-                return false;
+                return null;
             }
             Log.i(TAG, "setColorSpace: handle=" + handle + ", transfer=" + transfer +
                     ", transactionCommitted=" + transactionCommitted.get());
-            return transactionCommitted.get();
+            return transactionCommitted.get() ? "surfaceControl" : null;
         } catch (InterruptedException error) {
             Thread.currentThread().interrupt();
             Log.e(TAG, "setColorSpace: transaction wait interrupted: handle=" + handle, error);
-            return false;
+            return null;
         } catch (Throwable error) {
             Log.e(TAG, "setColorSpace: handle=" + handle + ", transfer=" + transfer, error);
-            return false;
+            return null;
         }
     }
 
     /** Applies the display dataspace only after the decoder has identified HDR. */
     public synchronized boolean setColorSpace(@NonNull String transfer) {
         final android.view.Surface surface = surfaceView.getHolder().getSurface();
-        final boolean applied = surface != null && setColorSpace(surface, transfer);
-        if (applied) appliedDataSpace = transfer;
-        return applied;
+        final String appliedPath = surface == null ? null : setColorSpace(surface, transfer);
+        if (appliedPath != null) appliedDataSpace = transfer;
+        return appliedPath != null;
+    }
+
+    /**
+     * Applies {@code transfer} to the current surface and reports the native
+     * outcome for HDR orchestration:
+     *
+     * <ul>
+     *   <li>{@code applied}: whether the dataspace was applied (true exactly
+     *       when {@code path != none}).</li>
+     *   <li>{@code path}: {@code ndk} (public NDK bridge succeeded, API &lt; 34),
+     *       {@code ext:<id>} (extension fallback succeeded),
+     *       {@code surfaceControl} (API &ge; 34 transaction committed),
+     *       {@code none} (everything failed or no live surface).</li>
+     *   <li>{@code requested}: the transfer as requested.</li>
+     *   <li>{@code readback}: the dataspace read back from the live surface as
+     *       a known constant name (e.g. {@code DATASPACE_BT2020_PQ}) or an
+     *       unsigned hex value for unknown dataspace ids; {@code none} when
+     *       there is no valid surface or the bridge did not load.</li>
+     * </ul>
+     *
+     * <p>Applied and readback are measured on different layers and must not
+     * be assumed equal. On the {@code surfaceControl} path (API &ge; 34)
+     * {@code applied} goes through {@code SurfaceControl.Transaction
+     * #setDataSpace} (SurfaceFlinger layer state), while {@code readback}
+     * goes through {@code ANativeWindow_getBuffersDataSpace} (buffer side);
+     * the two need not agree. On the {@code ndk}/{@code ext} paths (API &lt;
+     * 34) both sides go through ANativeWindow, so the readback is expected to
+     * match the request. Session orchestration must therefore exempt the
+     * {@code surfaceControl} path from a {@code dataSpaceReadbackMismatch}
+     * judgment.</p>
+     *
+     * <p>Semantics of the existing {@link #setColorSpace(String)} are
+     * unchanged; this call goes through the same application chain.</p>
+     */
+    @NonNull
+    public synchronized Map<String, Object> applyDataSpaceReport(@NonNull String transfer) {
+        final android.view.Surface surface = surfaceView.getHolder().getSurface();
+        final String appliedPath = surface == null ? null : setColorSpace(surface, transfer);
+        if (appliedPath != null) appliedDataSpace = transfer;
+        final Map<String, Object> report = new HashMap<>();
+        report.put("applied", appliedPath != null);
+        report.put("path", appliedPath != null ? appliedPath : "none");
+        report.put("requested", transfer);
+        report.put("readback", readbackDataSpaceName(surface));
+        return report;
+    }
+
+    @NonNull
+    private String readbackDataSpaceName(@Nullable android.view.Surface surface) {
+        if (!nativeDataSpaceBridgeLoaded || surface == null || !surface.isValid()) {
+            return "none";
+        }
+        final int dataSpace;
+        try {
+            dataSpace = getSurfaceDataSpace(surface);
+        } catch (Throwable error) {
+            Log.w(TAG, "applyDataSpaceReport: dataspace readback failed: handle=" + handle, error);
+            return "none";
+        }
+        return dataSpaceName(dataSpace);
+    }
+
+    /**
+     * Maps a dataspace id to its known constant name; unknown ids are
+     * reported as unsigned hex. Negative ids (read failures, e.g. -1) map to
+     * {@code none}.
+     */
+    @NonNull
+    private static String dataSpaceName(int dataSpace) {
+        if (dataSpace < 0) {
+            return "none";
+        }
+        switch (dataSpace) {
+            case DataSpace.DATASPACE_SRGB:
+                return "DATASPACE_SRGB";
+            case DataSpace.DATASPACE_SRGB_LINEAR:
+                return "DATASPACE_SRGB_LINEAR";
+            case DataSpace.DATASPACE_BT709:
+                return "DATASPACE_BT709";
+            case DataSpace.DATASPACE_BT2020:
+                return "DATASPACE_BT2020";
+            case DataSpace.DATASPACE_BT2020_PQ:
+                return "DATASPACE_BT2020_PQ";
+            case DataSpace.DATASPACE_BT2020_HLG:
+                return "DATASPACE_BT2020_HLG";
+            case DataSpace.DATASPACE_DISPLAY_P3:
+                return "DATASPACE_DISPLAY_P3";
+            // BT.2020 primaries / SMPTE ST 2084 / limited range: the HDR10
+            // MediaCodec direct-output dataspace some devices report (the
+            // `pq-itu` transfer request maps here).
+            case 0x11c60000:
+                return "DATASPACE_BT2020_PQ_LIMITED";
+            default:
+                return String.format("0x%08x", dataSpace);
+        }
     }
 
     public boolean hasLiveSurface() {

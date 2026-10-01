@@ -17,6 +17,7 @@ import io.flutter.plugin.common.StandardMessageCodec;
 import io.flutter.plugin.common.MethodChannel;
 
 import android.util.Log;
+import java.util.Map;
 import java.util.Objects;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
@@ -107,6 +108,50 @@ public class PlatformVideoViewFactory extends PlatformViewFactory {
             applied &= view.setColorSpace(transfer);
         }
         return found && applied;
+    }
+
+    /**
+     * Applies {@code transfer} to every live Surface of {@code handle} and
+     * reports the outcome for HDR orchestration. The report of the last live
+     * view is representative (single-view output is the norm); the overall
+     * {@code applied} is the conjunction over all live views. When no live
+     * Surface exists the report is {@code {applied=false, path=none}}.
+     *
+     * @return a map with {@code applied} (boolean), {@code path}
+     *         ({@code ndk} / {@code ext:<id>} / {@code surfaceControl} /
+     *         {@code none}), {@code requested} (the transfer as requested)
+     *         and {@code readback} (dataspace constant name, hex value or
+     *         {@code none}).
+     */
+    @NonNull
+    public Map<String, Object> applyDataSpaceReport(long handle, @NonNull String transfer) {
+        boolean found = false;
+        boolean applied = true;
+        Map<String, Object> report = null;
+        for (java.util.Map.Entry<SurfaceOwner, Integer> entry : liveSurfaceGenerations.entrySet()) {
+            if (entry.getKey().handle != handle) continue;
+            final PlatformVideoView view = surfaceOwners.get(entry.getKey());
+            if (view == null || !view.hasLiveSurface()) continue;
+            found = true;
+            final Map<String, Object> viewReport = view.applyDataSpaceReport(transfer);
+            applied &= (Boolean) viewReport.get("applied");
+            report = viewReport;
+        }
+        if (report == null) {
+            report = new HashMap<>();
+            report.put("applied", false);
+            report.put("path", "none");
+            report.put("requested", transfer);
+            report.put("readback", "none");
+            return report;
+        }
+        if (!applied) {
+            // One of the live views rejected the dataspace: the policy gate
+            // fails overall even if the representative view succeeded.
+            report.put("applied", false);
+            report.put("path", "none");
+        }
+        return report;
     }
 
     public String releaseSurface(
