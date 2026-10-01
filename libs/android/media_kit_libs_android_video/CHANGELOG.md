@@ -1,14 +1,15 @@
-## libmpv build lock（2026-09-30）
+## libmpv build lock（2026-10-01 更新）
 
 默认 arm64 libmpv 来源固定为 Goodwu fork 发布（其余 ABI 维持上游 Predidit v1.2.7 基线）：
 
-- Release: https://github.com/Goodwu/media-kit/releases/tag/libmpv-android-v2026.09
-- mpv: Goodwu/mpv `media-kit/android` @ `5e26cf86`（P5 dovi 重标定、片尾相邻帧回退、OES buffer_retire、av_log 接管）
+- Release: https://github.com/Goodwu/media-kit/releases/tag/libmpv-android-v2026.10
+- mpv: Goodwu/mpv `media-kit/android` @ `5f9ddf1777`（v2026.09 全部修复 + 架构审查整改立即修四项 P0-1/P0-2/P1-1/P1-2 与短期清理，LYA 实机验证通过）
 - FFmpeg: Goodwu/FFmpeg `feature/android-mediacodec-p5-rpu` @ `fff3ee7`
 - libplacebo: Goodwu/libplacebo `optimize/dovi-linear-decode` @ `c9fd879`
-- `media-kit-5e26cf86-arm64-v8a.jar` SHA-256 `7cb87a5ced18570bc74f984a2ab87e1bce15559e705ad0fe2668912b7ffc33f2`（默认）
-- `media-kit-398d0c3-arm64-v8a.jar` SHA-256 `dad30ae23cd75e85c43663959ce9e1c5940ae632adda404fbfe71d4202c2a9f7`（12700 合并验收所用构建）
-- 版本标识：libmpv.so 内 `P5_DOVI_RESCALE` / `P5_BUFFER_RETIRE` 标记串，CI（ci.yml `libmpv-jar-identity` job）据此校验。
+- 构建链: Goodwu/libmpv-android-video-build-dv-experiment @ `baac282`（v_mpv 钉定 5f9ddf1777）
+- `media-kit-5f9ddf17-arm64-v8a.jar` SHA-256 `c0e5d7f0fbca11767b28f030d3d81bef01c5c2295adaf820b2f9d4d8441db9ea`（默认）
+- 历史资产：v2026.09（5e26cf86 `7cb87a5c…`、398d0c3 `dad30ae2…`）见该 release 页
+- 版本标识：libmpv.so 内 `P5 direct external YUV sampler enabled` / `dovi rescale k=%.6f` 标记串（整改后探针已移除，旧 `P5_DOVI_RESCALE`/`P5_BUFFER_RETIRE` 不再存在），CI（ci.yml `libmpv-jar-identity` job）据此校验。
 
 ## 1.3.8
 
