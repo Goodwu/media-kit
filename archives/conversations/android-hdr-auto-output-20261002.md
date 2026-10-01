@@ -3,6 +3,7 @@
 ## Current State
 
 - **实施推进中（2026-10-02 第二轮开工）**：S0 基线冻结完成，S1/S2/S4/S7/S9 并行推进，然后 S3。每步完成即更新本节并提交。
+- **并行批预备**：`SurfaceDataSpaceExt` 已先行加 default `id()`/`isApplicable()`（S2 与 S7 共同依赖，避免并行写冲突；S2 验证覆盖、S7 消费）。S2 与 S4 都改 `MediaKitVideoPlugin.java`/`PlatformVideoView.java`，按计划"同文件串行"合并为同一 worker 串行实施、分步提交；其余按计划并行。
 - **S0 基线冻结（2026-10-02，V0）**：
   - 基线提交：`f42d39ec`（需求 v3 定稿）；media-kit `main` 单线。
   - 产品 JAR：发布源 `libmpv-android-v2026.10` / `media-kit-5f9ddf17-arm64-v8a.jar`，SHA-256 `c0e5d7f0fbca11767b28f030d3d81bef01c5c2295adaf820b2f9d4d8441db9ea`（钉定于 `libs/android/media_kit_libs_android_video/android/build.gradle:68`；本地构建目录无副本，构建时按 SHA 校验下载）。
