@@ -18,6 +18,10 @@ dependencies:
     path: ../media_kit_video
   media_kit_libs_video:
     path: ../libs/universal/media_kit_libs_video
+  # Vendor dataspace fallback (LYA-AL00 private ABI) as a controlled
+  # deliverable; this app only wraps it with diagnostics probes.
+  media_kit_android_dataspace_vendor:
+    path: ../libs/android/media_kit_android_dataspace_vendor
 
   path: ^1.8.2
   file_picker: ^12.1.3

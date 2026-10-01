@@ -1,0 +1,33 @@
+name: media_kit_android_dataspace_vendor
+description: >-
+  Device-vendor Surface dataspace fallback extension for package:media_kit_video.
+  Ships the LYA-AL00 private window ABI apply path behind an exact
+  SDK + firmware + BT2020_PQ read-only gate; the native library is loaded
+  only on the validated device and only for an applying call. No
+  diagnostics probes (those stay in media_kit_hdr_lab).
+version: 1.0.0
+homepage: https://github.com/media-kit/media-kit
+repository: https://github.com/media-kit/media-kit
+publish_to: none
+
+environment:
+  sdk: ">=2.17.0 <4.0.0"
+  flutter: ">=3.3.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  # The extension implements PlatformVideoView.SurfaceDataSpaceExt and
+  # registers itself through PlatformVideoView.setSurfaceDataSpaceExt.
+  media_kit_video:
+    path: ../../../media_kit_video
+
+dev_dependencies:
+  flutter_lints: ^5.0.0
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: com.alexmercerind.media_kit_android_dataspace_vendor
+        pluginClass: MediaKitAndroidDataspaceVendorPlugin
