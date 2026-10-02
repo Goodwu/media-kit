@@ -18,8 +18,7 @@ void withWindowsMta(void Function() action) {
   }
 
   final ole32 = DynamicLibrary.open('ole32.dll');
-  final increment = ole32.lookupFunction<
-      Int32 Function(Pointer<Pointer<Void>>),
+  final increment = ole32.lookupFunction<Int32 Function(Pointer<Pointer<Void>>),
       int Function(Pointer<Pointer<Void>>)>(
     'CoIncrementMTAUsage',
   );
