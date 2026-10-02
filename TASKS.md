@@ -14,6 +14,7 @@
 - **P5 修复要点**：华为硬解输出为 Main10 10-bit 布局（AHB 0x325，驱动 Y2Y 采样按 /1020 归一化，`archives/experiments/android-p5-buffer-bitdepth-mystery-20260930.md`），dovi 域按 code/1023 解释 → 1023/1020 缩放偏色；修复为 dovi 元数据就地重标定（mpv fork，k=1023/1020），数值验收 (47,50,70)/(50,19,58)/65535 ≤100。教训：读回装置旧前缀 FFmpeg 需 `debug.media_kit.p5_rpu_probe=2`；产品链接必须用 fff3ee7 世代 libavcodec（持久副本 `~/src/media-kit-build/product-ffmpeg-lib/`），误链 mkp4prefix 旧版会复演 `direct=0`。详见 `archives/experiments/android-p5-mediacodec-color-fix-20260930.md`。
 - **环境**：ADB 可用（设备 `3EP7N18C28016072` / LYA-AL00），每轮结束恢复原 12492、自动亮度、熄屏。**持久化资产（2026-09-30 起；/tmp 副本重启即弃，以下为权威本地副本）**：`~/src/mpv`（mpv fork 完整工作树，`media-kit/android` tip）；`~/src/media-kit-build/`（`mkp4prefix` 构建前缀、`product-ffmpeg-lib` fff3ee7 libavcodec、`jars/` 发布 JAR、`apks/` 验收包、`evidence/` 设备日志、`sources/` 测试源视频、`scripts/` 重链脚本 `mk-relink-product.sh` 等——轮次脚本权威版本在仓库 `tool/`）。读回构建链：mpv 源码 `~/src/mpv` + 前缀 `~/src/media-kit-build/mkp4prefix` + 手工链接需补 `-lc++_shared`；APK 直改重签（lib store + zipalign -p 4096 + debug keystore）。JDK17 构建、`ORG_GRADLE_PROJECT_mediaKitLocalArm64Jar` 注入 JAR 的正式流程不变；media-kit 主仓推送遇挂起时绕过 osxkeychain：`git -c credential.helper= -c credential.helper='!gh auth git-credential' push …`。可复用轮次/构建/分析脚本已收编仓库 `tool/`（使用说明 `tool/README.md`）。
 
+- **HDR 能力路由 Phase 1（S0–S13）完成（2026-10-02）**：会话 API/私有回退子包/诊断日志/hdr_lab 迁移/LYA 27+ 轮实机验收/PiliPlusX 接入全部交付并通过对应等级审核；验收记录 `archives/experiments/android-hdr-auto-output-acceptance-20261002.md`。**三仓状态**：media-kit main 已推送至 `420fba3e`，本地另有 3 个未推送提交（1c49c684 无 Player 查询入口、ae909874 进展、856b7cf5 S13 收尾）；mpv fork `media-kit/android` 为本地分支（远端无同名分支，发布走 tag 流），提交 `0f7e6bec32`（DV/Vivid 属性暴露）未推送；PiliPlusX 分支 `fix/darwin-video-output-rebuild-barrier` 4 个未推送提交（f7470fd09/2995115399/7721a1e92/2ce821d4c）。推送与 JAR 构建归入下述后续任务。
 ## 当前任务
 
 - [ ] Android HDR10 / DV P8.4 显示与原生 HDR 首帧闭环
@@ -39,7 +40,36 @@
   - context: archives/conversations/android-hdr-auto-output-20261002.md
   - acceptance: ①原生 DV 呈现（R7 预留项，FFmpeg `video/dolby-vision`+profile 打开解码器/mpv 路由/media-kit 三方，等 DV 设备到位）；②动态元数据重建扩展（HDR Vivid/HDR10+）；③`HdrCapabilities.query` 无 Player 入口 + PiliPlusX app 内 seek 验证。
   - latest: **③ 完成（2026-10-02）**：query player 改可选（186/186；media-kit 1c49c684）；PiliPlusX 删手工兜底走单一入口（2ce821d4c，81/81，构建 46441b40）；实机选档门复跑照常；seek 不变量维持进度条拖拽证据（长按钩子留人工路径）。**② fork 暴露完成（mpv `0f7e6bec32`）**：compat id/EL/ hdr-vivid 三属性 + 构建零错误；剩余：fork JAR/CI → 库消费 → 设备事实轮。①阻塞待 DV 设备。
-  - next: ② 剩余步骤按用户排期；①需 DV 设备。
+  - latest+: **用户已批准方案 B（2026-10-02）**：P5 管线探测去 Player 依赖的最终形态 = fork 加专用只读能力属性 + 桥接 .so（media_kit_video_hdr_bridge）加抛弃式 mpv 实例探针（create→initialize→读属性→terminate，无 vo 不碰 EGL，满足 R1.1）+ 插件 engine attach 时跑一次并缓存；与 ② 的专用属性改造合并实施，不做 Dart FFI 临时版。
+  - next: ②+方案 B 合并实施（fork 专用属性/bridge 探针/插件缓存/单测 → fork JAR 构建+推送+CI 标识串评估 → 库消费：classifier 复核优先读兼容 ID 缺省回退推断、Vivid 分类 → 设备事实轮：fate p81→compat 1、P7 FEL→EL 1、Vivid 样片→hdr-vivid true）；①需 DV 设备。
+
+- [ ] 待用户确认两（阻塞 Phase 1 完全关闭，2026-10-02）
+  - status: pending_user
+  - context: archives/conversations/android-hdr-auto-output-20261002.md
+  - ①人工观察：LYA 上看 a1-hlg-gate-85（纯 HLG 直出）与 a6-reshape（P8.4 RPU 重建 PQ）两轮画面；确认后把需求第 6 节 P8.4×baseLayerConvert 与 HLG×baseLayerDirect 升 verified 并同步代码常量表（S3 解析单测锁定两处同步）。
+  - ②R3.1 口径文字：开播前规划相的候选跳过以报告候选原因披露、不发 Degraded（A3-2 实测口径，Lead 决策记录在 conversation）——是否落进需求 R3.1 文字由用户定。
+  - latest: 均不阻塞其他任务启动；确认后无遗留动作。
+
+- [ ] OHOS HDR 能力路由支持（Phase 2，2026-10-02 显式登记）
+  - status: planned
+  - context: docs/requirements/android-hdr-auto-output.md R6（OHOS：VO 动态色彩契约单层写入，另立需求）；archives/conversations/android-hdr-auto-output-20261002.md
+  - acceptance: 另立 OHOS 需求文档（会话 API 在 OHOS 的路由执行与报告；VO 动态色彩契约单层写入语义）；PiliPlusX 侧 useHCPP/native-surface 候选路径（hdr.dart 保留段）迁移进会话；实机验收另定设备。
+  - latest: Phase 1 明确只做 Android（R6）；本条为显式登记防止遗漏。当前 OHOS 走 R2.5 透传 + unsupportedPlatform。
+  - next: 先立需求文档（含 OHOS 显示/解码能力查询面），再排实施。
+
+- [ ] macOS（darwin）HDR 能力路由支持（Phase 2，2026-10-02 显式登记）
+  - status: planned
+  - context: docs/requirements/android-hdr-auto-output.md R6（darwin：三事实交集门禁、final24 运行时禁止降档，另立需求）；media-kit TASKS「修复 macOS modern mpv 销毁时未释放 render context 的崩溃」（前置依赖）与 PiliPlusX final11 崩溃记录（render context free 屏障未落地前 macOS HDR 候选不可打包）。
+  - acceptance: 另立 darwin 需求文档（EDR/三事实门禁/final24 禁降档）；会话 API 在 darwin 的路由执行与报告；同源同 PTS 亮度对照验收。
+  - latest: 前置：macOS render context 销毁屏障（上方 queued 任务）必须先完成，否则重打包即复演 final11 SIGABRT。
+  - next: 前置任务完成后立需求文档。
+
+- [ ] 全平台会话逻辑一致性审计与未实现平台显式 stub（2026-10-02 用户指令）
+  - status: planned
+  - context: docs/requirements/android-hdr-auto-output.md R2.5；archives/conversations/android-hdr-auto-output-20261002.md
+  - acceptance: 审计 HdrVideoSession 在每个平台（android/darwin/ohos/linux/windows/web）的当前路径并落表；为暂不实现会话编排的平台加显式 stub（未实现即报错/报告 unsupportedPlatform，不静默假透传），保证调用方在全平台得到一致的逻辑形态；决策与 R2.5"透传+调用方不分平台分支"的取舍由用户确认后落需求修订。
+  - latest: 现状：Android=完整会话；darwin/OHOS=透传+unsupportedPlatform（R2.5 Phase 1 规定）；linux/windows/web 路径未审计。注意：darwin/OHOS 的透传是 R2.5 的 Phase 1 决策，若改为报错属需求修订（交用户确认）；从未规划会话的平台（如 web）加报错 stub 不与 R2.5 冲突。
+  - next: 出平台×现状表与 stub 方案（哪些报错、哪些保留透传）→ 用户确认 → 实施 + 单测。
 
 - [ ] 修复 macOS modern mpv 销毁时未释放 render context 的崩溃
   - status: queued
