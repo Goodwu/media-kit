@@ -35,6 +35,40 @@ Future<void> enterFullscreen(BuildContext context) {
         final videoViewParametersNotifierValue =
             videoViewParametersNotifier(context);
         final controllerValue = controller(context);
+        // R2.1: when the [Video] is mounted by an [HdrVideo], the pushed
+        // fullscreen page must follow [HdrVideoSession.controller] instead
+        // of holding this statically captured controller — a topology switch
+        // replaces the controller instance while the page is open.
+        final hdrSessionValue = HdrVideoScope.maybeOf(context)?.session;
+        Widget buildFullscreenVideo(VideoController controller) => Video(
+              controller: controller,
+              // Do not restrict the video's width & height in fullscreen mode:
+              width: null,
+              height: null,
+              fit: videoViewParametersNotifierValue.value.fit,
+              fill: videoViewParametersNotifierValue.value.fill,
+              alignment:
+                  videoViewParametersNotifierValue.value.alignment,
+              aspectRatio:
+                  videoViewParametersNotifierValue.value.aspectRatio,
+              filterQuality: videoViewParametersNotifierValue
+                  .value.filterQuality,
+              controls:
+                  videoViewParametersNotifierValue.value.controls,
+              // Do not acquire or modify existing wakelock in fullscreen mode:
+              wakelock: false,
+              pauseUponEnteringBackgroundMode:
+                  stateValue.widget.pauseUponEnteringBackgroundMode,
+              resumeUponEnteringForegroundMode:
+                  stateValue.widget.resumeUponEnteringForegroundMode,
+              subtitleViewConfiguration:
+                  videoViewParametersNotifierValue
+                      .value.subtitleViewConfiguration,
+              focusNode:
+                  videoViewParametersNotifierValue.value.focusNode,
+              onEnterFullscreen: stateValue.widget.onEnterFullscreen,
+              onExitFullscreen: stateValue.widget.onExitFullscreen,
+            );
         Navigator.of(context, rootNavigator: true).push(
           PageRouteBuilder(
             pageBuilder: (_, __, ___) => Material(
@@ -55,34 +89,14 @@ Future<void> enterFullscreen(BuildContext context) {
                       videoViewParametersNotifier:
                           videoViewParametersNotifierValue,
                       disposeNotifiers: false,
-                      child: Video(
+                      child: FullscreenVideoSurface(
+                        session: hdrSessionValue,
                         controller: controllerValue,
-                        // Do not restrict the video's width & height in fullscreen mode:
-                        width: null,
-                        height: null,
-                        fit: videoViewParametersNotifierValue.value.fit,
-                        fill: videoViewParametersNotifierValue.value.fill,
-                        alignment:
-                            videoViewParametersNotifierValue.value.alignment,
-                        aspectRatio:
-                            videoViewParametersNotifierValue.value.aspectRatio,
-                        filterQuality: videoViewParametersNotifierValue
-                            .value.filterQuality,
-                        controls:
-                            videoViewParametersNotifierValue.value.controls,
-                        // Do not acquire or modify existing wakelock in fullscreen mode:
-                        wakelock: false,
-                        pauseUponEnteringBackgroundMode:
-                            stateValue.widget.pauseUponEnteringBackgroundMode,
-                        resumeUponEnteringForegroundMode:
-                            stateValue.widget.resumeUponEnteringForegroundMode,
-                        subtitleViewConfiguration:
-                            videoViewParametersNotifierValue
-                                .value.subtitleViewConfiguration,
-                        focusNode:
-                            videoViewParametersNotifierValue.value.focusNode,
-                        onEnterFullscreen: stateValue.widget.onEnterFullscreen,
-                        onExitFullscreen: stateValue.widget.onExitFullscreen,
+                        buildVideo: buildFullscreenVideo,
+                        placeholder: ColoredBox(
+                          color: videoViewParametersNotifierValue.value.fill,
+                          child: const SizedBox.expand(),
+                        ),
                       ),
                     ),
                   ),
@@ -128,6 +142,51 @@ Future<void> toggleFullscreen(BuildContext context) {
     return exitFullscreen(context);
   } else {
     return enterFullscreen(context);
+  }
+}
+
+/// The video surface of the built-in fullscreen page (R2.1).
+///
+/// Without an [HdrVideoSession] (i.e. the windowed [Video] was not mounted
+/// by an [HdrVideo]) this builds the statically captured [VideoController] —
+/// the historical behavior, byte-for-byte. With a session, the surface
+/// follows [HdrVideoSession.controller] instead, so a controller replacement
+/// (Texture ↔ PlatformView topology switch) while the fullscreen page is
+/// open is reflected in it; [placeholder] is shown while the next controller
+/// is being created.
+class FullscreenVideoSurface extends StatelessWidget {
+  const FullscreenVideoSurface({
+    super.key,
+    required this.session,
+    required this.controller,
+    required this.buildVideo,
+    this.placeholder = const SizedBox.expand(),
+  });
+
+  /// The session detected above the windowed [Video], if any.
+  final HdrVideoSession? session;
+
+  /// The controller captured at push time. Only used when [session] is null.
+  final VideoController controller;
+
+  /// Builds the fullscreen [Video] for a controller.
+  final Widget Function(VideoController controller) buildVideo;
+
+  /// Shown while the session has no controller (replacement in progress).
+  final Widget placeholder;
+
+  @override
+  Widget build(BuildContext context) {
+    final session = this.session;
+    if (session == null) {
+      // No HDR session: keep the static behavior unchanged.
+      return buildVideo(controller);
+    }
+    return HdrVideoBody(
+      controller: session.controller,
+      placeholder: placeholder,
+      videoBuilder: buildVideo,
+    );
   }
 }
 
