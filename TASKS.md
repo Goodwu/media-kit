@@ -90,11 +90,11 @@
   - next: 出平台×现状表与 stub 方案（哪些报错、哪些保留透传）→ 用户确认 → 实施 + 单测。
 
 - [ ] 修复 macOS modern mpv 销毁时未释放 render context 的崩溃
-  - status: queued
+  - status: in_progress（代码修复与隔离验证已完成；产品链五场景验证交接中，2026-10-03）
   - context: archives/conversations/native-output-rebuild-20260920.md
   - acceptance: 同一控制器的并发 dispose 共用完成屏障；Player 销毁前完成 native output/render context 释放，dispose 后不再写 active notifier。用 modern mpv 实际播放后退出、快速重入和输出重建，均无 `mpv_render_context_free() not called` abort。
-  - latest: Darwin Player preTermination 屏障、创建/销毁仲裁及失败重试已通过 V2 静态复审。隔离 Goodwu mpv 0.41 W0 测试包完成 SDR 出图→重建→第二次出图→定时移除：两个 Surface 均有释放记录，两次 Player dispose 完成，进程未见 render-context abort，见 `archives/experiments/macos-w0-remove-20260927.md`。现有 PiliPlusX Debug app 经 LaunchServices `open -n` 可创建 1180×720 Aqua 窗口；这只解除“没有可操作窗口”的环境判断，产品 mpv 0.41 播放调用链仍未验收。
-  - next: 在已可打开的 PiliPlusX 窗口中验证产品调用链有序退出、快速重入、seek、输出重建及 HDR 长播；测试页的定时移除证据不能替代这些场景。
+  - latest: Darwin Player preTermination 屏障、创建/销毁仲裁及失败重试已通过 V2 静态复审；W0 隔离验证完成（`archives/experiments/macos-w0-remove-20260927.md`）。**产品链验证交接状态（2026-10-03 凌晨，交接给下一执行者）**：①App 已构建就绪 `~/src/PiliPlusX/build/macos/Build/Products/Debug/PiliPlusX.app`（含修复代码，`open -n` 启动）；②两轮 ZCode Verifier UI 自动化被终止（第二任因操作笨拙被用户手动停止），自动化路线不通，改由具备 UI 操作能力的执行者（用户指定 ChatGPT）或人工驱动完成；③部分证据已归档 `archives/experiments/artifacts/macos-ppx-darwin-verify-20261003/`（场景 a 的 log stream——AppKit terminate 序列完整、零 render-context 错误，但播放是否达成未确认故不算通过；b/c 的 flutter stdout 与导航截图；基线 crash 快照——截至 03:50 PiliPlusX/mpv 相关 .ips 零新增）；④验证方法：每场景 `log stream --predicate 'process == "PiliPlusX"' --style compact` 采集 + 场景后查 `~/Library/Logs/DiagnosticReports/` 新增 .ips，失败信号=`mpv_render_context_free` 相关 abort/SIGABRT。
+  - next: 五场景（a 播放≥10s 后 Cmd+Q 有序退出；b 退出→立即重开再播 ×3；c 播放中 seek ≥10 次；d 全屏切换/窗口缩放 ×3；e HDR 素材 ≥5 分钟）由下一执行者完成并逐场景出判定；全部通过则任务收口并解锁 macOS HDR Phase 2 需求文档。
 
 - [ ] Android native output / 双视图生命周期回归
   - status: queued
