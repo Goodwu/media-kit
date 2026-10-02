@@ -1,15 +1,15 @@
-## libmpv build lock（2026-10-01 更新）
+## libmpv build lock（2026-10-02 更新）
 
 默认 arm64 libmpv 来源固定为 Goodwu fork 发布（其余 ABI 维持上游 Predidit v1.2.7 基线）：
 
-- Release: https://github.com/Goodwu/media-kit/releases/tag/libmpv-android-v2026.10
-- mpv: Goodwu/mpv `media-kit/android` @ `5f9ddf1777`（v2026.09 全部修复 + 架构审查整改立即修四项 P0-1/P0-2/P1-1/P1-2 与短期清理，LYA 实机验证通过）
+- Release: https://github.com/Goodwu/media-kit/releases/tag/libmpv-android-v2026.011
+- mpv: Goodwu/mpv `media-kit/android` @ `d24c59905b`（tag `media-kit-v2026.011`；v2026.10 全部 + 客户端只读属性暴露：`dovi-p5-pipeline` 构建能力属性、`dolby-vision-compatibility-id`/`dolby-vision-el-present`/`hdr-vivid` 事实属性，渲染行为零改动，LYA 实机 8 轮验证通过）
 - FFmpeg: Goodwu/FFmpeg `feature/android-mediacodec-p5-rpu` @ `fff3ee7`
 - libplacebo: Goodwu/libplacebo `optimize/dovi-linear-decode` @ `c9fd879`
-- 构建链: Goodwu/libmpv-android-video-build-dv-experiment @ `baac282`（v_mpv 钉定 5f9ddf1777）
-- `media-kit-5f9ddf17-arm64-v8a.jar` SHA-256 `c0e5d7f0fbca11767b28f030d3d81bef01c5c2295adaf820b2f9d4d8441db9ea`（默认）
-- 历史资产：v2026.09（5e26cf86 `7cb87a5c…`、398d0c3 `dad30ae2…`）见该 release 页
-- 版本标识：libmpv.so 内 `P5 direct external YUV sampler enabled` / `dovi rescale k=%.6f` 标记串（整改后探针已移除，旧 `P5_DOVI_RESCALE`/`P5_BUFFER_RETIRE` 不再存在），CI（ci.yml `libmpv-jar-identity` job）据此校验。
+- 构建链: Goodwu/libmpv-android-video-build-dv-experiment @ `91bb42af`（v_mpv 钉定 d24c59905b）
+- `media-kit-d24c59905-arm64-v8a.jar` SHA-256 `cafef3a44f7ab6379faf59e352e65dd69fa0b0fce45e80f86bc3026520bfdf21`（默认）
+- 历史资产：v2026.10（5f9ddf17 `c0e5d7f0…`）、v2026.09（5e26cf86 `7cb87a5c…`、398d0c3 `dad30ae2…`）见各 release 页
+- 版本标识：libmpv.so 内 `P5 direct external YUV sampler enabled` / `dovi rescale k=%.6f` / `dovi-p5-fast-path` / `dovi-p5-pipeline` 标记串（整改后探针已移除，旧 `P5_DOVI_RESCALE`/`P5_BUFFER_RETIRE` 不再存在），CI（ci.yml `libmpv-jar-identity` job）据此校验。
 
 ## 1.3.8
 

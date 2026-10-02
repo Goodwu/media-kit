@@ -43,14 +43,15 @@
   - latest+: **用户已批准方案 B（2026-10-02）**：P5 管线探测去 Player 依赖的最终形态 = fork 加专用只读能力属性 + 桥接 .so（media_kit_video_hdr_bridge）加抛弃式 mpv 实例探针（create→initialize→读属性→terminate，无 vo 不碰 EGL，满足 R1.1）+ 插件 engine attach 时跑一次并缓存；与 ② 的专用属性改造合并实施，不做 Dart FFI 临时版。
   - latest++: **②+方案 B 合并实施完成（2026-10-02，V1 PASS）**：fork `d24c59905b`（`dovi-p5-pipeline` 只读属性）已提交推送；bridge 第 5 个 JNI 三态探针 + `MpvPipelineProbe.java` attach 幂等缓存 + 快照 `p5Pipeline` 字段，Dart P5 判定改原生快照单一来源（option-info 代理退役，`query` 无 Player 即权威）；classifier 消费 compat-id/el-present/hdr-vivid 三属性（容器事实优先、推断回退，Vivid 接通 `HdrSourceClass.hdrVivid`）；186→204 全过（+18）、analyze 基线不变、hdr_lab analyze 0。JAR `media-kit-d24c59905-arm64-v8a.jar`（`cafef3a4…`，构建仓 `91bb42af` 已推送，7 标识串全命中）；真实 Vivid 样片收编（`user-hdr-vivid-2160p-hlg-18c7c05a.mp4`，CUVA 005.1 side data 实证）。详见 conversation Current State。
   - latest++: **②+方案 B 全链收口（2026-10-02，代码 e90ada4d + 实机 8 轮）**：代码侧（探针包+消费包，V1 PASS，186→204 测试）已提交推送；JAR `media-kit-d24c59905-arm64-v8a.jar`（构建仓 `91bb42af` 已推送）实机验证——**P5 探针 8/8 全过**（正 result=1 4–8ms/负上游 result=0，快照逐轮一致）；**容器事实通道实机验证**（p81 compat=1 容器直证、P7 FEL el=true 旧版 null 关键区分、上游 JAR 推断回退不崩）；**发现并登记：HDR Vivid 在 mediacodec 路径不可观测**（MediaCodec 剥离 CUVA side data，软解对照实证；路由结果不受影响，需求第 8 节已登记，demuxer 级 SEI 探测归 ② 完整目标）；p84 零回归（R4b）。实验记录 `archives/experiments/android-hdr-planb-device-facts-20261002.md`。教训：指定断言样片前 ffprobe 核对容器记录（mkchk p84 对照样片无 dvcC）。
-  - next: 发布链三件套待用户排期（JAR 入 GitHub release → build.gradle 钉定 → CI `dovi-p5-pipeline` 标记同步）；② 完整目标（Vivid/HDR10+ 元数据重建，含 demuxer 级 SEI 探测绕开 mediacodec 剥离）按需另立实施；①需 DV 设备。
+  - next: ~~发布链三件套~~ **已完成（2026-10-02 晚）**：release `libmpv-android-v2026.011`（命名改 年.序号三位补零，用户决策；mpv tag `media-kit-v2026.011`；build.gradle/CHANGELOG/CI 标记 `dovi-p5-pipeline` 同步）。剩：人工观察升格两格（见"待用户确认"项）；② 完整目标（Vivid/HDR10+ 元数据重建，含 demuxer 级 SEI 探测绕开 mediacodec 剥离）按需另立实施；①需 DV 设备。
 
 - [ ] 待用户确认两（阻塞 Phase 1 完全关闭，2026-10-02）
   - status: pending_user
   - context: archives/conversations/android-hdr-auto-output-20261002.md
   - ①人工观察：LYA 上看 a1-hlg-gate-85（纯 HLG 直出）与 a6-reshape（P8.4 RPU 重建 PQ）两轮画面；确认后把需求第 6 节 P8.4×baseLayerConvert 与 HLG×baseLayerDirect 升 verified 并同步代码常量表（S3 解析单测锁定两处同步）。
   - ②R3.1 口径文字：开播前规划相的候选跳过以报告候选原因披露、不发 Degraded（A3-2 实测口径，Lead 决策记录在 conversation）——是否落进需求 R3.1 文字由用户定。
-  - latest: 均不阻塞其他任务启动；确认后无遗留动作。
+  - latest: **② 已确认落文（2026-10-02 晚）**：R3.1 加注记（"每次降级发布事件"仅指开播后运行时降级；规划相跳过经候选列表披露、发 RouteApplied）。**① 进行中**：两个观察轮 APK 已构建（obs-hlg-direct `60b73728…`、obs-p84-reshape `d1c1352a…`，新 JAR），待上机用户观察后升格两格。
+  - next: ① 观察轮上机（最高亮度短时观察纪律）→ 用户确认 → Lead 同步需求第 6 节与常量表 + S3 测试 → 提交。
 
 - [ ] OHOS HDR 能力路由支持（Phase 2，2026-10-02 显式登记）
   - status: planned
