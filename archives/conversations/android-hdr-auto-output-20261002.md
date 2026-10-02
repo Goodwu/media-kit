@@ -2,6 +2,7 @@
 
 ## Current State
 
+- **性能/画质开关设计评估（2026-10-02 晚，用户登记暂不实施）**：用户设想 PiliPlusX 性能优先/画质优先开关（性能：直出优先+硬件不支持时跳过 P8.4/HDR10+/Vivid 附加 metadata+fps>50 抽帧 2:1；画质：优先 metadata 处理+不丢帧）。Lead 评估结论（用户认可）：**架构合适**——App 级预设组合现有 `HdrRoutingPolicy`（性能≈默认序+门禁不放宽；画质≈dvP84 reshape 置顶+allowExperimental，即 A6 验证组合），库零新机制、建议库侧提供命名预设，运行中切换走 A5 已验证路径。**三点修正**：①P5 显式豁免（必须 reshape，R3.3 强制，性能优先不适用）；②HDR10+/Vivid 的 metadata 处理未实现（② 完整目标前置），画质优先对其暂为空操作、UI 不承诺；③固定 2:1 抽帧移除——4K60 归因热状态主导（41°C/DVFS 277MHz）、直出路径播放器侧低负载（硬解+SF 合成）、mpv 无固定抽帧原语只有自适应 framedrop（默认已开），gpu-next 4K60 降载如有数据需求走质量参数降档。已登记 TASKS Next 区"性能优先/画质优先开关"。
 - **人工观察①完成 + 两格升格 verified（2026-10-02 晚，用户两轮确认）**：
   - **观察执行**：Round 1 首用 DVS graypatch 被用户反馈"肉眼难以确认"（数值图案无人工判读价值，如实记录）；改用用户提供的真实 HLG 内容（user-hdr-vivid 样片 hlg 基底层，硬解路径按基础层分类，恰好是 hlg×baseLayerDirect 的真实内容载体）。两轮均在新 JAR（cafef3a4）+ 当前代码上复跑：Round 1 真实内容 HLG 直出（SF `BT2020_ITU_HLG`、循环播放）→ 用户确认"画面正常"；Round 2 P8.4 RPU 重建 PQ（`HDR_SESSION_ACTUAL: metadataReshape, nativeHdr, output: pq, dynamic: true`、预测==实际、SF `BT2020_PQ`）→ 用户确认"画面正常"。观察日志归档 `~/src/media-kit-build/evidence/hdr-observation-20261002/`（含 graypatch 首轮）；设备纪律恢复（原包 12492/自动亮度/熄屏核验通过）。
   - **升格落地**：需求第 6 节与代码常量表同步升 `HLG×baseLayerDirect`、`DV P8.4×baseLayerConvert` 两格 verified（S3 解析单测锁定同步）；需求第 8 节 Vivid 限制注记随之修订（HLG 直出升格后，硬解路径 Vivid 源按基础层默认直出而非 tone-map）。
