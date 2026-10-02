@@ -8,19 +8,8 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
-// S2 device-round probe: the library capability query is not exported from
-// the barrel yet, so the diagnostics app imports the library file directly.
-// ignore: implementation_imports
-import 'package:media_kit_video/src/hdr/hdr_capabilities.dart';
-import 'package:path_provider/path_provider.dart' as path_provider;
 
 import '../common/globals.dart';
-import '../common/sources/android_hdr_disposal.dart';
-import '../common/sources/android_hdr_open_coordinator.dart';
-import '../common/sources/android_hdr_output_slot.dart';
-import '../common/sources/android_hdr_player_backend.dart';
-import '../common/sources/android_hdr_sample_identity.dart';
-import '../common/sources/android_hdr_source_intent.dart';
 import '../common/sources/sources.dart';
 import '../common/widgets.dart';
 
@@ -123,176 +112,229 @@ class _SinglePlayerSingleVideoScreenState
   static const _androidGpuPlatformHdr = bool.fromEnvironment(
     'MEDIA_KIT_ANDROID_GPU_PLATFORM_HDR',
   );
-  static const _androidGpuPqItuProbe = bool.fromEnvironment(
-    'MEDIA_KIT_ANDROID_GPU_PQ_ITU_DATASPACE_PROBE',
+  // S10 experiment switches for the HdrVideoSession path (acceptance A3/A4/A6):
+  // - simulate-no-HLG: the session's capability provider drops HLG (type 3),
+  //   so a P8.4 source must degrade along the candidate list.
+  // - wrong-hint: forces a deliberately wrong hint descriptor at open
+  //   (`sdr`, `hdr10` or `p84`) to trigger the single review rebuild.
+  // - no-hint: opens without any hint; the session classifies from decoder
+  //   facts and rebuilds if needed.
+  // - policy-experimental: allowExperimental + metadataReshape first for the
+  //   P8.4 source class (A6 RPU-reshape PQ route).
+  // - preference/policy swap timers: mid-playback setPreference/setPolicy
+  //   probes (A5).
+  static const _androidHdrSimulateNoHlg = bool.fromEnvironment(
+    'MEDIA_KIT_ANDROID_HDR_SIMULATE_NO_HLG',
   );
-  static const _androidGpuHdrRgba8888SurfaceProbe = bool.fromEnvironment(
-    'MEDIA_KIT_ANDROID_GPU_HDR_RGBA8888_SURFACE_PROBE',
+  static const _androidHdrWrongHint = String.fromEnvironment(
+    'MEDIA_KIT_ANDROID_HDR_WRONG_HINT',
   );
-  static const _androidGpuHdrLateDataspaceProbe = bool.fromEnvironment(
-    'MEDIA_KIT_ANDROID_GPU_HDR_LATE_DATASPACE_PROBE',
+  static const _androidHdrNoHint = bool.fromEnvironment(
+    'MEDIA_KIT_ANDROID_HDR_NO_HINT',
+  );
+  static const _androidHdrPolicyExperimental = bool.fromEnvironment(
+    'MEDIA_KIT_ANDROID_HDR_POLICY_EXPERIMENTAL',
+  );
+  static const _androidHdrPreferenceSwapAtSeconds = int.fromEnvironment(
+    'MEDIA_KIT_ANDROID_HDR_PREFERENCE_SWAP_AT_SECONDS',
+    defaultValue: -1,
+  );
+  static const _androidHdrPolicySwapAtSeconds = int.fromEnvironment(
+    'MEDIA_KIT_ANDROID_HDR_POLICY_SWAP_AT_SECONDS',
+    defaultValue: -1,
+  );
+  static const _androidHdrDiagnostics = bool.fromEnvironment(
+    'MEDIA_KIT_ANDROID_HDR_DIAGNOSTICS',
   );
 
-  static String _surfaceTransferForProbe(String transfer) =>
-      _androidGpuPlatformHdr && _androidGpuPqItuProbe && transfer == 'pq'
-          ? 'pq-itu'
-          : transfer;
+  // The controlled /data/local/tmp fixtures opened by this page. Their
+  // identity mapping below is the page's existing sample enumeration (each
+  // fixture's content was verified in earlier device rounds); this is not a
+  // filename guess for arbitrary sources — anything else opens without a
+  // hint and is classified from decoder facts by the session.
+  static const _sdrControlSource = '/data/local/tmp/media-kit-sdr-control.mp4';
+  static final RegExp _namedFixturePattern = RegExp(
+      r'^/data/local/tmp/media-kit-(hdr10|hlg|p84|p5)-[a-z0-9][a-z0-9._-]*\.mp4$');
 
-  Future<AndroidHdrOpenCoordinator>? _hdrCoordinatorFuture;
+  /// The HDR session that owns the transaction path (migrated to
+  /// HdrVideoSession in S10). Created in initState on Android.
+  HdrVideoSession? _hdrSession;
+
+  /// Monotonic open serial replacing the old source-intent gating: delayed
+  /// probe callbacks capture the serial of the open that scheduled them and
+  /// only act while no newer open (or disposal) happened.
+  int _hdrOpenSerial = 0;
+
+  /// The source of the current/last open, for reopen probes.
+  String? _hdrCurrentSource;
   Future<void>? _hdrDisposeFuture;
-  AndroidHdrDisposalReport? _hdrLastDisposeReport;
-  Directory? _hdrPrivateRoot;
-  final _hdrIntent = AndroidHdrSourceIntent<AndroidHdrOpenResult>();
-  late final AndroidHdrOutputSlot<VideoController> _hdrOutputSlot =
-      AndroidHdrOutputSlot<VideoController>(
-    initial: _initialController,
-    rebuildInitial: configuration.value.android.usePlatformView,
-    voOf: (current) async =>
-        (await current.platform.future).configuration.vo ?? '',
-    disposeForRebuild: (current) => current.disposeForRebuild(),
-    create: (vo, hwdec, surfaceTransfer) => VideoController(
-      player,
-      configuration: configuration.value.copyWith(
-        vo: vo,
-        hwdec: hwdec,
-        android: configuration.value.android.copyWith(
-          gpuApi: vo == 'gpu-next' ? 'opengl' : null,
-          clearGpuApi: vo != 'gpu-next',
-          surfaceTransfer: configuration.value.android.usePlatformView
-              ? (surfaceTransfer == null ||
-                      (vo == 'gpu-next' && _androidGpuHdrLateDataspaceProbe)
-                  ? ''
-                  : _surfaceTransferForProbe(surfaceTransfer))
-              : null,
-          surfacePixelFormat: configuration.value.android.usePlatformView
-              ? (vo == 'gpu-next' &&
-                      surfaceTransfer != null &&
-                      !_androidGpuHdrRgba8888SurfaceProbe &&
-                      !_androidP5PlatformSdrDiagnostic
-                  ? 'rgba1010102'
-                  : '')
-              : null,
-        ),
-      ),
-    ),
-    publish: (_) {
-      if (mounted) setState(() {});
-    },
-    waitReady: (current) async {
-      final output = await current.platform.future;
-      await output.waitUntilCurrentOutputBound
-          .timeout(const Duration(seconds: 10));
-    },
-  );
+  bool? _hdrDisposeReportClean;
+  String? _hdrDisposeReportDetail;
+  int? _hdrResumeOpenSerial;
 
-  Future<AndroidHdrOpenCoordinator> _hdrCoordinator() =>
-      _hdrCoordinatorFuture ??= _createHdrCoordinator();
+  // ---------------------------------------------------------------------------
+  // HdrVideoSession path (migrated to HdrVideoSession (S10))
+  // ---------------------------------------------------------------------------
 
-  Future<AndroidHdrOpenCoordinator> _createHdrCoordinator() async {
-    final backend = AndroidHdrPlayerBackend(
-      player: player,
-      outputSlot: _hdrOutputSlot,
-      usePlatformView: configuration.value.android.usePlatformView,
-      p5RpuPipelineBuilt: _androidP5RpuPipelineBuilt,
-      p5PlatformSdrDiagnostic: _androidP5PlatformSdrDiagnostic,
-      textureCopyDiagnostic: _androidTextureCopyDiagnostic,
-      forceP84PqFallback: _androidForceP84PqFallback,
-      gpuPlatformHdrExperiment: _androidHdrTransaction &&
-          configuration.value.android.usePlatformView &&
-          _androidGpuPlatformHdr,
-      readDisplayHdrTypes: () async {
-        final capabilities = await _capabilitiesChannel
-            .invokeMapMethod<String, dynamic>('Get');
-        final raw = capabilities?['displayHdrTypes'];
-        if (raw is! List || raw.any((value) => value is! int)) {
-          throw StateError('Invalid display HDR capability report: $raw');
-        }
-        final reported = raw.cast<int>().toSet();
-        debugPrint('ANDROID_HDR_CAPABILITY reported=$reported '
-            'simulateNoHlgForP84=$_androidForceP84PqFallback');
-        return reported;
-      },
-      applySurfaceTransfer: (transfer) async {
-        final handle = await player.handle;
-        return await _videoChannel.invokeMethod<bool>(
-              'PlatformVideoView.SetColorSpace',
-              {
-                'handle': handle.toString(),
-                'transfer': _surfaceTransferForProbe(transfer),
-              },
-            ) ??
-            false;
-      },
-    );
-    if (_androidNamedLocalSource) {
-      if (sources.isEmpty) throw StateError('No named Android sample selected');
-      return AndroidHdrOpenCoordinator(
-        backend,
-        verifier: (source, cancelled) async {
-          if (cancelled()) {
-            throw StateError('Named source is no longer selected');
-          }
-          final name = RegExp(
-                  r'^/data/local/tmp/media-kit-(hdr10|hlg|p84|p5)-[a-z0-9][a-z0-9._-]*\.mp4$')
-              .firstMatch(source);
-          if (name == null ||
-              await FileSystemEntity.type(source, followLinks: false) !=
-                  FileSystemEntityType.file) {
-            throw StateError('Named source does not match a regular fixture');
-          }
-          final sample = switch (name.group(1)) {
-            'hdr10' => AndroidHdrSample.hdr10,
-            'hlg' => AndroidHdrSample.hlgBaseControl,
-            'p84' => AndroidHdrSample.dolbyVisionP84,
-            'p5' => AndroidHdrSample.dolbyVisionP5,
-            _ => throw StateError('Unknown named Android sample'),
-          };
-          debugPrint('ANDROID_NAMED_LOCAL_SAMPLE sample=$sample path=$source');
-          return AndroidHdrSampleIdentity(sample, '', source);
-        },
-        onPhase: _androidOpenPhaseTrace
-            ? (generation, phase, elapsedMicros) => debugPrint(
-                'ANDROID_HDR_OPEN_PHASE generation=$generation phase=$phase '
-                'elapsed_us=$elapsedMicros')
-            : null,
-      );
+  HdrVideoSession _requireHdrSession() {
+    final session = _hdrSession;
+    if (session == null) {
+      throw StateError('HDR session is not available');
     }
-    final support = await path_provider.getApplicationSupportDirectory();
-    final parent = Directory('${support.path}/android-hdr-staged');
-    await parent.create(recursive: true);
-    final removed =
-        await cleanupStaleAndroidHdrSessions(parent, currentPid: pid);
-    if (removed > 0) debugPrint('ANDROID_HDR_STALE_SESSIONS removed=$removed');
-    final privateRoot = await parent.createTemp('session-$pid-');
-    _hdrPrivateRoot = privateRoot;
-    return AndroidHdrOpenCoordinator.staged(
-      backend,
-      privateRoot,
-      onPhase: _androidOpenPhaseTrace
-          ? (generation, phase, elapsedMicros) => debugPrint(
-              'ANDROID_HDR_OPEN_PHASE generation=$generation phase=$phase '
-              'elapsed_us=$elapsedMicros')
-          : null,
+    return session;
+  }
+
+  /// Creates the session that owns the transaction path. Phase 1 constraint:
+  /// one session per process (the HdrCapabilities.Changed enable is a shared
+  /// switch), which the single-player page satisfies.
+  void _createHdrSession() {
+    if (_hdrSession != null) return;
+    final policy = _hdrRoutingPolicy();
+    // migrated to HdrVideoSession (S10): the lab coordinator/slot/backend are
+    // replaced by the library session. The public constructor cannot inject a
+    // capability provider, so the simulate-no-HLG switch uses the
+    // @visibleForTesting constructor to wrap one (see the S10 report).
+    final session = _androidHdrSimulateNoHlg
+        ? // The public constructor cannot inject a capability provider; the
+          // S10 plan explicitly allows the @visibleForTesting constructor for
+          // this experiment switch (A3 simulate-no-HLG).
+          // ignore: invalid_use_of_visible_for_testing_member
+          HdrVideoSession.forTesting(
+            player: player,
+            policy: policy,
+            configuration: configuration.value,
+            capabilitiesProvider: _capabilitiesWithoutHlg,
+          )
+        : HdrVideoSession(
+            player,
+            policy: policy,
+            configuration: configuration.value,
+          );
+    // Follow controller replacements (Texture ↔ PlatformView topology
+    // switches) the way the old output slot's publish callback did.
+    session.controller.addListener(_onHdrControllerChanged);
+    session.report.addListener(_onHdrReportChanged);
+    session.events.listen((event) => debugPrint('HDR_SESSION_EVENT $event'));
+    _hdrSession = session;
+  }
+
+  void _onHdrControllerChanged() {
+    if (mounted) setState(() {});
+  }
+
+  void _onHdrReportChanged() {
+    _logHdrSessionReport();
+  }
+
+  /// The routing policy from the A6 experiment switch: defaults, or
+  /// allowExperimental with `metadataReshape` first for the P8.4 class.
+  HdrRoutingPolicy _hdrRoutingPolicy() {
+    if (!_androidHdrPolicyExperimental) return HdrRoutingPolicy.defaults;
+    final base =
+        HdrRoutingPolicy.defaultPreferences[HdrSourceClass.dvP84] ??
+            const <HdrStrategy>[];
+    final reordered = <HdrStrategy>[
+      HdrStrategy.metadataReshape,
+      ...base.where((strategy) => strategy != HdrStrategy.metadataReshape),
+    ];
+    debugPrint('HDR_POLICY_EXPERIMENTAL dvP84=$reordered');
+    return HdrRoutingPolicy(
+      preferences: <HdrSourceClass, List<HdrStrategy>>{
+        HdrSourceClass.dvP84: reordered,
+      },
+      allowExperimental: true,
     );
   }
 
-  Future<AndroidHdrOpenResult> _openHdrSource(
+  /// Capability provider wrapper for the simulate-no-HLG switch (A3): the
+  /// real query with display type 3 (HLG) removed, so P8.4 cannot select an
+  /// HLG-output route and must degrade along the candidate list.
+  Future<HdrCapabilities> _capabilitiesWithoutHlg() async {
+    final capabilities = await HdrCapabilities.query(player: player);
+    final types = capabilities.displayHdrTypes;
+    final Set<int>? filtered =
+        types == null ? null : <int>{...types};
+    if (filtered != null) {
+      filtered.remove(HdrOutputPolicy.displayHdrTypeHlg);
+    }
+    debugPrint('HDR_CAP_SIMULATE_NO_HLG before=$types after=$filtered');
+    return HdrCapabilities(
+      sdkInt: capabilities.sdkInt,
+      displayHdrTypes: filtered,
+      hevcDecoders: capabilities.hevcDecoders,
+      dolbyVisionDecoders: capabilities.dolbyVisionDecoders,
+      p5PipelineAvailable: capabilities.p5PipelineAvailable,
+      dataSpaceBridgeLoaded: capabilities.dataSpaceBridgeLoaded,
+      dataSpaceExt: capabilities.dataSpaceExt,
+    );
+  }
+
+  /// The open hint for [source], built from the page's sample enumeration:
+  /// the controlled fixture regex and the SDR control literal map to source
+  /// descriptors; the wrong-hint/no-hint switches override both (A4).
+  HdrSourceDescriptor? _hintFor(String source) {
+    if (_androidHdrNoHint) return null;
+    switch (_androidHdrWrongHint) {
+      case '':
+        break;
+      case 'sdr':
+        return HdrSourceDescriptor.fromKind(HdrMediaKind.sdr);
+      case 'hdr10':
+        return HdrSourceDescriptor.fromKind(HdrMediaKind.hdr10);
+      case 'p84':
+        return HdrSourceDescriptor.fromKind(HdrMediaKind.dolbyVisionP84);
+      default:
+        throw StateError(
+            'MEDIA_KIT_ANDROID_HDR_WRONG_HINT must be sdr, hdr10 or p84');
+    }
+    final match = _namedFixturePattern.firstMatch(source);
+    if (match != null) {
+      switch (match.group(1)) {
+        case 'hdr10':
+          return HdrSourceDescriptor.fromKind(HdrMediaKind.hdr10);
+        case 'hlg':
+          return HdrSourceDescriptor.fromKind(HdrMediaKind.hlg);
+        case 'p84':
+          return HdrSourceDescriptor.fromKind(HdrMediaKind.dolbyVisionP84);
+        case 'p5':
+          return HdrSourceDescriptor.fromKind(HdrMediaKind.dolbyVisionP5);
+      }
+    }
+    if (source == _sdrControlSource) {
+      return HdrSourceDescriptor.fromKind(HdrMediaKind.sdr);
+    }
+    // Unknown source: no hint; the session classifies from decoder facts.
+    return null;
+  }
+
+  /// One open generation through the session (migrated to HdrVideoSession
+  /// (S10): the coordinator/backend open path is replaced by the session's
+  /// orchestrated open — hint pre-routing, decoder review with at most one
+  /// in-place rebuild, candidate degradation along the list).
+  Future<void> _openHdrSource(
     String source, {
     Duration? start,
   }) async {
-    final request = _hdrIntent.begin();
+    final serial = ++_hdrOpenSerial;
+    _hdrCurrentSource = source;
     try {
       await _applyAndroidVideoTimingOffset();
       await _applyAndroidScalers();
-      final result = await (await _hdrCoordinator()).openSource(
-        source,
-        start: start,
-      );
-      _hdrIntent.succeed(request, source, result);
-      debugPrint('ANDROID_HDR_OPEN sample=${result.identity.sample} '
-          'presentationVerified=${result.presentationVerified} '
-          'gpuPlatformHdr=$_androidGpuPlatformHdr '
-          'simulateNoHlgForP84=$_androidForceP84PqFallback');
+      final hint = _hintFor(source);
+      debugPrint('ANDROID_HDR_OPEN_BEGIN path=$source hint=$hint serial=$serial '
+          'simulateNoHlg=$_androidHdrSimulateNoHlg '
+          'wrongHint=$_androidHdrWrongHint noHint=$_androidHdrNoHint '
+          'policyExperimental=$_androidHdrPolicyExperimental '
+          'namedLocalSource=$_androidNamedLocalSource '
+          'p5RpuPipelineBuilt=$_androidP5RpuPipelineBuilt '
+          'forceP84PqFallback=$_androidForceP84PqFallback '
+          'textureCopyDiagnostic=$_androidTextureCopyDiagnostic '
+          'gpuPlatformHdr=$_androidGpuPlatformHdr');
+      await _requireHdrSession().open(Media(source), hint: hint, start: start);
+      debugPrint('ANDROID_HDR_OPEN path=$source serial=$serial');
+      if (serial == _hdrOpenSerial && mounted) {
+        _logHdrSessionReport();
+      }
       if (_androidOpenPhaseTrace) {
         unawaited(() async {
           final vo = await player.getProperty('vo');
@@ -314,7 +356,6 @@ class _SinglePlayerSingleVideoScreenState
         unawaited(_runOutputFailureRetryProbe());
       }
       if (_androidHdrPauseAtMediaSeconds >= 0) {
-        final snapshot = _hdrIntent.snapshot();
         unawaited(() async {
           try {
             final target = Duration(seconds: _androidHdrPauseAtMediaSeconds);
@@ -322,7 +363,7 @@ class _SinglePlayerSingleVideoScreenState
                 .firstWhere((position) => position >= target)
                 .timeout(
                     Duration(seconds: _androidHdrPauseAtMediaSeconds + 30));
-            if (!mounted || !_hdrIntent.mayResume(snapshot)) return;
+            if (!mounted || serial != _hdrOpenSerial) return;
             await player.pause();
             await player.seek(target);
             await Future<void>.delayed(const Duration(seconds: 1));
@@ -336,43 +377,65 @@ class _SinglePlayerSingleVideoScreenState
         }());
       }
       if (_androidHdrAutoPauseProbeSeconds > 0) {
-        final snapshot = _hdrIntent.snapshot();
         unawaited(Future<void>.delayed(
             Duration(seconds: _androidHdrAutoPauseProbeSeconds), () async {
-          if (!mounted || !_hdrIntent.mayResume(snapshot)) return;
+          if (!mounted || serial != _hdrOpenSerial) return;
           await player.pause();
           debugPrint('ANDROID_HDR_AUTO_PAUSE '
               'position=${player.state.position.inMilliseconds} '
               'pause=${await player.getProperty('pause')}');
         }));
       }
-      return result;
     } catch (_) {
-      _hdrIntent.fail(request);
       rethrow;
     }
   }
 
-  Future<void> _openDirectSdrAfterHdr(String source) async {
-    final coordinator = _hdrCoordinatorFuture;
-    if (coordinator == null) {
-      throw StateError('No HDR coordinator for SDR recovery');
+  /// Prints the session report of the current generation with the full
+  /// prediction (selected + every candidate) and the actual route — the A2
+  /// prediction-consistency evidence and the A1 route/dataspace readback.
+  void _logHdrSessionReport() {
+    final session = _hdrSession;
+    if (session == null) return;
+    final report = session.report.value;
+    debugPrint('HDR_SESSION_REPORT gen=${report.generation} '
+        'source=${report.source} origin=${report.sourceOrigin?.name} '
+        'verified=${report.verified} hwdecCurrent=${report.hwdecCurrent} '
+        'dataspace requested=${report.dataSpaceRequested} '
+        'path=${report.dataSpacePath} readback=${report.dataSpaceReadback} '
+        'degrade=${report.degradeReason?.name} '
+        'diagnostic=${report.diagnostic} error=${report.error}');
+    final prediction = report.prediction;
+    if (prediction != null) {
+      debugPrint('HDR_SESSION_PREDICTION gen=${report.generation} '
+          'selected=${prediction.selected} '
+          'presentation=${prediction.presentation.name} '
+          'confidence=${prediction.confidence.name} '
+          'playable=${prediction.playable}');
+      for (final candidate in prediction.candidates) {
+        debugPrint(
+            'HDR_SESSION_CANDIDATE gen=${report.generation} candidate=$candidate');
+      }
     }
-    // Invalidate delayed HDR pause/seek/resume callbacks before yielding to
-    // coordinator disposal or opening the SDR source.
-    final supersedingRequest = _hdrIntent.begin();
-    _hdrIntent.fail(supersedingRequest);
-    await (await coordinator).dispose();
-    // Reset the mounted output as well as mpv properties before SDR frames.
-    await _hdrOutputSlot.ensure(
-      'gpu-next',
-      'mediacodec',
-      surfaceTransfer: null,
-    );
-    await player.open(Media(source));
+    if (report.actual != null) {
+      debugPrint(
+          'HDR_SESSION_ACTUAL gen=${report.generation} actual=${report.actual}');
+    }
+  }
+
+  Future<void> _openDirectSdrAfterHdr(String source) async {
+    // migrated to HdrVideoSession (S10): the old coordinator disposal +
+    // output-slot reset + direct player.open path is replaced by a session
+    // open with the SDR descriptor; the session rebuilds the output topology
+    // (Texture SDR) itself. The serial bump invalidates delayed HDR
+    // pause/resume callbacks, as the old source-intent invalidation did.
+    _hdrOpenSerial++;
+    _hdrCurrentSource = source;
+    await _requireHdrSession().open(Media(source), hint: _hintFor(source));
     debugPrint('ANDROID_HDR_SDR_RECOVERY_OPEN path=$source '
         'vo=${await player.getProperty('vo')} '
         'hwdec=${await player.getProperty('hwdec-current')}');
+    if (mounted) _logHdrSessionReport();
   }
 
   Future<void> _runDualViewLifecycleProbe() async {
@@ -394,7 +457,7 @@ class _SinglePlayerSingleVideoScreenState
       await _disposeTestPlayer();
       if (Platform.isAndroid &&
           _androidHdrTransaction &&
-          _hdrLastDisposeReport?.clean != true) {
+          _hdrDisposeReportClean != true) {
         throw StateError('Android HDR resource disposal is incomplete');
       }
       debugPrint('ANDROID_AUTO_PLAYER exit player disposed');
@@ -479,7 +542,6 @@ class _SinglePlayerSingleVideoScreenState
     'MEDIA_KIT_ANDROID_HDR_PAUSE_AT_MEDIA_SECONDS',
     defaultValue: -1,
   );
-  AndroidHdrSourceSnapshot<AndroidHdrOpenResult>? _hdrResumeSnapshot;
   bool _preDestroyStopped = false;
   AppLifecycleState _previousLifecycleState = AppLifecycleState.resumed;
   static const _windowChannel = MethodChannel('media_kit_hdr_lab/window');
@@ -818,12 +880,56 @@ class _SinglePlayerSingleVideoScreenState
 
   VideoController get _hdrTransactionController =>
       Platform.isAndroid && _androidHdrTransaction
-          ? _hdrOutputSlot.current ?? _initialController
+          ? _hdrSession?.controller.value ?? _initialController
           : _initialController;
 
   @override
   void initState() {
     super.initState();
+    if (Platform.isAndroid && _androidHdrTransaction) {
+      // migrated to HdrVideoSession (S10): the session owns the HDR open
+      // orchestration for the page's lifetime.
+      _createHdrSession();
+      if (_androidHdrDiagnostics) {
+        // R4.3 seven-layer key=value logs (HDR capability/predict/classify/
+        // decision/readback/degrade/recover) on top of the page's own
+        // HDR_SESSION_* report printing.
+        HdrOutputDiagnostics.enabled = true;
+      }
+      if (_androidHdrPreferenceSwapAtSeconds > 0) {
+        // A5: mid-playback preference change (auto → off → auto).
+        Future<void>.delayed(
+          Duration(seconds: _androidHdrPreferenceSwapAtSeconds),
+          () async {
+            if (!mounted || _autoPlayerDisposed) return;
+            await _requireHdrSession().setPreference(HdrOutputPreference.off);
+            debugPrint('HDR_PREFERENCE_SWAP off at '
+                '${player.state.position.inMilliseconds}ms');
+          },
+        );
+        Future<void>.delayed(
+          Duration(seconds: _androidHdrPreferenceSwapAtSeconds * 2),
+          () async {
+            if (!mounted || _autoPlayerDisposed) return;
+            await _requireHdrSession().setPreference(HdrOutputPreference.auto);
+            debugPrint('HDR_PREFERENCE_SWAP auto at '
+                '${player.state.position.inMilliseconds}ms');
+          },
+        );
+      }
+      if (_androidHdrPolicySwapAtSeconds > 0) {
+        // A5: mid-playback routing-policy change (defaults ↔ experimental).
+        Future<void>.delayed(
+          Duration(seconds: _androidHdrPolicySwapAtSeconds),
+          () async {
+            if (!mounted || _autoPlayerDisposed) return;
+            await _requireHdrSession().setPolicy(_hdrRoutingPolicy());
+            debugPrint('HDR_POLICY_SWAP at '
+                '${player.state.position.inMilliseconds}ms');
+          },
+        );
+      }
+    }
     if (Platform.isAndroid &&
         _androidEngineDestroyAtSeconds >= 0 &&
         !_engineDestroyScheduled) {
@@ -969,10 +1075,9 @@ class _SinglePlayerSingleVideoScreenState
               await _openDirectSdrAfterHdr(source.substring(4));
               break;
             }
-            final result = await _openHdrSource(source);
+            await _openHdrSource(source);
             debugPrint(
-                'ANDROID_HDR_RECOVERY_OPEN sample=${result.identity.sample} '
-                'path=$source');
+                'ANDROID_HDR_RECOVERY_OPEN path=$source');
             await Future<void>.delayed(const Duration(seconds: 5));
           } catch (recoveryError, recoveryStack) {
             debugPrint('ANDROID_HDR_RECOVERY_ERROR source=$source '
@@ -1175,26 +1280,28 @@ class _SinglePlayerSingleVideoScreenState
         _androidHdrAutoResumeProbe) {
       if (_previousLifecycleState == AppLifecycleState.resumed &&
           state == AppLifecycleState.inactive) {
-        _hdrResumeSnapshot =
-            player.state.playing ? _hdrIntent.snapshot() : null;
+        _hdrResumeOpenSerial =
+            player.state.playing ? _hdrOpenSerial : null;
         debugPrint('ANDROID_HDR_AUTO_RESUME capturedPlaying='
-            '${_hdrResumeSnapshot != null} '
+            '${_hdrResumeOpenSerial != null} '
             'position=${player.state.position.inMilliseconds}');
       } else if (state == AppLifecycleState.resumed) {
-        final snapshot = _hdrResumeSnapshot;
-        _hdrResumeSnapshot = null;
-        if (snapshot != null) {
+        final resumeSerial = _hdrResumeOpenSerial;
+        _hdrResumeOpenSerial = null;
+        if (resumeSerial != null) {
           unawaited(() async {
-            if (!_hdrIntent.mayResume(snapshot)) return;
-            final output = _hdrOutputSlot.current;
-            final session = snapshot.session;
-            if (output == null || session == null) return;
-            final platform = await output.platform.future;
+            if (resumeSerial != _hdrOpenSerial) return;
+            // migrated to HdrVideoSession (S10): the old source-intent
+            // gate + coordinator.runForCurrent pair is replaced by the open
+            // serial guard; the output-bind wait uses the session's current
+            // controller.
+            final controller = _hdrSession?.controller.value;
+            if (controller == null) return;
+            final platform = await controller.platform.future;
             await platform.waitUntilCurrentOutputBound
                 .timeout(const Duration(seconds: 10));
-            if (!mounted || !_hdrIntent.mayResume(snapshot)) return;
-            final coordinator = await _hdrCoordinator();
-            await coordinator.runForCurrent(session, () => player.play());
+            if (!mounted || resumeSerial != _hdrOpenSerial) return;
+            await player.play();
             debugPrint('ANDROID_HDR_AUTO_RESUME played '
                 'position=${player.state.position.inMilliseconds}');
           }()
@@ -1248,25 +1355,29 @@ class _SinglePlayerSingleVideoScreenState
         state == AppLifecycleState.resumed &&
         _preDestroyStopped) {
       _preDestroyStopped = false;
-      final snapshot = _hdrIntent.snapshot();
-      final sessionBeforeResume = snapshot.session;
+      final openSerialBeforeResume = _hdrOpenSerial;
       unawaited(
           Future<void>.delayed(const Duration(milliseconds: 700), () async {
         if (!mounted) return;
-        if (_androidHdrTransaction && !_hdrIntent.mayResume(snapshot)) {
+        if (_androidHdrTransaction &&
+            openSerialBeforeResume != _hdrOpenSerial) {
           return;
         }
         final position = player.state.position;
-        var sessionForSeek = sessionBeforeResume;
+        // migrated to HdrVideoSession (S10): the reopen goes through the
+        // session open and the seek is guarded by the open serial that is
+        // current for the session the seek targets.
+        var seekGuardSerial = openSerialBeforeResume;
         if (_androidPostBindReopenProbe) {
           debugPrint(
               'POST_BIND_REOPEN begin position=$position ${DateTime.now().toIso8601String()}');
           if (_androidHdrTransaction) {
-            final source = _hdrIntent.source;
+            final source = _hdrCurrentSource;
             if (source == null) {
               throw StateError('No current HDR source to reopen');
             }
-            sessionForSeek = await _openHdrSource(source);
+            await _openHdrSource(source);
+            seekGuardSerial = _hdrOpenSerial;
           } else {
             await player.open(Media(sources[0]));
           }
@@ -1274,16 +1385,11 @@ class _SinglePlayerSingleVideoScreenState
         }
         debugPrint(
             'POST_BIND_SEEK begin position=$position ${DateTime.now().toIso8601String()}');
-        if (_androidHdrTransaction) {
-          final coordinator = await _hdrCoordinator();
-          final session = sessionForSeek;
-          if (session == null) {
-            throw StateError('No current HDR session to seek');
-          }
-          await coordinator.runForCurrent(session, () => player.seek(position));
-        } else {
-          await player.seek(position);
+        if (_androidHdrTransaction &&
+            seekGuardSerial != _hdrOpenSerial) {
+          return;
         }
+        await player.seek(position);
         debugPrint(
             'POST_BIND_SEEK complete ${DateTime.now().toIso8601String()}');
       }).catchError((Object error) {
@@ -1356,9 +1462,7 @@ class _SinglePlayerSingleVideoScreenState
           Duration(seconds: _androidAutoSdrAfterP5Seconds),
         );
         if (mounted && !_autoPlayerDisposed) {
-          await _openDirectSdrAfterHdr(
-            '/data/local/tmp/media-kit-sdr-control.mp4',
-          );
+          await _openDirectSdrAfterHdr(_sdrControlSource);
         }
       }
       if (_androidAutoSecondSourceAtSeconds > 0 &&
@@ -1367,11 +1471,11 @@ class _SinglePlayerSingleVideoScreenState
           Duration(seconds: _androidAutoSecondSourceAtSeconds),
         ).then((_) async {
           if (!mounted || _autoPlayerDisposed) return;
-          // Same-player reopen through the HDR coordinator: keeps the VO,
-          // rebuilds the hwdec mapper — exercises per-mapper state (e.g. P5
-          // dovi rescale) on the second file within the same process.
-          final result = await _openHdrSource(_androidAutoSecondSource);
-          debugPrint('AUTO_SECOND_SOURCE sample=${result.identity.sample} '
+          // Same-player reopen through the session: rebuilds the hwdec
+          // mapper as needed — exercises per-mapper state (e.g. P5 dovi
+          // rescale) on the second file within the same process.
+          await _openHdrSource(_androidAutoSecondSource);
+          debugPrint('AUTO_SECOND_SOURCE '
               'path=$_androidAutoSecondSource');
         }));
       }
@@ -1866,19 +1970,32 @@ class _SinglePlayerSingleVideoScreenState
   }
 
   Future<void> _disposeHdrPlayerOnce() async {
-    final coordinator = _hdrCoordinatorFuture;
-    final report = await disposeAndroidHdrResources(
-      disposeCoordinator: coordinator == null
-          ? null
-          : () async => (await coordinator).dispose(),
-      disposePlayer: player.dispose,
-      privateRoot: () => _hdrPrivateRoot,
-    );
-    _hdrLastDisposeReport = report;
-    if (!report.clean) {
-      debugPrint('ANDROID_HDR_DISPOSE coordinator=${report.coordinatorError} '
-          'player=${report.playerError} directory=${report.directoryError} '
-          'retained=${report.retainedDirectory}');
+    // migrated to HdrVideoSession (S10): the old coordinator/slot/intent
+    // disposal is replaced by the session's own dispose (mpv property
+    // restore, controller slot and backend teardown); the caller's player is
+    // still disposed here because the session does not own it.
+    final session = _hdrSession;
+    Object? playerDisposeError;
+    try {
+      await session?.dispose();
+    } finally {
+      try {
+        await player.dispose();
+      } catch (error) {
+        playerDisposeError = error;
+      }
+    }
+    final report = session?.lastDisposeReport;
+    _hdrDisposeReportClean =
+        (report?.clean ?? false) && playerDisposeError == null;
+    _hdrDisposeReportDetail = report == null
+        ? 'session=null playerError=$playerDisposeError'
+        : 'coordinator=${report.coordinatorError} '
+            'player=${report.playerError} '
+            'directory=${report.directoryError} '
+            'retained=${report.retainedDirectory}';
+    if (_hdrDisposeReportClean != true) {
+      debugPrint('ANDROID_HDR_DISPOSE $_hdrDisposeReportDetail');
       throw StateError('Android HDR resource disposal is incomplete');
     }
   }
@@ -1956,7 +2073,7 @@ class _SinglePlayerSingleVideoScreenState
       await player.stream.position.firstWhere((position) => position >= target);
     }
     if (!mounted) return;
-    final displayController = _hdrOutputSlot.current ?? _initialController;
+    final displayController = _hdrTransactionController;
     await _toggleDiagnosticFullscreen(
       GlobalObjectKey<VideoState>(displayController),
     );
@@ -1979,11 +2096,8 @@ class _SinglePlayerSingleVideoScreenState
     debugPrint('DIAG_SCOPE_PAGE_EXIT stop begin '
         'media=${player.state.position.inMilliseconds}ms');
     await _disposeTestPlayer();
-    final disposeReport = _hdrLastDisposeReport;
-    if (_androidHdrTransaction &&
-        (disposeReport == null ||
-            disposeReport.playerError != null ||
-            disposeReport.coordinatorError != null)) {
+    if (_androidHdrTransaction && _hdrDisposeReportClean != true) {
+      debugPrint('DIAG_SCOPE_PAGE_EXIT dispose=$_hdrDisposeReportDetail');
       throw StateError('Player or output disposal did not complete safely');
     }
     debugPrint('DIAG_SCOPE_PAGE_EXIT stop complete');
@@ -1991,9 +2105,23 @@ class _SinglePlayerSingleVideoScreenState
 
   @override
   Widget build(BuildContext context) {
-    final displayController = Platform.isAndroid && _androidHdrTransaction
-        ? _hdrOutputSlot.current
-        : _initialController;
+    // In the HDR session path the display follows the session's current
+    // controller; it is null until the session creates the first controller
+    // for an open (the placeholder branches below show black meanwhile).
+    final VideoController? displayController =
+        Platform.isAndroid && _androidHdrTransaction
+            ? _hdrSession?.controller.value
+            : _initialController;
+    // migrated to HdrVideoSession (S10): the primary surface in the HDR
+    // session path is HdrVideo, which follows session controller replacements
+    // (Texture ↔ PlatformView) and lets the built-in fullscreen page follow
+    // the session too (R2.1). The VideoState-key diagnostic branches keep the
+    // plain Video so their global keys keep working.
+    final useHdrVideo = Platform.isAndroid &&
+        _androidHdrTransaction &&
+        !_androidP5PlatformSdrDiagnostic &&
+        !_androidP5ScopeFullscreen &&
+        _hdrSession != null;
     final diagnosticVideoKey = displayController == null
         ? null
         : GlobalObjectKey<VideoState>(displayController);
@@ -2320,12 +2448,14 @@ class _SinglePlayerSingleVideoScreenState
                             child: Card(
                               clipBehavior: Clip.antiAlias,
                               margin: const EdgeInsets.all(32.0),
-                              child: displayController == null
-                                  ? const ColoredBox(color: Colors.black)
-                                  : Video(
-                                      key: videoKey,
-                                      controller: displayController,
-                                    ),
+                              child: useHdrVideo
+                                  ? HdrVideo(session: _hdrSession!)
+                                  : displayController == null
+                                      ? const ColoredBox(color: Colors.black)
+                                      : Video(
+                                          key: videoKey,
+                                          controller: displayController,
+                                        ),
                             ),
                           ),
                           const SizedBox(height: 32.0),
@@ -2344,18 +2474,25 @@ class _SinglePlayerSingleVideoScreenState
               )
             : ListView(
                 children: [
-                  displayController == null
-                      ? AspectRatio(
-                          aspectRatio: 16 / 9,
-                          child: const ColoredBox(color: Colors.black),
-                        )
-                      : Video(
-                          key: videoKey,
-                          controller: displayController,
+                  useHdrVideo
+                      ? HdrVideo(
+                          session: _hdrSession!,
                           width: MediaQuery.of(context).size.width,
                           height:
                               MediaQuery.of(context).size.width * 9.0 / 16.0,
-                        ),
+                        )
+                      : displayController == null
+                          ? AspectRatio(
+                              aspectRatio: 16 / 9,
+                              child: const ColoredBox(color: Colors.black),
+                            )
+                          : Video(
+                              key: videoKey,
+                              controller: displayController,
+                              width: MediaQuery.of(context).size.width,
+                              height:
+                                  MediaQuery.of(context).size.width * 9.0 / 16.0,
+                            ),
                   if (_androidFlutterRepaintProbe)
                     _androidFrameSchedulerProbe
                         ? RepaintBoundary(
