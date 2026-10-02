@@ -1,0 +1,264 @@
+[IMPORTANT:flutter/shell/platform/embedder/embedder_surface_metal_impeller.mm(53)] Using the Impeller rendering backend (MetalSDF).
+flutter: The Dart VM service is listening on http://127.0.0.1:50257/2HYIzCcjPaE=/
+flutter: media_kit: NativeReferenceHolder: Allocated 528779124736
+flutter: *** Request ***
+flutter: uri: https://api.bilibili.com/x/internal/gaia-gateway/ExClimbWuzhi
+flutter: 
+flutter: *** Request ***
+flutter: uri: https://api.bilibili.com/x/v2/history/shadow?jsonp=jsonp
+flutter: 
+flutter: dynamic_color: Accent color detected.
+flutter: ┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+flutter: │ 2026-10-03 03:33:11.233366
+flutter: ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+flutter: │ 🐛 Catcher 2 configured successfully.
+flutter: └───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+flutter: [38;5;208m┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+flutter: [38;5;208m│ 'package:PiliPlus/utils/grid.dart': Failed assertion: line 78 pos 12: 'crossAxisExtent > 0.0': is not true.[0m
+flutter: [38;5;208m├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄[0m
+flutter: [38;5;208m│ #2      SliverGridDelegateWithExtentAndRatio._debugAssertIsValid (package:PiliPlus/utils/grid.dart:78:12)[0m
+flutter: [38;5;208m│ #3      SliverGridDelegateWithExtentAndRatio.getLayout (package:PiliPlus/utils/grid.dart:92:12)[0m
+flutter: [38;5;208m│ #4      RenderSliverGrid.performLayout (package:flutter/src/rendering/sliver_grid.dart:605:51)[0m
+flutter: [38;5;208m│ #5      RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #6      RenderSliverMainAxisGroup.performLayout (package:flutter/src/rendering/sliver_group.dart:317:13)[0m
+flutter: [38;5;208m│ #7      RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #8      RenderSliverEdgeInsetsPadding.performLayout (package:flutter/src/rendering/sliver_padding.dart:133:12)[0m
+flutter: [38;5;208m│ #9      RenderSliverPadding.performLayout (package:flutter/src/rendering/sliver_padding.dart:368:11)[0m
+flutter: [38;5;208m│ #10     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #11     RenderViewportBase.layoutChildSequence (package:flutter/src/rendering/viewport.dart:821:13)[0m
+flutter: [38;5;208m│ #12     RenderViewport._attemptLayout (package:flutter/src/rendering/viewport.dart:1831:12)[0m
+flutter: [38;5;208m│ #13     RenderViewport.performLayout (package:flutter/src/rendering/viewport.dart:1724:20)[0m
+flutter: [38;5;208m│ #14     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #15     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)[0m
+flutter: [38;5;208m│ #16     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #17     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)[0m
+flutter: [38;5;208m│ #18     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #19     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)[0m
+flutter: [38;5;208m│ #20     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #21     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)[0m
+flutter: [38;5;208m│ #22     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #23     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)[0m
+flutter: [38;5;208m│ #24     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #25     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)[0m
+flutter: [38;5;208m│ #26     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #27     RenderRefreshLayout.performLayout (package:PiliPlus/common/widgets/refresh_layout.dart:98:29)[0m
+flutter: [38;5;208m│ #28     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #29     RenderPadding.performLayout (package:flutter/src/rendering/shifted_box.dart:262:12)[0m
+flutter: [38;5;208m│ #30     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #31     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)[0m
+flutter: [38;5;208m│ #32     _RenderCustomClip.performLayout (package:flutter/src/rendering/proxy_box.dart:1549:11)[0m
+flutter: [38;5;208m│ #33     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #34     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)[0m
+flutter: [38;5;208m│ #35     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #36     RenderPadding.performLayout (package:flutter/src/rendering/shifted_box.dart:262:12)[0m
+flutter: [38;5;208m│ #37     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #38     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)[0m
+flutter: [38;5;208m│ #39     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #40     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)[0m
+flutter: [38;5;208m│ #41     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #42     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)[0m
+flutter: [38;5;208m│ #43     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #44     RenderSliverFixedExtentBoxAdaptor.performLayout (package:flutter/src/rendering/sliver_fixed_extent_list.dart:403:19)[0m
+flutter: [38;5;208m│ #45     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #46     RenderSliverEdgeInsetsPadding.performLayout (package:flutter/src/rendering/sliver_padding.dart:133:12)[0m
+flutter: [38;5;208m│ #47     _RenderSliverFractionalPadding.performLayout (package:flutter/src/widgets/sliver_fill.dart:174:11)[0m
+flutter: [38;5;208m│ #48     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #49     RenderViewportBase.layoutChildSequence (package:flutter/src/rendering/viewport.dart:821:13)[0m
+flutter: [38;5;208m│ #50     RenderViewport._attemptLayout (package:flutter/src/rendering/viewport.dart:1831:12)[0m
+flutter: [38;5;208m│ #51     RenderViewport.performLayout (package:flutter/src/rendering/viewport.dart:1724:20)[0m
+flutter: [38;5;208m│ #52     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #53     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)[0m
+flutter: [38;5;208m│ #54     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #55     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)[0m
+flutter: [38;5;208m│ #56     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #57     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)[0m
+flutter: [38;5;208m│ #58     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #59     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)[0m
+flutter: [38;5;208m│ #60     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #61     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)[0m
+flutter: [38;5;208m│ #62     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #63     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)[0m
+flutter: [38;5;208m│ (elided 2 frames from class _AssertionError)[0m
+flutter: [38;5;208m├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄[0m
+flutter: [38;5;208m│ 2026-10-03 03:33:11.598698[0m
+flutter: [38;5;208m└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+flutter: [38;5;208m┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+flutter: [38;5;208m│ Null check operator used on a null value[0m
+flutter: [38;5;208m├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄[0m
+flutter: [38;5;208m│ #0      RenderSliverMainAxisGroup.performLayout (package:flutter/src/rendering/sliver_group.dart:334:64)[0m
+flutter: [38;5;208m│ #1      RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #2      RenderSliverEdgeInsetsPadding.performLayout (package:flutter/src/rendering/sliver_padding.dart:133:12)[0m
+flutter: [38;5;208m│ #3      RenderSliverPadding.performLayout (package:flutter/src/rendering/sliver_padding.dart:368:11)[0m
+flutter: [38;5;208m│ #4      RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #5      RenderViewportBase.layoutChildSequence (package:flutter/src/rendering/viewport.dart:821:13)[0m
+flutter: [38;5;208m│ #6      RenderViewport._attemptLayout (package:flutter/src/rendering/viewport.dart:1831:12)[0m
+flutter: [38;5;208m│ #7      RenderViewport.performLayout (package:flutter/src/rendering/viewport.dart:1724:20)[0m
+flutter: [38;5;208m│ #8      RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #9      RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)[0m
+flutter: [38;5;208m│ #10     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #11     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)[0m
+flutter: [38;5;208m│ #12     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #13     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)[0m
+flutter: [38;5;208m│ #14     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #15     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)[0m
+flutter: [38;5;208m│ #16     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #17     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)[0m
+flutter: [38;5;208m│ #18     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #19     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)[0m
+flutter: [38;5;208m│ #20     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #21     RenderRefreshLayout.performLayout (package:PiliPlus/common/widgets/refresh_layout.dart:98:29)[0m
+flutter: [38;5;208m│ #22     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #23     RenderPadding.performLayout (package:flutter/src/rendering/shifted_box.dart:262:12)[0m
+flutter: [38;5;208m│ #24     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #25     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)[0m
+flutter: [38;5;208m│ #26     _RenderCustomClip.performLayout (package:flutter/src/rendering/proxy_box.dart:1549:11)[0m
+flutter: [38;5;208m│ #27     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #28     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)[0m
+flutter: [38;5;208m│ #29     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #30     RenderPadding.performLayout (package:flutter/src/rendering/shifted_box.dart:262:12)[0m
+flutter: [38;5;208m│ #31     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #32     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)[0m
+flutter: [38;5;208m│ #33     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #34     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)[0m
+flutter: [38;5;208m│ #35     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #36     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)[0m
+flutter: [38;5;208m│ #37     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #38     RenderSliverFixedExtentBoxAdaptor.performLayout (package:flutter/src/rendering/sliver_fixed_extent_list.dart:403:19)[0m
+flutter: [38;5;208m│ #39     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #40     RenderSliverEdgeInsetsPadding.performLayout (package:flutter/src/rendering/sliver_padding.dart:133:12)[0m
+flutter: [38;5;208m│ #41     _RenderSliverFractionalPadding.performLayout (package:flutter/src/widgets/sliver_fill.dart:174:11)[0m
+flutter: [38;5;208m│ #42     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #43     RenderViewportBase.layoutChildSequence (package:flutter/src/rendering/viewport.dart:821:13)[0m
+flutter: [38;5;208m│ #44     RenderViewport._attemptLayout (package:flutter/src/rendering/viewport.dart:1831:12)[0m
+flutter: [38;5;208m│ #45     RenderViewport.performLayout (package:flutter/src/rendering/viewport.dart:1724:20)[0m
+flutter: [38;5;208m│ #46     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #47     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)[0m
+flutter: [38;5;208m│ #48     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #49     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)[0m
+flutter: [38;5;208m│ #50     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #51     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)[0m
+flutter: [38;5;208m│ #52     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #53     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)[0m
+flutter: [38;5;208m│ #54     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #55     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)[0m
+flutter: [38;5;208m│ #56     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #57     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)[0m
+flutter: [38;5;208m│ #58     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #59     ChildLayoutHelper.layoutChild (package:flutter/src/rendering/layout_helper.dart:62:11)[0m
+flutter: [38;5;208m│ #60     RenderFlex._computeSizes (package:flutter/src/rendering/flex.dart:1275:26)[0m
+flutter: [38;5;208m│ #61     RenderFlex.performLayout (package:flutter/src/rendering/flex.dart:1329:32)[0m
+flutter: [38;5;208m│ #62     RenderObject.layout (package:flutter/src/rendering/object.dart:2923:7)[0m
+flutter: [38;5;208m│ #63     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:118:18)[0m
+flutter: [38;5;208m├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄[0m
+flutter: [38;5;208m│ 2026-10-03 03:33:11.606735[0m
+flutter: [38;5;208m└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────[0m
+flutter: ┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+flutter: │ 2026-10-03 03:33:11.610807
+flutter: ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+flutter: │ 🐛 Error: 'Null check operator used on a null value' has been skipped to due to duplication occurrence within 0:00:03.000000 ms.
+flutter: └───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+flutter: ┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+flutter: │ 2026-10-03 03:33:11.610909
+flutter: ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+flutter: │ 🐛 Error: 'Null check operator used on a null value' has been skipped to due to duplication occurrence within 0:00:03.000000 ms.
+flutter: └───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+flutter: ┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+flutter: │ 2026-10-03 03:33:11.645957
+flutter: ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+flutter: │ 🐛 ConsoleHandler successfully reported an error
+flutter: └───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+flutter: ┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+flutter: │ 2026-10-03 03:33:11.646094
+flutter: ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+flutter: │ 🐛 ConsoleHandler successfully reported an error
+flutter: └───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+flutter: ┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+flutter: │ 2026-10-03 03:33:11.662201
+flutter: ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+flutter: │ 🐛 JsonFileHandler successfully reported an error
+flutter: └───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+flutter: ┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+flutter: │ 2026-10-03 03:33:11.694048
+flutter: ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+flutter: │ 🐛 JsonFileHandler successfully reported an error
+flutter: └───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+flutter: *** Request ***
+flutter: uri: https://app.bilibili.com/bilibili.app.dynamic.v1.Dynamic/DynRed
+flutter: 
+flutter: *** Request ***
+flutter: uri: https://api.vc.bilibili.com/session_svr/v1/session_svr/single_unread?build=0&mobi_app=web&unread_type=0&web_location=333.1365
+flutter: 
+flutter: *** Request ***
+flutter: uri: https://api.bilibili.com/x/msgfeed/unread?build=0&mobi_app=web&web_location=333.1365
+flutter: 
+flutter: *** Request ***
+flutter: uri: https://api.live.bilibili.com/xlive/app-interface/v2/index/feed?access_key=d248b13b969fb63365e4dd6d116a4392&channel=master&actionKey=appkey&build=8430300&version=8.43.0&c_locale=zh_CN&device=android&device_name=android&device_type=0&fnval=912&disable_rcmd=0&https_url_req=1&mobi_app=android&network=wifi&page=1&platform=android&relation_page=1&s_locale=zh_CN&scale=2&statistics=%7B%22appId%22%3A1%2C%22platform%22%3A3%2C%22version%22%3A%228.43.0%22%2C%22abtest%22%3A%22%22%7D&appkey=dfca71928277209b&ts=1790969591&sign=a53f312436042c16341554c8692478e8
+flutter: 
+flutter: ┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+flutter: │ 2026-10-03 03:33:11.805475
+flutter: ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+flutter: │ 🐛 Error: 'Null check operator used on a null value' has been skipped to due to duplication occurrence within 0:00:03.000000 ms.
+flutter: └───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+flutter: *** Request ***
+flutter: uri: https://api.bilibili.com/x/polymer/web-dynamic/v1/portal?up_list_more=1&web_location=333.1365
+flutter: 
+flutter: *** Request ***
+flutter: uri: https://app.bilibili.com/x/v2/feed/index?build=2001100&c_locale=zh_CN&channel=master&column=4&device=pad&device_name=android&device_type=0&disable_rcmd=0&flush=5&fnval=976&fnver=0&force_host=2&fourk=1&guidance=0&https_url_req=0&idx=0&mobi_app=android_hd&network=wifi&platform=android&player_net=1&pull=true&qn=32&recsys_mode=0&s_locale=zh_CN&splash_id=&statistics=%7B%22appId%22%3A5%2C%22platform%22%3A3%2C%22version%22%3A%222.0.1%22%2C%22abtest%22%3A%22%22%7D&voice_balance=0
+flutter: 
+flutter: *** Response ***
+flutter: uri: https://api.bilibili.com/x/v2/history/shadow?jsonp=jsonp
+flutter: 
+flutter: *** Response ***
+flutter: uri: https://api.bilibili.com/x/internal/gaia-gateway/ExClimbWuzhi
+flutter: 
+flutter: *** Response ***
+flutter: uri: https://api.bilibili.com/x/msgfeed/unread?build=0&mobi_app=web&web_location=333.1365
+flutter: 
+flutter: *** Response ***
+flutter: uri: https://api.vc.bilibili.com/session_svr/v1/session_svr/single_unread?build=0&mobi_app=web&unread_type=0&web_location=333.1365
+flutter: 
+flutter: *** Response ***
+flutter: uri: https://app.bilibili.com/bilibili.app.dynamic.v1.Dynamic/DynRed
+flutter: 
+flutter: *** Response ***
+flutter: uri: https://api.bilibili.com/x/polymer/web-dynamic/v1/portal?up_list_more=1&web_location=333.1365
+flutter: 
+flutter: *** Response ***
+flutter: uri: https://api.live.bilibili.com/xlive/app-interface/v2/index/feed?access_key=d248b13b969fb63365e4dd6d116a4392&channel=master&actionKey=appkey&build=8430300&version=8.43.0&c_locale=zh_CN&device=android&device_name=android&device_type=0&fnval=912&disable_rcmd=0&https_url_req=1&mobi_app=android&network=wifi&page=1&platform=android&relation_page=1&s_locale=zh_CN&scale=2&statistics=%7B%22appId%22%3A1%2C%22platform%22%3A3%2C%22version%22%3A%228.43.0%22%2C%22abtest%22%3A%22%22%7D&appkey=dfca71928277209b&ts=1790969591&sign=a53f312436042c16341554c8692478e8
+flutter: 
+flutter: ┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+flutter: │ 2026-10-03 03:33:12.163871
+flutter: ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+flutter: │ 🐛 Error: ''package:PiliPlus/utils/grid.dart': Failed assertion: line 78 pos 12: 'crossAxisExtent > 0.0': is not true.' has been skipped to due to duplication occurrence within 0:00:03.000000 ms.
+flutter: └───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+flutter: ┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+flutter: │ 2026-10-03 03:33:12.164031
+flutter: ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+flutter: │ 🐛 Error: 'Null check operator used on a null value' has been skipped to due to duplication occurrence within 0:00:03.000000 ms.
+flutter: └───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+flutter: ┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+flutter: │ 2026-10-03 03:33:12.164096
+flutter: ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+flutter: │ 🐛 Error: 'Null check operator used on a null value' has been skipped to due to duplication occurrence within 0:00:03.000000 ms.
+flutter: └───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+flutter: ┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+flutter: │ 2026-10-03 03:33:12.164156
+flutter: ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+flutter: │ 🐛 Error: 'Null check operator used on a null value' has been skipped to due to duplication occurrence within 0:00:03.000000 ms.
+flutter: └───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+flutter: ┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+flutter: │ 2026-10-03 03:33:12.164220
+flutter: ├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+flutter: │ 🐛 Error: 'Null check operator used on a null value' has been skipped to due to duplication occurrence within 0:00:03.000000 ms.
+flutter: └───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+flutter: *** Response ***
+flutter: uri: https://app.bilibili.com/x/v2/feed/index?build=2001100&c_locale=zh_CN&channel=master&column=4&device=pad&device_name=android&device_type=0&disable_rcmd=0&flush=5&fnval=976&fnver=0&force_host=2&fourk=1&guidance=0&https_url_req=0&idx=0&mobi_app=android_hd&network=wifi&platform=android&player_net=1&pull=true&qn=32&recsys_mode=0&s_locale=zh_CN&splash_id=&statistics=%7B%22appId%22%3A5%2C%22platform%22%3A3%2C%22version%22%3A%222.0.1%22%2C%22abtest%22%3A%22%22%7D&voice_balance=0&access_key=d248b13b969fb63365e4dd6d116a4392&appkey=dfca71928277209b&ts=1790969591&sign=d55ba443181b1d38ab47579daa1041e1
+flutter: 
+flutter: *** Request ***
+flutter: uri: https://app.bilibili.com/x/v2/feed/index?build=2001100&c_locale=zh_CN&channel=master&column=4&device=pad&device_name=android&device_type=0&disable_rcmd=0&flush=5&fnval=976&fnver=0&force_host=2&fourk=1&guidance=0&https_url_req=0&idx=1&mobi_app=android_hd&network=wifi&platform=android&player_net=1&pull=false&qn=32&recsys_mode=0&s_locale=zh_CN&splash_id=&statistics=%7B%22appId%22%3A5%2C%22platform%22%3A3%2C%22version%22%3A%222.0.1%22%2C%22abtest%22%3A%22%22%7D&voice_balance=0
+flutter: 
+flutter: *** Response ***
+flutter: uri: https://app.bilibili.com/x/v2/feed/index?build=2001100&c_locale=zh_CN&channel=master&column=4&device=pad&device_name=android&device_type=0&disable_rcmd=0&flush=5&fnval=976&fnver=0&force_host=2&fourk=1&guidance=0&https_url_req=0&idx=1&mobi_app=android_hd&network=wifi&platform=android&player_net=1&pull=false&qn=32&recsys_mode=0&s_locale=zh_CN&splash_id=&statistics=%7B%22appId%22%3A5%2C%22platform%22%3A3%2C%22version%22%3A%222.0.1%22%2C%22abtest%22%3A%22%22%7D&voice_balance=0&access_key=d248b13b969fb63365e4dd6d116a4392&appkey=dfca71928277209b&ts=1790969592&sign=50b7269c066807d67d2c9c8b6fbeaf53
+flutter: 
+embedder.cc (3079): 'FlutterPlatformMessageCreateResponseHandle' returned 'kInvalidArguments'. Engine handle was invalid.
+2026-10-03 03:39:30.588 PiliPlusX[76351:31971105] Failed to create a FlutterPlatformMessageResponseHandle (2)

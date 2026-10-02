@@ -1,0 +1,34 @@
+{
+  "BuildMachineOSBuild" => "26A428"
+  "CFBundleDevelopmentRegion" => "en"
+  "CFBundleExecutable" => "PiliPlusX"
+  "CFBundleIconFile" => "AppIcon"
+  "CFBundleIconName" => "AppIcon"
+  "CFBundleIdentifier" => "com.example.piliplusx"
+  "CFBundleInfoDictionaryVersion" => "6.0"
+  "CFBundleName" => "PiliPlusX"
+  "CFBundlePackageType" => "APPL"
+  "CFBundleShortVersionString" => "2.1.2"
+  "CFBundleSupportedPlatforms" => [
+    0 => "MacOSX"
+  ]
+  "CFBundleVersion" => "1"
+  "DTCompiler" => "com.apple.compilers.llvm.clang.1_0"
+  "DTPlatformBuild" => "26A425"
+  "DTPlatformName" => "macosx"
+  "DTPlatformVersion" => "27.0"
+  "DTSDKBuild" => "26A425"
+  "DTSDKName" => "macosx27.0"
+  "DTXcode" => "2700"
+  "DTXcodeBuild" => "27A266a"
+  "LSMinimumSystemVersion" => "12.0"
+  "NSBonjourServices" => [
+    0 => "_ssdp._udp"
+    1 => "_upnp._tcp"
+    2 => "_http._tcp"
+  ]
+  "NSHumanReadableCopyright" => "Copyright © 2023 com.example. All rights reserved."
+  "NSLocalNetworkUsageDescription" => "需要访问本地网络以发现和连接 DLNA 投屏设备"
+  "NSMainNibFile" => "MainMenu"
+  "NSPrincipalClass" => "NSApplication"
+}
