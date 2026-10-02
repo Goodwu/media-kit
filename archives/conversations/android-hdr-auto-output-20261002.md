@@ -130,3 +130,27 @@
 - 用户补充一：PiliPlusX 需要按设备能力决定是否请求 HDR 源，请求了 HDR 却 tone-map 播放，对 App 是错误行为。由此确定库必须提供开播前预测，并且预测与执行同源。
 - 用户补充三：询问其他设备直接渲染 DV 的可能。核实结论是现有链路没有原生 DV 路径，决定只预留、另立需求。用户补充四：DV 有多种 profile，同一 profile 有多种处理方式，需要按配置决策；默认偏好在倾向直出的同时，硬件支持时要优先 HDR 输出而不是 tone-map。据此修订为 v3。
 - 用户补充二（职责边界决策）：路由信息返回给 App；HDR 不可呈现时 tone-map 继续播放并报告事件，不主动停止，由 App 决定何时换源；片源与能力一致是 App 的需求，media-kit 只报告。据此把需求修订为 v2，并编制实施计划。
+
+## 全平台会话路径审计（2026-10-03，R2.5 一致性，Scout 采集 + Lead 整理）
+
+### 平台 × 现状表
+
+共用前提：`_isAndroid = isAndroid ?? Platform.isAndroid`（hdr_video_session.dart:110）；非 Android 在**构造函数**即透传——单 `VideoController` + `_report.value = HdrOutputReport(degradeReason: unsupportedPlatform)` 后早退（:116-124，报告是 ValueListenable 字段、非事件流）；`open()` 直通 `player.open`（:245-250）；dispose/重规划/能力变化均有 `!_isAndroid` 早退（:869-875/:671/:715）。
+
+| 平台 | 编译解析 | 运行时变体 | 会话行为 | 报告 |
+|---|---|---|---|---|
+| Android | io → android/real.dart | AndroidVideoController | 完整编排 | 路由报告/事件全套 |
+| iOS/macOS | io → android/real.dart（编译面）；桶工厂 Native 先命中 | NativeVideoController | 透传 | unsupportedPlatform |
+| linux/windows | 同上 | NativeVideoController | 透传 | unsupportedPlatform |
+| OHOS | io → android/ohos real.dart；Ohos 先命中 | OhosVideoController | 透传 | unsupportedPlatform |
+| web | js_interop → 三桶均 stub；Player 解析为 WebPlayer | WebVideoController + WebPlayer | 透传（open 直通，stub 静态全在门禁后不可达） | unsupportedPlatform |
+| wasm 编译面 | native/player → stub（三方法 UnsupportedError） | — | 编译面 | — |
+
+HdrVideo 渲染：非 Android 透传控制器走各平台常规 `Video` 路径（io → video_texture，web → video_web），无 HDR 专属产物。
+
+### 审计结论与方案（待用户确认）
+
+1. **无静默透传**：全部非 Android 平台构造时统一发 unsupportedPlatform 报告——R2.5"透传+报告"已在全平台一致落地；任务原设想的"未实现平台加报错 stub"不存在缺口。
+2. **建议维持 R2.5 现状**：透传保住了这些平台的常规播放（web/linux/windows 经同一会话 API 正常出画面）；改为抛错会破坏播放且与"API 平台无关"目标相悖。若未来某平台要求"尝试会话编排失败即硬失败"，届时按平台修订 R2.5 而非全局改。
+3. 可选一致性小项：web 桩抛错类型不统一（AndroidVideoController stub 用 UnimplementedError、WebPlayer/native stub 用 UnsupportedError）——统一为 UnsupportedError（纯一致性、无行为影响），可随下次触碰这些文件时顺手做。
+4. 未知项记录（CI 已实证绿、机制未深究）：dart:io Platform 在 web/wasm 编译面的解析机制；wasm 下 Player 条件链（`dart.library.html` vs `js_interop`）的实际解析目标。
