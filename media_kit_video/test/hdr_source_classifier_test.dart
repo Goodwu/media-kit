@@ -4,6 +4,7 @@ import 'package:media_kit_video/src/hdr/hdr_output_policy.dart'
     show HdrMediaKind;
 import 'package:media_kit_video/src/hdr/hdr_source_classifier.dart';
 import 'package:media_kit_video/src/hdr/hdr_source_descriptor.dart';
+import 'package:media_kit_video/src/hdr/hdr_strategy.dart';
 
 void main() {
   const classifier = HdrSourceClassifier();
@@ -93,7 +94,8 @@ void main() {
         videoParams: const VideoParams(gamma: 'pq', primaries: 'bt.2020'),
       );
       expect(descriptor.dvProfile, isNull);
-      // HDR10+/HDR Vivid are not observable through mpv yet: none.
+      // No HDR Vivid side-data fact reported: none (HDR10+ remains not
+      // observable through mpv).
       expect(descriptor.dynamicMetadata, HdrDynamicMetadata.none);
       expect(descriptor.transfer, 'pq');
       expect(descriptor.primaries, 'bt.2020');
@@ -180,6 +182,158 @@ void main() {
       expect(descriptor.dvProfile, 5);
       expect(descriptor.dvCompatibilityId, 0);
       expect(descriptor.kind, HdrMediaKind.dolbyVisionP5);
+    });
+  });
+
+  group('classify: container DV facts and HDR Vivid fact (fork 0f7e6bec32+)',
+      () {
+    test('explicit container compatibility id overrides the gamma inference',
+        () {
+      // Container fact 1 on an HLG base layer: the record is the DV
+      // signaling itself, so it wins over the hlg→4 inference.
+      final descriptor = classifier.classify(
+        videoParams: const VideoParams(gamma: 'hlg', primaries: 'bt.2020'),
+        dolbyVisionProfile: 8,
+        dvCompatibilityId: 1,
+      );
+      expect(descriptor.dvProfile, 8);
+      expect(descriptor.dvCompatibilityId, 1);
+      expect(descriptor.kind, HdrMediaKind.hdr10);
+    });
+
+    test('container fact 0 is valid and overrides a non-zero inference', () {
+      final descriptor = classifier.classify(
+        videoParams: const VideoParams(gamma: 'hlg', primaries: 'bt.2020'),
+        dolbyVisionProfile: 8,
+        dvCompatibilityId: 0,
+      );
+      expect(descriptor.dvCompatibilityId, 0);
+    });
+
+    test('a null container fact keeps the base-layer inference', () {
+      final descriptor = classifier.classify(
+        videoParams: const VideoParams(gamma: 'hlg', primaries: 'bt.2020'),
+        dolbyVisionProfile: 8,
+        dvCompatibilityId: null,
+      );
+      expect(descriptor.dvCompatibilityId, 4);
+    });
+
+    test('the -1 unknown sentinel falls back to the inference', () {
+      final descriptor = classifier.classify(
+        videoParams: const VideoParams(gamma: 'pq', primaries: 'bt.2020'),
+        dolbyVisionProfile: 8,
+        dvCompatibilityId: -1,
+      );
+      expect(descriptor.dvCompatibilityId, 1);
+
+      final p7 = classifier.classify(
+        videoParams: const VideoParams(gamma: 'pq', primaries: 'bt.2020'),
+        dolbyVisionProfile: 7,
+        dvCompatibilityId: -1,
+      );
+      expect(p7.dvCompatibilityId, 6);
+    });
+
+    test('container fact overrides the profile-5 default', () {
+      final descriptor = classifier.classify(
+        videoParams: const VideoParams(gamma: 'pq', primaries: 'bt.2020'),
+        dolbyVisionProfile: 5,
+        dvCompatibilityId: 2,
+      );
+      expect(descriptor.dvProfile, 5);
+      expect(descriptor.dvCompatibilityId, 2);
+    });
+
+    test('profile 7 enhancement layer follows the el-present fact', () {
+      final fel = classifier.classify(
+        videoParams: const VideoParams(gamma: 'pq', primaries: 'bt.2020'),
+        dolbyVisionProfile: 7,
+        dvElPresent: true,
+      );
+      expect(fel.enhancementLayer, isTrue);
+
+      final baseOnly = classifier.classify(
+        videoParams: const VideoParams(gamma: 'pq', primaries: 'bt.2020'),
+        dolbyVisionProfile: 7,
+        dvElPresent: false,
+      );
+      expect(baseOnly.enhancementLayer, isFalse);
+
+      // Unavailable fact stays unknown (the original mpv behavior).
+      final unknown = classifier.classify(
+        videoParams: const VideoParams(gamma: 'pq', primaries: 'bt.2020'),
+        dolbyVisionProfile: 7,
+      );
+      expect(unknown.enhancementLayer, isNull);
+    });
+
+    test('profile 5 and 8 enhancement-layer facts override the defaults', () {
+      final p5 = classifier.classify(
+        videoParams: const VideoParams(gamma: 'pq', primaries: 'bt.2020'),
+        dolbyVisionProfile: 5,
+        dvElPresent: true,
+      );
+      expect(p5.enhancementLayer, isTrue);
+
+      final p8 = classifier.classify(
+        videoParams: const VideoParams(gamma: 'hlg', primaries: 'bt.2020'),
+        dolbyVisionProfile: 8,
+        dvElPresent: false,
+      );
+      expect(p8.enhancementLayer, isFalse);
+    });
+
+    test('profile 8 container compatibility id and el fact combine', () {
+      final descriptor = classifier.classify(
+        videoParams: const VideoParams(gamma: 'hlg', primaries: 'bt.2020'),
+        dolbyVisionProfile: 8,
+        dvCompatibilityId: 1,
+        dvElPresent: true,
+      );
+      expect(descriptor.dvCompatibilityId, 1);
+      expect(descriptor.enhancementLayer, isTrue);
+    });
+
+    test('no profile + HDR Vivid fact true → hdrVivid metadata and class',
+        () {
+      final descriptor = classifier.classify(
+        videoParams: const VideoParams(gamma: 'pq', primaries: 'bt.2020'),
+        hdrVivid: true,
+      );
+      expect(descriptor.dvProfile, isNull);
+      expect(descriptor.dynamicMetadata, HdrDynamicMetadata.hdrVivid);
+      expect(descriptor.enhancementLayer, isFalse);
+      // The class derivation reads the metadata format (hdr_strategy.dart
+      // HdrSourceClass.of), so the fact feeds the maturity table directly.
+      expect(HdrSourceClass.of(descriptor), HdrSourceClass.hdrVivid);
+    });
+
+    test('no profile + HDR Vivid fact false or unknown → none', () {
+      final explicitNo = classifier.classify(
+        videoParams: const VideoParams(gamma: 'pq', primaries: 'bt.2020'),
+        hdrVivid: false,
+      );
+      expect(explicitNo.dynamicMetadata, HdrDynamicMetadata.none);
+      expect(HdrSourceClass.of(explicitNo), HdrSourceClass.hdr10);
+
+      final unavailable = classifier.classify(
+        videoParams: const VideoParams(gamma: 'pq', primaries: 'bt.2020'),
+      );
+      expect(unavailable.dynamicMetadata, HdrDynamicMetadata.none);
+    });
+
+    test('a DV profile wins over HDR Vivid metadata priority', () {
+      // DV metadata and HDR Vivid side data never co-occur; the existing
+      // switch structure prioritizes the DV branch without special-casing.
+      final descriptor = classifier.classify(
+        videoParams: const VideoParams(gamma: 'hlg', primaries: 'bt.2020'),
+        dolbyVisionProfile: 8,
+        dvCompatibilityId: 4,
+        hdrVivid: true,
+      );
+      expect(descriptor.dynamicMetadata, HdrDynamicMetadata.dolbyVision);
+      expect(HdrSourceClass.of(descriptor), HdrSourceClass.dvP84);
     });
   });
 

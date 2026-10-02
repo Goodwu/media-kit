@@ -376,12 +376,52 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
           .trim(),
     );
     final codec = await readProperty('current-tracks/video/codec');
+    // The fork's container/track facts (fork 0f7e6bec32+) are read once,
+    // right after the profile/codec reads — the same single-observation
+    // pattern, no extra polling round. These are side-data/track facts, not
+    // watched properties: a review executed mid-play samples the state at
+    // its execution point and does not observe later frame changes. An
+    // unavailable property reads as an empty string (getProperty never
+    // throws for unavailable), so a failed parse is already the unknown
+    // value the classifier falls back from.
+    final compatibilityIdRaw = int.tryParse(
+      (await readProperty(
+              'current-tracks/video/dolby-vision-compatibility-id'))
+          .trim(),
+    );
+    // No DOVI configuration record → the whole property is unavailable;
+    // with a record, `0` is a valid value (DV spec "None") and `-1` is the
+    // in-record "unknown" sentinel — every negative reads as unknown.
+    final dvCompatibilityId =
+        compatibilityIdRaw != null && compatibilityIdRaw >= 0
+            ? compatibilityIdRaw
+            : null;
+    final elPresentRaw = int.tryParse(
+      (await readProperty('current-tracks/video/dolby-vision-el-present'))
+          .trim(),
+    );
+    final dvElPresent = elPresentRaw == 1
+        ? true
+        : elPresentRaw == 0
+            ? false
+            : null; // -1 (unknown sentinel), unavailable, non-numeric.
+    // `video-params/hdr-vivid` is readable once video-params carry the
+    // base-layer tags (the poll above guarantees the read happens after the
+    // first frame); on the timeout path it is still sampled once and read
+    // defensively ('yes'/'no' are the only mpv bool spellings).
+    final hdrVividRaw =
+        await readProperty('video-params/hdr-vivid');
+    final hdrVivid =
+        hdrVividRaw == 'yes' ? true : hdrVividRaw == 'no' ? false : null;
     return HdrReviewFacts(
       videoParams: latestVideoParams(),
       dolbyVisionProfile: profile,
       codec: codec,
       hwdecCurrent: hwdec,
       path: currentPath,
+      dvCompatibilityId: dvCompatibilityId,
+      dvElPresent: dvElPresent,
+      hdrVivid: hdrVivid,
     );
   }
 

@@ -71,6 +71,13 @@ public class MediaKitVideoPlugin implements FlutterPlugin, MethodCallHandler {
     @Override
     public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
         pinNativeLibraries();
+        // Pipeline probe: the P5 verdict is answered once per process through
+        // a disposable mpv instance (no vo, no EGL) and cached; expected to
+        // complete in milliseconds, so it stays synchronous on attach.
+        final long probeBegin = android.os.SystemClock.uptimeMillis();
+        final int probeResult = MpvPipelineProbe.probeOnce();
+        android.util.Log.i("MediaKitVideoPlugin", "probeOnce: result=" + probeResult
+                + " elapsedMs=" + (android.os.SystemClock.uptimeMillis() - probeBegin));
         applicationContext = flutterPluginBinding.getApplicationContext();
         channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "com.alexmercerind/media_kit_video");
         channel.setMethodCallHandler(this);

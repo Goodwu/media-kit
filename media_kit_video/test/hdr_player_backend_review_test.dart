@@ -57,9 +57,14 @@ void main() {
 
   /// Property reader standing in for mpv: the media is loaded and the
   /// hardware decoder is active from the first query; the DV profile is the
-  /// integer `8`.
-  HdrPropertyReader reader() {
+  /// integer `8` and the container facts describe the hinted P8.4 (compat
+  /// id 4, no enhancement layer, no HDR Vivid side data). [properties]
+  /// overrides single property reads for the unavailable/sentinel scripts.
+  HdrPropertyReader reader({Map<String, String> properties = const {}}) {
     return (property) async {
+      if (properties.containsKey(property)) {
+        return properties[property]!;
+      }
       switch (property) {
         case 'path':
           return 'test://media';
@@ -71,6 +76,12 @@ void main() {
           return '8';
         case 'current-tracks/video/codec':
           return 'hevc';
+        case 'current-tracks/video/dolby-vision-compatibility-id':
+          return '4';
+        case 'current-tracks/video/dolby-vision-el-present':
+          return '0';
+        case 'video-params/hdr-vivid':
+          return 'no';
         default:
           return '';
       }
@@ -137,6 +148,74 @@ void main() {
     expect(facts.codec, 'hevc');
     expect(facts.hwdecCurrent, 'mediacodec');
     expect(facts.path, 'test://media');
+    expect(facts.dvCompatibilityId, 4);
+    expect(facts.dvElPresent, isFalse);
+    expect(facts.hdrVivid, isFalse);
+  });
+
+  test('gathers the container DV facts and the HDR Vivid fact', () async {
+    final facts = await AndroidHdrBackend.gatherReviewFacts(
+      mediaUri: 'test://media',
+      expectedHwdec: 'mediacodec',
+      readProperty: reader(properties: const {
+        'current-tracks/video/dolby-vision-compatibility-id': '1',
+        'current-tracks/video/dolby-vision-el-present': '1',
+        'video-params/hdr-vivid': 'yes',
+      }),
+      latestVideoParams: paramsAfterFirstQuery(),
+      waitForFileLoadedEntry: fileLoadedNext,
+      playlistEntryId: 7,
+      fileLoadedEpoch: 3,
+    );
+
+    expect(facts.dvCompatibilityId, 1);
+    expect(facts.dvElPresent, isTrue);
+    expect(facts.hdrVivid, isTrue);
+  });
+
+  test('unavailable container/Vivid properties read as unknown nulls',
+      () async {
+    // mpv getProperty returns '' for an unavailable property: a stream
+    // without a DOVI configuration record carries no container facts, and
+    // upstream mpv has no `video-params/hdr-vivid` sub-property.
+    final facts = await AndroidHdrBackend.gatherReviewFacts(
+      mediaUri: 'test://media',
+      expectedHwdec: 'mediacodec',
+      readProperty: reader(properties: const {
+        'current-tracks/video/dolby-vision-compatibility-id': '',
+        'current-tracks/video/dolby-vision-el-present': '',
+        'video-params/hdr-vivid': '',
+      }),
+      latestVideoParams: paramsAfterFirstQuery(),
+      waitForFileLoadedEntry: fileLoadedNext,
+      playlistEntryId: 7,
+      fileLoadedEpoch: 3,
+    );
+
+    expect(facts.dvCompatibilityId, isNull);
+    expect(facts.dvElPresent, isNull);
+    expect(facts.hdrVivid, isNull);
+  });
+
+  test('the -1 unknown sentinels and non-bool readings read as nulls',
+      () async {
+    final facts = await AndroidHdrBackend.gatherReviewFacts(
+      mediaUri: 'test://media',
+      expectedHwdec: 'mediacodec',
+      readProperty: reader(properties: const {
+        'current-tracks/video/dolby-vision-compatibility-id': '-1',
+        'current-tracks/video/dolby-vision-el-present': '-1',
+        'video-params/hdr-vivid': 'unknown',
+      }),
+      latestVideoParams: paramsAfterFirstQuery(),
+      waitForFileLoadedEntry: fileLoadedNext,
+      playlistEntryId: 7,
+      fileLoadedEpoch: 3,
+    );
+
+    expect(facts.dvCompatibilityId, isNull);
+    expect(facts.dvElPresent, isNull);
+    expect(facts.hdrVivid, isNull);
   });
 }
 

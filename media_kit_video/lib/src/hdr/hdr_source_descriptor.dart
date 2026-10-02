@@ -9,9 +9,10 @@ import 'hdr_output_policy.dart' show HdrMediaKind;
 ///
 /// The dynamic metadata format carried on top of the base layer, as far as
 /// it is knowable on this platform. Dolby Vision is detected from the
-/// decoder-reported `dolby-vision-profile`; HDR10+ and HDR Vivid are not
-/// exposed by mpv yet and stay [HdrDynamicMetadata.none] until a source for
-/// them exists.
+/// decoder-reported `dolby-vision-profile`; HDR Vivid from the fork's
+/// per-frame `video-params/hdr-vivid` side-data fact (0f7e6bec32+); HDR10+
+/// is not exposed by mpv yet and stays [HdrDynamicMetadata.none] until a
+/// source for it exists.
 ///
 /// {@endtemplate}
 enum HdrDynamicMetadata {
@@ -69,14 +70,21 @@ class HdrSourceDescriptor {
   /// Dolby Vision base-layer signal compatibility id (e.g. `1` for 8.1,
   /// `4` for 8.4, `2` for 8.2, `6` for profile 7, `0` for profile 5).
   ///
-  /// mpv does not expose it yet, so it is inferred from the base-layer
-  /// transfer function (`pq`→1, `hlg`→4, SDR gamma→2, profile 7→6,
-  /// profile 5→0) or carried over from a hint. `null` when unknown.
+  /// Authoritative from the container when the decoder review reports the
+  /// fork property `current-tracks/video/dolby-vision-compatibility-id`
+  /// (0f7e6bec32+) — the DOVI configuration record is the DV signaling
+  /// itself; otherwise it is inferred from the base-layer transfer function
+  /// (`pq`→1, `hlg`→4, SDR gamma→2, profile 7→6, profile 5→0) or carried
+  /// over from a hint. `null` when unknown.
   final int? dvCompatibilityId;
 
   /// Whether the stream carries a Dolby Vision enhancement layer (profile 7
-  /// FEL/MEL). `null` = unknown: mpv does not expose the flag yet, and
-  /// profile-7-dependent strategies must treat unknown as base-layer-only.
+  /// FEL/MEL). Authoritative from the container when the decoder review
+  /// reports the fork property `current-tracks/video/dolby-vision-el-present`
+  /// (0f7e6bec32+; the configuration record does not distinguish FEL/MEL).
+  /// `null` = unknown: the property is unavailable (no DOVI configuration
+  /// record, upstream mpv), and profile-7-dependent strategies must treat
+  /// unknown as base-layer-only.
   final bool? enhancementLayer;
 
   /// {@macro hdr_source_descriptor}
