@@ -458,6 +458,8 @@ class VideoState extends State<Video> with WidgetsBindingObserver {
   }
 }
 
+typedef VideoControlsBuilder = Widget Function(VideoState state);
+
 // --------------------------------------------------
 
 /// Makes the native window enter fullscreen.

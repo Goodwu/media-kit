@@ -131,8 +131,10 @@ jobs:
         with:
           name: media_kit_test_win32_x64
           path: media_kit_test/media_kit_test_win32_x64.7z
+      # The "vnext" draft-release automation is upstream-only: this fork's
+      # GITHUB_TOKEN stays read-only and its releases are published manually.
       - uses: softprops/action-gh-release@v2
-        if: github.ref == 'refs/heads/main'
+        if: github.repository == 'media-kit/media-kit' && github.ref == 'refs/heads/main'
         with:
           draft: true
           prerelease: false
@@ -170,7 +172,7 @@ jobs:
           name: media_kit_test_win32_arm64
           path: media_kit_test/media_kit_test_win32_arm64.7z
       - uses: softprops/action-gh-release@v1
-        if: github.ref == 'refs/heads/main'
+        if: github.repository == 'media-kit/media-kit' && github.ref == 'refs/heads/main'
         with:
           draft: true
           prerelease: false
@@ -212,7 +214,7 @@ jobs:
           name: media_kit_test_linux_x64
           path: media_kit_test/media_kit_test_linux_x64.7z
       - uses: softprops/action-gh-release@v2
-        if: github.ref == 'refs/heads/main'
+        if: github.repository == 'media-kit/media-kit' && github.ref == 'refs/heads/main'
         with:
           draft: true
           prerelease: false
@@ -242,7 +244,7 @@ jobs:
           name: media_kit_test_macos_universal
           path: media_kit_test/media_kit_test_macos_universal.7z
       - uses: softprops/action-gh-release@v2
-        if: github.ref == 'refs/heads/main'
+        if: github.repository == 'media-kit/media-kit' && github.ref == 'refs/heads/main'
         with:
           draft: true
           prerelease: false
@@ -272,7 +274,7 @@ jobs:
           name: media_kit_test_ios_arm64
           path: media_kit_test/media_kit_test_ios_arm64.7z
       - uses: softprops/action-gh-release@v2
-        if: github.ref == 'refs/heads/main'
+        if: github.repository == 'media-kit/media-kit' && github.ref == 'refs/heads/main'
         with:
           draft: true
           prerelease: false
@@ -320,7 +322,7 @@ jobs:
           name: media_kit_test_android-x86_64
           path: media_kit_test/build/app/outputs/flutter-apk/media_kit_test_android-x86_64.apk
       - uses: softprops/action-gh-release@v2
-        if: github.ref == 'refs/heads/main'
+        if: github.repository == 'media-kit/media-kit' && github.ref == 'refs/heads/main'
         with:
           draft: true
           prerelease: false
@@ -608,7 +610,9 @@ jobs:
 
   release-metadata:
     name: Release manifest and checksums
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # Upstream-only "vnext" release metadata: the fork's GITHUB_TOKEN stays
+    # read-only and its releases are published manually.
+    if: github.repository == 'media-kit/media-kit' && github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs:
       - windows
       - windows-arm64
@@ -779,6 +783,11 @@ jobs:
         working-directory: media_kit_hdr_lab
     steps:
       - uses: actions/checkout@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'

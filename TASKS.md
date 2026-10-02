@@ -29,11 +29,18 @@
 ## Next（近期候选，最多 10 条）
 
 - [ ] CI 修复：主 ci.yml 多 job 失败与 OHOS HAP 依赖解析（2026-10-02 登记）
-  - status: planned（登记后即最高优先工程项）
-  - context: archives/conversations/android-hdr-auto-output-20261002.md（OHOS CI 既有失败观察项）；提交 023905e2
+  - status: in_progress（五类已修复待 CI 验证；⑥单列）
+  - context: archives/experiments/ci-fix-20261002.md（根因/修复/验证全记录）；archives/conversations/android-hdr-auto-output-20261002.md（观察项来源）
   - acceptance: 失败 job 逐一定位根因并修复；主 ci.yml 全 job 绿或明确豁免登记；OHOS HAP "Resolve locked dependencies"（exit 65）根治或明确归因登记；`libmpv-jar-identity` 保持 success；修复前后失败集合差异为零（不引入新失败）。
-  - latest: 主 ci.yml 自 2026-10-01 `0f1b417d` 起 Windows/macOS/iOS/Android/Linux/Web/hdr_lab 多 job 失败；`420fba3e`（改动前最后完成 run）即已同集合失败，非后续改动引入；`libmpv-jar-identity` 新 run success。OHOS HAP 同期起每提交失败。
-  - next: 拉取失败 run 日志定位根因（疑似依赖/环境漂移层），逐 job 修复。
+  - latest: **五类修复完成（2026-10-02 深夜，本地验证全绿）**：①lockfile 最小差异再生成（420fba3e 升版未同步两 lock，主 1 行/OHOS 36 行）；②vnext release 步骤 7 处加 `github.repository == 'media-kit/media-kit'` 门禁（fork GITHUB_TOKEN 只读，该自动化在本 fork main 从未成功——此前"最后全绿 run"实为分支 workflow_dispatch）；③MetalSurfaceBlitter gpuStartTime 加 `#available(macOS 10.15, iOS 10.0, *)` 守卫（podspec 平台 10.9，我方 P1-6 引入）；④web/wasm 编译桩补齐（VideoControlsBuilder typedef、AndroidVideoController 四静态成员、WebPlayer/native-stub 三方法，R2.5 透传语义全抛错）；⑤hdr_lab 提交 gradle wrapper 三件套 + job 补 setup-java（JVM 测试本地 BUILD SUCCESSFUL）。**⑥Windows 原生崩溃单列下方任务**。另更正：主 ci 失败非"10-01 起"，09-30 首个 main run 即失败且早于当日改动。
+  - next: 提交推送后观察新 run：目标除 Windows tests 外全绿、`libmpv-jar-identity` 保持绿、OHOS 过依赖解析步；失败集合与 37027288889（修复前基线）对比归零（除⑥）。
+
+- [ ] Windows package tests 原生崩溃调查（fork 特有回归，自 CI 修复任务分出）
+  - status: planned
+  - context: archives/experiments/ci-fix-20261002.md（⑥节：崩溃上下文与归因边界）
+  - acceptance: 定位崩溃套件与根因并修复（或实证归因为环境/上游并登记豁免）；`package:media_kit tests (Windows)` 恢复 success。
+  - latest: 0xC0000005（access violation）pc 在 libmpv-2.dll（CI 钉定 mpv-dev 2023-08-11 件）内；`asset-loader-encode-asset-key` 通过后约 5s、下一播放类套件崩溃（早于用例名输出）。上游 media-kit 同 workflow 8b4d3afc（09-29 PR run）Windows tests **success** → fork 特有回归；窗口 ad22c36a（09-01 绿）→ eacc799a（09-30 首败）= 上游合并 a886f556（63 冲突裁定）+ 期间我方提交。本地 macOS 无法复现（media_kit VM 套件缺 Mpv.framework，72 项既有环境失败）。
+  - next: 用 workflow_dispatch 在临时分支二分窗口（`run_package_tests=true`，不动 main）；首查 a886f556 对 media_kit player/native 路径的冲突裁定；Web 单测 player-set-shuffle 单例失败（37002149440 轮）复看并入，持续则同查。
 
 - [ ] FFmpeg P5 RPU 整改版（`b4d2ea4ffb`）按测试计划验证（2026-10-02 登记）
   - status: planned

@@ -12,6 +12,29 @@ import 'package:media_kit_video/src/video_controller/platform_video_controller.d
 class AndroidVideoController extends PlatformVideoController {
   static const bool supported = false;
 
+  // Web compile-face stubs for the HDR capability-change members used by
+  // HdrVideoSession (Phase 1 R2.5 passthrough semantics). All call sites are
+  // behind the session's Android gate, so none of these is reachable on web.
+
+  static void registerHdrCapabilitiesChangedListener(
+    HdrCapabilitiesChangedListener listener,
+  ) =>
+      throw UnimplementedError();
+
+  static bool unregisterHdrCapabilitiesChangedListener(
+    HdrCapabilitiesChangedListener listener,
+  ) =>
+      throw UnimplementedError();
+
+  static Future<void> setHdrCapabilitiesChangedEnabled(bool enabled) =>
+      throw UnimplementedError();
+
+  static Future<Map<String, Object?>?> invokeApplyDataSpace({
+    required int handle,
+    required String transfer,
+  }) =>
+      throw UnimplementedError();
+
   AndroidVideoController._(
     super.player,
     super.configuration,

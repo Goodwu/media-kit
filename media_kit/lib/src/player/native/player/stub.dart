@@ -19,4 +19,39 @@ class NativePlayer extends PlatformPlayer {
   /// Whether the [NativePlayer] is initialized for unit-testing.
   @visibleForTesting
   static bool test = false;
+
+  // Compile-face parity with the io [NativePlayer]: under `--wasm`, this stub
+  // is what media_kit code compiles against, so the mpv property/command
+  // surface used by the HDR backend must exist (it always throws here).
+
+  /// Raw mpv property access parity with the io [NativePlayer].
+  Future<void> setPropertyStrict(
+    String property,
+    String value, {
+    bool waitForInitialization = true,
+  }) async {
+    throw UnsupportedError(
+      '[NativePlayer.setPropertyStrict] is not supported in the wasm compile stub: the native player requires dart:ffi',
+    );
+  }
+
+  /// Raw mpv property access parity with the io [NativePlayer].
+  Future<String> getProperty(
+    String property, {
+    bool waitForInitialization = true,
+  }) async {
+    throw UnsupportedError(
+      '[NativePlayer.getProperty] is not supported in the wasm compile stub: the native player requires dart:ffi',
+    );
+  }
+
+  /// Raw mpv command invocation parity with the io [NativePlayer].
+  Future<void> command(
+    List<String> command, {
+    bool waitForInitialization = true,
+  }) async {
+    throw UnsupportedError(
+      '[NativePlayer.command] is not supported in the wasm compile stub: the native player requires dart:ffi',
+    );
+  }
 }

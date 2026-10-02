@@ -1492,6 +1492,43 @@ class WebPlayer extends PlatformPlayer {
     );
   }
 
+  /// Raw mpv property access parity with [NativePlayer].
+  /// The web `<video>` player has no internal libmpv instance, so the mpv
+  /// property surface is not exposed.
+  Future<void> setPropertyStrict(
+    String property,
+    String value, {
+    bool waitForInitialization = true,
+  }) async {
+    throw UnsupportedError(
+      '[WebPlayer.setPropertyStrict] is not supported on web: the web player does not expose the mpv property surface',
+    );
+  }
+
+  /// Raw mpv property access parity with [NativePlayer].
+  /// The web `<video>` player has no internal libmpv instance, so the mpv
+  /// property surface is not exposed.
+  Future<String> getProperty(
+    String property, {
+    bool waitForInitialization = true,
+  }) async {
+    throw UnsupportedError(
+      '[WebPlayer.getProperty] is not supported on web: the web player does not expose the mpv property surface',
+    );
+  }
+
+  /// Raw mpv command invocation parity with [NativePlayer].
+  /// The web `<video>` player has no internal libmpv instance, so the mpv
+  /// command surface is not exposed.
+  Future<void> command(
+    List<String> command, {
+    bool waitForInitialization = true,
+  }) async {
+    throw UnsupportedError(
+      '[WebPlayer.command] is not supported on web: the web player does not expose the mpv command surface',
+    );
+  }
+
   void _loadSource(Media media) {
     try {
       if (_isHLS(media.uri)) {
