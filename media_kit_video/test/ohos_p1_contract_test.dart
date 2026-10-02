@@ -105,7 +105,7 @@ void main() {
       'native surface destroy must not switch to a Texture/SDR fallback before the replacement surface is ready');
 
   final reset =
-      controller.indexOf('Future<HdrOutputReport> resetHdrOutput()');
+      controller.indexOf('Future<HdrTransactionReport> resetHdrOutput()');
   final noSurface = controller.indexOf(
       'id == null || id == 0 || !nativeSurfaceActive', reset);
   final sdrWrite = controller.indexOf('_applySdrMpvProperties()', noSurface);

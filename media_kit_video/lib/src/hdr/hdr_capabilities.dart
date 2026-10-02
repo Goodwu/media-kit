@@ -244,8 +244,8 @@ class HdrCapabilities {
 
   /// Parses the raw native snapshot. Malformed or missing fields degrade to
   /// the safe defaults: no capability report (null displayHdrTypes), no
-  /// decoders, no bridge, no extension.
-  @visibleForTesting
+  /// decoders, no bridge, no extension. Also used by the session to parse
+  /// the `HdrCapabilities.Changed` event payload.
   static HdrCapabilities parseSnapshot(
     Map<Object?, Object?>? snapshot, {
     required bool p5PipelineAvailable,

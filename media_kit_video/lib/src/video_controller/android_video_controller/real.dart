@@ -104,6 +104,12 @@ Size calculateAndroidTextureOutputSizeForLayouts(
 /// The [PlatformVideoController] implementation based on native JNI & C/C++ used on Android.
 ///
 /// {@endtemplate}
+/// A listener for the native `HdrCapabilities.Changed` event. The arguments
+/// carry the full `HdrCapabilities.Get` snapshot map.
+typedef HdrCapabilitiesChangedListener = void Function(
+  Map<Object?, Object?> snapshot,
+);
+
 class AndroidVideoController extends PlatformVideoController {
   /// Whether [AndroidVideoController] is supported on the current platform or not.
   static bool get supported => Platform.isAndroid;
@@ -1038,6 +1044,45 @@ class AndroidVideoController extends PlatformVideoController {
     return _channel.invokeMapMethod<String, dynamic>(
       'PlatformVideoView.ApplyDataSpace',
       {'handle': handle.toString(), 'transfer': transfer},
+    );
+  }
+
+  /// Listeners for the native `HdrCapabilities.Changed` event (display HDR
+  /// capability changes, e.g. the system HDR toggle or a display switch).
+  /// The session consumes these to republish capability reports.
+  static final List<HdrCapabilitiesChangedListener>
+      _hdrCapabilitiesChangedListeners =
+      <HdrCapabilitiesChangedListener>[];
+
+  /// Registers a `HdrCapabilities.Changed` listener. Idempotent.
+  static void registerHdrCapabilitiesChangedListener(
+    HdrCapabilitiesChangedListener listener,
+  ) {
+    if (!_hdrCapabilitiesChangedListeners.contains(listener)) {
+      _hdrCapabilitiesChangedListeners.add(listener);
+    }
+  }
+
+  /// Removes a previously registered listener. Returns whether it was
+  /// registered.
+  static bool unregisterHdrCapabilitiesChangedListener(
+    HdrCapabilitiesChangedListener listener,
+  ) {
+    return _hdrCapabilitiesChangedListeners.remove(listener);
+  }
+
+  /// Subscribes (or unsubscribes) Dart to native default-display changes.
+  /// Every matching change re-sends the full `HdrCapabilities.Get` snapshot
+  /// as a `HdrCapabilities.Changed` method call on the shared channel.
+  ///
+  /// The enable is a shared channel switch, not per-subscriber: with several
+  /// [HdrVideoSession]s alive, one disposing closes the subscription for the
+  /// survivors. Phase 1 assumes a single session per process; revisit with a
+  /// reference count if that ever changes.
+  static Future<void> setHdrCapabilitiesChangedEnabled(bool enabled) {
+    return _channel.invokeMethod<Object?>(
+      'HdrCapabilities.Changed',
+      {'enable': enabled},
     );
   }
 
@@ -2012,6 +2057,27 @@ class AndroidVideoController extends PlatformVideoController {
                   surfaceGeneration,
                   fallbackIntentSerial,
                 );
+              }
+              break;
+            }
+          case 'HdrCapabilities.Changed':
+            {
+              // Native default-display change: forward the full capability
+              // snapshot to registered listeners (the HDR session
+              // republishes and re-plans from it).
+              final arguments = call.arguments;
+              if (arguments is Map) {
+                final snapshot = Map<Object?, Object?>.from(arguments);
+                final listeners = List<HdrCapabilitiesChangedListener>
+                    .unmodifiable(_hdrCapabilitiesChangedListeners);
+                for (final listener in listeners) {
+                  try {
+                    listener(snapshot);
+                  } catch (error, stacktrace) {
+                    debugPrint(error.toString());
+                    debugPrint(stacktrace.toString());
+                  }
+                }
               }
               break;
             }
