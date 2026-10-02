@@ -402,17 +402,17 @@ void main() {
   group('maturity gate (verification 3)', () {
     test('gate closed: experimental strategies are skipped with a reason', () {
       final HdrCapabilities lya = lyaCaps();
-      // Pure HLG: direct/convert/tone-map are all experimental for the hlg
-      // class (section 6 has only the P8.4-derived evidence), so the default
-      // policy tone-maps via the safety net.
+      // P7: direct/reshape/tone-map are all experimental for the dvP7 class
+      // (no long P7 sample has validated them), so the default policy
+      // tone-maps via the safety net.
       final HdrRoutePrediction prediction =
-          lya.predict(sources[HdrSourceClass.hlg]!);
+          lya.predict(sources[HdrSourceClass.dvP7]!);
       expect(prediction.selected.strategy, HdrStrategy.toneMapSdr);
       expect(prediction.candidates, hasLength(4));
       expect(prediction.candidates[0].strategy, HdrStrategy.baseLayerDirect);
       expect(prediction.candidates[0].skipReason,
           HdrDegradeReason.experimentalStrategySkipped);
-      expect(prediction.candidates[1].strategy, HdrStrategy.baseLayerConvert);
+      expect(prediction.candidates[1].strategy, HdrStrategy.metadataReshape);
       expect(prediction.candidates[1].skipReason,
           HdrDegradeReason.experimentalStrategySkipped);
       expect(prediction.candidates[2].strategy, HdrStrategy.toneMapSdr);
@@ -422,21 +422,21 @@ void main() {
       expect(prediction.candidates.last.skipReason, isNull);
       expect(prediction.playable, isTrue);
       checkInvariants(prediction,
-          cls: HdrSourceClass.hlg, capabilities: lya, allowExperimental: false);
+          cls: HdrSourceClass.dvP7, capabilities: lya, allowExperimental: false);
     });
 
     test('gate open: the same experimental strategy is selected', () {
       final HdrCapabilities lya = lyaCaps();
       final HdrRoutePrediction prediction = lya.predict(
-        sources[HdrSourceClass.hlg]!,
+        sources[HdrSourceClass.dvP7]!,
         policy: const HdrRoutingPolicy(allowExperimental: true),
       );
       expect(prediction.selected.strategy, HdrStrategy.baseLayerDirect);
       expect(prediction.selected.maturity, HdrStrategyMaturity.experimental);
       expect(prediction.selected.route!.vo, 'mediacodec_embed');
-      expect(prediction.selected.route!.outputTransfer, HdrOutputTransfer.hlg);
+      expect(prediction.selected.route!.outputTransfer, HdrOutputTransfer.pq);
       checkInvariants(prediction,
-          cls: HdrSourceClass.hlg, capabilities: lya, allowExperimental: true);
+          cls: HdrSourceClass.dvP7, capabilities: lya, allowExperimental: true);
     });
 
     test('inherited maturity is selected with the gate closed', () {
@@ -527,11 +527,11 @@ void main() {
           HdrRouteDependency.dataspacePq: HdrDegradeReason.dataSpaceApplyFailed,
         },
       );
-      final HdrCandidate convert = prediction.candidates
-          .firstWhere((HdrCandidate c) => c.strategy == HdrStrategy.baseLayerConvert);
-      // The maturity gate runs first, so the experimental conversion is
+      final HdrCandidate reshape = prediction.candidates
+          .firstWhere((HdrCandidate c) => c.strategy == HdrStrategy.metadataReshape);
+      // The maturity gate runs first, so the experimental reshape is
       // reported as gated, not as excluded.
-      expect(convert.skipReason,
+      expect(reshape.skipReason,
           HdrDegradeReason.experimentalStrategySkipped);
       expect(prediction.selected.strategy, HdrStrategy.toneMapSdr);
     });
@@ -827,7 +827,7 @@ void main() {
       );
       // The tone-map safety net has no dataspace/platformView dependency.
       expect(
-        lya.predict(sources[HdrSourceClass.hlg]!).selected.route!.dependencies,
+        lya.predict(sources[HdrSourceClass.dvP7]!).selected.route!.dependencies,
         <String>{HdrRouteDependency.hwdecMediacodec},
       );
       // Conversion to HLG (HDR10 base on an HLG-only display, gate open —

@@ -277,9 +277,9 @@ void main() {
     test('full candidate list with unsupported and gate skips (golden)', () {
       enable();
       // P8.4 on the LYA-like snapshot with the default policy: the reserved
-      // native DV strategy is unsupported, the PQ conversion and the RPU
-      // reshape are behind the experimental gate, direct and tone-map are
-      // feasible.
+      // native DV strategy is unsupported, the RPU reshape is behind the
+      // experimental gate, direct, the PQ conversion and tone-map are
+      // feasible (convert upgraded 2026-10-02 after human observation).
       HdrRoutePlanner.plan(source: p84, capabilities: caps());
       expect(
         lines.single,
@@ -288,7 +288,7 @@ void main() {
         'presentation=nativeHdr confidence=verified playable=true '
         'candidates=nativeDolbyVision:unsupportedStrategy,'
         'baseLayerDirect:ok,'
-        'baseLayerConvert:experimentalStrategySkipped,'
+        'baseLayerConvert:ok,'
         'metadataReshape:experimentalStrategySkipped,'
         'toneMapSdr:ok',
       );
@@ -315,7 +315,7 @@ void main() {
       expect(candidates, <String>[
         'nativeDolbyVision:unsupportedStrategy',
         'baseLayerDirect:ok',
-        'baseLayerConvert:experimentalStrategySkipped',
+        'baseLayerConvert:ok',
         'metadataReshape:experimentalStrategySkipped',
         'toneMapSdr:ok',
       ]);
