@@ -69,9 +69,22 @@ dataspace 读回（P5）：`requested=pq path=ext:lya-pq readback=DATASPACE_BT20
 - **重建/降级路径**（第 7 节 ≤2.0s）：A4 终态路由 applied ~1.0–1.3s（日志推算）；中间 SDR Texture 路由先出画面，无黑场间隔（重建期间持续有内容）。像素探针只测首个内容帧，"终态路由像素级首帧"未单独测量（记录测量口径）。
 - 4K60 负载：A6 reshape 轮 time-pos 97.8s 处 frame-drop=0；设备连续轮次后段电池 40.0°C（热状态归因基线 41°C 附近，本轮无独立温控对照——按第 7 节要求记录，4K60 对比测试需同温条件另行安排）。
 
-## A7/A8（PiliPlusX 接入）与缺口
+## A7 实机（PiliPlusX 接入版，LYA，构建 34663c59→4368e7c7）
 
-- A7/A8 属 S12（PiliPlusX 仓），未在本轮范围。
+- **首轮抓到接入缺陷**：session.open 在视频视图挂载前发起 + 视图挂载又等控制器发布 → 三方循环等待 → 10s outputBindTimeout、画面黑。worker 定位为**双向等待死锁**（open→视图、视图→输出绑定、输出绑定→控制器发布），修复（App 侧三处）：onInit 提前、挂载条件放宽（Rxn 订阅会话创建）、open 前等视图挂载（15s 超时兜底由会话降级接手，audio-only 跳过）。修复后构建 `4368e7c79b51286c`。
+- **BV1vY4y1N7TY（P8.4/HLG，URL intent）**：`HDR predict: quality=126, codec=dvh1.08.07, playable=true, presentation=nativeHdr, selected=baseLayerDirect, presentable=true`（预测门保留 HDR 档）→ `HDR dvProfile stats: dvProfile=8, compatId=4, strategy=baseLayerDirect, presentation=nativeHdr, confidence=verified` → SF 层 `BT2020_ITU_HLG (302383104)` → 播放中拖拽 seek 后输出持续正常、零降级零失败。**app 内 HDR 全链 ✓**（app 能展示的 HDR 路由文案在播放信息面板，长按该行 seek +60s 钩子已实现——面板导航未走通，seek 以进度条拖拽验证）。
+- **SDR 信息流（h264，quality 120）**：`HDR dvProfile stats: dvProfile=none, strategy=sdrDirect, presentation=sdr, confidence=verified, degrade=none` ✓。
+- **缺口（诚实记录）**：HDR10 与本地 P5 的 app 内轮次未覆盖（无已知 HDR10 BVID；信息流 DV 演示卡点击未注册；本地播放入口未自动化）——库侧同一路由证据已在 S10 穷尽；app 内 seek 经进度条拖拽验证（长按钩子留待人工路径）。
+- PiliPlusX 仓提交：`f7470fd09`（前会话记录补录）+ `2995115399`（S12 接入）+ `7721a1e92`（死锁修复；修复构建 4368e7c7 与本提交对应，V1 Reviewer 逐行覆盖后提交即闭）。数字更正：hdr.dart 1092→**1043** 行；全仓测试 **81/81**（hdr_test.dart 40）。首轮黑屏截图 a7-bv-2.png 未及归档（/tmp 已清），以 a7-bv-2 描述与日志为准。
+
+## A8（PiliPlusX diff 审查）
+
+- Worker 自证：新增行仅会话 API 调用/偏好常量/展示/事件；`usePlatformView: false` 常量与 `useHCPP: ohosNativeSurface` 为前会话参数迁移的 OHOS 路径遗留，非新增 Android 判断。
+- 红线 grep 实况：新增行命中 5 处，分解为 3 处 TASKS/归档**文档记录**（描述历史）+ 2 处上述迁移遗留——无 Android 设备判断新增。A8 正式判定由 V1 Reviewer 复核。
+
+## A7/A8 之外的缺口
+
+- P8.1 升级确认受样片阻塞；Mi Note 3 不在位（A3-3/S2 验证 4）；`HdrCapabilities.query` 强制 Player（进程首个视频的 P5 预测保守回落 SDR，P8.4/HDR10/HLG 不受影响）——已建议库侧提供无 Player 查询入口（登记 S13 后续）。
 - 缺口：Mi Note 3 不在位（A3-3）；P8.1 长样片不存在（升级确认阻塞）；A6/A1-HLG 升级的人工观察待用户；全屏中控制器替换的实机精确时序未单独隔离；终态路由像素级首帧未单独测量（口径记录）。
 
 ## 结论
