@@ -49,7 +49,7 @@
   - context: archives/conversations/android-hdr-auto-output-20261002.md
   - ①人工观察：LYA 上看 a1-hlg-gate-85（纯 HLG 直出）与 a6-reshape（P8.4 RPU 重建 PQ）两轮画面；确认后把需求第 6 节 P8.4×baseLayerConvert 与 HLG×baseLayerDirect 升 verified 并同步代码常量表（S3 解析单测锁定两处同步）。
   - ②R3.1 口径文字：开播前规划相的候选跳过以报告候选原因披露、不发 Degraded（A3-2 实测口径，Lead 决策记录在 conversation）——是否落进需求 R3.1 文字由用户定。
-  - latest: **两项全部完成（2026-10-02 晚）**。②R3.1 注记落文。①观察执行：graypatch 数值图案无人工判读价值（用户反馈），改用真实 HLG 内容（user-hdr-vivid 样片）+ P8.4 reshape 两轮，均"画面正常"确认；两格升 verified（需求第 6 节+常量表+S3 测试同步），**默认路由随之变更**（HLG 源缺省直出、无 HLG 屏 P8.4 走 convert），6 个旧断言测试改写，204/204 + hdr_lab 48/48。观察日志 `~/src/media-kit-build/evidence/hdr-observation-20261002/`。附带观察：**OHOS CI（Build OHOS unsigned HAP）自 10-01 起既有失败**（依赖解析 exit 65，非本轮引入），待单列排查。
+  - latest: **两项全部完成（2026-10-02 晚）**。②R3.1 注记落文。①观察执行：graypatch 数值图案无人工判读价值（用户反馈），改用真实 HLG 内容（user-hdr-vivid 样片）+ P8.4 reshape 两轮，均"画面正常"确认；两格升 verified（需求第 6 节+常量表+S3 测试同步），**默认路由随之变更**（HLG 源缺省直出、无 HLG 屏 P8.4 走 convert），6 个旧断言测试改写，204/204 + hdr_lab 48/48。观察日志 `~/src/media-kit-build/evidence/hdr-observation-20261002/`。附带观察：**OHOS CI 与主 ci.yml 多 job 自 10-01 起既有失败**（依赖/环境层，失败集合与改动前基线一致；`libmpv-jar-identity` 新 run success），CI 修复待单列任务。
 
 - [ ] OHOS HDR 能力路由支持（Phase 2，2026-10-02 显式登记）
   - status: planned
