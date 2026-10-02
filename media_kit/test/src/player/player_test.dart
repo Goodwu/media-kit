@@ -2326,8 +2326,12 @@ void main() {
 
       final playable = Playlist(
         [
-          for (int i = 0; i < sources.platform.length; i++)
-            Media(sources.platform[i], extras: {'i': i}),
+          // 10 entries cycling the platform sources: with 4 entries a random
+          // shuffle lands back on the identical order 1-in-24 times, and the
+          // distinct playlist stream then emits no event for it, failing the
+          // order-change expectation below.
+          for (int i = 0; i < 10; i++)
+            Media(sources.platform[i % sources.platform.length], extras: {'i': i}),
         ],
       );
 
@@ -2390,8 +2394,10 @@ void main() {
 
       final playable = Playlist(
         [
-          for (int i = 0; i < sources.platform.length; i++)
-            Media(sources.platform[i], extras: {'i': i}),
+          // See player-set-shuffle: 10 entries make an unchanged shuffle
+          // order practically impossible (the distinct stream would drop it).
+          for (int i = 0; i < 10; i++)
+            Media(sources.platform[i % sources.platform.length], extras: {'i': i}),
         ],
       );
 

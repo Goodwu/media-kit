@@ -29,11 +29,11 @@
 ## Next（近期候选，最多 10 条）
 
 - [ ] player-set-shuffle(-consecutive) 概率性 flaky 测试处置（上游同源，2026-10-03 定性登记）
-  - status: planned（低优先；上游同样偶发）
+  - status: in_progress（修复已推送待 CI 验证）
   - context: archives/experiments/ci-fix-20261002.md（终验节：机制与证据链）
   - acceptance: 随机洗牌未变序时测试不再误报（本地无法跑 player 套件——缺 libmpv 环境，需 CI run 验证）；处置方式（本地改测试 vs 提报上游）定案。
-  - latest: Linux/Web CI 偶发失败同一测试（420fba3e 轮 Web 挂姊妹用例 player-set-shuffle）。机制：`player.stream.playlist` 为 `_DistinctStream` 去重，mpv `playlist-shuffle` 4 项有 1/24 概率洗回原序 → 事件被吞 → 测试按"必变序"断言失败（日志实测 Stream closed 无第二事件）。证据：ff780809..420fba3e 窗口 media_kit 根包零提交；测试文件最后变更=a886f556 合并；**上游 media-kit run 36586434948（09-29）Web job 挂的正是同一测试**。
-  - next: 排期后处置：候选=测试内对未变序情形重洗/容忍（本地改，注意上游合并冲突面）或提报上游；改动需一次 CI run 验证。
+  - latest: **机制修正（2026-10-03 深夜复查测试源码）**：`setShuffle` 为状态门控（连续 5 次调用只在 false→true 跃迁时洗一次牌），单次 4 项随机排列 1/24 概率回原序 → `_DistinctStream` 吞掉事件 → 与日志"仅初始事件后 Stream closed"精确吻合。**修复**：两测试播放列表扩至 10 项（循环复用 sources.platform、extras 区分条目），碰撞概率降至 1/10!≈2.8e-7；media_kit analyze 4 基线不变。处置方式定为本地修（后续可考虑回馈上游）。
+  - next: 推送后 CI package tests（Linux/Web）复跑确认；持续绿则打勾收口。
 
 - [ ] Windows package tests 原生崩溃调查 + mpv-dev 夹具现代化（fork 特有回归，自 CI 修复任务分出）
   - status: planned
