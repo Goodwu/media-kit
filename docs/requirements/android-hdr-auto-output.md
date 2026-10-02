@@ -231,11 +231,11 @@ Phase 1 只做 Android。darwin（三事实交集门禁、final24 运行时禁�
 | HDR10 | baseLayerDirect | verified | 12703–12708 |
 | HDR10 | baseLayerConvert | experimental | 策略中有 `preferGpuOutput`，矩阵未单列 |
 | HDR10 | toneMapSdr | verified | Texture→SDR 首帧受控轮 |
-| HLG | baseLayerDirect | experimental | 只有 P8.4 剥 RPU 对照，缺纯 HLG 样片轮（本地 `HDR Vivid_HLG` 可用作基础层） |
+| HLG | baseLayerDirect | verified | a1-hlg-gate-85（SF HLG 层、60s+、零失败）+ 2026-10-02 人工观察确认（真实 HLG 内容直出画面正常） |
 | DV P5 | metadataReshape | verified | 12703–12708，全片 EOS |
 | DV P5 | toneMapSdr | verified | P0 P5→Texture SDR 默认开启，真人确认 |
 | DV P8.4 | baseLayerDirect | verified | 12703–12708 |
-| DV P8.4 | baseLayerConvert | experimental | `forceP84PqFallback` 模拟路径存在，需要单列一轮实机验证后升级 |
+| DV P8.4 | baseLayerConvert | verified | A3-2 模拟无 HLG 落 convert（PQ、读回/SF 一致、97.9s 续播）+ 2026-10-02 人工观察确认（P8.4 RPU 重建 PQ 画面正常） |
 | DV P8.4 | metadataReshape | experimental | 重建管线只在 P5 验证过 |
 | DV P8.4 | toneMapSdr | verified | 12703–12708 SDR 对照 |
 | DV P8.1 | baseLayerDirect | inherited | 机制同 HDR10 直出；P8.4 直出已证明 LYA 的 HEVC 解码器能容忍 RPU NAL；缺样片确认 |
@@ -263,7 +263,7 @@ Phase 1 只做 Android。darwin（三事实交集门禁、final24 运行时禁�
 - 测试面：`HdrOutputPolicy` 既有 11 项单测不回归（分类修复后对应用例同步修订）。hdr_lab 已有的 coordinator、slot、intent、disposal 单测迁入库内后继续通过。编排层新增行为要有 VM 单测。
 - 当前只有一台 HDR 实机（LYA，API 29，依赖私有回退）。公开 NDK 直接成功的路径（API 30–33）和 SurfaceControl 路径（API≥34）缺少实机证据，相关预测置信度标为 `unverified`。新设备接入后，先跑现有矩阵，再补其他验证。
 - P5 管线判定使用选项存在性作为代理（R1.4），较早的 fork 世代会被判为不可用。（注记 2026-10-02：该代理已退役，判定改为 fork 只读属性 `dovi-p5-pipeline` 经 bridge 探针，见 R1.4 注记——本条限制不再适用。）
-- （2026-10-02 实机登记）**HDR Vivid 事实在 mediacodec 路径不可观测**：Android MediaCodec 解码不向输出帧传播 CUVA 005.1 逐帧 side data，会话路由全部强制 `hwdec=mediacodec`，因此 `video-params/hdr-vivid` 在硬解路径恒 false、Vivid 源按基础层分类（实测 `archives/experiments/android-hdr-planb-device-facts-20261002.md` R1/R1b：软解 `hwdec=no` 下同一属性读 true，归因为解码通道剥离而非属性缺陷）。路由结果不受影响（hdrVivid 与基础层 HLG 在缺省策略下同为 tone-map 安全网），仅报告的元数据格式在硬解路径按基础层显示。库不为此切换软解路由（4K 软解不可行）；Vivid 元数据的可靠检测需 demuxer/码流级 SEI 探测，归入 ② 完整目标（动态元数据重建扩展）。
+- （2026-10-02 实机登记）**HDR Vivid 事实在 mediacodec 路径不可观测**：Android MediaCodec 解码不向输出帧传播 CUVA 005.1 逐帧 side data，会话路由全部强制 `hwdec=mediacodec`，因此 `video-params/hdr-vivid` 在硬解路径恒 false、Vivid 源按基础层分类（实测 `archives/experiments/android-hdr-planb-device-facts-20261002.md` R1/R1b：软解 `hwdec=no` 下同一属性读 true，归因为解码通道剥离而非属性缺陷）。路由结果不受影响是指不产生错误着色；直出/转换的具体档位随第 6 节成熟度更新——2026-10-02 HLG×baseLayerDirect 升 verified 后，硬解路径的 Vivid 源按基础层 HLG 分类并默认直出，报告的元数据格式仍按基础层显示。库不为此切换软解路由（4K 软解不可行）；Vivid 元数据的可靠检测需 demuxer/码流级 SEI 探测，归入 ② 完整目标（动态元数据重建扩展）。
 
 ## 9. 修订记录
 

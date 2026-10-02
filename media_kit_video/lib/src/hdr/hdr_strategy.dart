@@ -181,7 +181,7 @@ class HdrStrategyMaturityTable {
     HdrSourceClass.hlg: <HdrStrategy, HdrStrategyMaturity>{
       HdrStrategy.nativeDolbyVision: HdrStrategyMaturity.unsupported,
       HdrStrategy.baseLayerDirect: HdrStrategyMaturity
-          .experimental, // 仅 P8.4 剥 RPU 对照，缺纯 HLG 样片轮
+          .verified, // a1-hlg-gate-85 + 2026-10-02 人工观察（真实 HLG 内容直出）
       HdrStrategy.baseLayerConvert: HdrStrategyMaturity.experimental,
       HdrStrategy.metadataReshape: HdrStrategyMaturity.experimental,
       HdrStrategy.toneMapSdr: HdrStrategyMaturity.experimental,
@@ -221,7 +221,7 @@ class HdrStrategyMaturityTable {
       HdrStrategy.nativeDolbyVision: HdrStrategyMaturity.unsupported, // R7
       HdrStrategy.baseLayerDirect: HdrStrategyMaturity.verified, // 12703–12708
       HdrStrategy.baseLayerConvert: HdrStrategyMaturity
-          .experimental, // 需单列实机验证后升级
+          .verified, // A3-2 模拟无 HLG 落 convert + 2026-10-02 人工观察
       HdrStrategy.metadataReshape: HdrStrategyMaturity
           .experimental, // 重建管线只在 P5 验证过
       HdrStrategy.toneMapSdr: HdrStrategyMaturity

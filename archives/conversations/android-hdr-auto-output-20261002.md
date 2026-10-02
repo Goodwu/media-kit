@@ -2,6 +2,11 @@
 
 ## Current State
 
+- **人工观察①完成 + 两格升格 verified（2026-10-02 晚，用户两轮确认）**：
+  - **观察执行**：Round 1 首用 DVS graypatch 被用户反馈"肉眼难以确认"（数值图案无人工判读价值，如实记录）；改用用户提供的真实 HLG 内容（user-hdr-vivid 样片 hlg 基底层，硬解路径按基础层分类，恰好是 hlg×baseLayerDirect 的真实内容载体）。两轮均在新 JAR（cafef3a4）+ 当前代码上复跑：Round 1 真实内容 HLG 直出（SF `BT2020_ITU_HLG`、循环播放）→ 用户确认"画面正常"；Round 2 P8.4 RPU 重建 PQ（`HDR_SESSION_ACTUAL: metadataReshape, nativeHdr, output: pq, dynamic: true`、预测==实际、SF `BT2020_PQ`）→ 用户确认"画面正常"。观察日志归档 `~/src/media-kit-build/evidence/hdr-observation-20261002/`（含 graypatch 首轮）；设备纪律恢复（原包 12492/自动亮度/熄屏核验通过）。
+  - **升格落地**：需求第 6 节与代码常量表同步升 `HLG×baseLayerDirect`、`DV P8.4×baseLayerConvert` 两格 verified（S3 解析单测锁定同步）；需求第 8 节 Vivid 限制注记随之修订（HLG 直出升格后，硬解路径 Vivid 源按基础层默认直出而非 tone-map）。
+  - **默认路由变更（升格生效的实质）**：HLG 源缺省策略从 tone-map 安全网改为 HLG 直出；无 HLG 显示器上的 P8.4 从 tone-map 改为 convert(PQ)。6 个按旧表断言的测试按新真值改写（gate/dvP7 示例替换、golden convert:ok），204/204、analyze 18 基线、hdr_lab 48/48 analyze 0。
+  - **OHOS CI 既有失败（观察项，非本轮引入）**：`Build OHOS unsigned HAP` 自 2026-10-01 `0f1b417d` 起每提交在 "Resolve locked dependencies" 失败（exit 65），早于今日全部改动；待单列排查。
 - **发布链 v2026.011 + R3.1 口径落文（2026-10-02 晚，用户指令执行）**：
   - **命名规则变更（用户决策）**：release 命名改为 `年.年内序号`三位补零（v2026.011 = 2026 年第 11 次发布；v2026.09/10 即第 9/10 次），消除 YY.MM 月份歧义。先建的 v2026.11 release/tag 已删除重建为 v2026.011。
   - **三件套完成**：mpv tag `media-kit-v2026.011`（d24c59905b，已推送）；GitHub release [libmpv-android-v2026.011](https://github.com/Goodwu/media-kit/releases/tag/libmpv-android-v2026.011)（资产 media-kit-d24c59905-arm64-v8a.jar，SHA cafef3a4…，说明含命名规则与实机验证指针）；build.gradle arm64 钉定与 libs CHANGELOG 溯源更新；CI `libmpv-jar-identity` 标记加 `dovi-p5-pipeline`（注释同步：探针属性化，option-info 代理退役）。

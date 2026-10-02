@@ -45,13 +45,11 @@
   - latest++: **②+方案 B 全链收口（2026-10-02，代码 e90ada4d + 实机 8 轮）**：代码侧（探针包+消费包，V1 PASS，186→204 测试）已提交推送；JAR `media-kit-d24c59905-arm64-v8a.jar`（构建仓 `91bb42af` 已推送）实机验证——**P5 探针 8/8 全过**（正 result=1 4–8ms/负上游 result=0，快照逐轮一致）；**容器事实通道实机验证**（p81 compat=1 容器直证、P7 FEL el=true 旧版 null 关键区分、上游 JAR 推断回退不崩）；**发现并登记：HDR Vivid 在 mediacodec 路径不可观测**（MediaCodec 剥离 CUVA side data，软解对照实证；路由结果不受影响，需求第 8 节已登记，demuxer 级 SEI 探测归 ② 完整目标）；p84 零回归（R4b）。实验记录 `archives/experiments/android-hdr-planb-device-facts-20261002.md`。教训：指定断言样片前 ffprobe 核对容器记录（mkchk p84 对照样片无 dvcC）。
   - next: ~~发布链三件套~~ **已完成（2026-10-02 晚）**：release `libmpv-android-v2026.011`（命名改 年.序号三位补零，用户决策；mpv tag `media-kit-v2026.011`；build.gradle/CHANGELOG/CI 标记 `dovi-p5-pipeline` 同步）。剩：人工观察升格两格（见"待用户确认"项）；② 完整目标（Vivid/HDR10+ 元数据重建，含 demuxer 级 SEI 探测绕开 mediacodec 剥离）按需另立实施；①需 DV 设备。
 
-- [ ] 待用户确认两（阻塞 Phase 1 完全关闭，2026-10-02）
-  - status: pending_user
+- [x] 待用户确认两（Phase 1 完全关闭，2026-10-02 完成）
   - context: archives/conversations/android-hdr-auto-output-20261002.md
   - ①人工观察：LYA 上看 a1-hlg-gate-85（纯 HLG 直出）与 a6-reshape（P8.4 RPU 重建 PQ）两轮画面；确认后把需求第 6 节 P8.4×baseLayerConvert 与 HLG×baseLayerDirect 升 verified 并同步代码常量表（S3 解析单测锁定两处同步）。
   - ②R3.1 口径文字：开播前规划相的候选跳过以报告候选原因披露、不发 Degraded（A3-2 实测口径，Lead 决策记录在 conversation）——是否落进需求 R3.1 文字由用户定。
-  - latest: **② 已确认落文（2026-10-02 晚）**：R3.1 加注记（"每次降级发布事件"仅指开播后运行时降级；规划相跳过经候选列表披露、发 RouteApplied）。**① 进行中**：两个观察轮 APK 已构建（obs-hlg-direct `60b73728…`、obs-p84-reshape `d1c1352a…`，新 JAR），待上机用户观察后升格两格。
-  - next: ① 观察轮上机（最高亮度短时观察纪律）→ 用户确认 → Lead 同步需求第 6 节与常量表 + S3 测试 → 提交。
+  - latest: **两项全部完成（2026-10-02 晚）**。②R3.1 注记落文。①观察执行：graypatch 数值图案无人工判读价值（用户反馈），改用真实 HLG 内容（user-hdr-vivid 样片）+ P8.4 reshape 两轮，均"画面正常"确认；两格升 verified（需求第 6 节+常量表+S3 测试同步），**默认路由随之变更**（HLG 源缺省直出、无 HLG 屏 P8.4 走 convert），6 个旧断言测试改写，204/204 + hdr_lab 48/48。观察日志 `~/src/media-kit-build/evidence/hdr-observation-20261002/`。附带观察：**OHOS CI（Build OHOS unsigned HAP）自 10-01 起既有失败**（依赖解析 exit 65，非本轮引入），待单列排查。
 
 - [ ] OHOS HDR 能力路由支持（Phase 2，2026-10-02 显式登记）
   - status: planned
