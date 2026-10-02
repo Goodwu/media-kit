@@ -50,15 +50,15 @@ jobs:
       - run: dart pub get
       - name: Run complete suite serially
         run: |
-          dart test -j 1 --reporter expanded 2>&1 | Tee-Object -FilePath windows-tests.log
+          dart test test/src/player/player_test.dart --plain-name player-platform -j 1 --reporter expanded 2>&1 | Tee-Object -FilePath windows-tests.log
           exit $LASTEXITCODE
-      - name: Capture native exception in initializer suite if tests fail
+      - name: Capture native exception in player-platform
         if: failure()
         run: |
           $cdb = Get-ChildItem 'C:\Program Files (x86)\Windows Kits\10\Debuggers\x64\cdb.exe' -ErrorAction SilentlyContinue | Select-Object -First 1
           if (-not $cdb) { Write-Output 'cdb unavailable on runner'; exit 0 }
           $dart = Join-Path $env:FLUTTER_ROOT 'bin\cache\dart-sdk\bin\dart.exe'
-          & $cdb.FullName -o -G -c 'sxe -c ".ecxr; k; ~* k; lm; q" av; g' $dart test test/src/player/native/core/initializer_test.dart -j 1 --reporter expanded 2>&1 | Tee-Object -FilePath windows-cdb.log
+          & $cdb.FullName -o -g -G -c 'sxe -c ".ecxr; k; ~* k; lm; q" av; g' $dart test test/src/player/player_test.dart --plain-name player-platform -j 1 --reporter expanded 2>&1 | Tee-Object -FilePath windows-cdb.log
           exit $LASTEXITCODE
       - uses: actions/upload-artifact@v4
         if: always()
