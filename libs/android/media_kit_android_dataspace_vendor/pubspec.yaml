@@ -5,7 +5,7 @@ description: >-
   SDK + firmware + BT2020_PQ read-only gate; the native library is loaded
   only on the validated device and only for an applying call. No
   diagnostics probes (those stay in media_kit_hdr_lab).
-version: 1.0.0
+version: 1.0.0+1
 homepage: https://github.com/media-kit/media-kit
 repository: https://github.com/media-kit/media-kit
 publish_to: none

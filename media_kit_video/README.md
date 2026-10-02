@@ -19,6 +19,33 @@ uses the earlier, smaller viewport. Keep `Video` mounted through the open call;
 the output later follows the source video size. The preparation API applies to
 Android `SurfaceProducer` Texture output, not PlatformView output.
 
+## Android HDR routing and session (Phase 1)
+
+For Android HDR (Dolby Vision / HDR10 / HLG / HDR Vivid) playback, the
+session API provides pre-playback prediction, route execution and reporting
+per `docs/requirements/android-hdr-auto-output.md`:
+
+1. Query a capability snapshot with
+   `await HdrCapabilities.query(player: player)`, build a
+   `HdrSourceDescriptor` from the media you are about to open, and call
+   `snapshot.predict(descriptor)` (same planner as execution) to
+   learn the selected strategy, presentation and candidate list before
+   deciding whether to request the HDR source.
+2. Mount `HdrVideo` inside a `HdrVideoScope` and call
+   `await session.open(media, hint: descriptor)`. The session orchestrates
+   vo/hwdec topology, dataspace application and at most one decoder review
+   rebuild per generation, degrading along the candidate list without
+   stopping playback.
+3. Show `session.report.value` (actual strategy and presentation) and
+   handle `session.events` (`RouteApplied`/`Degraded`/`Reclassified`/
+   `CapabilityChanged`/`Error`) per your app's own policy.
+
+Default preference and the source × strategy maturity table are defined in
+the requirement's sections 3.4 and 6; experimental strategies require an
+explicit `allowExperimental` policy. Set `HdrOutputPreference.off` to
+always tone-map. The device-vendor fallback for the validated LYA-AL00
+device lives in the separate `media_kit_android_dataspace_vendor` package.
+
 ## License
 
 Copyright © 2021 & onwards, Hitesh Kumar Saini <<saini123hitesh@gmail.com>>
