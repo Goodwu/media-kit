@@ -104,11 +104,8 @@ Size calculateAndroidTextureOutputSizeForLayouts(
 /// The [PlatformVideoController] implementation based on native JNI & C/C++ used on Android.
 ///
 /// {@endtemplate}
-/// A listener for the native `HdrCapabilities.Changed` event. The arguments
-/// carry the full `HdrCapabilities.Get` snapshot map.
-typedef HdrCapabilitiesChangedListener = void Function(
-  Map<Object?, Object?> snapshot,
-);
+// HdrCapabilitiesChangedListener is defined in platform_video_controller.dart
+// (shared with the conditional-import web stub).
 
 class AndroidVideoController extends PlatformVideoController {
   /// Whether [AndroidVideoController] is supported on the current platform or not.

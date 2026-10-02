@@ -39,6 +39,12 @@ class TextureOutputLayoutRegistry {
       _byController.values.expand((layouts) => layouts).toList(growable: false);
 }
 
+/// A listener for the native `HdrCapabilities.Changed` event. The arguments
+/// carry the full `HdrCapabilities.Get` snapshot map.
+typedef HdrCapabilitiesChangedListener = void Function(
+  Map<Object?, Object?> snapshot,
+);
+
 /// {@template platform_video_controller}
 ///
 /// PlatformVideoController
