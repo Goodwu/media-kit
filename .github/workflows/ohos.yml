@@ -57,6 +57,11 @@ jobs:
           set -euo pipefail
           flutter --version
           dart --version
+      # pubspec.ohos.lock must match what the OHOS Flutter (3.44.9+ohos)
+      # resolves: the SDK-bundled packages (matcher/meta/test_api/vector_math)
+      # pin to that SDK's versions and differ from a desktop-stable Flutter
+      # re-lock. Regenerate with the OHOS toolchain, or keep those four
+      # entries untouched when re-locking locally.
       - name: Resolve locked dependencies
         run: |
           set -euo pipefail

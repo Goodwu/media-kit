@@ -35,12 +35,13 @@
   - latest: **五类修复完成（2026-10-02 深夜，本地验证全绿）**：①lockfile 最小差异再生成（420fba3e 升版未同步两 lock，主 1 行/OHOS 36 行）；②vnext release 步骤 7 处加 `github.repository == 'media-kit/media-kit'` 门禁（fork GITHUB_TOKEN 只读，该自动化在本 fork main 从未成功——此前"最后全绿 run"实为分支 workflow_dispatch）；③MetalSurfaceBlitter gpuStartTime 加 `#available(macOS 10.15, iOS 10.0, *)` 守卫（podspec 平台 10.9，我方 P1-6 引入）；④web/wasm 编译桩补齐（VideoControlsBuilder typedef、AndroidVideoController 四静态成员、WebPlayer/native-stub 三方法，R2.5 透传语义全抛错）；⑤hdr_lab 提交 gradle wrapper 三件套 + job 补 setup-java（JVM 测试本地 BUILD SUCCESSFUL）。**⑥Windows 原生崩溃单列下方任务**。另更正：主 ci 失败非"10-01 起"，09-30 首个 main run 即失败且早于当日改动。
   - next: 提交推送后观察新 run：目标除 Windows tests 外全绿、`libmpv-jar-identity` 保持绿、OHOS 过依赖解析步；失败集合与 37027288889（修复前基线）对比归零（除⑥）。
 
-- [ ] Windows package tests 原生崩溃调查（fork 特有回归，自 CI 修复任务分出）
+- [ ] Windows package tests 原生崩溃调查 + mpv-dev 夹具现代化（fork 特有回归，自 CI 修复任务分出）
   - status: planned
   - context: archives/experiments/ci-fix-20261002.md（⑥节：崩溃上下文与归因边界）
-  - acceptance: 定位崩溃套件与根因并修复（或实证归因为环境/上游并登记豁免）；`package:media_kit tests (Windows)` 恢复 success。
-  - latest: 0xC0000005（access violation）pc 在 libmpv-2.dll（CI 钉定 mpv-dev 2023-08-11 件）内；`asset-loader-encode-asset-key` 通过后约 5s、下一播放类套件崩溃（早于用例名输出）。上游 media-kit 同 workflow 8b4d3afc（09-29 PR run）Windows tests **success** → fork 特有回归；窗口 ad22c36a（09-01 绿）→ eacc799a（09-30 首败）= 上游合并 a886f556（63 冲突裁定）+ 期间我方提交。本地 macOS 无法复现（media_kit VM 套件缺 Mpv.framework，72 项既有环境失败）。
-  - next: 用 workflow_dispatch 在临时分支二分窗口（`run_package_tests=true`，不动 main）；首查 a886f556 对 media_kit player/native 路径的冲突裁定；Web 单测 player-set-shuffle 单例失败（37002149440 轮）复看并入，持续则同查。
+  - acceptance: 定位崩溃套件与根因并修复（或实证归因为夹具年代伪信号）；`package:media_kit tests (Windows)` 恢复 success；Windows 测试夹具从 2023-08-11 件升级至 libmpv-win32-video-build 最新 release（fork win32 构建件就位后仅换钉定 URL）。
+  - latest: **用户决策（2026-10-03）：Windows 是长期产品目标，Windows 构建/测试 job 保留不关**。夹具现代化评估为"对目标有实质推进、非仅消音"：①2023 件为 mpv ~0.36 代、我方 fork 基线 0.41，升级后测试环境行为大幅逼近 fork 现实；②Dart FFI 契约面在 Windows 持续受测、栈不腐烂（参照 web 编译面无编译即一日烂的先例）；③未来 fork win32 构建件就位后，工作流管道/测试套件直接复用，升级是该演进路径第一段。另：Windows 构建 job（x64/ARM64/optional/audio）与 mpv-dev 夹具无关（用 libs 包自带 dll），属纯编译覆盖，任何情况下保留。
+  - latest-: 崩溃事实：0xC0000005（access violation）pc 在 libmpv-2.dll（钉定 mpv-dev 2023-08-11 件）内；`asset-loader-encode-asset-key` 通过后约 5s、下一播放类套件崩溃（早于用例名输出，Dart 崩溃处理器走栈失败——现无可用 backtrace，仅故障地址）。上游 media-kit 同 workflow 8b4d3afc（09-29 PR run）Windows tests **success** → fork 特有回归；窗口 ad22c36a（09-01 绿）→ eacc799a（09-30 首败）= 上游合并 a886f556（63 冲突裁定）+ 期间我方提交。本地 macOS 无法复现（media_kit VM 套件缺 Mpv.framework）。已排除方向：media_kit core 无 fork 专属符号引用（dovi/p5 面全在 media_kit_video Android bridge），fork 对 C ABI 是纯加法——老件可正常加载，崩溃属行为交互非符号缺失。
+  - next: 诊断优先：①一次 workflow_dispatch 双变体 A/B（同代码分别挂 2023 件与最新上游 mpv-dev；`dart test -j 1 --reporter expanded` 串行定位崩溃套件，可挂 cdb 抓真栈）——新件不崩=夹具年代伪信号，直接升级钉定收口；仍崩=core 改动/合并裁定真 bug（首查 3a4fcaa2 NativePlayer 改动与 a886f556 player/native 冲突裁定，不收敛再分支二分）；②夹具升级随收口执行。Web 单测 player-set-shuffle 复看并入，持续则同查。远期（不另立项）：fork win32 构建链（msys2 交叉编译进 CI）。
 
 - [ ] FFmpeg P5 RPU 整改版（`b4d2ea4ffb`）按测试计划验证（2026-10-02 登记）
   - status: planned
