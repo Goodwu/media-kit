@@ -14,7 +14,7 @@ import 'package:media_kit/media_kit.dart';
 
 import 'package:media_kit_video/src/utils/query_decoders.dart';
 import 'package:media_kit_video/src/video_controller/platform_video_controller.dart';
-import 'package:media_kit_video/src/video_controller/hdr_output_report.dart';
+import 'package:media_kit_video/src/video_controller/hdr_transaction_report.dart';
 
 /// {@template native_video_controller}
 ///
@@ -59,7 +59,7 @@ class NativeVideoController extends PlatformVideoController {
   int? _invalidatedNativeOutputEpoch;
   int? _nativeOutputEpochGeneration;
   bool _nativeOutputResetInFlight = false;
-  Future<HdrOutputReport>? _nativeOutputResetFuture;
+  Future<HdrTransactionReport>? _nativeOutputResetFuture;
 
   NativePlayer get platform => player.platform as NativePlayer;
 
@@ -354,7 +354,7 @@ class NativeVideoController extends PlatformVideoController {
   }
 
   @override
-  Future<HdrOutputReport> createNativeOutput(
+  Future<HdrTransactionReport> createNativeOutput(
       {String? surfaceId, int? windowHandle}) async {
     // Only a genuinely new surface generation starts a new epoch namespace.
     // Repeated create calls during HDR reconfiguration are idempotent on the
@@ -374,16 +374,16 @@ class NativeVideoController extends PlatformVideoController {
             ) ??
             const <dynamic, dynamic>{})
         .cast<String, dynamic>();
-    return HdrOutputReport.fromMap(result);
+    return HdrTransactionReport.fromMap(result);
   }
 
   @override
-  Future<HdrOutputReport> configureHdrOutput(
+  Future<HdrTransactionReport> configureHdrOutput(
       Map<String, dynamic> configuration) async {
     final transaction = _nativeOutputTransaction;
     final handle = nativeHandle ?? await player.handle;
     if (transaction != _nativeOutputTransaction || _nativeOutputResetInFlight) {
-      return const HdrOutputReport(active: false, stale: true);
+      return const HdrTransactionReport(active: false, stale: true);
     }
     final payload = Map<String, dynamic>.from(configuration);
     if (this.configuration.darwin.useNativeSurface) {
@@ -423,7 +423,7 @@ class NativeVideoController extends PlatformVideoController {
       }
     }
     if (transaction != _nativeOutputTransaction) {
-      return const HdrOutputReport(active: false, stale: true);
+      return const HdrTransactionReport(active: false, stale: true);
     }
     _lastNativeConfiguration = payload.cast<String, dynamic>();
     final result = (await _channel.invokeMethod<Map<dynamic, dynamic>>(
@@ -437,15 +437,15 @@ class NativeVideoController extends PlatformVideoController {
             const <dynamic, dynamic>{})
         .cast<String, dynamic>();
     if (transaction != _nativeOutputTransaction) {
-      return const HdrOutputReport(active: false, stale: true);
+      return const HdrTransactionReport(active: false, stale: true);
     }
     final epoch = result['outputEpoch'];
     if (epoch is int) _lastNativeOutputEpoch = epoch;
-    return HdrOutputReport.fromMap(result);
+    return HdrTransactionReport.fromMap(result);
   }
 
   @override
-  Future<HdrOutputReport> resetHdrOutput() async {
+  Future<HdrTransactionReport> resetHdrOutput() async {
     final existing = _nativeOutputResetFuture;
     if (existing != null) return existing;
     // Invalidate the Dart-side replay payload before crossing the channel.
@@ -455,7 +455,7 @@ class NativeVideoController extends PlatformVideoController {
     _nativeOutputTransaction++;
     _nativeOutputResetInFlight = true;
     setNativeSurfaceActive(false);
-    late Future<HdrOutputReport> resetFuture;
+    late Future<HdrTransactionReport> resetFuture;
     var resetSucceeded = false;
     resetFuture = () async {
       try {
@@ -475,7 +475,7 @@ class NativeVideoController extends PlatformVideoController {
           _lastNativeOutputEpoch = resetEpoch;
           resetSucceeded = true;
         }
-        return HdrOutputReport.fromMap(result);
+        return HdrTransactionReport.fromMap(result);
       } finally {
         if (identical(_nativeOutputResetFuture, resetFuture)) {
           _nativeOutputResetFuture = null;

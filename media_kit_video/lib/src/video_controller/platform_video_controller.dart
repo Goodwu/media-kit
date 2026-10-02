@@ -9,7 +9,7 @@ import 'package:flutter/widgets.dart';
 
 import 'package:media_kit/media_kit.dart';
 
-import 'package:media_kit_video/src/video_controller/hdr_output_report.dart';
+import 'package:media_kit_video/src/video_controller/hdr_transaction_report.dart';
 import 'package:media_kit_video/src/video_controller/video_controller.dart';
 
 /// Rendering topology selected for a video output.
@@ -126,22 +126,22 @@ abstract class PlatformVideoController {
       false;
 
   /// Creates/configures the optional native output. Implementations must fail closed.
-  Future<HdrOutputReport> createNativeOutput(
+  Future<HdrTransactionReport> createNativeOutput(
           {String? surfaceId, int? windowHandle}) async =>
-      const HdrOutputReport(
+      const HdrTransactionReport(
         failureReason: 'unsupported platform',
       );
 
   /// Configures the native HDR output from a configuration payload map
   /// (`transfer`, optional `masteringMetadata`, `opticalOutputScale`, ...).
-  Future<HdrOutputReport> configureHdrOutput(
+  Future<HdrTransactionReport> configureHdrOutput(
           Map<String, dynamic> configuration) async =>
-      const HdrOutputReport(
+      const HdrTransactionReport(
         failureReason: 'unsupported platform',
       );
 
-  Future<HdrOutputReport> resetHdrOutput() async =>
-      const HdrOutputReport(
+  Future<HdrTransactionReport> resetHdrOutput() async =>
+      const HdrTransactionReport(
         failureReason: 'unsupported platform',
       );
 
