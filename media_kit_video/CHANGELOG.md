@@ -1,4 +1,4 @@
-## Unreleased (fork)
+## 1.3.1+1 (fork)
 
 - **BREAKING**(api): `VideoControllerConfiguration` 平台开关收敛为子对象。迁移：
   - `usePlatformView`/`useHCPP`/`enableAndroidSurfaceProducer`→`android.usePlatformView`/`android.useHCPP`/`android.enableSurfaceProducer`
@@ -9,6 +9,20 @@
   - `useNativeSurface`/`useNativeWindow`→`darwin.useNativeSurface`/`darwin.useNativeWindow`
   - 子对象经 `copyWith(android: config.android.copyWith(...))` 修改。
 - **REFACTOR**(darwin): native surface 由 CVDisplayLink/CADisplayLink 按显示刷新率驱动并按生产帧计数门控重绘；Metal blitter 改单一 pre-commit `addCompletedHandler` 异步完成，buffer 归还经 in-flight 跟踪与池 hold 闭环（主线程不再逐帧阻塞）。
+- **FEAT**(android): Phase 1 HDR 能力路由（需求 `docs/requirements/android-hdr-auto-output.md` v3）。新增公开 API 均为增量入口，无删除的公开接口：
+  - `HdrVideoSession`/`HdrVideo`/`HdrVideoScope`：会话编排（九步开播流程、代次失效与回滚、每代次最多一次解码器复核重建、失败最多再试一条 HDR 候选、dataspace 门禁只认 `applied`）、widget 挂载与内置全屏跟随、路由报告（`report` 即 `HdrOutputReport.actual`）与五类事件流（RouteApplied/Degraded/Reclassified/CapabilityChanged/Error）。
+  - `HdrCapabilities`：能力查询（SDK、displayHdrTypes、HEVC 解码器档位、DV 解码器、dataspace bridge 与扩展信息）+ P5 选项探测（`dovi-p5-fast-path`）+ `Changed` 能力变化事件（Phase 1 单会话共享开关）。
+  - `HdrSourceDescriptor`/`HdrSourceClassifier`：七字段源描述与分类；DV 兼容 ID 由基础层传输函数推断（pq→8.1、hlg→8.4、bt.1886→8.2）。
+  - `HdrStrategy`/`HdrRoutingPolicy`/`HdrRoutePlanner`：策略与成熟度枚举、偏好配置（`allowExperimental`）、开播前预测与执行同源（同一 planner 函数）。
+  - `HdrRoute`/`HdrCandidate`/`HdrRoutePrediction`/`HdrDegradeReason`：路由、候选（含跳过原因）、预测与降级原因（含 `unsupportedStrategy`、`p5PipelineUnavailable`）。
+  - `HdrOutputPreference`：`auto`/`off` 播放偏好。
+  - Android 原生层：`PlatformVideoView` 的 `applyDataSpace` 改为四元组回报 `{applied, path, requested, readback}`；`SurfaceDataSpaceExt` 增加 default `id()`/`isApplicable()`。
+  - `HdrOutputDiagnostics`：七层诊断日志（capability/predict/classify/readback/decision/degrade/recover，默认关闭）。
+  - 内部：旧 darwin/OHOS 的 `HdrOutputReport` 改名 `HdrTransactionReport`（内部类型，未导出过公开面）。
+- **FEAT**(android): 默认偏好与"源 × 策略"成熟度表以需求第 3.4/6 节为准（代码常量表由 S3 解析单测逐格锁定同步；P8.4×`baseLayerConvert` 与 HLG×`baseLayerDirect` 现为 experimental，实机升级轮证据完整、待人工观察画面后升级 verified）。
+- **DOCS**: 迁移指南（PiliPlusX 场景三步：`HdrCapabilities.predict` 选档 → `HdrVideoSession`/`HdrVideo` 挂载开播 → 展示 `report.actual`/按 App 策略处理事件）；hint 通道与解码器复核语义（复核仅在代次内做一次，重建最多一次）；dataspace 门禁只认 `applied`，`path`/`readback` 仅作诊断。
+- 已知限制：seek 不变量待补验证项（S10 实机记录）；P8.1 升级确认受样片阻塞（公开仅 10 帧 FATE 样片）；Mi Note 3 不在位（displayHdrTypes 空集验证缺实机）；no-HLG 开播前规划相候选跳过以报告候选原因披露、不发 Degraded 的口径决策待确认。
+- **DEPRECATED**: 无删除的公开接口；会话 API 是增量入口。R4.4 的 `probeHdrCapabilities` 废弃发生在 PiliPlusX 侧（S12 接入时删除）。
 
 ## 1.3.1
 
