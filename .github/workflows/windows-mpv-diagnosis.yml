@@ -14,14 +14,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - fixture: 2023-08-11
-            archive: mpv-dev-x86_64-20230811-git-140ec21.7z
-            algorithm: MD5
-            digest: c7d1d766a6404d58a876aca403e0f53a
-          - fixture: 2023-09-24
-            archive: mpv-dev-x86_64-20230924-git-652a1dd.7z
+          - fixture: '20261002'
+            archive: mpv-dev-x86_64-20261002-git-3186d369f9.7z
             algorithm: SHA256
-            digest: dce982222d7a23e4a1c6f0fb6cc39f6e899a6714624b95ea49cff6558ee97572
+            digest: d873450cc1a7f881a8a10c33936d9555ad18a3809d827b9dbea55ba55caebcf9
     defaults:
       run:
         working-directory: media_kit
@@ -39,7 +35,7 @@ jobs:
           ALGORITHM: ${{ matrix.algorithm }}
           DIGEST: ${{ matrix.digest }}
         run: |
-          $url = "https://github.com/media-kit/libmpv-win32-video-build/releases/download/$env:FIXTURE/$env:ARCHIVE"
+          $url = "https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/$env:FIXTURE/$env:ARCHIVE"
           curl.exe -fL --retry 3 $url -o $env:ARCHIVE
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           $actual = (Get-FileHash $env:ARCHIVE -Algorithm $env:ALGORITHM).Hash
@@ -50,7 +46,7 @@ jobs:
       - run: dart pub get
       - name: Run complete suite serially
         run: |
-          dart test test/src/player/player_test.dart --plain-name player-platform -j 1 --reporter expanded 2>&1 | Tee-Object -FilePath windows-tests.log
+          dart test -j 1 --reporter expanded 2>&1 | Tee-Object -FilePath windows-tests.log
           exit $LASTEXITCODE
       - name: Capture native exception in player-platform
         if: failure()
