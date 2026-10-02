@@ -173,7 +173,12 @@ final class MetalSurfaceBlitter {
         )
       }
       let gpuDurationSeconds: CFTimeInterval?
-      if commandBuffer.gpuStartTime > 0 && commandBuffer.gpuEndTime >= commandBuffer.gpuStartTime {
+      // GPU timestamps need macOS 10.15+; the pod's deployment floor is lower,
+      // so targets below it report no timing instead of failing to build.
+      if #available(macOS 10.15, iOS 10.0, *),
+        commandBuffer.gpuStartTime > 0,
+        commandBuffer.gpuEndTime >= commandBuffer.gpuStartTime
+      {
         gpuDurationSeconds = commandBuffer.gpuEndTime - commandBuffer.gpuStartTime
       } else {
         gpuDurationSeconds = nil

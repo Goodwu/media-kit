@@ -1,11 +1,12 @@
-gradle-wrapper.jar
 /.gradle
 /captures/
-/gradlew
-/gradlew.bat
 /local.properties
 GeneratedPluginRegistrant.java
 .cxx/
+
+# gradlew / gradlew.bat / gradle-wrapper.jar stay tracked: CI runs
+# ./gradlew directly for the vendor JVM tests, and Flutter only injects
+# the wrapper for its own build invocations.
 
 # Remember to never publicly share your keystore.
 # See https://flutter.dev/to/reference-keystore
