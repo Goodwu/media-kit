@@ -35,6 +35,13 @@
 
 ## Next（近期候选，最多 10 条）
 
+- [ ] PiliPlusX 性能优先/画质优先开关（HDR 路由策略预设）
+  - status: planned（2026-10-02 用户登记，暂不实施）
+  - context: archives/conversations/android-hdr-auto-output-20261002.md（设计评估记录节）
+  - acceptance: 库侧提供两个命名策略预设——性能优先 = 默认偏好序（直出优先）+ 不放宽 experimental 门禁；画质优先 = dvP84 reshape 置顶 + `allowExperimental`；PiliPlusX 只选预设、不写平台/设备决策（A8 红线）；运行中可切换（会话原位重建，A5 已验证路径）；文档显式声明 **P5 豁免**（必须 reshape，性能优先对 P5 不生效，R3.3 语义）与 **HDR10+/HDR Vivid metadata 处理未实现**（画质优先对其暂为空操作，前置依赖 ② 完整目标）；**不做固定抽帧**（自适应 framedrop 默认开启已覆盖"性能优先不卡"；gpu-next 路径 4K60 降载如有数据需求走质量参数降档，固定 2:1 抽帧仅作最后手段复议）。
+  - latest: 2026-10-02 用户提出原始设想（性能优先：直出+硬件不支持时跳过 P8.4/HDR10+/Vivid 附加 metadata+fps>50 抽帧 2:1；画质优先：优先 metadata 处理+不主动丢帧）；Lead 评估修正后用户认可登记：两预设映射现有 `HdrRoutingPolicy`（库零新机制）、P5 豁免、HDR10+/Vivid 前置依赖、固定抽帧移除（依据 4K60 归因热状态主导 + 直出路径播放器侧低负载 + mpv 无固定抽帧原语只有自适应 framedrop）。
+  - next: 用户排期后立项：库侧两预设 + 需求文档/dartdoc 补记 + PiliPlusX 设置项与会话接线。
+
 - [ ] HDR 能力路由后续三项（Phase 1 收尾登记，2026-10-02）
   - status: planned
   - context: archives/conversations/android-hdr-auto-output-20261002.md
