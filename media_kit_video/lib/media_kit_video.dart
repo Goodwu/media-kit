@@ -25,6 +25,7 @@ export 'package:media_kit_video/src/hdr/hdr_source_descriptor.dart';
 export 'package:media_kit_video/src/hdr/hdr_strategy.dart';
 export 'package:media_kit_video/src/hdr/hdr_strategy_realizer.dart';
 export 'package:media_kit_video/src/hdr/hdr_video_session.dart';
+export 'package:media_kit_video/src/hdr/hdr_video.dart';
 
 export 'package:media_kit_video/src/subtitle/subtitle_view.dart';
 
