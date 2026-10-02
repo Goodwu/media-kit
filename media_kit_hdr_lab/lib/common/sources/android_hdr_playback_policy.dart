@@ -1,3 +1,5 @@
+// MIGRATED (S10/S13): superseded by HdrRoutePlanner/HdrSourceClassifier in
+// media_kit_video/lib/src/hdr/; kept for hdr_lab tests only.
 import 'package:media_kit_video/media_kit_video.dart';
 
 import 'android_hdr_sample_identity.dart';
