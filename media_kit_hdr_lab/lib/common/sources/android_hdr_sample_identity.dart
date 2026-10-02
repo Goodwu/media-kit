@@ -1,3 +1,5 @@
+// MIGRATED (S10/S13): superseded by HdrRoutePlanner/HdrSourceClassifier in
+// media_kit_video/lib/src/hdr/; kept for hdr_lab tests only.
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';

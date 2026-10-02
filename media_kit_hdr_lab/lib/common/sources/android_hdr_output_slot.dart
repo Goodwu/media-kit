@@ -1,6 +1,9 @@
 /// Serial output replacement is called only from the open coordinator's
 /// native side-effect queue. A replacement is published before waiting for
 /// its Surface, so Flutter can mount the new PlatformView.
+// MIGRATED (S10/S13): the library implementation lives in media_kit_video/lib/src/hdr/;
+// this file is kept only for hdr_lab tests that still reference it and is no longer
+// wired into the 01 test page.
 class AndroidHdrOutputSlot<T> {
   AndroidHdrOutputSlot({
     required T initial,

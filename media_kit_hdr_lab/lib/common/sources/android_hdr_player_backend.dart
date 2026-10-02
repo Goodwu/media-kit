@@ -1,3 +1,6 @@
+// MIGRATED (S10/S13): the library implementation lives in media_kit_video/lib/src/hdr/;
+// this file is kept only for hdr_lab tests that still reference it and is no longer
+// wired into the 01 test page.
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
