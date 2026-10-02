@@ -28,12 +28,12 @@
 
 ## Next（近期候选，最多 10 条）
 
-- [ ] CI 修复：主 ci.yml 多 job 失败与 OHOS HAP 依赖解析（2026-10-02 登记）
-  - status: in_progress（五类已修复待 CI 验证；⑥单列）
-  - context: archives/experiments/ci-fix-20261002.md（根因/修复/验证全记录）；archives/conversations/android-hdr-auto-output-20261002.md（观察项来源）
-  - acceptance: 失败 job 逐一定位根因并修复；主 ci.yml 全 job 绿或明确豁免登记；OHOS HAP "Resolve locked dependencies"（exit 65）根治或明确归因登记；`libmpv-jar-identity` 保持 success；修复前后失败集合差异为零（不引入新失败）。
-  - latest: **五类修复完成（2026-10-02 深夜，本地验证全绿）**：①lockfile 最小差异再生成（420fba3e 升版未同步两 lock，主 1 行/OHOS 36 行）；②vnext release 步骤 7 处加 `github.repository == 'media-kit/media-kit'` 门禁（fork GITHUB_TOKEN 只读，该自动化在本 fork main 从未成功——此前"最后全绿 run"实为分支 workflow_dispatch）；③MetalSurfaceBlitter gpuStartTime 加 `#available(macOS 10.15, iOS 10.0, *)` 守卫（podspec 平台 10.9，我方 P1-6 引入）；④web/wasm 编译桩补齐（VideoControlsBuilder typedef、AndroidVideoController 四静态成员、WebPlayer/native-stub 三方法，R2.5 透传语义全抛错）；⑤hdr_lab 提交 gradle wrapper 三件套 + job 补 setup-java（JVM 测试本地 BUILD SUCCESSFUL）。**⑥Windows 原生崩溃单列下方任务**。另更正：主 ci 失败非"10-01 起"，09-30 首个 main run 即失败且早于当日改动。
-  - next: 提交推送后观察新 run：目标除 Windows tests 外全绿、`libmpv-jar-identity` 保持绿、OHOS 过依赖解析步；失败集合与 37027288889（修复前基线）对比归零（除⑥）。
+- [ ] player-set-shuffle(-consecutive) 概率性 flaky 测试处置（上游同源，2026-10-03 定性登记）
+  - status: planned（低优先；上游同样偶发）
+  - context: archives/experiments/ci-fix-20261002.md（终验节：机制与证据链）
+  - acceptance: 随机洗牌未变序时测试不再误报（本地无法跑 player 套件——缺 libmpv 环境，需 CI run 验证）；处置方式（本地改测试 vs 提报上游）定案。
+  - latest: Linux/Web CI 偶发失败同一测试（420fba3e 轮 Web 挂姊妹用例 player-set-shuffle）。机制：`player.stream.playlist` 为 `_DistinctStream` 去重，mpv `playlist-shuffle` 4 项有 1/24 概率洗回原序 → 事件被吞 → 测试按"必变序"断言失败（日志实测 Stream closed 无第二事件）。证据：ff780809..420fba3e 窗口 media_kit 根包零提交；测试文件最后变更=a886f556 合并；**上游 media-kit run 36586434948（09-29）Web job 挂的正是同一测试**。
+  - next: 排期后处置：候选=测试内对未变序情形重洗/容忍（本地改，注意上游合并冲突面）或提报上游；改动需一次 CI run 验证。
 
 - [ ] Windows package tests 原生崩溃调查 + mpv-dev 夹具现代化（fork 特有回归，自 CI 修复任务分出）
   - status: planned
@@ -41,7 +41,7 @@
   - acceptance: 定位崩溃套件与根因并修复（或实证归因为夹具年代伪信号）；`package:media_kit tests (Windows)` 恢复 success；Windows 测试夹具从 2023-08-11 件升级至 libmpv-win32-video-build 最新 release（fork win32 构建件就位后仅换钉定 URL）。
   - latest: **用户决策（2026-10-03）：Windows 是长期产品目标，Windows 构建/测试 job 保留不关**。夹具现代化评估为"对目标有实质推进、非仅消音"：①2023 件为 mpv ~0.36 代、我方 fork 基线 0.41，升级后测试环境行为大幅逼近 fork 现实；②Dart FFI 契约面在 Windows 持续受测、栈不腐烂（参照 web 编译面无编译即一日烂的先例）；③未来 fork win32 构建件就位后，工作流管道/测试套件直接复用，升级是该演进路径第一段。另：Windows 构建 job（x64/ARM64/optional/audio）与 mpv-dev 夹具无关（用 libs 包自带 dll），属纯编译覆盖，任何情况下保留。
   - latest-: 崩溃事实：0xC0000005（access violation）pc 在 libmpv-2.dll（钉定 mpv-dev 2023-08-11 件）内；`asset-loader-encode-asset-key` 通过后约 5s、下一播放类套件崩溃（早于用例名输出，Dart 崩溃处理器走栈失败——现无可用 backtrace，仅故障地址）。上游 media-kit 同 workflow 8b4d3afc（09-29 PR run）Windows tests **success** → fork 特有回归；窗口 ad22c36a（09-01 绿）→ eacc799a（09-30 首败）= 上游合并 a886f556（63 冲突裁定）+ 期间我方提交。本地 macOS 无法复现（media_kit VM 套件缺 Mpv.framework）。已排除方向：media_kit core 无 fork 专属符号引用（dovi/p5 面全在 media_kit_video Android bridge），fork 对 C ABI 是纯加法——老件可正常加载，崩溃属行为交互非符号缺失。
-  - next: 诊断优先：①一次 workflow_dispatch 双变体 A/B（同代码分别挂 2023 件与最新上游 mpv-dev；`dart test -j 1 --reporter expanded` 串行定位崩溃套件，可挂 cdb 抓真栈）——新件不崩=夹具年代伪信号，直接升级钉定收口；仍崩=core 改动/合并裁定真 bug（首查 3a4fcaa2 NativePlayer 改动与 a886f556 player/native 冲突裁定，不收敛再分支二分）；②夹具升级随收口执行。Web 单测 player-set-shuffle 复看并入，持续则同查。远期（不另立项）：fork win32 构建链（msys2 交叉编译进 CI）。
+  - next: 诊断优先：①一次 workflow_dispatch 双变体 A/B（同代码分别挂 2023 件与最新上游 mpv-dev；`dart test -j 1 --reporter expanded` 串行定位崩溃套件，可挂 cdb 抓真栈）——新件不崩=夹具年代伪信号，直接升级钉定收口；仍崩=core 改动/合并裁定真 bug（首查 3a4fcaa2 NativePlayer 改动与 a886f556 player/native 冲突裁定，不收敛再分支二分）；②夹具升级随收口执行。Web/Linux 单测 player-set-shuffle 复看已完成（2026-10-03）：与崩溃无关，系上游同源 flaky（已另立条目）。远期（不另立项）：fork win32 构建链（msys2 交叉编译进 CI）。
 
 - [ ] FFmpeg P5 RPU 整改版（`b4d2ea4ffb`）按测试计划验证（2026-10-02 登记）
   - status: planned
@@ -147,6 +147,7 @@ P5 主线（详细流水见 `archives/conversations/android-hdr-dv-display-plan-
 
 其他已完成：
 
+- [x] CI 修复：主 ci.yml 多 job 失败与 OHOS HAP 依赖解析：done（2026-10-03 收口）；五类根因全修并 CI 实证（lockfile 再生成、vnext release 上游门禁、macOS gpuStartTime 守卫、web/wasm 编译桩、hdr_lab gradle wrapper+JDK17），OHOS 全链绿（lock 引入以来 main push 首次）、`libmpv-jar-identity` 全程绿、无新增失败；残余两项各自登记（Windows 原生崩溃任务、player-set-shuffle 上游同源 flaky）。`archives/experiments/ci-fix-20261002.md`
 - [x] HDR 能力查询、路由执行与报告 API + 设备私有回退子包（Phase 1 Android）：done（2026-10-02 完全关闭）；S0–S13 全交付，待用户两项（人工观察两格升 verified + 默认路由变更、R3.1 口径注记）10-02 晚收口，204/204 + hdr_lab 48/48；发布 media_kit_video 1.3.1+1 + vendor 子包 1.0.0+1；PiliPlusX 接入 A7/A8 实机通过；②+方案 B（P5 探针/容器事实消费）随发布链 v2026.011 落地。`archives/conversations/android-hdr-auto-output-20261002.md`
 - [x] 架构审查整改（批次 A–H）：done；三个 P0 全部达成、全量静态回归通过、实机验收（2026-10-01 LYA 立即修四项 + 短期清理）。`archives/conversations/architecture-review-remediation-20260930.md`、`archives/experiments/android-remediation-mae-p0-readback-20261001.md`
 - [x] media-kit 主仓合并上游 main（236 提交）：done（`a886f556`，63 冲突分层裁定）；P5 五项实机验收（12700–12702）无回归，main 成为唯一维护线。`archives/experiments/android-media-kit-main-merge-acceptance-12700-20260930.md`
