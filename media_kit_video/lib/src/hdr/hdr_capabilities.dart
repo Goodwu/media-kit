@@ -210,7 +210,23 @@ class HdrCapabilities {
 
   /// Queries the Android capability snapshot and probes the mpv fork for the
   /// P5 dovi rescale pipeline (R1.1, R1.4).
-  static Future<HdrCapabilities> query({required Player player}) {
+  ///
+  /// [player] is optional. With a [Player], the P5 pipeline is probed through
+  /// its mpv property access as before. Without one (e.g. a route decision
+  /// made before the first player is created), no mpv option can be probed,
+  /// so `p5PipelineAvailable` is conservatively false: the prediction treats
+  /// every P5 source as not playable and falls back to SDR. This is not a
+  /// safety gap — it is the "unavailable is never misjudged as available"
+  /// direction. Callers must re-query once they hold a Player to get an
+  /// authoritative P5 verdict; predictions for non-P5 sources (P8.4, HDR10,
+  /// HLG, SDR) are unaffected.
+  static Future<HdrCapabilities> query({Player? player}) {
+    if (player == null) {
+      // No player: no mpv property access, so the P5 probe cannot run and
+      // the pipeline is treated as missing. [propertyReader] is deliberately
+      // not consulted — the conservative verdict must not depend on a seam.
+      return queryWith((property) async => '');
+    }
     final HdrPropertyReader reader =
         propertyReader ?? (property) => player.getProperty(property);
     return queryWith(reader);

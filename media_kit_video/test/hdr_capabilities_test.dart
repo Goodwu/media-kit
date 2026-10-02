@@ -239,4 +239,26 @@ void main() {
       expect(caps.p5PipelineAvailable, isFalse);
     });
   });
+
+  group('HdrCapabilities.query without a player', () {
+    test('query(player: null) reads the channel and conservatively reports '
+        'p5PipelineAvailable false', () async {
+      handler = (MethodCall call) async {
+        expect(call.method, 'HdrCapabilities.Get');
+        return fullSnapshot();
+      };
+
+      final HdrCapabilities caps = await HdrCapabilities.query(player: null);
+
+      // The Android snapshot is still fetched through the plugin channel.
+      expect(calls.single.method, 'HdrCapabilities.Get');
+      expect(caps.sdkInt, 29);
+      expect(caps.displayHdrTypes, <int>{2, 3});
+      // No player means no mpv option probe: the P5 pipeline is treated as
+      // missing (the safe direction), regardless of what the fork carries.
+      expect(caps.p5PipelineAvailable, isFalse);
+      expect(caps.dataSpaceBridgeLoaded, isTrue);
+      expect(caps.dataSpaceExt?.id, 'lya-pq');
+    });
+  });
 }
