@@ -4,6 +4,7 @@
 /// All rights reserved.
 /// Use of this source code is governed by MIT license that can be found in the LICENSE file.
 import 'hdr_capabilities.dart';
+import 'hdr_output_diagnostics.dart';
 import 'hdr_route.dart';
 import 'hdr_source_descriptor.dart';
 import 'hdr_strategy.dart';
@@ -213,7 +214,7 @@ class HdrRoutePlanner {
             ? HdrPredictionConfidence.verified
             : HdrPredictionConfidence.unverified;
 
-    return HdrRoutePrediction(
+    final HdrRoutePrediction prediction = HdrRoutePrediction(
       source: source,
       selected: selected,
       candidates: List<HdrCandidate>.unmodifiable(candidates),
@@ -222,6 +223,12 @@ class HdrRoutePlanner {
       confidence: confidence,
       playable: selected.feasible,
     );
+    // `HDR predict:` layer (R4.3), emitted at the single planning function
+    // prediction and execution both share (R1.3). Static emit: the sink is
+    // touched only when `HdrOutputDiagnostics.enabled` is set, so the pure
+    // function stays I/O-free and the disabled cost is one boolean check.
+    HdrOutputDiagnostics.predict(prediction);
+    return prediction;
   }
 
   /// Evaluates one strategy against the gates and this device.

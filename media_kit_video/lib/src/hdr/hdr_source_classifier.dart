@@ -5,6 +5,7 @@
 /// Use of this source code is governed by MIT license that can be found in the LICENSE file.
 import 'package:media_kit/media_kit.dart' show VideoParams;
 
+import 'hdr_output_diagnostics.dart';
 import 'hdr_source_descriptor.dart';
 
 /// {@template hdr_source_classifier}
@@ -50,6 +51,26 @@ class HdrSourceClassifier {
   /// description with an empty codec; pass the track codec through a hint to
   /// keep it populated.
   HdrSourceDescriptor classify({
+    VideoParams? videoParams,
+    int? dolbyVisionProfile,
+    HdrSourceDescriptor? hint,
+  }) {
+    final bool hasFacts = videoParams != null || dolbyVisionProfile != null;
+    final HdrSourceDescriptor descriptor = _classify(
+      videoParams: videoParams,
+      dolbyVisionProfile: dolbyVisionProfile,
+      hint: hint,
+    );
+    // `HDR classify:` layer (R4.3): the description plus where it came from.
+    // Short-circuits inside while disabled; no strings are built here.
+    HdrOutputDiagnostics.classify(
+      descriptor: descriptor,
+      origin: !hasFacts ? (hint == null ? 'default' : 'hint') : 'facts',
+    );
+    return descriptor;
+  }
+
+  HdrSourceDescriptor _classify({
     VideoParams? videoParams,
     int? dolbyVisionProfile,
     HdrSourceDescriptor? hint,

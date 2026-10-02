@@ -10,7 +10,20 @@
   - **实施曲折**：第一个 worker 实施中因供应商流错误崩溃（移植层+类型层已完成）；第二个 worker 核对遗留代码后修复 session 的 24 个编译错误与 3 个语义问题（P5 阻断不走候选重试、能力变化重建用触发快照、绑定超时排除 topology:platformView）。
   - **V1 Reviewer PASS**（4 建议）：①`hdr_open_plan.dart` 补进 barrel（错误对象可命名，已修）；②`HdrCapabilities.Changed` enable 是共享开关，多 session 会互相关闭——Phase 1 单会话约束已注释声明（已修）；③重建代次报告保留触发降级原因（`_stagedDegradeReason`，已修+测试断言）；④不可映射后端异常统一标 `unsupportedStrategy` 语义偏宽——接受现状（diagnostic 携带 error.toString()），后续可补 `openFailed`。审核确认 1.4 九步全落点、代次纪律无窗口期、迁移用例数与 lab 原版逐名核对（lab 16/9/3/4 → 库 14/10/3/5，删 4 条纯 staging 用例、新增 4 条扩展/库场景用例）。
   - **计划内偏差（记录）**：coordinator 样片 staging 机制随样片身份整体移除，lab 的 4 条 staging 专用测试未迁入（staging release×2、cleanup failure、dispose 期间 staging 清理）；其 dispose 语义由迁移的 disposal 测试继续覆盖。
-  - 下一步：S8 诊断日志（V0）→ S10 hdr_lab 迁移与实机验收 A1–A6（V1）。
+- **S8 诊断日志完成（2026-10-02 第三轮，V0）**：`HdrOutputDiagnostics`（默认关闭零输出，enabled 短路；printer 可注入便于测试，生产 debugPrint，tag `HdrDiag`）；七层挂接：capability（query 完成）/predict（planner.plan 返回处，纯函数内静态 emit，关闭时仅一次布尔判断）/classify/classify 后/readback（dataspace 应用后、失败门禁前，失败也留痕）/decision（session 计划相+applied 相，双相各带全候选+跳过原因+代次）/degrade（Degraded 事件）/recover（CapabilityChanged）。诊断测试 17 条（默认关闭硬要求、各层 golden 字段集与顺序、predict/decision 含 unsupported 与 experimentalStrategySkipped 全候选）。全套 **183/183**。
+  - **与 PiliPlusX `HDR decision:` 字段对照表**（其源码 `lib/plugin/pl_player/controller.dart:2232` 实测；库 decision 层单行格式 `phase=plan|applied gen=N origin=hint|facts source=<描述符七段,逗号连接> class= selected= maturity= presentation= confidence= vo= hwdec= output= topology= surface= stripRpu= hwdecCurrent= requested= path= readback= verified= degrade= candidates=<策略:原因,…>`）：
+    - `source`（kind.name）→ `source=`（描述符摘要）+`class=`（HdrSourceClass）
+    - `primaries`/`transfer` → `source=` 摘要第 3/2 段
+    - `dvProfile` → `source=` 第 5 段（5/8/7/10，无 DV 为 none）
+    - `dynamicMetadata` → `source=` 第 4 段（dolbyVision/hdrVivid/hdr10Plus/none）
+    - `el` → `source=` 第 7 段（false/true/none=未知）
+    - `output` → `output=`；`surface` → `surface=`（dataspace 请求）+`requested=`/`path=`/`readback=`（S4 四元组，比原 surface 字段多了生效路径与读回）
+    - `vo`/`hwdec` → `vo=`/`hwdec=`；实测 hwdec 另有 `hwdecCurrent=`
+    - `reason` → `degrade=` + `candidates=` 各候选跳过原因（比原单一 reason 细化到每候选）
+    - `matrix`/`rpu`/`dvEnhancement` → 库不产：matrix 未进描述符（mpv colormatrix 未接）；rpu 的决策面体现为 `stripRpu=`；dvEnhancement 无对应（FFmpeg DOVI 记录未暴露，S1 评估已列 fork 改造项）
+    - 库新增无对应：`phase`/`gen`（代次）/`maturity`/`presentation`/`confidence`/`topology`/`verified`
+    - PiliPlusX 的 `observed(...)` 三态（observed 值/none/unknown）在库 source 摘要里统一为值/none 两态
+  - **实施曲折**：worker 因供应商网络错误中断一次，遗留实现+大部分测试由 Lead 收尾：修测试桩 `show` 子句缺 `AttemptScript`、`keysOf` 分词下标（layer 词带冒号）、decision 计划相期望串用错源类别（场景 hint 是 hdr10）、recover 首行是丢失快照（空集渲染 none）而期望写成恢复值、dataspace 语义用例期望 surface=pq 与 S3 realizer 矛盾（HLG-only 屏 convert 正确输出 HLG，实现无误、期望修正）。
 - **S6 HdrVideo widget 与全屏跟随完成（2026-10-02 第三轮，V0）**：`HdrVideo`（参数与 Video 逐一对齐，controller 换 session）+ `HdrVideoScope` 注入 + `HdrVideoBody` 共享挂载点（ValueListenableBuilder 跟随 session.controller，null 占位）；内置全屏页检测 `HdrVideoScope.maybeOf`，有 session 时 `FullscreenVideoSurface` 跟随替换、无 session 时 `buildFullscreenVideo` 闭包逐参数保留历史静态行为（回归测试锁定 push 时捕获的同一控制器）；非 Android 上 HdrVideo 即透传显示层。widget 测试 5 条（替换换挂/全屏跟随/null 占位/非 session 回归/scope 可见性），全套 **166/166**，analyze 0 error。实机部分（全屏中重建）按计划并入 S10 的 A5。
 - **实机轮准备（2026-10-02，提交 99601a48）**：hdr_lab 无扩展验证开关（`-P hdrLabUnregisterVendorExt=true`→BuildConfig→configureFlutterEngine 末尾注销扩展）；探针构建脚本 `tool/hdr-auto-probe-build.sh`；HLG fixture 推送 `/data/local/tmp/media-kit-hlg-vivid-4k.mp4` 与 DVS 纯 HLG fixture `media-kit-hlg-dvs-graypatch50.mp4`；上游非 fork JAR `~/src/media-kit-build/jars/upstream-predidit-v127-arm64.jar`（Predidit/libmpv-android-video-build v1.2.7，SHA-256 `13e882d9…`）。
 - **实机探针轮完成（2026-10-02，LYA 3EP7N18C28016072，共 7 轮全部按纪律恢复 12492 包/自动亮度/熄屏）**。证据持久化 `~/src/media-kit-build/evidence/hdr-auto-output-probes-20261002/`（设备日志+构建日志；APK SHA 前 16：hdr10-facts `8ed236ed…`、p84-facts `fea9dfcd…`、hlg-facts `d57327cd…`、hlg-dvs-facts `da410b10…`、p5-combo2 `d17d7e61…`、p5-negjar `f4578f40…`、p5-noext `de62bf60…`；构建脚本 `tool/hdr-auto-probe-build.sh`）。

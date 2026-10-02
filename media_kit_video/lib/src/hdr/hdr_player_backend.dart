@@ -148,6 +148,14 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
         _dataSpaceRequested = transfer;
         _dataSpacePath = result?['path']?.toString();
         _dataSpaceReadback = result?['readback']?.toString();
+        // `HDR readback:` layer (R4.3), emitted before the failure gates so
+        // a failing application is logged too.
+        HdrOutputDiagnostics.readback(
+          requested: transfer,
+          path: _dataSpacePath,
+          applied: result?['applied'] == true,
+          readback: _dataSpaceReadback,
+        );
         // The applied flag is the gate (S4 reviewer note): on the
         // `surfaceControl` path applied and readback measure different
         // layers, so a readback mismatch there is diagnostic only.
