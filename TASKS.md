@@ -36,12 +36,14 @@
   - next: 排期后处置：候选=测试内对未变序情形重洗/容忍（本地改，注意上游合并冲突面）或提报上游；改动需一次 CI run 验证。
 
 - [ ] Windows package tests 原生崩溃调查 + mpv-dev 夹具现代化（fork 特有回归，自 CI 修复任务分出）
-  - status: planned
+  - status: in_progress
   - context: archives/experiments/ci-fix-20261002.md（⑥节：崩溃上下文与归因边界）
   - acceptance: 定位崩溃套件与根因并修复（或实证归因为夹具年代伪信号）；`package:media_kit tests (Windows)` 恢复 success；Windows 测试夹具从 2023-08-11 件升级至 libmpv-win32-video-build 最新 release（fork win32 构建件就位后仅换钉定 URL）。
   - latest: **用户决策（2026-10-03）：Windows 是长期产品目标，Windows 构建/测试 job 保留不关**。夹具现代化评估为"对目标有实质推进、非仅消音"：①2023 件为 mpv ~0.36 代、我方 fork 基线 0.41，升级后测试环境行为大幅逼近 fork 现实；②Dart FFI 契约面在 Windows 持续受测、栈不腐烂（参照 web 编译面无编译即一日烂的先例）；③未来 fork win32 构建件就位后，工作流管道/测试套件直接复用，升级是该演进路径第一段。另：Windows 构建 job（x64/ARM64/optional/audio）与 mpv-dev 夹具无关（用 libs 包自带 dll），属纯编译覆盖，任何情况下保留。
   - latest-: 崩溃事实：0xC0000005（access violation）pc 在 libmpv-2.dll（钉定 mpv-dev 2023-08-11 件）内；`asset-loader-encode-asset-key` 通过后约 5s、下一播放类套件崩溃（早于用例名输出，Dart 崩溃处理器走栈失败——现无可用 backtrace，仅故障地址）。上游 media-kit 同 workflow 8b4d3afc（09-29 PR run）Windows tests **success** → fork 特有回归；窗口 ad22c36a（09-01 绿）→ eacc799a（09-30 首败）= 上游合并 a886f556（63 冲突裁定）+ 期间我方提交。本地 macOS 无法复现（media_kit VM 套件缺 Mpv.framework）。已排除方向：media_kit core 无 fork 专属符号引用（dovi/p5 面全在 media_kit_video Android bridge），fork 对 C ABI 是纯加法——老件可正常加载，崩溃属行为交互非符号缺失。
   - next: 诊断优先：①一次 workflow_dispatch 双变体 A/B（同代码分别挂 2023 件与最新上游 mpv-dev；`dart test -j 1 --reporter expanded` 串行定位崩溃套件，可挂 cdb 抓真栈）——新件不崩=夹具年代伪信号，直接升级钉定收口；仍崩=core 改动/合并裁定真 bug（首查 3a4fcaa2 NativePlayer 改动与 a886f556 player/native 冲突裁定，不收敛再分支二分）；②夹具升级随收口执行。Web/Linux 单测 player-set-shuffle 复看已完成（2026-10-03）：与崩溃无关，系上游同源 flaky（已另立条目）。远期（不另立项）：fork win32 构建链（msys2 交叉编译进 CI）。
+
+  - 2026-10-03 续查：run 60 最终失败集合={Windows 原生崩溃, Web/Linux player-set-shuffle-consecutive}，macOS package tests success。串行 A/B：2023-08-11、原发布仓 latest 2023-09-24 均在 player-platform 销毁崩溃；shinchiro 20261002/3186d369f9 同样崩溃。候选最小修复为 Windows terminate_destroy 期间成对持有 COM MTA usage cookie；保留 awaited 终止屏障和全部门禁。旧/新夹具与全平台 CI 验证中，未结案。证据：archives/experiments/windows-ci-mpv-ab-20261003.md。
 
 - [ ] FFmpeg P5 RPU 整改版（`b4d2ea4ffb`）按测试计划验证（2026-10-02 登记）
   - status: planned

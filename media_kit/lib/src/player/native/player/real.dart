@@ -34,6 +34,7 @@ import 'package:media_kit/src/player/native/utils/android_helper.dart';
 import 'package:media_kit/src/player/native/utils/isolates.dart';
 import 'package:media_kit/src/player/native/utils/native_reference_holder.dart';
 import 'package:media_kit/src/player/native/utils/temp_file.dart';
+import 'package:media_kit/src/player/native/utils/windows_mta.dart';
 import 'package:media_kit/src/player/platform_player.dart';
 
 import 'package:media_kit/generated/libmpv/bindings.dart' as generated;
@@ -247,7 +248,7 @@ class NativePlayer extends PlatformPlayer {
           await Future.delayed(const Duration(seconds: 5));
           var terminated = false;
           try {
-            mpv.mpv_terminate_destroy(ctx);
+            withWindowsMta(() => mpv.mpv_terminate_destroy(ctx));
             _mpvTerminated = true;
             terminated = true;
           } catch (error, stack) {
