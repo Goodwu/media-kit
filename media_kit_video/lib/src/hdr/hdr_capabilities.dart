@@ -123,8 +123,11 @@ class HdrDecoderInfo {
 ///
 /// [query] reads the Android side (display HDR types including Dolby Vision,
 /// HEVC/Dolby Vision decoder census, dataspace bridge state, registered
-/// extension) and probes the mpv fork for the P5 dovi rescale pipeline. The
-/// snapshot never initializes EGL and never probes private ABIs.
+/// extension) and takes the P5 dovi rescale pipeline verdict from the native
+/// probe: a disposable mpv instance (no vo — never EGL) created once inside
+/// the already-pinned libmpv at engine attach, reading the fork's read-only
+/// `dovi-p5-pipeline` property. The snapshot never initializes EGL and never
+/// probes private ABIs.
 ///
 /// {@endtemplate}
 class HdrCapabilities {
@@ -142,22 +145,6 @@ class HdrCapabilities {
     'com.alexmercerind/media_kit_video',
   );
 
-  /// The mpv fork option whose existence identifies the generation carrying
-  /// the P5 dovi rescale pipeline (both introduced in the same fork commit),
-  /// so option presence is a conservative availability proxy (R1.4): an older
-  /// fork generation may be misjudged as unavailable, but an incapable build
-  /// is never misjudged as available.
-  static const String p5FastPathOption = 'dovi-p5-fast-path';
-
-  /// Property read to detect [p5FastPathOption]: the option's reported name
-  /// is non-empty exactly when the option exists.
-  static const String p5ProbeProperty = 'option-info/dovi-p5-fast-path/name';
-
-  /// Injectable property reader used instead of `Player.getProperty` by
-  /// [query]. Test seam; null in production.
-  @visibleForTesting
-  static HdrPropertyReader? propertyReader;
-
   /// Android SDK version.
   final int sdkInt;
 
@@ -173,8 +160,9 @@ class HdrCapabilities {
   /// `video/dolby-vision` decoders, reported as-is (usually empty).
   final List<HdrDecoderInfo> dolbyVisionDecoders;
 
-  /// Whether mpv carries the fork's P5 dovi rescale pipeline, detected from
-  /// the presence of the `dovi-p5-fast-path` option.
+  /// Whether mpv carries the fork's P5 dovi rescale pipeline, answered by
+  /// the native disposable mpv instance probe (the fork's read-only
+  /// `dovi-p5-pipeline` property, read once at engine attach and cached).
   final bool p5PipelineAvailable;
 
   /// Whether the native Surface dataspace bridge loaded in this process.
@@ -208,77 +196,59 @@ class HdrCapabilities {
     );
   }
 
-  /// Queries the Android capability snapshot and probes the mpv fork for the
-  /// P5 dovi rescale pipeline (R1.1, R1.4).
+  /// Queries the Android capability snapshot (R1.1, R1.4).
   ///
-  /// [player] is optional. With a [Player], the P5 pipeline is probed through
-  /// its mpv property access as before. Without one (e.g. a route decision
-  /// made before the first player is created), no mpv option can be probed,
-  /// so `p5PipelineAvailable` is conservatively false: the prediction treats
-  /// every P5 source as not playable and falls back to SDR. This is not a
-  /// safety gap — it is the "unavailable is never misjudged as available"
-  /// direction. Callers must re-query once they hold a Player to get an
-  /// authoritative P5 verdict; predictions for non-P5 sources (P8.4, HDR10,
-  /// HLG, SDR) are unaffected.
+  /// The P5 pipeline verdict comes from the snapshot: the native side answers
+  /// it once per process through a disposable mpv instance (created with no
+  /// vo and no media, so it never touches EGL) that reads the fork's
+  /// read-only `dovi-p5-pipeline` property. The probe runs at engine attach
+  /// and is cached; every query is therefore authoritative with or without a
+  /// [Player].
+  ///
+  /// [player] is kept only for source compatibility with the Phase 1
+  /// signature and is not consulted — no mpv property is read through it.
   static Future<HdrCapabilities> query({Player? player}) {
-    if (player == null) {
-      // No player: no mpv property access, so the P5 probe cannot run and
-      // the pipeline is treated as missing. [propertyReader] is deliberately
-      // not consulted — the conservative verdict must not depend on a seam.
-      return queryWith((property) async => '');
-    }
-    final HdrPropertyReader reader =
-        propertyReader ?? (property) => player.getProperty(property);
-    return queryWith(reader);
+    return queryWith();
   }
 
-  /// [query] with an injected libmpv property reader (test seam and for
-  /// callers that already hold a property access abstraction).
+  /// [query] implementation: fetches the snapshot through the plugin channel
+  /// and parses it. The P5 verdict is whatever the native probe wrote into
+  /// the snapshot (missing key degrades to false, the safe direction).
   @visibleForTesting
-  static Future<HdrCapabilities> queryWith(HdrPropertyReader readProperty) async {
-    final List<Object?> results = await Future.wait(<Future<Object?>>[
-      _channel.invokeMapMethod<String, dynamic>('HdrCapabilities.Get'),
-      detectP5Pipeline(readProperty),
-    ]);
-    final HdrCapabilities capabilities = parseSnapshot(
-      results[0] as Map<Object?, Object?>?,
-      p5PipelineAvailable: results[1] as bool,
-    );
+  static Future<HdrCapabilities> queryWith() async {
+    final Map<Object?, Object?>? snapshot =
+        await _channel.invokeMapMethod<String, dynamic>('HdrCapabilities.Get');
+    final HdrCapabilities capabilities = parseSnapshot(snapshot);
     // `HDR capability:` layer (R4.3); short-circuits while disabled.
     HdrOutputDiagnostics.capability(capabilities);
     return capabilities;
-  }
-
-  /// True exactly when mpv reports a non-empty name for the
-  /// [p5FastPathOption] option. Read failures and empty results mean the
-  /// fork does not carry the P5 pipeline — false, never true by accident.
-  @visibleForTesting
-  static Future<bool> detectP5Pipeline(HdrPropertyReader readProperty) async {
-    try {
-      final String name = await readProperty(p5ProbeProperty);
-      return name.trim().isNotEmpty;
-    } catch (_) {
-      return false;
-    }
   }
 
   /// Parses the raw native snapshot. Malformed or missing fields degrade to
   /// the safe defaults: no capability report (null displayHdrTypes), no
   /// decoders, no bridge, no extension. Also used by the session to parse
   /// the `HdrCapabilities.Changed` event payload.
+  ///
+  /// The P5 pipeline verdict is the snapshot's `p5Pipeline` field when
+  /// present (the native probe's answer, plan B 2026-10-02); when absent it
+  /// falls back to [p5PipelineAvailable] — the Phase 1 parameter kept so the
+  /// session's `HdrCapabilities.Changed` payload parsing compiles unchanged —
+  /// and both missing degrade to false, never true by accident.
   static HdrCapabilities parseSnapshot(
     Map<Object?, Object?>? snapshot, {
-    required bool p5PipelineAvailable,
+    bool? p5PipelineAvailable,
   }) {
     final Map<String, Object?> map = snapshot == null
         ? const <String, Object?>{}
         : Map<String, Object?>.from(snapshot);
+    final Object? p5Raw = map['p5Pipeline'];
     return HdrCapabilities(
       sdkInt: map['sdkInt'] is int ? map['sdkInt'] as int : 0,
       displayHdrTypes: _parseDisplayHdrTypes(map['displayHdrTypes']),
       hevcDecoders: _parseDecoders(map['hevcDecoders']),
       dolbyVisionDecoders: _parseDecoders(map['dolbyVisionDecoders']),
-      p5PipelineAvailable: p5PipelineAvailable,
+      p5PipelineAvailable:
+          p5Raw is bool ? p5Raw : (p5PipelineAvailable ?? false),
       dataSpaceBridgeLoaded: map['dataSpaceBridgeLoaded'] == true,
       dataSpaceExt: HdrDataSpaceExtInfo.fromMap(map['dataSpaceExt']),
     );

@@ -26,7 +26,6 @@ void main() {
   tearDown(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, null);
-    HdrCapabilities.propertyReader = null;
   });
 
   Map<Object?, Object?> fullSnapshot() => <Object?, Object?>{
@@ -47,6 +46,7 @@ void main() {
           },
         ],
         'dolbyVisionDecoders': <Object?>[],
+        'p5Pipeline': true,
         'dataSpaceBridgeLoaded': true,
         'dataSpaceExt': <Object?, Object?>{
           'id': 'lya-pq',
@@ -60,12 +60,7 @@ void main() {
         expect(call.method, 'HdrCapabilities.Get');
         return fullSnapshot();
       };
-      // Positive P5 probe: the option name comes back non-empty.
-      final HdrCapabilities caps =
-          await HdrCapabilities.queryWith((String property) async {
-        expect(property, HdrCapabilities.p5ProbeProperty);
-        return 'dovi-p5-fast-path';
-      });
+      final HdrCapabilities caps = await HdrCapabilities.queryWith();
 
       expect(calls.single.method, 'HdrCapabilities.Get');
       expect(caps.sdkInt, 29);
@@ -106,8 +101,7 @@ void main() {
             ],
           };
 
-      final HdrCapabilities caps = await HdrCapabilities.queryWith(
-          (String property) async => '');
+      final HdrCapabilities caps = await HdrCapabilities.queryWith();
 
       expect(caps.displayHdrTypes, <int>{1, 2, 3});
       expect(caps.dolbyVisionDecoders, hasLength(1));
@@ -123,8 +117,7 @@ void main() {
     test('missing keys degrade to no-report defaults', () async {
       handler = (MethodCall call) async => <Object?, Object?>{'sdkInt': 29};
 
-      final HdrCapabilities caps = await HdrCapabilities.queryWith(
-          (String property) async => '');
+      final HdrCapabilities caps = await HdrCapabilities.queryWith();
 
       expect(caps.displayHdrTypes, isNull);
       expect(caps.hevcDecoders, isEmpty);
@@ -139,8 +132,7 @@ void main() {
             'displayHdrTypes': null,
           };
 
-      final HdrCapabilities caps = await HdrCapabilities.queryWith(
-          (String property) async => '');
+      final HdrCapabilities caps = await HdrCapabilities.queryWith();
 
       expect(caps.displayHdrTypes, isNull);
     });
@@ -150,15 +142,14 @@ void main() {
       handler = (MethodCall call) async => <Object?, Object?>{
             'displayHdrTypes': <Object?>[2, '3'],
           };
-      HdrCapabilities caps = await HdrCapabilities.queryWith(
-          (String property) async => '');
+      HdrCapabilities caps = await HdrCapabilities.queryWith();
       expect(caps.displayHdrTypes, isNull);
 
       // Non-list value.
       handler = (MethodCall call) async => <Object?, Object?>{
             'displayHdrTypes': 2,
           };
-      caps = await HdrCapabilities.queryWith((String property) async => '');
+      caps = await HdrCapabilities.queryWith();
       expect(caps.displayHdrTypes, isNull);
     });
 
@@ -167,8 +158,7 @@ void main() {
             'displayHdrTypes': <Object?>[],
           };
 
-      final HdrCapabilities caps = await HdrCapabilities.queryWith(
-          (String property) async => '');
+      final HdrCapabilities caps = await HdrCapabilities.queryWith();
 
       expect(caps.displayHdrTypes, <int>{});
     });
@@ -178,8 +168,7 @@ void main() {
             'dataSpaceExt': null,
           };
 
-      final HdrCapabilities caps = await HdrCapabilities.queryWith(
-          (String property) async => '');
+      final HdrCapabilities caps = await HdrCapabilities.queryWith();
 
       expect(caps.dataSpaceExt, isNull);
     });
@@ -187,62 +176,86 @@ void main() {
     test('a missing channel reply is tolerated (null snapshot)', () async {
       handler = (MethodCall call) async => null;
 
-      final HdrCapabilities caps = await HdrCapabilities.queryWith(
-          (String property) async => '');
+      final HdrCapabilities caps = await HdrCapabilities.queryWith();
 
       expect(caps.displayHdrTypes, isNull);
       expect(caps.dataSpaceBridgeLoaded, isFalse);
     });
   });
 
-  group('HdrCapabilities P5 pipeline probe (injected property reader)', () {
-    test('non-empty option name means available', () async {
-      expect(
-        await HdrCapabilities.detectP5Pipeline(
-            (String property) async => 'dovi-p5-fast-path'),
-        isTrue,
+  group('HdrCapabilities.parseSnapshot P5 pipeline field', () {
+    test('snapshot p5Pipeline true means available', () async {
+      handler = (MethodCall call) async => <Object?, Object?>{
+            'sdkInt': 29,
+            'p5Pipeline': true,
+          };
+
+      final HdrCapabilities caps = await HdrCapabilities.queryWith();
+
+      expect(caps.p5PipelineAvailable, isTrue);
+    });
+
+    test('snapshot p5Pipeline false means unavailable', () async {
+      handler = (MethodCall call) async => <Object?, Object?>{
+            'sdkInt': 29,
+            'p5Pipeline': false,
+          };
+
+      final HdrCapabilities caps = await HdrCapabilities.queryWith();
+
+      expect(caps.p5PipelineAvailable, isFalse);
+    });
+
+    test('a missing p5Pipeline key falls back to the fallback argument', () {
+      final HdrCapabilities caps = HdrCapabilities.parseSnapshot(
+        <Object?, Object?>{'sdkInt': 29},
+        p5PipelineAvailable: true,
       );
-    });
+      expect(caps.p5PipelineAvailable, isTrue);
 
-    test('empty property result means unavailable', () async {
-      expect(
-        await HdrCapabilities.detectP5Pipeline((String property) async => ''),
-        isFalse,
+      final HdrCapabilities absentFalse = HdrCapabilities.parseSnapshot(
+        <Object?, Object?>{'sdkInt': 29},
+        p5PipelineAvailable: false,
       );
+      expect(absentFalse.p5PipelineAvailable, isFalse);
     });
 
-    test('a property read failure means unavailable', () async {
-      Future<String> fail(String property) async {
-        throw StateError('property unavailable');
-      }
-
-      expect(await HdrCapabilities.detectP5Pipeline(fail), isFalse);
+    test('a missing p5Pipeline key and no argument degrade to false', () {
+      final HdrCapabilities caps =
+          HdrCapabilities.parseSnapshot(<Object?, Object?>{'sdkInt': 29});
+      expect(caps.p5PipelineAvailable, isFalse);
     });
 
-    test('whitespace-only option name means unavailable', () async {
-      expect(
-        await HdrCapabilities.detectP5Pipeline(
-            (String property) async => '  '),
-        isFalse,
+    test('a non-bool p5Pipeline value degrades to false', () {
+      final HdrCapabilities caps = HdrCapabilities.parseSnapshot(
+        <Object?, Object?>{'p5Pipeline': 'true'},
       );
+      expect(caps.p5PipelineAvailable, isFalse);
     });
 
-    test('query reports p5PipelineAvailable false for a non-fork libmpv',
-        () async {
-      handler = (MethodCall call) async => fullSnapshot();
+    test('the snapshot field wins over the fallback argument', () {
+      final HdrCapabilities snapshotTrue = HdrCapabilities.parseSnapshot(
+        <Object?, Object?>{'p5Pipeline': true},
+        p5PipelineAvailable: false,
+      );
+      expect(snapshotTrue.p5PipelineAvailable, isTrue);
 
-      // Upstream (non-fork) libmpv has no such option: the property read
-      // comes back empty.
-      final HdrCapabilities caps = await HdrCapabilities.queryWith(
-          (String property) async => '');
+      final HdrCapabilities snapshotFalse = HdrCapabilities.parseSnapshot(
+        <Object?, Object?>{'p5Pipeline': false},
+        p5PipelineAvailable: true,
+      );
+      expect(snapshotFalse.p5PipelineAvailable, isFalse);
+    });
 
+    test('a null snapshot degrades to false', () {
+      final HdrCapabilities caps = HdrCapabilities.parseSnapshot(null);
       expect(caps.p5PipelineAvailable, isFalse);
     });
   });
 
   group('HdrCapabilities.query without a player', () {
-    test('query(player: null) reads the channel and conservatively reports '
-        'p5PipelineAvailable false', () async {
+    test('query(player: null) is authoritative: the native probe verdict in '
+        'the snapshot is used', () async {
       handler = (MethodCall call) async {
         expect(call.method, 'HdrCapabilities.Get');
         return fullSnapshot();
@@ -254,11 +267,27 @@ void main() {
       expect(calls.single.method, 'HdrCapabilities.Get');
       expect(caps.sdkInt, 29);
       expect(caps.displayHdrTypes, <int>{2, 3});
-      // No player means no mpv option probe: the P5 pipeline is treated as
-      // missing (the safe direction), regardless of what the fork carries.
-      expect(caps.p5PipelineAvailable, isFalse);
+      // Core new capability of plan B: no Player is required — the P5
+      // verdict comes from the disposable mpv instance probe cached at
+      // engine attach, so query() is authoritative without a player.
+      expect(caps.p5PipelineAvailable, isTrue);
       expect(caps.dataSpaceBridgeLoaded, isTrue);
       expect(caps.dataSpaceExt?.id, 'lya-pq');
+    });
+
+    test('query(player: null) reports p5PipelineAvailable false for a '
+        'non-fork libmpv', () async {
+      handler = (MethodCall call) async => <Object?, Object?>{
+            'sdkInt': 29,
+            'displayHdrTypes': <Object?>[2, 3],
+            // Upstream (non-fork) libmpv has no such property: the native
+            // probe answers 0 (unavailable, a verdict — not an error).
+            'p5Pipeline': false,
+          };
+
+      final HdrCapabilities caps = await HdrCapabilities.query(player: null);
+
+      expect(caps.p5PipelineAvailable, isFalse);
     });
   });
 }

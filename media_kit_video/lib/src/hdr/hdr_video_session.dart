@@ -500,6 +500,9 @@ class HdrVideoSession {
       videoParams: facts.videoParams,
       dolbyVisionProfile: facts.dolbyVisionProfile,
       hint: plan.source,
+      dvCompatibilityId: facts.dvCompatibilityId,
+      dvElPresent: facts.dvElPresent,
+      hdrVivid: facts.hdrVivid,
     );
     if (descriptor.codec.isEmpty && facts.codec.isNotEmpty) {
       // VideoParams does not carry the codec; the track codec read by the

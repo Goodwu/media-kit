@@ -98,6 +98,9 @@ class HdrReviewFacts {
     this.codec = '',
     this.hwdecCurrent = '',
     this.path = '',
+    this.dvCompatibilityId,
+    this.dvElPresent,
+    this.hdrVivid,
   });
 
   /// Latest decoder-reported video parameters (`video-params`).
@@ -115,6 +118,30 @@ class HdrReviewFacts {
 
   /// `path` observed after file-loaded.
   final String path;
+
+  /// Container Dolby Vision compatibility id from the fork property
+  /// `current-tracks/video/dolby-vision-compatibility-id` (fork
+  /// 0f7e6bec32+). Unavailable for a stream without a DOVI configuration
+  /// record; `0` is a valid value (the DV spec's "None"); `-1` is the
+  /// in-record "unknown" sentinel. Every non-parsed value (unavailable,
+  /// non-numeric) and every negative value reads as `null` = unknown/not
+  /// observable; the classifier then falls back to base-layer inference.
+  final int? dvCompatibilityId;
+
+  /// Container Dolby Vision enhancement-layer presence from the fork
+  /// property `current-tracks/video/dolby-vision-el-present` (fork
+  /// 0f7e6bec32+): `1` → true, `0` → false, `-1` (unknown sentinel) and
+  /// every non-parsed value (unavailable, non-numeric) → `null` = unknown.
+  /// The configuration record does not distinguish FEL/MEL; it only states
+  /// whether the enhancement layer exists.
+  final bool? dvElPresent;
+
+  /// Per-frame HDR Vivid side-data presence from the fork property
+  /// `video-params/hdr-vivid` (fork 0f7e6bec32+): `yes` → true, `no` →
+  /// false, every other/unavailable value → `null` = unknown (upstream mpv
+  /// has no such sub-property). The review samples this once — it is a
+  /// frame fact, not a watched property.
+  final bool? hdrVivid;
 }
 
 /// Backend observation pulled by the session to build a report (R4.2):

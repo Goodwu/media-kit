@@ -15,7 +15,7 @@ media-kit 已在 LYA-AL00（API 29）上跑通三条 Android HDR 路径（播放
 | DV P8.4 | HLG 直出（及剥 RPU 的 SDR 对照） | 视频层 BT.2020 HLG、首帧 0.6–0.7s |
 | DV P5 | `gpu-next` + dovi rescale → PQ 10 位视频层 | direct=1+RESCALE、全片 EOS、片尾回退命中 |
 
-库内已有的部分：路由纯函数 `HdrOutputPolicy`（`classifyMedia`/`decide`，11 项单测）；`PlatformVideoView` 的 dataspace 应用链路（公开 NDK 优先，失败后回退到已注册的 `SurfaceDataSpaceExt`）；bridge `.so`（4 个公开 JNI）；mpv JAR `libmpv-android-v2026.10`（P5 dovi rescale 管线）。
+库内已有的部分：路由纯函数 `HdrOutputPolicy`（`classifyMedia`/`decide`，11 项单测）；`PlatformVideoView` 的 dataspace 应用链路（公开 NDK 优先，失败后回退到已注册的 `SurfaceDataSpaceExt`）；bridge `.so`（公开 JNI；原 4 个，2026-10-02 方案 B 后含 P5 管线探针共 5 个，见 R5.2 注记）；mpv JAR `libmpv-android-v2026.10`（P5 dovi rescale 管线）。
 
 **缺口**：
 
@@ -122,6 +122,7 @@ P5 的基础层是 IPT 色彩空间，忽略 RPU 会偏色，所以 P5 没有 `b
    输入可以是 `HdrSourceDescriptor`，也可以是 `HdrMediaKind`，可附带分辨率和帧率。
 3. **预测与执行同源**：预测必须调用执行时使用的同一个规划函数，单测要覆盖"同一输入下，预测选中的路由等于执行选中的路由"。
 4. **P5 管线可用性必须在运行时、开播前可查**，不得依赖日志标识串或编译期 define。Phase 1 的判定方法是检查 mpv 是否存在 fork 选项 `dovi-p5-fast-path`（`option-info/dovi-p5-fast-path/name` 非空）。这个选项与 rescale 修复在同一提交 `5f9ddf1777` 引入，只会把较早的 fork 世代误判为不可用，不会把不可用的构建误判为可用。长期方案是在 mpv fork 中提供专门的只读能力属性。`metadataReshape` 用于 DV 时，都依赖这项能力。
+   - **注记（2026-10-02，方案 B）**：长期方案已落地——mpv fork 新增只读能力属性 `dovi-p5-pipeline`（bool）。判定改由 bridge `.so`（`media_kit_video_hdr_bridge`）在插件 engine attach 时创建抛弃式 mpv 实例（create→initialize→读属性→terminate，无 vo、无媒体、不触碰 EGL）执行一次并缓存；`option-info/dovi-p5-fast-path/name` 代理路径退役。上游构建无此属性→读取失败→判为不可用，仍是合法结果而非错误。
 5. **置信度**：
    - `verified`：路由不依赖运行时 dataspace 应用，或依赖的设备扩展已对本机门禁匹配。
    - `unverified`：路由依赖开播后才能确定成败的 dataspace 应用。
@@ -136,6 +137,7 @@ P5 的基础层是 IPT 色彩空间，忽略 RPU 会偏色，所以 P5 没有 `b
    - 复核结果与 hint 不一致，并且导致选中的路由变化时，在当前位置做一次单变量重建。每次开播最多重建一次。
    - 没有 hint 时，先按 SDR Texture 打开，再按复核结果决定是否重建。
    - 禁止旧源回写、禁止发布失效输出。
+   - **注记（2026-10-02）**：复核事实新增容器 DV 兼容 ID（`current-tracks/video/dolby-vision-compatibility-id`）、增强层标志（`current-tracks/video/dolby-vision-el-present`）与 HDR Vivid side data 存在性（`video-params/hdr-vivid`；均为 mpv fork 0f7e6bec32+ 属性）。分类器口径：容器显式兼容 ID 优先、基础层 gamma 推断回退（容器记录就是 DV 信令本身）；增强层按事实驱动、profile 缺省回退；HDR Vivid 事实接通 `HdrDynamicMetadata.hdrVivid`（成熟度经 class 推导自动生效）。
 4. 执行内容沿用 hdr_lab 已验证的语义：
    - 写入并读回确认 `vo`/`hwdec`/`target-prim`/`target-trc`/`egl-output-format` 等属性，在会话结束或换源时恢复原值；
    - 按策略决定是否剥离 RPU（vf）；
@@ -182,6 +184,7 @@ P5 的基础层是 IPT 色彩空间，忽略 RPU 会偏色，所以 P5 没有 `b
 
 1. 目标：**调用方零设备特定代码**。LYA-AL00 的厂商 dataspace 私有 ABI 回退（`LyaPqDataSpaceExt`，现位于 `media_kit_hdr_lab`）回归 media-kit 仓，作为受控交付物。
 2. 结构：做成**同仓独立子包**（Android 插件），App 依赖后自动注册到核心库已有的 `SurfaceDataSpaceExt` 扩展点。核心库不包含私有 ABI，bridge `.so` 符号面保持 4 个公开 JNI。
+   - **注记（2026-10-02，方案 B 批准后）**：探针（`MpvPipelineProbe.nativeProbeP5Pipeline`）为第 5 个公开 JNI。它不是设备私有 ABI——是公开能力探测（读 fork 只读属性 `dovi-p5-pipeline`，经抛弃式 mpv 实例执行）。本条原文意图（私有 ABI 不进核心 bridge）不变。
 3. 安全要求：
    - **默认关闭**。仅在 SDK、`ro.build.fingerprint` 和请求的 dataspace（BT2020_PQ）三者精确匹配已验证配置时才调用私有 ABI。
    - 是否适用通过**只读检查**判定，不得用试调私有 ABI 的方式探测。不适用时不加载原生库。
@@ -258,7 +261,7 @@ Phase 1 只做 Android。darwin（三事实交集门禁、final24 运行时禁�
 - 暂停空转修复（churn_fix_20261001 边沿触发）与 SurfaceReleaseProtocol/NativeOutputLifecycle 协议在会话编排下继续生效。
 - 测试面：`HdrOutputPolicy` 既有 11 项单测不回归（分类修复后对应用例同步修订）。hdr_lab 已有的 coordinator、slot、intent、disposal 单测迁入库内后继续通过。编排层新增行为要有 VM 单测。
 - 当前只有一台 HDR 实机（LYA，API 29，依赖私有回退）。公开 NDK 直接成功的路径（API 30–33）和 SurfaceControl 路径（API≥34）缺少实机证据，相关预测置信度标为 `unverified`。新设备接入后，先跑现有矩阵，再补其他验证。
-- P5 管线判定使用选项存在性作为代理（R1.4），较早的 fork 世代会被判为不可用。
+- P5 管线判定使用选项存在性作为代理（R1.4），较早的 fork 世代会被判为不可用。（注记 2026-10-02：该代理已退役，判定改为 fork 只读属性 `dovi-p5-pipeline` 经 bridge 探针，见 R1.4 注记——本条限制不再适用。）
 
 ## 9. 修订记录
 

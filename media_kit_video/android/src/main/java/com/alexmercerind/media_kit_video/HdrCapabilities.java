@@ -57,6 +57,13 @@ public final class HdrCapabilities {
      * capability at all (SDR panel, headless display); the key is always
      * present with an explicit value. Dolby Vision decoders are reported
      * as-is — an empty list simply means the device offers none.
+     *
+     * {@code p5Pipeline} answers whether the loaded mpv fork carries the P5
+     * dovi rescale pipeline. The source is the disposable mpv instance probe
+     * run once through the bridge at engine attach (plan B, 2026-10-02) —
+     * not option introspection. {@code probeOnce} is idempotent, so this
+     * fallback also covers an attach path that skipped the probe; the
+     * three-state verdict is consumed conservatively (-1 → false).
      */
     @NonNull
     public static Map<String, Object> get(@NonNull Context context) {
@@ -65,6 +72,7 @@ public final class HdrCapabilities {
         snapshot.put("displayHdrTypes", displayHdrTypes(context));
         snapshot.put("hevcDecoders", decoders(MediaFormat.MIMETYPE_VIDEO_HEVC));
         snapshot.put("dolbyVisionDecoders", decoders(MIMETYPE_DOLBY_VISION));
+        snapshot.put("p5Pipeline", MpvPipelineProbe.probeOnce() == 1);
         snapshot.put("dataSpaceBridgeLoaded", PlatformVideoView.isDataSpaceBridgeLoaded());
         snapshot.put("dataSpaceExt", PlatformVideoView.getSurfaceDataSpaceExtInfo());
         return snapshot;
