@@ -37,9 +37,9 @@
 - [ ] HDR 能力路由后续三项（Phase 1 收尾登记，2026-10-02）
   - status: planned
   - context: archives/conversations/android-hdr-auto-output-20261002.md
-  - acceptance: ①原生 DV 呈现（R7 预留项，FFmpeg `video/dolby-vision`+profile 打开解码器/mpv 路由/media-kit 三方，等 DV 设备到位）；②动态元数据重建扩展（HDR Vivid/HDR10+：fork 需暴露 DV 兼容 ID/增强层标志与 Vivid side data，S1 评估已列改动点）；③`HdrCapabilities.query` 提供无 Player 查询入口（PiliPlusX 进程首个视频的 P5 预测现保守回落 SDR）+ PiliPlusX app 内 seek 不变量验证（S12 登记待补）。
-  - latest: 三项均为 Phase 1 验收/实施中如实登记的缺口，无阻塞项。
-  - next: 按用户优先级排期；①需 DV 设备。
+  - acceptance: ①原生 DV 呈现（R7 预留项，FFmpeg `video/dolby-vision`+profile 打开解码器/mpv 路由/media-kit 三方，等 DV 设备到位）；②动态元数据重建扩展（HDR Vivid/HDR10+）；③`HdrCapabilities.query` 无 Player 入口 + PiliPlusX app 内 seek 验证。
+  - latest: **③ 完成（2026-10-02）**：query player 改可选（186/186；media-kit 1c49c684）；PiliPlusX 删手工兜底走单一入口（2ce821d4c，81/81，构建 46441b40）；实机选档门复跑照常；seek 不变量维持进度条拖拽证据（长按钩子留人工路径）。**② fork 暴露完成（mpv `0f7e6bec32`）**：compat id/EL/ hdr-vivid 三属性 + 构建零错误；剩余：fork JAR/CI → 库消费 → 设备事实轮。①阻塞待 DV 设备。
+  - next: ② 剩余步骤按用户排期；①需 DV 设备。
 
 - [ ] 修复 macOS modern mpv 销毁时未释放 render context 的崩溃
   - status: queued
