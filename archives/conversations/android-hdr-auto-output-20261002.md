@@ -2,6 +2,13 @@
 
 ## Current State
 
+- **②+方案 B 设备事实轮完成（2026-10-02 第七轮，LYA 8 轮，e90ada4d + d24c59905 JAR）**：记录 `archives/experiments/android-hdr-planb-device-facts-20261002.md`，证据 `~/src/media-kit-build/evidence/hdr-planb-facts-20261002/`。
+  - **方案 B P5 探针 8/8 全过**：正向 `result=1`（elapsedMs 4–8ms，config/initialize 零错误），负向上游 JAR `result=0`（property=-8 合法不可用），`HdrCapabilities.query` 快照逐轮一致，无 -1 机械失败零崩溃——方案 B 实机闭环。
+  - **② 容器事实通道实机验证**：R2 fate p81 **compat=1 为容器直证**（复核时 gamma=none，推断不可能给出 1）、class=dvP81、首个重规划 baseLayerDirect(inherited)（10 帧样片 mediacodec 无输出→hwdecMismatch 降级，与 a7-p81 基线一致）；R3 P7 FEL **el=true（旧版 null 的关键区分）**、compat=6、class=dvP7（dvP7 行全 experimental 默认落安全网）；R5 上游 JAR 三属性 unavailable→gamma 推断回退 compat=4 不崩、HLG 直出正常。
+  - **发现：HDR Vivid 在 mediacodec 路径不可观测（R1 断言不达，归因实证）**：MediaCodec 不传播 CUVA 005.1 side data，硬解路径 `video-params/hdr-vivid` 恒 false→Vivid 按基础层（hlg）分类；R1b 软解对照同一属性读 true 证实是解码通道剥离而非属性缺陷。路由结果不受影响（同为 tone-map 安全网）。**Lead 决策（2026-10-02）**：登记为设备/路由限制（需求第 8 节已加条目），不为此切软解路由（4K 软解不可行）；demuxer/码流级 SEI 探测归入 ② 完整目标。
+  - **R4 教训（Lead 运行手册错）**：mkchk p84 对照样片容器无 dvcC/dvvC（此前矩阵轮靠 hint 枚举分类所以未暴露）——指定断言样片前必须 ffprobe 核对容器记录；零回归由 R4b（p84-full）兑现：class=dvP84、compat=4、HLG 直出 verified、56s 零丢帧、rebuilt=false，与 S10 A1 基线一致。
+  - 超短样片（p81 10 帧/P7 FEL 1 帧）mediacodec 无解码输出为已知窗口问题，公开样片库无长 P7/P8.1 样片，缺口维持；MPVPROP 属性列表不含 compat-id/el-present 名（本轮不可改源码），原始值以会话报告反推且均有排除性佐证。
+  - **②+方案 B 本轮全部收口**（代码 e90ada4d 已推送、JAR/构建仓/fork 已推送、实机证据归档、限制已登记）；剩余：发布链三件套（JAR 入 GitHub release → build.gradle 钉定 → CI `dovi-p5-pipeline` 标记）待用户排期；② 完整目标（Vivid/HDR10+ 元数据重建，含 demuxer 级 SEI 探测）按需另立。
 - **②+方案 B 合并实施完成（2026-10-02 第七轮，V1 PASS，代码已提交）**：
   - **三包落地**：①mpv fork `d24c59905b`（`dovi-p5-pipeline` 只读能力属性，已推送 Goodwu/mpv `media-kit/android`——远端分支原在 5f9ddf1777，早前"远端无同名分支"记录有误）；②方案 B 探针包（bridge 第 5 个 JNI 三态探针/MpvPipelineProbe.java attach 一次幂等缓存/快照 p5Pipeline 字段/Dart 单一来源 + option-info 代理退役）；③②消费包（gatherReviewFacts +compat-id/el-present/hdr-vivid 三读取、HdrReviewFacts 三字段、classifier 容器事实优先推断回退、EL 事实驱动、hdrVivid→dynamicMetadata、session 透传）。测试 186→**204 全过**（净增 18：capabilities +3、classifier +11、backend +3、session +1），analyze 18 既有不增，hdr_lab analyze 0。
   - **V1 Reviewer PASS**（无阻塞无建议）：跨仓契约逐字核对（属性名/FLAG=3/哨兵/readProperty 空串语义）、探针生命周期（RTLD_NOLOAD 前提成立、terminate 必达、不碰 EGL、二次 attach 幂等）、P8.4 容器事实覆盖 gamma 推断等 4 项变异验证全部锁死且还原确认（diff hash f3c08cfb…）、删除面全仓零残留、文档四处注记一致。记录项已处置：session test 一行格式合并已修；基线数字勘误（186 非 189）；RTLD_NOLOAD 不 dlclose 与 broker 同模式（进程 pin 下无害）；原生链路运行时证据归设备事实轮（计划内）。
