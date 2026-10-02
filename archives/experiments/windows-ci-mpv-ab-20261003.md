@@ -30,7 +30,13 @@ Microsoft documents that [CoIncrementMTAUsage](https://learn.microsoft.com/en-us
 
 A [bare Python/libmpv control](https://github.com/Goodwu/media-kit/actions/runs/37047917848) passed both baseline and MTA cases, so that control does **not** establish a standalone upstream reproduction or prove causation.
 
-[Patched old/new full suites](https://github.com/Goodwu/media-kit/actions/runs/37048293551) and full-platform CI: pending. Do not call the task complete until Windows passes and the failure sets have been compared.
+[Patched old/new full suites](https://github.com/Goodwu/media-kit/actions/runs/37048293551) both succeeded: **81 passed, 15 skipped** each. The modern job first reproduced the unpatched access violation under cdb, then restored the fix and passed the complete suite. No failure retry was used to obtain these passes.
+
+[Full-platform CI run 64](https://github.com/Goodwu/media-kit/actions/runs/37049478534) completed successfully: 23 successful jobs, one unchanged upstream-only release metadata skip, zero failures. Windows/Linux/macOS each passed 81 tests with 15 existing skips; Web passed 61 with 27 existing skips. [OHOS run 37](https://github.com/Goodwu/media-kit/actions/runs/37049478577) also succeeded. Dart 3.13.2 analysis of both changed source files reported no issues.
+
+Run 64 tested PR head `76bff4a6` merged with current main `f6665609` (test merge `ba03e261`). Main's concurrent shuffle test change is separate from this Windows patch and accounts for the Web/Linux change; it is preserved. Failure set comparison: run 60 = {Windows access violation, Web shuffle, Linux shuffle}; run 64 = {}. Subsequent closure changes are documentation only.
+
+The fork's awaited delayed termination was introduced in `5cf24d77`; it exposes the native teardown fault at a guaranteed disposal boundary. The chosen correction is local to Windows core disposal rather than reverting that lifecycle contract or changing upstream merge resolutions. The MTA-lifetime explanation is supported by source/disassembly and controlled old/new-fixture results, but is not claimed as a standalone upstream reproducer.
 
 Fixture proposed for regular Windows package CI: https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/20261002/mpv-dev-x86_64-20261002-git-3186d369f9.7z
 
