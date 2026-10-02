@@ -154,6 +154,7 @@ P5 的基础层是 IPT 色彩空间，忽略 RPU 会偏色，所以 P5 没有 `b
    - 输出绑定超时；
    - 播放中能力丢失或 dataspace 被重置后重新应用失败。
    降级发生在开播前时，直接按下一条候选打开。发生在播放中时，在当前位置重建。
+   （口径确认 2026-10-02：**"每一次降级都要发布事件"仅指开播后运行时降级**。开播前规划相的候选跳过（如能力不足、门禁跳过 experimental）不是降级事件——跳过原因经 R1.2 预测候选与 R4.2 报告候选列表完整披露，会话按选中的路由正常打开并发 `RouteApplied`。A3-2 实测：模拟无 HLG 开播 P8.4，direct 因 `displayLacksTransfer` 计划相跳过、落 convert 打开，全程无 Degraded、报告候选携带跳过原因。）
 2. 降级原因是类型化枚举，附带诊断文本。至少区分以下原因：`preferenceOff`、`displayLacksTransfer`、`noDisplayCapabilityReport`、`experimentalStrategySkipped`、`dataSpaceApplyFailed`、`dataSpaceReadbackMismatch`、`hwdecMismatch`、`outputBindTimeout`、`capabilityLost`、`unsupportedPlatform`。
 3. **边界例外**：P5 的任何策略（包括 tone-map）都依赖 dovi rescale 管线才能正确着色。管线不可用时，库**不输出错误着色的画面**，改为发布 `p5PipelineUnavailable` 错误，播放不开始。PiliPlusX 应当在 R1 预测阶段就避开这种情况。
 4. 能力恢复时不自动升回 HDR，只发布 `CapabilityChanged` 事件。

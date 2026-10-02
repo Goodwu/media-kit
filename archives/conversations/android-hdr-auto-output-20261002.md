@@ -2,6 +2,11 @@
 
 ## Current State
 
+- **发布链 v2026.011 + R3.1 口径落文（2026-10-02 晚，用户指令执行）**：
+  - **命名规则变更（用户决策）**：release 命名改为 `年.年内序号`三位补零（v2026.011 = 2026 年第 11 次发布；v2026.09/10 即第 9/10 次），消除 YY.MM 月份歧义。先建的 v2026.11 release/tag 已删除重建为 v2026.011。
+  - **三件套完成**：mpv tag `media-kit-v2026.011`（d24c59905b，已推送）；GitHub release [libmpv-android-v2026.011](https://github.com/Goodwu/media-kit/releases/tag/libmpv-android-v2026.011)（资产 media-kit-d24c59905-arm64-v8a.jar，SHA cafef3a4…，说明含命名规则与实机验证指针）；build.gradle arm64 钉定与 libs CHANGELOG 溯源更新；CI `libmpv-jar-identity` 标记加 `dovi-p5-pipeline`（注释同步：探针属性化，option-info 代理退役）。
+  - **R3.1 口径用户确认落文**：需求 R3.1 加注记——"每次降级发布事件"仅指开播后运行时降级；开播前规划相候选跳过经 R1.2/R4.2 候选列表披露、发 RouteApplied 不发 Degraded（A3-2 实测口径）。
+  - **人工观察（待用户①项）进行中**：两个观察轮 APK 已构建（新 JAR cafef3a4 逐轮核验）——obs-hlg-direct（DVS graypatch HLG + `MEDIA_KIT_ANDROID_HDR_GATE_OPEN`，APK `60b73728…`）与 obs-p84-reshape（p84-full + `MEDIA_KIT_ANDROID_HDR_POLICY_EXPERIMENTAL`，APK `d1c1352a…`）；待上机、用户看画面确认后升 P8.4×baseLayerConvert 与 HLG×baseLayerDirect 两格 verified（需求第 6 节 + 代码常量表 + S3 解析单测同步）。
 - **②+方案 B 设备事实轮完成（2026-10-02 第七轮，LYA 8 轮，e90ada4d + d24c59905 JAR）**：记录 `archives/experiments/android-hdr-planb-device-facts-20261002.md`，证据 `~/src/media-kit-build/evidence/hdr-planb-facts-20261002/`。
   - **方案 B P5 探针 8/8 全过**：正向 `result=1`（elapsedMs 4–8ms，config/initialize 零错误），负向上游 JAR `result=0`（property=-8 合法不可用），`HdrCapabilities.query` 快照逐轮一致，无 -1 机械失败零崩溃——方案 B 实机闭环。
   - **② 容器事实通道实机验证**：R2 fate p81 **compat=1 为容器直证**（复核时 gamma=none，推断不可能给出 1）、class=dvP81、首个重规划 baseLayerDirect(inherited)（10 帧样片 mediacodec 无输出→hwdecMismatch 降级，与 a7-p81 基线一致）；R3 P7 FEL **el=true（旧版 null 的关键区分）**、compat=6、class=dvP7（dvP7 行全 experimental 默认落安全网）；R5 上游 JAR 三属性 unavailable→gamma 推断回退 compat=4 不崩、HLG 直出正常。

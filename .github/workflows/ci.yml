@@ -750,15 +750,17 @@ jobs:
 
           with zipfile.ZipFile(jar) as archive:
               so = archive.read('lib/arm64-v8a/libmpv.so')
-          # Version markers compiled into the fork's libmpv since the
+          # Version markers compiled into the fork's libmpv. Since the
           # architecture-review remediation (5f9ddf1777): the mapper's
-          # per-mapper init/fallback log and the dovi rescale factor log,
-          # plus the --dovi-p5-fast-path option name introduced in the same
-          # commit (the P5 pipeline availability proxy probed through
-          # option-info at runtime).
+          # per-mapper init/fallback log, the dovi rescale factor log and
+          # the --dovi-p5-fast-path option name. Since the HDR-routing
+          # property generation (d24c59905b, release v2026.011): the
+          # dovi-p5-pipeline read-only build-capability property, probed
+          # through the media_kit_video_hdr_bridge disposable-instance
+          # probe (the option-info proxy is retired).
           # (The old P5_DOVI_RESCALE / P5_BUFFER_RETIRE probe tags were
           # removed together with the experiment probes.)
-          markers = [b'P5 direct external YUV sampler enabled', b'dovi rescale k=%.6f', b'dovi-p5-fast-path']
+          markers = [b'P5 direct external YUV sampler enabled', b'dovi rescale k=%.6f', b'dovi-p5-fast-path', b'dovi-p5-pipeline']
           missing = [m.decode() for m in markers if m not in so]
           if missing:
               raise SystemExit(f'libmpv.so missing version markers: {missing}')
