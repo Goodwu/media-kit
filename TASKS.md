@@ -35,14 +35,6 @@
   - latest: **机制修正（2026-10-03 深夜复查测试源码）**：`setShuffle` 为状态门控（连续 5 次调用只在 false→true 跃迁时洗一次牌），单次 4 项随机排列 1/24 概率回原序 → `_DistinctStream` 吞掉事件 → 与日志"仅初始事件后 Stream closed"精确吻合。**修复**：两测试播放列表扩至 10 项（循环复用 sources.platform、extras 区分条目），碰撞概率降至 1/10!≈2.8e-7；media_kit analyze 4 基线不变。处置方式定为本地修（后续可考虑回馈上游）。
   - next: 推送后 CI package tests（Linux/Web）复跑确认；持续绿则打勾收口。
 
-- [ ] Windows package tests 原生崩溃调查 + mpv-dev 夹具现代化（fork 特有回归，自 CI 修复任务分出）
-  - status: planned
-  - context: archives/experiments/ci-fix-20261002.md（⑥节：崩溃上下文与归因边界）
-  - acceptance: 定位崩溃套件与根因并修复（或实证归因为夹具年代伪信号）；`package:media_kit tests (Windows)` 恢复 success；Windows 测试夹具从 2023-08-11 件升级至 libmpv-win32-video-build 最新 release（fork win32 构建件就位后仅换钉定 URL）。
-  - latest: **用户决策（2026-10-03）：Windows 是长期产品目标，Windows 构建/测试 job 保留不关**。夹具现代化评估为"对目标有实质推进、非仅消音"：①2023 件为 mpv ~0.36 代、我方 fork 基线 0.41，升级后测试环境行为大幅逼近 fork 现实；②Dart FFI 契约面在 Windows 持续受测、栈不腐烂（参照 web 编译面无编译即一日烂的先例）；③未来 fork win32 构建件就位后，工作流管道/测试套件直接复用，升级是该演进路径第一段。另：Windows 构建 job（x64/ARM64/optional/audio）与 mpv-dev 夹具无关（用 libs 包自带 dll），属纯编译覆盖，任何情况下保留。
-  - latest-: 崩溃事实：0xC0000005（access violation）pc 在 libmpv-2.dll（钉定 mpv-dev 2023-08-11 件）内；`asset-loader-encode-asset-key` 通过后约 5s、下一播放类套件崩溃（早于用例名输出，Dart 崩溃处理器走栈失败——现无可用 backtrace，仅故障地址）。上游 media-kit 同 workflow 8b4d3afc（09-29 PR run）Windows tests **success** → fork 特有回归；窗口 ad22c36a（09-01 绿）→ eacc799a（09-30 首败）= 上游合并 a886f556（63 冲突裁定）+ 期间我方提交。本地 macOS 无法复现（media_kit VM 套件缺 Mpv.framework）。已排除方向：media_kit core 无 fork 专属符号引用（dovi/p5 面全在 media_kit_video Android bridge），fork 对 C ABI 是纯加法——老件可正常加载，崩溃属行为交互非符号缺失。
-  - next: 诊断优先：①一次 workflow_dispatch 双变体 A/B（同代码分别挂 2023 件与最新上游 mpv-dev；`dart test -j 1 --reporter expanded` 串行定位崩溃套件，可挂 cdb 抓真栈）——新件不崩=夹具年代伪信号，直接升级钉定收口；仍崩=core 改动/合并裁定真 bug（首查 3a4fcaa2 NativePlayer 改动与 a886f556 player/native 冲突裁定，不收敛再分支二分）；②夹具升级随收口执行。Web/Linux 单测 player-set-shuffle 复看已完成（2026-10-03）：与崩溃无关，系上游同源 flaky（已另立条目）。远期（不另立项）：fork win32 构建链（msys2 交叉编译进 CI）。
-
 - [ ] FFmpeg P5 RPU 整改版（`b4d2ea4ffb`）按测试计划验证（2026-10-02 登记）
   - status: planned
   - context: archives/conversations/android-hdr-dv-display-plan-20260922.md（2026-10-02 验证缺口核对节）；测试计划 `~/src/FFmpeg/TEST-android-mediacodec-p5-rpu.md`（FFmpeg 仓未跟踪）
@@ -146,6 +138,8 @@ P5 主线（详细流水见 `archives/conversations/android-hdr-dv-display-plan-
 - [x] P5 · mediacodec 路径颜色回归修复：done（2026-09-30 全链闭环）；dovi 元数据就地重标定（mpv fork `398d0c3`），三方比较 ≤100/65535，产品集成三轮视觉复跑 + 真人确认。`archives/experiments/android-p5-mediacodec-color-fix-20260930.md`
 
 其他已完成：
+
+- [x] Windows package tests 原生崩溃 + mpv-dev 现代化：done（2026-10-03）。首崩为 player-platform 销毁时 WASAPI 热插拔 COM 回调注销；旧/新夹具均复现，Windows terminate_destroy 期间成对持有 MTA usage cookie 后两组均 81 passed / 15 skipped。夹具钉定 shinchiro 20261002/3186d369f9 + SHA-256，保留 awaited 屏障、全部测试及门禁。全平台 run 64 + OHOS 37 success，失败集合从 run 60 的 Windows/Web/Linux 三项变为空；Web/Linux 改善另归 main f6665609 shuffle 修改。证据：`archives/experiments/windows-ci-mpv-ab-20261003.md`。远期 fork win32 构建件就位后替换钉定。
 
 - [x] CI 修复：主 ci.yml 多 job 失败与 OHOS HAP 依赖解析：done（2026-10-03 收口）；五类根因全修并 CI 实证（lockfile 再生成、vnext release 上游门禁、macOS gpuStartTime 守卫、web/wasm 编译桩、hdr_lab gradle wrapper+JDK17），OHOS 全链绿（lock 引入以来 main push 首次）、`libmpv-jar-identity` 全程绿、无新增失败；残余两项各自登记（Windows 原生崩溃任务、player-set-shuffle 上游同源 flaky）。`archives/experiments/ci-fix-20261002.md`
 - [x] HDR 能力查询、路由执行与报告 API + 设备私有回退子包（Phase 1 Android）：done（2026-10-02 完全关闭）；S0–S13 全交付，待用户两项（人工观察两格升 verified + 默认路由变更、R3.1 口径注记）10-02 晚收口，204/204 + hdr_lab 48/48；发布 media_kit_video 1.3.1+1 + vendor 子包 1.0.0+1；PiliPlusX 接入 A7/A8 实机通过；②+方案 B（P5 探针/容器事实消费）随发布链 v2026.011 落地。`archives/conversations/android-hdr-auto-output-20261002.md`
