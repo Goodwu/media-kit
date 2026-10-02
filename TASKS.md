@@ -24,6 +24,8 @@
   - 素材：P5→PQ 输出/首帧/性能用 `~/Downloads/test-clips/Mystery Box Dolby Vision Profile 5.mp4`（SHA-256 `3e610d3b…`，HEVC Main10 4K60 DV P5/RPU，98.944s）；Glass P5 4K59.94（SHA-256 `afb24b77…`）保留作片尾紫屏定点复现。
   - latest: **四仓库归一后播放矩阵六轮全部通过（2026-09-30，12703–12708）**：P5/P8.4/HDR10 × SDR/HDR，全片 EOS（P8.4 为 5 分钟观察窗），输出路径全部符合预期，零渲染错误、资源闭合全对等。证据 `archives/experiments/android-playback-matrix-12703-12708-20260930.md`。第二台设备（Redmi Note 5A，骁龙 425）同矩阵不可行并按用户要求中断（OMX HEVC 不支持 4K、屏幕无 HDR）；第三台设备（Mi Note 3，骁龙 660）4K Main10 硬解/直采/EOS 通过但展示链路 VO 掉帧 84%，EOS 尾帧一次取图失败且回退未触发（设备差异观察项，原因未查）——均见同文件追加节。此前 HDR10、P8.4 全屏画质和流畅性已获用户认可；首帧读回 P8.4 HLG 0.623–0.676s、HDR10 PQ 0.630–0.653s（Surface 读回，非面板光学）。
   - next: 扩充原生 HDR 冷/热、重入、连续帧及 SDR 复位证据；P5 输出和首帧单列于 P1，不以 HDR10/P8.4 代替；P8.4 全片 EOS 按需补跑。可与 4K60 冷机复测（接手快照残余项）合并同一 LYA 会话。
+  - latest+ (2026-10-03 凌晨，新 JAR b4d2ea4 世代)：**SDR 复位 ✓**（HDR 轮后 sdrDirect texture 路由、无 HDR 残留、两轮一致）；**冷启动首帧 ×3**（tap→trigger→decoder 事实 verified ~0.6s→路由 applied，路径 ext:lya-pq + SF 读回 BT2020_PQ）；热重入部分（BACK+tap 未触发二次 open，自动化限制；A4 九轮语义证据在旧世代）；系统化冷/热百分位与 4K60 冷机复测顺延（设备整夜解码热负载）。证据 `archives/experiments/android-ffmpeg-p5-rpu-b4d2ea4-verify-20261003.md` app 通道节。
+  - next+ (更新): 冷/热百分位矩阵与 4K60 冷机复测待设备冷却后补（可与下次 LYA 会话合并）；重入复跑待 PiliPlusX 长按钩子或人工路径。
   - temp_reconcile: **已关闭（2026-10-02）**：`media-kit-firstframe-sdr-20260927`/`media-kit-firstframe-mix-20260927` 实测已消失（主机 16 天未重启、最后访问超 3 天，应为 macOS /private/tmp 周期清理），文件级核对不可能；按既有记录结论关闭（868 删除项本就不可重放，产品清理以 Git 历史为准），首帧/输出行为实机回归需求并入上方 next。
 
 ## Next（近期候选，最多 10 条）
@@ -33,14 +35,15 @@
   - context: archives/experiments/ci-fix-20261002.md（终验节：机制与证据链）
   - acceptance: 随机洗牌未变序时测试不再误报（本地无法跑 player 套件——缺 libmpv 环境，需 CI run 验证）；处置方式（本地改测试 vs 提报上游）定案。
   - latest: **机制修正（2026-10-03 深夜复查测试源码）**：`setShuffle` 为状态门控（连续 5 次调用只在 false→true 跃迁时洗一次牌），单次 4 项随机排列 1/24 概率回原序 → `_DistinctStream` 吞掉事件 → 与日志"仅初始事件后 Stream closed"精确吻合。**修复**：两测试播放列表扩至 10 项（循环复用 sources.platform、extras 区分条目），碰撞概率降至 1/10!≈2.8e-7；media_kit analyze 4 基线不变。处置方式定为本地修（后续可考虑回馈上游）。
-  - next: 推送后 CI package tests（Linux/Web）复跑确认；持续绿则打勾收口。
+  - latest: **CI 首验（f6665609 run 37048875825）：Linux/macOS 过，Web 仍挂且机制另立（2026-10-03 凌晨定性）**。Native 侧修复实证有效（mpv playlist-shuffle 随机碰撞路径）。**Web 失败不是碰撞**：WebPlayer.setShuffle 自带"洗到不同序为止"while 守卫（web/player/real.dart:1158-1160），同序不可能；真实机制疑似 `synchronized` 锁等待——web 样片是 5 个 GitHub 网络 URL（我的 10 项扩展=10 个网络条目），open() 持锁期间网络加载慢则 setShuffle 等锁超时、事件缺失（420fba3e/490ae215 两轮 4 项时 Web 也挂，锁/网络 flake 先于本轮改动存在；10 项可能加重）。失败签名一致：仅初始事件后 Stream closed。
+  - next: Web 侧处置选项（待排期）：①shuffle 测试改用非网络 Media（web 平台源依赖 GitHub URL 是根因）；②查 WebPlayer synchronized 锁与 open 网络加载的交互；③提报上游。Native 修复保留。
 
 - [ ] FFmpeg P5 RPU 整改版（`b4d2ea4ffb`）按测试计划验证（2026-10-02 登记）
-  - status: planned
-  - context: archives/conversations/android-hdr-dv-display-plan-20260922.md（2026-10-02 验证缺口核对节）；测试计划 `~/src/FFmpeg/TEST-android-mediacodec-p5-rpu.md`（FFmpeg 仓未跟踪）
-  - acceptance: 推送 `b4d2ea4ffb`；以整改版重建产品 libmpv 链路（现 `~/src/media-kit-build/product-ffmpeg-lib/` 为 fff3ee7 世代）；按测试计划执行 P0 用例 T1–T8 及 T9（pts 复现，整改主修复点），close 时 summary 日志满足计划健康标准；结论只对 `b4d2ea4ffb` 及之后版本出，fff3ee7 世代结论不外推。
-  - latest: 整改提交 `b4d2ea4ffb`（2026-10-02 02:39，本地未推送，按 REVIEW 意见整改）：新增 `mediacodec_dovi.c/h`、重构 `mediacodecdec.c`、公共层 receive 签名变化（aac/amr/mp3 共用上下文需回归）、新增解码器 `dovi=auto|on|off` 选项；修复 `fff3ee7a3e` 两已知问题（pts 复现时元数据整批丢失、4K 喂数据路径双重拷贝）。核对结论：此前全部验证均在旧提交 `fff3ee7a3e` 世代完成，测试计划明确"不要用旧提交出结论"；且无任何工作参照过该计划（media-kit 全仓对计划文件名/日志验收点/失败标记零引用，计划成文晚于全部既有验证）。
-  - next: 排期后执行：推送整改提交（连同 TEST/REVIEW 两份未跟踪文档处置）→ 产品库重建 → T1–T8 + T9；若采纳整改版，发布链 FFmpeg 钉定（`fff3ee7`）与 `product-ffmpeg-lib` 同步重钉。
+  - status: in_progress（2026-10-03 凌晨 P0 用例全部执行完毕，证据见实验记录；剩收尾决策项）
+  - context: archives/experiments/android-ffmpeg-p5-rpu-b4d2ea4-verify-20261003.md；测试计划 `~/src/FFmpeg/TEST-android-mediacodec-p5-rpu.md`
+  - acceptance: 推送 `b4d2ea4ffb`；以整改版重建产品 libmpv 链路；按测试计划执行 P0 用例 T1–T8 及 T9，close 时 summary 日志满足计划健康标准；结论只对 `b4d2ea4ffb` 及之后版本出。
+  - latest: **P0 验证完成（2026-10-03 凌晨，LYA，全记录见实验记录）**：构建链对等重建（JAR `c3bab5fc`，含 Kazumi 补丁与 configure hack 两处未跟踪改动的隐患登记）；CLI 通道 T2（6609 帧全绿）/T6×4/T7/T8（ABAB 不劣化，热节流主导）/T9 双形态（stream_loop 与 HLS 断续各 13218 帧全绿——pts 复现主修复点通过）/T11/T12 干净通过；app 通道 T1 全链通过（decoder verified→reshape→ext:lya-pq→SF 读回 PQ→EOS completed=true→decoder 零丢帧）。**三个登记项**：①T3 发现单帧元数据位移（298/300 一致、切换帧 SW pts81 vs MC pts92，匹配器为精确 pts 匹配，需 ES 级定性）；②T4 app 内 seek 拖拽自动化未达控件（A5 同源限制，解码语义由 T9/T5 覆盖）；③样片工程事实（-c copy 裁剪/concat 丢 DOVI 容器配置）。
+  - next: ①用户决策：是否采纳整改版——采纳则发布链 FFmpeg 钉定与 product-ffmpeg-lib 重钉至 b4d2ea4ffb 世代；②T3 单帧位移定性（FFmpeg 任务作者域：输入侧 packet 归属 vs 输出侧 pts 源）；③Kazumi 补丁入库（fork 分支或构建仓 patches/）；④可选项 T10/T13/T14 按需。
 
 - [ ] PiliPlusX 性能优先/画质优先开关（HDR 路由策略预设）
   - status: planned（2026-10-02 用户登记，暂不实施）
