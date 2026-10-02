@@ -4,9 +4,9 @@
 /// All rights reserved.
 /// Use of this source code is governed by MIT license that can be found in the LICENSE file.
 
-/// {@template hdr_output_report}
+/// {@template hdr_transaction_report}
 ///
-/// HdrOutputReport
+/// HdrTransactionReport
 /// ---------------
 /// Typed result of a native HDR output operation (create, configure, reset).
 ///
@@ -15,8 +15,8 @@
 /// diagnostics never lose information to the abstraction.
 ///
 /// {@endtemplate}
-class HdrOutputReport {
-  const HdrOutputReport({
+class HdrTransactionReport {
+  const HdrTransactionReport({
     this.capable = false,
     this.active = false,
     this.stale = false,
@@ -25,8 +25,8 @@ class HdrOutputReport {
     this.data = const <String, dynamic>{},
   });
 
-  factory HdrOutputReport.fromMap(Map<String, dynamic> map) {
-    return HdrOutputReport(
+  factory HdrTransactionReport.fromMap(Map<String, dynamic> map) {
+    return HdrTransactionReport(
       capable: map['capable'] == true,
       active: map['active'] == true,
       stale: map['stale'] == true,
@@ -59,5 +59,5 @@ class HdrOutputReport {
   final Map<String, dynamic> data;
 
   @override
-  String toString() => 'HdrOutputReport($data)';
+  String toString() => 'HdrTransactionReport($data)';
 }

@@ -14,7 +14,7 @@ import 'package:synchronized/synchronized.dart';
 import 'package:media_kit/media_kit.dart';
 
 import 'package:media_kit_video/src/video_controller/platform_video_controller.dart';
-import 'package:media_kit_video/src/video_controller/hdr_output_report.dart';
+import 'package:media_kit_video/src/video_controller/hdr_transaction_report.dart';
 
 enum _OhosHdrOutputMode { sdr, pq, hlg }
 
@@ -36,8 +36,8 @@ class _PendingHdrConfiguration {
 /// The [PlatformVideoController] implementation based on native C/C++ used on Ohos.
 ///
 /// {@endtemplate}
-HdrOutputReport _hdrReport(Map<String, dynamic> map) =>
-    HdrOutputReport.fromMap(map);
+HdrTransactionReport _hdrReport(Map<String, dynamic> map) =>
+    HdrTransactionReport.fromMap(map);
 
 class OhosVideoController extends PlatformVideoController {
   /// Whether [OhosVideoController] is supported on the current platform or not.
@@ -114,7 +114,7 @@ class OhosVideoController extends PlatformVideoController {
   }
 
   @override
-  Future<HdrOutputReport> createNativeOutput(
+  Future<HdrTransactionReport> createNativeOutput(
       {String? surfaceId, int? windowHandle}) async {
     // The XComponent PlatformView reports its surface asynchronously. Do
     // not claim native output until that surface has attached and mpv has
@@ -122,12 +122,12 @@ class OhosVideoController extends PlatformVideoController {
     final id = wid.value;
     if (!nativeSurfaceActive || id == null || id == 0) {
       if (nativeSurfaceCandidate) {
-        return const HdrOutputReport(
+        return const HdrTransactionReport(
           capable: true,
           failureReason: 'ohos-native-surface-awaiting-ready',
         );
       }
-      return const HdrOutputReport(
+      return const HdrTransactionReport(
         failureReason: 'ohos-native-surface-not-ready',
       );
     }
@@ -141,11 +141,11 @@ class OhosVideoController extends PlatformVideoController {
   }
 
   @override
-  Future<HdrOutputReport> configureHdrOutput(
+  Future<HdrTransactionReport> configureHdrOutput(
       Map<String, dynamic> configuration) async {
     return lock.synchronized(() async {
       if (_disposed) {
-        return const HdrOutputReport(
+        return const HdrTransactionReport(
           failureReason: 'ohos-video-controller-disposed',
         );
       }
@@ -431,7 +431,7 @@ class OhosVideoController extends PlatformVideoController {
   }
 
   @override
-  Future<HdrOutputReport> resetHdrOutput() async {
+  Future<HdrTransactionReport> resetHdrOutput() async {
     final result = await lock.synchronized(() async {
       if (_disposed) return null;
       _hdrConfigRevision++;
@@ -467,7 +467,7 @@ class OhosVideoController extends PlatformVideoController {
       };
     });
     if (result == null) {
-      return const HdrOutputReport(
+      return const HdrTransactionReport(
         failureReason: 'ohos-surface-id-unavailable',
       );
     }
