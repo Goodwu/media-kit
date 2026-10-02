@@ -135,6 +135,12 @@ class _SinglePlayerSingleVideoScreenState
   static const _androidHdrPolicyExperimental = bool.fromEnvironment(
     'MEDIA_KIT_ANDROID_HDR_POLICY_EXPERIMENTAL',
   );
+  // A3 candidate-degradation scenario: open the maturity gate while keeping
+  // the default preference order, so the skipped direct candidate falls
+  // through to the next HDR candidate instead of the A6 reshape-first order.
+  static const _androidHdrGateOpen = bool.fromEnvironment(
+    'MEDIA_KIT_ANDROID_HDR_GATE_OPEN',
+  );
   static const _androidHdrPreferenceSwapAtSeconds = int.fromEnvironment(
     'MEDIA_KIT_ANDROID_HDR_PREFERENCE_SWAP_AT_SECONDS',
     defaultValue: -1,
@@ -229,6 +235,10 @@ class _SinglePlayerSingleVideoScreenState
   /// The routing policy from the A6 experiment switch: defaults, or
   /// allowExperimental with `metadataReshape` first for the P8.4 class.
   HdrRoutingPolicy _hdrRoutingPolicy() {
+    if (_androidHdrGateOpen) {
+      debugPrint('HDR_GATE_OPEN default order, allowExperimental=true');
+      return const HdrRoutingPolicy(allowExperimental: true);
+    }
     if (!_androidHdrPolicyExperimental) return HdrRoutingPolicy.defaults;
     final base =
         HdrRoutingPolicy.defaultPreferences[HdrSourceClass.dvP84] ??

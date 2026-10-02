@@ -250,6 +250,9 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
     }
     _observedStoppedPath = false;
     final media = plan.media;
+    // Drop the previous media's cached video-params so the review waits for
+    // this open's report instead of classifying from a stale source.
+    _latestVideoParams = null;
     _openFileLoadedEpoch = player.fileLoadedEpoch;
     _openPlaylistEntryId = null;
     await player.open(
@@ -281,47 +284,100 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
     if (before == null || entryId == null) {
       throw StateError('No playlist-entry identity before review');
     }
-    final loaded = await player
-        .waitForFileLoadedEntryAfter(entryId, before)
-        .timeout(const Duration(seconds: 8));
-    if (loaded.epoch <= before || loaded.playlistEntryId != entryId) {
+    return gatherReviewFacts(
+      mediaUri: plan.media.uri,
+      expectedHwdec: plan.route.hwdec,
+      readProperty: player.getProperty,
+      latestVideoParams: () => _latestVideoParams,
+      waitForFileLoadedEntry: player.waitForFileLoadedEntryAfter,
+      playlistEntryId: entryId,
+      fileLoadedEpoch: before,
+    ).then((facts) {
+      _lastHwdecCurrent = facts.hwdecCurrent;
+      return facts;
+    });
+  }
+
+  /// Gathers the decoder facts after the open's file-loaded boundary (plan
+  /// 1.4 step 8). Static with injected readers so VM tests can drive the
+  /// polling without a native Player; [reviewFacts] delegates to it.
+  ///
+  /// Both review inputs are awaited: `dolby-vision-profile` is read after
+  /// the decoder reports, and video-params are polled until they carry the
+  /// base-layer tags (gamma/primaries) — a review executed while
+  /// video-params are still unreported would classify from the profile
+  /// alone and mis-route (A1-P8.4 round, 2026-10-02). On timeout the facts
+  /// are returned as observed (`videoParams == null`), and the session's
+  /// conservative review applies.
+  @visibleForTesting
+  static Future<HdrReviewFacts> gatherReviewFacts({
+    required String mediaUri,
+    required String expectedHwdec,
+    required HdrPropertyReader readProperty,
+    required VideoParams? Function() latestVideoParams,
+    required Future<FileLoadedRecord> Function(int playlistEntryId, int epoch)
+        waitForFileLoadedEntry,
+    required int playlistEntryId,
+    required int fileLoadedEpoch,
+    Duration reviewBudget = const Duration(seconds: 8),
+    Future<void> Function(Duration duration) delay = Future<void>.delayed,
+  }) async {
+    final loaded = await waitForFileLoadedEntry(playlistEntryId,
+            fileLoadedEpoch)
+        .timeout(reviewBudget);
+    if (loaded.epoch <= fileLoadedEpoch ||
+        loaded.playlistEntryId != playlistEntryId) {
       throw StateError('No matching native file-loaded event for this open');
     }
-    final deadline = DateTime.now().add(const Duration(seconds: 8));
+    final deadline = DateTime.now().add(reviewBudget);
     var currentPath = '';
     var videoFormat = '';
     while (DateTime.now().isBefore(deadline)) {
-      currentPath = await player.getProperty('path');
-      videoFormat = await player.getProperty('video-format');
-      if (currentPath == plan.media.uri && videoFormat.isNotEmpty) break;
-      await Future<void>.delayed(const Duration(milliseconds: 50));
+      currentPath = await readProperty('path');
+      videoFormat = await readProperty('video-format');
+      if (currentPath == mediaUri && videoFormat.isNotEmpty) break;
+      await delay(const Duration(milliseconds: 50));
     }
-    if (currentPath != plan.media.uri || videoFormat.isEmpty) {
+    if (currentPath != mediaUri || videoFormat.isEmpty) {
       throw StateError(
           'New media track not observed: path=$currentPath format=$videoFormat');
+    }
+    // video-params are the review's second input (plan 1.4 step 8): wait
+    // for the base-layer tags the same bounded way as the decoder below,
+    // keeping the media identity. FILE_LOADED and video-format can precede
+    // the first parameter report, and classifying from the profile alone
+    // mis-routes the open (an integer profile 8 without gamma is a
+    // conservative SDR-base-layer DV, not the 8.1/8.4 the tags decide).
+    while (latestVideoParams() == null && DateTime.now().isBefore(deadline)) {
+      if (await readProperty('path') != mediaUri) {
+        throw StateError('Media changed before video-params verification');
+      }
+      await delay(const Duration(milliseconds: 50));
     }
     // FILE_LOADED and video-format can precede decoder initialization on a
     // newly bound gpu-next output. Keep the same media identity while
     // waiting for the decoder instead of treating the initial empty
-    // property as a software-decoding verdict.
+    // property as a software-decoding verdict. One observation happens even
+    // when the params poll consumed the budget, so the review always sees
+    // the decoder's actual state.
     var hwdec = '';
-    while (DateTime.now().isBefore(deadline)) {
-      if (await player.getProperty('path') != plan.media.uri) {
+    while (true) {
+      if (await readProperty('path') != mediaUri) {
         throw StateError('Media changed before decoder verification');
       }
-      hwdec = await player.getProperty('hwdec-current');
-      if (hwdec == plan.route.hwdec) break;
+      hwdec = await readProperty('hwdec-current');
+      if (hwdec == expectedHwdec) break;
       if (hwdec.isNotEmpty) break;
-      await Future<void>.delayed(const Duration(milliseconds: 50));
+      if (!DateTime.now().isBefore(deadline)) break;
+      await delay(const Duration(milliseconds: 50));
     }
-    _lastHwdecCurrent = hwdec;
     final profile = int.tryParse(
-      (await player.getProperty('current-tracks/video/dolby-vision-profile'))
+      (await readProperty('current-tracks/video/dolby-vision-profile'))
           .trim(),
     );
-    final codec = await player.getProperty('current-tracks/video/codec');
+    final codec = await readProperty('current-tracks/video/codec');
     return HdrReviewFacts(
-      videoParams: _latestVideoParams,
+      videoParams: latestVideoParams(),
       dolbyVisionProfile: profile,
       codec: codec,
       hwdecCurrent: hwdec,
