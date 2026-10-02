@@ -17,7 +17,7 @@
 | a1-hdr10 | hdr10-full（hint HDR10） | baseLayerDirect PQ：mediacodec_embed、platformView | 12706 同组合 | **全片 EOS** completed=true@304s | 0 |
 | a1-p84-fix | p84-full（hint P8.4，修复后） | baseLayerDirect HLG：mediacodec_embed、platformView；SF 层 `BT2020_ITU_HLG (302383104)` | 12708 同组合 | 70s 观察窗 | 0 |
 | a1-hlg | DVS graypatch（hint HLG，默认门禁） | toneMapSdr 兜底：gpu-next Texture；candidates 全 experimentalStrategySkipped | 新覆盖（12703 时代无纯 HLG 轮） | 45s | 0 |
-| a1-sdr | Mystery Box（Texture SDR 流） | 会话 toneMapSdr Texture：gpu-next/mediacodec | 12703 行为不变 | 60s | 0 |
+| a1-sdr-control | media-kit-sdr-control（hint SDR） | sdrDirect Texture：gpu-next/mediacodec；解码器事实 h264/bt.1886/bt.709 | 12703 SDR 行为 | 30s | 0 |
 
 dataspace 读回（P5）：`requested=pq path=ext:lya-pq readback=DATASPACE_BT2020_PQ`，私有 ABI `perform=0 actual=163971072 expected=163971072`，与 12704 世代一致。
 
@@ -45,7 +45,8 @@ dataspace 读回（P5）：`requested=pq path=ext:lya-pq readback=DATASPACE_BT20
 
 ### A5 生命周期（脚本注入轮 /tmp/a5-round.sh，构建 `0a160eb1…`）
 
-退出重入 ×5、Home→返回 ×3、seek ×10（KEYCODE_MEDIA_FAST_FORWARD）、全屏中 user_rotation 旋转、暂停 30s→恢复（中央 tap）、播放中偏好/策略切换 ×3（`HDR_PREFERENCE_SWAP off@0ms / auto@16816ms`、`HDR_POLICY_SWAP@6840ms`）：**FATAL/ANR=0**；会话报告 8 份仅 gen=1/gen=2（无过期代次）；Surface `release=released` 与 `acknowledgeSurfaceRelease=acknowledged` 1:1 闭合；零渲染失败。注：swap 计时锚点为页面级而非播放级（0ms 起跳），"路由变化才重建"行为已由三次交换验证；全屏中控制器替换的实机精确时序未单独隔离（S6 widget 测试覆盖跟随语义，记录为观察项）。
+退出重入 ×5、Home→返回 ×3、全屏中 user_rotation 旋转、暂停 30s→恢复（中央 tap，PERF pause=yes/no 有痕）、播放中偏好/策略切换 ×3（`HDR_PREFERENCE_SWAP off@0ms / auto@16816ms`、`HDR_POLICY_SWAP@6840ms`）：**FATAL/ANR=0**；会话报告 8 份仅 gen=1/gen=2（无过期代次）；Surface `release=released` 与 `acknowledgeSurfaceRelease=acknowledged` 1:1 闭合；零渲染失败。注：swap 计时锚点为页面级而非播放级（0ms 起跳），"路由变化才重建"行为已由三次交换验证；全屏中控制器替换的实机精确时序未单独隔离（S6 widget 测试覆盖跟随语义，记录为观察项）。
+**seek 腿如实降格（V1 审核后）**：UI seek 注入在本环境不可达——media 键被设备上 PiliPlusX 的 MediaSession 接管（20 事件全部路由至 com.example.piliplusx）、双击（shell 间隔超双击阈值）/水平拖拽/DPAD/进度条点击四种机制均未到达 controls（a5-seek/seek2/seek3 三轮日志 + /tmp/controls-visible*.png 截图）。time-pos 全程线性无跳变，即 seek 腿零验证；seek 不变量（报告/输出在 seek 后正确）**未在本轮覆盖**，登记为待补验证项（需 UI 可交互环境或 app 内 seek 钩子）。
 
 ### A6 策略偏好（RPU 重建 PQ）
 
@@ -56,7 +57,7 @@ dataspace 读回（P5）：`requested=pq path=ext:lya-pq readback=DATASPACE_BT20
 | 源×策略 | 现状 | 本轮证据 | 升级结论 |
 |---|---|---|---|
 | P8.4×baseLayerConvert | experimental | A3-2：PQ 转换、读回/SF 一致、97.9s | **证据完整，待人工观察后升级 verified** |
-| HLG×baseLayerDirect | experimental | a1-hlg-gate-85：HLG 直出、time-pos 60.0s≥60s、SF HLG 层 2 处、零失败 | **证据完整，待人工观察后升级 verified** |
+| HLG×baseLayerDirect | experimental | a1-hlg-gate-85：HLG 直出、time-pos 60.0s≥60s、SF HLG 层 1 处、零失败 | **证据完整，待人工观察后升级 verified** |
 | P8.1×baseLayerDirect | inherited | a7-p81/a7-p81-loop：解码器识别 8.1（compat=1）✓、hwdec 不稳定触发降级 | **升级确认受样片阻塞**：公开仅有 10 帧 FATE 样片，复核窗口 hwdec 无法稳定；inherited 的"样片补确认"如实记缺口 |
 | P7/HDR Vivid | experimental | 未跑（P7 无 MEL 长样片；Vivid 本地文件实测为 PQ 基层=HDR10 类，升级无意义） | 维持 |
 
@@ -64,7 +65,7 @@ dataspace 读回（P5）：`requested=pq path=ext:lya-pq readback=DATASPACE_BT20
 
 ### 性能（第 7 节预算）
 
-- **hint 命中首帧**（perf-p84-hit ×3，FirstFramePixelCopy 探针，`MEDIA_KIT_ANDROID_PREOPEN_FIRST_FRAME_PROBE=true`，构建 `28fdec86…`）：touchDownToContent **438.4 / 455.8 / 485.8ms**，中位 **455.8ms ≤ 800ms** ✓（历史基线 0.623–0.676s）。
+- **hint 命中首帧**（perf-p84-hit ×3，FirstFramePixelCopy 探针，`MEDIA_KIT_ANDROID_PREOPEN_FIRST_FRAME_PROBE=true`，构建 `28fdec86…`）：touchToContent **438.4 / 455.8 / 483.3ms**，中位 **455.8ms ≤ 800ms** ✓（历史基线 0.623–0.676s；r3 的 touchDownToContent 为 485.8，基准差 2.5ms 不影响结论）。
 - **重建/降级路径**（第 7 节 ≤2.0s）：A4 终态路由 applied ~1.0–1.3s（日志推算）；中间 SDR Texture 路由先出画面，无黑场间隔（重建期间持续有内容）。像素探针只测首个内容帧，"终态路由像素级首帧"未单独测量（记录测量口径）。
 - 4K60 负载：A6 reshape 轮 time-pos 97.8s 处 frame-drop=0；设备连续轮次后段电池 40.0°C（热状态归因基线 41°C 附近，本轮无独立温控对照——按第 7 节要求记录，4K60 对比测试需同温条件另行安排）。
 
@@ -75,4 +76,4 @@ dataspace 读回（P5）：`requested=pq path=ext:lya-pq readback=DATASPACE_BT20
 
 ## 结论
 
-A1–A6 全部执行：A1 五轮与 12703–12708 逐项一致、A2 五轮预测==实际、A3 两注入降级 ≥60s 不停播（第三情形 Mi Note 3 缺口）、A4 九轮均恰好一次重建、A5 无 ANR/FATAL 资源闭合、A6 自定义偏好看效且默认配置不变；升级轮证据完整（P8.4 convert、HLG direct）待人工观察；hint 命中首帧中位 455.8ms 达标。过程中发现并修复 S5 复核时序缺陷（video-params 有界轮询，185/185）。
+A1–A6 全部执行（V1 审核后修订：原 a1-sdr 行误用 Mystery Box 走了会话 reshape 路由，已换成真正的 sdr-control 轮 a1-sdr-control（构建 6001aa3f…，sdrDirect Texture，h264/bt.1886 事实），教训记录在案）；A1 五轮与 12703–12708 逐项一致、A2 五轮预测==实际、A3 两注入降级 ≥60s 不停播（第三情形 Mi Note 3 缺口）、A4 九轮均恰好一次重建、A5 无 ANR/FATAL 资源闭合、A6 自定义偏好看效且默认配置不变；升级轮证据完整（P8.4 convert、HLG direct）待人工观察；hint 命中首帧中位 455.8ms 达标。过程中发现并修复 S5 复核时序缺陷（video-params 有界轮询，185/185）。
