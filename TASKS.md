@@ -23,17 +23,17 @@
   - acceptance: 固定素材和设备能力，核对 HDR10 PQ、P8.4 HLG 的真实后端、Surface 格式、系统合成、连续全屏画面及 SDR 复位；P8.4 无 HLG 路径与原生 DV 能力单独说明。原生 HDR 从触摸到视频内容小于2秒、争取1秒，补冷/热、重入与输出切换。最高亮度只用于短时人工观察，结束立即恢复自动亮度并熄屏。
   - 素材：P5→PQ 输出/首帧/性能用 `~/Downloads/test-clips/Mystery Box Dolby Vision Profile 5.mp4`（SHA-256 `3e610d3b…`，HEVC Main10 4K60 DV P5/RPU，98.944s）；Glass P5 4K59.94（SHA-256 `afb24b77…`）保留作片尾紫屏定点复现。
   - latest: **四仓库归一后播放矩阵六轮全部通过（2026-09-30，12703–12708）**：P5/P8.4/HDR10 × SDR/HDR，全片 EOS（P8.4 为 5 分钟观察窗），输出路径全部符合预期，零渲染错误、资源闭合全对等。证据 `archives/experiments/android-playback-matrix-12703-12708-20260930.md`。第二台设备（Redmi Note 5A，骁龙 425）同矩阵不可行并按用户要求中断（OMX HEVC 不支持 4K、屏幕无 HDR）；第三台设备（Mi Note 3，骁龙 660）4K Main10 硬解/直采/EOS 通过但展示链路 VO 掉帧 84%，EOS 尾帧一次取图失败且回退未触发（设备差异观察项，原因未查）——均见同文件追加节。此前 HDR10、P8.4 全屏画质和流畅性已获用户认可；首帧读回 P8.4 HLG 0.623–0.676s、HDR10 PQ 0.630–0.653s（Surface 读回，非面板光学）。
-  - next: 扩充原生 HDR 冷/热、重入、连续帧及 SDR 复位证据；P5 输出和首帧单列于 P1，不以 HDR10/P8.4 代替；P8.4 全片 EOS 按需补跑。
-  - temp_reconcile: `/private/tmp/media-kit-firstframe-sdr-20260927` 的5个App/plugin文件、`media-kit-firstframe-mix-20260927` 的9个修改及868个删除状态项尚未与当前代码逐项比较；后者只保存了修改补丁，删除项不可直接重放。先隔离比较真正的首帧/输出行为，再针对SDR、HDR10、P8.4冷/热打开与输出切换做相应实机回归；记录冗余或迁移结论后删除工作树。不要把大量删除当成产品清理。
-
-- [ ] HDR 能力查询、路由执行与报告 API + 设备私有回退子包（PiliPlusX 需求，Phase 1 Android）
-  - status: in_progress
-  - context: archives/conversations/android-hdr-auto-output-20261002.md；需求 docs/requirements/android-hdr-auto-output.md（v3）；计划 docs/requirements/android-hdr-auto-output-plan.md（S0–S13）；参考实现 media_kit_hdr_lab；实机基线 archives/experiments/android-playback-matrix-12703-12708-20260930.md
-  - acceptance: 需求 v3 验收 A1–A8。要点：开播前预测与执行同源；按"源描述 + 策略候选 + 偏好 + 成熟度门禁"选路由，默认先 HDR 输出再 tone-map、HDR 中直出优先；运行时沿候选列表降级，最终 tone-map 继续播放并发事件（P5 管线缺失除外）；路由、候选与状态报告给 App；`HdrVideoSession`/`HdrVideo` 支持控制器替换且全屏跟随；LYA 私有回退做成默认关闭、只读门禁的独立子包；PiliPlusX 只保留策略偏好，无设备代码、无平台决策代码。
-  - latest: **Phase 1 全部完成（2026-10-02，S0–S13）**。S0–S10 详见验收记录 `archives/experiments/android-hdr-auto-output-acceptance-20261002.md`；S11 发布 media_kit_video 1.3.1+1 + vendor 子包 1.0.0+1（main 已推送 GitHub 420fba3e）；S12 PiliPlusX 接入（其仓提交 f7470fd09/2995115399/7721a1e92，分支 fix/darwin-video-output-rebuild-barrier）：predict 选档门 + HdrVideoSession 挂载 + 事件/报告展示，A7 实机 BV1vY4y1N7TY P8.4 全链（预测门→HLG 直出 verified→SF HLG 层→拖拽 seek 正常）+ SDR 信息流 sdrDirect ✓；接入首轮抓到 open/视图/输出三方循环等待死锁并修复（先挂后开）。A8 红线 V1 审查 PASS（lib/android 无设备判断）。S13 收尾完成：hdr_lab 旧适配层六文件标记 MIGRATED、TASKS/conversation 终态、后续任务登记。**V1 审核中修复的缺陷**：S5 复核时序（video-params 有界轮询）、S12 接入死锁。**待用户**：人工观察（a1-hlg-gate-85 HLG 直出 / a6-reshape RPU 重建 PQ）确认 P8.4×convert 与 HLG×direct 升 verified（需求第 6 节与常量表同步）；R3.1 no-HLG 开播前跳过不发 Degraded 的口径文字。
-  - next: （已结案待人工观察项确认后完全关闭）后续任务见 Next 区三条登记。
+  - next: 扩充原生 HDR 冷/热、重入、连续帧及 SDR 复位证据；P5 输出和首帧单列于 P1，不以 HDR10/P8.4 代替；P8.4 全片 EOS 按需补跑。可与 4K60 冷机复测（接手快照残余项）合并同一 LYA 会话。
+  - temp_reconcile: **已关闭（2026-10-02）**：`media-kit-firstframe-sdr-20260927`/`media-kit-firstframe-mix-20260927` 实测已消失（主机 16 天未重启、最后访问超 3 天，应为 macOS /private/tmp 周期清理），文件级核对不可能；按既有记录结论关闭（868 删除项本就不可重放，产品清理以 Git 历史为准），首帧/输出行为实机回归需求并入上方 next。
 
 ## Next（近期候选，最多 10 条）
+
+- [ ] CI 修复：主 ci.yml 多 job 失败与 OHOS HAP 依赖解析（2026-10-02 登记）
+  - status: planned（登记后即最高优先工程项）
+  - context: archives/conversations/android-hdr-auto-output-20261002.md（OHOS CI 既有失败观察项）；提交 023905e2
+  - acceptance: 失败 job 逐一定位根因并修复；主 ci.yml 全 job 绿或明确豁免登记；OHOS HAP "Resolve locked dependencies"（exit 65）根治或明确归因登记；`libmpv-jar-identity` 保持 success；修复前后失败集合差异为零（不引入新失败）。
+  - latest: 主 ci.yml 自 2026-10-01 `0f1b417d` 起 Windows/macOS/iOS/Android/Linux/Web/hdr_lab 多 job 失败；`420fba3e`（改动前最后完成 run）即已同集合失败，非后续改动引入；`libmpv-jar-identity` 新 run success。OHOS HAP 同期起每提交失败。
+  - next: 拉取失败 run 日志定位根因（疑似依赖/环境漂移层），逐 job 修复。
 
 - [ ] PiliPlusX 性能优先/画质优先开关（HDR 路由策略预设）
   - status: planned（2026-10-02 用户登记，暂不实施）
@@ -50,7 +50,7 @@
   - latest+: **用户已批准方案 B（2026-10-02）**：P5 管线探测去 Player 依赖的最终形态 = fork 加专用只读能力属性 + 桥接 .so（media_kit_video_hdr_bridge）加抛弃式 mpv 实例探针（create→initialize→读属性→terminate，无 vo 不碰 EGL，满足 R1.1）+ 插件 engine attach 时跑一次并缓存；与 ② 的专用属性改造合并实施，不做 Dart FFI 临时版。
   - latest++: **②+方案 B 合并实施完成（2026-10-02，V1 PASS）**：fork `d24c59905b`（`dovi-p5-pipeline` 只读属性）已提交推送；bridge 第 5 个 JNI 三态探针 + `MpvPipelineProbe.java` attach 幂等缓存 + 快照 `p5Pipeline` 字段，Dart P5 判定改原生快照单一来源（option-info 代理退役，`query` 无 Player 即权威）；classifier 消费 compat-id/el-present/hdr-vivid 三属性（容器事实优先、推断回退，Vivid 接通 `HdrSourceClass.hdrVivid`）；186→204 全过（+18）、analyze 基线不变、hdr_lab analyze 0。JAR `media-kit-d24c59905-arm64-v8a.jar`（`cafef3a4…`，构建仓 `91bb42af` 已推送，7 标识串全命中）；真实 Vivid 样片收编（`user-hdr-vivid-2160p-hlg-18c7c05a.mp4`，CUVA 005.1 side data 实证）。详见 conversation Current State。
   - latest++: **②+方案 B 全链收口（2026-10-02，代码 e90ada4d + 实机 8 轮）**：代码侧（探针包+消费包，V1 PASS，186→204 测试）已提交推送；JAR `media-kit-d24c59905-arm64-v8a.jar`（构建仓 `91bb42af` 已推送）实机验证——**P5 探针 8/8 全过**（正 result=1 4–8ms/负上游 result=0，快照逐轮一致）；**容器事实通道实机验证**（p81 compat=1 容器直证、P7 FEL el=true 旧版 null 关键区分、上游 JAR 推断回退不崩）；**发现并登记：HDR Vivid 在 mediacodec 路径不可观测**（MediaCodec 剥离 CUVA side data，软解对照实证；路由结果不受影响，需求第 8 节已登记，demuxer 级 SEI 探测归 ② 完整目标）；p84 零回归（R4b）。实验记录 `archives/experiments/android-hdr-planb-device-facts-20261002.md`。教训：指定断言样片前 ffprobe 核对容器记录（mkchk p84 对照样片无 dvcC）。
-  - next: ~~发布链三件套~~ **已完成（2026-10-02 晚）**：release `libmpv-android-v2026.011`（命名改 年.序号三位补零，用户决策；mpv tag `media-kit-v2026.011`；build.gradle/CHANGELOG/CI 标记 `dovi-p5-pipeline` 同步）。剩：人工观察升格两格（见"待用户确认"项）；② 完整目标（Vivid/HDR10+ 元数据重建，含 demuxer 级 SEI 探测绕开 mediacodec 剥离）按需另立实施；①需 DV 设备。
+  - next: 发布链三件套与人工观察两格升 verified 均已收口（2026-10-02 晚，HLG/P8.4 默认路由随之变更）。剩：② 完整目标（Vivid/HDR10+ 元数据重建，含 demuxer 级 SEI 探测绕开 mediacodec 剥离）按需另立实施；①需 DV 设备。
 
 - [x] 待用户确认两（Phase 1 完全关闭，2026-10-02 完成）
   - context: archives/conversations/android-hdr-auto-output-20261002.md
@@ -92,7 +92,7 @@
   - acceptance: Surface 重建、Home→前台、退出/重入、oldA→newB 交错和失败重试时，播放器位置与持续可见帧正确，资源最终释放；晚到 Create、Release ACK 丢失及 engine detach 有明确 owner/屏障，不以构建或单次 EOS 代替生命周期验收。
   - latest: P8.4/HDR10/SDR 的 Home→返回、双视图存活 B 回退、释放/绑定失败重试已有实机可见画面证据（12473–12477、12491/12492 各轮，详见 context）。owner broker 第一步已落地——P5 Texture 播放中直接 destroy 的确定性 SIGSEGV 根因（release NativeCallable wakeup 蹦床随 isolate 失效）已修复（12653 播放中销毁 4/4 零崩溃、12654 正常路径无回归），无视频裸 Player 终态已证（12647）；broker 现覆盖 wakeup 回调清空与视频输出释放，**mpv 终止与音频-only 宿主接线是下一增量**。详见 `archives/experiments/android-p5-engine-destroy-12646-20260929.md`。
   - next: 核验清理中再次点击、失败重试和全屏组合；继续通用失败 disposal/global-ref 定量闭合、连续可见帧与 mpv WID 回读，再决定提前停轨默认值；P5 专属双视图与属性序列故障归入 P3（已完成）。
-  - temp_reconcile: `/private/tmp/media-kit-mpv-p5-replay-2214`（7文件）、`media-kit-mpv-p84-rebuild-2213`（6文件）、`media-kit-mpv-upstream-reader3`（4文件）均是未提交的旧mpv生命周期实验。逐项比对当前产品输出与现有复现记录；若保留修正，先跑双视图B存活、失败重试、Home返回、直接Engine销毁及资源闭合；无独有修正的目录在记录结论后删除。
+  - temp_reconcile: **已关闭（2026-10-02）**：`media-kit-mpv-p5-replay-2214`/`media-kit-mpv-p84-rebuild-2213`/`media-kit-mpv-upstream-reader3` 实测已消失（主机 16 天未重启，应为 macOS /private/tmp 周期清理），未提交实验补丁不可恢复；按既有复现记录结论关闭，生命周期验收需求保留在上方 next。
 
 - [ ] 整理 `archives` 的主题结构与引用
   - status: planned；context: archives/conversations/android-hdr-dv-display-plan-20260922.md
@@ -132,6 +132,7 @@ P5 主线（详细流水见 `archives/conversations/android-hdr-dv-display-plan-
 
 其他已完成：
 
+- [x] HDR 能力查询、路由执行与报告 API + 设备私有回退子包（Phase 1 Android）：done（2026-10-02 完全关闭）；S0–S13 全交付，待用户两项（人工观察两格升 verified + 默认路由变更、R3.1 口径注记）10-02 晚收口，204/204 + hdr_lab 48/48；发布 media_kit_video 1.3.1+1 + vendor 子包 1.0.0+1；PiliPlusX 接入 A7/A8 实机通过；②+方案 B（P5 探针/容器事实消费）随发布链 v2026.011 落地。`archives/conversations/android-hdr-auto-output-20261002.md`
 - [x] 架构审查整改（批次 A–H）：done；三个 P0 全部达成、全量静态回归通过、实机验收（2026-10-01 LYA 立即修四项 + 短期清理）。`archives/conversations/architecture-review-remediation-20260930.md`、`archives/experiments/android-remediation-mae-p0-readback-20261001.md`
 - [x] media-kit 主仓合并上游 main（236 提交）：done（`a886f556`，63 冲突分层裁定）；P5 五项实机验收（12700–12702）无回归，main 成为唯一维护线。`archives/experiments/android-media-kit-main-merge-acceptance-12700-20260930.md`
 - [x] 修复 Mi Note 3 OES 路径花屏：done（mpv `5e26cf86` buffer_retire 持有至 OES 路径）；A/B 基线 1 异常→修复 0 异常、真人确认。`archives/experiments/android-oes-buffer-retire-fix-20260930.md`
