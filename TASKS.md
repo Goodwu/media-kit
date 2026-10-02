@@ -29,8 +29,8 @@
   - status: in_progress
   - context: archives/conversations/android-hdr-auto-output-20261002.md；需求 docs/requirements/android-hdr-auto-output.md（v3）；计划 docs/requirements/android-hdr-auto-output-plan.md（S0–S13）；参考实现 media_kit_hdr_lab；实机基线 archives/experiments/android-playback-matrix-12703-12708-20260930.md
   - acceptance: 需求 v3 验收 A1–A8。要点：开播前预测与执行同源；按"源描述 + 策略候选 + 偏好 + 成熟度门禁"选路由，默认先 HDR 输出再 tone-map、HDR 中直出优先；运行时沿候选列表降级，最终 tone-map 继续播放并发事件（P5 管线缺失除外）；路由、候选与状态报告给 App；`HdrVideoSession`/`HdrVideo` 支持控制器替换且全屏跟随；LYA 私有回退做成默认关闭、只读门禁的独立子包；PiliPlusX 只保留策略偏好，无设备代码、无平台决策代码。
-  - latest: 第四轮（2026-10-02）S0–S10 主线完成：S0 基线（43/48→185/185）；S1 分类器+整数缺陷修复+设备事实锚点；S2 能力查询+P5 探测；S3 路由规划（V1 PASS）；S4 dataspace 回报（V1 PASS）；S7 私有回退子包（V2 PASS）；S9 六样片；S5 会话编排（V1 PASS，161→185 测试）；S6 HdrVideo/全屏跟随（V0）；S8 诊断日志+PiliPlusX 对照表（V0）；S10 hdr_lab 迁移+LYA 26 轮实机验收 A1–A6（V1 审核中）——验收证据 `archives/experiments/android-hdr-auto-output-acceptance-20261002.md`。过程中发现并修复：S5 复核时序缺陷（video-params 有界轮询）。事实冲突已汇报：需求第 6 节注的 `HDR Vivid_HLG` 本地文件实测为 PQ 基层。
-  - next: S10 V1 审核结论 → 用户人工观察（A1-HLG/A6 画面）确认成熟度升级 → S11 发布 → S12 PiliPlusX 接入（A7/A8）→ S13 收尾。
+  - latest: 第四轮（2026-10-02）S0–S10 主线完成：S0 基线（43/48→185/185）；S1 分类器+整数缺陷修复+设备事实锚点；S2 能力查询+P5 探测；S3 路由规划（V1 PASS）；S4 dataspace 回报（V1 PASS）；S7 私有回退子包（V2 PASS）；S9 六样片；S5 会话编排（V1 PASS，161→185 测试）；S6 HdrVideo/全屏跟随（V0）；S8 诊断日志+PiliPlusX 对照表（V0）；S10 hdr_lab 迁移+LYA 27 轮实机验收 A1–A6（V1 PASS，第一轮 FAIL 两处证据错位修订后复审通过；seek 待补验证项留 S12）——验收证据 `archives/experiments/android-hdr-auto-output-acceptance-20261002.md`。过程中发现并修复：S5 复核时序缺陷（video-params 有界轮询）。事实冲突已汇报：需求第 6 节注的 `HDR Vivid_HLG` 本地文件实测为 PQ 基层。
+  - next: 用户人工观察（a1-hlg-gate-85/a6-reshape 画面）确认成熟度升级 → 同步需求第 6 节与常量表 → S11 发布 → S12 PiliPlusX 接入（A7/A8）→ S13 收尾。
 
 ## Next（近期候选，最多 10 条）
 
