@@ -70,6 +70,7 @@ void main() {
     int? profile,
     String codec = 'hevc',
     String hwdec = 'mediacodec',
+    bool? hdrVivid,
   }) =>
       HdrReviewFacts(
         videoParams:
@@ -80,6 +81,7 @@ void main() {
         codec: codec,
         hwdecCurrent: hwdec,
         path: media.uri,
+        hdrVivid: hdrVivid,
       );
 
   HdrReviewFacts gammaFacts({
@@ -298,6 +300,37 @@ void main() {
     expect(report.verified, isTrue);
     expect(report.actual!.strategy, HdrStrategy.toneMapSdr);
     expect(events.whereType<HdrRouteAppliedEvent>(), hasLength(1));
+    await session.dispose();
+  });
+
+  test('a HDR Vivid side-data fact reclassifies an HDR10 hint and rebuilds '
+      'on the hdrVivid maturity row', () async {
+    final backend = FakeBackend()
+      ..factsForOpen
+          .add(facts(gamma: 'pq', primaries: 'bt.2020', hdrVivid: true))
+      ..factsForOpen
+          .add(facts(gamma: 'pq', primaries: 'bt.2020', hdrVivid: true));
+    final session = makeSession(backend: backend, capabilities: caps());
+    final events = <HdrOutputEvent>[];
+    session.events.listen(events.add);
+
+    await session.open(media, hint: hdr10);
+    await pumpEventQueue();
+
+    // hdrVivid class maturity (hdr_strategy.dart, locked by the table test):
+    // baseLayerDirect experimental, metadataReshape unsupported,
+    // toneMapSdr experimental — every default candidate is gated off, so
+    // the tone-map safety net is selected; the route changes and the
+    // single per-open rebuild applies at the playback position.
+    expect(backend.opened, hasLength(2));
+    expect(backend.opened.first.route.strategy, HdrStrategy.baseLayerDirect);
+    expect(backend.opened.last.route.strategy, HdrStrategy.toneMapSdr);
+    final report = session.report.value;
+    expect(report.verified, isTrue);
+    expect(report.source!.dynamicMetadata, HdrDynamicMetadata.hdrVivid);
+    expect(report.sourceOrigin, HdrReportSource.decoder);
+    expect(report.actual!.strategy, HdrStrategy.toneMapSdr);
+    expect(events.whereType<HdrReclassifiedEvent>().single.rebuilt, isTrue);
     await session.dispose();
   });
 

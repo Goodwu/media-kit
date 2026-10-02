@@ -1,3 +1,8 @@
+## Unreleased
+
+- **FEAT**(android): HDR 能力路由方案 B——P5 管线判定改为原生抛弃式 mpv 实例探针（需求 `docs/requirements/android-hdr-auto-output.md` R1.4，2026-10-02 批准）。新增 fork 只读能力属性 `dovi-p5-pipeline` 的 bridge 探针（`media_kit_video_hdr_bridge` 新增公开 JNI `MpvPipelineProbe.nativeProbeP5Pipeline`：create→initialize→读属性→terminate，无 vo、不触碰 EGL，满足 R1.1），插件 engine attach 时执行一次并缓存。`HdrCapabilities.query` 无 `Player` 时不再保守回退 false——P5 判定改以快照 `p5Pipeline` 字段为单一来源，无 Player 也权威；`parseSnapshot` 的 `p5PipelineAvailable` 改为可选回退参数（session 的 `CapabilityChanged` 解析零改动）。Phase 1 的 `option-info/dovi-p5-fast-path/name` 选项存在性代理路径退役（`detectP5Pipeline`/`propertyReader` 删除）；`query` 的 `player` 参数仅为源兼容保留、不被咨询。
+- **FEAT**(android): 解码器复核事实接通 mpv fork 0f7e6bec32+ 的三个新属性（需求 R2.3 注记，2026-10-02）：容器 DV 兼容 ID（`current-tracks/video/dolby-vision-compatibility-id`；`-1` 哨兵与 unavailable 按未知处理）、增强层标志（`current-tracks/video/dolby-vision-el-present`；配置记录不区分 FEL/MEL）、HDR Vivid side data 存在性（`video-params/hdr-vivid`，逐帧事实、复核单次采样）。分类优先级：容器显式兼容 ID 优先、基础层 gamma 推断回退（容器记录就是 DV 信令本身）；增强层按事实驱动、profile 缺省回退；profile 缺失且 Vivid 事实为真时分类为 `HdrDynamicMetadata.hdrVivid`（经 `HdrSourceClass.of` 自动映射 hdrVivid 成熟度行，无新增策略）。
+
 ## 1.3.1+1 (fork)
 
 - **BREAKING**(api): `VideoControllerConfiguration` 平台开关收敛为子对象。迁移：
