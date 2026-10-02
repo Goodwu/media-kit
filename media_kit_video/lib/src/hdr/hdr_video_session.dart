@@ -17,6 +17,7 @@ import 'hdr_capabilities.dart';
 import 'hdr_disposal.dart';
 import 'hdr_open_coordinator.dart';
 import 'hdr_open_plan.dart';
+import 'hdr_output_diagnostics.dart';
 import 'hdr_output_event.dart';
 import 'hdr_output_report.dart';
 import 'hdr_output_slot.dart';
@@ -288,6 +289,22 @@ class HdrVideoSession {
           diagnostic: _reviewDiagnostic,
         );
         _report.value = report;
+        // `HDR decision:` layer, applied phase (R4.3): the same decision
+        // after verification, with the dataspace outcome and hwdec observed.
+        HdrOutputDiagnostics.decision(
+          generation: serial,
+          phase: 'applied',
+          origin: plan.sourceOrigin,
+          source: plan.source,
+          prediction: plan.prediction,
+          actual: plan.route,
+          hwdecCurrent: report.hwdecCurrent,
+          dataSpaceRequested: report.dataSpaceRequested,
+          dataSpacePath: report.dataSpacePath,
+          dataSpaceReadback: report.dataSpaceReadback,
+          verified: report.verified,
+          degradeReason: report.degradeReason,
+        );
         _emit(HdrRouteAppliedEvent(serial, route: plan.route, report: report));
       }
     } on OpenSuperseded {
@@ -369,6 +386,15 @@ class HdrVideoSession {
       prediction: prediction,
       verified: false,
     ));
+    // `HDR decision:` layer, plan phase (R4.3): selected strategy, full
+    // candidate list with skip reasons, and the open generation.
+    HdrOutputDiagnostics.decision(
+      generation: _transactionSerial,
+      phase: 'plan',
+      origin: plan.sourceOrigin,
+      source: plan.source,
+      prediction: prediction,
+    );
     return plan;
   }
 
@@ -808,6 +834,25 @@ class HdrVideoSession {
     // Open-flow events carry their transaction's generation; a stale
     // transaction must not publish anything (plan 1.4 step 1).
     if (event.generation != _serial) return;
+    // `HDR degrade:` / `HDR recover:` layers (R4.3): hooked on the single
+    // event funnel so every degradation site and the capability-change
+    // recovery log identically, and only for live generations.
+    if (HdrOutputDiagnostics.enabled) {
+      if (event is HdrDegradedEvent) {
+        HdrOutputDiagnostics.degrade(
+          generation: event.generation,
+          reason: event.reason,
+          from: event.from,
+          to: event.to,
+          diagnostic: event.diagnostic,
+        );
+      } else if (event is HdrCapabilityChangedEvent) {
+        HdrOutputDiagnostics.recover(
+          generation: event.generation,
+          capabilities: event.capabilities,
+        );
+      }
+    }
     _events.add(event);
   }
 

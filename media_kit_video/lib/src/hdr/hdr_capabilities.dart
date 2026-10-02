@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 
 import 'package:media_kit/media_kit.dart' show Player;
 
+import 'hdr_output_diagnostics.dart';
 import 'hdr_route.dart';
 import 'hdr_route_planner.dart';
 import 'hdr_source_descriptor.dart';
@@ -223,10 +224,13 @@ class HdrCapabilities {
       _channel.invokeMapMethod<String, dynamic>('HdrCapabilities.Get'),
       detectP5Pipeline(readProperty),
     ]);
-    return parseSnapshot(
+    final HdrCapabilities capabilities = parseSnapshot(
       results[0] as Map<Object?, Object?>?,
       p5PipelineAvailable: results[1] as bool,
     );
+    // `HDR capability:` layer (R4.3); short-circuits while disabled.
+    HdrOutputDiagnostics.capability(capabilities);
+    return capabilities;
   }
 
   /// True exactly when mpv reports a non-empty name for the
