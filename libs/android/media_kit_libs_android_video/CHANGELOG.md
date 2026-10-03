@@ -1,15 +1,15 @@
-## libmpv build lock（2026-10-02 更新）
+## libmpv build lock（2026-10-03 更新）
 
 默认 arm64 libmpv 来源固定为 Goodwu fork 发布（其余 ABI 维持上游 Predidit v1.2.7 基线）：
 
-- Release: https://github.com/Goodwu/media-kit/releases/tag/libmpv-android-v2026.011
-- mpv: Goodwu/mpv `media-kit/android` @ `d24c59905b`（tag `media-kit-v2026.011`；v2026.10 全部 + 客户端只读属性暴露：`dovi-p5-pipeline` 构建能力属性、`dolby-vision-compatibility-id`/`dolby-vision-el-present`/`hdr-vivid` 事实属性，渲染行为零改动，LYA 实机 8 轮验证通过）
-- FFmpeg: Goodwu/FFmpeg `feature/android-mediacodec-p5-rpu` @ `fff3ee7`
+- Release: https://github.com/Goodwu/media-kit/releases/tag/libmpv-android-v2026.012
+- mpv: Goodwu/mpv `media-kit/android` @ `d24c59905b`（tag `media-kit-v2026.012` 同点该提交；与 v2026.011 相同——本轮只换 FFmpeg 世代）
+- FFmpeg: Goodwu/FFmpeg `feature/android-mediacodec-p5-rpu` @ `b4d2ea4ffb`（P5 RPU 整改版：pts 复现元数据整批丢失修复 + 4K 喂数据路径双重拷贝移除；新增 `dovi=auto|on|off` 解码器选项与 RPU 跟踪日志。P0 验证记录 `archives/experiments/android-ffmpeg-p5-rpu-b4d2ea4-verify-20261003.md`；已知登记项：元数据切换帧存在 11 帧位移（298/300 帧逐帧一致），归 FFmpeg 任务后续调查）
 - libplacebo: Goodwu/libplacebo `optimize/dovi-linear-decode` @ `c9fd879`
-- 构建链: Goodwu/libmpv-android-video-build-dv-experiment @ `91bb42af`（v_mpv 钉定 d24c59905b）
-- `media-kit-d24c59905-arm64-v8a.jar` SHA-256 `cafef3a44f7ab6379faf59e352e65dd69fa0b0fce45e80f86bc3026520bfdf21`（默认）
-- 历史资产：v2026.10（5f9ddf17 `c0e5d7f0…`）、v2026.09（5e26cf86 `7cb87a5c…`、398d0c3 `dad30ae2…`）见各 release 页
-- 版本标识：libmpv.so 内 `P5 direct external YUV sampler enabled` / `dovi rescale k=%.6f` / `dovi-p5-fast-path` / `dovi-p5-pipeline` 标记串（整改后探针已移除，旧 `P5_DOVI_RESCALE`/`P5_BUFFER_RETIRE` 不再存在），CI（ci.yml `libmpv-jar-identity` job）据此校验。
+- 构建链: Goodwu/libmpv-android-video-build-dv-experiment @ `3dc4596`（v_ffmpeg 钉定 b4d2ea4ffb、v_mpv 维持 d24c59905b；Kazumi HLS 补丁维持 patches/ffmpeg 机制，对 b4d2ea4ffb 兼容性已验）
+- `media-kit-d24c59905-ffmpeg-b4d2ea4-arm64-v8a.jar` SHA-256 `c3bab5fca4fd81fbf12715d934f298fd0a0c6971bb8cbfd0ce3439cf3de53702`（默认）
+- 历史资产：v2026.011（d24c59905+fff3ee7 `cafef3a4…`）、v2026.10（5f9ddf17 `c0e5d7f0…`）、v2026.09（5e26cf86 `7cb87a5c…`、398d0c3 `dad30ae2…`）见各 release 页
+- 版本标识：libmpv.so 内 `P5 direct external YUV sampler enabled` / `dovi rescale k=%.6f` / `dovi-p5-fast-path` / `dovi-p5-pipeline` / `Dolby Vision RPU export enabled`（末位为 b4d2ea4 世代 libavcodec 锁定标记）标记串，CI（ci.yml `libmpv-jar-identity` job）据此校验。
 
 ## 1.3.8
 

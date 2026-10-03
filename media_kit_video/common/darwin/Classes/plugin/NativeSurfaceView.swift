@@ -224,6 +224,43 @@ private final class FrameReportingView: NSView {
   }
 }
 
+// Bounded, opt-in late-playback evidence without synchronous mpv queries.
+private final class FrameStateDiagnostics {
+  static func make(handle: Int64) -> FrameStateDiagnostics? {
+    guard ProcessInfo.processInfo.environment["PILIPLUSX_FRAME_PACING_DIAGNOSTICS"] == "1" else { return nil }
+    return FrameStateDiagnostics(handle: handle)
+  }
+  private let handle: Int64
+  private let writer = DispatchQueue(label: "media-kit.frame-state-evidence", qos: .utility)
+  private var startedAt: CFTimeInterval?
+  private var lastSampleAt: CFTimeInterval = 0
+  private var rows = Data()
+  private init(handle: Int64) { self.handle = handle }
+  func sample(now: CFTimeInterval, hasBuffer: Bool, generation: Int,
+              lastDrawn: Int64, inFlight: Bool, size: CGSize) {
+    if startedAt == nil { startedAt = now }
+    guard let start = startedAt, now - start <= 180,
+          now - lastSampleAt >= 1 else { return }
+    lastSampleAt = now
+    let record: [String: Any] = [
+      "utcEpoch": Date().timeIntervalSince1970, "monotonic": now,
+      "pid": ProcessInfo.processInfo.processIdentifier, "handle": handle,
+      "generation": generation, "hasBuffer": hasBuffer,
+      "produced": NativeFrameRegistry.producedFrameCount(handle: handle),
+      "lastDrawn": lastDrawn, "inFlight": inFlight,
+      "epoch": NativeFrameRegistry.currentOutputEpoch(handle: handle),
+      "width": size.width, "height": size.height
+    ]
+    guard let row = try? JSONSerialization.data(withJSONObject: record, options: [.sortedKeys]) else { return }
+    rows.append(row); rows.append(0x0A)
+    let data = rows
+    let url = FileManager.default.temporaryDirectory.appendingPathComponent(
+      "media-kit-frame-state-\(ProcessInfo.processInfo.processIdentifier)-\(handle)-\(generation).jsonl"
+    )
+    writer.async { try? data.write(to: url, options: .atomic) }
+  }
+}
+
 private final class FramePacingDiagnostics {
   private static let tickLimit = 900
   private static let durationLimit: CFTimeInterval = 15.0
@@ -334,7 +371,7 @@ private final class FramePacingDiagnostics {
   func finish(reason: String) {
     guard !finished, tickCount > 0 else { return }
     finished = true
-    NSLog(
+    let summary =
       "FramePacingDiagnostics macOS summary " +
       "handle=\(handle) generation=\(generation) reason=\(reason) " +
       "ticks=\(tickCount) idle=\(idleTickCount) attempts=\(drawAttemptCount) " +
@@ -345,7 +382,14 @@ private final class FramePacingDiagnostics {
       "sequence=\(firstSequence ?? -1)...\(lastSequence ?? -1) gaps=\(sequenceGapCount) " +
       "inFlightMs={\(Self.describe(inFlightDurations))} " +
       "gpuMs={\(Self.describe(gpuDurations))}"
+    NSLog("%@", summary)
+    // Finder-launched apps may discard stderr. Diagnostics are opt-in and
+    // bounded to one summary per view, with a process-specific evidence file.
+    let evidenceURL = FileManager.default.temporaryDirectory.appendingPathComponent(
+      "media-kit-frame-pacing-\(ProcessInfo.processInfo.processIdentifier)-\(handle)-\(generation).txt"
     )
+    try? summary.write(to: evidenceURL, atomically: true, encoding: .utf8)
+
   }
 
   private static func describe(_ values: [CFTimeInterval]) -> String {
@@ -388,6 +432,7 @@ final class NativeSurfaceView: NSObject {
   private var needsRedraw = true
   private var blitInFlight = false
   private var drawDiagnosticsRemaining = 8
+  private var frameStateDiagnostics: FrameStateDiagnostics?
   private var framePacingDiagnostics: FramePacingDiagnostics?
   private let handle: Int64
   private let generation: Int
@@ -406,6 +451,7 @@ final class NativeSurfaceView: NSObject {
     generation = (args as? [String: Any])?["generation"] as? Int ?? 0
     viewToken = DarwinViewTokenRegistry.register(view: nativeView, handle: handle, generation: generation)
     super.init()
+    frameStateDiagnostics = FrameStateDiagnostics.make(handle: handle)
     framePacingDiagnostics = FramePacingDiagnostics.make(
       handle: handle,
       generation: generation
@@ -545,6 +591,9 @@ final class NativeSurfaceView: NSObject {
       framePacingDiagnostics = nil
     }
     let pixelBuffer = NativeFrameRegistry.copyFrame(handle: handle)
+    frameStateDiagnostics?.sample(now: CACurrentMediaTime(), hasBuffer: pixelBuffer != nil,
+      generation: generation, lastDrawn: lastDrawnProducedCount, inFlight: blitInFlight,
+      size: metalLayer.drawableSize)
     let diagnostics = framePacingDiagnostics
     diagnostics?.recordTick(at: CACurrentMediaTime(), pixelBuffer: pixelBuffer)
     diagnostics?.completeTick(at: CACurrentMediaTime())
