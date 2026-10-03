@@ -41,12 +41,13 @@ b4d2ea4ffb 在 LYA 上**P0 用例 T1–T8 全部通过或以已登记偏差覆�
 
 全部脚本与日志在 `/tmp/rpu-verify-20261003/`（battery*.sh、rpu-app-round.sh、t4-seek-round.sh、final-rounds.sh、t3_compare.py、各 T*.log 与 round-* 产物）；关键证据需归档时复制入 `archives/experiments/artifacts/`。JAR 在 `~/src/media-kit-build/jars/media-kit-ffmpeg-b4d2ea4-arm64-v8a.jar`；两 CLI 在构建仓 deps/ffmpeg/_build-cli-arm64（b4d2ea4）与 /tmp/fff3ee7-cli（基线）。
 
-## 隐患与登记
+## 隐患与登记（2026-10-03 采纳时更正）
 
-1. **Kazumi HLS 补丁未纳入任何 git 跟踪**：产品 JAR 实证含 `hls_ad_filter`/`seg_allow_img`（libmpv.so 特征串），但该补丁以未提交工作区改动形态存在于构建仓 deps/ffmpeg——构建不可复现风险。建议：入库 fork 分支或构建仓 patches/ 目录。附带观察：HLS 快验中同段重复 + EXT-X-DISCONTINUITY 场景待 battery3 结果确认。
-2. **T3 单帧位移**：见上表；匹配器代码已核（精确 pts 匹配），需要 FFmpeg 任务作者定性（输入侧 packet 归属 vs 输出侧 pts 源）。
+1. **Kazumi HLS 补丁——初判"未跟踪"系误判，已更正（2026-10-03）**：补丁实以 `buildscripts/patches/ffmpeg/ffmpeg-hls-kazumi-combined.patch` 入库于构建仓，patch.sh 以"deps 工作树 apply 留未提交改动"为设计机制（configure 空 config hack 同理由 ffmpeg.sh sed 产生）；对 b4d2ea4ffb 的 `git apply --reverse --check` 兼容性验证通过。产品 JAR 含 hls_ad_filter/seg_allow_img 为补丁机制生效的正常结果，无不可复现风险。
+2. **T3 单帧位移**：见上表；匹配器代码已核（精确 pts 匹配），需要 FFmpeg 任务作者定性（输入侧 packet 归属 vs 输出侧 pts 源）——已单列 TASKS 后续任务，按用户决策并行不阻塞采纳。
 3. **样片工程事实**：`-ss/-t -c copy` 裁剪与 concat demuxer 产物均丢 DOVI 容器配置（homebrew ffmpeg 9.0.2 实测）；短 dvcc 样片需另寻制作法（SOURCES.md 已有 P7 MEL 手工 dvcC 注入先例）。
 4. **T8 方法论**：ABAB 交替 + 同对比较是设备热敏感下唯一可信形态；冷态同基线、热态同节流即"不劣化"成立。
+5. **T9-hls 补充**：HLS 断续场景经 fork hls demuxer + Kazumi 补丁路径通过（13218 帧全绿），间接覆盖了补丁路径与 RPU 管线的共存。
 
 ## 设备纪律
 
