@@ -38,12 +38,16 @@
   - latest: **CI 首验（f6665609 run 37048875825）：Linux/macOS 过，Web 仍挂且机制另立（2026-10-03 凌晨定性）**。Native 侧修复实证有效（mpv playlist-shuffle 随机碰撞路径）。**Web 失败不是碰撞**：WebPlayer.setShuffle 自带"洗到不同序为止"while 守卫（web/player/real.dart:1158-1160），同序不可能；真实机制疑似 `synchronized` 锁等待——web 样片是 5 个 GitHub 网络 URL（我的 10 项扩展=10 个网络条目），open() 持锁期间网络加载慢则 setShuffle 等锁超时、事件缺失（420fba3e/490ae215 两轮 4 项时 Web 也挂，锁/网络 flake 先于本轮改动存在；10 项可能加重）。失败签名一致：仅初始事件后 Stream closed。
   - next: Web 侧处置选项（待排期）：①shuffle 测试改用非网络 Media（web 平台源依赖 GitHub URL 是根因）；②查 WebPlayer synchronized 锁与 open 网络加载的交互；③提报上游。Native 修复保留。
 
-- [ ] FFmpeg P5 RPU 整改版（`b4d2ea4ffb`）按测试计划验证（2026-10-02 登记）
-  - status: in_progress（2026-10-03 凌晨 P0 用例全部执行完毕，证据见实验记录；剩收尾决策项）
-  - context: archives/experiments/android-ffmpeg-p5-rpu-b4d2ea4-verify-20261003.md；测试计划 `~/src/FFmpeg/TEST-android-mediacodec-p5-rpu.md`
-  - acceptance: 推送 `b4d2ea4ffb`；以整改版重建产品 libmpv 链路；按测试计划执行 P0 用例 T1–T8 及 T9，close 时 summary 日志满足计划健康标准；结论只对 `b4d2ea4ffb` 及之后版本出。
-  - latest: **P0 验证完成（2026-10-03 凌晨，LYA，全记录见实验记录）**：构建链对等重建（JAR `c3bab5fc`，含 Kazumi 补丁与 configure hack 两处未跟踪改动的隐患登记）；CLI 通道 T2（6609 帧全绿）/T6×4/T7/T8（ABAB 不劣化，热节流主导）/T9 双形态（stream_loop 与 HLS 断续各 13218 帧全绿——pts 复现主修复点通过）/T11/T12 干净通过；app 通道 T1 全链通过（decoder verified→reshape→ext:lya-pq→SF 读回 PQ→EOS completed=true→decoder 零丢帧）。**三个登记项**：①T3 发现单帧元数据位移（298/300 一致、切换帧 SW pts81 vs MC pts92，匹配器为精确 pts 匹配，需 ES 级定性）；②T4 app 内 seek 拖拽自动化未达控件（A5 同源限制，解码语义由 T9/T5 覆盖）；③样片工程事实（-c copy 裁剪/concat 丢 DOVI 容器配置）。
-  - next: ①用户决策：是否采纳整改版——采纳则发布链 FFmpeg 钉定与 product-ffmpeg-lib 重钉至 b4d2ea4ffb 世代；②T3 单帧位移定性（FFmpeg 任务作者域：输入侧 packet 归属 vs 输出侧 pts 源）；③Kazumi 补丁入库（fork 分支或构建仓 patches/）；④可选项 T10/T13/T14 按需。
+- [x] FFmpeg P5 RPU 整改版（`b4d2ea4ffb`）按测试计划验证与采纳（2026-10-02 登记；2026-10-03 验证完成并采纳收口）
+  - context: archives/experiments/android-ffmpeg-p5-rpu-b4d2ea4-verify-20261003.md
+  - acceptance: 推送 `b4d2ea4ffb`；以整改版重建产品 libmpv 链路；按测试计划执行 P0 用例 T1–T8 及 T9；结论只对 `b4d2ea4ffb` 及之后版本出。
+  - latest: **验证完成 + 用户决策采纳（2026-10-03）**：CLI 通道 T2/T6×4/T7/T8(ABAB 不劣化)/T9 双形态(13218 帧全绿)/T11/T12/T5(delay_flush) 全过；app 通道 T1 全链通过（decoder verified→reshape→ext:lya-pq→SF 读回 PQ→EOS→解码零丢帧）。**发布链 v2026.012 已执行**：mpv tag（d24c59905b 同点）、GitHub release（JAR `media-kit-d24c59905-ffmpeg-b4d2ea4-arm64-v8a.jar` `c3bab5fc…`）、build.gradle 钉定、CI 标识串加 `Dolby Vision RPU export enabled`（libavcodec 世代锁定）、libs CHANGELOG、构建仓 depinfo v_ffmpeg→b4d2ea4ffb（`3dc4596`）、product-ffmpeg-lib 刷新+GENERATION 标记、FFmpeg 仓 TEST/REVIEW 文档入库。T3 单帧位移（298/300 一致+切换帧 11 帧位移）按用户决策**并行不阻塞**，单列下方后续任务。T4 app 内 seek 自动化受限（解码语义由 T9/T5 覆盖）；T10/T13/T14 可选项未做。
+- [ ] FFmpeg P5 RPU T3 单帧位移定性（b4d2ea4 世代已知项，2026-10-03 自验证任务分出）
+  - status: planned
+  - context: archives/experiments/android-ffmpeg-p5-rpu-b4d2ea4-verify-20261003.md（T3 行：机制与证据链）
+  - acceptance: ES 级定位该切换帧 RPU 的归属（输入侧 packet 归属 vs 输出侧 pts 源 vs 上游解析差异），给出定性结论与必要时修复；静态元数据下视觉零影响已确认。
+  - latest: 300 帧对齐比对：298/300 DOVI_METADATA 逐字节一致；片中唯一单帧元数据切换 SW(hevc) 在 pts=81、MC(hevc_mediacodec+fork) 在 pts=92；匹配器为精确 pts 匹配（mediacodec_dovi.c:360-372），顺序错位假说排除；两路径对该 RPU 的 AU 归属判定不一致，需 ES 级定位（FFmpeg 任务作者域）。
+  - next: 排期后：提取 ES 分析切换 RPU NAL 的 AU 边界归属；对照上游 hevc 解析器与 fork 输入侧 parse 的归属差异。
 
 - [ ] PiliPlusX 性能优先/画质优先开关（HDR 路由策略预设）
   - status: planned（2026-10-02 用户登记，暂不实施）
@@ -83,11 +87,10 @@
   - next: 前置任务完成后立需求文档。
 
 - [ ] 全平台会话逻辑一致性审计与未实现平台显式 stub（2026-10-02 用户指令）
-  - status: planned
-  - context: docs/requirements/android-hdr-auto-output.md R2.5；archives/conversations/android-hdr-auto-output-20261002.md
-  - acceptance: 审计 HdrVideoSession 在每个平台（android/darwin/ohos/linux/windows/web）的当前路径并落表；为暂不实现会话编排的平台加显式 stub（未实现即报错/报告 unsupportedPlatform，不静默假透传），保证调用方在全平台得到一致的逻辑形态；决策与 R2.5"透传+调用方不分平台分支"的取舍由用户确认后落需求修订。
-  - latest: 现状：Android=完整会话；darwin/OHOS=透传+unsupportedPlatform（R2.5 Phase 1 规定）；linux/windows/web 路径未审计。注意：darwin/OHOS 的透传是 R2.5 的 Phase 1 决策，若改为报错属需求修订（交用户确认）；从未规划会话的平台（如 web）加报错 stub 不与 R2.5 冲突。
-  - next: 出平台×现状表与 stub 方案（哪些报错、哪些保留透传）→ 用户确认 → 实施 + 单测。
+  - status: closed_by_user_decision（2026-10-03 用户确认维持现状，任务收口）
+  - context: docs/requirements/android-hdr-auto-output.md R2.5；archives/conversations/android-hdr-auto-output-20261002.md（全平台审计节：平台×现状表）
+  - acceptance: 审计 HdrVideoSession 在每个平台的当前路径并落表；为暂不实现会话编排的平台加显式 stub；决策与 R2.5 取舍由用户确认。
+  - latest: **审计完成 + 用户决策维持 R2.5 现状（2026-10-03）**。结论：全部非 Android 平台（darwin/ohos/linux/windows/web）在会话构造时统一发 unsupportedPlatform 报告 + 透传常规播放，**无静默假透传**——原设想的"报错 stub"无缺口（web 编译面桩已随 CI 修复轮补齐）；透传保住非 Android 平台播放能力，与"调用方不分平台分支"目标一致。平台×现状表（每条带文件:行号证据）见 conversation 审计节。可选小项登记：web 桩抛错类型不统一（UnimplementedError vs UnsupportedError），随下次触碰顺手统一。无需需求修订。
 
 - [ ] 修复 macOS modern mpv 销毁时未释放 render context 的崩溃
   - status: in_progress（代码修复与隔离验证已完成；产品链五场景验证交接中，2026-10-03）

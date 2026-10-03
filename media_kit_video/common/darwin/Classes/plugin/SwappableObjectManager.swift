@@ -74,8 +74,9 @@ public class SwappableObjectManager<T> {
     updateCurrent(hold: hold)
   }
 
-  /// Returns held objects whose hold predicate has cleared to the writable
-  /// pool. Idempotent; cheap to call speculatively.
+  /// Returns held objects to the writable pool when `predicate` is true
+  /// (the async consumer has finished). False keeps an object held.
+  /// Idempotent; cheap to call speculatively.
   public func releaseHeld(where predicate: (T) -> Bool) {
     lock.lock()
     defer {
@@ -86,9 +87,9 @@ public class SwappableObjectManager<T> {
     var stillHeld = [T]()
     for object in held {
       if predicate(object) {
-        stillHeld.append(object)
-      } else {
         available.append(object)
+      } else {
+        stillHeld.append(object)
       }
     }
     held = stillHeld

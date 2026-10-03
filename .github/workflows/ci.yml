@@ -764,7 +764,10 @@ jobs:
           # probe (the option-info proxy is retired).
           # (The old P5_DOVI_RESCALE / P5_BUFFER_RETIRE probe tags were
           # removed together with the experiment probes.)
-          markers = [b'P5 direct external YUV sampler enabled', b'dovi rescale k=%.6f', b'dovi-p5-fast-path', b'dovi-p5-pipeline']
+          # Since the FFmpeg P5 RPU remediation (b4d2ea4ffb, release
+          # v2026.012): the mediacodec dovi RPU tracking log line — this
+          # marker pins the libavcodec generation, not just the mpv fork.
+          markers = [b'P5 direct external YUV sampler enabled', b'dovi rescale k=%.6f', b'dovi-p5-fast-path', b'dovi-p5-pipeline', b'Dolby Vision RPU export enabled']
           missing = [m.decode() for m in markers if m not in so]
           if missing:
               raise SystemExit(f'libmpv.so missing version markers: {missing}')

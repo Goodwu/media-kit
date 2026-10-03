@@ -59,7 +59,9 @@ task downloadDependencies(type: Exec) {
         // Download all *.jar dependencies & verify their SHA-256 checksums.
         //
         // arm64 defaults to the Goodwu media-kit fork build (mpv d24c59905b +
-        // FFmpeg fff3ee7 + libplacebo c9fd879) so default builds pick up the
+        // FFmpeg b4d2ea4 (P5 RPU remediation: pts-duplication metadata
+        // fix + 4K feed-path copy removal) + libplacebo c9fd879) so default
+        // builds pick up the
         // validated P5 dovi rescale, tail fallback, OES buffer_retire and
         // av_log fixes plus the HDR-routing property generation
         // (dovi-p5-pipeline build capability, DOVI container facts,
@@ -67,7 +69,7 @@ task downloadDependencies(type: Exec) {
         // package's CHANGELOG.md. Other ABIs stay on the upstream Predidit
         // baseline: the fork's fix chain is validated on arm64 only.
         def filesToDownload = [
-            ["url": "https://github.com/Goodwu/media-kit/releases/download/libmpv-android-v2026.011/media-kit-d24c59905-arm64-v8a.jar", "sha256": "cafef3a44f7ab6379faf59e352e65dd69fa0b0fce45e80f86bc3026520bfdf21", "destination": file("$buildDir/libmpv-android-v2026.011/default-arm64-v8a.jar")],
+            ["url": "https://github.com/Goodwu/media-kit/releases/download/libmpv-android-v2026.012/media-kit-d24c59905-ffmpeg-b4d2ea4-arm64-v8a.jar", "sha256": "c3bab5fca4fd81fbf12715d934f298fd0a0c6971bb8cbfd0ce3439cf3de53702", "destination": file("$buildDir/libmpv-android-v2026.012/default-arm64-v8a.jar")],
             ["url": "https://github.com/Predidit/libmpv-android-video-build/releases/download/v1.2.7/default-armeabi-v7a.jar", "sha256": "7f522ed762ea6dfeba93a02e3837c5538790030b9965a03ed3a00276adc7b32c", "destination": file("$buildDir/v1.2.7/default-armeabi-v7a.jar")],
             ["url": "https://github.com/Predidit/libmpv-android-video-build/releases/download/v1.2.7/default-x86_64.jar", "sha256": "aed0fffc99e5e554d48e1af90bc700133c25fbc02615bf1bf17db9299365c481", "destination": file("$buildDir/v1.2.7/default-x86_64.jar")],
             ["url": "https://github.com/Predidit/libmpv-android-video-build/releases/download/v1.2.7/default-x86.jar", "sha256": "9269643264a1c9689116467f313d5e1b23ea56a68d338ab940c5e8fcf07061c6", "destination": file("$buildDir/v1.2.7/default-x86.jar")]
