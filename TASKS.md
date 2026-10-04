@@ -17,6 +17,17 @@
 - **HDR 能力路由 Phase 1（S0–S13）完成（2026-10-02）**：会话 API/私有回退子包/诊断日志/hdr_lab 迁移/LYA 27+ 轮实机验收/PiliPlusX 接入全部交付并通过对应等级审核；验收记录 `archives/experiments/android-hdr-auto-output-acceptance-20261002.md`。**三仓状态（2026-10-02 晚更新）**：media-kit main 已与远端同步（`420fba3e..8d8382da` 已推送，②+方案 B 本轮提交随本轮推送）；mpv fork `media-kit/android` 已推送至 `d24c59905b`（远端分支实际存在且原在 `5f9ddf1777`——早前"远端无同名分支"记录有误；发布 tag 流不变）；PiliPlusX `fix/darwin-video-output-rebuild-barrier` 已推送 personal remote `Goodwu/PiliPlusX`（`07f153733..2ce821d4c`；其 origin 指向上游 cnctem 无写权限）。构建仓 dv-experiment `feature/android-dv-build` 已推送 `91bb42af`（`v_mpv=d24c59905b`）；产物 JAR `media-kit-d24c59905-arm64-v8a.jar`（SHA-256 `cafef3a4…`）在 `~/src/media-kit-build/jars/`。CI 标记与 build.gradle 钉定随发布链同步，勿提前加。
 ## 当前任务
 
+- [ ] LG-H870DS API24 HDR能力检测与 hdr_lab 移植
+  - status: in_progress
+  - context: archives/conversations/lg-h870ds-hdr-demo-20261004.md
+  - acceptance: 固定素材和实际解码/输出路由；demo SDR/HDR10/P8.4/P5/nativeDV Release画质与性能；暂停、seek、全屏、重入、Surface恢复、失败回退及严格退出。人工显示验收独立，静态/构建/日志不能代替。
+  - installed: R21 APKc193f18f/lib7cc6/JAR23036实际build52158/install15898exit0，-2整APK/lib读回一致。62066唯一Run成功，run1791140414516796-n4已settled，外来FILE_LOADED/owner-stop refusal/原债务StateError保持/Player终止；73230唯一系统Back当前最终JSON读回+Launcher exit0，sessionclean=false预期债务，n4DeviceAcceptance=false；独审外部Surface release/ACK已按当前tuple确认。Close按钮裁剪不可达，三次validator均拒绝且无tap；原证据保留。日志57662/33703终态，timeout30000恢复sleep，runtime独审718e5aa1限定通过并已归档；未提交推送。
+  - verified: R3 P5完整画面/颜色/亮度/流畅性获人工确认；R6两轮默认全屏结构完成，人工颜色正常、流畅。R7失败启动Close与Back各独立运行保留原error/debt，真实配置恢复、Player终止、Launcher均验证；两次健康关闭end-certified且最终无错误/debt。
+  - diagnostic-next: R21独立runtime审核718e5aa1/manifest401c7f3f已逐hash核验归档：N4外来FILE_LOADED、同Session代次、native_dv/timed保持、owner-stop拒绝、原StateError债务与严格Back退出通过限定审核。vo/null和hwdec空不称全部属性保持。当前PID13871/handle545802965584/gen1/wid2099318在03:00:27明确released/acknowledged，属于自动dispose阶段，不是03:05 Back新ACK。原final不改，n4DeviceAcceptance=false、controllerRetired=false/nativeStopIssued未知保留。Close按钮不可达P2待布局修复及真实按钮验收。 当前原page作者已把Run/Close移出滚动诊断区；73952实际16PASS（4布局+12原transport），首次fixture释放semantics过晚失败已留证；77515 actualexit0/Noissues，REPORT4a669f71已freeze且Root全manifest核验归档，原reviewerV1限定PASS REVIEW12ade35b/export162ac461，52491实际24PASS，Root全hash核验归档，全部agent终态；不改Session/handler/default，未构建或ADB，真实按钮仍待。
+  - active-work: R8 N1真实约10.06s超时→同代SDR回退、options恢复/typed route/strict cleanup均通过；用户画面颜色正常，tone-map卡顿保留为已知失败。2026-10-04用户将tone-map性能降低优先级，暂无快速修复依据，已后移清单末尾；仅收尾已启动性能独审并保存草案，不新构建性能包。优先manual Resume/Home/Recents持续播放、全屏和HDR10验收。logcat已实测exec-out可用，LG日志开关恢复原值；R13比例/HDR亮度人工通过；HDR10颜色/profile独立候选及N4实机负向已采证，当前修复N4关闭按钮并准备P8.4普通Session，不改变默认策略，tone-map性能仍deferred。
+  - remaining: R9 ManualResume与Home连续播放人工/清理通过；安全Recents颜色/流畅通过，完整frame/亮度仍缺；全屏完整/旧叠层消失/亮度明确人工复核；N4按钮可达/整体验收缺口、HDR10 demo及时序亮度、P8.4普通Session路由/画面（设备固定素材1232790317B/SHA7626cac2已完整核对；tone-map性能low）、现代Vulkan设备回归；R14 Java Surface最终release ACK外部独立关联已通过，P5/失败分支的对应ACK未单独取证。SDR tone-map卡顿未解决，按用户优先级独立后续项，不阻塞当前高优先级实施。
+
+
 - [ ] Android HDR10 / DV P8.4 显示与原生 HDR 首帧闭环
   - status: in_progress
   - context: archives/conversations/android-hdr-dv-display-plan-20260922.md
@@ -170,3 +181,11 @@ P5 主线（详细流水见 `archives/conversations/android-hdr-dv-display-plan-
 - 实验流水、包身份、日志和历史判断写入对应 conversation 或 experiments，不在任务项重复堆积；清理时先做台账快照。
 - 完成项打勾并压缩为一行结论 + context 指针移入 Recently Done；超过近期容量后留存于 context/Git 历史。
 - 提交前同步 TASKS 与/或对应 conversation；变更记录以 Git log 为准。
+
+- [ ] LG API24 P5 / HDR10 SDR tone-map 卡顿
+  - priority: low（2026-10-04 用户明确后移，R10 HDR10 tone-map 同样后移）
+  - status: deferred
+  - context: archives/conversations/lg-h870ds-hdr-demo-20261004.md
+  - evidence: R8 N1 用户确认画面、颜色正常但卡顿；R10 HDR10 实际回退 toneMapSdr，用户确认“画面完整、颜色正常，不流畅”，亮度未确认。R10 有掉帧计数但尚未定位性能根因。固定4K24 P5、gpu-next/mediacodec-copy；copy是兼容路径，不能单独归因。
+  - preserved-work: Release sampler 8 tests/限定分析通过；page opt-in与退出drain草案、43源build draft、GPU/battery/context工具及独审原日志均保留。暂不新构建、安装或扩大测量。
+  - next: 排期后完成已存草案独审并同源同路由baseline采样；有可快速验证的修复依据时再处理，人工流畅性通过才关闭。
