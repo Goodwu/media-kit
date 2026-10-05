@@ -49,6 +49,25 @@ native 溯源门禁步骤、指纹 JSON 进产物、manifest 增 patch_branch/ba
 = 换机 + 云端双目标达成（结果见 TASKS 对应条目）。基线（tpc aa76d9bb 无 patch）
 与新基线（CPF 4f1a4267+parity）的指纹差异属预期换基线变化，已记录。
 
+## 验收结果（2026-10-06 收口）
+
+- **目标 1（换机复现）✓**：`tool/ohos/bootstrap_flutter_ohos.sh` 从镜像@pin 全新
+  checkout（engine revision 5a2a6a42 与 pin 一致），本机（macOS + DevEco）构建
+  `entry-default-unsigned.hap` 成功（60.9MB、零 error）。
+- **目标 2（GitHub 云端构建）✓**：ohos.yml v2 三跑绿（run 37362291696），
+  产物含 hap-fingerprint.json 与溯源 manifest（patch_branch/base_commit 入册）。
+- **双路径指纹比对**：libflutter.so / libmpv.so / libc++_shared.so /
+  ets/modules.abc 及全部 flutter_assets **字节一致**。差异项均为已知类别：
+  ① libapp.so——Dart AOT 快照嵌入本机绝对路径（机器固有，非功能差异）；
+  ② libmediakit_ohos_hdr.so 与 module.json——CI command-line-tools
+  26.0.0.621(Beta2) vs 本机 DevEco 26.0.0.105(Release) 工具链 patch 级差异
+  （后续字节对齐硬化项：本机改装 621 版 command-line-tools）。
+- **归一等价性 ✓**：libmpv-ohos-build 切 Goodwu 镜像后 CI 重建 libmpv.so
+  sha `9561823b…` == native-libs.pin 记录值（逐字节一致，证明归一只改可得性
+  不改产物）；SBOM/SHA256SUMS 校验通过，builder_commit 102510e。
+- **本地构建 PATH 前置（macOS）**：DevEco 的 hvigor/node/ohpm 三件套需入 PATH，
+  DEVECO_SDK_HOME 指向 DevEco sdk——已写入 bootstrap 脚本文档头。
+
 **修正记录（2026-10-06 凌晨）**：CI v2 首跑失败于 hvigor Dart 编译——v1 patch
 的 hunk 过滤器行号锚定差一，把部分 `case TargetPlatform.ohos:` 插到非 switch
 上下文（system_navigator/text_selection/editable 等 4 处起报）。v2 放弃行号
