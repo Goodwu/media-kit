@@ -4,8 +4,9 @@
 
 **路径映射（2026-10-05 起）**：`archives/experiments/` 已整体迁移至独立仓库 **`~/src/media-kit-experiments`**（实验记录/证据/交接/索引全量归档）。本文件及 conversations 中所有 `archives/experiments/` 前缀路径均映射到该库根目录；迁移前的提交历史在主仓库 `git log -- archives/experiments`。
 
-## 接手快照（2026-10-02 更新；换 agent 从这里开始）
+## 接手快照（2026-10-06 更新；换 agent 从这里开始）
 
+- **flutter-ohos-e3 归档与 ~/src 八目录评估（2026-10-06）**：本机唯一 OHOS Flutter SDK（CPF-Flutter fork 基线 `4f1a4267`，oh-3.44.9-dev）90 文件未提交改动消除单副本——framework `TargetPlatform.ohos` 扫尾 81 文件（+465/-110）、HCPP 输入阻断 epoch 变体 engine 9 文件（+1012/-147）、设计文档与契约测试脚本，patch 经 `git apply --check --reverse` 校验与工作区逐字节一致，experiments 库提交 `4a43068`，记录 `ohos-flutter-e3-archive-20261006.md`。产品 HCPP patch 线（openharmony-tpc `aa76d9bb` 基线，media-kit-build 产品树）未覆盖 framework 扫尾与 epoch 方案，回溯以该归档为唯一依据。**8 个 ~/src 实验目录（flutter-ohos-e3/flutter-packages-e3/luna_flutter_e3·e4/luna_video_player_e3/luna-ohos-e1·e3/PiliPlusX-e3）全部保留不删**——luna-ohos-e1 下另有会话找到早期测试经验；处置留待后续统一。context: `archives/conversations/src-dir-cleanup-20261006.md`。
 - **mpv 审整改实机验收完成（2026-10-01，LYA）**：review 立即修四项（P0-1/P0-2/P1-1/P1-2）+ 短期清理全部实机验证通过并已提交 mpv fork；MAE 系统偏差分量与基线一致（8× 块平均全 ≤100）；P0-1 同进程双文件双 dump 通过；4K59.94 SDR 性能不劣于 398d0c3/c025cbf 同夜对照。整改产品 JAR `media-kit-remediation-final-product.jar`（a7f36bd4…）已入 `~/src/media-kit-build/jars/`。详见 `archives/experiments/android-remediation-mae-p0-readback-20261001.md` 与 conversation `architecture-review-remediation-20260930.md` Current State。
 - **发布闭环完成（2026-10-02）**：release `libmpv-android-v2026.10`（默认 arm64 libmpv 钉定），mpv `5f9ddf1777` 已推送、dv-experiment 钉定 `baac282`、media-kit 钉定 `0f1b417d`；整改世代 JAR/标识串/build.gradle 三件套已同步。
 - **4K60 负载归因完成（2026-10-02）**：**热状态主导、代码世代全排除**（9/30 原始 12700 APK 同字节复测 4808 vs 当时 2102，电池 41°C/GPU capped 277MHz；App 三代×mpv 四代×libplacebo 两代同热一致）。唯一残余：冷机 GPU 需求 586 vs 9/28 记录 415MHz 的差异（快速路径效益或 DVFS 漂移），冷机复测已排定。详见 `archives/experiments/android-4k60-dropload-attribution-20261002.md`。
