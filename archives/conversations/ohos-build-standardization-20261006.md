@@ -49,6 +49,13 @@ native 溯源门禁步骤、指纹 JSON 进产物、manifest 增 patch_branch/ba
 = 换机 + 云端双目标达成（结果见 TASKS 对应条目）。基线（tpc aa76d9bb 无 patch）
 与新基线（CPF 4f1a4267+parity）的指纹差异属预期换基线变化，已记录。
 
+**修正记录（2026-10-06 凌晨）**：CI v2 首跑失败于 hvigor Dart 编译——v1 patch
+的 hunk 过滤器行号锚定差一，把部分 `case TargetPlatform.ohos:` 插到非 switch
+上下文（system_navigator/text_selection/editable 等 4 处起报）。v2 放弃行号
+运算：完整应用 E3 已验证 diff 后整体反向应用 69 个实验 hunks（两步均 git apply
+原子语义），60 文件 +134/-28 不变、配对断言通过。patch 分支 force 重写为
+45d1b004（parity 7c17b19e + docs），media-kit 内联 patch 与 pin 同步更新。
+
 **二进制政策落地**：必要例外仅 Flutter engine 工件（929M，与 engine.version
 对应）；libmpv 自建+溯源门禁；工具（OHOS SDK 26.0.0.621/hvigor/Java17/meson/
 setup-ohos SHA 钉定）豁免；无任何上游预编译 so/har 入 HAP。
