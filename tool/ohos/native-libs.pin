@@ -1,0 +1,11 @@
+{
+  "schema": 1,
+  "repo": "https://github.com/Goodwu/libmpv-ohos-build",
+  "source_lock_commit": "102510e8f6a3aa21d9df19fdbc3bc7c7f9de0d41",
+  "release_tag": "20260920",
+  "artifact": "libmpv_aarch64.zip",
+  "zip_path": "libs/ohos/media_kit_libs_ohos/ohos/src/main/cpp/libmpv_aarch64.zip",
+  "zip_sha256": "29b8bd4de54bb61c6fbb549022af5d9082d7b057a5901a1d388597ff15114191",
+  "libmpv_so_sha256": "9561823b4e2d0c53353eaefb071a8d4d25dc5a06c18ca8f517fb995fc5cb8176",
+  "notes": "自建二进制溯源：zip 必须来自 libmpv-ohos-build CI 构建并与此处指纹一致。刷新 zip 时同步更新本 pin（含新 source_lock_commit/release_tag）。"
+}
