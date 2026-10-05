@@ -4,9 +4,12 @@
 # Consumes tool/ohos/flutter-ohos.pin (single source of truth, shared with CI).
 # Machine prerequisites (documented, tool-exempt per binary policy):
 #   - git, python3, unzip/xz
-#   - HarmonyOS command-line-tools 26.0.0.621 on PATH or DEVECO_SDK_HOME
-#     (CI installs via ErBWs/setup-ohos@5c8e74d0; locally install DevEco Studio
-#     or command-line-tools and export DEVECO_SDK_HOME)
+#   - HarmonyOS command-line-tools 26.0.0.621 on PATH or DevEco Studio
+#     (CI installs via ErBWs/setup-ohos@5c8e74d0). Locally on macOS with
+#     DevEco Studio, export:
+#       DEVECO_SDK_HOME=/Applications/DevEco-Studio.app/Contents/sdk
+#       PATH="$PATH:/Applications/DevEco-Studio.app/Contents/tools/hvigor/bin:/Applications/DevEco-Studio.app/Contents/tools/node/bin"
+#     (flutter build hap requires hvigorw + node reachable on PATH)
 #   - Java 17 for hvigor
 #
 # Usage:
