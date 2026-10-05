@@ -156,6 +156,7 @@
   - acceptance: 原生输出实际呈现、后台/前台、退出/重入及 Surface 重建后持续播放且资源闭合；区分实体机、模拟器与静态检查证据。
   - latest: 2026-09-27 当前主机 `hdc list targets` 返回 `[Empty]`，没有可连接的真实 OHOS 设备；待设备接入后重新核验身份、包与运行状态，再继续实机验收。
   - latest+ (2026-10-06)：**模拟器轮完成（guard 移除验收）**——用户决策移除 OhosVideoController 模拟器 guard 并测试；发现并修复 OHOS Flutter 首跑阻塞（path_provider 未注册致支持目录通道挂起，显式依赖 path_provider_ohos 2.2.1 修复）；样片经 `MEDIA_KIT_TEST_SAMPLE_BASE` 镜像 define（10.0.2.2）打通。guard 移除 API 层验收通过（控制器创建/surface/纹理路径正常、无 UnsupportedError、退出 dispose 干净）；但底层管线模拟器两模式均不可用：H/W vo 线程 SIGSEGV（faultlog 已取）、S/W 恒黑不出帧——guard 原始动机证实，可视播放验收仍以真机为准（blocked 不变）。附带：仓库 libmpv_aarch64.zip 刷新为 CMake 钉定的 20260920 世代（原为过期副本）。详见 conversation 2026-10-06 节。
+  - latest++ (2026-10-06)：**黑帧根因定案（用户追问"以前解出过图像"）**——排除矩阵全复现：E1/E2 原生探针今日正常渲染（SMPTE 彩条），e3 纹理/e4 原生面（9 月构建产物）、当前 main、新旧 libmpv 两世代、gpu-dumb-mode 全部恒黑或崩；E2 唯一正常的原因是 `MPV_RENDER_API_TYPE_SW` 纯软件渲染+简单 blit。结论：mpv GL vo（gpu/gpu-next 含哑模式）在模拟器 DGLES 栈上产出黑帧（无报错），libmpv 无可用纯软件 vo；当年"解出图像"仅指 E1/E2 探针路径，Flutter vo 路径从未在模拟器出帧。**修复方案已定稿待实施**：media_kit_video 增 OHOS 软件纹理路径（sw_render.cpp 原生模块复用 E2 技术 + 纹理 surfaceId 零 ArkTS 改动 + Dart vo='sw' 分支），设计细节与验收门槛见 conversation "黑帧根因定案与修复设计" 节。
 
 ## Closed（结案，未达原门槛）
 
