@@ -69,6 +69,11 @@
 - **OHOS run 37309826002：success**（HAP 构建绿）。
 - ci.yml：push run 37309825922 被 workflow_dispatch run 的 concurrency（cancel-in-progress）按预期顶替；**dispatch run 37309892420（run_package_tests=true，24 job 全矩阵+四平台 package tests）**：23/24 绿（OHOS 独立 run 亦 success），唯一失败 `macOS (optional libs)`——**75743f5c 既有缺口首次进 CI 暴露**：该提交为 media_kit_test AppDelegate 新增 `MediaKitVideoPlugin.prepareForEngineShutdown`/`recordWakeupShutdownDiagnostic` 调用，但 no-libs 变体走 podspec 的 stub 插件（`common/darwin/Classes/stub/MediaKitVideoPlugin.swift` 仅 register()），成员缺失编译失败（本地带 libs 构建走真插件故未暴露；此前三个本地提交从未过 CI）。**修复**：stub 补 `#if os(macOS)` 守卫的 no-op 对应成员（无 libs 时本无 libmpv wakeup owner 可排空），本地以 CI 同款流程复现验证（删 media_kit_libs_* 行 + 清 SPM ephemeral → `flutter build macos` exit 0）；iOS/Windows/Linux/Android optional-libs 均不受影响（iOS 已绿）。修复提交随本轮推送，最终 CI 结论见下。
 
+**fix push run 37311773857（24 job）**：20/24 绿（含 macOS optional-libs 修复验证 ✓、OHOS 二次 success），四平台 package tests 各 1 失败——**全部溯源 75743f5c 新增测试的适配缺陷**（同属首次进 CI 暴露，非归一提交所致）：
+
+- macOS/Linux/Windows：`wakeup_callback_owner_test.dart` 在无 `MEDIA_KIT_TEST_MPV` 时以 `throw StateError` 硬失败（该测试设计为对精确候选 adhoc 运行，CI 套件必然缺 env）。修复：env 缺失时 main() early-return（注册零测试=通过；带 env 仍是完整 7 项——本会话已对候选 be044572 实证 7/7）。
+- Web：`native_player_event_pump_exit_test.dart` 位于 test/ 根且 import dart:ffi，CI web 流程只 rm `test/src/player/native`，该文件编译失败。修复：移入 `test/src/player/native/`（既有 rm 即覆盖；语义上本就是 native 测试，无外部路径引用）。
+
 ## Archive Metadata
 
 - date: 2026-10-05

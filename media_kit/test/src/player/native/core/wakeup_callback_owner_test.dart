@@ -64,7 +64,10 @@ void _preloadFrameworkDependencies() {
 void main() {
   final path = Platform.environment['MEDIA_KIT_TEST_MPV'];
   if (path == null) {
-    throw StateError('Set MEDIA_KIT_TEST_MPV to exact candidate mpv');
+    // The owner semantics are only meaningful against an exact candidate
+    // mpv build; without it (e.g. the CI package suite) register nothing
+    // instead of failing the load.
+    return;
   }
   _preloadFrameworkDependencies();
   final mpv = generated.MPV(DynamicLibrary.open(path));
