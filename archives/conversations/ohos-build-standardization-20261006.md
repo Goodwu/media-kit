@@ -54,7 +54,9 @@ native 溯源门禁步骤、指纹 JSON 进产物、manifest 增 patch_branch/ba
 上下文（system_navigator/text_selection/editable 等 4 处起报）。v2 放弃行号
 运算：完整应用 E3 已验证 diff 后整体反向应用 69 个实验 hunks（两步均 git apply
 原子语义），60 文件 +134/-28 不变、配对断言通过。patch 分支 force 重写为
-45d1b004（parity 7c17b19e + docs），media-kit 内联 patch 与 pin 同步更新。
+45d1b004（parity 7c17b19e + docs），media-kit 内联 patch 与 pin 同步更新。二跑
+（dd78a88a）构建本体成功，仅指纹步骤相对路径笔误（../../tool → ../tool），
+本地同源构建已绿（entry-default-unsigned.hap 60.9MB，零 error）。
 
 **二进制政策落地**：必要例外仅 Flutter engine 工件（929M，与 engine.version
 对应）；libmpv 自建+溯源门禁；工具（OHOS SDK 26.0.0.621/hvigor/Java17/meson/
