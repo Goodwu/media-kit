@@ -52,6 +52,70 @@ abstract class HdrOpenBackend<P> {
   HdrBackendObservation observe();
 }
 
+/// Coordinator invocation boundary, including the Session review decorator.
+/// A failed waitForOutput is the *awaited operation* outcome after timeout;
+/// it does not certify completion or cancellation of the underlying future.
+enum HdrBackendDiagnosticMethod {
+  validate,
+  stop,
+  resetOwnedConfiguration,
+  prepareOutput,
+  configure,
+  waitForOutput,
+  open,
+  reviewFacts,
+}
+
+enum HdrBackendDiagnosticBoundary { entered, returned, failed }
+
+enum HdrBackendDiagnosticPurpose { normal, rollback, disposal }
+
+/// Diagnostic attribution only; never used for ownership or admission.
+class HdrBackendDiagnosticAttempt<P> {
+  const HdrBackendDiagnosticAttempt(
+      this.coordinatorGeneration, this.ordinal, this.plan);
+  final int coordinatorGeneration;
+  final int ordinal;
+  final P plan;
+}
+
+/// Immutable envelope; generic plan and raw error references are not deeply
+/// immutable. Observers must synchronously snapshot scalar plan fields, retain
+/// raw errors separately for identity assertions, and return without I/O,
+/// Player calls, reentry, or widget/output mutation. A callback can still block
+/// or deliberately reenter playback; this seam cannot prevent such misuse.
+class HdrBackendCallDiagnostic<P> {
+  const HdrBackendCallDiagnostic({
+    required this.sequence,
+    required this.elapsedMicros,
+    required this.coordinatorGeneration,
+    required this.invocation,
+    required this.owningAttempt,
+    required this.sessionGeneration,
+    required this.owningSessionGeneration,
+    required this.method,
+    required this.boundary,
+    required this.purpose,
+    this.error,
+    this.stack,
+  });
+  final int sequence;
+  final int elapsedMicros;
+  final int coordinatorGeneration;
+
+  /// Null for disposal; request/attempt identity is separate from old ownership.
+  final HdrBackendDiagnosticAttempt<P>? invocation;
+  final HdrBackendDiagnosticAttempt<P>? owningAttempt;
+  final int? sessionGeneration;
+  final int? owningSessionGeneration;
+  final HdrBackendDiagnosticMethod method;
+  final HdrBackendDiagnosticBoundary boundary;
+  final HdrBackendDiagnosticPurpose purpose;
+  final Object? error;
+  final StackTrace? stack;
+  String get boundaryScope => 'coordinator-awaited-operation';
+}
+
 /// The review phase outcome (plan 1.4 step 8).
 class HdrReviewDecision<P> {
   /// Accept the open as-is. [nextPlan], when given, only updates what the
@@ -106,6 +170,8 @@ class HdrOpenCoordinator<R, P> {
     this.retry,
     this.maxRetries = 0,
     this.onPhase,
+    this.onBackendCallDiagnostic,
+    this.diagnosticSessionGeneration,
     this.outputTimeout = const Duration(seconds: 10),
   });
 
@@ -127,6 +193,61 @@ class HdrOpenCoordinator<R, P> {
 
   final Duration outputTimeout;
   final void Function(int generation, String phase, int elapsedMicros)? onPhase;
+
+  /// Internal/testing notification only. Null avoids event and clock allocation.
+  final void Function(HdrBackendCallDiagnostic<P>)? onBackendCallDiagnostic;
+  final int? Function(P)? diagnosticSessionGeneration;
+  Stopwatch? _diagnosticClock;
+  int _diagnosticSequence = 0;
+  int _diagnosticAttemptOrdinal = 0;
+  bool _emittingDiagnostic = false;
+  HdrBackendDiagnosticAttempt<P>? _diagnosticOwner;
+
+  HdrBackendDiagnosticAttempt<P>? _diagnosticAttempt(int generation, P plan) =>
+      onBackendCallDiagnostic == null
+          ? null
+          : HdrBackendDiagnosticAttempt(
+              generation, ++_diagnosticAttemptOrdinal, plan);
+
+  void _emitBackendCall(
+      HdrBackendDiagnosticMethod method,
+      HdrBackendDiagnosticBoundary boundary,
+      int generation,
+      HdrBackendDiagnosticAttempt<P>? invocation,
+      HdrBackendDiagnosticPurpose purpose,
+      {Object? error,
+      StackTrace? stack}) {
+    final observer = onBackendCallDiagnostic;
+    if (observer == null || _emittingDiagnostic) return;
+    _emittingDiagnostic = true;
+    try {
+      final clock = _diagnosticClock ??= Stopwatch()..start();
+      final owner = _diagnosticOwner;
+      observer(HdrBackendCallDiagnostic<P>(
+        sequence: ++_diagnosticSequence,
+        elapsedMicros: clock.elapsedMicroseconds,
+        coordinatorGeneration: generation,
+        invocation: invocation,
+        owningAttempt: owner,
+        sessionGeneration: invocation == null
+            ? null
+            : diagnosticSessionGeneration?.call(invocation.plan),
+        owningSessionGeneration: owner == null
+            ? null
+            : diagnosticSessionGeneration?.call(owner.plan),
+        method: method,
+        boundary: boundary,
+        purpose: purpose,
+        error: error,
+        stack: stack,
+      ));
+    } catch (_) {
+      // Entire projection/emission path is isolated, with no error reporter.
+    } finally {
+      _emittingDiagnostic = false;
+    }
+  }
+
   Future<void> _tail = Future<void>.value();
   final Set<Future<void>> _preparations = {};
   int _generation = 0;
@@ -180,6 +301,7 @@ class HdrOpenCoordinator<R, P> {
     final queued = _tail.then((_) async {
       var switching = false;
       var attemptPlan = plan;
+      var diagnosticAttempt = _diagnosticAttempt(generation, attemptPlan);
       var currentStart = start;
       var retriesUsed = 0;
       var rebuilt = false;
@@ -188,38 +310,282 @@ class HdrOpenCoordinator<R, P> {
           _check(generation);
           mark('queue_entered');
           if (_pendingRollback) {
-            await backend.stop();
-            await backend.resetOwnedConfiguration();
+            _emitBackendCall(
+                HdrBackendDiagnosticMethod.stop,
+                HdrBackendDiagnosticBoundary.entered,
+                generation,
+                diagnosticAttempt,
+                HdrBackendDiagnosticPurpose.rollback);
+            try {
+              await backend.stop();
+            } catch (error, stack) {
+              _emitBackendCall(
+                  HdrBackendDiagnosticMethod.stop,
+                  HdrBackendDiagnosticBoundary.failed,
+                  generation,
+                  diagnosticAttempt,
+                  HdrBackendDiagnosticPurpose.rollback,
+                  error: error,
+                  stack: stack);
+              rethrow;
+            }
+            _emitBackendCall(
+                HdrBackendDiagnosticMethod.stop,
+                HdrBackendDiagnosticBoundary.returned,
+                generation,
+                diagnosticAttempt,
+                HdrBackendDiagnosticPurpose.rollback);
+            _emitBackendCall(
+                HdrBackendDiagnosticMethod.resetOwnedConfiguration,
+                HdrBackendDiagnosticBoundary.entered,
+                generation,
+                diagnosticAttempt,
+                HdrBackendDiagnosticPurpose.rollback);
+            try {
+              await backend.resetOwnedConfiguration();
+            } catch (error, stack) {
+              _emitBackendCall(
+                  HdrBackendDiagnosticMethod.resetOwnedConfiguration,
+                  HdrBackendDiagnosticBoundary.failed,
+                  generation,
+                  diagnosticAttempt,
+                  HdrBackendDiagnosticPurpose.rollback,
+                  error: error,
+                  stack: stack);
+              rethrow;
+            }
+            _emitBackendCall(
+                HdrBackendDiagnosticMethod.resetOwnedConfiguration,
+                HdrBackendDiagnosticBoundary.returned,
+                generation,
+                diagnosticAttempt,
+                HdrBackendDiagnosticPurpose.rollback);
             _pendingRollback = false;
             _activeMedia = false;
+            _diagnosticOwner = null;
             _check(generation);
             mark('rollback_complete');
           }
-          await backend.validate(attemptPlan);
+          _emitBackendCall(
+              HdrBackendDiagnosticMethod.validate,
+              HdrBackendDiagnosticBoundary.entered,
+              generation,
+              diagnosticAttempt,
+              HdrBackendDiagnosticPurpose.normal);
+          try {
+            await backend.validate(attemptPlan);
+          } catch (error, stack) {
+            _emitBackendCall(
+                HdrBackendDiagnosticMethod.validate,
+                HdrBackendDiagnosticBoundary.failed,
+                generation,
+                diagnosticAttempt,
+                HdrBackendDiagnosticPurpose.normal,
+                error: error,
+                stack: stack);
+            rethrow;
+          }
+          _emitBackendCall(
+              HdrBackendDiagnosticMethod.validate,
+              HdrBackendDiagnosticBoundary.returned,
+              generation,
+              diagnosticAttempt,
+              HdrBackendDiagnosticPurpose.normal);
           _check(generation);
           mark('validated');
           switching = true;
           _pendingRollback = true;
-          await backend.stop();
+          _emitBackendCall(
+              HdrBackendDiagnosticMethod.stop,
+              HdrBackendDiagnosticBoundary.entered,
+              generation,
+              diagnosticAttempt,
+              HdrBackendDiagnosticPurpose.normal);
+          try {
+            await backend.stop();
+          } catch (error, stack) {
+            _emitBackendCall(
+                HdrBackendDiagnosticMethod.stop,
+                HdrBackendDiagnosticBoundary.failed,
+                generation,
+                diagnosticAttempt,
+                HdrBackendDiagnosticPurpose.normal,
+                error: error,
+                stack: stack);
+            rethrow;
+          }
+          _emitBackendCall(
+              HdrBackendDiagnosticMethod.stop,
+              HdrBackendDiagnosticBoundary.returned,
+              generation,
+              diagnosticAttempt,
+              HdrBackendDiagnosticPurpose.normal);
           _check(generation);
           mark('previous_output_stopped');
-          await backend.resetOwnedConfiguration();
+          _emitBackendCall(
+              HdrBackendDiagnosticMethod.resetOwnedConfiguration,
+              HdrBackendDiagnosticBoundary.entered,
+              generation,
+              diagnosticAttempt,
+              HdrBackendDiagnosticPurpose.normal);
+          try {
+            await backend.resetOwnedConfiguration();
+          } catch (error, stack) {
+            _emitBackendCall(
+                HdrBackendDiagnosticMethod.resetOwnedConfiguration,
+                HdrBackendDiagnosticBoundary.failed,
+                generation,
+                diagnosticAttempt,
+                HdrBackendDiagnosticPurpose.normal,
+                error: error,
+                stack: stack);
+            rethrow;
+          }
+          _emitBackendCall(
+              HdrBackendDiagnosticMethod.resetOwnedConfiguration,
+              HdrBackendDiagnosticBoundary.returned,
+              generation,
+              diagnosticAttempt,
+              HdrBackendDiagnosticPurpose.normal);
           _check(generation);
           _activeMedia = false;
+          _diagnosticOwner = null;
           mark('configuration_reset');
-          await backend.prepareOutput(attemptPlan);
+          _diagnosticOwner = diagnosticAttempt;
+          _emitBackendCall(
+              HdrBackendDiagnosticMethod.prepareOutput,
+              HdrBackendDiagnosticBoundary.entered,
+              generation,
+              diagnosticAttempt,
+              HdrBackendDiagnosticPurpose.normal);
+          try {
+            await backend.prepareOutput(attemptPlan);
+          } catch (error, stack) {
+            _emitBackendCall(
+                HdrBackendDiagnosticMethod.prepareOutput,
+                HdrBackendDiagnosticBoundary.failed,
+                generation,
+                diagnosticAttempt,
+                HdrBackendDiagnosticPurpose.normal,
+                error: error,
+                stack: stack);
+            rethrow;
+          }
+          _emitBackendCall(
+              HdrBackendDiagnosticMethod.prepareOutput,
+              HdrBackendDiagnosticBoundary.returned,
+              generation,
+              diagnosticAttempt,
+              HdrBackendDiagnosticPurpose.normal);
           _check(generation);
           mark('output_prepared');
-          await backend.configure(attemptPlan);
+          _emitBackendCall(
+              HdrBackendDiagnosticMethod.configure,
+              HdrBackendDiagnosticBoundary.entered,
+              generation,
+              diagnosticAttempt,
+              HdrBackendDiagnosticPurpose.normal);
+          try {
+            await backend.configure(attemptPlan);
+          } catch (error, stack) {
+            _emitBackendCall(
+                HdrBackendDiagnosticMethod.configure,
+                HdrBackendDiagnosticBoundary.failed,
+                generation,
+                diagnosticAttempt,
+                HdrBackendDiagnosticPurpose.normal,
+                error: error,
+                stack: stack);
+            rethrow;
+          }
+          _emitBackendCall(
+              HdrBackendDiagnosticMethod.configure,
+              HdrBackendDiagnosticBoundary.returned,
+              generation,
+              diagnosticAttempt,
+              HdrBackendDiagnosticPurpose.normal);
           _check(generation);
           mark('configured');
-          await backend.waitForOutput(attemptPlan).timeout(outputTimeout);
+          _emitBackendCall(
+              HdrBackendDiagnosticMethod.waitForOutput,
+              HdrBackendDiagnosticBoundary.entered,
+              generation,
+              diagnosticAttempt,
+              HdrBackendDiagnosticPurpose.normal);
+          try {
+            await backend.waitForOutput(attemptPlan).timeout(outputTimeout);
+          } catch (error, stack) {
+            _emitBackendCall(
+                HdrBackendDiagnosticMethod.waitForOutput,
+                HdrBackendDiagnosticBoundary.failed,
+                generation,
+                diagnosticAttempt,
+                HdrBackendDiagnosticPurpose.normal,
+                error: error,
+                stack: stack);
+            rethrow;
+          }
+          _emitBackendCall(
+              HdrBackendDiagnosticMethod.waitForOutput,
+              HdrBackendDiagnosticBoundary.returned,
+              generation,
+              diagnosticAttempt,
+              HdrBackendDiagnosticPurpose.normal);
           _check(generation);
           mark('output_ready');
-          await backend.open(attemptPlan, start: currentStart, play: play);
+          _emitBackendCall(
+              HdrBackendDiagnosticMethod.open,
+              HdrBackendDiagnosticBoundary.entered,
+              generation,
+              diagnosticAttempt,
+              HdrBackendDiagnosticPurpose.normal);
+          try {
+            await backend.open(attemptPlan, start: currentStart, play: play);
+          } catch (error, stack) {
+            _emitBackendCall(
+                HdrBackendDiagnosticMethod.open,
+                HdrBackendDiagnosticBoundary.failed,
+                generation,
+                diagnosticAttempt,
+                HdrBackendDiagnosticPurpose.normal,
+                error: error,
+                stack: stack);
+            rethrow;
+          }
+          _emitBackendCall(
+              HdrBackendDiagnosticMethod.open,
+              HdrBackendDiagnosticBoundary.returned,
+              generation,
+              diagnosticAttempt,
+              HdrBackendDiagnosticPurpose.normal);
           _check(generation);
           mark('media_opened');
-          final facts = await backend.reviewFacts(attemptPlan);
+          late final HdrReviewFacts facts;
+          _emitBackendCall(
+              HdrBackendDiagnosticMethod.reviewFacts,
+              HdrBackendDiagnosticBoundary.entered,
+              generation,
+              diagnosticAttempt,
+              HdrBackendDiagnosticPurpose.normal);
+          try {
+            facts = await backend.reviewFacts(attemptPlan);
+          } catch (error, stack) {
+            _emitBackendCall(
+                HdrBackendDiagnosticMethod.reviewFacts,
+                HdrBackendDiagnosticBoundary.failed,
+                generation,
+                diagnosticAttempt,
+                HdrBackendDiagnosticPurpose.normal,
+                error: error,
+                stack: stack);
+            rethrow;
+          }
+          _emitBackendCall(
+              HdrBackendDiagnosticMethod.reviewFacts,
+              HdrBackendDiagnosticBoundary.returned,
+              generation,
+              diagnosticAttempt,
+              HdrBackendDiagnosticPurpose.normal);
           _check(generation);
           mark('review_facts');
           final decide = review;
@@ -231,6 +597,7 @@ class HdrOpenCoordinator<R, P> {
             // One review-driven in-place reopen per open (plan 1.4 step 8).
             rebuilt = true;
             attemptPlan = decision.nextPlan as P;
+            diagnosticAttempt = _diagnosticAttempt(generation, attemptPlan);
             currentStart = decision.position;
             mark('review_reopen');
             continue;
@@ -257,10 +624,59 @@ class HdrOpenCoordinator<R, P> {
           if (!switching || error is OpenSuperseded || _invalid(generation)) {
             if (switching) {
               try {
-                await backend.stop();
-                await backend.resetOwnedConfiguration();
+                _emitBackendCall(
+                    HdrBackendDiagnosticMethod.stop,
+                    HdrBackendDiagnosticBoundary.entered,
+                    generation,
+                    diagnosticAttempt,
+                    HdrBackendDiagnosticPurpose.rollback);
+                try {
+                  await backend.stop();
+                } catch (error, stack) {
+                  _emitBackendCall(
+                      HdrBackendDiagnosticMethod.stop,
+                      HdrBackendDiagnosticBoundary.failed,
+                      generation,
+                      diagnosticAttempt,
+                      HdrBackendDiagnosticPurpose.rollback,
+                      error: error,
+                      stack: stack);
+                  rethrow;
+                }
+                _emitBackendCall(
+                    HdrBackendDiagnosticMethod.stop,
+                    HdrBackendDiagnosticBoundary.returned,
+                    generation,
+                    diagnosticAttempt,
+                    HdrBackendDiagnosticPurpose.rollback);
+                _emitBackendCall(
+                    HdrBackendDiagnosticMethod.resetOwnedConfiguration,
+                    HdrBackendDiagnosticBoundary.entered,
+                    generation,
+                    diagnosticAttempt,
+                    HdrBackendDiagnosticPurpose.rollback);
+                try {
+                  await backend.resetOwnedConfiguration();
+                } catch (error, stack) {
+                  _emitBackendCall(
+                      HdrBackendDiagnosticMethod.resetOwnedConfiguration,
+                      HdrBackendDiagnosticBoundary.failed,
+                      generation,
+                      diagnosticAttempt,
+                      HdrBackendDiagnosticPurpose.rollback,
+                      error: error,
+                      stack: stack);
+                  rethrow;
+                }
+                _emitBackendCall(
+                    HdrBackendDiagnosticMethod.resetOwnedConfiguration,
+                    HdrBackendDiagnosticBoundary.returned,
+                    generation,
+                    diagnosticAttempt,
+                    HdrBackendDiagnosticPurpose.rollback);
                 _pendingRollback = false;
                 _activeMedia = false;
+                _diagnosticOwner = null;
               } catch (_) {
                 // Preserve the failure that caused this transaction to abort.
               }
@@ -275,10 +691,59 @@ class HdrOpenCoordinator<R, P> {
               next = await hook(attemptPlan, error);
             } catch (_) {
               try {
-                await backend.stop();
-                await backend.resetOwnedConfiguration();
+                _emitBackendCall(
+                    HdrBackendDiagnosticMethod.stop,
+                    HdrBackendDiagnosticBoundary.entered,
+                    generation,
+                    diagnosticAttempt,
+                    HdrBackendDiagnosticPurpose.rollback);
+                try {
+                  await backend.stop();
+                } catch (error, stack) {
+                  _emitBackendCall(
+                      HdrBackendDiagnosticMethod.stop,
+                      HdrBackendDiagnosticBoundary.failed,
+                      generation,
+                      diagnosticAttempt,
+                      HdrBackendDiagnosticPurpose.rollback,
+                      error: error,
+                      stack: stack);
+                  rethrow;
+                }
+                _emitBackendCall(
+                    HdrBackendDiagnosticMethod.stop,
+                    HdrBackendDiagnosticBoundary.returned,
+                    generation,
+                    diagnosticAttempt,
+                    HdrBackendDiagnosticPurpose.rollback);
+                _emitBackendCall(
+                    HdrBackendDiagnosticMethod.resetOwnedConfiguration,
+                    HdrBackendDiagnosticBoundary.entered,
+                    generation,
+                    diagnosticAttempt,
+                    HdrBackendDiagnosticPurpose.rollback);
+                try {
+                  await backend.resetOwnedConfiguration();
+                } catch (error, stack) {
+                  _emitBackendCall(
+                      HdrBackendDiagnosticMethod.resetOwnedConfiguration,
+                      HdrBackendDiagnosticBoundary.failed,
+                      generation,
+                      diagnosticAttempt,
+                      HdrBackendDiagnosticPurpose.rollback,
+                      error: error,
+                      stack: stack);
+                  rethrow;
+                }
+                _emitBackendCall(
+                    HdrBackendDiagnosticMethod.resetOwnedConfiguration,
+                    HdrBackendDiagnosticBoundary.returned,
+                    generation,
+                    diagnosticAttempt,
+                    HdrBackendDiagnosticPurpose.rollback);
                 _pendingRollback = false;
                 _activeMedia = false;
+                _diagnosticOwner = null;
               } catch (_) {
                 // Preserve the failure that caused this transaction to abort.
               }
@@ -289,6 +754,7 @@ class HdrOpenCoordinator<R, P> {
           if (next != null && !_invalid(generation)) {
             retriesUsed++;
             attemptPlan = next;
+            diagnosticAttempt = _diagnosticAttempt(generation, attemptPlan);
             currentStart = start;
             mark('retry_planned');
             // Re-enter the transaction: the loop-top rollback and the stop/
@@ -297,10 +763,59 @@ class HdrOpenCoordinator<R, P> {
             continue;
           }
           try {
-            await backend.stop();
-            await backend.resetOwnedConfiguration();
+            _emitBackendCall(
+                HdrBackendDiagnosticMethod.stop,
+                HdrBackendDiagnosticBoundary.entered,
+                generation,
+                diagnosticAttempt,
+                HdrBackendDiagnosticPurpose.rollback);
+            try {
+              await backend.stop();
+            } catch (error, stack) {
+              _emitBackendCall(
+                  HdrBackendDiagnosticMethod.stop,
+                  HdrBackendDiagnosticBoundary.failed,
+                  generation,
+                  diagnosticAttempt,
+                  HdrBackendDiagnosticPurpose.rollback,
+                  error: error,
+                  stack: stack);
+              rethrow;
+            }
+            _emitBackendCall(
+                HdrBackendDiagnosticMethod.stop,
+                HdrBackendDiagnosticBoundary.returned,
+                generation,
+                diagnosticAttempt,
+                HdrBackendDiagnosticPurpose.rollback);
+            _emitBackendCall(
+                HdrBackendDiagnosticMethod.resetOwnedConfiguration,
+                HdrBackendDiagnosticBoundary.entered,
+                generation,
+                diagnosticAttempt,
+                HdrBackendDiagnosticPurpose.rollback);
+            try {
+              await backend.resetOwnedConfiguration();
+            } catch (error, stack) {
+              _emitBackendCall(
+                  HdrBackendDiagnosticMethod.resetOwnedConfiguration,
+                  HdrBackendDiagnosticBoundary.failed,
+                  generation,
+                  diagnosticAttempt,
+                  HdrBackendDiagnosticPurpose.rollback,
+                  error: error,
+                  stack: stack);
+              rethrow;
+            }
+            _emitBackendCall(
+                HdrBackendDiagnosticMethod.resetOwnedConfiguration,
+                HdrBackendDiagnosticBoundary.returned,
+                generation,
+                diagnosticAttempt,
+                HdrBackendDiagnosticPurpose.rollback);
             _pendingRollback = false;
             _activeMedia = false;
+            _diagnosticOwner = null;
           } catch (_) {
             // Preserve the failure that caused this transaction to abort.
           }
@@ -355,10 +870,59 @@ class HdrOpenCoordinator<R, P> {
     await Future.wait(_preparations.toList());
     await _tail;
     if (_activeMedia || _pendingRollback) {
-      await backend.stop();
-      await backend.resetOwnedConfiguration();
+      _emitBackendCall(
+          HdrBackendDiagnosticMethod.stop,
+          HdrBackendDiagnosticBoundary.entered,
+          _generation,
+          null,
+          HdrBackendDiagnosticPurpose.disposal);
+      try {
+        await backend.stop();
+      } catch (error, stack) {
+        _emitBackendCall(
+            HdrBackendDiagnosticMethod.stop,
+            HdrBackendDiagnosticBoundary.failed,
+            _generation,
+            null,
+            HdrBackendDiagnosticPurpose.disposal,
+            error: error,
+            stack: stack);
+        rethrow;
+      }
+      _emitBackendCall(
+          HdrBackendDiagnosticMethod.stop,
+          HdrBackendDiagnosticBoundary.returned,
+          _generation,
+          null,
+          HdrBackendDiagnosticPurpose.disposal);
+      _emitBackendCall(
+          HdrBackendDiagnosticMethod.resetOwnedConfiguration,
+          HdrBackendDiagnosticBoundary.entered,
+          _generation,
+          null,
+          HdrBackendDiagnosticPurpose.disposal);
+      try {
+        await backend.resetOwnedConfiguration();
+      } catch (error, stack) {
+        _emitBackendCall(
+            HdrBackendDiagnosticMethod.resetOwnedConfiguration,
+            HdrBackendDiagnosticBoundary.failed,
+            _generation,
+            null,
+            HdrBackendDiagnosticPurpose.disposal,
+            error: error,
+            stack: stack);
+        rethrow;
+      }
+      _emitBackendCall(
+          HdrBackendDiagnosticMethod.resetOwnedConfiguration,
+          HdrBackendDiagnosticBoundary.returned,
+          _generation,
+          null,
+          HdrBackendDiagnosticPurpose.disposal);
       _pendingRollback = false;
       _activeMedia = false;
+      _diagnosticOwner = null;
     }
   }
 }

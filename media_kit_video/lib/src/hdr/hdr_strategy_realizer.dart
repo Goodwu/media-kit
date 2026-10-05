@@ -14,8 +14,7 @@ import 'hdr_strategy.dart';
 class HdrStrategyRealization {
   const HdrStrategyRealization.route(this.route) : infeasibleReason = null;
 
-  const HdrStrategyRealization.infeasible(this.infeasibleReason)
-      : route = null;
+  const HdrStrategyRealization.infeasible(this.infeasibleReason) : route = null;
 
   final HdrRoute? route;
 
@@ -50,10 +49,7 @@ class HdrStrategyRealizer {
   }) {
     switch (strategy) {
       case HdrStrategy.nativeDolbyVision:
-        // R7: reserved; no native Dolby Vision presentation path exists in
-        // Phase 1 and the maturity table marks it unsupported.
-        return const HdrStrategyRealization.infeasible(
-            HdrDegradeReason.unsupportedStrategy);
+        return _nativeDolbyVision(source, sourceClass, capabilities);
       case HdrStrategy.baseLayerDirect:
         return _baseLayerDirect(source, sourceClass, capabilities);
       case HdrStrategy.baseLayerConvert:
@@ -65,6 +61,67 @@ class HdrStrategyRealizer {
       case HdrStrategy.sdrDirect:
         return _sdrDirect(source, sourceClass, capabilities);
     }
+  }
+
+  /// Native Dolby Vision P5 decode through MediaCodec and the DV bridge.
+  /// This bypasses libplacebo's P5 rescale pipeline while keeping the RPU in
+  /// the elementary stream for the native Dolby Vision decoder.
+  static HdrStrategyRealization _nativeDolbyVision(
+    HdrSourceDescriptor source,
+    HdrSourceClass cls,
+    HdrCapabilities capabilities,
+  ) {
+    if (cls != HdrSourceClass.dvP5 ||
+        source.codec != 'hevc' ||
+        source.dynamicMetadata != HdrDynamicMetadata.dolbyVision ||
+        source.dvProfile != 5 ||
+        source.dvCompatibilityId != 0 ||
+        source.enhancementLayer != false) {
+      return const HdrStrategyRealization.infeasible(
+          HdrDegradeReason.unsupportedStrategy);
+    }
+    final types = capabilities.displayHdrTypes;
+    if (types == null) {
+      return const HdrStrategyRealization.infeasible(
+          HdrDegradeReason.noDisplayCapabilityReport);
+    }
+    if (!types.contains(1)) {
+      return const HdrStrategyRealization.infeasible(
+          HdrDegradeReason.displayLacksTransfer);
+    }
+    const int dolbyVisionProfile32 = 32;
+    final hasDolbyVisionDecoder = capabilities.dolbyVisionDecoders.any(
+      (decoder) =>
+          decoder.mimeType == 'video/dolby-vision' &&
+          decoder.hardwareAcceleration &&
+          decoder.profiles.contains(dolbyVisionProfile32),
+    );
+    if (!hasDolbyVisionDecoder || capabilities.nativeDvBridgeApi != 1) {
+      return const HdrStrategyRealization.infeasible(
+          HdrDegradeReason.nativeDvUnavailable);
+    }
+    return HdrStrategyRealization.route(
+      HdrRoute(
+        strategy: HdrStrategy.nativeDolbyVision,
+        presentation: HdrPresentation.nativeDolbyVision,
+        outputTransfer: HdrOutputTransfer.dolbyVision,
+        appliesDynamicMetadata: true,
+        topology: HdrTopology.platformView,
+        vo: 'mediacodec_embed',
+        hwdec: 'mediacodec',
+        vdLavcOptions: 'native_dv=1',
+        mediacodecEmbedRenderMode: 'timed',
+        targetPrim: null,
+        targetTrc: null,
+        surfaceTransfer: null,
+        stripDvRpu: false,
+        dependencies: const <String>{
+          HdrRouteDependency.nativeDolbyVision,
+          HdrRouteDependency.hwdecMediacodec,
+          HdrRouteDependency.topologyPlatformView,
+        },
+      ),
+    );
   }
 
   /// `mediacodec_embed` direct output at the base-layer transfer function.
@@ -127,6 +184,10 @@ class HdrStrategyRealizer {
       return const HdrStrategyRealization.infeasible(
           HdrDegradeReason.unsupportedStrategy);
     }
+    if (_gpuHdrDataSpaceUnavailable(capabilities)) {
+      return const HdrStrategyRealization.infeasible(
+          HdrDegradeReason.gpuHdrDataSpaceUnavailable);
+    }
     final Set<int>? types = capabilities.displayHdrTypes;
     if (types == null) {
       return const HdrStrategyRealization.infeasible(
@@ -154,8 +215,7 @@ class HdrStrategyRealizer {
         targetPrim: 'bt.2020',
         targetTrc: trc,
         surfaceTransfer: trc,
-        stripDvRpu:
-            source.dynamicMetadata == HdrDynamicMetadata.dolbyVision,
+        stripDvRpu: source.dynamicMetadata == HdrDynamicMetadata.dolbyVision,
         dependencies: <String>{
           HdrRouteDependency.hwdecMediacodec,
           HdrRouteDependency.topologyPlatformView,
@@ -191,6 +251,10 @@ class HdrStrategyRealizer {
         return const HdrStrategyRealization.infeasible(
             HdrDegradeReason.unsupportedStrategy);
       }
+    }
+    if (_gpuHdrDataSpaceUnavailable(capabilities)) {
+      return const HdrStrategyRealization.infeasible(
+          HdrDegradeReason.gpuHdrDataSpaceUnavailable);
     }
     final HdrDegradeReason? reason =
         _displayTransferCheck(HdrOutputTransfer.pq, capabilities);
@@ -233,6 +297,7 @@ class HdrStrategyRealizer {
       return const HdrStrategyRealization.infeasible(
           HdrDegradeReason.p5PipelineUnavailable);
     }
+    final bool useMediacodecCopy = _requiresMediacodecCopy(capabilities);
     return HdrStrategyRealization.route(
       HdrRoute(
         strategy: HdrStrategy.toneMapSdr,
@@ -241,13 +306,15 @@ class HdrStrategyRealizer {
         appliesDynamicMetadata: cls == HdrSourceClass.dvP5,
         topology: HdrTopology.texture,
         vo: 'gpu-next',
-        hwdec: 'mediacodec',
+        hwdec: useMediacodecCopy ? 'mediacodec-copy' : 'mediacodec',
         targetPrim: 'bt.709',
         targetTrc: 'bt.1886',
         surfaceTransfer: null,
         stripDvRpu: cls == HdrSourceClass.dvP84,
-        dependencies: const <String>{
-          HdrRouteDependency.hwdecMediacodec,
+        dependencies: <String>{
+          useMediacodecCopy
+              ? HdrRouteDependency.hwdecMediacodecCopy
+              : HdrRouteDependency.hwdecMediacodec,
         },
       ),
     );
@@ -266,6 +333,7 @@ class HdrStrategyRealizer {
       return const HdrStrategyRealization.infeasible(
           HdrDegradeReason.unsupportedStrategy);
     }
+    final bool useMediacodecCopy = _requiresMediacodecCopy(capabilities);
     return HdrStrategyRealization.route(
       HdrRoute(
         strategy: HdrStrategy.sdrDirect,
@@ -274,14 +342,16 @@ class HdrStrategyRealizer {
         appliesDynamicMetadata: false,
         topology: HdrTopology.texture,
         vo: 'gpu-next',
-        hwdec: 'mediacodec',
+        hwdec: useMediacodecCopy ? 'mediacodec-copy' : 'mediacodec',
         targetPrim: null,
         targetTrc: null,
         surfaceTransfer: null,
         // P8.2 strips its RPU; plain SDR carries none.
         stripDvRpu: source.dynamicMetadata == HdrDynamicMetadata.dolbyVision,
-        dependencies: const <String>{
-          HdrRouteDependency.hwdecMediacodec,
+        dependencies: <String>{
+          useMediacodecCopy
+              ? HdrRouteDependency.hwdecMediacodecCopy
+              : HdrRouteDependency.hwdecMediacodec,
         },
       ),
     );
@@ -324,12 +394,34 @@ class HdrStrategyRealizer {
     if (types == null) {
       return HdrDegradeReason.noDisplayCapabilityReport;
     }
-    final int required = transfer == HdrOutputTransfer.pq
-        ? HdrOutputPolicy.displayHdrTypeHdr10
-        : HdrOutputPolicy.displayHdrTypeHlg;
+    final int? required;
+    switch (transfer) {
+      case HdrOutputTransfer.pq:
+        required = HdrOutputPolicy.displayHdrTypeHdr10;
+        break;
+      case HdrOutputTransfer.hlg:
+        required = HdrOutputPolicy.displayHdrTypeHlg;
+        break;
+      case HdrOutputTransfer.dolbyVision:
+        required = 1;
+        break;
+      case HdrOutputTransfer.sdr:
+        required = null;
+        break;
+    }
+    if (required == null) return null;
     if (!types.contains(required)) {
       return HdrDegradeReason.displayLacksTransfer;
     }
     return null;
   }
+
+  /// API 24/25 cannot import decoder buffers through the public GPU path used
+  /// by the Texture strategies. API 26/27 can import buffers, while public
+  /// HDR dataspace application is available from API 28.
+  static bool _requiresMediacodecCopy(HdrCapabilities capabilities) =>
+      capabilities.sdkInt > 0 && capabilities.sdkInt < 26;
+
+  static bool _gpuHdrDataSpaceUnavailable(HdrCapabilities capabilities) =>
+      capabilities.sdkInt > 0 && capabilities.sdkInt < 28;
 }

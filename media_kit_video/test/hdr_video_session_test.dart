@@ -46,14 +46,20 @@ void main() {
     enhancementLayer: false,
   );
   const undescribed = HdrSourceDescriptor();
+  const sdr = HdrSourceDescriptor(
+    transfer: 'bt.1886',
+    primaries: 'bt.709',
+    enhancementLayer: false,
+  );
 
   HdrCapabilities caps({
     Set<int>? types = const {1, 2, 3},
     bool p5Pipeline = true,
     bool ext = true,
+    int sdkInt = 29,
   }) =>
       HdrCapabilities(
-        sdkInt: 29,
+        sdkInt: sdkInt,
         displayHdrTypes: types,
         hevcDecoders: const <HdrDecoderInfo>[],
         dolbyVisionDecoders: const <HdrDecoderInfo>[],
@@ -365,6 +371,66 @@ void main() {
     await session.dispose();
   });
 
+  test('API 24 copy route accepts matching mediacodec-copy without reopen',
+      () async {
+    final backend = FakeBackend()
+      ..factsForOpen.add(const HdrReviewFacts(
+        hwdecCurrent: 'mediacodec-copy',
+        path: 'test://media',
+      ));
+    final session = makeSession(
+      backend: backend,
+      capabilities: caps(sdkInt: 24),
+    );
+    final events = <HdrOutputEvent>[];
+    session.events.listen(events.add);
+
+    await session.open(media, hint: sdr);
+    await pumpEventQueue();
+
+    expect(backend.opened, hasLength(1));
+    expect(backend.opened.single.route.hwdec, 'mediacodec-copy');
+    expect(session.report.value.hwdecCurrent, 'mediacodec-copy');
+    expect(session.report.value.degradeReason, isNull);
+    expect(events.whereType<HdrDegradedEvent>(), isEmpty);
+    await session.dispose();
+  });
+
+  test('API 24 copy mismatch excludes copy dependency and reopens at most once',
+      () async {
+    final backend = FakeBackend()
+      ..factsForOpen.addAll(const <HdrReviewFacts>[
+        HdrReviewFacts(hwdecCurrent: 'no', path: 'test://media'),
+        HdrReviewFacts(hwdecCurrent: 'no', path: 'test://media'),
+      ]);
+    final session = makeSession(
+      backend: backend,
+      capabilities: caps(sdkInt: 24),
+      position: const Duration(seconds: 3),
+    );
+    final events = <HdrOutputEvent>[];
+    session.events.listen(events.add);
+
+    await session.open(media, hint: sdr);
+    await pumpEventQueue();
+
+    expect(backend.opened, hasLength(2));
+    expect(backend.opened.first.route.hwdec, 'mediacodec-copy');
+    expect(backend.opened.last.route.hwdec, 'mediacodec-copy');
+    expect(backend.opened.last.start, const Duration(seconds: 3));
+    expect(
+      backend.preparedPlans.last.excluded,
+      containsPair(
+        HdrRouteDependency.hwdecMediacodecCopy,
+        HdrDegradeReason.hwdecMismatch,
+      ),
+    );
+    expect(session.report.value.degradeReason, HdrDegradeReason.hwdecMismatch);
+    expect(session.report.value.diagnostic, contains('mismatch persisted'));
+    expect(events.whereType<HdrDegradedEvent>(), hasLength(1));
+    await session.dispose();
+  });
+
   test('missing P5 pipeline publishes Error and never opens the media',
       () async {
     final backend = FakeBackend();
@@ -556,6 +622,7 @@ class FakeOpened {
 class FakeBackend implements HdrOpenBackend<HdrOpenPlan> {
   final calls = <String>[];
   final opened = <FakeOpened>[];
+  final preparedPlans = <HdrOpenPlan>[];
 
   /// Facts returned by [reviewFacts], one entry per attempt (last repeats).
   final factsForOpen = <HdrReviewFacts>[];
@@ -595,6 +662,7 @@ class FakeBackend implements HdrOpenBackend<HdrOpenPlan> {
   @override
   Future<void> prepareOutput(HdrOpenPlan plan) async {
     calls.add('prepare:${_tag(plan)}');
+    preparedPlans.add(plan);
   }
 
   @override

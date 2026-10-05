@@ -18,7 +18,7 @@ void main() {
       expect(descriptor.dvProfile, 5);
       expect(descriptor.dvCompatibilityId, 0);
       expect(descriptor.dynamicMetadata, HdrDynamicMetadata.dolbyVision);
-      expect(descriptor.enhancementLayer, isFalse);
+      expect(descriptor.enhancementLayer, isNull);
       expect(descriptor.transfer, 'pq');
       expect(descriptor.primaries, 'bt.2020');
       expect(descriptor.kind, HdrMediaKind.dolbyVisionP5);
@@ -276,6 +276,13 @@ void main() {
       );
       expect(p5.enhancementLayer, isTrue);
 
+      final p5SingleLayer = classifier.classify(
+        videoParams: const VideoParams(gamma: 'pq', primaries: 'bt.2020'),
+        dolbyVisionProfile: 5,
+        dvElPresent: false,
+      );
+      expect(p5SingleLayer.enhancementLayer, isFalse);
+
       final p8 = classifier.classify(
         videoParams: const VideoParams(gamma: 'hlg', primaries: 'bt.2020'),
         dolbyVisionProfile: 8,
@@ -295,8 +302,7 @@ void main() {
       expect(descriptor.enhancementLayer, isTrue);
     });
 
-    test('no profile + HDR Vivid fact true → hdrVivid metadata and class',
-        () {
+    test('no profile + HDR Vivid fact true → hdrVivid metadata and class', () {
       final descriptor = classifier.classify(
         videoParams: const VideoParams(gamma: 'pq', primaries: 'bt.2020'),
         hdrVivid: true,
@@ -405,12 +411,13 @@ void main() {
         kindOf(const HdrSourceDescriptor(transfer: 'pq', primaries: 'bt.2020')),
         HdrMediaKind.hdr10,
       );
-      expect(kindOf(const HdrSourceDescriptor(transfer: 'hlg')),
-          HdrMediaKind.hlg);
+      expect(
+          kindOf(const HdrSourceDescriptor(transfer: 'hlg')), HdrMediaKind.hlg);
       expect(kindOf(const HdrSourceDescriptor()), HdrMediaKind.sdr);
     });
 
-    test('profile 8 with unknown compatibility id falls back to the base '
+    test(
+        'profile 8 with unknown compatibility id falls back to the base '
         'layer transfer', () {
       expect(
         const HdrSourceDescriptor(

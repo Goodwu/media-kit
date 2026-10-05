@@ -5,6 +5,7 @@ import 'package:media_kit_video/src/hdr/hdr_route.dart';
 import 'package:media_kit_video/src/hdr/hdr_route_planner.dart';
 import 'package:media_kit_video/src/hdr/hdr_source_descriptor.dart';
 import 'package:media_kit_video/src/hdr/hdr_strategy.dart';
+import 'package:media_kit_video/src/hdr/hdr_strategy_realizer.dart';
 
 const HdrDataSpaceExtInfo extApplicable =
     HdrDataSpaceExtInfo(id: 'lya-pq', applicable: true);
@@ -22,6 +23,19 @@ const HdrDecoderInfo lyHevcDecoder = HdrDecoderInfo(
   frameRateRange: <int>[8, 240],
   supports4K: true,
   max4KFps: 59.94,
+);
+
+const HdrDecoderInfo nativeDvDecoder = HdrDecoderInfo(
+  name: 'OMX.vendor.video.decoder.dolby-vision',
+  mimeType: 'video/dolby-vision',
+  hardwareAcceleration: true,
+  profiles: <int>[32],
+  main10: null,
+  widthRange: <int>[16, 4096],
+  heightRange: <int>[16, 4096],
+  frameRateRange: <int>[8, 120],
+  supports4K: true,
+  max4KFps: 60,
 );
 
 /// One descriptor per source class. Each entry derives back to its key
@@ -91,13 +105,16 @@ HdrCapabilities caps({
   Set<int>? displayHdrTypes = const <int>{2, 3},
   bool p5 = true,
   HdrDataSpaceExtInfo? ext,
+  List<HdrDecoderInfo> dvDecoders = const <HdrDecoderInfo>[],
+  int nativeDvBridgeApi = 0,
 }) {
   return HdrCapabilities(
     sdkInt: sdkInt,
     displayHdrTypes: displayHdrTypes,
     hevcDecoders: const <HdrDecoderInfo>[lyHevcDecoder],
-    dolbyVisionDecoders: const <HdrDecoderInfo>[],
+    dolbyVisionDecoders: dvDecoders,
     p5PipelineAvailable: p5,
+    nativeDvBridgeApi: nativeDvBridgeApi,
     dataSpaceBridgeLoaded: true,
     dataSpaceExt: ext,
   );
@@ -227,6 +244,165 @@ void main() {
     extNotApplicable,
   ];
 
+  group('native Dolby Vision P5 realizer', () {
+    const HdrSourceDescriptor eligibleP5 = HdrSourceDescriptor(
+      codec: 'hevc',
+      // Unknown transfer is intentional: output must remain explicitly DV,
+      // never be inferred as SDR from an unavailable base-layer transfer.
+      transfer: 'transfer3',
+      dynamicMetadata: HdrDynamicMetadata.dolbyVision,
+      dvProfile: 5,
+      dvCompatibilityId: 0,
+      enhancementLayer: false,
+    );
+
+    HdrStrategyRealization realize({
+      HdrSourceDescriptor source = eligibleP5,
+      HdrSourceClass sourceClass = HdrSourceClass.dvP5,
+      HdrCapabilities? capabilities,
+    }) =>
+        HdrStrategyRealizer.realize(
+          HdrStrategy.nativeDolbyVision,
+          source: source,
+          sourceClass: sourceClass,
+          capabilities: capabilities ??
+              caps(
+                displayHdrTypes: const <int>{1},
+                p5: false,
+                dvDecoders: const <HdrDecoderInfo>[nativeDvDecoder],
+                nativeDvBridgeApi: 1,
+              ),
+        );
+
+    HdrSourceDescriptor source({
+      String codec = 'hevc',
+      HdrDynamicMetadata metadata = HdrDynamicMetadata.dolbyVision,
+      int? profile = 5,
+      int? compatibilityId = 0,
+      bool? enhancementLayer = false,
+    }) =>
+        HdrSourceDescriptor(
+          codec: codec,
+          transfer: 'transfer3',
+          dynamicMetadata: metadata,
+          dvProfile: profile,
+          dvCompatibilityId: compatibilityId,
+          enhancementLayer: enhancementLayer,
+        );
+
+    test('realizes only native route and does not need GPU P5 pipeline', () {
+      final HdrRoute route = realize().route!;
+      expect(route.strategy, HdrStrategy.nativeDolbyVision);
+      expect(route.presentation, HdrPresentation.nativeDolbyVision);
+      expect(route.outputTransfer, HdrOutputTransfer.dolbyVision);
+      expect(route.topology, HdrTopology.platformView);
+      expect(route.vo, 'mediacodec_embed');
+      expect(route.hwdec, 'mediacodec');
+      expect(route.vdLavcOptions, 'native_dv=1');
+      expect(route.mediacodecEmbedRenderMode, 'timed');
+      expect(route.stripDvRpu, isFalse);
+      expect(route.appliesDynamicMetadata, isTrue);
+      expect(route.dependencies, <String>{
+        HdrRouteDependency.nativeDolbyVision,
+        HdrRouteDependency.hwdecMediacodec,
+        HdrRouteDependency.topologyPlatformView,
+      });
+    });
+
+    test('rejects unknown or non-single-layer source facts', () {
+      final List<HdrSourceDescriptor> invalidSources = <HdrSourceDescriptor>[
+        source(codec: 'h264'),
+        source(metadata: HdrDynamicMetadata.none),
+        source(profile: 8),
+        source(compatibilityId: null),
+        source(compatibilityId: 1),
+        source(enhancementLayer: null),
+        source(enhancementLayer: true),
+      ];
+      for (final HdrSourceDescriptor invalid in invalidSources) {
+        expect(realize(source: invalid).infeasibleReason,
+            HdrDegradeReason.unsupportedStrategy,
+            reason: '$invalid');
+      }
+      expect(
+        realize(sourceClass: HdrSourceClass.dvP84).infeasibleReason,
+        HdrDegradeReason.unsupportedStrategy,
+      );
+    });
+
+    test('requires DV display, hardware profile 32 decoder and bridge v1', () {
+      expect(
+        realize(capabilities: caps(displayHdrTypes: null)).infeasibleReason,
+        HdrDegradeReason.noDisplayCapabilityReport,
+      );
+      expect(
+        realize(capabilities: caps(displayHdrTypes: const <int>{2, 3}))
+            .infeasibleReason,
+        HdrDegradeReason.displayLacksTransfer,
+      );
+      const HdrDecoderInfo softOrWrong = HdrDecoderInfo(
+        name: 'wrong',
+        mimeType: 'video/hevc',
+        hardwareAcceleration: false,
+        profiles: <int>[31],
+        main10: null,
+        widthRange: null,
+        heightRange: null,
+        frameRateRange: null,
+        supports4K: false,
+        max4KFps: null,
+      );
+      for (final List<HdrDecoderInfo> decoders in <List<HdrDecoderInfo>>[
+        const <HdrDecoderInfo>[],
+        const <HdrDecoderInfo>[softOrWrong],
+      ]) {
+        expect(
+          realize(
+            capabilities: caps(
+              displayHdrTypes: const <int>{1},
+              dvDecoders: decoders,
+              nativeDvBridgeApi: 1,
+            ),
+          ).infeasibleReason,
+          HdrDegradeReason.nativeDvUnavailable,
+        );
+      }
+      expect(
+        realize(
+          capabilities: caps(
+            displayHdrTypes: const <int>{1},
+            dvDecoders: const <HdrDecoderInfo>[nativeDvDecoder],
+          ),
+        ).infeasibleReason,
+        HdrDegradeReason.nativeDvUnavailable,
+      );
+    });
+
+    test('planner still refuses native DV while maturity is unsupported', () {
+      final HdrRoutePrediction prediction = caps(
+        displayHdrTypes: const <int>{1},
+        dvDecoders: const <HdrDecoderInfo>[nativeDvDecoder],
+        nativeDvBridgeApi: 1,
+      ).predict(
+        eligibleP5,
+        policy: const HdrRoutingPolicy(
+          preferences: <HdrSourceClass, List<HdrStrategy>>{
+            HdrSourceClass.dvP5: <HdrStrategy>[
+              HdrStrategy.nativeDolbyVision,
+              HdrStrategy.toneMapSdr,
+            ],
+          },
+          allowExperimental: true,
+        ),
+      );
+      expect(
+          prediction.candidates.first.strategy, HdrStrategy.nativeDolbyVision);
+      expect(prediction.candidates.first.skipReason,
+          HdrDegradeReason.unsupportedStrategy);
+      expect(prediction.selected.strategy, HdrStrategy.toneMapSdr);
+    });
+  });
+
   group('HdrSourceClass derivation', () {
     test('every matrix descriptor maps back to its intended class', () {
       sources.forEach((HdrSourceClass cls, HdrSourceDescriptor source) {
@@ -245,13 +421,12 @@ void main() {
       );
       expect(
         HdrSourceClass.of(const HdrSourceDescriptor(
-            transfer: 'hlg',
-            dynamicMetadata: HdrDynamicMetadata.hdrVivid)),
+            transfer: 'hlg', dynamicMetadata: HdrDynamicMetadata.hdrVivid)),
         HdrSourceClass.hdrVivid,
       );
       expect(
-        HdrSourceClass.of(const HdrSourceDescriptor(
-            transfer: 'pq', primaries: 'bt.2020')),
+        HdrSourceClass.of(
+            const HdrSourceDescriptor(transfer: 'pq', primaries: 'bt.2020')),
         HdrSourceClass.hdr10,
       );
       expect(
@@ -265,8 +440,7 @@ void main() {
         HdrSourceClass.sdr,
       );
       expect(
-        HdrSourceClass.of(
-            const HdrSourceDescriptor(transfer: 'bt.1886')),
+        HdrSourceClass.of(const HdrSourceDescriptor(transfer: 'bt.1886')),
         HdrSourceClass.sdr,
       );
     });
@@ -274,7 +448,9 @@ void main() {
     test('profile 8 with an unknown compatibility id follows the base layer',
         () {
       HdrSourceDescriptor p8(String? transfer) => HdrSourceDescriptor(
-          transfer: transfer, dynamicMetadata: HdrDynamicMetadata.dolbyVision, dvProfile: 8);
+          transfer: transfer,
+          dynamicMetadata: HdrDynamicMetadata.dolbyVision,
+          dvProfile: 8);
       expect(HdrSourceClass.of(p8('hlg')), HdrSourceClass.dvP84);
       expect(HdrSourceClass.of(p8('pq')), HdrSourceClass.dvP81);
       expect(HdrSourceClass.of(p8('bt.1886')), HdrSourceClass.dvP82);
@@ -301,10 +477,10 @@ void main() {
         for (final Set<int>? display in displays) {
           for (final bool p5 in const <bool>[true, false]) {
             for (final HdrDataSpaceExtInfo? ext in extensions) {
-              final HdrCapabilities at29 = caps(
-                  displayHdrTypes: display, p5: p5, ext: ext, sdkInt: 29);
-              final HdrCapabilities at34 = caps(
-                  displayHdrTypes: display, p5: p5, ext: ext, sdkInt: 34);
+              final HdrCapabilities at29 =
+                  caps(displayHdrTypes: display, p5: p5, ext: ext, sdkInt: 29);
+              final HdrCapabilities at34 =
+                  caps(displayHdrTypes: display, p5: p5, ext: ext, sdkInt: 34);
               final HdrRoutePrediction at29Plan =
                   HdrRoutePlanner.plan(source: source, capabilities: at29);
               final HdrRoutePrediction at34Plan =
@@ -343,7 +519,9 @@ void main() {
               final HdrRoutePrediction prediction = HdrRoutePlanner.plan(
                   source: source, capabilities: capabilities, policy: policy);
               checkInvariants(prediction,
-                  cls: cls, capabilities: capabilities, allowExperimental: true);
+                  cls: cls,
+                  capabilities: capabilities,
+                  allowExperimental: true);
               for (final HdrCandidate candidate in prediction.candidates) {
                 // The gate is open: nothing is skipped for maturity, and
                 // the reserved strategy is still refused.
@@ -352,7 +530,8 @@ void main() {
                     reason: '$candidate');
                 if (candidate.strategy == HdrStrategy.nativeDolbyVision) {
                   expect(candidate.skipReason,
-                      HdrDegradeReason.unsupportedStrategy, reason: '$candidate');
+                      HdrDegradeReason.unsupportedStrategy,
+                      reason: '$candidate');
                 }
               }
               combos++;
@@ -363,15 +542,160 @@ void main() {
       expect(combos, 462);
     });
 
+    test('API 24/25 use copy for texture routes and skip GPU HDR dataspace',
+        () {
+      const HdrRoutingPolicy convertFirst = HdrRoutingPolicy(
+        preferences: <HdrSourceClass, List<HdrStrategy>>{
+          HdrSourceClass.hdr10: <HdrStrategy>[
+            HdrStrategy.baseLayerConvert,
+            HdrStrategy.metadataReshape,
+            HdrStrategy.toneMapSdr,
+          ],
+        },
+        allowExperimental: true,
+      );
+      for (final int sdk in <int>[24, 25]) {
+        final HdrRoutePrediction sdr =
+            caps(sdkInt: sdk).predict(sources[HdrSourceClass.sdr]!);
+        expect(sdr.selected.route!.hwdec, 'mediacodec-copy');
+        expect(sdr.selected.route!.dependencies,
+            <String>{HdrRouteDependency.hwdecMediacodecCopy});
+
+        final HdrRoutePrediction hdr = caps(sdkInt: sdk).predict(
+          sources[HdrSourceClass.hdr10]!,
+          policy: convertFirst,
+        );
+        expect(hdr.candidates[0].skipReason,
+            HdrDegradeReason.gpuHdrDataSpaceUnavailable);
+        expect(hdr.candidates[1].skipReason,
+            HdrDegradeReason.gpuHdrDataSpaceUnavailable);
+        expect(hdr.selected.strategy, HdrStrategy.toneMapSdr);
+        expect(hdr.selected.route!.hwdec, 'mediacodec-copy');
+
+        // Decoder-composited output does not rely on the unavailable GPU
+        // dataspace API and remains a candidate on these Android versions.
+        final HdrRoutePrediction direct =
+            caps(sdkInt: sdk).predict(sources[HdrSourceClass.hdr10]!);
+        expect(direct.selected.strategy, HdrStrategy.baseLayerDirect);
+        expect(direct.selected.route!.vo, 'mediacodec_embed');
+      }
+    });
+
+    test('API 26/27 keep MediaCodec texture routes and skip GPU HDR dataspace',
+        () {
+      const HdrRoutingPolicy convertFirst = HdrRoutingPolicy(
+        preferences: <HdrSourceClass, List<HdrStrategy>>{
+          HdrSourceClass.hdr10: <HdrStrategy>[
+            HdrStrategy.baseLayerConvert,
+            HdrStrategy.metadataReshape,
+            HdrStrategy.toneMapSdr,
+          ],
+        },
+        allowExperimental: true,
+      );
+      for (final int sdk in <int>[26, 27]) {
+        final HdrRoutePrediction sdr =
+            caps(sdkInt: sdk).predict(sources[HdrSourceClass.sdr]!);
+        expect(sdr.selected.route!.hwdec, 'mediacodec');
+        expect(sdr.selected.route!.dependencies,
+            <String>{HdrRouteDependency.hwdecMediacodec});
+
+        final HdrRoutePrediction hdr = caps(sdkInt: sdk).predict(
+          sources[HdrSourceClass.hdr10]!,
+          policy: convertFirst,
+        );
+        expect(hdr.candidates[0].skipReason,
+            HdrDegradeReason.gpuHdrDataSpaceUnavailable);
+        expect(hdr.candidates[1].skipReason,
+            HdrDegradeReason.gpuHdrDataSpaceUnavailable);
+        expect(hdr.selected.strategy, HdrStrategy.toneMapSdr);
+      }
+    });
+
+    test('API 28+ enables GPU HDR routes; sdk 0 makes no legacy assumption',
+        () {
+      const HdrRoutingPolicy convertFirst = HdrRoutingPolicy(
+        preferences: <HdrSourceClass, List<HdrStrategy>>{
+          HdrSourceClass.hdr10: <HdrStrategy>[
+            HdrStrategy.baseLayerConvert,
+            HdrStrategy.metadataReshape,
+            HdrStrategy.toneMapSdr,
+          ],
+        },
+        allowExperimental: true,
+      );
+      for (final int sdk in <int>[28, 29, 34]) {
+        final HdrRoutePrediction hdr = caps(sdkInt: sdk).predict(
+          sources[HdrSourceClass.hdr10]!,
+          policy: convertFirst,
+        );
+        expect(hdr.selected.strategy, HdrStrategy.baseLayerConvert);
+      }
+      final HdrRoutePrediction p5At28 = caps(sdkInt: 28).predict(
+        sources[HdrSourceClass.dvP5]!,
+        policy: const HdrRoutingPolicy(
+          preferences: <HdrSourceClass, List<HdrStrategy>>{
+            HdrSourceClass.dvP5: <HdrStrategy>[
+              HdrStrategy.metadataReshape,
+              HdrStrategy.toneMapSdr,
+            ],
+          },
+        ),
+      );
+      expect(p5At28.selected.strategy, HdrStrategy.metadataReshape);
+
+      final HdrCapabilities unknownSdk = caps(sdkInt: 0);
+      expect(
+          unknownSdk
+              .predict(sources[HdrSourceClass.sdr]!)
+              .selected
+              .route!
+              .hwdec,
+          'mediacodec');
+      expect(
+        unknownSdk
+            .predict(sources[HdrSourceClass.hdr10]!, policy: convertFirst)
+            .selected
+            .strategy,
+        HdrStrategy.baseLayerConvert,
+      );
+    });
+
+    test('SDK compatibility never bypasses the P5 pipeline gate or strips RPU',
+        () {
+      final HdrRoutePrediction unavailable =
+          caps(sdkInt: 24, p5: false).predict(sources[HdrSourceClass.dvP5]!);
+      expect(unavailable.playable, isFalse);
+      expect(unavailable.selected.skipReason,
+          HdrDegradeReason.p5PipelineUnavailable);
+
+      final HdrRoutePrediction available =
+          caps(sdkInt: 24, p5: true).predict(sources[HdrSourceClass.dvP5]!);
+      expect(available.selected.strategy, HdrStrategy.toneMapSdr);
+      expect(available.selected.route!.hwdec, 'mediacodec-copy');
+      expect(available.selected.route!.appliesDynamicMetadata, isTrue);
+      expect(available.selected.route!.stripDvRpu, isFalse);
+      expect(
+        available.candidates
+            .firstWhere((candidate) =>
+                candidate.strategy == HdrStrategy.metadataReshape)
+            .skipReason,
+        HdrDegradeReason.gpuHdrDataSpaceUnavailable,
+      );
+      expect(
+        available.selected.route!.dependencies,
+        <String>{HdrRouteDependency.hwdecMediacodecCopy},
+      );
+    });
+
     test('"HDR first, tone-map last" holds for every combo (verification 2)',
         () {
       var checked = 0;
       for (final bool allowExperimental in const <bool>[false, true]) {
-        const HdrRoutingPolicy policy = HdrRoutingPolicy(
-            allowExperimental: true);
-        final HdrRoutingPolicy effectivePolicy = allowExperimental
-            ? policy
-            : HdrRoutingPolicy.defaults;
+        const HdrRoutingPolicy policy =
+            HdrRoutingPolicy(allowExperimental: true);
+        final HdrRoutingPolicy effectivePolicy =
+            allowExperimental ? policy : HdrRoutingPolicy.defaults;
         for (final HdrSourceClass cls in HdrSourceClass.values) {
           final HdrSourceDescriptor source = sources[cls]!;
           for (final Set<int>? display in displays) {
@@ -422,7 +746,9 @@ void main() {
       expect(prediction.candidates.last.skipReason, isNull);
       expect(prediction.playable, isTrue);
       checkInvariants(prediction,
-          cls: HdrSourceClass.dvP7, capabilities: lya, allowExperimental: false);
+          cls: HdrSourceClass.dvP7,
+          capabilities: lya,
+          allowExperimental: false);
     });
 
     test('gate open: the same experimental strategy is selected', () {
@@ -474,8 +800,8 @@ void main() {
       final HdrRoutePrediction p5 =
           lya.predict(sources[HdrSourceClass.dvP5]!, policy: policy);
       expect(p5.selected.strategy, HdrStrategy.metadataReshape);
-      expect(p5.candidates.first.skipReason,
-          HdrDegradeReason.unsupportedStrategy);
+      expect(
+          p5.candidates.first.skipReason, HdrDegradeReason.unsupportedStrategy);
     });
   });
 
@@ -504,14 +830,14 @@ void main() {
         },
       );
       expect(prediction.selected.strategy, HdrStrategy.toneMapSdr);
-      final HdrCandidate direct = prediction.candidates
-          .firstWhere((HdrCandidate c) => c.strategy == HdrStrategy.baseLayerDirect);
+      final HdrCandidate direct = prediction.candidates.firstWhere(
+          (HdrCandidate c) => c.strategy == HdrStrategy.baseLayerDirect);
       expect(direct.skipReason, HdrDegradeReason.displayLacksTransfer);
-      final HdrCandidate convert = prediction.candidates
-          .firstWhere((HdrCandidate c) => c.strategy == HdrStrategy.baseLayerConvert);
+      final HdrCandidate convert = prediction.candidates.firstWhere(
+          (HdrCandidate c) => c.strategy == HdrStrategy.baseLayerConvert);
       expect(convert.skipReason, HdrDegradeReason.dataSpaceApplyFailed);
-      final HdrCandidate reshape = prediction.candidates
-          .firstWhere((HdrCandidate c) => c.strategy == HdrStrategy.metadataReshape);
+      final HdrCandidate reshape = prediction.candidates.firstWhere(
+          (HdrCandidate c) => c.strategy == HdrStrategy.metadataReshape);
       expect(reshape.skipReason, HdrDegradeReason.dataSpaceApplyFailed);
       checkInvariants(prediction,
           cls: HdrSourceClass.dvP84,
@@ -527,12 +853,11 @@ void main() {
           HdrRouteDependency.dataspacePq: HdrDegradeReason.dataSpaceApplyFailed,
         },
       );
-      final HdrCandidate reshape = prediction.candidates
-          .firstWhere((HdrCandidate c) => c.strategy == HdrStrategy.metadataReshape);
+      final HdrCandidate reshape = prediction.candidates.firstWhere(
+          (HdrCandidate c) => c.strategy == HdrStrategy.metadataReshape);
       // The maturity gate runs first, so the experimental reshape is
       // reported as gated, not as excluded.
-      expect(reshape.skipReason,
-          HdrDegradeReason.experimentalStrategySkipped);
+      expect(reshape.skipReason, HdrDegradeReason.experimentalStrategySkipped);
       expect(prediction.selected.strategy, HdrStrategy.toneMapSdr);
     });
 
@@ -640,8 +965,7 @@ void main() {
         sources[HdrSourceClass.hdr10]!,
         policy: const HdrRoutingPolicy(allowExperimental: true),
       );
-      expect(gateOpen.candidates.every((HdrCandidate c) => c.feasible),
-          isTrue);
+      expect(gateOpen.candidates.every((HdrCandidate c) => c.feasible), isTrue);
     });
 
     test('P8.4 takes the verified HLG direct route', () {
@@ -658,8 +982,8 @@ void main() {
     test('tone-map fallback matches the Texture branch of decide', () {
       final HdrRoutePrediction prediction =
           lyaCaps().predict(sources[HdrSourceClass.dvP84]!);
-      final HdrCandidate toneMap = prediction.candidates
-          .singleWhere((HdrCandidate c) => c.strategy == HdrStrategy.toneMapSdr);
+      final HdrCandidate toneMap = prediction.candidates.singleWhere(
+          (HdrCandidate c) => c.strategy == HdrStrategy.toneMapSdr);
       expect(toneMap.route!.vo, 'gpu-next');
       expect(toneMap.route!.hwdec, 'mediacodec');
       expect(toneMap.route!.topology, HdrTopology.texture);
@@ -693,8 +1017,7 @@ void main() {
       expect(prediction.playable, isTrue);
     });
 
-    test('P5 without the pipeline is never playable, safety net included',
-        () {
+    test('P5 without the pipeline is never playable, safety net included', () {
       final HdrCapabilities capabilities = caps(p5: false, ext: extApplicable);
       final HdrRoutePrediction prediction =
           capabilities.predict(sources[HdrSourceClass.dvP5]!);
@@ -753,7 +1076,8 @@ void main() {
       expect(prediction.selected.route!.surfaceTransfer, 'pq');
       expect(prediction.selected.route!.appliesDynamicMetadata, isTrue);
       // The default policy still picks the HLG direct route.
-      expect(lyaCaps().predict(sources[HdrSourceClass.dvP84]!).selected.strategy,
+      expect(
+          lyaCaps().predict(sources[HdrSourceClass.dvP84]!).selected.strategy,
           HdrStrategy.baseLayerDirect);
     });
 
@@ -776,8 +1100,8 @@ void main() {
 
     test('preference off: HDR sources tone-map, SDR stays direct', () {
       for (final HdrSourceClass cls in HdrSourceClass.values) {
-        final HdrRoutePrediction prediction =
-            lyaCaps().predict(sources[cls]!, preference: HdrOutputPreference.off);
+        final HdrRoutePrediction prediction = lyaCaps()
+            .predict(sources[cls]!, preference: HdrOutputPreference.off);
         if (cls == HdrSourceClass.sdr) {
           expect(prediction.selected.strategy, HdrStrategy.sdrDirect,
               reason: '$cls');
@@ -792,8 +1116,8 @@ void main() {
     });
 
     test('preference off keeps a pipeline-less P5 unplayable (R3.3)', () {
-      final HdrRoutePrediction prediction = caps(p5: false)
-          .predict(sources[HdrSourceClass.dvP5]!,
+      final HdrRoutePrediction prediction = caps(p5: false).predict(
+          sources[HdrSourceClass.dvP5]!,
               preference: HdrOutputPreference.off);
       expect(prediction.playable, isFalse);
       expect(prediction.selected.skipReason,
@@ -807,7 +1131,11 @@ void main() {
       // Direct (embedded) and reshape (platform view GPU) render on the
       // platform view topology; tone-map/SDR direct render on a texture.
       expect(
-        lya.predict(sources[HdrSourceClass.hdr10]!).selected.route!.dependencies,
+        lya
+            .predict(sources[HdrSourceClass.hdr10]!)
+            .selected
+            .route!
+            .dependencies,
         <String>{
           HdrRouteDependency.hwdecMediacodec,
           HdrRouteDependency.topologyPlatformView

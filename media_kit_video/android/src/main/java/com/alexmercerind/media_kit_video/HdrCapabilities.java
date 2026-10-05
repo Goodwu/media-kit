@@ -64,6 +64,9 @@ public final class HdrCapabilities {
      * not option introspection. {@code probeOnce} is idempotent, so this
      * fallback also covers an attach path that skipped the probe; the
      * three-state verdict is consumed conservatively (-1 → false).
+     * {@code nativeDvBridgeApi} is the independent static bridge schema
+     * version (1 supported, otherwise 0), read from the same cached probe.
+     * Neither field establishes visible HDR or native DV playback acceptance.
      */
     @NonNull
     public static Map<String, Object> get(@NonNull Context context) {
@@ -73,6 +76,7 @@ public final class HdrCapabilities {
         snapshot.put("hevcDecoders", decoders(MediaFormat.MIMETYPE_VIDEO_HEVC));
         snapshot.put("dolbyVisionDecoders", decoders(MIMETYPE_DOLBY_VISION));
         snapshot.put("p5Pipeline", MpvPipelineProbe.probeOnce() == 1);
+        snapshot.put("nativeDvBridgeApi", MpvPipelineProbe.getNativeDvBridgeApi());
         snapshot.put("dataSpaceBridgeLoaded", PlatformVideoView.isDataSpaceBridgeLoaded());
         snapshot.put("dataSpaceExt", PlatformVideoView.getSurfaceDataSpaceExtInfo());
         return snapshot;

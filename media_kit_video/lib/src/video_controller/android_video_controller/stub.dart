@@ -7,10 +7,15 @@ import 'package:media_kit/media_kit.dart';
 
 import 'package:media_kit_video/src/video_controller/platform_video_controller.dart';
 
+import 'platform_surface_release.dart';
+
 // Stub declaration for avoiding compilation errors on Dart JS using conditional imports.
 
 class AndroidVideoController extends PlatformVideoController {
   static const bool supported = false;
+
+  /// Web has no Android platform Surface owner.
+  AndroidSurfaceAccountId? get currentBoundOutputIdentity => null;
 
   // Web compile-face stubs for the HDR capability-change members used by
   // HdrVideoSession (Phase 1 R2.5 passthrough semantics). All call sites are

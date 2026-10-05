@@ -8,6 +8,7 @@ import 'package:media_kit/media_kit.dart' show Media, VideoParams;
 import 'hdr_capabilities.dart';
 import 'hdr_route.dart';
 import 'hdr_source_descriptor.dart';
+import 'hdr_native_dv_review_evidence.dart';
 
 /// Where a plan's [HdrSourceDescriptor] came from.
 ///
@@ -101,6 +102,7 @@ class HdrReviewFacts {
     this.dvCompatibilityId,
     this.dvElPresent,
     this.hdrVivid,
+    this.nativeDvEvidence,
   });
 
   /// Latest decoder-reported video parameters (`video-params`).
@@ -142,6 +144,9 @@ class HdrReviewFacts {
   /// has no such sub-property). The review samples this once — it is a
   /// frame fact, not a watched property.
   final bool? hdrVivid;
+
+  /// Internal configured-codec/source/output sample, never presentation proof.
+  final HdrNativeDvReviewEvidence? nativeDvEvidence;
 }
 
 /// Backend observation pulled by the session to build a report (R4.2):

@@ -347,6 +347,12 @@ class MainActivity : FlutterActivity() {
                     result.error("INVALID_ARGUMENT", "path and maxFrames are required", null)
                     return@setMethodCallHandler
                 }
+                // The probe uses ImageReader.newInstance(..., usage), added in
+                // API 29. Reject before loading its HardwareBuffer-based class.
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                    result.error("UNSUPPORTED", "P5 ImageReader/HardwareBuffer probe requires API 29", null)
+                    return@setMethodCallHandler
+                }
                 Thread {
                     try {
                         val report = P5CodecProbe.run(

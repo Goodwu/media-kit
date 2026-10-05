@@ -20,6 +20,7 @@ import 'package:media_kit_video/src/utils/mpv_owner_broker.dart';
 import 'package:media_kit_video/src/video_controller/platform_video_controller.dart';
 
 import 'current_output_intent.dart';
+import 'current_bound_output_identity.dart';
 import 'platform_surface_release.dart';
 import 'surface_owner_ledger.dart';
 
@@ -949,6 +950,29 @@ class AndroidVideoController extends PlatformVideoController {
         _platformViewId == owner.viewId &&
         _platformSurfaceGeneration == owner.surfaceGeneration &&
         wid.value == owner.wid;
+  }
+
+  /// Complete identity of the currently stable Android platform output.
+  ///
+  /// The value is a synchronous snapshot. Callers that use it across awaits
+  /// must read it again and compare the full identity before accepting results.
+  /// `nativeSurfaceGeneration` is the controller's output-topology generation;
+  /// `surfaceGeneration` identifies the Java Surface owner.
+  AndroidSurfaceAccountId? get currentBoundOutputIdentity {
+    final handle = nativeHandle;
+    if (handle == null) return null;
+    final candidate = _boundSurfaceOwner(handle);
+    return currentBoundOutputIdentityForState(
+      candidate: candidate,
+      expected: _outputIntent.expected,
+      outputAvailable: !_currentPlatformOutputUnavailable,
+      noInFlightOwner: _ledger.inFlightOwner == null,
+      ownerLive: candidate != null && _ledger.isLive(candidate),
+      ownerNotBindFailed: candidate != null && !_ledger.isBindFailed(candidate),
+      ownerNotReleasing: candidate != null && !_ledger.isReleasing(candidate),
+      controllerActive: !_disposed && !_fullyDisposed && !_playerTerminated,
+      matchesBoundOutput: candidate != null && _isBoundSurfaceOwner(candidate),
+    );
   }
 
   AndroidSurfaceAccountId? _boundSurfaceOwner(int handle) {

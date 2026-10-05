@@ -47,6 +47,7 @@ void main() {
         ],
         'dolbyVisionDecoders': <Object?>[],
         'p5Pipeline': true,
+        'nativeDvBridgeApi': 1,
         'dataSpaceBridgeLoaded': true,
         'dataSpaceExt': <Object?, Object?>{
           'id': 'lya-pq',
@@ -55,7 +56,8 @@ void main() {
       };
 
   group('HdrCapabilities.query (channel parsing)', () {
-    test('parses a complete snapshot with HEVC decoder and extension', () async {
+    test('parses a complete snapshot with HEVC decoder and extension',
+        () async {
       handler = (MethodCall call) async {
         expect(call.method, 'HdrCapabilities.Get');
         return fullSnapshot();
@@ -79,12 +81,15 @@ void main() {
       expect(hevc.max4KFps, 59.94);
       expect(caps.dolbyVisionDecoders, isEmpty);
       expect(caps.p5PipelineAvailable, isTrue);
+      expect(caps.nativeDvBridgeApi, 1);
+      expect(caps.nativeDvBridgeSupported, isTrue);
       expect(caps.dataSpaceBridgeLoaded, isTrue);
       expect(caps.dataSpaceExt?.id, 'lya-pq');
       expect(caps.dataSpaceExt?.applicable, isTrue);
     });
 
-    test('parses a Dolby Vision decoder with profiles, no main10 key', () async {
+    test('parses a Dolby Vision decoder with profiles, no main10 key',
+        () async {
       handler = (MethodCall call) async => <Object?, Object?>{
             'sdkInt': 34,
             'displayHdrTypes': <Object?>[1, 2, 3],
@@ -253,8 +258,62 @@ void main() {
     });
   });
 
+  group('HdrCapabilities native DV bridge schema', () {
+    test('older constructor callers default to no native bridge', () {
+      const HdrCapabilities caps = HdrCapabilities(
+        sdkInt: 24,
+        displayHdrTypes: null,
+        hevcDecoders: <HdrDecoderInfo>[],
+        dolbyVisionDecoders: <HdrDecoderInfo>[],
+        p5PipelineAvailable: true,
+        dataSpaceBridgeLoaded: false,
+        dataSpaceExt: null,
+      );
+      expect(caps.nativeDvBridgeApi, 0);
+      expect(caps.nativeDvBridgeSupported, isFalse);
+    });
+
+    test('only an integer schema version 1 is supported', () {
+      for (final Object? raw in <Object?>[
+        null,
+        true,
+        false,
+        1.0,
+        '1',
+        -1,
+        0,
+        2,
+        100,
+      ]) {
+        final HdrCapabilities caps = HdrCapabilities.parseSnapshot(
+          <Object?, Object?>{'nativeDvBridgeApi': raw},
+        );
+        expect(caps.nativeDvBridgeApi, 0, reason: 'raw=$raw');
+        expect(caps.nativeDvBridgeSupported, isFalse, reason: 'raw=$raw');
+      }
+      expect(HdrCapabilities.parseSnapshot(null).nativeDvBridgeApi, 0);
+      expect(
+          HdrCapabilities.parseSnapshot(<Object?, Object?>{}).nativeDvBridgeApi,
+          0);
+    });
+
+    for (final bool p5 in <bool>[false, true]) {
+      for (final int api in <int>[0, 1]) {
+        test('P5 rescale=$p5 and native DV API=$api remain independent', () {
+          final HdrCapabilities caps = HdrCapabilities.parseSnapshot(
+            <Object?, Object?>{'p5Pipeline': p5, 'nativeDvBridgeApi': api},
+          );
+          expect(caps.p5PipelineAvailable, p5);
+          expect(caps.nativeDvBridgeApi, api);
+          expect(caps.nativeDvBridgeSupported, api == 1);
+        });
+      }
+    }
+  });
+
   group('HdrCapabilities.query without a player', () {
-    test('query(player: null) is authoritative: the native probe verdict in '
+    test(
+        'query(player: null) is authoritative: the native probe verdict in '
         'the snapshot is used', () async {
       handler = (MethodCall call) async {
         expect(call.method, 'HdrCapabilities.Get');
@@ -275,7 +334,8 @@ void main() {
       expect(caps.dataSpaceExt?.id, 'lya-pq');
     });
 
-    test('query(player: null) reports p5PipelineAvailable false for a '
+    test(
+        'query(player: null) reports p5PipelineAvailable false for a '
         'non-fork libmpv', () async {
       handler = (MethodCall call) async => <Object?, Object?>{
             'sdkInt': 29,

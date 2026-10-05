@@ -16,7 +16,8 @@ import android.util.Log;
  * (approved plan B, 2026-10-02; R1.4).
  *
  * The native side answers through a disposable mpv instance (create →
- * initialize → read the read-only property {@code dovi-p5-pipeline} →
+ * initialize → read {@code dovi-p5-pipeline} and
+ * {@code android-native-dv-bridge-api} from that same instance →
  * terminate) inside the already-loaded libmpv: no vo, no surface, no media,
  * so it never touches EGL (R1.1). The probe runs once at engine attach and
  * the verdict is cached for the process lifetime; a property read failure is
@@ -37,6 +38,7 @@ public final class MpvPipelineProbe {
      * volatile flag makes the one-shot idempotence visible across threads.
      */
     private static volatile int cachedResult = Integer.MIN_VALUE;
+    private static volatile int cachedNativeDvBridgeApi = 0;
 
     private static boolean bridgeLoaded;
 
@@ -56,17 +58,50 @@ public final class MpvPipelineProbe {
             cachedResult = -1;
             return cachedResult;
         }
-        final int result;
         try {
-            result = nativeProbeP5Pipeline();
-        } catch (Throwable e) {
-            Log.w(TAG, "probe failed: " + e);
+            final int[] result;
+            try {
+                result = nativeProbeCapabilities();
+            } catch (UnsatisfiedLinkError oldBridge) {
+                // Only an absent new JNI entry point falls back. It cannot
+                // have created an mpv instance. Mechanical probe failures,
+                // malformed replies and other exceptions must never retry.
+                cachedNativeDvBridgeApi = 0;
+                cachedResult = normalizeP5(nativeProbeP5Pipeline());
+                return cachedResult;
+            }
+            if (result == null || result.length != 2 ||
+                    (result[0] != -1 && result[0] != 0 && result[0] != 1)) {
+                cachedNativeDvBridgeApi = 0;
+                cachedResult = -1;
+            } else {
+                // Publish both cached verdicts before the completion marker.
+                cachedNativeDvBridgeApi = result[1] == 1 ? 1 : 0;
+                cachedResult = result[0];
+            }
+        } catch (Throwable error) {
+            Log.w(TAG, "probe failed: " + error);
+            cachedNativeDvBridgeApi = 0;
             cachedResult = -1;
-            return cachedResult;
         }
-        cachedResult = result;
         return cachedResult;
     }
+
+    /**
+     * Static bridge schema: 1 supported, 0 unavailable/unknown. This is
+     * independent of the P5 rescale pipeline and of visible HDR acceptance.
+     * Reuses probeOnce's process cache; never creates a second instance.
+     */
+    public static synchronized int getNativeDvBridgeApi() {
+        probeOnce();
+        return cachedNativeDvBridgeApi;
+    }
+
+    private static int normalizeP5(int value) {
+        return value == 1 || value == 0 || value == -1 ? value : -1;
+    }
+
+    private static native int[] nativeProbeCapabilities();
 
     private static native int nativeProbeP5Pipeline();
 
