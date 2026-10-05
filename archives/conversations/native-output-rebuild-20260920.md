@@ -67,6 +67,39 @@
 
 - [ ] A1: 在真实 macOS/OHOS 设备上完成 native output 生命周期验收。
 
+## 2026-10-06 OHOS 模拟器黑帧根因定案与修复设计（接上节）
+
+用户指令"以前解出来过图像，解决一下这个问题"。系统排查后**根因定案**：
+
+### 排除矩阵（全部今日实机复现）
+
+| 路径 | 今日结果 | 证据 |
+| --- | --- | --- |
+| E1/E2 原生探针（ArkTS XComponent + 自写 EGL + mpv render API **SW**） | **正常渲染**（SMPTE 彩条+动态元素+OSD） | /tmp/mk-e1.jpeg |
+| e3 纹理路径（vo=gpu-next/gpu, hwdec=no, 新旧 libmpv 两世代） | 恒黑、播放推进、vo 零报错 | 多轮 snapshot_display |
+| e4 原生面路径（useNativeSurface, 9月6日构建产物） | 恒黑 | /tmp/mk-e4.jpeg |
+| 当前 main app（H/W） | vo 线程 SIGSEGV（两 libmpv 世代同崩） | faultlog ×2 |
+| 当前 main app（S/W）+ 旧 libmpv（2f9d1f59）对换实验 | 恒黑（libmpv 世代排除） | /tmp/mk-old4.jpeg |
+| gpu-dumb-mode=yes + vo=gpu（哑管线） | 恒黑（shader 复杂度假设排除） | /tmp/mk-dumb.jpeg |
+
+### 结论
+
+mpv 的 GL vo（gpu/gpu-next，含哑模式）在模拟器的 DGLES（软件模拟 GL）栈上渲染产出黑帧（无报错、swap"成功"），与 EGL 初始化方式无关（E2 用同样的 `EGL_DEFAULT_DISPLAY`+window surface+ES3 就正常——因为 E2 内容来自 **`MPV_RENDER_API_TYPE_SW` 纯软件渲染**，只做简单 blit）。libmpv 的 OHOS vo 无纯软件 vo 可用。当年"解出图像"= E1/E2 探针路径；Flutter 内的 vo 路径（e3 纹理、e4 原生面）在模拟器上从未出过帧。
+
+### 修复设计（后续任务，接手即做）
+
+**OHOS 软件纹理路径**（把 E2 技术并进 media_kit_video）：
+1. 新增 native 模块 `media_kit_video/ohos/src/main/cpp/sw_render.cpp`（参照 `~/src/luna-ohos-e1/entry/src/main/cpp/luna_e2_native.cpp`）：持 mpv handle + surfaceId，`mpv_render_context_create(API_TYPE_SW)`，update 回调驱动 render→RGBA→GL blit→eglSwapBuffers 到既有纹理 surface（该 surfaceId 已经 Dart `VideoOutputManager.Create` 流转到 native，零 ArkTS 改动即可复用；CPU 直写 `OH_NativeWindow_RequestBuffer/FlushBuffer` 为备选）。
+2. Dart：`OhosVideoController` 增软件模式分支（如 `configuration.vo=='sw'` 或模拟器检测自动）→ `vo=libmpv`+`hwdec=no`+调 native setup 传 wid。
+3. 验收：模拟器可见画面 + 帧推进 + dispose 干净；真机回归不受影响（默认路径不变）。
+预估：C ~250 行 + 桥接 + Dart ~60 行 + 3-4 轮模拟器验证。
+
+### 本轮状态
+
+- 仓库已还原到提交态（01b15a01：新 libmpv 钉定 29b8bd4d）；CMake 临时旧 zip 实验已撤。
+- 模拟器现装：luna_flutter_e3（哑模式实验版，scratch 项目 ~/src/luna_flutter_e3 未提交改动）；宿主 HTTP 镜像服务仍在 8000 端口。
+- e3 项目 main.dart 的 dumb-mode 实验改动留在 scratch 项目内（不影响主仓）。
+
 ## 2026-10-06 OHOS 模拟器轮（guard 移除验收）
 
 用户决策移除 `OhosVideoController.create` 的 `Utils.IsEmulator` guard 并跑模拟器测试。环境：Mate 60 Pro+ 窗口模拟器（ARM64，API 26；磁盘清至 13G 过 12G 门槛）、hdc 127.0.0.1:5555、本地 flutter-ohos（补 tag 3.44.9+ohos + version 文件 + 清 flutter.version.json 缓存解决 0.0.0-unknown）、hvigorw/ohpm 入 PATH。
