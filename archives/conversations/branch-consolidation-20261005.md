@@ -59,9 +59,15 @@
 
 证据文件（experiments 库 `artifacts/branch-consolidation-20261005/`）：`media-kit-demo-initialization-27010.jsonl`（观察器全程）、`media-kit-flutter-consumption-27010-*.jsonl` ×2（两段播放帧消费）、`media-kit-wakeup-shutdown-27010.jsonl`（退出排空序列）。
 
-### 2.3 / 2.4
+### 2.3 Android LYA 回归轮（P5，bc2306）：通过
 
-（Android LYA 回归轮与 push/CI 结果随执行追加）
+当前 main（b31cd49b）+ libs 钉定 JAR（v2026.012 发布链 c3bab5fc）构建 p5-sdr 包（APK faf8d588…），LYA 实机 240s 轮：命名 P5 fixture 命中打开（hint dolbyVision P5/EL false）、路由 metadataReshape→nativeHdr/PQ（platformView+gpu-next+mediacodec）、VIDEOPARAMS 3840×2160 dolbyvision/pq/sigPeak4.93、SF BT2020_PQ 层活跃、EOS eof-reached + AUTO_COMPLETED true、BACK 后 AUTO_PLAYER_DISPOSE completed、四截图 pixel-judge 全「正常画面」、render_failures=0、零 FATAL/SIGSEGV、恢复链完整（原包 2086/自动亮度/熄屏）。记录：experiments 库 `branch-consolidation-android-round-20261005.md`；完整证据本机 `~/src/media-kit-build/evidence/branch-consolidation-20261005/`。操作备注：前两次尝试早退（产物目录为文件名前缀非目录；USB 连接方式弹窗抢占焦点——EMUI SYSTEM_ALERT，取消并 force-stop 后通过）；matrix-round.sh 两处 grep 为旧日志格式（OPEN 已按 ANDROID_HDR_OPEN_BEGIN 命中，非失败）。
+
+### 2.4 推送与 CI
+
+- **push main**：`3e6be578..b31cd49b`（4 提交）；**4 条远端分支全部删除**（codex/macos-shared-hdr-fix、codex/macos-completion-handoff、ci/windows-mpv-ab、fix/windows-mpv-com-lifetime）——本地与远端分支终态均仅剩 `main`。
+- **OHOS run 37309826002：success**（HAP 构建绿）。
+- ci.yml：push run 37309825922 被 workflow_dispatch run 的 concurrency（cancel-in-progress）按预期顶替；**dispatch run 37309892420（run_package_tests=true，24 job 全矩阵+四平台 package tests）**：23/24 绿（OHOS 独立 run 亦 success），唯一失败 `macOS (optional libs)`——**75743f5c 既有缺口首次进 CI 暴露**：该提交为 media_kit_test AppDelegate 新增 `MediaKitVideoPlugin.prepareForEngineShutdown`/`recordWakeupShutdownDiagnostic` 调用，但 no-libs 变体走 podspec 的 stub 插件（`common/darwin/Classes/stub/MediaKitVideoPlugin.swift` 仅 register()），成员缺失编译失败（本地带 libs 构建走真插件故未暴露；此前三个本地提交从未过 CI）。**修复**：stub 补 `#if os(macOS)` 守卫的 no-op 对应成员（无 libs 时本无 libmpv wakeup owner 可排空），本地以 CI 同款流程复现验证（删 media_kit_libs_* 行 + 清 SPM ephemeral → `flutter build macos` exit 0）；iOS/Windows/Linux/Android optional-libs 均不受影响（iOS 已绿）。修复提交随本轮推送，最终 CI 结论见下。
 
 ## Archive Metadata
 
