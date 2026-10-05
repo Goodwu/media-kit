@@ -3,6 +3,7 @@ import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 
 import '../common/globals.dart';
+import '../common/local_playback_observer.dart';
 import '../common/sources/sources.dart';
 import '../common/widgets.dart';
 
@@ -21,16 +22,22 @@ class _SinglePlayerSingleVideoScreenState
     player,
     configuration: configuration.value,
   );
+  LocalPlaybackObserver? _localObserver;
 
   @override
   void initState() {
     super.initState();
-    player.open(Media(sources[0]));
+    final opening = player.open(Media(sources[0]));
     player.stream.error.listen((error) => debugPrint(error));
+    if (LocalPlaybackObserver.enabled) {
+      _localObserver = LocalPlaybackObserver(player)
+        ..observeOpen(opening, sources[0]);
+    }
   }
 
   @override
   void dispose() {
+    _localObserver?.stop();
     player.dispose();
     super.dispose();
   }
@@ -47,7 +54,8 @@ class _SinglePlayerSingleVideoScreenState
               overflow: TextOverflow.ellipsis,
             ),
             onTap: () {
-              player.open(Media(sources[i]));
+              final opening = player.open(Media(sources[i]));
+              _localObserver?.observeOpen(opening, sources[i]);
             },
           ),
       ];
@@ -97,7 +105,8 @@ class _SinglePlayerSingleVideoScreenState
                               clipBehavior: Clip.antiAlias,
                               margin: const EdgeInsets.all(32.0),
                               child: Video(
-                                controller: controller,
+                                controller:
+                                    _localObserver?.observe(controller) ?? controller,
                               ),
                             ),
                           ),
@@ -118,7 +127,7 @@ class _SinglePlayerSingleVideoScreenState
             : ListView(
                 children: [
                   Video(
-                    controller: controller,
+                    controller: _localObserver?.observe(controller) ?? controller,
                     width: MediaQuery.of(context).size.width,
                     height: MediaQuery.of(context).size.width * 9.0 / 16.0,
                   ),

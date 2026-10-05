@@ -14,6 +14,7 @@ class MainFlutterWindow: NSWindow {
     self.setFrame(windowFrame, display: true)
 
     RegisterGeneratedPlugins(registry: flutterViewController)
+    (NSApp.delegate as? AppDelegate)?.registerMediaKitEngine(flutterViewController.engine)
 
     let channel = FlutterMethodChannel(
       name: "media_kit_test/window",

@@ -7,6 +7,12 @@ import Foundation
   import FlutterMacOS
 #endif
 
+#if os(macOS)
+private typealias VideoOutputDiagnosticRequest = CompletedRenderRequest
+#else
+private typealias VideoOutputDiagnosticRequest = Never
+#endif
+
 // This class creates and manipulates the different types of FlutterTexture,
 // handles resizing, rendering calls, and notify Flutter when a new frame is
 // available to render.
@@ -38,6 +44,9 @@ public class VideoOutput: NSObject {
   private var texture: ResizableTextureProtocol!
   private var textureId: Int64 = -1
   private var currentSize: CGSize = CGSize.zero
+  #if os(macOS)
+  private let completedRenderDiagnostics: CompletedRenderDiagnostics?
+  #endif
   private enum DisposalState {
     case active
     case disposing
@@ -63,6 +72,17 @@ public class VideoOutput: NSObject {
     useNativeSurface = configuration.useNativeSurface
     self.registry = registry
     self.textureUpdateCallback = textureUpdateCallback
+    #if os(macOS)
+    if CompletedRenderDiagnostics.enabled && configuration.enableHardwareAcceleration {
+      let session = UUID().uuidString
+      let file = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(
+        "media-kit-flutter-consumption-\(ProcessInfo.processInfo.processIdentifier)-\(Int(bitPattern: handle!))-\(session).jsonl"
+      )
+      completedRenderDiagnostics = CompletedRenderDiagnostics(active: true, session: session, fileURL: file)
+    } else {
+      completedRenderDiagnostics = nil
+    }
+    #endif
 
     super.init()
 
@@ -111,19 +131,18 @@ public class VideoOutput: NSObject {
     }
 
     if enableHardwareAcceleration {
-      texture = SafeResizableTexture(
-        TextureHW(
-          handle: handle,
-          nativeSurface: useNativeSurface,
-          // Use `weak self` to prevent memory leaks
-          updateCallback: { [weak self]() in
-            guard let that = self else {
-              return
-            }
-            that.updateCallback()
-          }
-        )
+      let update: () -> Void = { [weak self] in self?.updateCallback() }
+      #if os(macOS)
+      let hardware = TextureHW(
+        handle: handle, nativeSurface: useNativeSurface,
+        completedRenderDiagnostics: completedRenderDiagnostics,
+        diagnosticUpdateCallback: { [weak self] request in self?.updateCallback(diagnosticRequest: request) },
+        updateCallback: update
       )
+      #else
+      let hardware = TextureHW(handle: handle, nativeSurface: useNativeSurface, updateCallback: update)
+      #endif
+      texture = SafeResizableTexture(hardware)
     } else {
       texture = SafeResizableTexture(
         TextureSW(
@@ -168,6 +187,12 @@ public class VideoOutput: NSObject {
   }
 
   public func updateCallback() {
+    #if os(macOS)
+    if completedRenderDiagnostics != nil {
+      updateCallback(diagnosticRequest: nil)
+      return
+    }
+    #endif
     if isDisposalRequested {
       return
     }
@@ -176,34 +201,88 @@ public class VideoOutput: NSObject {
     }
   }
 
-  private func _updateCallback() {
+  #if os(macOS)
+  private func updateCallback(diagnosticRequest: CompletedRenderRequest?) {
+    let request = diagnosticRequest ?? completedRenderDiagnostics?.makeRequest(source: .videoOutput)
     if isDisposalRequested {
+      completedRenderDiagnostics?.notePhase(request, .workerEnd, skip: .disposedBeforeEnqueue)
+      return
+    }
+    completedRenderDiagnostics?.notePhase(request, .enqueue)
+    worker.enqueue { self._updateCallback(diagnosticRequest: request) }
+  }
+  #endif
+
+  private func _updateCallback(diagnosticRequest: VideoOutputDiagnosticRequest? = nil) {
+    #if os(macOS)
+    completedRenderDiagnostics?.notePhase(diagnosticRequest, .workerStart)
+    #endif
+    if isDisposalRequested {
+      #if os(macOS)
+      completedRenderDiagnostics?.notePhase(diagnosticRequest, .workerEnd, skip: .disposedInWorker)
+      #endif
       return
     }
 
     let size = videoSize
 
     if size.width == 0 || size.height == 0 {
+      #if os(macOS)
+      completedRenderDiagnostics?.notePhase(diagnosticRequest, .workerEnd, skip: .zeroSize)
+      #endif
       return
     }
 
     if currentSize != size {
       currentSize = size
 
+      #if os(macOS)
+      completedRenderDiagnostics?.notePhase(diagnosticRequest, .resizeBegin)
+      #endif
       texture.resize(size)
+      #if os(macOS)
+      completedRenderDiagnostics?.notePhase(diagnosticRequest, .resizeEnd)
+      completedRenderDiagnostics?.notePhase(diagnosticRequest, .resizeNotifyWait)
+      #endif
       DispatchQueue.main.sync { [weak self] in
         guard let that = self else { return }
+        #if os(macOS)
+        that.completedRenderDiagnostics?.notePhase(diagnosticRequest, .resizeNotifyMain)
+        #endif
         // textureUpdateCallback must run on the main thread
         that.textureUpdateCallback(that.textureId, size)
+        #if os(macOS)
+        that.completedRenderDiagnostics?.notePhase(diagnosticRequest, .resizeNotifyEnd)
+        #endif
       }
     }
 
+    #if os(macOS)
+    var completedToken: CompletedRenderToken?
+    if completedRenderDiagnostics != nil, let safeTexture = texture as? SafeResizableTexture {
+      completedToken = safeTexture.render(size, diagnosticRequest: diagnosticRequest)
+    } else {
+      texture.render(size)
+    }
+    completedRenderDiagnostics?.notePhase(diagnosticRequest, .notifyWait, token: completedToken)
+    #else
     texture.render(size)
+    #endif
     DispatchQueue.main.sync { [weak self] in
       guard let that = self else { return }
+      #if os(macOS)
+      that.completedRenderDiagnostics?.notePhase(diagnosticRequest, .notifyMain, token: completedToken)
+      #endif
       // Textures must be marked as available from the main thread
       that.registry.textureFrameAvailable(that.textureId)
+      #if os(macOS)
+      that.completedRenderDiagnostics?.notePhase(diagnosticRequest, .notifyEnd, token: completedToken)
+      #endif
     }
+    #if os(macOS)
+    completedRenderDiagnostics?.notePhase(diagnosticRequest, .workerEnd, token: completedToken,
+      skip: completedToken == nil ? .noCompletedRender : nil)
+    #endif
   }
 
   // Dispose in the worker's queue order, then synchronously unregister the

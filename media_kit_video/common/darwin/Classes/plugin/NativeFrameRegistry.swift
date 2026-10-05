@@ -5,10 +5,14 @@ import Foundation
 /// The callback never exposes an engine or platform pointer to Dart.
 public enum NativeFrameRegistry {
   private static var callbacks = [Int64: () -> CVPixelBuffer?]()
+  private static var leaseProviders = [Int64: () -> CVPixelBuffer?]()
   private static var floatFormats = Set<Int64>()
   private static var floatOutputEnabled = Set<Int64>()
   private static var presentedFrames = Set<Int64>()
   private static var outputEpochs = [Int64: Int64]()
+  private static var displayHeadrooms = [Int64: Double]()
+  private static var sharedRenderers = Set<Int64>()
+  private static var targetObservers = [Int64: () -> Void]()
   private static var producedEpochs = [Int64: [ObjectIdentifier: Int64]]()
   private static var formatObservers = [Int64: (Int64) -> Void]()
   private static var floatOutputObservers = [Int64: (Int64, Bool) -> Void]()
@@ -18,7 +22,50 @@ public enum NativeFrameRegistry {
   private static var inFlightBuffers = [Int64: Set<ObjectIdentifier>]()
   private static var inFlightDrainedObservers = [Int64: () -> Void]()
   private static var producedFrameCounts = [Int64: Int64]()
+  private static var transitionObservers = [Int64: (OutputTransition) -> Void]()
+  private static var transitionSequences = [Int64: UInt64]()
+  public struct DiagnosticOutputSnapshot: Equatable {
+    public let epoch: Int64
+    public let floatEnabled: Bool
+    public let currentHeadroom: Double?
+    public let surfaceActive: Bool
+    public let transitionSequence: UInt64
+  }
+  public struct OutputTransition: Equatable {
+    public let sequence: UInt64
+    public let reason: String
+    public let old: DiagnosticOutputSnapshot
+    public let new: DiagnosticOutputSnapshot
+  }
   private static let lock = NSLock()
+
+  // Called only inside the existing registry mutex. No diagnostic lock/IO.
+  private static func diagnosticSnapshotLocked(_ handle: Int64) -> DiagnosticOutputSnapshot {
+    DiagnosticOutputSnapshot(epoch: outputEpochs[handle] ?? 0,
+      floatEnabled: floatOutputEnabled.contains(handle), currentHeadroom: displayHeadrooms[handle],
+      surfaceActive: activeSurfaces.contains(handle), transitionSequence: transitionSequences[handle] ?? 0)
+  }
+  public static func diagnosticOutputSnapshot(handle: Int64) -> DiagnosticOutputSnapshot {
+    lock.lock(); defer { lock.unlock() }
+    return diagnosticSnapshotLocked(handle)
+  }
+  public static func observeOutputTransitions(handle: Int64, observer: @escaping (OutputTransition) -> Void) {
+    lock.lock()
+    transitionObservers[handle] = observer
+    transitionSequences[handle] = 0
+    let initial = diagnosticSnapshotLocked(handle)
+    lock.unlock()
+    observer(OutputTransition(sequence: 0, reason: "registered-prior-reason-unknown", old: initial, new: initial))
+  }
+  // A nil observer skips capture and sequence work altogether (default off).
+  private static func captureTransitionLocked(handle: Int64, old: DiagnosticOutputSnapshot?, reason: String)
+    -> (OutputTransition, (OutputTransition) -> Void)? {
+    guard let old, let observer = transitionObservers[handle] else { return nil }
+    let sequence = (transitionSequences[handle] ?? 0) + 1
+    transitionSequences[handle] = sequence
+    return (OutputTransition(sequence: sequence, reason: reason, old: old,
+      new: diagnosticSnapshotLocked(handle)), observer)
+  }
 
   public static func register(handle: Int64, callback: @escaping () -> CVPixelBuffer?) {
     lock.lock(); defer { lock.unlock() }
@@ -28,10 +75,14 @@ public enum NativeFrameRegistry {
   public static func unregister(handle: Int64) {
     lock.lock(); defer { lock.unlock() }
     callbacks.removeValue(forKey: handle)
+    leaseProviders.removeValue(forKey: handle)
     floatFormats.remove(handle)
     floatOutputEnabled.remove(handle)
     presentedFrames.remove(handle)
     outputEpochs.removeValue(forKey: handle)
+    displayHeadrooms.removeValue(forKey: handle)
+    sharedRenderers.remove(handle)
+    targetObservers.removeValue(forKey: handle)
     producedEpochs.removeValue(forKey: handle)
     formatObservers.removeValue(forKey: handle)
     floatOutputObservers.removeValue(forKey: handle)
@@ -41,6 +92,8 @@ public enum NativeFrameRegistry {
     inFlightBuffers.removeValue(forKey: handle)
     inFlightDrainedObservers.removeValue(forKey: handle)
     producedFrameCounts.removeValue(forKey: handle)
+    transitionObservers.removeValue(forKey: handle)
+    transitionSequences.removeValue(forKey: handle)
   }
 
   /// Counts every frame the provider pushed into its pool. The presentation
@@ -60,6 +113,17 @@ public enum NativeFrameRegistry {
   /// Marks a buffer as consumed by an async presenter (in-flight Metal blit).
   /// The GL producer must not write into an in-flight buffer; consult
   /// `isInFlight` before recycling a rotated-out pool object.
+  public static func tryAcquireCurrentFrame(handle: Int64, pixelBuffer: CVPixelBuffer) -> Bool {
+    lock.lock(); defer { lock.unlock() }
+    let key = ObjectIdentifier(pixelBuffer as AnyObject)
+    guard floatOutputEnabled.contains(handle),
+          CVPixelBufferGetPixelFormatType(pixelBuffer) == kCVPixelFormatType_64RGBAHalf,
+          let epoch = outputEpochs[handle], producedEpochs[handle]?[key] == epoch,
+          inFlightBuffers[handle]?.contains(key) != true else { return false }
+    inFlightBuffers[handle, default: []].insert(key)
+    return true
+  }
+
   public static func markInFlight(handle: Int64, pixelBuffer: CVPixelBuffer) {
     lock.lock()
     let key = ObjectIdentifier(pixelBuffer as AnyObject)
@@ -97,6 +161,19 @@ public enum NativeFrameRegistry {
     inFlightDrainedObservers[handle] = observer
   }
 
+  /// Provider claims its current buffer while holding the pool rotation lock.
+  /// Registry callbacks run outside the registry lock: pool -> registry is the
+  /// only nested lock order used by both acquisition and rotation.
+  public static func registerLeaseProvider(handle: Int64, callback: @escaping () -> CVPixelBuffer?) {
+    lock.lock(); defer { lock.unlock() }
+    leaseProviders[handle] = callback
+  }
+
+  public static func acquireFrame(handle: Int64) -> CVPixelBuffer? {
+    lock.lock(); let provider = leaseProviders[handle]; lock.unlock()
+    return provider?()
+  }
+
   public static func copyFrame(handle: Int64) -> CVPixelBuffer? {
     lock.lock(); let callback = callbacks[handle]; lock.unlock()
     return callback?()
@@ -120,10 +197,19 @@ public enum NativeFrameRegistry {
   /// still be observed before the native output is reported active.
   public static func setFloatOutputEnabled(handle: Int64, enabled: Bool) {
     lock.lock()
+    let changed = floatOutputEnabled.contains(handle) != enabled
+    let old = changed && transitionObservers[handle] != nil ? diagnosticSnapshotLocked(handle) : nil
     if enabled { floatOutputEnabled.insert(handle) } else { floatOutputEnabled.remove(handle) }
+    if changed {
+      outputEpochs[handle] = (outputEpochs[handle] ?? 0) + 1
+      producedEpochs[handle] = [:]
+      presentedFrames.remove(handle)
+    }
     if !enabled { presentedFrames.remove(handle) }
     let observer = floatOutputObservers[handle]
+    let transition = captureTransitionLocked(handle: handle, old: old, reason: "float-output-mode-change")
     lock.unlock()
+    if let transition { transition.1(transition.0) }
     observer?(handle, enabled)
   }
 
@@ -133,13 +219,77 @@ public enum NativeFrameRegistry {
   }
 
   @discardableResult
-  public static func advanceOutputEpoch(handle: Int64) -> Int64 {
-    lock.lock(); defer { lock.unlock() }
+  public static func advanceOutputEpoch(handle: Int64, diagnosticReason: String = "explicit-invalidation") -> Int64 {
+    lock.lock()
+    let old = transitionObservers[handle] == nil ? nil : diagnosticSnapshotLocked(handle)
     let next = (outputEpochs[handle] ?? 0) + 1
     outputEpochs[handle] = next
     presentedFrames.remove(handle)
     producedEpochs[handle] = [:]
+    let transition = captureTransitionLocked(handle: handle, old: old, reason: diagnosticReason)
+    lock.unlock()
+    if let transition { transition.1(transition.0) }
     return next
+  }
+
+  public static func setSharedRenderer(handle: Int64, enabled: Bool) {
+    lock.lock(); defer { lock.unlock() }
+    if enabled { sharedRenderers.insert(handle) } else { sharedRenderers.remove(handle) }
+  }
+
+  public static func hasSharedRenderer(handle: Int64) -> Bool {
+    lock.lock(); defer { lock.unlock() }
+    return sharedRenderers.contains(handle)
+  }
+
+  public static func hasAcceptedSharedTarget(handle: Int64) -> Bool {
+    lock.lock(); defer { lock.unlock() }
+    guard sharedRenderers.contains(handle), let epoch = outputEpochs[handle] else { return false }
+    return producedEpochs[handle]?.values.contains(epoch) == true
+  }
+
+  public struct OutputSnapshot {
+    public let epoch: Int64
+    public let floatEnabled: Bool
+    /// Relative to UI white; this is not an absolute luminance measurement.
+    public let currentHeadroom: Double?
+  }
+
+  public static func outputSnapshot(handle: Int64) -> OutputSnapshot {
+    lock.lock(); defer { lock.unlock() }
+    return OutputSnapshot(epoch: outputEpochs[handle] ?? 0,
+                          floatEnabled: floatOutputEnabled.contains(handle),
+                          currentHeadroom: displayHeadrooms[handle])
+  }
+
+  /// The native view publishes screen facts on the main thread. Render workers
+  /// consume only this cache and never touch AppKit or synchronously wait on it.
+  @discardableResult
+  public static func publishDisplayHeadroom(handle: Int64, value: Double?) -> Bool {
+    let valid = value.flatMap { $0.isFinite && $0 >= 1 ? $0 : nil }
+    lock.lock()
+    guard callbacks[handle] != nil, displayHeadrooms[handle] != valid else {
+      lock.unlock()
+      return false
+    }
+    let old = transitionObservers[handle] == nil ? nil : diagnosticSnapshotLocked(handle)
+    displayHeadrooms[handle] = valid
+    outputEpochs[handle] = (outputEpochs[handle] ?? 0) + 1
+    presentedFrames.remove(handle)
+    producedEpochs[handle] = [:]
+    let redraw = targetObservers[handle]
+    let changed = framePresentedObservers[handle] ?? framePresentedObservers[-1]
+    let transition = captureTransitionLocked(handle: handle, old: old, reason: "display-headroom-change")
+    lock.unlock()
+    if let transition { transition.1(transition.0) }
+    changed?(handle)
+    redraw?()
+    return true
+  }
+
+  public static func observeOutputTarget(handle: Int64, callback: @escaping () -> Void) {
+    lock.lock(); defer { lock.unlock() }
+    targetObservers[handle] = callback
   }
 
   public static func currentOutputEpoch(handle: Int64) -> Int64 {
@@ -171,6 +321,13 @@ public enum NativeFrameRegistry {
     let observer = framePresentedObservers[handle] ?? framePresentedObservers[-1]
     lock.unlock()
     observer?(handle)
+  }
+
+  public static func isCurrentOutputFrame(handle: Int64, pixelBuffer: CVPixelBuffer) -> Bool {
+    lock.lock(); defer { lock.unlock() }
+    let key = ObjectIdentifier(pixelBuffer as AnyObject)
+    guard let epoch = outputEpochs[handle] else { return false }
+    return producedEpochs[handle]?[key] == epoch
   }
 
   public static func markPresentationFailed(handle: Int64, pixelBuffer: CVPixelBuffer) {

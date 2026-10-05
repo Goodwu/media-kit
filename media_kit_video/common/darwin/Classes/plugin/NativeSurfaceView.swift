@@ -235,22 +235,158 @@ private final class FrameStateDiagnostics {
   private var startedAt: CFTimeInterval?
   private var lastSampleAt: CFTimeInterval = 0
   private var rows = Data()
+  private var metalEnqueued = 0
+  private var metalEnqueueFailed = 0
+  private var metalCompleted = 0
+  private var metalFailed = 0
+  private var drawablePresented = 0
+  private var windowPresented = 0
+  private var invalidPresentedTime = 0
+  private var outOfOrderPresentedTime = 0
+  private var lastPresentedAt: CFTimeInterval?
+  private var presentedIntervals = WindowMetric()
+  private var drawableWaits = WindowMetric()
+  private var finished = false
+  var isFinished: Bool { finished }
+
+  // Every value is mutated on the main queue. Only immutable JSON bytes
+  // cross to the writer. A stalled main queue cannot grow these arrays
+  // without bound before the next one-second sample.
+  private struct WindowMetric {
+    private static let capacity = 4096
+    private var values = [CFTimeInterval]()
+    private var count = 0
+    private var maximum: CFTimeInterval = 0
+
+    mutating func append(_ value: CFTimeInterval) {
+      guard value.isFinite, value >= 0 else { return }
+      count += 1
+      maximum = max(maximum, value)
+      if values.count < Self.capacity { values.append(value) }
+    }
+
+    var json: [String: Any] {
+      let sorted = values.sorted()
+      let p95 = sorted.isEmpty ? nil : sorted[min(Int(Double(sorted.count - 1) * 0.95), sorted.count - 1)]
+      return [
+        "count": count, "sampleCount": sorted.count,
+        "overflowCount": count - sorted.count,
+        "maxMs": count == 0 ? NSNull() as Any : maximum * 1000 as Any,
+        "p95Ms": p95.map { $0 * 1000 } as Any? ?? NSNull()
+      ]
+    }
+  }
+
   private init(handle: Int64) { self.handle = handle }
-  func sample(now: CFTimeInterval, hasBuffer: Bool, generation: Int,
-              lastDrawn: Int64, inFlight: Bool, size: CGSize) {
+
+  func isCollecting(at now: CFTimeInterval) -> Bool {
+    guard !finished, let startedAt else { return false }
+    return now - startedAt <= 180
+  }
+
+  func recordEnqueue(succeeded: Bool) {
+    guard isCollecting(at: CACurrentMediaTime()) else { return }
+    if succeeded { metalEnqueued += 1 } else { metalEnqueueFailed += 1 }
+  }
+
+  func recordMetal(_ timing: MetalSurfaceFrameTiming) {
+    guard isCollecting(at: CACurrentMediaTime()) else { return }
+    if timing.completed { metalCompleted += 1 } else { metalFailed += 1 }
+  }
+
+  func recordPresented(at presentedAt: CFTimeInterval) {
+    guard isCollecting(at: CACurrentMediaTime()) else { return }
+    // Apple documents zero for a drawable that has not been presented.
+    guard presentedAt.isFinite, presentedAt > 0 else {
+      invalidPresentedTime += 1
+      return
+    }
+    drawablePresented += 1
+    windowPresented += 1
+    if let previous = lastPresentedAt {
+      if presentedAt > previous {
+        presentedIntervals.append(presentedAt - previous)
+      } else {
+        // Callback delivery order is not a presentation order guarantee.
+        // Do not turn a non-positive delta into an apparent short frame.
+        outOfOrderPresentedTime += 1
+      }
+    }
+    lastPresentedAt = max(lastPresentedAt ?? presentedAt, presentedAt)
+  }
+
+  func recordDrawableWait(_ duration: CFTimeInterval) {
+    guard isCollecting(at: CACurrentMediaTime()) else { return }
+    drawableWaits.append(duration)
+  }
+
+  func sample(now: CFTimeInterval, pixelBuffer: CVPixelBuffer?, generation: Int,
+              lastDrawn: Int64, inFlight: Bool, size: CGSize,
+              bounds: CGRect, frame: CGRect, windowRect: CGRect,
+              backingScale: CGFloat) {
+    guard !finished else { return }
     if startedAt == nil { startedAt = now }
-    guard let start = startedAt, now - start <= 180,
-          now - lastSampleAt >= 1 else { return }
+    guard let start = startedAt else { return }
+    if now - start > 180 {
+      finished = true
+      presentedIntervals = WindowMetric()
+      drawableWaits = WindowMetric()
+      return
+    }
+    guard now - lastSampleAt >= 1 else { return }
+    let windowSeconds = lastSampleAt == 0 ? 0 : now - lastSampleAt
     lastSampleAt = now
+    let presentedHandlerSupported: Bool
+    if #available(macOS 10.15.4, *) { presentedHandlerSupported = true }
+    else { presentedHandlerSupported = false }
+    let pixelFormat = pixelBuffer.map { CVPixelBufferGetPixelFormatType($0) }
+    let pixelFormatName: String
+    switch pixelFormat {
+    case kCVPixelFormatType_64RGBAHalf?: pixelFormatName = "rgba16Float"
+    case kCVPixelFormatType_32BGRA?: pixelFormatName = "bgra8Unorm"
+    case nil: pixelFormatName = "none"
+    default: pixelFormatName = "other"
+    }
     let record: [String: Any] = [
       "utcEpoch": Date().timeIntervalSince1970, "monotonic": now,
       "pid": ProcessInfo.processInfo.processIdentifier, "handle": handle,
-      "generation": generation, "hasBuffer": hasBuffer,
+      "generation": generation, "hasBuffer": pixelBuffer != nil,
       "produced": NativeFrameRegistry.producedFrameCount(handle: handle),
       "lastDrawn": lastDrawn, "inFlight": inFlight,
       "epoch": NativeFrameRegistry.currentOutputEpoch(handle: handle),
-      "width": size.width, "height": size.height
+      // Preserve width/height as drawable dimensions for old readers.
+      "width": size.width, "height": size.height,
+      "pixelBufferWidth": pixelBuffer.map { CVPixelBufferGetWidth($0) } as Any? ?? NSNull(),
+      "pixelBufferHeight": pixelBuffer.map { CVPixelBufferGetHeight($0) } as Any? ?? NSNull(),
+      "pixelBufferFormat": pixelFormat as Any? ?? NSNull(),
+      "pixelBufferFormatName": pixelFormatName,
+      "nativeBoundsX": bounds.origin.x, "nativeBoundsY": bounds.origin.y,
+      "nativeBoundsWidth": bounds.width, "nativeBoundsHeight": bounds.height,
+      "nativeFrameX": frame.origin.x, "nativeFrameY": frame.origin.y,
+      "nativeFrameWidth": frame.width, "nativeFrameHeight": frame.height,
+      "windowRectX": windowRect.origin.x, "windowRectY": windowRect.origin.y,
+      "windowRectWidth": windowRect.width, "windowRectHeight": windowRect.height,
+      "backingScale": backingScale,
+      "floatEnabled": NativeFrameRegistry.isFloatOutputEnabled(handle: handle),
+      // Registry acceptance currently follows successful GPU completion;
+      // keep it explicitly separate from actual drawablePresented below.
+      "registryHasPresentedFrame": NativeFrameRegistry.hasPresentedFrame(handle: handle),
+      "surfaceActive": NativeFrameRegistry.isSurfaceActive(handle: handle),
+      "metalEnqueued": metalEnqueued, "metalEnqueueFailed": metalEnqueueFailed,
+      "metalCompleted": metalCompleted, "metalFailed": metalFailed,
+      "presentedHandlerSupported": presentedHandlerSupported,
+      "drawablePresented": drawablePresented,
+      "windowPresented": windowPresented,
+      "windowPresentedFps": windowSeconds > 0 ? Double(windowPresented) / windowSeconds as Any : NSNull() as Any,
+      "invalidPresentedTime": invalidPresentedTime,
+      "outOfOrderPresentedTime": outOfOrderPresentedTime,
+      "windowSeconds": windowSeconds,
+      "presentedInterval": presentedIntervals.json,
+      "nextDrawableWait": drawableWaits.json
     ]
+    presentedIntervals = WindowMetric()
+    drawableWaits = WindowMetric()
+    windowPresented = 0
     guard let row = try? JSONSerialization.data(withJSONObject: record, options: [.sortedKeys]) else { return }
     rows.append(row); rows.append(0x0A)
     let data = rows
@@ -580,7 +716,17 @@ final class NativeSurfaceView: NSObject {
     return nil
   }
 
+  private func publishDisplayHeadroom() {
+    assert(Thread.isMainThread)
+    let screen = nativeView.window?.screen ?? NSScreen.main
+    let value = screen.map { Double($0.maximumExtendedDynamicRangeColorComponentValue) }
+    if NativeFrameRegistry.publishDisplayHeadroom(handle: handle, value: value) {
+      needsRedraw = true
+    }
+  }
+
   func drawFrame() {
+    publishDisplayHeadroom()
     let scale = nativeView.window?.backingScaleFactor ?? NSScreen.main?.backingScaleFactor ?? 1.0
     metalLayer.contentsScale = scale
     metalLayer.drawableSize = CGSize(
@@ -591,17 +737,53 @@ final class NativeSurfaceView: NSObject {
       framePacingDiagnostics = nil
     }
     let pixelBuffer = NativeFrameRegistry.copyFrame(handle: handle)
-    frameStateDiagnostics?.sample(now: CACurrentMediaTime(), hasBuffer: pixelBuffer != nil,
+    frameStateDiagnostics?.sample(now: CACurrentMediaTime(), pixelBuffer: pixelBuffer,
       generation: generation, lastDrawn: lastDrawnProducedCount, inFlight: blitInFlight,
-      size: metalLayer.drawableSize)
+      size: metalLayer.drawableSize, bounds: nativeView.bounds,
+      frame: nativeView.frame, windowRect: nativeView.convert(nativeView.bounds, to: nil),
+      backingScale: scale)
+    if frameStateDiagnostics?.isFinished == true { frameStateDiagnostics = nil }
+    let stateDiagnostics = frameStateDiagnostics.flatMap {
+      $0.isCollecting(at: CACurrentMediaTime()) ? $0 : nil
+    }
     let diagnostics = framePacingDiagnostics
     diagnostics?.recordTick(at: CACurrentMediaTime(), pixelBuffer: pixelBuffer)
     diagnostics?.completeTick(at: CACurrentMediaTime())
-    guard let pixelBuffer else {
+    // SDR remains visible through Flutter Texture. Keep the candidate view
+    // mounted, but do not acquire drawables or compete for its BGRA pool.
+    // Float permission precedes HDR's first presentation and activation, so
+    // an inactive HDR candidate must still draw while float is enabled.
+    guard NativeFrameRegistry.isFloatOutputEnabled(handle: handle) ||
+        NativeFrameRegistry.isSurfaceActive(handle: handle) else {
+      return
+    }
+    let producedCount = NativeFrameRegistry.producedFrameCount(handle: handle)
+    guard !blitInFlight, let pixelBuffer = NativeFrameRegistry.acquireFrame(handle: handle) else {
       if drawDiagnosticsRemaining > 0 {
         drawDiagnosticsRemaining -= 1
         NSLog("NativeSurfaceView macOS draw skipped handle=\(handle) pixel=false bounds=\(nativeView.bounds) drawableSize=\(metalLayer.drawableSize)")
       }
+      return
+    }
+    let failureDiagnostics = SharedRenderFailureDiagnostics.forHandle(handle,
+      sharedRenderer: NativeFrameRegistry.hasSharedRenderer(handle: handle))
+    // Transfer the immutable token captured with this exact acquired buffer.
+    // Completion captures this value, even if the pool later recycles the slot.
+    let failureLease = failureDiagnostics?.takeLease(
+      buffer: String(describing: ObjectIdentifier(pixelBuffer as AnyObject)))
+    var leaseTransferred = false
+    defer {
+      if !leaseTransferred {
+        if let failureDiagnostics {
+          let output = NativeFrameRegistry.diagnosticOutputSnapshot(handle: handle)
+          failureDiagnostics.native("nativeLeaseReturnedWithoutEnqueue", lease: failureLease,
+            target: output)
+        }
+        NativeFrameRegistry.completeInFlight(handle: handle, pixelBuffer: pixelBuffer)
+      }
+    }
+    guard CVPixelBufferGetPixelFormatType(pixelBuffer) == kCVPixelFormatType_64RGBAHalf,
+          NativeFrameRegistry.isCurrentOutputFrame(handle: handle, pixelBuffer: pixelBuffer) else {
       return
     }
     // New-frame gating: skip the blit while the produced-frame count, layer
@@ -610,14 +792,17 @@ final class NativeSurfaceView: NSObject {
     // identity — is the new-frame signal. nextDrawable is only probed for
     // an actual presentation attempt — an unpresented drawable would pin
     // the CAMetalLayer drawable pool while idle.
-    let producedCount = NativeFrameRegistry.producedFrameCount(handle: handle)
     let sizeChanged = lastDrawableSize != metalLayer.drawableSize ||
         lastContentsScale != scale
     if !needsRedraw && !sizeChanged && producedCount == lastDrawnProducedCount {
       diagnostics?.recordIdleTick()
       return
     }
+    let drawableWaitStartedAt = stateDiagnostics == nil ? nil : CACurrentMediaTime()
     let drawable = metalLayer.nextDrawable()
+    if let drawableWaitStartedAt {
+      stateDiagnostics?.recordDrawableWait(CACurrentMediaTime() - drawableWaitStartedAt)
+    }
     diagnostics?.recordDrawAttempt(drawableAvailable: drawable != nil)
     guard !blitInFlight, let blitter, let drawable else {
       if drawDiagnosticsRemaining > 0 {
@@ -626,33 +811,60 @@ final class NativeSurfaceView: NSObject {
       }
       return
     }
-    NativeFrameRegistry.markInFlight(handle: handle, pixelBuffer: pixelBuffer)
     blitInFlight = true
     let isFloatFrame =
         CVPixelBufferGetPixelFormatType(pixelBuffer) == kCVPixelFormatType_64RGBAHalf
     let timingHandler: ((MetalSurfaceFrameTiming) -> Void)?
-    if let diagnostics {
-      timingHandler = { timing in diagnostics.recordMetal(timing) }
+    if diagnostics != nil || stateDiagnostics != nil {
+      timingHandler = { [weak stateDiagnostics] timing in
+        diagnostics?.recordMetal(timing)
+        stateDiagnostics?.recordMetal(timing)
+      }
     } else {
       timingHandler = nil
+    }
+    let presentedHandler: ((CFTimeInterval) -> Void)?
+    let leaseHandle = handle
+    if stateDiagnostics != nil || failureDiagnostics != nil {
+      presentedHandler = { [weak stateDiagnostics] time in
+        stateDiagnostics?.recordPresented(at: time)
+        if let failureDiagnostics {
+          let output = NativeFrameRegistry.diagnosticOutputSnapshot(handle: leaseHandle)
+          failureDiagnostics.native("nativePresented", lease: failureLease,
+            presentedTime: time, target: output)
+        }
+      }
+    } else {
+      presentedHandler = nil
     }
     let enqueued = blitter.draw(
       pixelBuffer: pixelBuffer,
       to: drawable,
-      timingHandler: timingHandler
+      timingHandler: timingHandler,
+      presentedHandler: presentedHandler
     ) { [weak self] completed in
+      if completed && isFloatFrame {
+        NativeFrameRegistry.markPresented(handle: leaseHandle, pixelBuffer: pixelBuffer)
+      } else if !completed {
+        NativeFrameRegistry.markPresentationFailed(handle: leaseHandle, pixelBuffer: pixelBuffer)
+      }
+      if let failureDiagnostics {
+        let output = NativeFrameRegistry.diagnosticOutputSnapshot(handle: leaseHandle)
+        failureDiagnostics.native("nativeCompletion", lease: failureLease, succeeded: completed,
+          target: output)
+      }
+      NativeFrameRegistry.completeInFlight(handle: leaseHandle, pixelBuffer: pixelBuffer)
       guard let self else { return }
       self.blitInFlight = false
-      NativeFrameRegistry.completeInFlight(handle: self.handle, pixelBuffer: pixelBuffer)
-      if completed && isFloatFrame {
-        NativeFrameRegistry.markPresented(handle: self.handle, pixelBuffer: pixelBuffer)
-      } else if !completed {
-        NativeFrameRegistry.markPresentationFailed(handle: self.handle, pixelBuffer: pixelBuffer)
-      }
+    }
+    stateDiagnostics?.recordEnqueue(succeeded: enqueued)
+    if let failureDiagnostics {
+      let output = NativeFrameRegistry.diagnosticOutputSnapshot(handle: handle)
+      failureDiagnostics.native("nativeEnqueue", lease: failureLease, succeeded: enqueued,
+        target: output)
     }
     if !enqueued {
       blitInFlight = false
-      NativeFrameRegistry.completeInFlight(handle: handle, pixelBuffer: pixelBuffer)
       NativeFrameRegistry.markPresentationFailed(handle: handle, pixelBuffer: pixelBuffer)
       if drawDiagnosticsRemaining > 0 {
         drawDiagnosticsRemaining -= 1
@@ -660,6 +872,7 @@ final class NativeSurfaceView: NSObject {
       }
       return
     }
+    leaseTransferred = true
     lastDrawnProducedCount = producedCount
     lastDrawableSize = metalLayer.drawableSize
     lastContentsScale = scale

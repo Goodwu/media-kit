@@ -152,7 +152,7 @@ final class NativeSurfaceOutput {
       return ["capable": false, "active": false, "failureReason": "stale surface generation", "generation": generation]
     }
     configurations[handle] = configuration
-    NativeFrameRegistry.advanceOutputEpoch(handle: handle)
+    NativeFrameRegistry.advanceOutputEpoch(handle: handle, diagnosticReason: "native-output-configure")
     NativeFrameRegistry.clearPresented(handle: handle)
     NativeSurfaceViewRegistry.configure(handle: handle, configuration: configuration)
     let candidate = canProduceFloat(handle: handle, configuration: configuration, state: state)
@@ -175,7 +175,7 @@ final class NativeSurfaceOutput {
     // previous player-target proof: a later display refresh must not
     // re-promote the producer before a fresh configure call.
     configurations.removeValue(forKey: handle)
-    NativeFrameRegistry.advanceOutputEpoch(handle: handle)
+    NativeFrameRegistry.advanceOutputEpoch(handle: handle, diagnosticReason: "native-output-reset")
     // Clear display-side HDR metadata as well as the producer mode. The next
     // configure call may restore PQ/HLG; leaving the old CAEDRMetadata active
     // would make an inactive/SDR edge indistinguishable from an HDR output.
@@ -215,17 +215,29 @@ final class NativeSurfaceOutput {
     for report in reports { onStateChanged?(report) }
   }
 
-  private func targetVerified(_ configuration: [String: Any]?) -> Bool {
+  private func targetVerified(handle: Int64, _ configuration: [String: Any]?) -> Bool {
+    #if os(macOS)
+      if NativeFrameRegistry.hasSharedRenderer(handle: handle) {
+        return NativeFrameRegistry.hasAcceptedSharedTarget(handle: handle)
+      }
+    #endif
     guard let configuration else { return false }
     return configuration["playerTargetVerified"] as? Bool == true &&
       configuration["target-colorspace"] as? String == "bt.2020" &&
       configuration["target-trc"] as? String == "linear"
   }
 
+  private func canAttemptTarget(handle: Int64, configuration: [String: Any]?) -> Bool {
+    #if os(macOS)
+      if NativeFrameRegistry.hasSharedRenderer(handle: handle) { return true }
+    #endif
+    return targetVerified(handle: handle, configuration)
+  }
+
   private func canProduceFloat(handle: Int64, configuration: [String: Any]?, state: State) -> Bool {
     let transfer = configuration?["transfer"] as? String
     let hdrInput = transfer == "pq" || transfer == "hlg"
-    return state.capable && hdrInput && targetVerified(configuration) &&
+    return state.capable && hdrInput && canAttemptTarget(handle: handle, configuration: configuration) &&
       layerReady[handle] == state.generation &&
       NativeFrameRegistry.hasFloatProvider(handle: handle) &&
       displaySupportsEdr(handle: handle)
@@ -251,6 +263,7 @@ final class NativeSurfaceOutput {
 
   private func report(handle: Int64) -> [String: Any] {
     let state = states[handle] ?? State()
+    let sharedRenderer = NativeFrameRegistry.hasSharedRenderer(handle: handle)
     return [
       "backend": "darwin-cametal-layer",
       // Profile 8 is verified through the HLG-compatible single-layer test
@@ -262,7 +275,10 @@ final class NativeSurfaceOutput {
       // The shipped Darwin libmpv artifact is not guaranteed to include
       // libplacebo. Report the verified render boundary instead of claiming
       // a backend feature from the Dart/native contract alone.
-      "sourceProcessing": "mpv-gpu-native-surface",
+      "sourceProcessing": sharedRenderer ? "mpv-gpu-next-shared-core" : "mpv-gpu-native-surface",
+      "sharedRendererCreated": sharedRenderer,
+      "sharedTargetAccepted": NativeFrameRegistry.hasAcceptedSharedTarget(handle: handle),
+      "outputWhitePolicy": sharedRenderer ? "reference-relative-ui-white" : "legacy",
       "outputEncoding": "rgba16Float",
       "dynamicMetadataApplied": false,
       "capable": state.capable,
@@ -272,7 +288,7 @@ final class NativeSurfaceOutput {
       "outputEpoch": NativeFrameRegistry.currentOutputEpoch(handle: handle),
       "hasFloatProvider": NativeFrameRegistry.hasFloatProvider(handle: handle),
       "layerReady": layerReady[handle] == state.generation,
-      "targetVerified": targetVerified(configurations[handle]),
+      "targetVerified": targetVerified(handle: handle, configurations[handle]),
       "targetPrim": configurations[handle]?["target-prim"] as? String ?? "",
       "targetTrc": configurations[handle]?["target-trc"] as? String ?? "",
       "activationStage": state.active ? "presented-float-frame" :

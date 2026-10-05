@@ -19,6 +19,33 @@ int _platformViewCount({
 
 void main() {
   final source = File('lib/src/video/video_texture.dart').readAsStringSync();
+  final viewportBranch = source.indexOf('if (nativeMacosSurface) {');
+  final legacyFit =
+      source.indexOf('return fitLegacyOutput(SizedBox(', viewportBranch);
+  _require(viewportBranch >= 0 && legacyFit > viewportBranch,
+      'native macOS surfaces must bypass legacy decoder-sized FittedBox layout');
+  final viewport = source.substring(viewportBranch, legacyFit);
+  _require(
+    viewport.contains('NativeSurfaceViewport(') &&
+        viewport.contains('sourceSize: rect.size') &&
+        viewport.contains('nativeSurface: nativeVideo') &&
+        RegExp(r'textureFallback:\s*nativeSurface\s*\?\s*null\s*:\s*Texture\(')
+            .hasMatch(viewport) &&
+        !viewport.contains('refreshSurfaceSize') &&
+        !viewport.contains('FittedBox('),
+    'viewport fitting keeps one native candidate and only removes its Texture '
+    'overlay on activation; resizing must not rebuild native output',
+  );
+  _require(
+    RegExp(r'final nativeMacosSurface\s*=\s*nativeMacosCandidate\s*&&\s*'
+                r'notifier\.configuration\s*\.darwin\s*\.useNativeSurface\s*&&\s*'
+                r'!notifier\.configuration\s*\.darwin\s*\.useNativeWindow')
+            .hasMatch(source) &&
+        source.contains('macos-native-surface-\${notifier.nativeHandle}-'
+            '\${notifier.nativeSurfaceGeneration}'),
+    'viewport fitting must be scoped to macOS native-surface output and its '
+    'platform-view key must bind handle and output generation',
+  );
   final nativeSurfaceState = source.indexOf('final nativeSurface =');
   final macosCandidate = source.indexOf('final nativeMacosCandidate =');
   final candidateMount = source.indexOf(
@@ -29,12 +56,12 @@ void main() {
   // Whitespace-tolerant: the upstream merge re-indented this block, which must
   // not affect the guarded composition-order contract.
   final activeMount = source.substring(textureFallback).indexOf(
-        RegExp(
-          r'if \(nativeSurface &&\s*'
-          r'!nativeOhosCandidate &&\s*'
-          r'!nativeMacosCandidate\)',
-        ),
-      ) +
+            RegExp(
+              r'if \(nativeSurface &&\s*'
+              r'!nativeOhosCandidate &&\s*'
+              r'!nativeMacosCandidate\)',
+            ),
+          ) +
       textureFallback;
 
   _require(

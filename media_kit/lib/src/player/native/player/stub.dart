@@ -4,6 +4,8 @@
 /// All rights reserved.
 /// Use of this source code is governed by MIT license that can be found in the LICENSE file.
 import 'package:meta/meta.dart';
+import 'package:synchronized/synchronized.dart';
+import 'package:media_kit/src/models/playable.dart';
 
 import 'package:media_kit/src/player/platform_player.dart';
 
@@ -23,6 +25,28 @@ class NativePlayer extends PlatformPlayer {
   // Compile-face parity with the io [NativePlayer]: under `--wasm`, this stub
   // is what media_kit code compiles against, so the mpv property/command
   // surface used by the HDR backend must exist (it always throws here).
+
+  /// Compile-face parity for the per-player, non-reentrant playback lock.
+  final Lock lock = Lock();
+
+  @override
+  Future<void> open(
+    Playable playable, {
+    bool play = true,
+    bool synchronized = true,
+  }) async {
+    throw UnsupportedError('[NativePlayer.open] requires dart:ffi');
+  }
+
+  @override
+  Future<void> stop({
+    bool open = false,
+    bool notify = true,
+    bool synchronized = true,
+    bool waitForVideoControllerInitialization = true,
+  }) async {
+    throw UnsupportedError('[NativePlayer.stop] requires dart:ffi');
+  }
 
   /// Raw mpv property access parity with the io [NativePlayer].
   Future<void> setPropertyStrict(

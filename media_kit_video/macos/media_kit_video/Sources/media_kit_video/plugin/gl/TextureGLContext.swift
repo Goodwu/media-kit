@@ -8,6 +8,8 @@ public class TextureGLContext {
   public let frameBuffer: GLuint
   public let texture: CVOpenGLTexture
   public let pixelBuffer: CVPixelBuffer
+  // Written only while this context is writable; copied with current under the pool lock.
+  var completedRenderToken: CompletedRenderToken?
 
   init(
     context: CGLContextObj,

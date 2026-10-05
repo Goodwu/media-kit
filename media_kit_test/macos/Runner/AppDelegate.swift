@@ -1,8 +1,28 @@
 import Cocoa
 import FlutterMacOS
+import media_kit_video
 
 @main
 class AppDelegate: FlutterAppDelegate {
+  private let mediaKitEngines = NSHashTable<FlutterEngine>.weakObjects()
+
+  func registerMediaKitEngine(_ engine: FlutterEngine) {
+    mediaKitEngines.add(engine)
+    MediaKitVideoPlugin.recordWakeupShutdownDiagnostic("host.engine.registered", fields: [
+      "engineCount": mediaKitEngines.allObjects.count,
+    ])
+  }
+
+  override func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+    let reply = super.applicationShouldTerminate(sender)
+    if reply == .terminateNow {
+      for engine in mediaKitEngines.allObjects {
+        MediaKitVideoPlugin.prepareForEngineShutdown(engine)
+      }
+    }
+    return reply
+  }
+
   override func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
     return true
   }

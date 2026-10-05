@@ -1,0 +1,72 @@
+{
+  "base": "mpv-0.41.0",
+  "base_archive_sha256": "ee21092a5ee427353392360929dc64645c54479aefdb5babc5cfbb5fad626209",
+  "patch_sha256": "0c026ab6d8060582a50dae1b46e71990dacecbcf82c19076f19c6cf5c6f02b74",
+  "files": {
+    "meson.build": {
+      "before": "04c4798fb53f243880cf7c420ac26f019562361f05b2a09da82f7c716899741c",
+      "after": "8dc7ad7ce8b67b071e51d6180f55f96dc54269f4698ba51c516df885a52c4076"
+    },
+    "video/out/gpu_next/frame.c": {
+      "before": null,
+      "after": "f5ad427f48d6078d4ee16a7d93af19135cad2f32526e49958e260928ba350baa"
+    },
+    "video/out/gpu_next/frame.h": {
+      "before": null,
+      "after": "7850c95a9f903fa3292cb59a96490550c5122103c64ba9d3581c46cc46e0dd0d"
+    },
+    "video/out/gpu_next/hwdec.c": {
+      "before": null,
+      "after": "01dc38be27867abf96de5a6790e8af12e57af938541e4bfcd9fc99e5d3f39b0e"
+    },
+    "video/out/gpu_next/hwdec.h": {
+      "before": null,
+      "after": "3c1adff8455dd5999bdd9476a850b4830b5004b800fb2caf85ddb5fb56bfb1ad"
+    },
+    "video/out/gpu_next/libmpv_gl_pl.c": {
+      "before": null,
+      "after": "9242733ddb7949790ccea8dd46739b5d71ac2e3aedd0f8ecf0d8697fc3d9dda2"
+    },
+    "video/out/gpu_next/libmpv_gl_pl.h": {
+      "before": null,
+      "after": "948dcfedf02031e33beda55bcf8d603c823c95e264442fd22c92256e54f5acaf"
+    },
+    "video/out/gpu_next/libmpv_gpu_next.c": {
+      "before": null,
+      "after": "73351705d971f0c606ee64bfdf71c36f06e74744bcc4985d5ffeda94e728ed64"
+    },
+    "video/out/gpu_next/libmpv_gpu_next.h": {
+      "before": null,
+      "after": "661b0789b12c78acc5366ededa666e327e7d9fca00f7a75ec393713133134756"
+    },
+    "video/out/gpu_next/renderer.c": {
+      "before": null,
+      "after": "4084b313114f87ffe015fff2d1c952c97cc1c8eeefc4c6f496497952f491fd5f"
+    },
+    "video/out/gpu_next/renderer.h": {
+      "before": null,
+      "after": "df1cf582a638bb45ed5dff5cadac3dbf9d7fccd54707e0b8633ea2389d9cf00f"
+    },
+    "video/out/gpu_next/target.c": {
+      "before": null,
+      "after": "ca0f3ff5e5101b258b71f8c07d4f72bea1b8dfdf11313b0ebe97fe2947e4109a"
+    },
+    "video/out/gpu_next/target.h": {
+      "before": null,
+      "after": "702420effb5cdd0612c4bf7b44a2402de6fa073d6ccd2ab3b7e5bc78df26ce30"
+    },
+    "video/out/libmpv.h": {
+      "before": "ca6f3e33b92efa692db7ef423028d9e422d5cf2ccb245b18580103c80a643e51",
+      "after": "18b58256ce626e2ebd49a9ec157c423a8d0ca014cbdfeccb95c59cf8bbbd60a4"
+    },
+    "video/out/vo_gpu_next.c": {
+      "before": "4f018a2360f7db5ca2da1e34e2224a4b76c33efec01f964c0d35994b794e81aa",
+      "after": "8c31b94c80ea6b041fc7dfc97009baf71d83d9f191513759624ca389e758b94e"
+    },
+    "video/out/vo_libmpv.c": {
+      "before": "505bb1c9ec219a966e24da4839b2c68a91411ddcb649f648e29160ccfd0bdebf",
+      "after": "7d352ce06ac53dd41d34cccb05a5ea1aa86ff7695f36ac6117f604eb90841d37"
+    }
+  },
+  "status": "candidate; runtime and visible acceptance incomplete"
+}
