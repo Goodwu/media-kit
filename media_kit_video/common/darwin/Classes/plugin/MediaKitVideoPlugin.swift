@@ -5,6 +5,32 @@
 #endif
 
 public class MediaKitVideoPlugin: NSObject, FlutterPlugin {
+  #if os(macOS)
+  private static let wakeupPlugins = NSMapTable<AnyObject, MediaKitVideoPlugin>(
+    keyOptions: .weakMemory, valueOptions: .weakMemory
+  )
+  private let wakeupOwner = DarwinWakeupCallbackRegistry.shared.createOwner()
+
+  /// The host calls this synchronously before engine.shutdown()/Dart teardown.
+  /// FlutterPlugin has no pre-detach callback; direct shutdown without this
+  /// explicit host barrier is not covered by normal application Quit handling.
+  public static func prepareForEngineShutdown(_ engine: FlutterEngine) {
+    let messenger = engine.binaryMessenger as AnyObject
+    let plugin = wakeupPlugins.object(forKey: messenger)
+    recordWakeupShutdownDiagnostic("plugin.prepare.lookup", fields: ["hit": plugin == nil ? 0 : 1])
+    guard let plugin else { return }
+    DarwinWakeupCallbackRegistry.shared.prepareForEngineShutdown(owner: plugin.wakeupOwner)
+  }
+  #endif
+
+  #if os(macOS)
+  /// Opt-in lifecycle diagnostics shared with the host. Integer counters/flags
+  /// only; default execution performs no diagnostic file IO.
+  public static func recordWakeupShutdownDiagnostic(_ event: String, fields: [String: Int] = [:]) {
+    DarwinWakeupShutdownDiagnostics.shared.record(event, fields: fields)
+  }
+  #endif
+
   private static let CHANNEL_NAME = "com.alexmercerind/media_kit_video"
 
   public static func register(with registrar: FlutterPluginRegistrar) {
@@ -28,6 +54,10 @@ public class MediaKitVideoPlugin: NSObject, FlutterPlugin {
       utils: utils
     )
     registrar.addMethodCallDelegate(instance, channel: channel)
+    #if os(macOS)
+    wakeupPlugins.setObject(instance, forKey: binaryMessenger as AnyObject)
+    recordWakeupShutdownDiagnostic("plugin.registered", fields: ["owner": Int(instance.wakeupOwner)])
+    #endif
     #if canImport(Flutter)
       let nativeSurfaceViewFactory = NativeSurfaceViewFactory(onLayerReady: { handle, generation, rendererReady in
         let report = instance.nativeSurfaceOutput.attachLayer(handle: handle, generation: generation, rendererReady: rendererReady)
@@ -100,6 +130,10 @@ public class MediaKitVideoPlugin: NSObject, FlutterPlugin {
     result: @escaping FlutterResult
   ) {
     switch call.method {
+    #if os(macOS)
+    case "WakeupCallback.Owner":
+      result(DarwinWakeupCallbackRegistry.binding(owner: wakeupOwner))
+    #endif
     case "NativeWindow.Attach":
       #if canImport(AppKit)
         let args = call.arguments as? [String: Any]

@@ -20,37 +20,59 @@ import 'package:media_kit/generated/libmpv/bindings.dart';
 MPV? _mpv;
 MPV get mpv => _mpv!;
 
+void _preloadFrameworkDependencies() {
+  final bundlePath = Platform.environment['MEDIA_KIT_TEST_FRAMEWORKS'];
+  if (bundlePath == null) return;
+  final pending = <String>[];
+  for (final entity in Directory(bundlePath).listSync(followLinks: true)) {
+    if (entity is Directory && entity.path.endsWith('.framework')) {
+      final executable = File(
+        join(entity.path, 'Versions', 'A',
+            basenameWithoutExtension(entity.path)),
+      );
+      if (executable.existsSync()) pending.add(executable.path);
+    } else if (entity is File && entity.path.endsWith('.dylib')) {
+      pending.add(entity.path);
+    }
+  }
+  while (pending.isNotEmpty) {
+    var loaded = false;
+    for (final candidate in pending.toList()) {
+      try {
+        DynamicLibrary.open(candidate);
+        pending.remove(candidate);
+        loaded = true;
+      } catch (_) {}
+    }
+    if (!loaded) break;
+  }
+}
+
 void main() {
   setUp(() {
+    _preloadFrameworkDependencies();
     NativeLibrary.ensureInitialized();
     _mpv = MPV(DynamicLibrary.open(NativeLibrary.path));
   });
   test(
     'initializer-init',
-    () {
-      expect(
-        Initializer(mpv).create((_) async {}),
-        completes,
-      );
+    () async {
+      final handle = await Initializer(mpv).create((_) async {});
+      await Initializer(mpv).dispose(handle);
     },
   );
   test(
     'initializer-create',
-    () {
-      expect(
-        Initializer(mpv).create((_) async {}),
-        completes,
-      );
+    () async {
+      final handle = await Initializer(mpv).create((_) async {});
+      await Initializer(mpv).dispose(handle);
     },
   );
   test(
     'initializer-dispose',
     () async {
       final handle = await Initializer(mpv).create((_) async {});
-      expect(
-        () => Initializer(mpv).dispose(handle),
-        returnsNormally,
-      );
+      await expectLater(Initializer(mpv).dispose(handle), completes);
     },
   );
   test(
@@ -114,7 +136,7 @@ void main() {
 
       await Future.delayed(const Duration(seconds: 5));
 
-      Initializer(mpv).dispose(handle);
+      await Initializer(mpv).dispose(handle);
     },
   );
   test(
@@ -154,7 +176,7 @@ void main() {
 
       await Future.delayed(const Duration(seconds: 5));
 
-      Initializer(mpv).dispose(handle);
+      await Initializer(mpv).dispose(handle);
     },
   );
 }

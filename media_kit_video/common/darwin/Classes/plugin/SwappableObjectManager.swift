@@ -58,6 +58,14 @@ public class SwappableObjectManager<T> {
     return object
   }
 
+  /// Returns a checked-out object after a failed write without publishing it.
+  /// The caller must return each object exactly once before pool reinitialization.
+  public func returnUnpublished(_ object: T) {
+    lock.lock()
+    defer { lock.unlock() }
+    available.append(object)
+  }
+
   /// Pushes a freshly written object as ready.
   ///
   /// When the previous current object is rotated out, `hold` decides whether
@@ -93,6 +101,22 @@ public class SwappableObjectManager<T> {
       }
     }
     held = stillHeld
+  }
+
+  /// Captures a retained payload and immutable metadata under the same lock
+  /// that rotates current. The closure must not perform IO or diagnostics.
+  public func withCurrentSnapshot<R>(_ snapshot: (T?) -> R) -> R {
+    lock.lock()
+    defer { lock.unlock() }
+    return snapshot(_current)
+  }
+
+  /// Read-only membership evidence. Copy identities while holding the pool
+  /// lock; callers must serialize and record diagnostics after it is released.
+  func auditSnapshot(identity: (T) -> String) -> [String: Any] {
+    lock.lock(); defer { lock.unlock() }
+    return ["available": available.map(identity), "ready": ready.map(identity),
+      "held": held.map(identity), "current": _current.map(identity) as Any? ?? NSNull()]
   }
 
   public var current: T? {

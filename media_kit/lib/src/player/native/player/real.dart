@@ -26,8 +26,10 @@ import 'package:media_kit/src/models/playlist_mode.dart';
 import 'package:media_kit/src/models/playlist.dart';
 import 'package:media_kit/src/models/track.dart';
 import 'package:media_kit/src/models/video_params.dart';
+import 'package:media_kit/src/native_wakeup_callback.dart';
 import 'package:media_kit/src/player/native/core/fallback_bitrate_handler.dart';
 import 'package:media_kit/src/player/native/core/initializer.dart';
+import 'package:media_kit/src/player/native/core/initializer_native_callable.dart';
 import 'package:media_kit/src/player/native/core/native_library.dart';
 import 'package:media_kit/src/player/native/utils/android_asset_loader.dart';
 import 'package:media_kit/src/player/native/utils/android_helper.dart';
@@ -179,6 +181,9 @@ class NativePlayer extends PlatformPlayer {
   /// Disposes the [Player] instance & releases the resources.
   @override
   Future<void> dispose({bool synchronized = true}) {
+    if (InitializerNativeCallable.isInActiveCallback(ctx)) {
+      throw ReentrantEventPumpDisposeError();
+    }
     final outputLifecycle = this.outputLifecycle;
     // Close admission synchronously, before the first await or lock wait.
     outputLifecycle?.onCloseOwnerAdmission?.call();
@@ -226,6 +231,16 @@ class NativePlayer extends PlatformPlayer {
         // removal.
         await runPreTerminationCallbacks();
 
+        // Native ownership removal can fail; it must remain retryable while
+        // the handle, streams and event pump are still alive. Never destroy a
+        // handle still retained by an engine's wakeup owner registry.
+        final ownedWakeupDisposed =
+            await Initializer(mpv).disposeOwnedWakeupCallback(ctx);
+        if (!ownedWakeupDisposed) {
+          // The isolate backend retains its historical request protocol; the
+          // NativeCallable backend is already closed and drained here.
+          await Initializer(mpv).dispose(ctx);
+        }
         reachedTerminalPhase = true;
 
         Object? cleanupError;
@@ -235,33 +250,23 @@ class NativePlayer extends PlatformPlayer {
         } catch (error, stack) {
           cleanupError = error;
           cleanupStack = stack;
-        } finally {
+        }
+        // Preserve the existing grace period. It is not used as a substitute
+        // for the owned event-pump drain above.
+        await Future.delayed(const Duration(seconds: 5));
+        try {
+          withWindowsMta(() => mpv.mpv_terminate_destroy(ctx));
+          _mpvTerminated = true;
+        } catch (error, stack) {
+          cleanupError ??= error;
+          cleanupStack ??= stack;
+        }
+        if (_mpvTerminated) {
           try {
-            Initializer(mpv).dispose(ctx);
+            await retryPostTerminationCallbacks();
           } catch (error, stack) {
             cleanupError ??= error;
             cleanupStack ??= stack;
-          }
-          // Preserve the existing grace period, but make termination an
-          // awaited lifecycle barrier. A retained native-output reference may
-          // be released only after this call returns.
-          await Future.delayed(const Duration(seconds: 5));
-          var terminated = false;
-          try {
-            withWindowsMta(() => mpv.mpv_terminate_destroy(ctx));
-            _mpvTerminated = true;
-            terminated = true;
-          } catch (error, stack) {
-            cleanupError ??= error;
-            cleanupStack ??= stack;
-          }
-          if (terminated) {
-            try {
-              await retryPostTerminationCallbacks();
-            } catch (error, stack) {
-              cleanupError ??= error;
-              cleanupStack ??= stack;
-            }
           }
         }
         if (cleanupError != null) {
@@ -2372,13 +2377,18 @@ class NativePlayer extends PlatformPlayer {
           if (fn != null) {
             final data = mpv.mpv_get_property_string(ctx, prop.ref.name);
             if (data != nullptr) {
+              late final String value;
               try {
-                await fn.call(data.cast<Utf8>().toDartString());
+                value = data.cast<Utf8>().toDartString();
+              } finally {
+                mpv.mpv_free(data.cast());
+              }
+              try {
+                await fn.call(value);
               } catch (exception, stacktrace) {
                 print(exception);
                 print(stacktrace);
               }
-              mpv.mpv_free(data.cast());
             }
           }
         }

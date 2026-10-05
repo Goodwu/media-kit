@@ -57,6 +57,23 @@ struct SwappableObjectManagerTests {
         check(pool.current === next, "latest frame remains current")
       }
     }
+    do {
+      let objects = (0..<3).map(Buffer.init)
+      let pool = SwappableObjectManager(objects: objects)
+      let first = pool.nextAvailable()!
+      pool.pushAsReady(first)
+      for _ in 0..<1000 {
+        let failed = pool.nextAvailable()!
+        pool.returnUnpublished(failed)
+        check(pool.current === first, "failed writes preserve last successful frame")
+      }
+      let second = pool.nextAvailable()!
+      let third = pool.nextAvailable()!
+      check(second !== third, "failed writes never duplicate pool slots")
+      check(pool.nextAvailable() == nil, "current frame remains unavailable to producers")
+      pool.pushAsReady(second)
+      check(pool.current === second, "successful frame recovers after repeated failures")
+    }
     if failures > 0 { print("\(failures) failures"); exit(1) }
     print("PASS: busy protection, completion, idempotence and 1000-frame rotation")
   }

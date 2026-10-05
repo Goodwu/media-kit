@@ -56,15 +56,24 @@ class Initializer {
     }
   }
 
+  /// Owned NativeCallable callbacks need a retryable pre-terminal barrier.
+  /// Other initializers preserve their existing terminal dispose ordering.
+  Future<bool> disposeOwnedWakeupCallback(
+    Pointer<generated.mpv_handle> ctx,
+  ) =>
+      InitializerNativeCallable(mpv).disposeOwned(ctx);
+
   /// Disposes [Pointer<mpv_handle>].
-  void dispose(Pointer<generated.mpv_handle> ctx) {
+  Future<void> dispose(Pointer<generated.mpv_handle> ctx) async {
     if (kDebugMode && isMainIsolate()) {
       InitializerIsolate().dispose(mpv, ctx);
       return;
     }
     if (!isExecmemRestricted) {
-      InitializerNativeCallable(mpv).dispose(ctx);
+      await InitializerNativeCallable(mpv).dispose(ctx);
     } else {
+      // Isolate shutdown remains its existing asynchronous request protocol;
+      // this path is not a close-and-drain completion barrier.
       InitializerIsolate().dispose(mpv, ctx);
     }
   }

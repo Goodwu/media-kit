@@ -107,7 +107,9 @@ final class MetalSurfaceBlitter {
   /// thread never blocks on GPU completion.
   ///
   /// The completion outcome arrives through [completionHandler] on the main
-  /// queue: the caller marks the frame presented (or failed) there. While the
+  /// queue: the caller records GPU completion (or failure) there. Actual
+  /// drawable presentation is reported separately by the optional diagnostic
+  /// [presentedHandler]. While the
   /// blit is in flight, the source [pixelBuffer] is marked in
   /// `NativeFrameRegistry`, so the GL producer parks it instead of recycling
   /// it into the writable pool (see `SwappableObjectManager.releaseHeld`).
@@ -115,6 +117,7 @@ final class MetalSurfaceBlitter {
     pixelBuffer: CVPixelBuffer,
     to drawable: CAMetalDrawable,
     timingHandler: ((MetalSurfaceFrameTiming) -> Void)? = nil,
+    presentedHandler: ((CFTimeInterval) -> Void)? = nil,
     completionHandler: ((Bool) -> Void)? = nil
   ) -> Bool {
     frameNumber += 1
@@ -153,6 +156,18 @@ final class MetalSurfaceBlitter {
     #if DEBUG
     if shouldSample {
       addOutputSample(to: command, from: drawable.texture, frame: frameNumber)
+    }
+    #endif
+    // Diagnostics only: GPU completion does not prove that Core Animation
+    // presented the drawable. The caller supplies this handler only during
+    // its bounded opt-in window. Registration never changes present policy.
+    #if os(macOS)
+    if let presentedHandler,
+       #available(macOS 10.15.4, *) {
+      drawable.addPresentedHandler { presentedDrawable in
+        let presentedAt = presentedDrawable.presentedTime
+        DispatchQueue.main.async { presentedHandler(presentedAt) }
+      }
     }
     #endif
     command.present(drawable)

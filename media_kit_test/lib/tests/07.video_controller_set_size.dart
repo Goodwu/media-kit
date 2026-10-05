@@ -3,6 +3,7 @@ import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 
 import '../common/globals.dart';
+import '../common/local_playback_observer.dart';
 import '../common/sources/sources.dart';
 
 class VideoControllerSetSizeScreen extends StatefulWidget {
@@ -20,20 +21,41 @@ class _VideoControllerSetSizeScreenState
     player,
     configuration: configuration.value,
   );
+  LocalPlaybackObserver? _localObserver;
 
   @override
   void initState() {
     super.initState();
     player.setAudioTrack(AudioTrack.no());
     player.setPlaylistMode(PlaylistMode.loop);
-    player.open(Media(sources[0]));
+    final opening = player.open(Media(sources[0]));
     player.stream.error.listen((error) => debugPrint(error));
+    if (LocalPlaybackObserver.enabled) {
+      _localObserver = LocalPlaybackObserver(player)
+        ..observeOpen(opening, sources[0]);
+    }
   }
 
   @override
   void dispose() {
+    _localObserver?.stop();
     player.dispose();
     super.dispose();
+  }
+
+  Future<void> _setSize(int height) async {
+    final width = 16 / 9 * height ~/ 1;
+    final resizing = controller.setSize(width: width, height: height);
+    _localObserver?.observeOperation(resizing, 'resize', {
+      'requestedWidth': width, 'requestedHeight': height,
+    });
+    await resizing;
+    // Local opt-in experiment: replay the same PTS after each size request.
+    // Normal demo behavior remains the original size change.
+    if (!mounted || _localObserver == null) return;
+    final seeking = player.seek(const Duration(seconds: 10));
+    _localObserver?.observeOperation(seeking, 'seek', {'targetMs': 10000});
+    await seeking;
   }
 
   @override
@@ -46,7 +68,7 @@ class _VideoControllerSetSizeScreenState
         alignment: Alignment.bottomRight,
         children: [
           Video(
-            controller: controller,
+            controller: _localObserver?.observe(controller) ?? controller,
             controls: NoVideoControls,
           ),
           Card(
@@ -57,10 +79,7 @@ class _VideoControllerSetSizeScreenState
               child: ListView(
                 children: [
                   ListTile(
-                    onTap: () => controller.setSize(
-                      width: 16 / 9 * 2160 ~/ 1,
-                      height: 2160,
-                    ),
+                    onTap: () => _setSize(2160),
                     title: const Text(
                       '2160p',
                       style: TextStyle(
@@ -81,10 +100,7 @@ class _VideoControllerSetSizeScreenState
                     ),
                   ),
                   ListTile(
-                    onTap: () => controller.setSize(
-                      width: 16 / 9 * 1080 ~/ 1,
-                      height: 1080,
-                    ),
+                    onTap: () => _setSize(1080),
                     title: const Text(
                       '1080p',
                       style: TextStyle(

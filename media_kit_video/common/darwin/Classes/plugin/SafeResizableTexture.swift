@@ -33,6 +33,20 @@ public class SafeResizableTexture:
     }
   }
 
+  #if os(macOS)
+  // Same original wrapper mutex and exactly one child render. The token comes
+  // from this call, never from a latest/global sequence or recycled identity.
+  func render(_ size: CGSize, diagnosticRequest: CompletedRenderRequest?) -> CompletedRenderToken? {
+    return locked {
+      if let hardware = child as? TextureHW {
+        return hardware.render(size, diagnosticRequest: diagnosticRequest)
+      }
+      child.render(size)
+      return nil
+    }
+  }
+  #endif
+
   public func copyPixelBuffer() -> Unmanaged<CVPixelBuffer>? {
     return child.copyPixelBuffer()
   }
