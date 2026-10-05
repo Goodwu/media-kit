@@ -74,6 +74,14 @@
 - macOS/Linux/Windows：`wakeup_callback_owner_test.dart` 在无 `MEDIA_KIT_TEST_MPV` 时以 `throw StateError` 硬失败（该测试设计为对精确候选 adhoc 运行，CI 套件必然缺 env）。修复：env 缺失时 main() early-return（注册零测试=通过；带 env 仍是完整 7 项——本会话已对候选 be044572 实证 7/7）。
 - Web：`native_player_event_pump_exit_test.dart` 位于 test/ 根且 import dart:ffi，CI web 流程只 rm `test/src/player/native`，该文件编译失败。修复：移入 `test/src/player/native/`（既有 rm 即覆盖；语义上本就是 native 测试，无外部路径引用）。
 
+**最终 CI 判定：fix push run 37324025458 全绿（24/24、零失败）**——含四平台 package tests（macOS 88 过、Linux/Windows/Web 全过）、全平台构建矩阵、libmpv-jar-identity、hdr-lab-analyze、macOS optional-libs（stub 修复验证）；OHOS run 37324025430 success（三连绿）。本地 belt-and-braces 全套复跑中两个网络流测试（player-buffering-network/upon-seek）瞬时抖动失败，隔离复跑 7/7 全过且 CI 同套件全绿——定性为网络 flake 非回归（该两测试从远端 URL 拉流计时断言）。
+
+### 终态
+
+- 分支：本地与远端均仅剩 `main`（推送至 f7a24aa6）；本会话三个提交：b31cd49b（归一+测试修复+证据）、f4bb23b5（stub no-libs 修复）、f7a24aa6（package tests 适配修复）。
+- 本会话共修复 75743f5c/8de8a0c2 首次进 CI 暴露的 4 处缺口（2 stale 测试、stub API 缺失、2 处测试平台/env 适配），全部本地+CI 双重验证。
+- 交接：macOS 五场景人工验收仍开放（既有任务门槛不变）；stash 保留 1 条 OHOS guard 移除待用户定夺；LG tone-map 性能、FFmpeg T3 等既有后续项不受本轮影响。
+
 ## Archive Metadata
 
 - date: 2026-10-05
