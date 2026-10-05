@@ -67,6 +67,22 @@ native 溯源门禁步骤、指纹 JSON 进产物、manifest 增 patch_branch/ba
   不改产物）；SBOM/SHA256SUMS 校验通过，builder_commit 102510e。
 - **本地构建 PATH 前置（macOS）**：DevEco 的 hvigor/node/ohpm 三件套需入 PATH，
   DEVECO_SDK_HOME 指向 DevEco sdk——已写入 bootstrap 脚本文档头。
+- **同步 workflow 修复与验证**：首跑失败因 `GITHUB_TOKEN` 未做 step 级 env 映射
+  （`set -u` 未绑定）；三个 infra workflow 修复后 flutter 同步重跑**绿**
+  （gitcode 从 GitHub runner 拉取 46 秒成功，可达性风险解除；镜像 tip 保持
+  f4ab1955 fast-forward no-op）。mpv/FFmpeg 同款 workflow 已修复推送，触发
+  验证因 runner 排队未即时回读，模式与 flutter 完全一致。
+
+## 遗留与后续
+
+1. patch 分支 rebase 到上游 tip（f4ab1955）的首轮升级演练（流程：同步→rebase→
+   CI→更新 pin 四件套）。
+2. engine 工件按 engine.version 快照为镜像仓 Release 资产（Phase 5 可选加固，
+   ~1G）。
+3. 本机安装 command-line-tools 26.0.0.621 对齐 CI 工具链，消除
+   libmediakit_ohos_hdr.so/module.json 的 patch 级差异，逼近全量字节等价。
+4. libapp.so 跨机差异为 AOT 嵌入绝对路径的固有行为；如需字节等价可评估
+   --obfuscate（改变产物语义，另行决策）。
 
 **修正记录（2026-10-06 凌晨）**：CI v2 首跑失败于 hvigor Dart 编译——v1 patch
 的 hunk 过滤器行号锚定差一，把部分 `case TargetPlatform.ohos:` 插到非 switch
