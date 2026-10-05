@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "mirror": "https://github.com/Goodwu/flutter_flutter.git",
+  "fallback": "https://gitcode.com/CPF-Flutter/flutter_flutter.git",
+  "upstream_branch": "oh-3.44.9-dev",
+  "base_commit": "4f1a4267afdd99ef58f81ae825fae7fb5603c67e",
+  "patch_branch": "ohos/media-kit-patches",
+  "patch_commit": "5be1ddcb6f333a92775134f558430b39d0e6a050",
+  "engine_version": "5a2a6a42cce67f965cf540fcecf616faca624aa1",
+  "version_tag": "3.44.9+ohos",
+  "notes": "单一事实源：CI 与本地 bootstrap 均消费本文件。升级流程 = 同步镜像 → rebase patch 分支 → 本地/CI 验证 → 更新 patch_commit。"
+}

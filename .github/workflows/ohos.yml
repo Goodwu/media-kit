@@ -7,6 +7,10 @@ on:
   push:
     branches:
       - main
+  schedule:
+    # Weekly canary: rebuild the pinned combo so upstream/mirror rot surfaces
+    # even without repo activity.
+    - cron: '33 4 * * 1'
   workflow_dispatch:
 
 concurrency:
@@ -38,18 +42,50 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
-      - name: Set up Flutter OHOS
+      # Single source of truth: tool/ohos/flutter-ohos.pin (same file the
+      # local bootstrap consumes). Primary source is the Goodwu mirror
+      # (patch branch exists only there); fallback reconstructs from gitcode
+      # base commit + the in-repo parity patch.
+      - name: Set up Flutter OHOS (pinned mirror + patch branch)
         run: |
+          set -euo pipefail
           flutter_ohos="$RUNNER_TEMP/flutter-ohos"
           mkdir -p "$flutter_ohos"
+          pin_file="$GITHUB_WORKSPACE/tool/ohos/flutter-ohos.pin"
+          read_pin() { python3 -c "import json;print(json.load(open('$pin_file'))['$1'])"; }
+          mirror=$(read_pin mirror)
+          fallback=$(read_pin fallback)
+          patch_commit=$(read_pin patch_commit)
+          base_commit=$(read_pin base_commit)
+          version_tag=$(read_pin version_tag)
           git -C "$flutter_ohos" init
-          git -C "$flutter_ohos" remote add origin https://gitcode.com/openharmony-tpc/flutter_flutter.git
-          git -C "$flutter_ohos" fetch --depth 1 origin aa76d9bbeee7806a87dbd202d2550dfd11550b82
-          git -C "$flutter_ohos" checkout --detach FETCH_HEAD
+          git -C "$flutter_ohos" remote add origin "$mirror"
+          if git -C "$flutter_ohos" fetch --depth 1 origin "$patch_commit"; then
+            git -C "$flutter_ohos" checkout --detach FETCH_HEAD
+            actual=$(git -C "$flutter_ohos" rev-parse HEAD)
+            if [ "$actual" != "$patch_commit" ]; then
+              echo "mirror returned $actual, expected $patch_commit" >&2
+              exit 1
+            fi
+          else
+            echo "mirror unreachable, reconstructing from $fallback @ $base_commit" >&2
+            git -C "$flutter_ohos" remote set-url origin "$fallback"
+            git -C "$flutter_ohos" fetch --depth 1 origin "$base_commit"
+            git -C "$flutter_ohos" checkout --detach FETCH_HEAD
+            git -C "$flutter_ohos" apply --check \
+              "$GITHUB_WORKSPACE/tool/ohos/patches/framework-ohos-parity-4f1a4267.patch"
+            git -C "$flutter_ohos" apply \
+              "$GITHUB_WORKSPACE/tool/ohos/patches/framework-ohos-parity-4f1a4267.patch"
+          fi
           # The OHOS fork does not publish upstream Flutter release tags. Add
           # a local build-metadata tag so Flutter reports a semver-compatible
           # framework version instead of 0.0.0-unknown.
-          git -C "$flutter_ohos" tag -f 3.44.9+ohos aa76d9bbeee7806a87dbd202d2550dfd11550b82
+          git -C "$flutter_ohos" tag -f "$version_tag" "$patch_commit"
+          {
+            echo "FLUTTER_OHOS_COMMIT=$patch_commit"
+            echo "FLUTTER_OHOS_BASE_COMMIT=$base_commit"
+            echo "FLUTTER_OHOS_PATCH_BRANCH=$(read_pin patch_branch)"
+          } >> "$GITHUB_ENV"
           echo "$RUNNER_TEMP/flutter-ohos/bin" >> "$GITHUB_PATH"
         working-directory: .
       - name: Verify Flutter OHOS toolchain
@@ -57,6 +93,25 @@ jobs:
           set -euo pipefail
           flutter --version
           dart --version
+      # Self-built binary provenance gate: the committed libmpv zip must match
+      # the recorded libmpv-ohos-build generation (see native-libs.pin).
+      - name: Verify native libmpv provenance
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          pin = json.load(open('tool/ohos/native-libs.pin'))
+          zip_path = Path(pin['zip_path'])
+          actual = hashlib.sha256(zip_path.read_bytes()).hexdigest()
+          if actual != pin['zip_sha256']:
+              raise SystemExit(
+                  f"libmpv zip drift: {actual} != {pin['zip_sha256']}\n"
+                  "rebuild via Goodwu/libmpv-ohos-build and update tool/ohos/native-libs.pin"
+              )
+          print(f"native provenance OK: {pin['artifact']} @ {pin['release_tag']} ({pin['repo']})")
+          PY
+        working-directory: .
       # pubspec.ohos.lock must match what the OHOS Flutter (3.44.9+ohos)
       # resolves: the SDK-bundled packages (matcher/meta/test_api/vector_math)
       # pin to that SDK's versions and differ from a desktop-stable Flutter
@@ -88,7 +143,9 @@ jobs:
         env:
           SOURCE_COMMIT: ${{ github.sha }}
           RUN_ID: ${{ github.run_id }}
-          FLUTTER_OHOS_COMMIT: aa76d9bbeee7806a87dbd202d2550dfd11550b82
+          FLUTTER_OHOS_COMMIT: ${{ env.FLUTTER_OHOS_COMMIT }}
+          FLUTTER_OHOS_BASE_COMMIT: ${{ env.FLUTTER_OHOS_BASE_COMMIT }}
+          FLUTTER_OHOS_PATCH_BRANCH: ${{ env.FLUTTER_OHOS_PATCH_BRANCH }}
           SETUP_OHOS_COMMIT: 5c8e74d05fc9888a387b6154ba06d0cd9ede3da1
           OHOS_CLI_VERSION: 26.0.0.621
         run: |
@@ -96,6 +153,8 @@ jobs:
           hap=$(find ohos/entry/build -type f -name '*unsigned.hap' -print -quit)
           mkdir -p release-metadata
           cp "$hap" release-metadata/
+          python3 ../../tool/ohos/hap_fingerprint.py "$hap" \
+            > release-metadata/hap-fingerprint.json
           python3 - <<'PY'
           import hashlib
           import json
@@ -111,6 +170,8 @@ jobs:
               'source_commit': os.environ['SOURCE_COMMIT'],
               'workflow_run_id': int(os.environ['RUN_ID']),
               'flutter_ohos_commit': os.environ['FLUTTER_OHOS_COMMIT'],
+              'flutter_ohos_base_commit': os.environ['FLUTTER_OHOS_BASE_COMMIT'],
+              'flutter_ohos_patch_branch': os.environ['FLUTTER_OHOS_PATCH_BRANCH'],
               'setup_ohos_commit': os.environ['SETUP_OHOS_COMMIT'],
               'ohos_cli_version': os.environ['OHOS_CLI_VERSION'],
               'platform': 'ohos',
@@ -126,8 +187,9 @@ jobs:
               encoding='utf-8',
           )
           PY
-          (cd release-metadata && sha256sum *.hap manifest.json > SHA256SUMS)
+          (cd release-metadata && sha256sum *.hap *.json > SHA256SUMS)
           cat release-metadata/manifest.json
+          python3 -c "import json;d=json.load(open('release-metadata/hap-fingerprint.json'));print('key_digest:', d['key_digest'])"
           cat release-metadata/SHA256SUMS
       - uses: actions/upload-artifact@v4
         with:
