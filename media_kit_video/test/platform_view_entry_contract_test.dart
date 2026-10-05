@@ -323,7 +323,7 @@ void main() {
                 "status != 'released' && status != 'alreadyReleased'"),
     'failed stop or release must retain retry state and reject ambiguous acknowledgements',
   );
-  final terminate = nativePlayer.indexOf('mpv.mpv_terminate_destroy(ctx);');
+  final terminate = nativePlayer.indexOf('mpv.mpv_terminate_destroy(ctx)');
   final terminalCallbacks =
       nativePlayer.indexOf('await retryPostTerminationCallbacks();', terminate);
   final terminalDispose = androidController

@@ -1,6 +1,16 @@
 # native output rebuild lifecycle
 
 ## Current State
+
+2026-10-05 agent交接：macOS后续修复已在独立共享核心分支提交并推送252c5851，产品已提交推送68edf0ec9；本工作树补充保存历史实验记录。完整任务/已证/未证/下一步见 `/Users/wuweiwei1/src/PiliPlusX/archives/handoffs/macos-player-20261005.md`。当前核心源码身份以已审252c5851为准，不能把本记录工作树76440510当作最新候选核心。
+
+- Release派生Info bootstrap的增量/target缺失/模板变化/未知模式/模式切换V2为PASS_RELEASE_BOOTSTRAP_MATRIX_WITH_LIMITS；derived缺失持久化前置记录与模板恢复SLF仍有限。
+- Debug/Profile实际构建、当前shared consumer/最终包绑定、P5实际HDR/EDR及P8.4同PTS metadata、最终操作/长播/退出重入及受影响平台回归未完成；旧可见流畅通过仅对应旧候选，最新r4有卡顿FAIL。
+- 用户授权保存交接、提交并推送；性能优化另专题，无Release/merge授权。证据目录仅报告/日志/源码快照/截图入Git，缓存及raw binary本地保留并索引；一条签名视频URL脱敏，原证据在本地handoff备份。
+- 本次没有新增构建或播放。完整submission receipt：`/Users/wuweiwei1/src/media-kit-build/macos-agent-handoff-20261005/submission-receipt.json`；本记录分支推送receipt将追加其中。
+- **分支归一注记（2026-10-05）**：codex/macos-shared-hdr-fix（252c5851）与 codex/macos-completion-handoff（0ecd4d9d）已按用户决策归一——前者代码同源并入 main 75743f5c（main 侧为超集），分支 ref 已删除，252c5851 作为已审 r4 快照身份引用仍有效；后者证据（macos-ppx-completion artifacts 596 文件 + 2 实验记录）已全量迁入 `~/src/media-kit-experiments`（提交 b4f9538），本文 `archives/experiments/` 前缀路径按 TASKS 路径映射规则指向该库根目录。
+
+## Historical State (旧快照与实验过程，不替代当前交接)
 - 2026-09-27 macOS 窗口复核：对现有 `/Users/wuweiwei1/src/PiliPlusX/build/macos/Build/Products/Debug/PiliPlusX.app` 执行 LaunchServices `open -n` 后，AppleScript 枚举到 1180×720 Aqua 窗口。此前“当前桌面环境无可操作窗口”已非持续阻断；尚未核对该包对应的 mpv 0.41 产品播放链、seek、重入、输出重建及 HDR 长播。
 - 2026-09-27 OHOS 实机验收入口核验：当前主机 `hdc list targets` 返回 `[Empty]`，无可连接实体机；TASKS 将该项移至 Blocked，设备接入后重新核验身份、包与运行状态。
 - 背景: 当前分支包含 macOS native surface、OHOS HDR surface 和播放器释放路径的协同修改。
@@ -65,3 +75,7 @@
 - submodule:
 - language: zh-CN
 - tags: [archive, native-output, hdr, ohos, macos]
+
+## 2026-10-03 产品链纠正
+
+旧交接默认 Debug modern 身份不成立（实为 mpv 0.36）。已加入 Xcode 全配置及 CI 最终包门禁，稳定源码构建、89 项测试与独立审核通过。产品五场景仍开放；本轮入口 `archives/experiments/macos-ppx-completion-20261003.md`。

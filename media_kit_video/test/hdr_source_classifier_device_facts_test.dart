@@ -48,8 +48,18 @@ void main() {
       );
       expect(descriptor.dvProfile, 5);
       expect(descriptor.dvCompatibilityId, 0);
-      expect(descriptor.enhancementLayer, isFalse);
+      // Decoder facts alone cannot prove the layer structure: without a
+      // container fact the P5 enhancement layer stays unknown.
+      expect(descriptor.enhancementLayer, isNull);
       expect(descriptor.kind, HdrMediaKind.dolbyVisionP5);
+      // The single-layer device fact reports through the container-fact
+      // channel (el-present), not base-layer inference.
+      final withContainerFact = const HdrSourceClassifier().classify(
+        videoParams: const VideoParams(gamma: 'pq', primaries: 'bt.2020'),
+        dolbyVisionProfile: 5,
+        dvElPresent: false,
+      );
+      expect(withContainerFact.enhancementLayer, isFalse);
     });
 
     // media-kit-hlg-dvs-graypatch50.mp4 (pure HLG): profile empty, gamma
