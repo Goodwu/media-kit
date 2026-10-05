@@ -67,6 +67,18 @@
 
 - [ ] A1: 在真实 macOS/OHOS 设备上完成 native output 生命周期验收。
 
+## 2026-10-06 OHOS 模拟器轮（guard 移除验收）
+
+用户决策移除 `OhosVideoController.create` 的 `Utils.IsEmulator` guard 并跑模拟器测试。环境：Mate 60 Pro+ 窗口模拟器（ARM64，API 26；磁盘清至 13G 过 12G 门槛）、hdc 127.0.0.1:5555、本地 flutter-ohos（补 tag 3.44.9+ohos + version 文件 + 清 flutter.version.json 缓存解决 0.0.0-unknown）、hvigorw/ohpm 入 PATH。
+
+- **发现并修复 OHOS Flutter 首跑阻塞**：`GeneratedPluginRegistrant` 从未注册 path_provider（OHOS 无联邦默认实现）→ `getApplicationSupportDirectory()` MethodChannel 永久挂起 → app 恒停下载页（pubspec.ohos.lock 从 pub.dev 解析、无 ohos 变体；CI 只构建不运行故从未暴露）。修复：pubspec 显式依赖 `path_provider_ohos 2.2.1`（pub.dev）+ 锁更新（SDK 四件套未漂移）。
+- **样片通路**：模拟器 NAT 无宿主代理到 GitHub 不通；新增 `MEDIA_KIT_TEST_SAMPLE_BASE` dart-define 样片基址覆盖（默认仍上游 URL），指向宿主 HTTP 服务（QEMU 网关 10.0.2.2:8000）后 5 样片全部 200 拉取成功。曾试 rawfile 打包提取（ArkTS/Dart 两版）未通、define 无 DNS 直连 IP 后即通——既往通路假设更正：先前"镜像 GET"实为本机自测 curl。
+- **guard 移除验收（API 层通过）**：列表→single_player_single_video 页，VideoController 正常创建（无 `does not support emulator` UnsupportedError），`[OhosVideoController] videoParams surface request: 854x480` surface 生成、纹理路径 `updateTextureBuffer=true` 运行。
+- **底层管线在模拟器两模式均不可用（guard 原始动机证实）**：H/W（hwdec auto）→ mpv **vo 线程 SIGSEGV**（libmpv.so 内 NULL 解引用，faultlog `cppcrash-...-20261006014024696.log` 已取回本机）；S/W → 无崩溃、解码管线活着但**视频区恒黑不出帧**（~60s 无渲染）。退出路径（BACK）dispose 干净、进程存活零新崩溃。
+- 附带修正：仓库内 `libs/ohos/.../libmpv_aarch64.zip` 为过期副本（2f9d1f59），构建按 CMake 钉定（20260920 release，SHA 29b8bd4d）自动重下替换——本轮随提交刷新为钉定版。测试 libmpv 即钉定 20260920 世代，崩溃结论对该世代成立。
+- **结论**：guard 移除本身达成（Dart 层不再拒绝模拟器、控制器生命周期可跑通退出）；模拟器上的可視播放仍不可行（vo 崩溃/黑帧），OHOS 播放验收仍以真机为准（既有 blocked 项不变）。e1/e2 探针证明的"libmpv 软解+自管 EGL"路线与 Flutter vo 管线不同层，差距定位在 libmpv OHOS vo/纹理路径对模拟器的适配。
+- 设备端截图判定用 `snapshot_display`（模拟器自带 -instance screenshot 输出损坏）；UI 注入用 `uinput -T -m x y x y 200`（H/W 切换、列表点击、BACK=`uinput -K -d 2 -u 2` 均可用）。
+
 ## Archive Metadata
 - date: 2026-09-20
 - entry: native-output-rebuild

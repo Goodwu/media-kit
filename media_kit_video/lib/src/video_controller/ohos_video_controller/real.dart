@@ -1003,15 +1003,6 @@ class OhosVideoController extends PlatformVideoController {
     Player player,
     VideoControllerConfiguration configuration,
   ) async {
-    final bool isEmulator = await _channel.invokeMethod('Utils.IsEmulator');
-    if (isEmulator) {
-      throw UnsupportedError(
-        '[VideoController] does not support emulator.'
-        ' '
-        'Please use actual device.',
-      );
-    }
-
     Future<String> getDefaultHwdec() async {
       bool hw = configuration.enableHardwareAcceleration;
       return hw ? 'auto' : 'no';

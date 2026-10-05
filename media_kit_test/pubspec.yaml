@@ -22,6 +22,10 @@ dependencies:
   path: ^1.8.2
   file_picker: ^12.1.3
   path_provider: ^2.0.14
+  # OHOS platform implementation of path_provider; resolved as an unused
+  # extra on other platforms, required for the demo's sample downloads on
+  # OHOS (no federated default implementation exists there).
+  path_provider_ohos: ^2.2.1
   http: ">=0.13.0 <2.0.0"
   universal_platform: ^1.0.0+1
   web: ^1.1.0
