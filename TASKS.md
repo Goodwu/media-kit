@@ -2,6 +2,8 @@
 
 任务事实源：这里只保留当前状态、验收门槛和下一步。清理前的完整任务台账快照：`archives/experiments/tasks-ledger-snapshot-20260927.md`、`archives/experiments/tasks-ledger-snapshot-20261002.md`；按各项 `context` 查看持续更新的依据。
 
+**路径映射（2026-10-05 起）**：`archives/experiments/` 已整体迁移至独立仓库 **`~/src/media-kit-experiments`**（实验记录/证据/交接/索引全量归档）。本文件及 conversations 中所有 `archives/experiments/` 前缀路径均映射到该库根目录；迁移前的提交历史在主仓库 `git log -- archives/experiments`。
+
 ## 接手快照（2026-10-02 更新；换 agent 从这里开始）
 
 - **mpv 审整改实机验收完成（2026-10-01，LYA）**：review 立即修四项（P0-1/P0-2/P1-1/P1-2）+ 短期清理全部实机验证通过并已提交 mpv fork；MAE 系统偏差分量与基线一致（8× 块平均全 ≤100）；P0-1 同进程双文件双 dump 通过；4K59.94 SDR 性能不劣于 398d0c3/c025cbf 同夜对照。整改产品 JAR `media-kit-remediation-final-product.jar`（a7f36bd4…）已入 `~/src/media-kit-build/jars/`。详见 `archives/experiments/android-remediation-mae-p0-readback-20261001.md` 与 conversation `architecture-review-remediation-20260930.md` Current State。
@@ -17,16 +19,23 @@
 - **HDR 能力路由 Phase 1（S0–S13）完成（2026-10-02）**：会话 API/私有回退子包/诊断日志/hdr_lab 迁移/LYA 27+ 轮实机验收/PiliPlusX 接入全部交付并通过对应等级审核；验收记录 `archives/experiments/android-hdr-auto-output-acceptance-20261002.md`。**三仓状态（2026-10-02 晚更新）**：media-kit main 已与远端同步（`420fba3e..8d8382da` 已推送，②+方案 B 本轮提交随本轮推送）；mpv fork `media-kit/android` 已推送至 `d24c59905b`（远端分支实际存在且原在 `5f9ddf1777`——早前"远端无同名分支"记录有误；发布 tag 流不变）；PiliPlusX `fix/darwin-video-output-rebuild-barrier` 已推送 personal remote `Goodwu/PiliPlusX`（`07f153733..2ce821d4c`；其 origin 指向上游 cnctem 无写权限）。构建仓 dv-experiment `feature/android-dv-build` 已推送 `91bb42af`（`v_mpv=d24c59905b`）；产物 JAR `media-kit-d24c59905-arm64-v8a.jar`（SHA-256 `cafef3a4…`）在 `~/src/media-kit-build/jars/`。CI 标记与 build.gradle 钉定随发布链同步，勿提前加。
 ## 当前任务
 
+- [ ] 共享 gpu-next/libplacebo 渲染核心关闭 macOS DV P5 偏色
+  - status: in_progress
+  - context: docs/requirements/shared-hdr-rendering.md；PiliPlusX archives/conversations/player-architecture-remediation.md
+  - latest: 2026-10-04 用户要求跨平台同一套代码。当前Pili最终4K小窗/全屏流畅，P5偏色未通过；legacy libmpv路径及native context缺口已取证，固定同源隔离参考库已通过增量V2，实际启动受锁屏阻止；统一core实施基线arm64已完成246项编译/链接（b303d221…），共用source-frame初始化已抽取，222项重编译/链接及最终V1通过（产物dadb0ffb…）；依赖漂移已修正，实际产物无Homebrew/LuaJIT。共享mapper重配置/texture导入及target色彩策略已抽取、编译与V1通过；实际target.c对象测试覆盖linear/PQ/hint/contrast。当前仍只有native VO消费helper，完整共享renderer及Render API接入未完成。 P4已写入约2300行共享renderer与约340行native adapter，完整queue/import/options/ICC/OSD/DR已迁移并编译链接通过；初步静态检查core无长期VO/锁/swapchain依赖、adapter无独立queue/renderer，实际core/queue/image/DR失败与生命周期测试已独立重跑通过，冻结四文件获独立V2限定PASS；该审核不涵盖Render API、真实shader、VideoToolbox导入或产品颜色。第二个Render API前端已写入并注册，固定布局目标契约及GL附件校验已落地；首轮GL枚举编译错误已修正，第二/三轮构建exit0；P5 v1十文件冻结及产物79ae5986…摘要已独立核对，正在高风险审核与实际frontend边界测试。五项审核修正已写入活动源并build5 exit0（包括由截图传入帧推进共享队列）；P5 v2已十文件冻结，build5 exit0，frontend fresh compile/link/run exit0且Lead独立重跑通过；测试覆盖512次wrapper平衡、ICC/LUT拒绝、first/seek截图选帧、target ABI及GL绑定恢复。dummy截图目标BLITTABLE能力仅在fixture边界适配，未验证真实shader/像素/硬解；v2独立复审限定PASS；真实CGL空帧1500轮PASS，宿主GL对象存活且allocator三点相等（不作leak结论）。真实P5 probe日志确认VT[p010]4K59.94，但矩形纹理shader textureSize(sampler2DRect,int)编译失败，接口仍返回0；不能判定真实视频通过，已定位PL349 scaler失败后sample_direct降级，v3共享RECT→normalized2D GPU导入和stickyerrors已写入、build6 exit0；真实P5观测probe exit0，VT/PTS推进30samples29变化finite0且无shader错误，但64x64诊断目标Dropped146，不能颜色/性能验收。v3最终build8冻结，library 1ec8d6a7…；frontend新增缓存resize/missingBlit及alias生命周期测试、P4回归通过。独立审核未发现确定新增源码阻断，但双平面部分失败、真实GPU两帧mix与完整GL状态覆盖仍缺。Lead最终同库P5实播1080p/4K均exit0，30samples29变化finite0/diagnostic0，分别Dropped112/52，不能作颜色或流畅验收；原probe未按帧更新及目标时间调度，已编译timed对照。v4正在补scissor/sRGB保护和双平面失败测试，Swift共享桥接已候选opt-in接入：固定64/28字节ABI、目标按buffer选择、headroom参考域snapshot+epoch、成功诊断门禁、锁外paused redraw通知；headroom不可视为绝对nit校准。25文件typecheck曾通过，最新lease/API CString修正待重测；取current+占用改为pool锁内atomic registry claim、所有early-return与completion归还，独立复审中。Intel同v4源码独立构建成功，install-name规范化与加载/fixture验证中；未lipo或打包新App。产物08d58edc…、test b883d8e6…，P5 v1独立审核发现fixed target仍可被ICC/LUT覆盖、非linear参考白接受但未生效、GL proc空检查过晚，均需v2修正与实参测试；第二前端尚未获审核通过或产品验收；macOS桥接失败帧不发布修复已获V2，pool/24文件typecheck通过，生产App尚未重建、错误注入与恢复未验收。不得将参考/PoC、编译通过或marker门禁视为产品完成。
+  - acceptance: 库内共享P5/HDR色彩核心、真实backend能力门禁、正确硬解导入和一次目标转换；同源同PTS用户颜色/亮度接受，4K60流畅、最终生命周期矩阵和双架构加载签名通过。Pili不补平台色彩实现，Android已通过路径需回归，默认启用需V2审核；未提交推送。
+
 - [ ] LG-H870DS API24 HDR能力检测与 hdr_lab 移植
   - status: in_progress
   - context: archives/conversations/lg-h870ds-hdr-demo-20261004.md
+  - handoff: ~/src/media-kit-experiments/lg-hdr-agent-handoff-20261005.md（独立库；接手先读；含各轮工具入口、设备状态与下一步）
+  - evidence-index: ~/src/media-kit-experiments/lg-hdr-evidence-index-20261005.json（5159文件全量归档独立库；原始大证据另留本机 ~/src/media-kit-build/lg-api24/）
   - acceptance: 固定素材和实际解码/输出路由；demo SDR/HDR10/P8.4/P5/nativeDV Release画质与性能；暂停、seek、全屏、重入、Surface恢复、失败回退及严格退出。人工显示验收独立，静态/构建/日志不能代替。
-  - installed: R21 APKc193f18f/lib7cc6/JAR23036实际build52158/install15898exit0，-2整APK/lib读回一致。62066唯一Run成功，run1791140414516796-n4已settled，外来FILE_LOADED/owner-stop refusal/原债务StateError保持/Player终止；73230唯一系统Back当前最终JSON读回+Launcher exit0，sessionclean=false预期债务，n4DeviceAcceptance=false；独审外部Surface release/ACK已按当前tuple确认。Close按钮裁剪不可达，三次validator均拒绝且无tap；原证据保留。日志57662/33703终态，timeout30000恢复sleep，runtime独审718e5aa1限定通过并已归档；未提交推送。
-  - verified: R3 P5完整画面/颜色/亮度/流畅性获人工确认；R6两轮默认全屏结构完成，人工颜色正常、流畅。R7失败启动Close与Back各独立运行保留原error/debt，真实配置恢复、Player终止、Launcher均验证；两次健康关闭end-certified且最终无错误/debt。
-  - diagnostic-next: R21独立runtime审核718e5aa1/manifest401c7f3f已逐hash核验归档：N4外来FILE_LOADED、同Session代次、native_dv/timed保持、owner-stop拒绝、原StateError债务与严格Back退出通过限定审核。vo/null和hwdec空不称全部属性保持。当前PID13871/handle545802965584/gen1/wid2099318在03:00:27明确released/acknowledged，属于自动dispose阶段，不是03:05 Back新ACK。原final不改，n4DeviceAcceptance=false、controllerRetired=false/nativeStopIssued未知保留。Close按钮不可达P2待布局修复及真实按钮验收。 当前原page作者已把Run/Close移出滚动诊断区；73952实际16PASS（4布局+12原transport），首次fixture释放semantics过晚失败已留证；77515 actualexit0/Noissues，REPORT4a669f71已freeze且Root全manifest核验归档，原reviewerV1限定PASS REVIEW12ade35b/export162ac461，52491实际24PASS，Root全hash核验归档，全部agent终态；不改Session/handler/default，未构建或ADB，真实按钮仍待。
-  - active-work: R8 N1真实约10.06s超时→同代SDR回退、options恢复/typed route/strict cleanup均通过；用户画面颜色正常，tone-map卡顿保留为已知失败。2026-10-04用户将tone-map性能降低优先级，暂无快速修复依据，已后移清单末尾；仅收尾已启动性能独审并保存草案，不新构建性能包。优先manual Resume/Home/Recents持续播放、全屏和HDR10验收。logcat已实测exec-out可用，LG日志开关恢复原值；R13比例/HDR亮度人工通过；HDR10颜色/profile独立候选及N4实机负向已采证，当前修复N4关闭按钮并准备P8.4普通Session，不改变默认策略，tone-map性能仍deferred。
-  - remaining: R9 ManualResume与Home连续播放人工/清理通过；安全Recents颜色/流畅通过，完整frame/亮度仍缺；全屏完整/旧叠层消失/亮度明确人工复核；N4按钮可达/整体验收缺口、HDR10 demo及时序亮度、P8.4普通Session路由/画面（设备固定素材1232790317B/SHA7626cac2已完整核对；tone-map性能low）、现代Vulkan设备回归；R14 Java Surface最终release ACK外部独立关联已通过，P5/失败分支的对应ACK未单独取证。SDR tone-map卡顿未解决，按用户优先级独立后续项，不阻塞当前高优先级实施。
-
+  - installed: **当前安装 P8.4 普通Session包**（lg-p84-ordinary-session-r1-20261005，APK c252ded15c4f055ab6552cf7196ca732bf671c3e629cb48e8ce02df5d2a9ddbd/lib7cc6f4ac/JAR23036e0b，defines 仅 AUTO_SINGLE_PLAYER/HDR_TRANSACTION/LOCAL_SOURCE=p84 三件，构建门=R22已审源码fresh一致（manifest 11a22f66）+R9 native+intake b12db075+用户指定defines，R22 build approval未继承；install predecessor=R22 strict fresh核验）。实播：素材fresh全字节校验（1232790317B/7626cac2）、hint→decoder verified升级、**实际路由 toneMapSdr 与intake预测100%命中**（nativeDV unsupportedStrategy/baseLayerDirect displayLacksTransfer/baseLayerConvert gpuHdrDataSpaceUnavailable/metadataReshape experimentalStrategySkipped四跳过原因逐项一致）、VIDEOPARAMS nv12 3840×1920 bt.2020-ncl gamma hlg sigPeak4.93 dvProfile8/compat4/无EL、tone-mapping bt.2390生效、android-surface-size 3840×1920、120s观察7截图（1.4-2.9MB变化，非黑屏）+logcat全程（仅1条探测期mpv错误）、Back严格退出（VideoOutputManager.dispose→AUTO_PLAYER_DISPOSE completed→Player disposed→WindowManager双surface销毁→Launcher、零flutter错误、timeout30000/sleep恢复）。设备现装P8.4包；R22 N4 final数据文件仍保留设备侧（strict-predecessor-r22-v1可续用）。人工画面/颜色/流畅验收pending（截图留档本机p84-session-run-r1/）。**EOS观察轮（2026-10-05，两轮共42分钟窗）**：AUTO_COMPLETED未出现、VIDEOPARAMS无新开播（非循环非停帧）——**极端tone-map性能劣化实证**：AudioTrack同句柄start()重启4824次（约250ms间隔持续underrun）、C2DColorConvert错误连续20分钟、04:29:54→05:13:57共44分钟wall-time未完成19.5分钟素材（推进<0.44x）；二次Back严格退出通过（dispose链handle 545917655120/wid2242、零flutter错误、timeout30000/sleep）。EOS缺口以"性能受限未达"关闭；eos-round 3文件归档（evidence-index 5137，eos-round-evidence.json量化）。**P8.4人工画面验收完成（2026-10-05用户实机重播反馈）**：颜色正常✓、流畅性不通过（帧率低、卡顿严重，与量化实测11.6fps/61%掉帧/4824次underrun完全吻合）；重播后Back严格退出通过（onSurfaceCleanup→dispose完成→Launcher）、timeout30000/sleep恢复。P8.4定性：路由toneMapSdr正确、颜色正确、性能失败（tone-map系统性问题，用户已定low/deferred，该人工结论构成性能项最终人工证据；量化基线：音频underrun约4次/秒）。
+  - verified: R3 P5完整画面/颜色/亮度/流畅性获人工确认；R6两轮默认全屏结构完成，人工颜色正常、流畅。R7失败启动Close与Back各独立运行保留原error/debt，真实配置恢复、Player终止、Launcher均验证；两次健康关闭end-certified且最终无错误/debt。R22 N4真实Close按钮严格退出通过（工具证书级，非人工显示验收）。P8.4普通Session实播路由/解码/严格退出技术性验证通过+**人工画面验收完成（颜色正常、卡顿严重如实登记为性能失败）**。
+  - diagnostic-next: 全屏维度R24完成（2026-10-05）：P5_SCOPE_FULLSCREEN define启用AppBar全屏按钮，用户观察旧叠层消失/画面完整/比例正常/全屏往返无异常全过；亮度不确定符合SDR tone-map路由预期；卡顿为已知tone-map性能项（low/deferred）。Back语义：首次Back被fullscreen scope消费（先退全屏）、二次Back严格退出（dispose→Launcher）——观察到的正常行为已归档。**LG任务全部无阻塞项完成，仅剩Vulkan回归（无设备blocked）**。
+  - active-work: 2026-10-05 全队列完成链：R22 N4 Close闭环→P8.4实播+人工验收→P5 ACK四分支闭环→HDR10人工观察轮→R17 Stop根因修复（审核PASS）→N4观测轮R23→**全屏维度R24人工观察完成（旧叠层消失✓/完整✓/比例✓/往返✓；亮度不确定=SDR tone-map预期；卡顿=已知deferred项）**。设备sleep/timeout30000、现装R24全屏包。**LG任务remaining仅剩Vulkan回归（无设备blocked）**。
+  - remaining: R9 ManualResume与Home连续播放人工/清理通过；安全Recents颜色/流畅通过，完整frame/亮度仍缺；HDR10观察轮已落定（Recents变黑=拓扑特征、时序亮度无感知跳变、全屏无入口需专用包）；N4按钮可达与真实Close严格退出已由R22闭环，N4观测已完成（R23：backendStopIssued三态+bound-output撤销withdrawn=true实机首证；controllerRetired维持平台限制定性，n4DeviceAcceptance工具边界不变）；**Surface ACK四分支全闭环（2026-10-05）**：HDR10 R14两段ACK、P8.4 texture链（PID17107）、N4失败R21 tuple、P5 texture链（PID3462/handle545902434384/wid1986，3840×2160与P8.4的1920区分）；R17间歇Stop失败获P5首证+谓词实机首证（path-not-empty，归档p5-ack-r1-20261005/），根因/修复为独立后续项；现代Vulkan设备回归。SDR tone-map卡顿未解决，按用户优先级独立后续项，不阻塞当前高优先级实施。
 
 - [ ] Android HDR10 / DV P8.4 显示与原生 HDR 首帧闭环
   - status: in_progress
@@ -182,10 +191,17 @@ P5 主线（详细流水见 `archives/conversations/android-hdr-dv-display-plan-
 - 完成项打勾并压缩为一行结论 + context 指针移入 Recently Done；超过近期容量后留存于 context/Git 历史。
 - 提交前同步 TASKS 与/或对应 conversation；变更记录以 Git log 为准。
 
+## 后续低优先级
+
 - [ ] LG API24 P5 / HDR10 SDR tone-map 卡顿
   - priority: low（2026-10-04 用户明确后移，R10 HDR10 tone-map 同样后移）
   - status: deferred
   - context: archives/conversations/lg-h870ds-hdr-demo-20261004.md
-  - evidence: R8 N1 用户确认画面、颜色正常但卡顿；R10 HDR10 实际回退 toneMapSdr，用户确认“画面完整、颜色正常，不流畅”，亮度未确认。R10 有掉帧计数但尚未定位性能根因。固定4K24 P5、gpu-next/mediacodec-copy；copy是兼容路径，不能单独归因。
+  - evidence: R8 N1 用户确认画面、颜色正常但卡顿；R10 HDR10 实际回退 toneMapSdr，用户确认“画面完整、颜色正常，不流畅”，亮度未确认。R10 有掉帧计数但尚未定位性能根因。固定4K24 P5、gpu-next/mediacodec-copy；copy是兼容路径，不能单独归因。**P8.4量化补充（2026-10-05 EOS观察轮）**：4K30 HLG素材toneMapSdr路径44分钟wall-time未完成19.5分钟素材；**完整性能画像三互证**——C2DColorConvert错误13955条/1205.6s≈11.6fps实际渲染（源29.97fps、掉帧61%）、AudioTrack underrun重启4824次（250ms间隔）、推进0.39x；软色转C2D路径瓶颈，建议排期时按系统性性能问题对待；证据eos-round/eos-round-evidence.json。
   - preserved-work: Release sampler 8 tests/限定分析通过；page opt-in与退出drain草案、43源build draft、GPU/battery/context工具及独审原日志均保留。暂不新构建、安装或扩大测量。
   - next: 排期后完成已存草案独审并同源同路由baseline采样；有可快速验证的修复依据时再处理，人工流畅性通过才关闭。
+
+- [x] 清理不再使用的构建中间产物（2026-10-05）
+  - status: done
+  - context: archives/conversations/intermediate-cleanup-20261005.md
+  - acceptance: 清单中的缓存/编译目录已全部删除并核验不存在；保留产物、源码、证据与未完成实验。
