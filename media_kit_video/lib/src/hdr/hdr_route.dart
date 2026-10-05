@@ -42,6 +42,10 @@ enum HdrOutputTransfer {
 
   hlg,
 
+  /// Dolby Vision output is not SDR, even when the base-layer transfer is
+  /// unavailable or represented by an unknown raw value.
+  dolbyVision,
+
   sdr,
 }
 
@@ -108,8 +112,15 @@ enum HdrDegradeReason {
   /// The GPU output surface did not bind within the budget.
   outputBindTimeout,
 
+  /// Native Dolby Vision decoder or bridge capability is unavailable.
+  nativeDvUnavailable,
+
   /// A capability the selected route relied on disappeared during playback.
   capabilityLost,
+
+  /// Android versions before API 28 cannot apply the public GPU HDR dataspace
+  /// needed by HDR PlatformView routes.
+  gpuHdrDataSpaceUnavailable,
 
   /// The platform has no HDR output pipeline (non-Android in Phase 1).
   unsupportedPlatform,
@@ -128,6 +139,12 @@ abstract class HdrRouteDependency {
 
   /// The route plays through the MediaCodec hardware decoder.
   static const String hwdecMediacodec = 'hwdec:mediacodec';
+
+  /// The route decodes through MediaCodec and copies frames to the GPU.
+  static const String hwdecMediacodecCopy = 'hwdec:mediacodec-copy';
+
+  /// The native Dolby Vision decoder/bridge pipeline.
+  static const String nativeDolbyVision = 'native:dolbyVision';
 
   /// The route renders through the platform view topology.
   static const String topologyPlatformView = 'topology:platformView';
@@ -158,6 +175,8 @@ class HdrRoute {
     required this.topology,
     required this.vo,
     required this.hwdec,
+    this.vdLavcOptions,
+    this.mediacodecEmbedRenderMode,
     required this.targetPrim,
     required this.targetTrc,
     required this.surfaceTransfer,
@@ -183,6 +202,12 @@ class HdrRoute {
 
   /// `hwdec` mpv property.
   final String hwdec;
+
+  /// Explicit `vd-lavc-o` value required by this route, when any.
+  final String? vdLavcOptions;
+
+  /// Explicit `mediacodec-embed-render-mode` required by this route, when any.
+  final String? mediacodecEmbedRenderMode;
 
   /// `target-prim` mpv property; null leaves the default.
   final String? targetPrim;
@@ -211,6 +236,8 @@ class HdrRoute {
         other.topology == topology &&
         other.vo == vo &&
         other.hwdec == hwdec &&
+        other.vdLavcOptions == vdLavcOptions &&
+        other.mediacodecEmbedRenderMode == mediacodecEmbedRenderMode &&
         other.targetPrim == targetPrim &&
         other.targetTrc == targetTrc &&
         other.surfaceTransfer == surfaceTransfer &&
@@ -227,6 +254,8 @@ class HdrRoute {
         topology,
         vo,
         hwdec,
+        vdLavcOptions,
+        mediacodecEmbedRenderMode,
         targetPrim,
         targetTrc,
         surfaceTransfer,
@@ -238,6 +267,7 @@ class HdrRoute {
   String toString() => 'HdrRoute(${strategy.name}, ${presentation.name}, '
       'output: ${outputTransfer.name}, dynamic: $appliesDynamicMetadata, '
       'topology: ${topology.name}, vo: $vo, hwdec: $hwdec, '
+      'vd-lavc-o: $vdLavcOptions, render-mode: $mediacodecEmbedRenderMode, '
       'prim: $targetPrim, trc: $targetTrc, surface: $surfaceTransfer, '
       'stripRpu: $stripDvRpu, deps: $dependencies)';
 }
@@ -286,7 +316,8 @@ class HdrCandidate {
   }
 
   @override
-  int get hashCode => Object.hash(strategy, maturity, feasible, skipReason, route);
+  int get hashCode =>
+      Object.hash(strategy, maturity, feasible, skipReason, route);
 
   @override
   String toString() => 'HdrCandidate(${strategy.name}, ${maturity.name}, '

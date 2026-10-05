@@ -92,7 +92,8 @@ class HdrDecoderInfo {
       heightRange: _intRange(map['heightRange']),
       frameRateRange: _intRange(map['frameRateRange']),
       supports4K: map['supports4K'] == true,
-      max4KFps: map['max4KFps'] is num ? (map['max4KFps'] as num).toDouble() : null,
+      max4KFps:
+          map['max4KFps'] is num ? (map['max4KFps'] as num).toDouble() : null,
     );
   }
 
@@ -126,7 +127,8 @@ class HdrDecoderInfo {
 /// extension) and takes the P5 dovi rescale pipeline verdict from the native
 /// probe: a disposable mpv instance (no vo — never EGL) created once inside
 /// the already-pinned libmpv at engine attach, reading the fork's read-only
-/// `dovi-p5-pipeline` property. The snapshot never initializes EGL and never
+/// `dovi-p5-pipeline` and `android-native-dv-bridge-api` properties. The
+/// snapshot never initializes EGL and never
 /// probes private ABIs.
 ///
 /// {@endtemplate}
@@ -137,6 +139,7 @@ class HdrCapabilities {
     required this.hevcDecoders,
     required this.dolbyVisionDecoders,
     required this.p5PipelineAvailable,
+    this.nativeDvBridgeApi = 0,
     required this.dataSpaceBridgeLoaded,
     required this.dataSpaceExt,
   });
@@ -164,6 +167,13 @@ class HdrCapabilities {
   /// the native disposable mpv instance probe (the fork's read-only
   /// `dovi-p5-pipeline` property, read once at engine attach and cached).
   final bool p5PipelineAvailable;
+
+  /// Independent native Dolby Vision bridge schema capability. Only version
+  /// 1 is understood; 0 means missing, malformed, unavailable or unknown.
+  /// This static fact does not prove native codec use or visible HDR output.
+  final int nativeDvBridgeApi;
+
+  bool get nativeDvBridgeSupported => nativeDvBridgeApi == 1;
 
   /// Whether the native Surface dataspace bridge loaded in this process.
   final bool dataSpaceBridgeLoaded;
@@ -242,6 +252,7 @@ class HdrCapabilities {
         ? const <String, Object?>{}
         : Map<String, Object?>.from(snapshot);
     final Object? p5Raw = map['p5Pipeline'];
+    final Object? nativeDvRaw = map['nativeDvBridgeApi'];
     return HdrCapabilities(
       sdkInt: map['sdkInt'] is int ? map['sdkInt'] as int : 0,
       displayHdrTypes: _parseDisplayHdrTypes(map['displayHdrTypes']),
@@ -249,6 +260,7 @@ class HdrCapabilities {
       dolbyVisionDecoders: _parseDecoders(map['dolbyVisionDecoders']),
       p5PipelineAvailable:
           p5Raw is bool ? p5Raw : (p5PipelineAvailable ?? false),
+      nativeDvBridgeApi: nativeDvRaw is int && nativeDvRaw == 1 ? 1 : 0,
       dataSpaceBridgeLoaded: map['dataSpaceBridgeLoaded'] == true,
       dataSpaceExt: HdrDataSpaceExtInfo.fromMap(map['dataSpaceExt']),
     );
@@ -282,5 +294,6 @@ class HdrCapabilities {
   String toString() => 'HdrCapabilities(sdk: $sdkInt, '
       'displayHdrTypes: $displayHdrTypes, hevc: ${hevcDecoders.length}, '
       'dv: ${dolbyVisionDecoders.length}, p5Pipeline: $p5PipelineAvailable, '
+      'nativeDvBridgeApi: $nativeDvBridgeApi, '
       'bridge: $dataSpaceBridgeLoaded, ext: $dataSpaceExt)';
 }

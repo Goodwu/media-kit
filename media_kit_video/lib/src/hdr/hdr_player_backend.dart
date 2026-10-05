@@ -6,11 +6,15 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:synchronized/synchronized.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:media_kit_video/src/video_controller/android_video_controller/android_video_controller.dart';
 
 import 'hdr_open_coordinator.dart';
+import 'hdr_native_dv_option_owner.dart';
+import 'hdr_native_dv_review.dart';
+import 'hdr_native_dv_review_evidence.dart';
 
 /// Android execution backend for `HdrVideoSession` (ported from hdr_lab's
 /// `AndroidHdrPlayerBackend` with the sample identity removed): writes mpv
@@ -20,12 +24,20 @@ import 'hdr_open_coordinator.dart';
 /// and applies the GPU surface dataspace through
 /// `AndroidVideoController.invokeApplyDataSpace`.
 ///
+/// Native DV source ownership requires source changes to use the Player's
+/// default serialized playback APIs. Raw `command`, source-changing property
+/// writes, and `synchronized: false` calls bypass that lock. Identity checks
+/// detect observable drift, but cannot attribute a same-URI raw replacement
+/// before its first event. Such concurrent mutations are outside this managed
+/// session contract; the native DV route remains unsupported by default.
+///
 /// Output capability and actual presentation must still be checked
 /// separately on the device.
 class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
   AndroidHdrBackend({
     required this.player,
     required this.outputSlot,
+    void Function(HdrNativeDvOptionDiagnostic)? onNativeDvOptionDiagnostic,
     Future<Map<String, Object?>?> Function(int handle, String transfer)?
         applyDataSpace,
   }) : _applyDataSpace = applyDataSpace ??
@@ -34,6 +46,12 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
                   handle: handle,
                   transfer: transfer,
                 )) {
+    _nativeDvOptions = HdrNativeDvOptionOwner(
+      readProperty: player.getProperty,
+      setPropertyStrict: player.setPropertyStrict,
+      readIdentity: _readOptionIdentity,
+      onDiagnostic: onNativeDvOptionDiagnostic,
+    );
     _videoParamsSubscription = player.stream.videoParams.listen((params) {
       if (params.gamma != null || params.primaries != null) {
         _latestVideoParams = params;
@@ -49,8 +67,14 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
   StreamSubscription<VideoParams>? _videoParamsSubscription;
   VideoParams? _latestVideoParams;
 
+  late final HdrNativeDvOptionOwner _nativeDvOptions;
+  HdrNativeDvPendingOpen? _nativeDvPendingOpen;
+  bool _nativeDvPendingOwnStopIssued = false;
+  HdrOptionSourceIdentity? _nativeDvStopAttemptBefore;
+
   bool _rpuFilterApplied = false;
   bool _observedStoppedPath = false;
+  HdrOptionSourceIdentity? _stoppedBoundary;
   int? _openFileLoadedEpoch;
   int? _openPlaylistEntryId;
   String? _dataSpaceRequested;
@@ -83,21 +107,383 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
 
   @override
   Future<void> validate(HdrOpenPlan plan) async {
-    // The planner already gated feasibility; the backend only executes.
+    final route = plan.route;
+    final hasPair = route.strategy == HdrStrategy.nativeDolbyVision ||
+        route.vdLavcOptions != null ||
+        route.mediacodecEmbedRenderMode != null;
+    if (hasPair &&
+        (route.strategy != HdrStrategy.nativeDolbyVision ||
+            route.vdLavcOptions != 'native_dv=1' ||
+            route.mediacodecEmbedRenderMode != 'timed' ||
+            route.vo != 'mediacodec_embed' ||
+            route.hwdec != 'mediacodec' ||
+            route.topology != HdrTopology.platformView ||
+            route.stripDvRpu)) {
+      throw StateError('Invalid native DV execution option pair');
+    }
+  }
+
+  /// Uses the SAME non-reentrant lock as default public Player.open. The
+  /// supplied open must explicitly bypass nested locking. Capture and publish
+  /// the immutable entry proof before releasing admission to another open.
+  /// FILE_LOADED waiting belongs outside this short critical section.
+  @visibleForTesting
+  static Future<HdrNativeDvPendingOpen> captureNativeDvOpenUnderLock({
+    required Lock lock,
+    required HdrNativeDvOptionOwner options,
+    required String mediaUri,
+    required Future<void> Function() openWithoutLock,
+    required Future<String> Function(String) readProperty,
+    required void Function(HdrNativeDvPendingOpen) onCaptured,
+  }) =>
+      lock.synchronized(() async {
+        await options.assertCurrent();
+        final before = options.identity;
+        if (before == null ||
+            before.path.isNotEmpty ||
+            before.playlistEntryId.isNotEmpty) {
+          throw StateError('No owned stopped boundary before native DV open');
+        }
+        await openWithoutLock();
+        final filename = await readProperty('playlist/0/filename');
+        final rawId = await readProperty('playlist/0/id');
+        final entryId = int.tryParse(rawId);
+        if (filename != mediaUri ||
+            entryId == null ||
+            entryId < 0 ||
+            await readProperty('playlist/0/filename') != filename ||
+            await readProperty('playlist/0/id') != rawId ||
+            options.identity != before) {
+          throw StateError(
+              'Opened native DV playlist differs from owned operation');
+        }
+        final captured = HdrNativeDvPendingOpen(
+            before: before, mediaUri: mediaUri, playlistEntryId: entryId);
+        onCaptured(captured);
+        return captured;
+      });
+
+  /// Capture only: neither FILE_LOADED waiting nor owner rebind happens
+  /// while this shared lock is held. The returned proof must be acknowledged
+  /// outside the lock, then checked again under it before updating ownership.
+  @visibleForTesting
+  static Future<HdrNativeDvStoppedCapture> captureNativeDvStopUnderLock({
+    required Lock lock,
+    required HdrNativeDvOptionOwner options,
+    required void Function(HdrOptionSourceIdentity) onStopIssued,
+    required Future<void> Function() stopWithoutLock,
+    required Future<HdrOptionSourceIdentity> Function() readIdentity,
+  }) =>
+      lock.synchronized(() async {
+        await options.assertCurrent();
+        final before = options.identity;
+        if (before == null) {
+          throw StateError('No owned native DV stop boundary');
+        }
+        onStopIssued(before);
+        Object? operationError;
+        StackTrace? operationStack;
+        try {
+          await stopWithoutLock();
+        } catch (error, stack) {
+          operationError = error;
+          operationStack = stack;
+        }
+        try {
+          final stopped = await readIdentity();
+          if (!identical(stopped.player, before.player) ||
+              stopped.path.isNotEmpty ||
+              stopped.playlistEntryId.isNotEmpty ||
+              options.identity != before) {
+            throw StateError('Stop did not clear owned native DV source');
+          }
+          return HdrNativeDvStoppedCapture(
+              before: before,
+              stopped: stopped,
+              operationError: operationError,
+              operationStack: operationStack);
+        } catch (identityError) {
+          throw HdrNativeDvOptionFailure(
+              operationError, {'sourceIdentity': identityError});
+        }
+      });
+
+  /// Shared by production and tests: a cross-lock proof is never reused as
+  /// current state without this fresh check inside the same Player lock.
+  @visibleForTesting
+  static Future<void> rebindNativeDvUnderLock({
+    required Lock lock,
+    required HdrNativeDvOptionOwner options,
+    required HdrOptionSourceIdentity before,
+    required HdrOptionSourceIdentity confirmed,
+  }) =>
+      lock.synchronized(() => options.rebind(before, confirmed));
+
+  @visibleForTesting
+  static Future<HdrOptionSourceIdentity> captureStoppedBoundaryUnderLock({
+    required Lock lock,
+    required Future<void> Function() stopWithoutLock,
+    required Future<HdrOptionSourceIdentity> Function() readIdentity,
+  }) =>
+      lock.synchronized(() async {
+        await stopWithoutLock();
+        var stopped = await readIdentity();
+        var pathEmpty = stopped.path.isEmpty;
+        var entryEmpty = stopped.playlistEntryId.isEmpty;
+        final prefix = 'Stop did not establish a stable empty source';
+        // mpv clears the playlist synchronously before `stop` returns, but the
+        // path property only resets once file teardown finishes; a read that
+        // lands in between observes an empty entry with a stale path. Bounded
+        // re-reads absorb that window; any other identity dimension changing
+        // across them keeps the original failure.
+        var rereads = 0;
+        while (!pathEmpty && entryEmpty && rereads < 5) {
+          rereads++;
+          await Future<void>.delayed(const Duration(milliseconds: 100));
+          final candidate = await readIdentity();
+          if (!identical(candidate.player, stopped.player) ||
+              candidate.playlistEntryId.isNotEmpty ||
+              candidate.fileLoadedEpoch != stopped.fileLoadedEpoch) {
+            throw StateError('$prefix; reason=identity-changed; '
+                'pathEmpty=$pathEmpty; entryEmpty=$entryEmpty; '
+                'firstEpoch=${stopped.fileLoadedEpoch}; '
+                'secondEpoch=${candidate.fileLoadedEpoch}; '
+                'samePlayer=${identical(candidate.player, stopped.player)}; '
+                'secondPathEmpty=${candidate.path.isEmpty}; '
+                'secondEntryEmpty=${candidate.playlistEntryId.isEmpty}; '
+                'entryIdMatches=${candidate.playlistEntryId == stopped.playlistEntryId}; '
+                'rereads=$rereads');
+          }
+          stopped = candidate;
+          pathEmpty = stopped.path.isEmpty;
+          entryEmpty = stopped.playlistEntryId.isEmpty;
+        }
+        if (!pathEmpty || !entryEmpty) {
+          final reason = !pathEmpty ? 'path-not-empty' : 'entry-not-empty';
+          throw StateError('$prefix; reason=$reason; pathEmpty=$pathEmpty; '
+              'entryEmpty=$entryEmpty; firstEpoch=${stopped.fileLoadedEpoch}'
+              '${rereads > 0 ? '; rereads=$rereads' : ''}');
+        }
+        final second = await readIdentity();
+        if (second != stopped) {
+          throw StateError('$prefix; reason=identity-changed; '
+              'pathEmpty=$pathEmpty; entryEmpty=$entryEmpty; '
+              'firstEpoch=${stopped.fileLoadedEpoch}; '
+              'secondEpoch=${second.fileLoadedEpoch}; '
+              'samePlayer=${identical(second.player, stopped.player)}; '
+              'secondPathEmpty=${second.path.isEmpty}; '
+              'secondEntryEmpty=${second.playlistEntryId.isEmpty}; '
+              'entryIdMatches=${second.playlistEntryId == stopped.playlistEntryId}');
+        }
+        return stopped;
+      });
+
+  @visibleForTesting
+  static Future<void> beginNativeDvUnderLock({
+    required Lock lock,
+    required HdrNativeDvOptionOwner options,
+    required HdrOptionSourceIdentity stoppedIdentity,
+    required String vd,
+    required String renderMode,
+  }) =>
+      lock.synchronized(() => options.begin(
+          stoppedIdentity: stoppedIdentity, vd: vd, renderMode: renderMode));
+
+  Future<HdrOptionSourceIdentity> _readOptionIdentity() async {
+    final epoch = player.fileLoadedEpoch;
+    final path = await player.getProperty('path');
+    final entry = await player.getProperty('playlist/0/id');
+    if (await player.getProperty('path') != path ||
+        await player.getProperty('playlist/0/id') != entry ||
+        player.fileLoadedEpoch != epoch) {
+      throw StateError('Media changed while reading native DV option identity');
+    }
+    return HdrOptionSourceIdentity(
+      player: player,
+      path: path,
+      playlistEntryId: entry,
+      fileLoadedEpoch: epoch,
+    );
+  }
+
+  /// Only a matching native FILE_LOADED record permits the backend to move
+  /// option ownership from its stopped boundary onto the entry it opened.
+  /// Kept injectable so late loading and failed-open rollback are tested
+  /// without creating a native Player.
+  @visibleForTesting
+  static Future<HdrOptionSourceIdentity> confirmNativeDvOpenIdentity({
+    required HdrOptionSourceIdentity before,
+    required String mediaUri,
+    required Future<HdrOptionSourceIdentity> Function() readIdentity,
+    required Future<String> Function() readPlaylistFilename,
+    required Future<FileLoadedRecord> Function(int, int) waitForFileLoadedEntry,
+    required int expectedPlaylistEntryId,
+    bool allowUnchanged = false,
+    Duration budget = const Duration(seconds: 8),
+  }) async {
+    final current = await readIdentity();
+    if (allowUnchanged && current == before) return before;
+    final entryId = expectedPlaylistEntryId;
+    return HdrNativeDvPendingOpen(
+      before: before,
+      mediaUri: mediaUri,
+      playlistEntryId: entryId,
+    ).confirmForCleanup(
+      readIdentity: readIdentity,
+      readPlaylistFilename: readPlaylistFilename,
+      waitForFileLoadedEntry: waitForFileLoadedEntry,
+      requireLoaded: true,
+      budget: budget,
+    );
+  }
+
+  Future<void> _recoverNativeDvPendingOpen() async {
+    final pending = _nativeDvPendingOpen;
+    if (pending == null) return;
+    final previous = _nativeDvOptions.identity;
+    if (previous == null) {
+      throw StateError('Native DV pending open lost option ownership');
+    }
+    final current = await pending.confirmForCleanup(
+      readIdentity: _readOptionIdentity,
+      readPlaylistFilename: () => player.getProperty('playlist/0/filename'),
+      waitForFileLoadedEntry: player.waitForFileLoadedEntryAfter,
+      afterOwnStop: _nativeDvPendingOwnStopIssued,
+    );
+    await rebindNativeDvUnderLock(
+        lock: player.lock,
+        options: _nativeDvOptions,
+        before: previous,
+        confirmed: current);
+    if (_nativeDvPendingOwnStopIssued &&
+        current.path.isEmpty &&
+        current.playlistEntryId.isEmpty) {
+      _nativeDvPendingOpen = null;
+      _nativeDvPendingOwnStopIssued = false;
+      _nativeDvStopAttemptBefore = null;
+    }
+    // Retain the verified entry through stop: its first FILE_LOADED can
+    // race with our own unload after the pre-stop confirmation.
+  }
+
+  Future<void> _recoverNativeDvStopAttempt() async {
+    final before = _nativeDvStopAttemptBefore;
+    if (before == null || _nativeDvPendingOpen != null) return;
+    final actual = await _readOptionIdentity();
+    if (actual == before) {
+      // The failed public stop never unloaded its owned source. It can be
+      // retried, but only after checking that source again under admission.
+      await player.lock.synchronized(() async {
+        await _nativeDvOptions.assertCurrent();
+        _nativeDvStopAttemptBefore = null;
+      });
+      return;
+    }
+    final stopped = await confirmNativeDvStoppedIdentity(
+        before: before, readIdentity: _readOptionIdentity);
+    await rebindNativeDvUnderLock(
+        lock: player.lock,
+        options: _nativeDvOptions,
+        before: before,
+        confirmed: stopped);
+    _nativeDvStopAttemptBefore = null;
+  }
+
+  Future<HdrOptionSourceIdentity> _confirmNativeDvOwnStop(
+      HdrOptionSourceIdentity before) async {
+    final pending = _nativeDvPendingOpen;
+    if (pending == null) {
+      return confirmNativeDvStoppedIdentity(
+          before: before, readIdentity: _readOptionIdentity);
+    }
+    final stopped = await pending.confirmForCleanup(
+      readIdentity: _readOptionIdentity,
+      readPlaylistFilename: () => player.getProperty('playlist/0/filename'),
+      waitForFileLoadedEntry: player.waitForFileLoadedEntryAfter,
+      afterOwnStop: true,
+    );
+    if (stopped.path.isNotEmpty || stopped.playlistEntryId.isNotEmpty) {
+      throw StateError('Native DV stop did not unload its pending entry');
+    }
+    return stopped;
+  }
+
+  @visibleForTesting
+  static Future<HdrOptionSourceIdentity> confirmNativeDvStoppedIdentity({
+    required HdrOptionSourceIdentity before,
+    required Future<HdrOptionSourceIdentity> Function() readIdentity,
+  }) async {
+    final stopped = await readIdentity();
+    if (!identical(stopped.player, before.player) ||
+        stopped.path.isNotEmpty ||
+        stopped.playlistEntryId.isNotEmpty ||
+        stopped.fileLoadedEpoch != before.fileLoadedEpoch ||
+        await readIdentity() != stopped) {
+      throw StateError('Native DV stop crossed an unowned media boundary');
+    }
+    return stopped;
   }
 
   @override
   Future<void> stop() async {
-    await player.stop();
-    final path = await player.getProperty('path');
-    if (path.isNotEmpty) {
-      throw StateError('Stop did not clear old media path: $path');
+    _observedStoppedPath = false;
+    _stoppedBoundary = null;
+    // All possible FILE_LOADED waits happen before/after the critical section.
+    await _recoverNativeDvPendingOpen();
+    await _recoverNativeDvStopAttempt();
+    if (!_nativeDvOptions.active) {
+      _stoppedBoundary = await captureStoppedBoundaryUnderLock(
+          lock: player.lock,
+          stopWithoutLock: () => player.stop(synchronized: false),
+          readIdentity: _readOptionIdentity);
+    } else {
+      final captured = await captureNativeDvStopUnderLock(
+        lock: player.lock,
+        options: _nativeDvOptions,
+        onStopIssued: (before) {
+          _nativeDvStopAttemptBefore = before;
+          if (_nativeDvPendingOpen != null) {
+            _nativeDvPendingOwnStopIssued = true;
+          }
+        },
+        stopWithoutLock: () => player.stop(synchronized: false),
+        readIdentity: _readOptionIdentity,
+      );
+      try {
+        final confirmed = await _confirmNativeDvOwnStop(captured.before);
+        if (confirmed != captured.stopped) {
+          throw StateError(
+              'Native DV stopped proof changed before acknowledgement');
+        }
+        await rebindNativeDvUnderLock(
+            lock: player.lock,
+            options: _nativeDvOptions,
+            before: captured.before,
+            confirmed: confirmed);
+        _stoppedBoundary = confirmed;
+        _nativeDvPendingOpen = null;
+        _nativeDvPendingOwnStopIssued = false;
+        _nativeDvStopAttemptBefore = null;
+      } catch (identityError) {
+        throw HdrNativeDvOptionFailure(
+            captured.operationError, {'sourceIdentity': identityError});
+      }
+      if (captured.operationError != null) {
+        Error.throwWithStackTrace(
+            captured.operationError!, captured.operationStack!);
+      }
     }
     _observedStoppedPath = true;
   }
 
   @override
   Future<void> resetOwnedConfiguration() async {
+    await _recoverNativeDvPendingOpen();
+    await _recoverNativeDvStopAttempt();
+    await player.lock.synchronized(_nativeDvOptions.restore);
+    _nativeDvPendingOpen = null;
+    _nativeDvPendingOwnStopIssued = false;
+    _nativeDvStopAttemptBefore = null;
     if (_rpuFilterApplied) {
       await player.command(['vf', 'remove', _dvRpuFilter]);
       _rpuFilterApplied = false;
@@ -115,11 +501,29 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
   @override
   Future<void> prepareOutput(HdrOpenPlan plan) async {
     final route = plan.route;
+    await validate(plan);
+    if (route.vdLavcOptions != null) {
+      final stopped = _stoppedBoundary;
+      if (!_observedStoppedPath || stopped == null) {
+        throw StateError('No stopped-media boundary before native DV options');
+      }
+      await beginNativeDvUnderLock(
+          lock: player.lock,
+          options: _nativeDvOptions,
+          stoppedIdentity: stopped,
+          vd: route.vdLavcOptions!,
+          renderMode: route.mediacodecEmbedRenderMode!);
+    }
     final gpuPlatform =
         route.topology == HdrTopology.platformView && route.vo == 'gpu-next';
     if (gpuPlatform) {
       await _setOwned('egl-output-format', 'rgb10_a2');
     }
+    // The Android video controller applies its creation-time hwdec setting
+    // while it initializes. Capture and register ownership before ensure()
+    // can construct that controller, or its initialization may overwrite the
+    // value that resetOwnedConfiguration is meant to restore.
+    await _setOwned('hwdec', route.hwdec);
     await outputSlot.ensure(
       route.vo,
       route.hwdec,
@@ -137,6 +541,9 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
   @override
   Future<void> configure(HdrOpenPlan plan) async {
     final route = plan.route;
+    if (route.vdLavcOptions != null) {
+      await player.lock.synchronized(_nativeDvOptions.verify);
+    }
     if (route.topology == HdrTopology.platformView) {
       final output = await outputSlot.current!.platform.future;
       await output.waitUntilCurrentOutputBound
@@ -216,6 +623,9 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
       }
       await _setOwned('target-colorspace-hint', 'auto');
     }
+    if (route.vdLavcOptions != null) {
+      await player.lock.synchronized(_nativeDvOptions.verify);
+    }
   }
 
   /// The readback is expected to carry the requested transfer on the
@@ -249,32 +659,88 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
       throw StateError('No stopped-media path boundary before open');
     }
     _observedStoppedPath = false;
+    _stoppedBoundary = null;
     final media = plan.media;
     // Drop the previous media's cached video-params so the review waits for
     // this open's report instead of classifying from a stale source.
     _latestVideoParams = null;
     _openFileLoadedEpoch = player.fileLoadedEpoch;
     _openPlaylistEntryId = null;
-    await player.open(
-      start == null && media.start == null
+    await _nativeDvOptions.assertCurrent();
+    final optionIdentity = _nativeDvOptions.identity;
+    var identityConfirmationAttempted = false;
+    try {
+      final playable = start == null && media.start == null
           ? media
-          : Media(
-              media.uri,
+          : Media(media.uri,
               start: start ?? media.start,
               end: media.end,
               extras: media.extras,
-              httpHeaders: media.httpHeaders,
-            ),
-      play: play,
-    );
-    final playlistPath = await player.getProperty('playlist/0/filename');
-    final entryId = int.tryParse(await player.getProperty('playlist/0/id'));
-    if (playlistPath != media.uri || entryId == null) {
-      throw StateError(
-          'Opened playlist entry differs from requested source: '
-          'path=$playlistPath id=$entryId');
+              httpHeaders: media.httpHeaders);
+      if (optionIdentity != null) {
+        final captured = await captureNativeDvOpenUnderLock(
+          lock: player.lock,
+          options: _nativeDvOptions,
+          mediaUri: media.uri,
+          openWithoutLock: () =>
+              player.open(playable, play: play, synchronized: false),
+          readProperty: player.getProperty,
+          onCaptured: (entry) {
+            _openFileLoadedEpoch = entry.before.fileLoadedEpoch;
+            _openPlaylistEntryId = entry.playlistEntryId;
+            _nativeDvPendingOpen = entry;
+            _nativeDvPendingOwnStopIssued = false;
+          },
+        );
+        identityConfirmationAttempted = true;
+        // The immutable proof was captured under Player.lock. An external
+        // default open admitted now cannot be mistaken for this entry.
+        final opened = await confirmNativeDvOpenIdentity(
+          before: captured.before,
+          mediaUri: captured.mediaUri,
+          expectedPlaylistEntryId: captured.playlistEntryId,
+          readIdentity: _readOptionIdentity,
+          readPlaylistFilename: () => player.getProperty('playlist/0/filename'),
+          waitForFileLoadedEntry: player.waitForFileLoadedEntryAfter,
+        );
+        await rebindNativeDvUnderLock(
+            lock: player.lock,
+            options: _nativeDvOptions,
+            before: captured.before,
+            confirmed: opened);
+        _nativeDvPendingOpen = null;
+        _nativeDvPendingOwnStopIssued = false;
+      } else {
+        await player.open(playable, play: play);
+        final playlistPath = await player.getProperty('playlist/0/filename');
+        final entryId = int.tryParse(await player.getProperty('playlist/0/id'));
+        if (playlistPath != media.uri || entryId == null) {
+          throw StateError(
+              'Opened playlist entry differs from requested source: '
+              'path=$playlistPath id=$entryId');
+        }
+        _openPlaylistEntryId = entryId;
+      }
+    } catch (error, stack) {
+      if (!identityConfirmationAttempted &&
+          optionIdentity != null &&
+          _nativeDvOptions.identity == optionIdentity) {
+        try {
+          // Without a verified returned entry, a same-URI current playlist
+          // could belong to an external open. Only the unchanged stopped
+          // boundary is safe to recover here.
+          if (await _readOptionIdentity() != optionIdentity) {
+            throw StateError(
+                'Failed native DV open has no verified owned entry');
+          }
+          await _nativeDvOptions.assertCurrent();
+        } catch (identityError) {
+          throw HdrNativeDvOptionFailure(
+              error, {'sourceIdentity': identityError});
+        }
+      }
+      Error.throwWithStackTrace(error, stack);
     }
-    _openPlaylistEntryId = entryId;
   }
 
   @override
@@ -283,6 +749,46 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
     final entryId = _openPlaylistEntryId;
     if (before == null || entryId == null) {
       throw StateError('No playlist-entry identity before review');
+    }
+    if (plan.route.strategy == HdrStrategy.nativeDolbyVision) {
+      final expected = _nativeDvOptions.identity;
+      if (expected == null || expected.path != plan.media.uri) {
+        throw const HdrNativeDvReviewFailure(
+            HdrNativeDvReviewFailureKind.ownership);
+      }
+      final facts = await gatherNativeDvReviewFacts(
+        lock: player.lock,
+        expectedIdentity: expected,
+        openedAfterEpoch: before,
+        expectedEntryId: entryId,
+        verifyOwned: () async {
+          if (_nativeDvOptions.identity != expected) {
+            throw StateError('Native DV review lost its owned open');
+          }
+          await _nativeDvOptions.verify();
+          if (_nativeDvOptions.identity != expected) {
+            throw StateError('Native DV review ownership changed');
+          }
+        },
+        readIdentity: _readOptionIdentity,
+        waitForFileLoadedEntry: player.waitForFileLoadedEntryAfter,
+        readOutput: () {
+          final controller = outputSlot.current?.notifier.value;
+          if (controller is! AndroidVideoController) return null;
+          if (!identical(controller.player, player)) {
+            throw const HdrNativeDvReviewFailure(
+                HdrNativeDvReviewFailureKind.outputIdentity);
+          }
+          final identity = controller.currentBoundOutputIdentity;
+          return identity == null
+              ? null
+              : HdrNativeDvOutputSnapshot(controller, identity);
+        },
+        readProperty: player.getProperty,
+        latestVideoParams: () => _latestVideoParams,
+      );
+      _lastHwdecCurrent = facts.hwdecCurrent;
+      return facts;
     }
     return gatherReviewFacts(
       mediaUri: plan.media.uri,
@@ -322,9 +828,9 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
     Duration reviewBudget = const Duration(seconds: 8),
     Future<void> Function(Duration duration) delay = Future<void>.delayed,
   }) async {
-    final loaded = await waitForFileLoadedEntry(playlistEntryId,
-            fileLoadedEpoch)
-        .timeout(reviewBudget);
+    final loaded =
+        await waitForFileLoadedEntry(playlistEntryId, fileLoadedEpoch)
+            .timeout(reviewBudget);
     if (loaded.epoch <= fileLoadedEpoch ||
         loaded.playlistEntryId != playlistEntryId) {
       throw StateError('No matching native file-loaded event for this open');
@@ -372,8 +878,7 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
       await delay(const Duration(milliseconds: 50));
     }
     final profile = int.tryParse(
-      (await readProperty('current-tracks/video/dolby-vision-profile'))
-          .trim(),
+      (await readProperty('current-tracks/video/dolby-vision-profile')).trim(),
     );
     final codec = await readProperty('current-tracks/video/codec');
     // The fork's container/track facts (fork 0f7e6bec32+) are read once,
@@ -385,8 +890,7 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
     // throws for unavailable), so a failed parse is already the unknown
     // value the classifier falls back from.
     final compatibilityIdRaw = int.tryParse(
-      (await readProperty(
-              'current-tracks/video/dolby-vision-compatibility-id'))
+      (await readProperty('current-tracks/video/dolby-vision-compatibility-id'))
           .trim(),
     );
     // No DOVI configuration record → the whole property is unavailable;
@@ -409,10 +913,12 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
     // base-layer tags (the poll above guarantees the read happens after the
     // first frame); on the timeout path it is still sampled once and read
     // defensively ('yes'/'no' are the only mpv bool spellings).
-    final hdrVividRaw =
-        await readProperty('video-params/hdr-vivid');
-    final hdrVivid =
-        hdrVividRaw == 'yes' ? true : hdrVividRaw == 'no' ? false : null;
+    final hdrVividRaw = await readProperty('video-params/hdr-vivid');
+    final hdrVivid = hdrVividRaw == 'yes'
+        ? true
+        : hdrVividRaw == 'no'
+            ? false
+            : null;
     return HdrReviewFacts(
       videoParams: latestVideoParams(),
       dolbyVisionProfile: profile,

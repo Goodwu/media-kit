@@ -20,7 +20,13 @@ class FullscreenInheritedWidget extends InheritedWidget {
     super.key,
     required this.parent,
     required Widget child,
-  }) : super(child: _FullscreenInheritedWidgetPopScope(child: child));
+    Future<void> Function()? onExit,
+  }) : super(
+          child: _FullscreenInheritedWidgetPopScope(
+            onExit: onExit,
+            child: child,
+          ),
+        );
 
   static FullscreenInheritedWidget? maybeOf(BuildContext context) {
     return context
@@ -48,8 +54,10 @@ class FullscreenInheritedWidget extends InheritedWidget {
 /// {@endtemplate}
 class _FullscreenInheritedWidgetPopScope extends StatefulWidget {
   final Widget child;
+  final Future<void> Function()? onExit;
   const _FullscreenInheritedWidgetPopScope({
     required this.child,
+    this.onExit,
   });
 
   @override
@@ -62,9 +70,11 @@ class _FullscreenInheritedWidgetPopScopeState
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      onPopInvokedWithResult: (_, __) {
-        // Make sure to exit native fullscreen when this route is popped from the navigator.
-        onExitFullscreen(context)?.call();
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) return;
+        // The captured callback remains valid if the window VideoState was
+        // disposed during a Session controller replacement.
+        (widget.onExit ?? onExitFullscreen(context))?.call();
       },
       child: widget.child,
     );

@@ -14,6 +14,7 @@ import 'package:media_kit_video/src/video/video.dart';
 import 'package:media_kit_video/src/video_controller/video_controller.dart';
 
 import 'hdr_video_session.dart';
+import '../video/android_output_presentation.dart';
 
 /// {@template hdr_video}
 ///
@@ -203,14 +204,16 @@ class HdrVideoBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<VideoController?>(
-      valueListenable: controller,
-      builder: (context, controller, _) {
-        if (controller == null) {
-          return placeholder;
-        }
-        return videoBuilder(controller);
-      },
+    return AndroidOutputPresentationHost(
+      child: ValueListenableBuilder<VideoController?>(
+        valueListenable: controller,
+        builder: (context, controller, _) {
+          if (controller == null) {
+            return placeholder;
+          }
+          return videoBuilder(controller);
+        },
+      ),
     );
   }
 }

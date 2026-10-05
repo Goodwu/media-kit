@@ -118,7 +118,9 @@ class HdrSourceClassifier {
       final bool? enhancementLayer;
       switch (profile) {
         case 5:
-          enhancementLayer = dvElPresent ?? false; // Single layer default.
+          // Native-DV eligibility must not infer single-layer structure from
+          // a missing container fact.
+          enhancementLayer = dvElPresent;
           break;
         case 7:
           // The profile-7 enhancement-layer presence is observable now
