@@ -286,7 +286,7 @@ void main() {
         'HdrDiag HDR predict: source=hevc,hlg,bt.2020,dolbyVision,8,4,false '
         'class=dvP84 selected=baseLayerDirect maturity=verified '
         'presentation=nativeHdr confidence=verified playable=true '
-        'candidates=nativeDolbyVision:unsupportedStrategy,'
+        'candidates=nativeDolbyVision:experimentalStrategySkipped,'
         'baseLayerDirect:ok,'
         'baseLayerConvert:ok,'
         'metadataReshape:experimentalStrategySkipped,'
@@ -313,7 +313,7 @@ void main() {
       final candidates =
           lines.single.split('candidates=')[1].split(',');
       expect(candidates, <String>[
-        'nativeDolbyVision:unsupportedStrategy',
+        'nativeDolbyVision:experimentalStrategySkipped',
         'baseLayerDirect:ok',
         'baseLayerConvert:ok',
         'metadataReshape:experimentalStrategySkipped',

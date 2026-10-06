@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:media_kit/media_kit.dart' show FileLoadedRecord, VideoParams;
 import 'package:synchronized/synchronized.dart';
 
@@ -7,6 +8,15 @@ import 'android_mediacodec_configuration.dart';
 import 'hdr_native_dv_option_owner.dart';
 import 'hdr_native_dv_review_evidence.dart';
 import 'hdr_open_plan.dart';
+
+/// Define-gated per-round sampling trace for on-device review diagnosis.
+const bool kHdrNativeDvReviewTrace =
+    bool.fromEnvironment('MEDIA_KIT_ANDROID_HDR_REVIEW_TRACE');
+
+String _configSummary(AndroidMediaCodecConfiguration? config) {
+  if (config == null) return 'null';
+  return '${config.mime}/${config.codec}/active=${config.nativeDvActive}';
+}
 
 /// Production native-DV review. All waits share one monotonic deadline.
 /// Future timeouts cannot interrupt synchronous native FFI; they bound the
@@ -148,6 +158,14 @@ Future<HdrReviewFacts> gatherNativeDvReviewFacts({
           final endHwdec = await bounded(() => readProperty('hwdec-current'));
           await verify();
           final afterOutput = output();
+          if (kHdrNativeDvReviewTrace) {
+            debugPrint('HDR_REVIEW_ROUND cfg=${_configSummary(config)} '
+                'end=${_configSummary(endConfig)} '
+                'hwdec="$hwdec" endHwdec="$endHwdec" vfmt="$videoFormat" '
+                'observed=${_configSummary(observedConfiguration)} '
+                'observedHwdec=$observedHwdec '
+                'out=${beforeOutput != null}:${afterOutput != null}');
+          }
           if (invalidConfiguration(raw, config) ||
               invalidConfiguration(endRaw, endConfig) ||
               (config != null && !sameConfiguration(config, endConfig))) {

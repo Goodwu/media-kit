@@ -148,10 +148,16 @@ void checkInvariants(
   );
   expect(prediction.selected.feasible, prediction.playable);
 
-  // R7: native Dolby Vision is never selected, whatever the policy says.
+  // R7 baseline: native Dolby Vision stays unselected unless the class is
+  // dvP5 on a DV-declaring display with the bridge loaded and the
+  // experimental gate open (2026-10-06 LG DV unlock).
   expect(
-    prediction.selected.strategy,
-    isNot(HdrStrategy.nativeDolbyVision),
+    prediction.selected.strategy != HdrStrategy.nativeDolbyVision ||
+        (cls == HdrSourceClass.dvP5 &&
+            allowExperimental &&
+            capabilities.displayHdrTypes?.contains(1) == true &&
+            capabilities.nativeDvBridgeApi == 1),
+    isTrue,
     reason: 'nativeDolbyVision selected for $cls',
   );
 
@@ -378,7 +384,8 @@ void main() {
       );
     });
 
-    test('planner still refuses native DV while maturity is unsupported', () {
+    test('planner selects native DV for eligible P5.0 once maturity allows',
+        () {
       final HdrRoutePrediction prediction = caps(
         displayHdrTypes: const <int>{1},
         dvDecoders: const <HdrDecoderInfo>[nativeDvDecoder],
@@ -397,9 +404,10 @@ void main() {
       );
       expect(
           prediction.candidates.first.strategy, HdrStrategy.nativeDolbyVision);
-      expect(prediction.candidates.first.skipReason,
-          HdrDegradeReason.unsupportedStrategy);
-      expect(prediction.selected.strategy, HdrStrategy.toneMapSdr);
+      expect(prediction.candidates.first.skipReason, isNull);
+      expect(prediction.selected.strategy, HdrStrategy.nativeDolbyVision);
+      expect(prediction.selected.route!.vdLavcOptions, 'native_dv=1');
+      expect(prediction.selected.route!.mediacodecEmbedRenderMode, 'timed');
     });
   });
 
@@ -523,16 +531,13 @@ void main() {
                   capabilities: capabilities,
                   allowExperimental: true);
               for (final HdrCandidate candidate in prediction.candidates) {
-                // The gate is open: nothing is skipped for maturity, and
-                // the reserved strategy is still refused.
+                // The gate is open: nothing is skipped for maturity. dvP5
+                // and dvP84 nativeDolbyVision now proceed to the realizer
+                // (display/decoder/bridge grounds); other classes keep the
+                // R7 refusal, locked by the maturity table test.
                 expect(candidate.skipReason,
                     isNot(HdrDegradeReason.experimentalStrategySkipped),
                     reason: '$candidate');
-                if (candidate.strategy == HdrStrategy.nativeDolbyVision) {
-                  expect(candidate.skipReason,
-                      HdrDegradeReason.unsupportedStrategy,
-                      reason: '$candidate');
-                }
               }
               combos++;
             }
@@ -800,8 +805,11 @@ void main() {
       final HdrRoutePrediction p5 =
           lya.predict(sources[HdrSourceClass.dvP5]!, policy: policy);
       expect(p5.selected.strategy, HdrStrategy.metadataReshape);
-      expect(
-          p5.candidates.first.skipReason, HdrDegradeReason.unsupportedStrategy);
+      // LYA declares no Dolby Vision display: after the dvP5 unlock the
+      // reserved strategy participates but the realizer refuses it on the
+      // display-transfer ground.
+      expect(p5.candidates.first.skipReason,
+          HdrDegradeReason.displayLacksTransfer);
     });
   });
 

@@ -300,7 +300,8 @@ class HdrNativeDvOptionOwner {
     if (_busy || active) {
       throw StateError('Native DV option transaction is still owned');
     }
-    if (vd != 'native_dv=1' || renderMode != 'timed') {
+    if (vd != 'native_dv=1' ||
+        (renderMode != 'timed' && renderMode != 'boolean')) {
       throw StateError('Unsupported native DV option pair');
     }
     if (stoppedIdentity.path.isNotEmpty ||

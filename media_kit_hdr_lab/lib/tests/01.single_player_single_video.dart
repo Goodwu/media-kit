@@ -675,6 +675,9 @@ class _SinglePlayerSingleVideoScreenState
   static const _androidPlaybackPerformance = bool.fromEnvironment(
     'MEDIA_KIT_ANDROID_PLAYBACK_PERFORMANCE_DIAGNOSTIC',
   );
+  static const _androidAvTrace = bool.fromEnvironment(
+    'MEDIA_KIT_ANDROID_AV_TRACE',
+  );
   static const _androidNativeDvSessionLifecycleActions = bool.fromEnvironment(
     'MEDIA_KIT_ANDROID_NATIVE_DV_SESSION_LIFECYCLE_ACTIONS',
   );
@@ -3822,6 +3825,32 @@ class _SinglePlayerSingleVideoScreenState
             debugPrint('AUTO_PAUSE_AT position=${player.state.position}');
           },
         );
+      }
+      if (_androidAvTrace) {
+        Timer.periodic(const Duration(seconds: 2), (timer) {
+          if (_autoPlayerDisposed || !mounted) {
+            timer.cancel();
+            return;
+          }
+          unawaited(() async {
+            try {
+              final tracePlayer = player;
+              debugPrint(
+                  'AVTRACE pos=${await tracePlayer.getProperty('time-pos', waitForInitialization: false)} '
+                  'pause=${await tracePlayer.getProperty('pause', waitForInitialization: false)} '
+                  'decDrop=${await tracePlayer.getProperty('decoder-frame-drop-count', waitForInitialization: false)} '
+                  'voDelayed=${await tracePlayer.getProperty('vo-delayed-frame-count', waitForInitialization: false)} '
+                  'frames=${await tracePlayer.getProperty('frame-count', waitForInitialization: false)} '
+                  'vbitrate=${await tracePlayer.getProperty('video-bitrate', waitForInitialization: false)} '
+                  'cacheDur=${await tracePlayer.getProperty('demuxer-cache-duration', waitForInitialization: false)} '
+                  'vfps=${await tracePlayer.getProperty('estimated-vf-fps', waitForInitialization: false)} '
+                  'completed=${tracePlayer.state.completed} '
+                  'buffering=${tracePlayer.state.buffering}');
+            } catch (error) {
+              debugPrint('AVTRACE error=$error');
+            }
+          }());
+        });
       }
       unawaited(_openInitialSource()
           .catchError((Object error, StackTrace stack) async {

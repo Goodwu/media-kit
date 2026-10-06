@@ -17,8 +17,10 @@ import 'hdr_source_descriptor.dart';
 /// {@endtemplate}
 enum HdrStrategy {
   /// DV decoder plus DV display, mapping done by the system and the Dolby
-  /// engine. Reserved (R7): the current pipeline cannot realize it and its
-  /// maturity is `unsupported`, so the planner never selects it.
+  /// engine. Reserved (R7) for every class except `dvP5`, which was
+  /// unlocked to `experimental` on 2026-10-06 after a DV-declaring LG
+  /// device (bridge v1, profile-32 hardware decoder) was verified; other
+  /// classes still never select it.
   nativeDolbyVision,
 
   /// Decoder direct output to the surface (`mediacodec_embed`), emitting the
@@ -188,7 +190,12 @@ class HdrStrategyMaturityTable {
       HdrStrategy.sdrDirect: HdrStrategyMaturity.experimental,
     },
     HdrSourceClass.dvP5: <HdrStrategy, HdrStrategyMaturity>{
-      HdrStrategy.nativeDolbyVision: HdrStrategyMaturity.unsupported, // R7
+      // 2026-10-06 LG DV 设备实机解锁（原 R7 保留）：LG 面板声明 DV
+      // （displayHdrTypes 含 1）、qcom DV 硬解器在位、native DV bridge v1
+      // 已加载（HDR_CAP_QUERY nativeDvBridgeApi=1），且 R22 N4 诊断模式已
+      // 证明该路由在 LG 上可达。experimental 起步：实机直通验证轮确认后
+      // 再议升级。
+      HdrStrategy.nativeDolbyVision: HdrStrategyMaturity.experimental,
       HdrStrategy.baseLayerDirect: HdrStrategyMaturity
           .experimental, // 忽略 RPU 会偏色；realize 直接判不可行
       HdrStrategy.baseLayerConvert: HdrStrategyMaturity
@@ -218,7 +225,8 @@ class HdrStrategyMaturityTable {
       HdrStrategy.sdrDirect: HdrStrategyMaturity.experimental,
     },
     HdrSourceClass.dvP84: <HdrStrategy, HdrStrategyMaturity>{
-      HdrStrategy.nativeDolbyVision: HdrStrategyMaturity.unsupported, // R7
+      // 2026-10-06 与 dvP5 同批解锁（用户导演的 LG DV 设备直通验证）。
+      HdrStrategy.nativeDolbyVision: HdrStrategyMaturity.experimental,
       HdrStrategy.baseLayerDirect: HdrStrategyMaturity.verified, // 12703–12708
       HdrStrategy.baseLayerConvert: HdrStrategyMaturity
           .verified, // A3-2 模拟无 HLG 落 convert + 2026-10-02 人工观察
@@ -239,7 +247,8 @@ class HdrStrategyMaturityTable {
       HdrStrategy.sdrDirect: HdrStrategyMaturity.experimental,
     },
     HdrSourceClass.dvP10: <HdrStrategy, HdrStrategyMaturity>{
-      // Phase 1 不涉及 AV1：全部 unsupported（nativeDolbyVision 亦由 R7 覆盖）。
+      // Phase 1 不涉及 AV1：全部 unsupported（nativeDolbyVision 无 realizer
+      // 分支；R7 的 dvP5 解锁不适用于本类）。
       HdrStrategy.nativeDolbyVision: HdrStrategyMaturity.unsupported,
       HdrStrategy.baseLayerDirect: HdrStrategyMaturity.unsupported,
       HdrStrategy.baseLayerConvert: HdrStrategyMaturity.unsupported,

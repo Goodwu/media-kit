@@ -71,12 +71,21 @@ class HdrStrategyRealizer {
     HdrSourceClass cls,
     HdrCapabilities capabilities,
   ) {
-    if (cls != HdrSourceClass.dvP5 ||
+    // 2026-10-06: dvP84 unlocked alongside dvP5 (user-directed direct-path
+    // verification on the LG DV device). P8.4 = profile 8, compatibility id 4
+    // (HLG base layer + enhancement/RPU); the Dolby engine handles the
+    // enhancement the same way the P5.0 single-layer case hands everything to
+    // it. Other classes/profiles remain unsupported.
+    final bool eligibleSource = (cls == HdrSourceClass.dvP5 &&
+            source.dvProfile == 5 &&
+            source.dvCompatibilityId == 0 &&
+            source.enhancementLayer == false) ||
+        (cls == HdrSourceClass.dvP84 &&
+            source.dvProfile == 8 &&
+            source.dvCompatibilityId == 4);
+    if (!eligibleSource ||
         source.codec != 'hevc' ||
-        source.dynamicMetadata != HdrDynamicMetadata.dolbyVision ||
-        source.dvProfile != 5 ||
-        source.dvCompatibilityId != 0 ||
-        source.enhancementLayer != false) {
+        source.dynamicMetadata != HdrDynamicMetadata.dolbyVision) {
       return const HdrStrategyRealization.infeasible(
           HdrDegradeReason.unsupportedStrategy);
     }
@@ -100,6 +109,10 @@ class HdrStrategyRealizer {
       return const HdrStrategyRealization.infeasible(
           HdrDegradeReason.nativeDvUnavailable);
     }
+    // P5 keeps the verified timed release. The API 24 vendor DV decoder
+    // holds at-time released buffers (on-device r28 chain: frames decoded,
+    // playback advancing, screen frozen 48s), so P8.4 releases immediately.
+    final renderMode = cls == HdrSourceClass.dvP84 ? 'boolean' : 'timed';
     return HdrStrategyRealization.route(
       HdrRoute(
         strategy: HdrStrategy.nativeDolbyVision,
@@ -110,7 +123,7 @@ class HdrStrategyRealizer {
         vo: 'mediacodec_embed',
         hwdec: 'mediacodec',
         vdLavcOptions: 'native_dv=1',
-        mediacodecEmbedRenderMode: 'timed',
+        mediacodecEmbedRenderMode: renderMode,
         targetPrim: null,
         targetTrc: null,
         surfaceTransfer: null,
@@ -145,7 +158,18 @@ class HdrStrategyRealizer {
       final HdrDegradeReason? reason =
           _displayTransferCheck(transfer, capabilities);
       if (reason != null) {
-        return HdrStrategyRealization.infeasible(reason);
+        // An HLG base layer stays presentable on a panel that declares
+        // Dolby Vision without HLG: the system composer interprets the HLG
+        // buffer itself (the platform player plays P8.4 this way on the
+        // API 24 LG device — smooth, desaturated, no dynamic metadata).
+        // Every other missing transfer stays infeasible.
+        final bool hlgOverDvPanel =
+            reason == HdrDegradeReason.displayLacksTransfer &&
+                transfer == HdrOutputTransfer.hlg &&
+                capabilities.displayHdrTypes?.contains(1) == true;
+        if (!hlgOverDvPanel) {
+          return HdrStrategyRealization.infeasible(reason);
+        }
       }
     }
     return HdrStrategyRealization.route(

@@ -847,8 +847,7 @@ void main() {
       expect(session.report.value.generation, 2);
       await session.dispose();
     });
-    test('real planner stays unsupported even with allowExperimental',
-        () async {
+    test('real planner selects nativeDolbyVision with allowExperimental on a DV-capable device', () async {
       final env = _Environment();
       final backend = _Backend()
         ..review = ((plan) async => HdrReviewFacts(
@@ -864,10 +863,13 @@ void main() {
           policy: const HdrRoutingPolicy(allowExperimental: true),
           capabilitiesProvider: () async => _caps());
       await session.open(env.media, hint: _p5);
+      // 2026-10-06 dvP5 maturity unlock: the real planner now picks the
+      // native DV route on a DV-declaring device with the bridge loaded —
+      // exactly the LG direct-path this unlock enables.
       expect(
           backend.opened
               .any((p) => p.route.strategy == HdrStrategy.nativeDolbyVision),
-          isFalse);
+          isTrue);
       await session.dispose();
       final source =
           File('lib/src/hdr/hdr_video_session.dart').readAsStringSync();

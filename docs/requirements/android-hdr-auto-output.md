@@ -62,7 +62,7 @@ media-kit 不负责保证片源和显示能力一致，只负责如实预测、�
 
 | 策略 | 含义 |
 |---|---|
-| `nativeDolbyVision` | DV 解码器加 DV 显示，由系统和 Dolby 引擎完成映射（**预留**，现有链路不支持，见 R7） |
+| `nativeDolbyVision` | DV 解码器加 DV 显示，由系统和 Dolby 引擎完成映射。DV P5.0 无 EL 与 DV P8.4 类为 `experimental`（2026-10-06 LG DV 实机解锁）；其余类仍**预留**（R7） |
 | `baseLayerDirect` | 解码器直出 Surface（`mediacodec_embed`），按基础层的传输函数输出，忽略动态元数据 |
 | `baseLayerConvert` | gpu-next 把基础层转换到显示器支持的 HDR 传输函数（如 HLG 转 PQ），忽略动态元数据 |
 | `metadataReshape` | gpu-next/libplacebo 应用动态元数据（DV RPU 等）重建后输出 HDR（PQ） |
@@ -198,7 +198,7 @@ Phase 1 只做 Android。darwin（三事实交集门禁、final24 运行时禁�
 
 ### R7 原生 DV 呈现（预留，另立需求）
 
-1. Phase 1 只预留：能力查询报告 DV 显示类型与 `video/dolby-vision` 解码器（R1.1）；策略枚举包含 `nativeDolbyVision`；呈现类型包含 `nativeDolbyVision`。`nativeDolbyVision` 的成熟度为 `unsupported`，规划时永远跳过。
+1. Phase 1 只预留：能力查询报告 DV 显示类型与 `video/dolby-vision` 解码器（R1.1）；策略枚举包含 `nativeDolbyVision`；呈现类型包含 `nativeDolbyVision`。`nativeDolbyVision` 的成熟度原为 `unsupported`（规划时永远跳过）；2026-10-06 起 DV P5 类解锁为 `experimental`（LG DV 设备实机验证轮，realizer 条件：DV P5.0 无 EL + 面板 DV 声明 + profile 32 硬解器 + bridge v1），其余类仍 `unsupported`。
 2. 在支持 DV 的设备上，DV 源按默认偏好的下一条策略呈现，报告中要明确写出"以 HDR10/HLG 呈现、非原生 DV"。
 3. 原生 DV 路由另立需求。它涉及 FFmpeg（用 `video/dolby-vision` 和对应 profile/level 打开解码器，RPU 保留在码流中）、mpv（路由选择）和 media-kit 三方。等 DV 设备到位，摸清它的解码器和合成链路后再设计。
 
@@ -246,7 +246,9 @@ Phase 1 只做 Android。darwin（三事实交集门禁、final24 运行时禁�
 | DV P10 | 全部 | unsupported | Phase 1 不涉及 AV1 |
 | HDR Vivid | baseLayerDirect | experimental | 本地有样片，待单列验证 |
 | HDR Vivid | metadataReshape | unsupported | 未实现 |
-| 任意 DV | nativeDolbyVision | unsupported | R7 |
+| DV P5 | nativeDolbyVision | experimental | 2026-10-06 LG DV 设备实机解锁：面板声明 DV（displayHdrTypes 含 1）+ qcom DV 硬解器在位 + native DV bridge v1；R22 N4 诊断模式路由成功先例。实机直通验证轮确认后另议升级 |
+| DV P8.4 | nativeDolbyVision | experimental | 2026-10-06 与 DV P5 同批解锁（用户导演：P8.4 素材 profile 8/compat 4 直出验证轮，qcom DV 硬解 profile 支持以实机 open 为准） |
+| DV P8.1 / DV P8.2 / DV P7 | nativeDolbyVision | unsupported | R7 保留（realizer 仅覆盖 DV P5.0 无 EL 与 DV P8.4） |
 
 样片收集：P8.1、P7（MEL 与 FEL）、P8.2、纯 HLG 各至少一个，记录 SHA-256 后放入 `~/src/media-kit-build/sources/`。
 

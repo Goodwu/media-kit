@@ -26,6 +26,17 @@ const Map<String, List<HdrSourceClass>> _sourceNames =
   'DV P8.1': <HdrSourceClass>[HdrSourceClass.dvP81],
   'DV P8.2': <HdrSourceClass>[HdrSourceClass.dvP82],
   'DV P8.4': <HdrSourceClass>[HdrSourceClass.dvP84],
+  'DV P8.1 / DV P8.2 / DV P8.4 / DV P7': <HdrSourceClass>[
+    HdrSourceClass.dvP81,
+    HdrSourceClass.dvP82,
+    HdrSourceClass.dvP84,
+    HdrSourceClass.dvP7,
+  ],
+  'DV P8.1 / DV P8.2 / DV P7': <HdrSourceClass>[
+    HdrSourceClass.dvP81,
+    HdrSourceClass.dvP82,
+    HdrSourceClass.dvP7,
+  ],
   'DV P7': <HdrSourceClass>[HdrSourceClass.dvP7],
   'DV P10': <HdrSourceClass>[HdrSourceClass.dvP10],
   'HDR Vivid': <HdrSourceClass>[HdrSourceClass.hdrVivid],
@@ -139,8 +150,8 @@ void main() {
               '(tried ../, ../../, ./ of docs/requirements/); maturity '
               'tests must run inside the media-kit checkout');
       final List<_Cell> cells = _parseSection6(requirement.readAsLinesSync());
-      expect(cells.length, 33,
-          reason: 'section 6 expands to 33 cells; when the requirement table '
+      expect(cells.length, 32,
+          reason: 'section 6 expands to 32 cells; when the requirement table '
               'changes, update the constant table and this count together');
       for (final _Cell cell in cells) {
         expect(
