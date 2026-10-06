@@ -87,6 +87,11 @@ abstract class PlatformVideoController {
   /// Candidate surface is mounted before HDR promotion so SDR and HDR keep topology.
   bool nativeSurfaceCandidate = false;
 
+  /// OHOS emulator mode: the software render bridge owns the XComponent
+  /// surface (libmpv render API SW blitted with the bridge's own EGL), while
+  /// mpv runs with vo=libmpv. See [OhosVideoController].
+  bool swRender = false;
+
   /// {@macro platform_video_controller}
   PlatformVideoController(this.player, this.configuration);
 

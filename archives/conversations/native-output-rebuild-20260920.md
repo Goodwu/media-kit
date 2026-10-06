@@ -67,6 +67,37 @@
 
 - [ ] A1: 在真实 macOS/OHOS 设备上完成 native output 生命周期验收。
 
+## 2026-10-06 Luna E1 方案打通轮（SW 桥落地，XComponent 挂载链未通）
+
+用户指令"Luna E1 可以播放视频，使用这个方案进行打通"。实施 E1/E2 技术进 media_kit：**软件渲染桥已落地并 attach 成功，但 XComponent ready 事件未到达，画面未通**——工作区保存，未收口。
+
+### 已落地的代码（本轮工作区状态）
+
+1. **`libs/ohos/.../cpp/sw_render.cpp`（新，约 300 行）**：软件渲染桥。dlopen("libmpv.so") 绑定 render API（mpv_render_context_create/free/render），attach 到 Dart 传入的**活体 mpv handle**（非 E2 的自建实例），SW 渲染 RGBA → 自有 EGL/GLES blit（shader/texture/VBO 全套）→ eglSwapBuffers 到目标 surface；逐帧读窗口几何自适应尺寸。CMake 目标 `mediakit_ohos_sw`（EGL/GLESv3/native_window/hilog_ndk.z），随 HAP 打包已实证（HAP 内 59KB）。
+2. **`media_kit_video/lib/src/video_controller/ohos_video_controller/sw_render.dart`（新）**：Dart FFI 封装（attach/detach/frames），带全路径回退（应用 libs 目录不在裸名搜索路径时）。
+3. **`OhosVideoController` 接线**：模拟器自动检测（`Utils.IsEmulator` channel，异常回退 false）或 `vo='sw'` 显式 → sw 模式：`vo=libmpv` + `hwdec=no` + darwin.useNativeSurface=true（XComponent 面）。`_attachNativeSurfaceLocked` 增 sw 分支（detach→attach、不设 wid）。`_disposeOnce` 挂 detach。`PlatformVideoController.swRender` 字段。
+4. libmpv-ohos-build 两项修复（前节）已提交。
+
+### 验证状态
+
+- **桥 attach 成功**（release 构建、模拟器实测 `start code=0`，surface id 与 mpv handle 均实值）。
+- **画面未通**：XComponent 面与纹理面均黑。终审探针（vo=null + 红背景）与 SW 桥一致黑 → 指向 Flutter-OHOS 纹理/合成显示链路（模拟器限制），但 **XComponent 直通合成未获验证机会**——本轮最后卡点：`nativeSurfaceReady` 事件未到达（`useNativeSurface=true` 后 XComponent 未挂载或挂载未回报），挂载链门槛未查明。
+- 原生侧 hilog（OH_LOG_Print LOG_APP）在 Flutter 宿主进程内**不落盘**（E2 独立应用同 API 可见）——渲染线程状态不可观测，是定位的主要障碍。
+- debug HAP（可获 VM service 与 composition trace）构建被 hvigor debug 变体环境失败阻断（release 正常；直接 ninja 手动编译可过，hvigor 调用自身报 00308018——环境问题待查）。
+
+### 精确下一步（接手即做）
+
+1. 查 XComponent 挂载链：video_texture.dart 的 ohosNativeSurfaceCandidate 分支要求 `id/rect/visible` 与 candidate 齐备——插桩 `_traceOhosComposition`（kDebugMode 门）需 debug HAP；或先读 native_surface_viewport.dart 的挂载条件静态排查。
+2. 解 hvigor debug 变体失败（00308018；release 同树正常）→ debug HAP → VM service 驱动 + composition trace。
+3. 原生日标通道：OH_LOG 不落盘时，改写状态到应用 files 目录文件（Dart 轮询）或走 mpv log 前缀转发。
+4. 若 XComponent ready 到达且 attach 成功仍黑：SW blit 的 EGL 在模拟器 guest-DGLES 上向 XComponent 窗口 swap 的行为需单独取证（E2 证明可行的是独立应用窗口；Flutter PlatformView 的 XComponent 合成路径未证）。
+5. 真机优先级不变：真机 vo=gpu-next 正常路径未受本轮任何影响（sw 模式仅模拟器/显式触发）。
+
+### 现场状态
+
+- media_kit 工作区：sw 桥全套代码（未提交，工作区保存）；luna_flutter_e3 有 dumb-mode 实验残留（scratch 项目不提交）；模拟器在跑（media_kit_test 已装 sw 桥版）；宿主镜像服务 8000 在跑。
+- libmpv-ohos-build：前节两项修复已提交；产物 71242b19 完整可用。
+
 ## 2026-10-06 选项 B 实施轮：构建修复达成、黑屏判决实验定案（显示链路）
 
 用户指令"开工"。按"探针取证 → RGBA config 补丁 → 重建 → 验证"执行，结果**选项 B 的补丁机制工作但未能解决模拟器黑屏——终审探针证明黑屏根因是 Flutter-OHOS 纹理显示链路在模拟器上不工作**。
