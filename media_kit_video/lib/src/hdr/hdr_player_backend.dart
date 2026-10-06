@@ -114,7 +114,8 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
     if (hasPair &&
         (route.strategy != HdrStrategy.nativeDolbyVision ||
             route.vdLavcOptions != 'native_dv=1' ||
-            route.mediacodecEmbedRenderMode != 'timed' ||
+            (route.mediacodecEmbedRenderMode != 'timed' &&
+                route.mediacodecEmbedRenderMode != 'boolean') ||
             route.vo != 'mediacodec_embed' ||
             route.hwdec != 'mediacodec' ||
             route.topology != HdrTopology.platformView ||

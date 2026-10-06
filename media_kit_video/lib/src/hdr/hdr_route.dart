@@ -9,8 +9,9 @@ import 'hdr_strategy.dart';
 import 'hdr_source_descriptor.dart';
 
 /// How the picture reaches the viewer (requirement R4.1). The value is
-/// derived from the selected strategy; `nativeDolbyVision` is reserved (R7)
-/// and never produced by the Phase 1 planner.
+/// derived from the selected strategy; `nativeDolbyVision` was reserved
+/// (R7) and is produced only for `dvP5` sources since the 2026-10-06
+/// experimental unlock on DV-declaring devices.
 enum HdrPresentation {
   sdr,
   toneMappedSdr,
@@ -89,10 +90,11 @@ enum HdrDegradeReason {
   /// `allowExperimental` (requirement 3.5).
   experimentalStrategySkipped,
 
-  /// The strategy cannot be realized on the current pipeline at all:
-  /// `nativeDolbyVision` (R7), a strategy that would ignore a P5 RPU, HDR
-  /// Vivid metadata rebuild (not implemented), or reshape on a P7 stream
-  /// whose enhancement layer may be FEL.
+  /// The strategy cannot be realized on the current pipeline at all: a
+  /// `nativeDolbyVision` source outside the 2026-10-06 dvP5 experimental
+  /// unlock, a strategy that would ignore a P5 RPU, HDR Vivid metadata
+  /// rebuild (not implemented), or reshape on a P7 stream whose
+  /// enhancement layer may be FEL.
   unsupportedStrategy,
 
   /// A Dolby Vision source needs the fork's P5 dovi rescale pipeline and it

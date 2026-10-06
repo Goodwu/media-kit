@@ -1109,10 +1109,14 @@ void main() {
       final ordinaryNative = ordinary.candidates.firstWhere(
         (candidate) => candidate.strategy == HdrStrategy.nativeDolbyVision,
       );
-      expect(ordinaryNative.maturity, HdrStrategyMaturity.unsupported);
-      expect(ordinaryNative.skipReason, HdrDegradeReason.unsupportedStrategy);
+      // 2026-10-06 dvP5 maturity unlock: the table now carries
+      // experimental for dvP5 x nativeDolbyVision (realizer gates still
+      // precede the maturity bypass below).
+      expect(ordinaryNative.maturity, HdrStrategyMaturity.experimental);
+      expect(ordinaryNative.skipReason,
+          HdrDegradeReason.experimentalStrategySkipped);
       expect(ordinary.selected.strategy, isNot(HdrStrategy.nativeDolbyVision));
-      expect(diagnostic.selected.maturity, HdrStrategyMaturity.unsupported);
+      expect(diagnostic.selected.maturity, HdrStrategyMaturity.experimental);
       expect(diagnostic.selected.strategy, HdrStrategy.nativeDolbyVision);
       expect(diagnostic.selected.feasible, isTrue);
       expect(diagnostic.playable, isTrue);

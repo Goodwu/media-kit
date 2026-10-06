@@ -425,7 +425,12 @@ HdrRoutePrediction planAndroidNativeDvSessionDiagnostic({
   final candidates = <HdrCandidate>[
     HdrCandidate(
       strategy: HdrStrategy.nativeDolbyVision,
-      maturity: HdrStrategyMaturity.unsupported,
+      // Reflect the current maturity table: the diagnostic bypass forces the
+      // reserved strategy through, but the reported maturity tracks the
+      // table (unsupported → experimental since the 2026-10-06 LG DV
+      // unlock).
+      maturity: HdrStrategyMaturityTable.of(
+          HdrSourceClass.dvP5, HdrStrategy.nativeDolbyVision),
       feasible: true,
       route: route,
     ),

@@ -237,15 +237,22 @@ Future<void> consumeNativeDvSessionEvidence({
         HdrNativeDvReviewFailureKind.sourceIdentity);
   }
   final configuration = evidence.configuration;
+  // The route realizer admits single-layer P5 (profile 5, compatibility 0)
+  // and P8.4 (profile 8, compatibility 4) sources; the decoder must report
+  // one of those two identities. Everything else is a configuration drift.
+  final isRealizedP5 = facts.dolbyVisionProfile == 5 &&
+      facts.dvCompatibilityId == 0 &&
+      facts.dvElPresent == false;
+  final isRealizedP84 = facts.dolbyVisionProfile == 8 &&
+      facts.dvCompatibilityId == 4 &&
+      facts.dvElPresent == false;
   if (configuration.mime != 'video/dolby-vision' ||
       configuration.codec.isEmpty ||
       !configuration.nativeDvActive ||
       evidence.hwdecCurrent != 'mediacodec' ||
       facts.hwdecCurrent != evidence.hwdecCurrent ||
       facts.codec != 'hevc' ||
-      facts.dolbyVisionProfile != 5 ||
-      facts.dvCompatibilityId != 0 ||
-      facts.dvElPresent != false) {
+      !(isRealizedP5 || isRealizedP84)) {
     throw const HdrNativeDvReviewFailure(
         HdrNativeDvReviewFailureKind.configuration);
   }
