@@ -99,6 +99,7 @@ mpv 的 GL vo（gpu/gpu-next，含哑模式）在模拟器的 DGLES（软件模�
 - 仓库已还原到提交态（01b15a01：新 libmpv 钉定 29b8bd4d）；CMake 临时旧 zip 实验已撤。
 - 模拟器现装：luna_flutter_e3（哑模式实验版，scratch 项目 ~/src/luna_flutter_e3 未提交改动）；宿主 HTTP 镜像服务仍在 8000 端口。
 - e3 项目 main.dart 的 dumb-mode 实验改动留在 scratch 项目内（不影响主仓）。
+- **SDK 位置更新（2026-10-06 后续）**：本地 OHOS Flutter SDK 定编为 `~/src/flutter-ohos`（原 flutter-ohos-e3 迁移；旧路径已不存在）。引擎 90 文件脏改动已由迁移方转为正式提交（HEAD `2ece1aae`，HCPP 契约文档+测试入库），版本缓存为规范化 `3.44.9+ohos-2`（不再需要本会话的 version 文件临时补丁），tag 3.44.9+ohos 与引擎缓存随迁完好。后续黑帧修复轮的构建命令一律用新路径；experiments 库 `ohos-flutter-e3-archive-20261006.md` 的恢复配方作为历史兜底仍有效。
 
 ## 2026-10-06 OHOS 模拟器轮（guard 移除验收）
 
