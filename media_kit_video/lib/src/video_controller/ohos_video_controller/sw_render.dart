@@ -27,7 +27,7 @@ class SwRender {
     return null;
   }
 
-  /// Starts the software blit loop for [surfaceId] driven by the live mpv
+  /// Starts the software render loop for [surfaceId] driven by the live mpv
   /// handle at [mpvHandle]. Returns false when the bridge is unavailable.
   static bool attach(int surfaceId, int mpvHandle) {
     final lib = _library ??= _open();
@@ -40,6 +40,26 @@ class SwRender {
       return code == 0;
     } catch (error) {
       debugPrint('[SwRender] start lookup/invoke failed: $error');
+      return false;
+    }
+  }
+
+  /// Starts the render context without a window: the loop drains mpv frames
+  /// into an internal buffer (E2 ordering — the context exists before the
+  /// video chain initializes). Call [setSurface] when the XComponent reports
+  /// its surface to begin submitting.
+  static bool start(int mpvHandle) => attach(0, mpvHandle);
+
+  /// Attaches or swaps the submission window; the render context survives.
+  static bool setSurface(int surfaceId) {
+    final lib = _library;
+    if (lib == null) return false;
+    try {
+      final set = lib.lookupFunction<Int32 Function(Int64), int Function(int)>(
+        'mk_sw_set_surface',
+      );
+      return set(surfaceId) == 0;
+    } catch (_) {
       return false;
     }
   }

@@ -16,6 +16,7 @@
 #include <unistd.h>
 
 #include <dlfcn.h>
+#include <cstdio>
 
 #include <atomic>
 #include <chrono>
@@ -57,6 +58,10 @@ struct MpvRenderParam {
 
 std::mutex g_mutex;
 std::atomic<bool> g_running{false};
+// Window attach state: the render context may exist (and render into the
+// internal buffer) long before any surface is attached; submission only
+// runs while a window is attached. Swapping windows never frees the ctx.
+std::atomic<bool> g_window_attached{false};
 std::atomic<uint64_t> g_frames{0};
 std::atomic<uint64_t> g_submitted{0};
 std::atomic<uint64_t> g_pixel_sum{0};
@@ -67,20 +72,75 @@ MpvRenderApi g_api;
 int g_width = 0;
 int g_height = 0;
 
+void LogFile(const char* line) {
+  // hilog drops LOG_APP from this module on the emulator; mirror to the
+  // app files dir where the Dart side can read it back.
+  FILE* f = fopen("/data/storage/el2/base/files/sw_log.txt", "a");
+  if (f) {
+    fputs(line, f);
+    fputc('\n', f);
+    fclose(f);
+  }
+}
+
 void Log(const char* message) {
   OH_LOG_Print(LOG_APP, LOG_INFO, kDomain, kTag, "[%{public}s]", message);
+  LogFile(message);
 }
 
 void LogValue(const char* message, int64_t value) {
   OH_LOG_Print(LOG_APP, LOG_INFO, kDomain, kTag,
                "[%{public}s %{public}lld]", message, value);
+  char line[160];
+  std::snprintf(line, sizeof(line), "%s %lld", message,
+                static_cast<long long>(value));
+  LogFile(line);
+}
+
+void LogSymbolOrigin(const char* via, void* symbol) {
+  Dl_info info{};
+  if (dladdr(symbol, &info) != 0 && info.dli_fname != nullptr) {
+    char line[512];
+    std::snprintf(line, sizeof(line), "sym %s -> %s", via, info.dli_fname);
+    LogFile(line);
+    OH_LOG_Print(LOG_APP, LOG_INFO, kDomain, kTag,
+                 "[%{public}s]", line);
+  } else {
+    Log("sym origin unknown");
+  }
 }
 
 bool BindMpvApi() {
+  // The app process already loaded libmpv (media_kit FFI). Prefer binding
+  // THAT instance: a namespace-isolated dlopen may load a second copy, and
+  // a render context on the copy never sees the player's video chain
+  // (observed as "render() not being called" + black output).
+  void* create_default = dlsym(RTLD_DEFAULT, "mpv_render_context_create");
+  if (create_default != nullptr) {
+    LogSymbolOrigin("RTLD_DEFAULT", create_default);
+    g_api.render_context_create =
+        reinterpret_cast<decltype(g_api.render_context_create)>(create_default);
+    g_api.render_context_free =
+        reinterpret_cast<decltype(g_api.render_context_free)>(
+            dlsym(RTLD_DEFAULT, "mpv_render_context_free"));
+    g_api.render_context_render =
+        reinterpret_cast<decltype(g_api.render_context_render)>(
+            dlsym(RTLD_DEFAULT, "mpv_render_context_render"));
+    if (g_api.render_context_free && g_api.render_context_render) {
+      g_api.handle = nullptr;  // borrowed from the global scope
+      return true;
+    }
+  }
   g_api.handle = dlopen("libmpv.so", RTLD_NOW);
   if (!g_api.handle) {
     Log("dlopen libmpv.so failed");
     return false;
+  }
+  if (create_default != nullptr) {
+    void* create_local = dlsym(g_api.handle, "mpv_render_context_create");
+    if (create_local != create_default) {
+      Log("SECOND libmpv copy detected");
+    }
   }
   g_api.render_context_create =
       reinterpret_cast<decltype(g_api.render_context_create)>(
@@ -162,6 +222,12 @@ void RenderLoop() {
     rendered++;
     g_frames.store(rendered);
 
+    if (!g_window_attached.load() || g_window == nullptr) {
+      // No consumer window yet (or between swaps): render into the internal
+      // buffer only, so the mpv render context keeps draining frames.
+      std::this_thread::sleep_for(std::chrono::milliseconds(25));
+      continue;
+    }
     OHNativeWindowBuffer* window_buffer = nullptr;
     int fence = -1;
     int rc = OH_NativeWindow_NativeWindowRequestBuffer(g_window,
@@ -235,18 +301,47 @@ int32_t mk_sw_start(int64_t surface_id, int64_t mpv_handle) {
   if (!BindMpvApi()) return -2;
   g_mpv_handle = reinterpret_cast<void*>(static_cast<uintptr_t>(mpv_handle));
   if (!g_mpv_handle) return -3;
-  if (OH_NativeWindow_CreateNativeWindowFromSurfaceId(
-          static_cast<uint64_t>(surface_id), &g_window) != 0 ||
-      !g_window) {
-    Log("native window from surface id failed");
-    return -4;
-  }
   g_width = g_height = 0;
   g_frames.store(0);
   g_submitted.store(0);
+  g_window_attached.store(false);
+  if (surface_id != 0) {
+    if (OH_NativeWindow_CreateNativeWindowFromSurfaceId(
+            static_cast<uint64_t>(surface_id), &g_window) != 0 ||
+        !g_window) {
+      Log("native window from surface id failed");
+      return -4;
+    }
+    g_window_attached.store(true);
+  }
   g_running.store(true);
   g_thread = std::thread(RenderLoop);
   LogValue("sw renderer started, mpv handle", mpv_handle);
+  return 0;
+}
+
+int32_t mk_sw_set_surface(int64_t surface_id) {
+  std::lock_guard<std::mutex> lock(g_mutex);
+  if (!g_running.load()) return -1;
+  OHNativeWindow* window = nullptr;
+  if (surface_id == 0 ||
+      OH_NativeWindow_CreateNativeWindowFromSurfaceId(
+          static_cast<uint64_t>(surface_id), &window) != 0 ||
+      !window) {
+    Log("set surface: native window from surface id failed");
+    return -2;
+  }
+  // The render loop reads g_window between frames; swap under the same
+  // lock the loop's geometry reads do NOT take, so retire the old window
+  // only after publishing the new one.
+  OHNativeWindow* previous = g_window;
+  g_window = window;
+  g_window_attached.store(true);
+  g_width = g_height = 0;
+  if (previous) {
+    OH_NativeWindow_DestroyNativeWindow(previous);
+  }
+  LogValue("set surface", surface_id);
   return 0;
 }
 

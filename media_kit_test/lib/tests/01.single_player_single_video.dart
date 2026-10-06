@@ -56,7 +56,19 @@ class _SinglePlayerSingleVideoScreenState
             'submitted=${SwRender.submitted()} '
             'pixelSum=${SwRender.pixelSum()}');
       }
-      // TEMPORARY: mpv runtime facts for the emulator black-frame probe.
+      // TEMPORARY: native bridge logs reach the app files dir only.
+      try {
+        final log = File('/data/storage/el2/base/files/sw_log.txt');
+        if (await log.exists()) {
+          final lines = await log.readAsLines();
+          for (final line in lines.length > 8
+              ? lines.sublist(lines.length - 8)
+              : lines) {
+            debugPrint('SwNative: $line');
+          }
+          await log.writeAsString('');
+        }
+      } catch (_) {}
       final platform = player.platform;
       if (platform != null) {
         try {

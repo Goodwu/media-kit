@@ -85,9 +85,11 @@
 
 ### 精确下一步（接手即做）
 
-1. **稳定单次 attach 序列**：查 real.dart nativeSurfaceDestroyed 路径的重开逻辑（`_hdrCurrentSource` reopen probes）——XComponent 重建循环期间避免 ctx free/crete 与 VO 重init 交错；或桥改 split API：`mk_sw_start(mpv_handle)`（create 即建 ctx，无窗口先渲到内存）+ `mk_sw_set_surface(id)`（attach 只换窗口）——ctx 生命周期与窗口解耦，open 前 ctx 已存在（E2 顺序完全成立）。
-2. 若仍黑：dump 单帧到文件（app files 目录）判读内容层；对照 mpv render.c 的 "not being called" 触发条件（target-usage 超时）。
-3. Goal 1（GL vo）未动：需先做显式 vo 覆盖轮（⑥ 原计划），补丁件 zip 在 libmpv-ohos-build 树。
+0. **恢复原生可见性（第一优先）**：r23 的文件日志方案（native 写 /data/storage/el2/base/files/sw_log.txt + Dart 轮询读回打印）Dart 侧未读到行——先查路径权限/写失败原因（Dart File 读自身 files 目录本应可行；native fopen 该路径在模拟器可能被 namespace 拦）；可见性恢复后即能量化 r22 的 RTLD_DEFAULT 绑定是否命中/是否 SECOND copy。
+1. **render-context 黑帧主嫌**：linker namespace 双 libmpv 副本（我们的 .so dlopen 得到新副本，ctx 不在 player 的视频链上——mpv "render() not being called" 而我们每秒调 30+ 次的唯一自洽解释）。r22 已落 RTLD_DEFAULT 优先绑定 + dladdr 取证 + "SECOND copy" 检测代码，**待日志验证**。备选：mk_sw_start 改由 Dart 传入已解析符号地址（Dart FFI probes 拿到 mpv_render_context_create 地址传给 native，彻底绕开 dlopen namespace）。
+2. 若非双副本：稳定单次 attach 序列（nativeSurfaceDestroyed 重开循环已实证多次 Playing 重开）；split-API（mk_sw_start 无窗启动 ctx + mk_sw_set_surface 换窗）已落地（r20-r21 实证 vo=libmpv/video-format 恢复正常时序）。
+3. Goal 1（GL vo）未动：显式 vo 覆盖轮（⑥ 原计划）+ 补丁件 zip 在 libmpv-ohos-build 树。
+4. rgb0/rgba 与 vid-cycle 两变量已排除（r18/r19 实证无效）。
 
 ### 现场与运维
 
