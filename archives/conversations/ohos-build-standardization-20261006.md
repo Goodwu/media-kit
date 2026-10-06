@@ -84,7 +84,9 @@ native 溯源门禁步骤、指纹 JSON 进产物、manifest 增 patch_branch/ba
 2. **switch 表达式 arm 内重复（20+7 处）**：基线 arm 已含
    `fuchsia || ohos =>`，扫尾在 `android ||` 后再插 ohos——同 arm 出现两次；
    typography.dart 一处甚至**矛盾**（会把 ohos 从基线的 Helsinki arm 改到
-   MountainView arm，属行为变更而非 parity）。
+   MountainView arm，属行为变更而非 parity）。navigator case 缩进随后按用户
+   指出对齐 sibling（终版分支 2ece1aae：parity f6cd306c）。bottom_sheet 类
+   文件的全部剩余改动均为手势实验家族（typedef/handler 公有化），按批准表丢弃。
 3. **终态**：131 处新增中 129 处为基线已覆盖的重复，真实缺口仅 2 处——
    navigator.dart poppedRoute 重聚焦 switch 补 case ohos（android
    fall-through）+ scrollbar.dart 甩动速度 arm 补 ohos（基线落
