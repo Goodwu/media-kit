@@ -1,6 +1,7 @@
 # LG-H870DS HDR 能力与 demo 移植
 
 ## Current State
+- **R25直通方案实机验证完成（2026-10-06，用户导演）**：整理后HEAD构建HDR10直通包bd72c380（R19同款defines+当前产品lib7cc6f4ac；首建误用R19旧lib期望值6c8ec17e已修正），安装全字节核验+PQ素材fresh（76438009B/3068be37），实机路由baseLayerDirect/nativeHdr/PQ直出+hal_hdr激活+0 Stop失败，**用户结论"流畅，显示正常"**——直通（baseLayerDirect）vs tone-map（toneMapSdr 11.6fps卡顿）对比定性完成，直通流畅性通过。R17修复直通路径冒烟无回归。退出hal_native恢复+timeout30000/sleep。归档新库hdr10-direct-r25-20261006/（evidence-index 5164——注意evidence-index自身已随experiments迁至新库，后续归档路径用~/src/media-kit-experiments/）。
 - **归档迁移（2026-10-05，用户指令）**：`archives/experiments/` 全量迁至独立仓库 `~/src/media-kit-experiments`（807MB/6308文件，构建缓存已清理见其CLEANING-MANIFEST.json）；本文及 TASKS 中所有 `archives/experiments/` 前缀路径均映射该库根。conversations 留主仓库。
 - **全屏维度R24人工观察完成（2026-10-05，队列第3项，LG任务无阻塞项全部收口）**：P5_SCOPE_FULLSCREEN define专用包（APK ab21e434，R23同源树仅加define）安装核验+素材fresh+起播，AppBar全屏按钮UI dump确认（bounds [1248,112][1440,304] clickable）。**用户观察结论**：旧叠层消失✓画面全屏无遮挡、画面完整✓未见缺失、比例✓正常、退出全屏往返✓无异常；亮度不确定是否HDR（SDR tone-map路由预期，非缺陷）；帧率低卡顿严重（已知tone-map性能项low/deferred，非全屏回归）。Back语义观察：首次Back被fullscreen scope消费（先退全屏）、二次Back严格页面退出（onSurfaceCleanup wid2218 3840×2160→AUTO_PLAYER_DISPOSE completed→Launcher）、timeout30000/sleep恢复。归档5文件（evidence-index 5159）。**LG任务剩余仅Vulkan回归（无设备blocked）——全部无阻塞工作完成**。
 - **N4观测轮R23完成（2026-10-05，用户批准队列第2项）**：观测增强实施（helper绑定撤销采样+backendStopIssued三态推导+page透传，lab 268/268+analyze零issue+独立审核PASS+两条LOW修复：gap文案区分未采样、值名inferred化）→R23构建（R22已审树+R17修复+N4增强两审核引用+fresh manifest，APK f717e718）→实机全链（R22 predecessor fresh→安装全字节→P5素材fresh→Run tap→settled→真实Close→final读回→Player终止→Launcher→sleep，run 1791188072374046-n4）。**新观测字段实机值**：backendStopIssued='issued-verify-failed-coordinator-error'（原unknown落定，stop已发出、验证失败于原债务StateError——负向语义保留）；boundOutputWithdrawnObserved=**true**（dispose前handle545803059792/gen1/viewId0/wid2099346→后全null，R21"未采不能追认"的tuple撤销观测实机首证）；controllerRetired=false维持Android平台定性（撤销观测补足retirement侧事实）；原债务/严格退出/Close按钮全保持。R17修复随轮冒烟：stop边界无错误、无回归。归档7文件（evidence-index 5154）+strict-predecessor-r23-v1。**仅剩：全屏维度（需专用包）、Vulkan回归（待设备）**。
@@ -38,6 +39,10 @@
 3. 人工验收通过后依次排：**P5 texture 分支 Surface ACK 采集轮**（唯一剩余分支；HDR10 R14/P8.4 texture链/N4失败分支R21 tuple均已闭环，见"仍需完成"定性）、**N4 整体设备验收观测**（nativeStopIssued/controllerRetired）、**现代 Vulkan 回归**（无设备，待到位）。tone-map 性能维持用户既定 low/deferred。
 
 ## History
+
+### 2026-10-06 R25直通方案实机验证：整理后代码直通流畅
+
+用户导演流程（纠正：不重复验证旧包，验证整理后代码+说明直通状态盘点）。直通状态盘点（LG API24）：HDR10 PQ已验证直通/SDR基线；HLG基层直出被displayLacksTransfer+gpuHdrDataSpaceUnavailable设备门禁拒绝；P5→PQ reshape被experimental门禁跳过（LYA已验证同路径）；nativeDV仅N4诊断模式路由已达画面未验证。构建整理后HEAD直通包（R19 defines+当前产品lib），实机：路由baseLayerDirect直出PQ+hal_hdr激活+0 Stop失败（R17修复直通路径冒烟无回归）+hal_native退出恢复。**用户结论：流畅，显示正常**——直通vs tone-map对比定性与量化证据（11.6fps）互相印证。归档新库（5文件，index 5164）。
 
 ### 2026-10-05 全屏维度R24：人工观察四项全过，LG无阻塞队列收口
 
