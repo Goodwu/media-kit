@@ -2,7 +2,7 @@
 
 ## Current State
 
-2026-10-07 agent 接手轮：**OHOS 模拟器播放通道打通**——sw 软件桥 + HCPP DISPLAY 直通组合在模拟器实机出画（清晰画面、帧推进、退出重入复播全通），"模拟器可视播放不可行"的旧定性就此推翻。详见下方 2026-10-07 HCPP 直通轮。
+2026-10-07 agent 接手轮：**OHOS 模拟器播放通道打通**（提交 67441db4）——sw 软件桥 + HCPP DISPLAY 直通组合在模拟器实机出画（清晰画面、帧推进、退出重入复播全通），"模拟器可视播放不可行"的旧定性就此推翻。详见下方 2026-10-07 HCPP 直通轮。
 
 - 出画路径定性：TLHC（initSurfaceAndroidView）在模拟器不可修——其 XComponent 消费者是引擎外部纹理链，RS `bind external with nullptr gbuffer`（DGLES 缺陷）恒黑；HCPP（initHybridAndroidView + buildinfo `enable_ohos_hybrid_composition=true`）让系统合成器直通 XComponent surface（Luna E2 同款），绕开引擎纹理链。此前"模拟器 Impeller 门禁锁死 HCPP"系误判——真实原因仅是 buildinfo 未配 HCPP 开关。
 - sw 桥三条硬修复：①生产者必须 SET_BUFFER_GEOMETRY（引擎消费侧恒 3×3 不 resize，不设几何则 RequestBuffer 恒 3×3，36 字节渲染缓冲、pixel_sum=0）；②几何随 videoParams 纠正（attach 时部件 rect 是布局前占位）；③绑定向 Dart 解析符号注入（mk_sw_start_ex；实测 same copy，双副本假设证伪但免疫化保留）。
