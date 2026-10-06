@@ -1,6 +1,9 @@
 # LG-H870DS HDR 能力与 demo 移植
 
 ## Current State
+- **R26两条定性撤销+日志问题解决+r26b受控重验（2026-10-06深夜）**：网上检索（READ_LOGS限制/persist.logd.size/LG G4 logd替换均不适用）后受控冷启动实验一锤定音——**真因=R26构建脚本漏注入local JAR env**，APK缺产品libmpv，冷启动抛"Cannot find libmpv.so"（黑屏/超时/无日志全由此）；**exec-out日志通路完全正常**（新进程flutter行全可读），"LG关闭三方app日志"定性撤销、诊断落盘任务降级。r26b修正（env注入+lib hash校验）重验：初始化干净、**nativeDolbyVision路由链实锤**（hint sdrDirect→decoder→nativeDV选中→ACTUAL output dolbyVision/dynamic true）、画面推进零错误、Back严格退出全链、timeout恢复。**nativeDV画面人工验收待用户**（提问未答，可随时重播）。归档r26b（6文件，index 5175）。
+- **LG logger专项轮完成（2026-10-06）**：按用户提供的LG G6/V20公开经验执行——persist.service.main/system/events.enable=1成功拉起三服务并激活/data/logger/文件旁路（main.log 5.9MB仅uid-1000系统行、events.log为events buffer旁路），但**三方app的main日志被独立关闭**（WWTEST写读不通、flutter 0行、logd buffer禁用不可经adb恢复）——R26黑屏根因的日志定性需app侧落盘机制，已登记新planned任务"HDR诊断日志落盘机制"。开关已恢复0。归档logger-round-20261006/（index 5169）。
+- **R26 nativeDV直通实机验证（2026-10-06）**：成熟度解锁（dvP5×nativeDV→experimental；需求表"任意DV"行拆分同步+锁定测试32格+planner/policy/diagnostic测试反转或条件化；V2独立审核PASS+两LOW采纳）后实机。**结果：路由可达但呈现不可靠**——首轮播放推进过+hal_hdr激活，用户观察"锁屏前白屏、解锁后黑屏"；am start -W两次挂起；LG logger开关对R26新进程关闭（flutter日志0行阻断定性）；crash buffer空。处置：maturity保持experimental默认关（experimental门价值实证）、toneMapSdr兜底不变、根因需开logger专项轮。归档nativedv-direct-r26-20261006/（新库，index 5168）。**用户"A完成即收口"语境下A未顺利通过——LG上其余验证按原计划继续待排期（不因A触发收口）**。
 - **R25直通方案实机验证完成（2026-10-06，用户导演）**：整理后HEAD构建HDR10直通包bd72c380（R19同款defines+当前产品lib7cc6f4ac；首建误用R19旧lib期望值6c8ec17e已修正），安装全字节核验+PQ素材fresh（76438009B/3068be37），实机路由baseLayerDirect/nativeHdr/PQ直出+hal_hdr激活+0 Stop失败，**用户结论"流畅，显示正常"**——直通（baseLayerDirect）vs tone-map（toneMapSdr 11.6fps卡顿）对比定性完成，直通流畅性通过。R17修复直通路径冒烟无回归。退出hal_native恢复+timeout30000/sleep。归档新库hdr10-direct-r25-20261006/（evidence-index 5164——注意evidence-index自身已随experiments迁至新库，后续归档路径用~/src/media-kit-experiments/）。
 - **归档迁移（2026-10-05，用户指令）**：`archives/experiments/` 全量迁至独立仓库 `~/src/media-kit-experiments`（807MB/6308文件，构建缓存已清理见其CLEANING-MANIFEST.json）；本文及 TASKS 中所有 `archives/experiments/` 前缀路径均映射该库根。conversations 留主仓库。
 - **全屏维度R24人工观察完成（2026-10-05，队列第3项，LG任务无阻塞项全部收口）**：P5_SCOPE_FULLSCREEN define专用包（APK ab21e434，R23同源树仅加define）安装核验+素材fresh+起播，AppBar全屏按钮UI dump确认（bounds [1248,112][1440,304] clickable）。**用户观察结论**：旧叠层消失✓画面全屏无遮挡、画面完整✓未见缺失、比例✓正常、退出全屏往返✓无异常；亮度不确定是否HDR（SDR tone-map路由预期，非缺陷）；帧率低卡顿严重（已知tone-map性能项low/deferred，非全屏回归）。Back语义观察：首次Back被fullscreen scope消费（先退全屏）、二次Back严格页面退出（onSurfaceCleanup wid2218 3840×2160→AUTO_PLAYER_DISPOSE completed→Launcher）、timeout30000/sleep恢复。归档5文件（evidence-index 5159）。**LG任务剩余仅Vulkan回归（无设备blocked）——全部无阻塞工作完成**。
@@ -39,6 +42,14 @@
 3. 人工验收通过后依次排：**P5 texture 分支 Surface ACK 采集轮**（唯一剩余分支；HDR10 R14/P8.4 texture链/N4失败分支R21 tuple均已闭环，见"仍需完成"定性）、**N4 整体设备验收观测**（nativeStopIssued/controllerRetired）、**现代 Vulkan 回归**（无设备，待到位）。tone-map 性能维持用户既定 low/deferred。
 
 ## History
+
+### 2026-10-06 R26撤销与r26b受控重验：真因=构建缺陷，nativeDV路由实锤
+
+用户目标"网上搜寻LG日志解决方案并解决"。检索三条候选（READ_LOGS/persist.logd.size/LG G4 logd替换）均不适用后，重审证据：R25（同方式）可读flutter而R26不可——受控冷启动实验：force-stop+重启后flutter 33行可读→再冷启动抓到"Unhandled Exception: Cannot find libmpv.so"（native_library.dart:83）→**R26坏包实锤**（脚本漏ORG_GRADLE_PROJECT_mediaKitLocalArm64Jar，Gradle回退上游Maven）。修复（env+embedded lib hash校验）重建r26b：lib 7cc6f4ac核验、安装全字节、受控冷启动——初始化干净、路由链nativeDolbyVision选中、ACTUAL=output dolbyVision、画面推进零错误；Back#1被fullscreen scope消费+Back#2严格退出（dispose completed/双surface销毁/Launcher）、timeout30000恢复/sleep。两条R26定性撤销（呈现不可靠+LG关app日志）；诊断落盘任务降级。nativeDV画面人工验收遗留待用户（AskUserQuestion未答）。
+
+### 2026-10-06 R26 nativeDV直通实机验证：路由可达但呈现不可靠
+
+V2审核PASS后实机（R26包b0dae803：P5三件+GATE_OPEN，默认偏好序dvP5首位nativeDV）。首轮播放推进+hal_hdr激活（路由可达性再证），但用户观察锁屏前白屏/解锁后黑屏——DV呈现跨息屏循环不可恢复；am start -W两次挂起（冷启动异常）；LG logger开关对新进程关闭（flutter日志0行）阻断日志定性；crash buffer空。处置：maturity保持experimental（默认关），toneMapSdr兜底不变；根因定性需开LG logger的专项轮。归档nativedv-direct-r26-20261006/（index 5168）。
 
 ### 2026-10-06 R25直通方案实机验证：整理后代码直通流畅
 
