@@ -67,6 +67,36 @@
 
 - [ ] A1: 在真实 macOS/OHOS 设备上完成 native output 生命周期验收。
 
+## 2026-10-06 选项 B 实施轮：构建修复达成、黑屏判决实验定案（显示链路）
+
+用户指令"开工"。按"探针取证 → RGBA config 补丁 → 重建 → 验证"执行，结果**选项 B 的补丁机制工作但未能解决模拟器黑屏——终审探针证明黑屏根因是 Flutter-OHOS 纹理显示链路在模拟器上不工作**。
+
+### 完成的实质修复（已入库 libmpv-ohos-build）
+
+1. **macOS 构建修复（真 bug）**：ffmpeg.sh configure 补传 `--ar/--ranlib/--nm`（llvm 工具链）。此前 macOS 宿主 BSD ar+ranlib 把 ELF 目标归档写成 **96 字节空档案**（ffmpeg 六个 .a 全空），libmpv.so 留 149 个未定义 av_* 符号 → HAP 内 dlopen 重定位失败 → 应用白屏。该 bug 使 ffmpeg.sh 在 macOS 上从未产出过可用库（既往发布件应产自 Linux）。
+2. **ohos-egl-rgba8-config-match.patch**：refine_config 回调读窗口 GET_FORMAT，=RGBA_8888 时优先选 8-bit RGBA config（auto），并打全量候选 config 取证日志；真机高深度选择路径不变。
+3. 完整构建达成：libmpv.so 37.1MB（对齐发布件 35.5MB 量级）、av_* 零未定义、av_frame_alloc 自含导出、native_media ×4 ohcodec 链接恢复、补丁串在包内。
+
+### 排查过程实证（模拟器，全部有日志/截图证据）
+
+- 首个新构建（半成品 16.9MB）装机即白屏：hilog 抓到 `relocating failed: s=av_frame_alloc` + `libmpv.so.2 load failed`——空档案问题 first hand。
+- 完整构建 + 补丁后（S/W）：日志证实 **渲染管线全链活跃**——`reconfig to 854x480 yuv420p`、窗口 `readback format=12`（RGBA8888，假设证实）、`Window size` 1x1→854x480 演进、libplacebo 建 r8 纹理+编译 `#version 300 es` shader、`first video frame after restart shown`——**但可见画面仍黑**。
+- H/W：vo SIGSEGV 跨 libmpv 世代复现（vo 线程，同签名）——模拟器无硬解，官方文档吻合。
+- **终审判决实验**：Dart `vo=null`（mpv 零渲染）+ ArkTS `setTextureBackGroundPixelMap` 纯红背景（854x480 RGBA）→ **仍纯黑**。纹理显示链路本身不通，与 mpv 无关；亦是选项 A（SW 纹理）在模拟器同样不可见的证明。
+
+### 结论修订（对上节"修复设计"的修订）
+
+- 上节"黑屏=libplacebo/GL 产出黑帧"的机制推断**被终审推翻**：mpv 侧渲染正常（帧 shown），断点在 Flutter-OHOS 引擎的纹理/合成层（模拟器限制，官方文档"视频显示受限"吻合）。
+- 选项 A/B 均无法让模拟器显示画面；**模拟器可用面收敛为**：UI/状态机/demux/网络/FFmpeg 软解（音频+解码推进）/RPU 纯算法——可视画面验证只能真机（官方口径一致）。
+- 选项 B 补丁保留价值：真机无回归风险 + 窗口格式自动匹配机制 upstream 质量；已在 libmpv-ohos-build 提交。media-kit 主仓 zip/CMakeLists 维持发布件 29b8bd4d 不变（黑屏根因不在 libmpv，本地构建不入产品链）。
+
+### 现场与遗留
+
+- libmpv-ohos-build：构建修复+补丁已提交（scripts/ffmpeg.sh、patches/mpv/ohos-egl-rgba8-config-match.patch）；完整产物 libmpv/arm64-build/{libmpv.so,libmpv_aarch64.zip}（zip SHA 71242b19…）在树，未经产品链审核不入主仓。
+- 已知 build 链 bug（未修，登记）：bundle.sh 内嵌 patch.sh 在"已应用+已构建"树上幂等失败（color-contract 补丁 reverse-check 不过）；本轮以手动跳过绕过。
+- media_kit_test 诊断代码全撤（VideoOutput 探针、test01 日志监听/vo=null 均还原）；模拟器在跑、样片缓存于应用内；宿主镜像服务 8000 仍在。
+- 主仓无本论代码改动（探针全撤、zip 还原发布态）；本节即本轮入库记录。
+
 ## 2026-10-06 OHOS 模拟器黑帧根因定案与修复设计（接上节）
 
 用户指令"以前解出来过图像，解决一下这个问题"。系统排查后**根因定案**：
