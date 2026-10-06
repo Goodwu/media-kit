@@ -17,17 +17,26 @@ export class OhosNativeSurfaceView extends PlatformView {
   readonly viewId: number;
   readonly handle: number;
   readonly generation: number;
+  // Physical pixel size of the Flutter display area. The embedding's
+  // BuilderNode host keeps its creation-time placeholder size (the framework
+  // resize never re-lays the node out on the emulator), so the XComponent
+  // sizes itself absolutely; 0 falls back to '100%'.
+  readonly surfaceWidthPx: number;
+  readonly surfaceHeightPx: number;
   readonly controller: XComponentController = new XComponentController();
   private readonly events: MethodChannel;
   private disposed: boolean = false;
   private destroyEventSent: boolean = false;
   private surfaceId: string | null = null;
 
-  constructor(viewId: number, handle: number, generation: number, events: MethodChannel) {
+  constructor(viewId: number, handle: number, generation: number,
+    surfaceWidthPx: number, surfaceHeightPx: number, events: MethodChannel) {
     super();
     this.viewId = viewId;
     this.handle = handle;
     this.generation = generation;
+    this.surfaceWidthPx = surfaceWidthPx;
+    this.surfaceHeightPx = surfaceHeightPx;
     this.events = events;
   }
 
@@ -87,8 +96,8 @@ struct OhosNativeSurfaceWidget {
     })
       .onLoad(() => this.view.onLoad())
       .onDestroy(() => this.view.onDestroy())
-      .width('100%')
-      .height('100%')
+      .width(this.view.surfaceWidthPx > 0 ? `${this.view.surfaceWidthPx}px` : '100%')
+      .height(this.view.surfaceHeightPx > 0 ? `${this.view.surfaceHeightPx}px` : '100%')
       .backgroundColor(Color.Black)
       // The Flutter player owns all playback gestures and control buttons.
       // Keep the native video surface out of ArkUI hit testing so its full
@@ -126,6 +135,10 @@ export class OhosNativeSurfaceFactory extends PlatformViewFactory {
         !Number.isFinite(generation) || generation < 1) {
       throw new Error('OHOS native surface requires valid handle and generation');
     }
-    return new OhosNativeSurfaceView(viewId, handle, generation, this.events);
+    const surfaceWidthPx = Number(values.get('surfaceWidthPx'));
+    const surfaceHeightPx = Number(values.get('surfaceHeightPx'));
+    return new OhosNativeSurfaceView(viewId, handle, generation,
+      Number.isFinite(surfaceWidthPx) ? surfaceWidthPx : 0,
+      Number.isFinite(surfaceHeightPx) ? surfaceHeightPx : 0, this.events);
   }
 }

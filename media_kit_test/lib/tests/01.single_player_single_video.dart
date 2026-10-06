@@ -56,19 +56,12 @@ class _SinglePlayerSingleVideoScreenState
             'submitted=${SwRender.submitted()} '
             'pixelSum=${SwRender.pixelSum()}');
       }
-      // TEMPORARY: native bridge logs reach the app files dir only.
-      try {
-        final log = File('/data/storage/el2/base/files/sw_log.txt');
-        if (await log.exists()) {
-          final lines = await log.readAsLines();
-          for (final line in lines.length > 8
-              ? lines.sublist(lines.length - 8)
-              : lines) {
-            debugPrint('SwNative: $line');
-          }
-          await log.writeAsString('');
-        }
-      } catch (_) {}
+      // TEMPORARY: native bridge logs reach Dart only through the FFI ring
+      // buffer (hilog drops LOG_APP here; the file mirror failed silently).
+      final logs = SwRender.takeLogs();
+      for (final line in logs.split('\n')) {
+        if (line.trim().isNotEmpty) debugPrint('SwNative: $line');
+      }
       final platform = player.platform;
       if (platform != null) {
         try {

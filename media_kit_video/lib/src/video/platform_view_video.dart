@@ -28,6 +28,9 @@ class PlatformViewVideo extends StatelessWidget {
     this.useHCPP = false,
     this.generation = 1,
     this.mpvWindow = false,
+    this.ohosSurfaceWidthPx,
+    this.ohosSurfaceHeightPx,
+    this.ohosHcpp = false,
     this.androidSurfaceTransfer,
     this.androidSurfacePixelFormat,
   });
@@ -41,6 +44,21 @@ class PlatformViewVideo extends StatelessWidget {
 
   /// Whether the Darwin native view should be bound as mpv's window.
   final bool mpvWindow;
+
+  /// Physical pixel size of the display area, forwarded to the OHOS
+  /// XComponent. The embedding's BuilderNode host stays at its creation-time
+  /// placeholder size on the emulator (the framework resize never re-lays
+  /// out the node), so the XComponent sizes itself absolutely.
+  final double? ohosSurfaceWidthPx;
+  final double? ohosSurfaceHeightPx;
+
+  /// OHOS software-bridge mode rides the Hybrid Composition++ (DISPLAY)
+  /// entry: the engine's TLHC external-texture chain drops frames on the
+  /// emulator ("bind external with nullptr gbuffer"), while an HCPP layer
+  /// lets the system compositor present the XComponent surface directly
+  /// (proven by the standalone Luna E2 probe). Requires the engine-side
+  /// `enable_ohos_hybrid_composition` buildinfo flag.
+  final bool ohosHcpp;
   final String? androidSurfaceTransfer;
   final String? androidSurfacePixelFormat;
 
@@ -57,6 +75,12 @@ class PlatformViewVideo extends StatelessWidget {
       'height': height,
       'generation': generation,
       'mpvWindow': mpvWindow,
+      if (Platform.operatingSystem == 'ohos' &&
+          (ohosSurfaceWidthPx ?? 0) > 0 &&
+          (ohosSurfaceHeightPx ?? 0) > 0) ...{
+        'surfaceWidthPx': ohosSurfaceWidthPx,
+        'surfaceHeightPx': ohosSurfaceHeightPx,
+      },
       if (Platform.isAndroid && (androidSurfaceTransfer?.isNotEmpty ?? false))
         'dataspace': androidSurfaceTransfer,
       if (Platform.isAndroid &&
@@ -114,7 +138,8 @@ class PlatformViewVideo extends StatelessWidget {
         onCreatePlatformView: (PlatformViewCreationParams params) {
           // TEMPORARY emulator trace (release-visible).
           debugPrint('[SwTrace] onCreatePlatformView id=${params.id} '
-              'ohos=$ohos hcpp=$useHCPP');
+              'ohos=$ohos hcpp=$useHCPP ohosHcpp=$ohosHcpp '
+              'swPx=$ohosSurfaceWidthPx x $ohosSurfaceHeightPx');
           return useHCPP && !ohos
               ? PlatformViewsService.initHybridAndroidView(
                   id: params.id,
@@ -125,11 +150,11 @@ class PlatformViewVideo extends StatelessWidget {
                   creationParamsCodec: const StandardMessageCodec(),
                   onFocus: () => params.onFocusChanged(true),
                 )
-              // OHOS and API-29 Android share the surface (TLHC) entry; the
-              // expensive entry is the documented ordinary Hybrid
-              // Composition requirement on API 29 only.
-              : (ohos || useHCPP)
-                  ? PlatformViewsService.initSurfaceAndroidView(
+              // OHOS HCPP (software-bridge emulator mode) shares the hybrid
+              // entry: DISPLAY-layer composition bypasses the engine's
+              // external-texture chain that renders black on the emulator.
+              : ohos && ohosHcpp
+                  ? PlatformViewsService.initHybridAndroidView(
                       id: params.id,
                       viewType: viewType,
                       layoutDirection:
@@ -138,15 +163,30 @@ class PlatformViewVideo extends StatelessWidget {
                       creationParamsCodec: const StandardMessageCodec(),
                       onFocus: () => params.onFocusChanged(true),
                     )
-                  : PlatformViewsService.initExpensiveAndroidView(
-                      id: params.id,
-                      viewType: viewType,
-                      layoutDirection:
-                          Directionality.maybeOf(context) ?? TextDirection.ltr,
-                      creationParams: creationParams,
-                      creationParamsCodec: const StandardMessageCodec(),
-                      onFocus: () => params.onFocusChanged(true),
-                    )
+                  // OHOS and API-29 Android share the surface (TLHC) entry; the
+                  // expensive entry is the documented ordinary Hybrid
+                  // Composition requirement on API 29 only.
+                  : (ohos || useHCPP)
+                      ? PlatformViewsService.initSurfaceAndroidView(
+                          id: params.id,
+                          viewType: viewType,
+                          layoutDirection:
+                              Directionality.maybeOf(context) ??
+                                  TextDirection.ltr,
+                          creationParams: creationParams,
+                          creationParamsCodec: const StandardMessageCodec(),
+                          onFocus: () => params.onFocusChanged(true),
+                        )
+                      : PlatformViewsService.initExpensiveAndroidView(
+                          id: params.id,
+                          viewType: viewType,
+                          layoutDirection:
+                              Directionality.maybeOf(context) ??
+                                  TextDirection.ltr,
+                          creationParams: creationParams,
+                          creationParamsCodec: const StandardMessageCodec(),
+                          onFocus: () => params.onFocusChanged(true),
+                        )
             ..addOnPlatformViewCreatedListener(params.onPlatformViewCreated)
             ..create();
         },

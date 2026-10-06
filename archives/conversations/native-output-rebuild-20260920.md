@@ -2,6 +2,13 @@
 
 ## Current State
 
+2026-10-07 agent 接手轮：**OHOS 模拟器播放通道打通**——sw 软件桥 + HCPP DISPLAY 直通组合在模拟器实机出画（清晰画面、帧推进、退出重入复播全通），"模拟器可视播放不可行"的旧定性就此推翻。详见下方 2026-10-07 HCPP 直通轮。
+
+- 出画路径定性：TLHC（initSurfaceAndroidView）在模拟器不可修——其 XComponent 消费者是引擎外部纹理链，RS `bind external with nullptr gbuffer`（DGLES 缺陷）恒黑；HCPP（initHybridAndroidView + buildinfo `enable_ohos_hybrid_composition=true`）让系统合成器直通 XComponent surface（Luna E2 同款），绕开引擎纹理链。此前"模拟器 Impeller 门禁锁死 HCPP"系误判——真实原因仅是 buildinfo 未配 HCPP 开关。
+- sw 桥三条硬修复：①生产者必须 SET_BUFFER_GEOMETRY（引擎消费侧恒 3×3 不 resize，不设几何则 RequestBuffer 恒 3×3，36 字节渲染缓冲、pixel_sum=0）；②几何随 videoParams 纠正（attach 时部件 rect 是布局前占位）；③绑定向 Dart 解析符号注入（mk_sw_start_ex；实测 same copy，双副本假设证伪但免疫化保留）。
+- 遗留：XComponent 节点 3×3 需 Dart 传绝对物理像素（ohosSurfaceWidthPx/HeightPx → ets XComponent 绝对尺寸）绕开 embedding BuilderNode 不 resize 的缺陷；该改动对真机 TLHC 同样生效（节点从 '100%' 变绝对尺寸），真机回归待设备验证（blocked 不变）。
+- 证据：`~/src/media-kit-build/ohos-emulator-evidence-20261007/`（mk11 出画首帧、mk12 动态帧、mk13 重入复播）。
+
 2026-10-05 agent交接：macOS后续修复已在独立共享核心分支提交并推送252c5851，产品已提交推送68edf0ec9；本工作树补充保存历史实验记录。完整任务/已证/未证/下一步见 `/Users/wuweiwei1/src/PiliPlusX/archives/handoffs/macos-player-20261005.md`。当前核心源码身份以已审252c5851为准，不能把本记录工作树76440510当作最新候选核心。
 
 - Release派生Info bootstrap的增量/target缺失/模板变化/未知模式/模式切换V2为PASS_RELEASE_BOOTSTRAP_MATRIX_WITH_LIMITS；derived缺失持久化前置记录与模板恢复SLF仍有限。
@@ -67,7 +74,35 @@
 
 - [ ] A1: 在真实 macOS/OHOS 设备上完成 native output 生命周期验收。
 
-## 2026-10-07 双目标轮：XComponent 挂载链全线打通，黑帧收窄为 render context 时序
+## 2026-10-07 HCPP 直通轮：模拟器播放通道打通（sw 桥 + DISPLAY 合成，出画达成）
+
+用户指令"继续打通OHOS模拟器播放通道"。接手 b2f9a89c 工作区（split-API + RTLD_DEFAULT 就位待验证），8 轮构建迭代后**模拟器实机出画**：视频清晰渲染、颜色正常、双截图动态帧推进、Back 退出→重入→复播闭环。
+
+### 三层根因逐一定案（每层有实机证据）
+
+1. **日志不可见（r23 遗留）**：原文件日志方案 `sw_log.txt` 本次实测已落盘（此前失败=装机 .so 陈旧）；但仍换装 **FFI 环形缓冲**（`mk_sw_log_take`/`mk_sw_log_buffer`，12KB tail + errno 记录），Dart 2s 轮询读回经 debugPrint 进 hilog——原生渲染线程状态全量可观测（`SwNative:` 前缀）。
+2. **双副本假设证伪 + 绑定固化**：dart/dlopen 符号同址、dladdr 同路径 `/data/storage/el1/bundle/libs/arm64/libmpv.so`、`bind verdict: same copy`——"render() not being called"的另解：**vo 消费帧但渲染缓冲恒 3×3**。新增 `mk_sw_start_ex`（Dart 经 media_kit 同一 DynamicLibrary 解析三符号传入），绑定不再依赖桥自身 dlopen。
+3. **真根因两层**：
+   - **渲染 3×3**：引擎 TLHC 消费侧从不清 resize XComponent surface（`GET_BUFFER_GEOMETRY` 恒 3×3 → RequestBuffer 返回 36 字节缓冲）。external_window.h 明确要求生产者 RequestBuffer 前 SET_BUFFER_GEOMETRY——桥从未设。修复：`mk_sw_set_surface(id,w,h)` + `mk_sw_set_geometry(w,h)`（videoParams 到达时纠正，854×480）→ buffer 1639680 字节、pixel_sum 数百万级持续变化（**内容产出正常**）。
+   - **显示恒黑（终审定案）**：节点同样 3×3（uitest dumpLayout 实证 [0,308][3,311]），Dart 传绝对物理像素（`ohosSurfaceWidthPx/HeightPx`，candidate 门在创建时固化、viewportWidth/Height 有无界 fallback）→ ets XComponent 绝对尺寸 → 节点 1260×709。**但画面仍黑**：hilog 抓到 `render_service bind external with nullptr gbuffer`——TLHC 的 XComponent BufferQueue 消费者是引擎外部纹理链，模拟器 DGLES 在 bind external 环节断（与 2026-10-06 "纹理显示链路不工作"终审同源）。**HCPP 直通**（`initHybridAndroidView` + 测试 app buildinfo.json5 `enable_ohos_hybrid_composition=true`，sw 模式 `notifier.swRender` 驱动）让系统合成器直接呈现 XComponent surface——**出画**。既往"Impeller 门禁锁死 HCPP"定性撤销：真实原因仅是 buildinfo 未配开关。
+
+### 改动清单（本轮工作区）
+
+- `libs/ohos/.../cpp/sw_render.cpp`：FFI 日志环 + errno 取证；`mk_sw_start_ex` 符号注入；`Forensics` 绑定取证（三路 dlsym 对比 + dladdr 路径 + verdict）；`mk_sw_set_surface(id,w,h)`/`mk_sw_set_geometry` 生产者几何；几何变化日志。
+- `media_kit_video/.../sw_render.dart`：`_resolveMpvSymbols`（按 NativeLibrary 顺序 libmpv.so→.so.2）；`start_ex` 带 legacy 回退；`setSurface(w,h)`/`setGeometry`/`takeLogs`。
+- `media_kit_video/.../ohos_video_controller/real.dart`：attach 传尺寸（rect×DPR，<8px 时用 lastRequested 兜底，全无效传 0）；videoParams 监听 `nativeSurfaceActive` 时 `SwRender.setGeometry`。
+- `media_kit_video/lib/src/video/platform_view_video.dart`：`ohosSurfaceWidthPx/HeightPx`（进 creationParams）+ `ohosHcpp`（OHOS 走 `initHybridAndroidView`）；SwTrace 打印参数值。
+- `media_kit_video/lib/src/video/video_texture.dart`：OHOS 分支传物理像素（`nativeOhosCandidate` 门——creationParams 在 create 时固化，active 门太晚；viewportWidth/Height 已含无界 fallback）+ `ohosHcpp: notifier.swRender`。
+- `media_kit_video/ohos/.../OhosNativeSurface.ets`：XComponent 宽高绝对 px（>0 时）else '100%'。
+- `media_kit_test`：测试页日志轮询换 `takeLogs()`；**buildinfo.json5 加 `enable_ohos_hybrid_composition=true`**（测试 app 本地，产品不经此路径）。
+
+### 验证状态（模拟器 127.0.0.1:5555，release HAP）
+
+- 出画 ✓（mk11/mk12：画面清晰颜色正常、双截图 MD5 不同动态推进）；帧推进 ✓（297+ 帧渲染提交、pixel_sum 2588 万级）；退出重入 ✓（Back→重开→复播正常，mk13）。
+- analyze 全绿；media_kit_video 测试套回归见 TASKS 登记值；真机回归风险：OHOS TLHC 节点尺寸从 '100%' 变绝对像素（video_texture 传参改动全 OHOS 生效），无设备 blocked 不变，真机验收时必测。
+- 遗留：SW 桥 25ms 轮询渲染的效率与 vsync 对齐、HCPP 路径的手势/覆盖层/全屏组合、`vo='sw'` 显式路径文档化。
+
+## 2026-10-07 双目标轮：XComponent 挂载链全线打通，黑帧收窄为 render context 时序（b2f9a89c，本 HCPP 直通轮的前一轮）
 
 用户指令"①尽可能实现 EGL 正常播放；②Luna E1 方案正常播放"。**挂载链月度堵点已全线打通**（viewType 修复→XComponent 创建→nativeSurfaceReady 首次到达→attach→提交→mpv 解码链可达），黑帧最终收窄为一个明确定位的 mpv render-context 生命周期问题。
 
