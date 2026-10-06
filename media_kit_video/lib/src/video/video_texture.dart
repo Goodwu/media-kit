@@ -797,6 +797,37 @@ class VideoState extends State<Video> with WidgetsBindingObserver {
                                           mpvWindow: Platform.isMacOS &&
                                               notifier.configuration.darwin
                                                   .useNativeWindow,
+                                          // Physical pixels of the display
+                                          // area: the OHOS embedding keeps the
+                                          // XComponent host node at its
+                                          // creation-time placeholder size, so
+                                          // the native view sizes itself.
+                                          // Gated on the candidate state, not
+                                          // nativeSurfaceActive: creation
+                                          // params are fixed at platform-view
+                                          // creation, which precedes the
+                                          // nativeSurfaceReady attach.
+                                          // viewportWidth/Height already fall
+                                          // back to the video parameters when
+                                          // the viewport is unbounded (e.g.
+                                          // inside a scroll view).
+                                          ohosSurfaceWidthPx:
+                                              nativeOhosCandidate
+                                                  ? viewportWidth *
+                                                      (MediaQuery.maybeOf(
+                                                                  context)
+                                                              ?.devicePixelRatio ??
+                                                          1.0)
+                                                  : null,
+                                          ohosSurfaceHeightPx:
+                                              nativeOhosCandidate
+                                                  ? viewportHeight *
+                                                      (MediaQuery.maybeOf(
+                                                                  context)
+                                                              ?.devicePixelRatio ??
+                                                          1.0)
+                                                  : null,
+                                          ohosHcpp: notifier.swRender,
                                         );
                                         if (nativeMacosSurface) {
                                           // AppKitView receives actual fitted

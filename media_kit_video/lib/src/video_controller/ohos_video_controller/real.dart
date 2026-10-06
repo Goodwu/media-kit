@@ -755,6 +755,11 @@ class OhosVideoController extends PlatformVideoController {
         if (_disposed) return;
         _lastRequestedSurfaceWidth = width;
         _lastRequestedSurfaceHeight = height;
+        if (swRender && nativeSurfaceActive) {
+          // The engine consumer never resizes the XComponent surface; drive
+          // the producer-side buffer geometry from the real video size.
+          SwRender.setGeometry(width, height);
+        }
         debugPrint(
           '[OhosVideoController] videoParams surface request: '
           '${width}x$height view=$_nativeViewId surface=${wid.value} '
@@ -977,8 +982,35 @@ class OhosVideoController extends PlatformVideoController {
     if (swRender) {
       // Software render mode: the bridge's render context already exists
       // (started at create with vo=libmpv selected); attach only swaps the
-      // submission window onto the XComponent surface.
-      final attached = SwRender.setSurface(surfaceId);
+      // submission window onto the XComponent surface. The engine's consumer
+      // leaves the surface at its default 3x3 geometry and never resizes it,
+      // so the bridge sets the producer-side buffer geometry from the widget
+      // rect scaled to physical pixels.
+      int swWidth = 0;
+      int swHeight = 0;
+      final outputRect = rect.value;
+      if (outputRect != null) {
+        final dpr = PlatformDispatcher.instance.views.first.devicePixelRatio;
+        swWidth = (outputRect.width * dpr).round();
+        swHeight = (outputRect.height * dpr).round();
+      }
+      // The pre-layout placeholder rect is useless as a geometry source;
+      // mpv's videoParams event corrects it within ~100ms. On re-attach the
+      // videoParams listener may dedupe away the correction, so fall back to
+      // the last requested size.
+      if (swWidth < 8 || swHeight < 8) {
+        swWidth = _lastRequestedSurfaceWidth ?? 0;
+        swHeight = _lastRequestedSurfaceHeight ?? 0;
+      }
+      if (swWidth < 8 || swHeight < 8) {
+        swWidth = 0;
+        swHeight = 0;
+      }
+      final attached = SwRender.setSurface(
+        surfaceId,
+        width: swWidth,
+        height: swHeight,
+      );
       await setProperties({
         if (rect.value != null)
           'ohos-surface-size':
