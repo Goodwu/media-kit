@@ -975,24 +975,19 @@ class OhosVideoController extends PlatformVideoController {
     await _stopVideoOutputForReconfigure();
     wid.value = surfaceId;
     if (swRender) {
-      // Software render mode: the bridge submits render-API-SW frames to the
-      // XComponent window through the NativeWindow producer API; mpv must
-      // not bind the surface as its own window. The render context has to
-      // exist BEFORE vo switches to libmpv, otherwise mpv aborts the video
-      // chain with "No render context set".
-      SwRender.detach();
-      final attached = SwRender.attach(surfaceId, nativeHandle ?? 0);
+      // Software render mode: the bridge's render context already exists
+      // (started at create with vo=libmpv selected); attach only swaps the
+      // submission window onto the XComponent surface.
+      final attached = SwRender.setSurface(surfaceId);
       await setProperties({
         if (rect.value != null)
           'ohos-surface-size':
               '${rect.value!.width.toInt()}x${rect.value!.height.toInt()}',
       });
+      // _stopVideoOutputForReconfigure above resets vo to null; restore the
+      // render-API binding (the context from create survives, so this cannot
+      // hit the "No render context set" fatal).
       await setProperty('vo', 'libmpv');
-      // The video chain initialized against vo=null before the render
-      // context existed; cycle the video track so the libmpv VO re-inits
-      // with the context bound and frames start flowing (E2 ordering).
-      await setProperty('vid', 'no');
-      await setProperty('vid', 'auto');
       nativeSurfaceCandidate = true;
       setNativeSurfaceActive(true);
       debugPrint(
@@ -1073,6 +1068,13 @@ class OhosVideoController extends PlatformVideoController {
 
     // Retrieve the native handle of the [Player].
     final handle = await player.handle;
+    if (swRender) {
+      // E2 ordering: create the mpv render context before the video chain
+      // initializes, window-less. The context must exist before vo switches
+      // to libmpv ("No render context set" fatal otherwise) and before the
+      // first frame so the software renderer drains from the start.
+      SwRender.start(handle);
+    }
     // Return the existing [VideoController] if it's already created. A
     // controller that is disposing remains cached until the native dispose
     // call completes, so a concurrent create must wait for that barrier.
@@ -1155,11 +1157,12 @@ class OhosVideoController extends PlatformVideoController {
       // the Flutter Texture first creates frames for a producer that is
       // immediately replaced; after the handoff Flutter can keep consuming
       // that stale BufferQueue and report 40601000 indefinitely. Software
-      // render mode also stays on vo=null here: the libmpv vo must not be
-      // selected before the bridge's render context exists (mpv aborts the
-      // video chain with "No render context set" and playback falls back to
-      // audio-only). The attach path owns the vo=libmpv switch.
-      if (!(Platform.operatingSystem == 'ohos' &&
+      // render mode already owns a render context (started at create), so it
+      // selects vo=libmpv here and the XComponent attach only swaps the
+      // submission window.
+      if (swRender) {
+        await controller.setProperty('vo', 'libmpv');
+      } else if (!(Platform.operatingSystem == 'ohos' &&
           configuration.darwin.useNativeSurface)) {
         await controller.setProperty('vo', configuration.vo!);
       }
