@@ -107,6 +107,18 @@ engine 9 文件 / `ohos-flutter-e3-hcpp-untracked-20261006/` docs+契约测试�
 日志=丢弃（可回溯）、HCPP embedding epoch 变体=延后 Phase 5、docs+test=已入
 patch 分支、parity=经本次重做后仅 2 处真实缺口入分支。
 
+## 本地工具链固定化与 e3 终局（2026-10-06 午后）
+
+- **本地 OHOS SDK 固定**：`/tmp` 验证 clone 搬移至 **`~/src/flutter-ohos`**
+  （`ohos/media-kit-patches` @ `2ece1aae`，bin/cache 热，engine 5a2a6a42 与 pin
+  一致，`flutter --version` 报 3.44.9+ohos-2）；media_kit_test 解析已刷新指向
+  该目录。今后本地 OHOS 操作（ohos lock 再生等）一律在此 SDK 上做。
+- **flutter-ohos-e3 已删除**（1.6G）。删除前安全门：92 个脏文件与 experiments
+  `4a43068` 归档 diff 逐字节一致、2 个未跟踪文件 sha256 一致，零独有内容；
+  目录随时可从镜像 clone @ 4f1a4267 重建。
+- **experiments 库无远端**（历史即无配置）：`4a43068` 等归档现为本机唯一副本，
+  待建 GitHub private 远端推送（.git 569M，最大 blob 41MB APK，可直推）。
+
 ## 遗留与后续
 
 0. **主 CI lock 缺口（2026-10-06 晨修复）**：01b15a01 给 pubspec.yaml 加
