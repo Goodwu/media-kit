@@ -73,6 +73,38 @@ native 溯源门禁步骤、指纹 JSON 进产物、manifest 增 patch_branch/ba
   f4ab1955 fast-forward no-op）。mpv/FFmpeg 同款 workflow 已修复推送，触发
   验证因 runner 排队未即时回读，模式与 flutter 完全一致。
 
+## patch 分支重做（2026-10-06，用户审查驱动）
+
+用户对比 `oh-3.44.9-dev...ohos/media-kit-patches` 发现大量 `case ohos` 与基线
+重复，判 v2 提交低质量并要求废弃重做。逐层复核证实且比表面更严重：
+
+1. **语句级重复（104 处）**：基线同 switch 已有 ohos 标签，扫尾又加一个
+   （基线 1/patch 2 模式）；system_navigator 等还出现「standalone
+   `case ohos: return;` + android 后 fall-through」矛盾对。
+2. **switch 表达式 arm 内重复（20+7 处）**：基线 arm 已含
+   `fuchsia || ohos =>`，扫尾在 `android ||` 后再插 ohos——同 arm 出现两次；
+   typography.dart 一处甚至**矛盾**（会把 ohos 从基线的 Helsinki arm 改到
+   MountainView arm，属行为变更而非 parity）。
+3. **终态**：131 处新增中 129 处为基线已覆盖的重复，真实缺口仅 2 处——
+   navigator.dart poppedRoute 重聚焦 switch 补 case ohos（android
+   fall-through）+ scrollbar.dart 甩动速度 arm 补 ohos（基线落
+   `_ => Velocity.zero`，OHOS thumb 甩动无弹道滚动的真实行为修复）。
+
+重建方法：最内层 switch 归属 + 插入集对照（native+inserted 混杂即删插入）
++ switch 表达式整体作用域分析，逐处人工核对。patch 分支重写为
+`cae3a1d0`（parity `4d42a06a`：2 文件 +2/−1，+ docs/test 提交），media-kit
+内联 patch 与 pin 同步更新。教训：**case 级"纯添加"判定不等于语义正确**，
+必须对照基线对应 switch/arm 的既有覆盖；E3 扫尾的 171 处基线覆盖当时未被
+审计。
+
+**其它 patch 的去向（同日用户问询）**：全部原始内容在 media-kit-experiments
+库 `4a43068` 全量存档（`ohos-flutter-e3-framework-ohos-sweep-20261006.patch`
+81 文件全量 / `ohos-flutter-e3-hcpp-embedding-epoch-20261006.patch` HCPP
+engine 9 文件 / `ohos-flutter-e3-hcpp-untracked-20261006/` docs+契约测试），
+处置表见同库 `ohos-flutter-e3-archive-20261006.md`：手势实验家族与 native
+日志=丢弃（可回溯）、HCPP embedding epoch 变体=延后 Phase 5、docs+test=已入
+patch 分支、parity=经本次重做后仅 2 处真实缺口入分支。
+
 ## 遗留与后续
 
 0. **主 CI lock 缺口（2026-10-06 晨修复）**：01b15a01 给 pubspec.yaml 加
