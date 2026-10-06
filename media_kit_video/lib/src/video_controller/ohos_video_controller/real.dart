@@ -14,6 +14,7 @@ import 'package:synchronized/synchronized.dart';
 import 'package:media_kit/media_kit.dart';
 
 import 'package:media_kit_video/src/video_controller/platform_video_controller.dart';
+import 'package:media_kit_video/src/video_controller/ohos_video_controller/sw_render.dart';
 import 'package:media_kit_video/src/video_controller/hdr_transaction_report.dart';
 
 enum _OhosHdrOutputMode { sdr, pq, hlg }
@@ -973,6 +974,26 @@ class OhosVideoController extends PlatformVideoController {
     final previous = wid.value;
     await _stopVideoOutputForReconfigure();
     wid.value = surfaceId;
+    if (swRender) {
+      // Software render mode: the bridge owns the surface (its own EGL on
+      // the XComponent window, mpv render API SW frames blitted onto it);
+      // mpv keeps vo=libmpv and must not bind the surface as a window.
+      await setProperties({
+        if (rect.value != null)
+          'ohos-surface-size':
+              '${rect.value!.width.toInt()}x${rect.value!.height.toInt()}',
+      });
+      await setProperty('vo', 'libmpv');
+      nativeSurfaceCandidate = true;
+      setNativeSurfaceActive(true);
+      SwRender.detach();
+      final attached = SwRender.attach(surfaceId, nativeHandle ?? 0);
+      debugPrint(
+        '[OhosVideoController] software render attach: surface=$surfaceId '
+        'attached=$attached',
+      );
+      return;
+    }
     await setProperties({
       'wid': surfaceId.toString(),
       if (rect.value != null)
@@ -1013,6 +1034,29 @@ class OhosVideoController extends PlatformVideoController {
       vo: configuration.vo ?? 'gpu-next',
       hwdec: configuration.hwdec ?? await getDefaultHwdec(),
     );
+
+    // OHOS emulator: the GL video outputs (gpu/gpu-next) render black with no
+    // error and the hardware decoder path crashes in libmpv's vo thread, so
+    // attach the software render bridge (libmpv render API SW blitted onto
+    // the Flutter texture surface). Real devices are unaffected.
+    bool swRender = configuration.vo == 'sw';
+    if (!swRender) {
+      try {
+        swRender = await _channel.invokeMethod('Utils.IsEmulator') == true;
+      } catch (_) {
+        swRender = false;
+      }
+    }
+    if (swRender) {
+      configuration = configuration.copyWith(
+        vo: 'libmpv',
+        hwdec: 'no',
+        // The bridge blits onto the XComponent's native window (direct
+        // composition, proven by the Luna E2 probe); the Flutter texture
+        // surface does not display on the emulator.
+        darwin: configuration.darwin.copyWith(useNativeSurface: true),
+      );
+    }
 
     // Retrieve the native handle of the [Player].
     final handle = await player.handle;
@@ -1067,6 +1111,7 @@ class OhosVideoController extends PlatformVideoController {
     controller.rect.value = rect;
     controller.wid.value = wid;
     controller.nativeHandle = handle;
+    controller.swRender = swRender;
     // Mount the XComponent so its onLoad callback can provide the native
     // surface ID. After destruction a live controller keeps the candidate
     // enabled and the widget can mount a new generation; dispose clears it.
@@ -1081,10 +1126,12 @@ class OhosVideoController extends PlatformVideoController {
       await controller.setProperties(
         {
           'ohos-surface-size': '${rect.width.toInt()}x${rect.height.toInt()}',
-          'wid': wid.toString(),
+          // Software render mode blits onto the texture surface through the
+          // native bridge: mpv must not bind the surface as its own window.
+          if (!swRender) 'wid': wid.toString(),
           'hwdec': configuration.hwdec!,
           'vid': 'auto',
-          'force-window': 'yes',
+          if (!swRender) 'force-window': 'yes',
           'sub-use-margins': 'no',
           'sub-scale-with-window': 'no',
           'osd-font': 'HarmonyOS Sans SC',
@@ -1100,6 +1147,16 @@ class OhosVideoController extends PlatformVideoController {
         await controller.setProperty('vo', configuration.vo!);
       }
     });
+
+    if (swRender) {
+      // The software bridge attaches when the XComponent reports its surface
+      // (nativeSurfaceReady → _attachNativeSurfaceLocked); the texture
+      // surface is not used at all in this mode.
+      debugPrint(
+        '[OhosVideoController] software render mode: waiting for the '
+        'XComponent surface (native surface candidate enabled)',
+      );
+    }
 
     // Return the [PlatformVideoController].
     return controller;
@@ -1139,6 +1196,7 @@ class OhosVideoController extends PlatformVideoController {
     _queuedSurfaceHeight = null;
     _queuedViewportWidth = null;
     _queuedViewportHeight = null;
+    SwRender.detach();
 
     Object? cleanupError;
     StackTrace? cleanupStack;

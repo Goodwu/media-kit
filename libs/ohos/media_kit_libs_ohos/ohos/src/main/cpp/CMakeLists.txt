@@ -96,4 +96,13 @@ add_custom_command(
 add_custom_target("LIBMPV_EXTRACT" ALL DEPENDS "${LIBMPV_EXTRACT_STAMP}")
 add_dependencies(mediakit_ohos_hdr "LIBMPV_EXTRACT")
 
+# Software render bridge: attaches to the app's live libmpv (dlopen) and
+# blits render-API-SW frames onto the Flutter texture surface. Used by the
+# emulator path where the GL video outputs render black.
+add_library(mediakit_ohos_sw SHARED sw_render.cpp)
+target_link_libraries(mediakit_ohos_sw PUBLIC
+  EGL GLESv3 native_window hilog_ndk.z
+)
+add_dependencies(mediakit_ohos_sw "LIBMPV_EXTRACT")
+
 link_libraries(DART_SHARED_LIB ${LIBS})
