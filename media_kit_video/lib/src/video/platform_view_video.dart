@@ -48,7 +48,9 @@ class PlatformViewVideo extends StatelessWidget {
   Widget build(BuildContext context) {
     final String viewType = (Platform.isIOS || Platform.isMacOS)
         ? 'com.alexmercerind/media_kit_video/native_surface'
-        : 'com.alexmercerind/media_kit_video_platform_view';
+        : Platform.operatingSystem == 'ohos'
+            ? 'com.alexmercerind/media_kit_video/ohos_native_surface'
+            : 'com.alexmercerind/media_kit_video_platform_view';
     final Map<String, dynamic> creationParams = {
       'handle': handle,
       'width': width,
@@ -88,19 +90,32 @@ class PlatformViewVideo extends StatelessWidget {
     }
 
     // IgnorePointer so that GestureDetector can be used above the platform view.
+    final bool ohos = Platform.operatingSystem == 'ohos';
     return IgnorePointer(
       child: PlatformViewLink(
         viewType: viewType,
         surfaceFactory:
             (BuildContext context, PlatformViewController controller) {
+          // OHOS rides the standard surface entry: the fork's channel maps
+          // the texture-layer request to the engine's TLHC composition (the
+          // September Luna e4 build proved this displays on the emulator via
+          // external-texture composition). The hybrid/expensive entries hit
+          // the engine's "HCPP unavailable → created but not composed"
+          // fallback where XComponent onLoad never fires.
           return AndroidViewSurface(
             controller: controller as AndroidViewController,
-            gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
-            hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+            gestureRecognizers:
+                const <Factory<OneSequenceGestureRecognizer>>{},
+            hitTestBehavior: ohos
+                ? PlatformViewHitTestBehavior.transparent
+                : PlatformViewHitTestBehavior.opaque,
           );
         },
         onCreatePlatformView: (PlatformViewCreationParams params) {
-          return useHCPP
+          // TEMPORARY emulator trace (release-visible).
+          debugPrint('[SwTrace] onCreatePlatformView id=${params.id} '
+              'ohos=$ohos hcpp=$useHCPP');
+          return useHCPP && !ohos
               ? PlatformViewsService.initHybridAndroidView(
                   id: params.id,
                   viewType: viewType,
@@ -110,19 +125,28 @@ class PlatformViewVideo extends StatelessWidget {
                   creationParamsCodec: const StandardMessageCodec(),
                   onFocus: () => params.onFocusChanged(true),
                 )
-              // On API 29 the explicit, documented ordinary Hybrid
-              // Composition entry is required. initSurfaceAndroidView first
-              // attempts TLHC, which makes the composition contract depend on
-              // a runtime fallback and obscures the HDR experiment topology.
-              : PlatformViewsService.initExpensiveAndroidView(
-                  id: params.id,
-                  viewType: viewType,
-                  layoutDirection:
-                      Directionality.maybeOf(context) ?? TextDirection.ltr,
-                  creationParams: creationParams,
-                  creationParamsCodec: const StandardMessageCodec(),
-                  onFocus: () => params.onFocusChanged(true),
-                )
+              // OHOS and API-29 Android share the surface (TLHC) entry; the
+              // expensive entry is the documented ordinary Hybrid
+              // Composition requirement on API 29 only.
+              : (ohos || useHCPP)
+                  ? PlatformViewsService.initSurfaceAndroidView(
+                      id: params.id,
+                      viewType: viewType,
+                      layoutDirection:
+                          Directionality.maybeOf(context) ?? TextDirection.ltr,
+                      creationParams: creationParams,
+                      creationParamsCodec: const StandardMessageCodec(),
+                      onFocus: () => params.onFocusChanged(true),
+                    )
+                  : PlatformViewsService.initExpensiveAndroidView(
+                      id: params.id,
+                      viewType: viewType,
+                      layoutDirection:
+                          Directionality.maybeOf(context) ?? TextDirection.ltr,
+                      creationParams: creationParams,
+                      creationParamsCodec: const StandardMessageCodec(),
+                      onFocus: () => params.onFocusChanged(true),
+                    )
             ..addOnPlatformViewCreatedListener(params.onPlatformViewCreated)
             ..create();
         },

@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
+import 'package:media_kit_video/src/video_controller/ohos_video_controller/sw_render.dart';
 
 import '../common/globals.dart';
 import '../common/local_playback_observer.dart';
@@ -17,18 +20,57 @@ class SinglePlayerSingleVideoScreen extends StatefulWidget {
 
 class _SinglePlayerSingleVideoScreenState
     extends State<SinglePlayerSingleVideoScreen> {
-  late final Player player = Player();
+  late final Player player = Player(
+    // TEMPORARY emulator probe: verbose mpv logs for the black-frame chain.
+    configuration: const PlayerConfiguration(logLevel: MPVLogLevel.debug),
+  );
   late final VideoController controller = VideoController(
     player,
     configuration: configuration.value,
   );
   LocalPlaybackObserver? _localObserver;
 
+  // TEMPORARY emulator diagnostics: poll the software render bridge frame
+  // counter so bridge liveness is observable from hilog.
+  Timer? _swFramesPoll;
+
   @override
   void initState() {
     super.initState();
     final opening = player.open(Media(sources[0]));
     player.stream.error.listen((error) => debugPrint(error));
+    // TEMPORARY: vo/vd/cplayer logs for the emulator black-frame chain.
+    player.stream.log.listen((log) {
+      if (log.prefix == 'vo' ||
+          log.prefix == 'vo/libmpv' ||
+          log.prefix == 'vd' ||
+          (log.prefix == 'cplayer' && log.level != 'debug') ||
+          log.level == 'error') {
+        debugPrint('MPV[${log.prefix}] ${log.level}: ${log.text}');
+      }
+    });
+    _swFramesPoll = Timer.periodic(const Duration(seconds: 2), (_) async {
+      final frames = SwRender.frames();
+      if (frames > 0) {
+        debugPrint('SwRender frames=$frames '
+            'submitted=${SwRender.submitted()} '
+            'pixelSum=${SwRender.pixelSum()}');
+      }
+      // TEMPORARY: mpv runtime facts for the emulator black-frame probe.
+      final platform = player.platform;
+      if (platform != null) {
+        try {
+          final vo = await (platform as dynamic).getProperty('vo');
+          final vf = await (platform as dynamic)
+              .getProperty('video-format');
+          final idle = await (platform as dynamic)
+              .getProperty('idle-active');
+          final w = player.state.width;
+          debugPrint('SwRender mpv vo=$vo video-format=$vf '
+              'idle=$idle width=$w');
+        } catch (_) {}
+      }
+    });
     if (LocalPlaybackObserver.enabled) {
       _localObserver = LocalPlaybackObserver(player)
         ..observeOpen(opening, sources[0]);
@@ -37,6 +79,7 @@ class _SinglePlayerSingleVideoScreenState
 
   @override
   void dispose() {
+    _swFramesPoll?.cancel();
     _localObserver?.stop();
     player.dispose();
     super.dispose();

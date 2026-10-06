@@ -61,4 +61,20 @@ class SwRender {
       'mk_sw_frames',
     )();
   }
+
+  static int submitted() {
+    final lib = _library;
+    if (lib == null) return 0;
+    return lib.lookupFunction<Int64 Function(), int Function()>(
+      'mk_sw_submitted',
+    )();
+  }
+
+  static int pixelSum() {
+    final lib = _library;
+    if (lib == null) return 0;
+    return lib.lookupFunction<Int64 Function(), int Function()>(
+      'mk_sw_pixel_sum',
+    )();
+  }
 }

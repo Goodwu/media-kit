@@ -975,19 +975,26 @@ class OhosVideoController extends PlatformVideoController {
     await _stopVideoOutputForReconfigure();
     wid.value = surfaceId;
     if (swRender) {
-      // Software render mode: the bridge owns the surface (its own EGL on
-      // the XComponent window, mpv render API SW frames blitted onto it);
-      // mpv keeps vo=libmpv and must not bind the surface as a window.
+      // Software render mode: the bridge submits render-API-SW frames to the
+      // XComponent window through the NativeWindow producer API; mpv must
+      // not bind the surface as its own window. The render context has to
+      // exist BEFORE vo switches to libmpv, otherwise mpv aborts the video
+      // chain with "No render context set".
+      SwRender.detach();
+      final attached = SwRender.attach(surfaceId, nativeHandle ?? 0);
       await setProperties({
         if (rect.value != null)
           'ohos-surface-size':
               '${rect.value!.width.toInt()}x${rect.value!.height.toInt()}',
       });
       await setProperty('vo', 'libmpv');
+      // The video chain initialized against vo=null before the render
+      // context existed; cycle the video track so the libmpv VO re-inits
+      // with the context bound and frames start flowing (E2 ordering).
+      await setProperty('vid', 'no');
+      await setProperty('vid', 'auto');
       nativeSurfaceCandidate = true;
       setNativeSurfaceActive(true);
-      SwRender.detach();
-      final attached = SwRender.attach(surfaceId, nativeHandle ?? 0);
       debugPrint(
         '[OhosVideoController] software render attach: surface=$surfaceId '
         'attached=$attached',
@@ -1029,6 +1036,10 @@ class OhosVideoController extends PlatformVideoController {
       return hw ? 'auto' : 'no';
     }
 
+    // An explicitly configured vo always wins over the emulator fallback
+    // below; capture it before the defaults fill `vo` with gpu-next.
+    final bool explicitVo = configuration.vo != null;
+
     // Update [configuration] to have default values.
     configuration = configuration.copyWith(
       vo: configuration.vo ?? 'gpu-next',
@@ -1038,9 +1049,11 @@ class OhosVideoController extends PlatformVideoController {
     // OHOS emulator: the GL video outputs (gpu/gpu-next) render black with no
     // error and the hardware decoder path crashes in libmpv's vo thread, so
     // attach the software render bridge (libmpv render API SW blitted onto
-    // the Flutter texture surface). Real devices are unaffected.
+    // the XComponent native surface). Real devices are unaffected, and an
+    // explicit `vo` configuration always wins over the automatic fallback so
+    // the GL path stays testable on the emulator.
     bool swRender = configuration.vo == 'sw';
-    if (!swRender) {
+    if (!swRender && !explicitVo) {
       try {
         swRender = await _channel.invokeMethod('Utils.IsEmulator') == true;
       } catch (_) {
@@ -1141,7 +1154,11 @@ class OhosVideoController extends PlatformVideoController {
       // until the XComponent reports its real surface. Starting gpu-next on
       // the Flutter Texture first creates frames for a producer that is
       // immediately replaced; after the handoff Flutter can keep consuming
-      // that stale BufferQueue and report 40601000 indefinitely.
+      // that stale BufferQueue and report 40601000 indefinitely. Software
+      // render mode also stays on vo=null here: the libmpv vo must not be
+      // selected before the bridge's render context exists (mpv aborts the
+      // video chain with "No render context set" and playback falls back to
+      // audio-only). The attach path owns the vo=libmpv switch.
       if (!(Platform.operatingSystem == 'ohos' &&
           configuration.darwin.useNativeSurface)) {
         await controller.setProperty('vo', configuration.vo!);
