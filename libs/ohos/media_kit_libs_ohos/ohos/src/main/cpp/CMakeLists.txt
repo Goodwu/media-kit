@@ -101,7 +101,7 @@ add_dependencies(mediakit_ohos_hdr "LIBMPV_EXTRACT")
 # emulator path where the GL video outputs render black.
 add_library(mediakit_ohos_sw SHARED sw_render.cpp)
 target_link_libraries(mediakit_ohos_sw PUBLIC
-  EGL GLESv3 native_window hilog_ndk.z
+  native_window native_buffer hilog_ndk.z
 )
 add_dependencies(mediakit_ohos_sw "LIBMPV_EXTRACT")
 

@@ -67,6 +67,35 @@
 
 - [ ] A1: 在真实 macOS/OHOS 设备上完成 native output 生命周期验收。
 
+## 2026-10-07 双目标轮：XComponent 挂载链全线打通，黑帧收窄为 render context 时序
+
+用户指令"①尽可能实现 EGL 正常播放；②Luna E1 方案正常播放"。**挂载链月度堵点已全线打通**（viewType 修复→XComponent 创建→nativeSurfaceReady 首次到达→attach→提交→mpv 解码链可达），黑帧最终收窄为一个明确定位的 mpv render-context 生命周期问题。
+
+### 三个连环根因与修复（本轮）
+
+1. **S2 viewType 丢失（主根因）**：main 的 `platform_view_video.dart` 整改重写时丢了 OHOS 分支，OHOS 落入 Android viewType `media_kit_video_platform_view` → 引擎对未注册类型 throw（PlatformViewsController.ets:806-808）→ XComponent 从未创建（9 月 e4 至今全部黑屏的共同根因，真机同样存在）。修复：viewType 三元恢复 `ohos → com.alexmercerind/media_kit_video/ohos_native_surface`（9 月版一行式）。
+2. **合成模式错误**：OHOS 落入 `initExpensiveAndroidView`（hybrid 入口）→ 引擎 `createForPlatformViewLayer: HCPP unavailable → created but not composed`（模拟器 Impeller 门禁锁死 HCPP）→ 视图不可见。修复：OHOS 分支改走 `initSurfaceAndroidView`（TLHC 纹理层，fork channel 协议等价、跨 SDK 可编译；`initSurfaceOhosView` 动态派发方案因 Dart 静态方法不能 dynamic 调用而不可行——`Class 'Type'` 实证）。用户问"为何借 Android 名"：编译约束+协议等价，正式形态=接线死代码 `platform_view_video_ohos.dart`（需 fork 上游条件导入机制，登记后续）。
+3. **S1 `_visible` 门**：OHOS candidate 允许 pre-visible 挂载（`mountOhosNativeSurfaceCandidate`），镜像 Android 先例。
+
+### 软件桥（Luna E1 方案）当前状态：生产链全通、内容黑
+
+- sw_render.cpp 重写为 **NativeWindow 生产者路径**（RequestBuffer→MapPlanes→memcpy(rowStride 对齐)→FlushBuffer；弃自有 EGL——会饿死引擎消费者，实证"bind external with nullptr gbuffer" 1610 次）。`frames==submitted` 1600+/分钟（FFI 计数实证），pixel_sum 探针 + mk_sw_submitted/mk_sw_pixel_sum 导出。
+- **mpv 侧修复**：早设 vo=libmpv 曾致 `vo/libmpv fatal: No render context set → Video: no video`（mpv 原话日志）——已改 attach 时"先建 ctx 再切 vo"，video-format=h264/width=854 恢复。
+- **残余**：pixelSum 恒 0 + `vo/libmpv: mpv_render_context_render() not being called or stuck`（伴随 XComponent destroy/ready 循环引发的多次文件重开）。定性：render context 与 VO 在多次重建循环中未稳定绑定（E2 是 ctx 先于 open 的全新实例；media_kit 运行时 attach 顺序无法完全复刻）。rgb0 格式与 vid 循环两个变量已排除。
+
+### 精确下一步（接手即做）
+
+1. **稳定单次 attach 序列**：查 real.dart nativeSurfaceDestroyed 路径的重开逻辑（`_hdrCurrentSource` reopen probes）——XComponent 重建循环期间避免 ctx free/crete 与 VO 重init 交错；或桥改 split API：`mk_sw_start(mpv_handle)`（create 即建 ctx，无窗口先渲到内存）+ `mk_sw_set_surface(id)`（attach 只换窗口）——ctx 生命周期与窗口解耦，open 前 ctx 已存在（E2 顺序完全成立）。
+2. 若仍黑：dump 单帧到文件（app files 目录）判读内容层；对照 mpv render.c 的 "not being called" 触发条件（target-usage 超时）。
+3. Goal 1（GL vo）未动：需先做显式 vo 覆盖轮（⑥ 原计划），补丁件 zip 在 libmpv-ohos-build 树。
+
+### 现场与运维
+
+- hvigor 插件 Node bug 已本地修复（DevEco hvigor-ohos-plugin `fs_extra rmdirSync→rmSync`，.bak 备份）——release 构建稳定；debug 变体还需签名配置（00304004 提示）。
+- 增量构建陷阱实证：`flutter build hap` 对 path 依赖改动可能不重编（SwTrace 字符串核对法），清 `.dart_tool/flutter_build`+`build/ohos` 后恢复。
+- 模拟器当日两次死亡（磁盘门槛/幽灵锁），恢复流程已固化（清空间>12G→-stop→-start→tconn）。
+- 测试 app 诊断插桩（帧数/mpv 属性轮询/日志监听/SwTrace）在工作区，收口时按注释清理。
+
 ## 2026-10-06 Luna E1 方案打通轮（SW 桥落地，XComponent 挂载链未通）
 
 用户指令"Luna E1 可以播放视频，使用这个方案进行打通"。实施 E1/E2 技术进 media_kit：**软件渲染桥已落地并 attach 成功，但 XComponent ready 事件未到达，画面未通**——工作区保存，未收口。

@@ -645,10 +645,21 @@ class VideoState extends State<Video> with WidgetsBindingObserver {
                                       final keepMountedNativeSurface =
                                           ohosNativeSurfaceCandidate &&
                                               _ohosNativeSurfaceMounted;
+                                      // The OHOS native-surface candidate may
+                                      // mount before the first video frame:
+                                      // its XComponent must exist for the
+                                      // ready event to fire, while mpv can
+                                      // hold vo=null until the surface is
+                                      // attached (same ordering the Android
+                                      // platform-view branch relies on).
+                                      final mountOhosNativeSurfaceCandidate =
+                                          ohosNativeSurfaceCandidate &&
+                                              notifier.nativeSurfaceCandidate;
                                       if (id != null &&
                                           rect != null &&
                                           (_visible ||
-                                              keepMountedNativeSurface)) {
+                                              keepMountedNativeSurface ||
+                                              mountOhosNativeSurfaceCandidate)) {
                                         final nativeSurfaceCandidate = (Platform
                                                     .isAndroid &&
                                                 notifier.configuration.android
