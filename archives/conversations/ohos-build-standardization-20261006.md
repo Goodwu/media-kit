@@ -75,6 +75,13 @@ native 溯源门禁步骤、指纹 JSON 进产物、manifest 增 patch_branch/ba
 
 ## 遗留与后续
 
+0. **主 CI lock 缺口（2026-10-06 晨修复）**：01b15a01 给 pubspec.yaml 加
+   path_provider_ohos 时只更新了 ohos lock，主 pubspec.lock 缺条目——规范化
+   期间各次推送的主 workflow run 均被并发取消，至 7d2d3334 首次完整执行时四
+   平台 `--enforce-lockfile` 全挂。修复：桌面 flutter 再生主 lock（恰好 +8 行
+   仅 path_provider_ohos，版本与 sha 和 ohos lock 一致，SDK 四件套未漂移）。
+   教训：**改 media_kit_test/pubspec.yaml 必须同时再生两个 lock**（主 lock 用
+   桌面 flutter、ohos lock 用 OHOS 工具链）。
 1. patch 分支 rebase 到上游 tip（f4ab1955）的首轮升级演练（流程：同步→rebase→
    CI→更新 pin 四件套）。
 2. engine 工件按 engine.version 快照为镜像仓 Release 资产（Phase 5 可选加固，
@@ -83,6 +90,9 @@ native 溯源门禁步骤、指纹 JSON 进产物、manifest 增 patch_branch/ba
    libmediakit_ohos_hdr.so/module.json 的 patch 级差异，逼近全量字节等价。
 4. libapp.so 跨机差异为 AOT 嵌入绝对路径的固有行为；如需字节等价可评估
    --obfuscate（改变产物语义，另行决策）。
+5. mpv 同步 workflow 首次 dispatch 的 run 被 runner 队列回收（cancelled），重
+   触发后绿（tip 6edeee0 no-op 正确）；「手动运行」标识源于 dispatch 验证，
+   定时触发自下周日 cron 起生效。
 
 **修正记录（2026-10-06 凌晨）**：CI v2 首跑失败于 hvigor Dart 编译——v1 patch
 的 hunk 过滤器行号锚定差一，把部分 `case TargetPlatform.ohos:` 插到非 switch
