@@ -51,7 +51,8 @@
   - 工具: surface_dataspace 桥（set/get/probe）、hdr_lab define 机制、AVTRACE、SF dump 判别法（screencap 对 HWC overlay 失真已记录，双轨量化）。
   - **快验 A 结论（2026-10-07，已执行）**：用户实机确认 **LG 系统播放器（com.lge.videoplayer）播纯 HLG 素材（user-hdr-vivid 18c7c05a，无任何 DV/RPU，流标记 bt.2020/HLG 已核实）同样偏淡**——坐实根因=系统级 HLG 呈现缺失（OOTF/解释问题），与 DV/RPU/我们链路无关；连 LG 自家播放器都做不对 HLG，displayHdrTypes 无 type 3 是诚实声明。**方案重大收窄**：标 HLG dataspace 只会走系统已证明走不好的路——唯一正确方向=**HLG→PQ 转换 + PQ 呈现**（面板 PQ 显示已被 HDR10 直通 R25 用户验收证明正确）；原阶段 1（dataspace 诊断）意义下降，阶段 2 收窄为"PQ 标注+内容转换"组合验证（通道有效性并入 3A 开发）。快验过程副产物：hlg 素材 dvs-hlg-graypatch50（e8d05431）流标记实为 bt.1886 非纯 HLG（不可用作对照）；lab 裸 hint（codec 空）首开存在 surface 竞态 fallback sdrDirect（P8.4 完整 hint 不受影响，独立待查项）。
   - 性能要求（用户 2026-10-07）：能力验证后近似验证性能，**4K30 达标**（AVTRACE vfps/time-pos 推进速率量化）。
-  - next: 读历史 dataspace 实验线（android-hdr-surface-dataspace-gate 等，vendor private/BufferQueue 通道在 API24 的约束）→ 设计 HLG→PQ 转换最小实现（解码→GPU 一 pass transfer→Surface 标 PQ 或 vendor dataspace）。
+  - **快验 D 完成（2026-10-07，通道实锤）**：perform 直调通道在 LG 活——LGE 定制 ANativeWindow 布局经 8 轮探针+libgui 符号表线性映射逆向定位（query=0x90/perform=0x98/queue_DEP=0x88），`perform(op=19, BT2020_PQ)` 实测 ret=0、复位成功、零崩溃。**HLG→PQ 三要素全绿**：①转换引擎 gpu-next target-trc=pq+stripRpu（LYA 97.9s 先例）②dataspace 出口 perform 通道（本轮实锤）③面板 PQ 显示（HDR10 直通 R25 背书）。归档 lg-dataspace-probe-r32-20261007/（10文件 index 5233，experiments 26e1b45）。开放项：SF/HWC 合成端是否真正生效（N 无读回，并入实施轮画面验收）；4K30 性能未测。
+  - next: **HLG→PQ 实施轮**（通道已验证，进入实现）：gpu-next PQ 目标渲染（ImageReader 直采/mediacodec-copy 取舍）+ EGL rgb10_a2 SurfaceView 窗口 + perform(19,PQ) dataspace（探针代码升格为 LG 版 vendor 扩展，照 lya 先例独立插件）；验收=画面色彩 vs HDR10 直通基准+4K30 性能红线。
 
 - [ ] Android HDR10 / DV P8.4 显示与原生 HDR 首帧闭环
   - status: in_progress
