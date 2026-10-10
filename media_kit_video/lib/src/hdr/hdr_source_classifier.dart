@@ -34,10 +34,12 @@ import 'hdr_source_descriptor.dart';
 /// (`current-tracks/video/dolby-vision-el-present`); when the review
 /// reports them, they are authoritative — the container record is the DV
 /// signaling itself — and the base-layer transfer inference is only the
-/// fallback for a `null` fact. HDR Vivid is observable as a per-frame
-/// side-data fact (`video-params/hdr-vivid`): a reported `true` classifies
-/// a profile-less source as [HdrDynamicMetadata.hdrVivid]. HDR10+ remains
-/// not observable through mpv and stays [HdrDynamicMetadata.none].
+/// fallback for a `null` compatibility fact. A missing enhancement-layer
+/// fact stays unknown for every supported DV profile. HDR Vivid is
+/// observable as a per-frame side-data fact (`video-params/hdr-vivid`): a
+/// reported `true` classifies a profile-less source as
+/// [HdrDynamicMetadata.hdrVivid]. HDR10+ remains not observable through mpv
+/// and stays [HdrDynamicMetadata.none].
 ///
 /// When no decoder facts are available at all ([VideoParams] and the profile
 /// both absent), the optional [hint] descriptor is returned as-is so a hint
@@ -55,14 +57,14 @@ class HdrSourceClassifier {
   /// [dolbyVisionProfile] is the raw integer `dolby-vision-profile` mpv
   /// property (`5`, `8`, `10`, ...). [dvCompatibilityId] and [dvElPresent]
   /// are the container facts from the fork's compatibility-id/el-present
-  /// properties; when reported they take priority over the base-layer
-  /// inference (the container record is the DV signaling itself) and a
-  /// `null` fact falls back to the profile/gamma defaults. [hdrVivid] is
-  /// the per-frame side-data fact from `video-params/hdr-vivid`; it applies
-  /// only to profile-less sources (a DV profile and HDR Vivid side data
-  /// never co-occur — when both appear, the DV branch wins). Passing
-  /// hint-less facts produces a description with an empty codec; pass the
-  /// track codec through a hint to keep it populated.
+  /// properties; when reported they take priority over inference. A missing
+  /// compatibility id may use the profile/gamma defaults; a missing EL
+  /// fact remains unknown and must not authorize native single-layer DV.
+  /// [hdrVivid] is the per-frame side-data fact from `video-params/hdr-vivid`;
+  /// it applies only to profile-less sources (a DV profile and HDR Vivid
+  /// side data never co-occur — when both appear, the DV branch wins).
+  /// Passing hint-less facts produces a description with an empty codec;
+  /// pass the track codec through a hint to keep it populated.
   HdrSourceDescriptor classify({
     VideoParams? videoParams,
     int? dolbyVisionProfile,
@@ -118,19 +120,13 @@ class HdrSourceClassifier {
       final bool? enhancementLayer;
       switch (profile) {
         case 5:
-          // Native-DV eligibility must not infer single-layer structure from
-          // a missing container fact.
-          enhancementLayer = dvElPresent;
-          break;
         case 7:
-          // The profile-7 enhancement-layer presence is observable now
-          // (`el-present`); the record does not distinguish FEL/MEL, and a
-          // null fact stays unknown.
-          enhancementLayer = dvElPresent;
-          break;
         case 8:
         case 10:
-          enhancementLayer = dvElPresent ?? false; // Single layer default.
+          // Preserve the actual container fact. In particular, P8's missing
+          // EL field cannot become false before native-DV admission checks
+          // it. Presence alone also does not distinguish P7 MEL from FEL.
+          enhancementLayer = dvElPresent;
           break;
         default:
           enhancementLayer = null;
