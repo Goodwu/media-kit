@@ -16,7 +16,7 @@
 - **mpv fork 上游策略（2026-09-30 定）**：跟发布版不跟 master（master 1029 行 libplacebo v7 迁移正面冲突）；等 v0.42 发布→merge-tree 评估（hwdec API+vo_gpu_next dovi 路径）→P5 五项回归→新发布 tag；期间按需 cherry-pick；FFmpeg 安全修复走 CVE cherry-pick 单独机制。
 - **P5 修复要点**：华为硬解输出 Main10 10-bit 布局（AHB 0x325），dovi 域按 code/1023 解释→1023/1020 缩放偏色；修复=dovi 元数据就地重标定（mpv fork，k=1023/1020）。教训：误链旧世代 libavcodec 复演 `direct=0`（发布链保持钉定即为此）；读回调试 `debug.media_kit.p5_rpu_probe=2`。
 - **历史哈希换算**：主库 2026-10-06 剥离 `archives/experiments/`（main `51ef66cc`→`ee28accd`，tip 树零变化）；旧哈希查 `~/src/media-kit-build/history-strip-20261006/commit-map.json`，旧对象 fetch `Goodwu/media-kit-history-archive`（branch `pre-strip-20261006`）。
-- **OHOS 现状**：构建规范化落地（CI 三跑绿+双路径字节一致+镜像切换等价实证）；本地 SDK 固定 `~/src/flutter-ohos`（OHOS 操作一律在此）；模拟器可视播放已打通（HCPP 直通+sw 桥，2026-10-07），真机生命周期验收 blocked 待设备；patch 分支 rebase 上游 tip 首演待办；experiments 库远端=github.com/Goodwu/media-kit-experiments（master 同步 @ a4e952f；本地余 1 修改+5 未跟踪目录+本轮台账快照，留待对应轮次）。
+- **OHOS 现状**：构建规范化落地（CI 三跑绿+双路径字节一致+镜像切换等价实证）；本地 SDK 固定 `~/src/flutter-ohos`（OHOS 操作一律在此）；模拟器可视播放已打通（HCPP 直通+sw 桥，2026-10-07），真机生命周期验收 blocked 待设备；patch 分支 rebase 上游 tip 首演待办；experiments 库远端=github.com/Goodwu/media-kit-experiments（远端 @ a4e952f；本地领先 2 提交未推送——回归轮报告 4c65217 + 存档收口 f599d27：10-08 三轮证据（EGL 格式探针/real-pq-route-lock PAUSED/visual278 owner+session-only）、D1 MKS VUI harness 归档、台账 20261010 快照、handoff logcat 协议，库工作树已清空）。
 
 ## 当前任务
 
