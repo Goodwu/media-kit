@@ -1,0 +1,55 @@
+name: Routing Darwin viewport checks
+
+on:
+  push:
+    branches: [routing/MK-ROUTING-20261011]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: routing-darwin-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  viewport:
+    name: Darwin viewport widget tests (macOS)
+    runs-on: macos-latest
+    timeout-minutes: 15
+    env:
+      EXPECTED_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: media_kit_video
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Resolve current source and record provenance
+        run: |
+          set -euo pipefail
+          out="$GITHUB_WORKSPACE/ci-darwin-results"
+          mkdir -p "$out"
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE_SHA"
+          { git rev-parse HEAD; flutter --version; printf '\nScope: mocked platform-view widget tests, not native/device acceptance.\n'; } | tee "$out/source.txt"
+          flutter pub get 2>&1 | tee "$out/pub-get.log"
+      - name: Exercise cases skipped by Linux host tests
+        run: |
+          set -euo pipefail
+          flutter test --no-pub --concurrency=1 --reporter expanded test/native_surface_viewport_test.dart 2>&1 | tee "$GITHUB_WORKSPACE/ci-darwin-results/tests.log"
+          git diff --exit-code -- lib test
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: routing-darwin-${{ env.EXPECTED_SOURCE_SHA }}
+          path: ci-darwin-results
+          if-no-files-found: error
