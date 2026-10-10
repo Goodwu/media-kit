@@ -255,3 +255,109 @@ Java_com_example_media_1kit_1hdr_1lab_LyaDiagnosticsDataSpaceExt_nativeVulkanHdr
   probe_vulkan_hdr_window(window);
   ANativeWindow_release(window);
 }
+
+// Diagnostic probe: API 24 ANativeWindow perform(SET_BUFFERS_DATASPACE).
+// The LG-custom slots are confined to the exact evidenced firmware and
+// arm64 process, with format and hook ownership checks before invocation.
+// A successful setter is NOT dataspace readback verification.
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_example_media_1kit_1hdr_1lab_DataSpacePerformProbe_nativeRun(
+    JNIEnv* env, jclass, jobject surface, jint dataSpace) {
+  char out[512];
+#if !defined(__aarch64__)
+  return env->NewStringUTF("{\"error\":\"unsupported process ABI\"}");
+#endif
+  char sdk[PROP_VALUE_MAX] = {}, fp[PROP_VALUE_MAX] = {}, model[PROP_VALUE_MAX] = {};
+  if (sizeof(void*) != 8 ||
+      __system_property_get("ro.build.version.sdk", sdk) <= 0 || strcmp(sdk, "24") != 0 ||
+      __system_property_get("ro.product.model", model) <= 0 || strcmp(model, "LG-H870DS") != 0 ||
+      __system_property_get("ro.build.fingerprint", fp) <= 0 ||
+      strcmp(fp, "lge/lucye_global_com/lucye:7.0/NRD90U/172921900e77a:user/release-keys") != 0 ||
+      (dataSpace != 0x09c60000 && dataSpace != 0x11c60000)) {
+    return env->NewStringUTF("{\"error\":\"unsupported firmware or dataspace\"}");
+  }
+  if (surface == nullptr) return env->NewStringUTF("{\"error\":\"null surface\"}");
+  ANativeWindow* window = ANativeWindow_fromSurface(env, surface);
+  if (window == nullptr) return env->NewStringUTF("{\"error\":\"window null\"}");
+  if (ANativeWindow_getFormat(window) != AHARDWAREBUFFER_FORMAT_R10G10B10A2_UNORM) {
+    ANativeWindow_release(window);
+    return env->NewStringUTF("{\"error\":\"unsupported format\"}");
+  }
+  // v5: locate the perform slot by symbol. libgui exports the static
+  // Surface member functions; their real addresses are compared against
+  // the object's function-pointer slots (0x60..0xC0) so no layout guessing
+  // remains. Derived slots are logged before use.
+  int performRet = -999;
+  int verified = -1;
+  int fmt = -999;
+  char attempts[256] = "";
+  const uint8_t* base = reinterpret_cast<const uint8_t*>(window);
+  {
+    // v8: symbol-proven slots. The ten slot pointers map 1:1 (constant
+    // +0x24000) onto libgui's exported Surface hook_* symbols: query=0x90
+    // (hook_query 0x7b084), perform=0x98 (hook_perform 0x7b09c). The v4/v6
+    // crashes had called queueBuffer_DEPRECATED at 0x88.
+    char maps[1024] = "";
+    {
+      FILE* f = fopen("/proc/self/maps", "r");
+      if (f != nullptr) {
+        char line[512];
+        while (fgets(line, sizeof(line), f) != nullptr) {
+          if (strstr(line, "libgui.so") == nullptr) continue;
+          char* sp = strchr(line, ' ');
+          if (sp == nullptr) continue;
+          *sp = '\0';
+          strncat(maps, line, sizeof(maps) - strlen(maps) - 1);
+          strncat(maps, ";", sizeof(maps) - strlen(maps) - 1);
+          break;  // first mapping (base) is enough
+        }
+        fclose(f);
+      }
+    }
+    const size_t kQuerySlot = 0x90;
+    const size_t kPerformSlot = 0x98;
+    void* queryPtr = nullptr;
+    void* performPtr = nullptr;
+    std::memcpy(&queryPtr, base + kQuerySlot, sizeof(queryPtr));
+    std::memcpy(&performPtr, base + kPerformSlot, sizeof(performPtr));
+    Dl_info q = {}, p = {};
+    if (ANativeWindow_getFormat(window) != AHARDWAREBUFFER_FORMAT_R10G10B10A2_UNORM ||
+        queryPtr == nullptr || performPtr == nullptr ||
+        dladdr(queryPtr, &q) == 0 || dladdr(performPtr, &p) == 0 ||
+        q.dli_fbase != p.dli_fbase || q.dli_fname == nullptr || p.dli_fname == nullptr ||
+        strcmp(q.dli_fname, "/system/lib64/libgui.so") != 0 ||
+        strcmp(p.dli_fname, "/system/lib64/libgui.so") != 0 ||
+        reinterpret_cast<uintptr_t>(performPtr) != reinterpret_cast<uintptr_t>(queryPtr) + 0x18) {
+      ANativeWindow_release(window);
+      return env->NewStringUTF("{\"error\":\"unsupported hook pair or format\"}");
+    }
+    {
+      using QueryFn = int (*)(const ANativeWindow*, int, int*);
+      int f = -999;
+      const int qret =
+          reinterpret_cast<QueryFn>(queryPtr)(window, 2 /* FORMAT */, &f);
+      fmt = f;
+      snprintf(attempts, sizeof(attempts), "[qret=%d f=%d]", qret, f);
+      if (qret != 0 || f != AHARDWAREBUFFER_FORMAT_R10G10B10A2_UNORM) {
+        snprintf(out, sizeof(out),
+                 "{\"error\":\"query slot check failed\",\"detail\":\"%s\"}",
+                 attempts);
+        ANativeWindow_release(window);
+        return env->NewStringUTF(out);
+      }
+    }
+    {
+      using PerformFn = int (*)(ANativeWindow*, int, ...);
+      // 19 = NATIVE_WINDOW_SET_BUFFERS_DATASPACE (AOSP standard).
+      performRet = reinterpret_cast<PerformFn>(performPtr)(
+          window, 19, static_cast<int>(dataSpace));
+      verified = static_cast<int>(kPerformSlot);
+    }
+  }
+  ANativeWindow_release(window);
+  snprintf(out, sizeof(out),
+           "{\"checkedPerformSlotOffset\":\"0x%x\",\"formatQuery\":%d,"
+           "\"performRet\":%d,\"dataSpace\":%d,\"attempts\":\"%s\"}",
+           verified, fmt, performRet, static_cast<int>(dataSpace), attempts);
+  return env->NewStringUTF(out);
+}

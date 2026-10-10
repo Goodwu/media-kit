@@ -47,6 +47,22 @@ public final class LyaDiagnosticsDataSpaceExt implements PlatformVideoView.Surfa
     }
 
     @Override
+    public void registerLgExperimentSurface(Surface surface, long handle, int generation,
+            int viewId, int surfaceGeneration, String token) {
+        delegate.registerLgExperimentSurface(surface, handle, generation, viewId, surfaceGeneration, token);
+    }
+    @Override
+    public void unregisterLgExperimentSurface(Surface surface, long handle, int generation,
+            int viewId, int surfaceGeneration, String token) {
+        delegate.unregisterLgExperimentSurface(surface, handle, generation, viewId, surfaceGeneration, token);
+    }
+    @Override
+    public boolean applyDataSpace(Surface surface, int dataSpace, long handle, int generation,
+            int viewId, int surfaceGeneration, String token) {
+        return delegate.applyDataSpace(surface, dataSpace, handle, generation, viewId, surfaceGeneration, token);
+    }
+
+    @Override
     public void onSurfaceAvailable(@NonNull Surface surface) {
         // The native side is gated on debug.media_kit.late_pq_probe=1.
         nativeLatePqProbe(surface);
