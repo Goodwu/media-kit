@@ -276,17 +276,18 @@ void main() {
   group('predict layer', () {
     test('full candidate list with unsupported and gate skips (golden)', () {
       enable();
-      // P8.4 on the LYA-like snapshot with the default policy: the reserved
-      // native DV strategy is unsupported, the RPU reshape is behind the
-      // experimental gate, direct, the PQ conversion and tone-map are
-      // feasible (convert upgraded 2026-10-02 after human observation).
+      // P8.4 on the LYA-like snapshot with the default policy: the native DV
+      // strategy is verified since 2026-10-10 but this snapshot has no DV
+      // decoder, so the realizer refuses it (nativeDvUnavailable); the RPU
+      // reshape is behind the experimental gate, direct, the PQ conversion
+      // (verified since 2026-10-10) and tone-map are feasible.
       HdrRoutePlanner.plan(source: p84, capabilities: caps());
       expect(
         lines.single,
         'HdrDiag HDR predict: source=hevc,hlg,bt.2020,dolbyVision,8,4,false '
         'class=dvP84 selected=baseLayerDirect maturity=verified '
         'presentation=nativeHdr confidence=verified playable=true '
-        'candidates=nativeDolbyVision:experimentalStrategySkipped,'
+        'candidates=nativeDolbyVision:nativeDvUnavailable,'
         'baseLayerDirect:ok,'
         'baseLayerConvert:ok,'
         'metadataReshape:experimentalStrategySkipped,'
@@ -313,7 +314,7 @@ void main() {
       final candidates =
           lines.single.split('candidates=')[1].split(',');
       expect(candidates, <String>[
-        'nativeDolbyVision:experimentalStrategySkipped',
+        'nativeDolbyVision:nativeDvUnavailable',
         'baseLayerDirect:ok',
         'baseLayerConvert:ok',
         'metadataReshape:experimentalStrategySkipped',
@@ -375,7 +376,7 @@ void main() {
       expect(
         decisions[0],
         contains('candidates=baseLayerDirect:ok,'
-            'baseLayerConvert:experimentalStrategySkipped,'
+            'baseLayerConvert:ok,'
             'toneMapSdr:ok'),
       );
 
