@@ -612,6 +612,10 @@ class VideoState extends State<Video> with WidgetsBindingObserver {
                                           .configuration
                                           .android
                                           .surfaceTransfer,
+                                      lgExperimentOwnerToken: notifier
+                                          .configuration
+                                          .android
+                                          .lgExperimentOwnerToken,
                                       androidSurfacePixelFormat: notifier
                                           .configuration
                                           .android
@@ -811,22 +815,18 @@ class VideoState extends State<Video> with WidgetsBindingObserver {
                                           // back to the video parameters when
                                           // the viewport is unbounded (e.g.
                                           // inside a scroll view).
-                                          ohosSurfaceWidthPx:
-                                              nativeOhosCandidate
-                                                  ? viewportWidth *
-                                                      (MediaQuery.maybeOf(
-                                                                  context)
-                                                              ?.devicePixelRatio ??
-                                                          1.0)
-                                                  : null,
-                                          ohosSurfaceHeightPx:
-                                              nativeOhosCandidate
-                                                  ? viewportHeight *
-                                                      (MediaQuery.maybeOf(
-                                                                  context)
-                                                              ?.devicePixelRatio ??
-                                                          1.0)
-                                                  : null,
+                                          ohosSurfaceWidthPx: nativeOhosCandidate
+                                              ? viewportWidth *
+                                                  (MediaQuery.maybeOf(context)
+                                                          ?.devicePixelRatio ??
+                                                      1.0)
+                                              : null,
+                                          ohosSurfaceHeightPx: nativeOhosCandidate
+                                              ? viewportHeight *
+                                                  (MediaQuery.maybeOf(context)
+                                                          ?.devicePixelRatio ??
+                                                      1.0)
+                                              : null,
                                           ohosHcpp: notifier.swRender,
                                         );
                                         if (nativeMacosSurface) {

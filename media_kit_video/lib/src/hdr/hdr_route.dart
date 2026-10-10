@@ -183,6 +183,7 @@ class HdrRoute {
     required this.targetTrc,
     required this.surfaceTransfer,
     required this.stripDvRpu,
+    this.offscreenTransfer,
     this.dependencies = const <String>{},
   });
 
@@ -219,7 +220,22 @@ class HdrRoute {
 
   /// Dataspace requested for the GPU PlatformView surface (`pq`/`hlg`), or
   /// null when the route has no GPU HDR transfer to apply.
+  ///
+  /// Window contract only (A4 contract split): this labels the presenting
+  /// window, not the offscreen intermediary (`pq-itu` = BT2020 PQ / LIMITED
+  /// 0x11C60000, the YUV window's forced label). The offscreen encoding of a
+  /// route with a separate offscreen contract is [offscreenTransfer]; the
+  /// two fields are independent and must never be read interchangeably.
   final String? surfaceTransfer;
+
+  /// Content encoding of the route's offscreen intermediary FBO, when that
+  /// offscreen is a contract distinct from the presenting window. Only the
+  /// YUV route (SurfaceTexture offscreen → NV12 window) declares one today:
+  /// `pq-full` = full-range normalized PQ, the euv13/euv17 accepted offscreen
+  /// contract. Routes whose offscreen and window share one RGB contract keep
+  /// null — the single window [surfaceTransfer] plus mpv's default output
+  /// levels carry the current semantics and nothing is issued offscreen.
+  final String? offscreenTransfer;
 
   /// Whether the Dolby Vision RPU must be stripped from the bitstream.
   final bool stripDvRpu;
@@ -243,6 +259,7 @@ class HdrRoute {
         other.targetPrim == targetPrim &&
         other.targetTrc == targetTrc &&
         other.surfaceTransfer == surfaceTransfer &&
+        other.offscreenTransfer == offscreenTransfer &&
         other.stripDvRpu == stripDvRpu &&
         setEquals(other.dependencies, dependencies);
   }
@@ -261,6 +278,7 @@ class HdrRoute {
         targetPrim,
         targetTrc,
         surfaceTransfer,
+        offscreenTransfer,
         stripDvRpu,
         Object.hashAllUnordered(dependencies),
       );
@@ -271,6 +289,7 @@ class HdrRoute {
       'topology: ${topology.name}, vo: $vo, hwdec: $hwdec, '
       'vd-lavc-o: $vdLavcOptions, render-mode: $mediacodecEmbedRenderMode, '
       'prim: $targetPrim, trc: $targetTrc, surface: $surfaceTransfer, '
+      'offscreen: ${offscreenTransfer ?? 'none'}, '
       'stripRpu: $stripDvRpu, deps: $dependencies)';
 }
 

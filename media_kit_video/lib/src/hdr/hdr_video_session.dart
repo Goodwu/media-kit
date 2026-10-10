@@ -63,6 +63,13 @@ typedef HdrSessionRoutePlanner = HdrRoutePrediction Function({
 ///
 /// {@endtemplate}
 class HdrVideoSession {
+  /// Build-time pixel-format override for the GPU HDR platform view.
+  /// Default rgba1010102 (10-bit); 'rgba8888' trades bit depth for a
+  /// potentially cheaper compositor path on old devices.
+  static const String _surfaceFormatOverride = String.fromEnvironment(
+      'MEDIA_KIT_ANDROID_HDR_SURFACE_FORMAT',
+      defaultValue: 'rgba1010102');
+
   /// {@macro hdr_video_session}
   HdrVideoSession(
     Player player, {
@@ -338,12 +345,21 @@ class HdrVideoSession {
   ///
   /// Returns normally when a newer [open] superseded this one. Other
   /// failures are published as an [HdrErrorEvent] and rethrown.
+  bool _lgExperimentOpenUsed = false;
+
   Future<void> open(
     Media media, {
     HdrSourceDescriptor? hint,
     bool play = true,
     Duration? start,
   }) async {
+    if (_configuration.android.lgExperimentOwnerToken != null) {
+      if (_lgExperimentOpenUsed) {
+        throw StateError('LG experiment Session permits one open attempt only');
+      }
+      _lgExperimentOpenUsed =
+          true; // Atomic before the first await; failure consumes it.
+    }
     if (!_isAndroid) {
       final player = _player;
       if (player == null) throw StateError('HdrVideoSession has no Player');
@@ -897,6 +913,9 @@ class HdrVideoSession {
   /// the current description and rebuilds at the current position only
   /// when the selected route changed.
   Future<void> setPreference(HdrOutputPreference preference) async {
+    if (_configuration.android.lgExperimentOwnerToken != null) {
+      throw StateError('LG single-open experiment rejects preference controls');
+    }
     if (_preference == preference) return;
     _preference = preference;
     await _replanAfterConfigurationChange(
@@ -909,6 +928,9 @@ class HdrVideoSession {
   /// Changes the routing policy during playback (R2.2), same rebuild rule
   /// as [setPreference].
   Future<void> setPolicy(HdrRoutingPolicy policy) async {
+    if (_configuration.android.lgExperimentOwnerToken != null) {
+      throw StateError('LG single-open experiment rejects policy controls');
+    }
     _policy = policy;
     await _replanAfterConfigurationChange();
   }
@@ -923,6 +945,10 @@ class HdrVideoSession {
     final capabilities = _lastCapabilities;
     if (descriptor == null || actual == null || media == null) return;
     if (capabilities == null) return;
+    if (_configuration.android.lgExperimentOwnerToken != null) {
+      throw StateError(
+          'LG single-open experiment rejects automatic replanning');
+    }
     final prediction = HdrRoutePlanner.plan(
       source: descriptor,
       capabilities: capabilities,
@@ -968,6 +994,10 @@ class HdrVideoSession {
     if (descriptor == null || actual == null || media == null) {
       _lastCapabilities = capabilities;
       return;
+    }
+    if (_configuration.android.lgExperimentOwnerToken != null) {
+      throw StateError(
+          'LG single-open experiment rejects automatic replanning');
     }
     final prediction = HdrRoutePlanner.plan(
       source: descriptor,
@@ -1047,7 +1077,9 @@ class HdrVideoSession {
       clearGpuApi: vo != 'gpu-next',
       surfaceTransfer: usePlatformView ? (surfaceTransfer ?? '') : null,
       surfacePixelFormat: usePlatformView
-          ? (vo == 'gpu-next' && surfaceTransfer != null ? 'rgba1010102' : '')
+          ? (vo == 'gpu-next' && surfaceTransfer != null
+              ? _surfaceFormatOverride
+              : '')
           : null,
     );
     return VideoController(

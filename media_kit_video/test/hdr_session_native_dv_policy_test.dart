@@ -722,10 +722,10 @@ void main() {
         final session = env.session(backend);
         await session.open(env.media, hint: _p5);
         expect(backend.opened.map((p) => p.route.strategy),
-            [HdrStrategy.nativeDolbyVision, HdrStrategy.toneMapSdr]);
+            [HdrStrategy.nativeDolbyVision, HdrStrategy.metadataReshape]);
         expect(backend.opened.last.excluded,
             contains(HdrRouteDependency.nativeDolbyVision));
-        expect(session.report.value.actual!.strategy, HdrStrategy.toneMapSdr);
+        expect(session.report.value.actual!.strategy, HdrStrategy.metadataReshape);
         expect(session.report.value.degradeReason,
             HdrDegradeReason.nativeDvUnavailable);
         await session.dispose();
@@ -761,9 +761,9 @@ void main() {
       expect(backend.opened.map((p) => p.route.strategy), [
         HdrStrategy.sdrDirect,
         HdrStrategy.nativeDolbyVision,
-        HdrStrategy.toneMapSdr
+        HdrStrategy.metadataReshape
       ]);
-      expect(session.report.value.actual!.strategy, HdrStrategy.toneMapSdr);
+      expect(session.report.value.actual!.strategy, HdrStrategy.metadataReshape);
       expect(session.report.value.verified, isTrue);
       await session.dispose();
     });
@@ -780,7 +780,7 @@ void main() {
       expect(session.report.value.verified, isFalse);
       expect(
           backend.configured
-              .where((p) => p.route.strategy == HdrStrategy.toneMapSdr),
+              .where((p) => p.route.strategy == HdrStrategy.metadataReshape),
           isEmpty);
       await session.dispose();
     });
@@ -841,7 +841,7 @@ void main() {
       await session.open(env.media, hint: _p5);
       expect(backend.opened.map((p) => p.route.strategy), [
         HdrStrategy.nativeDolbyVision,
-        HdrStrategy.toneMapSdr,
+        HdrStrategy.metadataReshape,
         HdrStrategy.nativeDolbyVision
       ]);
       expect(session.report.value.generation, 2);
