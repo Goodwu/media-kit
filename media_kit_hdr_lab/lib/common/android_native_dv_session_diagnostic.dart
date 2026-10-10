@@ -428,7 +428,8 @@ HdrRoutePrediction planAndroidNativeDvSessionDiagnostic({
       // Reflect the current maturity table: the diagnostic bypass forces the
       // reserved strategy through, but the reported maturity tracks the
       // table (unsupported → experimental since the 2026-10-06 LG DV
-      // unlock).
+      // unlock → verified since the 2026-10-10 user-adjudicated direct-path
+      // default promotion).
       maturity: HdrStrategyMaturityTable.of(
           HdrSourceClass.dvP5, HdrStrategy.nativeDolbyVision),
       feasible: true,

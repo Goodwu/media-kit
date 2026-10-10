@@ -149,12 +149,13 @@ void checkInvariants(
   expect(prediction.selected.feasible, prediction.playable);
 
   // R7 baseline: native Dolby Vision stays unselected unless the class is
-  // dvP5 on a DV-declaring display with the bridge loaded and the
-  // experimental gate open (2026-10-06 LG DV unlock).
+  // dvP5 on a DV-declaring display with the bridge loaded. Since the
+  // 2026-10-10 promotion dvP5 × nativeDolbyVision is `verified` and no
+  // longer behind the experimental gate; dvP84 still is (gate state checked
+  // by the dedicated matrix tests below).
   expect(
     prediction.selected.strategy != HdrStrategy.nativeDolbyVision ||
         (cls == HdrSourceClass.dvP5 &&
-            allowExperimental &&
             capabilities.displayHdrTypes?.contains(1) == true &&
             capabilities.nativeDvBridgeApi == 1),
     isTrue,
@@ -238,9 +239,10 @@ void main() {
     <int>{2},
     <int>{3},
     <int>{2, 3},
-    // A display reporting Dolby Vision (type 1). The planner consumes no
-    // route from it yet (nativeDolbyVision is unsupported, R7), so plans
-    // must be identical to the {2, 3} display.
+    // A display reporting Dolby Vision (type 1). Only the native DV route
+    // consumes the type (realizer display ground for dvP5/dvP84); without a
+    // DV decoder + bridge in `caps()` those candidates are refused and the
+    // rest of the plan ignores the type.
     <int>{1},
     <int>{1, 2, 3},
   ];
@@ -386,6 +388,9 @@ void main() {
 
     test('planner selects native DV for eligible P5.0 once maturity allows',
         () {
+      // Gate explicitly open: still selects (the promotion did not change
+      // the gate-open behavior; see the maturity-gate group for the
+      // gate-closed default selection).
       final HdrRoutePrediction prediction = caps(
         displayHdrTypes: const <int>{1},
         dvDecoders: const <HdrDecoderInfo>[nativeDvDecoder],
@@ -778,7 +783,53 @@ void main() {
       expect(prediction.selected.maturity, HdrStrategyMaturity.inherited);
     });
 
-    test('nativeDolbyVision is never selected, even first in preferences', () {
+    test(
+        'dvP5 reaches nativeDolbyVision by default, without allowExperimental '
+        '(2026-10-10 promotion)', () {
+      // DV-capable device (declares DV, profile-32 hardware decoder, bridge
+      // v1) with the default policy: the gate stays closed, yet the P5
+      // source goes straight to the native route — the old behavior (skip
+      // with experimentalStrategySkipped unless the gate was open) is gone.
+      final HdrRoutePrediction prediction = caps(
+        displayHdrTypes: const <int>{1},
+        dvDecoders: const <HdrDecoderInfo>[nativeDvDecoder],
+        nativeDvBridgeApi: 1,
+      ).predict(sources[HdrSourceClass.dvP5]!);
+      expect(prediction.selected.strategy, HdrStrategy.nativeDolbyVision);
+      expect(prediction.selected.maturity, HdrStrategyMaturity.verified);
+      expect(prediction.selected.skipReason, isNull);
+      expect(prediction.candidates.first.strategy,
+          HdrStrategy.nativeDolbyVision);
+      expect(prediction.candidates.first.skipReason, isNull);
+      expect(prediction.selected.route!.vdLavcOptions, 'native_dv=1');
+      expect(prediction.playable, isTrue);
+      checkInvariants(prediction,
+          cls: HdrSourceClass.dvP5,
+          capabilities: caps(
+            displayHdrTypes: const <int>{1},
+            dvDecoders: const <HdrDecoderInfo>[nativeDvDecoder],
+            nativeDvBridgeApi: 1,
+          ),
+          allowExperimental: false);
+
+      // Contrast (scope red line): the same closed gate on the same device
+      // still skips dvP84 × nativeDolbyVision — the promotion moved exactly
+      // one cell; GATE_OPEN remains the only way in for the others.
+      final HdrRoutePrediction p84 = caps(
+        displayHdrTypes: const <int>{1, 2},
+        dvDecoders: const <HdrDecoderInfo>[nativeDvDecoder],
+        nativeDvBridgeApi: 1,
+      ).predict(sources[HdrSourceClass.dvP84]!);
+      final HdrCandidate p84Native = p84.candidates.firstWhere(
+          (HdrCandidate c) => c.strategy == HdrStrategy.nativeDolbyVision);
+      expect(p84Native.maturity, HdrStrategyMaturity.experimental);
+      expect(p84Native.skipReason,
+          HdrDegradeReason.experimentalStrategySkipped);
+      expect(p84.selected.strategy, isNot(HdrStrategy.nativeDolbyVision));
+    });
+
+    test('nativeDolbyVision stays unselected on a non-DV display, even first '
+        'in preferences', () {
       final HdrCapabilities lya = lyaCaps();
       const HdrRoutingPolicy policy = HdrRoutingPolicy(
         preferences: <HdrSourceClass, List<HdrStrategy>>{

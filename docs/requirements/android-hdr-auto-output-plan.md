@@ -246,6 +246,7 @@ plan(source, caps, policy, preference, excluded = {}):
   1. 默认偏好矩阵：每个源类别 × {无报告、空集、仅 HDR10、仅 HLG、HDR10+HLG、含 DV} × {P5 管线有/无} × {扩展适用/不适用} × {SDK 29/34}，断言选中策略、候选列表、跳过原因、置信度。
   2. **"先 HDR 后 tone-map"性质测试**：对所有输入组合，只要候选列表中存在可行、成熟度允许且呈现为 HDR 的策略，选中的就不能是 `toneMapSdr` 或 `sdrDirect`。
   3. 成熟度门禁：`allowExperimental=false` 时，实验性策略不会被选中，且出现 `experimentalStrategySkipped`；为 true 时可以被选中。`nativeDolbyVision` 在任何配置下都不会被选中。
+     - **注记（2026-10-10）**：上句为 Phase 1 规划时的口径，已被两次成熟度更新取代——2026-10-06 DV P5/P8.4 类解锁为 `experimental`（开启 `allowExperimental` 可选中），2026-10-10 DV P5 × nativeDolbyVision 经用户裁决提升为 `verified` 并默认直通（无需 `allowExperimental`，见 `android-hdr-auto-output.md` 第 6 节状态表）。门禁机制本身（experimental 需显式开启）不变，单测按状态表现值断言。
   4. `excluded` 降级：PQ dataspace 被排除后，P8.4 从 `baseLayerConvert(PQ)` 跳到 `toneMapSdr`；HLG 不支持时，P8.4 从 `baseLayerDirect` 落到 `baseLayerConvert(PQ)`。
   5. 同源性：对同一组输入，`predict().selected.route` 必须等于 session 执行时 `plan()` 选中的路由，用表驱动遍历全部组合。
   6. LYA 的实际能力快照（S2 采集）代入后：HDR10→直出；P8.4→HLG 直出；P5→RPU 重建 PQ（有扩展时置信度 verified）；P8.1→直出（inherited）。
