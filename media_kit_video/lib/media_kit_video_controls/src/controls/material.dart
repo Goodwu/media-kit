@@ -1763,7 +1763,6 @@ class _BackwardSeekIndicator extends StatefulWidget {
   final void Function(Duration) onChanged;
   final void Function(Duration) onSubmitted;
   const _BackwardSeekIndicator({
-    super.key,
     required this.duration,
     required this.onChanged,
     required this.onSubmitted,
@@ -1852,7 +1851,6 @@ class _ForwardSeekIndicator extends StatefulWidget {
   final void Function(Duration) onChanged;
   final void Function(Duration) onSubmitted;
   const _ForwardSeekIndicator({
-    super.key,
     required this.duration,
     required this.onChanged,
     required this.onSubmitted,
