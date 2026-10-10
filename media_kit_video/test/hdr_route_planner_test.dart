@@ -149,13 +149,12 @@ void checkInvariants(
   expect(prediction.selected.feasible, prediction.playable);
 
   // R7 baseline: native Dolby Vision stays unselected unless the class is
-  // dvP5 on a DV-declaring display with the bridge loaded. Since the
-  // 2026-10-10 promotion dvP5 × nativeDolbyVision is `verified` and no
-  // longer behind the experimental gate; dvP84 still is (gate state checked
-  // by the dedicated matrix tests below).
+  // dvP5 or dvP84 on a DV-declaring display with the bridge loaded (both
+  // verified since the 2026-10-10 A-group promotion; dvP5 via the genbump2
+  // LG acceptance, dvP84 via the marble r30g acceptance).
   expect(
     prediction.selected.strategy != HdrStrategy.nativeDolbyVision ||
-        (cls == HdrSourceClass.dvP5 &&
+        ((cls == HdrSourceClass.dvP5 || cls == HdrSourceClass.dvP84) &&
             capabilities.displayHdrTypes?.contains(1) == true &&
             capabilities.nativeDvBridgeApi == 1),
     isTrue,
@@ -812,20 +811,106 @@ void main() {
           ),
           allowExperimental: false);
 
-      // Contrast (scope red line): the same closed gate on the same device
-      // still skips dvP84 × nativeDolbyVision — the promotion moved exactly
-      // one cell; GATE_OPEN remains the only way in for the others.
-      final HdrRoutePrediction p84 = caps(
+      // Contrast (scope red line): on the same device the R7-reserved
+      // classes never route natively — dvP81's nativeDolbyVision stays
+      // realizer-refused (unsupportedStrategy), gate state aside.
+      final HdrRoutePrediction p81 = caps(
+        displayHdrTypes: const <int>{1, 2},
+        dvDecoders: const <HdrDecoderInfo>[nativeDvDecoder],
+        nativeDvBridgeApi: 1,
+      ).predict(sources[HdrSourceClass.dvP81]!);
+      final HdrCandidate p81Native = p81.candidates.firstWhere(
+          (HdrCandidate c) => c.strategy == HdrStrategy.nativeDolbyVision);
+      expect(p81Native.maturity, HdrStrategyMaturity.unsupported);
+      expect(p81Native.skipReason, HdrDegradeReason.unsupportedStrategy);
+      expect(p81.selected.strategy, isNot(HdrStrategy.nativeDolbyVision));
+    });
+
+    test(
+        'dvP84 reaches nativeDolbyVision by default on capable caps; a panel '
+        'without DV signaling stays infeasible (LG N/A, 2026-10-10)', () {
+      // marble r30g acceptance promoted this cell: with the default policy
+      // (gate closed) a DV-capable device takes the P8.4 native route —
+      // immediate release (boolean render mode), unlike P5's timed one.
+      final HdrRoutePrediction prediction = caps(
         displayHdrTypes: const <int>{1, 2},
         dvDecoders: const <HdrDecoderInfo>[nativeDvDecoder],
         nativeDvBridgeApi: 1,
       ).predict(sources[HdrSourceClass.dvP84]!);
-      final HdrCandidate p84Native = p84.candidates.firstWhere(
+      expect(prediction.selected.strategy, HdrStrategy.nativeDolbyVision);
+      expect(prediction.selected.maturity, HdrStrategyMaturity.verified);
+      expect(prediction.selected.skipReason, isNull);
+      expect(prediction.selected.route!.mediacodecEmbedRenderMode, 'boolean');
+      expect(prediction.selected.route!.vdLavcOptions, 'native_dv=1');
+      expect(prediction.playable, isTrue);
+
+      // LG declares no P8.4 DV signaling: the native route is unreachable
+      // there (N/A, not a failure) and playback keeps the verified HLG
+      // direct route.
+      final HdrRoutePrediction noDvSignaling = caps(
+        displayHdrTypes: const <int>{2, 3},
+        dvDecoders: const <HdrDecoderInfo>[nativeDvDecoder],
+        nativeDvBridgeApi: 1,
+      ).predict(sources[HdrSourceClass.dvP84]!);
+      final HdrCandidate native = noDvSignaling.candidates.firstWhere(
           (HdrCandidate c) => c.strategy == HdrStrategy.nativeDolbyVision);
-      expect(p84Native.maturity, HdrStrategyMaturity.experimental);
-      expect(p84Native.skipReason,
-          HdrDegradeReason.experimentalStrategySkipped);
-      expect(p84.selected.strategy, isNot(HdrStrategy.nativeDolbyVision));
+      expect(native.maturity, HdrStrategyMaturity.verified);
+      expect(native.skipReason, HdrDegradeReason.displayLacksTransfer);
+      expect(noDvSignaling.selected.strategy, HdrStrategy.baseLayerDirect);
+      expect(
+          noDvSignaling.selected.route!.outputTransfer, HdrOutputTransfer.hlg);
+    });
+
+    test('hdr10 baseLayerConvert is default-reachable (preferGpuOutput route)',
+        () {
+      // Default policy: the PQ conversion sits right behind the verified
+      // direct route with no maturity skip (verified 2026-10-10, LG
+      // genbump2 full-route round).
+      final HdrRoutePrediction prediction =
+          lyaCaps().predict(sources[HdrSourceClass.hdr10]!);
+      final HdrCandidate convert = prediction.candidates.firstWhere(
+          (HdrCandidate c) => c.strategy == HdrStrategy.baseLayerConvert);
+      expect(convert.maturity, HdrStrategyMaturity.verified);
+      expect(convert.skipReason, isNull);
+      expect(convert.feasible, isTrue);
+      // The preferGpuOutput scenario — an app preferring the gpu output
+      // route — selects it with the default gate closed.
+      const HdrRoutingPolicy convertFirst = HdrRoutingPolicy(
+        preferences: <HdrSourceClass, List<HdrStrategy>>{
+          HdrSourceClass.hdr10: <HdrStrategy>[
+            HdrStrategy.baseLayerConvert,
+            HdrStrategy.baseLayerDirect,
+            HdrStrategy.toneMapSdr,
+          ],
+        },
+      );
+      final HdrRoutePrediction preferred = lyaCaps()
+          .predict(sources[HdrSourceClass.hdr10]!, policy: convertFirst);
+      expect(preferred.selected.strategy, HdrStrategy.baseLayerConvert);
+      expect(preferred.selected.maturity, HdrStrategyMaturity.verified);
+      expect(preferred.selected.skipReason, isNull);
+      expect(preferred.selected.route!.surfaceTransfer, 'pq');
+    });
+
+    test('hdr10 metadataReshape is verified and selectable (2026-10-10)', () {
+      // Indirect-evidence cell (pipeline verified at dvP5 + user
+      // adjudication): the reshape is no longer behind the gate for HDR10.
+      const HdrRoutingPolicy reshapeFirst = HdrRoutingPolicy(
+        preferences: <HdrSourceClass, List<HdrStrategy>>{
+          HdrSourceClass.hdr10: <HdrStrategy>[
+            HdrStrategy.metadataReshape,
+            HdrStrategy.toneMapSdr,
+          ],
+        },
+      );
+      final HdrRoutePrediction prediction = lyaCaps()
+          .predict(sources[HdrSourceClass.hdr10]!, policy: reshapeFirst);
+      expect(prediction.selected.strategy, HdrStrategy.metadataReshape);
+      expect(prediction.selected.maturity, HdrStrategyMaturity.verified);
+      expect(prediction.selected.skipReason, isNull);
+      // An HDR10 source carries no dynamic metadata to re-apply.
+      expect(prediction.selected.route!.appliesDynamicMetadata, isFalse);
+      expect(prediction.selected.route!.surfaceTransfer, 'pq');
     });
 
     test('nativeDolbyVision stays unselected on a non-DV display, even first '
@@ -1013,18 +1098,19 @@ void main() {
           HdrStrategy.toneMapSdr
         ],
       );
-      // Default policy: the conversion is experimental (section 6) and
-      // stays behind the maturity gate; direct and tone-map are verified.
-      expect(prediction.candidates[1].skipReason,
-          HdrDegradeReason.experimentalStrategySkipped);
-      expect(prediction.candidates[1].feasible, isFalse);
+      // Default policy: direct, the PQ conversion (verified 2026-10-10,
+      // the preferGpuOutput route) and tone-map are all verified — the
+      // whole default candidate list is feasible with the gate closed.
+      expect(prediction.candidates[1].skipReason, isNull);
+      expect(prediction.candidates[1].feasible, isTrue);
       expect(prediction.candidates[2].feasible, isTrue);
-      // Gate open: every default candidate is feasible on this display.
+      // Gate open changes nothing for this class any more: the same list.
       final HdrRoutePrediction gateOpen = lyaCaps().predict(
         sources[HdrSourceClass.hdr10]!,
         policy: const HdrRoutingPolicy(allowExperimental: true),
       );
       expect(gateOpen.candidates.every((HdrCandidate c) => c.feasible), isTrue);
+      expect(gateOpen.selected, prediction.selected);
     });
 
     test('P8.4 takes the verified HLG direct route', () {

@@ -152,8 +152,8 @@ void main() {
               '(tried ../, ../../, ./ of docs/requirements/); maturity '
               'tests must run inside the media-kit checkout');
       final List<_Cell> cells = _parseSection6(requirement.readAsLinesSync());
-      expect(cells.length, 32,
-          reason: 'section 6 expands to 32 cells; when the requirement table '
+      expect(cells.length, 33,
+          reason: 'section 6 expands to 33 cells; when the requirement table '
               'changes, update the constant table and this count together');
       for (final _Cell cell in cells) {
         expect(

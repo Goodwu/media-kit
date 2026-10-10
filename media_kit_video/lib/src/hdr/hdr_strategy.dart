@@ -20,8 +20,10 @@ enum HdrStrategy {
   /// engine. Reserved (R7) for every class except `dvP5` (verified since
   /// 2026-10-10: user-adjudicated default promotion after the genbump2 LG
   /// 30 s realtime pass; unlocked to `experimental` on 2026-10-06) and
-  /// `dvP84` (`experimental` since the same 2026-10-06 unlock); other
-  /// classes still never select it.
+  /// `dvP84` (verified since 2026-10-10 via the marble r30g single-device
+  /// acceptance; `experimental` from the same 2026-10-06 unlock, N/A on LG
+  /// which declares no P8.4 DV signaling); other classes still never select
+  /// it.
   nativeDolbyVision,
 
   /// Decoder direct output to the surface (`mediacodec_embed`), emitting the
@@ -162,6 +164,12 @@ enum HdrSourceClass {
 /// `sdr × sdrDirect` is `verified` (the always-on SDR Texture baseline
 /// every non-HDR playback uses today).
 ///
+/// The 2026-10-10 user-adjudicated A-group promotions (`dvP5`/`dvP84` ×
+/// `nativeDolbyVision`, `hdr10` × `baseLayerConvert`/`metadataReshape`) are
+/// documented rows in the status table — `hdr10 × baseLayerConvert` in
+/// particular is no longer the unlisted "preferGpuOutput matrix pending"
+/// conservative cell.
+///
 /// `hdr_maturity_table_test.dart` parses the requirement's table and locks
 /// this constant table to it; upgrading a cell (plan S10 step 7) requires
 /// updating both.
@@ -177,8 +185,18 @@ class HdrStrategyMaturityTable {
     HdrSourceClass.hdr10: <HdrStrategy, HdrStrategyMaturity>{
       HdrStrategy.nativeDolbyVision: HdrStrategyMaturity.unsupported,
       HdrStrategy.baseLayerDirect: HdrStrategyMaturity.verified, // 12703–12708
-      HdrStrategy.baseLayerConvert: HdrStrategyMaturity.experimental,
-      HdrStrategy.metadataReshape: HdrStrategyMaturity.experimental,
+      // 2026-10-10 用户裁决提升（experimental → verified）：LG genbump2 轮
+      // 哔哩哔哩 PQ 长片 30s，ACTUAL=baseLayerConvert 全路由
+      // （platformView/surfacetexture/offscreen pq-full）、path=ext:lg-pq、
+      // hal_hdr 单次稳定、decDrop=0，用户"3 个视频均人验通过"明确含
+      // HDR10；历史 R33–r40 LG 多轮实测。原"preferGpuOutput 矩阵未单列"
+      // 的保守档取消，正式立条。
+      HdrStrategy.baseLayerConvert: HdrStrategyMaturity.verified,
+      // 2026-10-10 用户裁决提升（experimental → verified，间接证据格）：
+      // gpu-next/libplacebo 重建管线已在 dvP5 verified（同一管线）；用户
+      // 裁决 A 组含本格（产品裁决背书）。无 HDR10 源 metadataReshape 直接
+      // 入验记录。
+      HdrStrategy.metadataReshape: HdrStrategyMaturity.verified,
       HdrStrategy.toneMapSdr: HdrStrategyMaturity.verified, // Texture→SDR 轮
       HdrStrategy.sdrDirect: HdrStrategyMaturity.experimental,
     },
@@ -232,7 +250,11 @@ class HdrStrategyMaturityTable {
     },
     HdrSourceClass.dvP84: <HdrStrategy, HdrStrategyMaturity>{
       // 2026-10-06 与 dvP5 同批解锁（用户导演的 LG DV 设备直通验证）。
-      HdrStrategy.nativeDolbyVision: HdrStrategyMaturity.experimental,
+      // 2026-10-10 用户裁决提升（experimental → verified）：marble r30g
+      // （2026-10-07）实机 ACTUAL=nativeDolbyVision，用户验收"颜色正常/
+      // 亮度好/流畅性好"；LG 无 P8.4 DV 信令该路线不可达（N/A，非失败）
+      // —— marble 单设备人工验收。
+      HdrStrategy.nativeDolbyVision: HdrStrategyMaturity.verified,
       HdrStrategy.baseLayerDirect: HdrStrategyMaturity.verified, // 12703–12708
       HdrStrategy.baseLayerConvert: HdrStrategyMaturity
           .verified, // A3-2 模拟无 HLG 落 convert + 2026-10-02 人工观察
