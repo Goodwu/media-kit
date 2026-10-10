@@ -14,11 +14,22 @@ Android 实机验收与构建链的常用脚本。2026-09-30 起把此前散落�
 
 ## 构建链
 
+### `build-android-test.sh` — 测试版默认构建（最新源码）
+
+**测试版构建的默认入口**：从最新源码构建 libmpv JAR 并构建 Android 测试 APK。三步全自动化——①ninja 增量编译 `~/src/mpv/_build-arm64-mks`（media-kit/android HEAD，含未推送提交）；②`build-mks-r1.py` 历史链接配方 + genbump token 重指 → strip → 换装 r22 钉定基础 JAR（helper 库保持钉定），产出带 `native-candidate.json` 溯源的 JAR；③经 gradle 内建 `ORG_GRADLE_PROJECT_mediaKitLocalArm64Jar` 属性（`media_kit_libs_android_video/android/build.gradle` 正式支持的本地 JAR 验证通道，非文件系统 hack）构建 APK。JAR-only 阶段可用管线环境开关 `MKS_SKIP_APK=1`。
+
+```
+tool/build-android-test.sh --tag mytest --local-source /data/local/tmp/media-kit-p5-mystery-box.mp4
+tool/build-android-test.sh --tag mytest-pv --platform-view --local-source /data/local/tmp/media-kit-hdr10-full.mp4
+```
+
+产物：`media_kit_hdr_lab/build/app/outputs/flutter-apk/<tag>-release.apk` + 同名构建日志；JAR/溯源在 `~/src/media-kit-build/lg-api24/lg-api24-realtime-gpu-mks-<tag>-build/`。发布构建不走此脚本（gradle 钉定下载链保持默认）。
+
 ### `matrix-build.sh` — 播放矩阵六包构建
 
 P5/HDR10/P8.4 × SDR/HDR 六个 arm64 APK 批量构建（基础 define 集 = 12632 去起播偏移；HDR 轮加 `PLATFORM_VIEW`，P5 PQ 另加 `GPU_PLATFORM_HDR`）。产物 `/tmp/matrix-<tag>.apk` + 构建日志 `/tmp/matrix-build-<tag>.log`，末尾打印各包 SHA-256。
 
-- 前置：JDK17（脚本内已 export `/opt/homebrew/opt/openjdk@17`）；`ORG_GRADLE_PROJECT_mediaKitLocalArm64Jar` 指向当期发布基线 JAR —— 脚本内硬编码 `/tmp/media-kit-p5-colorfix-398d0c3-arm64.jar`，换 JAR 必须改这一行（教训：误链旧世代 libavcodec 会复演 `direct=0`）。
+- 前置：JDK17（脚本内已 export `/opt/homebrew/opt/openjdk@17`）；默认源为钉定发布 JAR（gradle 下载 + SHA 核验，v2026.012）；需要验证重建 JAR 时用 `ORG_GRADLE_PROJECT_mediaKitLocalArm64Jar` 覆盖，日常测试构建直接走 `build-android-test.sh`（教训：误链旧世代 libavcodec 会复演 `direct=0`）。
 - `MEDIA_KIT_ANDROID_LOCAL_SOURCE` 指向设备侧素材路径（`/data/local/tmp/...`），换素材需改 `build` 调用参数。
 - define 集与六轮验收依据：`archives/experiments/android-playback-matrix-12703-12708-20260930.md`。
 
