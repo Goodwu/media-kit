@@ -60,6 +60,18 @@ public final class PlatformVideoView implements PlatformView {
          */
         boolean applyDataSpace(@NonNull android.view.Surface surface, int dataSpace);
 
+        default void registerLgExperimentSurface(android.view.Surface surface,
+                long handle, int generation, int viewId, int surfaceGeneration,
+                @Nullable String token) {}
+        default void unregisterLgExperimentSurface(android.view.Surface surface,
+                long handle, int generation, int viewId, int surfaceGeneration,
+                @Nullable String token) {}
+        default boolean applyDataSpace(android.view.Surface surface, int dataSpace,
+                long handle, int generation, int viewId, int surfaceGeneration,
+                @Nullable String token) {
+            return applyDataSpace(surface, dataSpace);
+        }
+
         /**
          * Diagnostics hook: called on a live surface that was created without
          * an initial HDR dataspace, roughly eight seconds after creation.
@@ -148,6 +160,48 @@ public final class PlatformVideoView implements PlatformView {
     @Nullable
     private volatile String appliedDataSpace;
     private long wid = 0;
+    private int lgOwnerGeneration;
+    private int lgOwnerViewId;
+    @Nullable private String lgOwnerToken;
+    private final Map<Integer, android.view.Surface> lgOwnerSurfaces = new HashMap<>();
+
+    void setLgExperimentOwner(int generation, int viewId, @Nullable String token) {
+        lgOwnerGeneration = generation;
+        lgOwnerViewId = viewId;
+        lgOwnerToken = token;
+        // Explicit owner-scoped bridge init: the native surfacetexture
+        // backend initializes ONLY here, bound to (owner token, generation);
+        // the raw token never crosses into native state. Without an owner
+        // the bridge stays uninitialized and every native gate refuses
+        // (fail-closed). The view never calls the native shutdown: the
+        // decoder window's ANativeWindow is owned by the mpv-side importer,
+        // and a Java-side teardown would race the GL-thread latch while the
+        // producer is still live (surface release stays producer-ACK-driven
+        // in this view for the same reason).
+        if (token == null || token.isEmpty() || generation <= 0) {
+            return;
+        }
+        try {
+            MediaCodecSurfaceTextureBridge.ensureInitialized(token, generation);
+        } catch (Throwable t) {
+            Log.w("MKSURF", "bridge init failed (opt-in surfacetexture hwdec will be unavailable)", t);
+        }
+    }
+
+    private void revokeLgSurface(int generation) {
+        final android.view.Surface surface = lgOwnerSurfaces.remove(generation);
+        final SurfaceDataSpaceExt ext = surfaceDataSpaceExt;
+        if (surface != null && ext != null) {
+            ext.unregisterLgExperimentSurface(surface, handle, lgOwnerGeneration,
+                    lgOwnerViewId, generation, lgOwnerToken);
+        }
+    }
+
+    private void revokeAllLgSurfaces() {
+        for (Integer generation : new java.util.ArrayList<>(lgOwnerSurfaces.keySet())) {
+            revokeLgSurface(generation);
+        }
+    }
     static final class SurfaceEvent {
         final long wid;
         final int generation;
@@ -276,6 +330,12 @@ public final class PlatformVideoView implements PlatformView {
                     // before a WID exists, so its failure cannot be confused
                     // with an older successful Surface from this view.
                     final int generation = ++surfaceGeneration;
+                    if (lgOwnerToken != null) {
+                        lgOwnerSurfaces.put(generation, holder.getSurface());
+                        final SurfaceDataSpaceExt ext = surfaceDataSpaceExt;
+                        if (ext != null) ext.registerLgExperimentSurface(holder.getSurface(),
+                                handle, lgOwnerGeneration, lgOwnerViewId, generation, lgOwnerToken);
+                    }
                     appliedDataSpace = null;
                     if (initialDataSpace != null) {
                         final String appliedPath =
@@ -284,6 +344,7 @@ public final class PlatformVideoView implements PlatformView {
                                 ", transfer=" + initialDataSpace +
                                 ", applied=" + (appliedPath != null));
                         if (appliedPath == null) {
+                            revokeLgSurface(generation);
                             // Do not publish a WID for a Surface generation
                             // whose HDR dataspace could not be applied.
                             onSurfaceEvent.accept(new SurfaceEvent(
@@ -365,6 +426,7 @@ public final class PlatformVideoView implements PlatformView {
             @Override
             public void surfaceDestroyed(@NonNull SurfaceHolder holder) {
                 Log.i(TAG, "surfaceDestroyed: handle=" + handle + ", wid=" + wid);
+                revokeLgSurface(surfaceGeneration);
                 final long destroyedWid = wid;
                 if (destroyedWid != 0) {
                     onSurfaceEvent.accept(new SurfaceEvent(destroyedWid, activeSurfaceGeneration, true));
@@ -388,6 +450,7 @@ public final class PlatformVideoView implements PlatformView {
         if (!GlobalObjectRefManager.deleteGlobalObjectRef(reference)) {
             return "deleteFailed";
         }
+        revokeLgSurface(generation);
         surfaceReferences.remove(generation);
         releasedSurfaceReferences.put(generation, reference);
         if (failedSurfaceGeneration == generation) {
@@ -427,6 +490,7 @@ public final class PlatformVideoView implements PlatformView {
     }
 
     synchronized boolean releaseAllSurfacesAfterProducerTermination() {
+        revokeAllLgSurfaces();
         boolean released = true;
         for (Map.Entry<Integer, Long> reference : new HashMap<>(surfaceReferences).entrySet()) {
             if (GlobalObjectRefManager.deleteGlobalObjectRef(reference.getValue())) {
@@ -477,29 +541,55 @@ public final class PlatformVideoView implements PlatformView {
      *         fallback), {@code surfaceControl} (API &ge; 34 transaction) —
      *         or null when nothing was applied.
      */
+    private void logLgDataSpaceBinding(@NonNull String stage,
+            @NonNull android.view.Surface surface, @NonNull String transfer,
+            @NonNull String outcome) {
+        if (Build.VERSION.SDK_INT == 24 && "LG-H870DS".equals(Build.MODEL)) {
+            // Local logcat only; no addresses/identities added to public reports.
+            Log.i(TAG, "lgDataSpaceBinding stage=" + stage + ", handle=" + handle +
+                    ", androidViewId=" + surfaceView.getId() +
+                    ", viewIdentity=" + System.identityHashCode(surfaceView) +
+                    ", wid=" + wid + ", generation=" + activeSurfaceGeneration +
+                    ", surfaceIdentity=" + System.identityHashCode(surface) +
+                    ", surface=" + surface + ", transfer=" + transfer +
+                    ", dataSpace=" + dataSpaceFor(transfer) + ", outcome=" + outcome);
+        }
+    }
+
     @Nullable
     private String setColorSpace(
             @NonNull android.view.Surface surface, @NonNull String transfer) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
+        logLgDataSpaceBinding("request", surface, transfer, "pending");
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P && !hasSurfaceDataSpaceExt()) {
+            // Below P there is no public path (the NDK setter is API 28+);
+            // only a registered vendor extension can attempt the apply.
+            logLgDataSpaceBinding("refused", surface, transfer, "no-extension-pre-api28");
             return null;
         }
         final int dataSpace = dataSpaceFor(transfer);
         if (Build.VERSION.SDK_INT < 34) {
             if (!nativeDataSpaceBridgeLoaded) {
+                logLgDataSpaceBinding("refused", surface, transfer, "bridge-not-loaded");
                 return null;
             }
             if (setSurfaceDataSpace(
                     surface, dataSpace, "rgba1010102".equals(initialPixelFormat))) {
+                logLgDataSpaceBinding("output", surface, transfer, "ndk-accepted");
                 return "ndk";
             }
+            logLgDataSpaceBinding("public-bridge", surface, transfer, "not-applied");
             final SurfaceDataSpaceExt ext = surfaceDataSpaceExt;
             if (ext != null) {
-                final boolean applied = ext.applyDataSpace(surface, dataSpace);
+                final boolean applied = ext.applyDataSpace(surface, dataSpace,
+                        handle, lgOwnerGeneration, lgOwnerViewId, surfaceGeneration, lgOwnerToken);
                 Log.i(TAG, "ext dataspace fallback: transfer=" + transfer +
                         ", applied=" + applied);
+                logLgDataSpaceBinding("output", surface, transfer,
+                        applied ? "extension-accepted" : "extension-refused");
                 if (applied) {
                     return "ext:" + ext.id();
                 }
+                revokeLgSurface(surfaceGeneration);
                 ext.onDataSpaceApplyFailed(surface, dataSpace);
             }
             return null;
@@ -652,6 +742,7 @@ public final class PlatformVideoView implements PlatformView {
         Log.i(TAG, "dispose: handle=" + handle);
         if (disposed) return;
         disposed = true;
+        revokeAllLgSurfaces();
         // Flutter may dispose a PlatformView without delivering
         // SurfaceHolder.surfaceDestroyed first. Keep every JNI reference alive
         // until Dart has stopped the matching mpv producer (when still active)

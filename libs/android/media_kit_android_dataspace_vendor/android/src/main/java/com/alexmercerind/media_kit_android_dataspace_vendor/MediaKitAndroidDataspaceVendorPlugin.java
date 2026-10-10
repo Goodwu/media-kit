@@ -22,7 +22,7 @@ public class MediaKitAndroidDataspaceVendorPlugin implements FlutterPlugin {
     private static final String TAG = "MediaKitDataspaceVendor";
 
     @Nullable
-    private LyaPqDataSpaceExt registered;
+    private PlatformVideoView.SurfaceDataSpaceExt registered;
     private boolean slotTakenOver;
 
     @Override
@@ -30,21 +30,30 @@ public class MediaKitAndroidDataspaceVendorPlugin implements FlutterPlugin {
         if (registered != null) {
             return; // Already attached; idempotent.
         }
-        LyaPqDataSpaceExt ext = new LyaPqDataSpaceExt();
-        // Read-only gate first: no registration and no native library load
-        // on any other device.
-        if (!ext.isApplicable()) {
-            Log.i(TAG, "device not applicable; extension not registered");
+        // Read-only gates first: no registration and no native library load
+        // on any other device. Devices are mutually exclusive.
+        LyaPqDataSpaceExt lya = new LyaPqDataSpaceExt();
+        if (lya.isApplicable()) {
+            PlatformVideoView.setSurfaceDataSpaceExt(lya);
+            registered = lya;
             return;
         }
-        PlatformVideoView.setSurfaceDataSpaceExt(ext);
-        registered = ext;
+        LgPqDataSpaceExt lg = new LgPqDataSpaceExt();
+        if (lg.isApplicable()) {
+            PlatformVideoView.setSurfaceDataSpaceExt(lg);
+            registered = lg;
+            return;
+        }
+        Log.i(TAG, "device not applicable; extension not registered");
     }
 
     @Override
     public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
         if (registered == null) {
             return;
+        }
+        if (registered instanceof LgPqDataSpaceExt) {
+            ((LgPqDataSpaceExt) registered).clearVisual278Experiments();
         }
         registered = null;
         // The core exposes a single static slot without an ownership query.
@@ -64,6 +73,15 @@ public class MediaKitAndroidDataspaceVendorPlugin implements FlutterPlugin {
      */
     @Nullable
     public LyaPqDataSpaceExt registeredExtension() {
+        return registered instanceof LyaPqDataSpaceExt ? (LyaPqDataSpaceExt) registered : null;
+    }
+
+    /**
+     * The extension this plugin registered (LYA or LG), or {@code null}
+     * when the device gate failed for both.
+     */
+    @Nullable
+    public PlatformVideoView.SurfaceDataSpaceExt registeredAny() {
         return registered;
     }
 
