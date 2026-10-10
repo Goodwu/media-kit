@@ -35,7 +35,7 @@
 | D | D2 分类修复链产品化 | ✅ 完成（device 待验 3 格登记） | tool/mksvui-regress 收编+7 用例+fuzz PASS+回归矩阵 L0-L5；dev-1/2/3 设备格待验；MKSVUIPROBE/MKSCOLORKEYS 降级与 configure hack 裁决移交 D3 |
 | **D** | **D3 上游化决策** | ✅ 完成（2026-10-10） | 决策=fork 长期携带（上游 ps.c 本就正确，无可上游化缺陷；镜像解析器为 fork 特有特性）；D2 移交裁决：MKSVUIPROBE/MKSCOLORKEYS=log 标签保持现状、configure hack=构建树配方保留；`docs/plans/lg-p84-d3-upstream-decision-20261010.md` |
 | E | E1/E2/E3 条件触发 | 挂起 | E1 触发条件未再现（hal_hdr 震荡已随 range=1 恢复消失）；E2 横屏黑屏未复现；E3 备用 |
-| G | G1 configure hack 正式方案 | ❌ 待批准实施 | 方案 B（构建仓承载+字节门）推荐，详见 §14；过渡期两树 dirty 维持现状 |
+| G | G1 configure hack 正式方案 | ✅ 用户已裁决：不正式化，维持现状 | 清空 dirty=常态机制，验证窗口保留、不用恢复原始文件；操作纪律见 §14；方案 B/A/C 存档 |
 | G | G2 Kazumi hls 补丁 | ✅ 用户已裁决：不入库 | 留档构建树工作树+genbump 溯源精确源树；重建须有意识携带，详见 §14 |
 | F | P2 收尾 | 部分 | 模块隔离/日志注释随 A 线落地；TASKS 旧 status 摘要同步=随手项 |
 
@@ -248,7 +248,13 @@ Lead 建议见 §6.4）。P2 随手；E 挂起；B 线触发式；C0 移除。
 
 ## 14. G 线 · 构建链正式方案（2026-10-10 新增，用户裁决驱动）
 
-### G1 · FFmpeg configure hack（FFMPEG_CONFIGURATION 清空）正式方案（❌ 待批准实施）
+### G1 · FFmpeg configure hack（FFMPEG_CONFIGURATION 清空）正式方案（✅ 已裁决：不正式化，维持现状，2026-10-10 用户裁决）
+
+**裁决（2026-10-10）**：不做正式修改（方案 B/A/C 均不立项）。清空 dirty 即常态机制：
+**需要字节级比对/重建验证的窗口保持两树清空状态，不用时恢复原始 configure 文件即可**。
+操作纪律（同 G2 携带纪律）：未来任何 prefix 重建前须核验两树 dirty 在位（字节门依赖
+该清空）；验证窗口结束后恢复与否由当轮自行决定，恢复不损失任何功能（该字符串功能
+惰性，见下机理）。
 
 **现状**：`~/src/FFmpeg` 与构建仓 `buildscripts/deps/ffmpeg` 两树 configure 各持同一 1 行
 未提交改动：config.h 模板 `#define FFMPEG_CONFIGURATION "$(c_escape $FFMPEG_CONFIGURATION)"` → `""`。
@@ -270,7 +276,8 @@ FFmpeg 归档字节随构建路径/configure 行漂移，破坏字节级复现�
 - **C（长期）**：向上游 FFmpeg 提正式选项 patch，不阻塞本线。
 
 **过渡**：B 实施前两树 dirty 维持现状（防 prefix 重建路径断裂）；实施后撤销并过字节门。
-实施涉及构建仓提交与一次重建验证，待用户批准。
+~~实施涉及构建仓提交与一次重建验证，待用户批准。~~（2026-10-10 用户裁决：不正式化，
+维持现状按需保留/恢复，见节首裁决——以下方案 B/A/C 降为存档参考。）
 
 ### G2 · Kazumi HLS 广告过滤补丁（✅ 已裁决：不入库）
 
