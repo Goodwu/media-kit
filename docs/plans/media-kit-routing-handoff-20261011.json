@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "taskId": "MK-ROUTING-20261011",
+  "updatedOn": "2026-10-11",
+  "timezone": "Asia/Seoul",
+  "plan": "docs/plans/media-kit-routing-implementation-20261011.md",
+  "planCommit": "7a2cd26ad003f7524d7362bf218f7d5eee3cd0ee",
+  "status": "in_progress",
+  "canonicalDevelopment": {
+    "mediaKit": {
+      "repository": "Goodwu/media-kit",
+      "baseRef": "main",
+      "observedSourceCommit": "0f0f1525a2c1f3569052412775b8ba939963614b",
+      "branch": "routing/MK-ROUTING-20261011",
+      "branchState": "registered_not_created",
+      "pullRequest": null
+    },
+    "piliPlusX": {
+      "workspaceRoot": "piliplusx",
+      "observedBranch": "fix/darwin-video-output-rebuild-barrier",
+      "observedSourceCommit": "73afb9b66",
+      "repository": null,
+      "branch": null,
+      "pullRequest": null
+    }
+  },
+  "tasks": [
+    {"id": "PLAN", "status": "implemented", "commit": "7a2cd26ad003f7524d7362bf218f7d5eee3cd0ee", "evidence": "GitHub create_file succeeded; fetch_file on main read back plan", "doNotRepeat": true},
+    {"id": "HANDOFF", "status": "implemented", "commitAnchor": "docs: add canonical MK-ROUTING-20261011 handoff before implementation", "doNotRepeat": true},
+    {"id": "B1", "status": "planned", "commits": [], "tests": []},
+    {"id": "B2", "status": "planned", "commits": [], "tests": []},
+    {"id": "B3", "status": "planned", "commits": [], "tests": [], "note": "Evaluate actual native gaps individually; existing-capability closure is permitted with evidence, not an excuse to omit evaluation."},
+    {"id": "APP", "status": "planned", "commits": [], "tests": []},
+    {"id": "CI", "status": "not_run", "runs": [], "note": "No run has been claimed successful."}
+  ],
+  "nonNegotiable": [
+    "Read this ledger and remote branches/commits/PRs before coding. Reuse the registered branch; do not reimplement committed tasks on a new branch.",
+    "Keep implemented and validated distinct; a committed task with failed CI remains implemented, not planned.",
+    "Build candidates from latest relevant source including all current modifications; never substitute pinned historical sources or binaries. Record the resolved source vector for provenance only.",
+    "HdrCapabilities.query(player:) is our own API and may be changed or removed. No legacy compatibility framework is required.",
+    "Preserve existing approved maturity promotions, LG YUV8 decision and native owner/ACK/lease contracts.",
+    "Do not reset, clean or overwrite the existing FFmpeg dirty tree. Determine its actual build significance first.",
+    "CI success requires a completed successful run associated with the actual latest implementation head; queued, skipped or stale runs are not acceptance."
+  ],
+  "environment": {
+    "codexWorkspace": "Read-only tools exposed; no file-write or command-execution action.",
+    "localRuntime": "git available; flutter/dart/gh not found on PATH; git ls-remote https://github.com/Goodwu/media-kit.git failed with DNS resolution error (exit 128).",
+    "github": "Read and create_file succeeded. Workflow collection GET via generic fetch rejected as unsupported URL; other Actions read/trigger paths require investigation.",
+    "deviceTests": "not_run"
+  },
+  "nextAction": "Inspect existing workflows and execution capabilities; create the registered media-kit branch from latest main once, record it, then implement B1 with tests. Investigate PiliPlusX remote before changes.",
+  "resumptionRule": "Before executing nextAction, first re-read this ledger and query the canonical branch/PR. Later commits may have completed it. Never infer absence from an older local workspace."
+}
