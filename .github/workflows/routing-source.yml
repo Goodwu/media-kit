@@ -4,13 +4,15 @@ on:
   push:
     branches:
       - routing/MK-ROUTING-20261011
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: routing-source-${{ github.ref }}
+  group: routing-source-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -22,6 +24,8 @@ jobs:
       fail-fast: false
       matrix:
         package: [media_kit_video, media_kit_hdr_lab]
+    env:
+      EXPECTED_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
     defaults:
       run:
         shell: bash
@@ -29,7 +33,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.sha }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
       - uses: subosito/flutter-action@v2
         with:
@@ -39,7 +43,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "$GITHUB_WORKSPACE/.ci-results/${{ matrix.package }}"
-          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE_SHA"
           {
             printf 'task=MK-ROUTING-20261011\nscope=host-source-tests\n'
             printf 'source_sha=%s\n' "$(git rev-parse HEAD)"
@@ -69,6 +73,6 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: routing-source-${{ matrix.package }}-${{ github.sha }}
+          name: routing-source-${{ matrix.package }}-${{ env.EXPECTED_SOURCE_SHA }}
           path: .ci-results/${{ matrix.package }}
           if-no-files-found: error
