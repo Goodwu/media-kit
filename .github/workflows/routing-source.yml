@@ -1,0 +1,74 @@
+name: Routing source checks
+
+on:
+  push:
+    branches:
+      - routing/MK-ROUTING-20261011
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: routing-source-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  flutter-source:
+    name: Source analyze and tests (${{ matrix.package }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        package: [media_kit_video, media_kit_hdr_lab]
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{ matrix.package }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Record the source under test
+        run: |
+          set -euo pipefail
+          mkdir -p "$GITHUB_WORKSPACE/.ci-results/${{ matrix.package }}"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          {
+            printf 'task=MK-ROUTING-20261011\nscope=host-source-tests\n'
+            printf 'source_sha=%s\n' "$(git rev-parse HEAD)"
+            printf 'source_tree=%s\n' "$(git rev-parse HEAD^{tree})"
+            flutter --version
+            printf '\nNo prebuilt libmpv is installed by this job.\n'
+            printf 'This job is not native-build or device acceptance.\n'
+          } | tee "$GITHUB_WORKSPACE/.ci-results/${{ matrix.package }}/source.txt"
+      - name: Resolve current source packages
+        id: resolve
+        run: |
+          set -euo pipefail
+          flutter pub get 2>&1 | tee "$GITHUB_WORKSPACE/.ci-results/${{ matrix.package }}/pub-get.log"
+      - name: Analyze source
+        if: ${{ !cancelled() && steps.resolve.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          flutter analyze --no-pub 2>&1 | tee "$GITHUB_WORKSPACE/.ci-results/${{ matrix.package }}/analyze.log"
+      - name: Run source tests
+        if: ${{ !cancelled() && steps.resolve.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          flutter test --no-pub --concurrency=1 --reporter expanded 2>&1 | tee "$GITHUB_WORKSPACE/.ci-results/${{ matrix.package }}/tests.log"
+      - name: Check that testing did not rewrite source
+        if: ${{ !cancelled() && steps.resolve.outcome == 'success' }}
+        run: git diff --exit-code -- lib test
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: routing-source-${{ matrix.package }}-${{ github.sha }}
+          path: .ci-results/${{ matrix.package }}
+          if-no-files-found: error

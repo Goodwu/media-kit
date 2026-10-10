@@ -29,7 +29,9 @@ const HdrDecoderInfo nativeDvDecoder = HdrDecoderInfo(
   name: 'OMX.vendor.video.decoder.dolby-vision',
   mimeType: 'video/dolby-vision',
   hardwareAcceleration: true,
-  profiles: <int>[32],
+  // Generic P5 + P8 device. Profile-only counterexamples live in
+  // hdr_route_admission_test.dart; P5 support cannot stand in for P8.
+  profiles: <int>[32, 256],
   main10: null,
   widthRange: <int>[16, 4096],
   heightRange: <int>[16, 4096],
@@ -828,7 +830,7 @@ void main() {
 
     test(
         'dvP84 reaches nativeDolbyVision by default on capable caps; a panel '
-        'without DV signaling stays infeasible (LG N/A, 2026-10-10)', () {
+        'without DV declaration stays infeasible', () {
       // marble r30g acceptance promoted this cell: with the default policy
       // (gate closed) a DV-capable device takes the P8.4 native route —
       // immediate release (boolean render mode), unlike P5's timed one.
@@ -844,9 +846,9 @@ void main() {
       expect(prediction.selected.route!.vdLavcOptions, 'native_dv=1');
       expect(prediction.playable, isTrue);
 
-      // LG declares no P8.4 DV signaling: the native route is unreachable
-      // there (N/A, not a failure) and playback keeps the verified HLG
-      // direct route.
+      // This fixture is an HLG-capable display without DV, not the LG
+      // display (which declares DV and PQ, but not HLG). Decoder and
+      // display requirements are independent.
       final HdrRoutePrediction noDvSignaling = caps(
         displayHdrTypes: const <int>{2, 3},
         dvDecoders: const <HdrDecoderInfo>[nativeDvDecoder],
