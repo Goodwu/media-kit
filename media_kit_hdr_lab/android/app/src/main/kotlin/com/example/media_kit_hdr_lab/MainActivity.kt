@@ -27,6 +27,22 @@ class MainActivity : FlutterActivity() {
     private var lastTouchDownNs = 0L
     private var lastTouchUpNs = 0L
 
+    companion object {
+        init {
+            // SurfaceTexture diagnostics (OES leg): load the bridge .so at app
+            // start so the 01 page's Dart FFI `DynamicLibrary.open` resolves
+            // the already-loaded handle at any point, even before the first
+            // platform view exists. Failure must never crash the app — the
+            // diagnostic switch then stays unreachable (MKSURF-DIAG: switch
+            // unavailable) and the driver-side getter stays 0.
+            try {
+                System.loadLibrary("media_kit_video_hdr_bridge")
+            } catch (error: Throwable) {
+                Log.w("MKSURF", "media_kit_video_hdr_bridge.so preload failed", error)
+            }
+        }
+    }
+
     override fun dispatchTouchEvent(event: MotionEvent): Boolean {
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> lastTouchDownNs = SystemClock.elapsedRealtimeNanos()
@@ -213,7 +229,8 @@ class MainActivity : FlutterActivity() {
         val vendorPlugin = flutterEngine.plugins
             .get(MediaKitAndroidDataspaceVendorPlugin::class.java) as?
             MediaKitAndroidDataspaceVendorPlugin
-        val vendorExt = vendorPlugin?.registeredExtension() ?: LyaPqDataSpaceExt()
+        val vendorExt: com.alexmercerind.media_kit_video.platformview.PlatformVideoView.SurfaceDataSpaceExt =
+            vendorPlugin?.registeredAny() ?: LyaPqDataSpaceExt()
         vendorPlugin?.takeOverSlot()
         PlatformVideoView.setSurfaceDataSpaceExt(LyaDiagnosticsDataSpaceExt(vendorExt))
         if (BuildConfig.HDR_LAB_UNREGISTER_VENDOR_EXT) {
@@ -223,6 +240,36 @@ class MainActivity : FlutterActivity() {
             // from here on no apply path can reach it.
             PlatformVideoView.setSurfaceDataSpaceExt(null)
         }
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "media_kit_hdr_lab/lg_visual278_experiment")
+            .setMethodCallHandler { call, result ->
+                val lg = vendorExt as? com.alexmercerind.media_kit_android_dataspace_vendor.LgPqDataSpaceExt
+                val handle = call.argument<Number>("handle")?.toLong() ?: 0L
+                val token = call.argument<String>("ownerToken") ?: ""
+                if (call.method == "Revoke") {
+                    lg?.revokeVisual278Experiment(handle, token)
+                    result.success(true)
+                } else if (call.method == "Enable") {
+                    val enabled = !BuildConfig.HDR_LAB_UNREGISTER_VENDOR_EXT && lg != null &&
+                        lg.enableVisual278Experiment(handle, token,
+                            call.argument<Boolean>("routeLocked") == true,
+                            call.argument<Boolean>("acceptNonConformant") == true)
+                    if (enabled) result.success(true)
+                    else result.error("VISUAL278_EXPERIMENT_REFUSED", "Strict LG experiment prerequisites missing", null)
+                } else if (call.method == "EnableYuvDiag") {
+                    // Owner-bound YUV diag arm: the vendor extension checks
+                    // the owner ledger (pending + registered surface) before
+                    // the native bind; refusal is reported, never swallowed.
+                    val gen = call.argument<Number>("generation")?.toInt() ?: 0
+                    val enabled = !BuildConfig.HDR_LAB_UNREGISTER_VENDOR_EXT &&
+                        lg?.enableYuvDiag(token, gen) == true
+                    if (enabled) result.success(true)
+                    else result.error("YUV_DIAG_ARM_REFUSED",
+                        "Owner-bound YUV diag arm refused (device gate, owner ledger or library)", null)
+                } else if (call.method == "DisableYuvDiag") {
+                    lg?.disableYuvDiag()
+                    result.success(true)
+                } else result.notImplemented()
+            }
         CapabilitiesChannel.register(this, flutterEngine)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "media_kit_hdr_lab/engine_control")
             .setMethodCallHandler { call, result ->
@@ -325,6 +372,22 @@ class MainActivity : FlutterActivity() {
                 } else {
                     PixelCopy.request(surface, rect, bitmap, callback, Handler(Looper.getMainLooper()))
                 }
+            }
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "media_kit_hdr_lab/dataspace_perform_probe")
+            .setMethodCallHandler { call, result ->
+                if (call.method != "Run") {
+                    result.notImplemented()
+                    return@setMethodCallHandler
+                }
+                // API24 provides no original-dataspace readback. Writing
+                // UNKNOWN is not a restoration, and may defeat a route lock.
+                // Disable this old live-window mutation channel entirely.
+                result.error(
+                    "PROBE_DISABLED_REBUILD_OUTPUT",
+                    "Original dataspace is unavailable; live probe disabled. " +
+                        "Rebuild the output through Session before any further playback.",
+                    null
+                )
             }
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "media_kit_hdr_lab/p5_codec_probe")
             .setMethodCallHandler { call, result ->
