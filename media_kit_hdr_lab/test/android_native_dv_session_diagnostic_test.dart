@@ -1072,8 +1072,8 @@ void main() {
     });
 
     test(
-        'ordinary refusal is retained and realizer gates precede maturity bypass',
-        () {
+        'realizer gates precede maturity bypass; dvP5 native route is '
+        'default-selected since the 2026-10-10 promotion', () {
       final source = HdrSourceDescriptor.fromKind(HdrMediaKind.dolbyVisionP5);
       const caps = HdrCapabilities(
         sdkInt: 24,
@@ -1106,22 +1106,66 @@ void main() {
         preference: HdrOutputPreference.auto,
         excluded: const {},
       );
-      final ordinaryNative = ordinary.candidates.firstWhere(
-        (candidate) => candidate.strategy == HdrStrategy.nativeDolbyVision,
-      );
-      // 2026-10-06 dvP5 maturity unlock: the table now carries
-      // experimental for dvP5 x nativeDolbyVision (realizer gates still
-      // precede the maturity bypass below).
-      expect(ordinaryNative.maturity, HdrStrategyMaturity.experimental);
-      expect(ordinaryNative.skipReason,
-          HdrDegradeReason.experimentalStrategySkipped);
-      expect(ordinary.selected.strategy, isNot(HdrStrategy.nativeDolbyVision));
-      expect(diagnostic.selected.maturity, HdrStrategyMaturity.experimental);
+      // 2026-10-10 dvP5 direct-path default promotion: with the closed
+      // default gate the ordinary planner itself now selects the native
+      // route on capable caps (the old ordinary refusal on maturity grounds
+      // is gone for dvP5); the diagnostic bypass converges on the same
+      // route and the reported maturity tracks the table (verified).
+      expect(ordinary.selected.strategy, HdrStrategy.nativeDolbyVision);
+      expect(ordinary.selected.maturity, HdrStrategyMaturity.verified);
+      expect(ordinary.selected.skipReason, isNull);
+      expect(ordinary.playable, isTrue);
+      expect(diagnostic.selected.maturity, HdrStrategyMaturity.verified);
       expect(diagnostic.selected.strategy, HdrStrategy.nativeDolbyVision);
       expect(diagnostic.selected.feasible, isTrue);
       expect(diagnostic.playable, isTrue);
       expect(diagnostic.presentation, HdrPresentation.nativeDolbyVision);
       expect(diagnostic.confidence, HdrPredictionConfidence.verified);
+
+      // The realizer still gates the bypass: without bridge v1 the native
+      // route is infeasible and the wrapper returns the ordinary refusal
+      // (nativeDvUnavailable) instead of forcing a route through.
+      const bridgelessCaps = HdrCapabilities(
+        sdkInt: 24,
+        displayHdrTypes: {1},
+        hevcDecoders: [],
+        dolbyVisionDecoders: [
+          HdrDecoderInfo(
+            name: 'hardware-dv',
+            mimeType: 'video/dolby-vision',
+            hardwareAcceleration: true,
+            profiles: [32],
+            main10: null,
+            widthRange: null,
+            heightRange: null,
+            frameRateRange: null,
+            supports4K: true,
+            max4KFps: 60,
+          ),
+        ],
+        p5PipelineAvailable: false,
+        nativeDvBridgeApi: 0,
+        dataSpaceBridgeLoaded: false,
+        dataSpaceExt: null,
+      );
+      final refused =
+          HdrRoutePlanner.plan(source: source, capabilities: bridgelessCaps);
+      final refusedDiagnostic = planAndroidNativeDvSessionDiagnostic(
+        source: source,
+        capabilities: bridgelessCaps,
+        policy: HdrRoutingPolicy.defaults,
+        preference: HdrOutputPreference.auto,
+        excluded: const {},
+      );
+      final refusedNative = refused.candidates.firstWhere(
+        (candidate) => candidate.strategy == HdrStrategy.nativeDolbyVision,
+      );
+      expect(refusedNative.maturity, HdrStrategyMaturity.verified);
+      expect(refusedNative.skipReason, HdrDegradeReason.nativeDvUnavailable);
+      expect(refused.selected.strategy, isNot(HdrStrategy.nativeDolbyVision));
+      expect(
+          refusedDiagnostic.selected.strategy,
+          isNot(HdrStrategy.nativeDolbyVision));
       expect(
         planAndroidNativeDvSessionDiagnostic(
           source: source,

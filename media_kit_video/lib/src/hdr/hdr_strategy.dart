@@ -17,9 +17,10 @@ import 'hdr_source_descriptor.dart';
 /// {@endtemplate}
 enum HdrStrategy {
   /// DV decoder plus DV display, mapping done by the system and the Dolby
-  /// engine. Reserved (R7) for every class except `dvP5`, which was
-  /// unlocked to `experimental` on 2026-10-06 after a DV-declaring LG
-  /// device (bridge v1, profile-32 hardware decoder) was verified; other
+  /// engine. Reserved (R7) for every class except `dvP5` (verified since
+  /// 2026-10-10: user-adjudicated default promotion after the genbump2 LG
+  /// 30 s realtime pass; unlocked to `experimental` on 2026-10-06) and
+  /// `dvP84` (`experimental` since the same 2026-10-06 unlock); other
   /// classes still never select it.
   nativeDolbyVision,
 
@@ -156,9 +157,10 @@ enum HdrSourceClass {
 /// The fact source is the status table in section 6 of
 /// `docs/requirements/android-hdr-auto-output.md`; cells the status table
 /// does not list carry the conservative `experimental` default, with two
-/// documented exceptions: `nativeDolbyVision` is `unsupported` for every
-/// class (R7 reserves it), and `sdr × sdrDirect` is `verified` (the
-/// always-on SDR Texture baseline every non-HDR playback uses today).
+/// documented exceptions: `nativeDolbyVision` stays `unsupported` for the
+/// classes R7 still reserves (every class except `dvP5`/`dvP84`), and
+/// `sdr × sdrDirect` is `verified` (the always-on SDR Texture baseline
+/// every non-HDR playback uses today).
 ///
 /// `hdr_maturity_table_test.dart` parses the requirement's table and locks
 /// this constant table to it; upgrading a cell (plan S10 step 7) requires
@@ -193,9 +195,13 @@ class HdrStrategyMaturityTable {
       // 2026-10-06 LG DV 设备实机解锁（原 R7 保留）：LG 面板声明 DV
       // （displayHdrTypes 含 1）、qcom DV 硬解器在位、native DV bridge v1
       // 已加载（HDR_CAP_QUERY nativeDvBridgeApi=1），且 R22 N4 诊断模式已
-      // 证明该路由在 LG 上可达。experimental 起步：实机直通验证轮确认后
-      // 再议升级。
-      HdrStrategy.nativeDolbyVision: HdrStrategyMaturity.experimental,
+      // 证明该路由在 LG 上可达。experimental 起步。
+      // 2026-10-10 用户裁决直通默认化（experimental → verified）：genbump2
+      // 代际 LG 原文件直通 ACTUAL=nativeDolbyVision 30s 实时（dvProfile 5
+      // verified、decDrop=0、vfps=24.0 源率），用户人工观察通过；历史证据
+      // r26b（2026-10-07 LG，"P5 nativeDV 画面没问题"）与 r30b（marble，
+      // "颜色正常/画面流畅"）。`allowExperimental` 门槛与其它格零改动。
+      HdrStrategy.nativeDolbyVision: HdrStrategyMaturity.verified,
       HdrStrategy.baseLayerDirect: HdrStrategyMaturity
           .experimental, // 忽略 RPU 会偏色；realize 直接判不可行
       HdrStrategy.baseLayerConvert: HdrStrategyMaturity

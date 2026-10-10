@@ -1,7 +1,7 @@
 # 需求：HDR 能力查询、路由执行与报告（消费方：PiliPlusX）
 
 - 提出方：PiliPlusX（2026-10-02）
-- 版本：v3（2026-10-02；修订记录见第 9 节）
+- 版本：v4（2026-10-10；修订记录见第 9 节）
 - 状态：需求已定稿，按 `android-hdr-auto-output-plan.md` 实施
 - 关联：`archives/experiments/android-playback-matrix-12703-12708-20260930.md`（实机基线）、`archives/conversations/architecture-review-remediation-20260930.md`（P0-1/P0-3）、`archives/conversations/android-hdr-auto-output-20261002.md`（本主题上下文）、`media_kit_hdr_lab/`（参考实现）
 
@@ -62,7 +62,7 @@ media-kit 不负责保证片源和显示能力一致，只负责如实预测、�
 
 | 策略 | 含义 |
 |---|---|
-| `nativeDolbyVision` | DV 解码器加 DV 显示，由系统和 Dolby 引擎完成映射。DV P5.0 无 EL 与 DV P8.4 类为 `experimental`（2026-10-06 LG DV 实机解锁）；其余类仍**预留**（R7） |
+| `nativeDolbyVision` | DV 解码器加 DV 显示，由系统和 Dolby 引擎完成映射。DV P5.0 无 EL 类为 `verified`（2026-10-10 用户裁决直通默认化，见第 6 节）；DV P8.4 类为 `experimental`（2026-10-06 LG DV 实机解锁）；其余类仍**预留**（R7） |
 | `baseLayerDirect` | 解码器直出 Surface（`mediacodec_embed`），按基础层的传输函数输出，忽略动态元数据 |
 | `baseLayerConvert` | gpu-next 把基础层转换到显示器支持的 HDR 传输函数（如 HLG 转 PQ），忽略动态元数据 |
 | `metadataReshape` | gpu-next/libplacebo 应用动态元数据（DV RPU 等）重建后输出 HDR（PQ） |
@@ -198,7 +198,7 @@ Phase 1 只做 Android。darwin（三事实交集门禁、final24 运行时禁�
 
 ### R7 原生 DV 呈现（预留，另立需求）
 
-1. Phase 1 只预留：能力查询报告 DV 显示类型与 `video/dolby-vision` 解码器（R1.1）；策略枚举包含 `nativeDolbyVision`；呈现类型包含 `nativeDolbyVision`。`nativeDolbyVision` 的成熟度原为 `unsupported`（规划时永远跳过）；2026-10-06 起 DV P5 类解锁为 `experimental`（LG DV 设备实机验证轮，realizer 条件：DV P5.0 无 EL + 面板 DV 声明 + profile 32 硬解器 + bridge v1），其余类仍 `unsupported`。
+1. Phase 1 只预留：能力查询报告 DV 显示类型与 `video/dolby-vision` 解码器（R1.1）；策略枚举包含 `nativeDolbyVision`；呈现类型包含 `nativeDolbyVision`。`nativeDolbyVision` 的成熟度原为 `unsupported`（规划时永远跳过）；2026-10-06 起 DV P5 类解锁为 `experimental`（LG DV 设备实机验证轮，realizer 条件：DV P5.0 无 EL + 面板 DV 声明 + profile 32 硬解器 + bridge v1）；2026-10-10 起 DV P5 类经用户裁决提升为 `verified` 并默认直通（无需 `allowExperimental`，证据见第 6 节状态表）；DV P8.4 类仍 `experimental`，其余类仍 `unsupported`。
 2. 在支持 DV 的设备上，DV 源按默认偏好的下一条策略呈现，报告中要明确写出"以 HDR10/HLG 呈现、非原生 DV"。
 3. 原生 DV 路由另立需求。它涉及 FFmpeg（用 `video/dolby-vision` 和对应 profile/level 打开解码器，RPU 保留在码流中）、mpv（路由选择）和 media-kit 三方。等 DV 设备到位，摸清它的解码器和合成链路后再设计。
 
@@ -246,7 +246,7 @@ Phase 1 只做 Android。darwin（三事实交集门禁、final24 运行时禁�
 | DV P10 | 全部 | unsupported | Phase 1 不涉及 AV1 |
 | HDR Vivid | baseLayerDirect | experimental | 本地有样片，待单列验证 |
 | HDR Vivid | metadataReshape | unsupported | 未实现 |
-| DV P5 | nativeDolbyVision | experimental | 2026-10-06 LG DV 设备实机解锁：面板声明 DV（displayHdrTypes 含 1）+ qcom DV 硬解器在位 + native DV bridge v1；R22 N4 诊断模式路由成功先例。实机直通验证轮确认后另议升级 |
+| DV P5 | nativeDolbyVision | verified | 2026-10-10 用户裁决直通默认化（experimental → verified）：genbump2 代际 LG 原文件直通 ACTUAL=nativeDolbyVision 30s 实时（dvProfile 5 verified、decDrop=0、vfps=24.0 源率），用户人工观察通过；历史 r26b（2026-10-07 LG，"P5 nativeDV 画面没问题"）、r30b（marble，"颜色正常/画面流畅"）。前史：2026-10-06 LG DV 实机解锁（面板声明 DV + qcom DV 硬解器 + native DV bridge v1；R22 N4 诊断先例）。realizer 条件不变；其它格与 `allowExperimental` 门槛零改动 |
 | DV P8.4 | nativeDolbyVision | experimental | 2026-10-06 与 DV P5 同批解锁（用户导演：P8.4 素材 profile 8/compat 4 直出验证轮，qcom DV 硬解 profile 支持以实机 open 为准） |
 | DV P8.1 / DV P8.2 / DV P7 | nativeDolbyVision | unsupported | R7 保留（realizer 仅覆盖 DV P5.0 无 EL 与 DV P8.4） |
 
@@ -287,3 +287,6 @@ Phase 1 只做 Android。darwin（三事实交集门禁、final24 运行时禁�
   - 预留原生 DV（R7），能力查询增加 DV 显示类型与 DV 解码器；
   - 动态元数据格式覆盖 HDR Vivid 和 HDR10+；
   - 新增验收 A6（策略偏好），原 A6/A7 顺延为 A7/A8。
+- v4（2026-10-10）：
+  - DV P5 × nativeDolbyVision 成熟度 `experimental` → `verified`（用户裁决"P5 直通默认化"）：证据链 = genbump2 代际 LG 原文件直通 30s 实时人工验收（2026-10-10，dvProfile 5 verified、decDrop=0、vfps=24.0 源率）+ r26b（2026-10-07 LG）+ r30b（marble）双设备历史确认；默认偏好下 DV P5 源在 DV 能力齐备设备上直达 nativeDolbyVision，不再要求 `allowExperimental`；
+  - 范围限定：仅该一格提升；DV P8.4 × nativeDolbyVision 仍 `experimental`，其它策略 × 源类格零改动，`allowExperimental` 门槛机制与其它 experimental 格的准入零改动（LG 严格实验会话的策略准入不受影响，其 P5 block 为该配置设计行为）。

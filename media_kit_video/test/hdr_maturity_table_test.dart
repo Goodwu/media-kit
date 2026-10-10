@@ -60,8 +60,10 @@ const Map<String, HdrStrategy> _strategyNames = <String, HdrStrategy>{
 };
 
 /// "全部" expands to the five concrete strategies; `nativeDolbyVision` is
-/// covered by the dedicated "任意 DV" row (R7 marks it unsupported, which
-/// overrides the "全部" rows of P8.2 and P10).
+/// covered by the dedicated per-class rows (DV P5 `verified` since the
+/// 2026-10-10 promotion, DV P8.4 `experimental` since the 2026-10-06
+/// unlock, the R7-reserved classes `unsupported`), which override the
+/// "全部" rows of P8.2 and P10.
 const List<HdrStrategy> _allStrategies = <HdrStrategy>[
   HdrStrategy.baseLayerDirect,
   HdrStrategy.baseLayerConvert,

@@ -31,9 +31,11 @@ const _p5 = HdrSourceDescriptor(
 const _dvRaw = '{"api":1,"mime":"video/dolby-vision",'
     '"codec":"OMX.qcom.video.decoder.dolby-vision","native-dv-active":true}';
 
-HdrCapabilities _caps({bool pipeline = true, int sdk = 24}) => HdrCapabilities(
+HdrCapabilities _caps(
+        {bool pipeline = true, int sdk = 24, Set<int> types = const {1, 2, 3}}) =>
+    HdrCapabilities(
       sdkInt: sdk,
-      displayHdrTypes: const {1, 2, 3},
+      displayHdrTypes: types,
       hevcDecoders: const [],
       dolbyVisionDecoders: const [
         HdrDecoderInfo(
@@ -401,18 +403,37 @@ void main() {
     await session.dispose();
   });
 
-  test('default planner never enables native observer and public API has none',
+  test('default planner observer follows native selection; public API has none',
       () async {
+    // 2026-10-10 dvP5 direct-path default promotion: with the real planner
+    // and the default (closed-gate) policy, a DV-capable device reaches
+    // nativeDolbyVision by default and the observer follows the selection.
     final env = _Environment();
     final backend = _Backend()..review = env.review;
     var captures = 0;
     final session = env.session(backend,
         diagnosticPlanner: false, observer: (_, __, ___) => captures++);
     await session.open(env.media, hint: _p5);
-    expect(captures, 0);
-    expect(
-        backend.opened.map((p) => p.route.strategy), [HdrStrategy.metadataReshape]);
+    expect(captures, 1);
+    expect(backend.opened.map((p) => p.route.strategy),
+        [HdrStrategy.nativeDolbyVision]);
     await session.dispose();
+
+    // Without the DV display declaration the native route stays unreachable
+    // by default: the observer never engages and playback reshapes instead.
+    final plainEnv = _Environment();
+    final plainBackend = _Backend()..review = plainEnv.review;
+    var plainCaptures = 0;
+    final plainSession = plainEnv.session(plainBackend,
+        diagnosticPlanner: false,
+        capabilitiesProvider: () async => _caps(types: const {2, 3}),
+        observer: (_, __, ___) => plainCaptures++);
+    await plainSession.open(plainEnv.media, hint: _p5);
+    expect(plainCaptures, 0);
+    expect(plainBackend.opened.map((p) => p.route.strategy),
+        [HdrStrategy.metadataReshape]);
+    await plainSession.dispose();
+
     final source =
         File('lib/src/hdr/hdr_video_session.dart').readAsStringSync();
     final publicConstructor = source.substring(
