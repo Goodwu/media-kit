@@ -248,8 +248,19 @@ void main() {
       expect(
         lines.single,
         'HdrDiag HDR classify: origin=facts codec=hevc transfer=hlg '
-        'primaries=bt.2020 meta=dolbyVision dv=8 compat=4 el=false',
+        'primaries=bt.2020 meta=dolbyVision dv=8 compat=4 el=unknown',
       );
+    });
+
+    test('explicit single-layer fact remains false in the diagnostic', () {
+      enable();
+      const HdrSourceClassifier().classify(
+        videoParams: const VideoParams(gamma: 'hlg', primaries: 'bt.2020'),
+        dolbyVisionProfile: 8,
+        dvElPresent: false,
+        hint: p84,
+      );
+      expect(lines.single, endsWith('dv=8 compat=4 el=false'));
     });
 
     test('hint without facts keeps the hint origin', () {

@@ -488,7 +488,9 @@ class AndroidVideoController extends PlatformVideoController {
     if (_disposed ||
         _fullyDisposed ||
         _playerTerminated ||
-        _detachRetryTimers.containsKey(owner)) return;
+        _detachRetryTimers.containsKey(owner)) {
+      return;
+    }
     final attempts = _detachRetryAttempts[owner] ?? 0;
     if (attempts >= _maxPlatformSurfaceRetries) {
       debugPrint('PlatformVideoView detach retry exhausted: '
@@ -522,7 +524,9 @@ class AndroidVideoController extends PlatformVideoController {
         _playerTerminated ||
         !_ledger.isLive(owner) ||
         !_outputIntent.isCurrent(owner, outputIntentSerial) ||
-        _bindRetryTimers.containsKey(owner)) return;
+        _bindRetryTimers.containsKey(owner)) {
+      return;
+    }
     final attempts = _bindRetryAttempts[owner] ?? 0;
     if (attempts >= _maxPlatformSurfaceRetries) {
       debugPrint('PlatformVideoView bind retry exhausted: '

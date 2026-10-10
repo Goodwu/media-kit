@@ -13,8 +13,8 @@ class _FakeReleaseChannel implements PlatformSurfaceReleaseChannel {
   });
 
   /// Replies for successive `ReleaseSurface` calls (values or Exceptions).
-  final List<Object> releaseReplies;
-  final List<Object> acknowledgeReplies;
+  final List<Object?> releaseReplies;
+  final List<Object?> acknowledgeReplies;
 
   final calls = <String, AndroidSurfaceAccountId>{};
   int releaseCalls = 0;
@@ -60,6 +60,32 @@ const _ownerB = AndroidSurfaceAccountId(
 );
 
 void main() {
+  test('a null release reply remains a failure and never acknowledges', () async {
+    final channel = _FakeReleaseChannel(
+      releaseReplies: [null],
+      acknowledgeReplies: [true],
+    );
+    await expectLater(
+      SurfaceReleaseProtocol(channel).release(_ownerA),
+      throwsStateError,
+    );
+    expect(channel.releaseCalls, 1);
+    expect(channel.acknowledgeCalls, 0);
+  });
+
+  test('a null acknowledgement fails rather than releasing the owner', () async {
+    final channel = _FakeReleaseChannel(
+      releaseReplies: ['released'],
+      acknowledgeReplies: [null],
+    );
+    await expectLater(
+      SurfaceReleaseProtocol(channel).release(_ownerA),
+      throwsStateError,
+    );
+    expect(channel.releaseCalls, 1);
+    expect(channel.acknowledgeCalls, 1);
+  });
+
   test('a clean release is release-then-acknowledge with full identity',
       () async {
     final channel = _FakeReleaseChannel(
