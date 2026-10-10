@@ -16,5 +16,4 @@ void main() {
       SwRender.takeLogs().isNotEmpty) {
     throw StateError('Unavailable bridge reported native frame evidence');
   }
-  print('OHOS software bridge web facade: PASS');
 }
