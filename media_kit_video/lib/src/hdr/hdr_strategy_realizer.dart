@@ -67,26 +67,24 @@ class HdrStrategyRealizer {
     }
   }
 
-  /// Native Dolby Vision P5 decode through MediaCodec and the DV bridge.
-  /// This bypasses libplacebo's P5 rescale pipeline while keeping the RPU in
-  /// the elementary stream for the native Dolby Vision decoder.
+  /// Native single-layer Dolby Vision decode through MediaCodec and the
+  /// DV bridge. The RPU stays in the elementary stream for the native
+  /// decoder; the GPU P5 rescale pipeline is not used by this route.
   static HdrStrategyRealization _nativeDolbyVision(
     HdrSourceDescriptor source,
     HdrSourceClass cls,
     HdrCapabilities capabilities,
   ) {
-    // 2026-10-06: dvP84 unlocked alongside dvP5 (user-directed direct-path
-    // verification on the LG DV device). P8.4 = profile 8, compatibility id 4
-    // (HLG base layer + enhancement/RPU); the Dolby engine handles the
-    // enhancement the same way the P5.0 single-layer case hands everything to
-    // it. Other classes/profiles remain unsupported.
-    final bool eligibleSource = (cls == HdrSourceClass.dvP5 &&
-            source.dvProfile == 5 &&
-            source.dvCompatibilityId == 0 &&
-            source.enhancementLayer == false) ||
-        (cls == HdrSourceClass.dvP84 &&
-            source.dvProfile == 8 &&
-            source.dvCompatibilityId == 4);
+    // Match the fork's single-layer native_dv contract for both supported
+    // source classes. Unknown EL presence is not proof of a single layer.
+    // FFmpeg separately validates the BL/RPU flags and initialization data.
+    final bool eligibleSource = source.enhancementLayer == false &&
+        ((cls == HdrSourceClass.dvP5 &&
+                source.dvProfile == 5 &&
+                source.dvCompatibilityId == 0) ||
+            (cls == HdrSourceClass.dvP84 &&
+                source.dvProfile == 8 &&
+                source.dvCompatibilityId == 4));
     if (!eligibleSource ||
         source.codec != 'hevc' ||
         source.dynamicMetadata != HdrDynamicMetadata.dolbyVision) {
@@ -102,20 +100,23 @@ class HdrStrategyRealizer {
       return const HdrStrategyRealization.infeasible(
           HdrDegradeReason.displayLacksTransfer);
     }
-    const int dolbyVisionProfile32 = 32;
+    // These are Android CodecProfileLevel keys, not DV profile numbers:
+    // P5 uses DvheStn (0x20); P8 uses DvheSt (0x100). Keep admission aligned
+    // with FFmpeg's native_dv_android_profile_key(). A P5-only decoder is
+    // not a P8 candidate, and a P8 decoder need not also advertise P5.
+    final int requiredAndroidProfile = cls == HdrSourceClass.dvP5 ? 32 : 256;
     final hasDolbyVisionDecoder = capabilities.dolbyVisionDecoders.any(
       (decoder) =>
           decoder.mimeType == 'video/dolby-vision' &&
           decoder.hardwareAcceleration &&
-          decoder.profiles.contains(dolbyVisionProfile32),
+          decoder.profiles.contains(requiredAndroidProfile),
     );
     if (!hasDolbyVisionDecoder || capabilities.nativeDvBridgeApi != 1) {
       return const HdrStrategyRealization.infeasible(
           HdrDegradeReason.nativeDvUnavailable);
     }
-    // P5 keeps the verified timed release. The API 24 vendor DV decoder
-    // holds at-time released buffers (on-device r28 chain: frames decoded,
-    // playback advancing, screen frozen 48s), so P8.4 releases immediately.
+    // Preserve the accepted release-mode behavior. Decoder-specific mode
+    // policy is independent of this source/profile admission correction.
     final renderMode = cls == HdrSourceClass.dvP84 ? 'boolean' : 'timed';
     return HdrStrategyRealization.route(
       HdrRoute(
@@ -162,18 +163,12 @@ class HdrStrategyRealizer {
       final HdrDegradeReason? reason =
           _displayTransferCheck(transfer, capabilities);
       if (reason != null) {
-        // An HLG base layer stays presentable on a panel that declares
-        // Dolby Vision without HLG: the system composer interprets the HLG
-        // buffer itself (the platform player plays P8.4 this way on the
-        // API 24 LG device — smooth, desaturated, no dynamic metadata).
-        // Every other missing transfer stays infeasible.
-        final bool hlgOverDvPanel =
-            reason == HdrDegradeReason.displayLacksTransfer &&
-                transfer == HdrOutputTransfer.hlg &&
-                capabilities.displayHdrTypes?.contains(1) == true;
-        if (!hlgOverDvPanel) {
-          return HdrStrategyRealization.infeasible(reason);
-        }
+        // Dolby Vision display support does not imply support for a bare
+        // HLG base layer. In particular, the LG HLG-over-DV-panel experiment
+        // did not establish correct HLG HDR presentation. Conversion and
+        // SDR candidates must pass their own gates instead of bypassing
+        // this display-transfer requirement.
+        return HdrStrategyRealization.infeasible(reason);
       }
     }
     return HdrStrategyRealization.route(

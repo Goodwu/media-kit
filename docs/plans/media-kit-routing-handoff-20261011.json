@@ -15,8 +15,9 @@
       "branch": "routing/MK-ROUTING-20261011",
       "branchState": "created",
       "createdFrom": "e7239901d92d2a5e3fbb82e5c4bd437c784bb861",
+      "branchBaseAfterRegistration": "7ea31c55a867d772965ca89911d7b432687826f4",
       "pullRequest": null,
-      "authoritativeProgress": "Read this same handoff path on routing/MK-ROUTING-20261011 before implementation. main is the discovery pointer until merge."
+      "authoritativeProgress": "This file on routing/MK-ROUTING-20261011. main contains a discovery pointer until merge."
     },
     "piliPlusX": {
       "workspaceRoot": "piliplusx",
@@ -28,36 +29,49 @@
     }
   },
   "tasks": [
-    {"id": "PLAN", "status": "implemented", "commit": "7a2cd26ad003f7524d7362bf218f7d5eee3cd0ee", "evidence": "GitHub create_file succeeded and main readback confirmed full plan", "doNotRepeat": true},
-    {"id": "HANDOFF", "status": "implemented", "commit": "8edf822947da242efd5ba80d9c92e5b085bbee08", "evidence": "Existing ledger read back; amend this path only", "doNotRepeat": true},
-    {"id": "B1", "status": "in_progress", "commits": [], "tests": [], "note": "Canonical branch created after checking all-state PRs and remote branches; no functional changes yet."},
+    {"id": "PLAN", "status": "implemented", "commit": "7a2cd26ad003f7524d7362bf218f7d5eee3cd0ee", "doNotRepeat": true},
+    {"id": "HANDOFF", "status": "implemented", "commit": "8edf822947da242efd5ba80d9c92e5b085bbee08", "doNotRepeat": true},
+    {
+      "id": "B1", "status": "in_progress", "commits": [], "tests": [],
+      "subtasks": [
+        {
+          "id": "B1a-admission", "status": "implemented",
+          "commitAnchor": "fix(hdr): align DV profile and HLG display admission [MK-ROUTING-20261011 B1a]",
+          "files": ["media_kit_video/lib/src/hdr/hdr_strategy_realizer.dart", "media_kit_video/test/hdr_route_admission_test.dart", "media_kit_video/test/hdr_route_planner_test.dart"],
+          "changes": ["P5 requires Android profile32, P8.4 profile256", "Both native classes require explicit EL=false", "Remove HLG-over-DV display bypass", "Correct generic P5/P8 test fixture and mislabeled LG comment"],
+          "tests": {"status": "not_run", "newCases": 18, "file": "media_kit_video/test/hdr_route_admission_test.dart", "note": "Source cases added; no runtime result claimed. New workflow runs whole video/lab suites, not just these cases."},
+          "doNotRepeat": true
+        },
+        {"id": "B1b-source-facts", "status": "planned"},
+        {"id": "B1c-dependencies-review-fallback", "status": "planned"}
+      ]
+    },
     {"id": "B2", "status": "planned", "commits": [], "tests": []},
-    {"id": "B3", "status": "planned", "commits": [], "tests": [], "note": "Evaluate actual native gaps individually; existing-capability closure requires evidence."},
+    {"id": "B3", "status": "planned", "commits": [], "tests": [], "note": "Evaluate decoder selection/source facts/RPU gaps independently; no native changes made."},
     {"id": "APP", "status": "planned", "commits": [], "tests": []},
-    {"id": "CI", "status": "not_run", "runs": [], "baselineInspected": true, "note": "Existing CI downloads dated Windows libmpv and distro mpv on Linux; those builds are not latest-source candidate acceptance."}
+    {"id": "CI", "status": "in_progress", "runs": [], "workflow": ".github/workflows/routing-source.yml", "note": "Added push-triggered current-source host analyze/tests. No native binaries installed by this job. Does not complete current-source native/APK build or existing all-platform CI acceptance; actual run must be inspected."}
   ],
   "nonNegotiable": [
-    "Read main discovery pointer, then the handoff on the canonical branch, and remote commits/PRs before coding. Reuse the registered branch; never reimplement committed tasks on a new branch.",
-    "Keep implemented and validated distinct. Failed CI never changes implemented back to planned.",
-    "Build candidates from latest relevant source including all current changes; do not substitute historical pinned sources or binaries. Resolved SHAs are provenance only.",
-    "HdrCapabilities.query(player:) is our API and may be modified/deleted; no compatibility framework is required.",
-    "Preserve approved maturity promotions, LG YUV8 and native owner/ACK/lease contracts.",
-    "Do not reset/clean/overwrite existing FFmpeg dirty changes; first establish actual build significance.",
-    "CI acceptance requires a completed successful run for the actual implementation head, not queued, skipped or stale checks.",
-    "Upload plan and progress promptly. Use this plan/ledger rather than another independently maintained plan."
+    "Read main discovery pointer, then this branch ledger and remote commits/PRs. Reuse the canonical branch; never reimplement committed subtasks elsewhere.",
+    "Implemented is not validated. Failed or missing CI never resets implemented tasks to planned.",
+    "Build test versions from latest relevant source including all changes, not historical pinned source/APK/JAR/so. SHA records are provenance only.",
+    "HdrCapabilities.query(player:) may change or disappear; no compatibility framework required.",
+    "Preserve approved maturity, LG YUV8 and native owner/ACK/lease contracts.",
+    "Do not reset/clean/overwrite existing FFmpeg dirty changes; establish their build significance.",
+    "CI acceptance requires completed success for the actual implementation head. Host unit checks are not native-build/device acceptance.",
+    "Keep full plan and this ledger uploaded promptly; committed progress is not only in chat."
   ],
   "environment": {
-    "codexWorkspace": "Read-only tools; schema confirmed no command execution or file writes.",
-    "localRuntime": "Rechecked this turn: git/java/node/python available; flutter/dart/gh absent; git ls-remote failed DNS github.com exit 128. Local /mnt/data contains RFC v1 only, not connected workspace repositories.",
-    "github": "Read and writes available; canonical branch creation succeeded. Actions dispatch/PR execution still to verify.",
+    "codexWorkspace": "Read-only schema, current local main remains 0f0f1525. It does not include this remote branch's implementation.",
+    "localRuntime": "git/java/node/python available; flutter/dart/gh absent; git ls-remote failed DNS github.com exit128; raw download also unavailable.",
+    "github": "create_branch, create_tree, create_commit, update_ref available. Workflow metadata GET path is rejected by fetch; runs endpoints are available. Verify actual runs after push.",
     "deviceTests": "not_run"
   },
   "ciBaseline": {
     "workflowPaths": [".github/workflows/ci.yml", ".github/workflows/ohos.yml", ".github/workflows/windows-mpv-diagnosis.yml"],
-    "observedHistoricalRun": {"id": 37508737653, "headSha": "b2f9a89cf4b601163e727f111da1ee2d9fb5bdfc", "conclusion": "failure", "note": "Historical only; not current acceptance."},
-    "requiredNextCheck": "Establish CI execution for the current branch and read source-build recipes before adding candidate builds."
+    "note": "Existing workflows contain historical prebuilt dependencies; do not use their old binaries as this task's candidate validation. They were not disabled or weakened."
   },
-  "nextAction": "Fast-forward the just-created branch to this docs checkpoint if it still has createdFrom as head; then implement B1 on that branch. Inspect branch first in case code has since landed. Inspect PiliPlusX remote before changes.",
-  "resumptionRule": "Always re-read branch ledger and commits first; main may deliberately only contain this discovery pointer until merge.",
-  "lastCheckpoint": "Created the only registered branch; no functional code or tests committed at this checkpoint. Subsequent branch commits are authoritative progress."
+  "nextAction": "Inspect B1a commit and Routing source checks for this branch head, fix any failures without reimplementing B1a; then continue B1b/B1c and query/APP on this same chain. Discover PiliPlusX remote before writes. Audit latest native build recipe before producing test binaries.",
+  "resumptionRule": "Read current branch ledger and commits first; main may only have the discovery pointer. B1a code and 18 regression cases exist in the commit identified by commitAnchor.",
+  "lastCheckpoint": "B1a source and tests included with a new source-only CI workflow. No native source/binary changes; no test pass or device result claimed."
 }
