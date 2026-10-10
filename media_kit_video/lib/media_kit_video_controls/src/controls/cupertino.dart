@@ -20,14 +20,6 @@ Widget CupertinoVideoControls(VideoState state) {
   );
 }
 
-/// [MaterialDesktopVideoControlsThemeData] available in this [context].
-CupertinoVideoControlsThemeData _theme(BuildContext context) =>
-    !isFullscreen(context)
-        ? CupertinoVideoControlsTheme.maybeOf(context)?.normal ??
-            kDefaultCupertinoVideoControlsThemeData
-        : CupertinoVideoControlsTheme.maybeOf(context)?.fullscreen ??
-            kDefaultCupertinoVideoControlsThemeDataFullscreen;
-
 /// Default [CupertinoVideoControlsThemeData].
 const kDefaultCupertinoVideoControlsThemeData =
     CupertinoVideoControlsThemeData();
