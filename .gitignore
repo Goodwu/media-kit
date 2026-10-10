@@ -44,3 +44,5 @@ libs/ohos/media_kit_libs_ohos/ohos/libs/
 # Experiment evidence lives in ~/src/media-kit-experiments; it was stripped
 # from this repo's history (2026-10-06) and must not re-enter.
 archives/experiments/
+.zcode
+.zcodeignore
