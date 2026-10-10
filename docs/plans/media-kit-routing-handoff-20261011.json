@@ -13,8 +13,10 @@
       "baseRef": "main",
       "observedSourceCommit": "0f0f1525a2c1f3569052412775b8ba939963614b",
       "branch": "routing/MK-ROUTING-20261011",
-      "branchState": "registered_not_created",
-      "pullRequest": null
+      "branchState": "created",
+      "createdFrom": "e7239901d92d2a5e3fbb82e5c4bd437c784bb861",
+      "pullRequest": null,
+      "authoritativeProgress": "Read this same handoff path on routing/MK-ROUTING-20261011 before implementation. main is the discovery pointer until merge."
     },
     "piliPlusX": {
       "workspaceRoot": "piliplusx",
@@ -26,36 +28,36 @@
     }
   },
   "tasks": [
-    {"id": "PLAN", "status": "implemented", "commit": "7a2cd26ad003f7524d7362bf218f7d5eee3cd0ee", "evidence": "GitHub create_file succeeded; fetch_file on main read back plan", "doNotRepeat": true},
-    {"id": "HANDOFF", "status": "implemented", "commit": "8edf822947da242efd5ba80d9c92e5b085bbee08", "evidence": "GitHub fetch_file on main read back initial handoff; later checkpoint commits amend this same path", "doNotRepeat": true},
-    {"id": "B1", "status": "planned", "commits": [], "tests": []},
+    {"id": "PLAN", "status": "implemented", "commit": "7a2cd26ad003f7524d7362bf218f7d5eee3cd0ee", "evidence": "GitHub create_file succeeded and main readback confirmed full plan", "doNotRepeat": true},
+    {"id": "HANDOFF", "status": "implemented", "commit": "8edf822947da242efd5ba80d9c92e5b085bbee08", "evidence": "Existing ledger read back; amend this path only", "doNotRepeat": true},
+    {"id": "B1", "status": "in_progress", "commits": [], "tests": [], "note": "Canonical branch created after checking all-state PRs and remote branches; no functional changes yet."},
     {"id": "B2", "status": "planned", "commits": [], "tests": []},
-    {"id": "B3", "status": "planned", "commits": [], "tests": [], "note": "Evaluate actual native gaps individually; existing-capability closure is permitted with evidence, not an excuse to omit evaluation."},
+    {"id": "B3", "status": "planned", "commits": [], "tests": [], "note": "Evaluate actual native gaps individually; existing-capability closure requires evidence."},
     {"id": "APP", "status": "planned", "commits": [], "tests": []},
-    {"id": "CI", "status": "not_run", "runs": [], "baselineInspected": true, "note": "No run for the implementation has been claimed successful. Existing ci.yml currently downloads a dated Windows libmpv and installs distro mpv on Linux; existing CI by itself does not meet the new latest-source candidate requirement."}
+    {"id": "CI", "status": "not_run", "runs": [], "baselineInspected": true, "note": "Existing CI downloads dated Windows libmpv and distro mpv on Linux; those builds are not latest-source candidate acceptance."}
   ],
   "nonNegotiable": [
-    "Read this ledger and remote branches/commits/PRs before coding. Reuse the registered branch; do not reimplement committed tasks on a new branch.",
-    "Keep implemented and validated distinct; a committed task with failed CI remains implemented, not planned.",
-    "Build candidates from latest relevant source including all current modifications; never substitute pinned historical sources or binaries. Record the resolved source vector for provenance only.",
-    "HdrCapabilities.query(player:) is our own API and may be changed or removed. No legacy compatibility framework is required.",
-    "Preserve existing approved maturity promotions, LG YUV8 decision and native owner/ACK/lease contracts.",
-    "Do not reset, clean or overwrite the existing FFmpeg dirty tree. Determine its actual build significance first.",
-    "CI success requires a completed successful run associated with the actual latest implementation head; queued, skipped or stale runs are not acceptance.",
-    "Upload plans and handoffs promptly, before feature completion. The documents already exist on main; update them instead of creating an alternate plan or branch from an obsolete local workspace."
+    "Read main discovery pointer, then the handoff on the canonical branch, and remote commits/PRs before coding. Reuse the registered branch; never reimplement committed tasks on a new branch.",
+    "Keep implemented and validated distinct. Failed CI never changes implemented back to planned.",
+    "Build candidates from latest relevant source including all current changes; do not substitute historical pinned sources or binaries. Resolved SHAs are provenance only.",
+    "HdrCapabilities.query(player:) is our API and may be modified/deleted; no compatibility framework is required.",
+    "Preserve approved maturity promotions, LG YUV8 and native owner/ACK/lease contracts.",
+    "Do not reset/clean/overwrite existing FFmpeg dirty changes; first establish actual build significance.",
+    "CI acceptance requires a completed successful run for the actual implementation head, not queued, skipped or stale checks.",
+    "Upload plan and progress promptly. Use this plan/ledger rather than another independently maintained plan."
   ],
   "environment": {
-    "codexWorkspace": "Read-only tools exposed; no file-write or command-execution action. Local workspace still observed at pre-document source head; do not infer remote docs are missing.",
-    "localRuntime": "git available; flutter/dart/gh not found on PATH; actual git ls-remote https://github.com/Goodwu/media-kit.git failed with DNS resolution error (exit 128).",
-    "github": "Read, create_file, update_file available; plan and ledger already uploaded. Generic fetch of /actions/workflows rejected, but /actions/runs?per_page=3 succeeded. Contents API reads .github/workflows/ci.yml. A workflow file is present; execution/dispatch permissions and current workflow enabled state have not been proven.",
+    "codexWorkspace": "Read-only tools; schema confirmed no command execution or file writes.",
+    "localRuntime": "Rechecked this turn: git/java/node/python available; flutter/dart/gh absent; git ls-remote failed DNS github.com exit 128. Local /mnt/data contains RFC v1 only, not connected workspace repositories.",
+    "github": "Read and writes available; canonical branch creation succeeded. Actions dispatch/PR execution still to verify.",
     "deviceTests": "not_run"
   },
   "ciBaseline": {
     "workflowPaths": [".github/workflows/ci.yml", ".github/workflows/ohos.yml", ".github/workflows/windows-mpv-diagnosis.yml"],
-    "observedHistoricalRun": {"id": 37508737653, "headSha": "b2f9a89cf4b601163e727f111da1ee2d9fb5bdfc", "conclusion": "failure", "note": "Historical result only; not a result for this task or current head."},
-    "requiredNextCheck": "Read current runs for the actual head and workflow configuration; do not rerun historical source as acceptance. Inspect source-build recipes before choosing CI changes."
+    "observedHistoricalRun": {"id": 37508737653, "headSha": "b2f9a89cf4b601163e727f111da1ee2d9fb5bdfc", "conclusion": "failure", "note": "Historical only; not current acceptance."},
+    "requiredNextCheck": "Establish CI execution for the current branch and read source-build recipes before adding candidate builds."
   },
-  "nextAction": "Inspect executable/source-build environment and PiliPlusX remote. Reconcile this ledger with remote refs, create registered media-kit branch from latest main only if still absent, then implement B1 with tests. Continue B2/B3/APP on that single documented chain.",
-  "resumptionRule": "Before executing nextAction, first re-read this ledger and query the canonical branch/PR. Later commits may have completed it. Never infer absence from an older local workspace.",
-  "lastCheckpoint": "Plan and handoff uploaded and read back. No functional code written, no development branch created, no build/test/CI executed for this task yet. Do not claim any of B1/B2/B3/APP complete."
+  "nextAction": "Fast-forward the just-created branch to this docs checkpoint if it still has createdFrom as head; then implement B1 on that branch. Inspect branch first in case code has since landed. Inspect PiliPlusX remote before changes.",
+  "resumptionRule": "Always re-read branch ledger and commits first; main may deliberately only contain this discovery pointer until merge.",
+  "lastCheckpoint": "Created the only registered branch; no functional code or tests committed at this checkpoint. Subsequent branch commits are authoritative progress."
 }
