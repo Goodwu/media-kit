@@ -257,6 +257,7 @@ public class PlatformVideoViewFactory extends PlatformViewFactory {
         final PlatformVideoView view = new PlatformVideoView(context, handle, width, height, initialDataSpace,
             initialPixelFormat,
             (event) -> {});
+        view.setLgExperimentOwner(generation, id, (String) params.get("lgExperimentOwnerToken"));
         final SurfaceOwner owner = new SurfaceOwner(handle, generation, id);
         surfaceOwners.put(owner, view);
         view.setOnSurfaceEvent((surfaceEvent) -> {
