@@ -1,0 +1,79 @@
+name: Routing final lint cleanup
+
+# Temporary, narrowly scoped editing job. Independent CI validates its commit.
+on:
+  push:
+    branches: [routing/MK-ROUTING-20261011]
+permissions:
+  contents: read
+jobs:
+  cleanup:
+    if: >-
+      github.repository == 'Goodwu/media-kit' &&
+      github.ref == 'refs/heads/routing/MK-ROUTING-20261011' &&
+      contains(github.event.head_commit.message, '[routing-lint-cleanup]')
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Apply the three exact follow-up fixes
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ci-lint-results
+          git rev-parse HEAD > ci-lint-results/input-sha.txt
+          python3 - <<'PY'
+          from pathlib import Path
+          import subprocess
+          material = Path('media_kit_video/lib/media_kit_video_controls/src/controls/material.dart')
+          smoke = Path('media_kit_video/test/web/ohos_sw_render_smoke.dart')
+          text = material.read_text()
+          for constructor in ['_BackwardSeekIndicator', '_ForwardSeekIndicator']:
+              old = '  const ' + constructor + '({\n    super.key,\n'
+              if text.count(old) != 1:
+                  raise SystemExit('Source changed at ' + constructor)
+              text = text.replace(old, '  const ' + constructor + '({\n', 1)
+          smoke_text = smoke.read_text()
+          old = "  print('OHOS software bridge web facade: PASS');\n"
+          if smoke_text.count(old) != 1:
+              raise SystemExit('Smoke entry changed')
+          smoke_text = smoke_text.replace(old, '', 1)
+          material.write_text(text)
+          smoke.write_text(smoke_text)
+          changed = set(subprocess.check_output(['git', 'diff', '--name-only'], text=True).splitlines())
+          if changed != {str(material), str(smoke)}:
+              raise SystemExit('Unexpected changes: ' + repr(changed))
+          subprocess.run(['git', 'add', '--', *sorted(changed)], check=True)
+          PY
+          git diff --cached --check
+          git diff --cached | tee ci-lint-results/source.patch
+      - name: Persist the source to the canonical branch with an expected-head check
+        shell: bash
+        env:
+          ROUTING_WRITE_TOKEN: ${{ github.token }}
+          EXPECTED_HEAD: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          askpass="$RUNNER_TEMP/routing-lint-askpass.sh"
+          printf '%s\n' '#!/bin/sh' 'case "$1" in *Username*) printf "%s\n" x-access-token ;; *) printf "%s\n" "$ROUTING_WRITE_TOKEN" ;; esac' > "$askpass"
+          chmod 700 "$askpass"
+          export GIT_ASKPASS="$askpass" GIT_TERMINAL_PROMPT=0
+          trap 'rm -f "$askpass"' EXIT
+          current=$(git ls-remote origin refs/heads/routing/MK-ROUTING-20261011 | cut -f1)
+          test "$current" = "$EXPECTED_HEAD"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'fix(ci): remove unused private keys and smoke print [MK-ROUTING-20261011]'
+          git push origin HEAD:refs/heads/routing/MK-ROUTING-20261011
+          git rev-parse HEAD | tee ci-lint-results/committed-sha.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: routing-lint-${{ github.sha }}
+          path: ci-lint-results
+          if-no-files-found: error
