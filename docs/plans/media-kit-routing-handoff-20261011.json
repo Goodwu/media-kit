@@ -7,6 +7,7 @@
   "planCommit": "7a2cd26ad003f7524d7362bf218f7d5eee3cd0ee",
   "initialHandoffCommit": "8edf822947da242efd5ba80d9c92e5b085bbee08",
   "status": "in_progress",
+  "validationBlocker": "No executable Flutter workspace is exposed, and current-head GitHub Actions runs remain absent after push and PR events. Do not claim full validation or merge the draft.",
   "canonicalDevelopment": {
     "mediaKit": {
       "repository": "Goodwu/media-kit",
@@ -19,22 +20,26 @@
       "pullRequest": 4,
       "pullRequestUrl": "https://github.com/Goodwu/media-kit/pull/4",
       "draft": true,
-      "authoritativeProgress": "This file on routing/MK-ROUTING-20261011. main contains the discovery pointer until merge."
+      "authoritativeProgress": "This file on routing/MK-ROUTING-20261011. main contains the discovery pointer until merge. Read-only local main is older and cannot be used to infer implementation absence."
     },
     "piliPlusX": {
       "workspaceRoot": "piliplusx",
+      "repository": "Goodwu/PiliPlusX",
+      "defaultBranch": "dev-new",
       "observedBranch": "fix/darwin-video-output-rebuild-barrier",
-      "observedSourceCommit": "73afb9b66",
-      "repository": null,
+      "observedSourceCommit": "73afb9b66ce44bf142fa17165c46c54be8c89731",
       "branch": null,
-      "pullRequest": null
+      "branchState": "not_created",
+      "pullRequest": null,
+      "note": "Repository and workspace-branch ref verified through GitHub; do not assume default dev-new contains this branch. Reconcile before APP implementation."
     }
   },
   "tasks": [
     {"id": "PLAN", "status": "implemented", "commit": "7a2cd26ad003f7524d7362bf218f7d5eee3cd0ee", "doNotRepeat": true},
     {"id": "HANDOFF", "status": "implemented", "commit": "8edf822947da242efd5ba80d9c92e5b085bbee08", "doNotRepeat": true},
     {
-      "id": "B1", "status": "in_progress", "commits": ["d18de2751085913591f50653d125b5db6fe5eff2"], "tests": [],
+      "id": "B1", "status": "in_progress",
+      "commits": ["d18de2751085913591f50653d125b5db6fe5eff2", "f0bba6ff5a618767b92286011b768f77eee1ef9e"],
       "subtasks": [
         {
           "id": "B1a-admission", "status": "implemented",
@@ -46,47 +51,64 @@
         },
         {
           "id": "B1b-el-facts", "status": "implemented",
-          "commitAnchor": "fix(hdr): preserve unknown DV layer facts through review [MK-ROUTING-20261011 B1b-EL]",
+          "commit": "f0bba6ff5a618767b92286011b768f77eee1ef9e",
           "files": ["media_kit_video/lib/src/hdr/hdr_source_classifier.dart", "media_kit_video/test/hdr_source_native_admission_test.dart"],
-          "changes": ["P8/P10 no longer turn missing EL into false", "Classifier-to-native-admission regression covers missing EL despite single-layer hint and explicit valid EL"],
+          "changes": ["P8/P10 no longer turn missing EL into false", "Classifier-to-native-admission tests cover missing EL despite single-layer hint and explicit valid EL"],
           "tests": {"status": "not_run", "newCases": 5, "file": "media_kit_video/test/hdr_source_native_admission_test.dart"},
           "doNotRepeat": true
         },
-        {"id": "B1b-source-classification", "status": "planned", "note": "Unknown P8 transfer/compatibility can still map to P8.2 in HdrSourceClass/kind; this commit only closes manufactured EL evidence. Full source/output fact separation pending."},
-        {"id": "B1c-dependencies-review-fallback", "status": "planned"}
+        {"id": "B1b-source-classification", "status": "planned", "note": "Unknown P8 transfer/compatibility still maps to P8.2 in HdrSourceClass/kind; only manufactured EL evidence is fixed. Source/output fact separation remains open."},
+        {"id": "B1c-dependencies-review-fallback", "status": "planned", "note": "Actual surfacetexture dependency tagging, output reuse, observed decoder review, exclusion-aware fallback and budget behavior still require implementation/testing."}
       ]
     },
-    {"id": "B2", "status": "planned", "commits": [], "tests": []},
-    {"id": "B3", "status": "planned", "commits": [], "tests": [], "note": "Audit decoder selection/source facts/RPU independently. No native source changes. P8 MIME-only selection remains an audit target, not fixed by admission."},
-    {"id": "APP", "status": "planned", "commits": [], "tests": []},
+    {"id": "B2", "status": "planned", "commits": [], "tests": [], "note": "query(player:) and normal-session LG wiring not changed yet."},
     {
-      "id": "CI", "status": "in_progress", "runs": [],
+      "id": "B3", "status": "in_progress", "commits": [],
+      "subtasks": [
+        {
+          "id": "B3-selection-audit", "status": "gap_reproduced_not_fixed",
+          "commitAnchor": "test(hdr): reproduce native P8 selection gap from current source [MK-ROUTING-20261011 B3-audit]",
+          "evidence": "docs/plans/media-kit-routing-native-audit-20261011.md",
+          "tool": "tool/routing_native_audit/run.py",
+          "execution": {"inputScope": "current-source-region-captures", "compiler": "GCC 14.2.0", "sanitizers": "address,undefined", "compileExit": 0, "regressionExit": 1, "controlsPassed": 5, "counterexampleReproduced": 1, "fullNativeBuild": false, "deviceTest": false},
+          "toolTests": {"command": "python3 -m unittest -v test_extract", "passed": 6, "scope": "extraction utility only"},
+          "next": "Repair demonstrated native P8 MIME-only selection narrowly; also examine empty profile-list behavior. Re-run current-source harness, then full native/device tests. Do not infer all cases are fixed by setting the caller's profile alone.",
+          "doNotRecreateHarness": true
+        },
+        {"id": "B3-existing-protocol-audit", "status": "source_inspected", "note": "P5/P8 profile mapping, mpv decoder-info v1 and dovi=auto/on/off already exist. No new native protocol implemented or required solely for these fields; actual frame metadata delivery and source-fact gaps remain to validate."}
+      ]
+    },
+    {"id": "APP", "status": "planned", "commits": [], "tests": [], "note": "Remote discovered; no APP branch or integration changes yet."},
+    {
+      "id": "CI", "status": "blocked_no_execution_observed", "runs": [],
       "workflow": ".github/workflows/routing-source.yml",
-      "observations": ["After d18 push: branch Actions runs=0, commit check-runs=0", "After PR4 creation: PR-triggered runs for d18=0"],
-      "note": "Added pull_request trigger as well as branch push. Checks out actual PR head/current push source. Whole video/lab source analyze and tests; no prebuilt libmpv installed. No run or pass claimed; native/APK current-source build and platform CI remain open."
+      "observations": ["d18: branch Actions runs=0; commit check-runs=0", "After PR4 creation: PR-triggered runs for d18=0", "After f0bba push with PR trigger added: exact-head Actions runs=0"],
+      "note": "Source-only workflow checks out actual PR head/current push and runs whole video/lab analyze and tests. No current-head execution or success observed. No full native/APK build. No existing CI job disabled or weakened. Cause of absent runs remains unknown."
     }
   ],
   "nonNegotiable": [
-    "Read main discovery pointer, then branch ledger, refs, commits and PR4 before coding. Continue this branch; never reimplement committed subtasks on another branch.",
-    "Implemented is not validated. Missing/failed CI never resets implemented to planned.",
-    "Build candidates from latest relevant sources with all changes. Never substitute pinned historical source/APK/JAR/so. Recorded SHAs describe tested inputs only.",
-    "HdrCapabilities.query(player:) is our API and may be changed/deleted; no compatibility framework required.",
-    "Preserve approved maturity, LG YUV8 and native owner/ACK/lease/pixel contracts.",
-    "Do not reset/clean/overwrite existing FFmpeg dirty changes; determine their current build significance first.",
-    "CI acceptance requires completed success for actual implementation head. Host source checks do not prove native-build/device acceptance.",
-    "Upload progress promptly using this same ledger. main may only be a discovery pointer until merge."
+    "Read main discovery pointer, then branch ledger, refs, commits and PR4 before coding. Continue this branch; never reimplement committed subtasks elsewhere.",
+    "Read-only local main 0f0f1525 is stale relative to the canonical remote branch. A future executable workspace must fetch/reconcile this branch before touching code.",
+    "Implemented is not validated. Missing/failed CI never resets implemented to planned. Current native regression exit1 is a real failure, not a green test.",
+    "Build candidates from latest relevant sources with all changes. Never substitute pinned historical source/APK/JAR/so. Source hashes identify executed inputs only.",
+    "HdrCapabilities.query(player:) may change or disappear; no compatibility framework required.",
+    "Preserve approved maturity, LG YUV8 and owner/ACK/lease/pixel contracts.",
+    "Do not reset/clean/overwrite FFmpeg configure dirty changes. Observed diff sets FFMPEG_CONFIGURATION empty; it was not modified here.",
+    "CI success requires a completed successful run for the actual implementation head. Source-only checks and extracted-function host tests are not full native/device acceptance.",
+    "Upload progress promptly in this same plan/ledger. Do not merge the draft before remaining correctness and validation requirements are met."
   ],
   "environment": {
-    "codexWorkspace": "Only read/review actions exposed; local main 0f0f1525 does not include these remote implementation commits.",
-    "localRuntime": "Confirmed git available, flutter/dart/gh absent on PATH; git ls-remote failed DNS github.com exit128. No local Flutter test or candidate build executed.",
-    "github": "Branch/tree/commit/ref writes and PR4 creation succeeded. Workflow metadata URL rejected by connector allowlist; actual workflow runs/checks remain absent at recorded observations. Cause not established; do not claim Actions disabled or permission denied without evidence.",
+    "codexWorkspace": "Read/review actions only. No command execution or write operation; local main does not contain remote implementation commits.",
+    "localRuntime": "C compiler/Python work. Flutter/Dart/gh absent on PATH; git ls-remote failed DNS github.com exit128. Current source regions were captured for the explicitly scoped host C test only.",
+    "github": "Branch/tree/commit/ref writes and draft PR4 creation work. No workflow dispatch/enable action exposed. Workflow-management fetch URL rejected by connector allowlist, not a verified GitHub permissions denial. Actions runs absent at recorded checks.",
     "deviceTests": "not_run"
   },
-  "ciBaseline": {
-    "workflowPaths": [".github/workflows/ci.yml", ".github/workflows/ohos.yml", ".github/workflows/windows-mpv-diagnosis.yml"],
-    "note": "Existing workflows contain historical prebuilt native dependencies and are not the latest-source candidate build gate. No existing job disabled or weakened."
+  "buildAudit": {
+    "status": "incomplete",
+    "evidence": "docs/plans/media-kit-routing-native-audit-20261011.md",
+    "note": "build-android-test.sh calls ninja but describes an external relink/r22 base JAR with pinned helpers. Audit/rebuild all actual inputs before claiming latest-source candidate. Check Flutter app working directory as well. No test APK/JAR/so produced."
   },
-  "nextAction": "Inspect this commit's source CI/PR4 checks first; fix failures on same branch. Continue remaining B1 source/route correctness, then B2/APP and evidence-led B3. Discover actual PiliPlusX remote before writes. Audit current native build inputs before producing binaries.",
-  "resumptionRule": "B1a and B1b-EL already have source/tests in this branch. Reconcile commitAnchor with git log once, record SHA and validate; do not recreate implementation elsewhere.",
-  "lastCheckpoint": "B1a d18 pushed and draft PR4 created. Follow-up closes classifier EL fabrication, adding 5 tests (23 total new cases). No Flutter execution, native build, device acceptance or CI success claimed."
+  "nextAction": "Establish actual current-head Flutter/CI execution and validate B1a/EL on this branch. Then finish B1 source/fallback/dependency work, B2 and APP integration. B3 now has a concrete failing selection test; repair that narrow gap without broad protocol rewrites. Audit current native build chain before packaging.",
+  "resumptionRule": "B1a=d18de275 and B1b-EL=f0bba6ff already exist. The B3 audit harness/evidence is in the commit with the recorded anchor. Read git log and PR4, record the exact audit SHA, then continue; do not recreate implementations or a new media-kit branch.",
+  "lastCheckpoint": "Two functional Dart commits, 23 added but unrun Flutter cases, draft PR4, and an actually compiled native-selection counterexample plus six passing extractor tests. Other B1 items, B2, native repair, APP, latest-source product builds and GitHub CI acceptance remain open."
 }
