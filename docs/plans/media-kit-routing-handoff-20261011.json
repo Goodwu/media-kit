@@ -63,10 +63,11 @@
     },
     {"id": "B2", "status": "planned", "commits": [], "tests": [], "note": "query(player:) and normal-session LG wiring not changed yet."},
     {
-      "id": "B3", "status": "in_progress", "commits": [],
+      "id": "B3", "status": "in_progress", "commits": ["ac4f7889063623b3912d3fe5e8b43588915b3ee4"],
       "subtasks": [
         {
           "id": "B3-selection-audit", "status": "gap_reproduced_not_fixed",
+          "commit": "ac4f7889063623b3912d3fe5e8b43588915b3ee4",
           "commitAnchor": "test(hdr): reproduce native P8 selection gap from current source [MK-ROUTING-20261011 B3-audit]",
           "evidence": "docs/plans/media-kit-routing-native-audit-20261011.md",
           "tool": "tool/routing_native_audit/run.py",
@@ -95,8 +96,33 @@
     "Preserve approved maturity, LG YUV8 and owner/ACK/lease/pixel contracts.",
     "Do not reset/clean/overwrite FFmpeg configure dirty changes. Observed diff sets FFMPEG_CONFIGURATION empty; it was not modified here.",
     "CI success requires a completed successful run for the actual implementation head. Source-only checks and extracted-function host tests are not full native/device acceptance.",
-    "Upload progress promptly in this same plan/ledger. Do not merge the draft before remaining correctness and validation requirements are met."
+    "Upload progress promptly in this same plan/ledger. Do not merge the draft before remaining correctness and validation requirements are met.",
+    "The execution environment is temporary. Persist every recoverable implementation/test stage remotely without waiting for the whole batch or CI to pass; local commits, temporary files and chat alone are not durable checkpoints."
   ],
+  "checkpointPolicy": {
+    "authority": "User reminder: commit and push stage results promptly because the environment is temporary.",
+    "requiredBefore": [
+      "Starting the next independent implementation stage after a coherent source/test change exists.",
+      "Starting long-running builds, tests, dependency setup or switching execution environments when new work would otherwise exist only locally.",
+      "Ending a work round or handing off while there are unpersisted task changes or new test findings."
+    ],
+    "procedure": [
+      "Re-read the canonical remote branch and ledger; reconcile newer work and do not create a replacement branch for completed subtasks.",
+      "Review and save only task-owned source, tests and sanitized evidence. Commit and push to the registered branch; GitHub API commits/ref updates are also remote persistence and must not be described as a local git push command.",
+      "Save partial or unvalidated progress as an explicit checkpoint on the draft development chain instead of waiting for CI. Keep implemented, tested, failed and blocked states distinct; do not merge an unvalidated checkpoint.",
+      "Read back the remote branch or PR head and affected content after the write. If persistence fails, report the failure and retain the local material; do not claim that the work is safely uploaded.",
+      "Update this ledger with task IDs, authoritative branch, implementation commits or resolvable anchors, actual validation scope/results, blockers and next action. Resume existing code rather than rewriting it."
+    ],
+    "privacy": "Do not commit credentials, private media or unsanitized environment/device logs. Preserve reproducible tests and sanitized evidence; use appropriate artifact storage for permitted large build outputs.",
+    "lastVerificationBeforeThisDocsUpdate": {
+      "repository": "Goodwu/media-kit",
+      "branch": "routing/MK-ROUTING-20261011",
+      "pullRequest": 4,
+      "remoteHead": "ac4f7889063623b3912d3fe5e8b43588915b3ee4",
+      "source": "GitHub get_pr_info returned the canonical branch head and recorded stage commits.",
+      "scope": "Remote persistence check only; no new code, build, device or CI validation performed in this reminder round."
+    }
+  },
   "environment": {
     "codexWorkspace": "Read/review actions only. No command execution or write operation; local main does not contain remote implementation commits.",
     "localRuntime": "C compiler/Python work. Flutter/Dart/gh absent on PATH; git ls-remote failed DNS github.com exit128. Current source regions were captured for the explicitly scoped host C test only.",
@@ -109,6 +135,6 @@
     "note": "build-android-test.sh calls ninja but describes an external relink/r22 base JAR with pinned helpers. Audit/rebuild all actual inputs before claiming latest-source candidate. Check Flutter app working directory as well. No test APK/JAR/so produced."
   },
   "nextAction": "Establish actual current-head Flutter/CI execution and validate B1a/EL on this branch. Then finish B1 source/fallback/dependency work, B2 and APP integration. B3 now has a concrete failing selection test; repair that narrow gap without broad protocol rewrites. Audit current native build chain before packaging.",
-  "resumptionRule": "B1a=d18de275 and B1b-EL=f0bba6ff already exist. The B3 audit harness/evidence is in the commit with the recorded anchor. Read git log and PR4, record the exact audit SHA, then continue; do not recreate implementations or a new media-kit branch.",
-  "lastCheckpoint": "Two functional Dart commits, 23 added but unrun Flutter cases, draft PR4, and an actually compiled native-selection counterexample plus six passing extractor tests. Other B1 items, B2, native repair, APP, latest-source product builds and GitHub CI acceptance remain open."
+  "resumptionRule": "B1a=d18de275 and B1b-EL=f0bba6ff already exist; B3 audit harness/evidence=ac4f7889. Read current git log and PR4 before continuing; do not recreate implementations or a new media-kit branch. Apply checkpointPolicy throughout every work round.",
+  "lastCheckpoint": "Remote PR4 head ac4f7889 and existing task ledger re-read; exact B3 audit commit recorded. Added explicit immediate commit/push/readback discipline for temporary environments. No new functional code or validation in this reminder round. Existing implementation and open work statuses are unchanged."
 }
