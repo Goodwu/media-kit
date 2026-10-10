@@ -109,7 +109,9 @@ class HdrRoutingPolicy {
   /// The preference list for [cls]: the caller's row when present, otherwise
   /// the default row, otherwise an empty list (safety net only).
   List<HdrStrategy> preferencesFor(HdrSourceClass cls) {
-    return preferences?[cls] ?? defaultPreferences[cls] ?? const <HdrStrategy>[];
+    return preferences?[cls] ??
+        defaultPreferences[cls] ??
+        const <HdrStrategy>[];
   }
 }
 
@@ -209,10 +211,10 @@ class HdrRoutePlanner {
     final bool dependsOnDataSpace =
         route != null && route.surfaceTransfer != null;
     final ext = capabilities.dataSpaceExt;
-    final HdrPredictionConfidence confidence =
-        !dependsOnDataSpace || (ext != null && ext.applicable)
-            ? HdrPredictionConfidence.verified
-            : HdrPredictionConfidence.unverified;
+    final HdrPredictionConfidence confidence = !dependsOnDataSpace ||
+            (ext != null && ext.applicable && ext.id == 'lya-pq')
+        ? HdrPredictionConfidence.verified
+        : HdrPredictionConfidence.unverified;
 
     final HdrRoutePrediction prediction = HdrRoutePrediction(
       source: source,
@@ -275,8 +277,8 @@ class HdrRoutePlanner {
       return HdrCandidate(
         strategy: strategy,
         maturity: maturity,
-        skipReason:
-            realization.infeasibleReason ?? HdrDegradeReason.unsupportedStrategy,
+        skipReason: realization.infeasibleReason ??
+            HdrDegradeReason.unsupportedStrategy,
       );
     }
     // The excluded check runs after realize because the dependency tags come

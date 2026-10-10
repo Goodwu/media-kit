@@ -33,6 +33,7 @@ class PlatformViewVideo extends StatelessWidget {
     this.ohosHcpp = false,
     this.androidSurfaceTransfer,
     this.androidSurfacePixelFormat,
+    this.lgExperimentOwnerToken,
   });
 
   /// The handle (player ID) of the video player.
@@ -61,6 +62,7 @@ class PlatformViewVideo extends StatelessWidget {
   final bool ohosHcpp;
   final String? androidSurfaceTransfer;
   final String? androidSurfacePixelFormat;
+  final String? lgExperimentOwnerToken;
 
   @override
   Widget build(BuildContext context) {
@@ -75,6 +77,8 @@ class PlatformViewVideo extends StatelessWidget {
       'height': height,
       'generation': generation,
       'mpvWindow': mpvWindow,
+      if (Platform.isAndroid && lgExperimentOwnerToken != null)
+        'lgExperimentOwnerToken': lgExperimentOwnerToken,
       if (Platform.operatingSystem == 'ohos' &&
           (ohosSurfaceWidthPx ?? 0) > 0 &&
           (ohosSurfaceHeightPx ?? 0) > 0) ...{
@@ -128,8 +132,7 @@ class PlatformViewVideo extends StatelessWidget {
           // fallback where XComponent onLoad never fires.
           return AndroidViewSurface(
             controller: controller as AndroidViewController,
-            gestureRecognizers:
-                const <Factory<OneSequenceGestureRecognizer>>{},
+            gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
             hitTestBehavior: ohos
                 ? PlatformViewHitTestBehavior.transparent
                 : PlatformViewHitTestBehavior.opaque,
@@ -170,9 +173,8 @@ class PlatformViewVideo extends StatelessWidget {
                       ? PlatformViewsService.initSurfaceAndroidView(
                           id: params.id,
                           viewType: viewType,
-                          layoutDirection:
-                              Directionality.maybeOf(context) ??
-                                  TextDirection.ltr,
+                          layoutDirection: Directionality.maybeOf(context) ??
+                              TextDirection.ltr,
                           creationParams: creationParams,
                           creationParamsCodec: const StandardMessageCodec(),
                           onFocus: () => params.onFocusChanged(true),
@@ -180,9 +182,8 @@ class PlatformViewVideo extends StatelessWidget {
                       : PlatformViewsService.initExpensiveAndroidView(
                           id: params.id,
                           viewType: viewType,
-                          layoutDirection:
-                              Directionality.maybeOf(context) ??
-                                  TextDirection.ltr,
+                          layoutDirection: Directionality.maybeOf(context) ??
+                              TextDirection.ltr,
                           creationParams: creationParams,
                           creationParamsCodec: const StandardMessageCodec(),
                           onFocus: () => params.onFocusChanged(true),

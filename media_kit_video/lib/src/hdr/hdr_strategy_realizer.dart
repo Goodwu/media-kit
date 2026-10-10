@@ -3,11 +3,15 @@
 /// Copyright © 2021 & onwards, Hitesh Kumar Saini <saini123hitesh@gmail.com>.
 /// All rights reserved.
 /// Use of this source code is governed by MIT license that can be found in the LICENSE file.
+import 'package:flutter/foundation.dart'
+    show debugPrint, visibleForTesting;
 import 'hdr_capabilities.dart';
+import 'hdr_mkst_bridge_probe.dart';
 import 'hdr_output_policy.dart' show HdrOutputPolicy;
 import 'hdr_route.dart';
 import 'hdr_source_descriptor.dart';
 import 'hdr_strategy.dart';
+import 'hdr_yuv_presentation_contract.dart';
 
 /// The outcome of realizing one strategy: either a concrete route, or the
 /// typed reason the strategy is infeasible for this source on this device.
@@ -226,7 +230,51 @@ class HdrStrategyRealizer {
       return const HdrStrategyRealization.infeasible(
           HdrDegradeReason.displayLacksTransfer);
     }
+    if (output == HdrOutputTransfer.pq &&
+        (_convertPqSurfaceTransfer != 'pq' &&
+            (_convertPqSurfaceTransfer != 'pq-itu' ||
+                !_convertRouteLock ||
+                capabilities.sdkInt != 24 ||
+                capabilities.dataSpaceExt?.id != 'lg-pq' ||
+                capabilities.dataSpaceExt?.applicable != true))) {
+      return const HdrStrategyRealization.infeasible(
+          HdrDegradeReason.unsupportedStrategy);
+    }
     final String trc = output == HdrOutputTransfer.pq ? 'pq' : 'hlg';
+    // API < 26 has no non-copy mediacodec GPU import; the convert route
+    // then decodes through mediacodec-copy like the SDR routes.
+    final bool useMediacodecCopy = _requiresMediacodecCopy(capabilities);
+    final String routedHwdec =
+        useMediacodecCopy ? 'mediacodec-copy' : 'mediacodec';
+    // The official backend applies at this decision point only when the
+    // bridge reports an owner-bound explicit init; every gate above
+    // (applicability, display capability, transfer whitelist) has already
+    // passed, so the override rides the same admission as the routed value.
+    // Other strategies never consult the bridge.
+    final String hwdec = surfaceTexturePocHwdec(
+      routedHwdec,
+      officialBackendReady:
+          mkstBridgeProbeOverride?.call() ?? mkstBridgeInitialized(),
+    );
+    if (hwdec != routedHwdec) {
+      debugPrint('MKSURF-POC: route hwdec override $routedHwdec -> $hwdec');
+    }
+    // A4 contract split, P8.4 A5 V2 review fix: the separate offscreen
+    // contract is keyed on the CARRIER, not on the requested window label.
+    // The `surfacetexture` hwdec is the LG yuv-diag path's only carrier and
+    // presents the actual YUV shape (the vendor forces the 0x11C60000 window
+    // label for either PQ request in yuvDiag mode), so the offscreen
+    // contract (full-range normalized PQ in the offscreen FBO, realized
+    // mpv-side by the owned video-output-levels=full write) must be declared
+    // for the product-default `pq` request too, not only for the locked
+    // `pq-itu` experiment. RGB window routes (plain mediacodec /
+    // mediacodec-copy carriers) share a single output contract and keep
+    // offscreenTransfer null.
+    final bool yuvWindowContract = hwdec == 'surfacetexture' &&
+        output == HdrOutputTransfer.pq &&
+        (_convertPqSurfaceTransfer == 'pq' ||
+            _convertPqSurfaceTransfer ==
+                HdrYuvPresentationContract.windowTransfer);
     return HdrStrategyRealization.route(
       HdrRoute(
         strategy: HdrStrategy.baseLayerConvert,
@@ -235,13 +283,21 @@ class HdrStrategyRealizer {
         appliesDynamicMetadata: false,
         topology: HdrTopology.platformView,
         vo: 'gpu-next',
-        hwdec: 'mediacodec',
+        hwdec: hwdec,
         targetPrim: 'bt.2020',
         targetTrc: trc,
-        surfaceTransfer: trc,
+        // Keep the production PQ label unchanged. A limited-range override
+        // is admitted only for the explicitly locked LG lab experiment.
+        surfaceTransfer:
+            output == HdrOutputTransfer.pq ? _convertPqSurfaceTransfer : trc,
+        offscreenTransfer: yuvWindowContract
+            ? HdrYuvPresentationContract.offscreenTransfer
+            : null,
         stripDvRpu: source.dynamicMetadata == HdrDynamicMetadata.dolbyVision,
         dependencies: <String>{
-          HdrRouteDependency.hwdecMediacodec,
+          useMediacodecCopy
+              ? HdrRouteDependency.hwdecMediacodecCopy
+              : HdrRouteDependency.hwdecMediacodec,
           HdrRouteDependency.topologyPlatformView,
           output == HdrOutputTransfer.pq
               ? HdrRouteDependency.dataspacePq
@@ -442,10 +498,52 @@ class HdrStrategyRealizer {
 
   /// API 24/25 cannot import decoder buffers through the public GPU path used
   /// by the Texture strategies. API 26/27 can import buffers, while public
-  /// HDR dataspace application is available from API 28.
+  /// HDR dataspace application is available from API 28, or earlier on a
+  /// device whose registered vendor dataspace extension passed its
+  /// read-only applicability gate (e.g. the API 24 LG private-slot path).
+  /// Production defaults to PQ full-range. Limited is a locked LG-only
+  /// experiment, not a claim about verified color or panel presentation.
+  static const String _convertPqSurfaceTransfer = String.fromEnvironment(
+      'MEDIA_KIT_ANDROID_CONVERT_SURFACE_TRANSFER',
+      defaultValue: 'pq');
+  static const bool _convertRouteLock =
+      bool.fromEnvironment('MEDIA_KIT_ANDROID_HDR_CONVERT_ROUTE_LOCK');
+
+  /// WP-C SurfaceTexture PoC (phase1-design-spec §5): a non-empty
+  /// MEDIA_KIT_ANDROID_SURFACETEXTURE_POC define overrides only the
+  /// baseLayerConvert route hwdec with the experimental `surfacetexture`
+  /// importer. Empty (default) keeps every routed value unchanged.
+  static const String _surfaceTexturePoc =
+      String.fromEnvironment('MEDIA_KIT_ANDROID_SURFACETEXTURE_POC');
+
+  /// Test seam for the official backend probe: null (default) runs the real
+  /// FFI probe. Only the baseLayerConvert decision point consumes it.
+  ///
+  /// Visibility constraint (frozen): this seam exists for host tests only —
+  /// it stays `@visibleForTesting` (compile-time enforced, no runtime gate,
+  /// no build flag around it) and must never grow a production caller or a
+  /// runtime toggle that could silently re-route the admission decision.
+  @visibleForTesting
+  static bool Function()? mkstBridgeProbeOverride;
+
+  /// hwdec written at the baseLayerConvert decision point. Pure helper with
+  /// injectable inputs for tests; production passes the official backend
+  /// probe ([mkstBridgeInitialized]) and uses [_surfaceTexturePoc].
+  /// All other realizer decision points never call this. The define stays
+  /// authoritative: a non-empty define forces the override even when the
+  /// probe is absent; the official path applies only while the bridge
+  /// reports an owner-bound explicit init.
+  static String surfaceTexturePocHwdec(String routedHwdec,
+          {String? define, bool officialBackendReady = false}) =>
+      (define ?? _surfaceTexturePoc).isNotEmpty || officialBackendReady
+          ? 'surfacetexture'
+          : routedHwdec;
+
   static bool _requiresMediacodecCopy(HdrCapabilities capabilities) =>
       capabilities.sdkInt > 0 && capabilities.sdkInt < 26;
 
   static bool _gpuHdrDataSpaceUnavailable(HdrCapabilities capabilities) =>
-      capabilities.sdkInt > 0 && capabilities.sdkInt < 28;
+      capabilities.sdkInt > 0 &&
+      capabilities.sdkInt < 28 &&
+      capabilities.dataSpaceExt?.applicable != true;
 }

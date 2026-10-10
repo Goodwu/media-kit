@@ -257,6 +257,9 @@ class AndroidVideoOptions {
   final String? surfaceTransfer;
   final String? surfacePixelFormat;
 
+  /// Null outside the explicitly owner-bound LG lab experiment.
+  final String? lgExperimentOwnerToken;
+
   const AndroidVideoOptions({
     this.usePlatformView = false,
     this.useHCPP = false,
@@ -266,6 +269,7 @@ class AndroidVideoOptions {
     this.gpuApi,
     this.surfaceTransfer,
     this.surfacePixelFormat,
+    this.lgExperimentOwnerToken,
   });
 
   AndroidVideoOptions copyWith({
@@ -278,6 +282,7 @@ class AndroidVideoOptions {
     bool clearGpuApi = false,
     String? surfaceTransfer,
     String? surfacePixelFormat,
+    String? lgExperimentOwnerToken,
   }) =>
       AndroidVideoOptions(
         usePlatformView: usePlatformView ?? this.usePlatformView,
@@ -291,6 +296,8 @@ class AndroidVideoOptions {
         gpuApi: clearGpuApi ? null : gpuApi ?? this.gpuApi,
         surfaceTransfer: surfaceTransfer ?? this.surfaceTransfer,
         surfacePixelFormat: surfacePixelFormat ?? this.surfacePixelFormat,
+        lgExperimentOwnerToken:
+            lgExperimentOwnerToken ?? this.lgExperimentOwnerToken,
       );
 }
 

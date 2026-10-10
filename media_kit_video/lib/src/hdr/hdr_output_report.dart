@@ -69,8 +69,31 @@ class HdrOutputReport {
   /// The observed `hwdec-current`, when read.
   final String? hwdecCurrent;
 
-  /// Whether the decoder review completed for this generation.
+  /// Whether the decoder review completed for this generation. This does
+  /// not certify the surface dataspace or panel presentation.
   final bool verified;
+
+  /// A setter was accepted; this is weaker than a matching surface readback.
+  bool get dataSpaceSetterAccepted =>
+      actual?.surfaceTransfer != null &&
+      dataSpacePath != null &&
+      dataSpacePath != 'none';
+
+  /// Exact transfer AND range readback match; never inferred from extension
+  /// applicability or a successful setter.
+  bool get dataSpaceReadbackVerified {
+    final value = dataSpaceReadback?.toUpperCase();
+    switch (dataSpaceRequested) {
+      case 'pq':
+        return value == 'DATASPACE_BT2020_PQ' || value == '0X09C60000';
+      case 'pq-itu':
+        return value == 'DATASPACE_BT2020_PQ_LIMITED' || value == '0X11C60000';
+      case 'hlg':
+        return value == 'DATASPACE_BT2020_HLG' || value == '0X09C70000';
+      default:
+        return false;
+    }
+  }
 
   /// The typed degradation reason, when the open degraded (or was blocked,
   /// e.g. `p5PipelineUnavailable`) or runs on an unsupported platform
@@ -121,6 +144,8 @@ class HdrOutputReport {
       'source: $source (${sourceOrigin?.name}), actual: $actual, '
       'dataspace: $dataSpaceRequested/$dataSpacePath/$dataSpaceReadback, '
       'hwdec: $hwdecCurrent, verified: $verified, '
+      'setterAccepted: $dataSpaceSetterAccepted, '
+      'readbackVerified: $dataSpaceReadbackVerified, '
       'degrade: ${degradeReason?.name}, diagnostic: $diagnostic, '
       'error: $error)';
 }

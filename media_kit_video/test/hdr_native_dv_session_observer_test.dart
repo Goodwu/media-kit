@@ -243,7 +243,7 @@ void main() {
     await session.open(env.media, hint: _p5);
     expect(captures, 0);
     expect(backend.opened.map((p) => p.route.strategy),
-        [HdrStrategy.nativeDolbyVision, HdrStrategy.toneMapSdr]);
+        [HdrStrategy.nativeDolbyVision, HdrStrategy.metadataReshape]);
     await session.dispose();
   });
 
@@ -396,8 +396,8 @@ void main() {
     await session.open(env.media, hint: _p5);
     expect(captures, 1); // captured validation is not route application.
     expect(backend.opened.map((p) => p.route.strategy),
-        [HdrStrategy.nativeDolbyVision, HdrStrategy.toneMapSdr]);
-    expect(session.report.value.actual?.strategy, HdrStrategy.toneMapSdr);
+        [HdrStrategy.nativeDolbyVision, HdrStrategy.metadataReshape]);
+    expect(session.report.value.actual?.strategy, HdrStrategy.metadataReshape);
     await session.dispose();
   });
 
@@ -411,7 +411,7 @@ void main() {
     await session.open(env.media, hint: _p5);
     expect(captures, 0);
     expect(
-        backend.opened.map((p) => p.route.strategy), [HdrStrategy.toneMapSdr]);
+        backend.opened.map((p) => p.route.strategy), [HdrStrategy.metadataReshape]);
     await session.dispose();
     final source =
         File('lib/src/hdr/hdr_video_session.dart').readAsStringSync();

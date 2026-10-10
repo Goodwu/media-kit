@@ -15,6 +15,7 @@ import 'hdr_open_coordinator.dart';
 import 'hdr_native_dv_option_owner.dart';
 import 'hdr_native_dv_review.dart';
 import 'hdr_native_dv_review_evidence.dart';
+import 'hdr_yuv_presentation_contract.dart';
 
 /// Android execution backend for `HdrVideoSession` (ported from hdr_lab's
 /// `AndroidHdrPlayerBackend` with the sample identity removed): writes mpv
@@ -108,6 +109,10 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
   @override
   Future<void> validate(HdrOpenPlan plan) async {
     final route = plan.route;
+    // A4 contract split: a route declaring the YUV window shape must carry
+    // the whole accepted presentation quad, before any owned property write
+    // or output creation runs (fail-closed).
+    HdrYuvPresentationContract.validate(route);
     final hasPair = route.strategy == HdrStrategy.nativeDolbyVision ||
         route.vdLavcOptions != null ||
         route.mediacodecEmbedRenderMode != null;
@@ -545,6 +550,20 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
     if (route.vdLavcOptions != null) {
       await player.lock.synchronized(_nativeDvOptions.verify);
     }
+    // A4 contract split: on the YUV window route both contracts are issued
+    // here — the offscreen contract as the mpv output-levels option (the
+    // lab define's MPV_OUTPUT_LEVELS=full application, promoted into the
+    // backend) and the window contract through the dataspace apply below.
+    // The quad is re-validated fail-closed first, and the write is owned so
+    // the session end restores the captured value. Routes without an
+    // offscreen contract issue nothing (default routing unchanged).
+    if (HdrYuvPresentationContract.isYuvWindowRoute(route)) {
+      HdrYuvPresentationContract.validate(route);
+      await _setOwned(
+          'video-output-levels',
+          HdrYuvPresentationContract.mpvOutputLevels(
+              route.offscreenTransfer!));
+    }
     if (route.topology == HdrTopology.platformView) {
       final output = await outputSlot.current!.platform.future;
       await output.waitUntilCurrentOutputBound
@@ -575,8 +594,13 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
             reason: HdrDegradeReason.dataSpaceApplyFailed,
           );
         }
+        // Only the evidence-pinned API24 LG extension may accept a setter
+        // without readback. This is not verified presentation evidence.
+        final bool acceptedWithoutReadback = acceptsUnverifiedLgSetter(
+            plan.capabilities, transfer, _dataSpacePath, _dataSpaceReadback);
         if (_dataSpacePath != 'surfaceControl' &&
-            !_readbackMatches(transfer, _dataSpaceReadback)) {
+            !acceptedWithoutReadback &&
+            !dataSpaceReadbackMatches(transfer, _dataSpaceReadback)) {
           throw HdrDataSpaceApplyException(
             transfer,
             path: _dataSpacePath,
@@ -632,16 +656,28 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
   /// The readback is expected to carry the requested transfer on the
   /// ANativeWindow paths (`ndk`/`ext:<id>`); constant names differ per
   /// platform, so match on the transfer keyword.
-  static bool _readbackMatches(String transfer, String? readback) {
-    if (readback == null || readback.isEmpty || readback == 'none') {
-      return false;
+  static bool dataSpaceReadbackMatches(String transfer, String? readback) {
+    final value = readback?.toUpperCase();
+    switch (transfer) {
+      case 'pq':
+        return value == 'DATASPACE_BT2020_PQ' || value == '0X09C60000';
+      case 'pq-itu':
+        return value == 'DATASPACE_BT2020_PQ_LIMITED' || value == '0X11C60000';
+      case 'hlg':
+        return value == 'DATASPACE_BT2020_HLG' || value == '0X09C70000';
+      default:
+        return false;
     }
-    final upper = readback.toUpperCase();
-    return transfer == 'pq'
-        ? upper.contains('PQ')
-        : transfer == 'hlg'
-            ? upper.contains('HLG')
-            : true;
+  }
+
+  static bool acceptsUnverifiedLgSetter(HdrCapabilities capabilities,
+      String transfer, String? path, String? readback) {
+    return capabilities.sdkInt == 24 &&
+        capabilities.dataSpaceExt?.id == 'lg-pq' &&
+        capabilities.dataSpaceExt?.applicable == true &&
+        path == 'ext:lg-pq' &&
+        (transfer == 'pq' || transfer == 'pq-itu') &&
+        (readback == null || readback.isEmpty || readback == 'none');
   }
 
   @override

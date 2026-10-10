@@ -1,5 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:media_kit_video/media_kit_video.dart';
 
 import 'package:media_kit_video/src/video_controller/android_video_controller/real.dart';
 
@@ -41,6 +42,29 @@ void main() {
         'readback': readback,
       };
 
+  test('LYA default convert still requests PQ full over the channel', () async {
+    const capabilities = HdrCapabilities(
+        sdkInt: 29,
+        displayHdrTypes: {2},
+        hevcDecoders: [],
+        dolbyVisionDecoders: [],
+        p5PipelineAvailable: true,
+        dataSpaceBridgeLoaded: true,
+        dataSpaceExt: HdrDataSpaceExtInfo(id: 'lya-pq', applicable: true));
+    final route = HdrStrategyRealizer.realize(HdrStrategy.baseLayerConvert,
+            source: const HdrSourceDescriptor(transfer: 'hlg'),
+            sourceClass: HdrSourceClass.hlg,
+            capabilities: capabilities)
+        .route!;
+    handler = (call) {
+      expect(call.arguments['transfer'], 'pq');
+      return report(true, 'ext:lya-pq', 'DATASPACE_BT2020_PQ');
+    };
+    final result = await AndroidVideoController.invokeApplyDataSpace(
+        handle: 7, transfer: route.surfaceTransfer!);
+    expect(calls, hasLength(1));
+    expect(result!['requested'], 'pq');
+  });
   group('AndroidVideoController.invokeApplyDataSpace', () {
     test('ndk path: outgoing arguments and parsed report', () async {
       handler = (MethodCall call) async {
@@ -130,12 +154,14 @@ void main() {
           transfer: branch['requested'] as String,
         );
         expect(result, isNotNull);
-        expect(result!.keys, containsAll(<String>[
-          'applied',
-          'path',
-          'requested',
-          'readback',
-        ]));
+        expect(
+            result!.keys,
+            containsAll(<String>[
+              'applied',
+              'path',
+              'requested',
+              'readback',
+            ]));
         expect(result['applied'], isA<bool>());
         expect(result['path'], isA<String>());
         expect(result['requested'], isA<String>());
