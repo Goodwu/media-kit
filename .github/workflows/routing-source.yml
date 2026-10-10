@@ -11,11 +11,37 @@ on:
 permissions:
   contents: read
 
+# Push and PR events for the same branch must not duplicate the full suites.
 concurrency:
-  group: routing-source-${{ github.event.pull_request.number || github.ref }}
+  group: routing-source-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 
 jobs:
+  python-tools:
+    name: Routing audit utility tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Run extraction and guarded-repair utility tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ci-tool-results
+          git rev-parse HEAD | tee ci-tool-results/source.txt
+          python3 -m unittest discover -s tool/routing_native_audit -v 2>&1 | tee ci-tool-results/extractor.log
+          python3 -m unittest discover -s tool/routing_ci -v 2>&1 | tee ci-tool-results/repair-tool.log
+          git diff --exit-code
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: routing-tools-${{ github.event.pull_request.head.sha || github.sha }}
+          path: ci-tool-results
+          if-no-files-found: error
+
   flutter-source:
     name: Source analyze and tests (${{ matrix.package }})
     runs-on: ubuntu-latest
@@ -67,6 +93,19 @@ jobs:
         run: |
           set -euo pipefail
           flutter test --no-pub --concurrency=1 --reporter expanded 2>&1 | tee "$GITHUB_WORKSPACE/.ci-results/${{ matrix.package }}/tests.log"
+      - name: Compile and execute the OHOS facade on JavaScript
+        if: ${{ !cancelled() && steps.resolve.outcome == 'success' && matrix.package == 'media_kit_video' }}
+        run: |
+          set -euo pipefail
+          out="$GITHUB_WORKSPACE/.ci-results/${{ matrix.package }}"
+          dart compile js test/web/ohos_sw_render_smoke.dart -o "$out/ohos-smoke.js" 2>&1 | tee "$out/ohos-js-compile.log"
+          node "$out/ohos-smoke.js" 2>&1 | tee "$out/ohos-js-run.log"
+      - name: Compile the OHOS facade on WebAssembly
+        if: ${{ !cancelled() && steps.resolve.outcome == 'success' && matrix.package == 'media_kit_video' }}
+        run: |
+          set -euo pipefail
+          out="$GITHUB_WORKSPACE/.ci-results/${{ matrix.package }}"
+          dart compile wasm test/web/ohos_sw_render_smoke.dart -o "$out/ohos-smoke.wasm" 2>&1 | tee "$out/ohos-wasm-compile.log"
       - name: Check that testing did not rewrite source
         if: ${{ !cancelled() && steps.resolve.outcome == 'success' }}
         run: git diff --exit-code -- lib test
