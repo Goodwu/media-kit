@@ -14,6 +14,8 @@ R01e新提交5c8e54dc（tree d00c5232）独立库CI：source38162912143 attempt1
 
 General CI窄诊断：旧8b98/87eb两run已terminal cancelled，日志测试持续推进无挂死/timeout证据；当前5c8四test仍live/raw404。本轮ci.yml仅对head_ref/ref_name精确routing/MK-ROUTING-20261011设置cancel-in-progress=false，避免阶段push反复打断长suite；其他分支true。完整actionlint前后均相同3个既有旧action runner错误（checkoutv2一处/softpropsv1两处），表达式无新错误，不能称整workflow lint绿。证据/tmp/mk-routing-general-diagnosis-20261012/summary.json及/tmp/mk-general-ci-baseline-actionlint.log。后续旧action升级仍需检查发布契约。
 
+CI旧action窄修：仅ci.yml checkoutv2→v4一处、softpropsv1→v2两处，独立writer核官方action输入submodules/draft/prerelease/tag_name/files兼容，Lead三行diff/hash复核；if/permissions/发布路径/资产/签名/tests未改。完整actionlint1.7.12与diffcheck通过，文件SHA795561ea0a5362525fd9b0cca7f0c9ba66087d23a92b1b68e43821ccea96c79d。只workflow语法/合同验收，不实际发布/native验收；与CONFIGdirty分开提交。
+
 Android/Pink实际Release接线中央6111864635进行中：一次exact source向量、受审A/JAR与B/manifest-evidence双artifact获取、固定selector与账本、bootstrap/副本/显式routing source gates、实际localJAR+arm64Only构建参数、APK后/ABI/sign/parity/finalize。账本仍空，不批准native，缺接受记录必须Gradle前失败不回旧JAR。pending-parity仅中间材料，全部门过才candidate；旧parity对libapp AOT的潜在差异未实测、不删门。生产pin/metadata/签名不放宽，routing不release。
 
 DV0011095原review5483753705/6110373174/6111479264未修，DEVICE继续原配方/native owner/YUV arm/实机单写，CORE为唯一公共集成者。PR5最新5b历史16行已归aeaf，3md逐字/6hash/相对链接核验，两脚本未导入；188/34info/244为旧8bed+a3+JARcd5声称，原manifest日志未随PR入库，AVC EOS不等dvh1/HDR、UX归因未证。DV001与PR5最终归并、真实完整manifest及最新P5/P8.4/true与false/普通Session/HDR/持续性能仍必需，不能结项。

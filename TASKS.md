@@ -15,7 +15,7 @@
 - DV001剩余门：符号读取失败关闭、两Vulkan目标独立检查、构建失败传播、干净staging、最终成员/链接/补丁来源；需受审完整manifest及最新适用源码产物。旧8bed+a3+JARcd5的188/34info/244仅DEVICE声称，AVC EOS不能代替dvh1/HDR验收。最新P5/P8.4、experimental true/false、普通Session与可见输出/持续性能仍必需。
 - native输入gate08acc独立critical通过；CORE接受账本空。Android/Pink实际Release接线作者114/全Python412通过，但V2确认新增res/assets/shaders/jniLibs输入漏检阻断，原writer第一轮修复中；未获受审输入必须明确阻断，不用旧默认JAR。Windows完整bootstrap已解阻，旧PNG唯一因果未证明。actualYUV carrier/owner arm仍DEVICE范围；产品experimental默认false不变。
 
-- General长suite旧两向量已取消且日志持续推进，无挂死证据；ci.yml仅本任务routing分支保留live运行，其他分支取消策略不变。actionlint仍有3个既有旧action runner错误需后续修；不推定general通过。
+- General长suite旧两向量已取消且日志持续推进，无挂死证据；ci.yml仅本任务routing分支保留live运行，其他分支取消策略不变。三处旧action已迁移checkoutv4/softpropsv2并完整actionlint通过；不推定general通过。
 ## 接手快照（2026-10-10 更新；换 agent 从这里开始）
 
 - **事实源与范围**：本文件是任务状态；`archives/README.md` 是主题导航。主题上下文（各 conversation 顶部 Current State）：Android HDR/P5 主线 `archives/conversations/android-hdr-dv-display-plan-20260922.md`；LG/marble 线 `archives/conversations/lg-h870ds-hdr-demo-20261004.md`；整改主题 `archives/conversations/architecture-review-remediation-20260930.md`。LG followup 单一计划=`docs/plans/lg-p84-hdr-followup-plan-20261009.md`（v4.1，全部出清，触发式候选/重开条件在案）。接手后先重读 Git/设备状态，快照仅是入口。

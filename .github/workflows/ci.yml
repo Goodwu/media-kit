@@ -149,7 +149,7 @@ jobs:
       run:
         working-directory: media_kit_test
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: "true"
       - name: Set up Flutter for ARM64
@@ -171,7 +171,7 @@ jobs:
         with:
           name: media_kit_test_win32_arm64
           path: media_kit_test/media_kit_test_win32_arm64.7z
-      - uses: softprops/action-gh-release@v1
+      - uses: softprops/action-gh-release@v2
         if: github.repository == 'media-kit/media-kit' && github.ref == 'refs/heads/main'
         with:
           draft: true
@@ -702,7 +702,7 @@ jobs:
           path: |
             manifest.json
             SHA256SUMS
-      - uses: softprops/action-gh-release@v1
+      - uses: softprops/action-gh-release@v2
         with:
           draft: true
           prerelease: false
