@@ -154,7 +154,7 @@ class HdrOutputBindTimeout extends TimeoutException {
   }
 }
 
-/// An unresolved review cannot be accepted after the single reopen budget.
+/// An unresolved review cannot be accepted after the configured reopen budget.
 class HdrReviewReopenLimit implements Exception {
   const HdrReviewReopenLimit();
 }
@@ -192,11 +192,16 @@ class HdrOpenCoordinator<R, P> {
     this.review,
     this.retry,
     this.maxRetries = 0,
+    this.maxReviewReopens = 1,
     this.onPhase,
     this.onBackendCallDiagnostic,
     this.diagnosticSessionGeneration,
     this.outputTimeout = const Duration(seconds: 10),
-  });
+  }) {
+    if (maxReviewReopens < 0 || maxReviewReopens > 4) {
+      throw ArgumentError.value(maxReviewReopens, 'maxReviewReopens', 'Expected 0..4');
+    }
+  }
 
   final HdrOpenBackend<P> backend;
 
@@ -213,6 +218,10 @@ class HdrOpenCoordinator<R, P> {
 
   /// How many times [retry] may replace a plan within one open.
   final int maxRetries;
+
+  /// Default single source-review rebuild. Session may use a bounded larger
+  /// value for distinct SDR requests while enforcing its own admission gates.
+  final int maxReviewReopens;
 
   final Duration outputTimeout;
   final void Function(int generation, String phase, int elapsedMicros)? onPhase;
@@ -327,7 +336,7 @@ class HdrOpenCoordinator<R, P> {
       var diagnosticAttempt = _diagnosticAttempt(generation, attemptPlan);
       var currentStart = start;
       var retriesUsed = 0;
-      var rebuilt = false;
+      var reviewReopens = 0;
       while (true) {
         try {
           _check(generation);
@@ -619,12 +628,12 @@ class HdrOpenCoordinator<R, P> {
               ? HdrReviewDecision<P>.accept()
               : await decide(attemptPlan, facts);
           _check(generation);
-          if (decision.reopen && rebuilt) {
+          if (decision.reopen && reviewReopens >= maxReviewReopens) {
             throw const HdrReviewReopenLimit();
           }
           if (decision.reopen) {
-            // One review-driven in-place reopen per open (plan 1.4 step 8).
-            rebuilt = true;
+            // Review-driven replacement shares the same finite transaction.
+            reviewReopens++;
             attemptPlan = decision.nextPlan as P;
             diagnosticAttempt = _diagnosticAttempt(generation, attemptPlan);
             currentStart = decision.position;

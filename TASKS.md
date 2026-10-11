@@ -6,14 +6,14 @@
 
 ## MK-ROUTING-20261011（CORE继任，2026-10-11）
 
-- CONFIG事实模型检查点：独立35库/22App/4额外反例与targetstrict通过；requested/effective/override与纯设置适配不等于闭环，实际DASH/planner/Session/report接线仍待R01e后串行。仅模型切片，其他dirty不归入。最新完整已验08acc+8b98 source38160661703四平台SUCCESS，359Python/各211Flutter；Build6Release仍FAIL，native/DEVICE仍未验。
-- 状态：进行中；唯一集成分支 `routing/MK-ROUTING-20261011`，主PR media-kit#4/App#1/FFmpeg#1。CORE接手登记6110756605；context=`archives/conversations/media-kit-routing-20261011.md`。
-- 已完成：CORE-F01实现及库/App宿主验证，库6e7570fc + App569138fa：571video（Linux跳过3既有macOS例）、298lab、192App Flutter；同App SHA此前244Python保留。bundle/10包来源/新鲜度成功，严格分析仍34info；旧planned/pending/62info已由终态取代。
-- 当前源码：库91521544 source38158342447 video604+3既有mac Linux跳过、lab298/strict通过；App f179+915两run38159246222/38159246432实际Android/Linux/macOS bootstrap通过（strict零问题、各211Flutter/bundle/SDK+package patches/来源），本轮Python各309；Windows未知SDK修改门失败，Build另6Release前置失败。general库CI最后仍运行，不推定绿。旧34info已清零。
-- DV001与PR#5必须归并：86c三Markdown已归并，5b279611新增16行device-results续接中、逐文件hash/来源保持；两个配方脚本未导入。DV0011095原审查未修，DEVICE原PR所有；最新整合P5/P8.4/true与false/普通Session复测不可省。旧8bed+a3+JARcd5的188/34info/244为DEVICE声称，原日志未随PR入库；AVC EOS不是dvh1/HDR验收。
-- R01a/R01b/R01c已实现，R01c915独立231/strict通过且当前源码CI通过；R01d两critical阻断已修复并独立255/strict通过，两删除门负例红灯证据保留，检查点待提交。当前普通scalar decoder/MIME/frame/代次与报告绑定已接通；review预算不包含open，不能抢占同步FFI。实际YUV carrier、独立copy/software catalog、auto/prefer/require有效配置仍开放。
-- CI04 Windows窄修进行中，不忽略未知SDK diff；native输入门新文件待critical，CORE接受账本空，实际Release接线/候选未验。experimental默认false不变，true主测/false回归。
-- DEVICE继续native构建/实机；DV001仍1095、PR5最新5b279611文档增量待核验归并，完整来源/owner/YUV arm/最新HDR及持续性能未完成。主任务PR不自动merge/publish。
+- 状态：进行中；唯一集成分支 `routing/MK-ROUTING-20261011`，主PR media-kit#4/App#1/FFmpeg#1；context=`archives/conversations/media-kit-routing-20261011.md`。主PR不自动合并或发布。
+- 当前推送源码：库87eb946 + Appabc149；FFmpeg9aba43cf。CONFIG模型检查点独立35库/22App/4额外反例与target strict通过，实际DASH/planner/Session/report同一配置闭环仍未完成。
+- CORE-F01、DASH逐候选过滤、query迁移及FFmpeg e8df200c已完成，不重新开发。旧6e757+569138的192Flutter/34info属于历史向量；34info已在CORE-CI03清零。
+- 最新完整App源码验证：08acc+8b98 source38160661703四平台SUCCESS，各211Flutter/strict0/bundle/来源/freshness，实际359Python；Build38160661882六Release仍FAIL。新abc149+87eb CI06 source38161696564四平台SUCCESS，各233Flutter/strict0/bundle/finalize/来源与freshness；Build38161696805源码矩阵SUCCESS但六Release失败，Python本轮各359；库source38161681107 video663+3原mac Linux跳过/lab298/两strict通过。不得跨向量重标。
+- R01a/b/c/d检查点已提交；R01d8b98独立255/strict通过，实际decoder/MIME/frame/代次与报告绑定已接通。R01e direct/copy/software有限catalog当前17文件冻结，作者及独立V2各688/strict通过，17哈希一致、4独立外置反例通过；本轮提交检查点，不代表native/实机验收。
+- DV001与PR#5必须完成归并：PR5 86c三Markdown与5b279611追加16行已分别归入e162/aeaf并独立原文/hash/链接核验；两个配方脚本未导入，不能标整项完成。2026-10-12本轮重新读远端，DV001仍1095a43，PR5仍5b279611。DV001原review5483753705/6110373174未修，DEVICE继续原PR单写，CORE审查整合。
+- DV001剩余门：符号读取失败关闭、两Vulkan目标独立检查、构建失败传播、干净staging、最终成员/链接/补丁来源；需受审完整manifest及最新适用源码产物。旧8bed+a3+JARcd5的188/34info/244仅DEVICE声称，AVC EOS不能代替dvh1/HDR验收。最新P5/P8.4、experimental true/false、普通Session与可见输出/持续性能仍必需。
+- native输入gate08acc独立critical通过；CORE接受账本空。Android/Pink实际Release接线正在实现，未获受审输入必须明确阻断，不用旧默认JAR。Windows完整bootstrap已解阻，旧PNG唯一因果未证明。actualYUV carrier/owner arm仍DEVICE范围；产品experimental默认false不变。
 
 ## 接手快照（2026-10-10 更新；换 agent 从这里开始）
 

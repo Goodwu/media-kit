@@ -51,51 +51,51 @@ class HdrRoutingPolicy {
   /// HDR10+ metadata yet) — those classes fall through to the safety net.
   static const Map<HdrSourceClass, List<HdrStrategy>> defaultPreferences =
       <HdrSourceClass, List<HdrStrategy>>{
-        HdrSourceClass.dvP5: <HdrStrategy>[
-          HdrStrategy.nativeDolbyVision,
-          HdrStrategy.metadataReshape,
-          HdrStrategy.toneMapSdr,
-        ],
-        HdrSourceClass.dvP81: <HdrStrategy>[
-          HdrStrategy.nativeDolbyVision,
-          HdrStrategy.baseLayerDirect,
-          HdrStrategy.metadataReshape,
-          HdrStrategy.toneMapSdr,
-        ],
-        HdrSourceClass.dvP84: <HdrStrategy>[
-          HdrStrategy.nativeDolbyVision,
-          HdrStrategy.baseLayerDirect,
-          HdrStrategy.baseLayerConvert,
-          HdrStrategy.metadataReshape,
-          HdrStrategy.toneMapSdr,
-        ],
-        HdrSourceClass.dvP82: <HdrStrategy>[
-          HdrStrategy.nativeDolbyVision,
-          HdrStrategy.metadataReshape,
-          HdrStrategy.sdrDirect,
-        ],
-        HdrSourceClass.dvP7: <HdrStrategy>[
-          HdrStrategy.baseLayerDirect,
-          HdrStrategy.metadataReshape,
-          HdrStrategy.toneMapSdr,
-        ],
-        HdrSourceClass.hdr10: <HdrStrategy>[
-          HdrStrategy.baseLayerDirect,
-          HdrStrategy.baseLayerConvert,
-          HdrStrategy.toneMapSdr,
-        ],
-        HdrSourceClass.hlg: <HdrStrategy>[
-          HdrStrategy.baseLayerDirect,
-          HdrStrategy.baseLayerConvert,
-          HdrStrategy.toneMapSdr,
-        ],
-        HdrSourceClass.hdrVivid: <HdrStrategy>[
-          HdrStrategy.baseLayerDirect,
-          HdrStrategy.metadataReshape,
-          HdrStrategy.toneMapSdr,
-        ],
-        HdrSourceClass.sdr: <HdrStrategy>[HdrStrategy.sdrDirect],
-      };
+    HdrSourceClass.dvP5: <HdrStrategy>[
+      HdrStrategy.nativeDolbyVision,
+      HdrStrategy.metadataReshape,
+      HdrStrategy.toneMapSdr,
+    ],
+    HdrSourceClass.dvP81: <HdrStrategy>[
+      HdrStrategy.nativeDolbyVision,
+      HdrStrategy.baseLayerDirect,
+      HdrStrategy.metadataReshape,
+      HdrStrategy.toneMapSdr,
+    ],
+    HdrSourceClass.dvP84: <HdrStrategy>[
+      HdrStrategy.nativeDolbyVision,
+      HdrStrategy.baseLayerDirect,
+      HdrStrategy.baseLayerConvert,
+      HdrStrategy.metadataReshape,
+      HdrStrategy.toneMapSdr,
+    ],
+    HdrSourceClass.dvP82: <HdrStrategy>[
+      HdrStrategy.nativeDolbyVision,
+      HdrStrategy.metadataReshape,
+      HdrStrategy.sdrDirect,
+    ],
+    HdrSourceClass.dvP7: <HdrStrategy>[
+      HdrStrategy.baseLayerDirect,
+      HdrStrategy.metadataReshape,
+      HdrStrategy.toneMapSdr,
+    ],
+    HdrSourceClass.hdr10: <HdrStrategy>[
+      HdrStrategy.baseLayerDirect,
+      HdrStrategy.baseLayerConvert,
+      HdrStrategy.toneMapSdr,
+    ],
+    HdrSourceClass.hlg: <HdrStrategy>[
+      HdrStrategy.baseLayerDirect,
+      HdrStrategy.baseLayerConvert,
+      HdrStrategy.toneMapSdr,
+    ],
+    HdrSourceClass.hdrVivid: <HdrStrategy>[
+      HdrStrategy.baseLayerDirect,
+      HdrStrategy.metadataReshape,
+      HdrStrategy.toneMapSdr,
+    ],
+    HdrSourceClass.sdr: <HdrStrategy>[HdrStrategy.sdrDirect],
+  };
 
   /// The library default policy: requirement 3.4 preferences, experimental
   /// strategies gated off.
@@ -154,58 +154,37 @@ class HdrRoutePlanner {
 
     final List<HdrCandidate> candidates = <HdrCandidate>[];
     HdrCandidate? selected;
-    for (int i = 0; i < list.length; i++) {
-      final HdrCandidate candidate = _evaluate(
-        list[i],
-        source: source,
-        sourceClass: cls,
-        capabilities: capabilities,
-        policy: policy,
-        excluded: excluded,
-      );
-      candidates.add(candidate);
-      if (candidate.feasible) {
-        selected = candidate;
-        // Evaluate the remaining entries for display (feasibility and skip
-        // reasons), without changing the selection.
-        for (int j = i + 1; j < list.length; j++) {
-          candidates.add(
-            _evaluate(
-              list[j],
-              source: source,
-              sourceClass: cls,
-              capabilities: capabilities,
-              policy: policy,
-              excluded: excluded,
-            ),
-          );
-        }
-        break;
+    for (final strategy in list) {
+      for (final candidate in _evaluateCandidates(strategy,
+          source: source,
+          sourceClass: cls,
+          capabilities: capabilities,
+          policy: policy,
+          excluded: excluded)) {
+        candidates.add(candidate);
+        if (candidate.feasible) selected ??= candidate;
       }
     }
     if (selected == null) {
-      // The SDR fallback may relax maturity, never a known execution failure.
-      // No usable remaining implementation means blocked playback, not a
-      // retry of the same failed decoder/import path under a different name.
-      final HdrCandidate candidate = _evaluate(
-        fallback,
-        source: source,
-        sourceClass: cls,
-        capabilities: capabilities,
-        policy: policy,
-        excluded: excluded,
-        gateMaturity: false,
-      );
-      selected = candidate;
-      candidates.add(candidate);
+      // The safety net relaxes maturity, never source or failed dependencies.
+      final fallbackCandidates = _evaluateCandidates(fallback,
+          source: source,
+          sourceClass: cls,
+          capabilities: capabilities,
+          policy: policy,
+          excluded: excluded,
+          gateMaturity: false);
+      candidates.addAll(fallbackCandidates);
+      selected = fallbackCandidates.firstWhere(
+          (candidate) => candidate.feasible,
+          orElse: () => fallbackCandidates.first);
     }
 
     final HdrRoute? route = selected.route;
     final bool dependsOnDataSpace =
         route != null && route.surfaceTransfer != null;
     final ext = capabilities.dataSpaceExt;
-    final HdrPredictionConfidence confidence =
-        !dependsOnDataSpace ||
+    final HdrPredictionConfidence confidence = !dependsOnDataSpace ||
             (ext != null && ext.applicable && ext.id == 'lya-pq')
         ? HdrPredictionConfidence.verified
         : HdrPredictionConfidence.unverified;
@@ -216,11 +195,10 @@ class HdrRoutePlanner {
       candidates: List<HdrCandidate>.unmodifiable(candidates),
       presentation:
           route?.presentation ?? HdrPresentation.ofStrategy(selected.strategy),
-      confidence:
-          cls == HdrSourceClass.dvUnknown ||
+      confidence: cls == HdrSourceClass.dvUnknown ||
               route != null &&
-              capabilities.sourceSupport != null &&
-              capabilities.decoderSupportFor(route) == VideoSupport.unknown
+                  (route.hwdec == 'no' || capabilities.sourceSupport != null) &&
+                  capabilities.decoderSupportFor(route) == VideoSupport.unknown
           ? HdrPredictionConfidence.unverified
           : confidence,
       playable: selected.feasible,
@@ -231,6 +209,40 @@ class HdrRoutePlanner {
     // function stays I/O-free and the disabled cost is one boolean check.
     HdrOutputDiagnostics.predict(prediction);
     return prediction;
+  }
+
+  static List<HdrCandidate> _evaluateCandidates(
+    HdrStrategy strategy, {
+    required HdrSourceDescriptor source,
+    required HdrSourceClass sourceClass,
+    required HdrCapabilities capabilities,
+    required HdrRoutingPolicy policy,
+    required Map<String, HdrDegradeReason> excluded,
+    bool gateMaturity = true,
+  }) {
+    final candidates = [
+      for (final realization in HdrStrategyRealizer.realizeCandidates(strategy,
+          source: source, sourceClass: sourceClass, capabilities: capabilities))
+        _evaluate(strategy,
+            source: source,
+            sourceClass: sourceClass,
+            capabilities: capabilities,
+            policy: policy,
+            excluded: excluded,
+            gateMaturity: gateMaturity,
+            realization: realization),
+    ];
+    // Maturity blocks the strategy before any execution can be attempted.
+    // Keep one strategy rejection; a relaxed safety net still lists every
+    // distinct executable route and retains all source/dependency gates.
+    if (gateMaturity &&
+        candidates.every((candidate) =>
+            candidate.skipReason ==
+                HdrDegradeReason.experimentalStrategySkipped ||
+            candidate.skipReason == HdrDegradeReason.unsupportedStrategy)) {
+      return [candidates.first];
+    }
+    return candidates;
   }
 
   /// Evaluates one strategy against the gates and this device.
@@ -245,6 +257,7 @@ class HdrRoutePlanner {
     required HdrRoutingPolicy policy,
     required Map<String, HdrDegradeReason> excluded,
     bool gateMaturity = true,
+    required HdrStrategyRealization realization,
   }) {
     final HdrStrategyMaturity maturity = HdrStrategyMaturityTable.of(
       sourceClass,
@@ -254,6 +267,7 @@ class HdrRoutePlanner {
       return HdrCandidate(
         strategy: strategy,
         maturity: maturity,
+        isSafetyNet: !gateMaturity,
         skipReason: HdrDegradeReason.sourceMetadataUnknown,
       );
     }
@@ -262,6 +276,7 @@ class HdrRoutePlanner {
         return HdrCandidate(
           strategy: strategy,
           maturity: maturity,
+          isSafetyNet: !gateMaturity,
           skipReason: HdrDegradeReason.unsupportedStrategy,
         );
       }
@@ -270,32 +285,19 @@ class HdrRoutePlanner {
         return HdrCandidate(
           strategy: strategy,
           maturity: maturity,
+          isSafetyNet: !gateMaturity,
           skipReason: HdrDegradeReason.experimentalStrategySkipped,
         );
       }
     }
-    final HdrStrategyRealization realization = HdrStrategyRealizer.realize(
-      strategy,
-      source: source,
-      sourceClass: sourceClass,
-      capabilities: capabilities,
-    );
     final HdrRoute? route = realization.route;
     if (route == null) {
       return HdrCandidate(
         strategy: strategy,
         maturity: maturity,
-        skipReason:
-            realization.infeasibleReason ??
+        isSafetyNet: !gateMaturity,
+        skipReason: realization.infeasibleReason ??
             HdrDegradeReason.unsupportedStrategy,
-      );
-    }
-    if (capabilities.sourceSupport != null &&
-        capabilities.decoderSupportFor(route) == VideoSupport.unsupported) {
-      return HdrCandidate(
-        strategy: strategy,
-        maturity: maturity,
-        skipReason: HdrDegradeReason.sourceDecodeUnsupported,
       );
     }
     // The excluded check runs after realize because the dependency tags come
@@ -308,13 +310,24 @@ class HdrRoutePlanner {
         return HdrCandidate(
           strategy: strategy,
           maturity: maturity,
+          isSafetyNet: !gateMaturity,
           skipReason: entry.value,
         );
       }
     }
+    if (capabilities.sourceSupport != null &&
+        capabilities.decoderSupportFor(route) == VideoSupport.unsupported) {
+      return HdrCandidate(
+        strategy: strategy,
+        maturity: maturity,
+        isSafetyNet: !gateMaturity,
+        skipReason: HdrDegradeReason.sourceDecodeUnsupported,
+      );
+    }
     return HdrCandidate(
       strategy: strategy,
       maturity: maturity,
+      isSafetyNet: !gateMaturity,
       feasible: true,
       route: route,
     );

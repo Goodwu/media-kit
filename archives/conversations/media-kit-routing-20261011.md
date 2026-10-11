@@ -2,6 +2,25 @@
 
 ## Current State
 
+已推送库87eb946fc5ce1e3fc7d3b951fc2f6f2bbd58302a + Appabc149dcf7e89cf0ea1f08ba133bf1047c36138d；FFmpeg9aba43cf；DEVICE DV001仍1095a43。最新两个CONFIG提交仅事实模型/纯adapter检查点，V1独立35库+22App+4额外反例/target strict通过，一行public export；requested/override/effective与来源/序列化、explicit reset、默认experimental=false与legacy诊断保留。模型未接实际DASH/planner/Session/report，不能标auto/prefer/require闭环，未知hwdec诊断必须由caller处理。库handoff=docs/plans/core-config-model-handoff-20261012.json。
+
+最新完整已验向量只为App08acc+库8b98：source38160661703 attempt1四平台真实bootstrap SUCCESS，各211Flutter/strict零问题/bundle/finalize/10routing+261roots+102toolsroots/2662源码hash/前后freshness；Python359/Chrome1/Webrelease成功。Build38160661882源码矩阵全成功，整体因6Release前置失败。库source628video+3既有mac Linux跳过、lab298及两strict/query/Darwin9/OHOSunsigned通过。Windows原SDK状态干净已真实解阻；旧PNG唯一因果未证明，旧b197取消partial不重标。general旧8b98四平台test仍live/log API404，不猜阻塞/通过。CI05证据/tmp/mk-routing-ci05-20261012/summary.json。
+
+CONFIG组合CI06终态：Appabc149+库87eb，source38161696564 attempt1四平台SUCCESS，各233Flutter/strict0/bundle/finalize，8份source及Buildsource receipt的2667源码hash、10routing/261allroots/102toolsroots无逃逸、originalSDK状态空、准确tree498a895e/c4320051及freshness一致。Python实际两次359，Chrome1/Webrelease成功。Build38161696805源码矩阵全成功、整体因六Release失败；库663video+3既有跳过/lab298/strict及query/Darwin9/OHOSunsigned通过。general仍仅四live快照不推定通过。全部artifact/ZIP/hash/logs证据/tmp/mk-routing-ci06-20261012/summary.json，不重标R01e新提交。
+
+R01a/R01b/R01c/R01d已提交并分别验证。R01e17文件已冻结，作者及独立V2各688全包/strict No issues通过，17源码/test哈希一致，4作者撤门及4独立外置反例证据保留；最终V2 PASS仅宿主范围已回读，本轮保存检查点。有限SDR Texture direct/copy/software、完整route去重、共享MC解码失败与不同导入/upload失败区分、实际CPU帧复核、requested/attempt/effective报告及caprefresh保留当前已审路线已接真实Session。默认coordinator上界1，Session有限catalog3，不放宽HDR<=2/nativeonce/source一次/owner清理债务；F01和unknownDV颜色门保留。普通源EL假fixture修正来自native属性仅DOVI可用的事实，未改变生产源模型。handoff=docs/plans/core-r01e-handoff-20261012.json；不证明native/实机/YUV presenter。CONFIG继续修不可满足新约束却旧输出继续及同route新require实际复核。App实际接线认领中央6112094797/6112101005，与Release writer分离；库共享写入待R01e提交后串行。
+
+Android/Pink实际Release接线中央6111864635进行中：一次exact source向量、受审A/JAR与B/manifest-evidence双artifact获取、固定selector与账本、bootstrap/副本/显式routing source gates、实际localJAR+arm64Only构建参数、APK后/ABI/sign/parity/finalize。账本仍空，不批准native，缺接受记录必须Gradle前失败不回旧JAR。pending-parity仅中间材料，全部门过才candidate；旧parity对libapp AOT的潜在差异未实测、不删门。生产pin/metadata/签名不放宽，routing不release。
+
+DV0011095原review5483753705/6110373174/6111479264未修，DEVICE继续原配方/native owner/YUV arm/实机单写，CORE为唯一公共集成者。PR5最新5b历史16行已归aeaf，3md逐字/6hash/相对链接核验，两脚本未导入；188/34info/244为旧8bed+a3+JARcd5声称，原manifest日志未随PR入库，AVC EOS不等dvh1/HDR、UX归因未证。DV001与PR5最终归并、真实完整manifest及最新P5/P8.4/true与false/普通Session/HDR/持续性能仍必需，不能结项。
+
+保留LG批准FULL/range1/YUV8、精确设备门及owner/ACK/lease；不重开10bit/lease融合，不以关闭实验替代验证，产品experimental默认false，true主场景并false回归。ST+PQ不是已证YUV presenter，实际carrier/arm仍待DEVICE协作证明。主任务PR保持未merge/close/publish。
+
+## History
+
+### CONFIG模型提交时状态快照（历史）
+
+
 本CONFIG模型检查点以库8b98+App08acc为代码基线，新增不可变requested/override/effective配置与来源/序列化、纯App设置适配及库一行public export。V1独立35库+22App+4额外反例/两target strict通过，5文件与实际HdrMode/HwDecType哈希一致；隔离纯模型测试最初assets失败保留，最终no-test-assets通过，不是App全量。experimental默认false，explicit auto/reset及按库→App→open完整覆盖；require不被实验/失败策略暗弱化。默认MC组合prefer hardware，disableHA require software；旧原串、copy/direct未完整迁移及未知mode诊断保留。事实模型尚未接DASH/NetworkSource/planner/Session/report，不能标配置闭环完成，后续caller必须处理未知mode诊断。handoff见库docs/plans/core-config-model-handoff-20261012.json。R01e与Release接线其他dirty改动不进入本模型切片。
 
 最新完整已验源码向量只为App08accb63df8c4cab62d00946fb2159dd3781e0ee+库8b98c67a293876bd4af3f36ff245968ca848b41e：source38160661703 attempt1 SUCCESS，四平台真实bootstrap各211/strict零问题/bundle/finalize、Python359/Chrome1/Web；8份source/Build内实际bootstrapreceipt前后向量/10routing+261roots/102toolsroots及2662hash一致，无SKIP。Build38160661882整体FAIL但源码矩阵全成功，6Release既有前置失败，不native验收。库628video+3原mac Linux跳过/lab298与strict/query/Darwin9/OHOSunsigned成功；general四平台test仍live/运行中log API404，未重跑取消跳过。Windows已真实成功，但旧PNG因果未单独证明。证据/tmp/mk-routing-ci05-20261012/summary.json；这些结果不重标本模型提交。
@@ -17,7 +36,6 @@ CI03 34 info已清零；DEVICE新增旧8bed+a3向量的34info不覆盖当前CORE
 
 DEVICE6111344927的原LG候选实体呈现证据保留，DV002 passed_for_vector，黑位/过曝既有项仍登记。native owner/YUV arm、普通无define Session、完整来源manifest和最新整合P5/P8.4/true与false复测仍必需。CORE不另写配方，不改LG FULL/range1或owner/ACK/lease。主PR未合并/发布。
 
-## History
 
 ### DV/CI状态校正前快照（历史）
 

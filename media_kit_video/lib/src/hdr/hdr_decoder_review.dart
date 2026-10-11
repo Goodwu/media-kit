@@ -37,6 +37,19 @@ class HdrDecoderObservation {
 
   /// `no` is mpv's positive software observation. Empty is unreported.
   bool get softwareDecoded => hwdec == 'no';
+
+  /// Conservative known CPU format names from mpv/FFmpeg's scalar property.
+  /// A hardware or unrecognized format is not CPU-upload evidence. This does
+  /// not certify format support or successful rendering by libplacebo.
+  bool get cpuFrame => RegExp(
+        r'^(?:(?:yuv|yuvj|yuva)(?:420|422|444|440|411|410)p(?:9|10|12|14|16)?(?:le|be)?|'
+        r'(?:gbrp|gbrap)(?:9|10|12|14|16|f32)?(?:le|be)?|'
+        r'(?:gray|ya)(?:8|9|10|12|14|16|f32)?(?:le|be)?|'
+        r'nv(?:12|21|16|20|24|42)(?:le|be)?|p(?:010|012|016|210|212|216|410|412|416)(?:le|be)?|'
+        r'(?:rgb|bgr)(?:24|48|565|555|444|8|4)(?:le|be)?|'
+        r'rgba|bgra|argb|abgr|rgb0|bgr0|0rgb|0bgr|rgba64(?:le|be)?|bgra64(?:le|be)?|'
+        r'yuyv422|uyvy422|uyyvyy411|xyz12(?:le|be)?|monow|monob)$',
+      ).hasMatch(pixelFormat);
 }
 
 /// Checks the actual resource accepted by the existing presenter. It does not
@@ -66,12 +79,20 @@ void validateDecoderObservation(HdrRoute route, HdrReviewFacts facts) {
     'vp9': 'video/x-vnd.on2.vp9',
     'av1': 'video/av01',
   };
+  if (observation.softwareDecoded && config != null) {
+    throw const HdrPlaybackBlocked(HdrDegradeReason.routeReviewMismatch);
+  }
   final expectedMime = mimeByCodec[facts.codec];
   if (config != null && expectedMime != null && config.mime != expectedMime) {
     throw const HdrPlaybackBlocked(HdrDegradeReason.routeReviewMismatch);
   }
   if ((observation.softwareDecoded || observation.hwdec == 'mediacodec-copy') &&
-      observation.pixelFormat == 'mediacodec') {
+      !observation.cpuFrame) {
+    throw const HdrPlaybackBlocked(HdrDegradeReason.routeReviewMismatch);
+  }
+  if ((observation.hwdec == 'mediacodec' ||
+          observation.hwdec == 'surfacetexture') &&
+      observation.pixelFormat != 'mediacodec') {
     throw const HdrPlaybackBlocked(HdrDegradeReason.routeReviewMismatch);
   }
 }

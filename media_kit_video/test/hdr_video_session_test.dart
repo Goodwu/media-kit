@@ -504,7 +504,7 @@ void main() {
     await session.dispose();
   });
 
-  test('hwdec mismatch cannot reuse the failed stage through SDR fallback', () async {
+  test('hwdec mismatch reaches independent SDR software without reusing failed requests', () async {
     final backend = FakeBackend()
       ..factsForOpen.add(facts(gamma: 'pq', primaries: 'bt.2020', hwdec: 'no'));
     final session = makeSession(
@@ -516,13 +516,14 @@ void main() {
     session.events.listen(events.add);
     await session.open(media, hint: hdr10);
     await pumpEventQueue();
-    expect(backend.opened, hasLength(1));
-    expect(backend.opened.single.route.strategy, HdrStrategy.baseLayerDirect);
-    expect(session.report.value.verified, isFalse);
-    expect(session.report.value.degradeReason, HdrDegradeReason.hwdecMismatch);
-    expect(events.whereType<HdrRouteAppliedEvent>(), isEmpty);
-    expect(events.whereType<HdrErrorEvent>().single.reason,
-        HdrDegradeReason.hwdecMismatch);
+    expect(backend.opened.map((o) => o.route.hwdec),
+        ['mediacodec', 'mediacodec-copy', 'no']);
+    expect(backend.opened.first.route.strategy, HdrStrategy.baseLayerDirect);
+    expect(backend.opened.last.route.strategy, HdrStrategy.toneMapSdr);
+    expect(session.report.value.verified, isTrue);
+    expect(backend.opened.map((o) => o.route).toSet(), hasLength(3));
+    expect(events.whereType<HdrRouteAppliedEvent>(), hasLength(1));
+    expect(events.whereType<HdrErrorEvent>(), isEmpty);
     expect(backend.calls, contains('stop'));
     expect(backend.calls, contains('reset'));
     await session.dispose();
@@ -669,7 +670,7 @@ void main() {
     await session.dispose();
   });
 
-  test('API 24 copy mismatch blocks rather than retrying the same failed copy path',
+  test('API 24 copy mismatch reaches software without repeating failed copy',
       () async {
     final backend = FakeBackend()
       ..factsForOpen.add(const HdrReviewFacts(
@@ -684,13 +685,11 @@ void main() {
     session.events.listen(events.add);
     await session.open(media, hint: sdr);
     await pumpEventQueue();
-    expect(backend.opened, hasLength(1));
-    expect(backend.opened.single.route.hwdec, 'mediacodec-copy');
-    expect(session.report.value.verified, isFalse);
-    expect(session.report.value.degradeReason, HdrDegradeReason.hwdecMismatch);
-    expect(events.whereType<HdrRouteAppliedEvent>(), isEmpty);
-    expect(events.whereType<HdrErrorEvent>().single.reason,
-        HdrDegradeReason.hwdecMismatch);
+    expect(backend.opened.map((o) => o.route.hwdec), ['mediacodec-copy', 'no']);
+    expect(session.report.value.verified, isTrue);
+    expect(session.report.value.actual!.hwdec, 'no');
+    expect(events.whereType<HdrRouteAppliedEvent>(), hasLength(1));
+    expect(events.whereType<HdrErrorEvent>(), isEmpty);
     expect(backend.calls, contains('stop'));
     expect(backend.calls, contains('reset'));
     await session.dispose();
@@ -728,16 +727,13 @@ void main() {
       await session.open(media, hint: hdr10);
       await pumpEventQueue();
 
-      expect(backend.opened, hasLength(2),
-          reason: 'one replan is the per-open bound; experimental='
-              '$allowExperimental');
-      expect(backend.opened.first.route.hwdec, 'surfacetexture');
-      expect(backend.opened.last.route.hwdec, 'mediacodec-copy');
+      expect(backend.opened.map((o) => o.route.hwdec),
+          ['surfacetexture', 'mediacodec-copy', 'no']);
+      expect(backend.opened.map((o) => o.route).toSet(), hasLength(3));
       expect(backend.opened.last.route.strategy, HdrStrategy.toneMapSdr);
-      expect(session.report.value.verified, isFalse);
-      expect(session.report.value.degradeReason, HdrDegradeReason.hwdecMismatch);
-      expect(events.whereType<HdrRouteAppliedEvent>(), isEmpty);
-      expect(events.whereType<HdrErrorEvent>(), hasLength(1));
+      expect(session.report.value.verified, isTrue);
+      expect(events.whereType<HdrRouteAppliedEvent>(), hasLength(1));
+      expect(events.whereType<HdrErrorEvent>(), isEmpty);
       expect(backend.calls, contains('reset'));
       await session.dispose();
     }

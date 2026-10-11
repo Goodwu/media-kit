@@ -261,7 +261,8 @@ class HdrVideoSession {
       preparer: _prepare,
       review: _review,
       retry: _retry,
-      maxRetries: 2,
+      maxRetries: 4, // At most two HDR executions plus three SDR executions.
+      maxReviewReopens: 3, // One source rebuild, then distinct SDR requests.
       onBackendCallDiagnostic: onBackendCallDiagnostic,
       diagnosticSessionGeneration: onBackendCallDiagnostic == null
           ? null
@@ -351,6 +352,7 @@ class HdrVideoSession {
   HdrDegradeReason? _stagedDegradeReason;
   String? _reviewDiagnostic;
   HdrDecoderObservation? _decoderObservation;
+  HdrRoute? _requestedRoute;
   HdrCapabilities? _lastCapabilities;
   HdrDisposalReport? _lastDisposeReport;
 
@@ -441,6 +443,7 @@ class HdrVideoSession {
     _degradeReason = null;
     _reviewDiagnostic = null;
     _decoderObservation = null;
+    _requestedRoute = null;
     final intentSerial = _intent.begin();
     // Consume the override before yielding; another open must not inherit it.
     final capabilitiesOverride = _capabilitiesOverride;
@@ -473,6 +476,8 @@ class HdrVideoSession {
           sourceFacts: plan.sourceFacts,
           prediction: plan.prediction,
           actual: plan.route,
+          requested: _requestedRoute,
+          attemptedRoutes: List<HdrRoute>.unmodifiable(_attemptPolicy.attempted),
           dataSpaceRequested: observation.dataSpaceRequested,
           dataSpacePath: observation.dataSpacePath,
           dataSpaceReadback: observation.dataSpaceReadback,
@@ -511,6 +516,8 @@ class HdrVideoSession {
       if (serial == _serial && !_disposed) {
         _report.value = HdrOutputReport(
           generation: serial,
+          requested: _requestedRoute,
+          attemptedRoutes: List<HdrRoute>.unmodifiable(_attemptPolicy.attempted),
           source: error.sourceFacts?.source ?? hint,
           sourceOrigin: error.sourceFacts != null
               ? HdrReportSource.decoder
@@ -536,6 +543,8 @@ class HdrVideoSession {
       if (serial == _serial && !_disposed) {
         _report.value = HdrOutputReport(
           generation: serial,
+          requested: _requestedRoute,
+          attemptedRoutes: List<HdrRoute>.unmodifiable(_attemptPolicy.attempted),
           verified: false,
           degradeReason: _degradeReason ?? _stagedDegradeReason,
           error: error,
@@ -579,6 +588,7 @@ class HdrVideoSession {
       );
     }
     _lastCapabilities = capabilities;
+    _requestedRoute = prediction.selected.route;
     final plan = HdrOpenPlan(
       media: request.media,
       source: source,
@@ -596,6 +606,7 @@ class HdrVideoSession {
         sourceOrigin: plan.sourceOrigin,
         sourceFacts: plan.sourceFacts,
         prediction: prediction,
+        requested: _requestedRoute,
         verified: false,
       ),
     );
@@ -618,6 +629,7 @@ class HdrVideoSession {
   Future<HdrOpenPlan?> _retry(HdrOpenPlan failed, Object error) async {
     final generation = _generationOf(failed);
     if (generation != _serial || _disposed) return null;
+    if (error is HdrSessionRouteBudgetFailure && _attemptPolicy.attempted.length >= 5) return null;
     if (error is HdrPlaybackBlocked ||
         error is HdrDecoderReviewFailure ||
         nativeDvFailureMustAbort(error)) {
@@ -630,7 +642,6 @@ class HdrVideoSession {
     if (error is TimeoutException && error is! HdrOutputBindTimeout) {
       return null;
     }
-    if (_preference == HdrOutputPreference.off) return null;
     final nativeFailure =
         failed.route.strategy == HdrStrategy.nativeDolbyVision;
     if (nativeFailure) _attemptPolicy.excludeNativeDv();
@@ -642,6 +653,10 @@ class HdrVideoSession {
     final diagnostic = error.toString();
     if (nativeFailure || error is HdrSessionRouteBudgetFailure) {
       reason = HdrDegradeReason.nativeDvUnavailable;
+    } else if (error is HdrExecutionDependencyFailure) {
+      if (!failed.route.dependencies.contains(error.dependency)) return null;
+      reason = error.reason;
+      excluded[error.dependency] = reason;
     } else if (error is HdrDataSpaceApplyException) {
       reason = error.reason;
       excluded[failed.route.surfaceTransfer == 'hlg'
@@ -659,7 +674,11 @@ class HdrVideoSession {
     final cls = HdrSourceClass.of(failed.source);
     final full = _policy.preferencesFor(cls);
     final index = full.indexOf(failed.route.strategy);
-    final remaining = index >= 0 ? full.sublist(index + 1) : full;
+    // SDR output candidates share a strategy, so exhausting a strategy would
+    // discard independent copy/software requests before they can execute.
+    final remaining = _isSdrTexture(failed.route)
+        ? full
+        : index >= 0 ? full.sublist(index + 1) : full;
     final slicedPolicy = HdrRoutingPolicy(
       preferences: <HdrSourceClass, List<HdrStrategy>>{cls: remaining},
       allowExperimental: _policy.allowExperimental,
@@ -719,6 +738,45 @@ class HdrVideoSession {
         preference: HdrOutputPreference.off,
         excluded: nextExcluded,
       );
+    }
+    return _selectUnattempted(prediction);
+  }
+
+  static bool _isSdrTexture(HdrRoute route) => route.vo == 'gpu-next' &&
+      route.topology == HdrTopology.texture &&
+      route.outputTransfer == HdrOutputTransfer.sdr &&
+      (route.strategy == HdrStrategy.sdrDirect ||
+          route.strategy == HdrStrategy.toneMapSdr);
+
+  HdrRoutePrediction _selectUnattempted(HdrRoutePrediction prediction) {
+    final candidates = <HdrCandidate>[
+      for (final candidate in prediction.candidates)
+        if (candidate.feasible && _attemptPolicy.attempted.contains(candidate.route))
+          HdrCandidate(strategy: candidate.strategy, maturity: candidate.maturity,
+            isSafetyNet: candidate.isSafetyNet,
+            route: candidate.route, skipReason: HdrDegradeReason.candidateExhausted)
+        else candidate,
+    ];
+    final selected = candidates.firstWhere((candidate) => candidate.feasible,
+      orElse: () => candidates.first);
+    return HdrRoutePrediction(source: prediction.source, selected: selected,
+      candidates: List<HdrCandidate>.unmodifiable(candidates),
+      presentation: selected.route?.presentation ?? prediction.presentation,
+      confidence: selected.route?.hwdec == 'no'
+          ? HdrPredictionConfidence.unverified : prediction.confidence,
+      playable: selected.feasible);
+  }
+
+  /// An independent fallback that passed review remains the effective route;
+  /// a preferred request attempted earlier is not the output being reviewed.
+  HdrRoutePrediction _preferCurrent(HdrRoutePrediction prediction, HdrRoute route) {
+    for (final candidate in prediction.candidates) {
+      if (candidate.feasible && candidate.route == route) {
+        return HdrRoutePrediction(source: prediction.source, selected: candidate,
+          candidates: prediction.candidates, presentation: route.presentation,
+          confidence: route.hwdec == 'no' ? HdrPredictionConfidence.unverified
+              : prediction.confidence, playable: true);
+      }
     }
     return prediction;
   }
@@ -883,13 +941,13 @@ class HdrVideoSession {
             _attemptPolicy.hdrAttempts >= 2
         ? HdrOutputPreference.off
         : _preference;
-    final prediction = _routePlanner(
+    final prediction = _preferCurrent(_routePlanner(
       source: descriptor,
       capabilities: plan.capabilities,
       policy: _policy,
       preference: reviewPreference,
       excluded: _attemptPolicy.exclusions(plan.excluded),
-    );
+    ), plan.route);
     if (!prediction.playable) {
       // The decoder reported a source whose routes all need the P5
       // pipeline (e.g. a mislabeled hint): stop before wrong colors (R3.3).
@@ -949,7 +1007,7 @@ class HdrVideoSession {
       );
     }
 
-    if (_rebuildUsed) {
+    if (_rebuildUsed && !(hwdecMismatch && _isSdrTexture(plan.route))) {
       // The current output still disagrees with its required route or decoder.
       // Stop within the existing budget; do not report a hypothetical candidate
       // as an accepted output, nor open an unbounded third attempt.
@@ -1174,7 +1232,7 @@ class HdrVideoSession {
     }
     HdrCandidate? currentCandidate;
     for (final candidate in prediction.candidates) {
-      if (candidate.strategy == actual.strategy) {
+      if (candidate.feasible && candidate.route == actual) {
         currentCandidate = candidate;
         break;
       }
