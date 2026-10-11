@@ -103,3 +103,13 @@ critical reviewer 终版裁决：**REQUEST_CHANGES——不批准整组 define �
 - LG_VISUAL278/MKS_YUV_DIAG：不可原样转正（owner 机制迁移为产品事务所有权；YUV 功能与 DIAG 解耦，不得全局 arm）
 - DV002 终版定性：呈现验收未完成（NV12 缓冲在位+HWC 合成，黑截图/录屏为捕获限制的解释而非唯一已证根因）；旧"回传丢失"假设已证伪（format278 精确门拒绝→正确降级，完整证据链）
 - 人眼通过只关闭呈现验收项，不自动关闭 owner/全局 arm/普通 Session 接线/发布链四类缺口
+
+### DV002 呈现验收：人眼通过（2026-10-12）
+
+用户对 LG 实体屏幕直接目视验收（baseLayerConvert→nativeHdr pq，媒体 kit-p84-7626cac2 素材，从片头播放）：**画面颜色、亮度基本正常**——P8.4 HLG→PQ 转换线在面板上正确呈现。DV002 对应的"呈现验收未完成"项就此关闭（passed_for_vector，人眼口径）。
+
+同场登记两项**既有画质问题**（用户确认"老问题"，非本轮链路回归，留待后续画质分轮诊断）：
+1. 黑色层次不足（暗部层次）；
+2. 高亮处过曝。
+
+按 critical reviewer 终版结论边界：本验收**只关闭呈现验收项**，不自动关闭——owner/YUV arm process-global 收束、realizer 真实 YUV carrier 验证、普通 Session 无 define 接线、FULL/limited 契约描述对齐、发布 JAR 钉定更新（默认 pin 仍 v2026.013）等转正前置条件维持 REQUEST_CHANGES 状态。
