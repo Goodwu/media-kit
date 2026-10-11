@@ -7,6 +7,7 @@ import 'package:media_kit/media_kit.dart' show Media, VideoParams;
 
 import '../routing/video_output_target.dart';
 import '../routing/video_source_spec.dart';
+import '../routing/video_route_options.dart';
 import 'hdr_capabilities.dart';
 import 'hdr_route.dart';
 import 'hdr_source_descriptor.dart';
@@ -29,12 +30,14 @@ class HdrOpenRequest {
     this.hint, {
     this.target = const VideoOutputTarget.applicationView(),
     this.sourceSpec,
+    this.options,
     this.capabilitiesOverride,
     this.sourceFacts,
   });
 
   final VideoOutputTarget target;
   final VideoSourceSpec? sourceSpec;
+  final EffectiveVideoRouteOptions? options;
   final HdrCapabilities? capabilitiesOverride;
 
   /// Internal same-source configuration rebuild seed. A public Session.open
@@ -63,8 +66,12 @@ class HdrOpenPlan {
     required this.route,
     this.excluded = const <String, HdrDegradeReason>{},
     this.sourceFacts,
+    this.options,
+    this.sourceSpec,
   });
 
+  final EffectiveVideoRouteOptions? options;
+  final VideoSourceSpec? sourceSpec;
   final Media media;
 
   /// The description the [route] was planned against.
@@ -110,6 +117,8 @@ class HdrOpenPlan {
       route: route ?? this.route,
       excluded: excluded ?? this.excluded,
       sourceFacts: sourceFacts ?? this.sourceFacts,
+      options: options,
+      sourceSpec: sourceSpec,
     );
   }
 

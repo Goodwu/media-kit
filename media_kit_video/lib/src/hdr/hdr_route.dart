@@ -80,6 +80,9 @@ enum HdrDegradeReason {
   /// Every execution of this complete request was already admitted once.
   candidateExhausted,
 
+  /// The requested configuration cannot be met by an eligible/current route.
+  routeOptionsUnsatisfied,
+
   /// DV is present but its profile/base-layer interpretation is not known.
   /// More source facts are required; requesting SDR cannot remove this need.
   sourceMetadataUnknown,

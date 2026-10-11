@@ -3,6 +3,8 @@
 /// Copyright © 2021 & onwards, Hitesh Kumar Saini <saini123hitesh@gmail.com>.
 /// All rights reserved.
 /// Use of this source code is governed by MIT license that can be found in the LICENSE file.
+import '../routing/video_route_options.dart';
+import '../routing/video_route_option_review.dart';
 import 'hdr_open_plan.dart';
 import 'hdr_decoder_review.dart';
 import 'hdr_route.dart';
@@ -32,6 +34,8 @@ class HdrOutputReport {
     this.prediction,
     this.actual,
     this.requested,
+    this.options,
+    this.optionFulfillment,
     this.attemptedRoutes = const [],
     this.dataSpaceRequested,
     this.dataSpacePath,
@@ -69,6 +73,8 @@ class HdrOutputReport {
   /// Initial requested execution, before bounded independent alternatives.
   /// [actual] is the effective applied request; decoderObservation is observed.
   final HdrRoute? requested;
+  final EffectiveVideoRouteOptions? options;
+  final VideoRouteOptionFulfillment? optionFulfillment;
   final List<HdrRoute> attemptedRoutes;
 
   /// Dataspace requested for the GPU surface (`pq`/`hlg`), when the route
@@ -138,6 +144,8 @@ class HdrOutputReport {
     HdrRoutePrediction? prediction,
     HdrRoute? actual,
     HdrRoute? requested,
+    EffectiveVideoRouteOptions? options,
+    VideoRouteOptionFulfillment? optionFulfillment,
     List<HdrRoute>? attemptedRoutes,
     String? dataSpaceRequested,
     String? dataSpacePath,
@@ -157,6 +165,8 @@ class HdrOutputReport {
       prediction: prediction ?? this.prediction,
       actual: actual ?? this.actual,
       requested: requested ?? this.requested,
+      options: options ?? this.options,
+      optionFulfillment: optionFulfillment ?? this.optionFulfillment,
       attemptedRoutes: attemptedRoutes ?? this.attemptedRoutes,
       dataSpaceRequested: dataSpaceRequested ?? this.dataSpaceRequested,
       dataSpacePath: dataSpacePath ?? this.dataSpacePath,

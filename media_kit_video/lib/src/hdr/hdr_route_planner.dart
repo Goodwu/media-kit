@@ -4,6 +4,8 @@
 /// All rights reserved.
 /// Use of this source code is governed by MIT license that can be found in the LICENSE file.
 import '../routing/video_decoder_support.dart';
+import '../routing/video_route_options.dart';
+import '../routing/video_route_option_review.dart';
 import 'hdr_capabilities.dart';
 import 'hdr_output_diagnostics.dart';
 import 'hdr_route.dart';
@@ -33,7 +35,9 @@ enum HdrOutputPreference { auto, off }
 /// {@endtemplate}
 class HdrRoutingPolicy {
   /// {@macro hdr_routing_policy}
-  const HdrRoutingPolicy({this.preferences, this.allowExperimental = false});
+  const HdrRoutingPolicy({this.preferences, bool? allowExperimental})
+      : allowExperimental = allowExperimental ?? false,
+        experimentalWasSpecified = allowExperimental != null;
 
   /// Caller overrides keyed by source class. Treated as immutable; callers
   /// must not mutate a map after handing it to a policy.
@@ -42,6 +46,7 @@ class HdrRoutingPolicy {
   /// Whether `experimental` strategies may be selected (requirement 3.5).
   /// `verified` and `inherited` are always allowed.
   final bool allowExperimental;
+  final bool experimentalWasSpecified;
 
   /// The default preference order per source class: HDR output first with
   /// direct routes preferred, tone-map last (requirement 3.4).
@@ -140,10 +145,20 @@ class HdrRoutePlanner {
   static HdrRoutePrediction plan({
     required HdrSourceDescriptor source,
     required HdrCapabilities capabilities,
-    HdrRoutingPolicy policy = HdrRoutingPolicy.defaults,
-    HdrOutputPreference preference = HdrOutputPreference.auto,
+    HdrRoutingPolicy? policy,
+    HdrOutputPreference? preference,
+    EffectiveVideoRouteOptions? options,
     Map<String, HdrDegradeReason> excluded = const <String, HdrDegradeReason>{},
   }) {
+    options = resolveHdrRouteOptions(
+        options: options, policy: policy, preference: preference);
+    policy = HdrRoutingPolicy(
+        preferences: policy?.preferences,
+        allowExperimental: options.experimental);
+    preference = options.output.isRequired &&
+            options.output.target == VideoOutputIntent.sdr
+        ? HdrOutputPreference.off
+        : preference ?? HdrOutputPreference.auto;
     final HdrSourceClass cls = HdrSourceClass.of(source);
     final HdrStrategy fallback = cls == HdrSourceClass.sdr
         ? HdrStrategy.sdrDirect
@@ -160,7 +175,8 @@ class HdrRoutePlanner {
           sourceClass: cls,
           capabilities: capabilities,
           policy: policy,
-          excluded: excluded)) {
+          excluded: excluded,
+          options: options)) {
         candidates.add(candidate);
         if (candidate.feasible) selected ??= candidate;
       }
@@ -173,13 +189,17 @@ class HdrRoutePlanner {
           capabilities: capabilities,
           policy: policy,
           excluded: excluded,
-          gateMaturity: false);
+          gateMaturity: false,
+          options: options);
       candidates.addAll(fallbackCandidates);
       selected = fallbackCandidates.firstWhere(
           (candidate) => candidate.feasible,
           orElse: () => fallbackCandidates.first);
     }
 
+    final ordered = applyVideoRouteOptions(candidates, capabilities, options);
+    selected = ordered.firstWhere((candidate) => candidate.feasible,
+        orElse: () => selected!);
     final HdrRoute? route = selected.route;
     final bool dependsOnDataSpace =
         route != null && route.surfaceTransfer != null;
@@ -192,7 +212,7 @@ class HdrRoutePlanner {
     final HdrRoutePrediction prediction = HdrRoutePrediction(
       source: source,
       selected: selected,
-      candidates: List<HdrCandidate>.unmodifiable(candidates),
+      candidates: List<HdrCandidate>.unmodifiable(ordered),
       presentation:
           route?.presentation ?? HdrPresentation.ofStrategy(selected.strategy),
       confidence: cls == HdrSourceClass.dvUnknown ||
@@ -219,6 +239,7 @@ class HdrRoutePlanner {
     required HdrRoutingPolicy policy,
     required Map<String, HdrDegradeReason> excluded,
     bool gateMaturity = true,
+    required EffectiveVideoRouteOptions options,
   }) {
     final candidates = [
       for (final realization in HdrStrategyRealizer.realizeCandidates(strategy,
@@ -242,7 +263,7 @@ class HdrRoutePlanner {
             candidate.skipReason == HdrDegradeReason.unsupportedStrategy)) {
       return [candidates.first];
     }
-    return candidates;
+    return applyVideoRouteOptions(candidates, capabilities, options);
   }
 
   /// Evaluates one strategy against the gates and this device.
@@ -332,4 +353,35 @@ class HdrRoutePlanner {
       route: route,
     );
   }
+}
+
+/// Convert legacy callers once; explicit contradictory inputs cannot be ignored.
+EffectiveVideoRouteOptions resolveHdrRouteOptions(
+    {EffectiveVideoRouteOptions? options,
+    HdrRoutingPolicy? policy,
+    HdrOutputPreference? preference}) {
+  if (options != null) {
+    if (preference == HdrOutputPreference.off &&
+        !(options.output.isRequired &&
+            options.output.target == VideoOutputIntent.sdr)) {
+      throw ArgumentError(
+          'Legacy HDR off conflicts with effective output options');
+    }
+    if (policy?.experimentalWasSpecified == true &&
+        policy!.allowExperimental != options.experimental) {
+      throw ArgumentError(
+          'Legacy experimental policy conflicts with effective options');
+    }
+    return options;
+  }
+  return EffectiveVideoRouteOptions.resolve(
+      application: VideoRouteOptions(
+          output: preference == null
+              ? null
+              : preference == HdrOutputPreference.off
+                  ? const VideoRouteSelection.require(VideoOutputIntent.sdr)
+                  : const VideoRouteSelection<VideoOutputIntent>.auto(),
+          experimental: policy?.experimentalWasSpecified == true
+              ? policy!.allowExperimental
+              : null));
 }

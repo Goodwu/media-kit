@@ -7,6 +7,8 @@ enum VideoDecodeTarget { hardware, software }
 
 enum VideoOutputIntent { hdr, sdr }
 
+enum VideoImportPreference { auto, preferCopy, preferDirect }
+
 enum VideoRouteFailurePolicy { allowAlternatives, stop }
 
 enum VideoRouteOptionOrigin { libraryDefault, application, openOverride }
@@ -52,18 +54,21 @@ class VideoRouteOptions {
   const VideoRouteOptions({
     this.decode,
     this.output,
+    this.importPreference,
     this.failurePolicy,
     this.experimental,
   });
 
   final VideoRouteSelection<VideoDecodeTarget>? decode;
   final VideoRouteSelection<VideoOutputIntent>? output;
+  final VideoImportPreference? importPreference;
   final VideoRouteFailurePolicy? failurePolicy;
   final bool? experimental;
 
   VideoRouteOptions merge(VideoRouteOptions overrides) => VideoRouteOptions(
         decode: overrides.decode ?? decode,
         output: overrides.output ?? output,
+        importPreference: overrides.importPreference ?? importPreference,
         failurePolicy: overrides.failurePolicy ?? failurePolicy,
         experimental: overrides.experimental ?? experimental,
       );
@@ -72,6 +77,7 @@ class VideoRouteOptions {
   Map<String, Object?> toMap() => Map<String, Object?>.unmodifiable({
         'decode': decode?.toMap(),
         'output': output?.toMap(),
+        'importPreference': importPreference?.name,
         'failurePolicy': failurePolicy?.name,
         'experimental': experimental,
       });
@@ -79,8 +85,13 @@ class VideoRouteOptions {
   String get key => jsonEncode(toMap());
 
   factory VideoRouteOptions.fromMap(Map<String, Object?> map) {
-    _checkKeys(
-        map, const {'decode', 'output', 'failurePolicy', 'experimental'});
+    _checkKeys(map, const {
+      'decode',
+      'output',
+      'importPreference',
+      'failurePolicy',
+      'experimental'
+    });
     final experimental = map['experimental'];
     if (experimental != null && experimental is! bool) {
       throw const FormatException('experimental must be a boolean or null');
@@ -88,6 +99,8 @@ class VideoRouteOptions {
     return VideoRouteOptions(
       decode: _selection(map['decode'], VideoDecodeTarget.values),
       output: _selection(map['output'], VideoOutputIntent.values),
+      importPreference:
+          _enumValue(map['importPreference'], VideoImportPreference.values),
       failurePolicy:
           _enumValue(map['failurePolicy'], VideoRouteFailurePolicy.values),
       experimental: experimental as bool?,
@@ -99,11 +112,13 @@ class VideoRouteOptions {
       other is VideoRouteOptions &&
       decode == other.decode &&
       output == other.output &&
+      importPreference == other.importPreference &&
       failurePolicy == other.failurePolicy &&
       experimental == other.experimental;
 
   @override
-  int get hashCode => Object.hash(decode, output, failurePolicy, experimental);
+  int get hashCode => Object.hash(
+      decode, output, importPreference, failurePolicy, experimental);
 }
 
 /// One effective configuration for selection, planning, execution and reporting.
@@ -113,6 +128,7 @@ class EffectiveVideoRouteOptions {
   EffectiveVideoRouteOptions._({
     required this.decode,
     required this.output,
+    required this.importPreference,
     required this.failurePolicy,
     required this.experimental,
     required this.libraryDefaults,
@@ -124,6 +140,7 @@ class EffectiveVideoRouteOptions {
   static const defaults = VideoRouteOptions(
     decode: VideoRouteSelection<VideoDecodeTarget>.auto(),
     output: VideoRouteSelection<VideoOutputIntent>.auto(),
+    importPreference: VideoImportPreference.auto,
     failurePolicy: VideoRouteFailurePolicy.allowAlternatives,
     experimental: false,
   );
@@ -146,6 +163,7 @@ class EffectiveVideoRouteOptions {
     return EffectiveVideoRouteOptions._(
       decode: result.decode!,
       output: result.output!,
+      importPreference: result.importPreference!,
       failurePolicy: result.failurePolicy!,
       experimental: result.experimental!,
       libraryDefaults: libraryDefaults,
@@ -157,6 +175,7 @@ class EffectiveVideoRouteOptions {
 
   final VideoRouteSelection<VideoDecodeTarget> decode;
   final VideoRouteSelection<VideoOutputIntent> output;
+  final VideoImportPreference importPreference;
   final VideoRouteFailurePolicy failurePolicy;
   final bool experimental;
   final VideoRouteOptions libraryDefaults;
@@ -167,6 +186,7 @@ class EffectiveVideoRouteOptions {
   Map<String, Object?> toMap() => Map<String, Object?>.unmodifiable({
         'decode': decode.toMap(),
         'output': output.toMap(),
+        'importPreference': importPreference.name,
         'failurePolicy': failurePolicy.name,
         'experimental': experimental,
         'origins': Map<String, Object?>.unmodifiable({

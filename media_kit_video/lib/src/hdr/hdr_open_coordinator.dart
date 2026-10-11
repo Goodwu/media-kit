@@ -894,6 +894,42 @@ class HdrOpenCoordinator<R, P> {
 
   /// Invalidates callbacks immediately; in-flight native calls finish before
   /// the owner disposes its Player. This does not dispose the Player itself.
+  /// Invalidate queued/preparing work, then stop/restore on the same side-effect
+  /// queue. This cannot interrupt synchronous native FFI. Debt is retained if
+  /// either operation fails; later opens must clear it before any configure.
+  Future<void> stopAndReset() {
+    if (_disposed) throw StateError('Open coordinator is disposed');
+    final generation = ++_generation;
+    final stopping = _tail.then((_) async {
+      if (!_activeMedia && !_pendingRollback) return;
+      _pendingRollback = true;
+      for (final method in [HdrBackendDiagnosticMethod.stop,
+          HdrBackendDiagnosticMethod.resetOwnedConfiguration]) {
+        _emitBackendCall(method, HdrBackendDiagnosticBoundary.entered,
+            generation, null, HdrBackendDiagnosticPurpose.rollback);
+        try {
+          if (method == HdrBackendDiagnosticMethod.stop) {
+            await backend.stop();
+          } else {
+            await backend.resetOwnedConfiguration();
+          }
+        } catch (error, stack) {
+          _emitBackendCall(method, HdrBackendDiagnosticBoundary.failed,
+              generation, null, HdrBackendDiagnosticPurpose.rollback,
+              error: error, stack: stack);
+          rethrow;
+        }
+        _emitBackendCall(method, HdrBackendDiagnosticBoundary.returned,
+            generation, null, HdrBackendDiagnosticPurpose.rollback);
+      }
+      _pendingRollback = false;
+      _activeMedia = false;
+      _diagnosticOwner = null;
+    });
+    _tail = stopping.then<void>((_) {}, onError: (Object _, StackTrace __) {});
+    return stopping;
+  }
+
   Future<void> dispose() {
     final existing = _disposeFuture;
     if (existing != null) return existing;
