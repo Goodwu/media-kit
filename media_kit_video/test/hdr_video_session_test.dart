@@ -219,36 +219,35 @@ void main() {
     await session.dispose();
   });
 
-  test('a second review disagreement is accepted and reported honestly',
-      () async {
-    // The decoder keeps failing hardware decoding; after the first rebuild
-    // to tone-map the second review still disagrees on hwdec.
-    final backend = FakeBackend()
-      ..factsForOpen.add(facts(gamma: 'pq', primaries: 'bt.2020', hwdec: 'no'))
-      ..factsForOpen.add(facts(gamma: 'pq', primaries: 'bt.2020', hwdec: 'no'));
-    final session = makeSession(
-      backend: backend,
-      capabilities: caps(),
-      position: const Duration(seconds: 2),
-    );
-    final events = <HdrOutputEvent>[];
-    session.events.listen(events.add);
-
-    await session.open(media, hint: hdr10);
-    await pumpEventQueue();
-
-    expect(backend.opened, hasLength(2)); // No third open.
-    expect(backend.opened.last.route.strategy, HdrStrategy.toneMapSdr);
-    final report = session.report.value;
-    expect(report.verified, isTrue);
-    expect(report.degradeReason, HdrDegradeReason.hwdecMismatch);
-    expect(report.diagnostic, contains('mismatch persisted'));
-    expect(
-      events.whereType<HdrDegradedEvent>().single.reason,
-      HdrDegradeReason.hwdecMismatch,
-    );
-    await session.dispose();
-  });
+  test('a failed decoder on the second review is not verified or opened a third time',
+    () async {
+  // First open is SDR with a valid decoder. Actual HDR facts cause a
+  // legitimate topology rebuild; only the second decoder fails.
+  final backend = FakeBackend()
+    ..factsForOpen.add(gammaFacts(gamma: 'pq'))
+    ..factsForOpen.add(facts(gamma: 'pq', primaries: 'bt.2020', hwdec: 'no'));
+  final session = makeSession(
+    backend: backend,
+    capabilities: caps(),
+    position: const Duration(seconds: 2),
+  );
+  final events = <HdrOutputEvent>[];
+  session.events.listen(events.add);
+  await session.open(media);
+  await pumpEventQueue();
+  expect(backend.opened, hasLength(2));
+  expect(backend.opened.first.route.strategy, HdrStrategy.sdrDirect);
+  expect(backend.opened.last.route.strategy, HdrStrategy.baseLayerDirect);
+  expect(session.report.value.verified, isFalse);
+  expect(session.report.value.degradeReason, HdrDegradeReason.hwdecMismatch);
+  expect(events.whereType<HdrRouteAppliedEvent>(), isEmpty);
+  expect(events.whereType<HdrErrorEvent>().single.reason,
+      HdrDegradeReason.hwdecMismatch);
+  expect(events.whereType<HdrReclassifiedEvent>().single.rebuilt, isTrue);
+  expect(backend.calls, contains('stop'));
+  expect(backend.calls, contains('reset'));
+  await session.dispose();
+});
 
   test('dataspace failure degrades along the candidates, tone-map keeps '
       'playing, every step emits an event', () async {
