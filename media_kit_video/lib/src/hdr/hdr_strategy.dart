@@ -90,7 +90,11 @@ enum HdrSourceClass {
   hlg,
   hdrVivid,
   hdr10Plus,
-  sdr;
+  sdr,
+
+  /// DV is present but its profile or compatible base layer is unresolved.
+  /// Not an alias for P5/P8.2 and never made playable by the maturity gate.
+  dvUnknown;
 
   /// Derives the preference/maturity key from a source description.
   ///
@@ -99,10 +103,11 @@ enum HdrSourceClass {
   /// format; everything else follows the base-layer transfer function
   /// (`hlg`, or `pq` with BT.2020 primaries, is HDR; the rest is SDR).
   ///
-  /// DV metadata without a decodable profile is treated as profile 5: the
-  /// only family whose routes never ignore the RPU, so a malformed hint can
-  /// never select a route that mis-colors the picture (requirement R3.3).
+  /// Incomplete DV signaling remains [dvUnknown]. Applying P5 processing or
+  /// discarding RPU as though an unknown base layer were SDR is not a safe
+  /// interpretation; the planner asks for more source facts instead.
   static HdrSourceClass of(HdrSourceDescriptor source) {
+    if (source.hasUnresolvedDolbyVision) return HdrSourceClass.dvUnknown;
     if (source.dynamicMetadata == HdrDynamicMetadata.hdrVivid) {
       return HdrSourceClass.hdrVivid;
     }
@@ -118,7 +123,7 @@ enum HdrSourceClass {
         case 10:
           return HdrSourceClass.dvP10;
         case 8:
-          switch (source.dvCompatibilityId) {
+          switch (source.resolvedCompatibilityId) {
             case 1:
               return HdrSourceClass.dvP81;
             case 4:
@@ -130,9 +135,7 @@ enum HdrSourceClass {
           // rule the classifier uses to infer the id itself.
           return _dvP8FromBaseLayer(source.transfer);
       }
-      // DV metadata without a profile: profile 5, conservatively (see the
-      // doc comment above).
-      return HdrSourceClass.dvP5;
+      return HdrSourceClass.dvUnknown;
     }
     if (source.transfer == 'hlg') return HdrSourceClass.hlg;
     if (source.transfer == 'pq' && source.primaries == 'bt.2020') {
@@ -142,11 +145,18 @@ enum HdrSourceClass {
   }
 
   /// Profile 8 with an unknown compatibility id: `hlg` identifies 8.4, `pq`
-  /// maps to 8.1, an SDR (or unknown) gamma maps to 8.2.
+  /// maps to 8.1; only a recognized SDR gamma identifies 8.2.
   static HdrSourceClass _dvP8FromBaseLayer(String? transfer) {
-    if (transfer == 'hlg') return HdrSourceClass.dvP84;
-    if (transfer == 'pq') return HdrSourceClass.dvP81;
-    return HdrSourceClass.dvP82;
+    switch (HdrSourceDescriptor.compatibilityFromTransfer(transfer)) {
+      case 1:
+        return HdrSourceClass.dvP81;
+      case 2:
+        return HdrSourceClass.dvP82;
+      case 4:
+        return HdrSourceClass.dvP84;
+      default:
+        return HdrSourceClass.dvUnknown;
+    }
   }
 }
 
@@ -162,7 +172,9 @@ enum HdrSourceClass {
 /// documented exceptions: `nativeDolbyVision` stays `unsupported` for the
 /// classes R7 still reserves (every class except `dvP5`/`dvP84`), and
 /// `sdr × sdrDirect` is `verified` (the always-on SDR Texture baseline
-/// every non-HDR playback uses today).
+/// every non-HDR playback uses today). [HdrSourceClass.dvUnknown] has no
+/// implemented interpretation, so all its cells are `unsupported`. This
+/// source-fact constraint also applies to the SDR safety net.
 ///
 /// The 2026-10-10 user-adjudicated A-group promotions (`dvP5`/`dvP84` ×
 /// `nativeDolbyVision`, `hdr10` × `baseLayerConvert`/`metadataReshape`) are
@@ -302,6 +314,14 @@ class HdrStrategyMaturityTable {
       HdrStrategy.metadataReshape: HdrStrategyMaturity.experimental,
       HdrStrategy.toneMapSdr: HdrStrategyMaturity.experimental,
       HdrStrategy.sdrDirect: HdrStrategyMaturity.experimental,
+    },
+    HdrSourceClass.dvUnknown: <HdrStrategy, HdrStrategyMaturity>{
+      HdrStrategy.nativeDolbyVision: HdrStrategyMaturity.unsupported,
+      HdrStrategy.baseLayerDirect: HdrStrategyMaturity.unsupported,
+      HdrStrategy.baseLayerConvert: HdrStrategyMaturity.unsupported,
+      HdrStrategy.metadataReshape: HdrStrategyMaturity.unsupported,
+      HdrStrategy.toneMapSdr: HdrStrategyMaturity.unsupported,
+      HdrStrategy.sdrDirect: HdrStrategyMaturity.unsupported,
     },
     HdrSourceClass.sdr: <HdrStrategy, HdrStrategyMaturity>{
       HdrStrategy.nativeDolbyVision: HdrStrategyMaturity.unsupported,

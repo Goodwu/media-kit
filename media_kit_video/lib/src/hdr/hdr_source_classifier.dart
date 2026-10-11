@@ -183,11 +183,7 @@ class HdrSourceClassifier {
   /// Base-layer compatibility-id inference for profiles 8 and 10, where the
   /// profile alone does not identify the cross-compatibility family:
   /// `pq` → 1 (8.1), `hlg` → 4 (8.4), SDR gammas (`bt.1886`/`srgb`/...) →
-  /// 2 (8.2). `null` gamma stays unknown.
-  int? _compatibilityIdFromBaseLayer(String? gamma) {
-    if (gamma == null) return null;
-    if (gamma == 'pq') return 1; // 8.1
-    if (gamma == 'hlg') return 4; // 8.4
-    return 2; // 8.2 (SDR base layer)
-  }
+  /// 2 (8.2). Missing and unrecognized gamma values stay unknown.
+  int? _compatibilityIdFromBaseLayer(String? gamma) =>
+      HdrSourceDescriptor.compatibilityFromTransfer(gamma);
 }

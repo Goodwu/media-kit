@@ -217,7 +217,8 @@ class HdrRoutePlanner {
       presentation:
           route?.presentation ?? HdrPresentation.ofStrategy(selected.strategy),
       confidence:
-          route != null &&
+          cls == HdrSourceClass.dvUnknown ||
+              route != null &&
               capabilities.sourceSupport != null &&
               capabilities.decoderSupportFor(route) == VideoSupport.unknown
           ? HdrPredictionConfidence.unverified
@@ -249,6 +250,13 @@ class HdrRoutePlanner {
       sourceClass,
       strategy,
     );
+    if (source.hasUnresolvedDolbyVision) {
+      return HdrCandidate(
+        strategy: strategy,
+        maturity: maturity,
+        skipReason: HdrDegradeReason.sourceMetadataUnknown,
+      );
+    }
     if (gateMaturity) {
       if (maturity == HdrStrategyMaturity.unsupported) {
         return HdrCandidate(

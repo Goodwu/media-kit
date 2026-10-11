@@ -51,6 +51,14 @@ class HdrStrategyRealizer {
     required HdrSourceClass sourceClass,
     required HdrCapabilities capabilities,
   }) {
+    // Guard the direct realizer API too: a caller-supplied coarse class must
+    // not override the descriptor's unresolved DV semantics.
+    if (source.hasUnresolvedDolbyVision ||
+        sourceClass == HdrSourceClass.dvUnknown) {
+      return const HdrStrategyRealization.infeasible(
+        HdrDegradeReason.sourceMetadataUnknown,
+      );
+    }
     switch (strategy) {
       case HdrStrategy.nativeDolbyVision:
         return _nativeDolbyVision(source, sourceClass, capabilities);
@@ -453,6 +461,7 @@ class HdrStrategyRealizer {
       case HdrSourceClass.sdr:
       case HdrSourceClass.dvP5: // Unreachable: refused above.
       case HdrSourceClass.dvP10:
+      case HdrSourceClass.dvUnknown: // unreachable after the source-fact guard
         if (source.transfer == 'hlg') return HdrOutputTransfer.hlg;
         if (source.transfer == 'pq') return HdrOutputTransfer.pq;
         return HdrOutputTransfer.sdr;

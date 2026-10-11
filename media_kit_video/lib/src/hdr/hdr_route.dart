@@ -77,6 +77,10 @@ enum HdrDegradeReason {
   /// Does not prove that an unenumerated FFmpeg software path is impossible.
   sourceDecodeUnsupported,
 
+  /// DV is present but its profile/base-layer interpretation is not known.
+  /// More source facts are required; requesting SDR cannot remove this need.
+  sourceMetadataUnknown,
+
   /// Output forced to SDR because the caller set `HdrOutputPreference.off`.
   preferenceOff,
 
@@ -387,8 +391,8 @@ class HdrRoutePrediction {
 
   final HdrPredictionConfidence confidence;
 
-  /// False only when playback must not start: a P5 source whose dovi
-  /// rescale pipeline is missing (R3.3).
+  /// False when no candidate satisfies source and execution constraints.
+  /// Includes missing P5 processing, unresolved DV and failed dependencies.
   final bool playable;
 
   @override

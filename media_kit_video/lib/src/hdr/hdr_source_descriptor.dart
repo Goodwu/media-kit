@@ -33,14 +33,14 @@ enum HdrDynamicMetadata {
 ///
 /// HdrSourceDescriptor
 /// -------------------
-/// Decoder-fact description of an HDR source. Every field is a fact reported
+/// Description of an HDR source. Every field is a fact reported
 /// by the decoder or an explicit caller hint — never derived from the file
 /// name. Fields the current pipeline cannot observe carry the documented
 /// unknown value instead of a guess.
 ///
 /// The legacy [HdrMediaKind] classification is derived from this description
-/// through [kind], which keeps the existing routing behavior intact while
-/// letting callers describe sources with more precision.
+/// through [kind]. Unresolved Dolby Vision is explicit rather than being
+/// treated as an SDR-compatible base layer or guessed to be profile 5.
 ///
 /// {@endtemplate}
 class HdrSourceDescriptor {
@@ -98,11 +98,60 @@ class HdrSourceDescriptor {
     this.enhancementLayer,
   });
 
+  /// Infer compatibility only from recognized transfer functions. An absent,
+  /// automatic, malformed or future transfer name is not evidence of SDR.
+  /// Linear scene/display values are also insufficient to identify a DV
+  /// compatibility profile, so they deliberately remain unknown.
+  static int? compatibilityFromTransfer(String? transfer) {
+    switch (transfer) {
+      case 'pq':
+        return 1;
+      case 'hlg':
+        return 4;
+      case 'bt.1886':
+      case 'bt.709':
+      case 'srgb':
+      case 'gamma1.8':
+      case 'gamma2.0':
+      case 'gamma2.2':
+      case 'gamma2.4':
+      case 'gamma2.6':
+      case 'gamma2.8':
+        return 2;
+      default:
+        return null;
+    }
+  }
+
+  /// Container compatibility is authoritative when present. Only a missing
+  /// value permits transfer-based inference; an unrecognized explicit value
+  /// must not be silently replaced by a familiar gamma.
+  int? get resolvedCompatibilityId =>
+      dvCompatibilityId ?? compatibilityFromTransfer(transfer);
+
+  /// There is not enough information to choose a correct DV interpretation.
+  /// This is a source-fact constraint, independent of experimental maturity,
+  /// display support and whether the requested output is SDR.
+  bool get hasUnresolvedDolbyVision {
+    if (dynamicMetadata != HdrDynamicMetadata.dolbyVision) return false;
+    switch (dvProfile) {
+      case 5:
+      case 7:
+        return false;
+      case 8:
+      case 10:
+        final compatibility = resolvedCompatibilityId;
+        return compatibility != 1 && compatibility != 2 && compatibility != 4;
+      default:
+        return true;
+    }
+  }
+
   /// Builds a descriptor from the legacy [HdrMediaKind] classification, for
   /// callers that only know the kind (hint channels, old code paths).
   ///
-  /// Every kind maps to a fully determined source class, so enhancement
-  /// layer absence is stated as fact (`false`) rather than unknown.
+  /// Known kinds preserve their existing hints. [HdrMediaKind.dolbyVisionUnknown]
+  /// does not manufacture a profile, compatibility id or enhancement-layer fact.
   factory HdrSourceDescriptor.fromKind(HdrMediaKind kind) {
     switch (kind) {
       case HdrMediaKind.dolbyVisionP5:
@@ -135,46 +184,38 @@ class HdrSourceDescriptor {
         );
       case HdrMediaKind.sdr:
         return const HdrSourceDescriptor(enhancementLayer: false);
+      case HdrMediaKind.dolbyVisionUnknown:
+        return const HdrSourceDescriptor(
+          dynamicMetadata: HdrDynamicMetadata.dolbyVision,
+        );
     }
   }
 
-  /// The legacy [HdrMediaKind] classification derived from this description.
-  ///
-  /// Dolby Vision profile 5 → [HdrMediaKind.dolbyVisionP5]; profile 7 and
-  /// profile 8.1 (compatibility id 1) → [HdrMediaKind.hdr10] (the profile-7
-  /// base layer is HDR10-compatible and this preserves the existing routing
-  /// behavior); profile 8.4 (compatibility id 4) →
-  /// [HdrMediaKind.dolbyVisionP84]; profile 8.2 (compatibility id 2) →
-  /// [HdrMediaKind.sdr]; profile 10 and profile 8 with an unknown
-  /// compatibility id follow the base-layer transfer function (profile 8
-  /// additionally maps `hlg` to 8.4's kind), as do non-Dolby Vision
-  /// sources: `hlg` → [HdrMediaKind.hlg], `pq` with `bt.2020` primaries →
-  /// [HdrMediaKind.hdr10], everything else → [HdrMediaKind.sdr].
+  /// A coarse source label, not an output decision. Unknown DV signaling is
+  /// retained; it cannot become SDR merely because a transfer is missing.
+  /// Compatibility ids identify P8/P10 base layers even if a decoded frame
+  /// uses a different transfer after processing. Full original/decoded-fact
+  /// separation is an independent Session concern.
   HdrMediaKind get kind {
+    if (hasUnresolvedDolbyVision) return HdrMediaKind.dolbyVisionUnknown;
     if (dynamicMetadata == HdrDynamicMetadata.dolbyVision) {
       switch (dvProfile) {
         case 5:
           return HdrMediaKind.dolbyVisionP5;
         case 7:
-          // The profile-7 base layer is HDR10-compatible; enhancement-layer
-          // handling is a routing concern, not part of the legacy kind.
           return HdrMediaKind.hdr10;
         case 8:
-          switch (dvCompatibilityId) {
-            case 1:
-              return HdrMediaKind.hdr10; // 8.1
-            case 4:
-              return HdrMediaKind.dolbyVisionP84; // 8.4
-            case 2:
-              return HdrMediaKind.sdr; // 8.2
-          }
-          // Unknown compatibility id: an HLG base layer identifies 8.4,
-          // everything else follows the base layer (PQ+BT.2020 → 8.1's
-          // HDR10 kind, SDR gamma → 8.2's SDR kind).
-          if (transfer == 'hlg') return HdrMediaKind.dolbyVisionP84;
-          return _kindFromBaseLayer();
         case 10:
-          return _kindFromBaseLayer();
+          switch (resolvedCompatibilityId) {
+            case 1:
+              return HdrMediaKind.hdr10;
+            case 4:
+              return dvProfile == 8
+                  ? HdrMediaKind.dolbyVisionP84
+                  : HdrMediaKind.hlg;
+            case 2:
+              return HdrMediaKind.sdr;
+          }
       }
     }
     return _kindFromBaseLayer();
