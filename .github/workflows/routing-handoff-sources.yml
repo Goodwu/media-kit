@@ -1,0 +1,43 @@
+name: Routing handoff source snapshots
+
+on:
+  push:
+    branches: [routing/MK-ROUTING-20261011]
+    paths:
+      - '.github/workflows/routing-handoff-sources.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: media-kit
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: Goodwu/PiliPlusX
+          path: app
+          ref: routing/MK-ROUTING-20261011
+          persist-credentials: false
+      - name: Archive tracked current source only
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir sources
+          git -C media-kit archive --format=tar.gz -o "$PWD/sources/media-kit.tar.gz" HEAD
+          git -C app archive --format=tar.gz -o "$PWD/sources/piliplusx.tar.gz" HEAD
+          printf 'mediaKit=%s\napp=%s\n' "$(git -C media-kit rev-parse HEAD)" "$(git -C app rev-parse HEAD)" > sources/heads.txt
+          sha256sum sources/*.tar.gz > sources/SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: routing-current-sources-${{ github.sha }}
+          path: sources
+          if-no-files-found: error
+          retention-days: 14
