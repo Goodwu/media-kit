@@ -26,14 +26,20 @@ jobs:
           path: app
           ref: routing/MK-ROUTING-20261011
           persist-credentials: false
-      - name: Archive tracked current source only
+      - name: Archive tracked current source and tree provenance
         shell: bash
         run: |
           set -euo pipefail
           mkdir sources
+          for directory in media-kit app; do
+            head=$(git -C "$directory" rev-parse HEAD)
+            remote=$(git -C "$directory" ls-remote origin refs/heads/routing/MK-ROUTING-20261011 | cut -f1)
+            test "$head" = "$remote" || { echo "Source advanced in $directory; request a new snapshot" >&2; exit 1; }
+          done
           git -C media-kit archive --format=tar.gz -o "$PWD/sources/media-kit.tar.gz" HEAD
           git -C app archive --format=tar.gz -o "$PWD/sources/piliplusx.tar.gz" HEAD
           printf 'mediaKit=%s\napp=%s\n' "$(git -C media-kit rev-parse HEAD)" "$(git -C app rev-parse HEAD)" > sources/heads.txt
+          printf 'mediaKitTree=%s\nappTree=%s\n' "$(git -C media-kit rev-parse HEAD^{tree})" "$(git -C app rev-parse HEAD^{tree})" > sources/trees.txt
           sha256sum sources/*.tar.gz > sources/SHA256SUMS
       - uses: actions/upload-artifact@v4
         with:
