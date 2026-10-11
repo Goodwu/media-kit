@@ -113,3 +113,19 @@ critical reviewer 终版裁决：**REQUEST_CHANGES——不批准整组 define �
 2. 高亮处过曝。
 
 按 critical reviewer 终版结论边界：本验收**只关闭呈现验收项**，不自动关闭——owner/YUV arm process-global 收束、realizer 真实 YUV carrier 验证、普通 Session 无 define 接线、FULL/limited 契约描述对齐、发布 JAR 钉定更新（默认 pin 仍 v2026.013）等转正前置条件维持 REQUEST_CHANGES 状态。
+
+## PiliPlusX App 构建与测试补全（2026-10-12，响应"PiliPlusX 没有构建测试过"）
+
+前述 App 侧仅有构建 + SDR 冒烟；本轮补全测试套件与 DV 内容 e2e。全部在设备向量上执行（PiliPlusX 8bed4a4f6 + media-kit a3cdbda2 + 本地 JAR cd5fe26b 注入）：
+
+| 项 | 结果 |
+| --- | --- |
+| flutter test（全量） | **188 全部通过**（manifests/app-flutter-test.log） |
+| flutter analyze | **34 info，0 error，0 warning**（manifests/app-analyze.log；CI 头上为 62 info 口径不同） |
+| Python 套件（python3.13，与 CI 同 runner 同命令） | **244 OK**（3.15 的 discover 行为变化导致首轮失败，与 CI 3.13 对齐后全过） |
+| scripts/verify_hdr_channel.py | **通过：7 endpoints，Android query/Session delegation** |
+| App SDR e2e | 4 设备（此前已录） |
+| App DV 分 P e2e | BV11f4y1K7Wx P2「4K 杜比视界」深链直达（?p=2），**完整播至 EOS 02:51/02:51，零 FATAL**；实际流为 AVC 档（App 清晰度偏好选择；DV 流需 App 内清晰度菜单手动选择，属 UX 而非路由） |
+| 遗留 | App 端 DV 流（dvh1）在清晰度菜单选档后的 e2e 未自动驱动（UI 自动化未达清晰度面板）；路由/描述符逻辑已由 lab 矩阵 + CI 244/178 覆盖 |
+
+灭屏收尾：全部四台设备 KEYCODE_SLEEP + 恢复自动亮度（防 OLED 烧屏）。
