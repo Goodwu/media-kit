@@ -20,7 +20,7 @@ jobs:
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           python3 tool/routing_ci/stage_ci_b1.py
           python3 -m unittest tool.routing_ci.test_android_jar_identity -v
-      - name: Stage immutable tree for connector review, never update refs
+      - name: Stage non-workflow immutable source tree for connector review
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
@@ -28,6 +28,7 @@ jobs:
           set -euo pipefail
           mkdir stage-result
           git diff --binary > stage-result/changes.patch
+          cp .github/workflows/ci.yml stage-result/ci.yml
           python3 - <<'PY'
           import json, os, subprocess, urllib.request
           from pathlib import Path
@@ -42,12 +43,14 @@ jobs:
           allowed = {'media_kit_video/lib/src/hdr/hdr_route_planner.dart','media_kit_video/test/hdr_video_session_test.dart','.github/workflows/ci.yml','docs/plans/media-kit-routing-handoff-20261011.json'}
           if set(paths) != allowed:
               raise SystemExit('Unexpected staging diff: ' + str(paths))
-          entries = [{'path': path, 'mode': '100644', 'type': 'blob', 'content': Path(path).read_text()} for path in paths]
-          entries += [{'path': path, 'mode': '100644', 'type': 'blob', 'sha': None} for path in ['tool/routing_ci/stage_ci_b1.py','.github/workflows/routing-stage-ci-b1.yml']]
+          source_paths = [path for path in paths if not path.startswith('.github/')]
+          entries = [{'path': path, 'mode': '100644', 'type': 'blob', 'content': Path(path).read_text()} for path in source_paths]
+          entries.append({'path': 'tool/routing_ci/stage_ci_b1.py', 'mode': '100644', 'type': 'blob', 'sha': None})
           tree = api('/git/trees', {'base_tree': base, 'tree': entries})['sha']
-          Path('stage-result/tree.json').write_text(json.dumps({'head':head,'tree':tree,'paths':paths,'refsWritten':False}, indent=2))
+          Path('stage-result/tree.json').write_text(json.dumps({'head':head,'tree':tree,'paths':source_paths,'workflowUpdatePending':True,'refsWritten':False}, indent=2))
           PY
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: routing-ci-b1-staged-${{ github.sha }}
           path: stage-result
