@@ -19,6 +19,7 @@ export 'package:media_kit_video/src/hdr/hdr_output_diagnostics.dart';
 export 'package:media_kit_video/src/hdr/hdr_output_event.dart';
 export 'package:media_kit_video/src/hdr/hdr_output_report.dart';
 export 'package:media_kit_video/src/hdr/hdr_output_slot.dart';
+export 'package:media_kit_video/src/hdr/hdr_output_contract.dart';
 export 'package:media_kit_video/src/hdr/hdr_route.dart';
 export 'package:media_kit_video/src/hdr/hdr_route_planner.dart';
 export 'package:media_kit_video/src/hdr/hdr_source_classifier.dart';

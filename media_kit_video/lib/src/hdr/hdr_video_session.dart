@@ -27,6 +27,7 @@ import 'hdr_output_diagnostics.dart';
 import 'hdr_output_event.dart';
 import 'hdr_output_report.dart';
 import 'hdr_output_slot.dart';
+import 'hdr_output_contract.dart';
 import 'hdr_player_backend.dart';
 import 'hdr_route.dart';
 import 'hdr_route_planner.dart';
@@ -233,6 +234,7 @@ class HdrVideoSession {
         AndroidHdrBackend(
           player: player!,
           outputSlot: _slot!,
+          surfacePixelFormatOverride: _surfaceFormatOverride,
           onNativeDvOptionDiagnostic: onNativeDvOptionDiagnostic,
         );
     _coordinator = HdrOpenCoordinator<HdrOpenRequest, HdrOpenPlan>(
@@ -1239,36 +1241,13 @@ class HdrVideoSession {
   // Controller creation and lifecycle
   // ---------------------------------------------------------------------------
 
-  /// Builds a controller for the route's (vo, hwdec, surfaceTransfer):
-  /// the topology follows the route — `mediacodec_embed` and any GPU route
-  /// with a surface transfer use the platform view, everything else uses
-  /// the Texture (hdr_lab slot semantics).
-  VideoController _createController(
-    String vo,
-    String hwdec,
-    String? surfaceTransfer,
-  ) {
+  /// Uses the same immutable request that the backend handed to the slot.
+  VideoController _createController(HdrOutputContract contract) {
     final player = _player;
     if (player == null) throw StateError('HdrVideoSession has no Player');
-    final usePlatformView = vo == 'mediacodec_embed' || surfaceTransfer != null;
-    final android = _configuration.android.copyWith(
-      usePlatformView: usePlatformView,
-      gpuApi: vo == 'gpu-next' ? 'opengl' : null,
-      clearGpuApi: vo != 'gpu-next',
-      surfaceTransfer: usePlatformView ? (surfaceTransfer ?? '') : null,
-      surfacePixelFormat: usePlatformView
-          ? (vo == 'gpu-next' && surfaceTransfer != null
-                ? _surfaceFormatOverride
-                : '')
-          : null,
-    );
     return VideoController(
       player,
-      configuration: _configuration.copyWith(
-        vo: vo,
-        hwdec: hwdec,
-        android: android,
-      ),
+      configuration: contract.controllerConfiguration(_configuration),
     );
   }
 
