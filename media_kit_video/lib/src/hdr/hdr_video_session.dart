@@ -1017,6 +1017,8 @@ class HdrVideoSession {
         return HdrRouteDependency.hwdecMediacodec;
       case 'mediacodec-copy':
         return HdrRouteDependency.hwdecMediacodecCopy;
+      case 'surfacetexture':
+        return HdrRouteDependency.hwdecSurfaceTexture;
       default:
         return null;
     }

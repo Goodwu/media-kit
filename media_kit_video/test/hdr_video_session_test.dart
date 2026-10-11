@@ -10,6 +10,7 @@ import 'package:media_kit_video/src/hdr/hdr_route.dart';
 import 'package:media_kit_video/src/hdr/hdr_route_planner.dart';
 import 'package:media_kit_video/src/hdr/hdr_source_descriptor.dart';
 import 'package:media_kit_video/src/hdr/hdr_strategy.dart';
+import 'package:media_kit_video/src/hdr/hdr_strategy_realizer.dart';
 import 'package:media_kit_video/src/hdr/hdr_video_session.dart';
 
 /// S5 verification 2: session orchestration behaviors on a fake backend and
@@ -68,6 +69,19 @@ void main() {
         dataSpaceExt: ext
             ? const HdrDataSpaceExtInfo(id: 'lya-pq', applicable: true)
             : null,
+      );
+
+  HdrCapabilities lgPqCaps() => HdrCapabilities(
+        sdkInt: 24,
+        displayHdrTypes: const {2},
+        hevcDecoders: const [],
+        dolbyVisionDecoders: const [],
+        p5PipelineAvailable: true,
+        dataSpaceBridgeLoaded: true,
+        dataSpaceExt: const HdrDataSpaceExtInfo(
+          id: 'lg-pq',
+          applicable: true,
+        ),
       );
 
   HdrReviewFacts facts({
@@ -413,6 +427,107 @@ void main() {
     expect(backend.calls, contains('stop'));
     expect(backend.calls, contains('reset'));
     await session.dispose();
+  });
+
+  test('SurfaceTexture mismatch is excluded and rebuild remains bounded',
+      () async {
+    addTearDown(() {
+      HdrStrategyRealizer.mkstBridgeProbeOverride = null;
+    });
+    for (final allowExperimental in [false, true]) {
+      HdrStrategyRealizer.mkstBridgeProbeOverride = () => true;
+      final backend = FakeBackend()
+        ..factsForOpen.addAll([
+          facts(gamma: 'pq', primaries: 'bt.2020', hwdec: 'mediacodec'),
+          facts(gamma: 'pq', primaries: 'bt.2020', hwdec: 'no'),
+        ]);
+      final session = makeSession(
+        backend: backend,
+        capabilities: lgPqCaps(),
+        policy: HdrRoutingPolicy(
+          preferences: const {
+            HdrSourceClass.hdr10: [
+              HdrStrategy.baseLayerConvert,
+              HdrStrategy.toneMapSdr,
+            ],
+          },
+          allowExperimental: allowExperimental,
+        ),
+        position: const Duration(seconds: 2),
+      );
+      final events = <HdrOutputEvent>[];
+      session.events.listen(events.add);
+
+      await session.open(media, hint: hdr10);
+      await pumpEventQueue();
+
+      expect(backend.opened, hasLength(2),
+          reason: 'one replan is the per-open bound; experimental='
+              '$allowExperimental');
+      expect(backend.opened.first.route.hwdec, 'surfacetexture');
+      expect(backend.opened.last.route.hwdec, 'mediacodec-copy');
+      expect(backend.opened.last.route.strategy, HdrStrategy.toneMapSdr);
+      expect(session.report.value.verified, isFalse);
+      expect(session.report.value.degradeReason, HdrDegradeReason.hwdecMismatch);
+      expect(events.whereType<HdrRouteAppliedEvent>(), isEmpty);
+      expect(events.whereType<HdrErrorEvent>(), hasLength(1));
+      expect(backend.calls, contains('reset'));
+      await session.dispose();
+    }
+  });
+
+  test('SurfaceTexture mismatch can recover through independent copy mode',
+      () async {
+    addTearDown(() {
+      HdrStrategyRealizer.mkstBridgeProbeOverride = null;
+    });
+    for (final allowExperimental in [false, true]) {
+      HdrStrategyRealizer.mkstBridgeProbeOverride = () => true;
+      final backend = FakeBackend()
+        ..factsForOpen.addAll([
+          facts(gamma: 'pq', primaries: 'bt.2020', hwdec: 'mediacodec'),
+          facts(gamma: 'pq', primaries: 'bt.2020', hwdec: 'mediacodec-copy'),
+        ]);
+      final session = makeSession(
+        backend: backend,
+        capabilities: lgPqCaps(),
+        policy: HdrRoutingPolicy(
+          preferences: const {
+            HdrSourceClass.hdr10: [
+              HdrStrategy.baseLayerConvert,
+              HdrStrategy.toneMapSdr,
+            ],
+          },
+          allowExperimental: allowExperimental,
+        ),
+        position: const Duration(seconds: 2),
+      );
+      final events = <HdrOutputEvent>[];
+      session.events.listen(events.add);
+
+      await session.open(media, hint: hdr10);
+      await pumpEventQueue();
+
+      expect(backend.opened, hasLength(2),
+          reason: 'one replan is the per-open bound; experimental='
+              '$allowExperimental');
+      expect(backend.opened.first.route.hwdec, 'surfacetexture');
+      expect(backend.opened.last.route.hwdec, 'mediacodec-copy');
+      expect(backend.opened.last.route.strategy, HdrStrategy.toneMapSdr);
+      expect(session.report.value.hwdecCurrent, 'mediacodec-copy');
+      expect(session.report.value.actual!.hwdec, 'mediacodec-copy');
+      expect(session.report.value.verified, isTrue);
+      expect(events.whereType<HdrRouteAppliedEvent>(), hasLength(1));
+      expect(
+        backend.preparedPlans.last.excluded,
+        contains(HdrRouteDependency.hwdecSurfaceTexture),
+      );
+      expect(
+        backend.preparedPlans.last.excluded,
+        isNot(contains(HdrRouteDependency.hwdecMediacodecCopy)),
+      );
+      await session.dispose();
+    }
   });
 
   test('missing P5 pipeline publishes Error and never opens the media',

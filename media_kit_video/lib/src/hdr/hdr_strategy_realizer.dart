@@ -278,6 +278,14 @@ class HdrStrategyRealizer {
         (_convertPqSurfaceTransfer == 'pq' ||
             _convertPqSurfaceTransfer ==
                 HdrYuvPresentationContract.windowTransfer);
+    final String hwdecDependency;
+    if (hwdec == 'surfacetexture') {
+      hwdecDependency = HdrRouteDependency.hwdecSurfaceTexture;
+    } else if (hwdec == 'mediacodec-copy') {
+      hwdecDependency = HdrRouteDependency.hwdecMediacodecCopy;
+    } else {
+      hwdecDependency = HdrRouteDependency.hwdecMediacodec;
+    }
     return HdrStrategyRealization.route(
       HdrRoute(
         strategy: HdrStrategy.baseLayerConvert,
@@ -298,9 +306,7 @@ class HdrStrategyRealizer {
             : null,
         stripDvRpu: source.dynamicMetadata == HdrDynamicMetadata.dolbyVision,
         dependencies: <String>{
-          useMediacodecCopy
-              ? HdrRouteDependency.hwdecMediacodecCopy
-              : HdrRouteDependency.hwdecMediacodec,
+          hwdecDependency,
           HdrRouteDependency.topologyPlatformView,
           output == HdrOutputTransfer.pq
               ? HdrRouteDependency.dataspacePq

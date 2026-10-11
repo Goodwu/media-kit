@@ -4,6 +4,13 @@
 
 **路径映射（2026-10-05 起）**：`archives/experiments/` 已整体迁移至独立仓库 **`~/src/media-kit-experiments`**（实验记录/证据/交接/索引全量归档）。本文件及 conversations 中所有 `archives/experiments/` 前缀路径均映射到该库根目录。**主库历史已剥离该路径（2026-10-06，main 51ef66cc→ee28accd，树零变化）**：剥离前提交历史不再在主库，查备份仓 `Goodwu/media-kit-history-archive`（分支 `pre-strip-20261006`）；旧哈希换算用 `~/src/media-kit-build/history-strip-20261006/commit-map.json`。
 
+## MK-ROUTING-20261011（CORE继任，2026-10-11）
+
+- 状态：进行中；唯一集成分支 `routing/MK-ROUTING-20261011`，主PR media-kit#4/App#1/FFmpeg#1。CORE接手登记6110756605；context=`archives/conversations/media-kit-routing-20261011.md`。
+- 已完成：CORE-F01实现及库/App宿主验证，库6e7570fc + App569138fa：571video（Linux跳过3既有macOS例）、298lab、192App Flutter；同App SHA此前244Python保留。bundle/10包来源/新鲜度成功，严格分析仍34info；旧planned/pending/62info已由终态取代。
+- 当前：CORE-R01a SurfaceTexture实际执行路径依赖与mismatch隔离已实现，50关联宿主用例/严格分析通过，V1独立审核与92关联用例通过，当前CI待确认；完整输出身份、decoder复核、独立软件替代与auto/prefer/require仍开放。实验true主场景并回归false，App默认false不变。
+- DEVICE：继续native构建/实机；DV001@1095a43审查未修，PR5@cbcc6bb8档案向量/来源/帧推进有缺口，未集成。验收：目标测试与严格分析、当前源码CI、App联合测试，native/最新F01/HDR/持续性能另由DEVICE验证。
+
 ## 接手快照（2026-10-10 更新；换 agent 从这里开始）
 
 - **事实源与范围**：本文件是任务状态；`archives/README.md` 是主题导航。主题上下文（各 conversation 顶部 Current State）：Android HDR/P5 主线 `archives/conversations/android-hdr-dv-display-plan-20260922.md`；LG/marble 线 `archives/conversations/lg-h870ds-hdr-demo-20261004.md`；整改主题 `archives/conversations/architecture-review-remediation-20260930.md`。LG followup 单一计划=`docs/plans/lg-p84-hdr-followup-plan-20261009.md`（v4.1，全部出清，触发式候选/重开条件在案）。接手后先重读 Git/设备状态，快照仅是入口。
