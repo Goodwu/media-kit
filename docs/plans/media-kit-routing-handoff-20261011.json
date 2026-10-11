@@ -1,398 +1,253 @@
 {
-  "schema": 1,
+  "schema": 2,
   "taskId": "MK-ROUTING-20261011",
   "updatedOn": "2026-10-11",
   "timezone": "Asia/Seoul",
-  "plan": "docs/plans/media-kit-routing-implementation-20261011.md",
-  "planCommit": "6107617628199ec64a44581126fd488ea201af0f",
-  "initialHandoffCommit": "8edf822947da242efd5ba80d9c92e5b085bbee08",
   "status": "in_progress",
-  "validationBlocker": "B2b implemented in both repositories. Latest lab fixture repair and fresh combined App tests/build need independent acceptance. No current full-native/device acceptance.",
+  "plan": "docs/plans/media-kit-routing-implementation-20261011.md",
+  "planVersion": 3,
+  "planCommit": "6107617628199ec64a44581126fd488ea201af0f",
+  "initialPlanCommit": "7a2cd26ad003f7524d7362bf218f7d5eee3cd0ee",
+  "initialHandoffCommit": "8edf822947da242efd5ba80d9c92e5b085bbee08",
+  "checkpoint": "CI-B1c-B3-validated-source-checkpoint",
+  "checkpointScope": "This commit updates documentation only. Validation records below identify actual tested source inputs, not a historical revision to use in future builds.",
+  "history": {
+    "previousFullLedger": {
+      "repository": "Goodwu/media-kit",
+      "ref": "b48d94ce4254857872d16c234566c69beac782c6",
+      "path": "docs/plans/media-kit-routing-handoff-20261011.json",
+      "blob": "b438dcfe79aee915ace5f1a4e9c259e9f4a72e6a"
+    },
+    "previousAppLedger": {
+      "repository": "Goodwu/PiliPlusX",
+      "ref": "a6593b3f0e986779848828b770ed5b29ce4ae412",
+      "path": "docs/plans/media-kit-routing-app-handoff-20261011.json"
+    },
+    "B2bVerifiedResultComments": {"mediaKitPR4": 6107283427, "appPR1": 6107287306},
+    "rule": "History remains in Git and these immutable references. Earlier pending/not_fixed fields are superseded by this checkpoint, not instructions to reimplement. Later PR result comments may complete validation without creating a new production revision."
+  },
   "canonicalDevelopment": {
     "mediaKit": {
       "repository": "Goodwu/media-kit",
       "baseRef": "main",
       "branch": "routing/MK-ROUTING-20261011",
-      "branchState": "created",
-      "createdFrom": "e7239901d92d2a5e3fbb82e5c4bd437c784bb861",
-      "branchBaseAfterRegistration": "7ea31c55a867d772965ca89911d7b432687826f4",
       "pullRequest": 4,
-      "pullRequestUrl": "https://github.com/Goodwu/media-kit/pull/4",
       "draft": true,
-      "lastImplementationHead": "090a4ebceade78baa743d43ef9d8186a95ff9f68",
-      "authoritativeProgress": "This ledger, this canonical branch and PR4. main is only a discovery pointer. Read-only local main0f0f1525 is stale; do not infer missing code from it. Later PR result comments may record completed checks without creating another source revision."
+      "lastVerifiedSourceHead": "b48d94ce4254857872d16c234566c69beac782c6",
+      "integrationCommit": "8b80f4523f58a635b380bee1e12c1654afe706f5",
+      "integratedMain": "d761922721ad8da6bb186abd270bb096100944ea"
     },
     "piliPlusX": {
-      "workspaceRoot": "piliplusx",
       "repository": "Goodwu/PiliPlusX",
-      "defaultBranch": "dev-new",
-      "observedBranch": "fix/darwin-video-output-rebuild-barrier",
-      "integrationBaseCommit": "f570150c2e366a78e91196eb735beb63b17e35a9",
-      "observedSourceCommit": "1a3dc7045e519689eb66d7560e0b64a63448671d",
-      "lastImplementationHead": "384b10ae2fb02fe5909fec89597499ea314f3f4a",
+      "baseRef": "fix/darwin-video-output-rebuild-barrier",
+      "createdFrom": "f570150c2e366a78e91196eb735beb63b17e35a9",
       "branch": "routing/MK-ROUTING-20261011",
-      "branchState": "created",
       "pullRequest": 1,
-      "note": "Existing PR1; do not recreate. New query/DASH filter is IMPLEMENTED in384b10ae, validation pending. Result comments6100836133/6100840179 describe the older8fc+ef vector only."
-    }
+      "draft": true,
+      "lastVerifiedSourceHead": "a6593b3f0e986779848828b770ed5b29ce4ae412",
+      "integrationCommit": "d0926b315af63b43bf5452119b4e4a067f58f88c",
+      "integratedAndroid7": "30434b3eb6d77a787b0f8f5db6891d4090032696",
+      "integrationOnlyPR": 2,
+      "note": "PR2 brought already implemented Android7 fixes into this existing task branch and is closed/merged. Primary PR1 is still draft. Do not recreate a branch or redevelop startup compatibility."
+    },
+    "ffmpeg": {
+      "repository": "Goodwu/FFmpeg",
+      "baseRef": "lg-p84-d1-vui-fix-20261010",
+      "createdFrom": "d4bb79394b98d6247887e169998778474f43887e",
+      "branch": "routing/MK-ROUTING-20261011",
+      "pullRequest": 1,
+      "draft": true,
+      "registrationCommit": "b6163ec6e18ddebd9f2b1ed2775e00073c555d4c",
+      "implementationCommit": "e8df200cdaba99cc98ba1def82034396d945597b",
+      "lastVerifiedSourceHead": "9aba43cfbee182ade060cdccbe15340a0fbe3e83",
+      "note": "This is the first necessary FFmpeg task branch. Native profile selection is ALREADY IMPLEMENTED and independently compiled. Do not duplicate it. Local preexisting configure changes were not accessed or modified."
+    },
+    "mpv": {"productionModifiedByThisTask": false, "observedSource": "c11426b67a"}
   },
   "tasks": [
     {
       "id": "PLAN",
       "status": "implemented",
-      "commit": "7a2cd26ad003f7524d7362bf218f7d5eee3cd0ee",
       "doNotRepeat": true
     },
     {
       "id": "HANDOFF",
-      "status": "implemented",
-      "commit": "8edf822947da242efd5ba80d9c92e5b085bbee08",
+      "status": "implemented_and_maintained",
       "doNotRepeat": true
     },
     {
       "id": "B1",
       "status": "in_progress",
-      "commits": [
-        "d18de2751085913591f50653d125b5db6fe5eff2",
-        "f0bba6ff5a618767b92286011b768f77eee1ef9e"
-      ],
       "subtasks": [
+        {"id": "B1a-admission", "status": "implemented_host_validated", "commit": "d18de2751085913591f50653d125b5db6fe5eff2", "doNotRepeat": true},
+        {"id": "B1b-el-facts", "status": "implemented_host_validated", "commit": "f0bba6ff5a618767b92286011b768f77eee1ef9e", "doNotRepeat": true},
+        {"id": "B1b-source-classification", "status": "planned", "note": "Unknown P8 must not become P8.2/SDR; original and processed facts still need separation. This is distinct from the completed unknown-EL fix."},
         {
-          "id": "B1a-admission",
-          "status": "implemented",
-          "commit": "d18de2751085913591f50653d125b5db6fe5eff2",
-          "changes": [
-            "P5 profile32 and P8.4 profile256 independently",
-            "native EL=false required",
-            "remove HLG-over-DV bypass"
-          ],
-          "tests": {
-            "newCases": 18,
-            "status": "passed_in_source_suite",
-            "sourceHead": "36e6a6d32786bff144d920195574e83f20430f61",
-            "runId": 38073262628,
-            "notDeviceAcceptance": true
-          },
-          "doNotRepeat": true
+          "id": "B1c-failure-aware-fallback",
+          "status": "implemented_host_validated",
+          "implementationCommit": "98a349f74b2066b476700becdde8b56e96645119",
+          "secondReviewTestCommit": "e4f7af3c3fef8803d53dcd1c74cab9c5cbfaccc1",
+          "newPlannerCases": 10,
+          "sessionCasesRevised": 3,
+          "sourceRun": 38130280175,
+          "doNotRepeat": true,
+          "contract": "SDR fallback retains failed dependencies and root reason. No independent implementation means blocked, not another open of the failed decoder under a different label. Second-review regression now tests valid reclassification followed by failed hardware, with no third attempt or false verified event.",
+          "limit": "Maturity exception still exists; no general software-alternative catalog or complete review-contract redesign is claimed."
         },
-        {
-          "id": "B1b-el-facts",
-          "status": "implemented",
-          "commit": "f0bba6ff5a618767b92286011b768f77eee1ef9e",
-          "tests": {
-            "newCases": 5,
-            "status": "passed_in_source_suite",
-            "sourceHead": "36e6a6d32786bff144d920195574e83f20430f61",
-            "runId": 38073262628
-          },
-          "doNotRepeat": true
-        },
-        {
-          "id": "B1b-source-classification",
-          "status": "planned",
-          "note": "Unknown P8 class/kind still maps to P8.2. Original/processed facts need work; do not confuse this with the completed EL fix."
-        },
-        {
-          "id": "B1c-dependencies-review-fallback",
-          "status": "in_progress",
-          "note": "Fallback now honors failures; independent tests pending. Importer/output identity and software alternatives remain open."
-        }
+        {"id": "B1c-importer-output-review", "status": "planned", "note": "Actual SurfaceTexture/import dependencies, presenter distinction, output reuse/rebuild identity, source correctness review and software alternatives remain open."}
       ]
     },
     {
       "id": "B2",
       "status": "in_progress",
-      "commits": [
-        "639714555e39013a5a99d23d77a6909d761f770c",
-        "5638f9b596a4f50243e33934d2c73facd0c580dc",
-        "861b9ab2946394cb6187cd32600ffd3dedde5452",
-        "4d8407b9158fa420316581d4f24f5a01591cfa5d",
-        "090a4ebceade78baa743d43ef9d8186a95ff9f68"
-      ],
-      "note": "Player query removed from Dart. Session/lab and App have migrated to target/source-aware queries. Source filter implemented; independent combined validation in progress.",
       "subtasks": [
-        {
-          "id": "B2a-query",
-          "status": "implemented",
-          "commit": "639714555e39013a5a99d23d77a6909d761f770c",
-          "hostJavaAssertionsPassed": 34,
-          "independentFlutterAndAndroidCI": "passed_on43415b",
-          "doNotRepeat": true
-        },
+        {"id": "B2a-query", "status": "implemented_host_and_plugin_compile_validated", "commit": "639714555e39013a5a99d23d77a6909d761f770c", "lintRepair": "5638f9b596a4f50243e33934d2c73facd0c580dc", "doNotRepeat": true},
         {
           "id": "B2b-query-migration-App-source-filter",
-          "status": "implemented_host_validated",
+          "status": "implemented_host_and_App_bundle_validated",
           "libraryCommit": "861b9ab2946394cb6187cd32600ffd3dedde5452",
           "appCommit": "384b10ae2fb02fe5909fec89597499ea314f3f4a",
-          "changes": [
-            "Remove HdrCapabilities.query/queryWith Player API; preserve HDR value/parser",
-            "Bind exact source support to planner, including safety fallback",
-            "Session captures per-open target/spec and refreshes its own target rather than using legacy default-display payload",
-            "App filters actual DASH renditions before codec preference and quality selection",
-            "Immutable NetworkSource carries selected sourceSpec/outputTarget into Session",
-            "Unknown remains conditional; no process-global successful-query fallback"
-          ],
-          "tests": {
-            "newLibraryCases": 9,
-            "libraryCases": "passed_on2811_and4d8407",
-            "videoSuite": "502_passed_3_existing_Linux_skips_on4d8407",
-            "videoAnalyze": "success_on4d8407",
-            "newAppCases": 12,
-            "newAppCasesState": "independent_execution_pending"
-          },
-          "fixtureRepairs": {
-            "widgetFakeCommit": "4d8407b9158fa420316581d4f24f5a01591cfa5d",
-            "labCommit": "090a4ebceade78baa743d43ef9d8186a95ff9f68",
-            "note": "Retain all assertions. Page formatting restored only after dart-format equality proves current code equivalence; no old production query restored."
-          },
+          "newLibraryCases": 9,
+          "newAppCases": 12,
+          "fixtureRepairs": ["4d8407b9158fa420316581d4f24f5a01591cfa5d", "090a4ebceade78baa743d43ef9d8186a95ff9f68"],
           "doNotRepeat": true,
-          "validationComment": 6107283427
+          "note": "Player query is deleted from Dart. Exact target/source declarations feed planner and Session; actual DASH renditions are filtered before quality/codec preference. Immutable selected input survives reopen. No global stale-capability fallback. Do not restore old query or mark this pending implementation."
         },
-        {
-          "id": "B2c-LG-managed-output",
-          "status": "planned"
-        },
-        {
-          "id": "B2-options-and-other-platforms",
-          "status": "planned",
-          "note": "auto/prefer/require and shared platform semantics are in v3. Do not claim full adapters, advanced options, runtime presented-HDR proof or multi-view completion."
-        }
+        {"id": "B2c-LG-managed-output", "status": "planned", "note": "Preserve accepted YUV8 recipe and all native owner/ACK gates; ordinary managed wiring and strict experiment authorization remain distinct."},
+        {"id": "B2-options-and-other-platforms", "status": "planned", "note": "Implement auto/prefer/require only for real available execution paths, then App controls/reporting and platform adapters. Query's first FlutterView adapter is limited; do not claim full multi-view or platform coverage."}
       ]
     },
     {
       "id": "B3",
       "status": "in_progress",
-      "commits": [
-        "ac4f7889063623b3912d3fe5e8b43588915b3ee4"
-      ],
       "subtasks": [
         {
-          "id": "B3-selection-audit",
-          "status": "gap_reproduced_not_fixed",
-          "commit": "ac4f7889063623b3912d3fe5e8b43588915b3ee4",
-          "evidence": "docs/plans/media-kit-routing-native-audit-20261011.md",
-          "tool": "tool/routing_native_audit/run.py",
-          "execution": {
-            "scope": "current-source C regions with JNI fixtures",
-            "compileExit": 0,
-            "regressionExit": 1,
-            "controlsPassed": 5,
-            "counterexampleReproduced": 1,
-            "sanitizers": "address,undefined",
-            "fullNativeBuild": false,
-            "deviceTest": false
-          },
-          "toolTests": {
-            "passed": 6,
-            "scope": "extraction only"
-          },
-          "next": "Narrow P8 selection repair including empty profile-list behavior; no broad new decoder-naming protocol by default.",
-          "doNotRecreateHarness": true
+          "id": "B3-selection-audit-and-repair",
+          "status": "implemented_host_and_Android_target_compile_validated",
+          "originalHarnessCommit": "ac4f7889063623b3912d3fe5e8b43588915b3ee4",
+          "expandedHarnessCommit": "b48d94ce4254857872d16c234566c69beac782c6",
+          "nativeImplementation": "e8df200cdaba99cc98ba1def82034396d945597b",
+          "nativeCICommit": "9aba43cfbee182ade060cdccbe15340a0fbe3e83",
+          "beforeAfterRun": 38130138873,
+          "independentRun": 38130404541,
+          "doNotRepeat": true,
+          "changes": ["P5/P8 decoder lookup uses the configured32/256 profile", "Missing profile and legacy experimental0x2 rejected before lookup", "Empty native-DV profile lists cannot establish strict support", "Ordinary codec and unconstrained MIME legacy behavior retained"],
+          "limits": ["Host selector fixtures do not exercise real configure/start or panel output", "Android static library configuration is limited, not the full mpv/helper/product build", "Missing-profile configure guard has source/target compile coverage, not a full runtime configure test"],
+          "remaining": "Integrate this exact existing native repair into latest complete product build; never reimplement or substitute older FFmpeg."
         },
-        {
-          "id": "B3-existing-protocol-audit",
-          "status": "source_inspected",
-          "note": "P5/P8 mapping, decoder-info v1 and dovi=auto/on/off exist. Actual metadata delivery/source-fact gaps still need tests. Production FFmpeg/mpv unchanged."
-        }
+        {"id": "B3-existing-protocol-audit", "status": "source_inspected_tests_pending", "note": "Existing P5/P8 mapping, decoder-info v1, RPU controls and source facts are reused. Actual metadata delivery and remaining source-fact gaps need tests; no broad new mpv protocol by default."}
       ]
     },
     {
       "id": "APP",
       "status": "in_progress",
-      "commits": [
-        "223031bb30b8f4cea5ad1f740eabe425fd659579",
-        "2c4001fbddf410d9d1dbb829fc1137f34c143748",
-        "e80a52f0273a762061069fb9f18ad7965af9cebe",
-        "9fe16772d874d5bf9bf9a1035fc2c94d85ddccc3",
-        "384b10ae2fb02fe5909fec89597499ea314f3f4a"
-      ],
-      "tests": [
-        {
-          "run": 38075867243,
-          "app": "8fc8f2c618b96b60b29d576e4242d0e153fd00bd",
-          "mediaKit": "ef3951eb239d48747f4cbb2c3c2749fde40ff274",
-          "pythonPassed": 231,
-          "flutterPassed": 156,
-          "bundle": "success",
-          "analyze": "failure_85_infos",
-          "scope": "older_vector_not_B2b_acceptance"
-        }
-      ],
-      "userReminder": "Perform PiliPlusX build and tests; do not stop at library-only results.",
-      "required": [
-        "Verify actual package resolution points to latest task media-kit source",
-        "Run App tests and available build targets",
-        "Record both App and library SHAs and actual build inputs",
-        "Keep source-only/legacy-native compile evidence separate from full latest-source-native candidate acceptance",
-        "Persist App branch, PR, commits, failures and results in this task ledger"
-      ],
-      "note": "New query/DASH filter implemented in384b10ae; temporary writer retired in1a3dc704. Fresh full source/build CI38124750626 was triggered; query/compile failures require repair, not reimplementation on another branch."
+      "completedCommits": {
+        "portableOverridesAndVerifier": "223031bb30b8f4cea5ad1f740eabe425fd659579",
+        "correctHostAndCompiler": "2c4001fbddf410d9d1dbb829fc1137f34c143748",
+        "SDKPatchComposition": "e80a52f0273a762061069fb9f18ad7965af9cebe",
+        "lifecycleFixture": "9fe16772d874d5bf9bf9a1035fc2c94d85ddccc3",
+        "sourceFilter": "384b10ae2fb02fe5909fec89597499ea314f3f4a",
+        "migrationLints": "4f7fcd66d2162434bb4cbb821dcdaaba15352c7a",
+        "requiredAppleRefs": "c6c72369c79d9cbd1310302fe23dc8d03b3bd8b2",
+        "reviewedSafeLints": "a6593b3f0e986779848828b770ed5b29ce4ae412"
+      },
+      "note": "Latest full App tests and bundle passed; strict analyze still fails62 info findings. Only reviewed non-timing fixes accepted; Get.reset teardown tear-off and ancillary pubspec edit were rejected. No suppressions or broad copied-control rewrite.",
+      "remaining": ["62 analyzer infos", "Legacy Build current-source layout/lock/patch/preflight migration", "Advanced route preferences and explanations", "Full latest-source native APK and device acceptance"]
     },
     {
       "id": "CI",
-      "status": "B2b_combined_revalidation_pending",
-      "workflow": ".github/workflows/routing-source.yml",
-      "evidence": "docs/plans/media-kit-routing-ci-20261011.md",
-      "runs": [
-        {
-          "id": 38072309054,
-          "headSha": "01703016d333a97540fdd0f4ac5f9cd901bb54da",
-          "lab": "analyze_success_298_tests_passed",
-          "video": "18_analyzer_findings_and_unknown_EL_golden_failure_partial_test_run"
-        },
-        {
-          "id": 38072308952,
-          "headSha": "01703016d333a97540fdd0f4ac5f9cd901bb54da",
-          "webJob": 114272073801,
-          "web": "failed_OHOS_unconditional_ffi",
-          "latestNativeCandidateAcceptance": false
-        },
-        {
-          "id": 38072868284,
-          "headSha": "146269c414085ac0bc352886739267f83fe5c9d1",
-          "scope": "source_edit_not_validation",
-          "conclusion": "artifact_upload_failed_hidden_path",
-          "sourceCommitAndPush": "success",
-          "resultCommit": "1c134790cfbf4f7094c90472b8fd2357184a92e8",
-          "pythonTestsPassed": 10
-        },
-        {
-          "id": 38073262628,
-          "headSha": "36e6a6d32786bff144d920195574e83f20430f61",
-          "videoJob": 114274887230,
-          "videoTestsPassed": 475,
-          "videoTestsSkipped": 3,
-          "skipScope": "existing_macOS_only_viewport_widgets",
-          "videoAnalyze": "failed_2_unused_private_keys_and_smoke_print",
-          "labAnalyze": "success",
-          "labTests": "success",
-          "pythonTools": "success_6_plus_4_tests",
-          "ohosFacadeJavaScriptCompile": "success",
-          "ohosFacadeJavaScriptExecution": "success",
-          "ohosFacadeWasmCompile": "success",
-          "fullNativeBuild": false
-        },
-        {
-          "id": 38122745962,
-          "headSha": "43415b4955e55f9785a7ef32b4b3261181d7fd9d",
-          "source": "success",
-          "queryRun": 38122746023,
-          "query": "success",
-          "darwinRun": 38122745951,
-          "darwin": "success",
-          "ohosRun": 38122746152,
-          "ohos": "success"
-        },
-        {
-          "id": 38124012739,
-          "headSha": "2811f624c30bcaad312a73bacba550105ccb61a0",
-          "videoPassed": 497,
-          "videoFailedModules": 1,
-          "newSourceCasesPassed": 9,
-          "failure": "widget implementing fake missing new Session API; lab fake and formatting anchors also pending",
-          "queryRun": 38124012729,
-          "query": "success"
-        },
-        {
-          "id": 38124687703,
-          "headSha": "4d8407b9158fa420316581d4f24f5a01591cfa5d",
-          "videoPassed": 502,
-          "videoLinuxSkipped": 3,
-          "videoAnalyze": "success",
-          "lab": "266_passed_3_failures_including_one_module_compile",
-          "labRepair": "090a4ebceade78baa743d43ef9d8186a95ff9f68",
-          "fullNativeBuild": false
-        }
-      ],
-      "repairs": [
-        {
-          "id": "CI-web-ffi",
-          "status": "implemented_and_smoke_validated",
-          "commit": "445a2add7e1df072e09885070ce1c0eb40b335b5",
-          "nativeImplementationBlobUnchanged": "ab031d15910763fb646c45209fb867a9cbc19ee6",
-          "newTests": 2,
-          "doNotRepeat": true
-        },
-        {
-          "id": "CI-analyzer-and-golden",
-          "status": "implemented",
-          "commit": "1c134790cfbf4f7094c90472b8fd2357184a92e8",
-          "newTests": 3,
-          "doNotRepeat": true
-        },
-        {
-          "id": "CI-final-lints",
-          "status": "implemented",
-          "commit": "c2afeb990e8c87a9f18e67dcf0a375dd6c8239c8",
-          "changes": [
-            "remove two unused private constructor key parameters",
-            "remove print from smoke entry"
-          ],
-          "doNotRepeat": true
-        },
-        {
-          "id": "CI-query-lints",
-          "status": "implemented_and_validated",
-          "commit": "5638f9b596a4f50243e33934d2c73facd0c580dc",
-          "doNotRepeat": true
-        }
-      ],
-      "next": "Independently validate latest lab fixture repair and current App+library vector. All temporary source writers retired. Do not count legacy-prebuilt platform CI as latest-native acceptance."
+      "status": "partial_success_with_explicit_open_gates",
+      "releaseIdentityFix": {"commit": "98a349f74b2066b476700becdde8b56e96645119", "unitTests": 8, "job": 114443263585, "conclusion": "success", "scope": "Configured release checksum/markers only, not current-source native acceptance"},
+      "legacyBuildStartupFix": {"commit": "c6c72369c79d9cbd1310302fe23dc8d03b3bd8b2", "newPythonCases": 4, "status": "actual_jobs_now_start", "stillBlocked": true},
+      "remaining": ["General media-kit package tests still running at last observation", "App strict analysis62 infos", "Legacy App Build now fails actual dependency/patch/preflight steps, not workflow startup", "Full current-native APK build chain"]
     }
   ],
-  "nonNegotiable": [
-    "Read canonical branch, ledger, log and PR4 before coding; never duplicate committed work on another branch.",
-    "Implemented is distinct from validated. Test failures never reset implemented tasks. Native regression exit1 is unresolved.",
-    "Use latest relevant sources and all current changes for candidates; no historical source/APK/JAR/so substitute. Record resolved SHAs only as provenance.",
-    "HdrCapabilities.query(player:) is our own API and may change or be removed without a compatibility framework.",
-    "Preserve approved maturity, LG YUV8 and pixel/metadata/owner/ACK/lease contracts.",
-    "Do not reset or overwrite FFmpeg configure dirty change (empty FFMPEG_CONFIGURATION).",
-    "Require real completed success on the final candidate. Source tests/mock tests/legacy-native builds are not full current-native/device acceptance.",
-    "Persist every recoverable stage promptly before long tasks or handoff. Keep PR draft; no unvalidated merge.",
-    "PiliPlusX build and tests are required work, not an optional follow-up."
-  ],
-  "checkpointPolicy": {
-    "authority": "User requires prompt commit/push because environment is temporary.",
-    "procedure": [
-      "Review task-owned changes and sanitized evidence",
-      "Commit/push on the registered chain without awaiting all tests",
-      "Read back remote head/content and record real failures",
-      "Keep exact commit/result/next-action handoff; PR result comments may complete evidence without repeatedly cancelling new-head CI"
+  "latestValidation": {
+    "mediaKit": {
+      "source": "b48d94ce4254857872d16c234566c69beac782c6",
+      "sourceRun": 38130280175,
+      "sourceConclusion": "success",
+      "videoPassed": 512,
+      "videoLinuxSkipped": 3,
+      "skipReason": "Existing macOS-only viewport tests, separately covered by Darwin job",
+      "videoAnalyze": "success",
+      "labPassed": 298,
+      "labAnalyze": "success",
+      "queryAndJavaRun": 38130280156,
+      "queryAndJava": "success",
+      "darwinRun": 38130280098,
+      "darwin": "success",
+      "ohosRun": 38130280166,
+      "ohos": "success",
+      "generalRun": 38130280194,
+      "generalLastObserved": "in_progress",
+      "generalBuildJobs": "Windows/x64+arm64/Linux/macOS/iOS/Android/Web build jobs observed success; inherited native inputs are not full current-native acceptance"
+    },
+    "app": {
+      "run": 38130584907,
+      "app": "a6593b3f0e986779848828b770ed5b29ce4ae412",
+      "mediaKit": "b48d94ce4254857872d16c234566c69beac782c6",
+      "pythonPassed": 235,
+      "flutterPassed": 168,
+      "bundle": "success",
+      "actualTenPackageRootsAndBeforeAfterFreshness": "success",
+      "analyze": {"conclusion": "failure", "infos": 62, "errors": 0, "warnings": 0, "previousInfos": 85},
+      "kernelSha256": "94888eda49771d3c8029ad217eb553f609312c53d01b5abfff2da260b81c7832",
+      "nativeProductionRepairLinked": false,
+      "legacyBuildRun": 38130585018,
+      "legacyBuildDiagnosedError": "HDR test job114443891817 could not resolve ../media-kit sibling path; other jobs also fail patch/channel/release-preflight steps. Do not reuse old pinned dependencies to bypass this."
+    },
+    "ffmpeg": {
+      "run": 38130404541,
+      "conclusion": "success",
+      "source": "9aba43cfbee182ade060cdccbe15340a0fbe3e83",
+      "harnessSource": "b48d94ce4254857872d16c234566c69beac782c6",
+      "extractorTestsPassed": 6,
+      "selectorCasesPerCompiler": 17,
+      "compilers": ["clang", "gcc"],
+      "sanitizers": ["address", "undefined"],
+      "compileExit": 0,
+      "regressionExit": 0,
+      "inputsUnchanged": true,
+      "androidAPIs": [24, 35],
+      "androidArchitecture": "aarch64",
+      "androidCompiledLibraries": ["libavcodec.a", "libavutil.a"],
+      "androidActualMediaCodecObjectsVerified": ["mediacodec_wrapper.o", "mediacodecdec_common.o", "mediacodecdec.o"],
+      "ndk": "27.3.13750724",
+      "fullProductBuild": false
+    },
+    "fullNativeAPKAcceptance": false,
+    "deviceTests": false
+  },
+  "evidence": {
+    "downloadedAndHashChecked": [
+      {"repository": "Goodwu/media-kit", "artifact": 11698277850, "sha256": "a3aac146a30ad14e99e082b34f3b942aeeacafb4edeff4dbc99da85092630a28"},
+      {"repository": "Goodwu/media-kit", "artifact": 11699058209, "sha256": "dfe7e126edf63802b548eb54a3c4a4ec935d1b4830a70e32f8c3d585383c6629"},
+      {"repository": "Goodwu/PiliPlusX", "artifact": 11698138576, "sha256": "de4bbabbb3d08bb3536ec175dc57e54cabdd06bbb2a4115add71b5d0e01bd5bc"},
+      {"repository": "Goodwu/PiliPlusX", "artifact": 11699083599, "sha256": "321cedd9ec343a2c999eb4c996ce89098126b8f6fd4ed84eba97a67951f83eb7"},
+      {"repository": "Goodwu/FFmpeg", "artifact": 11698903794, "sha256": "04d9f310cbc93c67c403e411ae10c2cab6709e36c3283e66ce1e19d9e37d229b"},
+      {"repository": "Goodwu/FFmpeg", "artifact": 11698293031, "sha256": "ee7d40f0e49073f1dbefe73be7ff58227483566b267a46fe9ec5c9d9a200cb16"},
+      {"repository": "Goodwu/FFmpeg", "artifact": 11698772458, "sha256": "07d558c4d5292e67abc37960a666d8588796d722362edc6559ef8340234cac65"}
     ],
-    "privacy": "No credentials, private media or unsanitized logs in commits."
+    "additionalDocuments": ["docs/plans/media-kit-routing-native-audit-20261011.md", "docs/plans/media-kit-routing-native-selection-20261011.md", "Goodwu/PiliPlusX:docs/plans/media-kit-routing-ci-followup-20261011.md"]
   },
   "environment": {
-    "codexWorkspace": "Read-only; local main0f0f1525 is stale.",
-    "localRuntime": "Python/C available; Flutter/Dart/gh absent and git DNS failed. Current tracked source archives retrieved through read-only CI; local synthetic snapshot git histories are NOT upstream branches and must never be pushed. Fourteen existing App routing Python cases passed locally this turn.",
-    "github": "Actions operational. Scoped exact-index source checkpoints have been committed and pushed; all temporary source writers are retired. Normal tests are read-only and use fresh source checkouts.",
-    "deviceTests": "not_run"
+    "codex": "Read-only workspace review; no command/ADB endpoint. Local observed heads are not authoritative task refs.",
+    "temporaryRuntime": "Python/C/git available; no local Flutter/Dart/gh; Git network previously failed. Use authenticated connector and current tracked-source artifacts without assuming archive export includes every tracked path.",
+    "github": "Actions operational; workflow-writing scope belongs to authorized connector, not default GITHUB_TOKEN. All completed temporary source-writing/staging workflows have been retired.",
+    "devices": "No physical device execution in this task session; existing other-line device records are not acceptance of the current task vector."
   },
-  "buildAudit": {
-    "status": "incomplete",
-    "evidence": "docs/plans/media-kit-routing-native-audit-20261011.md",
-    "note": "Existing Android test build external relink/r22 helper pipeline still requires full source rebuild audit. No current-native test candidate claimed."
-  },
-  "nextAction": "Validate phaseCiB1 on existing PR4; B2b is already implemented and host-validated (comments6107283427/6107287306). Finish App CI, importer/source facts, B3 selection and latest-source native build; do not repeat integrations.",
-  "resumptionRule": "Do not rerun checkpoint materializers. Existing B1a=d18de275; EL=f0bba6ff; native audit=ac4f7889; Web=445a2add; analyzer/golden=1c134790; final lints=c2afeb990; B2a=63971455; query lint=5638f9b5; B2b library=861b9ab2; B2b App=384b10ae. Read latest remote ledger/PR results first.",
-  "lastCheckpoint": "B2b implemented and pushed in BOTH canonical repositories. Library502 tests+analyze passed on4d8407; lab fixture/format compatibility fixed090a4e pending independent run. App12 new tests added, full current vector pending. No full native APK/device or all-CI-success claim.",
-  "planVersion": 3,
-  "phaseCiB1": {
-    "status": "implemented_validation_pending",
-    "mediaIntegration": "8b80f4523f58a635b380bee1e12c1654afe706f5",
-    "appIntegration": "d0926b315af63b43bf5452119b4e4a067f58f88c",
-    "localIdentityTestsPassed": 8,
-    "newFallbackTests": 10,
-    "sessionTestsUpdated": 2,
-    "doNotReimplement": true,
-    "fullNativeAcceptance": false,
-    "open": [
-      "App85infos",
-      "AppBuildRequiredRef",
-      "UnknownP8",
-      "ImporterAndOutputIdentity",
-      "LGManaged",
-      "B3NativeSelection",
-      "LatestNativeAPK"
-    ]
-  }
+  "nonNegotiable": [
+    "Continue existing canonical branches and primary draft PRs; no duplicate implementation, force-push, destructive reset or merge of unaccepted primary PRs.",
+    "Read current refs, this ledger and latest result comments before coding. Implemented but failed validation never becomes planned again.",
+    "Use latest complete relevant sources and applicable product patches for candidates; old release JAR/APK/so is not a fresh-source substitute. Resolved SHAs are provenance, not stale build targets.",
+    "Preserve approved LG YUV8, maturity, exact pixel/metadata and owner/ACK/lease contracts. Do not reopen deferred10-bit/lease work without a new need.",
+    "Do not reset/overwrite the user's preexisting FFmpeg configure dirty state; inventory additional build-tree patches before product builds.",
+    "Experimental only relaxes maturity; test both states and primarily allowExperimental=true. App defaults remain false until deliberately changed, not implicitly granted by library tests.",
+    "No Player dependency in capability queries. Source specs and actual display target drive query/plan; unknown is not SDR or proven support.",
+    "PiliPlusX tests/build are required, not a library-only optional follow-up. Bundle, host fixtures and limited Android static compile are not full product/device acceptance.",
+    "Save every recoverable stage remotely before long work and handoff, verify actual refs, and never include credentials or private media.",
+    "Do not lower analyzer strictness or disable failing tests to manufacture green CI. Report actual failure scope and input vector."
+  ],
+  "nextAction": "Do not redo B2b, Android7 integration,98a349 fallback or e8df200c native selection. Finish CI's remaining current-source App layout/lock/patch checks and62 info debt; then remaining B1 source/import/output facts and product integration of the already repaired FFmpeg. Continue v3 LG/config/platform tasks and build latest complete mpv/FFmpeg/helper APK. Keep final physical-device acceptance explicit."
 }
