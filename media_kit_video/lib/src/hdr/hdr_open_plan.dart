@@ -10,6 +10,7 @@ import '../routing/video_source_spec.dart';
 import 'hdr_capabilities.dart';
 import 'hdr_route.dart';
 import 'hdr_source_descriptor.dart';
+import 'hdr_source_facts.dart';
 import 'hdr_native_dv_review_evidence.dart';
 
 /// Where a plan's [HdrSourceDescriptor] came from.
@@ -28,11 +29,16 @@ class HdrOpenRequest {
     this.target = const VideoOutputTarget.applicationView(),
     this.sourceSpec,
     this.capabilitiesOverride,
+    this.sourceFacts,
   });
 
   final VideoOutputTarget target;
   final VideoSourceSpec? sourceSpec;
   final HdrCapabilities? capabilitiesOverride;
+
+  /// Internal same-source configuration rebuild seed. A public Session.open
+  /// never supplies it; per-open failure/review retries carry their plan.
+  final HdrSourceFacts? sourceFacts;
 
   final Media media;
 
@@ -55,6 +61,7 @@ class HdrOpenPlan {
     required this.prediction,
     required this.route,
     this.excluded = const <String, HdrDegradeReason>{},
+    this.sourceFacts,
   });
 
   final Media media;
@@ -64,6 +71,12 @@ class HdrOpenPlan {
 
   /// Whether [source] came from the caller hint or from the decoder review.
   final HdrReportSource? sourceOrigin;
+
+  /// Immutable evidence for this logical source. Shared only by retries of
+  /// this open, never by a new open (even for the same URI). The coarse
+  /// [sourceOrigin] is not a per-field verification claim; inspect the origins
+  /// here for hint/track/decoder-inference distinctions.
+  final HdrSourceFacts? sourceFacts;
 
   /// The capability snapshot the route was planned against.
   final HdrCapabilities capabilities;
@@ -85,6 +98,7 @@ class HdrOpenPlan {
     HdrRoutePrediction? prediction,
     HdrRoute? route,
     Map<String, HdrDegradeReason>? excluded,
+    HdrSourceFacts? sourceFacts,
   }) {
     return HdrOpenPlan(
       media: media,
@@ -94,6 +108,7 @@ class HdrOpenPlan {
       prediction: prediction ?? this.prediction,
       route: route ?? this.route,
       excluded: excluded ?? this.excluded,
+      sourceFacts: sourceFacts ?? this.sourceFacts,
     );
   }
 
@@ -189,7 +204,11 @@ class HdrBackendObservation {
 /// is missing would render wrongly colored output, so the library refuses
 /// to open the media.
 class HdrPlaybackBlocked implements Exception {
-  const HdrPlaybackBlocked(this.reason);
+  const HdrPlaybackBlocked(this.reason, {this.sourceFacts});
+
+  /// Evidence that caused a review to block. Preserved in the failed report,
+  /// not promoted to an accepted route or discarded in favor of the old hint.
+  final HdrSourceFacts? sourceFacts;
 
   /// Why playback is blocked; [HdrDegradeReason.p5PipelineUnavailable] in
   /// Phase 1.
@@ -216,7 +235,7 @@ class HdrDataSpaceApplyException implements Exception {
   /// Applied path reported by the native side, when known.
   final String? path;
 
-  /// Readback reported by the native side, when known.
+  /// The readback reported by the native side, when known.
   final String? readback;
 
   /// [HdrDegradeReason.dataSpaceApplyFailed] or

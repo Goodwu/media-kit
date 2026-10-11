@@ -23,6 +23,7 @@ export 'package:media_kit_video/src/hdr/hdr_route.dart';
 export 'package:media_kit_video/src/hdr/hdr_route_planner.dart';
 export 'package:media_kit_video/src/hdr/hdr_source_classifier.dart';
 export 'package:media_kit_video/src/hdr/hdr_source_descriptor.dart';
+export 'package:media_kit_video/src/hdr/hdr_source_facts.dart';
 export 'package:media_kit_video/src/hdr/hdr_strategy.dart';
 export 'package:media_kit_video/src/hdr/hdr_strategy_realizer.dart';
 export 'package:media_kit_video/src/hdr/hdr_video_session.dart';

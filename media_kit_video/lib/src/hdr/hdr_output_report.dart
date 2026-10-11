@@ -6,6 +6,7 @@
 import 'hdr_open_plan.dart';
 import 'hdr_route.dart';
 import 'hdr_source_descriptor.dart';
+import 'hdr_source_facts.dart';
 
 /// {@template hdr_output_report}
 ///
@@ -26,6 +27,7 @@ class HdrOutputReport {
     this.generation = 0,
     this.source,
     this.sourceOrigin,
+    this.sourceFacts,
     this.prediction,
     this.actual,
     this.dataSpaceRequested,
@@ -47,6 +49,11 @@ class HdrOutputReport {
   /// Whether [source] came from the caller hint or from the decoder review;
   /// null when neither has happened yet.
   final HdrReportSource? sourceOrigin;
+
+  /// Per-field original-source evidence and the separate latest decoded-frame
+  /// sample. The presence of this snapshot or [verified] does not certify the
+  /// initial hint, source bitstream, metadata delivery or panel presentation.
+  final HdrSourceFacts? sourceFacts;
 
   /// The prediction the route was selected from, including the full
   /// candidate list with skip reasons.
@@ -111,6 +118,7 @@ class HdrOutputReport {
     int? generation,
     HdrSourceDescriptor? source,
     HdrReportSource? sourceOrigin,
+    HdrSourceFacts? sourceFacts,
     HdrRoutePrediction? prediction,
     HdrRoute? actual,
     String? dataSpaceRequested,
@@ -126,6 +134,7 @@ class HdrOutputReport {
       generation: generation ?? this.generation,
       source: source ?? this.source,
       sourceOrigin: sourceOrigin ?? this.sourceOrigin,
+      sourceFacts: sourceFacts ?? this.sourceFacts,
       prediction: prediction ?? this.prediction,
       actual: actual ?? this.actual,
       dataSpaceRequested: dataSpaceRequested ?? this.dataSpaceRequested,
