@@ -54,8 +54,9 @@ class VideoSourceSupport {
         }
         continue;
       }
-      if (decoder.support == VideoSupport.supported)
+      if (decoder.support == VideoSupport.supported) {
         return VideoSupport.supported;
+      }
       if (decoder.support == VideoSupport.unknown) unknown = true;
     }
     return unknown ? VideoSupport.unknown : VideoSupport.unsupported;
@@ -124,8 +125,9 @@ class VideoRouteCapabilities {
     final unique = <String, VideoSourceSpec>{};
     var count = 0;
     for (final source in sources) {
-      if (++count > 128)
+      if (++count > 128) {
         throw ArgumentError('At most 128 source specifications per query');
+      }
       unique[source.key] = source;
     }
     Map<Object?, Object?>? raw;
@@ -160,8 +162,9 @@ class VideoRouteCapabilities {
       throw const FormatException('Invalid VideoRouteCapabilities schema');
     }
     final display = raw['display'] as Map;
-    if (display['status'] is! String)
+    if (display['status'] is! String) {
       throw const FormatException('Invalid display status');
+    }
     final hdrTypes = display['hdrTypes'];
     if (hdrTypes != null &&
         (hdrTypes is! List || hdrTypes.any((v) => v is! int))) {
@@ -204,8 +207,9 @@ class VideoRouteCapabilities {
           decoders: decoders,
           reason: item['reason'] as String);
     }
-    if (results.length != unique.length)
+    if (results.length != unique.length) {
       throw const FormatException('Missing source support result');
+    }
     final hdrMap = Map<Object?, Object?>.from(raw['hdr'] as Map);
     // Display truth is owned by the resolved target, never a legacy default.
     hdrMap['displayHdrTypes'] =
