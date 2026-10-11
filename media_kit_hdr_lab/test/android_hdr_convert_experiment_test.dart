@@ -254,10 +254,22 @@ void main() {
     expect(prepared, 1);
     await expectLater(
         session.open(Media('test://retry'), hint: source), throwsStateError);
+    final backendCalls = List<String>.of(backend.calls);
+    final failedReport = session.report.value;
+    await expectLater(
+        session.setOptions(EffectiveVideoRouteOptions.resolve(
+            application: const VideoRouteOptions(
+                decode: VideoRouteSelection.require(VideoDecodeTarget.software),
+                output: VideoRouteSelection.require(VideoOutputIntent.sdr)))),
+        throwsStateError);
     await expectLater(
         session.setPreference(HdrOutputPreference.off), throwsStateError);
     await expectLater(
         session.setPolicy(HdrRoutingPolicy.defaults), throwsStateError);
+    expect(backend.calls, backendCalls);
+    expect(session.report.value, same(failedReport));
+    expect(revoked, ['owner-a/7']);
+    expect(prepared, 1);
     await session.dispose();
   });
   test(

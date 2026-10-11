@@ -434,11 +434,6 @@ class HdrVideoSession {
     bool play = true,
     Duration? start,
   }) async {
-    final frozenOptions = resolveHdrRouteOptions(
-        options: options ?? _configuredOptions,
-        policy: _configuredOptions == null ? _legacyPolicy : null,
-        preference: _configuredOptions == null ? _legacyPreference : null);
-
     if (_configuration.android.lgExperimentOwnerToken != null) {
       if (_lgExperimentOpenUsed) {
         throw StateError('LG experiment Session permits one open attempt only');
@@ -446,6 +441,10 @@ class HdrVideoSession {
       _lgExperimentOpenUsed =
           true; // Atomic before the first await; failure consumes it.
     }
+    final frozenOptions = resolveHdrRouteOptions(
+        options: options ?? _configuredOptions,
+        policy: _configuredOptions == null ? _legacyPolicy : null,
+        preference: _configuredOptions == null ? _legacyPreference : null);
     if (_disposed) throw StateError('HdrVideoSession is disposed');
     if (!_isAndroid) {
       final serial = ++_serial;
@@ -1358,7 +1357,7 @@ class HdrVideoSession {
   /// when the resource contract is unchanged. A stronger requirement cannot
   /// be accepted from the previous generation's observations.
   Future<void> setOptions(EffectiveVideoRouteOptions options) async {
-    if (_disposed) throw StateError('HdrVideoSession is disposed');
+    _ensureConfigurationChangeAllowed();
     _configuredOptions = options;
     final pending = _pendingOpen;
     if (pending != null && pending.generation == _serial) {
@@ -1407,7 +1406,16 @@ class HdrVideoSession {
         failurePolicy: value.failurePolicy);
   }
 
+  void _ensureConfigurationChangeAllowed() {
+    if (_disposed) throw StateError('HdrVideoSession is disposed');
+    if (_configuration.android.lgExperimentOwnerToken != null) {
+      throw StateError(
+          'LG single-open experiment rejects configuration controls');
+    }
+  }
+
   Future<void> setPreference(HdrOutputPreference preference) async {
+    _ensureConfigurationChangeAllowed();
     await setOptions(EffectiveVideoRouteOptions.resolve(
         application: _settingsValues().merge(VideoRouteOptions(
             output: preference == HdrOutputPreference.off
@@ -1416,6 +1424,7 @@ class HdrVideoSession {
   }
 
   Future<void> setPolicy(HdrRoutingPolicy policy) async {
+    _ensureConfigurationChangeAllowed();
     _policy = policy;
     await setOptions(EffectiveVideoRouteOptions.resolve(
         application: _settingsValues()
