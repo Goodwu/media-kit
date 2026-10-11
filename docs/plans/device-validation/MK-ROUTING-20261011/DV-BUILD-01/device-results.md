@@ -84,3 +84,10 @@ PREFER_CONVERT/CONVERT_ROUTE_LOCK/SURFACETEXTURE_POC/OUTPUT_LEVELS=full 的转�
 - 决定性证据：播放中 `dumpsys SurfaceFlinger` 显示 lab 两组输出 SurfaceView 层 BufferQueue **activeBuffer=[0x0:0:0]**（从未投递缓冲，其一 default-size 2160x4320 即 2:1 输出面），Flutter UI 层 activeBuffer=[1440x2672] 正常——窗口 leg 从未 post 缓冲。
 - critical reviewer 独立发现第二缺陷：mpv tip context_android.c:253-269 BT2020_NCL 默认实际输出 **FULL YCbCr**（mksColor=vec3(y, cb+.5, cr+.5)），与 Dart hdr_yuv_presentation_contract.dart:31-37 的 limited NV12(16+219) 契约失配——窗口缓冲恢复后颜色仍将错误，须一并修复。
 - DV002 根因聚焦：MKSURF init/bound、vo 激活、E1 dataspace applied ret=1 均成功，但窗口 SurfaceView 无缓冲投递（a040233d3e 收口 / 7163121865 官方注册与 lab POC r2 接线错配为嫌疑）。
+
+### DV002 归因边界修正（critical reviewer 复核）
+
+- **不得把 a040233d3e 收口笼统定为"晚于验收"**：10-10 genbump2 原始日志（logcat-bound-LOCAL-ONLY.txt:83）已有 owner bound poc-r2、:184/:193 ACTUAL、:367 release/latches=801 fences 1603/1603——owner/verify-only 机制在验收运行中即存在。收口提交与黑屏的因果关系未证实，DV002 唯一根因未证（缺光学实拍与 lease/offscreen/window 像素探针），不应断言"末级坏"。
+- MPVPROP target-peak 新旧均为 auto（旧:225 / 新 p84-full-verified2:1202），计划写 1000 不能当实测值。
+- **reviewer 新增两个转正阻塞**：① native YUV arm 为 process-global 且 owner tuple 仅 advisory（lg_fw_adapter.cpp:95-109, 273-303）；② realizer 把任意 surfacetexture+PQ 等同 YUV 而未核实 YUV arm——产品多 Session 不能继承 lab 单 Session 例外。
+- reviewer 终版结论预告：REQUEST_CHANGES + 定向转正步骤；不建议"修回传"或强置 ready。
