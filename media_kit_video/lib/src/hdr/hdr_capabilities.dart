@@ -1,3 +1,4 @@
+import '../routing/video_route_options.dart';
 /// This file is a part of media_kit (https://github.com/media-kit/media-kit).
 ///
 /// Copyright © 2021 & onwards, Hitesh Kumar Saini <saini123hitesh@gmail.com>.
@@ -184,14 +185,16 @@ class HdrCapabilities {
   /// decoder filtering; this value alone describes HDR routing facts.
   HdrRoutePrediction predict(
     HdrSourceDescriptor source, {
-    HdrRoutingPolicy policy = HdrRoutingPolicy.defaults,
-    HdrOutputPreference preference = HdrOutputPreference.auto,
+    HdrRoutingPolicy? policy,
+    HdrOutputPreference? preference,
+    EffectiveVideoRouteOptions? options,
   }) {
     return HdrRoutePlanner.plan(
       source: source,
       capabilities: this,
       policy: policy,
       preference: preference,
+      options: options,
     );
   }
 

@@ -23,6 +23,28 @@ void main() {
         {VideoRouteOptionOrigin.libraryDefault});
   });
 
+  for (final preference in VideoImportPreference.values) {
+    test('import $preference roundtrip, provenance and explicit auto reset',
+        () {
+      final requested = VideoRouteOptions(importPreference: preference);
+      expect(VideoRouteOptions.fromMap(requested.toMap()), requested);
+      final value = EffectiveVideoRouteOptions.resolve(application: requested);
+      expect(value.importPreference, preference);
+      expect(value.origins['importPreference'],
+          VideoRouteOptionOrigin.application);
+      final reset = EffectiveVideoRouteOptions.resolve(
+          application: requested,
+          openOverride: const VideoRouteOptions(
+              importPreference: VideoImportPreference.auto));
+      expect(reset.importPreference, VideoImportPreference.auto);
+      expect(reset.origins['importPreference'],
+          VideoRouteOptionOrigin.openOverride);
+      expect(reset.application, requested);
+      expect(requested.merge(const VideoRouteOptions()), requested);
+      expect(const VideoRouteOptions().key, isNot(requested.key));
+    });
+  }
+
   test('unset inherits application and partial library defaults', () {
     final options = EffectiveVideoRouteOptions.resolve(
       libraryDefaults: const VideoRouteOptions(output: hdr, experimental: true),

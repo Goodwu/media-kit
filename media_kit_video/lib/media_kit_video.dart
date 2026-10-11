@@ -41,3 +41,5 @@ export 'src/routing/video_source_spec.dart';
 export 'src/routing/video_output_target.dart';
 export 'src/routing/video_route_capabilities.dart';
 export 'src/routing/video_route_options.dart';
+
+export 'src/routing/video_route_option_review.dart';

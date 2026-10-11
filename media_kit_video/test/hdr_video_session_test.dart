@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:media_kit/media_kit.dart' show FileLoadedRecord, Media, VideoParams;
+import 'package:media_kit_video/src/routing/video_route_options.dart';
+import 'package:media_kit/media_kit.dart'
+    show FileLoadedRecord, Media, VideoParams;
 import 'package:media_kit_video/src/hdr/hdr_capabilities.dart';
 import 'package:media_kit_video/src/hdr/hdr_decoder_review.dart';
 import 'package:media_kit_video/src/hdr/android_mediacodec_configuration.dart';
@@ -99,10 +101,9 @@ void main() {
     bool? hdrVivid,
   }) =>
       HdrReviewFacts(
-        videoParams:
-            gamma == null && primaries == null
-                ? null
-                : const VideoParams(gamma: 'pq', primaries: 'bt.2020'),
+        videoParams: gamma == null && primaries == null
+            ? null
+            : const VideoParams(gamma: 'pq', primaries: 'bt.2020'),
         dolbyVisionProfile: profile,
         codec: codec,
         hwdecCurrent: hwdec,
@@ -150,8 +151,7 @@ void main() {
   }
 
   test('hint agreeing with the decoder review causes zero rebuilds', () async {
-    final backend = FakeBackend()
-      ..factsForOpen.add(gammaFacts(gamma: 'pq'));
+    final backend = FakeBackend()..factsForOpen.add(gammaFacts(gamma: 'pq'));
     final session = makeSession(backend: backend, capabilities: caps());
     final events = <HdrOutputEvent>[];
     session.events.listen(events.add);
@@ -239,35 +239,36 @@ void main() {
     await session.dispose();
   });
 
-  test('a failed decoder on the second review is not verified or opened a third time',
-    () async {
-  // First open is SDR with a valid decoder. Actual HDR facts cause a
-  // legitimate topology rebuild; only the second decoder fails.
-  final backend = FakeBackend()
-    ..factsForOpen.add(gammaFacts(gamma: 'pq'))
-    ..factsForOpen.add(facts(gamma: 'pq', primaries: 'bt.2020', hwdec: 'no'));
-  final session = makeSession(
-    backend: backend,
-    capabilities: caps(),
-    position: const Duration(seconds: 2),
-  );
-  final events = <HdrOutputEvent>[];
-  session.events.listen(events.add);
-  await session.open(media);
-  await pumpEventQueue();
-  expect(backend.opened, hasLength(2));
-  expect(backend.opened.first.route.strategy, HdrStrategy.sdrDirect);
-  expect(backend.opened.last.route.strategy, HdrStrategy.baseLayerDirect);
-  expect(session.report.value.verified, isFalse);
-  expect(session.report.value.degradeReason, HdrDegradeReason.hwdecMismatch);
-  expect(events.whereType<HdrRouteAppliedEvent>(), isEmpty);
-  expect(events.whereType<HdrErrorEvent>().single.reason,
-      HdrDegradeReason.hwdecMismatch);
-  expect(events.whereType<HdrReclassifiedEvent>().single.rebuilt, isTrue);
-  expect(backend.calls, contains('stop'));
-  expect(backend.calls, contains('reset'));
-  await session.dispose();
-});
+  test(
+      'a failed decoder on the second review is not verified or opened a third time',
+      () async {
+    // First open is SDR with a valid decoder. Actual HDR facts cause a
+    // legitimate topology rebuild; only the second decoder fails.
+    final backend = FakeBackend()
+      ..factsForOpen.add(gammaFacts(gamma: 'pq'))
+      ..factsForOpen.add(facts(gamma: 'pq', primaries: 'bt.2020', hwdec: 'no'));
+    final session = makeSession(
+      backend: backend,
+      capabilities: caps(),
+      position: const Duration(seconds: 2),
+    );
+    final events = <HdrOutputEvent>[];
+    session.events.listen(events.add);
+    await session.open(media);
+    await pumpEventQueue();
+    expect(backend.opened, hasLength(2));
+    expect(backend.opened.first.route.strategy, HdrStrategy.sdrDirect);
+    expect(backend.opened.last.route.strategy, HdrStrategy.baseLayerDirect);
+    expect(session.report.value.verified, isFalse);
+    expect(session.report.value.degradeReason, HdrDegradeReason.hwdecMismatch);
+    expect(events.whereType<HdrRouteAppliedEvent>(), isEmpty);
+    expect(events.whereType<HdrErrorEvent>().single.reason,
+        HdrDegradeReason.hwdecMismatch);
+    expect(events.whereType<HdrReclassifiedEvent>().single.rebuilt, isTrue);
+    expect(backend.calls, contains('stop'));
+    expect(backend.calls, contains('reset'));
+    await session.dispose();
+  });
 
   test(
       'persistent second-review mismatch blocks even with another playable route',
@@ -304,7 +305,8 @@ void main() {
     }
   });
 
-  test('persistent route-only disagreement blocks with an accurate reason', () async {
+  test('persistent route-only disagreement blocks with an accurate reason',
+      () async {
     final backend = FakeBackend()
       ..factsForOpen.addAll([
         gammaFacts(gamma: 'pq'),
@@ -330,7 +332,8 @@ void main() {
   });
 
   for (final phase in ['prepare', 'configure']) {
-    test('actual output readiness timeout in $phase excludes its topology', () async {
+    test('actual output readiness timeout in $phase excludes its topology',
+        () async {
       final raw = TimeoutException('actual output readiness');
       final typed = HdrOutputBindTimeout(raw);
       final backend = FakeBackend()
@@ -345,7 +348,9 @@ void main() {
       await pumpEventQueue();
       expect(backend.opened, hasLength(1));
       expect(backend.opened.single.route.strategy, HdrStrategy.toneMapSdr);
-      expect(backend.preparedPlans.last.excluded[HdrRouteDependency.topologyPlatformView],
+      expect(
+          backend.preparedPlans.last
+              .excluded[HdrRouteDependency.topologyPlatformView],
           HdrDegradeReason.outputBindTimeout);
       expect(events.whereType<HdrDegradedEvent>().single.reason,
           HdrDegradeReason.outputBindTimeout);
@@ -384,7 +389,8 @@ void main() {
     });
   }
 
-  test('the already admitted second HDR attempt may still pass review', () async {
+  test('the already admitted second HDR attempt may still pass review',
+      () async {
     final backend = FakeBackend()
       ..attemptScripts.add(const AttemptScript(dataSpaceApplyFailed: true));
     final session = makeSession(
@@ -403,8 +409,10 @@ void main() {
     );
     await session.open(media, hint: hdr10);
     expect(backend.preparedPlans, hasLength(2));
-    expect(backend.preparedPlans.first.route.strategy, HdrStrategy.baseLayerConvert);
-    expect(backend.preparedPlans.last.route.strategy, HdrStrategy.baseLayerDirect);
+    expect(backend.preparedPlans.first.route.strategy,
+        HdrStrategy.baseLayerConvert);
+    expect(
+        backend.preparedPlans.last.route.strategy, HdrStrategy.baseLayerDirect);
     expect(backend.opened, hasLength(1));
     expect(session.report.value.verified, isTrue);
     expect(session.report.value.actual!.strategy, HdrStrategy.baseLayerDirect);
@@ -467,13 +475,16 @@ void main() {
     final report = session.report.value;
     expect(report.verified, isTrue);
     expect(report.actual!.strategy, HdrStrategy.toneMapSdr);
-    expect(backend.preparedPlans.last.excluded[HdrRouteDependency.topologyPlatformView],
+    expect(
+        backend.preparedPlans.last
+            .excluded[HdrRouteDependency.topologyPlatformView],
         HdrDegradeReason.outputBindTimeout);
     expect(events.whereType<HdrRouteAppliedEvent>(), hasLength(1));
     await session.dispose();
   });
 
-  test('a HDR Vivid side-data fact reclassifies an HDR10 hint and rebuilds '
+  test(
+      'a HDR Vivid side-data fact reclassifies an HDR10 hint and rebuilds '
       'on the hdrVivid maturity row', () async {
     final backend = FakeBackend()
       ..factsForOpen
@@ -504,7 +515,9 @@ void main() {
     await session.dispose();
   });
 
-  test('hwdec mismatch reaches independent SDR software without reusing failed requests', () async {
+  test(
+      'hwdec mismatch reaches independent SDR software without reusing failed requests',
+      () async {
     final backend = FakeBackend()
       ..factsForOpen.add(facts(gamma: 'pq', primaries: 'bt.2020', hwdec: 'no'));
     final session = makeSession(
@@ -529,84 +542,138 @@ void main() {
     await session.dispose();
   });
 
-  test('ordinary to native internal reopen clears predecessor decoder observation', () async {
+  test(
+      'ordinary to native internal reopen clears predecessor decoder observation',
+      () async {
     // Synthetic native endpoints exercise the real Session consumer and report
     // boundary. They do not claim any device codec or display acceptance.
     const nativeRaw = '{"api":1,"mime":"video/dolby-vision",'
         '"codec":"c2.native.dv","native-dv-active":true}';
     final playerIdentity = Object(), controllerIdentity = Object();
     final sourceIdentity = HdrOptionSourceIdentity(
-      player: playerIdentity, path: media.uri,
-      playlistEntryId: '7', fileLoadedEpoch: 4,
+      player: playerIdentity,
+      path: media.uri,
+      playlistEntryId: '7',
+      fileLoadedEpoch: 4,
     );
-    final output = HdrNativeDvOutputSnapshot(controllerIdentity,
-      const AndroidSurfaceAccountId(handle: 11, generation: 2,
-        viewId: 3, surfaceGeneration: 4, wid: 5));
+    final output = HdrNativeDvOutputSnapshot(
+        controllerIdentity,
+        const AndroidSurfaceAccountId(
+            handle: 11,
+            generation: 2,
+            viewId: 3,
+            surfaceGeneration: 4,
+            wid: 5));
     final backend = FakeBackend()
       ..factsForOpen.addAll([
-        HdrReviewFacts(codec: 'hevc', hwdecCurrent: 'mediacodec', path: media.uri,
-          dolbyVisionProfile: 5, dvCompatibilityId: 0, dvElPresent: false,
-          decoderObservation: const HdrDecoderObservation(
-            playlistEntryId: 1, fileLoadedEpoch: 1, decoder: 'hevc_mediacodec',
-            decoderDescription: '', hwdec: 'mediacodec',
-            pixelFormat: 'mediacodec', hwPixelFormat: 'nv12')),
-        HdrReviewFacts(codec: 'hevc', hwdecCurrent: 'mediacodec', path: media.uri,
-          dolbyVisionProfile: 5, dvCompatibilityId: 0, dvElPresent: false,
-          nativeDvEvidence: HdrNativeDvReviewEvidence(source: sourceIdentity,
-            loaded: const FileLoadedRecord(4, 7), controller: output.controller,
-            output: output.identity,
-            configuration: AndroidMediaCodecConfiguration.parse(nativeRaw)!,
-            hwdecCurrent: 'mediacodec')),
+        HdrReviewFacts(
+            codec: 'hevc',
+            hwdecCurrent: 'mediacodec',
+            path: media.uri,
+            dolbyVisionProfile: 5,
+            dvCompatibilityId: 0,
+            dvElPresent: false,
+            decoderObservation: const HdrDecoderObservation(
+                playlistEntryId: 1,
+                fileLoadedEpoch: 1,
+                decoder: 'hevc_mediacodec',
+                decoderDescription: '',
+                hwdec: 'mediacodec',
+                pixelFormat: 'mediacodec',
+                hwPixelFormat: 'nv12')),
+        HdrReviewFacts(
+            codec: 'hevc',
+            hwdecCurrent: 'mediacodec',
+            path: media.uri,
+            dolbyVisionProfile: 5,
+            dvCompatibilityId: 0,
+            dvElPresent: false,
+            nativeDvEvidence: HdrNativeDvReviewEvidence(
+                source: sourceIdentity,
+                loaded: const FileLoadedRecord(4, 7),
+                controller: output.controller,
+                output: output.identity,
+                configuration: AndroidMediaCodecConfiguration.parse(nativeRaw)!,
+                hwdecCurrent: 'mediacodec')),
       ]);
     final session = HdrVideoSession.forTesting(
-      backend: backend, isAndroid: true,
+      backend: backend,
+      isAndroid: true,
       capabilitiesProvider: () async => caps(),
-      nativePlayerIdentity: playerIdentity, nativePlayerLock: Lock(),
+      nativePlayerIdentity: playerIdentity,
+      nativePlayerLock: Lock(),
       readNativeIdentity: () async => sourceIdentity,
       readNativeProperty: (name) async =>
           name == 'android-mediacodec-info' ? nativeRaw : 'mediacodec',
       readNativeOutput: () => output,
       reviewMonotonicNow: () => Duration.zero,
-      routePlanner: ({required source, required capabilities, required policy,
-          required preference, required excluded}) {
-        final ordinary = HdrRoutePlanner.plan(source: source,
-          capabilities: capabilities, policy: policy, preference: preference,
-          excluded: excluded);
+      routePlanner: (
+          {required source,
+          required capabilities,
+          required policy,
+          required preference,
+          required excluded}) {
+        final ordinary = HdrRoutePlanner.plan(
+            source: source,
+            capabilities: capabilities,
+            policy: policy,
+            preference: preference,
+            excluded: excluded);
         if (HdrSourceClass.of(source) != HdrSourceClass.dvP5) return ordinary;
-        const nativeRoute = HdrRoute(strategy: HdrStrategy.nativeDolbyVision,
-          presentation: HdrPresentation.nativeDolbyVision,
-          outputTransfer: HdrOutputTransfer.dolbyVision,
-          appliesDynamicMetadata: true, topology: HdrTopology.platformView,
-          vo: 'mediacodec_embed', hwdec: 'mediacodec',
-          targetPrim: null, targetTrc: null, surfaceTransfer: null,
-          stripDvRpu: false);
-        const candidate = HdrCandidate(strategy: HdrStrategy.nativeDolbyVision,
-          maturity: HdrStrategyMaturity.unsupported, route: nativeRoute, feasible: true);
-        return HdrRoutePrediction(source: source, selected: candidate,
-          candidates: [candidate, ...ordinary.candidates],
-          presentation: nativeRoute.presentation,
-          confidence: HdrPredictionConfidence.unverified, playable: true);
+        const nativeRoute = HdrRoute(
+            strategy: HdrStrategy.nativeDolbyVision,
+            presentation: HdrPresentation.nativeDolbyVision,
+            outputTransfer: HdrOutputTransfer.dolbyVision,
+            appliesDynamicMetadata: true,
+            topology: HdrTopology.platformView,
+            vo: 'mediacodec_embed',
+            hwdec: 'mediacodec',
+            targetPrim: null,
+            targetTrc: null,
+            surfaceTransfer: null,
+            stripDvRpu: false);
+        const candidate = HdrCandidate(
+            strategy: HdrStrategy.nativeDolbyVision,
+            maturity: HdrStrategyMaturity.unsupported,
+            route: nativeRoute,
+            feasible: true);
+        return HdrRoutePrediction(
+            source: source,
+            selected: candidate,
+            candidates: [candidate, ...ordinary.candidates],
+            presentation: nativeRoute.presentation,
+            confidence: HdrPredictionConfidence.unverified,
+            playable: true);
       },
     );
     await session.open(media);
     expect(backend.opened.map((plan) => plan.route.strategy),
         [HdrStrategy.sdrDirect, HdrStrategy.nativeDolbyVision]);
     expect(session.report.value.verified, isTrue);
-    expect(session.report.value.actual!.strategy, HdrStrategy.nativeDolbyVision);
+    expect(
+        session.report.value.actual!.strategy, HdrStrategy.nativeDolbyVision);
     expect(session.report.value.decoderObservation, isNull);
     expect(session.report.value.decoderIdentityKnown, isFalse);
     await session.dispose();
   });
 
-  test('ordinary unnamed decoder keeps route and identity verification separate', () async {
+  test(
+      'ordinary unnamed decoder keeps route and identity verification separate',
+      () async {
     final backend = FakeBackend()
       ..factsForOpen.add(HdrReviewFacts(
-        codec: 'hevc', hwdecCurrent: 'mediacodec', path: media.uri,
+        codec: 'hevc',
+        hwdecCurrent: 'mediacodec',
+        path: media.uri,
         videoParams: const VideoParams(gamma: 'pq', primaries: 'bt.2020'),
         decoderObservation: const HdrDecoderObservation(
-          playlistEntryId: 1, fileLoadedEpoch: 1,
-          decoder: '', decoderDescription: '', hwdec: 'mediacodec',
-          pixelFormat: 'mediacodec', hwPixelFormat: 'nv12',
+          playlistEntryId: 1,
+          fileLoadedEpoch: 1,
+          decoder: '',
+          decoderDescription: '',
+          hwdec: 'mediacodec',
+          pixelFormat: 'mediacodec',
+          hwPixelFormat: 'nv12',
         ),
       ));
     final session = makeSession(backend: backend, capabilities: caps());
@@ -618,17 +685,24 @@ void main() {
     await session.dispose();
   });
 
-  test('ordinary observation blocks wrong MIME despite matching hwdec', () async {
+  test('ordinary observation blocks wrong MIME despite matching hwdec',
+      () async {
     final backend = FakeBackend()
       ..factsForOpen.add(HdrReviewFacts(
-        codec: 'hevc', hwdecCurrent: 'mediacodec', path: media.uri,
+        codec: 'hevc',
+        hwdecCurrent: 'mediacodec',
+        path: media.uri,
         videoParams: const VideoParams(gamma: 'pq', primaries: 'bt.2020'),
         decoderObservation: HdrDecoderObservation(
-          playlistEntryId: 1, fileLoadedEpoch: 1,
-          decoder: 'h264_mediacodec', decoderDescription: '',
-          hwdec: 'mediacodec', pixelFormat: 'mediacodec', hwPixelFormat: 'nv12',
+          playlistEntryId: 1,
+          fileLoadedEpoch: 1,
+          decoder: 'h264_mediacodec',
+          decoderDescription: '',
+          hwdec: 'mediacodec',
+          pixelFormat: 'mediacodec',
+          hwPixelFormat: 'nv12',
           mediaCodecConfiguration: AndroidMediaCodecConfiguration.parse(
-            '{"api":1,"mime":"video/avc","codec":"c2.avc","native-dv-active":false}'),
+              '{"api":1,"mime":"video/avc","codec":"c2.avc","native-dv-active":false}'),
         ),
       ));
     final session = makeSession(backend: backend, capabilities: caps());
@@ -638,7 +712,8 @@ void main() {
     await pumpEventQueue();
     expect(backend.opened, hasLength(1));
     expect(session.report.value.verified, isFalse);
-    expect(session.report.value.degradeReason, HdrDegradeReason.routeReviewMismatch);
+    expect(session.report.value.degradeReason,
+        HdrDegradeReason.routeReviewMismatch);
     expect(events.whereType<HdrRouteAppliedEvent>(), isEmpty);
     expect(backend.calls, contains('stop'));
     expect(backend.calls, contains('reset'));
@@ -674,7 +749,8 @@ void main() {
       () async {
     final backend = FakeBackend()
       ..factsForOpen.add(const HdrReviewFacts(
-        hwdecCurrent: 'no', path: 'test://media',
+        hwdecCurrent: 'no',
+        path: 'test://media',
       ));
     final session = makeSession(
       backend: backend,
@@ -818,7 +894,8 @@ void main() {
     await session.dispose();
   });
 
-  test('a newer open supersedes the old one: no stale report, backend '
+  test(
+      'a newer open supersedes the old one: no stale report, backend '
       'rolled back', () async {
     final backend = FakeBackend()..holdConfigure = Completer<void>();
     final session = makeSession(backend: backend, capabilities: caps());
@@ -875,7 +952,7 @@ void main() {
     expect(events.whereType<HdrDegradedEvent>(), isEmpty);
   });
 
-  test('playback preference and policy changes rebuild only on route change',
+  test('playback configuration changes review even an unchanged route',
       () async {
     final backend = FakeBackend()
       ..factsForOpen.add(facts(gamma: 'pq', primaries: 'bt.2020'))
@@ -905,15 +982,20 @@ void main() {
     // The rebuilt generation's report states why the route degraded (R4.2).
     expect(session.report.value.degradeReason, HdrDegradeReason.preferenceOff);
 
-    // Policy change that does not alter the selected route: no rebuild.
+    // The same route still receives a fresh configure/open/review for new settings.
     await session.setPolicy(const HdrRoutingPolicy(preferences: {
       HdrSourceClass.hdr10: [HdrStrategy.toneMapSdr],
     }));
     await pumpEventQueue();
-    expect(backend.opened, hasLength(2));
+    expect(backend.opened, hasLength(3));
+    expect(backend.opened.last.route, backend.opened[1].route);
+    expect(backend.opened.last.options, same(session.report.value.options));
+    expect(
+        backend.calls.where((c) => c.startsWith('configure:')), hasLength(3));
+    expect(backend.calls.where((c) => c.startsWith('review:')), hasLength(3));
     expect(
       events.whereType<HdrRouteAppliedEvent>(),
-      hasLength(2),
+      hasLength(3),
     );
     await session.dispose();
   });
@@ -984,7 +1066,8 @@ class AttemptScript {
 
 /// The currently opened route, with the start the backend was asked for.
 class FakeOpened {
-  const FakeOpened(this.route, this.start);
+  const FakeOpened(this.route, this.start, this.options);
+  final EffectiveVideoRouteOptions? options;
   final HdrRoute route;
   final Duration? start;
 }
@@ -1084,7 +1167,7 @@ class FakeBackend implements HdrOpenBackend<HdrOpenPlan> {
   }) async {
     calls.add('open:${_tag(plan)}:$start');
     if (_script.openError != null) throw _script.openError!;
-    opened.add(FakeOpened(plan.route, start));
+    opened.add(FakeOpened(plan.route, start, plan.options));
   }
 
   @override
@@ -1098,7 +1181,8 @@ class FakeBackend implements HdrOpenBackend<HdrOpenPlan> {
                 : factsForOpen.length - 1]
             .hwdecCurrent;
     if (factsForOpen.isEmpty) {
-      return HdrReviewFacts(hwdecCurrent: plan.route.hwdec, path: plan.media.uri);
+      return HdrReviewFacts(
+          hwdecCurrent: plan.route.hwdec, path: plan.media.uri);
     }
     return factsForOpen[_attempt - 1 < factsForOpen.length
         ? _attempt - 1

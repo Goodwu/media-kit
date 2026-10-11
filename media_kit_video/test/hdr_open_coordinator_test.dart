@@ -93,6 +93,50 @@ class FakeBackend implements HdrOpenBackend<FakePlan> {
 FakePlan plan(String path) => FakePlan(path);
 
 void main() {
+  test('queued stop invalidates slow preparation and allows a later legal open',
+      () async {
+    final held = Completer<FakePlan>();
+    final backend = FakeBackend();
+    final c = HdrOpenCoordinator<String, FakePlan>(backend,
+        preparer: (source, _) =>
+            source == 'stale' ? held.future : Future.value(plan(source)));
+    await c.openSource('active');
+    final stale = c.openSource('stale');
+    await c.stopAndReset();
+    held.complete(plan('stale'));
+    await expectLater(stale, throwsA(isA<OpenSuperseded>()));
+    expect(backend.calls, isNot(contains('configure:stale')));
+    await c.openSource('new');
+    expect(backend.calls, contains('open:new'));
+    await c.dispose();
+  });
+  test('queued stop waits for old side effects and failed cleanup retains debt',
+      () async {
+    final backend = FakeBackend()..heldConfigure = Completer<void>();
+    final c = HdrOpenCoordinator<String, FakePlan>(backend,
+        preparer: (source, _) async => plan(source));
+    final pending = c.openSource('old');
+    while (!backend.calls.contains('configure:old')) {
+      await Future<void>.delayed(Duration.zero);
+    }
+    final oldCalls = backend.calls.length;
+    final stopped = c.stopAndReset();
+    await Future<void>.delayed(Duration.zero);
+    expect(backend.calls.length, oldCalls);
+    backend.heldConfigure!.complete();
+    await expectLater(pending, throwsA(isA<OpenSuperseded>()));
+    await stopped;
+    expect(backend.calls, isNot(contains('open:old')));
+    await c.openSource('active');
+    backend.failStopOnce = true;
+    await expectLater(c.stopAndReset(), throwsStateError);
+    final before = backend.calls.length;
+    await c.openSource('new');
+    expect(backend.calls.skip(before).take(2), ['stop', 'reset']);
+    expect(backend.calls.skip(before), contains('configure:new'));
+    await c.dispose();
+  });
+
   test('successful direct open is stopped and reset on coordinator dispose',
       () async {
     final backend = FakeBackend();
@@ -358,18 +402,25 @@ void main() {
       preparer: (source, _) async => plan(source),
       onBackendCallDiagnostic: diagnostics.add,
     );
-    await expectLater(coordinator.openSource('A'),
-        throwsA(isA<HdrOutputBindTimeout>().having((error) => error.cause, 'cause', same(raw))));
-    expect(diagnostics.where((event) =>
-        event.method == HdrBackendDiagnosticMethod.waitForOutput &&
-        event.boundary == HdrBackendDiagnosticBoundary.failed).single.error,
+    await expectLater(
+        coordinator.openSource('A'),
+        throwsA(isA<HdrOutputBindTimeout>()
+            .having((error) => error.cause, 'cause', same(raw))));
+    expect(
+        diagnostics
+            .where((event) =>
+                event.method == HdrBackendDiagnosticMethod.waitForOutput &&
+                event.boundary == HdrBackendDiagnosticBoundary.failed)
+            .single
+            .error,
         same(raw));
     expect(backend.calls, isNot(contains('open:A')));
     expect(backend.calls.skip(backend.calls.length - 2), ['stop', 'reset']);
     await coordinator.dispose();
   });
 
-  test('exact readiness wrapper preserves cause, stack, and typed identity', () async {
+  test('exact readiness wrapper preserves cause, stack, and typed identity',
+      () async {
     final raw = TimeoutException('Surface binding timeout');
     final stack = StackTrace.fromString('original-readiness-stack');
     try {
@@ -387,21 +438,27 @@ void main() {
         throwsA(same(other)));
   });
 
-  test('review reopen budget is finite and rejects invalid configuration', () async {
+  test('review reopen budget is finite and rejects invalid configuration',
+      () async {
     for (final value in [-1, 5]) {
-      expect(() => HdrOpenCoordinator<String, FakePlan>(FakeBackend(),
-        preparer: (source, _) async => plan(source), maxReviewReopens: value),
-        throwsArgumentError);
+      expect(
+          () => HdrOpenCoordinator<String, FakePlan>(FakeBackend(),
+              preparer: (source, _) async => plan(source),
+              maxReviewReopens: value),
+          throwsArgumentError);
     }
     for (final limit in [0, 3]) {
       final backend = FakeBackend();
       var count = 0;
       final coordinator = HdrOpenCoordinator<String, FakePlan>(backend,
-        preparer: (source, _) async => plan(source), maxReviewReopens: limit,
-        review: (_, __) async => HdrReviewDecision<FakePlan>.reopen(
-          Duration.zero, plan('rebuild-${++count}')));
-      await expectLater(coordinator.openSource('A'), throwsA(isA<HdrReviewReopenLimit>()));
-      expect(backend.calls.where((call) => call.startsWith('open:')), hasLength(limit + 1));
+          preparer: (source, _) async => plan(source),
+          maxReviewReopens: limit,
+          review: (_, __) async => HdrReviewDecision<FakePlan>.reopen(
+              Duration.zero, plan('rebuild-${++count}')));
+      await expectLater(
+          coordinator.openSource('A'), throwsA(isA<HdrReviewReopenLimit>()));
+      expect(backend.calls.where((call) => call.startsWith('open:')),
+          hasLength(limit + 1));
       expect(count, limit + 1);
       await coordinator.dispose();
     }
@@ -436,7 +493,8 @@ void main() {
   });
 
   for (final cleanup in ['stop', 'reset']) {
-    test('second review disagreement retains failed $cleanup cleanup debt', () async {
+    test('second review disagreement retains failed $cleanup cleanup debt',
+        () async {
       final backend = FakeBackend();
       var reviews = 0;
       final coordinator = HdrOpenCoordinator<String, FakePlan>(
@@ -453,11 +511,12 @@ void main() {
               backend.failResetOnce = true;
             }
           }
-          return HdrReviewDecision<FakePlan>.reopen(Duration.zero, plan('A-rebuilt'));
+          return HdrReviewDecision<FakePlan>.reopen(
+              Duration.zero, plan('A-rebuilt'));
         },
       );
-      await expectLater(coordinator.openSource('A'),
-          throwsA(isA<HdrReviewReopenLimit>()));
+      await expectLater(
+          coordinator.openSource('A'), throwsA(isA<HdrReviewReopenLimit>()));
       final beforeBlocked = backend.calls.length;
       if (cleanup == 'stop') {
         backend.failStopOnce = true;
