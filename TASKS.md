@@ -10,7 +10,7 @@
 - 已完成：CORE-F01实现及库/App宿主验证，库6e7570fc + App569138fa：571video（Linux跳过3既有macOS例）、298lab、192App Flutter；同App SHA此前244Python保留。bundle/10包来源/新鲜度成功，严格分析仍34info；旧planned/pending/62info已由终态取代。
 - 当前源码：库91521544 source38158342447 video604+3既有mac Linux跳过、lab298/strict通过；App f179+915两run38159246222/38159246432实际Android/Linux/macOS bootstrap通过（strict零问题、各211Flutter/bundle/SDK+package patches/来源），本轮Python各309；Windows未知SDK修改门失败，Build另6Release前置失败。general库CI最后仍运行，不推定绿。旧34info已清零。
 - DV001与PR#5必须归并：86c三Markdown已归并，5b279611新增16行device-results续接中、逐文件hash/来源保持；两个配方脚本未导入。DV0011095原审查未修，DEVICE原PR所有；最新整合P5/P8.4/true与false/普通Session复测不可省。旧8bed+a3+JARcd5的188/34info/244为DEVICE声称，原日志未随PR入库；AVC EOS不是dvh1/HDR验收。
-- R01a/R01b/R01c已实现，R01c915独立231/strict通过且当前源码CI通过；R01d未提交，critical两阻断（缺失codec跳过MIME、内部native重开旧观察）修复中。实际YUV carrier、独立copy/software catalog、auto/prefer/require有效配置仍开放。
+- R01a/R01b/R01c已实现，R01c915独立231/strict通过且当前源码CI通过；R01d两critical阻断已修复并独立255/strict通过，两删除门负例红灯证据保留，检查点待提交。当前普通scalar decoder/MIME/frame/代次与报告绑定已接通；review预算不包含open，不能抢占同步FFI。实际YUV carrier、独立copy/software catalog、auto/prefer/require有效配置仍开放。
 - CI04 Windows窄修进行中，不忽略未知SDK diff；native输入门新文件待critical，CORE接受账本空，实际Release接线/候选未验。experimental默认false不变，true主测/false回归。
 - DEVICE继续native构建/实机；DV001仍1095、PR5最新5b279611文档增量待核验归并，完整来源/owner/YUV arm/最新HDR及持续性能未完成。主任务PR不自动merge/publish。
 

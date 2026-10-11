@@ -23,6 +23,7 @@ import 'hdr_open_coordinator.dart';
 import 'hdr_open_plan.dart';
 import 'hdr_native_dv_option_owner.dart';
 import 'hdr_native_dv_review_evidence.dart';
+import 'hdr_decoder_review.dart';
 import 'hdr_output_diagnostics.dart';
 import 'hdr_output_event.dart';
 import 'hdr_output_report.dart';
@@ -349,6 +350,7 @@ class HdrVideoSession {
   /// only used when this open itself does not set one.
   HdrDegradeReason? _stagedDegradeReason;
   String? _reviewDiagnostic;
+  HdrDecoderObservation? _decoderObservation;
   HdrCapabilities? _lastCapabilities;
   HdrDisposalReport? _lastDisposeReport;
 
@@ -438,6 +440,7 @@ class HdrVideoSession {
     _stagedDegradeReason = _degradeReason;
     _degradeReason = null;
     _reviewDiagnostic = null;
+    _decoderObservation = null;
     final intentSerial = _intent.begin();
     // Consume the override before yielding; another open must not inherit it.
     final capabilitiesOverride = _capabilitiesOverride;
@@ -474,6 +477,7 @@ class HdrVideoSession {
           dataSpacePath: observation.dataSpacePath,
           dataSpaceReadback: observation.dataSpaceReadback,
           hwdecCurrent: observation.hwdecCurrent,
+          decoderObservation: _decoderObservation,
           verified: true,
           degradeReason: _degradeReason ?? _stagedDegradeReason,
           diagnostic: _reviewDiagnostic,
@@ -614,7 +618,9 @@ class HdrVideoSession {
   Future<HdrOpenPlan?> _retry(HdrOpenPlan failed, Object error) async {
     final generation = _generationOf(failed);
     if (generation != _serial || _disposed) return null;
-    if (error is HdrPlaybackBlocked || nativeDvFailureMustAbort(error)) {
+    if (error is HdrPlaybackBlocked ||
+        error is HdrDecoderReviewFailure ||
+        nativeDvFailureMustAbort(error)) {
       // Ownership/source/debt failures retain their original typed cause.
       // Coordinator cleanup is still protected by the backend's owner gates.
       return null;
@@ -834,6 +840,14 @@ class HdrVideoSession {
         }
         reviewWindow!.remaining();
       }
+    }
+    if (plan.route.strategy != HdrStrategy.nativeDolbyVision) {
+      validateDecoderObservation(plan.route, facts);
+      _decoderObservation = facts.decoderObservation;
+    } else {
+      // A native review describes another accepted attempt. Do not attach an
+      // ordinary predecessor's entry/decoder/frame sample to this report.
+      _decoderObservation = null;
     }
     // Source evidence survives this logical open's retries. Decoder output
     // is stored separately and cannot erase original DV/HDR metadata merely
