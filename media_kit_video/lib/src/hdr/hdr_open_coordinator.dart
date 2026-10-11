@@ -136,6 +136,29 @@ class HdrReviewDecision<P> {
   final P? nextPlan;
 }
 
+/// Only created at an actual output-readiness wait. Other phase timeouts
+/// cannot establish a failed output topology. The original timeout remains
+/// available to callers and backend diagnostics retain their original error.
+class HdrOutputBindTimeout extends TimeoutException {
+  HdrOutputBindTimeout(this.cause) : super(cause.message, cause.duration);
+
+  final TimeoutException cause;
+
+  static Future<void> waitFor(Future<void> readiness) async {
+    try {
+      await readiness;
+    } on TimeoutException catch (error, stack) {
+      if (error is HdrOutputBindTimeout) rethrow;
+      Error.throwWithStackTrace(HdrOutputBindTimeout(error), stack);
+    }
+  }
+}
+
+/// An unresolved review cannot be accepted after the single reopen budget.
+class HdrReviewReopenLimit implements Exception {
+  const HdrReviewReopenLimit();
+}
+
 class OpenSuperseded implements Exception {
   const OpenSuperseded();
 }
@@ -523,6 +546,9 @@ class HdrOpenCoordinator<R, P> {
                 HdrBackendDiagnosticPurpose.normal,
                 error: error,
                 stack: stack);
+            if (error is TimeoutException && error is! HdrOutputBindTimeout) {
+              Error.throwWithStackTrace(HdrOutputBindTimeout(error), stack);
+            }
             rethrow;
           }
           _emitBackendCall(
@@ -593,7 +619,10 @@ class HdrOpenCoordinator<R, P> {
               ? HdrReviewDecision<P>.accept()
               : await decide(attemptPlan, facts);
           _check(generation);
-          if (decision.reopen && !rebuilt) {
+          if (decision.reopen && rebuilt) {
+            throw const HdrReviewReopenLimit();
+          }
+          if (decision.reopen) {
             // One review-driven in-place reopen per open (plan 1.4 step 8).
             rebuilt = true;
             attemptPlan = decision.nextPlan as P;
@@ -621,7 +650,10 @@ class HdrOpenCoordinator<R, P> {
           // configuration behind. Like hdr_lab, a failure before the
           // transaction began switching (e.g. validate) leaves the currently
           // playing media untouched.
-          if (!switching || error is OpenSuperseded || _invalid(generation)) {
+          if (!switching ||
+              error is OpenSuperseded ||
+              error is HdrReviewReopenLimit ||
+              _invalid(generation)) {
             if (switching) {
               try {
                 _emitBackendCall(

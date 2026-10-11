@@ -116,6 +116,9 @@ enum HdrDegradeReason {
   /// `hwdec-current` did not match the route's expectation.
   hwdecMismatch,
 
+  /// The reviewed source requires a different route after the single rebuild.
+  routeReviewMismatch,
+
   /// The GPU output surface did not bind within the budget.
   outputBindTimeout,
 

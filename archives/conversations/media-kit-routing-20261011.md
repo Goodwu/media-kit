@@ -4,7 +4,7 @@
 
 当前库HEAD12966e7ac78983807199e0a179e84ad763a547a7；App da28171292931d32a1f4954f495ab5b7c29852a6；FFmpeg9aba43cf；DEVICE构建DV0011095a43。最新已验源码组合为库12966+App c51fd0973：库source38156773328 video591通过/3原mac跳过、lab298、strict通过；App source38156848733 strict零问题、211Flutter/1Chrome/268Python、Web/bundle/10包来源及freshness通过。Darwin/query/OHOS成功，general38156773301仍in_progress，不推定整套CI完成。证据/tmp/mk-routing-new-ci-20261012/summary.json。App da281是后续URI窄修，不能重标旧运行。
 
-CORE-F01/R01a/R01b已实现并验证。R01b内部输出请求contract/复用身份与publish失败清理已推送12966；它不关闭realizer中ST+PQ推定YUV的实际carrier缺口。R01c正在修持续二次mismatch接受和错误timeout归因，首四例红灯已保存，代码尚未提交，critical复核中。完整实际decoder/采样身份预算、copy/software catalog、auto/prefer/require有效配置闭环仍开放。
+CORE-F01/R01a/R01b已实现并验证。R01b内部输出请求contract/复用身份与publish失败清理已推送12966；它不关闭realizer中ST+PQ推定YUV的实际carrier缺口。R01c首阶段已实现并critical通过：仅实际绑定等待typed timeout，普通配置/open/review超时停止清理；持续二次hwdec/route mismatch拒绝accept，coordinator二次reopen拒绝。合法预算SDR兜底及已准入第二HDR均保留；worker228+1，独立critical231及全包strict零问题。原4行为红灯保留，true先失败的baseline不虚称false红；route-only仅最终覆盖。cleanup债务stop/reset回归保留。源码hash/边界见docs/plans/core-r01c-handoff-20261012.json，后续新CI待。完整实际decoder/采样身份预算、copy/software catalog、auto/prefer/require有效配置闭环仍开放。
 
 CI03 34 info已清零；Release38156848910 FAILURE：cache/兄弟源码/旧锁/空tag前置失败，非native编译验收。App bootstrap三新文件正在按V1修改，mock通过不算真实3OS；产品experimental默认false保留，验证true主场景和false。
 

@@ -224,8 +224,9 @@ class HdrVideoSession {
       publish: (controller) => _controller.value = controller,
       waitReady: (controller) async {
         final output = await controller.platform.future;
-        await output.waitUntilCurrentOutputBound.timeout(
-          const Duration(seconds: 10),
+        await HdrOutputBindTimeout.waitFor(
+          output.waitUntilCurrentOutputBound
+              .timeout(const Duration(seconds: 10)),
         );
       },
     );
@@ -514,6 +515,7 @@ class HdrVideoSession {
           verified: false,
           degradeReason: error.reason,
           error: error,
+          diagnostic: _reviewDiagnostic,
         );
         _emit(
           HdrErrorEvent(
@@ -617,6 +619,11 @@ class HdrVideoSession {
       // Coordinator cleanup is still protected by the backend's owner gates.
       return null;
     }
+    // A timeout in open/review/configuration does not identify a failed
+    // decoder or presenter. Stop and clean up rather than guessing a route.
+    if (error is TimeoutException && error is! HdrOutputBindTimeout) {
+      return null;
+    }
     if (_preference == HdrOutputPreference.off) return null;
     final nativeFailure =
         failed.route.strategy == HdrStrategy.nativeDolbyVision;
@@ -635,7 +642,7 @@ class HdrVideoSession {
               ? HdrRouteDependency.dataspaceHlg
               : HdrRouteDependency.dataspacePq] =
           reason;
-    } else if (error is TimeoutException) {
+    } else if (error is HdrOutputBindTimeout) {
       reason = HdrDegradeReason.outputBindTimeout;
       if (failed.route.topology == HdrTopology.platformView) {
         excluded[HdrRouteDependency.topologyPlatformView] = reason;
@@ -784,8 +791,8 @@ class HdrVideoSession {
 
   /// The review decision (plan 1.4 step 8): classify the decoder facts,
   /// re-plan, and reopen in place at most once when the route changed or
-  /// `hwdec-current` mismatches. A second disagreement is accepted and
-  /// reported honestly.
+  /// `hwdec-current` mismatches. A second disagreement blocks playback;
+  /// a playable prediction cannot verify the output that actually opened.
   Future<HdrReviewDecision<HdrOpenPlan>> _review(
     HdrOpenPlan plan,
     HdrReviewFacts facts,
@@ -796,7 +803,7 @@ class HdrVideoSession {
     }
     if (plan.route.strategy == HdrStrategy.nativeDolbyVision) {
       // Missing/contradictory native evidence throws before either ordinary
-      // mismatch branch, including the second-disagreement acceptance path.
+      // mismatch branch, including the second-disagreement blocking path.
       // Keep this transaction's window even if a diagnostic callback starts
       // another open. Observation never grants a new acceptance deadline.
       final reviewWindow = _nativeReviewWindow;
@@ -855,11 +862,18 @@ class HdrVideoSession {
       );
     }
     final reclassified = descriptor != plan.source;
+    // A previously admitted HDR route may still be reviewed at the limit.
+    // A non-HDR route selected after exhausting the two HDR attempts must
+    // keep that effective SDR constraint instead of predicting a new upgrade.
+    final reviewPreference = !HdrSessionAttemptPolicy.isHdr(plan.route) &&
+            _attemptPolicy.hdrAttempts >= 2
+        ? HdrOutputPreference.off
+        : _preference;
     final prediction = _routePlanner(
       source: descriptor,
       capabilities: plan.capabilities,
       policy: _policy,
-      preference: _preference,
+      preference: reviewPreference,
       excluded: _attemptPolicy.exclusions(plan.excluded),
     );
     if (!prediction.playable) {
@@ -888,7 +902,7 @@ class HdrVideoSession {
         source: descriptor,
         capabilities: plan.capabilities,
         policy: _policy,
-        preference: _preference,
+        preference: reviewPreference,
         excluded: excludedForRebuild,
       );
       if (!replanned.playable) {
@@ -922,33 +936,18 @@ class HdrVideoSession {
     }
 
     if (_rebuildUsed) {
-      // Second disagreement within one open: no further rebuild; report
-      // the actual situation (plan S5 case 4).
-      _reviewDiagnostic =
-          'decoder review mismatch persisted after rebuild: '
+      // The current output still disagrees with its required route or decoder.
+      // Stop within the existing budget; do not report a hypothetical candidate
+      // as an accepted output, nor open an unbounded third attempt.
+      _reviewDiagnostic = 'decoder review mismatch persisted after rebuild: '
           'route=${plan.route.strategy.name}, hwdec=${facts.hwdecCurrent}, '
           'profile=${facts.dolbyVisionProfile}, '
           'gamma=${facts.videoParams?.gamma}';
-      if (hwdecMismatch) {
-        _degradeReason ??= HdrDegradeReason.hwdecMismatch;
-      }
-      if (reclassified) {
-        _emit(
-          HdrReclassifiedEvent(
-            _transactionSerial,
-            previous: plan.source,
-            current: descriptor,
-            rebuilt: false,
-          ),
-        );
-      }
-      return HdrReviewDecision<HdrOpenPlan>.accept(
-        nextPlan: plan.copyWith(
-          source: descriptor,
-          sourceOrigin: reclassified ? HdrReportSource.decoder : null,
-          sourceFacts: sourceFacts,
-          prediction: replanned,
-        ),
+      throw HdrPlaybackBlocked(
+        hwdecMismatch
+            ? HdrDegradeReason.hwdecMismatch
+            : HdrDegradeReason.routeReviewMismatch,
+        sourceFacts: sourceFacts,
       );
     }
 
