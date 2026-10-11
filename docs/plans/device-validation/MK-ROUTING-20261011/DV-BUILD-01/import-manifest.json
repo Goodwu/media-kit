@@ -1,0 +1,26 @@
+{
+  "sourcePr": "https://github.com/Goodwu/media-kit/pull/5",
+  "sourceCommit": "86c186f000c9b9399d4f91227f740ab2669cb83c",
+  "scope": "historical-markdown-only",
+  "files": [
+    {
+      "path": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/input-vector.md",
+      "originalSha256": "9cd1fd4446ceba4ec5c778d00277e21a7866d84c1e113b8090c0acd62991a988",
+      "importedSha256": "63a02d698a70748ddc5f4f4f1277014324e390fcf36d109a39fbb4d1cb957bba"
+    },
+    {
+      "path": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/device-results.md",
+      "originalSha256": "233b6ddfb9338516d160a91a001f700be033025df6420e6b3af8e8b0b04e79e3",
+      "importedSha256": "f01da4be7e7d60a942daff40018ea2a88767adc3ab5b9f716fe041d9fa78269e"
+    },
+    {
+      "path": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/critical-review-define-promotion.md",
+      "originalSha256": "ead9bf0e762646c997bc38f83b21c15432a53d16ae93305a41c32e8fc72ea645",
+      "importedSha256": "cb00d09aff09299c9d8f403895b6bf58dd2cccb1f3421e379e140a482bb9a59f"
+    }
+  ],
+  "excludedScripts": [
+    "assemble-jar-arm64.sh",
+    "matrix-device-build.sh"
+  ]
+}

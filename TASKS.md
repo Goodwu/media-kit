@@ -9,8 +9,9 @@
 - 状态：进行中；唯一集成分支 `routing/MK-ROUTING-20261011`，主PR media-kit#4/App#1/FFmpeg#1。CORE接手登记6110756605；context=`archives/conversations/media-kit-routing-20261011.md`。
 - 已完成：CORE-F01实现及库/App宿主验证，库6e7570fc + App569138fa：571video（Linux跳过3既有macOS例）、298lab、192App Flutter；同App SHA此前244Python保留。bundle/10包来源/新鲜度成功，严格分析仍34info；旧planned/pending/62info已由终态取代。
 - 当前：R01a bd9b9f85源码CI已通过573video+3既有Linux跳过、298lab与两包strict。App1965ba0e+库bd9b9f85 source run38155973408成功：strict零问题、211Flutter/1Chrome/263Python、Web/bundle/10包来源与新鲜度通过，中央6111284247。旧34info已清零，旧向量不改标。
-- CORE-R01b输出创建请求契约已实现，64目标私有SDK测试/全库strict及独立critical78项/strict通过；同VO不同完整契约重建，未知initial或失败清理输出不复用，发布失败进入清理。实际decoder/presenter观察、独立软件替代、auto/prefer/require仍开放；当前源码CI/App新组合待提交后验证。实验true主场景并回归false，App默认false不变。
-- DEVICE：继续native构建/实机；DV001@1095a43审查未修，PR5@cbcc6bb8档案向量/来源/帧推进有缺口，未集成。验收：目标测试与严格分析、当前源码CI、App联合测试，native/最新F01/HDR/持续性能另由DEVICE验证。
+- DV001与PR#5必须归并：PR5精确86c186f0三Markdown历史切片导入/索引/哈希critical已通过，两个配方脚本未导入；DV0011095仍REQUEST_CHANGES、DEVICE原PR修复，最新整合向量P5/P8.4复测不可省。
+- CORE-R01b输出创建请求契约已实现，64目标私有SDK测试/全库strict及独立critical78项/strict通过；同VO不同完整契约重建，未知initial或失败清理输出不复用，发布失败进入清理。实际decoder/presenter观察、独立软件替代、auto/prefer/require仍开放；库12966+Appc51最新源码CI成功（video591+3原mac跳过/lab298、App211/1/268、strict/来源），不改标后续Appda281。实验true主场景并回归false，App默认false不变。
+- DEVICE：继续native构建/实机；DV001@1095a43审查未修，PR5@86c186f0三Markdown历史证据部分归并，配方/完整来源/最新整合复测仍未完成。验收：目标测试与严格分析、当前源码CI、App联合测试，native/最新F01/HDR/持续性能另由DEVICE验证。
 
 ## 接手快照（2026-10-10 更新；换 agent 从这里开始）
 
