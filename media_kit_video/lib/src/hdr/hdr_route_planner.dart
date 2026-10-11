@@ -3,6 +3,7 @@
 /// Copyright © 2021 & onwards, Hitesh Kumar Saini <saini123hitesh@gmail.com>.
 /// All rights reserved.
 /// Use of this source code is governed by MIT license that can be found in the LICENSE file.
+import '../routing/video_decoder_support.dart';
 import 'hdr_capabilities.dart';
 import 'hdr_output_diagnostics.dart';
 import 'hdr_route.dart';
@@ -13,11 +14,7 @@ import 'hdr_strategy_realizer.dart';
 /// The playback-level output preference (requirement 3.3). `off` is the
 /// caller asking for tone-mapped SDR regardless of capability (SDR sources
 /// stay SDR); it does not stop playback.
-enum HdrOutputPreference {
-  auto,
-
-  off,
-}
+enum HdrOutputPreference { auto, off }
 
 /// {@template hdr_routing_policy}
 ///
@@ -54,53 +51,51 @@ class HdrRoutingPolicy {
   /// HDR10+ metadata yet) — those classes fall through to the safety net.
   static const Map<HdrSourceClass, List<HdrStrategy>> defaultPreferences =
       <HdrSourceClass, List<HdrStrategy>>{
-    HdrSourceClass.dvP5: <HdrStrategy>[
-      HdrStrategy.nativeDolbyVision,
-      HdrStrategy.metadataReshape,
-      HdrStrategy.toneMapSdr,
-    ],
-    HdrSourceClass.dvP81: <HdrStrategy>[
-      HdrStrategy.nativeDolbyVision,
-      HdrStrategy.baseLayerDirect,
-      HdrStrategy.metadataReshape,
-      HdrStrategy.toneMapSdr,
-    ],
-    HdrSourceClass.dvP84: <HdrStrategy>[
-      HdrStrategy.nativeDolbyVision,
-      HdrStrategy.baseLayerDirect,
-      HdrStrategy.baseLayerConvert,
-      HdrStrategy.metadataReshape,
-      HdrStrategy.toneMapSdr,
-    ],
-    HdrSourceClass.dvP82: <HdrStrategy>[
-      HdrStrategy.nativeDolbyVision,
-      HdrStrategy.metadataReshape,
-      HdrStrategy.sdrDirect,
-    ],
-    HdrSourceClass.dvP7: <HdrStrategy>[
-      HdrStrategy.baseLayerDirect,
-      HdrStrategy.metadataReshape,
-      HdrStrategy.toneMapSdr,
-    ],
-    HdrSourceClass.hdr10: <HdrStrategy>[
-      HdrStrategy.baseLayerDirect,
-      HdrStrategy.baseLayerConvert,
-      HdrStrategy.toneMapSdr,
-    ],
-    HdrSourceClass.hlg: <HdrStrategy>[
-      HdrStrategy.baseLayerDirect,
-      HdrStrategy.baseLayerConvert,
-      HdrStrategy.toneMapSdr,
-    ],
-    HdrSourceClass.hdrVivid: <HdrStrategy>[
-      HdrStrategy.baseLayerDirect,
-      HdrStrategy.metadataReshape,
-      HdrStrategy.toneMapSdr,
-    ],
-    HdrSourceClass.sdr: <HdrStrategy>[
-      HdrStrategy.sdrDirect,
-    ],
-  };
+        HdrSourceClass.dvP5: <HdrStrategy>[
+          HdrStrategy.nativeDolbyVision,
+          HdrStrategy.metadataReshape,
+          HdrStrategy.toneMapSdr,
+        ],
+        HdrSourceClass.dvP81: <HdrStrategy>[
+          HdrStrategy.nativeDolbyVision,
+          HdrStrategy.baseLayerDirect,
+          HdrStrategy.metadataReshape,
+          HdrStrategy.toneMapSdr,
+        ],
+        HdrSourceClass.dvP84: <HdrStrategy>[
+          HdrStrategy.nativeDolbyVision,
+          HdrStrategy.baseLayerDirect,
+          HdrStrategy.baseLayerConvert,
+          HdrStrategy.metadataReshape,
+          HdrStrategy.toneMapSdr,
+        ],
+        HdrSourceClass.dvP82: <HdrStrategy>[
+          HdrStrategy.nativeDolbyVision,
+          HdrStrategy.metadataReshape,
+          HdrStrategy.sdrDirect,
+        ],
+        HdrSourceClass.dvP7: <HdrStrategy>[
+          HdrStrategy.baseLayerDirect,
+          HdrStrategy.metadataReshape,
+          HdrStrategy.toneMapSdr,
+        ],
+        HdrSourceClass.hdr10: <HdrStrategy>[
+          HdrStrategy.baseLayerDirect,
+          HdrStrategy.baseLayerConvert,
+          HdrStrategy.toneMapSdr,
+        ],
+        HdrSourceClass.hlg: <HdrStrategy>[
+          HdrStrategy.baseLayerDirect,
+          HdrStrategy.baseLayerConvert,
+          HdrStrategy.toneMapSdr,
+        ],
+        HdrSourceClass.hdrVivid: <HdrStrategy>[
+          HdrStrategy.baseLayerDirect,
+          HdrStrategy.metadataReshape,
+          HdrStrategy.toneMapSdr,
+        ],
+        HdrSourceClass.sdr: <HdrStrategy>[HdrStrategy.sdrDirect],
+      };
 
   /// The library default policy: requirement 3.4 preferences, experimental
   /// strategies gated off.
@@ -175,14 +170,16 @@ class HdrRoutePlanner {
         // Evaluate the remaining entries for display (feasibility and skip
         // reasons), without changing the selection.
         for (int j = i + 1; j < list.length; j++) {
-          candidates.add(_evaluate(
-            list[j],
-            source: source,
-            sourceClass: cls,
-            capabilities: capabilities,
-            policy: policy,
-            excluded: excluded,
-          ));
+          candidates.add(
+            _evaluate(
+              list[j],
+              source: source,
+              sourceClass: cls,
+              capabilities: capabilities,
+              policy: policy,
+              excluded: excluded,
+            ),
+          );
         }
         break;
       }
@@ -211,7 +208,8 @@ class HdrRoutePlanner {
     final bool dependsOnDataSpace =
         route != null && route.surfaceTransfer != null;
     final ext = capabilities.dataSpaceExt;
-    final HdrPredictionConfidence confidence = !dependsOnDataSpace ||
+    final HdrPredictionConfidence confidence =
+        !dependsOnDataSpace ||
             (ext != null && ext.applicable && ext.id == 'lya-pq')
         ? HdrPredictionConfidence.verified
         : HdrPredictionConfidence.unverified;
@@ -222,7 +220,12 @@ class HdrRoutePlanner {
       candidates: List<HdrCandidate>.unmodifiable(candidates),
       presentation:
           route?.presentation ?? HdrPresentation.ofStrategy(selected.strategy),
-      confidence: confidence,
+      confidence:
+          route != null &&
+              capabilities.sourceSupport != null &&
+              capabilities.decoderSupportFor(route) == VideoSupport.unknown
+          ? HdrPredictionConfidence.unverified
+          : confidence,
       playable: selected.feasible,
     );
     // `HDR predict:` layer (R4.3), emitted at the single planning function
@@ -247,8 +250,10 @@ class HdrRoutePlanner {
     bool gateMaturity = true,
     bool honorExcluded = true,
   }) {
-    final HdrStrategyMaturity maturity =
-        HdrStrategyMaturityTable.of(sourceClass, strategy);
+    final HdrStrategyMaturity maturity = HdrStrategyMaturityTable.of(
+      sourceClass,
+      strategy,
+    );
     if (gateMaturity) {
       if (maturity == HdrStrategyMaturity.unsupported) {
         return HdrCandidate(
@@ -277,8 +282,17 @@ class HdrRoutePlanner {
       return HdrCandidate(
         strategy: strategy,
         maturity: maturity,
-        skipReason: realization.infeasibleReason ??
+        skipReason:
+            realization.infeasibleReason ??
             HdrDegradeReason.unsupportedStrategy,
+      );
+    }
+    if (capabilities.sourceSupport != null &&
+        capabilities.decoderSupportFor(route) == VideoSupport.unsupported) {
+      return HdrCandidate(
+        strategy: strategy,
+        maturity: maturity,
+        skipReason: HdrDegradeReason.sourceDecodeUnsupported,
       );
     }
     // The excluded check runs after realize because the dependency tags come

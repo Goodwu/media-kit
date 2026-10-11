@@ -3,12 +3,8 @@
 /// Copyright © 2021 & onwards, Hitesh Kumar Saini <saini123hitesh@gmail.com>.
 /// All rights reserved.
 /// Use of this source code is governed by MIT license that can be found in the LICENSE file.
-import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
-
-import 'package:media_kit/media_kit.dart' show Player;
-
-import 'hdr_output_diagnostics.dart';
+import '../routing/video_decoder_support.dart';
+import 'hdr_strategy.dart';
 import 'hdr_route.dart';
 import 'hdr_route_planner.dart';
 import 'hdr_source_descriptor.dart';
@@ -92,8 +88,9 @@ class HdrDecoderInfo {
       heightRange: _intRange(map['heightRange']),
       frameRateRange: _intRange(map['frameRateRange']),
       supports4K: map['supports4K'] == true,
-      max4KFps:
-          map['max4KFps'] is num ? (map['max4KFps'] as num).toDouble() : null,
+      max4KFps: map['max4KFps'] is num
+          ? (map['max4KFps'] as num).toDouble()
+          : null,
     );
   }
 
@@ -112,7 +109,8 @@ class HdrDecoderInfo {
   }
 
   @override
-  String toString() => 'HdrDecoderInfo($name, $mimeType, '
+  String toString() =>
+      'HdrDecoderInfo($name, $mimeType, '
       'hardware: $hardwareAcceleration, main10: $main10, 4K: $supports4K)';
 }
 
@@ -122,11 +120,11 @@ class HdrDecoderInfo {
 /// ---------------
 /// Pre-playback device capability snapshot for HDR output planning (R1).
 ///
-/// [query] reads the Android side (display HDR types including Dolby Vision,
+/// VideoRouteCapabilities.query reads the Android side (display HDR types including Dolby Vision,
 /// HEVC/Dolby Vision decoder census, dataspace bridge state, registered
 /// extension) and takes the P5 dovi rescale pipeline verdict from the native
 /// probe: a disposable mpv instance (no vo — never EGL) created once inside
-/// the already-pinned libmpv at engine attach, reading the fork's read-only
+/// the currently loaded libmpv at engine attach, reading the fork's read-only
 /// `dovi-p5-pipeline` and `android-native-dv-bridge-api` properties. The
 /// snapshot never initializes EGL and never
 /// probes private ABIs.
@@ -142,16 +140,13 @@ class HdrCapabilities {
     this.nativeDvBridgeApi = 0,
     required this.dataSpaceBridgeLoaded,
     required this.dataSpaceExt,
+    this.sourceSupport,
   });
-
-  static const MethodChannel _channel = MethodChannel(
-    'com.alexmercerind/media_kit_video',
-  );
 
   /// Android SDK version.
   final int sdkInt;
 
-  /// HDR types supported by the default display: Dolby Vision (1), HDR10 (2),
+  /// HDR types supported by the queried display target: Dolby Vision (1), HDR10 (2),
   /// HLG (3), HDR10+ (4). Null means the platform reported no capability
   /// report at all — distinct from an empty set (a display that reports
   /// support for none).
@@ -186,17 +181,13 @@ class HdrCapabilities {
   /// skip reasons, the presentation type, and the confidence.
   ///
   /// This is a thin delegation to `HdrRoutePlanner.plan` with this snapshot
-  /// — the exact function the executor uses — so a predicted route and the
-  /// applied route cannot drift apart (R1.3). [width], [height] and [fps]
-  /// are accepted per R1.2 and reserved for decoder size/frame-rate tier
-  /// matching; the Phase 1 planner does not consume them yet.
+  /// — the same function used by the executor. Use
+  /// VideoRouteCapabilities.predict with a VideoSourceSpec for source-aware
+  /// decoder filtering; this value alone describes HDR routing facts.
   HdrRoutePrediction predict(
     HdrSourceDescriptor source, {
     HdrRoutingPolicy policy = HdrRoutingPolicy.defaults,
     HdrOutputPreference preference = HdrOutputPreference.auto,
-    int? width,
-    int? height,
-    double? fps,
   }) {
     return HdrRoutePlanner.plan(
       source: source,
@@ -206,33 +197,35 @@ class HdrCapabilities {
     );
   }
 
-  /// Queries the Android capability snapshot (R1.1, R1.4).
-  ///
-  /// The P5 pipeline verdict comes from the snapshot: the native side answers
-  /// it once per process through a disposable mpv instance (created with no
-  /// vo and no media, so it never touches EGL) that reads the fork's
-  /// read-only `dovi-p5-pipeline` property. The probe runs at engine attach
-  /// and is cached; every query is therefore authoritative with or without a
-  /// [Player].
-  ///
-  /// [player] is kept only for source compatibility with the Phase 1
-  /// signature and is not consulted — no mpv property is read through it.
-  static Future<HdrCapabilities> query({Player? player}) {
-    return queryWith();
-  }
+  /// Optional exact source declaration attached by the target-aware query.
+  /// Null means the caller has not supplied source specifications.
+  final VideoSourceSupport? sourceSupport;
 
-  /// [query] implementation: fetches the snapshot through the plugin channel
-  /// and parses it. The P5 verdict is whatever the native probe wrote into
-  /// the snapshot (missing key degrades to false, the safe direction).
-  @visibleForTesting
-  static Future<HdrCapabilities> queryWith() async {
-    final Map<Object?, Object?>? snapshot =
-        await _channel.invokeMapMethod<String, dynamic>('HdrCapabilities.Get');
-    final HdrCapabilities capabilities = parseSnapshot(snapshot);
-    // `HDR capability:` layer (R4.3); short-circuits while disabled.
-    HdrOutputDiagnostics.capability(capabilities);
-    return capabilities;
-  }
+  HdrCapabilities withSourceSupport(VideoSourceSupport support) =>
+      HdrCapabilities(
+        sdkInt: sdkInt,
+        displayHdrTypes: displayHdrTypes,
+        hevcDecoders: hevcDecoders,
+        dolbyVisionDecoders: dolbyVisionDecoders,
+        p5PipelineAvailable: p5PipelineAvailable,
+        nativeDvBridgeApi: nativeDvBridgeApi,
+        dataSpaceBridgeLoaded: dataSpaceBridgeLoaded,
+        dataSpaceExt: dataSpaceExt,
+        sourceSupport: support,
+      );
+
+  /// The source must match the consumer actually used by the route. Native
+  /// DV support cannot authorize a HEVC base-layer fallback, or vice versa.
+  VideoSupport decoderSupportFor(HdrRoute route) =>
+      sourceSupport?.support(
+        path: route.strategy == HdrStrategy.nativeDolbyVision
+            ? 'nativeDv'
+            : 'codec',
+        kind: route.strategy == HdrStrategy.nativeDolbyVision
+            ? VideoDecoderKind.hardware
+            : null,
+      ) ??
+      VideoSupport.unknown;
 
   /// Parses the raw native snapshot. Malformed or missing fields degrade to
   /// the safe defaults: no capability report (null displayHdrTypes), no
@@ -258,8 +251,9 @@ class HdrCapabilities {
       displayHdrTypes: _parseDisplayHdrTypes(map['displayHdrTypes']),
       hevcDecoders: _parseDecoders(map['hevcDecoders']),
       dolbyVisionDecoders: _parseDecoders(map['dolbyVisionDecoders']),
-      p5PipelineAvailable:
-          p5Raw is bool ? p5Raw : (p5PipelineAvailable ?? false),
+      p5PipelineAvailable: p5Raw is bool
+          ? p5Raw
+          : (p5PipelineAvailable ?? false),
       nativeDvBridgeApi: nativeDvRaw is int && nativeDvRaw == 1 ? 1 : 0,
       dataSpaceBridgeLoaded: map['dataSpaceBridgeLoaded'] == true,
       dataSpaceExt: HdrDataSpaceExtInfo.fromMap(map['dataSpaceExt']),
@@ -283,15 +277,17 @@ class HdrCapabilities {
     final List<HdrDecoderInfo> decoders = <HdrDecoderInfo>[];
     for (final Object? entry in raw) {
       if (entry is! Map) continue;
-      final HdrDecoderInfo? decoder =
-          HdrDecoderInfo.fromMap(Map<String, Object?>.from(entry));
+      final HdrDecoderInfo? decoder = HdrDecoderInfo.fromMap(
+        Map<String, Object?>.from(entry),
+      );
       if (decoder != null) decoders.add(decoder);
     }
     return decoders;
   }
 
   @override
-  String toString() => 'HdrCapabilities(sdk: $sdkInt, '
+  String toString() =>
+      'HdrCapabilities(sdk: $sdkInt, '
       'displayHdrTypes: $displayHdrTypes, hevc: ${hevcDecoders.length}, '
       'dv: ${dolbyVisionDecoders.length}, p5Pipeline: $p5PipelineAvailable, '
       'nativeDvBridgeApi: $nativeDvBridgeApi, '

@@ -7,13 +7,18 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart'
-    show HdrCapabilities, HdrDecoderInfo;
+    show
+        HdrCapabilities,
+        HdrDecoderInfo,
+        VideoRouteCapabilities,
+        VideoOutputTarget;
 
 /// Opt-in VM-service diagnostics for Android devices without usable logcat.
 /// The registered handler follows the current test-page player.
 class AndroidServiceProbe {
-  static const _enabled =
-      bool.fromEnvironment('MEDIA_KIT_ANDROID_SERVICE_PROBE');
+  static const _enabled = bool.fromEnvironment(
+    'MEDIA_KIT_ANDROID_SERVICE_PROBE',
+  );
   static Player? _player;
   static Future<void> Function(String)? _open;
   static String? Function()? _report;
@@ -28,9 +33,12 @@ class AndroidServiceProbe {
   static final _nativeDvInputLogs = <String>[];
   static int _nativeDvInputLogsDropped = 0;
 
-  static void attach(Player player, Future<void> Function(String) open,
-      {String? Function()? report,
-      Future<Map<String, Object?>?> Function()? surfaceSnapshot}) {
+  static void attach(
+    Player player,
+    Future<void> Function(String) open, {
+    String? Function()? report,
+    Future<Map<String, Object?>?> Function()? surfaceSnapshot,
+  }) {
     if (!kDebugMode || !Platform.isAndroid || !_enabled) return;
     _player = player;
     _open = open;
@@ -68,11 +76,15 @@ class AndroidServiceProbe {
       final current = _player;
       if (current == null) {
         return developer.ServiceExtensionResponse.error(
-            developer.ServiceExtensionResponse.extensionError, 'No player');
+          developer.ServiceExtensionResponse.extensionError,
+          'No player',
+        );
       }
       if (_busy) {
         return developer.ServiceExtensionResponse.error(
-            developer.ServiceExtensionResponse.extensionError, 'Probe busy');
+          developer.ServiceExtensionResponse.extensionError,
+          'Probe busy',
+        );
       }
       _busy = true;
       final action = args['action'] ?? 'snapshot';
@@ -97,7 +109,8 @@ class AndroidServiceProbe {
             if (_nativeDvTransaction != null &&
                 !identical(_nativeDvTransaction!.player, current)) {
               throw StateError(
-                  'A native-DV option is pending restoration for another player');
+                'A native-DV option is pending restoration for another player',
+              );
             }
             final transaction = _nativeDvTransaction;
             if (transaction != null && identical(transaction.player, current)) {
@@ -113,7 +126,8 @@ class AndroidServiceProbe {
             }
             if (_report?.call() != null) {
               throw StateError(
-                  'native-dv-open requires a player without an HDR session');
+                'native-dv-open requires a player without an HDR session',
+              );
             }
             final requestedRenderMode = args['renderMode'] ?? 'timed';
             final inputDiag = args['inputDiag'] ?? 'false';
@@ -131,65 +145,84 @@ class AndroidServiceProbe {
             _ensureProbeCurrent(current, generation);
             if (vo != 'mediacodec_embed') {
               throw StateError(
-                  'native-dv-open requires vo=mediacodec_embed (got $vo)');
+                'native-dv-open requires vo=mediacodec_embed (got $vo)',
+              );
             }
             final hwdecOption = await current.getProperty('hwdec');
             _ensureProbeCurrent(current, generation);
             if (hwdecOption != 'mediacodec') {
               throw StateError(
-                  'native-dv-open requires hwdec=mediacodec (got $hwdecOption)');
+                'native-dv-open requires hwdec=mediacodec (got $hwdecOption)',
+              );
             }
             final durationProperty = await current.getProperty('duration');
             _ensureProbeCurrent(current, generation);
             final parsedDuration = double.tryParse(durationProperty);
-            final hasStableDuration = current.state.duration > Duration.zero ||
+            final hasStableDuration =
+                current.state.duration > Duration.zero ||
                 (current.state.completed &&
                     parsedDuration != null &&
                     parsedDuration.isFinite &&
                     parsedDuration > 0);
             if (!hasStableDuration) {
-              throw StateError('native-dv-open requires an initialized media '
-                  'with a known duration');
+              throw StateError(
+                'native-dv-open requires an initialized media '
+                'with a known duration',
+              );
             }
             final transaction = _nativeDvTransaction;
             if (transaction != null &&
                 !identical(transaction.player, current)) {
               throw StateError(
-                  'A native-DV option is pending restoration for another player');
+                'A native-DV option is pending restoration for another player',
+              );
             }
             final alreadyEnabled = transaction != null;
             final currentOption = await current.getProperty('vd-lavc-o');
             _ensureProbeCurrent(current, generation);
-            final currentRenderMode =
-                await current.getProperty('mediacodec-embed-render-mode');
+            final currentRenderMode = await current.getProperty(
+              'mediacodec-embed-render-mode',
+            );
             _ensureProbeCurrent(current, generation);
             if (alreadyEnabled) {
               if (transaction.nativeOption != requestedNativeOption) {
-                throw StateError('Restore with ordinary open before changing '
-                    'native input diagnostics');
+                throw StateError(
+                  'Restore with ordinary open before changing '
+                  'native input diagnostics',
+                );
               }
               if (transaction.renderMode != requestedRenderMode) {
-                throw StateError('A native-DV transaction is already active '
-                    'with render-mode=${transaction.renderMode}; restore it '
-                    'with ordinary open before changing modes');
+                throw StateError(
+                  'A native-DV transaction is already active '
+                  'with render-mode=${transaction.renderMode}; restore it '
+                  'with ordinary open before changing modes',
+                );
               }
               if (currentOption != transaction.nativeOption) {
-                throw StateError('vd-lavc-o changed during native-DV probe: '
-                    '$currentOption');
+                throw StateError(
+                  'vd-lavc-o changed during native-DV probe: '
+                  '$currentOption',
+                );
               }
               if (currentRenderMode != requestedRenderMode) {
-                throw StateError('mediacodec-embed-render-mode changed during '
-                    'native-DV probe: $currentRenderMode');
+                throw StateError(
+                  'mediacodec-embed-render-mode changed during '
+                  'native-DV probe: $currentRenderMode',
+                );
               }
             } else {
               if (currentOption.trim().isNotEmpty) {
-                throw StateError('native-dv-open requires an empty vd-lavc-o '
-                    '(got $currentOption)');
+                throw StateError(
+                  'native-dv-open requires an empty vd-lavc-o '
+                  '(got $currentOption)',
+                );
               }
               if (currentRenderMode != 'boolean') {
-                throw StateError('native-dv-open requires the default '
-                    'mediacodec-embed-render-mode=boolean (got '
-                    '$currentRenderMode)');
+                throw StateError(
+                  'native-dv-open requires the default '
+                  'mediacodec-embed-render-mode=boolean (got '
+                  '$currentRenderMode)',
+                );
               }
               final created = _NativeDvOptionTransaction(
                 player: current,
@@ -217,9 +250,11 @@ class AndroidServiceProbe {
                 final appliedOption = await current.getProperty('vd-lavc-o');
                 _ensureProbeCurrent(current, generation);
                 if (appliedOption != activeTransaction.nativeOption) {
-                  throw StateError('vd-lavc-o did not acknowledge '
-                      '${activeTransaction.nativeOption} '
-                      '(got $appliedOption)');
+                  throw StateError(
+                    'vd-lavc-o did not acknowledge '
+                    '${activeTransaction.nativeOption} '
+                    '(got $appliedOption)',
+                  );
                 }
                 _ensureProbeCurrent(current, generation);
                 await nativePlayer.setPropertyStrictAsync(
@@ -228,13 +263,16 @@ class AndroidServiceProbe {
                   waitForInitialization: false,
                 );
                 _ensureProbeCurrent(current, generation);
-                final appliedRenderMode =
-                    await current.getProperty('mediacodec-embed-render-mode');
+                final appliedRenderMode = await current.getProperty(
+                  'mediacodec-embed-render-mode',
+                );
                 _ensureProbeCurrent(current, generation);
                 if (appliedRenderMode != requestedRenderMode) {
-                  throw StateError('mediacodec-embed-render-mode did not '
-                      'acknowledge $requestedRenderMode '
-                      '(got $appliedRenderMode)');
+                  throw StateError(
+                    'mediacodec-embed-render-mode did not '
+                    'acknowledge $requestedRenderMode '
+                    '(got $appliedRenderMode)',
+                  );
                 }
               }
               await open!(path);
@@ -267,21 +305,25 @@ class AndroidServiceProbe {
             _ensureProbeCurrent(current, generation);
             // Read only the received log buffer: no decoder lock or property
             // queries. Receipt timestamps cannot establish native event time.
-            return developer.ServiceExtensionResponse.result(jsonEncode({
-              'generation': generation,
-              'receiptTimestampsOnly': true,
-              'dropped': _nativeDvInputLogsDropped,
-              'logs': List<String>.of(_nativeDvInputLogs),
-            }));
+            return developer.ServiceExtensionResponse.result(
+              jsonEncode({
+                'generation': generation,
+                'receiptTimestampsOnly': true,
+                'dropped': _nativeDvInputLogsDropped,
+                'logs': List<String>.of(_nativeDvInputLogs),
+              }),
+            );
           case 'capabilities':
             actionResult = 'capabilities requested';
             actionData = await _readCapabilities(current, generation);
             _ensureProbeCurrent(current, generation);
-            return developer.ServiceExtensionResponse.result(jsonEncode({
-              'generation': generation,
-              'actionResult': actionResult,
-              'actionData': actionData,
-            }));
+            return developer.ServiceExtensionResponse.result(
+              jsonEncode({
+                'generation': generation,
+                'actionResult': actionResult,
+                'actionData': actionData,
+              }),
+            );
           case 'play':
             await current.play();
             break;
@@ -293,18 +335,21 @@ class AndroidServiceProbe {
             if (!seconds.isFinite || seconds < 0) {
               throw ArgumentError('seconds must be finite and nonnegative');
             }
-            await current.seek(Duration(
-                microseconds:
-                    (seconds * Duration.microsecondsPerSecond).round()));
+            await current.seek(
+              Duration(
+                microseconds: (seconds * Duration.microsecondsPerSecond)
+                    .round(),
+              ),
+            );
             break;
           case 'snapshot':
             break;
           case 'p5-probe':
             await const MethodChannel('media_kit_hdr_lab/p5_codec_probe')
                 .invokeMethod<Object?>('Run', {
-              'path': args['path'],
-              'maxFrames': 1,
-            });
+                  'path': args['path'],
+                  'maxFrames': 1,
+                });
             break;
           default:
             throw ArgumentError('Unknown action');
@@ -349,22 +394,26 @@ class AndroidServiceProbe {
           surface = await surfaceSnapshot();
           _ensureProbeCurrent(current, generation);
         }
-        return developer.ServiceExtensionResponse.result(jsonEncode({
-          'generation': generation,
-          if (actionResult != null) 'actionResult': actionResult,
-          if (actionData != null) 'actionData': actionData,
-          'hdrSessionReport': _report?.call(),
-          'properties': properties,
-          'surface': surface,
-          'playing': current.state.playing,
-          'completed': current.state.completed,
-          'positionMs': current.state.position.inMilliseconds,
-          'logs': List<String>.of(_logs),
-          'codecLifecycleLogs': List<String>.of(_codecLifecycleLogs),
-        }));
+        return developer.ServiceExtensionResponse.result(
+          jsonEncode({
+            'generation': generation,
+            if (actionResult != null) 'actionResult': actionResult,
+            if (actionData != null) 'actionData': actionData,
+            'hdrSessionReport': _report?.call(),
+            'properties': properties,
+            'surface': surface,
+            'playing': current.state.playing,
+            'completed': current.state.completed,
+            'positionMs': current.state.position.inMilliseconds,
+            'logs': List<String>.of(_logs),
+            'codecLifecycleLogs': List<String>.of(_codecLifecycleLogs),
+          }),
+        );
       } catch (error) {
         return developer.ServiceExtensionResponse.error(
-            developer.ServiceExtensionResponse.extensionError, '$error');
+          developer.ServiceExtensionResponse.extensionError,
+          '$error',
+        );
       } finally {
         _busy = false;
       }
@@ -387,7 +436,9 @@ class AndroidServiceProbe {
   }
 
   static Future<String> _reinitializeVideo(
-      Player player, int generation) async {
+    Player player,
+    int generation,
+  ) async {
     if (_report?.call() != null) {
       throw StateError('video-reinit requires a player without an HDR session');
     }
@@ -397,7 +448,8 @@ class AndroidServiceProbe {
         !transaction.nativeOptionPending ||
         !transaction.renderModePending) {
       throw StateError(
-          'video-reinit requires an owned native-DV transaction for this player');
+        'video-reinit requires an owned native-DV transaction for this player',
+      );
     }
     final vo = await player.getProperty('vo');
     _ensureProbeCurrent(player, generation);
@@ -417,22 +469,28 @@ class AndroidServiceProbe {
     final renderMode = await player.getProperty('mediacodec-embed-render-mode');
     _ensureProbeCurrent(player, generation);
     if (renderMode != transaction.renderMode) {
-      throw StateError('video-reinit requires owned render-mode='
-          '${transaction.renderMode} (got $renderMode)');
+      throw StateError(
+        'video-reinit requires owned render-mode='
+        '${transaction.renderMode} (got $renderMode)',
+      );
     }
 
     final savedVid = await player.getProperty('vid');
     _ensureProbeCurrent(player, generation);
     final savedVideoTrack = int.tryParse(savedVid);
     if (savedVideoTrack == null || savedVideoTrack <= 0) {
-      throw StateError('video-reinit requires a positive numeric vid track '
-          '(got $savedVid)');
+      throw StateError(
+        'video-reinit requires a positive numeric vid track '
+        '(got $savedVid)',
+      );
     }
     final savedPause = await player.getProperty('pause');
     _ensureProbeCurrent(player, generation);
     if (savedPause != 'yes' && savedPause != 'no') {
-      throw StateError('video-reinit cannot preserve unknown pause value '
-          '$savedPause');
+      throw StateError(
+        'video-reinit cannot preserve unknown pause value '
+        '$savedPause',
+      );
     }
     final nativePlayer = player.platform as NativePlayer;
     Object? operationError;
@@ -482,8 +540,10 @@ class AndroidServiceProbe {
     }
     if (operationError != null) {
       if (restoreErrors.isNotEmpty) {
-        throw StateError('video-reinit failed: $operationError; '
-            '${restoreErrors.join('; ')}');
+        throw StateError(
+          'video-reinit failed: $operationError; '
+          '${restoreErrors.join('; ')}',
+        );
       }
       Error.throwWithStackTrace(operationError, operationStack!);
     }
@@ -516,7 +576,9 @@ class AndroidServiceProbe {
   }
 
   static Future<Map<String, Object?>> _readNativeDvFacts(
-      Player player, int generation) async {
+    Player player,
+    int generation,
+  ) async {
     final pathBefore = await player.getProperty('path');
     _ensureProbeCurrent(player, generation);
     final bridgeApiRaw = await _readProbeProperty(
@@ -532,8 +594,10 @@ class AndroidServiceProbe {
     final pathAfter = await player.getProperty('path');
     _ensureProbeCurrent(player, generation);
     if (pathBefore != pathAfter) {
-      throw StateError('Media path changed during native-DV fact read: '
-          '$pathBefore -> $pathAfter');
+      throw StateError(
+        'Media path changed during native-DV fact read: '
+        '$pathBefore -> $pathAfter',
+      );
     }
     final bridgeApi = _parseBridgeApi(bridgeApiRaw);
     final mediaCodecInfo = _parseCodecConfiguration(mediaCodecInfoRaw);
@@ -554,9 +618,13 @@ class AndroidServiceProbe {
   }
 
   static Future<Map<String, Object?>> _readCapabilities(
-      Player player, int generation) async {
+    Player player,
+    int generation,
+  ) async {
     _ensureProbeCurrent(player, generation);
-    final capabilities = await HdrCapabilities.query(player: null);
+    final capabilities = (await VideoRouteCapabilities.query(
+      target: const VideoOutputTarget.applicationView(),
+    )).hdr;
     _ensureProbeCurrent(player, generation);
     final displayHdrTypes = capabilities.displayHdrTypes?.toList();
     displayHdrTypes?.sort();
@@ -615,16 +683,16 @@ class AndroidServiceProbe {
   }
 
   static Map<String, Object?> _decoderCapabilitySummary(
-          HdrDecoderInfo decoder) =>
-      {
-        'name': decoder.name,
-        'mimeType': decoder.mimeType,
-        'hardwareAcceleration': decoder.hardwareAcceleration,
-        'profiles': decoder.profiles,
-        'main10': decoder.main10,
-        'supports4K': decoder.supports4K,
-        'max4KFps': decoder.max4KFps,
-      };
+    HdrDecoderInfo decoder,
+  ) => {
+    'name': decoder.name,
+    'mimeType': decoder.mimeType,
+    'hardwareAcceleration': decoder.hardwareAcceleration,
+    'profiles': decoder.profiles,
+    'main10': decoder.main10,
+    'supports4K': decoder.supports4K,
+    'max4KFps': decoder.max4KFps,
+  };
 
   static bool _isCodecLifecycleLog(PlayerLog log) {
     final text = log.text.toLowerCase();
@@ -650,7 +718,8 @@ class AndroidServiceProbe {
   }
 
   static Future<void> _restoreNativeDvOptions(
-      _NativeDvOptionTransaction transaction) async {
+    _NativeDvOptionTransaction transaction,
+  ) async {
     final inProgress = transaction.restoreFuture;
     if (inProgress != null) {
       await inProgress;
@@ -667,7 +736,8 @@ class AndroidServiceProbe {
   }
 
   static Future<void> _performNativeDvRestore(
-      _NativeDvOptionTransaction transaction) async {
+    _NativeDvOptionTransaction transaction,
+  ) async {
     if (!identical(_nativeDvTransaction, transaction)) return;
     final player = transaction.player;
     final nativePlayer = player.platform as NativePlayer;
@@ -727,8 +797,10 @@ class AndroidServiceProbe {
       }
       if (currentValue != ownedValue) {
         clearPending();
-        failures.add('$property ownership conflict; preserved current value: '
-            '$currentValue');
+        failures.add(
+          '$property ownership conflict; preserved current value: '
+          '$currentValue',
+        );
         return;
       }
       await nativePlayer.setPropertyStrictAsync(
@@ -740,8 +812,10 @@ class AndroidServiceProbe {
       final restoredValue = await player.getProperty(property);
       if (!identical(_nativeDvTransaction, transaction)) return;
       if (restoredValue != originalValue) {
-        failures.add('$property restore was not acknowledged '
-            '(got $restoredValue)');
+        failures.add(
+          '$property restore was not acknowledged '
+          '(got $restoredValue)',
+        );
         return;
       }
       clearPending();
