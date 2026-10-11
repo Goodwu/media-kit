@@ -6,6 +6,7 @@
 
 ## MK-ROUTING-20261011（CORE继任，2026-10-11）
 
+- CONFIG事实模型检查点：独立35库/22App/4额外反例与targetstrict通过；requested/effective/override与纯设置适配不等于闭环，实际DASH/planner/Session/report接线仍待R01e后串行。仅模型切片，其他dirty不归入。最新完整已验08acc+8b98 source38160661703四平台SUCCESS，359Python/各211Flutter；Build6Release仍FAIL，native/DEVICE仍未验。
 - 状态：进行中；唯一集成分支 `routing/MK-ROUTING-20261011`，主PR media-kit#4/App#1/FFmpeg#1。CORE接手登记6110756605；context=`archives/conversations/media-kit-routing-20261011.md`。
 - 已完成：CORE-F01实现及库/App宿主验证，库6e7570fc + App569138fa：571video（Linux跳过3既有macOS例）、298lab、192App Flutter；同App SHA此前244Python保留。bundle/10包来源/新鲜度成功，严格分析仍34info；旧planned/pending/62info已由终态取代。
 - 当前源码：库91521544 source38158342447 video604+3既有mac Linux跳过、lab298/strict通过；App f179+915两run38159246222/38159246432实际Android/Linux/macOS bootstrap通过（strict零问题、各211Flutter/bundle/SDK+package patches/来源），本轮Python各309；Windows未知SDK修改门失败，Build另6Release前置失败。general库CI最后仍运行，不推定绿。旧34info已清零。
