@@ -53,10 +53,7 @@ enum HdrOutputTransfer {
 /// The output topology of a realized route: a `gpu-next` GL texture
 /// (Texture widget) or a native surface hosted by the platform view
 /// (decoder-composited `mediacodec_embed` or the GPU HDR dataspace surface).
-enum HdrTopology {
-  texture,
-  platformView,
-}
+enum HdrTopology { texture, platformView }
 
 /// Confidence that the predicted route will actually come up on this device
 /// (requirement R1.5). Orthogonal to [HdrStrategyMaturity]: maturity says
@@ -76,6 +73,10 @@ enum HdrPredictionConfidence {
 /// Typed reasons for a skipped candidate or a runtime degradation
 /// (requirement R3.2, which sets the floor "至少区分以下原因").
 enum HdrDegradeReason {
+  /// No available system decoder for this exact source and route consumer.
+  /// Does not prove that an unenumerated FFmpeg software path is impossible.
+  sourceDecodeUnsupported,
+
   /// Output forced to SDR because the caller set `HdrOutputPreference.off`.
   preferenceOff,
 
@@ -266,25 +267,26 @@ class HdrRoute {
 
   @override
   int get hashCode => Object.hash(
-        strategy,
-        presentation,
-        outputTransfer,
-        appliesDynamicMetadata,
-        topology,
-        vo,
-        hwdec,
-        vdLavcOptions,
-        mediacodecEmbedRenderMode,
-        targetPrim,
-        targetTrc,
-        surfaceTransfer,
-        offscreenTransfer,
-        stripDvRpu,
-        Object.hashAllUnordered(dependencies),
-      );
+    strategy,
+    presentation,
+    outputTransfer,
+    appliesDynamicMetadata,
+    topology,
+    vo,
+    hwdec,
+    vdLavcOptions,
+    mediacodecEmbedRenderMode,
+    targetPrim,
+    targetTrc,
+    surfaceTransfer,
+    offscreenTransfer,
+    stripDvRpu,
+    Object.hashAllUnordered(dependencies),
+  );
 
   @override
-  String toString() => 'HdrRoute(${strategy.name}, ${presentation.name}, '
+  String toString() =>
+      'HdrRoute(${strategy.name}, ${presentation.name}, '
       'output: ${outputTransfer.name}, dynamic: $appliesDynamicMetadata, '
       'topology: ${topology.name}, vo: $vo, hwdec: $hwdec, '
       'vd-lavc-o: $vdLavcOptions, render-mode: $mediacodecEmbedRenderMode, '
@@ -341,7 +343,8 @@ class HdrCandidate {
       Object.hash(strategy, maturity, feasible, skipReason, route);
 
   @override
-  String toString() => 'HdrCandidate(${strategy.name}, ${maturity.name}, '
+  String toString() =>
+      'HdrCandidate(${strategy.name}, ${maturity.name}, '
       'feasible: $feasible, skip: ${skipReason?.name}, route: $route)';
 }
 
@@ -404,11 +407,18 @@ class HdrRoutePrediction {
   }
 
   @override
-  int get hashCode => Object.hash(source, selected, presentation, confidence,
-      playable, Object.hashAll(candidates));
+  int get hashCode => Object.hash(
+    source,
+    selected,
+    presentation,
+    confidence,
+    playable,
+    Object.hashAll(candidates),
+  );
 
   @override
-  String toString() => 'HdrRoutePrediction(selected: $selected, '
+  String toString() =>
+      'HdrRoutePrediction(selected: $selected, '
       'presentation: ${presentation.name}, confidence: ${confidence.name}, '
       'playable: $playable, candidates: $candidates)';
 }

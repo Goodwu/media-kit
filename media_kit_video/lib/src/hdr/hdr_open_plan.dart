@@ -5,6 +5,8 @@
 /// Use of this source code is governed by MIT license that can be found in the LICENSE file.
 import 'package:media_kit/media_kit.dart' show Media, VideoParams;
 
+import '../routing/video_output_target.dart';
+import '../routing/video_source_spec.dart';
 import 'hdr_capabilities.dart';
 import 'hdr_route.dart';
 import 'hdr_source_descriptor.dart';
@@ -20,7 +22,17 @@ enum HdrReportSource { hint, decoder }
 
 /// One open request handed to `HdrOpenCoordinator.openSource`.
 class HdrOpenRequest {
-  const HdrOpenRequest(this.media, this.hint);
+  const HdrOpenRequest(
+    this.media,
+    this.hint, {
+    this.target = const VideoOutputTarget.applicationView(),
+    this.sourceSpec,
+    this.capabilitiesOverride,
+  });
+
+  final VideoOutputTarget target;
+  final VideoSourceSpec? sourceSpec;
+  final HdrCapabilities? capabilitiesOverride;
 
   final Media media;
 
@@ -86,7 +98,8 @@ class HdrOpenPlan {
   }
 
   @override
-  String toString() => 'HdrOpenPlan(${media.uri}, source: $source, '
+  String toString() =>
+      'HdrOpenPlan(${media.uri}, source: $source, '
       'route: $route, excluded: $excluded)';
 }
 
@@ -211,6 +224,7 @@ class HdrDataSpaceApplyException implements Exception {
   final HdrDegradeReason reason;
 
   @override
-  String toString() => 'HdrDataSpaceApplyException($transfer, path: $path, '
+  String toString() =>
+      'HdrDataSpaceApplyException($transfer, path: $path, '
       'readback: $readback, reason: ${reason.name})';
 }

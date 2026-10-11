@@ -14,6 +14,9 @@ import 'package:media_kit_video/src/video_controller/android_video_controller/an
 import 'package:media_kit_video/src/video_controller/platform_video_controller.dart';
 import 'package:media_kit_video/src/video_controller/video_controller.dart';
 
+import '../routing/video_output_target.dart';
+import '../routing/video_route_capabilities.dart';
+import '../routing/video_source_spec.dart';
 import 'hdr_capabilities.dart';
 import 'hdr_disposal.dart';
 import 'hdr_open_coordinator.dart';
@@ -67,22 +70,25 @@ class HdrVideoSession {
   /// Default rgba1010102 (10-bit); 'rgba8888' trades bit depth for a
   /// potentially cheaper compositor path on old devices.
   static const String _surfaceFormatOverride = String.fromEnvironment(
-      'MEDIA_KIT_ANDROID_HDR_SURFACE_FORMAT',
-      defaultValue: 'rgba1010102');
+    'MEDIA_KIT_ANDROID_HDR_SURFACE_FORMAT',
+    defaultValue: 'rgba1010102',
+  );
 
   /// {@macro hdr_video_session}
   HdrVideoSession(
     Player player, {
     HdrOutputPreference preference = HdrOutputPreference.auto,
     HdrRoutingPolicy policy = HdrRoutingPolicy.defaults,
+    VideoOutputTarget target = const VideoOutputTarget.applicationView(),
     VideoControllerConfiguration configuration =
         const VideoControllerConfiguration(),
   }) : this._(
-          player: player,
-          preference: preference,
-          policy: policy,
-          configuration: configuration,
-        );
+         player: player,
+         preference: preference,
+         policy: policy,
+         target: target,
+         configuration: configuration,
+       );
 
   /// Test seam: same session with injectable capability querying, position
   /// reading, platform detection and backend. Not for application use.
@@ -96,6 +102,7 @@ class HdrVideoSession {
     Player? player,
     HdrOutputPreference preference = HdrOutputPreference.auto,
     HdrRoutingPolicy policy = HdrRoutingPolicy.defaults,
+    VideoOutputTarget target = const VideoOutputTarget.applicationView(),
     VideoControllerConfiguration configuration =
         const VideoControllerConfiguration(),
     Future<HdrCapabilities> Function()? capabilitiesProvider,
@@ -111,38 +118,40 @@ class HdrVideoSession {
     Duration Function()? reviewMonotonicNow,
     Duration reviewBudget = const Duration(seconds: 8),
     void Function(int generation, HdrOpenPlan plan, HdrReviewFacts facts)?
-        onNativeDvConsumerValidated,
+    onNativeDvConsumerValidated,
     void Function(Object, StackTrace)? onNativeDvConsumerCaptureError,
     void Function(HdrBackendCallDiagnostic<HdrOpenPlan>)?
-        onBackendCallDiagnostic,
+    onBackendCallDiagnostic,
     void Function(HdrNativeDvOptionDiagnostic)? onNativeDvOptionDiagnostic,
   }) : this._(
-          player: player,
-          preference: preference,
-          policy: policy,
-          configuration: configuration,
-          capabilitiesProvider: capabilitiesProvider,
-          positionProvider: positionProvider,
-          isAndroid: isAndroid,
-          backend: backend,
-          routePlanner: routePlanner,
-          nativePlayerIdentity: nativePlayerIdentity,
-          nativePlayerLock: nativePlayerLock,
-          readNativeIdentity: readNativeIdentity,
-          readNativeProperty: readNativeProperty,
-          readNativeOutput: readNativeOutput,
-          reviewMonotonicNow: reviewMonotonicNow,
-          reviewBudget: reviewBudget,
-          onNativeDvConsumerValidated: onNativeDvConsumerValidated,
-          onNativeDvConsumerCaptureError: onNativeDvConsumerCaptureError,
-          onBackendCallDiagnostic: onBackendCallDiagnostic,
-          onNativeDvOptionDiagnostic: onNativeDvOptionDiagnostic,
-        );
+         player: player,
+         preference: preference,
+         policy: policy,
+         target: target,
+         configuration: configuration,
+         capabilitiesProvider: capabilitiesProvider,
+         positionProvider: positionProvider,
+         isAndroid: isAndroid,
+         backend: backend,
+         routePlanner: routePlanner,
+         nativePlayerIdentity: nativePlayerIdentity,
+         nativePlayerLock: nativePlayerLock,
+         readNativeIdentity: readNativeIdentity,
+         readNativeProperty: readNativeProperty,
+         readNativeOutput: readNativeOutput,
+         reviewMonotonicNow: reviewMonotonicNow,
+         reviewBudget: reviewBudget,
+         onNativeDvConsumerValidated: onNativeDvConsumerValidated,
+         onNativeDvConsumerCaptureError: onNativeDvConsumerCaptureError,
+         onBackendCallDiagnostic: onBackendCallDiagnostic,
+         onNativeDvOptionDiagnostic: onNativeDvOptionDiagnostic,
+       );
 
   HdrVideoSession._({
     Player? player,
     required HdrOutputPreference preference,
     required HdrRoutingPolicy policy,
+    required VideoOutputTarget target,
     required VideoControllerConfiguration configuration,
     Future<HdrCapabilities> Function()? capabilitiesProvider,
     Duration Function()? positionProvider,
@@ -157,15 +166,16 @@ class HdrVideoSession {
     Duration Function()? reviewMonotonicNow,
     Duration reviewBudget = const Duration(seconds: 8),
     void Function(int generation, HdrOpenPlan plan, HdrReviewFacts facts)?
-        onNativeDvConsumerValidated,
+    onNativeDvConsumerValidated,
     void Function(Object, StackTrace)? onNativeDvConsumerCaptureError,
     void Function(HdrBackendCallDiagnostic<HdrOpenPlan>)?
-        onBackendCallDiagnostic,
+    onBackendCallDiagnostic,
     void Function(HdrNativeDvOptionDiagnostic)? onNativeDvOptionDiagnostic,
   }) {
     _player = player;
     _preference = preference;
     _policy = policy;
+    _target = target;
     _configuration = configuration;
     _routePlanner = routePlanner ?? HdrRoutePlanner.plan;
     _onNativeDvConsumerValidated = onNativeDvConsumerValidated;
@@ -175,29 +185,31 @@ class HdrVideoSession {
     _testReadNativeIdentity = readNativeIdentity;
     _testReadNativeProperty = readNativeProperty;
     _testReadNativeOutput = readNativeOutput;
-    _positionProvider = positionProvider ??
+    _positionProvider =
+        positionProvider ??
         (player == null ? () => Duration.zero : () => player.state.position);
     _isAndroid = isAndroid ?? Platform.isAndroid;
-    _capabilitiesProvider = capabilitiesProvider ??
-        (player == null
-            ? () async => throw StateError('HdrVideoSession has no Player')
-            : () => HdrCapabilities.query(player: player));
+    _capabilitiesProvider = capabilitiesProvider;
 
     if (!_isAndroid) {
       // Phase 1 non-Android: single-controller passthrough (R2.5).
       if (player != null) {
-        _controller.value =
-            VideoController(player, configuration: configuration);
+        _controller.value = VideoController(
+          player,
+          configuration: configuration,
+        );
       }
       _report.value = const HdrOutputReport(
-          degradeReason: HdrDegradeReason.unsupportedPlatform);
+        degradeReason: HdrDegradeReason.unsupportedPlatform,
+      );
       return;
     }
     // A supplied backend does not expose its actual option owner. Reject that
     // combination rather than silently claiming real-owner coverage.
     if (backend != null && onNativeDvOptionDiagnostic != null) {
       throw ArgumentError(
-          'Option diagnostics require the Session-created backend');
+        'Option diagnostics require the Session-created backend',
+      );
     }
     if (backend == null && player == null) {
       throw ArgumentError('HdrVideoSession requires a Player');
@@ -211,11 +223,13 @@ class HdrVideoSession {
       publish: (controller) => _controller.value = controller,
       waitReady: (controller) async {
         final output = await controller.platform.future;
-        await output.waitUntilCurrentOutputBound
-            .timeout(const Duration(seconds: 10));
+        await output.waitUntilCurrentOutputBound.timeout(
+          const Duration(seconds: 10),
+        );
       },
     );
-    _backend = backend ??
+    _backend =
+        backend ??
         AndroidHdrBackend(
           player: player!,
           outputSlot: _slot!,
@@ -245,8 +259,9 @@ class HdrVideoSession {
       retry: _retry,
       maxRetries: 2,
       onBackendCallDiagnostic: onBackendCallDiagnostic,
-      diagnosticSessionGeneration:
-          onBackendCallDiagnostic == null ? null : _generationOf,
+      diagnosticSessionGeneration: onBackendCallDiagnostic == null
+          ? null
+          : _generationOf,
     );
     AndroidVideoController.registerHdrCapabilitiesChangedListener(
       _onNativeCapabilitiesChanged,
@@ -255,8 +270,10 @@ class HdrVideoSession {
     // [AndroidVideoController.setHdrCapabilitiesChangedEnabled]): Phase 1
     // assumes a single session per process, so turning it on here and off
     // in dispose is the whole lifecycle.
-    unawaited(AndroidVideoController.setHdrCapabilitiesChangedEnabled(true)
-        .catchError((Object _) {}));
+    unawaited(
+      AndroidVideoController.setHdrCapabilitiesChangedEnabled(true)
+          .catchError((Object _) {}),
+    );
   }
 
   static const String _tag = 'HdrVideoSession';
@@ -267,7 +284,7 @@ class HdrVideoSession {
   late VideoControllerConfiguration _configuration;
   late HdrSessionRoutePlanner _routePlanner;
   void Function(int generation, HdrOpenPlan plan, HdrReviewFacts facts)?
-      _onNativeDvConsumerValidated;
+  _onNativeDvConsumerValidated;
   void Function(Object, StackTrace)? _onNativeDvConsumerCaptureError;
   Object? _testNativePlayerIdentity;
   Lock? _testNativePlayerLock;
@@ -279,7 +296,23 @@ class HdrVideoSession {
   HdrSessionReviewWindow? _nativeReviewWindow;
   late bool _isAndroid;
   late Duration Function() _positionProvider;
-  late Future<HdrCapabilities> Function() _capabilitiesProvider;
+  Future<HdrCapabilities> Function()? _capabilitiesProvider;
+  late VideoOutputTarget _target;
+  VideoSourceSpec? _currentSourceSpec;
+  int _capabilityQuerySerial = 0;
+
+  Future<HdrCapabilities> _queryCapabilities(
+    VideoOutputTarget target,
+    VideoSourceSpec? source,
+  ) async {
+    final injected = _capabilitiesProvider;
+    if (injected != null) return injected();
+    final result = await VideoRouteCapabilities.query(
+      target: target,
+      sources: source == null ? const [] : [source],
+    );
+    return source == null ? result.hdr : result.forHdrSource(source);
+  }
 
   /// Capability snapshot a rebuild must plan against when the trigger already
   /// carries a fresh snapshot (a capability change). Null re-queries through
@@ -288,8 +321,9 @@ class HdrVideoSession {
 
   final ValueNotifier<VideoController?> _controller =
       ValueNotifier<VideoController?>(null);
-  final ValueNotifier<HdrOutputReport> _report =
-      ValueNotifier<HdrOutputReport>(const HdrOutputReport());
+  final ValueNotifier<HdrOutputReport> _report = ValueNotifier<HdrOutputReport>(
+    const HdrOutputReport(),
+  );
   final StreamController<HdrOutputEvent> _events =
       StreamController<HdrOutputEvent>.broadcast();
   final HdrSourceIntent<HdrOpenResult<HdrOpenPlan>> _intent =
@@ -350,6 +384,8 @@ class HdrVideoSession {
   Future<void> open(
     Media media, {
     HdrSourceDescriptor? hint,
+    VideoSourceSpec? sourceSpec,
+    VideoOutputTarget? target,
     bool play = true,
     Duration? start,
   }) async {
@@ -382,15 +418,27 @@ class HdrVideoSession {
     _degradeReason = null;
     _reviewDiagnostic = null;
     final intentSerial = _intent.begin();
+    // Consume the override before yielding; another open must not inherit it.
+    final capabilitiesOverride = _capabilitiesOverride;
+    _capabilitiesOverride = null;
+    _target = target ?? _target;
+    final request = HdrOpenRequest(
+      media,
+      hint,
+      target: _target,
+      sourceSpec: sourceSpec,
+      capabilitiesOverride: capabilitiesOverride,
+    );
     try {
       final result = await _coordinator!.openSource(
-        HdrOpenRequest(media, hint),
+        request,
         start: start,
         play: play,
       );
       _intent.succeed(intentSerial, media.uri, result);
-      _currentMedia = media;
       if (serial == _serial && !_disposed) {
+        _currentMedia = media;
+        _currentSourceSpec = sourceSpec;
         final observation = _backend!.observe();
         final plan = result.plan;
         final report = HdrOutputReport(
@@ -442,12 +490,14 @@ class HdrVideoSession {
           degradeReason: error.reason,
           error: error,
         );
-        _emit(HdrErrorEvent(
-          serial,
-          reason: error.reason,
-          error: error,
-          diagnostic: 'playback blocked: ${error.reason.name}',
-        ));
+        _emit(
+          HdrErrorEvent(
+            serial,
+            reason: error.reason,
+            error: error,
+            diagnostic: 'playback blocked: ${error.reason.name}',
+          ),
+        );
       }
       return;
     } catch (error, stack) {
@@ -461,7 +511,8 @@ class HdrVideoSession {
           diagnostic: error.toString(),
         );
         _emit(
-            HdrErrorEvent(serial, error: error, diagnostic: error.toString()));
+          HdrErrorEvent(serial, error: error, diagnostic: error.toString()),
+        );
       }
       Error.throwWithStackTrace(error, stack);
     }
@@ -474,7 +525,9 @@ class HdrVideoSession {
     HdrOpenRequest request,
     bool Function() cancelled,
   ) async {
-    final capabilities = _capabilitiesOverride ?? await _capabilitiesProvider();
+    final capabilities =
+        request.capabilitiesOverride ??
+        await _queryCapabilities(request.target, request.sourceSpec);
     if (cancelled()) throw const OpenSuperseded();
     final hint = request.hint;
     final source = hint ?? const HdrSourceDescriptor();
@@ -488,7 +541,10 @@ class HdrVideoSession {
     if (!prediction.playable) {
       // P5 without the dovi rescale pipeline: never output a wrongly
       // colored picture (R3.3).
-      throw HdrPlaybackBlocked(HdrDegradeReason.p5PipelineUnavailable);
+      throw HdrPlaybackBlocked(
+        prediction.selected.skipReason ??
+            HdrDegradeReason.p5PipelineUnavailable,
+      );
     }
     _lastCapabilities = capabilities;
     final plan = HdrOpenPlan(
@@ -500,13 +556,15 @@ class HdrVideoSession {
       route: prediction.selected.route!,
     );
     _planGenerations[plan] = _serial;
-    _publish(HdrOutputReport(
-      generation: _transactionSerial,
-      source: source,
-      sourceOrigin: plan.sourceOrigin,
-      prediction: prediction,
-      verified: false,
-    ));
+    _publish(
+      HdrOutputReport(
+        generation: _transactionSerial,
+        source: source,
+        sourceOrigin: plan.sourceOrigin,
+        prediction: prediction,
+        verified: false,
+      ),
+    );
     // `HDR decision:` layer, plan phase (R4.3): selected strategy, full
     // candidate list with skip reasons, and the open generation.
     HdrOutputDiagnostics.decision(
@@ -535,8 +593,10 @@ class HdrVideoSession {
     final nativeFailure =
         failed.route.strategy == HdrStrategy.nativeDolbyVision;
     if (nativeFailure) _attemptPolicy.excludeNativeDv();
-    final excluded =
-        _attemptPolicy.exclusions(failed.excluded, nextAttempt: true);
+    final excluded = _attemptPolicy.exclusions(
+      failed.excluded,
+      nextAttempt: true,
+    );
     HdrDegradeReason reason;
     final diagnostic = error.toString();
     if (nativeFailure || error is HdrSessionRouteBudgetFailure) {
@@ -544,8 +604,9 @@ class HdrVideoSession {
     } else if (error is HdrDataSpaceApplyException) {
       reason = error.reason;
       excluded[failed.route.surfaceTransfer == 'hlg'
-          ? HdrRouteDependency.dataspaceHlg
-          : HdrRouteDependency.dataspacePq] = reason;
+              ? HdrRouteDependency.dataspaceHlg
+              : HdrRouteDependency.dataspacePq] =
+          reason;
     } else if (error is TimeoutException) {
       reason = HdrDegradeReason.outputBindTimeout;
       if (failed.route.topology == HdrTopology.platformView) {
@@ -572,13 +633,15 @@ class HdrVideoSession {
     final nextRoute = prediction.selected.route!;
     if (nextRoute == failed.route) return null;
     _degradeReason = reason;
-    _emit(HdrDegradedEvent(
-      generation,
-      reason: reason,
-      diagnostic: diagnostic,
-      from: failed.route,
-      to: nextRoute,
-    ));
+    _emit(
+      HdrDegradedEvent(
+        generation,
+        reason: reason,
+        diagnostic: diagnostic,
+        from: failed.route,
+        to: nextRoute,
+      ),
+    );
     final next = failed.copyWith(
       prediction: prediction,
       route: nextRoute,
@@ -620,7 +683,9 @@ class HdrVideoSession {
   }
 
   Future<void> _consumeNativeDvEvidence(
-      HdrOpenPlan plan, HdrReviewFacts facts) async {
+    HdrOpenPlan plan,
+    HdrReviewFacts facts,
+  ) async {
     final generation = _generationOf(plan);
     final native = _player?.platform;
     final identity = _testNativePlayerIdentity ?? native;
@@ -629,30 +694,35 @@ class HdrVideoSession {
     final window = _nativeReviewWindow;
     if (window == null || identity == null || lock == null) {
       throw const HdrNativeDvReviewFailure(
-          HdrNativeDvReviewFailureKind.configuration);
+        HdrNativeDvReviewFailureKind.configuration,
+      );
     }
     Future<HdrOptionSourceIdentity> readIdentity() async {
       if (_testReadNativeIdentity != null) return _testReadNativeIdentity!();
       if (native is! NativePlayer) {
         throw const HdrNativeDvReviewFailure(
-            HdrNativeDvReviewFailureKind.sourceIdentity);
+          HdrNativeDvReviewFailureKind.sourceIdentity,
+        );
       }
       final epoch = native.fileLoadedEpoch;
       final path = await window.bounded(() => native.getProperty('path'));
-      final entry =
-          await window.bounded(() => native.getProperty('playlist/0/id'));
+      final entry = await window.bounded(
+        () => native.getProperty('playlist/0/id'),
+      );
       if (await window.bounded(() => native.getProperty('path')) != path ||
           await window.bounded(() => native.getProperty('playlist/0/id')) !=
               entry ||
           native.fileLoadedEpoch != epoch) {
         throw const HdrNativeDvReviewFailure(
-            HdrNativeDvReviewFailureKind.sourceIdentity);
+          HdrNativeDvReviewFailureKind.sourceIdentity,
+        );
       }
       return HdrOptionSourceIdentity(
-          player: native,
-          path: path,
-          playlistEntryId: entry,
-          fileLoadedEpoch: epoch);
+        player: native,
+        path: path,
+        playlistEntryId: entry,
+        fileLoadedEpoch: epoch,
+      );
     }
 
     HdrNativeDvOutputSnapshot? readOutput() {
@@ -676,7 +746,8 @@ class HdrVideoSession {
       expectedPlayer: identity,
       lock: lock,
       readIdentity: readIdentity,
-      readProperty: _testReadNativeProperty ??
+      readProperty:
+          _testReadNativeProperty ??
           ((name) => (native as NativePlayer).getProperty(name)),
       readOutput: readOutput,
       isCurrent: () => generation == _serial && !_disposed,
@@ -761,7 +832,10 @@ class HdrVideoSession {
     if (!prediction.playable) {
       // The decoder reported a source whose routes all need the P5
       // pipeline (e.g. a mislabeled hint): stop before wrong colors (R3.3).
-      throw HdrPlaybackBlocked(HdrDegradeReason.p5PipelineUnavailable);
+      throw HdrPlaybackBlocked(
+        prediction.selected.skipReason ??
+            HdrDegradeReason.p5PipelineUnavailable,
+      );
     }
     final routeChanged = prediction.selected.route != plan.route;
     final hwdecMismatch = facts.hwdecCurrent != plan.route.hwdec;
@@ -784,18 +858,23 @@ class HdrVideoSession {
         excluded: excludedForRebuild,
       );
       if (!replanned.playable) {
-        throw HdrPlaybackBlocked(HdrDegradeReason.p5PipelineUnavailable);
+        throw HdrPlaybackBlocked(
+          replanned.selected.skipReason ??
+              HdrDegradeReason.p5PipelineUnavailable,
+        );
       }
     }
 
     if (!routeChanged && !hwdecMismatch) {
       if (reclassified) {
-        _emit(HdrReclassifiedEvent(
-          _transactionSerial,
-          previous: plan.source,
-          current: descriptor,
-          rebuilt: false,
-        ));
+        _emit(
+          HdrReclassifiedEvent(
+            _transactionSerial,
+            previous: plan.source,
+            current: descriptor,
+            rebuilt: false,
+          ),
+        );
       }
       return HdrReviewDecision<HdrOpenPlan>.accept(
         nextPlan: reclassified
@@ -811,7 +890,8 @@ class HdrVideoSession {
     if (_rebuildUsed) {
       // Second disagreement within one open: no further rebuild; report
       // the actual situation (plan S5 case 4).
-      _reviewDiagnostic = 'decoder review mismatch persisted after rebuild: '
+      _reviewDiagnostic =
+          'decoder review mismatch persisted after rebuild: '
           'route=${plan.route.strategy.name}, hwdec=${facts.hwdecCurrent}, '
           'profile=${facts.dolbyVisionProfile}, '
           'gamma=${facts.videoParams?.gamma}';
@@ -819,12 +899,14 @@ class HdrVideoSession {
         _degradeReason ??= HdrDegradeReason.hwdecMismatch;
       }
       if (reclassified) {
-        _emit(HdrReclassifiedEvent(
-          _transactionSerial,
-          previous: plan.source,
-          current: descriptor,
-          rebuilt: false,
-        ));
+        _emit(
+          HdrReclassifiedEvent(
+            _transactionSerial,
+            previous: plan.source,
+            current: descriptor,
+            rebuilt: false,
+          ),
+        );
       }
       return HdrReviewDecision<HdrOpenPlan>.accept(
         nextPlan: plan.copyWith(
@@ -838,8 +920,10 @@ class HdrVideoSession {
     _rebuildUsed = true;
     // A review reopen is an actual new attempt too. Persist native-once
     // exclusions and enforce the same two-HDR budget as failure retries.
-    excludedForRebuild =
-        _attemptPolicy.exclusions(excludedForRebuild, nextAttempt: true);
+    excludedForRebuild = _attemptPolicy.exclusions(
+      excludedForRebuild,
+      nextAttempt: true,
+    );
     replanned = _planNextAttempt(
       source: descriptor,
       capabilities: plan.capabilities,
@@ -847,26 +931,33 @@ class HdrVideoSession {
       excluded: excludedForRebuild,
     );
     if (!replanned.playable) {
-      throw HdrPlaybackBlocked(HdrDegradeReason.p5PipelineUnavailable);
+      throw HdrPlaybackBlocked(
+        replanned.selected.skipReason ?? HdrDegradeReason.p5PipelineUnavailable,
+      );
     }
     if (hwdecMismatch) {
       _degradeReason = HdrDegradeReason.hwdecMismatch;
-      _emit(HdrDegradedEvent(
-        _transactionSerial,
-        reason: HdrDegradeReason.hwdecMismatch,
-        diagnostic: 'hwdec-current=${facts.hwdecCurrent} '
-            'expected=${plan.route.hwdec}',
-        from: plan.route,
-        to: replanned.selected.route,
-      ));
+      _emit(
+        HdrDegradedEvent(
+          _transactionSerial,
+          reason: HdrDegradeReason.hwdecMismatch,
+          diagnostic:
+              'hwdec-current=${facts.hwdecCurrent} '
+              'expected=${plan.route.hwdec}',
+          from: plan.route,
+          to: replanned.selected.route,
+        ),
+      );
     }
     if (reclassified) {
-      _emit(HdrReclassifiedEvent(
-        _transactionSerial,
-        previous: plan.source,
-        current: descriptor,
-        rebuilt: true,
-      ));
+      _emit(
+        HdrReclassifiedEvent(
+          _transactionSerial,
+          previous: plan.source,
+          current: descriptor,
+          rebuilt: true,
+        ),
+      );
     }
     final rebuildPlan = plan.copyWith(
       source: descriptor,
@@ -935,8 +1026,9 @@ class HdrVideoSession {
     await _replanAfterConfigurationChange();
   }
 
-  Future<void> _replanAfterConfigurationChange(
-      {HdrDegradeReason? reason}) async {
+  Future<void> _replanAfterConfigurationChange({
+    HdrDegradeReason? reason,
+  }) async {
     if (!_isAndroid || _disposed) return;
     final current = _report.value;
     final descriptor = current.source;
@@ -947,7 +1039,8 @@ class HdrVideoSession {
     if (capabilities == null) return;
     if (_configuration.android.lgExperimentOwnerToken != null) {
       throw StateError(
-          'LG single-open experiment rejects automatic replanning');
+        'LG single-open experiment rejects automatic replanning',
+      );
     }
     final prediction = HdrRoutePlanner.plan(
       source: descriptor,
@@ -956,27 +1049,36 @@ class HdrVideoSession {
       preference: _preference,
     );
     if (!prediction.playable) {
-      _emit(HdrErrorEvent(
-        _serial,
-        reason: HdrDegradeReason.p5PipelineUnavailable,
-        diagnostic: 're-planned route is not playable',
-      ));
+      _emit(
+        HdrErrorEvent(
+          _serial,
+          reason: HdrDegradeReason.p5PipelineUnavailable,
+          diagnostic: 're-planned route is not playable',
+        ),
+      );
       return;
     }
     final next = prediction.selected.route!;
     if (next == actual) return; // Route unchanged: no rebuild.
     if (reason != null) {
       _degradeReason = reason;
-      _emit(HdrDegradedEvent(
-        _serial,
-        reason: reason,
-        diagnostic: 'configuration changed; rebuilding at current position',
-        from: actual,
-        to: next,
-      ));
+      _emit(
+        HdrDegradedEvent(
+          _serial,
+          reason: reason,
+          diagnostic: 'configuration changed; rebuilding at current position',
+          from: actual,
+          to: next,
+        ),
+      );
     }
-    await open(media,
-        hint: descriptor, play: _openPlay, start: _positionProvider());
+    await open(
+      media,
+      hint: descriptor,
+      sourceSpec: _currentSourceSpec,
+      play: _openPlay,
+      start: _positionProvider(),
+    );
   }
 
   /// Consumes a capability snapshot change (R1.6/R3.4): always publishes
@@ -997,7 +1099,8 @@ class HdrVideoSession {
     }
     if (_configuration.android.lgExperimentOwnerToken != null) {
       throw StateError(
-          'LG single-open experiment rejects automatic replanning');
+        'LG single-open experiment rejects automatic replanning',
+      );
     }
     final prediction = HdrRoutePlanner.plan(
       source: descriptor,
@@ -1007,11 +1110,13 @@ class HdrVideoSession {
     );
     _lastCapabilities = capabilities;
     if (!prediction.playable) {
-      _emit(HdrErrorEvent(
-        _serial,
-        reason: HdrDegradeReason.p5PipelineUnavailable,
-        diagnostic: 'capability change made the source unplayable',
-      ));
+      _emit(
+        HdrErrorEvent(
+          _serial,
+          reason: HdrDegradeReason.p5PipelineUnavailable,
+          diagnostic: 'capability change made the source unplayable',
+        ),
+      );
       return;
     }
     HdrCandidate? currentCandidate;
@@ -1021,24 +1126,32 @@ class HdrVideoSession {
         break;
       }
     }
-    final stillFeasible = currentCandidate != null &&
+    final stillFeasible =
+        currentCandidate != null &&
         currentCandidate.feasible &&
         currentCandidate.route == actual;
     if (stillFeasible) return; // E.g. capability recovery: event only (R3.4).
     _degradeReason = HdrDegradeReason.capabilityLost;
-    _emit(HdrDegradedEvent(
-      _serial,
-      reason: HdrDegradeReason.capabilityLost,
-      diagnostic: 'the applied route is no longer feasible',
-      from: actual,
-      to: prediction.selected.route,
-    ));
+    _emit(
+      HdrDegradedEvent(
+        _serial,
+        reason: HdrDegradeReason.capabilityLost,
+        diagnostic: 'the applied route is no longer feasible',
+        from: actual,
+        to: prediction.selected.route,
+      ),
+    );
     // The rebuild must plan against the snapshot that triggered it, not
     // against a fresh query that may still return the stale state.
     _capabilitiesOverride = capabilities;
     try {
-      await open(media,
-          hint: descriptor, play: _openPlay, start: _positionProvider());
+      await open(
+        media,
+        hint: descriptor,
+        sourceSpec: _currentSourceSpec,
+        play: _openPlay,
+        start: _positionProvider(),
+      );
     } finally {
       if (identical(_capabilitiesOverride, capabilities)) {
         _capabilitiesOverride = null;
@@ -1047,12 +1160,40 @@ class HdrVideoSession {
   }
 
   void _onNativeCapabilitiesChanged(Map<Object?, Object?> snapshot) {
-    if (_disposed) return;
-    final capabilities = HdrCapabilities.parseSnapshot(
-      snapshot,
-      p5PipelineAvailable: _lastCapabilities?.p5PipelineAvailable ?? false,
-    );
-    unawaited(handleCapabilitiesChanged(capabilities));
+    // Legacy notifications carry default-display data. Use them only as
+    // invalidation; query THIS Session's target and source instead.
+    unawaited(refreshCapabilities());
+  }
+
+  /// Re-query the attached output target without a Player-based lookup.
+  Future<void> refreshCapabilities() async {
+    if (_disposed || !_isAndroid) return;
+    final querySerial = ++_capabilityQuerySerial;
+    final generation = _serial;
+    final source = _currentSourceSpec;
+    try {
+      final capabilities = await _queryCapabilities(_target, source);
+      if (_disposed ||
+          generation != _serial ||
+          querySerial != _capabilityQuerySerial) {
+        return;
+      }
+      await handleCapabilitiesChanged(capabilities);
+    } catch (error) {
+      if (_disposed ||
+          generation != _serial ||
+          querySerial != _capabilityQuerySerial) {
+        return;
+      }
+      _emit(
+        HdrErrorEvent(
+          generation,
+          reason: HdrDegradeReason.noDisplayCapabilityReport,
+          error: error,
+          diagnostic: 'target capability refresh failed',
+        ),
+      );
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -1078,14 +1219,17 @@ class HdrVideoSession {
       surfaceTransfer: usePlatformView ? (surfaceTransfer ?? '') : null,
       surfacePixelFormat: usePlatformView
           ? (vo == 'gpu-next' && surfaceTransfer != null
-              ? _surfaceFormatOverride
-              : '')
+                ? _surfaceFormatOverride
+                : '')
           : null,
     );
     return VideoController(
       player,
-      configuration:
-          _configuration.copyWith(vo: vo, hwdec: hwdec, android: android),
+      configuration: _configuration.copyWith(
+        vo: vo,
+        hwdec: hwdec,
+        android: android,
+      ),
     );
   }
 
@@ -1143,12 +1287,15 @@ class HdrVideoSession {
       AndroidVideoController.unregisterHdrCapabilitiesChangedListener(
         _onNativeCapabilitiesChanged,
       );
-      unawaited(AndroidVideoController.setHdrCapabilitiesChangedEnabled(false)
-          .catchError((Object _) {}));
+      unawaited(
+        AndroidVideoController.setHdrCapabilitiesChangedEnabled(false)
+            .catchError((Object _) {}),
+      );
     }
     _lastDisposeReport = await disposeHdrResources(
-      disposeCoordinator:
-          _coordinator == null ? null : () => _coordinator!.dispose(),
+      disposeCoordinator: _coordinator == null
+          ? null
+          : () => _coordinator!.dispose(),
     );
     try {
       await _slot?.dispose();

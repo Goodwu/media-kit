@@ -7,7 +7,7 @@
   "planCommit": "6107617628199ec64a44581126fd488ea201af0f",
   "initialHandoffCommit": "8edf822947da242efd5ba80d9c92e5b085bbee08",
   "status": "in_progress",
-  "validationBlocker": "Actions executes again. Source suites have run, but latest lint repair needs a fresh independent run. Full latest-source native builds, APP builds and devices are not yet accepted.",
+  "validationBlocker": "B2b migration independent tests and App integration pending. No current full-native/device acceptance.",
   "canonicalDevelopment": {
     "mediaKit": {
       "repository": "Goodwu/media-kit",
@@ -19,7 +19,7 @@
       "pullRequest": 4,
       "pullRequestUrl": "https://github.com/Goodwu/media-kit/pull/4",
       "draft": true,
-      "lastImplementationHead": "c2afeb990e8c87a9f18e67dcf0a375dd6c8239c8",
+      "lastImplementationHead": "5638f9b596a4f50243e33934d2c73facd0c580dc",
       "authoritativeProgress": "This ledger, this canonical branch and PR4. main is only a discovery pointer. Read-only local main0f0f1525 is stale; do not infer missing code from it. Later PR result comments may record completed checks without creating another source revision."
     },
     "piliPlusX": {
@@ -100,7 +100,10 @@
     {
       "id": "B2",
       "status": "in_progress",
-      "commits": [],
+      "commits": [
+        "639714555e39013a5a99d23d77a6909d761f770c",
+        "5638f9b596a4f50243e33934d2c73facd0c580dc"
+      ],
       "note": "New query implemented, original Player query callers and Session/App migration still pending.",
       "subtasks": [
         {
@@ -108,12 +111,14 @@
           "status": "implemented",
           "commitAnchor": "feat(video): add target-aware source-spec capability query [MK-ROUTING-20261011 B2a]",
           "hostJavaAssertionsPassed": 34,
-          "independentFlutterAndAndroidCI": "pending",
+          "independentFlutterAndAndroidCI": "passed_on43415b",
           "doNotRepeat": true
         },
         {
           "id": "B2b-query-migration-App-source-filter",
-          "status": "planned"
+          "status": "library_implemented_app_pending",
+          "commitAnchor": "feat(routing): migrate query and enforce exact source support [MK-ROUTING-20261011 B2b]",
+          "tests": "9 new channel/planner/Session regressions pending independent execution"
         },
         {
           "id": "B2c-LG-managed-output",
@@ -280,8 +285,8 @@
     "evidence": "docs/plans/media-kit-routing-native-audit-20261011.md",
     "note": "Existing Android test build external relink/r22 helper pipeline still requires full source rebuild audit. No current-native test candidate claimed."
   },
-  "nextAction": "Read resulting B2a commit, retire temporary workflows via authorized connector and add host query test to source CI; validate independently. Then migrate Session/lab/App query and actual DASH filtering on the same two branches. Retain remaining B1/B3/LG/config work.",
+  "nextAction": "Read B2b source commit and independently validate it. Continue existing PiliPlusX PR1 with new query and exact DASH source filtering, then fresh combined tests/build. Do not rerun retired checkpoint materializers.",
   "resumptionRule": "Existing: B1a=d18de275; EL=f0bba6ff; native audit=ac4f7889; Web=445a2add; analyzer/golden=1c134790; final lints=c2afeb990. Do not rerun one-shot patch scripts. Read latest remote ledger/PR results first.",
-  "lastCheckpoint": "B2a code persisted after34 current-Java host assertions. First runner push failed because workflow changes require a different permission; retry changes source only. Independent Flutter/Android/native/device validation not yet claimed. Patch transport is removed; workflow retirement is separate.",
+  "lastCheckpoint": "B2b library migration checkpoint: remove Player query, bind exact source support to planner/Session, capture per-open target/spec and refresh target. Nine integration tests added; independent CI and App migration pending. Lint7 repair5638f9b and source/query/Darwin/OHOS CI on43415b succeeded. This checkpoint must not be redeveloped.",
   "planVersion": 3
 }
