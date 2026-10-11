@@ -190,6 +190,10 @@ void main() {
               HdrStrategyMaturityTable.of(cls, strategy);
           final bool isDocumentedDefault =
               maturity == HdrStrategyMaturity.experimental ||
+                  // No strategy can interpret unresolved DV facts. This is
+                  // not a new maturity promotion or a device claim.
+                  (cls == HdrSourceClass.dvUnknown &&
+                      maturity == HdrStrategyMaturity.unsupported) ||
                   // R7: the reserved strategy is unsupported for every class.
                   (strategy == HdrStrategy.nativeDolbyVision &&
                       maturity == HdrStrategyMaturity.unsupported) ||
