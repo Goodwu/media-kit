@@ -1,0 +1,72 @@
+name: Routing second review fixture checkpoint
+on:
+  push:
+    branches: [routing/MK-ROUTING-20261011]
+    paths: ['.github/workflows/routing-review-fixture-once.yml']
+permissions:
+  contents: write
+jobs:
+  checkpoint:
+    if: github.repository == 'Goodwu/media-kit'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: routing/MK-ROUTING-20261011
+          fetch-depth: 1
+      - name: Update exactly the formerly bug-preserving test
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('media_kit_video/test/hdr_video_session_test.dart')
+          s = p.read_text()
+          anchor = "  test('a second review disagreement is accepted and reported honestly'"
+          assert s.count(anchor) == 1
+          start = s.index(anchor)
+          end = s.index("  test('dataspace failure degrades", start)
+          s = s[:start] + '''  test('a failed decoder on the second review is not verified or opened a third time',
+              () async {
+            // First open is SDR with a valid decoder. Actual HDR facts cause a
+            // legitimate topology rebuild; only the second decoder fails.
+            final backend = FakeBackend()
+              ..factsForOpen.add(gammaFacts(gamma: 'pq'))
+              ..factsForOpen.add(facts(gamma: 'pq', primaries: 'bt.2020', hwdec: 'no'));
+            final session = makeSession(
+              backend: backend,
+              capabilities: caps(),
+              position: const Duration(seconds: 2),
+            );
+            final events = <HdrOutputEvent>[];
+            session.events.listen(events.add);
+            await session.open(media);
+            await pumpEventQueue();
+            expect(backend.opened, hasLength(2));
+            expect(backend.opened.first.route.strategy, HdrStrategy.sdrDirect);
+            expect(backend.opened.last.route.strategy, HdrStrategy.baseLayerDirect);
+            expect(session.report.value.verified, isFalse);
+            expect(session.report.value.degradeReason, HdrDegradeReason.hwdecMismatch);
+            expect(events.whereType<HdrRouteAppliedEvent>(), isEmpty);
+            expect(events.whereType<HdrErrorEvent>().single.reason,
+                HdrDegradeReason.hwdecMismatch);
+            expect(events.whereType<HdrReclassifiedEvent>().single.rebuilt, isTrue);
+            expect(backend.calls, contains('stop'));
+            expect(backend.calls, contains('reset'));
+            await session.dispose();
+          });
+
+          ''' + s[end:]
+          p.write_text(s)
+          PY
+          test "$(git diff --name-only)" = 'media_kit_video/test/hdr_video_session_test.dart'
+          git diff --check
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add media_kit_video/test/hdr_video_session_test.dart
+          git commit -m 'test(routing): reject second-review failed decoder without a third attempt [MK-ROUTING-20261011 B1c]'
+          test "$(git ls-remote origin refs/heads/routing/MK-ROUTING-20261011 | cut -f1)" = "$GITHUB_SHA"
+          git push origin HEAD:refs/heads/routing/MK-ROUTING-20261011
+          test "$(git ls-remote origin refs/heads/routing/MK-ROUTING-20261011 | cut -f1)" = "$(git rev-parse HEAD)"
