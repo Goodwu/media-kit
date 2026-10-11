@@ -78,12 +78,12 @@ LG API24、APK `matrix-p84-full-verified.apk`（SHA `09c22c9535c174f6…`）：
 
 PREFER_CONVERT/CONVERT_ROUTE_LOCK/SURFACETEXTURE_POC/OUTPUT_LEVELS=full 的转正评估以 DV002 根因修复为前置：显示路径在 tip 上未闭环前，SURFACETEXTURE_POC/OUTPUT_LEVELS 不可转正。上表其他结论（P5 native DV、HLG/SDR 类路由、App 冒烟）不受本更正影响。
 
-### DV002 证据强化（2026-10-12 第二轮）
+### DV002 再定性（2026-10-12 第三轮，critical reviewer 原件复核后）
 
-- 排除捕获缺失：screenrecord（独立虚拟显示路径）8s 抽帧同样全黑（rec-frame-1/2/3.png 字节一致）。
-- 决定性证据：播放中 `dumpsys SurfaceFlinger` 显示 lab 两组输出 SurfaceView 层 BufferQueue **activeBuffer=[0x0:0:0]**（从未投递缓冲，其一 default-size 2160x4320 即 2:1 输出面），Flutter UI 层 activeBuffer=[1440x2672] 正常——窗口 leg 从未 post 缓冲。
-- critical reviewer 独立发现第二缺陷：mpv tip context_android.c:253-269 BT2020_NCL 默认实际输出 **FULL YCbCr**（mksColor=vec3(y, cb+.5, cr+.5)），与 Dart hdr_yuv_presentation_contract.dart:31-37 的 limited NV12(16+219) 契约失配——窗口缓冲恢复后颜色仍将错误，须一并修复。
-- DV002 根因聚焦：MKSURF init/bound、vo 激活、E1 dataspace applied ret=1 均成功，但窗口 SurfaceView 无缓冲投递（a040233d3e 收口 / 7163121865 官方注册与 lab POC r2 接线错配为嫌疑）。
+- ~~前述"SF 无缓冲投递/窗口不出画"判读被原件证伪~~：sf-during-play.txt:102-115 真正视频层 Layer 0x78069a5400 (SurfaceView) **activeBuffer=[1440x720:1536, NV12] 在位**，HWC 段 :332 显示该层源 1440x720→显示区 [0,1136,1440,1856] 正在合成；零缓冲项为 LayerDim（我误读），2160x4320 为 1:2 而非 2:1。第二轮新 dump（sf-during-play2.txt，00:16:42）同样 NV12 缓冲在位。
+- 截图与录屏同黑的最优解释 = **HWC 捕获限制**（两条捕获路径均拿不到 NV12 overlay 合成结果）；面板实际呈现未证实也未证伪，需人眼/光学/像素链证据。lab 播放保持运行供人工目视验收。
+- FULL/limited 定性（reviewer）：跨层契约描述失配、非已证像素错误；已验收历史为 FULL shader + metadata range1，**严禁把 shader 强改 16+219**；修正方向是对齐已验收 native 配方（修 Dart 侧契约描述），颜色错误本身保持"未验证"。
+- DV002 重新定性：从"窗口不出画"降级为"呈现不可由截屏/录屏证实（捕获限制），人眼验收未完成"。转正阻塞维持：①人眼/光学/像素链验收缺失；②native YUV arm process-global 且 owner tuple 仅 advisory（lg_fw_adapter.cpp:95-109,273-303）；③realizer 把任意 surfacetexture+PQ 等同 YUV 未核实 YUV arm——产品多 Session 不能继承 lab 单 Session 例外。
 
 ### DV002 归因边界修正（critical reviewer 复核）
 
