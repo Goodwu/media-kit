@@ -33,3 +33,8 @@ export 'package:media_kit_video/src/subtitle/subtitle_view.dart';
 export 'package:media_kit_video/media_kit_video_controls/media_kit_video_controls.dart';
 
 export 'package:media_kit_video/src/utils/darwin_wakeup_callback_owner.dart';
+
+// Player-independent target and encoded-source capability discovery.
+export 'src/routing/video_source_spec.dart';
+export 'src/routing/video_output_target.dart';
+export 'src/routing/video_route_capabilities.dart';
