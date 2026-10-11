@@ -30,7 +30,7 @@ import 'hdr_output_slot.dart';
 import 'hdr_player_backend.dart';
 import 'hdr_route.dart';
 import 'hdr_route_planner.dart';
-import 'hdr_source_classifier.dart';
+import 'hdr_source_facts.dart';
 import 'hdr_source_descriptor.dart';
 import 'hdr_source_intent.dart';
 import 'hdr_session_native_dv_policy.dart';
@@ -328,7 +328,6 @@ class HdrVideoSession {
       StreamController<HdrOutputEvent>.broadcast();
   final HdrSourceIntent<HdrOpenResult<HdrOpenPlan>> _intent =
       HdrSourceIntent<HdrOpenResult<HdrOpenPlan>>();
-  final HdrSourceClassifier _classifier = const HdrSourceClassifier();
 
   HdrOutputSlot<VideoController>? _slot;
   HdrOpenBackend<HdrOpenPlan>? _backend;
@@ -388,6 +387,25 @@ class HdrVideoSession {
     VideoOutputTarget? target,
     bool play = true,
     Duration? start,
+  }) => _open(
+    media,
+    hint: hint,
+    sourceSpec: sourceSpec,
+    target: target,
+    play: play,
+    start: start,
+  );
+
+  // Only an internal same-source configuration/capability rebuild carries
+  // evidence forward. Every explicit public open starts a new source scope.
+  Future<void> _open(
+    Media media, {
+    HdrSourceDescriptor? hint,
+    VideoSourceSpec? sourceSpec,
+    VideoOutputTarget? target,
+    HdrSourceFacts? sourceFacts,
+    bool play = true,
+    Duration? start,
   }) async {
     if (_configuration.android.lgExperimentOwnerToken != null) {
       if (_lgExperimentOpenUsed) {
@@ -428,6 +446,7 @@ class HdrVideoSession {
       target: _target,
       sourceSpec: sourceSpec,
       capabilitiesOverride: capabilitiesOverride,
+      sourceFacts: sourceFacts,
     );
     try {
       final result = await _coordinator!.openSource(
@@ -445,6 +464,7 @@ class HdrVideoSession {
           generation: serial,
           source: plan.source,
           sourceOrigin: plan.sourceOrigin,
+          sourceFacts: plan.sourceFacts,
           prediction: plan.prediction,
           actual: plan.route,
           dataSpaceRequested: observation.dataSpaceRequested,
@@ -484,8 +504,11 @@ class HdrVideoSession {
       if (serial == _serial && !_disposed) {
         _report.value = HdrOutputReport(
           generation: serial,
-          source: hint,
-          sourceOrigin: hint == null ? null : HdrReportSource.hint,
+          source: error.sourceFacts?.source ?? hint,
+          sourceOrigin: error.sourceFacts != null
+              ? HdrReportSource.decoder
+              : hint == null ? null : HdrReportSource.hint,
+          sourceFacts: error.sourceFacts,
           verified: false,
           degradeReason: error.reason,
           error: error,
@@ -530,7 +553,8 @@ class HdrVideoSession {
         await _queryCapabilities(request.target, request.sourceSpec);
     if (cancelled()) throw const OpenSuperseded();
     final hint = request.hint;
-    final source = hint ?? const HdrSourceDescriptor();
+    final sourceFacts = request.sourceFacts ?? HdrSourceFacts.fromHint(hint);
+    final source = sourceFacts.source;
     final prediction = _routePlanner(
       source: source,
       capabilities: capabilities,
@@ -551,6 +575,7 @@ class HdrVideoSession {
       media: request.media,
       source: source,
       sourceOrigin: hint == null ? null : HdrReportSource.hint,
+      sourceFacts: sourceFacts,
       capabilities: capabilities,
       prediction: prediction,
       route: prediction.selected.route!,
@@ -561,6 +586,7 @@ class HdrVideoSession {
         generation: _transactionSerial,
         source: source,
         sourceOrigin: plan.sourceOrigin,
+        sourceFacts: plan.sourceFacts,
         prediction: prediction,
         verified: false,
       ),
@@ -800,25 +826,30 @@ class HdrVideoSession {
         reviewWindow!.remaining();
       }
     }
-    HdrSourceDescriptor descriptor = _classifier.classify(
-      videoParams: facts.videoParams,
-      dolbyVisionProfile: facts.dolbyVisionProfile,
-      hint: plan.source,
-      dvCompatibilityId: facts.dvCompatibilityId,
-      dvElPresent: facts.dvElPresent,
-      hdrVivid: facts.hdrVivid,
+    // Source evidence survives this logical open's retries. Decoder output
+    // is stored separately and cannot erase original DV/HDR metadata merely
+    // because the new decoder omitted it. Native DV may transform frame colors;
+    // its output tags are never used to infer the source compatibility family.
+    final sourceFacts =
+        (plan.sourceFacts ?? HdrSourceFacts.fromHint(plan.source)).observe(
+          videoParams: facts.videoParams,
+          dolbyVisionProfile: facts.dolbyVisionProfile,
+          codec: facts.codec,
+          dvCompatibilityId: facts.dvCompatibilityId,
+          dvElPresent: facts.dvElPresent,
+          hdrVivid: facts.hdrVivid,
+          inferSourceColorFromDecoder:
+              plan.route.strategy != HdrStrategy.nativeDolbyVision,
+        );
+    final descriptor = sourceFacts.source;
+    HdrOutputDiagnostics.classify(
+      descriptor: descriptor,
+      origin: sourceFacts.retainsHint ? 'mixed' : 'facts',
     );
-    if (descriptor.codec.isEmpty && facts.codec.isNotEmpty) {
-      // VideoParams does not carry the codec; the track codec read by the
-      // backend fills the gap (see the S1 availability notes).
-      descriptor = HdrSourceDescriptor(
-        codec: facts.codec,
-        transfer: descriptor.transfer,
-        primaries: descriptor.primaries,
-        dynamicMetadata: descriptor.dynamicMetadata,
-        dvProfile: descriptor.dvProfile,
-        dvCompatibilityId: descriptor.dvCompatibilityId,
-        enhancementLayer: descriptor.enhancementLayer,
+    if (sourceFacts.hasConflict) {
+      throw HdrPlaybackBlocked(
+        HdrDegradeReason.sourceMetadataUnknown,
+        sourceFacts: sourceFacts,
       );
     }
     final reclassified = descriptor != plan.source;
@@ -835,6 +866,7 @@ class HdrVideoSession {
       throw HdrPlaybackBlocked(
         prediction.selected.skipReason ??
             HdrDegradeReason.p5PipelineUnavailable,
+        sourceFacts: sourceFacts,
       );
     }
     final routeChanged = prediction.selected.route != plan.route;
@@ -861,6 +893,7 @@ class HdrVideoSession {
         throw HdrPlaybackBlocked(
           replanned.selected.skipReason ??
               HdrDegradeReason.p5PipelineUnavailable,
+          sourceFacts: sourceFacts,
         );
       }
     }
@@ -877,13 +910,12 @@ class HdrVideoSession {
         );
       }
       return HdrReviewDecision<HdrOpenPlan>.accept(
-        nextPlan: reclassified
-            ? plan.copyWith(
-                source: descriptor,
-                sourceOrigin: HdrReportSource.decoder,
-                prediction: prediction,
-              )
-            : null,
+        nextPlan: plan.copyWith(
+          source: descriptor,
+          sourceOrigin: reclassified ? HdrReportSource.decoder : null,
+          sourceFacts: sourceFacts,
+          prediction: prediction,
+        ),
       );
     }
 
@@ -912,6 +944,7 @@ class HdrVideoSession {
         nextPlan: plan.copyWith(
           source: descriptor,
           sourceOrigin: reclassified ? HdrReportSource.decoder : null,
+          sourceFacts: sourceFacts,
           prediction: replanned,
         ),
       );
@@ -933,6 +966,7 @@ class HdrVideoSession {
     if (!replanned.playable) {
       throw HdrPlaybackBlocked(
         replanned.selected.skipReason ?? HdrDegradeReason.p5PipelineUnavailable,
+        sourceFacts: sourceFacts,
       );
     }
     if (hwdecMismatch) {
@@ -962,6 +996,7 @@ class HdrVideoSession {
     final rebuildPlan = plan.copyWith(
       source: descriptor,
       sourceOrigin: reclassified ? HdrReportSource.decoder : plan.sourceOrigin,
+      sourceFacts: sourceFacts,
       prediction: replanned,
       route: replanned.selected.route!,
       excluded: excludedForRebuild,
@@ -1072,9 +1107,10 @@ class HdrVideoSession {
         ),
       );
     }
-    await open(
+    await _open(
       media,
       hint: descriptor,
+      sourceFacts: current.sourceFacts,
       sourceSpec: _currentSourceSpec,
       play: _openPlay,
       start: _positionProvider(),
@@ -1145,9 +1181,10 @@ class HdrVideoSession {
     // against a fresh query that may still return the stale state.
     _capabilitiesOverride = capabilities;
     try {
-      await open(
+      await _open(
         media,
         hint: descriptor,
+        sourceFacts: current.sourceFacts,
         sourceSpec: _currentSourceSpec,
         play: _openPlay,
         start: _positionProvider(),
