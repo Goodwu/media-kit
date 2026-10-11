@@ -7,7 +7,7 @@
   "planCommit": "6107617628199ec64a44581126fd488ea201af0f",
   "initialHandoffCommit": "8edf822947da242efd5ba80d9c92e5b085bbee08",
   "status": "in_progress",
-  "validationBlocker": "B2b migration independent tests and App integration pending. No current full-native/device acceptance.",
+  "validationBlocker": "B2b implemented in both repositories. Latest lab fixture repair and fresh combined App tests/build need independent acceptance. No current full-native/device acceptance.",
   "canonicalDevelopment": {
     "mediaKit": {
       "repository": "Goodwu/media-kit",
@@ -19,7 +19,7 @@
       "pullRequest": 4,
       "pullRequestUrl": "https://github.com/Goodwu/media-kit/pull/4",
       "draft": true,
-      "lastImplementationHead": "5638f9b596a4f50243e33934d2c73facd0c580dc",
+      "lastImplementationHead": "090a4ebceade78baa743d43ef9d8186a95ff9f68",
       "authoritativeProgress": "This ledger, this canonical branch and PR4. main is only a discovery pointer. Read-only local main0f0f1525 is stale; do not infer missing code from it. Later PR result comments may record completed checks without creating another source revision."
     },
     "piliPlusX": {
@@ -27,11 +27,13 @@
       "repository": "Goodwu/PiliPlusX",
       "defaultBranch": "dev-new",
       "observedBranch": "fix/darwin-video-output-rebuild-barrier",
-      "observedSourceCommit": "8fc8f2c618b96b60b29d576e4242d0e153fd00bd",
+      "integrationBaseCommit": "f570150c2e366a78e91196eb735beb63b17e35a9",
+      "observedSourceCommit": "1a3dc7045e519689eb66d7560e0b64a63448671d",
+      "lastImplementationHead": "384b10ae2fb02fe5909fec89597499ea314f3f4a",
       "branch": "routing/MK-ROUTING-20261011",
       "branchState": "created",
       "pullRequest": 1,
-      "note": "Existing PR1; do not recreate. Result comments6100836133/6100840179 record231 Python/156 Flutter and bundle success, analyzer still red."
+      "note": "Existing PR1; do not recreate. New query/DASH filter is IMPLEMENTED in384b10ae, validation pending. Result comments6100836133/6100840179 describe the older8fc+ef vector only."
     }
   },
   "tasks": [
@@ -50,88 +52,59 @@
     {
       "id": "B1",
       "status": "in_progress",
-      "commits": [
-        "d18de2751085913591f50653d125b5db6fe5eff2",
-        "f0bba6ff5a618767b92286011b768f77eee1ef9e"
-      ],
+      "commits": ["d18de2751085913591f50653d125b5db6fe5eff2", "f0bba6ff5a618767b92286011b768f77eee1ef9e"],
       "subtasks": [
         {
           "id": "B1a-admission",
           "status": "implemented",
           "commit": "d18de2751085913591f50653d125b5db6fe5eff2",
-          "changes": [
-            "P5 profile32 and P8.4 profile256 independently",
-            "native EL=false required",
-            "remove HLG-over-DV bypass"
-          ],
-          "tests": {
-            "newCases": 18,
-            "status": "passed_in_source_suite",
-            "sourceHead": "36e6a6d32786bff144d920195574e83f20430f61",
-            "runId": 38073262628,
-            "notDeviceAcceptance": true
-          },
+          "changes": ["P5 profile32 and P8.4 profile256 independently", "native EL=false required", "remove HLG-over-DV bypass"],
+          "tests": {"newCases": 18, "status": "passed_in_source_suite", "sourceHead": "36e6a6d32786bff144d920195574e83f20430f61", "runId": 38073262628, "notDeviceAcceptance": true},
           "doNotRepeat": true
         },
         {
           "id": "B1b-el-facts",
           "status": "implemented",
           "commit": "f0bba6ff5a618767b92286011b768f77eee1ef9e",
-          "tests": {
-            "newCases": 5,
-            "status": "passed_in_source_suite",
-            "sourceHead": "36e6a6d32786bff144d920195574e83f20430f61",
-            "runId": 38073262628
-          },
+          "tests": {"newCases": 5, "status": "passed_in_source_suite", "sourceHead": "36e6a6d32786bff144d920195574e83f20430f61", "runId": 38073262628},
           "doNotRepeat": true
         },
-        {
-          "id": "B1b-source-classification",
-          "status": "planned",
-          "note": "Unknown P8 class/kind still maps to P8.2. Original/processed facts need work; do not confuse this with the completed EL fix."
-        },
-        {
-          "id": "B1c-dependencies-review-fallback",
-          "status": "planned",
-          "note": "Actual importer dependencies, output reuse, decoder review, exclusion-aware fallback and budgets remain open."
-        }
+        {"id": "B1b-source-classification", "status": "planned", "note": "Unknown P8 class/kind still maps to P8.2. Original/processed facts need work; do not confuse this with the completed EL fix."},
+        {"id": "B1c-dependencies-review-fallback", "status": "planned", "note": "Actual importer dependencies, output reuse, decoder review, exclusion-aware fallback and budgets remain open. B2b's exact-source negative gate also applies to the safety fallback, but does not close the older exclusion-bypass issue."}
       ]
     },
     {
       "id": "B2",
       "status": "in_progress",
-      "commits": [
-        "639714555e39013a5a99d23d77a6909d761f770c",
-        "5638f9b596a4f50243e33934d2c73facd0c580dc"
-      ],
-      "note": "New query implemented, original Player query callers and Session/App migration still pending.",
+      "commits": ["639714555e39013a5a99d23d77a6909d761f770c", "5638f9b596a4f50243e33934d2c73facd0c580dc", "861b9ab2946394cb6187cd32600ffd3dedde5452", "4d8407b9158fa420316581d4f24f5a01591cfa5d", "090a4ebceade78baa743d43ef9d8186a95ff9f68"],
+      "note": "Player query removed from Dart. Session/lab and App have migrated to target/source-aware queries. Source filter implemented; independent combined validation in progress.",
       "subtasks": [
         {
           "id": "B2a-query",
           "status": "implemented",
-          "commitAnchor": "feat(video): add target-aware source-spec capability query [MK-ROUTING-20261011 B2a]",
+          "commit": "639714555e39013a5a99d23d77a6909d761f770c",
           "hostJavaAssertionsPassed": 34,
           "independentFlutterAndAndroidCI": "passed_on43415b",
           "doNotRepeat": true
         },
         {
           "id": "B2b-query-migration-App-source-filter",
-          "status": "library_implemented_app_pending",
-          "commitAnchor": "feat(routing): migrate query and enforce exact source support [MK-ROUTING-20261011 B2b]",
-          "tests": "9 new channel/planner/Session regressions pending independent execution"
+          "status": "implemented_validation_in_progress",
+          "libraryCommit": "861b9ab2946394cb6187cd32600ffd3dedde5452",
+          "appCommit": "384b10ae2fb02fe5909fec89597499ea314f3f4a",
+          "changes": ["Remove HdrCapabilities.query/queryWith Player API; preserve HDR value/parser", "Bind exact source support to planner, including safety fallback", "Session captures per-open target/spec and refreshes its own target rather than using legacy default-display payload", "App filters actual DASH renditions before codec preference and quality selection", "Immutable NetworkSource carries selected sourceSpec/outputTarget into Session", "Unknown remains conditional; no process-global successful-query fallback"],
+          "tests": {"newLibraryCases": 9, "libraryCases": "passed_on2811_and4d8407", "videoSuite": "502_passed_3_existing_Linux_skips_on4d8407", "videoAnalyze": "success_on4d8407", "newAppCases": 12, "newAppCasesState": "independent_execution_pending"},
+          "fixtureRepairs": {"widgetFakeCommit": "4d8407b9158fa420316581d4f24f5a01591cfa5d", "labCommit": "090a4ebceade78baa743d43ef9d8186a95ff9f68", "note": "Retain all assertions. Page formatting restored only after dart-format equality proves current code equivalence; no old production query restored."},
+          "doNotRepeat": true
         },
-        {
-          "id": "B2c-LG-managed-output",
-          "status": "planned"
-        }
+        {"id": "B2c-LG-managed-output", "status": "planned"},
+        {"id": "B2-options-and-other-platforms", "status": "planned", "note": "auto/prefer/require and shared platform semantics are in v3. Do not claim full adapters, advanced options, runtime presented-HDR proof or multi-view completion."}
       ]
     },
     {
       "id": "B3",
       "status": "in_progress",
-      "commits": [
-        "ac4f7889063623b3912d3fe5e8b43588915b3ee4"
-      ],
+      "commits": ["ac4f7889063623b3912d3fe5e8b43588915b3ee4"],
       "subtasks": [
         {
           "id": "B3-selection-audit",
@@ -139,118 +112,44 @@
           "commit": "ac4f7889063623b3912d3fe5e8b43588915b3ee4",
           "evidence": "docs/plans/media-kit-routing-native-audit-20261011.md",
           "tool": "tool/routing_native_audit/run.py",
-          "execution": {
-            "scope": "current-source C regions with JNI fixtures",
-            "compileExit": 0,
-            "regressionExit": 1,
-            "controlsPassed": 5,
-            "counterexampleReproduced": 1,
-            "sanitizers": "address,undefined",
-            "fullNativeBuild": false,
-            "deviceTest": false
-          },
-          "toolTests": {
-            "passed": 6,
-            "scope": "extraction only"
-          },
+          "execution": {"scope": "current-source C regions with JNI fixtures", "compileExit": 0, "regressionExit": 1, "controlsPassed": 5, "counterexampleReproduced": 1, "sanitizers": "address,undefined", "fullNativeBuild": false, "deviceTest": false},
+          "toolTests": {"passed": 6, "scope": "extraction only"},
           "next": "Narrow P8 selection repair including empty profile-list behavior; no broad new decoder-naming protocol by default.",
           "doNotRecreateHarness": true
         },
-        {
-          "id": "B3-existing-protocol-audit",
-          "status": "source_inspected",
-          "note": "P5/P8 mapping, decoder-info v1 and dovi=auto/on/off exist. Actual metadata delivery/source-fact gaps still need tests. Production FFmpeg/mpv unchanged."
-        }
+        {"id": "B3-existing-protocol-audit", "status": "source_inspected", "note": "P5/P8 mapping, decoder-info v1 and dovi=auto/on/off exist. Actual metadata delivery/source-fact gaps still need tests. Production FFmpeg/mpv unchanged."}
       ]
     },
     {
       "id": "APP",
       "status": "in_progress",
-      "commits": [],
-      "tests": [],
-      "userReminder": "After current media-kit CI work, perform PiliPlusX build and tests; do not stop at library-only results.",
-      "required": [
-        "Verify actual package resolution points to latest task media-kit source",
-        "Run App tests and available build targets",
-        "Record both App and library SHAs and actual build inputs",
-        "Keep source-only/legacy-native compile evidence separate from full latest-source-native candidate acceptance",
-        "Persist App branch, PR, commits, failures and results in this task ledger"
-      ],
-      "note": "Existing PR1 source integration/test/bundle implemented; new query/DASH filter pending."
+      "commits": ["223031bb30b8f4cea5ad1f740eabe425fd659579", "2c4001fbddf410d9d1dbb829fc1137f34c143748", "e80a52f0273a762061069fb9f18ad7965af9cebe", "9fe16772d874d5bf9bf9a1035fc2c94d85ddccc3", "384b10ae2fb02fe5909fec89597499ea314f3f4a"],
+      "tests": [{"run": 38075867243, "app": "8fc8f2c618b96b60b29d576e4242d0e153fd00bd", "mediaKit": "ef3951eb239d48747f4cbb2c3c2749fde40ff274", "pythonPassed": 231, "flutterPassed": 156, "bundle": "success", "analyze": "failure_85_infos", "scope": "older_vector_not_B2b_acceptance"}],
+      "userReminder": "Perform PiliPlusX build and tests; do not stop at library-only results.",
+      "required": ["Verify actual package resolution points to latest task media-kit source", "Run App tests and available build targets", "Record both App and library SHAs and actual build inputs", "Keep source-only/legacy-native compile evidence separate from full latest-source-native candidate acceptance", "Persist App branch, PR, commits, failures and results in this task ledger"],
+      "note": "New query/DASH filter implemented in384b10ae; temporary writer retired in1a3dc704. Fresh full source/build CI38124750626 was triggered; query/compile failures require repair, not reimplementation on another branch."
     },
     {
       "id": "CI",
-      "status": "latest_cleanup_revalidation_pending",
+      "status": "B2b_combined_revalidation_pending",
       "workflow": ".github/workflows/routing-source.yml",
       "evidence": "docs/plans/media-kit-routing-ci-20261011.md",
       "runs": [
-        {
-          "id": 38072309054,
-          "headSha": "01703016d333a97540fdd0f4ac5f9cd901bb54da",
-          "lab": "analyze_success_298_tests_passed",
-          "video": "18_analyzer_findings_and_unknown_EL_golden_failure_partial_test_run"
-        },
-        {
-          "id": 38072308952,
-          "headSha": "01703016d333a97540fdd0f4ac5f9cd901bb54da",
-          "webJob": 114272073801,
-          "web": "failed_OHOS_unconditional_ffi",
-          "latestNativeCandidateAcceptance": false
-        },
-        {
-          "id": 38072868284,
-          "headSha": "146269c414085ac0bc352886739267f83fe5c9d1",
-          "scope": "source_edit_not_validation",
-          "conclusion": "artifact_upload_failed_hidden_path",
-          "sourceCommitAndPush": "success",
-          "resultCommit": "1c134790cfbf4f7094c90472b8fd2357184a92e8",
-          "pythonTestsPassed": 10
-        },
-        {
-          "id": 38073262628,
-          "headSha": "36e6a6d32786bff144d920195574e83f20430f61",
-          "videoJob": 114274887230,
-          "videoTestsPassed": 475,
-          "videoTestsSkipped": 3,
-          "skipScope": "existing_macOS_only_viewport_widgets",
-          "videoAnalyze": "failed_2_unused_private_keys_and_smoke_print",
-          "labAnalyze": "success",
-          "labTests": "success",
-          "pythonTools": "success_6_plus_4_tests",
-          "ohosFacadeJavaScriptCompile": "success",
-          "ohosFacadeJavaScriptExecution": "success",
-          "ohosFacadeWasmCompile": "success",
-          "fullNativeBuild": false
-        }
+        {"id": 38072309054, "headSha": "01703016d333a97540fdd0f4ac5f9cd901bb54da", "lab": "analyze_success_298_tests_passed", "video": "18_analyzer_findings_and_unknown_EL_golden_failure_partial_test_run"},
+        {"id": 38072308952, "headSha": "01703016d333a97540fdd0f4ac5f9cd901bb54da", "webJob": 114272073801, "web": "failed_OHOS_unconditional_ffi", "latestNativeCandidateAcceptance": false},
+        {"id": 38072868284, "headSha": "146269c414085ac0bc352886739267f83fe5c9d1", "scope": "source_edit_not_validation", "conclusion": "artifact_upload_failed_hidden_path", "sourceCommitAndPush": "success", "resultCommit": "1c134790cfbf4f7094c90472b8fd2357184a92e8", "pythonTestsPassed": 10},
+        {"id": 38073262628, "headSha": "36e6a6d32786bff144d920195574e83f20430f61", "videoJob": 114274887230, "videoTestsPassed": 475, "videoTestsSkipped": 3, "skipScope": "existing_macOS_only_viewport_widgets", "videoAnalyze": "failed_2_unused_private_keys_and_smoke_print", "labAnalyze": "success", "labTests": "success", "pythonTools": "success_6_plus_4_tests", "ohosFacadeJavaScriptCompile": "success", "ohosFacadeJavaScriptExecution": "success", "ohosFacadeWasmCompile": "success", "fullNativeBuild": false},
+        {"id": 38122745962, "headSha": "43415b4955e55f9785a7ef32b4b3261181d7fd9d", "source": "success", "queryRun": 38122746023, "query": "success", "darwinRun": 38122745951, "darwin": "success", "ohosRun": 38122746152, "ohos": "success"},
+        {"id": 38124012739, "headSha": "2811f624c30bcaad312a73bacba550105ccb61a0", "videoPassed": 497, "videoFailedModules": 1, "newSourceCasesPassed": 9, "failure": "widget implementing fake missing new Session API; lab fake and formatting anchors also pending", "queryRun": 38124012729, "query": "success"},
+        {"id": 38124687703, "headSha": "4d8407b9158fa420316581d4f24f5a01591cfa5d", "videoPassed": 502, "videoLinuxSkipped": 3, "videoAnalyze": "success", "lab": "266_passed_3_failures_including_one_module_compile", "labRepair": "090a4ebceade78baa743d43ef9d8186a95ff9f68", "fullNativeBuild": false}
       ],
       "repairs": [
-        {
-          "id": "CI-web-ffi",
-          "status": "implemented_and_smoke_validated",
-          "commit": "445a2add7e1df072e09885070ce1c0eb40b335b5",
-          "nativeImplementationBlobUnchanged": "ab031d15910763fb646c45209fb867a9cbc19ee6",
-          "newTests": 2,
-          "doNotRepeat": true
-        },
-        {
-          "id": "CI-analyzer-and-golden",
-          "status": "implemented",
-          "commit": "1c134790cfbf4f7094c90472b8fd2357184a92e8",
-          "newTests": 3,
-          "doNotRepeat": true
-        },
-        {
-          "id": "CI-final-lints",
-          "status": "implemented",
-          "commit": "c2afeb990e8c87a9f18e67dcf0a375dd6c8239c8",
-          "changes": [
-            "remove two unused private constructor key parameters",
-            "remove print from smoke entry"
-          ],
-          "doNotRepeat": true
-        }
+        {"id": "CI-web-ffi", "status": "implemented_and_smoke_validated", "commit": "445a2add7e1df072e09885070ce1c0eb40b335b5", "nativeImplementationBlobUnchanged": "ab031d15910763fb646c45209fb867a9cbc19ee6", "newTests": 2, "doNotRepeat": true},
+        {"id": "CI-analyzer-and-golden", "status": "implemented", "commit": "1c134790cfbf4f7094c90472b8fd2357184a92e8", "newTests": 3, "doNotRepeat": true},
+        {"id": "CI-final-lints", "status": "implemented", "commit": "c2afeb990e8c87a9f18e67dcf0a375dd6c8239c8", "changes": ["remove two unused private constructor key parameters", "remove print from smoke entry"], "doNotRepeat": true},
+        {"id": "CI-query-lints", "status": "implemented_and_validated", "commit": "5638f9b596a4f50243e33934d2c73facd0c580dc", "doNotRepeat": true}
       ],
-      "next": "Fresh independent validation after c2afeb990. Both write-capable one-shot workflows are retired. Added read-only macOS viewport job to execute three Linux-skipped cases. Preserve ordinary platform CI results and latest-source acceptance boundaries."
+      "next": "Independently validate latest lab fixture repair and current App+library vector. All temporary source writers retired. Do not count legacy-prebuilt platform CI as latest-native acceptance."
     }
   ],
   "nonNegotiable": [
@@ -266,27 +165,18 @@
   ],
   "checkpointPolicy": {
     "authority": "User requires prompt commit/push because environment is temporary.",
-    "procedure": [
-      "Review task-owned changes and sanitized evidence",
-      "Commit/push on the registered chain without awaiting all tests",
-      "Read back remote head/content and record real failures",
-      "Keep exact commit/result/next-action handoff; PR result comments may complete evidence without repeatedly cancelling new-head CI"
-    ],
+    "procedure": ["Review task-owned changes and sanitized evidence", "Commit/push on the registered chain without awaiting all tests", "Read back remote head/content and record real failures", "Keep exact commit/result/next-action handoff; PR result comments may complete evidence without repeatedly cancelling new-head CI"],
     "privacy": "No credentials, private media or unsanitized logs in commits."
   },
   "environment": {
     "codexWorkspace": "Read-only; local main0f0f1525 is stale.",
-    "localRuntime": "Python/C available; Flutter/Dart/gh absent and git DNS failed. Utility tests6+4 passed; original fixture-anchor failure retained.",
-    "github": "Actions now operational. Same-branch source repairs persisted by scoped one-shot runners; both write workflows retired. Normal tests are read-only and use fresh source checkouts.",
+    "localRuntime": "Python/C available; Flutter/Dart/gh absent and git DNS failed. Current tracked source archives retrieved through read-only CI; local synthetic snapshot git histories are NOT upstream branches and must never be pushed. Fourteen existing App routing Python cases passed locally this turn.",
+    "github": "Actions operational. Scoped exact-index source checkpoints have been committed and pushed; all temporary source writers are retired. Normal tests are read-only and use fresh source checkouts.",
     "deviceTests": "not_run"
   },
-  "buildAudit": {
-    "status": "incomplete",
-    "evidence": "docs/plans/media-kit-routing-native-audit-20261011.md",
-    "note": "Existing Android test build external relink/r22 helper pipeline still requires full source rebuild audit. No current-native test candidate claimed."
-  },
-  "nextAction": "Read B2b source commit and independently validate it. Continue existing PiliPlusX PR1 with new query and exact DASH source filtering, then fresh combined tests/build. Do not rerun retired checkpoint materializers.",
-  "resumptionRule": "Existing: B1a=d18de275; EL=f0bba6ff; native audit=ac4f7889; Web=445a2add; analyzer/golden=1c134790; final lints=c2afeb990. Do not rerun one-shot patch scripts. Read latest remote ledger/PR results first.",
-  "lastCheckpoint": "B2b library migration checkpoint: remove Player query, bind exact source support to planner/Session, capture per-open target/spec and refresh target. Nine integration tests added; independent CI and App migration pending. Lint7 repair5638f9b and source/query/Darwin/OHOS CI on43415b succeeded. This checkpoint must not be redeveloped.",
+  "buildAudit": {"status": "incomplete", "evidence": "docs/plans/media-kit-routing-native-audit-20261011.md", "note": "Existing Android test build external relink/r22 helper pipeline still requires full source rebuild audit. No current-native test candidate claimed."},
+  "nextAction": "Read latest CI for the existing B2b source commits861b9ab/384b10ae and fixture repairs4d8407/090a4e. Fix actual failures and run current two-repository App tests/bundle. Then continue remaining B1/B3/LG/config/native-build tasks; never recreate B2b on a new branch.",
+  "resumptionRule": "Do not rerun checkpoint materializers. Existing B1a=d18de275; EL=f0bba6ff; native audit=ac4f7889; Web=445a2add; analyzer/golden=1c134790; final lints=c2afeb990; B2a=63971455; query lint=5638f9b5; B2b library=861b9ab2; B2b App=384b10ae. Read latest remote ledger/PR results first.",
+  "lastCheckpoint": "B2b implemented and pushed in BOTH canonical repositories. Library502 tests+analyze passed on4d8407; lab fixture/format compatibility fixed090a4e pending independent run. App12 new tests added, full current vector pending. No full native APK/device or all-CI-success claim.",
   "planVersion": 3
 }
