@@ -7,14 +7,15 @@
 ## MK-ROUTING-20261011（CORE继任，2026-10-11）
 
 - 状态：进行中；唯一集成分支 `routing/MK-ROUTING-20261011`，主PR media-kit#4/App#1/FFmpeg#1；context=`archives/conversations/media-kit-routing-20261011.md`。主PR不自动合并或发布。
-- 当前推送源码：库87eb946 + Appabc149；FFmpeg9aba43cf。CONFIG模型检查点独立35库/22App/4额外反例与target strict通过，实际DASH/planner/Session/report同一配置闭环仍未完成。
+- 当前推送源码：库5c8e54dc + Appabc149；FFmpeg9aba43cf。CONFIG模型检查点独立35库/22App/4额外反例与target strict通过，实际DASH/planner/Session/report同一配置闭环仍未完成。
 - CORE-F01、DASH逐候选过滤、query迁移及FFmpeg e8df200c已完成，不重新开发。旧6e757+569138的192Flutter/34info属于历史向量；34info已在CORE-CI03清零。
 - 最新完整App源码验证：08acc+8b98 source38160661703四平台SUCCESS，各211Flutter/strict0/bundle/来源/freshness，实际359Python；Build38160661882六Release仍FAIL。新abc149+87eb CI06 source38161696564四平台SUCCESS，各233Flutter/strict0/bundle/finalize/来源与freshness；Build38161696805源码矩阵SUCCESS但六Release失败，Python本轮各359；库source38161681107 video663+3原mac Linux跳过/lab298/两strict通过。不得跨向量重标。
-- R01a/b/c/d检查点已提交；R01d8b98独立255/strict通过，实际decoder/MIME/frame/代次与报告绑定已接通。R01e direct/copy/software有限catalog当前17文件冻结，作者及独立V2各688/strict通过，17哈希一致、4独立外置反例通过；本轮提交检查点，不代表native/实机验收。
+- R01a/b/c/d检查点已提交；R01d8b98独立255/strict通过，实际decoder/MIME/frame/代次与报告绑定已接通。R01e direct/copy/software有限catalog已推5c8e54dc，作者及独立V2各688/strict通过，17哈希一致、4独立外置反例通过；新库CI685+3skip/lab298/strict通过，不代表native/实机验收。CONFIG实际Session/plan/report快照与queued stop/reset正在接线；App真实设置/过期查询/teardown恢复测试待联测。
 - DV001与PR#5必须完成归并：PR5 86c三Markdown与5b279611追加16行已分别归入e162/aeaf并独立原文/hash/链接核验；两个配方脚本未导入，不能标整项完成。2026-10-12本轮重新读远端，DV001仍1095a43，PR5仍5b279611。DV001原review5483753705/6110373174未修，DEVICE继续原PR单写，CORE审查整合。
 - DV001剩余门：符号读取失败关闭、两Vulkan目标独立检查、构建失败传播、干净staging、最终成员/链接/补丁来源；需受审完整manifest及最新适用源码产物。旧8bed+a3+JARcd5的188/34info/244仅DEVICE声称，AVC EOS不能代替dvh1/HDR验收。最新P5/P8.4、experimental true/false、普通Session与可见输出/持续性能仍必需。
-- native输入gate08acc独立critical通过；CORE接受账本空。Android/Pink实际Release接线正在实现，未获受审输入必须明确阻断，不用旧默认JAR。Windows完整bootstrap已解阻，旧PNG唯一因果未证明。actualYUV carrier/owner arm仍DEVICE范围；产品experimental默认false不变。
+- native输入gate08acc独立critical通过；CORE接受账本空。Android/Pink实际Release接线作者114/全Python412通过，但V2确认新增res/assets/shaders/jniLibs输入漏检阻断，原writer第一轮修复中；未获受审输入必须明确阻断，不用旧默认JAR。Windows完整bootstrap已解阻，旧PNG唯一因果未证明。actualYUV carrier/owner arm仍DEVICE范围；产品experimental默认false不变。
 
+- General长suite旧两向量已取消且日志持续推进，无挂死证据；ci.yml仅本任务routing分支保留live运行，其他分支取消策略不变。actionlint仍有3个既有旧action runner错误需后续修；不推定general通过。
 ## 接手快照（2026-10-10 更新；换 agent 从这里开始）
 
 - **事实源与范围**：本文件是任务状态；`archives/README.md` 是主题导航。主题上下文（各 conversation 顶部 Current State）：Android HDR/P5 主线 `archives/conversations/android-hdr-dv-display-plan-20260922.md`；LG/marble 线 `archives/conversations/lg-h870ds-hdr-demo-20261004.md`；整改主题 `archives/conversations/architecture-review-remediation-20260930.md`。LG followup 单一计划=`docs/plans/lg-p84-hdr-followup-plan-20261009.md`（v4.1，全部出清，触发式候选/重开条件在案）。接手后先重读 Git/设备状态，快照仅是入口。
