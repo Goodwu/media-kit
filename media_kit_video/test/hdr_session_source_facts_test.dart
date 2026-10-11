@@ -5,6 +5,7 @@ import 'package:media_kit/media_kit.dart' show Media, VideoParams;
 import 'package:media_kit_video/src/hdr/hdr_capabilities.dart';
 import 'package:media_kit_video/src/hdr/hdr_open_plan.dart';
 import 'package:media_kit_video/src/hdr/hdr_output_event.dart';
+import 'package:media_kit_video/src/hdr/hdr_output_policy.dart';
 import 'package:media_kit_video/src/hdr/hdr_route.dart';
 import 'package:media_kit_video/src/hdr/hdr_source_descriptor.dart';
 import 'package:media_kit_video/src/hdr/hdr_source_facts.dart';
