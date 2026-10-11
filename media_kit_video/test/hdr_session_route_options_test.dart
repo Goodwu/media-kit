@@ -11,6 +11,7 @@ import 'package:media_kit_video/src/routing/video_decoder_support.dart';
 import 'package:media_kit_video/src/routing/video_route_options.dart';
 import 'package:media_kit_video/src/routing/video_route_option_review.dart';
 import 'package:media_kit_video/src/routing/video_source_spec.dart';
+import 'package:media_kit_video/src/video_controller/platform_video_controller.dart';
 
 import 'hdr_execution_catalog_test.dart' as catalog;
 
@@ -116,6 +117,125 @@ Future<void> blocked(Future<void> operation, HdrVideoSession session) async {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  for (final phase in ['fresh', 'pending', 'failed', 'accepted']) {
+    for (final setter in ['options', 'preference', 'policy']) {
+      test('LG single-open $phase rejects $setter before any mutation',
+          () async {
+        final b = Backend();
+        final query = Completer<HdrCapabilities>();
+        const initialPolicy = HdrRoutingPolicy(allowExperimental: true);
+        HdrRoutingPolicy? plannedPolicy;
+        final s = HdrVideoSession.forTesting(
+            backend: b,
+            isAndroid: true,
+            configuration: const VideoControllerConfiguration(
+                android: AndroidVideoOptions(lgExperimentOwnerToken: 'guard')),
+            policy: initialPolicy,
+            capabilitiesProvider: () => query.future,
+            routePlanner: (
+                {required source,
+                required capabilities,
+                required policy,
+                required preference,
+                required excluded}) {
+              plannedPolicy = policy;
+              return HdrRoutePlanner.plan(
+                  source: source,
+                  capabilities: capabilities,
+                  policy: policy,
+                  preference: preference,
+                  excluded: excluded);
+            });
+        Future<void>? pending;
+        if (phase != 'fresh') {
+          if (phase == 'failed') {
+            for (final hwdec in ['mediacodec', 'mediacodec-copy', 'no']) {
+              b.reviewErrors[hwdec] = StateError('first attempt failed');
+            }
+          }
+          pending = s.open(media, hint: b.source, sourceSpec: spec);
+          if (phase != 'pending') {
+            query.complete(capabilities());
+            if (phase == 'failed') {
+              await expectLater(pending, throwsStateError);
+              expect(s.report.value.error, isA<StateError>());
+            } else {
+              await pending;
+            }
+            expect(s.report.value.verified, phase == 'accepted');
+          }
+        }
+        final priorReport = s.report.value;
+        final stops = b.stops, resets = b.resets;
+        final plans = List<HdrOpenPlan>.of(b.plans);
+        final resources = List<String>.of(b.resources);
+        final configured = List<HdrRoute>.of(b.configured);
+        final opened = List<HdrRoute>.of(b.opened);
+        final operation = setter == 'options'
+            ? s.setOptions(options(
+                decode: const VideoRouteSelection.require(
+                    VideoDecodeTarget.software),
+                output:
+                    const VideoRouteSelection.require(VideoOutputIntent.sdr),
+                importer: VideoImportPreference.preferCopy))
+            : setter == 'preference'
+                ? s.setPreference(HdrOutputPreference.off)
+                : s.setPolicy(const HdrRoutingPolicy(
+                    preferences: {}, allowExperimental: false));
+        await expectLater(operation, throwsStateError);
+        expect(s.report.value, same(priorReport));
+        expect(b.stops, stops);
+        expect(b.resets, resets);
+        expect(b.plans, plans);
+        expect(b.resources, resources);
+        expect(b.configured, configured);
+        expect(b.opened, opened);
+        if (phase == 'fresh' || phase == 'pending') {
+          pending ??= s.open(media, hint: b.source, sourceSpec: spec);
+          query.complete(capabilities());
+          await pending;
+          expect(s.report.value.verified, isTrue);
+          expect(plannedPolicy!.preferences, initialPolicy.preferences);
+          expect(plannedPolicy!.allowExperimental,
+              initialPolicy.allowExperimental);
+          expect(b.plans.single.options!.experimental, isTrue);
+          expect(b.plans.single.options!.decode.preference,
+              VideoRoutePreference.auto);
+          expect(b.plans.single.options!.output.preference,
+              VideoRoutePreference.auto);
+          expect(b.plans.single.options!.importPreference,
+              VideoImportPreference.auto);
+        }
+        await expectLater(
+            s.open(media, hint: b.source, sourceSpec: spec), throwsStateError);
+        await s.dispose();
+      });
+    }
+  }
+  test('LG contradictory first options consume attempt before resolving',
+      () async {
+    final b = Backend();
+    var queries = 0;
+    final s = HdrVideoSession.forTesting(
+        backend: b,
+        isAndroid: true,
+        preference: HdrOutputPreference.off,
+        configuration: const VideoControllerConfiguration(
+            android: AndroidVideoOptions(lgExperimentOwnerToken: 'conflict')),
+        capabilitiesProvider: () async {
+          queries++;
+          return capabilities();
+        });
+    await expectLater(open(s, b, options()), throwsArgumentError);
+    await expectLater(
+        s.open(media, hint: b.source, sourceSpec: spec), throwsStateError);
+    expect(queries, 0);
+    expect(b.plans, isEmpty);
+    expect(b.opened, isEmpty);
+    expect(b.stops, 0);
+    expect(s.report.value.generation, 0);
+    await s.dispose();
+  });
   test('same snapshot before query, retry, plan copy and report', () async {
     final query = Completer<HdrCapabilities>();
     final b = Backend()
