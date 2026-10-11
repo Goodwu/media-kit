@@ -2,6 +2,11 @@
 
 ## Current State
 
+本CONFIG模型检查点以库8b98+App08acc为代码基线，新增不可变requested/override/effective配置与来源/序列化、纯App设置适配及库一行public export。V1独立35库+22App+4额外反例/两target strict通过，5文件与实际HdrMode/HwDecType哈希一致；隔离纯模型测试最初assets失败保留，最终no-test-assets通过，不是App全量。experimental默认false，explicit auto/reset及按库→App→open完整覆盖；require不被实验/失败策略暗弱化。默认MC组合prefer hardware，disableHA require software；旧原串、copy/direct未完整迁移及未知mode诊断保留。事实模型尚未接DASH/NetworkSource/planner/Session/report，不能标配置闭环完成，后续caller必须处理未知mode诊断。handoff见库docs/plans/core-config-model-handoff-20261012.json。R01e与Release接线其他dirty改动不进入本模型切片。
+
+最新完整已验源码向量只为App08accb63df8c4cab62d00946fb2159dd3781e0ee+库8b98c67a293876bd4af3f36ff245968ca848b41e：source38160661703 attempt1 SUCCESS，四平台真实bootstrap各211/strict零问题/bundle/finalize、Python359/Chrome1/Web；8份source/Build内实际bootstrapreceipt前后向量/10routing+261roots/102toolsroots及2662hash一致，无SKIP。Build38160661882整体FAIL但源码矩阵全成功，6Release既有前置失败，不native验收。库628video+3原mac Linux跳过/lab298与strict/query/Darwin9/OHOSunsigned成功；general四平台test仍live/运行中log API404，未重跑取消跳过。Windows已真实成功，但旧PNG因果未单独证明。证据/tmp/mk-routing-ci05-20261012/summary.json；这些结果不重标本模型提交。
+
+
 当前已推送库HEAD9152154473901b750553be96dbc2137c927b2f5d；App f179e21a7c20f9f167232c060f90f32d702c19bd；FFmpeg9aba43cf；DEVICE构建DV0011095a43。库source38158342447：604video通过/3既有macOS例Linux跳过、lab298、两包strict；query/Darwin/OHOS成功，general38158342443最后四项test仍运行，不推定通过。App f179+915两run source38159246222与Build38159246432均失败：Android/Linux/macOS真实bootstrap通过（strict零问题、各211Flutter、bundle、真实SDK/package补丁、10routing+261全部roots、源码前后/final一致）；Android另Chrome/Web通过，两run Python本轮各309。Windows因source SDK tracked PNG修改拒绝，绝对路径261字符只是原因嫌疑，实际工作文件hash/diff尚缺；不忽略/重置。Build另6个既有Release前置失败，非native构建通过。证据/tmp/mk-routing-ci04-20261012/summary.json，旧f750向量成功不重标f179。
 
 CORE-F01/R01a/R01b/R01c已实现并分别验证；R01c已推送91521544。R01b完整输出请求契约不证明实际YUV carrier。R01d普通decoder采样已修复两项critical阻断并完成独立复审：缺失track codec等待/拒绝，consumer不跳过MIME证据；ordinary→native内部重开成功清空旧普通观察。11文件255项与全包strict通过，两门删除负例实际红灯后恢复。当前检查点待提交，源码/hash/日志见docs/plans/core-r01d-handoff-20261012.json；此前187/214绿灯未覆盖问题的历史保留。review预算不包含open admission，Dart timeout不能抢占同步native FFI。生产普通open的entry/epoch在Player锁内捕获，FILE_LOADED在锁外等待；当前scalar decoder/frame/MIME/config A/B一致性与代次检查、embed拒CPU已接通，失败不虚构排除依赖。完整copy/software catalog与auto/prefer/require有效配置闭环仍开放。
