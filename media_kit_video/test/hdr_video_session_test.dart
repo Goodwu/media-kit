@@ -340,11 +340,9 @@ void main() {
     await session.dispose();
   });
 
-  test('hwdec mismatch excludes the stage and reopens in place', () async {
+  test('hwdec mismatch cannot reuse the failed stage through SDR fallback', () async {
     final backend = FakeBackend()
-      ..factsForOpen.add(facts(gamma: 'pq', primaries: 'bt.2020', hwdec: 'no'))
-      ..factsForOpen
-          .add(facts(gamma: 'pq', primaries: 'bt.2020', hwdec: 'mediacodec'));
+      ..factsForOpen.add(facts(gamma: 'pq', primaries: 'bt.2020', hwdec: 'no'));
     final session = makeSession(
       backend: backend,
       capabilities: caps(),
@@ -352,22 +350,17 @@ void main() {
     );
     final events = <HdrOutputEvent>[];
     session.events.listen(events.add);
-
     await session.open(media, hint: hdr10);
     await pumpEventQueue();
-
-    expect(backend.opened, hasLength(2));
-    expect(backend.opened.first.route.strategy, HdrStrategy.baseLayerDirect);
-    expect(backend.opened.last.route.strategy, HdrStrategy.toneMapSdr);
-    expect(backend.opened.last.start, const Duration(seconds: 3));
-    final report = session.report.value;
-    expect(report.verified, isTrue);
-    expect(report.degradeReason, HdrDegradeReason.hwdecMismatch);
-    expect(report.hwdecCurrent, 'mediacodec');
-    expect(
-      events.whereType<HdrDegradedEvent>().single.reason,
-      HdrDegradeReason.hwdecMismatch,
-    );
+    expect(backend.opened, hasLength(1));
+    expect(backend.opened.single.route.strategy, HdrStrategy.baseLayerDirect);
+    expect(session.report.value.verified, isFalse);
+    expect(session.report.value.degradeReason, HdrDegradeReason.hwdecMismatch);
+    expect(events.whereType<HdrRouteAppliedEvent>(), isEmpty);
+    expect(events.whereType<HdrErrorEvent>().single.reason,
+        HdrDegradeReason.hwdecMismatch);
+    expect(backend.calls, contains('stop'));
+    expect(backend.calls, contains('reset'));
     await session.dispose();
   });
 
@@ -396,13 +389,12 @@ void main() {
     await session.dispose();
   });
 
-  test('API 24 copy mismatch excludes copy dependency and reopens at most once',
+  test('API 24 copy mismatch blocks rather than retrying the same failed copy path',
       () async {
     final backend = FakeBackend()
-      ..factsForOpen.addAll(const <HdrReviewFacts>[
-        HdrReviewFacts(hwdecCurrent: 'no', path: 'test://media'),
-        HdrReviewFacts(hwdecCurrent: 'no', path: 'test://media'),
-      ]);
+      ..factsForOpen.add(const HdrReviewFacts(
+        hwdecCurrent: 'no', path: 'test://media',
+      ));
     final session = makeSession(
       backend: backend,
       capabilities: caps(sdkInt: 24),
@@ -410,24 +402,17 @@ void main() {
     );
     final events = <HdrOutputEvent>[];
     session.events.listen(events.add);
-
     await session.open(media, hint: sdr);
     await pumpEventQueue();
-
-    expect(backend.opened, hasLength(2));
-    expect(backend.opened.first.route.hwdec, 'mediacodec-copy');
-    expect(backend.opened.last.route.hwdec, 'mediacodec-copy');
-    expect(backend.opened.last.start, const Duration(seconds: 3));
-    expect(
-      backend.preparedPlans.last.excluded,
-      containsPair(
-        HdrRouteDependency.hwdecMediacodecCopy,
-        HdrDegradeReason.hwdecMismatch,
-      ),
-    );
+    expect(backend.opened, hasLength(1));
+    expect(backend.opened.single.route.hwdec, 'mediacodec-copy');
+    expect(session.report.value.verified, isFalse);
     expect(session.report.value.degradeReason, HdrDegradeReason.hwdecMismatch);
-    expect(session.report.value.diagnostic, contains('mismatch persisted'));
-    expect(events.whereType<HdrDegradedEvent>(), hasLength(1));
+    expect(events.whereType<HdrRouteAppliedEvent>(), isEmpty);
+    expect(events.whereType<HdrErrorEvent>().single.reason,
+        HdrDegradeReason.hwdecMismatch);
+    expect(backend.calls, contains('stop'));
+    expect(backend.calls, contains('reset'));
     await session.dispose();
   });
 

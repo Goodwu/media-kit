@@ -124,10 +124,9 @@ class HdrRoutingPolicy {
 /// does not depend on an excluded pipeline stage. Skipped entries stay in
 /// the candidate list with their typed reason. When nothing survives, the
 /// safety net (tone-mapped SDR, SDR direct for SDR sources) keeps playback
-/// going — requirement section 2 forbids stopping playback — except a P5
-/// source without the dovi rescale pipeline, which reports
-/// [HdrDegradeReason.p5PipelineUnavailable] and `playable == false`
-/// (R3.3: never output a wrongly colored picture).
+/// going only when it satisfies the source and execution constraints too.
+/// Known failures retain their original reason. A P5 source without the
+/// rescale pipeline remains blocked (never output a wrongly colored picture).
 ///
 /// {@endtemplate}
 class HdrRoutePlanner {
@@ -185,11 +184,9 @@ class HdrRoutePlanner {
       }
     }
     if (selected == null) {
-      // Safety net: playback continues tone-mapped (SDR direct for SDR
-      // sources). It bypasses the maturity gate and the excluded stages on
-      // purpose — the requirement mandates continuing playback — so its
-      // only possible failure is why playback will not start at all (a P5
-      // source without the rescale pipeline, R3.3).
+      // The SDR fallback may relax maturity, never a known execution failure.
+      // No usable remaining implementation means blocked playback, not a
+      // retry of the same failed decoder/import path under a different name.
       final HdrCandidate candidate = _evaluate(
         fallback,
         source: source,
@@ -198,7 +195,6 @@ class HdrRoutePlanner {
         policy: policy,
         excluded: excluded,
         gateMaturity: false,
-        honorExcluded: false,
       );
       selected = candidate;
       candidates.add(candidate);
@@ -248,7 +244,6 @@ class HdrRoutePlanner {
     required HdrRoutingPolicy policy,
     required Map<String, HdrDegradeReason> excluded,
     bool gateMaturity = true,
-    bool honorExcluded = true,
   }) {
     final HdrStrategyMaturity maturity = HdrStrategyMaturityTable.of(
       sourceClass,
@@ -301,7 +296,7 @@ class HdrRoutePlanner {
     // not the carried failure reason — the deeper cause. The selected
     // strategy is unaffected either way.
     for (final MapEntry<String, HdrDegradeReason> entry in excluded.entries) {
-      if (honorExcluded && route.dependencies.contains(entry.key)) {
+      if (route.dependencies.contains(entry.key)) {
         return HdrCandidate(
           strategy: strategy,
           maturity: maturity,
