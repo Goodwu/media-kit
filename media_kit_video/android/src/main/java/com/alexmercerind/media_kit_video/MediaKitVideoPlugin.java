@@ -10,6 +10,12 @@ package com.alexmercerind.media_kit_video;
 import androidx.annotation.NonNull;
 
 import android.content.Context;
+import android.app.Activity;
+import android.view.View;
+import android.view.ViewGroup;
+import io.flutter.embedding.android.FlutterView;
+import io.flutter.embedding.engine.plugins.activity.ActivityAware;
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
 import android.hardware.display.DisplayManager;
 import android.os.Build;
 import android.os.Handler;
@@ -31,7 +37,7 @@ import com.alexmercerind.media_kit_video.platformview.PlatformVideoViewFactory;
 /**
  * MediaKitVideoPlugin
  */
-public class MediaKitVideoPlugin implements FlutterPlugin, MethodCallHandler {
+public class MediaKitVideoPlugin implements FlutterPlugin, MethodCallHandler, ActivityAware {
     /**
      * Pins the native libraries for the process lifetime.
      *
@@ -62,6 +68,8 @@ public class MediaKitVideoPlugin implements FlutterPlugin, MethodCallHandler {
     }
 
     private MethodChannel channel;
+    private Activity activity;
+    private BinaryMessenger engineMessenger;
     private VideoOutputManager videoOutputManager;
     private Context applicationContext;
     private PlatformVideoViewFactory platformVideoViewFactory;
@@ -78,6 +86,7 @@ public class MediaKitVideoPlugin implements FlutterPlugin, MethodCallHandler {
         final int probeResult = MpvPipelineProbe.probeOnce();
         android.util.Log.i("MediaKitVideoPlugin", "probeOnce: result=" + probeResult
                 + " elapsedMs=" + (android.os.SystemClock.uptimeMillis() - probeBegin));
+        engineMessenger = flutterPluginBinding.getBinaryMessenger();
         applicationContext = flutterPluginBinding.getApplicationContext();
         channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "com.alexmercerind/media_kit_video");
         channel.setMethodCallHandler(this);
@@ -188,6 +197,20 @@ public class MediaKitVideoPlugin implements FlutterPlugin, MethodCallHandler {
                 result.success(platformVideoViewFactory.applyDataSpaceReport(handle, transfer));
                 break;
             }
+            case "VideoRouteCapabilities.Get": {
+                try {
+                    if (!(call.arguments instanceof java.util.Map)) {
+                        throw new IllegalArgumentException("Expected capability query map");
+                    }
+                    result.success(VideoRouteCapabilities.get(applicationContext,
+                            applicationDisplay(), (java.util.Map<?, ?>) call.arguments));
+                } catch (IllegalArgumentException e) {
+                    result.error("invalid_source_query", e.getMessage(), null);
+                } catch (RuntimeException | LinkageError e) {
+                    result.error("capability_query_failed", e.getClass().getSimpleName(), null);
+                }
+                break;
+            }
             case "HdrCapabilities.Get": {
                 result.success(HdrCapabilities.get(applicationContext));
                 break;
@@ -282,6 +305,32 @@ public class MediaKitVideoPlugin implements FlutterPlugin, MethodCallHandler {
         }
     }
 
+    // Resolve only this engine's attached FlutterView; two matching views
+    // are ambiguous. Android View IDs and Dart FlutterView IDs are unrelated.
+    private Display applicationDisplay() {
+        if (activity == null || engineMessenger == null) return null;
+        java.util.List<FlutterView> matches = new java.util.ArrayList<>();
+        collectFlutterViews(activity.getWindow().getDecorView(), matches);
+        return matches.size() == 1 ? matches.get(0).getDisplay() : null;
+    }
+
+    private void collectFlutterViews(View view, java.util.List<FlutterView> matches) {
+        if (view instanceof FlutterView) {
+            FlutterView flutterView = (FlutterView) view;
+            if (flutterView.isAttachedToFlutterEngine() &&
+                    flutterView.getBinaryMessenger() == engineMessenger) matches.add(flutterView);
+        }
+        if (view instanceof ViewGroup) {
+            ViewGroup group = (ViewGroup) view;
+            for (int i = 0; i < group.getChildCount(); i++) collectFlutterViews(group.getChildAt(i), matches);
+        }
+    }
+
+    @Override public void onAttachedToActivity(@NonNull ActivityPluginBinding binding) { activity = binding.getActivity(); }
+    @Override public void onReattachedToActivityForConfigChanges(@NonNull ActivityPluginBinding binding) { activity = binding.getActivity(); }
+    @Override public void onDetachedFromActivityForConfigChanges() { activity = null; }
+    @Override public void onDetachedFromActivity() { activity = null; }
+
     @Override
     public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
         // Owner-broker teardown: hosts may destroy the FlutterEngine without
@@ -303,6 +352,8 @@ public class MediaKitVideoPlugin implements FlutterPlugin, MethodCallHandler {
         platformVideoViewFactory.onEngineDetached();
         channel.setMethodCallHandler(null);
         applicationContext = null;
+        activity = null;
+        engineMessenger = null;
         platformVideoViewFactory = null;
     }
 
