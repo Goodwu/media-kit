@@ -32,9 +32,7 @@ import '../common/android_native_dv_session_negative.dart';
 import '../common/android_playback_performance_diagnostic.dart';
 import '../common/android_native_dv_session_foreign_ownership.dart';
 import '../common/android_hdr_session_diagnostic.dart';
-
 import 'package:media_kit_video/src/video_controller/android_video_controller/android_video_controller.dart';
-
 import '../common/globals.dart';
 import '../common/sources/sources.dart';
 import '../common/widgets.dart';
@@ -115,22 +113,20 @@ class AndroidNativeDvN4PageLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SafeArea(
-    child: Column(
-      children: [
-        Expanded(flex: 3, child: video),
-        Expanded(
-          flex: 2,
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: diagnostics,
+        child: Column(children: [
+          Expanded(flex: 3, child: video),
+          Expanded(
+            flex: 2,
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: diagnostics,
+              ),
             ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            children: [
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(children: [
               Expanded(
                 child: Semantics(
                   label: 'native-dv-n4:run-once',
@@ -152,12 +148,10 @@ class AndroidNativeDvN4PageLayout extends StatelessWidget {
                   ),
                 ),
               ),
-            ],
+            ]),
           ),
-        ),
-      ],
-    ),
-  );
+        ]),
+      );
 }
 
 /// The page transport binds actual callbacks and invokes only same-Player raw
@@ -275,21 +269,23 @@ class AndroidNativeDvN4PageTransport {
     required HdrVideoSession callbackSession,
     required String sessionInstanceId,
     required HdrBackendCallDiagnostic<HdrOpenPlan> diagnostic,
-  }) => run.onBackendCallDiagnostic(
-    callbackSession: callbackSession,
-    sessionInstanceId: sessionInstanceId,
-    diagnostic: diagnostic,
-  );
+  }) =>
+      run.onBackendCallDiagnostic(
+        callbackSession: callbackSession,
+        sessionInstanceId: sessionInstanceId,
+        diagnostic: diagnostic,
+      );
 
   void onNativeOption({
     required HdrVideoSession callbackSession,
     required String sessionInstanceId,
     required HdrNativeDvOptionDiagnostic diagnostic,
-  }) => run.onNativeOptionDiagnostic(
-    callbackSession: callbackSession,
-    sessionInstanceId: sessionInstanceId,
-    diagnostic: diagnostic,
-  );
+  }) =>
+      run.onNativeOptionDiagnostic(
+        callbackSession: callbackSession,
+        sessionInstanceId: sessionInstanceId,
+        diagnostic: diagnostic,
+      );
 
   void onSessionEvent({
     required HdrVideoSession callbackSession,
@@ -340,8 +336,7 @@ class AndroidNativeDvN4PageTransport {
   Future<AndroidNativeDvForeignOwnershipResult> execute() {
     if (!ready) {
       return Future.error(
-        StateError('N4 requires actual same-session accepted P5 route'),
-      );
+          StateError('N4 requires actual same-session accepted P5 route'));
     }
     return _execution ??= run.execute(
       rawPlayerOpen: (actualPlayer, sameSource) =>
@@ -382,11 +377,11 @@ class AndroidNativeDvN4PageCloseError {
   final StackTrace stackTrace;
 
   Map<String, Object?> toJson() => <String, Object?>{
-    'phase': phase,
-    'errorType': error.runtimeType.toString(),
-    'error': error.toString(),
-    'stack': stackTrace.toString(),
-  };
+        'phase': phase,
+        'errorType': error.runtimeType.toString(),
+        'error': error.toString(),
+        'stack': stackTrace.toString(),
+      };
 }
 
 class AndroidNativeDvN4PageCloseSnapshot {
@@ -432,17 +427,15 @@ class AndroidNativeDvN4PageCloseSequence {
     required Future<void> Function() closeHelper,
     required Future<void> Function() cancelEvents,
     required Future<List<Map<String, Object?>>> Function() drain,
-    required bool Function(
-      AndroidNativeDvForeignOwnershipResult? result,
-      List<Map<String, Object?>> journal,
-    )
-    playerTerminationSucceeded,
+    required bool Function(AndroidNativeDvForeignOwnershipResult? result,
+            List<Map<String, Object?>> journal)
+        playerTerminationSucceeded,
     required Object? Function(AndroidNativeDvForeignOwnershipResult? result)
-    terminationError,
+        terminationError,
     required StackTrace? Function(AndroidNativeDvForeignOwnershipResult? result)
-    terminationStack,
+        terminationStack,
     required Future<void> Function(AndroidNativeDvN4PageCloseSnapshot snapshot)
-    persistFinalReport,
+        persistFinalReport,
     required void Function() closeAdmission,
   }) {
     _admissionClosed = true;
@@ -470,17 +463,15 @@ class AndroidNativeDvN4PageCloseSequence {
     required Future<void> Function() closeHelper,
     required Future<void> Function() cancelEvents,
     required Future<List<Map<String, Object?>>> Function() drain,
-    required bool Function(
-      AndroidNativeDvForeignOwnershipResult? result,
-      List<Map<String, Object?>> journal,
-    )
-    playerTerminationSucceeded,
+    required bool Function(AndroidNativeDvForeignOwnershipResult? result,
+            List<Map<String, Object?>> journal)
+        playerTerminationSucceeded,
     required Object? Function(AndroidNativeDvForeignOwnershipResult? result)
-    terminationError,
+        terminationError,
     required StackTrace? Function(AndroidNativeDvForeignOwnershipResult? result)
-    terminationStack,
+        terminationStack,
     required Future<void> Function(AndroidNativeDvN4PageCloseSnapshot snapshot)
-    persistFinalReport,
+        persistFinalReport,
   }) async {
     final errors = <AndroidNativeDvN4PageCloseError>[];
 
@@ -488,13 +479,11 @@ class AndroidNativeDvN4PageCloseSequence {
       try {
         await action();
       } catch (error, stack) {
-        errors.add(
-          AndroidNativeDvN4PageCloseError(
-            phase: phase,
-            error: error,
-            stackTrace: stack,
-          ),
-        );
+        errors.add(AndroidNativeDvN4PageCloseError(
+          phase: phase,
+          error: error,
+          stackTrace: stack,
+        ));
       }
     }
 
@@ -508,20 +497,16 @@ class AndroidNativeDvN4PageCloseSequence {
     try {
       journal = await drain();
     } catch (error, stack) {
-      errors.add(
-        AndroidNativeDvN4PageCloseError(
-          phase: 'journal-drain',
-          error: error,
-          stackTrace: stack,
-        ),
-      );
+      errors.add(AndroidNativeDvN4PageCloseError(
+        phase: 'journal-drain',
+        error: error,
+        stackTrace: stack,
+      ));
     }
 
     final executionResult = result();
-    final terminationSucceeded = playerTerminationSucceeded(
-      executionResult,
-      journal,
-    );
+    final terminationSucceeded =
+        playerTerminationSucceeded(executionResult, journal);
     final snapshot = AndroidNativeDvN4PageCloseSnapshot(
       result: executionResult,
       journal: List.unmodifiable(journal),
@@ -534,8 +519,7 @@ class AndroidNativeDvN4PageCloseSequence {
     await persistFinalReport(snapshot);
 
     if (!terminationSucceeded) {
-      final original =
-          terminationError(executionResult) ??
+      final original = terminationError(executionResult) ??
           executionResult?.playerDisposeError;
       if (original != null) {
         Error.throwWithStackTrace(
@@ -546,18 +530,18 @@ class AndroidNativeDvN4PageCloseSequence {
         );
       }
       throw StateError(
-        'N4 Player termination has no explicit successful evidence',
-      );
+          'N4 Player termination has no explicit successful evidence');
     }
   }
 
   Future<void> exit({
     required Future<void> Function() closeAndPersist,
     required Future<void> Function() pop,
-  }) => _exitFuture ??= () async {
-    await closeAndPersist();
-    await pop();
-  }();
+  }) =>
+      _exitFuture ??= () async {
+        await closeAndPersist();
+        await pop();
+      }();
 }
 
 Future<File> writeAndroidNativeDvN4ExternalReport({
@@ -570,11 +554,9 @@ Future<File> writeAndroidNativeDvN4ExternalReport({
     throw StateError('App external files directory unavailable');
   }
   final reportDirectory = Directory(
-    '${externalRoot.path}${Platform.pathSeparator}media-kit-hdr-diagnostic',
-  );
+      '${externalRoot.path}${Platform.pathSeparator}media-kit-hdr-diagnostic');
   await reportDirectory.create(recursive: true);
-  final finalPath =
-      '${reportDirectory.path}${Platform.pathSeparator}'
+  final finalPath = '${reportDirectory.path}${Platform.pathSeparator}'
       'android-native-dv-n4-$runId.json';
   final temporaryFile = File('$finalPath.tmp');
   await temporaryFile.writeAsString(jsonEncode(payload), flush: true);
@@ -590,11 +572,8 @@ class AndroidNativeDvSessionPageExitController {
   bool get actionPending => _actionFuture != null;
   bool get exitRequested => _exitFuture != null;
 
-  bool actionEnabled(
-    AndroidNativeDvSessionLifecycleRun run,
-    String actionId, {
-    required bool terminationAttempted,
-  }) {
+  bool actionEnabled(AndroidNativeDvSessionLifecycleRun run, String actionId,
+      {required bool terminationAttempted}) {
     if (exitRequested ||
         actionPending ||
         run.busy ||
@@ -617,16 +596,11 @@ class AndroidNativeDvSessionPageExitController {
     // Establish ownership before the callback can synchronously change state.
     final attempt = Future<void>(action);
     _actionFuture = attempt;
-    unawaited(
-      attempt.then<void>(
-        (_) {
-          if (identical(_actionFuture, attempt)) _actionFuture = null;
-        },
-        onError: (Object _, StackTrace __) {
-          if (identical(_actionFuture, attempt)) _actionFuture = null;
-        },
-      ),
-    );
+    unawaited(attempt.then<void>((_) {
+      if (identical(_actionFuture, attempt)) _actionFuture = null;
+    }, onError: (Object _, StackTrace __) {
+      if (identical(_actionFuture, attempt)) _actionFuture = null;
+    }));
     return attempt;
   }
 
@@ -695,19 +669,14 @@ class AndroidNativeDvSessionPageExitController {
     // this attempt latched. The terminated page retains its error; repeated
     // Back never re-disposes the Player or treats run.closed as write success.
     _exitFuture = attempt;
-    unawaited(
-      attempt.then<void>(
-        (_) {},
-        onError: (Object _, StackTrace __) {
-          // Only a pre-termination refusal can be retried after safe settlement.
-          if (!terminationAttempted() &&
-              getRun()?.closed != true &&
-              identical(_exitFuture, attempt)) {
-            _exitFuture = null;
-          }
-        },
-      ),
-    );
+    unawaited(attempt.then<void>((_) {}, onError: (Object _, StackTrace __) {
+      // Only a pre-termination refusal can be retried after safe settlement.
+      if (!terminationAttempted() &&
+          getRun()?.closed != true &&
+          identical(_exitFuture, attempt)) {
+        _exitFuture = null;
+      }
+    }));
     return attempt;
   }
 }
@@ -743,8 +712,7 @@ class SinglePlayerSingleVideoScreen extends StatefulWidget {
 }
 
 class _SinglePlayerSingleVideoScreenState
-    extends State<SinglePlayerSingleVideoScreen>
-    with WidgetsBindingObserver {
+    extends State<SinglePlayerSingleVideoScreen> with WidgetsBindingObserver {
   static const _androidNativeDvReleaseDiagnostic = bool.fromEnvironment(
     'MEDIA_KIT_ANDROID_NATIVE_DV_RELEASE_DIAGNOSTIC',
   );
@@ -754,11 +722,13 @@ class _SinglePlayerSingleVideoScreenState
   );
   static const _androidNativeDvReleaseDiagnosticIntervalSeconds =
       int.fromEnvironment(
-        'MEDIA_KIT_ANDROID_NATIVE_DV_DIAGNOSTIC_INTERVAL_SECONDS',
-        defaultValue: 5,
-      );
+    'MEDIA_KIT_ANDROID_NATIVE_DV_DIAGNOSTIC_INTERVAL_SECONDS',
+    defaultValue: 5,
+  );
   static const _androidNativeDvReleaseDiagnosticIdentity =
-      String.fromEnvironment('MEDIA_KIT_ANDROID_NATIVE_DV_DIAGNOSTIC_IDENTITY');
+      String.fromEnvironment(
+    'MEDIA_KIT_ANDROID_NATIVE_DV_DIAGNOSTIC_IDENTITY',
+  );
   static const _androidNativeDvSessionDiagnostic = bool.fromEnvironment(
     'MEDIA_KIT_ANDROID_NATIVE_DV_SESSION_DIAGNOSTIC',
   );
@@ -871,10 +841,8 @@ class _SinglePlayerSingleVideoScreenState
     'MEDIA_KIT_ANDROID_LG_VISUAL278_EXPERIMENT',
   );
   static const _convertExperiment = AndroidHdrConvertExperiment(
-    String.fromEnvironment(
-      'MEDIA_KIT_ANDROID_CONVERT_SURFACE_TRANSFER',
-      defaultValue: 'pq',
-    ),
+    String.fromEnvironment('MEDIA_KIT_ANDROID_CONVERT_SURFACE_TRANSFER',
+        defaultValue: 'pq'),
     _androidMpvOutputLevels,
   );
   // WP-C SurfaceTexture PoC (plan §7): independent experiment class with the
@@ -882,10 +850,8 @@ class _SinglePlayerSingleVideoScreenState
   // experimental surfacetexture importer. Define off keeps every call site
   // on the legacy convert experiment unchanged.
   static const _surfaceTextureExperiment = AndroidSurfaceTextureExperiment(
-    String.fromEnvironment(
-      'MEDIA_KIT_ANDROID_CONVERT_SURFACE_TRANSFER',
-      defaultValue: 'pq',
-    ),
+    String.fromEnvironment('MEDIA_KIT_ANDROID_CONVERT_SURFACE_TRANSFER',
+        defaultValue: 'pq'),
     _androidMpvOutputLevels,
   );
   static const _androidMpvVoDebug = bool.fromEnvironment(
@@ -914,28 +880,24 @@ class _SinglePlayerSingleVideoScreenState
   );
   // HLG OOTF experiment: libplacebo derives the HLG scene-to-display
   // transform from the target peak (nit). Empty keeps mpv's auto.
-  static const _androidMpvTargetPeak = String.fromEnvironment(
-    'MEDIA_KIT_ANDROID_MPV_TARGET_PEAK',
-  );
+  static const _androidMpvTargetPeak =
+      String.fromEnvironment('MEDIA_KIT_ANDROID_MPV_TARGET_PEAK');
   // GPU render resolution cap for the convert route: the API 24 LG renders
   // 4K PQ at the edge of its budget; capping the output width (still above
   // the 1440 panel) restores realtime with no visible loss.
   static const _androidOutputMaxWidth = int.fromEnvironment(
-    'MEDIA_KIT_ANDROID_OUTPUT_MAX_WIDTH',
-    defaultValue: 0,
-  );
+      'MEDIA_KIT_ANDROID_OUTPUT_MAX_WIDTH',
+      defaultValue: 0);
   // Full-range experiment: force the frame range to full before the GPU
   // conversion so the full-range dataspace variant matches the content.
-  static const _androidVfFullRange = bool.fromEnvironment(
-    'MEDIA_KIT_ANDROID_VF_FULL_RANGE',
-  );
+  static const _androidVfFullRange =
+      bool.fromEnvironment('MEDIA_KIT_ANDROID_VF_FULL_RANGE');
   // Force the renderer's output encoding range (mpv video-output-levels).
   // Default auto adopts the swapchain value (limited for 10-bit HDR on this
   // Android EGL path); 'full' expands in the existing final pass at ~zero
   // GPU cost so a full-range dataspace tag can be used with matching content.
-  static const _androidMpvOutputLevels = String.fromEnvironment(
-    'MEDIA_KIT_ANDROID_MPV_OUTPUT_LEVELS',
-  );
+  static const _androidMpvOutputLevels =
+      String.fromEnvironment('MEDIA_KIT_ANDROID_MPV_OUTPUT_LEVELS');
   static const _androidNativeDvSessionLifecycleActions = bool.fromEnvironment(
     'MEDIA_KIT_ANDROID_NATIVE_DV_SESSION_LIFECYCLE_ACTIONS',
   );
@@ -944,13 +906,11 @@ class _SinglePlayerSingleVideoScreenState
     defaultValue: androidNativeDvSessionLifecycleMaxSeconds,
   );
   static const _androidHdr10SessionDiagnostic = bool.fromEnvironment(
-    'MEDIA_KIT_ANDROID_HDR10_SESSION_DIAGNOSTIC',
-    defaultValue: false,
-  );
+      'MEDIA_KIT_ANDROID_HDR10_SESSION_DIAGNOSTIC',
+      defaultValue: false);
   static const _androidHdr10DiagnosticIdentity = String.fromEnvironment(
-    'MEDIA_KIT_ANDROID_HDR10_DIAGNOSTIC_IDENTITY',
-    defaultValue: '',
-  );
+      'MEDIA_KIT_ANDROID_HDR10_DIAGNOSTIC_IDENTITY',
+      defaultValue: '');
   AndroidHdrSessionDiagnostic? _hdr10Journal;
   StreamSubscription<PlayerLog>? _hdr10CodecLogSubscription;
   String? _hdr10BuildError;
@@ -1097,8 +1057,7 @@ class _SinglePlayerSingleVideoScreenState
   // hint and is classified from decoder facts by the session.
   static const _sdrControlSource = '/data/local/tmp/media-kit-sdr-control.mp4';
   static final RegExp _namedFixturePattern = RegExp(
-    r'^/data/local/tmp/media-kit-(hdr10|hlg|p84|p5)-[a-z0-9][a-z0-9._-]*\.mp4$',
-  );
+      r'^/data/local/tmp/media-kit-(hdr10|hlg|p84|p5)-[a-z0-9][a-z0-9._-]*\.mp4$');
 
   /// The HDR session that owns the transaction path (migrated to
   /// HdrVideoSession in S10). Created in initState on Android.
@@ -1117,7 +1076,7 @@ class _SinglePlayerSingleVideoScreenState
   int? _hdrResumeOpenSerial;
   AndroidNativeDvReleaseDiagnostic? _nativeDvReleaseDiagnostic;
   final AndroidNativeDvDiagnosticPageAdmission<PlatformVideoController>
-  _nativeDvPageAdmission =
+      _nativeDvPageAdmission =
       AndroidNativeDvDiagnosticPageAdmission<PlatformVideoController>();
   Future<void>? _nativeDvPageStartupFuture;
   String? _nativeDvReleaseDiagnosticBuildError;
@@ -1178,91 +1137,89 @@ class _SinglePlayerSingleVideoScreenState
       };
 
   String? _validateHdr10DiagnosticBuild() => validateAndroidHdr10Diagnostic(
-    android: Platform.isAndroid,
-    transaction: _androidHdrTransaction,
-    sources: sources,
-    label: _androidHdr10DiagnosticIdentity,
-    conflictingFlags:
-        _androidNativeDvSessionDiagnostic ||
-        _androidNativeDvSessionNegativeN1 ||
-        _androidNativeDvSessionForeignOwnershipN4 ||
-        _androidNativeDvSessionLifecycleActions ||
-        _androidNativeDvReleaseDiagnostic ||
-        _androidPlaybackPerformance ||
-        _androidHdrSimulateNoHlg ||
-        _androidHdrNoHint ||
-        _androidHdrWrongHint.isNotEmpty ||
-        _androidHdrPolicyExperimental ||
-        _androidHdrGateOpen ||
-        _androidHdrDiagnostics ||
-        _androidAutoSecondSource.isNotEmpty ||
-        _androidAutoSecondSourceAtSeconds > 0 ||
-        _androidAutoSdrAfterP5Seconds > 0 ||
-        _androidHdrPreferenceSwapAtSeconds > 0 ||
-        _androidHdrPolicySwapAtSeconds > 0 ||
-        _androidHdrAutoResumeProbe ||
-        _androidHdrLifecyclePositionProbe ||
-        _androidHdrPauseAtMediaSeconds >= 0 ||
-        _androidHdrAutoPauseProbeSeconds > 0 ||
-        _androidPostBindSeekProbe ||
-        _androidPostBindReopenProbe ||
-        _androidPreDestroyVidStop ||
-        _androidAutoSeekAtSeconds >= 0 ||
-        _androidAutoReopenAfterSeek ||
-        _androidHotSwitchTarget.isNotEmpty ||
-        _androidHotSwitchAtSeconds >= 0 ||
-        _androidEngineDestroyAtSeconds >= 0 ||
-        _androidOutputFailureAtSeconds >= 0 ||
-        _androidDualPlayerView ||
-        _androidDualViewLifecycleProbe ||
-        _androidOpenPhaseTrace ||
-        _androidDirectOpenTrace ||
-        _androidVerboseLog ||
-        _androidCodecTraceLog ||
-        _androidVulkanProbe ||
-        _androidPerfProbe ||
-        _androidNoMediaProbe ||
-        _androidSameSurfaceRebindProbe ||
-        _androidTextureConsumerProbe ||
-        _androidFlutterRepaintProbe ||
-        _androidFrameSchedulerProbe ||
-        _androidP5PlatformSdrDiagnostic ||
-        _androidP5PrestopFullscreen ||
-        _androidP5PrestopVidFullscreen ||
-        _androidP5PrestopWidFullscreen ||
-        _androidP5InplaceFullscreen ||
-        _androidP5ScopeFullscreen ||
-        _androidP5AutoFullscreenAtSeconds >= 0 ||
-        _androidP5CounterProbe ||
-        _androidTextureCopyDiagnostic ||
-        _androidForceP84PqFallback ||
-        _androidGpuPlatformHdr ||
-        _androidP5CodecProbePath.isNotEmpty ||
-        _androidP5CodecSurfaceProbe ||
-        _androidP5CodecCpuReadProbe ||
-        _androidP5CodecGpuImportProbe ||
-        _androidP5CodecNativeReaderProbe ||
-        _androidP5CodecDeferredAcquireProbe ||
-        _androidP5CodecHoldPreviousImageProbe ||
-        _androidP84BaseLayerProbe ||
-        _androidRecoverySources.isNotEmpty ||
-        _androidOpenOnTap ||
-        _androidTapFullscreenBeforeOpen ||
-        _androidPreopenFullscreen ||
-        _androidPreopenFirstFrameProbe ||
-        _androidPlayingStartSeconds.isNotEmpty ||
-        _androidVideoTimingOffset.isNotEmpty ||
-        _androidScale.isNotEmpty ||
-        _androidDscale.isNotEmpty ||
-        _androidCscale.isNotEmpty ||
-        _androidLavcThreads.isNotEmpty ||
-        _androidVoSummaryStopSeconds > 0 ||
-        _androidLoopSource ||
-        _autoToneMapping.isNotEmpty ||
-        _autoTexture ||
-        _autoSdr ||
-        _autoStartSeconds.isNotEmpty,
-  );
+      android: Platform.isAndroid,
+      transaction: _androidHdrTransaction,
+      sources: sources,
+      label: _androidHdr10DiagnosticIdentity,
+      conflictingFlags: _androidNativeDvSessionDiagnostic ||
+          _androidNativeDvSessionNegativeN1 ||
+          _androidNativeDvSessionForeignOwnershipN4 ||
+          _androidNativeDvSessionLifecycleActions ||
+          _androidNativeDvReleaseDiagnostic ||
+          _androidPlaybackPerformance ||
+          _androidHdrSimulateNoHlg ||
+          _androidHdrNoHint ||
+          _androidHdrWrongHint.isNotEmpty ||
+          _androidHdrPolicyExperimental ||
+          _androidHdrGateOpen ||
+          _androidHdrDiagnostics ||
+          _androidAutoSecondSource.isNotEmpty ||
+          _androidAutoSecondSourceAtSeconds > 0 ||
+          _androidAutoSdrAfterP5Seconds > 0 ||
+          _androidHdrPreferenceSwapAtSeconds > 0 ||
+          _androidHdrPolicySwapAtSeconds > 0 ||
+          _androidHdrAutoResumeProbe ||
+          _androidHdrLifecyclePositionProbe ||
+          _androidHdrPauseAtMediaSeconds >= 0 ||
+          _androidHdrAutoPauseProbeSeconds > 0 ||
+          _androidPostBindSeekProbe ||
+          _androidPostBindReopenProbe ||
+          _androidPreDestroyVidStop ||
+          _androidAutoSeekAtSeconds >= 0 ||
+          _androidAutoReopenAfterSeek ||
+          _androidHotSwitchTarget.isNotEmpty ||
+          _androidHotSwitchAtSeconds >= 0 ||
+          _androidEngineDestroyAtSeconds >= 0 ||
+          _androidOutputFailureAtSeconds >= 0 ||
+          _androidDualPlayerView ||
+          _androidDualViewLifecycleProbe ||
+          _androidOpenPhaseTrace ||
+          _androidDirectOpenTrace ||
+          _androidVerboseLog ||
+          _androidCodecTraceLog ||
+          _androidVulkanProbe ||
+          _androidPerfProbe ||
+          _androidNoMediaProbe ||
+          _androidSameSurfaceRebindProbe ||
+          _androidTextureConsumerProbe ||
+          _androidFlutterRepaintProbe ||
+          _androidFrameSchedulerProbe ||
+          _androidP5PlatformSdrDiagnostic ||
+          _androidP5PrestopFullscreen ||
+          _androidP5PrestopVidFullscreen ||
+          _androidP5PrestopWidFullscreen ||
+          _androidP5InplaceFullscreen ||
+          _androidP5ScopeFullscreen ||
+          _androidP5AutoFullscreenAtSeconds >= 0 ||
+          _androidP5CounterProbe ||
+          _androidTextureCopyDiagnostic ||
+          _androidForceP84PqFallback ||
+          _androidGpuPlatformHdr ||
+          _androidP5CodecProbePath.isNotEmpty ||
+          _androidP5CodecSurfaceProbe ||
+          _androidP5CodecCpuReadProbe ||
+          _androidP5CodecGpuImportProbe ||
+          _androidP5CodecNativeReaderProbe ||
+          _androidP5CodecDeferredAcquireProbe ||
+          _androidP5CodecHoldPreviousImageProbe ||
+          _androidP84BaseLayerProbe ||
+          _androidRecoverySources.isNotEmpty ||
+          _androidOpenOnTap ||
+          _androidTapFullscreenBeforeOpen ||
+          _androidPreopenFullscreen ||
+          _androidPreopenFirstFrameProbe ||
+          _androidPlayingStartSeconds.isNotEmpty ||
+          _androidVideoTimingOffset.isNotEmpty ||
+          _androidScale.isNotEmpty ||
+          _androidDscale.isNotEmpty ||
+          _androidCscale.isNotEmpty ||
+          _androidLavcThreads.isNotEmpty ||
+          _androidVoSummaryStopSeconds > 0 ||
+          _androidLoopSource ||
+          _autoToneMapping.isNotEmpty ||
+          _autoTexture ||
+          _autoSdr ||
+          _autoStartSeconds.isNotEmpty);
 
   Future<Map<String, Object?>> _hdr10ReadIdentity() async {
     final session = _hdrSession;
@@ -1275,8 +1232,7 @@ class _SinglePlayerSingleVideoScreenState
           platform.configuration.android.usePlatformView) {
         final owner = platform.currentBoundOutputIdentity;
         output = {
-          'bound':
-              owner != null &&
+          'bound': owner != null &&
               identical(video.notifier.value, platform) &&
               identical(session?.controller.value, video) &&
               identical(video.player, platform.player),
@@ -1298,9 +1254,8 @@ class _SinglePlayerSingleVideoScreenState
       'sessionGeneration': report?.generation,
       'verified': report?.verified,
       'actual': androidHdr10RouteJson(report?.actual),
-      'source': report == null
-          ? null
-          : androidHdr10ReportJson(report)['source'],
+      'source':
+          report == null ? null : androidHdr10ReportJson(report)['source'],
       'sourceOrigin': report?.sourceOrigin?.name,
       'boundOutput': output,
       'playing': player.state.playing,
@@ -1314,11 +1269,8 @@ class _SinglePlayerSingleVideoScreenState
     // Wait for native initialization before using waitForInitialization:false
     // under the existing Player lock. This is an idle readiness read only.
     await player.getProperty('path');
-    journal.recordCapabilities(
-      (await VideoRouteCapabilities.query(
-        target: const VideoOutputTarget.applicationView(),
-      )).hdr,
-    );
+    journal.recordCapabilities((await VideoRouteCapabilities.query(
+        target: const VideoOutputTarget.applicationView())).hdr);
     await journal.captureBaseline();
     _createHdrSession();
     journal.recordReport(_requireHdrSession().report.value);
@@ -1331,84 +1283,79 @@ class _SinglePlayerSingleVideoScreenState
           timer.cancel();
           return;
         }
-        unawaited(
-          journal.sample().then<void>(
-            (_) {
-              if (player.state.completed) timer.cancel();
-              if (mounted) setState(() {});
-            },
-            onError: (Object error, StackTrace stack) {
-              journal.recordError(error, stack);
-              timer.cancel();
-              if (mounted) setState(() {});
-            },
-          ),
-        );
+        unawaited(journal.sample().then<void>((_) {
+          if (player.state.completed) timer.cancel();
+          if (mounted) setState(() {});
+        }, onError: (Object error, StackTrace stack) {
+          journal.recordError(error, stack);
+          timer.cancel();
+          if (mounted) setState(() {});
+        }));
       });
     }
     if (mounted) setState(() {});
   }
 
   Future<void> _closeHdr10Owned() => _hdr10CleanupFuture ??= () async {
-    _hdr10Closing = true;
-    _hdr10Timer?.cancel();
-    final startup = _hdr10Startup;
-    if (startup != null) {
-      try {
-        await startup;
-      } catch (error, stack) {
-        _hdr10Journal?.recordError(error, stack);
-      }
-    }
-    final session = _hdrSession;
-    final journal = _hdr10Journal;
-    try {
-      await _hdr10CodecLogSubscription?.cancel();
-    } catch (error, stack) {
-      journal?.recordError(error, stack);
-    } finally {
-      _hdr10CodecLogSubscription = null;
-    }
-    _autoPlayerDisposed = true;
-    if (journal == null) {
-      await player.dispose();
-      return;
-    }
-    await journal.finish(
-      disposeSession: () async {
-        if (session != null) {
-          session.report.removeListener(_onHdrReportChanged);
-          session.controller.removeListener(_onHdrControllerChanged);
-          await session.dispose();
+        _hdr10Closing = true;
+        _hdr10Timer?.cancel();
+        final startup = _hdr10Startup;
+        if (startup != null) {
+          try {
+            await startup;
+          } catch (error, stack) {
+            _hdr10Journal?.recordError(error, stack);
+          }
         }
-      },
-      sessionCleanupFacts: () {
-        final report = session?.lastDisposeReport;
-        return {
-          'sessionReportClean': report?.clean == true,
-          'controllerRetired':
-              session != null && session.controller.value == null,
-          'coordinatorError': report?.coordinatorError?.toString(),
-          'playerError': report?.playerError?.toString(),
-          'directoryError': report?.directoryError?.toString(),
-          'retainedDirectory': report?.retainedDirectory,
-        };
-      },
-      terminatePlayer: player.dispose,
-    );
-  }();
+        final session = _hdrSession;
+        final journal = _hdr10Journal;
+        try {
+          await _hdr10CodecLogSubscription?.cancel();
+        } catch (error, stack) {
+          journal?.recordError(error, stack);
+        } finally {
+          _hdr10CodecLogSubscription = null;
+        }
+        _autoPlayerDisposed = true;
+        if (journal == null) {
+          await player.dispose();
+          return;
+        }
+        await journal.finish(
+          disposeSession: () async {
+            if (session != null) {
+              session.report.removeListener(_onHdrReportChanged);
+              session.controller.removeListener(_onHdrControllerChanged);
+              await session.dispose();
+            }
+          },
+          sessionCleanupFacts: () {
+            final report = session?.lastDisposeReport;
+            return {
+              'sessionReportClean': report?.clean == true,
+              'controllerRetired':
+                  session != null && session.controller.value == null,
+              'coordinatorError': report?.coordinatorError?.toString(),
+              'playerError': report?.playerError?.toString(),
+              'directoryError': report?.directoryError?.toString(),
+              'retainedDirectory': report?.retainedDirectory,
+            };
+          },
+          terminatePlayer: player.dispose,
+        );
+      }();
 
   Future<void> _exitHdr10DiagnosticPage() => _hdr10ExitFuture ??= () async {
-    try {
-      await _closeHdr10Owned();
-      await SystemNavigator.pop();
-    } catch (error, stack) {
-      _hdr10Journal?.recordError(error, stack);
-      _hdr10BuildError ??= '$error';
-      if (mounted) setState(() {});
-      rethrow;
-    }
-  }();
+        try {
+          await _closeHdr10Owned();
+          await SystemNavigator.pop();
+        } catch (error, stack) {
+          _hdr10Journal?.recordError(error, stack);
+          _hdr10BuildError ??= '$error';
+          if (mounted) setState(() {});
+          rethrow;
+        }
+      }();
 
   String? _validateNativeDvSessionDiagnosticBuild() {
     if (_androidNativeDvSessionForeignOwnershipN4) {
@@ -1552,42 +1499,35 @@ class _SinglePlayerSingleVideoScreenState
       negative.admitOpen();
       _hdrCurrentSource = androidNativeDvSessionDiagnosticSource;
       try {
-        await session.open(
-          Media(androidNativeDvSessionDiagnosticSource),
-          hint: HdrSourceDescriptor.fromKind(HdrMediaKind.dolbyVisionP5),
-        );
+        await session.open(Media(androidNativeDvSessionDiagnosticSource),
+            hint: HdrSourceDescriptor.fromKind(HdrMediaKind.dolbyVisionP5));
         // Drain typed event delivery after the existing open has completed.
         await Future<void>.delayed(Duration.zero);
         negative.record('open-returned', {
           'generation': session.report.value.generation,
-          'actual': AndroidNativeDvN1Run.routeFields(
-            session.report.value.actual,
-          ),
+          'actual':
+              AndroidNativeDvN1Run.routeFields(session.report.value.actual),
         });
         if (_androidPlaybackPerformance) {
-          _playbackPerformance = AndroidPlaybackPerformanceDiagnostic(
-            player: player,
-          );
+          _playbackPerformance =
+              AndroidPlaybackPerformanceDiagnostic(player: player);
           _playbackPerformanceEpoch = player.fileLoadedEpoch;
           await _samplePlaybackPerformance();
-          _playbackPerformanceTimer = Timer.periodic(
-            const Duration(seconds: 2),
-            (_) {
-              if (_playbackPerformanceSample != null ||
-                  _autoPlayerDisposed ||
-                  negative.closed ||
-                  negative.elapsedMicros >=
-                      negative.durationSeconds * 1000000) {
-                return;
-              }
-              unawaited(_samplePlaybackPerformance());
-            },
-          );
+          _playbackPerformanceTimer =
+              Timer.periodic(const Duration(seconds: 2), (_) {
+            if (_playbackPerformanceSample != null ||
+                _autoPlayerDisposed ||
+                negative.closed ||
+                negative.elapsedMicros >= negative.durationSeconds * 1000000) {
+              return;
+            }
+            unawaited(_samplePlaybackPerformance());
+          });
         }
         negative.status.value =
             negative.audit()['configurationEvidenceComplete'] == true
-            ? 'N1 fallback configuration observed; visible output pending'
-            : 'N1 evidence incomplete; inspect report';
+                ? 'N1 fallback configuration observed; visible output pending'
+                : 'N1 evidence incomplete; inspect report';
       } catch (error, stack) {
         negative.record('open-failed', {}, error: error, stack: stack);
         negative.status.value = 'N1 open failed; inspect retained evidence';
@@ -1636,11 +1576,8 @@ class _SinglePlayerSingleVideoScreenState
         run.debt ||
         run.terminal) {
       for (final id in androidNativeDvSessionLifecycleActions) {
-        run.setActionEnabled(
-          id,
-          false,
-          reason: run.debt ? 'cleanup debt' : 'run is closed',
-        );
+        run.setActionEnabled(id, false,
+            reason: run.debt ? 'cleanup debt' : 'run is closed');
       }
       return;
     }
@@ -1648,60 +1585,37 @@ class _SinglePlayerSingleVideoScreenState
     final state = player.state;
     final activePlayback =
         ready && state.playing && !state.completed && !state.buffering;
-    final seekAvailable =
-        ready &&
+    final seekAvailable = ready &&
         !state.completed &&
         !state.buffering &&
         state.duration > const Duration(seconds: 93);
-    run.setActionEnabled(
-      'close-and-exit',
-      ready,
-      reason: ready ? null : 'Session startup is not accepted',
-    );
-    run.setActionEnabled(
-      'Pause10Resume',
-      activePlayback,
-      reason: activePlayback ? null : 'requires active non-EOS playback',
-    );
+    run.setActionEnabled('close-and-exit', ready,
+        reason: ready ? null : 'Session startup is not accepted');
+    run.setActionEnabled('Pause10Resume', activePlayback,
+        reason: activePlayback ? null : 'requires active non-EOS playback');
     final manualResumeAvailable = _nativeDvManualResumeState().canResume;
-    run.setActionEnabled(
-      'ManualResume',
-      manualResumeAvailable,
-      reason: manualResumeAvailable
-          ? null
-          : 'requires accepted paused non-EOS nonbuffering Session',
-    );
-    run.setActionEnabled(
-      'Seek90Then30',
-      seekAvailable,
-      reason: seekAvailable ? null : 'requires playable P5 beyond 93 seconds',
-    );
+    run.setActionEnabled('ManualResume', manualResumeAvailable,
+        reason: manualResumeAvailable
+            ? null
+            : 'requires accepted paused non-EOS nonbuffering Session');
+    run.setActionEnabled('Seek90Then30', seekAvailable,
+        reason:
+            seekAvailable ? null : 'requires playable P5 beyond 93 seconds');
     for (final id in <String>[
       'Reopen40Then10',
       'P5SDRP5',
       'RestoreSurface',
       'RecreateSession',
     ]) {
-      run.setActionEnabled(
-        id,
-        ready,
-        reason: ready ? null : 'Session startup is not accepted',
-      );
+      run.setActionEnabled(id, ready,
+          reason: ready ? null : 'Session startup is not accepted');
     }
     final fullscreenAvailable = ready && !state.completed;
-    run.setActionEnabled(
-      'FullscreenRoundTrip',
-      fullscreenAvailable,
-      reason: fullscreenAvailable ? null : 'requires non-EOS playback',
-    );
+    run.setActionEnabled('FullscreenRoundTrip', fullscreenAvailable,
+        reason: fullscreenAvailable ? null : 'requires non-EOS playback');
     if (!run.busy) {
-      run.status.value =
-          'ready · rows=${run.rows.length} · '
-          'player=${state.completed
-              ? 'EOS'
-              : state.playing
-              ? 'playing'
-              : 'paused'}';
+      run.status.value = 'ready · rows=${run.rows.length} · '
+          'player=${state.completed ? 'EOS' : state.playing ? 'playing' : 'paused'}';
     }
   }
 
@@ -1710,8 +1624,7 @@ class _SinglePlayerSingleVideoScreenState
     return AndroidNativeDvManualResumeState(
       session: _hdrSession,
       sessionInstanceId: _nativeDvSessionInstanceId,
-      startupAccepted:
-          _nativeDvSessionStartupAccepted &&
+      startupAccepted: _nativeDvSessionStartupAccepted &&
           !_autoPlayerDisposed &&
           !_nativeDvPlayerTerminationAttempted,
       playing: state.playing,
@@ -1804,11 +1717,9 @@ class _SinglePlayerSingleVideoScreenState
       );
       _hdrCurrentSource = sourcePath;
       if (mounted) setState(() {});
-      debugPrint(
-        'NATIVE_DV_LIFECYCLE_OPEN_ACCEPTED '
-        'action=$actionId request=$requestId source=$sourcePath '
-        'generation=$generation route=${applied['route']}',
-      );
+      debugPrint('NATIVE_DV_LIFECYCLE_OPEN_ACCEPTED '
+          'action=$actionId request=$requestId source=$sourcePath '
+          'generation=$generation route=${applied['route']}');
     } catch (error) {
       await run.recordStep(
         actionId: actionId,
@@ -1828,9 +1739,8 @@ class _SinglePlayerSingleVideoScreenState
   void _reportNativeDvSessionExitFailure(Object error) {
     final prior = _nativeDvSessionActionError;
     final detail = '$error';
-    _nativeDvSessionActionError = prior == null || prior == detail
-        ? detail
-        : '$prior\nExit: $detail';
+    _nativeDvSessionActionError =
+        prior == null || prior == detail ? detail : '$prior\nExit: $detail';
     if (mounted) setState(() {});
   }
 
@@ -1853,9 +1763,8 @@ class _SinglePlayerSingleVideoScreenState
       await _exitNativeDvSessionLifecyclePage();
       return;
     }
-    final attempt = _nativeDvSessionPageExit.runAction(
-      () => _runNativeDvSessionLifecycleActionOnce(actionId),
-    );
+    final attempt = _nativeDvSessionPageExit
+        .runAction(() => _runNativeDvSessionLifecycleActionOnce(actionId));
     if (mounted) setState(() {});
     try {
       await attempt;
@@ -1869,18 +1778,14 @@ class _SinglePlayerSingleVideoScreenState
     if (run == null) throw StateError('Lifecycle run is unavailable');
     // UI enablement can be stale. Reject before publishing an action, and the
     // admitted helper reads again after the ACK and step writes have settled.
-    final manualResumeExpected = actionId == 'ManualResume'
-        ? _nativeDvManualResumeState()
-        : null;
+    final manualResumeExpected =
+        actionId == 'ManualResume' ? _nativeDvManualResumeState() : null;
     if (manualResumeExpected != null && !manualResumeExpected.canResume) {
       throw StateError('Manual resume requires accepted paused playback');
     }
     final requestId = 'tap-${++_nativeDvSessionActionSequence}';
-    Future<void> step(
-      String id,
-      Future<void> Function() operation, {
-      Map<String, Object?> Function()? facts,
-    }) async {
+    Future<void> step(String id, Future<void> Function() operation,
+        {Map<String, Object?> Function()? facts}) async {
       await run.recordStep(
         actionId: actionId,
         requestId: requestId,
@@ -1962,8 +1867,7 @@ class _SinglePlayerSingleVideoScreenState
           requestId: requestId,
           operation: 'observe-seek-${target.inSeconds}s',
         );
-        final value =
-            candidate ??
+        final value = candidate ??
             await observed.future.timeout(
               remaining < const Duration(seconds: 12)
                   ? remaining
@@ -2053,68 +1957,63 @@ class _SinglePlayerSingleVideoScreenState
               break;
             case 'Reopen40Then10':
               await step(
-                'p5-at-40s',
-                () => _lifecycleOpenSource(
-                  sourcePath: androidNativeDvSessionLifecycleP5Path,
-                  start: const Duration(seconds: 40),
-                  play: true,
-                  actionId: actionId,
-                  requestId: requestId,
-                  stepId: 'p5-at-40s',
-                ),
-              );
+                  'p5-at-40s',
+                  () => _lifecycleOpenSource(
+                        sourcePath: androidNativeDvSessionLifecycleP5Path,
+                        start: const Duration(seconds: 40),
+                        play: true,
+                        actionId: actionId,
+                        requestId: requestId,
+                        stepId: 'p5-at-40s',
+                      ));
               await delay(const Duration(seconds: 10));
               await step(
-                'p5-at-10s',
-                () => _lifecycleOpenSource(
-                  sourcePath: androidNativeDvSessionLifecycleP5Path,
-                  start: const Duration(seconds: 10),
-                  play: true,
-                  actionId: actionId,
-                  requestId: requestId,
-                  stepId: 'p5-at-10s',
-                ),
-              );
+                  'p5-at-10s',
+                  () => _lifecycleOpenSource(
+                        sourcePath: androidNativeDvSessionLifecycleP5Path,
+                        start: const Duration(seconds: 10),
+                        play: true,
+                        actionId: actionId,
+                        requestId: requestId,
+                        stepId: 'p5-at-10s',
+                      ));
               await delay(const Duration(seconds: 10));
               break;
             case 'P5SDRP5':
               await step(
-                'sdr-control',
-                () => _lifecycleOpenSource(
-                  sourcePath: androidNativeDvSessionLifecycleSdrPath,
-                  start: Duration.zero,
-                  play: true,
-                  actionId: actionId,
-                  requestId: requestId,
-                  stepId: 'sdr-control',
-                ),
-              );
+                  'sdr-control',
+                  () => _lifecycleOpenSource(
+                        sourcePath: androidNativeDvSessionLifecycleSdrPath,
+                        start: Duration.zero,
+                        play: true,
+                        actionId: actionId,
+                        requestId: requestId,
+                        stepId: 'sdr-control',
+                      ));
               await delay(const Duration(seconds: 10));
               await step(
-                'p5-return',
-                () => _lifecycleOpenSource(
-                  sourcePath: androidNativeDvSessionLifecycleP5Path,
-                  start: const Duration(seconds: 30),
-                  play: true,
-                  actionId: actionId,
-                  requestId: requestId,
-                  stepId: 'p5-return',
-                ),
-              );
+                  'p5-return',
+                  () => _lifecycleOpenSource(
+                        sourcePath: androidNativeDvSessionLifecycleP5Path,
+                        start: const Duration(seconds: 30),
+                        play: true,
+                        actionId: actionId,
+                        requestId: requestId,
+                        stepId: 'p5-return',
+                      ));
               await delay(const Duration(seconds: 10));
               break;
             case 'RestoreSurface':
               await step(
-                'reopen-after-lifecycle',
-                () => _lifecycleOpenSource(
-                  sourcePath: androidNativeDvSessionLifecycleP5Path,
-                  start: _lifecycleSafeResumePosition(),
-                  play: true,
-                  actionId: actionId,
-                  requestId: requestId,
-                  stepId: 'reopen-after-lifecycle',
-                ),
-              );
+                  'reopen-after-lifecycle',
+                  () => _lifecycleOpenSource(
+                        sourcePath: androidNativeDvSessionLifecycleP5Path,
+                        start: _lifecycleSafeResumePosition(),
+                        play: true,
+                        actionId: actionId,
+                        requestId: requestId,
+                        stepId: 'reopen-after-lifecycle',
+                      ));
               await delay(const Duration(seconds: 10));
               break;
             case 'FullscreenRoundTrip':
@@ -2142,9 +2041,7 @@ class _SinglePlayerSingleVideoScreenState
   }
 
   Future<void> _recreateNativeDvSession(
-    String actionId,
-    String requestId,
-  ) async {
+      String actionId, String requestId) async {
     final diagnostic = _nativeDvSessionDiagnostic!;
     final oldSession = _requireHdrSession();
     final oldId = _nativeDvSessionInstanceId;
@@ -2183,8 +2080,7 @@ class _SinglePlayerSingleVideoScreenState
       lifecycleDebt: _nativeDvSessionLifecycleRun?.debt ?? true,
     )) {
       throw StateError(
-        'Old Session cleanup did not prove actual baseline restoration',
-      );
+          'Old Session cleanup did not prove actual baseline restoration');
     }
     _nativeDvSessionLifecycleRun!.ensureActionSideEffectAllowed(
       actionId: actionId,
@@ -2197,10 +2093,8 @@ class _SinglePlayerSingleVideoScreenState
         'session-${++_nativeDvSessionInstanceSequence}';
     _createHdrSession(lifecycleSessionInstanceId: _nativeDvSessionInstanceId);
     final newSession = _requireHdrSession();
-    await diagnostic.attach(
-      newSession,
-      sessionInstanceId: _nativeDvSessionInstanceId,
-    );
+    await diagnostic.attach(newSession,
+        sessionInstanceId: _nativeDvSessionInstanceId);
     _nativeDvSessionVideoMounted = true;
     if (mounted) setState(() {});
     await SchedulerBinding.instance.endOfFrame;
@@ -2248,18 +2142,14 @@ class _SinglePlayerSingleVideoScreenState
         sessionInstanceId: _nativeDvSessionInstanceId,
         facts: <String, Object?>{
           ...observations.toJson(),
-          'windowedContext': _nativeDvSessionContextFact(
-            _nativeDvSessionWindowedVideoContext,
-          ),
+          'windowedContext':
+              _nativeDvSessionContextFact(_nativeDvSessionWindowedVideoContext),
           'fullscreenContext': _nativeDvSessionContextFact(
-            _nativeDvSessionFullscreenVideoContext,
-          ),
-          'selectedWindowedContext': _nativeDvSessionContextFact(
-            windowedContext,
-          ),
-          'selectedFullscreenContext': _nativeDvSessionContextFact(
-            fullscreenContext,
-          ),
+              _nativeDvSessionFullscreenVideoContext),
+          'selectedWindowedContext':
+              _nativeDvSessionContextFact(windowedContext),
+          'selectedFullscreenContext':
+              _nativeDvSessionContextFact(fullscreenContext),
           'beforeSurfaceTuple': before,
           'duringSurfaceTuple': during,
           'fullscreenBeforeRecovery': during,
@@ -2285,9 +2175,8 @@ class _SinglePlayerSingleVideoScreenState
         requestId: requestId,
         operation: 'enter-fullscreen-toggle',
         prepare: () async {
-          await diagnostic.quiesceLifecycleSegment(
-            'before-fullscreen-roundtrip',
-          );
+          await diagnostic
+              .quiesceLifecycleSegment('before-fullscreen-roundtrip');
           before = await diagnostic.captureCurrentSurfaceTuple();
           savedPosition = _lifecycleSafeResumePosition();
           windowedContext = _nativeDvSessionWindowedVideoContext;
@@ -2295,8 +2184,7 @@ class _SinglePlayerSingleVideoScreenState
               !windowedContext!.mounted ||
               video_controls.isFullscreen(windowedContext!)) {
             throw StateError(
-              'Mounted windowed Video controls context is unavailable',
-            );
+                'Mounted windowed Video controls context is unavailable');
           }
         },
         sideEffect: () => video_controls.toggleFullscreen(windowedContext!),
@@ -2334,8 +2222,7 @@ class _SinglePlayerSingleVideoScreenState
                 !refreshedContext.mounted ||
                 !video_controls.isFullscreen(refreshedContext)) {
               throw StateError(
-                'Fullscreen context did not survive the Surface reopen',
-              );
+                  'Fullscreen context did not survive the Surface reopen');
             }
             fullscreenContext = refreshedContext;
             postEntryRecovery = await diagnostic.captureCurrentSurfaceTuple();
@@ -2388,25 +2275,23 @@ class _SinglePlayerSingleVideoScreenState
   }
 
   Future<void> _exitNativeDvN1Page() => _nativeDvN1Exit ??= () async {
-    final startup = _nativeDvSessionStartup;
-    if (startup != null) {
-      try {
-        await startup;
-      } catch (_) {}
-    }
-    await _closeNativeDvSessionAndPlayer();
-    await SystemNavigator.pop();
-  }();
+        final startup = _nativeDvSessionStartup;
+        if (startup != null) {
+          try {
+            await startup;
+          } catch (_) {}
+        }
+        await _closeNativeDvSessionAndPlayer();
+        await SystemNavigator.pop();
+      }();
 
   Future<void> _runNativeDvN4Experiment() async {
     final transport = _nativeDvN4;
     if (transport == null || !transport.ready || _nativeDvN4Closing) {
       throw StateError('N4 requires actual accepted native P5 callbacks');
     }
-    setState(
-      () => _nativeDvN4Status =
-          'N4 raw Player.open pending; waiting for settled result',
-    );
+    setState(() => _nativeDvN4Status =
+        'N4 raw Player.open pending; waiting for settled result');
     final execution = transport.execute();
     _nativeDvN4Execution = execution;
     AndroidNativeDvForeignOwnershipResult? result;
@@ -2422,11 +2307,10 @@ class _SinglePlayerSingleVideoScreenState
     _nativeDvN4ExecutionError = executionError;
     _nativeDvN4ExecutionStack = executionStack;
     if (mounted) {
-      setState(
-        () => _nativeDvN4Status = result?.foreignFileLoadedMatched == true
-            ? 'N4 settled; close to persist final report; device acceptance pending'
-            : 'N4 settled without matched foreign FILE_LOADED; close to persist report',
-      );
+      setState(() => _nativeDvN4Status = result?.foreignFileLoadedMatched ==
+              true
+          ? 'N4 settled; close to persist final report; device acceptance pending'
+          : 'N4 settled without matched foreign FILE_LOADED; close to persist report');
     }
   }
 
@@ -2434,18 +2318,15 @@ class _SinglePlayerSingleVideoScreenState
     if (_nativeDvN4ExecutionReport != null || _nativeDvN4Closing) return;
     final attempt = _runNativeDvN4Experiment();
     _nativeDvN4ExecutionReport = attempt;
-    unawaited(
-      attempt.catchError((Object error, StackTrace stack) {
-        _nativeDvN4ExecutionError ??= error;
-        _nativeDvN4ExecutionStack ??= stack;
-        debugPrint('N4_EXECUTION_ERROR $error');
-        if (mounted) {
-          setState(
-            () => _nativeDvN4Status = 'N4 execution settled with error; close to persist final report',
-          );
-        }
-      }),
-    );
+    unawaited(attempt.catchError((Object error, StackTrace stack) {
+      _nativeDvN4ExecutionError ??= error;
+      _nativeDvN4ExecutionStack ??= stack;
+      debugPrint('N4_EXECUTION_ERROR $error');
+      if (mounted) {
+        setState(() => _nativeDvN4Status =
+            'N4 execution settled with error; close to persist final report');
+      }
+    }));
   }
 
   Future<void> _writeNativeDvN4Report({
@@ -2461,14 +2342,13 @@ class _SinglePlayerSingleVideoScreenState
     final transport = _nativeDvN4;
     final session = transport?.session ?? _hdrSession;
     final disposeReport = session?.lastDisposeReport;
-    final errors =
-        transport?.run.rawErrors ??
+    final errors = transport?.run.rawErrors ??
         result?.rawErrors ??
         const <AndroidNativeDvForeignOwnershipRawError>[];
     final journal =
         drainedJournal == null || (drainedJournal.isEmpty && result != null)
-        ? result?.journal ?? drainedJournal ?? const []
-        : drainedJournal;
+            ? result?.journal ?? drainedJournal ?? const []
+            : drainedJournal;
     final payload = <String, Object?>{
       'schema': 1,
       'experiment': 'android-native-dv-session-foreign-ownership-n4',
@@ -2500,12 +2380,10 @@ class _SinglePlayerSingleVideoScreenState
               'lastDisposeReportClean': result.lastDisposeReportClean,
               'coordinatorErrorType': result.coordinatorErrorType,
               'coordinatorErrorText': result.coordinatorErrorText,
-              'sessionDisposeThrownType': result
-                  .sessionDisposeThrown
-                  ?.runtimeType
-                  .toString(),
-              'sessionDisposeThrownText': result.sessionDisposeThrown
-                  ?.toString(),
+              'sessionDisposeThrownType':
+                  result.sessionDisposeThrown?.runtimeType.toString(),
+              'sessionDisposeThrownText':
+                  result.sessionDisposeThrown?.toString(),
               'sessionDebtObserved': result.sessionDebtObserved,
               'ownershipStopRefusalObserved':
                   result.ownershipStopRefusalObserved,
@@ -2513,8 +2391,8 @@ class _SinglePlayerSingleVideoScreenState
                   result.noSessionOpenOrConfigureAfterForeign,
               'controllerRetiredObserved': result.controllerRetiredObserved,
               'playerTerminated': result.playerTerminated,
-              'playerDisposeErrorType': result.playerDisposeError?.runtimeType
-                  .toString(),
+              'playerDisposeErrorType':
+                  result.playerDisposeError?.runtimeType.toString(),
               'playerDisposeErrorText': result.playerDisposeError?.toString(),
               'ownerRestoration': result.ownerRestoration,
               'backendStopIssued': result.backendStopIssued,
@@ -2540,10 +2418,10 @@ class _SinglePlayerSingleVideoScreenState
               'executionErrorType': (executionError ?? result.executionError)
                   ?.runtimeType
                   .toString(),
-              'executionErrorText': (executionError ?? result.executionError)
-                  ?.toString(),
-              'executionStack': (executionStack ?? result.executionStack)
-                  ?.toString(),
+              'executionErrorText':
+                  (executionError ?? result.executionError)?.toString(),
+              'executionStack':
+                  (executionStack ?? result.executionStack)?.toString(),
               'evidenceGaps': result.evidenceGaps,
               'rawErrors': [
                 for (final error in errors)
@@ -2554,7 +2432,7 @@ class _SinglePlayerSingleVideoScreenState
                     'type': error.error.runtimeType.toString(),
                     'text': error.error.toString(),
                     'stack': error.stackTrace?.toString(),
-                  },
+                  }
               ],
               'journal': journal,
               'overflow': result.overflow,
@@ -2564,27 +2442,24 @@ class _SinglePlayerSingleVideoScreenState
           ? null
           : <String, Object?>{
               'clean': disposeReport.clean,
-              'coordinatorErrorType': disposeReport
-                  .coordinatorError
-                  ?.runtimeType
-                  .toString(),
-              'coordinatorErrorText': disposeReport.coordinatorError
-                  ?.toString(),
-              'playerErrorType': disposeReport.playerError?.runtimeType
-                  .toString(),
+              'coordinatorErrorType':
+                  disposeReport.coordinatorError?.runtimeType.toString(),
+              'coordinatorErrorText':
+                  disposeReport.coordinatorError?.toString(),
+              'playerErrorType':
+                  disposeReport.playerError?.runtimeType.toString(),
               'playerErrorText': disposeReport.playerError?.toString(),
-              'directoryErrorType': disposeReport.directoryError?.runtimeType
-                  .toString(),
+              'directoryErrorType':
+                  disposeReport.directoryError?.runtimeType.toString(),
               'directoryErrorText': disposeReport.directoryError?.toString(),
               'retainedDirectory': disposeReport.retainedDirectory,
             },
       if (result == null) 'journal': journal,
       'finalCloseErrors': [for (final error in closeErrors) error.toJson()],
-      'executionErrorType': (executionError ?? result?.executionError)
-          ?.runtimeType
-          .toString(),
-      'executionErrorText': (executionError ?? result?.executionError)
-          ?.toString(),
+      'executionErrorType':
+          (executionError ?? result?.executionError)?.runtimeType.toString(),
+      'executionErrorText':
+          (executionError ?? result?.executionError)?.toString(),
       'executionStack': (executionStack ?? result?.executionStack)?.toString(),
     };
     final publishedReport = await writeAndroidNativeDvN4ExternalReport(
@@ -2639,9 +2514,8 @@ class _SinglePlayerSingleVideoScreenState
         if (result?.playerDisposeError != null) {
           return result!.playerDisposeError;
         }
-        for (final raw
-            in _nativeDvN4?.run.rawErrors.reversed ??
-                const <AndroidNativeDvForeignOwnershipRawError>[]) {
+        for (final raw in _nativeDvN4?.run.rawErrors.reversed ??
+            const <AndroidNativeDvForeignOwnershipRawError>[]) {
           if (raw.phase == 'player-dispose-threw') return raw.error;
         }
         return null;
@@ -2650,9 +2524,8 @@ class _SinglePlayerSingleVideoScreenState
         if (result?.playerDisposeStack != null) {
           return result!.playerDisposeStack;
         }
-        for (final raw
-            in _nativeDvN4?.run.rawErrors.reversed ??
-                const <AndroidNativeDvForeignOwnershipRawError>[]) {
+        for (final raw in _nativeDvN4?.run.rawErrors.reversed ??
+            const <AndroidNativeDvForeignOwnershipRawError>[]) {
           if (raw.phase == 'player-dispose-threw') return raw.stackTrace;
         }
         return null;
@@ -2662,8 +2535,8 @@ class _SinglePlayerSingleVideoScreenState
         await _writeNativeDvN4Report(
           executionStatus: explicitRun
               ? snapshot.result == null
-                    ? 'execution-error'
-                    : 'settled'
+                  ? 'execution-error'
+                  : 'settled'
               : 'closed-without-explicit-test',
           result: snapshot.result,
           executionError: _nativeDvN4ExecutionError,
@@ -2688,16 +2561,17 @@ class _SinglePlayerSingleVideoScreenState
     _autoPlayerDisposed = true;
     _nativeDvN4?.stopAdmission();
     return _nativeDvN4Exit ??= _nativeDvN4CloseSequence
-        .exit(closeAndPersist: _closeNativeDvN4Owned, pop: SystemNavigator.pop)
+        .exit(
+      closeAndPersist: _closeNativeDvN4Owned,
+      pop: SystemNavigator.pop,
+    )
         .catchError((Object error, StackTrace stack) {
-          if (mounted) {
-            setState(
-              () => _nativeDvN4Status =
-                  'N4 finalization failed; exit held: $error',
-            );
-          }
-          Error.throwWithStackTrace(error, stack);
-        });
+      if (mounted) {
+        setState(() =>
+            _nativeDvN4Status = 'N4 finalization failed; exit held: $error');
+      }
+      Error.throwWithStackTrace(error, stack);
+    });
   }
 
   Future<void> _samplePlaybackPerformance() async {
@@ -2713,11 +2587,10 @@ class _SinglePlayerSingleVideoScreenState
     final attempt = () async {
       try {
         final result = await sampler.sample(
-          expectedSource: androidNativeDvSessionDiagnosticSource,
-          expectedFileLoadedEpoch: epoch,
-          expectedVo: 'gpu-next',
-          expectedHwdecCurrent: 'mediacodec-copy',
-        );
+            expectedSource: androidNativeDvSessionDiagnosticSource,
+            expectedFileLoadedEpoch: epoch,
+            expectedVo: 'gpu-next',
+            expectedHwdecCurrent: 'mediacodec-copy');
         if (result.accepted) {
           negative.record('performance-sample', {'sample': result.row});
         } else {
@@ -2729,28 +2602,23 @@ class _SinglePlayerSingleVideoScreenState
         }
         for (final raw in result.rawErrors) {
           negative.record(
-            'performance-property-error',
-            {
-              'index': raw.index,
-              'row': raw.row,
-              'phase': raw.phase,
-              'property': raw.property,
-              'acceptedSample': result.accepted,
-            },
-            error: raw.error,
-            stack: raw.stackTrace,
-          );
+              'performance-property-error',
+              {
+                'index': raw.index,
+                'row': raw.row,
+                'phase': raw.phase,
+                'property': raw.property,
+                'acceptedSample': result.accepted,
+              },
+              error: raw.error,
+              stack: raw.stackTrace);
         }
         if (sampler.rawErrorOverflow) {
           negative.record('performance-error-overflow', {});
         }
       } catch (error, stack) {
-        negative.record(
-          'performance-sample-failed',
-          {},
-          error: error,
-          stack: stack,
-        );
+        negative.record('performance-sample-failed', {},
+            error: error, stack: stack);
       }
     }();
     _playbackPerformanceSample = attempt;
@@ -2785,11 +2653,10 @@ class _SinglePlayerSingleVideoScreenState
       capturePostSession: (sessionDisposeError) async {
         if (negative != null) {
           await negative.captureCleanup(
-            player: player,
-            report: session?.lastDisposeReport,
-            error: sessionDisposeError,
-            controller: session?.controller.value,
-          );
+              player: player,
+              report: session?.lastDisposeReport,
+              error: sessionDisposeError,
+              controller: session?.controller.value);
           if (!negative.sessionClean) {
             throw StateError('N1 Session cleanup has debt');
           }
@@ -2835,12 +2702,11 @@ class _SinglePlayerSingleVideoScreenState
     }
     if (!outcome.clean) {
       throw StateError(
-        'Termination failed: recorder=${outcome.recorderCloseError} '
-        'session=${outcome.sessionDisposeError} '
-        'capture=${outcome.cleanupCaptureError} '
-        'player=${outcome.playerDisposeError} '
-        'terminationReport=${outcome.terminationRecordError}',
-      );
+          'Termination failed: recorder=${outcome.recorderCloseError} '
+          'session=${outcome.sessionDisposeError} '
+          'capture=${outcome.cleanupCaptureError} '
+          'player=${outcome.playerDisposeError} '
+          'terminationReport=${outcome.terminationRecordError}');
     }
   }
 
@@ -2866,32 +2732,26 @@ class _SinglePlayerSingleVideoScreenState
         };
         final controls = <Widget>[];
         for (final actionId in androidNativeDvSessionLifecycleActions) {
-          final enabled = _nativeDvSessionPageExit.actionEnabled(
-            run,
-            actionId,
-            terminationAttempted: _nativeDvPlayerTerminationAttempted,
-          );
-          controls.add(
-            Semantics(
-              label: 'dv-session-action:$actionId',
-              button: true,
-              enabled: enabled,
-              child: OutlinedButton(
-                onPressed: enabled
-                    ? () => unawaited(
-                        _runNativeDvSessionLifecycleAction(actionId)
-                            .catchError((Object error, StackTrace stack) {
-                              debugPrint(
-                                'NATIVE_DV_LIFECYCLE_ACTION_ERROR '
-                                'action=$actionId error=$error',
-                              );
-                            }),
+          final enabled = _nativeDvSessionPageExit.actionEnabled(run, actionId,
+              terminationAttempted: _nativeDvPlayerTerminationAttempted);
+          controls.add(Semantics(
+            label: 'dv-session-action:$actionId',
+            button: true,
+            enabled: enabled,
+            child: OutlinedButton(
+              onPressed: enabled
+                  ? () => unawaited(
+                        _runNativeDvSessionLifecycleAction(actionId).catchError(
+                          (Object error, StackTrace stack) {
+                            debugPrint('NATIVE_DV_LIFECYCLE_ACTION_ERROR '
+                                'action=$actionId error=$error');
+                          },
+                        ),
                       )
-                    : null,
-                child: Text(labels[actionId] ?? actionId),
-              ),
+                  : null,
+              child: Text(labels[actionId] ?? actionId),
             ),
-          );
+          ));
         }
         return Container(
           width: double.infinity,
@@ -2916,10 +2776,8 @@ class _SinglePlayerSingleVideoScreenState
                 ),
               ),
               if (_nativeDvSessionActionError != null)
-                Text(
-                  _nativeDvSessionActionError!,
-                  style: const TextStyle(color: Colors.redAccent),
-                ),
+                Text(_nativeDvSessionActionError!,
+                    style: const TextStyle(color: Colors.redAccent)),
               Wrap(spacing: 6, runSpacing: 2, children: controls),
             ],
           ),
@@ -2979,34 +2837,32 @@ class _SinglePlayerSingleVideoScreenState
     if (rejected != null) throw StateError(rejected);
     if (_hdrSession != null) {
       throw StateError(
-        'Release native DV diagnostic cannot use HdrVideoSession',
-      );
+          'Release native DV diagnostic cannot use HdrVideoSession');
     }
     final diagnostic = await _nativeDvPageAdmission
         .createAfterReady<AndroidNativeDvReleaseDiagnostic>(
-          output: controller.platform.future,
-          waitUntilReady: (output) => output.waitUntilInitialOutputBound,
-          pageIsAlive: () => mounted && !_autoPlayerDisposed,
-          create: (output) {
-            if (output is! AndroidVideoController ||
-                !identical(output.player, player)) {
-              throw StateError(
-                'A bound AndroidVideoController for this Player is required',
-              );
-            }
-            final value = AndroidNativeDvReleaseDiagnostic(
-              player: player,
-              outputController: output,
-              durationSeconds: _androidNativeDvReleaseDiagnosticSeconds,
-              sampleIntervalSeconds:
-                  _androidNativeDvReleaseDiagnosticIntervalSeconds,
-              externalIdentityLabel: _androidNativeDvReleaseDiagnosticIdentity,
-            );
-            _nativeDvReleaseDiagnostic = value;
-            if (mounted && !_autoPlayerDisposed) setState(() {});
-            return value;
-          },
+      output: controller.platform.future,
+      waitUntilReady: (output) => output.waitUntilInitialOutputBound,
+      pageIsAlive: () => mounted && !_autoPlayerDisposed,
+      create: (output) {
+        if (output is! AndroidVideoController ||
+            !identical(output.player, player)) {
+          throw StateError(
+              'A bound AndroidVideoController for this Player is required');
+        }
+        final value = AndroidNativeDvReleaseDiagnostic(
+          player: player,
+          outputController: output,
+          durationSeconds: _androidNativeDvReleaseDiagnosticSeconds,
+          sampleIntervalSeconds:
+              _androidNativeDvReleaseDiagnosticIntervalSeconds,
+          externalIdentityLabel: _androidNativeDvReleaseDiagnosticIdentity,
         );
+        _nativeDvReleaseDiagnostic = value;
+        if (mounted && !_autoPlayerDisposed) setState(() {});
+        return value;
+      },
+    );
     if (diagnostic == null) return;
     if (!_nativeDvPageAdmission.isOpen || !mounted || _autoPlayerDisposed) {
       await diagnostic.shutdown();
@@ -3044,18 +2900,13 @@ class _SinglePlayerSingleVideoScreenState
     final policy = _hdrRoutingPolicy();
     if (_androidLgVisual278Experiment) {
       final random = Random.secure();
-      _lgExperimentOwner = AndroidLgSingleOpenOwner(
-        List.generate(
-          24,
-          (_) => random.nextInt(256).toRadixString(16).padLeft(2, '0'),
-        ).join(),
-      );
+      _lgExperimentOwner = AndroidLgSingleOpenOwner(List.generate(
+              24, (_) => random.nextInt(256).toRadixString(16).padLeft(2, '0'))
+          .join());
     }
     final experimentConfiguration = configuration.value.copyWith(
-      android: configuration.value.android.copyWith(
-        lgExperimentOwnerToken: _lgExperimentToken,
-      ),
-    );
+        android: configuration.value.android
+            .copyWith(lgExperimentOwnerToken: _lgExperimentToken));
     // migrated to HdrVideoSession (S10): the lab coordinator/slot/backend are
     // replaced by the library session. The public constructor cannot inject a
     // capability provider, so the simulate-no-HLG switch uses the
@@ -3097,12 +2948,10 @@ class _SinglePlayerSingleVideoScreenState
     if (_androidHdrConvertRouteLock) {
       if (AndroidSurfaceTexturePoc.enabled) {
         _surfaceTextureExperiment.validateAdmission(
-          dataSpacePerformProbe: _androidDataSpacePerformProbe,
-        );
+            dataSpacePerformProbe: _androidDataSpacePerformProbe);
       } else {
         _convertExperiment.validateAdmission(
-          dataSpacePerformProbe: _androidDataSpacePerformProbe,
-        );
+            dataSpacePerformProbe: _androidDataSpacePerformProbe);
       }
       if (!_androidHdrTransaction ||
           _androidNativeDvSessionDiagnostic ||
@@ -3111,14 +2960,13 @@ class _SinglePlayerSingleVideoScreenState
           _androidHdrGateOpen ||
           _androidHdrPolicyExperimental) {
         throw StateError(
-          'Convert route lock rejects conflicting diagnostic modes',
-        );
+            'Convert route lock rejects conflicting diagnostic modes');
       }
     }
     session = _androidHdrConvertRouteLock
         ? // Lab-only planner rejects initial SDR, retries and review replans.
-          // ignore: invalid_use_of_visible_for_testing_member
-          HdrVideoSession.forTesting(
+        // ignore: invalid_use_of_visible_for_testing_member
+        HdrVideoSession.forTesting(
             player: player,
             policy: policy,
             configuration: experimentConfiguration,
@@ -3129,54 +2977,54 @@ class _SinglePlayerSingleVideoScreenState
                 : _convertExperiment.plan,
           )
         : _androidNativeDvSessionDiagnostic
-        ? // The only diagnostic seam is a realizer-backed fixed-P5 planner
-          // and a passive observer; backend/capabilities/identity stay real.
-          // ignore: invalid_use_of_visible_for_testing_member
-          HdrVideoSession.forTesting(
-            player: player,
-            policy: policy,
-            configuration: configuration.value,
-            routePlanner: diagnostic!.routePlanner,
-            onBackendCallDiagnostic: onBackendCall,
-            onNativeDvOptionDiagnostic: onNativeOption,
-            onNativeDvConsumerValidated: (generation, plan, facts) {
-              diagnostic.onNativeDvConsumerValidated(
-                generation,
-                plan,
-                facts,
-                sessionInstanceId: lifecycleId,
-              );
-              n4?.onConsumerValidated(
-                callbackSession: session,
-                sessionInstanceId: lifecycleId,
-                generation: generation,
-                plan: plan,
-                facts: facts,
-              );
-            },
-            onNativeDvConsumerCaptureError: (error, stack) =>
-                diagnostic.onNativeDvConsumerCaptureError(
+            ? // The only diagnostic seam is a realizer-backed fixed-P5 planner
+            // and a passive observer; backend/capabilities/identity stay real.
+            // ignore: invalid_use_of_visible_for_testing_member
+            HdrVideoSession.forTesting(
+                player: player,
+                policy: policy,
+                configuration: configuration.value,
+                routePlanner: diagnostic!.routePlanner,
+                onBackendCallDiagnostic: onBackendCall,
+                onNativeDvOptionDiagnostic: onNativeOption,
+                onNativeDvConsumerValidated: (generation, plan, facts) {
+                  diagnostic.onNativeDvConsumerValidated(
+                    generation,
+                    plan,
+                    facts,
+                    sessionInstanceId: lifecycleId,
+                  );
+                  n4?.onConsumerValidated(
+                    callbackSession: session,
+                    sessionInstanceId: lifecycleId,
+                    generation: generation,
+                    plan: plan,
+                    facts: facts,
+                  );
+                },
+                onNativeDvConsumerCaptureError: (error, stack) =>
+                    diagnostic.onNativeDvConsumerCaptureError(
                   error,
                   stack,
                   sessionInstanceId: lifecycleId,
                 ),
-          )
-        : _androidHdrSimulateNoHlg
-        ? // The public constructor cannot inject a capability provider; the
-          // S10 plan explicitly allows the @visibleForTesting constructor for
-          // this experiment switch (A3 simulate-no-HLG).
-          // ignore: invalid_use_of_visible_for_testing_member
-          HdrVideoSession.forTesting(
-            player: player,
-            policy: policy,
-            configuration: configuration.value,
-            capabilitiesProvider: _capabilitiesWithoutHlg,
-          )
-        : HdrVideoSession(
-            player,
-            policy: policy,
-            configuration: configuration.value,
-          );
+              )
+            : _androidHdrSimulateNoHlg
+                ? // The public constructor cannot inject a capability provider; the
+                // S10 plan explicitly allows the @visibleForTesting constructor for
+                // this experiment switch (A3 simulate-no-HLG).
+                // ignore: invalid_use_of_visible_for_testing_member
+                HdrVideoSession.forTesting(
+                    player: player,
+                    policy: policy,
+                    configuration: configuration.value,
+                    capabilitiesProvider: _capabilitiesWithoutHlg,
+                  )
+                : HdrVideoSession(
+                    player,
+                    policy: policy,
+                    configuration: configuration.value,
+                  );
     _hdrSession = session;
     if (n4 != null) {
       n4.bindSession(session, lifecycleId);
@@ -3198,13 +3046,11 @@ class _SinglePlayerSingleVideoScreenState
     session.events.listen((event) {
       _hdr10Journal?.recordEvent(event);
       if (sessionExperimentOwner != null && event is HdrErrorEvent) {
-        unawaited(
-          sessionExperimentOwner.revoke(_revokeLgExperiment).catchError((
-            Object error,
-          ) {
-            debugPrint('LG_EXPERIMENT_REVOKE_ERROR $error');
-          }),
-        );
+        unawaited(sessionExperimentOwner
+            .revoke(_revokeLgExperiment)
+            .catchError((Object error) {
+          debugPrint('LG_EXPERIMENT_REVOKE_ERROR $error');
+        }));
       }
       debugPrint('HDR_SESSION_EVENT $event');
     });
@@ -3213,9 +3059,8 @@ class _SinglePlayerSingleVideoScreenState
   void _onHdrControllerChanged() {
     final negative = _nativeDvN1;
     if (negative != null) {
-      _nativeDvSessionVideoMounted = negative.observeController(
-        _hdrSession?.controller.value,
-      );
+      _nativeDvSessionVideoMounted =
+          negative.observeController(_hdrSession?.controller.value);
     }
     if (mounted) setState(() {});
   }
@@ -3235,8 +3080,7 @@ class _SinglePlayerSingleVideoScreenState
       // HLG→PQ color-accuracy experiment: prefer the GPU convert route over
       // the (systemically desaturated on HLG-incapable panels) direct one
       // for the P8.4 class. Verified-only; no experimental admission.
-      final base =
-          HdrRoutingPolicy.defaultPreferences[HdrSourceClass.dvP84] ??
+      final base = HdrRoutingPolicy.defaultPreferences[HdrSourceClass.dvP84] ??
           const <HdrStrategy>[];
       final reordered = <HdrStrategy>[
         HdrStrategy.baseLayerConvert,
@@ -3250,8 +3094,7 @@ class _SinglePlayerSingleVideoScreenState
       );
     }
     if (!_androidHdrPolicyExperimental) return HdrRoutingPolicy.defaults;
-    final base =
-        HdrRoutingPolicy.defaultPreferences[HdrSourceClass.dvP84] ??
+    final base = HdrRoutingPolicy.defaultPreferences[HdrSourceClass.dvP84] ??
         const <HdrStrategy>[];
     final reordered = <HdrStrategy>[
       HdrStrategy.metadataReshape,
@@ -3271,8 +3114,7 @@ class _SinglePlayerSingleVideoScreenState
   /// HLG-output route and must degrade along the candidate list.
   Future<HdrCapabilities> _capabilitiesWithoutHlg() async {
     final capabilities = (await VideoRouteCapabilities.query(
-      target: const VideoOutputTarget.applicationView(),
-    )).hdr;
+        target: const VideoOutputTarget.applicationView())).hdr;
     final types = capabilities.displayHdrTypes;
     final Set<int>? filtered = types == null ? null : <int>{...types};
     if (filtered != null) {
@@ -3310,8 +3152,7 @@ class _SinglePlayerSingleVideoScreenState
         return HdrSourceDescriptor.fromKind(HdrMediaKind.dolbyVisionP84);
       default:
         throw StateError(
-          'MEDIA_KIT_ANDROID_HDR_WRONG_HINT must be sdr, hdr10 or p84',
-        );
+            'MEDIA_KIT_ANDROID_HDR_WRONG_HINT must be sdr, hdr10 or p84');
     }
     final match = _namedFixturePattern.firstMatch(source);
     if (match != null) {
@@ -3337,7 +3178,10 @@ class _SinglePlayerSingleVideoScreenState
   /// (S10): the coordinator/backend open path is replaced by the session's
   /// orchestrated open — hint pre-routing, decoder review with at most one
   /// in-place rebuild, candidate degradation along the list).
-  Future<void> _openHdrSource(String source, {Duration? start}) async {
+  Future<void> _openHdrSource(
+    String source, {
+    Duration? start,
+  }) async {
     if (_androidHdr10SessionDiagnostic &&
         source != androidHdr10DiagnosticSource) {
       throw StateError('HDR10 journal rejects sources other than fixed PQ');
@@ -3348,8 +3192,7 @@ class _SinglePlayerSingleVideoScreenState
             (source == androidNativeDvSessionLifecycleP5Path ||
                 source == androidNativeDvSessionLifecycleSdrPath))) {
       throw StateError(
-        'Session diagnostic rejects all sources except fixed P5',
-      );
+          'Session diagnostic rejects all sources except fixed P5');
     }
     final experimentOwner = _lgExperimentOwner;
     final session = _requireHdrSession();
@@ -3361,8 +3204,7 @@ class _SinglePlayerSingleVideoScreenState
         await _applyAndroidScalers();
         if (_androidVfFullRange) {
           throw StateError(
-            'VF_FULL_RANGE is not an output range conversion; use MPV_OUTPUT_LEVELS',
-          );
+              'VF_FULL_RANGE is not an output range conversion; use MPV_OUTPUT_LEVELS');
         }
         if (_androidMpvOutputLevels.isNotEmpty) {
           if (_androidHdrConvertRouteLock) {
@@ -3381,27 +3223,22 @@ class _SinglePlayerSingleVideoScreenState
             }
           } else {
             await player.setPropertyStrict(
-              'video-output-levels',
-              _androidMpvOutputLevels,
-            );
+                'video-output-levels', _androidMpvOutputLevels);
             final levels = await player.getProperty('video-output-levels');
             if (levels != _androidMpvOutputLevels) {
               throw StateError('Output levels not accepted: $levels');
             }
           }
           debugPrint(
-            'MPV_OUTPUT_LEVELS=$_androidMpvOutputLevels accepted=true beforeOpen=true',
-          );
+              'MPV_OUTPUT_LEVELS=$_androidMpvOutputLevels accepted=true beforeOpen=true');
         }
         if (_androidLgVisual278Experiment) {
           if (AndroidSurfaceTexturePoc.enabled) {
             _surfaceTextureExperiment.validateAdmission(
-              dataSpacePerformProbe: _androidDataSpacePerformProbe,
-            );
+                dataSpacePerformProbe: _androidDataSpacePerformProbe);
           } else {
             _convertExperiment.validateAdmission(
-              dataSpacePerformProbe: _androidDataSpacePerformProbe,
-            );
+                dataSpacePerformProbe: _androidDataSpacePerformProbe);
           }
           if (experimentOwner == null) {
             throw StateError('Missing experiment owner');
@@ -3409,15 +3246,14 @@ class _SinglePlayerSingleVideoScreenState
           final openToken = experimentOwner.token;
           final openHandle = await player.handle;
           experimentOwner.bindHandle(openHandle);
-          final enabled =
-              await const MethodChannel(
-                'media_kit_hdr_lab/lg_visual278_experiment',
-              ).invokeMethod<bool>('Enable', {
-                'routeLocked': _androidHdrConvertRouteLock,
-                'acceptNonConformant': true,
-                'handle': openHandle,
-                'ownerToken': openToken,
-              });
+          final enabled = await const MethodChannel(
+                  'media_kit_hdr_lab/lg_visual278_experiment')
+              .invokeMethod<bool>('Enable', {
+            'routeLocked': _androidHdrConvertRouteLock,
+            'acceptNonConformant': true,
+            'handle': openHandle,
+            'ownerToken': openToken,
+          });
           if (enabled != true) {
             throw StateError('Visual278 experiment enable refused');
           }
@@ -3493,16 +3329,15 @@ class _SinglePlayerSingleVideoScreenState
         debugPrint('YUV-DIAG: define on but PoC off; branch inert');
       }
       debugPrint(
-        'ANDROID_HDR_OPEN_BEGIN path=$source hint=$hint serial=$serial '
-        'simulateNoHlg=$_androidHdrSimulateNoHlg '
-        'wrongHint=$_androidHdrWrongHint noHint=$_androidHdrNoHint '
-        'policyExperimental=$_androidHdrPolicyExperimental '
-        'namedLocalSource=$_androidNamedLocalSource '
-        'p5RpuPipelineBuilt=$_androidP5RpuPipelineBuilt '
-        'forceP84PqFallback=$_androidForceP84PqFallback '
-        'textureCopyDiagnostic=$_androidTextureCopyDiagnostic '
-        'gpuPlatformHdr=$_androidGpuPlatformHdr',
-      );
+          'ANDROID_HDR_OPEN_BEGIN path=$source hint=$hint serial=$serial '
+          'simulateNoHlg=$_androidHdrSimulateNoHlg '
+          'wrongHint=$_androidHdrWrongHint noHint=$_androidHdrNoHint '
+          'policyExperimental=$_androidHdrPolicyExperimental '
+          'namedLocalSource=$_androidNamedLocalSource '
+          'p5RpuPipelineBuilt=$_androidP5RpuPipelineBuilt '
+          'forceP84PqFallback=$_androidForceP84PqFallback '
+          'textureCopyDiagnostic=$_androidTextureCopyDiagnostic '
+          'gpuPlatformHdr=$_androidGpuPlatformHdr');
       // The open outcome never short-circuits the PoC verdict below: a
       // bridge init failure can make vd_lavc fall back to software decoding
       // while the session only DEGRADES and keeps playing.
@@ -3511,13 +3346,12 @@ class _SinglePlayerSingleVideoScreenState
       try {
         if (experimentOwner != null) {
           await experimentOwner.open(
-            session: session,
-            media: Media(source),
-            hint: hint,
-            start: start,
-            prepare: prepare,
-            revokeOwner: _revokeLgExperiment,
-          );
+              session: session,
+              media: Media(source),
+              hint: hint,
+              start: start,
+              prepare: prepare,
+              revokeOwner: _revokeLgExperiment);
         } else {
           await prepare();
           await session.open(Media(source), hint: hint, start: start);
@@ -3566,30 +3400,23 @@ class _SinglePlayerSingleVideoScreenState
             versionObserved: _surfaceTexturePocVersionObserved,
           );
           if (failure != null) {
-            debugPrint(
-              '${AndroidSurfaceTexturePoc.tag} '
-              'active-importer-verify-fail $failure',
-            );
+            debugPrint('${AndroidSurfaceTexturePoc.tag} '
+                'active-importer-verify-fail $failure');
             if (openFailure == null) {
               // Hard stop: a degraded open keeps playing software-decoded
               // frames otherwise.
               try {
                 await player.stop();
               } catch (stopError) {
-                debugPrint(
-                  '${AndroidSurfaceTexturePoc.tag} '
-                  'player stop after verify-fail failed: $stopError',
-                );
+                debugPrint('${AndroidSurfaceTexturePoc.tag} '
+                    'player stop after verify-fail failed: $stopError');
               }
               throw StateError(
-                'SurfaceTexture PoC verification failed: $failure',
-              );
+                  'SurfaceTexture PoC verification failed: $failure');
             }
           } else if (openFailure == null) {
-            debugPrint(
-              '${AndroidSurfaceTexturePoc.tag} '
-              'active-importer=surfacetexture verified',
-            );
+            debugPrint('${AndroidSurfaceTexturePoc.tag} '
+                'active-importer=surfacetexture verified');
           }
           verdictBlockAborted = false;
         } finally {
@@ -3653,8 +3480,7 @@ class _SinglePlayerSingleVideoScreenState
         final report = _requireHdrSession().report.value;
         if (report.error != null || report.actual == null) {
           throw StateError(
-            'Locked convert experiment did not open: ${report.error}',
-          );
+              'Locked convert experiment did not open: ${report.error}');
         }
       }
       debugPrint('ANDROID_HDR_OPEN path=$source serial=$serial');
@@ -3662,18 +3488,16 @@ class _SinglePlayerSingleVideoScreenState
         _logHdrSessionReport();
       }
       if (_androidOpenPhaseTrace) {
-        unawaited(
-          () async {
-            final vo = await player.getProperty('vo');
-            final hwdec = await player.getProperty('hwdec-current');
-            final path = await player.getProperty('path');
-            debugPrint(
-              'ANDROID_HDR_OUTPUT vo=$vo hwdecCurrent=$hwdec path=$path',
-            );
-          }().catchError((Object error) {
-            debugPrint('ANDROID_HDR_OUTPUT error=$error');
-          }),
-        );
+        unawaited(() async {
+          final vo = await player.getProperty('vo');
+          final hwdec = await player.getProperty('hwdec-current');
+          final path = await player.getProperty('path');
+          debugPrint(
+              'ANDROID_HDR_OUTPUT vo=$vo hwdecCurrent=$hwdec path=$path');
+        }()
+            .catchError((Object error) {
+          debugPrint('ANDROID_HDR_OUTPUT error=$error');
+        }));
       }
       if (_androidDualViewLifecycleProbe && !_dualViewProbeScheduled) {
         _dualViewProbeScheduled = true;
@@ -3692,37 +3516,29 @@ class _SinglePlayerSingleVideoScreenState
             await player.stream.position
                 .firstWhere((position) => position >= target)
                 .timeout(
-                  Duration(seconds: _androidHdrPauseAtMediaSeconds + 30),
-                );
+                    Duration(seconds: _androidHdrPauseAtMediaSeconds + 30));
             if (!mounted || serial != _hdrOpenSerial) return;
             await player.pause();
             await player.seek(target);
             await Future<void>.delayed(const Duration(seconds: 1));
             debugPrint(
-              'ANDROID_HDR_MEDIA_PAUSE target=${target.inMilliseconds} '
-              'timePos=${await player.getProperty('time-pos')} '
-              'pause=${await player.getProperty('pause')}',
-            );
+                'ANDROID_HDR_MEDIA_PAUSE target=${target.inMilliseconds} '
+                'timePos=${await player.getProperty('time-pos')} '
+                'pause=${await player.getProperty('pause')}');
           } catch (error) {
             debugPrint('ANDROID_HDR_MEDIA_PAUSE error=$error');
           }
         }());
       }
       if (_androidHdrAutoPauseProbeSeconds > 0) {
-        unawaited(
-          Future<void>.delayed(
-            Duration(seconds: _androidHdrAutoPauseProbeSeconds),
-            () async {
-              if (!mounted || serial != _hdrOpenSerial) return;
-              await player.pause();
-              debugPrint(
-                'ANDROID_HDR_AUTO_PAUSE '
-                'position=${player.state.position.inMilliseconds} '
-                'pause=${await player.getProperty('pause')}',
-              );
-            },
-          ),
-        );
+        unawaited(Future<void>.delayed(
+            Duration(seconds: _androidHdrAutoPauseProbeSeconds), () async {
+          if (!mounted || serial != _hdrOpenSerial) return;
+          await player.pause();
+          debugPrint('ANDROID_HDR_AUTO_PAUSE '
+              'position=${player.state.position.inMilliseconds} '
+              'pause=${await player.getProperty('pause')}');
+        }));
       }
     } catch (_) {
       rethrow;
@@ -3738,13 +3554,10 @@ class _SinglePlayerSingleVideoScreenState
     if (_surfaceTextureDiagSwitchProbed) return _surfaceTextureDiagSwitch;
     _surfaceTextureDiagSwitchProbed = true;
     try {
-      final bridge = ffi.DynamicLibrary.open(
-        'libmedia_kit_video_hdr_bridge.so',
-      );
+      final bridge = ffi.DynamicLibrary.open('libmedia_kit_video_hdr_bridge.so');
       _surfaceTextureDiagSwitch = bridge
           .lookupFunction<ffi.Void Function(ffi.Int32), void Function(int)>(
-            'mkst_set_diag_enabled',
-          );
+              'mkst_set_diag_enabled');
     } catch (error) {
       _surfaceTextureDiagSwitch = null;
       debugPrint('MKSURF-DIAG: switch unavailable ($error)');
@@ -3806,14 +3619,13 @@ class _SinglePlayerSingleVideoScreenState
   static void Function(int)? _resolveDiagDataspaceArmer() {
     if (_diagDataspaceArmerProbed) return _diagDataspaceArmer;
     _diagDataspaceArmerProbed = true;
-    void lookup(ffi.DynamicLibrary library) => _diagDataspaceArmer = library
-        .lookupFunction<ffi.Void Function(ffi.Int32), void Function(int)>(
-          'mkvendor_set_diag_dataspace',
-        );
+    void lookup(ffi.DynamicLibrary library) =>
+        _diagDataspaceArmer = library
+            .lookupFunction<ffi.Void Function(ffi.Int32), void Function(int)>(
+                'mkvendor_set_diag_dataspace');
     try {
-      lookup(
-        ffi.DynamicLibrary.open('libmedia_kit_android_dataspace_vendor.so'),
-      );
+      lookup(ffi.DynamicLibrary.open(
+          'libmedia_kit_android_dataspace_vendor.so'));
     } catch (_) {
       try {
         lookup(ffi.DynamicLibrary.open('libmedia_kit_dataspace_vendor.so'));
@@ -3846,10 +3658,8 @@ class _SinglePlayerSingleVideoScreenState
     final armer = _resolveDiagDataspaceArmer();
     if (armer == null) {
       if (_androidMksYuvDiag) {
-        throw StateError(
-          'MKSURF-E1: diag dataspace armer unavailable; '
-          'YUV mode requires the PQ/LIMITED injection to arm',
-        );
+        throw StateError('MKSURF-E1: diag dataspace armer unavailable; '
+            'YUV mode requires the PQ/LIMITED injection to arm');
       }
       return;
     }
@@ -3891,14 +3701,13 @@ class _SinglePlayerSingleVideoScreenState
       return _yuvDiagSwitch;
     }
     _yuvDiagSwitchProbed = true;
-    void lookup(ffi.DynamicLibrary library) => _yuvDiagSwitch = library
-        .lookupFunction<ffi.Void Function(ffi.Int32), void Function(int)>(
-          'mkvendor_set_yuv_diag_enabled',
-        );
+    void lookup(ffi.DynamicLibrary library) =>
+        _yuvDiagSwitch = library
+            .lookupFunction<ffi.Void Function(ffi.Int32), void Function(int)>(
+                'mkvendor_set_yuv_diag_enabled');
     try {
-      lookup(
-        ffi.DynamicLibrary.open('libmedia_kit_android_dataspace_vendor.so'),
-      );
+      lookup(ffi.DynamicLibrary.open(
+          'libmedia_kit_android_dataspace_vendor.so'));
     } catch (_) {
       try {
         lookup(ffi.DynamicLibrary.open('libmedia_kit_dataspace_vendor.so'));
@@ -3918,12 +3727,10 @@ class _SinglePlayerSingleVideoScreenState
     _yuvDiagDisarmProbed = true;
     void lookup(ffi.DynamicLibrary library) => _yuvDiagDisarm = library
         .lookupFunction<ffi.Void Function(), void Function()>(
-          'mkvendor_disarm_yuv_diag',
-        );
+            'mkvendor_disarm_yuv_diag');
     try {
-      lookup(
-        ffi.DynamicLibrary.open('libmedia_kit_android_dataspace_vendor.so'),
-      );
+      lookup(ffi.DynamicLibrary.open(
+          'libmedia_kit_android_dataspace_vendor.so'));
     } catch (_) {
       try {
         lookup(ffi.DynamicLibrary.open('libmedia_kit_dataspace_vendor.so'));
@@ -3953,51 +3760,41 @@ class _SinglePlayerSingleVideoScreenState
   /// output only; the fallback controller getter is never touched (P8.4 C2).
   Future<void> _armYuvDiagSwitch(int serial) async {
     if (_yuvDiagConvertTransfer != 'pq' || _androidMpvOutputLevels != 'full') {
-      throw StateError(
-        'YUV-DIAG: pairing rejected '
-        '(need CONVERT_SURFACE_TRANSFER=pq + MPV_OUTPUT_LEVELS=full; '
-        'got transfer=$_yuvDiagConvertTransfer '
-        'levels=$_androidMpvOutputLevels; offscreen full, window limited, '
-        'single final-pass packing)',
-      );
+      throw StateError('YUV-DIAG: pairing rejected '
+          '(need CONVERT_SURFACE_TRANSFER=pq + MPV_OUTPUT_LEVELS=full; '
+          'got transfer=$_yuvDiagConvertTransfer '
+          'levels=$_androidMpvOutputLevels; offscreen full, window limited, '
+          'single final-pass packing)');
     }
     if (_yuvDiagSerial != null) {
       if (_yuvDiagSerial == serial) return;
       _disarmYuvDiagSwitch(serial: null);
     }
     final String? ownerToken = _lgExperimentToken;
-    final int? ownerGeneration = await resolveYuvDiagOwnerGeneration(
-      _hdrSession,
-    );
+    final int? ownerGeneration =
+        await resolveYuvDiagOwnerGeneration(_hdrSession);
     if (ownerToken != null && ownerGeneration != null) {
       try {
-        final bound =
-            await const MethodChannel(
-              'media_kit_hdr_lab/lg_visual278_experiment',
-            ).invokeMethod<bool>('EnableYuvDiag', {
-              'ownerToken': ownerToken,
-              'generation': ownerGeneration,
-            });
+        final bound = await const MethodChannel(
+                'media_kit_hdr_lab/lg_visual278_experiment')
+            .invokeMethod<bool>('EnableYuvDiag', {
+          'ownerToken': ownerToken,
+          'generation': ownerGeneration,
+        });
         if (bound == true) {
           _yuvDiagSerial = serial;
-          debugPrint(
-            'YUV-DIAG: switch armed (owner-bound, '
-            'generation=$ownerGeneration, config49 NV12 branch, pq/full)',
-          );
+          debugPrint('YUV-DIAG: switch armed (owner-bound, '
+              'generation=$ownerGeneration, config49 NV12 branch, pq/full)');
           return;
         }
         debugPrint('YUV-DIAG: owner-bound arm refused; legacy global arm');
       } catch (error) {
-        debugPrint(
-          'YUV-DIAG: owner-bound arm unavailable ($error); '
-          'legacy global arm',
-        );
+        debugPrint('YUV-DIAG: owner-bound arm unavailable ($error); '
+            'legacy global arm');
       }
     } else {
-      debugPrint(
-        'YUV-DIAG: owner token/generation unavailable; '
-        'legacy global arm',
-      );
+      debugPrint('YUV-DIAG: owner token/generation unavailable; '
+          'legacy global arm');
     }
     final arm = _resolveYuvDiagSwitch();
     // Unreachable: the resolver throws instead of returning null, but the
@@ -4042,10 +3839,8 @@ class _SinglePlayerSingleVideoScreenState
     if (legacy == null) return;
     try {
       legacy(0);
-      debugPrint(
-        'YUV-DIAG: switch disarmed (legacy setter; '
-        'binding tuple reset to 0/0)',
-      );
+      debugPrint('YUV-DIAG: switch disarmed (legacy setter; '
+          'binding tuple reset to 0/0)');
     } catch (error) {
       debugPrint('YUV-DIAG: disarm failed: $error');
     }
@@ -4057,20 +3852,18 @@ class _SinglePlayerSingleVideoScreenState
   /// playback.
   void _startSurfaceTextureDiagWatch(int serial) {
     _surfaceTextureDiagTimer?.cancel();
-    _surfaceTextureDiagTimer = Timer.periodic(
-      const Duration(milliseconds: 500),
-      (timer) {
-        final superseded = serial != _hdrOpenSerial;
-        if (!mounted ||
-            _autoPlayerDisposed ||
-            superseded ||
-            player.state.completed ||
-            _surfaceTextureDiagSerial == null) {
-          timer.cancel();
-          _disableSurfaceTextureDiagSwitch(serial: superseded ? null : serial);
-        }
-      },
-    );
+    _surfaceTextureDiagTimer =
+        Timer.periodic(const Duration(milliseconds: 500), (timer) {
+      final superseded = serial != _hdrOpenSerial;
+      if (!mounted ||
+          _autoPlayerDisposed ||
+          superseded ||
+          player.state.completed ||
+          _surfaceTextureDiagSerial == null) {
+        timer.cancel();
+        _disableSurfaceTextureDiagSwitch(serial: superseded ? null : serial);
+      }
+    });
   }
 
   /// Copy leg only (diag on, PoC off): appends the unlabeled signalstats
@@ -4089,15 +3882,12 @@ class _SinglePlayerSingleVideoScreenState
     }
     final original = await player.getProperty('vf');
     if (original.contains('signalstats')) {
-      debugPrint(
-        'MKSURF-COPY-DIAG: vf already carries signalstats; '
-        'append skipped',
-      );
+      debugPrint('MKSURF-COPY-DIAG: vf already carries signalstats; '
+          'append skipped');
       return;
     }
-    final updated = original.isEmpty
-        ? _copyDiagVfFilter
-        : '$original,$_copyDiagVfFilter';
+    final updated =
+        original.isEmpty ? _copyDiagVfFilter : '$original,$_copyDiagVfFilter';
     await player.setPropertyStrict('vf', updated);
     final actual = await player.getProperty('vf');
     // mpv normalizes the graph syntax (e.g. lavfi=[signalstats] becomes
@@ -4126,10 +3916,8 @@ class _SinglePlayerSingleVideoScreenState
       await player.setPropertyStrict('vf', original);
       final actual = await player.getProperty('vf');
       if (actual != original) {
-        debugPrint(
-          'MKSURF-COPY-DIAG: vf restore mismatch '
-          'requested=$original actual=$actual',
-        );
+        debugPrint('MKSURF-COPY-DIAG: vf restore mismatch '
+            'requested=$original actual=$actual');
       }
     } catch (error) {
       debugPrint('MKSURF-COPY-DIAG: vf restore failed: $error');
@@ -4147,19 +3935,15 @@ class _SinglePlayerSingleVideoScreenState
     }
     final original = await player.getProperty('vd-lavc-o');
     if (original.isNotEmpty) {
-      debugPrint(
-        'MKSURF-DIAG: vd-lavc-o already set ($original); '
-        'write skipped',
-      );
+      debugPrint('MKSURF-DIAG: vd-lavc-o already set ($original); '
+          'write skipped');
       return;
     }
     await player.setPropertyStrict('vd-lavc-o', _diagVdLavcOValue);
     final actual = await player.getProperty('vd-lavc-o');
     if (actual != _diagVdLavcOValue) {
-      throw StateError(
-        'vd-lavc-o rejected: requested=$_diagVdLavcOValue '
-        'actual=$actual',
-      );
+      throw StateError('vd-lavc-o rejected: requested=$_diagVdLavcOValue '
+          'actual=$actual');
     }
     _diagOriginalVdLavcO = original;
     _diagVdLavcOSerial = serial;
@@ -4179,10 +3963,8 @@ class _SinglePlayerSingleVideoScreenState
       await player.setPropertyStrict('vd-lavc-o', original);
       final actual = await player.getProperty('vd-lavc-o');
       if (actual != original) {
-        debugPrint(
-          'MKSURF-DIAG: vd-lavc-o restore mismatch '
-          'requested=$original actual=$actual',
-        );
+        debugPrint('MKSURF-DIAG: vd-lavc-o restore mismatch '
+            'requested=$original actual=$actual');
       }
     } catch (error) {
       debugPrint('MKSURF-DIAG: vd-lavc-o restore failed: $error');
@@ -4217,20 +3999,15 @@ class _SinglePlayerSingleVideoScreenState
     _copyDiagSampleInFlight = true;
     try {
       final pos = await player.getProperty('time-pos');
-      final yavg = await player.getProperty(
-        'vf-metadata/mksdiag/lavfi.signalstats.YAVG',
-      );
-      final ymin = await player.getProperty(
-        'vf-metadata/mksdiag/lavfi.signalstats.YMIN',
-      );
-      final ymax = await player.getProperty(
-        'vf-metadata/mksdiag/lavfi.signalstats.YMAX',
-      );
-      debugPrint(
-        'MKSURF-COPY-DIAG: t=${_copyDiagValue(pos)} '
-        'yavg=${_copyDiagValue(yavg)} ymin=${_copyDiagValue(ymin)} '
-        'ymax=${_copyDiagValue(ymax)}',
-      );
+      final yavg =
+          await player.getProperty('vf-metadata/mksdiag/lavfi.signalstats.YAVG');
+      final ymin =
+          await player.getProperty('vf-metadata/mksdiag/lavfi.signalstats.YMIN');
+      final ymax =
+          await player.getProperty('vf-metadata/mksdiag/lavfi.signalstats.YMAX');
+      debugPrint('MKSURF-COPY-DIAG: t=${_copyDiagValue(pos)} '
+          'yavg=${_copyDiagValue(yavg)} ymin=${_copyDiagValue(ymin)} '
+          'ymax=${_copyDiagValue(ymax)}');
     } catch (error) {
       debugPrint('MKSURF-COPY-DIAG: sample failed: $error');
     } finally {
@@ -4248,34 +4025,28 @@ class _SinglePlayerSingleVideoScreenState
     if (session == null) return;
     final report = session.report.value;
     _hdr10Journal?.recordReport(report);
-    debugPrint(
-      'HDR_SESSION_REPORT gen=${report.generation} '
-      'source=${report.source} origin=${report.sourceOrigin?.name} '
-      'verified=${report.verified} hwdecCurrent=${report.hwdecCurrent} '
-      'dataspace requested=${report.dataSpaceRequested} '
-      'path=${report.dataSpacePath} readback=${report.dataSpaceReadback} '
-      'degrade=${report.degradeReason?.name} '
-      'diagnostic=${report.diagnostic} error=${report.error}',
-    );
+    debugPrint('HDR_SESSION_REPORT gen=${report.generation} '
+        'source=${report.source} origin=${report.sourceOrigin?.name} '
+        'verified=${report.verified} hwdecCurrent=${report.hwdecCurrent} '
+        'dataspace requested=${report.dataSpaceRequested} '
+        'path=${report.dataSpacePath} readback=${report.dataSpaceReadback} '
+        'degrade=${report.degradeReason?.name} '
+        'diagnostic=${report.diagnostic} error=${report.error}');
     final prediction = report.prediction;
     if (prediction != null) {
-      debugPrint(
-        'HDR_SESSION_PREDICTION gen=${report.generation} '
-        'selected=${prediction.selected} '
-        'presentation=${prediction.presentation.name} '
-        'confidence=${prediction.confidence.name} '
-        'playable=${prediction.playable}',
-      );
+      debugPrint('HDR_SESSION_PREDICTION gen=${report.generation} '
+          'selected=${prediction.selected} '
+          'presentation=${prediction.presentation.name} '
+          'confidence=${prediction.confidence.name} '
+          'playable=${prediction.playable}');
       for (final candidate in prediction.candidates) {
         debugPrint(
-          'HDR_SESSION_CANDIDATE gen=${report.generation} candidate=$candidate',
-        );
+            'HDR_SESSION_CANDIDATE gen=${report.generation} candidate=$candidate');
       }
     }
     if (report.actual != null) {
       debugPrint(
-        'HDR_SESSION_ACTUAL gen=${report.generation} actual=${report.actual}',
-      );
+          'HDR_SESSION_ACTUAL gen=${report.generation} actual=${report.actual}');
     }
   }
 
@@ -4288,11 +4059,9 @@ class _SinglePlayerSingleVideoScreenState
     _hdrOpenSerial++;
     _hdrCurrentSource = source;
     await _requireHdrSession().open(Media(source), hint: _hintFor(source));
-    debugPrint(
-      'ANDROID_HDR_SDR_RECOVERY_OPEN path=$source '
-      'vo=${await player.getProperty('vo')} '
-      'hwdec=${await player.getProperty('hwdec-current')}',
-    );
+    debugPrint('ANDROID_HDR_SDR_RECOVERY_OPEN path=$source '
+        'vo=${await player.getProperty('vo')} '
+        'hwdec=${await player.getProperty('hwdec-current')}');
     if (mounted) _logHdrSessionReport();
   }
 
@@ -4301,11 +4070,9 @@ class _SinglePlayerSingleVideoScreenState
       await Future<void>.delayed(const Duration(seconds: 5));
       if (!mounted || _autoPlayerDisposed) return;
       setState(() => _dualViewPhase = phase);
-      debugPrint(
-        'ANDROID_DUAL_VIEW phase=$phase '
-        'position=${player.state.position.inMilliseconds} '
-        'playing=${player.state.playing}',
-      );
+      debugPrint('ANDROID_DUAL_VIEW phase=$phase '
+          'position=${player.state.position.inMilliseconds} '
+          'playing=${player.state.playing}');
     }
   }
 
@@ -4329,10 +4096,8 @@ class _SinglePlayerSingleVideoScreenState
     }
   }
 
-  Future<void> _openSelectedSource(
-    String source, {
-    bool rethrowErrors = false,
-  }) async {
+  Future<void> _openSelectedSource(String source,
+      {bool rethrowErrors = false}) async {
     if (_androidNativeDvSessionDiagnostic &&
         source != androidNativeDvSessionDiagnosticSource) {
       throw StateError(
@@ -4354,10 +4119,10 @@ class _SinglePlayerSingleVideoScreenState
           !_androidPreopenFullscreen) {
         final started = await _flutterSurfaceProbeChannel
             .invokeMapMethod<String, dynamic>('StartFirstFrameProbe', {
-              'target': configuration.value.android.usePlatformView
-                  ? 'platform'
-                  : 'flutter',
-            });
+          'target': configuration.value.android.usePlatformView
+              ? 'platform'
+              : 'flutter',
+        });
         debugPrint('FIRST_FRAME_PIXEL_COPY started=$started');
       }
       if (Platform.isAndroid && _androidTapFullscreenBeforeOpen) {
@@ -4501,9 +4266,8 @@ class _SinglePlayerSingleVideoScreenState
         await second.setPlaylistMode(PlaylistMode.loop);
         await second.open(Media(_androidDualPlayerSource));
         debugPrint(
-          'ANDROID_DUAL_PLAYER second_open path=$_androidDualPlayerSource '
-          'position=${second.state.position}',
-        );
+            'ANDROID_DUAL_PLAYER second_open path=$_androidDualPlayerSource '
+            'position=${second.state.position}');
         if (!mounted) {
           await second.dispose();
           return;
@@ -4519,9 +4283,8 @@ class _SinglePlayerSingleVideoScreenState
     }();
   }
 
-  static const _engineControlChannel = MethodChannel(
-    'media_kit_hdr_lab/engine_control',
-  );
+  static const _engineControlChannel =
+      MethodChannel('media_kit_hdr_lab/engine_control');
   static const _autoStartSeconds = String.fromEnvironment(
     'MEDIA_KIT_AUTO_START_SECONDS',
   );
@@ -4624,8 +4387,7 @@ class _SinglePlayerSingleVideoScreenState
       final actual = await player.getProperty(entry.key);
       if (actual.toString() != entry.value) {
         throw StateError(
-          'Android scaler property ${entry.key} rejected: $actual',
-        );
+            'Android scaler property ${entry.key} rejected: $actual');
       }
       debugPrint('ANDROID_SCALER ${entry.key}=$actual');
     }
@@ -4721,9 +4483,8 @@ class _SinglePlayerSingleVideoScreenState
     if (_tickReadbackInFlight) return;
     _tickReadbackInFlight = true;
     try {
-      final boundary =
-          _tickReadbackKey.currentContext?.findRenderObject()
-              as RenderRepaintBoundary?;
+      final boundary = _tickReadbackKey.currentContext?.findRenderObject()
+          as RenderRepaintBoundary?;
       if (boundary == null) return;
       final image = await boundary.toImage(pixelRatio: 1.0);
       final bytes = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
@@ -4734,8 +4495,7 @@ class _SinglePlayerSingleVideoScreenState
         hash = ((hash ^ byte) * 16777619) & 0xffffffff;
       }
       debugPrint(
-        'FLUTTER_TICK_READBACK tick=$tick hash=${hash.toRadixString(16)}',
-      );
+          'FLUTTER_TICK_READBACK tick=$tick hash=${hash.toRadixString(16)}');
       try {
         final pixelCopyHash = await _flutterSurfaceProbeChannel
             .invokeMethod<String>('CopyVideoPixels');
@@ -4759,10 +4519,10 @@ class _SinglePlayerSingleVideoScreenState
       logLevel: _androidCodecTraceLog
           ? MPVLogLevel.trace
           : (_androidVulkanProbe ||
-                _androidVerboseLog ||
-                _androidHdr10SessionDiagnostic)
-          ? MPVLogLevel.v
-          : MPVLogLevel.error,
+                  _androidVerboseLog ||
+                  _androidHdr10SessionDiagnostic)
+              ? MPVLogLevel.v
+              : MPVLogLevel.error,
     ),
   );
   late final VideoController _initialController = VideoController(
@@ -4773,8 +4533,8 @@ class _SinglePlayerSingleVideoScreenState
 
   VideoController get _hdrTransactionController =>
       Platform.isAndroid && _androidHdrTransaction
-      ? _hdrSession?.controller.value ?? _initialController
-      : _initialController;
+          ? _hdrSession?.controller.value ?? _initialController
+          : _initialController;
 
   Future<Map<String, Object?>?> _androidServiceProbeSurfaceSnapshot() async {
     final controller = _hdrTransactionController;
@@ -4806,11 +4566,10 @@ class _SinglePlayerSingleVideoScreenState
   void initState() {
     super.initState();
     AndroidHdrConvertExperiment.validateVisual278Admission(
-      enabled: _androidLgVisual278Experiment,
-      routeLocked: _androidHdrConvertRouteLock,
-      android: Platform.isAndroid,
-      hdrTransaction: _androidHdrTransaction,
-    );
+        enabled: _androidLgVisual278Experiment,
+        routeLocked: _androidHdrConvertRouteLock,
+        android: Platform.isAndroid,
+        hdrTransaction: _androidHdrTransaction);
     if (_androidLgVisual278Experiment &&
         (_androidDualPlayerView ||
             _androidDualViewLifecycleProbe ||
@@ -4818,8 +4577,7 @@ class _SinglePlayerSingleVideoScreenState
             _androidP5InplaceFullscreen ||
             _androidP5AutoFullscreenAtSeconds >= 0)) {
       throw StateError(
-        'LG visual278 experiment excludes multi-output/fullscreen modes',
-      );
+          'LG visual278 experiment excludes multi-output/fullscreen modes');
     }
     if (_androidHdrConvertRouteLock &&
         (!Platform.isAndroid ||
@@ -4828,8 +4586,7 @@ class _SinglePlayerSingleVideoScreenState
             _androidPreopenFullscreen ||
             _androidNoMediaProbe)) {
       throw StateError(
-        'Convert route lock requires the Android Session open path',
-      );
+          'Convert route lock requires the Android Session open path');
     }
     if ((_androidMpvOutputLevels.isNotEmpty || _androidVfFullRange) &&
         !_androidHdrTransaction) {
@@ -4850,31 +4607,22 @@ class _SinglePlayerSingleVideoScreenState
       _hdr10CodecLogSubscription = player.stream.log.listen(
         (log) {
           journal.recordCodecFormatLog(
-            prefix: log.prefix,
-            level: log.level,
-            text: log.text,
-          );
+              prefix: log.prefix, level: log.level, text: log.text);
         },
         onError: (Object error, StackTrace stack) =>
             journal.recordError(error, stack),
       );
       final startup = _startHdr10Diagnostic();
       _hdr10Startup = startup;
-      unawaited(
-        startup.then<void>(
-          (_) {},
+      unawaited(startup.then<void>((_) {},
           onError: (Object error, StackTrace stack) async {
-            journal.recordError(error, stack);
-            _hdr10BuildError ??= '$error';
-            try {
-              await journal.writeNow();
-            } catch (_) {
-              /* retained by journal */
-            }
-            if (mounted) setState(() {});
-          },
-        ),
-      );
+        journal.recordError(error, stack);
+        _hdr10BuildError ??= '$error';
+        try {
+          await journal.writeNow();
+        } catch (_) {/* retained by journal */}
+        if (mounted) setState(() {});
+      }));
       return;
     }
     if (_androidNativeDvSessionDiagnostic ||
@@ -4886,9 +4634,8 @@ class _SinglePlayerSingleVideoScreenState
       if (_nativeDvSessionDiagnosticError != null) return;
       if (_androidNativeDvSessionNegativeN1) {
         _nativeDvN1 = AndroidNativeDvN1Run(
-          externalIdentityLabel: _androidNativeDvReleaseDiagnosticIdentity,
-          durationSeconds: _androidNativeDvReleaseDiagnosticSeconds,
-        );
+            externalIdentityLabel: _androidNativeDvReleaseDiagnosticIdentity,
+            durationSeconds: _androidNativeDvReleaseDiagnosticSeconds);
         _nativeDvSessionVideoMounted = false;
       }
       if (_androidNativeDvSessionLifecycleActions) {
@@ -4897,22 +4644,16 @@ class _SinglePlayerSingleVideoScreenState
           externalIdentityLabel: _androidNativeDvReleaseDiagnosticIdentity,
         );
         for (final actionId in androidNativeDvSessionLifecycleActions) {
-          lifecycle.setActionEnabled(
-            actionId,
-            false,
-            reason: 'startup segment not yet accepted',
-          );
+          lifecycle.setActionEnabled(actionId, false,
+              reason: 'startup segment not yet accepted');
         }
         _nativeDvSessionStateSubscriptions.addAll(<StreamSubscription<bool>>[
-          player.stream.playing.listen(
-            (_) => _refreshNativeDvSessionLifecycleActions(),
-          ),
-          player.stream.completed.listen(
-            (_) => _refreshNativeDvSessionLifecycleActions(),
-          ),
-          player.stream.buffering.listen(
-            (_) => _refreshNativeDvSessionLifecycleActions(),
-          ),
+          player.stream.playing
+              .listen((_) => _refreshNativeDvSessionLifecycleActions()),
+          player.stream.completed
+              .listen((_) => _refreshNativeDvSessionLifecycleActions()),
+          player.stream.buffering
+              .listen((_) => _refreshNativeDvSessionLifecycleActions()),
         ]);
         _nativeDvSessionLifecycleRun = lifecycle;
       }
@@ -4928,24 +4669,19 @@ class _SinglePlayerSingleVideoScreenState
       _nativeDvSessionDiagnostic = diagnostic;
       final startup = _startNativeDvSessionDiagnostic();
       _nativeDvSessionStartup = startup;
-      unawaited(
-        startup.then<void>(
-          (_) {
-            if (identical(_nativeDvSessionStartup, startup)) {
-              _nativeDvSessionStartup = null;
-            }
-          },
-          onError: (Object error, StackTrace stack) {
-            if (identical(_nativeDvSessionStartup, startup)) {
-              _nativeDvSessionStartup = null;
-            }
-            _nativeDvSessionDiagnosticError = '$error';
-            _nativeDvSessionLifecycleRun?.markDebt('startup failed: $error');
-            debugPrint('NATIVE_DV_SESSION_DIAGNOSTIC_START_ERROR=$error');
-            if (mounted) setState(() {});
-          },
-        ),
-      );
+      unawaited(startup.then<void>((_) {
+        if (identical(_nativeDvSessionStartup, startup)) {
+          _nativeDvSessionStartup = null;
+        }
+      }, onError: (Object error, StackTrace stack) {
+        if (identical(_nativeDvSessionStartup, startup)) {
+          _nativeDvSessionStartup = null;
+        }
+        _nativeDvSessionDiagnosticError = '$error';
+        _nativeDvSessionLifecycleRun?.markDebt('startup failed: $error');
+        debugPrint('NATIVE_DV_SESSION_DIAGNOSTIC_START_ERROR=$error');
+        if (mounted) setState(() {});
+      }));
       if (_androidNativeDvSessionLifecycleActions) {
         WidgetsBinding.instance.addObserver(this);
       }
@@ -4956,31 +4692,27 @@ class _SinglePlayerSingleVideoScreenState
           _validateNativeDvReleaseDiagnosticBuild();
       final startup = _openInitialSource();
       _nativeDvPageStartupFuture = startup;
-      unawaited(
-        startup.then<void>(
-          (_) {
-            if (identical(_nativeDvPageStartupFuture, startup)) {
-              _nativeDvPageStartupFuture = null;
-            }
-          },
-          onError: (Object error, StackTrace stack) {
-            if (identical(_nativeDvPageStartupFuture, startup)) {
-              _nativeDvPageStartupFuture = null;
-            }
-            _nativeDvReleaseDiagnosticBuildError ??= '$error';
-            debugPrint('NATIVE_DV_RELEASE_DIAGNOSTIC_START_ERROR=$error');
-            if (mounted) setState(() {});
-          },
-        ),
-      );
+      unawaited(startup.then<void>(
+        (_) {
+          if (identical(_nativeDvPageStartupFuture, startup)) {
+            _nativeDvPageStartupFuture = null;
+          }
+        },
+        onError: (Object error, StackTrace stack) {
+          if (identical(_nativeDvPageStartupFuture, startup)) {
+            _nativeDvPageStartupFuture = null;
+          }
+          _nativeDvReleaseDiagnosticBuildError ??= '$error';
+          debugPrint('NATIVE_DV_RELEASE_DIAGNOSTIC_START_ERROR=$error');
+          if (mounted) setState(() {});
+        },
+      ));
       return;
     }
     AndroidServiceProbe.attach(
-      player,
-      (source) => _openSelectedSource(source, rethrowErrors: true),
-      report: () => _hdrSession?.report.value.toString(),
-      surfaceSnapshot: _androidServiceProbeSurfaceSnapshot,
-    );
+        player, (source) => _openSelectedSource(source, rethrowErrors: true),
+        report: () => _hdrSession?.report.value.toString(),
+        surfaceSnapshot: _androidServiceProbeSurfaceSnapshot);
     if (Platform.isAndroid && _androidHdrTransaction) {
       // migrated to HdrVideoSession (S10): the session owns the HDR open
       // orchestration for the page's lifetime.
@@ -4998,10 +4730,8 @@ class _SinglePlayerSingleVideoScreenState
           () async {
             if (!mounted || _autoPlayerDisposed) return;
             await _requireHdrSession().setPreference(HdrOutputPreference.off);
-            debugPrint(
-              'HDR_PREFERENCE_SWAP off at '
-              '${player.state.position.inMilliseconds}ms',
-            );
+            debugPrint('HDR_PREFERENCE_SWAP off at '
+                '${player.state.position.inMilliseconds}ms');
           },
         );
         Future<void>.delayed(
@@ -5009,10 +4739,8 @@ class _SinglePlayerSingleVideoScreenState
           () async {
             if (!mounted || _autoPlayerDisposed) return;
             await _requireHdrSession().setPreference(HdrOutputPreference.auto);
-            debugPrint(
-              'HDR_PREFERENCE_SWAP auto at '
-              '${player.state.position.inMilliseconds}ms',
-            );
+            debugPrint('HDR_PREFERENCE_SWAP auto at '
+                '${player.state.position.inMilliseconds}ms');
           },
         );
       }
@@ -5023,10 +4751,8 @@ class _SinglePlayerSingleVideoScreenState
           () async {
             if (!mounted || _autoPlayerDisposed) return;
             await _requireHdrSession().setPolicy(_hdrRoutingPolicy());
-            debugPrint(
-              'HDR_POLICY_SWAP at '
-              '${player.state.position.inMilliseconds}ms',
-            );
+            debugPrint('HDR_POLICY_SWAP at '
+                '${player.state.position.inMilliseconds}ms');
           },
         );
       }
@@ -5097,53 +4823,47 @@ class _SinglePlayerSingleVideoScreenState
       unawaited(
         const MethodChannel('media_kit_hdr_lab/p5_codec_probe')
             .invokeMapMethod<String, dynamic>('Run', {
-              'path': _androidP5CodecProbePath,
-              'maxFrames': _androidP5CodecProbeMaxFrames != 250
-                  ? _androidP5CodecProbeMaxFrames
-                  : _androidP5CodecSurfaceProbe &&
-                        !_androidP5CodecCpuReadProbe &&
-                        !_androidP5CodecGpuImportProbe &&
-                        !_androidP5CodecNativeReaderProbe
+          'path': _androidP5CodecProbePath,
+          'maxFrames': _androidP5CodecProbeMaxFrames != 250
+              ? _androidP5CodecProbeMaxFrames
+              : _androidP5CodecSurfaceProbe &&
+                      !_androidP5CodecCpuReadProbe &&
+                      !_androidP5CodecGpuImportProbe &&
+                      !_androidP5CodecNativeReaderProbe
                   ? 32
                   : 250,
-              'surfaceMode': _androidP5CodecSurfaceProbe,
-              'cpuRead': _androidP5CodecCpuReadProbe,
-              'gpuImport': _androidP5CodecGpuImportProbe,
-              'readerWidth': _androidP5CodecReaderWidth,
-              'readerHeight': _androidP5CodecReaderHeight,
-              'readerMaxImages': _androidP5CodecReaderMaxImages,
-              'nativeReaderMode': _androidP5CodecNativeReaderProbe,
-              'deferredAcquire': _androidP5CodecDeferredAcquireProbe,
-              'holdPreviousImage': _androidP5CodecHoldPreviousImageProbe,
-            })
-            .then(
-              (report) {
-                report?.forEach((key, value) {
-                  if (key == 'surfaceImages' && value is List) {
-                    for (final image in value) {
-                      final serialized = image.toString();
-                      for (
-                        var offset = 0;
-                        offset < serialized.length;
-                        offset += 700
-                      ) {
-                        final end = offset + 700 < serialized.length
-                            ? offset + 700
-                            : serialized.length;
-                        debugPrint(
-                          'P5_CODEC_PROBE image_part=$offset '
-                          '${serialized.substring(offset, end)}',
-                        );
-                      }
-                    }
-                  } else {
-                    debugPrint('P5_CODEC_PROBE $key=$value');
+          'surfaceMode': _androidP5CodecSurfaceProbe,
+          'cpuRead': _androidP5CodecCpuReadProbe,
+          'gpuImport': _androidP5CodecGpuImportProbe,
+          'readerWidth': _androidP5CodecReaderWidth,
+          'readerHeight': _androidP5CodecReaderHeight,
+          'readerMaxImages': _androidP5CodecReaderMaxImages,
+          'nativeReaderMode': _androidP5CodecNativeReaderProbe,
+          'deferredAcquire': _androidP5CodecDeferredAcquireProbe,
+          'holdPreviousImage': _androidP5CodecHoldPreviousImageProbe,
+        }).then(
+          (report) {
+            report?.forEach((key, value) {
+              if (key == 'surfaceImages' && value is List) {
+                for (final image in value) {
+                  final serialized = image.toString();
+                  for (var offset = 0;
+                      offset < serialized.length;
+                      offset += 700) {
+                    final end = offset + 700 < serialized.length
+                        ? offset + 700
+                        : serialized.length;
+                    debugPrint('P5_CODEC_PROBE image_part=$offset '
+                        '${serialized.substring(offset, end)}');
                   }
-                });
-              },
-              onError: (Object error) =>
-                  debugPrint('P5_CODEC_PROBE ERROR=$error'),
-            ),
+                }
+              } else {
+                debugPrint('P5_CODEC_PROBE $key=$value');
+              }
+            });
+          },
+          onError: (Object error) => debugPrint('P5_CODEC_PROBE ERROR=$error'),
+        ),
       );
     }
     if (Platform.isAndroid &&
@@ -5152,38 +4872,33 @@ class _SinglePlayerSingleVideoScreenState
     } else if (Platform.isAndroid && _androidNoMediaProbe) {
       debugPrint('ANDROID_NO_MEDIA_PROBE PlatformView mounted without open');
     } else {
-      const autoPauseAtSeconds = int.fromEnvironment(
-        'MEDIA_KIT_AUTO_PAUSE_AT_SECONDS',
-      );
+      const autoPauseAtSeconds =
+          int.fromEnvironment('MEDIA_KIT_AUTO_PAUSE_AT_SECONDS');
       if (autoPauseAtSeconds > 0) {
-        Future<void>.delayed(Duration(seconds: autoPauseAtSeconds), () async {
-          if (!mounted || _autoPlayerDisposed) return;
-          await player.pause();
-          debugPrint('AUTO_PAUSE_AT position=${player.state.position}');
-        });
+        Future<void>.delayed(
+          Duration(seconds: autoPauseAtSeconds),
+          () async {
+            if (!mounted || _autoPlayerDisposed) return;
+            await player.pause();
+            debugPrint('AUTO_PAUSE_AT position=${player.state.position}');
+          },
+        );
       }
       if (_androidOutputMaxWidth > 0) {
         unawaited(
-          Future<void>.delayed(const Duration(seconds: 6)).then((_) async {
-            try {
-              // 2:1 source aspect; the width cap keeps supersampling over the
-              // 1440-wide panel while halving the GPU pixel load.
-              final height = (_androidOutputMaxWidth * 1920 ~/ 3840);
-              await player.setProperty(
-                'android-surface-size',
-                '$_androidOutputMaxWidth'
-                    'x'
-                    '$height',
-              );
-              debugPrint(
-                'OUTPUT_MAX_WIDTH=$_androidOutputMaxWidth applied '
-                '${_androidOutputMaxWidth}x$height',
-              );
-            } catch (error) {
-              debugPrint('OUTPUT_MAX_WIDTH error=$error');
-            }
-          }),
-        );
+            Future<void>.delayed(const Duration(seconds: 6)).then((_) async {
+          try {
+            // 2:1 source aspect; the width cap keeps supersampling over the
+            // 1440-wide panel while halving the GPU pixel load.
+            final height = (_androidOutputMaxWidth * 1920 ~/ 3840);
+            await player.setProperty('android-surface-size',
+                '$_androidOutputMaxWidth' 'x' '$height');
+            debugPrint('OUTPUT_MAX_WIDTH=$_androidOutputMaxWidth applied '
+                '${_androidOutputMaxWidth}x$height');
+          } catch (error) {
+            debugPrint('OUTPUT_MAX_WIDTH error=$error');
+          }
+        }));
       }
       if (_androidMpvTargetPeak.isNotEmpty) {
         unawaited(() async {
@@ -5206,26 +4921,18 @@ class _SinglePlayerSingleVideoScreenState
         }());
       }
       if (_androidDataSpacePerformProbe) {
-        unawaited(
-          Future<void>.delayed(const Duration(seconds: 12))
-              .then((_) {
-                const channel = MethodChannel(
-                  'media_kit_hdr_lab/dataspace_perform_probe',
-                );
-                return channel.invokeMethod<Object>('Run', <String, Object>{
-                  'dataSpace': 0x09C60000,
-                  'observeSeconds': 8,
-                });
-              })
-              .then(
-                (value) {
-                  debugPrint('DATASPACE_PROBE result=$value');
-                },
-                onError: (Object error) {
-                  debugPrint('DATASPACE_PROBE error=$error');
-                },
-              ),
-        );
+        unawaited(Future<void>.delayed(const Duration(seconds: 12)).then((_) {
+          const channel =
+              MethodChannel('media_kit_hdr_lab/dataspace_perform_probe');
+          return channel.invokeMethod<Object>('Run', <String, Object>{
+            'dataSpace': 0x09C60000,
+            'observeSeconds': 8,
+          });
+        }).then((value) {
+          debugPrint('DATASPACE_PROBE result=$value');
+        }, onError: (Object error) {
+          debugPrint('DATASPACE_PROBE error=$error');
+        }));
       }
       if (_androidAvTrace) {
         Timer.periodic(const Duration(seconds: 2), (timer) {
@@ -5237,17 +4944,16 @@ class _SinglePlayerSingleVideoScreenState
             try {
               final tracePlayer = player;
               debugPrint(
-                'AVTRACE pos=${await tracePlayer.getProperty('time-pos', waitForInitialization: false)} '
-                'pause=${await tracePlayer.getProperty('pause', waitForInitialization: false)} '
-                'decDrop=${await tracePlayer.getProperty('decoder-frame-drop-count', waitForInitialization: false)} '
-                'voDelayed=${await tracePlayer.getProperty('vo-delayed-frame-count', waitForInitialization: false)} '
-                'frames=${await tracePlayer.getProperty('frame-count', waitForInitialization: false)} '
-                'vbitrate=${await tracePlayer.getProperty('video-bitrate', waitForInitialization: false)} '
-                'cacheDur=${await tracePlayer.getProperty('demuxer-cache-duration', waitForInitialization: false)} '
-                'vfps=${await tracePlayer.getProperty('estimated-vf-fps', waitForInitialization: false)} '
-                'completed=${tracePlayer.state.completed} '
-                'buffering=${tracePlayer.state.buffering}',
-              );
+                  'AVTRACE pos=${await tracePlayer.getProperty('time-pos', waitForInitialization: false)} '
+                  'pause=${await tracePlayer.getProperty('pause', waitForInitialization: false)} '
+                  'decDrop=${await tracePlayer.getProperty('decoder-frame-drop-count', waitForInitialization: false)} '
+                  'voDelayed=${await tracePlayer.getProperty('vo-delayed-frame-count', waitForInitialization: false)} '
+                  'frames=${await tracePlayer.getProperty('frame-count', waitForInitialization: false)} '
+                  'vbitrate=${await tracePlayer.getProperty('video-bitrate', waitForInitialization: false)} '
+                  'cacheDur=${await tracePlayer.getProperty('demuxer-cache-duration', waitForInitialization: false)} '
+                  'vfps=${await tracePlayer.getProperty('estimated-vf-fps', waitForInitialization: false)} '
+                  'completed=${tracePlayer.state.completed} '
+                  'buffering=${tracePlayer.state.buffering}');
             } catch (error) {
               debugPrint('AVTRACE error=$error');
             }
@@ -5264,10 +4970,8 @@ class _SinglePlayerSingleVideoScreenState
           unawaited(() async {
             try {
               final passesPlayer = player;
-              final passes = await passesPlayer.getProperty(
-                'vo-passes',
-                waitForInitialization: false,
-              );
+              final passes = await passesPlayer.getProperty('vo-passes',
+                  waitForInitialization: false);
               debugPrint('VOPASSES len=${passes.length} $passes');
             } catch (error) {
               voPassesFailures += 1;
@@ -5278,38 +4982,35 @@ class _SinglePlayerSingleVideoScreenState
           }());
         });
       }
-      unawaited(
-        _openInitialSource().catchError((Object error, StackTrace stack) async {
-          debugPrint('AUTO_SOURCE ERROR=$error');
-          debugPrintStack(stackTrace: stack);
-          if (!Platform.isAndroid ||
-              !_androidHdrTransaction ||
-              _androidRecoverySources.isEmpty) {
-            return;
+      unawaited(_openInitialSource()
+          .catchError((Object error, StackTrace stack) async {
+        debugPrint('AUTO_SOURCE ERROR=$error');
+        debugPrintStack(stackTrace: stack);
+        if (!Platform.isAndroid ||
+            !_androidHdrTransaction ||
+            _androidRecoverySources.isEmpty) {
+          return;
+        }
+        for (final source in _androidRecoverySources.split(',')) {
+          if (!mounted || source.isEmpty) {
+            break;
           }
-          for (final source in _androidRecoverySources.split(',')) {
-            if (!mounted || source.isEmpty) {
+          try {
+            if (source.startsWith('sdr:')) {
+              await _openDirectSdrAfterHdr(source.substring(4));
               break;
             }
-            try {
-              if (source.startsWith('sdr:')) {
-                await _openDirectSdrAfterHdr(source.substring(4));
-                break;
-              }
-              await _openHdrSource(source);
-              debugPrint('ANDROID_HDR_RECOVERY_OPEN path=$source');
-              await Future<void>.delayed(const Duration(seconds: 5));
-            } catch (recoveryError, recoveryStack) {
-              debugPrint(
-                'ANDROID_HDR_RECOVERY_ERROR source=$source '
-                'error=$recoveryError',
-              );
-              debugPrintStack(stackTrace: recoveryStack);
-              break;
-            }
+            await _openHdrSource(source);
+            debugPrint('ANDROID_HDR_RECOVERY_OPEN path=$source');
+            await Future<void>.delayed(const Duration(seconds: 5));
+          } catch (recoveryError, recoveryStack) {
+            debugPrint('ANDROID_HDR_RECOVERY_ERROR source=$source '
+                'error=$recoveryError');
+            debugPrintStack(stackTrace: recoveryStack);
+            break;
           }
-        }),
-      );
+        }
+      }));
     }
     if (const bool.fromEnvironment('MEDIA_KIT_AUTO_RESIZE')) {
       Future<void>.delayed(const Duration(seconds: 6), () {
@@ -5343,13 +5044,17 @@ class _SinglePlayerSingleVideoScreenState
     }
     player.stream.error.listen((error) => debugPrint(error));
     if (Platform.isAndroid && _androidPerfProbe) {
-      player.stream.completed.listen((completed) {
-        debugPrint('AUTO_COMPLETED completed=$completed');
-        if (completed) unawaited(_sampleAndroidP5Counters());
-      });
+      player.stream.completed.listen(
+        (completed) {
+          debugPrint('AUTO_COMPLETED completed=$completed');
+          if (completed) unawaited(_sampleAndroidP5Counters());
+        },
+      );
     }
     player.stream.log.listen(
-      (log) => debugPrint('MPVLOG [${log.prefix}] ${log.level}: ${log.text}'),
+      (log) => debugPrint(
+        'MPVLOG [${log.prefix}] ${log.level}: ${log.text}',
+      ),
     );
     player.stream.videoParams.listen(
       (params) => debugPrint('VIDEOPARAMS $params'),
@@ -5404,17 +5109,15 @@ class _SinglePlayerSingleVideoScreenState
           debugPrint('HDR_CAP_LAB ERROR=$error');
         }
         try {
-          final lib = await _videoChannel.invokeMapMethod<String, dynamic>(
-            'HdrCapabilities.Get',
-          );
+          final lib = await _videoChannel
+              .invokeMapMethod<String, dynamic>('HdrCapabilities.Get');
           debugPrint('HDR_CAP_LIB_CHANNEL $lib');
         } catch (error) {
           debugPrint('HDR_CAP_LIB_CHANNEL ERROR=$error');
         }
         try {
           final caps = (await VideoRouteCapabilities.query(
-            target: const VideoOutputTarget.applicationView(),
-          )).hdr;
+        target: const VideoOutputTarget.applicationView())).hdr;
           debugPrint('HDR_CAP_QUERY $caps');
         } catch (error) {
           debugPrint('HDR_CAP_QUERY ERROR=$error');
@@ -5429,7 +5132,7 @@ class _SinglePlayerSingleVideoScreenState
               'PlatformVideoView.ApplyDataSpace',
               {
                 'handle': handle.toString(),
-                'transfer': _androidSurfaceTransfer,
+                'transfer': _androidSurfaceTransfer
               },
             );
             debugPrint(
@@ -5462,7 +5165,10 @@ class _SinglePlayerSingleVideoScreenState
           ]) {
             try {
               final value = await player
-                  .getProperty(property, waitForInitialization: false)
+                  .getProperty(
+                    property,
+                    waitForInitialization: false,
+                  )
                   .timeout(const Duration(seconds: 2));
               debugPrint('PERF t=$second $property=$value');
             } catch (error) {
@@ -5479,12 +5185,11 @@ class _SinglePlayerSingleVideoScreenState
           }
           if (_androidTextureConsumerProbe) {
             try {
-              final stats = await _videoChannel
-                  .invokeMapMethod<String, dynamic>(
-                    'VideoOutputManager.GetConsumerStats',
-                    {'handle': (await player.handle).toString()},
-                  )
-                  .timeout(const Duration(seconds: 2));
+              final stats =
+                  await _videoChannel.invokeMapMethod<String, dynamic>(
+                'VideoOutputManager.GetConsumerStats',
+                {'handle': (await player.handle).toString()},
+              ).timeout(const Duration(seconds: 2));
               debugPrint('PERF t=$second texture-consumer=$stats');
             } catch (error) {
               debugPrint('PERF t=$second texture-consumer ERROR=$error');
@@ -5516,69 +5221,55 @@ class _SinglePlayerSingleVideoScreenState
       if (_previousLifecycleState == AppLifecycleState.resumed &&
           state == AppLifecycleState.inactive) {
         _hdrResumeOpenSerial = player.state.playing ? _hdrOpenSerial : null;
-        debugPrint(
-          'ANDROID_HDR_AUTO_RESUME capturedPlaying='
-          '${_hdrResumeOpenSerial != null} '
-          'position=${player.state.position.inMilliseconds}',
-        );
+        debugPrint('ANDROID_HDR_AUTO_RESUME capturedPlaying='
+            '${_hdrResumeOpenSerial != null} '
+            'position=${player.state.position.inMilliseconds}');
       } else if (state == AppLifecycleState.resumed) {
         final resumeSerial = _hdrResumeOpenSerial;
         _hdrResumeOpenSerial = null;
         if (resumeSerial != null) {
-          unawaited(
-            () async {
-              if (resumeSerial != _hdrOpenSerial) return;
-              // migrated to HdrVideoSession (S10): the old source-intent
-              // gate + coordinator.runForCurrent pair is replaced by the open
-              // serial guard; the output-bind wait uses the session's current
-              // controller.
-              final controller = _hdrSession?.controller.value;
-              if (controller == null) return;
-              final platform = await controller.platform.future;
-              await platform.waitUntilCurrentOutputBound.timeout(
-                const Duration(seconds: 10),
-              );
-              if (!mounted || resumeSerial != _hdrOpenSerial) return;
-              await player.play();
-              debugPrint(
-                'ANDROID_HDR_AUTO_RESUME played '
-                'position=${player.state.position.inMilliseconds}',
-              );
-            }().catchError((Object error) {
-              debugPrint('ANDROID_HDR_AUTO_RESUME error=$error');
-            }),
-          );
+          unawaited(() async {
+            if (resumeSerial != _hdrOpenSerial) return;
+            // migrated to HdrVideoSession (S10): the old source-intent
+            // gate + coordinator.runForCurrent pair is replaced by the open
+            // serial guard; the output-bind wait uses the session's current
+            // controller.
+            final controller = _hdrSession?.controller.value;
+            if (controller == null) return;
+            final platform = await controller.platform.future;
+            await platform.waitUntilCurrentOutputBound
+                .timeout(const Duration(seconds: 10));
+            if (!mounted || resumeSerial != _hdrOpenSerial) return;
+            await player.play();
+            debugPrint('ANDROID_HDR_AUTO_RESUME played '
+                'position=${player.state.position.inMilliseconds}');
+          }()
+              .catchError((Object error) {
+            debugPrint('ANDROID_HDR_AUTO_RESUME error=$error');
+          }));
         }
       }
     }
     if (Platform.isAndroid &&
         _androidHdrTransaction &&
         _androidHdrLifecyclePositionProbe) {
-      debugPrint(
-        'ANDROID_HDR_LIFECYCLE state=$state '
-        'cachedPosition=${player.state.position.inMilliseconds} '
-        'playing=${player.state.playing} '
-        'time=${DateTime.now().toIso8601String()}',
-      );
-      unawaited(
-        player
-            .getProperty('time-pos', waitForInitialization: false)
-            .timeout(const Duration(seconds: 2))
-            .then(
+      debugPrint('ANDROID_HDR_LIFECYCLE state=$state '
+          'cachedPosition=${player.state.position.inMilliseconds} '
+          'playing=${player.state.playing} '
+          'time=${DateTime.now().toIso8601String()}');
+      unawaited(player
+          .getProperty('time-pos', waitForInitialization: false)
+          .timeout(const Duration(seconds: 2))
+          .then(
               (value) => debugPrint(
-                'ANDROID_HDR_LIFECYCLE_MPV state=$state timePos=$value '
-                'time=${DateTime.now().toIso8601String()}',
-              ),
+                  'ANDROID_HDR_LIFECYCLE_MPV state=$state timePos=$value '
+                  'time=${DateTime.now().toIso8601String()}'),
               onError: (Object error) => debugPrint(
-                'ANDROID_HDR_LIFECYCLE_MPV state=$state error=$error',
-              ),
-            ),
-      );
+                  'ANDROID_HDR_LIFECYCLE_MPV state=$state error=$error')));
     }
     if (Platform.isAndroid && _androidPreDestroyVidStop) {
       debugPrint(
-        'LIFECYCLE_STATE $_previousLifecycleState -> $state ${DateTime.now().toIso8601String()}',
-      );
+          'LIFECYCLE_STATE $_previousLifecycleState -> $state ${DateTime.now().toIso8601String()}');
     }
     if (Platform.isAndroid &&
         _androidPreDestroyVidStop &&
@@ -5590,22 +5281,13 @@ class _SinglePlayerSingleVideoScreenState
         return;
       }
       debugPrint(
-        'PRE_DESTROY_VID_STOP begin ${DateTime.now().toIso8601String()}',
-      );
-      unawaited(
-        player
-            .setProperty('vid', 'no')
-            .then(
-              (_) {
-                debugPrint(
-                  'PRE_DESTROY_VID_STOP complete ${DateTime.now().toIso8601String()}',
-                );
-              },
-              onError: (Object error) {
-                debugPrint('PRE_DESTROY_VID_STOP error=$error');
-              },
-            ),
-      );
+          'PRE_DESTROY_VID_STOP begin ${DateTime.now().toIso8601String()}');
+      unawaited(player.setProperty('vid', 'no').then((_) {
+        debugPrint(
+            'PRE_DESTROY_VID_STOP complete ${DateTime.now().toIso8601String()}');
+      }, onError: (Object error) {
+        debugPrint('PRE_DESTROY_VID_STOP error=$error');
+      }));
     }
     if (Platform.isAndroid &&
         (_androidPostBindSeekProbe || _androidPostBindReopenProbe) &&
@@ -5614,47 +5296,43 @@ class _SinglePlayerSingleVideoScreenState
       _preDestroyStopped = false;
       final openSerialBeforeResume = _hdrOpenSerial;
       unawaited(
-        Future<void>.delayed(const Duration(milliseconds: 700), () async {
-          if (!mounted) return;
-          if (_androidHdrTransaction &&
-              openSerialBeforeResume != _hdrOpenSerial) {
-            return;
-          }
-          final position = player.state.position;
-          // migrated to HdrVideoSession (S10): the reopen goes through the
-          // session open and the seek is guarded by the open serial that is
-          // current for the session the seek targets.
-          var seekGuardSerial = openSerialBeforeResume;
-          if (_androidPostBindReopenProbe) {
-            debugPrint(
-              'POST_BIND_REOPEN begin position=$position ${DateTime.now().toIso8601String()}',
-            );
-            if (_androidHdrTransaction) {
-              final source = _hdrCurrentSource;
-              if (source == null) {
-                throw StateError('No current HDR source to reopen');
-              }
-              await _openHdrSource(source);
-              seekGuardSerial = _hdrOpenSerial;
-            } else {
-              await player.open(Media(sources[0]));
+          Future<void>.delayed(const Duration(milliseconds: 700), () async {
+        if (!mounted) return;
+        if (_androidHdrTransaction &&
+            openSerialBeforeResume != _hdrOpenSerial) {
+          return;
+        }
+        final position = player.state.position;
+        // migrated to HdrVideoSession (S10): the reopen goes through the
+        // session open and the seek is guarded by the open serial that is
+        // current for the session the seek targets.
+        var seekGuardSerial = openSerialBeforeResume;
+        if (_androidPostBindReopenProbe) {
+          debugPrint(
+              'POST_BIND_REOPEN begin position=$position ${DateTime.now().toIso8601String()}');
+          if (_androidHdrTransaction) {
+            final source = _hdrCurrentSource;
+            if (source == null) {
+              throw StateError('No current HDR source to reopen');
             }
-            await Future<void>.delayed(const Duration(milliseconds: 700));
+            await _openHdrSource(source);
+            seekGuardSerial = _hdrOpenSerial;
+          } else {
+            await player.open(Media(sources[0]));
           }
-          debugPrint(
-            'POST_BIND_SEEK begin position=$position ${DateTime.now().toIso8601String()}',
-          );
-          if (_androidHdrTransaction && seekGuardSerial != _hdrOpenSerial) {
-            return;
-          }
-          await player.seek(position);
-          debugPrint(
-            'POST_BIND_SEEK complete ${DateTime.now().toIso8601String()}',
-          );
-        }).catchError((Object error) {
-          debugPrint('POST_BIND_SEEK error=$error');
-        }),
-      );
+          await Future<void>.delayed(const Duration(milliseconds: 700));
+        }
+        debugPrint(
+            'POST_BIND_SEEK begin position=$position ${DateTime.now().toIso8601String()}');
+        if (_androidHdrTransaction && seekGuardSerial != _hdrOpenSerial) {
+          return;
+        }
+        await player.seek(position);
+        debugPrint(
+            'POST_BIND_SEEK complete ${DateTime.now().toIso8601String()}');
+      }).catchError((Object error) {
+        debugPrint('POST_BIND_SEEK error=$error');
+      }));
     }
     _previousLifecycleState = state;
   }
@@ -5662,8 +5340,8 @@ class _SinglePlayerSingleVideoScreenState
   Future<void> _logAndroidCapabilities() async {
     if (!Platform.isAndroid) return;
     try {
-      final capabilities = await _capabilitiesChannel
-          .invokeMapMethod<String, dynamic>('Get');
+      final capabilities =
+          await _capabilitiesChannel.invokeMapMethod<String, dynamic>('Get');
       debugPrint('ANDROID_CAPABILITIES $capabilities');
     } catch (error) {
       debugPrint('ANDROID_CAPABILITIES ERROR=$error');
@@ -5697,10 +5375,8 @@ class _SinglePlayerSingleVideoScreenState
     if (Platform.isAndroid && _androidHdrTransaction) {
       if (_androidLoopSource) {
         await player.setPlaylistMode(PlaylistMode.single);
-        debugPrint(
-          'ANDROID_LOOP_SOURCE mode=single '
-          'loop-file=${await player.getProperty('loop-file')}',
-        );
+        debugPrint('ANDROID_LOOP_SOURCE mode=single '
+            'loop-file=${await player.getProperty('loop-file')}');
       }
       final seconds = _androidPlayingStartSeconds.isEmpty
           ? null
@@ -5711,16 +5387,15 @@ class _SinglePlayerSingleVideoScreenState
       }
       if (_autoStartSeconds.isNotEmpty) {
         throw StateError(
-          'Paused auto-start is incompatible with HDR transaction',
-        );
+            'Paused auto-start is incompatible with HDR transaction');
       }
       await _openHdrSource(
         sources[0],
         start: seconds == null
             ? null
             : Duration(
-                microseconds: (seconds * Duration.microsecondsPerSecond)
-                    .round(),
+                microseconds:
+                    (seconds * Duration.microsecondsPerSecond).round(),
               ),
       );
       if (_androidAutoSdrAfterP5Seconds > 0 &&
@@ -5734,21 +5409,17 @@ class _SinglePlayerSingleVideoScreenState
       }
       if (_androidAutoSecondSourceAtSeconds > 0 &&
           _androidAutoSecondSource.isNotEmpty) {
-        unawaited(
-          Future<void>.delayed(
-            Duration(seconds: _androidAutoSecondSourceAtSeconds),
-          ).then((_) async {
-            if (!mounted || _autoPlayerDisposed) return;
-            // Same-player reopen through the session: rebuilds the hwdec
-            // mapper as needed — exercises per-mapper state (e.g. P5 dovi
-            // rescale) on the second file within the same process.
-            await _openHdrSource(_androidAutoSecondSource);
-            debugPrint(
-              'AUTO_SECOND_SOURCE '
-              'path=$_androidAutoSecondSource',
-            );
-          }),
-        );
+        unawaited(Future<void>.delayed(
+          Duration(seconds: _androidAutoSecondSourceAtSeconds),
+        ).then((_) async {
+          if (!mounted || _autoPlayerDisposed) return;
+          // Same-player reopen through the session: rebuilds the hwdec
+          // mapper as needed — exercises per-mapper state (e.g. P5 dovi
+          // rescale) on the second file within the same process.
+          await _openHdrSource(_androidAutoSecondSource);
+          debugPrint('AUTO_SECOND_SOURCE '
+              'path=$_androidAutoSecondSource');
+        }));
       }
       if (_androidP5PlatformSdrDiagnostic &&
           _androidP5AutoFullscreenAtSeconds >= 0) {
@@ -5769,8 +5440,7 @@ class _SinglePlayerSingleVideoScreenState
       if (!sources[0].contains('DV-P8.4') &&
           !sources[0].endsWith('/media-kit-p84-full.mp4')) {
         throw StateError(
-          'P8.4 base-layer probe requires the fixed P8.4 source',
-        );
+            'P8.4 base-layer probe requires the fixed P8.4 source');
       }
       if (_androidP84DoviFilter != 'yes' && _androidP84DoviFilter != 'no') {
         throw StateError('P8.4 filter mode must be yes or no');
@@ -5815,8 +5485,7 @@ class _SinglePlayerSingleVideoScreenState
       if (_androidOpenGlSwapInterval >= 0) {
         if (_androidOpenGlSwapInterval > 1 || _androidVo != 'gpu-next') {
           throw StateError(
-            'OpenGL swap interval probe requires gpu-next and 0 or 1',
-          );
+              'OpenGL swap interval probe requires gpu-next and 0 or 1');
         }
         await player.setProperty(
           'opengl-swapinterval',
@@ -5831,8 +5500,7 @@ class _SinglePlayerSingleVideoScreenState
       if (_androidVideoLatencyHacks) {
         await player.setProperty('video-latency-hacks', 'yes');
         debugPrint(
-          'ANDROID_VIDEO_LATENCY_HACKS=${await player.getProperty('video-latency-hacks')}',
-        );
+            'ANDROID_VIDEO_LATENCY_HACKS=${await player.getProperty('video-latency-hacks')}');
       }
       await _applyAndroidScalers();
     }
@@ -5857,10 +5525,8 @@ class _SinglePlayerSingleVideoScreenState
           debugPrint('AUTO_TEXTURE_SDR ${entry.key} ERROR=$error');
         }
       }
-    } else if (!const bool.fromEnvironment(
-      'MEDIA_KIT_AUTO_NATIVE_WINDOW',
-      defaultValue: true,
-    )) {
+    } else if (!const bool.fromEnvironment('MEDIA_KIT_AUTO_NATIVE_WINDOW',
+        defaultValue: true)) {
       try {
         if (_autoSdr) {
           // Pure SDR control: do not configure NativeSurface/EDR or touch
@@ -5870,9 +5536,8 @@ class _SinglePlayerSingleVideoScreenState
           debugPrint('AUTO_SDR_TARGET target-prim=bt.709 target-trc=bt.1886');
         } else {
           final output = await controller.platform.future;
-          const targetPeak = String.fromEnvironment(
-            'MEDIA_KIT_AUTO_TARGET_PEAK',
-          );
+          const targetPeak =
+              String.fromEnvironment('MEDIA_KIT_AUTO_TARGET_PEAK');
           if (targetPeak.isNotEmpty) {
             await player.setProperty('target-peak', targetPeak);
             debugPrint('AUTO_NATIVE_TARGET_PEAK set=$targetPeak');
@@ -5900,8 +5565,7 @@ class _SinglePlayerSingleVideoScreenState
             !playingStartSeconds.isFinite ||
             playingStartSeconds < 0)) {
       throw StateError(
-        'Android playing start time must be a nonnegative number',
-      );
+          'Android playing start time must be a nonnegative number');
     }
     if (autoStartSeconds != null && playingStartSeconds != null) {
       throw StateError('Only one Android start-time probe may be set');
@@ -5930,18 +5594,16 @@ class _SinglePlayerSingleVideoScreenState
     if (Platform.isAndroid && _androidDirectOpenTrace) {
       debugPrint('ANDROID_DIRECT_OPEN media_command');
     }
-    await player.open(
-      Media(
-        sources[0],
-        start: requestedStartSeconds != null && requestedStartSeconds >= 0.0
-            ? Duration(
-                microseconds:
-                    (requestedStartSeconds * Duration.microsecondsPerSecond)
-                        .round(),
-              )
-            : null,
-      ),
-    );
+    await player.open(Media(
+      sources[0],
+      start: requestedStartSeconds != null && requestedStartSeconds >= 0.0
+          ? Duration(
+              microseconds:
+                  (requestedStartSeconds * Duration.microsecondsPerSecond)
+                      .round(),
+            )
+          : null,
+    ));
     if (Platform.isAndroid &&
         _androidAutoSeekAtSeconds >= 0 &&
         !_autoSeekReopenScheduled) {
@@ -6043,35 +5705,28 @@ class _SinglePlayerSingleVideoScreenState
           .timeout(Duration(seconds: _androidAutoSeekAtSeconds + 30));
       if (!mounted || _autoPlayerDisposed) return;
       debugPrint(
-        'AUTO_SEEK_REOPEN seek_begin position=${player.state.position} '
-        'target=$target',
-      );
+          'AUTO_SEEK_REOPEN seek_begin position=${player.state.position} '
+          'target=$target');
       await player.seek(target);
       await player.stream.position
           .firstWhere(
-            (position) => position >= target + const Duration(seconds: 2),
-          )
+              (position) => position >= target + const Duration(seconds: 2))
           .timeout(const Duration(seconds: 20));
       if (!mounted || _autoPlayerDisposed) return;
       debugPrint(
-        'AUTO_SEEK_REOPEN seek_playing position=${player.state.position}',
-      );
+          'AUTO_SEEK_REOPEN seek_playing position=${player.state.position}');
       if (!_androidAutoReopenAfterSeek) return;
       debugPrint(
-        'AUTO_SEEK_REOPEN reopen_begin position=${player.state.position}',
-      );
+          'AUTO_SEEK_REOPEN reopen_begin position=${player.state.position}');
       await player.open(Media(sources[0]));
       await player.stream.position
-          .firstWhere(
-            (position) =>
-                position >= const Duration(seconds: 2) &&
-                position < const Duration(seconds: 10),
-          )
+          .firstWhere((position) =>
+              position >= const Duration(seconds: 2) &&
+              position < const Duration(seconds: 10))
           .timeout(const Duration(seconds: 20));
       if (!mounted || _autoPlayerDisposed) return;
       debugPrint(
-        'AUTO_SEEK_REOPEN reopen_playing position=${player.state.position}',
-      );
+          'AUTO_SEEK_REOPEN reopen_playing position=${player.state.position}');
     } catch (error, stack) {
       debugPrint('AUTO_SEEK_REOPEN error=$error');
       debugPrintStack(stackTrace: stack);
@@ -6101,8 +5756,7 @@ class _SinglePlayerSingleVideoScreenState
       }());
       await player.open(Media(target));
       debugPrint(
-        'ANDROID_HOT_SWITCH switched position=${player.state.position}',
-      );
+          'ANDROID_HOT_SWITCH switched position=${player.state.position}');
       await Future<void>.delayed(const Duration(seconds: 3));
       if (mounted) {
         setState(() {
@@ -6123,21 +5777,16 @@ class _SinglePlayerSingleVideoScreenState
   Future<void> _runEngineDestroyProbe() async {
     try {
       await Future<void>.delayed(
-        Duration(seconds: _androidEngineDestroyAtSeconds),
-      );
+          Duration(seconds: _androidEngineDestroyAtSeconds));
       if (!mounted) return;
-      debugPrint(
-        'ANDROID_ENGINE_DESTROY requested '
-        'position=${player.state.position}',
-      );
-      unawaited(
-        _engineControlChannel
-            .invokeMethod<void>('DestroyEngineNow')
-            .then((_) => debugPrint('ANDROID_ENGINE_DESTROY returned'))
-            .catchError((Object error) {
-              debugPrint('ANDROID_ENGINE_DESTROY invoke error=$error');
-            }),
-      );
+      debugPrint('ANDROID_ENGINE_DESTROY requested '
+          'position=${player.state.position}');
+      unawaited(_engineControlChannel
+          .invokeMethod<void>('DestroyEngineNow')
+          .then((_) => debugPrint('ANDROID_ENGINE_DESTROY returned'))
+          .catchError((Object error) {
+        debugPrint('ANDROID_ENGINE_DESTROY invoke error=$error');
+      }));
     } catch (error, stack) {
       debugPrint('ANDROID_ENGINE_DESTROY error=$error');
       debugPrintStack(stackTrace: stack);
@@ -6156,46 +5805,38 @@ class _SinglePlayerSingleVideoScreenState
           .timeout(Duration(seconds: _androidOutputFailureAtSeconds + 30));
       if (!mounted || _autoPlayerDisposed) return;
       debugPrint(
-        'ANDROID_OUTPUT_FAILURE begin position=${player.state.position}',
-      );
+          'ANDROID_OUTPUT_FAILURE begin position=${player.state.position}');
       final handle = await player.handle;
       await const MethodChannel('com.alexmercerind/media_kit_video')
           .invokeMethod<void>('VideoOutputManager.Dispose', {
-            'handle': handle.toString(),
-          });
+        'handle': handle.toString(),
+      });
       debugPrint('ANDROID_OUTPUT_FAILURE output_disposed');
       await _openHdrSource(sources[0]);
       debugPrint(
-        'ANDROID_OUTPUT_FAILURE reopened position=${player.state.position}',
-      );
+          'ANDROID_OUTPUT_FAILURE reopened position=${player.state.position}');
       await player.stream.position
-          .firstWhere(
-            (position) =>
-                position >= const Duration(seconds: 2) &&
-                position < const Duration(seconds: 10),
-          )
+          .firstWhere((position) =>
+              position >= const Duration(seconds: 2) &&
+              position < const Duration(seconds: 10))
           .timeout(const Duration(seconds: 20));
       debugPrint(
-        'ANDROID_OUTPUT_FAILURE recovered position=${player.state.position}',
-      );
+          'ANDROID_OUTPUT_FAILURE recovered position=${player.state.position}');
     } catch (error, stack) {
       debugPrint('ANDROID_OUTPUT_FAILURE error=$error');
       debugPrintStack(stackTrace: stack);
     }
   }
 
-  Future<void> _resizeTestWindow({
-    required double width,
-    required double height,
-  }) async {
+  Future<void> _resizeTestWindow(
+      {required double width, required double height}) async {
     try {
       final result = await _windowChannel.invokeMethod<Map<Object?, Object?>>(
         'setFrame',
         {'width': width, 'height': height},
       );
       debugPrint(
-        'AUTO_WINDOW_RESIZE requested=${width}x$height result=$result',
-      );
+          'AUTO_WINDOW_RESIZE requested=${width}x$height result=$result');
     } catch (error) {
       debugPrint('AUTO_WINDOW_RESIZE ERROR=$error');
     }
@@ -6206,16 +5847,11 @@ class _SinglePlayerSingleVideoScreenState
     if (existing != null) return existing;
     final attempt = _disposeTestPlayerOnce();
     _autoPlayerDisposeFuture = attempt;
-    unawaited(
-      attempt.then<void>(
-        (_) {},
-        onError: (Object _, StackTrace __) {
-          if (identical(_autoPlayerDisposeFuture, attempt)) {
-            _autoPlayerDisposeFuture = null;
-          }
-        },
-      ),
-    );
+    unawaited(attempt.then<void>((_) {}, onError: (Object _, StackTrace __) {
+      if (identical(_autoPlayerDisposeFuture, attempt)) {
+        _autoPlayerDisposeFuture = null;
+      }
+    }));
     return attempt;
   }
 
@@ -6277,11 +5913,9 @@ class _SinglePlayerSingleVideoScreenState
       unawaited(subscription.cancel());
     }
     if (_inplaceFullscreen) {
-      unawaited(
-        SystemChrome.setPreferredOrientations(const [
-          DeviceOrientation.portraitUp,
-        ]),
-      );
+      unawaited(SystemChrome.setPreferredOrientations(
+        const [DeviceOrientation.portraitUp],
+      ));
       unawaited(SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge));
     }
     final second = _secondPlayer;
@@ -6319,11 +5953,10 @@ class _SinglePlayerSingleVideoScreenState
     }
     if (!_autoPlayerDisposed) {
       unawaited(
-        _disposeTestPlayer().catchError((Object error, StackTrace stack) {
-          debugPrint('AUTO_PLAYER_DISPOSE error=$error');
-          debugPrintStack(stackTrace: stack);
-        }),
-      );
+          _disposeTestPlayer().catchError((Object error, StackTrace stack) {
+        debugPrint('AUTO_PLAYER_DISPOSE error=$error');
+        debugPrintStack(stackTrace: stack);
+      }));
     }
     super.dispose();
   }
@@ -6333,14 +5966,9 @@ class _SinglePlayerSingleVideoScreenState
     if (existing != null) return existing;
     final attempt = _disposeHdrPlayerOnce();
     _hdrDisposeFuture = attempt;
-    unawaited(
-      attempt.then<void>(
-        (_) {},
-        onError: (Object _, StackTrace __) {
-          if (identical(_hdrDisposeFuture, attempt)) _hdrDisposeFuture = null;
-        },
-      ),
-    );
+    unawaited(attempt.then<void>((_) {}, onError: (Object _, StackTrace __) {
+      if (identical(_hdrDisposeFuture, attempt)) _hdrDisposeFuture = null;
+    }));
     return attempt;
   }
 
@@ -6375,9 +6003,8 @@ class _SinglePlayerSingleVideoScreenState
           );
         } catch (captureError) {
           try {
-            await _nativeDvSessionDiagnostic?.recordCleanupCaptureError(
-              captureError,
-            );
+            await _nativeDvSessionDiagnostic
+                ?.recordCleanupCaptureError(captureError);
           } catch (_) {}
         }
       }
@@ -6399,9 +6026,9 @@ class _SinglePlayerSingleVideoScreenState
     _hdrDisposeReportDetail = report == null
         ? 'session=null playerError=$playerDisposeError'
         : 'coordinator=${report.coordinatorError} '
-              'player=${report.playerError} '
-              'directory=${report.directoryError} '
-              'retained=${report.retainedDirectory}';
+            'player=${report.playerError} '
+            'directory=${report.directoryError} '
+            'retained=${report.retainedDirectory}';
     if (_hdrDisposeReportClean != true) {
       debugPrint('ANDROID_HDR_DISPOSE $_hdrDisposeReportDetail');
       throw StateError('Android HDR resource disposal is incomplete');
@@ -6409,67 +6036,57 @@ class _SinglePlayerSingleVideoScreenState
   }
 
   List<Widget> get items => [
-    for (int i = 0; i < sources.length; i++)
-      ListTile(
-        title: Text(
-          'Video $i',
-          style: const TextStyle(fontSize: 14.0),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        onTap: () {
-          unawaited(_openSelectedSource(sources[i]));
-        },
-      ),
-  ];
+        for (int i = 0; i < sources.length; i++)
+          ListTile(
+            title: Text(
+              'Video $i',
+              style: const TextStyle(
+                fontSize: 14.0,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            onTap: () {
+              unawaited(_openSelectedSource(sources[i]));
+            },
+          ),
+      ];
 
   Future<void> _toggleDiagnosticFullscreen(
-    GlobalObjectKey<VideoState> videoKey,
-  ) async {
+      GlobalObjectKey<VideoState> videoKey) async {
     if (_androidLgVisual278Experiment) {
       throw StateError(
-        'LG visual278 experiment is portrait single-output; fullscreen unsupported',
-      );
+          'LG visual278 experiment is portrait single-output; fullscreen unsupported');
     }
     if (_androidP5ScopeFullscreen) {
       final videoState = videoKey.currentState;
       if (!mounted || videoState == null) {
         throw StateError('Diagnostic VideoState is unavailable at fullscreen');
       }
-      debugPrint(
-        'DIAG_FULLSCREEN_SCOPE toggle begin '
-        'media=${player.state.position.inMilliseconds}ms',
-      );
+      debugPrint('DIAG_FULLSCREEN_SCOPE toggle begin '
+          'media=${player.state.position.inMilliseconds}ms');
       await videoState.toggleFullscreen();
-      debugPrint(
-        'DIAG_FULLSCREEN_SCOPE toggle complete '
-        'media=${player.state.position.inMilliseconds}ms',
-      );
+      debugPrint('DIAG_FULLSCREEN_SCOPE toggle complete '
+          'media=${player.state.position.inMilliseconds}ms');
       return;
     }
     if (_androidP5InplaceFullscreen) {
-      debugPrint(
-        'DIAG_FULLSCREEN_INPLACE begin '
-        'media=${player.state.position.inMilliseconds}ms',
+      debugPrint('DIAG_FULLSCREEN_INPLACE begin '
+          'media=${player.state.position.inMilliseconds}ms');
+      await SystemChrome.setPreferredOrientations(
+        const [DeviceOrientation.landscapeLeft],
       );
-      await SystemChrome.setPreferredOrientations(const [
-        DeviceOrientation.landscapeLeft,
-      ]);
       await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
       if (mounted) setState(() => _inplaceFullscreen = true);
-      debugPrint(
-        'DIAG_FULLSCREEN_INPLACE complete '
-        'media=${player.state.position.inMilliseconds}ms',
-      );
+      debugPrint('DIAG_FULLSCREEN_INPLACE complete '
+          'media=${player.state.position.inMilliseconds}ms');
       return;
     }
     if (_androidP5PrestopFullscreen ||
         _androidP5PrestopVidFullscreen ||
         _androidP5PrestopWidFullscreen) {
-      debugPrint(
-        'DIAG_FULLSCREEN_PRESTOP begin '
-        'media=${player.state.position.inMilliseconds}ms',
-      );
+      debugPrint('DIAG_FULLSCREEN_PRESTOP begin '
+          'media=${player.state.position.inMilliseconds}ms');
       await player.setProperty('vo', 'null');
       if (_androidP5PrestopWidFullscreen) {
         await player.setProperty('wid', '0');
@@ -6477,19 +6094,15 @@ class _SinglePlayerSingleVideoScreenState
       if (_androidP5PrestopVidFullscreen) {
         await player.setProperty('vid', 'no');
       }
-      debugPrint(
-        'DIAG_FULLSCREEN_PRESTOP complete '
-        'media=${player.state.position.inMilliseconds}ms',
-      );
+      debugPrint('DIAG_FULLSCREEN_PRESTOP complete '
+          'media=${player.state.position.inMilliseconds}ms');
     }
     final videoState = videoKey.currentState;
     if (!mounted || videoState == null) {
       throw StateError('Diagnostic VideoState is unavailable at fullscreen');
     }
-    debugPrint(
-      'DIAG_FULLSCREEN_TOGGLE begin '
-      'media=${player.state.position.inMilliseconds}ms',
-    );
+    debugPrint('DIAG_FULLSCREEN_TOGGLE begin '
+        'media=${player.state.position.inMilliseconds}ms');
     await videoState.toggleFullscreen();
   }
 
@@ -6507,26 +6120,20 @@ class _SinglePlayerSingleVideoScreenState
 
   Future<void> _exitInplaceDiagnosticFullscreen() async {
     if (!_inplaceFullscreen) return;
-    debugPrint(
-      'DIAG_FULLSCREEN_INPLACE exit begin '
-      'media=${player.state.position.inMilliseconds}ms',
+    debugPrint('DIAG_FULLSCREEN_INPLACE exit begin '
+        'media=${player.state.position.inMilliseconds}ms');
+    await SystemChrome.setPreferredOrientations(
+      const [DeviceOrientation.portraitUp],
     );
-    await SystemChrome.setPreferredOrientations(const [
-      DeviceOrientation.portraitUp,
-    ]);
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     if (mounted) setState(() => _inplaceFullscreen = false);
-    debugPrint(
-      'DIAG_FULLSCREEN_INPLACE exit complete '
-      'media=${player.state.position.inMilliseconds}ms',
-    );
+    debugPrint('DIAG_FULLSCREEN_INPLACE exit complete '
+        'media=${player.state.position.inMilliseconds}ms');
   }
 
   Future<void> _exitScopeDiagnosticPage() async {
-    debugPrint(
-      'DIAG_SCOPE_PAGE_EXIT stop begin '
-      'media=${player.state.position.inMilliseconds}ms',
-    );
+    debugPrint('DIAG_SCOPE_PAGE_EXIT stop begin '
+        'media=${player.state.position.inMilliseconds}ms');
     await _disposeTestPlayer();
     if (_androidHdrTransaction && _hdrDisposeReportClean != true) {
       debugPrint('DIAG_SCOPE_PAGE_EXIT dispose=$_hdrDisposeReportDetail');
@@ -6542,7 +6149,9 @@ class _SinglePlayerSingleVideoScreenState
   /// happens. Define off keeps the existing adaptive layout untouched.
   Widget _pocFixedOutputLayout(Widget child) {
     debugPrint('MKSURF-POC: fixed 2:1 output layout');
-    return Center(child: AspectRatio(aspectRatio: 2.0, child: child));
+    return Center(
+      child: AspectRatio(aspectRatio: 2.0, child: child),
+    );
   }
 
   @override
@@ -6555,9 +6164,8 @@ class _SinglePlayerSingleVideoScreenState
         },
         child: Scaffold(
           appBar: AppBar(
-            title: const Text('LG experimental - single output'),
-            automaticallyImplyLeading: false,
-          ),
+              title: const Text('LG experimental - single output'),
+              automaticallyImplyLeading: false),
           body: AndroidLgSingleOwnerVideo(session: _hdrSession),
         ),
       );
@@ -6569,91 +6177,71 @@ class _SinglePlayerSingleVideoScreenState
       final page = Scaffold(
         backgroundColor: Colors.black,
         appBar: AppBar(
-          title: const Text('HDR10 Session diagnostic'),
-          automaticallyImplyLeading: false,
-        ),
-        body: Column(
-          children: [
-            Expanded(
+            title: const Text('HDR10 Session diagnostic'),
+            automaticallyImplyLeading: false),
+        body: Column(children: [
+          Expanded(
               child: session == null
                   ? const SizedBox.expand()
                   : Center(
                       child: AspectRatio(
-                        // This diagnostic admits only the byte-verified
-                        // 3840 x 1920 sample; keep its native viewport 2:1.
-                        aspectRatio: 2.0,
-                        child: HdrVideo(
-                          session: session,
+                          // This diagnostic admits only the byte-verified
+                          // 3840 x 1920 sample; keep its native viewport 2:1.
                           aspectRatio: 2.0,
-                          controls: (_) => const SizedBox.shrink(),
-                        ),
-                      ),
-                    ),
-            ),
-            Padding(
+                          child: HdrVideo(
+                              session: session,
+                              aspectRatio: 2.0,
+                              controls: (_) => const SizedBox.shrink())))),
+          Padding(
               padding: const EdgeInsets.all(12),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'run: ${journal?.runId ?? "not admitted"}\n'
-                    'route: ${session?.report.value.actual}\n'
-                    'journal: ${snapshot?["closed"] == true ? "closed" : "observing"}; '
-                    '10s position support: ${snapshot?["progressSupport"]}\n'
-                    'Visible image, brightness, and smoothness require phone observation.',
-                    style: const TextStyle(color: Colors.white, fontSize: 11),
-                  ),
-                  if (_hdr10BuildError != null)
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                     Text(
-                      _hdr10BuildError!,
-                      style: const TextStyle(color: Colors.red, fontSize: 11),
-                    ),
-                  Semantics(
-                    label: 'hdr10-session-action:close-and-exit',
-                    button: true,
-                    child: OutlinedButton(
-                      onPressed: _hdr10ExitFuture == null
-                          ? () => unawaited(
-                              _exitHdr10DiagnosticPage().catchError((
-                                Object error,
-                                StackTrace stack,
-                              ) {
-                                debugPrint('HDR10_SESSION_EXIT_ERROR $error');
-                              }),
-                            )
-                          : null,
-                      child: const Text('Close & exit'),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+                        'run: ${journal?.runId ?? "not admitted"}\n'
+                        'route: ${session?.report.value.actual}\n'
+                        'journal: ${snapshot?["closed"] == true ? "closed" : "observing"}; '
+                        '10s position support: ${snapshot?["progressSupport"]}\n'
+                        'Visible image, brightness, and smoothness require phone observation.',
+                        style:
+                            const TextStyle(color: Colors.white, fontSize: 11)),
+                    if (_hdr10BuildError != null)
+                      Text(_hdr10BuildError!,
+                          style:
+                              const TextStyle(color: Colors.red, fontSize: 11)),
+                    Semantics(
+                        label: 'hdr10-session-action:close-and-exit',
+                        button: true,
+                        child: OutlinedButton(
+                            onPressed: _hdr10ExitFuture == null
+                                ? () => unawaited(_exitHdr10DiagnosticPage()
+                                        .catchError(
+                                            (Object error, StackTrace stack) {
+                                      debugPrint(
+                                          'HDR10_SESSION_EXIT_ERROR $error');
+                                    }))
+                                : null,
+                            child: const Text('Close & exit'))),
+                  ])),
+        ]),
       );
       return PopScope(
-        canPop: false,
-        onPopInvokedWithResult: (didPop, result) {
-          if (!didPop) {
-            unawaited(
-              _exitHdr10DiagnosticPage().catchError((
-                Object error,
-                StackTrace stack,
-              ) {
+          canPop: false,
+          onPopInvokedWithResult: (didPop, result) {
+            if (!didPop) {
+              unawaited(_exitHdr10DiagnosticPage()
+                  .catchError((Object error, StackTrace stack) {
                 debugPrint('HDR10_SESSION_EXIT_ERROR $error');
-              }),
-            );
-          }
-        },
-        child: page,
-      );
+              }));
+            }
+          },
+          child: page);
     }
 
     if (Platform.isAndroid && _androidNativeDvSessionForeignOwnershipN4) {
       final session = _hdrSession;
       final transport = _nativeDvN4;
-      final canRun =
-          transport?.ready == true &&
+      final canRun = transport?.ready == true &&
           _nativeDvN4ExecutionReport == null &&
           !_nativeDvN4Closing;
       final page = Scaffold(
@@ -6699,22 +6287,16 @@ class _SinglePlayerSingleVideoScreenState
                   style: TextStyle(color: Colors.orangeAccent),
                 ),
               if (_nativeDvSessionDiagnosticError != null)
-                Text(
-                  _nativeDvSessionDiagnosticError!,
-                  style: const TextStyle(color: Colors.redAccent),
-                ),
+                Text(_nativeDvSessionDiagnosticError!,
+                    style: const TextStyle(color: Colors.redAccent)),
             ],
           ),
           onRun: canRun ? _startNativeDvN4Experiment : null,
           onClose: _nativeDvN4Exit == null
-              ? () => unawaited(
-                  _exitNativeDvN4Page().catchError((
-                    Object error,
-                    StackTrace stack,
-                  ) {
+              ? () => unawaited(_exitNativeDvN4Page()
+                      .catchError((Object error, StackTrace stack) {
                     debugPrint('N4_EXIT_ERROR $error');
-                  }),
-                )
+                  }))
               : null,
         ),
       );
@@ -6722,14 +6304,10 @@ class _SinglePlayerSingleVideoScreenState
         canPop: false,
         onPopInvokedWithResult: (didPop, result) {
           if (!didPop) {
-            unawaited(
-              _exitNativeDvN4Page().catchError((
-                Object error,
-                StackTrace stack,
-              ) {
-                debugPrint('N4_BACK_EXIT_ERROR $error');
-              }),
-            );
+            unawaited(_exitNativeDvN4Page()
+                .catchError((Object error, StackTrace stack) {
+              debugPrint('N4_BACK_EXIT_ERROR $error');
+            }));
           }
         },
         child: page,
@@ -6760,8 +6338,7 @@ class _SinglePlayerSingleVideoScreenState
                             controls: (_) => Builder(
                               builder: (videoContext) {
                                 _captureNativeDvSessionVideoContext(
-                                  videoContext,
-                                );
+                                    videoContext);
                                 return const SizedBox.shrink();
                               },
                             ),
@@ -6780,91 +6357,76 @@ class _SinglePlayerSingleVideoScreenState
                         width: double.infinity,
                         color: Colors.black.withValues(alpha: 0.78),
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
+                            horizontal: 12, vertical: 8),
                         child: negative != null
                             ? ValueListenableBuilder<String>(
                                 valueListenable: negative.status,
                                 builder: (context, value, _) => Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      value,
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    const Text(
-                                      'N1: one real open; first native Surface intentionally unmounted. Fallback uses the same Session. Visible output and Surface ACK require separate confirmation.',
-                                      style: TextStyle(color: Colors.white70),
-                                    ),
-                                    if (_nativeDvSessionDiagnosticError != null)
-                                      Text(
-                                        _nativeDvSessionDiagnosticError!,
-                                        style: const TextStyle(
-                                          color: Colors.redAccent,
-                                        ),
-                                      ),
-                                    if (_nativeDvSessionActionError != null)
-                                      Text(
-                                        _nativeDvSessionActionError!,
-                                        style: const TextStyle(
-                                          color: Colors.redAccent,
-                                        ),
-                                      ),
-                                    TextButton(
-                                      onPressed: _nativeDvN1Exit == null
-                                          ? () => unawaited(
-                                              _exitNativeDvN1Page().catchError((
-                                                Object error,
-                                                StackTrace _,
-                                              ) {
-                                                _reportNativeDvSessionExitFailure(
-                                                  error,
-                                                );
-                                              }),
-                                            )
-                                          : null,
-                                      child: const Text('Close N1'),
-                                    ),
-                                  ],
-                                ),
-                              )
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(value,
+                                            style: const TextStyle(
+                                                color: Colors.white)),
+                                        const Text(
+                                            'N1: one real open; first native Surface intentionally unmounted. Fallback uses the same Session. Visible output and Surface ACK require separate confirmation.',
+                                            style: TextStyle(
+                                                color: Colors.white70)),
+                                        if (_nativeDvSessionDiagnosticError !=
+                                            null)
+                                          Text(_nativeDvSessionDiagnosticError!,
+                                              style: const TextStyle(
+                                                  color: Colors.redAccent)),
+                                        if (_nativeDvSessionActionError != null)
+                                          Text(_nativeDvSessionActionError!,
+                                              style: const TextStyle(
+                                                  color: Colors.redAccent)),
+                                        TextButton(
+                                            onPressed: _nativeDvN1Exit == null
+                                                ? () => unawaited(
+                                                        _exitNativeDvN1Page()
+                                                            .catchError((Object
+                                                                    error,
+                                                                StackTrace _) {
+                                                      _reportNativeDvSessionExitFailure(
+                                                          error);
+                                                    }))
+                                                : null,
+                                            child: const Text('Close N1')),
+                                      ],
+                                    ))
                             : diagnostic == null
-                            ? Text(
-                                _nativeDvSessionDiagnosticError ??
-                                    'Preparing fixed-source Session diagnostic',
-                                style: const TextStyle(color: Colors.white),
-                              )
-                            : ValueListenableBuilder<String>(
-                                valueListenable: diagnostic.status,
-                                builder: (context, value, _) => Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      'Native DV Session diagnostic: $value',
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    const Text(
-                                      'consumerValidated / routeApplied are configuration evidence only; visual HDR acceptance is pending.',
-                                      style: TextStyle(color: Colors.white70),
-                                    ),
-                                    if (_nativeDvSessionDiagnosticError != null)
-                                      Text(
-                                        _nativeDvSessionDiagnosticError!,
-                                        style: const TextStyle(
-                                          color: Colors.redAccent,
+                                ? Text(
+                                    _nativeDvSessionDiagnosticError ??
+                                        'Preparing fixed-source Session diagnostic',
+                                    style: const TextStyle(color: Colors.white),
+                                  )
+                                : ValueListenableBuilder<String>(
+                                    valueListenable: diagnostic.status,
+                                    builder: (context, value, _) => Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                            'Native DV Session diagnostic: $value',
+                                            style: const TextStyle(
+                                                color: Colors.white)),
+                                        const Text(
+                                          'consumerValidated / routeApplied are configuration evidence only; visual HDR acceptance is pending.',
+                                          style:
+                                              TextStyle(color: Colors.white70),
                                         ),
-                                      ),
-                                    if (_androidNativeDvSessionLifecycleActions)
-                                      _buildNativeDvLifecycleControls(),
-                                  ],
-                                ),
-                              ),
+                                        if (_nativeDvSessionDiagnosticError !=
+                                            null)
+                                          Text(_nativeDvSessionDiagnosticError!,
+                                              style: const TextStyle(
+                                                  color: Colors.redAccent)),
+                                        if (_androidNativeDvSessionLifecycleActions)
+                                          _buildNativeDvLifecycleControls(),
+                                      ],
+                                    ),
+                                  ),
                       ),
                     ),
                   ),
@@ -6876,32 +6438,26 @@ class _SinglePlayerSingleVideoScreenState
       );
       if (negative != null) {
         return PopScope(
-          canPop: false,
-          onPopInvokedWithResult: (didPop, result) {
-            if (!didPop) {
-              unawaited(
-                _exitNativeDvN1Page().catchError((Object error, StackTrace _) {
+            canPop: false,
+            onPopInvokedWithResult: (didPop, result) {
+              if (!didPop) {
+                unawaited(_exitNativeDvN1Page()
+                    .catchError((Object error, StackTrace _) {
                   _reportNativeDvSessionExitFailure(error);
-                }),
-              );
-            }
-          },
-          child: page,
-        );
+                }));
+              }
+            },
+            child: page);
       }
       if (!_androidNativeDvSessionLifecycleActions) return page;
       return PopScope(
         canPop: false,
         onPopInvokedWithResult: (didPop, result) {
           if (!didPop) {
-            unawaited(
-              _exitNativeDvSessionLifecyclePage().catchError((
-                Object error,
-                StackTrace _,
-              ) {
-                _reportNativeDvSessionExitFailure(error);
-              }),
-            );
+            unawaited(_exitNativeDvSessionLifecyclePage()
+                .catchError((Object error, StackTrace _) {
+              _reportNativeDvSessionExitFailure(error);
+            }));
           }
         },
         child: page,
@@ -6946,8 +6502,7 @@ class _SinglePlayerSingleVideoScreenState
                           style: const TextStyle(color: Colors.white),
                         )
                       : ValueListenableBuilder<
-                          AndroidNativeDvReleaseDiagnosticState
-                        >(
+                          AndroidNativeDvReleaseDiagnosticState>(
                           valueListenable: diagnostic.state,
                           builder: (context, value, _) => Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -6973,9 +6528,8 @@ class _SinglePlayerSingleVideoScreenState
                               if (value.error != null)
                                 Text(
                                   value.error!,
-                                  style: const TextStyle(
-                                    color: Colors.redAccent,
-                                  ),
+                                  style:
+                                      const TextStyle(color: Colors.redAccent),
                                 ),
                             ],
                           ),
@@ -7000,15 +6554,14 @@ class _SinglePlayerSingleVideoScreenState
     // for an open (the placeholder branches below show black meanwhile).
     final VideoController? displayController =
         Platform.isAndroid && _androidHdrTransaction
-        ? _hdrSession?.controller.value
-        : _initialController;
+            ? _hdrSession?.controller.value
+            : _initialController;
     // migrated to HdrVideoSession (S10): the primary surface in the HDR
     // session path is HdrVideo, which follows session controller replacements
     // (Texture ↔ PlatformView) and lets the built-in fullscreen page follow
     // the session too (R2.1). The VideoState-key diagnostic branches keep the
     // plain Video so their global keys keep working.
-    final useHdrVideo =
-        Platform.isAndroid &&
+    final useHdrVideo = Platform.isAndroid &&
         _androidHdrTransaction &&
         !_androidP5PlatformSdrDiagnostic &&
         !_androidP5ScopeFullscreen &&
@@ -7018,33 +6571,31 @@ class _SinglePlayerSingleVideoScreenState
         : GlobalObjectKey<VideoState>(displayController);
     final videoKey =
         (_androidP5PlatformSdrDiagnostic || _androidP5ScopeFullscreen)
-        ? diagnosticVideoKey
-        : ObjectKey(displayController);
+            ? diagnosticVideoKey
+            : ObjectKey(displayController);
     if (Platform.isAndroid && _androidDualPlayerView) {
       final second = _secondController;
       final dualPlayerPage = Scaffold(
-        body: Row(
-          children: [
-            Expanded(
-              key: const ValueKey('android-dual-player-a'),
-              child: displayController == null
-                  ? const ColoredBox(color: Colors.black)
-                  : Video(
-                      key: const ValueKey('android-dual-player-view-a'),
-                      controller: displayController,
-                    ),
-            ),
-            Expanded(
-              key: const ValueKey('android-dual-player-b'),
-              child: second == null
-                  ? const ColoredBox(color: Colors.black)
-                  : Video(
-                      key: const ValueKey('android-dual-player-view-b'),
-                      controller: second,
-                    ),
-            ),
-          ],
-        ),
+        body: Row(children: [
+          Expanded(
+            key: const ValueKey('android-dual-player-a'),
+            child: displayController == null
+                ? const ColoredBox(color: Colors.black)
+                : Video(
+                    key: const ValueKey('android-dual-player-view-a'),
+                    controller: displayController,
+                  ),
+          ),
+          Expanded(
+            key: const ValueKey('android-dual-player-b'),
+            child: second == null
+                ? const ColoredBox(color: Colors.black)
+                : Video(
+                    key: const ValueKey('android-dual-player-view-b'),
+                    controller: second,
+                  ),
+          ),
+        ]),
       );
       if (!_autoSinglePlayer) return dualPlayerPage;
       return PopScope(
@@ -7083,14 +6634,11 @@ class _SinglePlayerSingleVideoScreenState
                     if (_androidPreopenFirstFrameProbe) {
                       final started = await _flutterSurfaceProbeChannel
                           .invokeMapMethod<String, dynamic>(
-                            'StartFirstFrameProbe',
-                            {
-                              'target':
-                                  configuration.value.android.usePlatformView
-                                  ? 'platform'
-                                  : 'flutter',
-                            },
-                          );
+                              'StartFirstFrameProbe', {
+                        'target': configuration.value.android.usePlatformView
+                            ? 'platform'
+                            : 'flutter',
+                      });
                       debugPrint('FIRST_FRAME_PIXEL_COPY started=$started');
                     }
                     await _openInitialSource();
@@ -7116,36 +6664,33 @@ class _SinglePlayerSingleVideoScreenState
     }
     if (_androidDualViewLifecycleProbe) {
       final showA = _dualViewPhase != 2 && _dualViewPhase != 4;
-      final showB =
-          _dualViewPhase == 1 ||
+      final showB = _dualViewPhase == 1 ||
           _dualViewPhase == 2 ||
           _dualViewPhase == 3 ||
           _dualViewPhase == 4;
       final dualViewPage = Scaffold(
-        body: Row(
-          children: [
-            if (showA)
-              Expanded(
-                key: const ValueKey('android-dual-slot-a'),
-                child: displayController == null
-                    ? const ColoredBox(color: Colors.black)
-                    : Video(
-                        key: const ValueKey('android-dual-view-a'),
-                        controller: displayController,
-                      ),
-              ),
-            if (showB)
-              Expanded(
-                key: const ValueKey('android-dual-slot-b'),
-                child: displayController == null
-                    ? const ColoredBox(color: Colors.black)
-                    : Video(
-                        key: const ValueKey('android-dual-view-b'),
-                        controller: displayController,
-                      ),
-              ),
-          ],
-        ),
+        body: Row(children: [
+          if (showA)
+            Expanded(
+              key: const ValueKey('android-dual-slot-a'),
+              child: displayController == null
+                  ? const ColoredBox(color: Colors.black)
+                  : Video(
+                      key: const ValueKey('android-dual-view-a'),
+                      controller: displayController,
+                    ),
+            ),
+          if (showB)
+            Expanded(
+              key: const ValueKey('android-dual-slot-b'),
+              child: displayController == null
+                  ? const ColoredBox(color: Colors.black)
+                  : Video(
+                      key: const ValueKey('android-dual-view-b'),
+                      controller: displayController,
+                    ),
+            ),
+        ]),
       );
       if (!_autoSinglePlayer) return dualViewPage;
       return PopScope(
@@ -7172,30 +6717,28 @@ class _SinglePlayerSingleVideoScreenState
                       onPressed: diagnosticVideoKey == null
                           ? null
                           : () =>
-                                _toggleDiagnosticFullscreen(diagnosticVideoKey),
+                              _toggleDiagnosticFullscreen(diagnosticVideoKey),
                     ),
                   ],
                 ),
-          body: Stack(
-            children: [
+          body: Stack(children: [
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: fullscreen ? 0 : null,
+              height: fullscreen ? null : viewHeight,
+              child: child,
+            ),
+            if (!fullscreen)
               Positioned(
-                top: 0,
+                top: viewHeight,
                 left: 0,
                 right: 0,
-                bottom: fullscreen ? 0 : null,
-                height: fullscreen ? null : viewHeight,
-                child: child,
+                bottom: 0,
+                child: ListView(children: items),
               ),
-              if (!fullscreen)
-                Positioned(
-                  top: viewHeight,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  child: ListView(children: items),
-                ),
-            ],
-          ),
+          ]),
         ),
         child: displayController == null
             ? const ColoredBox(color: Colors.black)
@@ -7203,17 +6746,17 @@ class _SinglePlayerSingleVideoScreenState
                 key: videoKey,
                 controller: displayController,
                 onEnterFullscreen: () async {
-                  await SystemChrome.setPreferredOrientations(const [
-                    DeviceOrientation.landscapeLeft,
-                  ]);
+                  await SystemChrome.setPreferredOrientations(
+                    const [DeviceOrientation.landscapeLeft],
+                  );
                   await SystemChrome.setEnabledSystemUIMode(
                     SystemUiMode.immersiveSticky,
                   );
                 },
                 onExitFullscreen: () async {
-                  await SystemChrome.setPreferredOrientations(const [
-                    DeviceOrientation.portraitUp,
-                  ]);
+                  await SystemChrome.setPreferredOrientations(
+                    const [DeviceOrientation.portraitUp],
+                  );
                   await SystemChrome.setEnabledSystemUIMode(
                     SystemUiMode.edgeToEdge,
                   );
@@ -7224,55 +6767,54 @@ class _SinglePlayerSingleVideoScreenState
     if (_androidP5InplaceFullscreen) {
       final viewHeight = MediaQuery.of(context).size.width * 9 / 16;
       return PopScope(
-        canPop:
-            !_inplaceFullscreen && !(Platform.isAndroid && _autoSinglePlayer),
-        onPopInvokedWithResult: (didPop, _) {
-          if (!didPop && _inplaceFullscreen) {
-            unawaited(_exitInplaceDiagnosticFullscreen());
-          } else if (!didPop && Platform.isAndroid && _autoSinglePlayer) {
-            unawaited(_exitAutoPlayerAfterDisposal());
-          }
-        },
-        child: Scaffold(
-          appBar: _inplaceFullscreen
-              ? null
-              : AppBar(
-                  title: const Text('package:media_kit'),
-                  actions: [
-                    IconButton(
-                      tooltip: 'Toggle diagnostic video fullscreen',
-                      icon: const Icon(Icons.fullscreen),
-                      onPressed: diagnosticVideoKey == null
-                          ? null
-                          : () =>
+          canPop:
+              !_inplaceFullscreen && !(Platform.isAndroid && _autoSinglePlayer),
+          onPopInvokedWithResult: (didPop, _) {
+            if (!didPop && _inplaceFullscreen) {
+              unawaited(_exitInplaceDiagnosticFullscreen());
+            } else if (!didPop && Platform.isAndroid && _autoSinglePlayer) {
+              unawaited(_exitAutoPlayerAfterDisposal());
+            }
+          },
+          child: Scaffold(
+            appBar: _inplaceFullscreen
+                ? null
+                : AppBar(
+                    title: const Text('package:media_kit'),
+                    actions: [
+                      IconButton(
+                        tooltip: 'Toggle diagnostic video fullscreen',
+                        icon: const Icon(Icons.fullscreen),
+                        onPressed: diagnosticVideoKey == null
+                            ? null
+                            : () =>
                                 _toggleDiagnosticFullscreen(diagnosticVideoKey),
-                    ),
-                  ],
-                ),
-          body: Stack(
-            children: [
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: _inplaceFullscreen ? 0 : null,
-                height: _inplaceFullscreen ? null : viewHeight,
-                child: displayController == null
-                    ? const ColoredBox(color: Colors.black)
-                    : Video(key: videoKey, controller: displayController),
-              ),
-              if (!_inplaceFullscreen)
+                      ),
+                    ],
+                  ),
+            body: Stack(
+              children: [
                 Positioned(
-                  top: viewHeight,
+                  top: 0,
                   left: 0,
                   right: 0,
-                  bottom: 0,
-                  child: ListView(children: items),
+                  bottom: _inplaceFullscreen ? 0 : null,
+                  height: _inplaceFullscreen ? null : viewHeight,
+                  child: displayController == null
+                      ? const ColoredBox(color: Colors.black)
+                      : Video(key: videoKey, controller: displayController),
                 ),
-            ],
-          ),
-        ),
-      );
+                if (!_inplaceFullscreen)
+                  Positioned(
+                    top: viewHeight,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: ListView(children: items),
+                  ),
+              ],
+            ),
+          ));
     }
     if (_androidFrameSchedulerProbe &&
         _flutterRepaintTick % 5 == 0 &&
@@ -7318,26 +6860,20 @@ class _SinglePlayerSingleVideoScreenState
                 FloatingActionButton(
                   heroTag: 'file',
                   tooltip: 'Open [File]',
-                  onPressed: () => showFilePicker(
-                    context,
-                    player,
-                    openSource: Platform.isAndroid && _androidHdrTransaction
-                        ? _openSelectedSource
-                        : null,
-                  ),
+                  onPressed: () => showFilePicker(context, player,
+                      openSource: Platform.isAndroid && _androidHdrTransaction
+                          ? _openSelectedSource
+                          : null),
                   child: const Icon(Icons.file_open),
                 ),
                 const SizedBox(width: 16.0),
                 FloatingActionButton(
                   heroTag: 'uri',
                   tooltip: 'Open [Uri]',
-                  onPressed: () => showURIPicker(
-                    context,
-                    player,
-                    openSource: Platform.isAndroid && _androidHdrTransaction
-                        ? _openSelectedSource
-                        : null,
-                  ),
+                  onPressed: () => showURIPicker(context, player,
+                      openSource: Platform.isAndroid && _androidHdrTransaction
+                          ? _openSelectedSource
+                          : null),
                   child: const Icon(Icons.link),
                 ),
               ],
@@ -7360,16 +6896,15 @@ class _SinglePlayerSingleVideoScreenState
                               margin: const EdgeInsets.all(32.0),
                               child: useHdrVideo
                                   ? (AndroidSurfaceTexturePoc.enabled
-                                        ? _pocFixedOutputLayout(
-                                            HdrVideo(session: _hdrSession!),
-                                          )
-                                        : HdrVideo(session: _hdrSession!))
+                                      ? _pocFixedOutputLayout(
+                                          HdrVideo(session: _hdrSession!))
+                                      : HdrVideo(session: _hdrSession!))
                                   : displayController == null
-                                  ? const ColoredBox(color: Colors.black)
-                                  : Video(
-                                      key: videoKey,
-                                      controller: displayController,
-                                    ),
+                                      ? const ColoredBox(color: Colors.black)
+                                      : Video(
+                                          key: videoKey,
+                                          controller: displayController,
+                                        ),
                             ),
                           ),
                           const SizedBox(height: 32.0),
@@ -7378,39 +6913,41 @@ class _SinglePlayerSingleVideoScreenState
                     ),
                   ),
                   const VerticalDivider(width: 1.0, thickness: 1.0),
-                  Expanded(flex: 1, child: ListView(children: items)),
+                  Expanded(
+                    flex: 1,
+                    child: ListView(
+                      children: items,
+                    ),
+                  ),
                 ],
               )
             : ListView(
                 children: [
                   useHdrVideo
                       ? (AndroidSurfaceTexturePoc.enabled
-                            ? _pocFixedOutputLayout(
-                                HdrVideo(
-                                  session: _hdrSession!,
-                                  controls: (_) => const SizedBox.shrink(),
-                                ),
-                              )
-                            : HdrVideo(
-                                session: _hdrSession!,
-                                width: MediaQuery.of(context).size.width,
-                                height:
-                                    MediaQuery.of(context).size.width *
-                                    9.0 /
-                                    16.0,
-                              ))
+                          ? _pocFixedOutputLayout(HdrVideo(
+                              session: _hdrSession!,
+                              controls: (_) => const SizedBox.shrink(),
+                            ))
+                          : HdrVideo(
+                              session: _hdrSession!,
+                              width: MediaQuery.of(context).size.width,
+                              height:
+                                  MediaQuery.of(context).size.width * 9.0 / 16.0,
+                            ))
                       : displayController == null
-                      ? AspectRatio(
-                          aspectRatio: 16 / 9,
-                          child: const ColoredBox(color: Colors.black),
-                        )
-                      : Video(
-                          key: videoKey,
-                          controller: displayController,
-                          width: MediaQuery.of(context).size.width,
-                          height:
-                              MediaQuery.of(context).size.width * 9.0 / 16.0,
-                        ),
+                          ? AspectRatio(
+                              aspectRatio: 16 / 9,
+                              child: const ColoredBox(color: Colors.black),
+                            )
+                          : Video(
+                              key: videoKey,
+                              controller: displayController,
+                              width: MediaQuery.of(context).size.width,
+                              height: MediaQuery.of(context).size.width *
+                                  9.0 /
+                                  16.0,
+                            ),
                   if (_androidFlutterRepaintProbe)
                     _androidFrameSchedulerProbe
                         ? RepaintBoundary(
