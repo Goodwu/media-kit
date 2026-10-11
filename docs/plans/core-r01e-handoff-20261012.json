@@ -1,0 +1,307 @@
+{
+  "head": "87eb946fc5ce1e3fc7d3b951fc2f6f2bbd58302a",
+  "files": [
+    {
+      "path": "media_kit_video/lib/src/hdr/hdr_route.dart",
+      "sha256": "cf4ff986a51d00630b566f06abb87492e450ace5f18332a071378dde2a17cc52",
+      "authorMatch": true
+    },
+    {
+      "path": "media_kit_video/lib/src/hdr/hdr_strategy_realizer.dart",
+      "sha256": "7e3de29421b9c23e4aa058722d52fe59abf06ca03c8e709f7719d98ea7b5823b",
+      "authorMatch": true
+    },
+    {
+      "path": "media_kit_video/lib/src/hdr/hdr_route_planner.dart",
+      "sha256": "fd0c2c42c76c247a8e8b3366cd3c2679e4954cad902180fd3c20380026a48b93",
+      "authorMatch": true
+    },
+    {
+      "path": "media_kit_video/lib/src/hdr/hdr_video_session.dart",
+      "sha256": "9f89d427021feab3fe5f969d0c0faccec90392fdfdd2cef9c339c548eb4f8f03",
+      "authorMatch": true
+    },
+    {
+      "path": "media_kit_video/lib/src/hdr/hdr_decoder_review.dart",
+      "sha256": "495b5bd10572c127948686b6c54ab874667f46e0df2cbb1978215fc7ab8de01b",
+      "authorMatch": true
+    },
+    {
+      "path": "media_kit_video/lib/src/hdr/hdr_open_coordinator.dart",
+      "sha256": "8ea9901309b95f6ecd0ab9febf7d529dd389859ad59570f785c452a1cc52011f",
+      "authorMatch": true
+    },
+    {
+      "path": "media_kit_video/lib/src/hdr/hdr_session_native_dv_policy.dart",
+      "sha256": "89c240b674826edaf78ff93a44ead3a8d4300e5bbbed2bac1220763e8dc2915b",
+      "authorMatch": true
+    },
+    {
+      "path": "media_kit_video/lib/src/hdr/hdr_capabilities.dart",
+      "sha256": "e1690c750b9a913428ae27c2e49f1a16ee1142bafc122e9bd77f7263f70daa39",
+      "authorMatch": true
+    },
+    {
+      "path": "media_kit_video/lib/src/hdr/hdr_output_report.dart",
+      "sha256": "40259815c492379b35bb9cda2d0a8b43671aa652547e511c85eca1563d7f0ffa",
+      "authorMatch": true
+    },
+    {
+      "path": "media_kit_video/test/hdr_execution_catalog_test.dart",
+      "sha256": "35be752887c60057bf775bdefbda8ed17c3a9a778ddbfd9f2c5f5c0de8d924d0",
+      "authorMatch": true
+    },
+    {
+      "path": "media_kit_video/test/hdr_fallback_failure_test.dart",
+      "sha256": "c4022e7cb40711d9c2c6b37cd1ac7b70ed0762b6e878c92639bac753805ae21e",
+      "authorMatch": true
+    },
+    {
+      "path": "media_kit_video/test/hdr_open_coordinator_test.dart",
+      "sha256": "ff2260e0a39dce3e4909887282bef81182d8535da0c76af1ed1b4e6690a9480d",
+      "authorMatch": true
+    },
+    {
+      "path": "media_kit_video/test/hdr_output_diagnostics_test.dart",
+      "sha256": "56902c2575402e0755e4dab85b7865e26c91db4f8fe8366b62f01943df1def09",
+      "authorMatch": true
+    },
+    {
+      "path": "media_kit_video/test/hdr_route_planner_test.dart",
+      "sha256": "e98549119534c68884f18264f19b9ae5376432e98b21a40c7ffdbe6bc35c6571",
+      "authorMatch": true
+    },
+    {
+      "path": "media_kit_video/test/hdr_session_native_dv_policy_test.dart",
+      "sha256": "b08bb277860e9710e738f573e8ce2ad5770e677d9c4cbb35c64bc1a483813b45",
+      "authorMatch": true
+    },
+    {
+      "path": "media_kit_video/test/hdr_video_session_test.dart",
+      "sha256": "357bf0e4cb551479f95273ef534cf4dcfac0f55168f5a420c56a12fee67d5da5",
+      "authorMatch": true
+    },
+    {
+      "path": "media_kit_video/test/video_source_routing_test.dart",
+      "sha256": "382cb28fe62d24033094ee7035a48ecbd3565638ff5e724852df77adf412abad",
+      "authorMatch": true
+    }
+  ],
+  "task": "MK-ROUTING-20261011",
+  "stage": "CORE-R01e",
+  "status": "independent-V2-PASS-host-scope",
+  "authorEvidence": "/tmp/mk-r01e-author-evidence.txt",
+  "validation": {
+    "authorFullVideoTests": 688,
+    "independentFullVideoTests": 688,
+    "strictAnalysis": "No issues",
+    "authorNegativeMutations": 4,
+    "independentExternalCounterexamples": 4
+  },
+  "scope": [
+    "SDR Texture direct/copy/software bounded execution catalog",
+    "shared MediaCodec decoding failure dependency, distinct import/upload dependencies",
+    "actual CPU-frame review; requested/attempted/effective route report",
+    "preserve fully reviewed copy/software route on capability refresh"
+  ],
+  "invariants": [
+    "HDR attempts <=2",
+    "nativeDV once",
+    "source reopen once",
+    "full route identity deduplication",
+    "default coordinator review reopen limit 1; Session catalog limit 3",
+    "F01 source facts and unknown DV color rejection unchanged",
+    "owner/ACK/lease and cleanup debt unchanged",
+    "experimental product default false"
+  ],
+  "notAccepted": [
+    "native build",
+    "device visible HDR",
+    "continuous performance",
+    "actual YUV presenter",
+    "configuration closed loop"
+  ],
+  "remaining": {
+    "CONFIG": "prediction not playable must terminate violating old output; same-route new hard constraints need actual review",
+    "DEVICE": "DV001 recipe repairs and PR5 scripts/full fresh manifest/device integration remain open"
+  },
+  "independentReview": {
+    "head": "87eb946fc5ce1e3fc7d3b951fc2f6f2bbd58302a",
+    "files": [
+      {
+        "path": "media_kit_video/lib/src/hdr/hdr_route.dart",
+        "sha256": "cf4ff986a51d00630b566f06abb87492e450ace5f18332a071378dde2a17cc52",
+        "authorMatch": true,
+        "finalMatch": true
+      },
+      {
+        "path": "media_kit_video/lib/src/hdr/hdr_strategy_realizer.dart",
+        "sha256": "7e3de29421b9c23e4aa058722d52fe59abf06ca03c8e709f7719d98ea7b5823b",
+        "authorMatch": true,
+        "finalMatch": true
+      },
+      {
+        "path": "media_kit_video/lib/src/hdr/hdr_route_planner.dart",
+        "sha256": "fd0c2c42c76c247a8e8b3366cd3c2679e4954cad902180fd3c20380026a48b93",
+        "authorMatch": true,
+        "finalMatch": true
+      },
+      {
+        "path": "media_kit_video/lib/src/hdr/hdr_video_session.dart",
+        "sha256": "9f89d427021feab3fe5f969d0c0faccec90392fdfdd2cef9c339c548eb4f8f03",
+        "authorMatch": true,
+        "finalMatch": true
+      },
+      {
+        "path": "media_kit_video/lib/src/hdr/hdr_decoder_review.dart",
+        "sha256": "495b5bd10572c127948686b6c54ab874667f46e0df2cbb1978215fc7ab8de01b",
+        "authorMatch": true,
+        "finalMatch": true
+      },
+      {
+        "path": "media_kit_video/lib/src/hdr/hdr_open_coordinator.dart",
+        "sha256": "8ea9901309b95f6ecd0ab9febf7d529dd389859ad59570f785c452a1cc52011f",
+        "authorMatch": true,
+        "finalMatch": true
+      },
+      {
+        "path": "media_kit_video/lib/src/hdr/hdr_session_native_dv_policy.dart",
+        "sha256": "89c240b674826edaf78ff93a44ead3a8d4300e5bbbed2bac1220763e8dc2915b",
+        "authorMatch": true,
+        "finalMatch": true
+      },
+      {
+        "path": "media_kit_video/lib/src/hdr/hdr_capabilities.dart",
+        "sha256": "e1690c750b9a913428ae27c2e49f1a16ee1142bafc122e9bd77f7263f70daa39",
+        "authorMatch": true,
+        "finalMatch": true
+      },
+      {
+        "path": "media_kit_video/lib/src/hdr/hdr_output_report.dart",
+        "sha256": "40259815c492379b35bb9cda2d0a8b43671aa652547e511c85eca1563d7f0ffa",
+        "authorMatch": true,
+        "finalMatch": true
+      },
+      {
+        "path": "media_kit_video/test/hdr_execution_catalog_test.dart",
+        "sha256": "35be752887c60057bf775bdefbda8ed17c3a9a778ddbfd9f2c5f5c0de8d924d0",
+        "authorMatch": true,
+        "finalMatch": true
+      },
+      {
+        "path": "media_kit_video/test/hdr_fallback_failure_test.dart",
+        "sha256": "c4022e7cb40711d9c2c6b37cd1ac7b70ed0762b6e878c92639bac753805ae21e",
+        "authorMatch": true,
+        "finalMatch": true
+      },
+      {
+        "path": "media_kit_video/test/hdr_open_coordinator_test.dart",
+        "sha256": "ff2260e0a39dce3e4909887282bef81182d8535da0c76af1ed1b4e6690a9480d",
+        "authorMatch": true,
+        "finalMatch": true
+      },
+      {
+        "path": "media_kit_video/test/hdr_output_diagnostics_test.dart",
+        "sha256": "56902c2575402e0755e4dab85b7865e26c91db4f8fe8366b62f01943df1def09",
+        "authorMatch": true,
+        "finalMatch": true
+      },
+      {
+        "path": "media_kit_video/test/hdr_route_planner_test.dart",
+        "sha256": "e98549119534c68884f18264f19b9ae5376432e98b21a40c7ffdbe6bc35c6571",
+        "authorMatch": true,
+        "finalMatch": true
+      },
+      {
+        "path": "media_kit_video/test/hdr_session_native_dv_policy_test.dart",
+        "sha256": "b08bb277860e9710e738f573e8ce2ad5770e677d9c4cbb35c64bc1a483813b45",
+        "authorMatch": true,
+        "finalMatch": true
+      },
+      {
+        "path": "media_kit_video/test/hdr_video_session_test.dart",
+        "sha256": "357bf0e4cb551479f95273ef534cf4dcfac0f55168f5a420c56a12fee67d5da5",
+        "authorMatch": true,
+        "finalMatch": true
+      },
+      {
+        "path": "media_kit_video/test/video_source_routing_test.dart",
+        "sha256": "382cb28fe62d24033094ee7035a48ecbd3565638ff5e724852df77adf412abad",
+        "authorMatch": true,
+        "finalMatch": true
+      }
+    ],
+    "verdict": "PASS_FOR_R01e_HOST_SCOPE",
+    "blockingFindings": [],
+    "testResults": [
+      {
+        "name": "full media_kit_video host regression",
+        "count": 688,
+        "exitCode": 0,
+        "log": "/tmp/mk-r01e-critical-full.log",
+        "logSha256": "23d3d205c147c37a9c7dde628560888bb6097aac2104ad25a62695fa31187047"
+      },
+      {
+        "name": "strict full package analysis --fatal-infos",
+        "exitCode": 0,
+        "log": "/tmp/mk-r01e-critical-analyze.log",
+        "logSha256": "e070994ac1b214ed3be272fe0fdacfd8304c98d246309f93cdca67a005562b55"
+      },
+      {
+        "name": "independent external adversarial tests",
+        "count": 4,
+        "exitCode": 0,
+        "log": "/tmp/mk-r01e-critical-extra-final.log",
+        "source": "/tmp/mk_r01e_critical_test.dart",
+        "cases": [
+          "unrelated typed dependency cannot authorize retry",
+          "nested source blocked never becomes an alternative",
+          "public open resets candidate exhaustion and old software report",
+          "five distinct route bound and HDR budget remain separate"
+        ],
+        "logSha256": "74d71a614b18559efbb0b5ac42fb6ca0e7307c9f9819391930ad51d95ee1c739"
+      }
+    ],
+    "nonBlockingFindings": [
+      {
+        "id": "existing-capability-loss-output",
+        "path": "media_kit_video/lib/src/hdr/hdr_video_session.dart",
+        "line": 1222,
+        "summary": "Existing handleCapabilitiesChanged emits an error then returns when the prediction is unplayable; old output can remain active. Unchanged by R01e; must stay open for CONFIG closure."
+      },
+      {
+        "id": "stale-review-comment",
+        "path": "media_kit_video/lib/src/hdr/hdr_video_session.dart",
+        "line": 849,
+        "summary": "Review doc comments still describe a single reopen. Runtime Session allows bounded distinct SDR reopens while HDR/source invariants remain separately constrained."
+      }
+    ],
+    "verifiedFacts": [
+      "17 reviewed file SHA256 values match author freeze before and after independent execution",
+      "Full route equality prevents strategy-only candidate suppression; actual request output contract replaces direct/copy/software resources",
+      "Typed dependency must belong to failed route; nested source/owner/timeout failures cannot become route alternatives",
+      "MC decoder shared dependency excludes direct and copy; FFmpeg remains unknown until current decoder and CPU format evidence",
+      "Native DV once, HDR maximum two, total maximum five and duplicate route rejection retain separate admission gates",
+      "F01 source model unchanged; unknown DV still blocks before configuration; plain EL fixture null agrees with mpv current-tracks property unavailable without dovi record",
+      "Local mpv c11426b67a96747c74dfd2a1b0a0340af9696103 clean source has copy variant and gpu-next CPU upload; mediacodec_embed query_format only accepts IMGFMT_MEDIACODEC"
+    ],
+    "notVerified": [
+      "Fresh native build and DEVICE DV001 recipe corrections",
+      "Actual direct/copy/software decoding, upload, visible playback and performance on devices",
+      "Actual YUV presenter, native owner/arm and final DV001/PR5 integration",
+      "auto/prefer/require actual configuration closure",
+      "CI status of a future committed R01e vector"
+    ],
+    "reviewTriggers": [
+      "Any edit to frozen 17 source/test files",
+      "Changes to retry budgets, route dependencies, decoder/pixel validation, ownership/source cleanup or output contract",
+      "CONFIG integration especially invalid configuration stopping existing output",
+      "New native executable or DEVICE candidate requires exact source vector and separate native/device acceptance"
+    ],
+    "notes": [
+      "Initial external test harness compile failed because reviewer omitted one import and required constructor fields; corrected outside repository. Initial log retained at /tmp/mk-r01e-critical-extra.log. No product source changed.",
+      "Author four restored mutation logs inspected only; not claimed independently repeated.",
+      "Root TASKS/conversation edits were outside review ownership."
+    ]
+  }
+}

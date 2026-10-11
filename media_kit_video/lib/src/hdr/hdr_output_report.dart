@@ -31,6 +31,8 @@ class HdrOutputReport {
     this.sourceFacts,
     this.prediction,
     this.actual,
+    this.requested,
+    this.attemptedRoutes = const [],
     this.dataSpaceRequested,
     this.dataSpacePath,
     this.dataSpaceReadback,
@@ -63,6 +65,11 @@ class HdrOutputReport {
 
   /// The route actually being executed, when playback opened.
   final HdrRoute? actual;
+
+  /// Initial requested execution, before bounded independent alternatives.
+  /// [actual] is the effective applied request; decoderObservation is observed.
+  final HdrRoute? requested;
+  final List<HdrRoute> attemptedRoutes;
 
   /// Dataspace requested for the GPU surface (`pq`/`hlg`), when the route
   /// needs one.
@@ -130,6 +137,8 @@ class HdrOutputReport {
     HdrSourceFacts? sourceFacts,
     HdrRoutePrediction? prediction,
     HdrRoute? actual,
+    HdrRoute? requested,
+    List<HdrRoute>? attemptedRoutes,
     String? dataSpaceRequested,
     String? dataSpacePath,
     String? dataSpaceReadback,
@@ -147,6 +156,8 @@ class HdrOutputReport {
       sourceFacts: sourceFacts ?? this.sourceFacts,
       prediction: prediction ?? this.prediction,
       actual: actual ?? this.actual,
+      requested: requested ?? this.requested,
+      attemptedRoutes: attemptedRoutes ?? this.attemptedRoutes,
       dataSpaceRequested: dataSpaceRequested ?? this.dataSpaceRequested,
       dataSpacePath: dataSpacePath ?? this.dataSpacePath,
       dataSpaceReadback: dataSpaceReadback ?? this.dataSpaceReadback,

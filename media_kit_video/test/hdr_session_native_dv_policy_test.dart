@@ -599,6 +599,27 @@ void main() {
     expect(budget.hdrAttempts, 2);
   });
 
+  test('five complete route admissions are finite and same vo does not erase contract identity', () {
+    final budget = HdrSessionAttemptPolicy();
+    final hdr = HdrRoutePlanner.plan(source: _hdr10, capabilities: _caps(sdk: 29)).selected.route!;
+    final native = _Environment().plan().route;
+    final sdr = HdrRoutePlanner.plan(source: _hdr10, capabilities: _caps(sdk: 29),
+      preference: HdrOutputPreference.off).candidates.where((c) => c.feasible).map((c) => c.route!).toList();
+    budget.admit(native);
+    budget.admit(hdr);
+    for (final route in sdr) { budget.admit(route); }
+    expect(budget.attempted, hasLength(5));
+    expect(budget.hdrAttempts, 2);
+    expect(sdr.map((r) => r.vo).toSet(), {'gpu-next'});
+    expect(sdr.toSet(), hasLength(3));
+    expect(() => budget.admit(sdr.first), throwsA(isA<HdrSessionRouteBudgetFailure>()));
+    expect(() => budget.admit(sdr.first.withExecution(hwdec: 'extra', dependencies: {})),
+      throwsA(isA<HdrSessionRouteBudgetFailure>()));
+    final fresh = HdrSessionAttemptPolicy()..admit(sdr.first);
+    expect(() => fresh.admit(sdr.first), throwsA(isA<HdrSessionRouteBudgetFailure>()));
+    expect(() => fresh.attempted.clear(), throwsUnsupportedError);
+  });
+
   group('actual Session/coordinator flow with synthetic evidence', () {
     test('superseded review cannot plan or spend successor generation state',
         () async {

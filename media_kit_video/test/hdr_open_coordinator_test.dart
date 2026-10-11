@@ -387,6 +387,26 @@ void main() {
         throwsA(same(other)));
   });
 
+  test('review reopen budget is finite and rejects invalid configuration', () async {
+    for (final value in [-1, 5]) {
+      expect(() => HdrOpenCoordinator<String, FakePlan>(FakeBackend(),
+        preparer: (source, _) async => plan(source), maxReviewReopens: value),
+        throwsArgumentError);
+    }
+    for (final limit in [0, 3]) {
+      final backend = FakeBackend();
+      var count = 0;
+      final coordinator = HdrOpenCoordinator<String, FakePlan>(backend,
+        preparer: (source, _) async => plan(source), maxReviewReopens: limit,
+        review: (_, __) async => HdrReviewDecision<FakePlan>.reopen(
+          Duration.zero, plan('rebuild-${++count}')));
+      await expectLater(coordinator.openSource('A'), throwsA(isA<HdrReviewReopenLimit>()));
+      expect(backend.calls.where((call) => call.startsWith('open:')), hasLength(limit + 1));
+      expect(count, limit + 1);
+      await coordinator.dispose();
+    }
+  });
+
   test('a second review reopen fails closed without retry or third open',
       () async {
     final backend = FakeBackend();

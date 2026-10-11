@@ -88,9 +88,8 @@ class HdrDecoderInfo {
       heightRange: _intRange(map['heightRange']),
       frameRateRange: _intRange(map['frameRateRange']),
       supports4K: map['supports4K'] == true,
-      max4KFps: map['max4KFps'] is num
-          ? (map['max4KFps'] as num).toDouble()
-          : null,
+      max4KFps:
+          map['max4KFps'] is num ? (map['max4KFps'] as num).toDouble() : null,
     );
   }
 
@@ -109,8 +108,7 @@ class HdrDecoderInfo {
   }
 
   @override
-  String toString() =>
-      'HdrDecoderInfo($name, $mimeType, '
+  String toString() => 'HdrDecoderInfo($name, $mimeType, '
       'hardware: $hardwareAcceleration, main10: $main10, 4K: $supports4K)';
 }
 
@@ -217,15 +215,18 @@ class HdrCapabilities {
   /// The source must match the consumer actually used by the route. Native
   /// DV support cannot authorize a HEVC base-layer fallback, or vice versa.
   VideoSupport decoderSupportFor(HdrRoute route) =>
-      sourceSupport?.support(
-        path: route.strategy == HdrStrategy.nativeDolbyVision
-            ? 'nativeDv'
-            : 'codec',
-        kind: route.strategy == HdrStrategy.nativeDolbyVision
-            ? VideoDecoderKind.hardware
-            : null,
-      ) ??
-      VideoSupport.unknown;
+      // MediaCodecList's software rows are not FFmpeg decoder availability.
+      route.hwdec == 'no'
+          ? VideoSupport.unknown
+          : sourceSupport?.support(
+                path: route.strategy == HdrStrategy.nativeDolbyVision
+                    ? 'nativeDv'
+                    : 'codec',
+                kind: route.strategy == HdrStrategy.nativeDolbyVision
+                    ? VideoDecoderKind.hardware
+                    : null,
+              ) ??
+              VideoSupport.unknown;
 
   /// Parses the raw native snapshot. Malformed or missing fields degrade to
   /// the safe defaults: no capability report (null displayHdrTypes), no
@@ -251,9 +252,8 @@ class HdrCapabilities {
       displayHdrTypes: _parseDisplayHdrTypes(map['displayHdrTypes']),
       hevcDecoders: _parseDecoders(map['hevcDecoders']),
       dolbyVisionDecoders: _parseDecoders(map['dolbyVisionDecoders']),
-      p5PipelineAvailable: p5Raw is bool
-          ? p5Raw
-          : (p5PipelineAvailable ?? false),
+      p5PipelineAvailable:
+          p5Raw is bool ? p5Raw : (p5PipelineAvailable ?? false),
       nativeDvBridgeApi: nativeDvRaw is int && nativeDvRaw == 1 ? 1 : 0,
       dataSpaceBridgeLoaded: map['dataSpaceBridgeLoaded'] == true,
       dataSpaceExt: HdrDataSpaceExtInfo.fromMap(map['dataSpaceExt']),
@@ -286,8 +286,7 @@ class HdrCapabilities {
   }
 
   @override
-  String toString() =>
-      'HdrCapabilities(sdk: $sdkInt, '
+  String toString() => 'HdrCapabilities(sdk: $sdkInt, '
       'displayHdrTypes: $displayHdrTypes, hevc: ${hevcDecoders.length}, '
       'dv: ${dolbyVisionDecoders.length}, p5Pipeline: $p5PipelineAvailable, '
       'nativeDvBridgeApi: $nativeDvBridgeApi, '

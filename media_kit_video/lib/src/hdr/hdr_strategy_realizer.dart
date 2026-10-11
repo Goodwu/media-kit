@@ -3,8 +3,7 @@
 /// Copyright © 2021 & onwards, Hitesh Kumar Saini <saini123hitesh@gmail.com>.
 /// All rights reserved.
 /// Use of this source code is governed by MIT license that can be found in the LICENSE file.
-import 'package:flutter/foundation.dart'
-    show debugPrint, visibleForTesting;
+import 'package:flutter/foundation.dart' show debugPrint, visibleForTesting;
 import 'hdr_capabilities.dart';
 import 'hdr_mkst_bridge_probe.dart';
 import 'hdr_output_policy.dart' show HdrOutputPolicy;
@@ -63,16 +62,88 @@ class HdrStrategyRealizer {
       case HdrStrategy.nativeDolbyVision:
         return _nativeDolbyVision(source, sourceClass, capabilities);
       case HdrStrategy.baseLayerDirect:
-        return _baseLayerDirect(source, sourceClass, capabilities);
+        return _withOrdinaryDecoderDependency(
+            _baseLayerDirect(source, sourceClass, capabilities));
       case HdrStrategy.baseLayerConvert:
-        return _baseLayerConvert(source, sourceClass, capabilities);
+        return _withOrdinaryDecoderDependency(
+            _baseLayerConvert(source, sourceClass, capabilities));
       case HdrStrategy.metadataReshape:
-        return _metadataReshape(source, sourceClass, capabilities);
+        return _withOrdinaryDecoderDependency(
+            _metadataReshape(source, sourceClass, capabilities));
       case HdrStrategy.toneMapSdr:
-        return _toneMapSdr(source, sourceClass, capabilities);
+        return _withOrdinaryDecoderDependency(
+            _toneMapSdr(source, sourceClass, capabilities));
       case HdrStrategy.sdrDirect:
-        return _sdrDirect(source, sourceClass, capabilities);
+        return _withOrdinaryDecoderDependency(
+            _sdrDirect(source, sourceClass, capabilities));
     }
+  }
+
+  // These mpv requests all use the ordinary MediaCodec decode implementation.
+  // Native DV owns a different configured decoder contract; hwdec=no is FFmpeg.
+  static HdrStrategyRealization _withOrdinaryDecoderDependency(
+      HdrStrategyRealization realization) {
+    final route = realization.route;
+    if (route == null ||
+        !const {'mediacodec', 'mediacodec-copy', 'surfacetexture'}
+            .contains(route.hwdec)) {
+      return realization;
+    }
+    return HdrStrategyRealization.route(route.withExecution(
+        hwdec: route.hwdec,
+        dependencies: {
+          ...route.dependencies,
+          HdrRouteDependency.decoderMediacodec
+        }));
+  }
+
+  /// Existing SDR Texture executions, in bounded preference order. CPU
+  /// candidates preserve the same tone-map/P5 pipeline/P8.4 stripping gates;
+  /// they never add an HDR presenter or feed CPU frames to mediacodec_embed.
+  static List<HdrStrategyRealization> realizeCandidates(
+    HdrStrategy strategy, {
+    required HdrSourceDescriptor source,
+    required HdrSourceClass sourceClass,
+    required HdrCapabilities capabilities,
+  }) {
+    final primary = realize(strategy,
+        source: source, sourceClass: sourceClass, capabilities: capabilities);
+    final route = primary.route;
+    if (route == null ||
+        route.vo != 'gpu-next' ||
+        route.topology != HdrTopology.texture ||
+        route.outputTransfer != HdrOutputTransfer.sdr ||
+        (strategy != HdrStrategy.sdrDirect &&
+            strategy != HdrStrategy.toneMapSdr)) {
+      return [primary];
+    }
+    final requests = <String>[
+      route.hwdec,
+      if (route.hwdec != 'mediacodec-copy') 'mediacodec-copy',
+      'no',
+    ];
+    return List<HdrStrategyRealization>.unmodifiable([
+      for (final hwdec in requests)
+        HdrStrategyRealization.route(
+            route.withExecution(hwdec: hwdec, dependencies: {
+          ...route.dependencies.where((dependency) =>
+              dependency != HdrRouteDependency.hwdecMediacodec &&
+              dependency != HdrRouteDependency.hwdecMediacodecCopy &&
+              dependency != HdrRouteDependency.decoderMediacodec),
+          HdrRouteDependency.presenterGpuTexture,
+          if (hwdec == 'no')
+            HdrRouteDependency.decoderSoftware
+          else
+            HdrRouteDependency.decoderMediacodec,
+          if (hwdec == 'mediacodec') ...{
+            HdrRouteDependency.hwdecMediacodec,
+            HdrRouteDependency.importMediacodec,
+          } else
+            HdrRouteDependency.importCpuUpload,
+          if (hwdec == 'mediacodec-copy')
+            HdrRouteDependency.hwdecMediacodecCopy,
+        })),
+    ]);
   }
 
   /// Native single-layer Dolby Vision decode through MediaCodec and the

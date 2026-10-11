@@ -6,7 +6,7 @@ void main() {
   for (final experimental in [false, true]) {
     for (final sdk in [24, 29]) {
       for (final hdr in [false, true]) {
-        test('fallback retains failure: experimental=$experimental SDK=$sdk HDR=$hdr', () {
+        test('fallback retains failed request while permitting independent execution: experimental=$experimental SDK=$sdk HDR=$hdr', () {
           final caps = HdrCapabilities(
             sdkInt: sdk,
             displayHdrTypes: const {},
@@ -29,10 +29,21 @@ void main() {
             policy: HdrRoutingPolicy(allowExperimental: experimental),
             excluded: failures,
           );
-          expect(result.playable, isFalse);
-          expect(result.selected.route, isNull);
-          expect(result.selected.skipReason, HdrDegradeReason.hwdecMismatch);
+          expect(result.playable, isTrue);
+          expect(result.selected.route!.hwdec, sdk < 26 ? 'no' : 'mediacodec-copy');
+          expect(result.selected.route!.dependencies, isNot(contains(dependency)));
+          expect(result.candidates.where((c) => c.skipReason == HdrDegradeReason.hwdecMismatch), isNotEmpty);
           expect(failures, {dependency: HdrDegradeReason.hwdecMismatch});
+          // A shared presenter failure still blocks every independent decoder.
+          final sharedFailures = {...failures,
+            HdrRouteDependency.presenterGpuTexture: HdrDegradeReason.hwdecMismatch};
+          final blocked = HdrRoutePlanner.plan(source: source, capabilities: caps,
+            policy: HdrRoutingPolicy(allowExperimental: experimental), excluded: sharedFailures);
+          expect(blocked.playable, isFalse);
+          expect(blocked.selected.route, isNull);
+          expect(blocked.selected.skipReason, HdrDegradeReason.hwdecMismatch);
+          expect(sharedFailures, {...failures,
+            HdrRouteDependency.presenterGpuTexture: HdrDegradeReason.hwdecMismatch});
         });
       }
     }

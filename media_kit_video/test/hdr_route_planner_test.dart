@@ -180,14 +180,14 @@ void checkInvariants(
       expect(candidate.route, isNotNull, reason: '$candidate');
     }
     // With the gate closed, an experimental strategy may only become the
-    // selection through the safety net (the last candidate); the same for
+    // selection through the explicit safety-net block; the same for
     // an unsupported maturity (e.g. profile 10's safety net).
     if (candidate.skipReason == null &&
         (candidate.maturity == HdrStrategyMaturity.experimental &&
                 !allowExperimental ||
             candidate.maturity == HdrStrategyMaturity.unsupported)) {
       expect(
-        identical(candidate, prediction.candidates.last),
+        candidate.isSafetyNet,
         isTrue,
         reason: 'gated candidate selected outside the safety net: $candidate',
       );
@@ -335,7 +335,8 @@ void main() {
         source(enhancementLayer: true),
       ];
       for (final HdrSourceDescriptor invalid in invalidSources) {
-        expect(realize(source: invalid).infeasibleReason,
+        expect(
+            realize(source: invalid).infeasibleReason,
             invalid.hasUnresolvedDolbyVision
                 ? HdrDegradeReason.sourceMetadataUnknown
                 : HdrDegradeReason.unsupportedStrategy,
@@ -576,8 +577,12 @@ void main() {
         final HdrRoutePrediction sdr =
             caps(sdkInt: sdk).predict(sources[HdrSourceClass.sdr]!);
         expect(sdr.selected.route!.hwdec, 'mediacodec-copy');
-        expect(sdr.selected.route!.dependencies,
-            <String>{HdrRouteDependency.hwdecMediacodecCopy});
+        expect(sdr.selected.route!.dependencies, <String>{
+          HdrRouteDependency.hwdecMediacodecCopy,
+          HdrRouteDependency.decoderMediacodec,
+          HdrRouteDependency.importCpuUpload,
+          HdrRouteDependency.presenterGpuTexture
+        });
 
         final HdrRoutePrediction hdr = caps(sdkInt: sdk).predict(
           sources[HdrSourceClass.hdr10]!,
@@ -615,8 +620,12 @@ void main() {
         final HdrRoutePrediction sdr =
             caps(sdkInt: sdk).predict(sources[HdrSourceClass.sdr]!);
         expect(sdr.selected.route!.hwdec, 'mediacodec');
-        expect(sdr.selected.route!.dependencies,
-            <String>{HdrRouteDependency.hwdecMediacodec});
+        expect(sdr.selected.route!.dependencies, <String>{
+          HdrRouteDependency.hwdecMediacodec,
+          HdrRouteDependency.decoderMediacodec,
+          HdrRouteDependency.importMediacodec,
+          HdrRouteDependency.presenterGpuTexture
+        });
 
         final HdrRoutePrediction hdr = caps(sdkInt: sdk).predict(
           sources[HdrSourceClass.hdr10]!,
@@ -702,7 +711,12 @@ void main() {
       );
       expect(
         available.selected.route!.dependencies,
-        <String>{HdrRouteDependency.hwdecMediacodecCopy},
+        <String>{
+          HdrRouteDependency.hwdecMediacodecCopy,
+          HdrRouteDependency.decoderMediacodec,
+          HdrRouteDependency.importCpuUpload,
+          HdrRouteDependency.presenterGpuTexture
+        },
       );
     });
 
@@ -750,7 +764,7 @@ void main() {
       final HdrRoutePrediction prediction =
           lya.predict(sources[HdrSourceClass.dvP7]!);
       expect(prediction.selected.strategy, HdrStrategy.toneMapSdr);
-      expect(prediction.candidates, hasLength(4));
+      expect(prediction.candidates, hasLength(6));
       expect(prediction.candidates[0].strategy, HdrStrategy.baseLayerDirect);
       expect(prediction.candidates[0].skipReason,
           HdrDegradeReason.experimentalStrategySkipped);
@@ -760,6 +774,11 @@ void main() {
       expect(prediction.candidates[2].strategy, HdrStrategy.toneMapSdr);
       expect(prediction.candidates[2].skipReason,
           HdrDegradeReason.experimentalStrategySkipped);
+      expect(
+          prediction.candidates
+              .where((c) => c.isSafetyNet)
+              .map((c) => c.route!.hwdec),
+          ['mediacodec', 'mediacodec-copy', 'no']);
       expect(prediction.candidates.last.feasible, isTrue);
       expect(prediction.candidates.last.skipReason, isNull);
       expect(prediction.playable, isTrue);
@@ -806,8 +825,8 @@ void main() {
       expect(prediction.selected.strategy, HdrStrategy.nativeDolbyVision);
       expect(prediction.selected.maturity, HdrStrategyMaturity.verified);
       expect(prediction.selected.skipReason, isNull);
-      expect(prediction.candidates.first.strategy,
-          HdrStrategy.nativeDolbyVision);
+      expect(
+          prediction.candidates.first.strategy, HdrStrategy.nativeDolbyVision);
       expect(prediction.candidates.first.skipReason, isNull);
       expect(prediction.selected.route!.vdLavcOptions, 'native_dv=1');
       expect(prediction.playable, isTrue);
@@ -922,7 +941,8 @@ void main() {
       expect(prediction.selected.route!.surfaceTransfer, 'pq');
     });
 
-    test('nativeDolbyVision stays unselected on a non-DV display, even first '
+    test(
+        'nativeDolbyVision stays unselected on a non-DV display, even first '
         'in preferences', () {
       final HdrCapabilities lya = lyaCaps();
       const HdrRoutingPolicy policy = HdrRoutingPolicy(
@@ -1104,6 +1124,8 @@ void main() {
         <HdrStrategy>[
           HdrStrategy.baseLayerDirect,
           HdrStrategy.baseLayerConvert,
+          HdrStrategy.toneMapSdr,
+          HdrStrategy.toneMapSdr,
           HdrStrategy.toneMapSdr
         ],
       );
@@ -1137,7 +1159,9 @@ void main() {
       final HdrRoutePrediction prediction =
           lyaCaps().predict(sources[HdrSourceClass.dvP84]!);
       final HdrCandidate toneMap = prediction.candidates.singleWhere(
-          (HdrCandidate c) => c.strategy == HdrStrategy.toneMapSdr);
+          (HdrCandidate c) =>
+              c.strategy == HdrStrategy.toneMapSdr &&
+              c.route?.hwdec == 'mediacodec');
       expect(toneMap.route!.vo, 'gpu-next');
       expect(toneMap.route!.hwdec, 'mediacodec');
       expect(toneMap.route!.topology, HdrTopology.texture);
@@ -1273,7 +1297,7 @@ void main() {
     test('preference off keeps a pipeline-less P5 unplayable (R3.3)', () {
       final HdrRoutePrediction prediction = caps(p5: false).predict(
           sources[HdrSourceClass.dvP5]!,
-              preference: HdrOutputPreference.off);
+          preference: HdrOutputPreference.off);
       expect(prediction.playable, isFalse);
       expect(prediction.selected.skipReason,
           HdrDegradeReason.p5PipelineUnavailable);
@@ -1293,7 +1317,8 @@ void main() {
             .dependencies,
         <String>{
           HdrRouteDependency.hwdecMediacodec,
-          HdrRouteDependency.topologyPlatformView
+          HdrRouteDependency.topologyPlatformView,
+          HdrRouteDependency.decoderMediacodec,
         },
       );
       expect(
@@ -1302,16 +1327,27 @@ void main() {
           HdrRouteDependency.hwdecMediacodec,
           HdrRouteDependency.topologyPlatformView,
           HdrRouteDependency.dataspacePq,
+          HdrRouteDependency.decoderMediacodec,
         },
       );
       expect(
         lya.predict(sources[HdrSourceClass.sdr]!).selected.route!.dependencies,
-        <String>{HdrRouteDependency.hwdecMediacodec},
+        <String>{
+          HdrRouteDependency.hwdecMediacodec,
+          HdrRouteDependency.decoderMediacodec,
+          HdrRouteDependency.importMediacodec,
+          HdrRouteDependency.presenterGpuTexture
+        },
       );
       // The tone-map safety net has no dataspace/platformView dependency.
       expect(
         lya.predict(sources[HdrSourceClass.dvP7]!).selected.route!.dependencies,
-        <String>{HdrRouteDependency.hwdecMediacodec},
+        <String>{
+          HdrRouteDependency.hwdecMediacodec,
+          HdrRouteDependency.decoderMediacodec,
+          HdrRouteDependency.importMediacodec,
+          HdrRouteDependency.presenterGpuTexture
+        },
       );
       // Conversion to HLG (HDR10 base on an HLG-only display, gate open —
       // the direct route is infeasible without display HDR10) carries
@@ -1326,6 +1362,7 @@ void main() {
         HdrRouteDependency.hwdecMediacodec,
         HdrRouteDependency.topologyPlatformView,
         HdrRouteDependency.dataspaceHlg,
+        HdrRouteDependency.decoderMediacodec,
       });
     });
   });
