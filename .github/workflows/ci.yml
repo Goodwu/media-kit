@@ -17,7 +17,7 @@ on:
 
 concurrency:
   group: media-kit-ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.head_ref != 'routing/MK-ROUTING-20261011' && github.ref_name != 'routing/MK-ROUTING-20261011' }}
 
 jobs:
   media_kit-tests-windows:
