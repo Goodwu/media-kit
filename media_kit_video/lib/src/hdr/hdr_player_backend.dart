@@ -566,8 +566,9 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
     }
     if (route.topology == HdrTopology.platformView) {
       final output = await outputSlot.current!.platform.future;
-      await output.waitUntilCurrentOutputBound
-          .timeout(const Duration(seconds: 10));
+      await HdrOutputBindTimeout.waitFor(
+        output.waitUntilCurrentOutputBound.timeout(const Duration(seconds: 10)),
+      );
       final transfer = route.surfaceTransfer;
       if (transfer != null) {
         final handle = await player.handle;

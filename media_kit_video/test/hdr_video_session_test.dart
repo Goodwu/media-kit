@@ -263,7 +263,150 @@ void main() {
   await session.dispose();
 });
 
-  test('dataspace failure degrades along the candidates, tone-map keeps '
+  test(
+      'persistent second-review mismatch blocks even with another playable route',
+      () async {
+    addTearDown(() => HdrStrategyRealizer.mkstBridgeProbeOverride = null);
+    HdrStrategyRealizer.mkstBridgeProbeOverride = () => false;
+    for (final experimental in [true, false]) {
+      final backend = FakeBackend()
+        ..factsForOpen.addAll([
+          gammaFacts(gamma: 'pq', hwdec: 'mediacodec-copy'),
+          gammaFacts(gamma: 'pq', hwdec: 'no'),
+        ]);
+      final session = makeSession(
+        backend: backend,
+        capabilities: lgPqCaps(),
+        policy: HdrRoutingPolicy(allowExperimental: experimental),
+      );
+      final events = <HdrOutputEvent>[];
+      session.events.listen(events.add);
+      await session.open(media);
+      await pumpEventQueue();
+      expect(backend.opened, hasLength(2));
+      expect(backend.opened.first.route.strategy, HdrStrategy.sdrDirect);
+      expect(backend.opened.last.route.strategy, HdrStrategy.baseLayerDirect);
+      expect(session.report.value.verified, isFalse);
+      expect(
+          session.report.value.degradeReason, HdrDegradeReason.hwdecMismatch);
+      expect(session.report.value.sourceFacts?.source, hdr10);
+      expect(events.whereType<HdrRouteAppliedEvent>(), isEmpty);
+      expect(events.whereType<HdrErrorEvent>().single.reason,
+          HdrDegradeReason.hwdecMismatch);
+      expect(backend.calls.skip(backend.calls.length - 2), ['stop', 'reset']);
+      await session.dispose();
+    }
+  });
+
+  test('persistent route-only disagreement blocks with an accurate reason', () async {
+    final backend = FakeBackend()
+      ..factsForOpen.addAll([
+        gammaFacts(gamma: 'pq'),
+        gammaFacts(gamma: 'hlg'),
+      ]);
+    final session = makeSession(backend: backend, capabilities: caps());
+    final events = <HdrOutputEvent>[];
+    session.events.listen(events.add);
+    await session.open(media);
+    await pumpEventQueue();
+    expect(backend.opened, hasLength(2));
+    expect(session.report.value.verified, isFalse);
+    expect(session.report.value.degradeReason,
+        HdrDegradeReason.routeReviewMismatch);
+    expect(session.report.value.sourceFacts?.source.transfer, 'hlg');
+    expect(session.report.value.diagnostic,
+        contains('mismatch persisted after rebuild'));
+    expect(events.whereType<HdrRouteAppliedEvent>(), isEmpty);
+    expect(events.whereType<HdrErrorEvent>().single.reason,
+        HdrDegradeReason.routeReviewMismatch);
+    expect(backend.calls.skip(backend.calls.length - 2), ['stop', 'reset']);
+    await session.dispose();
+  });
+
+  for (final phase in ['prepare', 'configure']) {
+    test('actual output readiness timeout in $phase excludes its topology', () async {
+      final raw = TimeoutException('actual output readiness');
+      final typed = HdrOutputBindTimeout(raw);
+      final backend = FakeBackend()
+        ..prepareErrorOnce = phase == 'prepare' ? typed : null
+        ..attemptScripts.add(AttemptScript(
+          configureError: phase == 'configure' ? typed : null,
+        ));
+      final session = makeSession(backend: backend, capabilities: caps());
+      final events = <HdrOutputEvent>[];
+      session.events.listen(events.add);
+      await session.open(media, hint: hdr10);
+      await pumpEventQueue();
+      expect(backend.opened, hasLength(1));
+      expect(backend.opened.single.route.strategy, HdrStrategy.toneMapSdr);
+      expect(backend.preparedPlans.last.excluded[HdrRouteDependency.topologyPlatformView],
+          HdrDegradeReason.outputBindTimeout);
+      expect(events.whereType<HdrDegradedEvent>().single.reason,
+          HdrDegradeReason.outputBindTimeout);
+      expect(session.report.value.verified, isTrue);
+      await session.dispose();
+    });
+  }
+
+  for (final phase in ['configure', 'open', 'review']) {
+    test('$phase timeout aborts without excluding a working PlatformView',
+        () async {
+      final timeout = TimeoutException('$phase timed out');
+      final backend = FakeBackend()
+        ..attemptScripts.add(AttemptScript(
+          configureError: phase == 'configure' ? timeout : null,
+          openError: phase == 'open' ? timeout : null,
+          reviewError: phase == 'review' ? timeout : null,
+        ));
+      final session = makeSession(backend: backend, capabilities: caps());
+      final events = <HdrOutputEvent>[];
+      session.events.listen(events.add);
+      await expectLater(
+          session.open(media, hint: hdr10), throwsA(same(timeout)));
+      await pumpEventQueue();
+      expect(backend.preparedPlans, hasLength(1));
+      expect(backend.preparedPlans.single.excluded,
+          isNot(contains(HdrRouteDependency.topologyPlatformView)));
+      expect(events.whereType<HdrDegradedEvent>(), isEmpty);
+      expect(events.whereType<HdrRouteAppliedEvent>(), isEmpty);
+      expect(session.report.value.verified, isFalse);
+      expect(session.report.value.degradeReason,
+          isNot(HdrDegradeReason.outputBindTimeout));
+      expect(session.report.value.error, same(timeout));
+      expect(backend.calls.skip(backend.calls.length - 2), ['stop', 'reset']);
+      await session.dispose();
+    });
+  }
+
+  test('the already admitted second HDR attempt may still pass review', () async {
+    final backend = FakeBackend()
+      ..attemptScripts.add(const AttemptScript(dataSpaceApplyFailed: true));
+    final session = makeSession(
+      backend: backend,
+      capabilities: caps(),
+      policy: const HdrRoutingPolicy(
+        preferences: {
+          HdrSourceClass.hdr10: [
+            HdrStrategy.baseLayerConvert,
+            HdrStrategy.baseLayerDirect,
+            HdrStrategy.toneMapSdr,
+          ],
+        },
+        allowExperimental: true,
+      ),
+    );
+    await session.open(media, hint: hdr10);
+    expect(backend.preparedPlans, hasLength(2));
+    expect(backend.preparedPlans.first.route.strategy, HdrStrategy.baseLayerConvert);
+    expect(backend.preparedPlans.last.route.strategy, HdrStrategy.baseLayerDirect);
+    expect(backend.opened, hasLength(1));
+    expect(session.report.value.verified, isTrue);
+    expect(session.report.value.actual!.strategy, HdrStrategy.baseLayerDirect);
+    await session.dispose();
+  });
+
+  test(
+      'dataspace failure degrades along the candidates, tone-map keeps '
       'playing, every step emits an event', () async {
     // Convert(PQ) fails its dataspace application; the next HDR candidate
     // (direct HLG) is tried and fails on the output bind; the fallback
@@ -318,6 +461,8 @@ void main() {
     final report = session.report.value;
     expect(report.verified, isTrue);
     expect(report.actual!.strategy, HdrStrategy.toneMapSdr);
+    expect(backend.preparedPlans.last.excluded[HdrRouteDependency.topologyPlatformView],
+        HdrDegradeReason.outputBindTimeout);
     expect(events.whereType<HdrRouteAppliedEvent>(), hasLength(1));
     await session.dispose();
   });
@@ -698,7 +843,17 @@ void main() {
 
 /// Per-attempt behavior of the fake backend's configure/waitForOutput phases.
 class AttemptScript {
-  const AttemptScript({this.dataSpaceApplyFailed = false, this.bindTimeout});
+  const AttemptScript({
+    this.dataSpaceApplyFailed = false,
+    this.bindTimeout,
+    this.configureError,
+    this.openError,
+    this.reviewError,
+  });
+
+  final Object? configureError;
+  final Object? openError;
+  final Object? reviewError;
 
   /// `configure` throws [HdrDataSpaceApplyException] for a route with a
   /// surface transfer.
@@ -731,6 +886,7 @@ class FakeBackend implements HdrOpenBackend<HdrOpenPlan> {
 
   /// When set, [configure] blocks until completed (holds the queue).
   Completer<void>? holdConfigure;
+  Object? prepareErrorOnce;
 
   int _attempt = 0;
   String? _dataSpaceRequested;
@@ -762,12 +918,16 @@ class FakeBackend implements HdrOpenBackend<HdrOpenPlan> {
   Future<void> prepareOutput(HdrOpenPlan plan) async {
     calls.add('prepare:${_tag(plan)}');
     preparedPlans.add(plan);
+    final error = prepareErrorOnce;
+    prepareErrorOnce = null;
+    if (error != null) throw error;
   }
 
   @override
   Future<void> configure(HdrOpenPlan plan) async {
     calls.add('configure:${_tag(plan)}');
     _attempt++;
+    if (_script.configureError != null) throw _script.configureError!;
     final transfer = plan.route.surfaceTransfer;
     _dataSpaceRequested = transfer;
     _dataSpacePath = null;
@@ -805,12 +965,14 @@ class FakeBackend implements HdrOpenBackend<HdrOpenPlan> {
     required bool play,
   }) async {
     calls.add('open:${_tag(plan)}:$start');
+    if (_script.openError != null) throw _script.openError!;
     opened.add(FakeOpened(plan.route, start));
   }
 
   @override
   Future<HdrReviewFacts> reviewFacts(HdrOpenPlan plan) async {
     calls.add('review:${_tag(plan)}');
+    if (_script.reviewError != null) throw _script.reviewError!;
     _lastHwdec = factsForOpen.isEmpty
         ? plan.route.hwdec
         : factsForOpen[_attempt - 1 < factsForOpen.length
