@@ -1,0 +1,62 @@
+name: Routing target and source query checks
+
+on:
+  push:
+    branches: [routing/MK-ROUTING-20261011]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: routing-query-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  android-query:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      EXPECTED_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Record scope and test current Java query with host fixtures
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir ci-query-results
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE_SHA"
+          git rev-parse HEAD > ci-query-results/source.txt
+          printf '%s\n' 'Host query fixtures and Android plugin Java compilation only; no native player binary or device acceptance.' > ci-query-results/scope.txt
+          python3 -m unittest discover -s tool/routing_query -v 2>&1 | tee ci-query-results/host-java.log
+      - name: Resolve current lab and compile actual Android plugin Java
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd media_kit_hdr_lab
+          flutter pub get 2>&1 | tee ../ci-query-results/pub-get.log
+          printf 'sdk.dir=%s\nflutter.sdk=%s\n' "$ANDROID_HOME" "$FLUTTER_ROOT" > android/local.properties
+          cd android
+          ./gradlew :media_kit_video:compileDebugJavaWithJavac --stacktrace 2>&1 | tee ../../ci-query-results/android-java.log
+      - name: Check source stayed unchanged
+        if: ${{ !cancelled() }}
+        run: git diff --exit-code -- media_kit_video/lib media_kit_video/android media_kit_video/test tool/routing_query
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: routing-query-${{ env.EXPECTED_SOURCE_SHA }}
+          path: ci-query-results
+          if-no-files-found: error
