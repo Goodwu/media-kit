@@ -38,6 +38,7 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
   AndroidHdrBackend({
     required this.player,
     required this.outputSlot,
+    this.surfacePixelFormatOverride = 'rgba1010102',
     void Function(HdrNativeDvOptionDiagnostic)? onNativeDvOptionDiagnostic,
     Future<Map<String, Object?>?> Function(int handle, String transfer)?
         applyDataSpace,
@@ -62,6 +63,7 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
 
   final Player player;
   final HdrOutputSlot<VideoController> outputSlot;
+  final String surfacePixelFormatOverride;
 
   final Future<Map<String, Object?>?> Function(int handle, String transfer)
       _applyDataSpace;
@@ -520,22 +522,20 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
           vd: route.vdLavcOptions!,
           renderMode: route.mediacodecEmbedRenderMode!);
     }
-    final gpuPlatform =
-        route.topology == HdrTopology.platformView && route.vo == 'gpu-next';
-    if (gpuPlatform) {
-      await _setOwned('egl-output-format', 'rgb10_a2');
+    final contract = HdrOutputContract.fromRoute(
+      route,
+      surfacePixelFormatOverride: surfacePixelFormatOverride,
+    );
+    final eglOutputFormat = contract.eglOutputFormat;
+    if (eglOutputFormat != null) {
+      await _setOwned('egl-output-format', eglOutputFormat);
     }
     // The Android video controller applies its creation-time hwdec setting
     // while it initializes. Capture and register ownership before ensure()
     // can construct that controller, or its initialization may overwrite the
     // value that resetOwnedConfiguration is meant to restore.
-    await _setOwned('hwdec', route.hwdec);
-    await outputSlot.ensure(
-      route.vo,
-      route.hwdec,
-      outputFormat: gpuPlatform ? 'rgb10_a2' : null,
-      surfaceTransfer: route.surfaceTransfer,
-    );
+    await _setOwned('hwdec', contract.requestedHwdec);
+    await outputSlot.ensure(contract);
     if (route.topology != HdrTopology.platformView && route.vo == 'gpu-next') {
       final prepared = await outputSlot.current!.prepareAndroidTextureOutput();
       debugPrint(prepared

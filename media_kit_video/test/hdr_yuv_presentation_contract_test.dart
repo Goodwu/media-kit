@@ -248,7 +248,7 @@ _Harness _harness() {
       initial: null,
       voOf: (_) async => 'gpu-next',
       disposeForRebuild: (_) async {},
-      create: (vo, hwdec, transfer) => _FakeOutput(),
+      create: (contract) => _FakeOutput(),
       publish: (_) {},
       waitReady: (_) async {},
     ),
