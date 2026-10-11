@@ -91,3 +91,15 @@ PREFER_CONVERT/CONVERT_ROUTE_LOCK/SURFACETEXTURE_POC/OUTPUT_LEVELS=full 的转�
 - MPVPROP target-peak 新旧均为 auto（旧:225 / 新 p84-full-verified2:1202），计划写 1000 不能当实测值。
 - **reviewer 新增两个转正阻塞**：① native YUV arm 为 process-global 且 owner tuple 仅 advisory（lg_fw_adapter.cpp:95-109, 273-303）；② realizer 把任意 surfacetexture+PQ 等同 YUV 而未核实 YUV arm——产品多 Session 不能继承 lab 单 Session 例外。
 - reviewer 终版结论预告：REQUEST_CHANGES + 定向转正步骤；不建议"修回传"或强置 ready。
+
+### 转正独立审核终版（2026-10-12）
+
+critical reviewer 终版裁决：**REQUEST_CHANGES——不批准整组 define 全局默认化**。逐 define 判定、owner/YUV arm/契约三项高风险阻塞、发布 JAR 差距（默认 arm64 pin 仍 v2026.013）、10 项转正前置条件、最小可行路径（精确设备+源类门控的事务化后端接线，无 define 宿主验收后逐设备开放）、必需验证矩阵与 6 项复审触发条件，全文见同目录 critical-review-define-promotion.md。要点：
+
+- PREFER_CONVERT：有条件转正目标行为，禁止全局默认现有排序（HLG-capable/PQ-capable 设备会抢占 nativeDV 并剥 RPU）
+- CONVERT_ROUTE_LOCK：不可转正（严格诊断锁，默认化破坏 SDR 兜底）
+- SURFACETEXTURE_POC：不可默认强制开启（须产品事务接线+验收；officialBackendReady 仅进程桥 initialized，不查 owner/method/GL/YUV arm）
+- OUTPUT_LEVELS=full：仅限真实 PQ YUV 路由 owned 写入；不可全局默认
+- LG_VISUAL278/MKS_YUV_DIAG：不可原样转正（owner 机制迁移为产品事务所有权；YUV 功能与 DIAG 解耦，不得全局 arm）
+- DV002 终版定性：呈现验收未完成（NV12 缓冲在位+HWC 合成，黑截图/录屏为捕获限制的解释而非唯一已证根因）；旧"回传丢失"假设已证伪（format278 精确门拒绝→正确降级，完整证据链）
+- 人眼通过只关闭呈现验收项，不自动关闭 owner/全局 arm/普通 Session 接线/发布链四类缺口
