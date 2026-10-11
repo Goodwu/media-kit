@@ -8,11 +8,11 @@
 
 - 状态：进行中；唯一集成分支 `routing/MK-ROUTING-20261011`，主PR media-kit#4/App#1/FFmpeg#1。CORE接手登记6110756605；context=`archives/conversations/media-kit-routing-20261011.md`。
 - 已完成：CORE-F01实现及库/App宿主验证，库6e7570fc + App569138fa：571video（Linux跳过3既有macOS例）、298lab、192App Flutter；同App SHA此前244Python保留。bundle/10包来源/新鲜度成功，严格分析仍34info；旧planned/pending/62info已由终态取代。
-- 当前：R01a bd9b9f85源码CI已通过573video+3既有Linux跳过、298lab与两包strict。App1965ba0e+库bd9b9f85 source run38155973408成功：strict零问题、211Flutter/1Chrome/263Python、Web/bundle/10包来源与新鲜度通过，中央6111284247。旧34info已清零，旧向量不改标。
-- DV001与PR#5必须归并：PR5精确86c186f0三Markdown历史切片导入/索引/哈希critical已通过，两个配方脚本未导入；DV0011095仍REQUEST_CHANGES、DEVICE原PR修复，最新整合向量P5/P8.4复测不可省。
-- CORE-R01c精确timeout/持续二次mismatch拒绝与coordinator二次reopen guard已实现；worker228+1、critical231及全包strict通过，合法预算SDR和第二HDR不误拒。实际decoder/采样deadline/catalog/有效配置仍未完成，新CI待。
-- CORE-R01b输出创建请求契约已实现，64目标私有SDK测试/全库strict及独立critical78项/strict通过；同VO不同完整契约重建，未知initial或失败清理输出不复用，发布失败进入清理。实际decoder/presenter观察、独立软件替代、auto/prefer/require仍开放；库12966+Appc51最新源码CI成功（video591+3原mac跳过/lab298、App211/1/268、strict/来源），不改标后续Appda281。实验true主场景并回归false，App默认false不变。
-- DEVICE：继续native构建/实机；DV001@1095a43审查未修，PR5@86c186f0三Markdown历史证据部分归并，配方/完整来源/最新整合复测仍未完成。验收：目标测试与严格分析、当前源码CI、App联合测试，native/最新F01/HDR/持续性能另由DEVICE验证。
+- 当前源码：库91521544 source38158342447 video604+3既有mac Linux跳过、lab298/strict通过；App f179+915两run38159246222/38159246432实际Android/Linux/macOS bootstrap通过（strict零问题、各211Flutter/bundle/SDK+package patches/来源），本轮Python各309；Windows未知SDK修改门失败，Build另6Release前置失败。general库CI最后仍运行，不推定绿。旧34info已清零。
+- DV001与PR#5必须归并：86c三Markdown已归并，5b279611新增16行device-results续接中、逐文件hash/来源保持；两个配方脚本未导入。DV0011095原审查未修，DEVICE原PR所有；最新整合P5/P8.4/true与false/普通Session复测不可省。旧8bed+a3+JARcd5的188/34info/244为DEVICE声称，原日志未随PR入库；AVC EOS不是dvh1/HDR验收。
+- R01a/R01b/R01c已实现，R01c915独立231/strict通过且当前源码CI通过；R01d未提交，critical两阻断（缺失codec跳过MIME、内部native重开旧观察）修复中。实际YUV carrier、独立copy/software catalog、auto/prefer/require有效配置仍开放。
+- CI04 Windows窄修进行中，不忽略未知SDK diff；native输入门新文件待critical，CORE接受账本空，实际Release接线/候选未验。experimental默认false不变，true主测/false回归。
+- DEVICE继续native构建/实机；DV001仍1095、PR5最新5b279611文档增量待核验归并，完整来源/owner/YUV arm/最新HDR及持续性能未完成。主任务PR不自动merge/publish。
 
 ## 接手快照（2026-10-10 更新；换 agent 从这里开始）
 

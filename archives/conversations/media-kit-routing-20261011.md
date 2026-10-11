@@ -2,6 +2,20 @@
 
 ## Current State
 
+当前已推送库HEAD9152154473901b750553be96dbc2137c927b2f5d；App f179e21a7c20f9f167232c060f90f32d702c19bd；FFmpeg9aba43cf；DEVICE构建DV0011095a43。库source38158342447：604video通过/3既有macOS例Linux跳过、lab298、两包strict；query/Darwin/OHOS成功，general38158342443最后四项test仍运行，不推定通过。App f179+915两run source38159246222与Build38159246432均失败：Android/Linux/macOS真实bootstrap通过（strict零问题、各211Flutter、bundle、真实SDK/package补丁、10routing+261全部roots、源码前后/final一致）；Android另Chrome/Web通过，两run Python本轮各309。Windows因source SDK tracked PNG修改拒绝，绝对路径261字符只是原因嫌疑，实际工作文件hash/diff尚缺；不忽略/重置。Build另6个既有Release前置失败，非native构建通过。证据/tmp/mk-routing-ci04-20261012/summary.json，旧f750向量成功不重标f179。
+
+CORE-F01/R01a/R01b/R01c已实现并分别验证；R01c已推送91521544。R01b完整输出请求契约不证明实际YUV carrier。R01d普通decoder采样尚未提交；critical发现缺失track codec可跳过MIME比较及ordinary→native内部重开旧观察风险，worker修复中，不能因187/214回归与strict通过而接受。review预算不包含open admission，Dart timeout不能抢占同步native FFI。完整copy/software catalog与auto/prefer/require有效配置闭环仍开放。
+
+CI03 34 info已清零；DEVICE新增旧8bed+a3向量的34info不覆盖当前CORE零问题。CI04 Windows窄修按中央6111697645推进：短私有路径、首次checkout/SDK前长路径支持、拒绝前完整差异证据；保持来源门。App native输入gate四新文件待独立critical，接受账本空，未授权DV001；workflow/native候选尚未接线验收。experimental产品默认false，true主测/false回归保留。
+
+用户明确要求归并DV001与PR#5；此前86c186f三Markdown历史切片已归并，现续接5b27961137a3b03e687dddbeb05a0320fcf6c60c唯一device-results追加16行。逐文件来源/原文与导入hash保留；两个配方脚本仍未导入。DEVICE6111648066与新增文档一致，但188Flutter/34info/244Python的本机原日志未随PR入库，按DEVICE声称保留。AVC EOS02:51不等于dvh1/HDR验收；dvh1菜单后e2e仍未执行，UX归因未验证。DV0011095原审查未修，DEVICE继续原PR所有权，不能标两PR已完成。
+
+DEVICE6111344927的原LG候选实体呈现证据保留，DV002 passed_for_vector，黑位/过曝既有项仍登记。native owner/YUV arm、普通无define Session、完整来源manifest和最新整合P5/P8.4/true与false复测仍必需。CORE不另写配方，不改LG FULL/range1或owner/ACK/lease。主PR未合并/发布。
+
+## History
+
+### DV/CI状态校正前快照（历史）
+
 当前库HEAD12966e7ac78983807199e0a179e84ad763a547a7；App da28171292931d32a1f4954f495ab5b7c29852a6；FFmpeg9aba43cf；DEVICE构建DV0011095a43。最新已验源码组合为库12966+App c51fd0973：库source38156773328 video591通过/3原mac跳过、lab298、strict通过；App source38156848733 strict零问题、211Flutter/1Chrome/268Python、Web/bundle/10包来源及freshness通过。Darwin/query/OHOS成功，general38156773301仍in_progress，不推定整套CI完成。证据/tmp/mk-routing-new-ci-20261012/summary.json。App da281是后续URI窄修，不能重标旧运行。
 
 CORE-F01/R01a/R01b已实现并验证。R01b内部输出请求contract/复用身份与publish失败清理已推送12966；它不关闭realizer中ST+PQ推定YUV的实际carrier缺口。R01c首阶段已实现并critical通过：仅实际绑定等待typed timeout，普通配置/open/review超时停止清理；持续二次hwdec/route mismatch拒绝accept，coordinator二次reopen拒绝。合法预算SDR兜底及已准入第二HDR均保留；worker228+1，独立critical231及全包strict零问题。原4行为红灯保留，true先失败的baseline不虚称false红；route-only仅最终覆盖。cleanup债务stop/reset回归保留。源码hash/边界见docs/plans/core-r01c-handoff-20261012.json，后续新CI待。完整实际decoder/采样身份预算、copy/software catalog、auto/prefer/require有效配置闭环仍开放。
@@ -12,7 +26,6 @@ CI03 34 info已清零；Release38156848910 FAILURE：cache/兄弟源码/旧锁/�
 
 DEVICE6111344927证明原LG候选实体屏幕颜色亮度基本正常，DV002呈现项passed_for_vector；黑位/过曝既有项仍登记。native owner/YUV arm、普通无define Session、完整来源manifest和最新整合P5/P8.4复测仍必需。CORE不另写配方，不改已批准LG FULL/range1或owner/ACK/lease。主PR未合并/发布。
 
-## History
 
 - 2026-10-11：全文读取takeover/v3/中央App台账/F01/CI02/最终评论及DEVICE最新认领；中央登记接手与文件范围6110756605、续审6110762843。CORE-R01a已派发worker，DEVICE配方保持其所有权。
 
