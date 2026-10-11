@@ -121,12 +121,15 @@ static void make_codec(struct Fixture *f, const char *name, const char *mime, in
     f->types.count=1; f->types.elements[0]=&f->mime;
     f->info.types=&f->types; f->info.capabilities=&f->caps; f->info.name=&f->name;
 }
-static int check(const char *label, int profile, const char *expected) {
-    char *actual=ff_AMediaCodecList_getCodecNameByType("video/dolby-vision",profile,0,NULL);
+static int check_type(const char *label, const char *mime, int profile, const char *expected) {
+    char *actual=ff_AMediaCodecList_getCodecNameByType(mime,profile,0,NULL);
     int match=(actual && expected)?strcmp(actual,expected)==0:actual==NULL && expected==NULL;
-    printf("%s profile=%d expected=%s actual=%s result=%s\n",label,profile,
+    printf("%s mime=%s profile=%d expected=%s actual=%s result=%s\n",label,mime,profile,
            expected?expected:"none",actual?actual:"none",match?"PASS":"FAIL");
     free(actual); return !match;
+}
+static int check(const char *label, int profile, const char *expected) {
+    return check_type(label,"video/dolby-vision",profile,expected);
 }
 int main(void) {
     struct Fixture a,b;
@@ -136,15 +139,34 @@ int main(void) {
     int controls=0;
     controls+=check("control-p5-profile",32,"vendor.p5-only");
     controls+=check("control-p8-profile",256,"vendor.p8-only");
-    // This is the profile=-1 value used by the current native P8 caller.
-    int counterexample=check("counterexample-current-p8-mime-only",native_lookup_profile(256),"vendor.p8-only");
+    int counterexample=check("counterexample-current-p8-selection",native_lookup_profile(256),"vendor.p8-only");
+    controls+=check("control-current-p5-selection",native_lookup_profile(32),"vendor.p5-only");
     a.info.encoder=1;
     controls+=check("control-skip-encoder",-1,"vendor.p8-only");
     a.info.encoder=0; a.info.software=1;
     controls+=check("control-skip-software",-1,"vendor.p8-only");
     a.info.software=0; a.mime.text="video/hevc";
     controls+=check("control-skip-other-mime",-1,"vendor.p8-only");
+
+    make_codec(&a,"vendor.empty","video/dolby-vision",-1);
+    controls+=check("empty-before-valid-p8",native_lookup_profile(256),"vendor.p8-only");
+    make_codec(&b,"vendor.p5-only","video/dolby-vision",32);
+    controls+=check("empty-before-valid-p5",native_lookup_profile(32),"vendor.p5-only");
+    controls+=check("empty-and-p5-cannot-authorize-p8",256,NULL);
+    codec_list.count=1;
+    controls+=check("only-empty-cannot-authorize-p8",256,NULL);
+    controls+=check("only-empty-cannot-authorize-p5",32,NULL);
+    controls+=check("unconstrained-mime-lookup-keeps-legacy-behavior",-1,"vendor.empty");
+    a.mime.text="video/hevc";
+    controls+=check_type("ordinary-hevc-empty-profile-unchanged","video/hevc",2,"vendor.empty");
+
+    make_codec(&a,"vendor.p5-only","video/dolby-vision",32);
+    make_codec(&b,"vendor.p8-only","video/dolby-vision",256);
+    codec_list.count=2; codec_list.elements[0]=&b.info; codec_list.elements[1]=&a.info;
+    controls+=check("reversed-order-p5",native_lookup_profile(32),"vendor.p5-only");
+    controls+=check("reversed-order-p8",native_lookup_profile(256),"vendor.p8-only");
+    codec_list.count=0;
+    controls+=check("no-decoder",native_lookup_profile(256),NULL);
     printf("controls_failed=%d counterexample_reproduced=%d\n",controls,counterexample);
-    // A reproduced defect is a failing regression, not a successful suite.
     return controls || counterexample ? 1 : 0;
 }
