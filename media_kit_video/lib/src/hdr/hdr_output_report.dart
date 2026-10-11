@@ -4,6 +4,7 @@
 /// All rights reserved.
 /// Use of this source code is governed by MIT license that can be found in the LICENSE file.
 import 'hdr_open_plan.dart';
+import 'hdr_decoder_review.dart';
 import 'hdr_route.dart';
 import 'hdr_source_descriptor.dart';
 import 'hdr_source_facts.dart';
@@ -34,6 +35,7 @@ class HdrOutputReport {
     this.dataSpacePath,
     this.dataSpaceReadback,
     this.hwdecCurrent,
+    this.decoderObservation,
     this.verified = false,
     this.degradeReason,
     this.diagnostic,
@@ -75,6 +77,13 @@ class HdrOutputReport {
 
   /// The observed `hwdec-current`, when read.
   final String? hwdecCurrent;
+
+  /// Ordinary current-source decoder/frame sample. Missing names remain
+  /// unknown; route verification does not certify decoder identity or pixels.
+  final HdrDecoderObservation? decoderObservation;
+
+  bool get decoderIdentityKnown =>
+      decoderObservation?.decoderIdentityKnown ?? false;
 
   /// Whether the decoder review completed for this generation. This does
   /// not certify the surface dataspace or panel presentation.
@@ -125,6 +134,7 @@ class HdrOutputReport {
     String? dataSpacePath,
     String? dataSpaceReadback,
     String? hwdecCurrent,
+    HdrDecoderObservation? decoderObservation,
     bool? verified,
     HdrDegradeReason? degradeReason,
     String? diagnostic,
@@ -141,6 +151,7 @@ class HdrOutputReport {
       dataSpacePath: dataSpacePath ?? this.dataSpacePath,
       dataSpaceReadback: dataSpaceReadback ?? this.dataSpaceReadback,
       hwdecCurrent: hwdecCurrent ?? this.hwdecCurrent,
+      decoderObservation: decoderObservation ?? this.decoderObservation,
       verified: verified ?? this.verified,
       degradeReason: degradeReason ?? this.degradeReason,
       diagnostic: diagnostic ?? this.diagnostic,

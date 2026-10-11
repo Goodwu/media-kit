@@ -12,6 +12,7 @@ import 'hdr_route.dart';
 import 'hdr_source_descriptor.dart';
 import 'hdr_source_facts.dart';
 import 'hdr_native_dv_review_evidence.dart';
+import 'hdr_decoder_review.dart';
 
 /// Where a plan's [HdrSourceDescriptor] came from.
 ///
@@ -131,6 +132,7 @@ class HdrReviewFacts {
     this.dvElPresent,
     this.hdrVivid,
     this.nativeDvEvidence,
+    this.decoderObservation,
   });
 
   /// Latest decoder-reported video parameters (`video-params`).
@@ -175,6 +177,9 @@ class HdrReviewFacts {
 
   /// Internal configured-codec/source/output sample, never presentation proof.
   final HdrNativeDvReviewEvidence? nativeDvEvidence;
+
+  /// Ordinary current-source decode snapshot; independent of source metadata.
+  final HdrDecoderObservation? decoderObservation;
 }
 
 /// Backend observation pulled by the session to build a report (R4.2):

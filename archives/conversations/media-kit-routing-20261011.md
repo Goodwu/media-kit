@@ -4,7 +4,7 @@
 
 当前已推送库HEAD9152154473901b750553be96dbc2137c927b2f5d；App f179e21a7c20f9f167232c060f90f32d702c19bd；FFmpeg9aba43cf；DEVICE构建DV0011095a43。库source38158342447：604video通过/3既有macOS例Linux跳过、lab298、两包strict；query/Darwin/OHOS成功，general38158342443最后四项test仍运行，不推定通过。App f179+915两run source38159246222与Build38159246432均失败：Android/Linux/macOS真实bootstrap通过（strict零问题、各211Flutter、bundle、真实SDK/package补丁、10routing+261全部roots、源码前后/final一致）；Android另Chrome/Web通过，两run Python本轮各309。Windows因source SDK tracked PNG修改拒绝，绝对路径261字符只是原因嫌疑，实际工作文件hash/diff尚缺；不忽略/重置。Build另6个既有Release前置失败，非native构建通过。证据/tmp/mk-routing-ci04-20261012/summary.json，旧f750向量成功不重标f179。
 
-CORE-F01/R01a/R01b/R01c已实现并分别验证；R01c已推送91521544。R01b完整输出请求契约不证明实际YUV carrier。R01d普通decoder采样尚未提交；critical发现缺失track codec可跳过MIME比较及ordinary→native内部重开旧观察风险，worker修复中，不能因187/214回归与strict通过而接受。review预算不包含open admission，Dart timeout不能抢占同步native FFI。完整copy/software catalog与auto/prefer/require有效配置闭环仍开放。
+CORE-F01/R01a/R01b/R01c已实现并分别验证；R01c已推送91521544。R01b完整输出请求契约不证明实际YUV carrier。R01d普通decoder采样已修复两项critical阻断并完成独立复审：缺失track codec等待/拒绝，consumer不跳过MIME证据；ordinary→native内部重开成功清空旧普通观察。11文件255项与全包strict通过，两门删除负例实际红灯后恢复。当前检查点待提交，源码/hash/日志见docs/plans/core-r01d-handoff-20261012.json；此前187/214绿灯未覆盖问题的历史保留。review预算不包含open admission，Dart timeout不能抢占同步native FFI。生产普通open的entry/epoch在Player锁内捕获，FILE_LOADED在锁外等待；当前scalar decoder/frame/MIME/config A/B一致性与代次检查、embed拒CPU已接通，失败不虚构排除依赖。完整copy/software catalog与auto/prefer/require有效配置闭环仍开放。
 
 CI03 34 info已清零；DEVICE新增旧8bed+a3向量的34info不覆盖当前CORE零问题。CI04 Windows窄修按中央6111697645推进：短私有路径、首次checkout/SDK前长路径支持、拒绝前完整差异证据；保持来源门。App native输入gate四新文件待独立critical，接受账本空，未授权DV001；workflow/native候选尚未接线验收。experimental产品默认false，true主测/false回归保留。
 

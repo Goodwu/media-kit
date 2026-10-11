@@ -1,8 +1,14 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:media_kit/media_kit.dart' show Media, VideoParams;
+import 'package:media_kit/media_kit.dart' show FileLoadedRecord, Media, VideoParams;
 import 'package:media_kit_video/src/hdr/hdr_capabilities.dart';
+import 'package:media_kit_video/src/hdr/hdr_decoder_review.dart';
+import 'package:media_kit_video/src/hdr/android_mediacodec_configuration.dart';
+import 'package:media_kit_video/src/hdr/hdr_native_dv_option_owner.dart';
+import 'package:media_kit_video/src/hdr/hdr_native_dv_review_evidence.dart';
+import 'package:media_kit_video/src/video_controller/android_video_controller/platform_surface_release.dart';
+import 'package:synchronized/synchronized.dart';
 import 'package:media_kit_video/src/hdr/hdr_open_coordinator.dart';
 import 'package:media_kit_video/src/hdr/hdr_open_plan.dart';
 import 'package:media_kit_video/src/hdr/hdr_output_event.dart';
@@ -517,6 +523,122 @@ void main() {
     expect(events.whereType<HdrRouteAppliedEvent>(), isEmpty);
     expect(events.whereType<HdrErrorEvent>().single.reason,
         HdrDegradeReason.hwdecMismatch);
+    expect(backend.calls, contains('stop'));
+    expect(backend.calls, contains('reset'));
+    await session.dispose();
+  });
+
+  test('ordinary to native internal reopen clears predecessor decoder observation', () async {
+    // Synthetic native endpoints exercise the real Session consumer and report
+    // boundary. They do not claim any device codec or display acceptance.
+    const nativeRaw = '{"api":1,"mime":"video/dolby-vision",'
+        '"codec":"c2.native.dv","native-dv-active":true}';
+    final playerIdentity = Object(), controllerIdentity = Object();
+    final sourceIdentity = HdrOptionSourceIdentity(
+      player: playerIdentity, path: media.uri,
+      playlistEntryId: '7', fileLoadedEpoch: 4,
+    );
+    final output = HdrNativeDvOutputSnapshot(controllerIdentity,
+      const AndroidSurfaceAccountId(handle: 11, generation: 2,
+        viewId: 3, surfaceGeneration: 4, wid: 5));
+    final backend = FakeBackend()
+      ..factsForOpen.addAll([
+        HdrReviewFacts(codec: 'hevc', hwdecCurrent: 'mediacodec', path: media.uri,
+          dolbyVisionProfile: 5, dvCompatibilityId: 0, dvElPresent: false,
+          decoderObservation: const HdrDecoderObservation(
+            playlistEntryId: 1, fileLoadedEpoch: 1, decoder: 'hevc_mediacodec',
+            decoderDescription: '', hwdec: 'mediacodec',
+            pixelFormat: 'mediacodec', hwPixelFormat: 'nv12')),
+        HdrReviewFacts(codec: 'hevc', hwdecCurrent: 'mediacodec', path: media.uri,
+          dolbyVisionProfile: 5, dvCompatibilityId: 0, dvElPresent: false,
+          nativeDvEvidence: HdrNativeDvReviewEvidence(source: sourceIdentity,
+            loaded: const FileLoadedRecord(4, 7), controller: output.controller,
+            output: output.identity,
+            configuration: AndroidMediaCodecConfiguration.parse(nativeRaw)!,
+            hwdecCurrent: 'mediacodec')),
+      ]);
+    final session = HdrVideoSession.forTesting(
+      backend: backend, isAndroid: true,
+      capabilitiesProvider: () async => caps(),
+      nativePlayerIdentity: playerIdentity, nativePlayerLock: Lock(),
+      readNativeIdentity: () async => sourceIdentity,
+      readNativeProperty: (name) async =>
+          name == 'android-mediacodec-info' ? nativeRaw : 'mediacodec',
+      readNativeOutput: () => output,
+      reviewMonotonicNow: () => Duration.zero,
+      routePlanner: ({required source, required capabilities, required policy,
+          required preference, required excluded}) {
+        final ordinary = HdrRoutePlanner.plan(source: source,
+          capabilities: capabilities, policy: policy, preference: preference,
+          excluded: excluded);
+        if (HdrSourceClass.of(source) != HdrSourceClass.dvP5) return ordinary;
+        const nativeRoute = HdrRoute(strategy: HdrStrategy.nativeDolbyVision,
+          presentation: HdrPresentation.nativeDolbyVision,
+          outputTransfer: HdrOutputTransfer.dolbyVision,
+          appliesDynamicMetadata: true, topology: HdrTopology.platformView,
+          vo: 'mediacodec_embed', hwdec: 'mediacodec',
+          targetPrim: null, targetTrc: null, surfaceTransfer: null,
+          stripDvRpu: false);
+        const candidate = HdrCandidate(strategy: HdrStrategy.nativeDolbyVision,
+          maturity: HdrStrategyMaturity.unsupported, route: nativeRoute, feasible: true);
+        return HdrRoutePrediction(source: source, selected: candidate,
+          candidates: [candidate, ...ordinary.candidates],
+          presentation: nativeRoute.presentation,
+          confidence: HdrPredictionConfidence.unverified, playable: true);
+      },
+    );
+    await session.open(media);
+    expect(backend.opened.map((plan) => plan.route.strategy),
+        [HdrStrategy.sdrDirect, HdrStrategy.nativeDolbyVision]);
+    expect(session.report.value.verified, isTrue);
+    expect(session.report.value.actual!.strategy, HdrStrategy.nativeDolbyVision);
+    expect(session.report.value.decoderObservation, isNull);
+    expect(session.report.value.decoderIdentityKnown, isFalse);
+    await session.dispose();
+  });
+
+  test('ordinary unnamed decoder keeps route and identity verification separate', () async {
+    final backend = FakeBackend()
+      ..factsForOpen.add(HdrReviewFacts(
+        codec: 'hevc', hwdecCurrent: 'mediacodec', path: media.uri,
+        videoParams: const VideoParams(gamma: 'pq', primaries: 'bt.2020'),
+        decoderObservation: const HdrDecoderObservation(
+          playlistEntryId: 1, fileLoadedEpoch: 1,
+          decoder: '', decoderDescription: '', hwdec: 'mediacodec',
+          pixelFormat: 'mediacodec', hwPixelFormat: 'nv12',
+        ),
+      ));
+    final session = makeSession(backend: backend, capabilities: caps());
+    await session.open(media, hint: hdr10);
+    expect(session.report.value.verified, isTrue);
+    expect(session.report.value.decoderIdentityKnown, isFalse);
+    expect(session.report.value.decoderObservation!.pixelFormat, 'mediacodec');
+    expect(backend.opened, hasLength(1));
+    await session.dispose();
+  });
+
+  test('ordinary observation blocks wrong MIME despite matching hwdec', () async {
+    final backend = FakeBackend()
+      ..factsForOpen.add(HdrReviewFacts(
+        codec: 'hevc', hwdecCurrent: 'mediacodec', path: media.uri,
+        videoParams: const VideoParams(gamma: 'pq', primaries: 'bt.2020'),
+        decoderObservation: HdrDecoderObservation(
+          playlistEntryId: 1, fileLoadedEpoch: 1,
+          decoder: 'h264_mediacodec', decoderDescription: '',
+          hwdec: 'mediacodec', pixelFormat: 'mediacodec', hwPixelFormat: 'nv12',
+          mediaCodecConfiguration: AndroidMediaCodecConfiguration.parse(
+            '{"api":1,"mime":"video/avc","codec":"c2.avc","native-dv-active":false}'),
+        ),
+      ));
+    final session = makeSession(backend: backend, capabilities: caps());
+    final events = <HdrOutputEvent>[];
+    session.events.listen(events.add);
+    await session.open(media, hint: hdr10);
+    await pumpEventQueue();
+    expect(backend.opened, hasLength(1));
+    expect(session.report.value.verified, isFalse);
+    expect(session.report.value.degradeReason, HdrDegradeReason.routeReviewMismatch);
+    expect(events.whereType<HdrRouteAppliedEvent>(), isEmpty);
     expect(backend.calls, contains('stop'));
     expect(backend.calls, contains('reset'));
     await session.dispose();
