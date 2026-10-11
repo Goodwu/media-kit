@@ -64,7 +64,7 @@ void main() {
       );
       expect(descriptor.dvProfile, 7);
       expect(descriptor.dvCompatibilityId, 6);
-      // mpv does not expose the enhancement-layer flag yet: unknown.
+      // No enhancement-layer fact was provided: unknown.
       expect(descriptor.enhancementLayer, isNull);
       // The profile-7 base layer keeps the HDR10 routing behavior.
       expect(descriptor.kind, HdrMediaKind.hdr10);
@@ -143,7 +143,9 @@ void main() {
       );
       expect(descriptor.dvProfile, 8);
       expect(descriptor.dvCompatibilityId, isNull);
-      expect(descriptor.kind, HdrMediaKind.sdr);
+      expect(descriptor.kind, HdrMediaKind.dolbyVisionUnknown);
+      expect(descriptor.hasUnresolvedDolbyVision, isTrue);
+      expect(HdrSourceClass.of(descriptor), HdrSourceClass.dvUnknown);
     });
   });
 
@@ -440,7 +442,7 @@ void main() {
   });
 
   group('HdrSourceDescriptor.fromKind', () {
-    test('every kind produces a fully determined description', () {
+    test('known kinds preserve hints and the unknown kind stays unresolved', () {
       const p5 = HdrSourceDescriptor(
         codec: 'hevc',
         dynamicMetadata: HdrDynamicMetadata.dolbyVision,
@@ -472,6 +474,12 @@ void main() {
       expect(HdrSourceDescriptor.fromKind(HdrMediaKind.hdr10), hdr10);
       expect(HdrSourceDescriptor.fromKind(HdrMediaKind.hlg), hlg);
       expect(HdrSourceDescriptor.fromKind(HdrMediaKind.sdr), sdr);
+      final unknown = HdrSourceDescriptor.fromKind(HdrMediaKind.dolbyVisionUnknown);
+      expect(unknown.dynamicMetadata, HdrDynamicMetadata.dolbyVision);
+      expect(unknown.dvProfile, isNull);
+      expect(unknown.dvCompatibilityId, isNull);
+      expect(unknown.enhancementLayer, isNull);
+      expect(unknown.transfer, isNull);
     });
 
     test('fromKind round-trips through the kind getter', () {
