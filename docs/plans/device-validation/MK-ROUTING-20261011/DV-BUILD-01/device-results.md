@@ -58,3 +58,22 @@
 - implementation：pushed（build-repo DV001 PR#1；本 docs 分支）
 - validation：passed_for_vector（上表全部用例，输入向量 r2）
 - integration：pending（等待 CORE 合入 DV001 与本分支后，最新整合向量复测 P5/P8.4 关键路径）
+
+## 更正与 DV002（2026-10-12 补充）
+
+### P8.4 结论更正
+
+上表 p84-G/p84-F 用例使用的 mkchk 控制片**无容器 DOVI 记录**，会话正确按纯 HLG 分类——那些用例只验证了 HLG 类路由，不是 P8.4 验证。正确 P8.4 素材为 `media-kit-p84-7626cac2.mp4`（SHA-256 `7626cac28819ffd1377a712b56c7cc4bbf8677f5db4b39fb0c83f92e58d74443`，DOVI 记录 profile 8/compat id 4/HLG 基层；即 Downloads/test-clips 北海道 VLOG，与旧设备文件 media-kit-p84-full.mp4 同源同 SHA）。
+
+### 已验证配方复测（defines-c2-telemetry-genbump.json 全集 + 本地 JAR cd5fe26b）
+
+LG API24、APK `matrix-p84-full-verified.apk`（SHA `09c22c9535c174f6…`）：
+
+- **路由选择与应用正确**：ANDROID_HDR_OPEN_BEGIN hint 命中；HDR_SESSION_REPORT 确认 dvProfile=8/dvCompatibilityId=4/dynamicMetadata=dolbyVision；两次 open（00:05:22、00:09:25）均 baseLayerConvert→nativeHdr output=pq、topology=platformView、vo=gpu-next、**hwdec=surfacetexture**、offscreen=pq-full，HdrRouteAppliedEvent 无降级；MKSURF surfacetexture-poc-r2 init/bound（owner_key/generation）；lgPqApply 对 window(format43) 与第二 surface(format2141391876) 均 setter-accepted-no-readback、applied=true。
+- **播放推进健康**：pos 0→189s、vfps 29.970030、decDrop=0、voDelayed=0、零 FATAL。
+- **[DV002] 窗口黑屏**：pos 40/86/189s 三次截屏视频区全黑，而源文件同段为明亮场景（参考帧 /tmp/ref-{5,20,60,120,300}.png 对照提取）。显示线最终 leg（offscreen pq-full → 窗口表面）在当前 tip 链上不出画。
+- 嫌疑范围：mpv tip 新增的 a040233d3e（收口：owner 门产品化、MKS_ST_DIAG_READBACK 默认关、verify-only ensure_init、egl_helpers config49 断言）与 7163121865（官方 hwdec=surfacetexture method 注册）晚于 10-10 验收状态，可能与 lab POC r2 私有接线/插件侧存在版本错配。critical reviewer 独立审核进行中（含旧运行 format278 精确门拒绝的根因确认：applied=false 与 Dart 降级一致，回传管道无丢失）。
+
+### 对转正问题的影响
+
+PREFER_CONVERT/CONVERT_ROUTE_LOCK/SURFACETEXTURE_POC/OUTPUT_LEVELS=full 的转正评估以 DV002 根因修复为前置：显示路径在 tip 上未闭环前，SURFACETEXTURE_POC/OUTPUT_LEVELS 不可转正。上表其他结论（P5 native DV、HLG/SDR 类路由、App 冒烟）不受本更正影响。
