@@ -150,6 +150,11 @@ abstract class HdrRouteDependency {
   /// The route decodes through MediaCodec and copies frames to the GPU.
   static const String hwdecMediacodecCopy = 'hwdec:mediacodec-copy';
 
+  /// The route imports SurfaceTexture decoder frames. This records the
+  /// execution dependency only; it does not imply a YUV presenter or identify
+  /// a decoder failure cause.
+  static const String hwdecSurfaceTexture = 'hwdec:surfacetexture';
+
   /// The native Dolby Vision decoder/bridge pipeline.
   static const String nativeDolbyVision = 'native:dolbyVision';
 
