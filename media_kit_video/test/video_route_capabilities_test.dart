@@ -251,13 +251,16 @@ void main() {
         if (malformed == 'null') return null;
         if (malformed == 'schema') raw['schema'] = 99;
         if (malformed == 'missing') raw['sources'] = [];
-        if (malformed == 'duplicate')
+        if (malformed == 'duplicate') {
           (raw['sources'] as List).add((raw['sources'] as List).first);
-        if (malformed == 'foreign')
+        }
+        if (malformed == 'foreign') {
           ((raw['sources'] as List).first as Map)['key'] = 'foreign';
-        if (malformed == 'enum')
+        }
+        if (malformed == 'enum') {
           (((raw['sources'] as List).first as Map)['decoders'] as List)
               .first['support'] = 'maybe';
+        }
         return raw;
       });
       await expectLater(VideoRouteCapabilities.query(sources: [source]),
