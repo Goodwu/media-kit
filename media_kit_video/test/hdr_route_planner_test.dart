@@ -41,7 +41,7 @@ const HdrDecoderInfo nativeDvDecoder = HdrDecoderInfo(
 );
 
 /// One descriptor per source class. Each entry derives back to its key
-/// (asserted below), so the matrix really walks the eleven classes.
+/// (asserted below), so the matrix includes unresolved Dolby Vision too.
 const Map<HdrSourceClass, HdrSourceDescriptor> sources =
     <HdrSourceClass, HdrSourceDescriptor>{
   HdrSourceClass.hdr10: HdrSourceDescriptor(
@@ -98,6 +98,10 @@ const Map<HdrSourceClass, HdrSourceDescriptor> sources =
       primaries: 'bt.2020',
       dynamicMetadata: HdrDynamicMetadata.hdr10Plus,
       enhancementLayer: false),
+  HdrSourceClass.dvUnknown: HdrSourceDescriptor(
+      codec: 'hevc',
+      dynamicMetadata: HdrDynamicMetadata.dolbyVision,
+      dvProfile: 8),
   HdrSourceClass.sdr: HdrSourceDescriptor(
       transfer: 'bt.1886', primaries: 'bt.709', enhancementLayer: false),
 };
@@ -141,11 +145,12 @@ void checkInvariants(
       ? HdrStrategy.sdrDirect
       : HdrStrategy.toneMapSdr;
 
-  // R3.3: playable is false only for a P5 source without the rescale
-  // pipeline; otherwise playback always continues.
+  // Known supported source families retain their baseline. Unknown DV must
+  // remain blocked independently of the decoder/display/P5 pipeline.
   expect(
     prediction.playable,
-    cls != HdrSourceClass.dvP5 || capabilities.p5PipelineAvailable,
+    cls != HdrSourceClass.dvUnknown &&
+        (cls != HdrSourceClass.dvP5 || capabilities.p5PipelineAvailable),
     reason: 'playable for $cls with p5=${capabilities.p5PipelineAvailable}',
   );
   expect(prediction.selected.feasible, prediction.playable);
@@ -206,7 +211,8 @@ void checkInvariants(
   final HdrDataSpaceExtInfo? ext = capabilities.dataSpaceExt;
   expect(
     prediction.confidence,
-    !dependsOnDataSpace || (ext != null && ext.applicable)
+    cls != HdrSourceClass.dvUnknown &&
+            (!dependsOnDataSpace || (ext != null && ext.applicable))
         ? HdrPredictionConfidence.verified
         : HdrPredictionConfidence.unverified,
     reason: 'confidence for $cls (ext: $ext)',
@@ -330,7 +336,9 @@ void main() {
       ];
       for (final HdrSourceDescriptor invalid in invalidSources) {
         expect(realize(source: invalid).infeasibleReason,
-            HdrDegradeReason.unsupportedStrategy,
+            invalid.hasUnresolvedDolbyVision
+                ? HdrDegradeReason.sourceMetadataUnknown
+                : HdrDegradeReason.unsupportedStrategy,
             reason: '$invalid');
       }
       expect(
@@ -468,23 +476,22 @@ void main() {
       expect(HdrSourceClass.of(p8('hlg')), HdrSourceClass.dvP84);
       expect(HdrSourceClass.of(p8('pq')), HdrSourceClass.dvP81);
       expect(HdrSourceClass.of(p8('bt.1886')), HdrSourceClass.dvP82);
-      expect(HdrSourceClass.of(p8(null)), HdrSourceClass.dvP82);
+      expect(HdrSourceClass.of(p8(null)), HdrSourceClass.dvUnknown);
     });
 
-    test('DV metadata without a profile is treated as profile 5 (conservative)',
-        () {
-      // The only family whose routes never ignore the RPU, so a malformed
-      // hint cannot select a mis-coloring route (R3.3).
+    test('DV metadata without a profile remains unresolved', () {
+      // Neither P5 processing nor RPU stripping is justified by an unknown
+      // profile, even when an ordinary base-layer transfer is present.
       expect(
         HdrSourceClass.of(const HdrSourceDescriptor(
             transfer: 'pq', dynamicMetadata: HdrDynamicMetadata.dolbyVision)),
-        HdrSourceClass.dvP5,
+        HdrSourceClass.dvUnknown,
       );
     });
   });
 
   group('default preference matrix (verification 1)', () {
-    test('11 classes × 7 displays × 2 P5 pipelines × 3 ext × 2 SDK', () {
+    test('12 classes × 7 displays × 2 P5 pipelines × 3 ext × 2 SDK', () {
       var combos = 0;
       for (final HdrSourceClass cls in HdrSourceClass.values) {
         final HdrSourceDescriptor source = sources[cls]!;
@@ -517,7 +524,7 @@ void main() {
           }
         }
       }
-      expect(combos, 462);
+      expect(combos, 504);
     });
 
     test('gate open (allowExperimental): same matrix holds without skips', () {
@@ -550,7 +557,7 @@ void main() {
           }
         }
       }
-      expect(combos, 462);
+      expect(combos, 504);
     });
 
     test('API 24/25 use copy for texture routes and skip GPU HDR dataspace',
@@ -727,10 +734,10 @@ void main() {
           }
         }
       }
-      // 2 gate states × 11 classes × 7 displays × 2 P5 pipelines. The
+      // 2 gate states × 12 classes × 7 displays × 2 P5 pipelines. The
       // extension dimension is irrelevant to this property (it only moves
       // confidence) and is covered by the matrix tests.
-      expect(checked, 308);
+      expect(checked, 336);
     });
   });
 
@@ -1062,7 +1069,7 @@ void main() {
           }
         }
       }
-      expect(combos, 924);
+      expect(combos, 1008);
     });
 
     test('predict() default arguments use the default policy and auto', () {
@@ -1256,7 +1263,8 @@ void main() {
           expect(prediction.selected.strategy, HdrStrategy.toneMapSdr,
               reason: '$cls');
         }
-        expect(prediction.playable, isTrue, reason: '$cls');
+        expect(prediction.playable, cls != HdrSourceClass.dvUnknown,
+            reason: '$cls');
         checkInvariants(prediction,
             cls: cls, capabilities: lyaCaps(), allowExperimental: false);
       }

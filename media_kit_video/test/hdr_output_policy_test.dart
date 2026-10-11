@@ -74,6 +74,14 @@ void main() {
   group('decide: Texture output (no PlatformView)', () {
     test('every HDR kind tone-maps to BT.709/BT.1886 with mediacodec', () {
       for (final kind in HdrMediaKind.values) {
+        if (kind == HdrMediaKind.dolbyVisionUnknown) {
+          expect(
+            () => HdrOutputPolicy.decide(kind,
+                usePlatformView: false, p5DoviRescaleAvailable: true),
+            throwsStateError,
+          );
+          continue;
+        }
         if (kind == HdrMediaKind.dolbyVisionP5 ||
             kind == HdrMediaKind.sdr) {
           continue;
