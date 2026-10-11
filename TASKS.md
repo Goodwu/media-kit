@@ -6,7 +6,7 @@
 
 ## MK-ROUTING-20261011（CORE继任，2026-10-11）
 
-- 最新补充：LG专用单次claim窄修Critical PASS（lab298/video775/额外4边界/两strict0），原CI失败保留；App native来源与SDK接线PASS_WITH_PENDING_HOSTED，444Python/36contract/parser7本机证据不替新hosted/fullprepare。仅已审切片集成，ledger空、native/DEVICE/DV001与PR5整体验收仍开放。
+- 当前已核对源码向量：库751d0cdd + App6c4c1b478。库CI38168100713 video772+3原mac Linux跳过/lab298/两strict0；App38168113931 SUCCESS及Build38168114089内四平台各268/strict0/bundle/finalize，hosted Python实际两次444、parser/kernel7与身份前后稳定。Build整体六Release仍失败；Android/Pink空accepted selector实际preAPI/preGradle拒绝，非native通过。精简证据docs/plans/core-native-ci-checkpoint-20261012.json；原失败/旧向量保留。
 
 - 状态：进行中；唯一集成分支 `routing/MK-ROUTING-20261011`，主PR media-kit#4/App#1/FFmpeg#1；context=`archives/conversations/media-kit-routing-20261011.md`。主PR不自动合并或发布。
 - 当前推送源码：库a31269ba + Appabc149；FFmpeg9aba43cf。CONFIG模型检查点独立35库/22App/4额外反例与target strict通过，实际DASH/planner/Session/report同一配置闭环仍未完成。
