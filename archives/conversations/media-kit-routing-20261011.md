@@ -2,6 +2,22 @@
 
 ## Current State
 
+当前库HEAD12966e7ac78983807199e0a179e84ad763a547a7；App da28171292931d32a1f4954f495ab5b7c29852a6；FFmpeg9aba43cf；DEVICE构建DV0011095a43。最新已验源码组合为库12966+App c51fd0973：库source38156773328 video591通过/3原mac跳过、lab298、strict通过；App source38156848733 strict零问题、211Flutter/1Chrome/268Python、Web/bundle/10包来源及freshness通过。Darwin/query/OHOS成功，general38156773301仍in_progress，不推定整套CI完成。证据/tmp/mk-routing-new-ci-20261012/summary.json。App da281是后续URI窄修，不能重标旧运行。
+
+CORE-F01/R01a/R01b已实现并验证。R01b内部输出请求contract/复用身份与publish失败清理已推送12966；它不关闭realizer中ST+PQ推定YUV的实际carrier缺口。R01c正在修持续二次mismatch接受和错误timeout归因，首四例红灯已保存，代码尚未提交，critical复核中。完整实际decoder/采样身份预算、copy/software catalog、auto/prefer/require有效配置闭环仍开放。
+
+CI03 34 info已清零；Release38156848910 FAILURE：cache/兄弟源码/旧锁/空tag前置失败，非native编译验收。App bootstrap三新文件正在按V1修改，mock通过不算真实3OS；产品experimental默认false保留，验证true主场景和false。
+
+用户明确要求归并DV001与PR#5；中央6111454734/PR5 6111454975登记。PR5最新86c186f0的三Markdown历史证据已导入并通过critical原文/6哈希/5相对链接核对，新增README Current State与original/import SHA256 manifest；原正文逐字保留，两shell脚本未导入。原input-vector与device-results混记多轮，不拼成单一验收向量。DV0011095原review5483753705未修，配方仍DEVICE所有；不能标两PR已完成。
+
+DEVICE6111344927证明原LG候选实体屏幕颜色亮度基本正常，DV002呈现项passed_for_vector；黑位/过曝既有项仍登记。native owner/YUV arm、普通无define Session、完整来源manifest和最新整合P5/P8.4复测仍必需。CORE不另写配方，不改已批准LG FULL/range1或owner/ACK/lease。主PR未合并/发布。
+
+## History
+
+- 2026-10-11：全文读取takeover/v3/中央App台账/F01/CI02/最终评论及DEVICE最新认领；中央登记接手与文件范围6110756605、续审6110762843。CORE-R01a已派发worker，DEVICE配方保持其所有权。
+
+### 2026-10-12 前序检查点（历史）
+
 2026-10-12：库最新已推送bd9b9f852949af8980faaad337064a0830c405da的R01a终态中央6110898494：573video+3原macOS专用Linux跳过、298lab及两包严格分析通过，query/实际插件Java、Darwin宿主及OHOS unsigned HAP各成功，完整native/设备验收未完成。App最新1965ba0e6c50316f1a64f6830bb0877d5f84606e（CI03）已推送回读，本地严格分析No issues、211Flutter、bundle、Chrome DOM与实际main_web release构建通过并独立复核；中央6111208521。远端source run38155973408尚在执行，已完成Python job114518915972实际263项通过，artifact11708632336；不虚称远端App整体通过。
 
 CORE-R01b已实现内部创建请求契约统一，范围新hdr_output_contract、Slot/backend.prepareOutput/Session._createController及直接测试，现有Slot类型导出配套contract一行导出。完整vo/topology/requestedHwdec/GPU/EGL/Surface/offscreen身份用于复用，不推导已观察YUV arm。旧初始未知身份重建、失败且清理失败的输出不能偶然ready后复用，publish异常纳入原失败清理。旧测试配置共享SDK边界已发现，私有pubget重解析成功且无tracked lock变化；最终64目标私有SDK测试/全库strict通过，独立critical复审78项/全库strict通过。新增发布失败两例修复前红灯保留，真实carrier夹具已改surfacetexture。日志/tmp/mk-r01b-{final-tests,final-analyze,publication-baseline,review-final-tests,review-final-analyze}.log。检查点及后续CI见docs/plans/core-r01b-handoff-20261012.json；不能据此声称native呈现、实际decoder或完整R01完成。
@@ -23,7 +39,3 @@ DEVICE DV001仍1095a43，review5483753705/comment6110373174没有新修复。续
 R01a实现已完成：最终hwdec独立SurfaceTexture依赖与Session排除，双门成功copy及二次失败有界测试；50关联用例通过，严格分析无问题，V1独立审核无阻塞，独立92关联用例通过。源码CI/App最新组合未验收，记录见docs/plans/core-r01a-handoff-20261011.json。
 
 下一步：独立审核后及时commit/push/readback、当前源码CI；随后输出身份/decoder复核及可执行独立替代，真实选项闭环、34info和Release CI。构建开始固定最新适用输入，期间不pull；旧向量不重标新SHA。
-
-## History
-
-- 2026-10-11：全文读取takeover/v3/中央App台账/F01/CI02/最终评论及DEVICE最新认领；中央登记接手与文件范围6110756605、续审6110762843。CORE-R01a已派发worker，DEVICE配方保持其所有权。
