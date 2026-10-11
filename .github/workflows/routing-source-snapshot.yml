@@ -1,0 +1,44 @@
+name: Routing source snapshot
+
+on:
+  push:
+    branches: [routing/MK-ROUTING-20261011]
+    paths: [.github/workflows/routing-source-snapshot.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  snapshot:
+    if: contains(github.event.head_commit.message, '[MK-ROUTING-20261011 snapshot]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: media-kit
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: Goodwu/PiliPlusX
+          ref: routing/MK-ROUTING-20261011
+          path: app
+          persist-credentials: false
+      - name: Capture tracked current source only
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir snapshots
+          for repo in media-kit app; do
+            git -C "$repo" rev-parse HEAD > "snapshots/$repo.sha"
+            git -C "$repo" archive --format=zip HEAD > "snapshots/$repo.zip"
+          done
+          printf '%s\n' 'Tracked source snapshot only. No test/build/native validation.' > snapshots/scope.txt
+          sha256sum snapshots/*.zip > snapshots/SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: routing-source-snapshot-${{ github.sha }}
+          path: snapshots
+          retention-days: 7
+          if-no-files-found: error
