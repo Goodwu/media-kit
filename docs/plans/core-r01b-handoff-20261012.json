@@ -1,0 +1,48 @@
+{
+  "taskId": "MK-ROUTING-20261011",
+  "phase": "CORE-R01b",
+  "branch": "routing/MK-ROUTING-20261011",
+  "sourceParent": "bd9b9f852949af8980faaad337064a0830c405da",
+  "implementation": "complete for request contract and output reuse lifecycle",
+  "hostValidation": {
+    "workerTargetTests": 64,
+    "independentCriticalTests": 78,
+    "wholeVideoPackageStrictAnalysis": "passed",
+    "toolchain": "private Flutter3.47.2/Dart3.13.2; package roots re-resolved into private SDK",
+    "sharedSdkEarlierResults": "diagnostic only",
+    "publicationFailureBaseline": "2 expected failures before fix"
+  },
+  "sourceFilesSha256": {
+    "media_kit_video/lib/media_kit_video.dart": "c86ac66503a0b552dd84a96124dbad37af5225beb32f257fe5139d808dd5e044",
+    "media_kit_video/lib/src/hdr/hdr_output_contract.dart": "9a41e89f20f3b1c3f5450f5709a7b7f246634c9a52a2bbf11795fe52771e442d",
+    "media_kit_video/lib/src/hdr/hdr_output_slot.dart": "128a683e338d5304e1f332463ece2d00c388f99ab94256c901e80411b6f38c54",
+    "media_kit_video/lib/src/hdr/hdr_player_backend.dart": "2443e0cc4ad4879c1f475204f30a992f71ac5c26c35383c440bda6241ac87b99",
+    "media_kit_video/lib/src/hdr/hdr_video_session.dart": "40a68c0e1e464cc252c8be6bf120a6491c088cd9459d4bed0d7e6b0ae246ea9d",
+    "media_kit_video/test/hdr_output_contract_test.dart": "27116281ec8897d63f9e4c1b36f74bdf3ae84d003aa3b3523a7477616aa53894",
+    "media_kit_video/test/hdr_output_slot_test.dart": "9cce1bbef2e80135ba45434ae8b5d4f4474f7725c92cad87e2a03686deacf4b5",
+    "media_kit_video/test/hdr_player_backend_output_ownership_test.dart": "ce6db833b2b0eaff5df79f83755085d5949e8a99c69ecde345ad5077b0641688",
+    "media_kit_video/test/hdr_yuv_presentation_contract_test.dart": "06112adb9a915ca0ef14133a765bac721fe509a2b874b9f291845a9682aecb0f"
+  },
+  "ciValidation": "pending post-checkpoint; old bd9b9f85/App1965ba0e run38155973408 is not this vector",
+  "nativeValidation": "not performed by CORE; owner/YUV arm/actual decoder/presentation remain separate",
+  "preserved": [
+    "LG approved values",
+    "owner ACK lease",
+    "source evidence",
+    "nativeDV validation",
+    "failure-aware fallback",
+    "App default experimental=false"
+  ],
+  "remaining": [
+    "actual decoder/importer/presenter verification",
+    "independent executable copy/software route catalog",
+    "auto/prefer/require effective configuration closure",
+    "Release CI and latest native/device acceptance"
+  ],
+  "centralContext": [
+    "6110847640",
+    "6111090195",
+    "6111208521",
+    "6111284247"
+  ]
+}

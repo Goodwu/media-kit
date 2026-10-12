@@ -1,0 +1,67 @@
+{
+  "stage": "CORE-R01d",
+  "parentCommit": "aeafc6c38a064ba13368d069334b0b4ca2cdc868",
+  "scope": "ordinary-current-decoder-observation",
+  "files": [
+    {
+      "path": "media_kit_video/lib/src/hdr/hdr_open_plan.dart",
+      "sha256": "d6c7fb1d90bcf13a796fafdb57629b984833ae74b3d5907821297d43241ff603"
+    },
+    {
+      "path": "media_kit_video/lib/src/hdr/hdr_output_report.dart",
+      "sha256": "18710f39ed1527fc252a027848dd601007fb45efd424260d64a21bb4554c2635"
+    },
+    {
+      "path": "media_kit_video/lib/src/hdr/hdr_player_backend.dart",
+      "sha256": "6674d884b67b65ede697eeec8aab5ec8f74711eb47d0631cc31e0e40b8d5d8d1"
+    },
+    {
+      "path": "media_kit_video/lib/src/hdr/hdr_video_session.dart",
+      "sha256": "c04ee8cc6ebf137552f4566ecec716b74b78b027b34b3d9d8dbce59fd715aedb"
+    },
+    {
+      "path": "media_kit_video/lib/src/hdr/hdr_decoder_review.dart",
+      "sha256": "20f4f08711223fae12aa5c80202fd230d8729127db820c3b9e99c62565724be7"
+    },
+    {
+      "path": "media_kit_video/test/hdr_video_session_test.dart",
+      "sha256": "9b96eb423cc8b382b9157a19ac0d852d56432d493281907d01a92efc2a58b3ce"
+    },
+    {
+      "path": "media_kit_video/test/hdr_decoder_review_test.dart",
+      "sha256": "8a1bf172248c71d032683d596d545f91e4b84082ecdbf7b16cde4ec94cba53da"
+    }
+  ],
+  "validation": {
+    "independentTests": 255,
+    "strictAnalysis": "No issues",
+    "negativeTests": [
+      "missing codec emits incomplete facts when guard removed",
+      "ordinary-to-native stale observation when clearing removed"
+    ],
+    "logs": [
+      {
+        "path": "/tmp/mk-r01d-critical-rereview-tests.log",
+        "sha256": "3d32d074d603e85f24ecb66e3c7929b2de6bcb62c1f8c8ba5e7a10a451198cb4"
+      },
+      {
+        "path": "/tmp/mk-r01d-critical-rereview-analyze.log",
+        "sha256": "3b64367686c15c3265d9e6ad1c9e6fb576e486e6386a4c175ac833d8d8c9b6bf"
+      },
+      {
+        "path": "/tmp/mk-r01d-missing-codec-negative.log",
+        "sha256": "80b601da307a704643eebcbcd0a61beaa18d8b6749088a157d591b57f8f78f6e"
+      },
+      {
+        "path": "/tmp/mk-r01d-stale-observation-negative.log",
+        "sha256": "44512c8206195574814ddec1bece49064f78ff773966cdc83175ec3419c7a4cd"
+      }
+    ]
+  },
+  "boundaries": [
+    "review budget excludes open admission",
+    "Dart timeout cannot preempt synchronous native FFI",
+    "no native build or device presentation acceptance",
+    "copy/software catalog and effective configuration remain incomplete"
+  ]
+}

@@ -77,6 +77,12 @@ enum HdrDegradeReason {
   /// Does not prove that an unenumerated FFmpeg software path is impossible.
   sourceDecodeUnsupported,
 
+  /// Every execution of this complete request was already admitted once.
+  candidateExhausted,
+
+  /// The requested configuration cannot be met by an eligible/current route.
+  routeOptionsUnsatisfied,
+
   /// DV is present but its profile/base-layer interpretation is not known.
   /// More source facts are required; requesting SDR cannot remove this need.
   sourceMetadataUnknown,
@@ -116,6 +122,9 @@ enum HdrDegradeReason {
   /// `hwdec-current` did not match the route's expectation.
   hwdecMismatch,
 
+  /// The reviewed source requires a different route after the single rebuild.
+  routeReviewMismatch,
+
   /// The GPU output surface did not bind within the budget.
   outputBindTimeout,
 
@@ -150,11 +159,23 @@ abstract class HdrRouteDependency {
   /// The route decodes through MediaCodec and copies frames to the GPU.
   static const String hwdecMediacodecCopy = 'hwdec:mediacodec-copy';
 
+  /// The route imports SurfaceTexture decoder frames. This records the
+  /// execution dependency only; it does not imply a YUV presenter or identify
+  /// a decoder failure cause.
+  static const String hwdecSurfaceTexture = 'hwdec:surfacetexture';
+
   /// The native Dolby Vision decoder/bridge pipeline.
   static const String nativeDolbyVision = 'native:dolbyVision';
 
   /// The route renders through the platform view topology.
   static const String topologyPlatformView = 'topology:platformView';
+
+  /// Shared ordinary MediaCodec decode, independent of frame import mode.
+  static const String decoderMediacodec = 'decoder:mediacodec';
+  static const String decoderSoftware = 'decoder:ffmpeg-software';
+  static const String importMediacodec = 'import:mediacodec-hardware';
+  static const String importCpuUpload = 'import:cpu-upload';
+  static const String presenterGpuTexture = 'presenter:gpu-next-opengl-texture';
 }
 
 /// {@template hdr_route}
@@ -248,6 +269,28 @@ class HdrRoute {
   /// The pipeline stages this route depends on (see [HdrRouteDependency]).
   final Set<String> dependencies;
 
+  /// Preserves source processing and all output/color requests while changing
+  /// the decode/import execution path. OutputContract derives from this value.
+  HdrRoute withExecution(
+          {required String hwdec, required Set<String> dependencies}) =>
+      HdrRoute(
+        strategy: strategy,
+        presentation: presentation,
+        outputTransfer: outputTransfer,
+        appliesDynamicMetadata: appliesDynamicMetadata,
+        topology: topology,
+        vo: vo,
+        hwdec: hwdec,
+        vdLavcOptions: vdLavcOptions,
+        mediacodecEmbedRenderMode: mediacodecEmbedRenderMode,
+        targetPrim: targetPrim,
+        targetTrc: targetTrc,
+        surfaceTransfer: surfaceTransfer,
+        offscreenTransfer: offscreenTransfer,
+        stripDvRpu: stripDvRpu,
+        dependencies: Set<String>.unmodifiable(dependencies),
+      );
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
@@ -271,26 +314,25 @@ class HdrRoute {
 
   @override
   int get hashCode => Object.hash(
-    strategy,
-    presentation,
-    outputTransfer,
-    appliesDynamicMetadata,
-    topology,
-    vo,
-    hwdec,
-    vdLavcOptions,
-    mediacodecEmbedRenderMode,
-    targetPrim,
-    targetTrc,
-    surfaceTransfer,
-    offscreenTransfer,
-    stripDvRpu,
-    Object.hashAllUnordered(dependencies),
-  );
+        strategy,
+        presentation,
+        outputTransfer,
+        appliesDynamicMetadata,
+        topology,
+        vo,
+        hwdec,
+        vdLavcOptions,
+        mediacodecEmbedRenderMode,
+        targetPrim,
+        targetTrc,
+        surfaceTransfer,
+        offscreenTransfer,
+        stripDvRpu,
+        Object.hashAllUnordered(dependencies),
+      );
 
   @override
-  String toString() =>
-      'HdrRoute(${strategy.name}, ${presentation.name}, '
+  String toString() => 'HdrRoute(${strategy.name}, ${presentation.name}, '
       'output: ${outputTransfer.name}, dynamic: $appliesDynamicMetadata, '
       'topology: ${topology.name}, vo: $vo, hwdec: $hwdec, '
       'vd-lavc-o: $vdLavcOptions, render-mode: $mediacodecEmbedRenderMode, '
@@ -312,6 +354,7 @@ class HdrCandidate {
     required this.strategy,
     required this.maturity,
     this.feasible = false,
+    this.isSafetyNet = false,
     this.skipReason,
     this.route,
   });
@@ -322,6 +365,9 @@ class HdrCandidate {
 
   /// Whether the strategy can be realized on this device right now.
   final bool feasible;
+
+  /// Explicit source-safe SDR fallback, whose maturity gate was relaxed.
+  final bool isSafetyNet;
 
   /// Why the strategy was not (or cannot be) selected. Null when the
   /// candidate is feasible — including a feasible non-selected candidate
@@ -338,17 +384,17 @@ class HdrCandidate {
         other.strategy == strategy &&
         other.maturity == maturity &&
         other.feasible == feasible &&
+        other.isSafetyNet == isSafetyNet &&
         other.skipReason == skipReason &&
         other.route == route;
   }
 
   @override
   int get hashCode =>
-      Object.hash(strategy, maturity, feasible, skipReason, route);
+      Object.hash(strategy, maturity, feasible, isSafetyNet, skipReason, route);
 
   @override
-  String toString() =>
-      'HdrCandidate(${strategy.name}, ${maturity.name}, '
+  String toString() => 'HdrCandidate(${strategy.name}, ${maturity.name}, '
       'feasible: $feasible, skip: ${skipReason?.name}, route: $route)';
 }
 
@@ -412,17 +458,30 @@ class HdrRoutePrediction {
 
   @override
   int get hashCode => Object.hash(
-    source,
-    selected,
-    presentation,
-    confidence,
-    playable,
-    Object.hashAll(candidates),
-  );
+        source,
+        selected,
+        presentation,
+        confidence,
+        playable,
+        Object.hashAll(candidates),
+      );
 
   @override
-  String toString() =>
-      'HdrRoutePrediction(selected: $selected, '
+  String toString() => 'HdrRoutePrediction(selected: $selected, '
       'presentation: ${presentation.name}, confidence: ${confidence.name}, '
       'playable: $playable, candidates: $candidates)';
+}
+
+/// A caller/native adapter has identified the failing execution component.
+/// Generic errors do not establish this cause. Session verifies the dependency
+/// belongs to the failed route before excluding other candidates that share it.
+class HdrExecutionDependencyFailure implements Exception {
+  const HdrExecutionDependencyFailure(this.dependency, this.reason,
+      {this.cause});
+  final String dependency;
+  final HdrDegradeReason reason;
+  final Object? cause;
+  @override
+  String toString() =>
+      'HdrExecutionDependencyFailure($dependency, ${reason.name}, $cause)';
 }

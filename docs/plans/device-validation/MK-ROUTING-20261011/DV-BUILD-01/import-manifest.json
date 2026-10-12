@@ -1,0 +1,50 @@
+{
+  "sourcePr": "https://github.com/Goodwu/media-kit/pull/5",
+  "sourceCommit": "5b27961137a3b03e687dddbeb05a0320fcf6c60c",
+  "scope": "historical-markdown-only",
+  "files": [
+    {
+      "path": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/input-vector.md",
+      "originalSha256": "9cd1fd4446ceba4ec5c778d00277e21a7866d84c1e113b8090c0acd62991a988",
+      "importedSha256": "63a02d698a70748ddc5f4f4f1277014324e390fcf36d109a39fbb4d1cb957bba",
+      "sourceCommit": "86c186f000c9b9399d4f91227f740ab2669cb83c"
+    },
+    {
+      "path": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/device-results.md",
+      "originalSha256": "20574e0be0d598912e98eacd975e86662c04fb349a9640bfd2e6b95a0f639844",
+      "importedSha256": "32839c686a3eaac526e615d1fb1a449095deb455b39889f335291ce1fb5c9989",
+      "sourceCommit": "5b27961137a3b03e687dddbeb05a0320fcf6c60c"
+    },
+    {
+      "path": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/critical-review-define-promotion.md",
+      "originalSha256": "ead9bf0e762646c997bc38f83b21c15432a53d16ae93305a41c32e8fc72ea645",
+      "importedSha256": "cb00d09aff09299c9d8f403895b6bf58dd2cccb1f3421e379e140a482bb9a59f",
+      "sourceCommit": "86c186f000c9b9399d4f91227f740ab2669cb83c"
+    },
+    {
+      "path": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/dv003-specialist-review.md",
+      "originalSha256": "c1a5899e7f3deba84c3464f9d2896c35f1394b0d4e4cab6d440e244573f5c581",
+      "importedSha256": "c1a5899e7f3deba84c3464f9d2896c35f1394b0d4e4cab6d440e244573f5c581",
+      "sourceCommit": "644908c93f09083f21720699227eb4e7a14d9c7a",
+      "sourceGitBlob": "4e5869669234140442c3f21d70d85c4b004e8a3d"
+    }
+  ],
+  "excludedScripts": [
+    "assemble-jar-arm64.sh",
+    "matrix-device-build.sh"
+  ],
+  "importHistory": [
+    {
+      "sourceCommit": "86c186f000c9b9399d4f91227f740ab2669cb83c",
+      "scope": "initial-three-markdown-import"
+    },
+    {
+      "sourceCommit": "5b27961137a3b03e687dddbeb05a0320fcf6c60c",
+      "scope": "device-results-only-16-line-append"
+    },
+    {
+      "sourceCommit": "644908c93f09083f21720699227eb4e7a14d9c7a",
+      "scope": "exact-DV003-specialist-review-note-import; historical-design-only; no-implementation-acceptance"
+    }
+  ]
+}

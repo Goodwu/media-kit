@@ -1,0 +1,46 @@
+{
+  "taskId": "MK-ROUTING-20261011",
+  "role": "CORE-SUCCESSOR",
+  "workItem": "CORE-R01a",
+  "claimComment": 6110756605,
+  "baseline": "1e1e0d97f35f7d02185665f1c9837939ba172ca7",
+  "commitAnchor": "fix(routing): \u9694\u79bbSurfaceTexture\u6267\u884c\u4f9d\u8d56\u4e0e\u5931\u8d25\u91cd\u8bd5 [CORE CORE-R01a MK-ROUTING-20261011]",
+  "implementation": "checkpoint_ready_for_push",
+  "scope": [
+    "HdrRouteDependency.hwdecSurfaceTexture",
+    "HdrStrategyRealizer._baseLayerConvert final hwdec dependency",
+    "HdrVideoSession._hwdecDependency SurfaceTexture mapping"
+  ],
+  "limits": [
+    "Request execution identity, not decoder/importer root-cause attribution or YUV presenter acceptance",
+    "Output identity/native decoder review/general software catalog remain open",
+    "No native/owner/ACK/lease/LG recipe/App production modifications"
+  ],
+  "validation": {
+    "host": "passed_for_worktree",
+    "toolchain": "Flutter3.47.2/Dart3.13.2",
+    "targetedPassed": 50,
+    "command": "flutter test --no-pub --reporter expanded test/hdr_surface_texture_official_backend_test.dart test/hdr_video_session_test.dart test/hdr_fallback_failure_test.dart test/hdr_session_source_facts_test.dart test/hdr_yuv_presentation_contract_test.dart",
+    "analyzeCommand": "flutter analyze --no-pub",
+    "analyze": "no_issues",
+    "experimental": [
+      true,
+      false
+    ],
+    "nativeDeviceAcceptance": false,
+    "sourceCI": "pending_after_push"
+  },
+  "logSha256": {
+    "mk-core-r01a-targeted-tests.log": "9f5c0e93c03937f6406e626dc9f651941fe3447b1ae4a706b5cec08b46b9ce68",
+    "mk-core-r01a-analyze.log": "3953ed8f13056b2c681614c26db7702a3e86d1265d34845e672b490ea2d2e18f"
+  },
+  "next": "Current source CI and App pair; subsequent R01 output identity/native decoder review/executable alternatives. DEVICE fixes existing DV001 review.",
+  "intermediateFailure": "Initial targeted test incorrectly assumed a unique candidate via .single; changed to strategy lookup and reran. Initial20-case success was superseded by expanded50-case final run.",
+  "independentReview": {
+    "role": "team_reviewer",
+    "level": "V1",
+    "result": "no_blocking_findings",
+    "independentTestsPassed": 92,
+    "scope": "six associated test files including planner; no native/device acceptance"
+  }
+}

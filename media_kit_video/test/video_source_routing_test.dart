@@ -6,6 +6,7 @@ import 'package:media_kit/media_kit.dart' show Media;
 import 'package:media_kit_video/media_kit_video.dart';
 
 import 'hdr_video_session_test.dart' show FakeBackend;
+import 'hdr_execution_catalog_test.dart' show Backend;
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -100,7 +101,7 @@ void main() {
   };
   tearDown(() => messenger.setMockMethodCallHandler(channel, null));
 
-  test('exact source negative also blocks SDR safety fallback', () async {
+  test('exact MC negative blocks MC safety fallback but FFmpeg remains conditional', () async {
     messenger.setMockMethodCallHandler(
       channel,
       (call) async => response([large], codecSupport: 'unsupported'),
@@ -112,11 +113,12 @@ void main() {
         specification: large,
         policy: HdrRoutingPolicy(allowExperimental: enabled),
       );
-      expect(prediction.playable, isFalse);
-      expect(
-        prediction.selected.skipReason,
-        HdrDegradeReason.sourceDecodeUnsupported,
-      );
+      expect(prediction.playable, isTrue);
+      expect(prediction.selected.route!.hwdec, 'no');
+      expect(prediction.confidence, HdrPredictionConfidence.unverified);
+      expect(prediction.candidates.where((c) => c.skipReason == HdrDegradeReason.sourceDecodeUnsupported), isNotEmpty);
+      expect(prediction.candidates.where((c) => c.feasible).every((c) => c.route!.hwdec == 'no'), isTrue);
+      expect(caps.forSource(large).support(), VideoSupport.unsupported);
     }
   });
 
@@ -162,16 +164,12 @@ void main() {
         caps.predict(p84, specification: small).selected.strategy,
         HdrStrategy.nativeDolbyVision,
       );
-      expect(
-        caps
-            .predict(
-              p84,
-              specification: small,
-              preference: HdrOutputPreference.off,
-            )
-            .playable,
-        isFalse,
-      );
+      final off = caps.predict(p84, specification: small, preference: HdrOutputPreference.off);
+      expect(off.playable, isTrue);
+      expect(off.selected.route!.hwdec, 'no');
+      expect(off.selected.route!.stripDvRpu, isTrue);
+      expect(off.confidence, HdrPredictionConfidence.unverified);
+      expect(off.candidates.where((c) => c.feasible).every((c) => c.route!.hwdec == 'no'), isTrue);
       messenger.setMockMethodCallHandler(
         channel,
         (call) async => response([small]),
@@ -238,26 +236,45 @@ void main() {
     },
   );
 
-  test('Session known negative performs no configure or open', () async {
+  test('MC negative Session only admits FFmpeg and cannot verify before current review', () async {
     messenger.setMockMethodCallHandler(
       channel,
       (call) async => call.method == 'VideoRouteCapabilities.Get'
           ? response([large], codecSupport: 'unsupported')
           : null,
     );
-    final backend = FakeBackend();
-    final session = HdrVideoSession.forTesting(
-      isAndroid: true,
-      backend: backend,
-    );
+    final release = Completer<void>();
+    final backend = Backend(hdr10)..reviewHold = release.future;
+    final session = HdrVideoSession.forTesting(isAndroid: true, backend: backend);
     addTearDown(session.dispose);
-    await session.open(Media('test://large'), hint: hdr10, sourceSpec: large);
-    expect(backend.opened, isEmpty);
-    expect(backend.calls.where((c) => c.startsWith('configure:')), isEmpty);
-    expect(
-      session.report.value.degradeReason,
-      HdrDegradeReason.sourceDecodeUnsupported,
-    );
+    final open = session.open(Media('test://large'), hint: hdr10, sourceSpec: large);
+    await pumpEventQueue();
+    expect(backend.opened.map((r) => r.hwdec), ['no']);
+    expect(backend.configured.map((r) => r.hwdec), ['no']);
+    expect(session.report.value.verified, isFalse);
+    release.complete();
+    await open;
+    expect(session.report.value.verified, isTrue);
+    expect(session.report.value.actual!.hwdec, 'no');
+    expect(session.report.value.decoderObservation!.softwareDecoded, isTrue);
+    expect(session.report.value.decoderObservation!.cpuFrame, isTrue);
+    expect(session.report.value.prediction!.confidence, HdrPredictionConfidence.unverified);
+  });
+
+  test('MC negative cannot accept observed hardware or unknown CPU format as FFmpeg', () async {
+    messenger.setMockMethodCallHandler(channel, (call) async =>
+      call.method == 'VideoRouteCapabilities.Get' ? response([large], codecSupport: 'unsupported') : null);
+    for (final hardware in [true, false]) {
+      final backend = Backend(hdr10);
+      if (hardware) { backend.hwdecOverrides['no'] = 'mediacodec'; }
+      else { backend.pixelOverrides['no'] = 'unknown-format'; }
+      final session = HdrVideoSession.forTesting(isAndroid: true, backend: backend);
+      await session.open(Media('test://large'), hint: hdr10, sourceSpec: large);
+      expect(backend.configured.map((r) => r.hwdec), ['no']);
+      expect(session.report.value.verified, isFalse);
+      expect(session.report.value.actual, isNull);
+      await session.dispose();
+    }
   });
 
   test('late source query cannot replace newer source support', () async {

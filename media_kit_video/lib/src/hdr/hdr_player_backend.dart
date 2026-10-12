@@ -12,6 +12,7 @@ import 'package:media_kit_video/media_kit_video.dart';
 import 'package:media_kit_video/src/video_controller/android_video_controller/android_video_controller.dart';
 
 import 'hdr_open_coordinator.dart';
+import 'hdr_decoder_review.dart';
 import 'hdr_native_dv_option_owner.dart';
 import 'hdr_native_dv_review.dart';
 import 'hdr_native_dv_review_evidence.dart';
@@ -38,6 +39,7 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
   AndroidHdrBackend({
     required this.player,
     required this.outputSlot,
+    this.surfacePixelFormatOverride = 'rgba1010102',
     void Function(HdrNativeDvOptionDiagnostic)? onNativeDvOptionDiagnostic,
     Future<Map<String, Object?>?> Function(int handle, String transfer)?
         applyDataSpace,
@@ -62,6 +64,7 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
 
   final Player player;
   final HdrOutputSlot<VideoController> outputSlot;
+  final String surfacePixelFormatOverride;
 
   final Future<Map<String, Object?>?> Function(int handle, String transfer)
       _applyDataSpace;
@@ -78,6 +81,7 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
   HdrOptionSourceIdentity? _stoppedBoundary;
   int? _openFileLoadedEpoch;
   int? _openPlaylistEntryId;
+  int _ordinaryReviewSerial = 0;
   String? _dataSpaceRequested;
   String? _dataSpacePath;
   String? _dataSpaceReadback;
@@ -432,6 +436,7 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
 
   @override
   Future<void> stop() async {
+    ++_ordinaryReviewSerial;
     _observedStoppedPath = false;
     _stoppedBoundary = null;
     // All possible FILE_LOADED waits happen before/after the critical section.
@@ -520,22 +525,20 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
           vd: route.vdLavcOptions!,
           renderMode: route.mediacodecEmbedRenderMode!);
     }
-    final gpuPlatform =
-        route.topology == HdrTopology.platformView && route.vo == 'gpu-next';
-    if (gpuPlatform) {
-      await _setOwned('egl-output-format', 'rgb10_a2');
+    final contract = HdrOutputContract.fromRoute(
+      route,
+      surfacePixelFormatOverride: surfacePixelFormatOverride,
+    );
+    final eglOutputFormat = contract.eglOutputFormat;
+    if (eglOutputFormat != null) {
+      await _setOwned('egl-output-format', eglOutputFormat);
     }
     // The Android video controller applies its creation-time hwdec setting
     // while it initializes. Capture and register ownership before ensure()
     // can construct that controller, or its initialization may overwrite the
     // value that resetOwnedConfiguration is meant to restore.
-    await _setOwned('hwdec', route.hwdec);
-    await outputSlot.ensure(
-      route.vo,
-      route.hwdec,
-      outputFormat: gpuPlatform ? 'rgb10_a2' : null,
-      surfaceTransfer: route.surfaceTransfer,
-    );
+    await _setOwned('hwdec', contract.requestedHwdec);
+    await outputSlot.ensure(contract);
     if (route.topology != HdrTopology.platformView && route.vo == 'gpu-next') {
       final prepared = await outputSlot.current!.prepareAndroidTextureOutput();
       debugPrint(prepared
@@ -566,8 +569,9 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
     }
     if (route.topology == HdrTopology.platformView) {
       final output = await outputSlot.current!.platform.future;
-      await output.waitUntilCurrentOutputBound
-          .timeout(const Duration(seconds: 10));
+      await HdrOutputBindTimeout.waitFor(
+        output.waitUntilCurrentOutputBound.timeout(const Duration(seconds: 10)),
+      );
       final transfer = route.surfaceTransfer;
       if (transfer != null) {
         final handle = await player.handle;
@@ -697,6 +701,7 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
     }
     _observedStoppedPath = false;
     _stoppedBoundary = null;
+    final reviewSerial = ++_ordinaryReviewSerial;
     final media = plan.media;
     // Drop the previous media's cached video-params so the review waits for
     // this open's report instead of classifying from a stale source.
@@ -748,15 +753,20 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
         _nativeDvPendingOpen = null;
         _nativeDvPendingOwnStopIssued = false;
       } else {
-        await player.open(playable, play: play);
-        final playlistPath = await player.getProperty('playlist/0/filename');
-        final entryId = int.tryParse(await player.getProperty('playlist/0/id'));
-        if (playlistPath != media.uri || entryId == null) {
-          throw StateError(
-              'Opened playlist entry differs from requested source: '
-              'path=$playlistPath id=$entryId');
+        final entry = await captureDecoderOpenUnderLock(
+          lock: player.lock,
+          mediaUri: media.uri,
+          fileLoadedEpoch: () => player.fileLoadedEpoch,
+          openWithoutLock: () =>
+              player.open(playable, play: play, synchronized: false),
+          readProperty: player.getProperty,
+          isCurrent: () => _ordinaryReviewSerial == reviewSerial,
+        );
+        if (_ordinaryReviewSerial != reviewSerial) {
+          throw const HdrDecoderReviewFailure('Superseded ordinary open');
         }
-        _openPlaylistEntryId = entryId;
+        _openFileLoadedEpoch = entry.openedAfterEpoch;
+        _openPlaylistEntryId = entry.playlistEntryId;
       }
     } catch (error, stack) {
       if (!identityConfirmationAttempted &&
@@ -827,23 +837,29 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
       _lastHwdecCurrent = facts.hwdecCurrent;
       return facts;
     }
-    return gatherReviewFacts(
+    final reviewSerial = _ordinaryReviewSerial;
+    final facts = await gatherDecoderReviewFacts(
+      lock: player.lock,
       mediaUri: plan.media.uri,
-      expectedHwdec: plan.route.hwdec,
       readProperty: player.getProperty,
-      latestVideoParams: () => _latestVideoParams,
       waitForFileLoadedEntry: player.waitForFileLoadedEntryAfter,
       playlistEntryId: entryId,
-      fileLoadedEpoch: before,
-    ).then((facts) {
-      _lastHwdecCurrent = facts.hwdecCurrent;
-      return facts;
-    });
+      openedAfterEpoch: before,
+      fileLoadedEpoch: () => player.fileLoadedEpoch,
+      isCurrent: () => _ordinaryReviewSerial == reviewSerial,
+    );
+    if (_ordinaryReviewSerial != reviewSerial) {
+      throw const HdrDecoderReviewFailure('Superseded decoder result');
+    }
+    _lastHwdecCurrent = facts.hwdecCurrent;
+    return facts;
   }
 
   /// Gathers the decoder facts after the open's file-loaded boundary (plan
   /// 1.4 step 8). Static with injected readers so VM tests can drive the
-  /// polling without a native Player; [reviewFacts] delegates to it.
+  /// polling without a native Player. This legacy test seam is not the
+  /// production [reviewFacts] path; ordinary production review uses
+  /// [gatherDecoderReviewFacts] and current scalar source/frame evidence.
   ///
   /// Both review inputs are awaited: `dolby-vision-profile` is read after
   /// the decoder reports, and video-params are polled until they carry the
@@ -979,6 +995,7 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
   }
 
   Future<void> dispose() async {
+    ++_ordinaryReviewSerial;
     await _videoParamsSubscription?.cancel();
     _videoParamsSubscription = null;
   }
