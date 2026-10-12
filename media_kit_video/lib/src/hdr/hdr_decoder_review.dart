@@ -270,6 +270,33 @@ Future<HdrReviewFacts> gatherDecoderReviewFacts({
               throw HdrDecoderReviewFailure('Decoder endpoint changed: $key');
             }
           }
+          final hwdec = a['hwdec-current']!;
+          final pixel = a['video-params/pixelformat']!;
+          final gamma = a['video-params/gamma']!;
+          final primaries = a['video-params/primaries']!;
+          if (hwdec.isEmpty ||
+              pixel.isEmpty ||
+              gamma.isEmpty ||
+              primaries.isEmpty ||
+              a['video-format']!.isEmpty ||
+              a['current-tracks/video/codec']!.isEmpty) {
+            // DV004: pre-completeness rounds carry mpv's logical decoder
+            // name, which the first decoded frame replaces with the actual
+            // AVCodec name (f_decoder_wrapper.c:452-463 →
+            // av_common.c:449-457). Sampling identity only from complete
+            // samples keeps that name publication from failing the review;
+            // real post-establishment switches remain guarded by the
+            // session's final plan comparison.
+            diag('requiredFactsMissing', {
+              'hwdec': hwdec,
+              'pixelFormat': pixel,
+              'gamma': gamma,
+              'primaries': primaries,
+              'videoFormat': a['video-format'],
+              'codec': a['current-tracks/video/codec'],
+            });
+            return null;
+          }
           for (final key in decoderIdentityEndpoints) {
             final value = a[key]!;
             final observed = observedDecoderEndpoints[key];
@@ -309,26 +336,6 @@ Future<HdrReviewFacts> gatherDecoderReviewFacts({
           if (config?.nativeDvActive == true) {
             throw const HdrDecoderReviewFailure(
                 'Native DV requires its owned review consumer');
-          }
-          final hwdec = a['hwdec-current']!;
-          final pixel = a['video-params/pixelformat']!;
-          final gamma = a['video-params/gamma']!;
-          final primaries = a['video-params/primaries']!;
-          if (hwdec.isEmpty ||
-              pixel.isEmpty ||
-              gamma.isEmpty ||
-              primaries.isEmpty ||
-              a['video-format']!.isEmpty ||
-              a['current-tracks/video/codec']!.isEmpty) {
-            diag('requiredFactsMissing', {
-              'hwdec': hwdec,
-              'pixelFormat': pixel,
-              'gamma': gamma,
-              'primaries': primaries,
-              'videoFormat': a['video-format'],
-              'codec': a['current-tracks/video/codec'],
-            });
-            return null;
           }
           String? optional(String key) => a[key]!.isEmpty ? null : a[key];
           return HdrReviewFacts(
