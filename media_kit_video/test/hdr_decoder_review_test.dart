@@ -37,7 +37,8 @@ class Sample {
   }
 
   Future<HdrReviewFacts> gather(
-          {Duration budget = const Duration(seconds: 1)}) =>
+          {Duration budget = const Duration(seconds: 1),
+          void Function()? betweenRounds}) =>
       gatherDecoderReviewFacts(
         lock: lock,
         mediaUri: 'test://same',
@@ -52,6 +53,7 @@ class Sample {
         monotonicNow: () => elapsed,
         delay: (duration) async {
           elapsed += duration;
+          betweenRounds?.call();
         },
       );
 }
@@ -184,18 +186,32 @@ void main() {
     expect(facts.decoderObservation!.pixelFormat, 'mediacodec');
   });
 
-  test('observed decoder cannot change between first-frame polling rounds',
+  test('pre-completeness logical decoder name is not an authorization baseline',
       () async {
+    // DV004: before frame facts complete, current-tracks/video/decoder
+    // carries mpv's logical selection name; the first decoded frame
+    // republishes it as the actual AVCodec name
+    // (f_decoder_wrapper.c:452-463 → av_common.c:449-457). That name
+    // publication is not a decoder switch, so a partial round's logical
+    // name must not fail the first complete round. Real post-establishment
+    // decoder switches remain guarded by the session's final plan
+    // comparison.
     final s = Sample();
-    var decoderReads = 0;
+    s.props['current-tracks/video/decoder'] = 'h264';
     s.props['video-params/pixelformat'] = '';
-    s.onRead = (p) async {
-      if (p == 'current-tracks/video/decoder' && ++decoderReads > 2) {
-        return 'different-decoder';
+    var rounds = 0;
+    final facts = await s.gather(betweenRounds: () {
+      if (++rounds == 1) {
+        // First decoded frame: mpv republishes the logical name as the
+        // actual AVCodec name and frame facts become available.
+        s.props['current-tracks/video/decoder'] = 'h264_mediacodec';
+        s.props['video-params/pixelformat'] = 'mediacodec';
+        s.props['hwdec-current'] = 'mediacodec-copy';
       }
-      return s.props[p] ?? '';
-    };
-    await expectLater(s.gather(), throwsA(isA<HdrDecoderReviewFailure>()));
+    });
+    expect(facts.decoderObservation!.decoder, 'h264_mediacodec');
+    expect(facts.hwdecCurrent, 'mediacodec-copy');
+    expect(facts.decoderObservation!.decoderIdentityKnown, isTrue);
   });
 
   test('same URI new epoch is not owned entry', () async {
