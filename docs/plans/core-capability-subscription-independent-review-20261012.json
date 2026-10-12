@@ -1,0 +1,162 @@
+{
+  "schema": "core-independent-code-review/v1",
+  "task": "MK-ROUTING-20261011",
+  "slice": "CORE-CAPABILITY-SUBSCRIPTION-01",
+  "reviewer": "CORE independent review helper /root/device_return_review; no production edits, no public writes, no new DEVICE work line",
+  "observed_at_utc": "2026-10-12T15:58:42.476514+00:00",
+  "repository": "Goodwu/media-kit",
+  "checkout": "/workspace/scratch/bb7931e64549/checkouts/media-kit",
+  "base_head": "a73d570b633a949aab6a31e8f68ec03a13643c31",
+  "scope": [
+    "media_kit_video/lib/src/video_controller/android_video_controller/real.dart",
+    "media_kit_video/test/android_hdr_capability_subscription_test.dart"
+  ],
+  "status": "PASS_WITH_PENDING_HOSTED",
+  "blocking_findings": [],
+  "summary": "No P1/P2 found in this exact two-file candidate. Listener collection owns subscription lifetime. Actual Session lifecycle and inbound MethodChannel event refresh are exercised in authored tests. No Dart/Flutter tests or compiler were run locally.",
+  "manifest": [
+    {
+      "path": "media_kit_video/lib/src/video_controller/android_video_controller/real.dart",
+      "bytes": 83379,
+      "sha256": "8a0073c434aa8606491902e5659abac732039fc071dc845f1fe9f5f284d57609",
+      "git_blob": "27e21ca1ebf3d07d5d62f040e08d47a3fc7d4748",
+      "base_blob": "0f063a8d6e54bf69cecd8aeb17fadd951d5bbb23",
+      "frozen_path": "/workspace/scratch/bb7931e64549/audit-capability-subscription-review/android-files/media_kit_video/lib/src/video_controller/android_video_controller/real.dart"
+    },
+    {
+      "path": "media_kit_video/test/android_hdr_capability_subscription_test.dart",
+      "bytes": 7929,
+      "sha256": "b61386dc3b0e7099f5a9ae3f60303ff2e65e716ddb55f67892cf10cbf2dfde8b",
+      "git_blob": "4a699a0d95e2470956252dcd1fba811346f18566",
+      "base_blob": null,
+      "frozen_path": "/workspace/scratch/bb7931e64549/audit-capability-subscription-review/android-files/media_kit_video/test/android_hdr_capability_subscription_test.dart"
+    }
+  ],
+  "diff": {
+    "path": "/workspace/scratch/bb7931e64549/audit-capability-subscription-review/android-reviewed.diff",
+    "bytes": 10016,
+    "sha256": "d67d9cc0a02341e53ab3f207c82f2bddddd65680dd526beec9b2547beeb76116"
+  },
+  "read_only_dependencies": [
+    {
+      "path": "media_kit_video/lib/src/hdr/hdr_video_session.dart",
+      "git_blob": "b7afbf0f28f5a782c61071f36e8ebe1dd57fe63d",
+      "sha256": "38006cbb22c0808776efc97faa6b3a583f584e632e43a00d27d1443b7d80710e",
+      "modified_against_base": false
+    },
+    {
+      "path": "media_kit_video/android/src/main/java/com/alexmercerind/media_kit_video/MediaKitVideoPlugin.java",
+      "git_blob": "45437af035c790f0a1f63480e83bcc540228f6a8",
+      "sha256": "2f0f3b784048419f03c31cdc94d90e5f1e985945486c9182ae3a2c25dfcd3205",
+      "modified_against_base": false
+    },
+    {
+      "path": "media_kit_video/test/hdr_video_session_test.dart",
+      "git_blob": "8ef3c6c46d38c6503001fae582add9779c95148d",
+      "sha256": "798fb880ef0a3fa87ceb62acf8744431bc34c707d10643c4b77f98fe36a5821b",
+      "modified_against_base": false
+    }
+  ],
+  "production_assessment": [
+    {
+      "location": "media_kit_video/lib/src/video_controller/android_video_controller/real.dart:1075-1097,1100-1114",
+      "finding": "Registration remains idempotent contains/add and remove. Setter projects caller enabled OR listener collection nonempty. Repeated true calls acquire no synthetic owner; false while any registered Session survives stays true; false with no listener disables."
+    },
+    {
+      "location": "media_kit_video/lib/src/hdr/hdr_video_session.dart:279-289,1650-1672",
+      "finding": "Real Android Session registers before enable and unregisters before disable. Successful repeated dispose returns cached future and cannot decrement a count twice. Setter adds no mutable enabled cache, refcount, or ACK-dependent ownership."
+    },
+    {
+      "location": "media_kit_video/android/src/main/java/com/alexmercerind/media_kit_video/MediaKitVideoPlugin.java:218-221,268-305",
+      "finding": "Unchanged Java method applies registration synchronously before success reply; native registration/unregistration is idempotent. Flutter built-in MethodChannel documented FIFO plus this synchronous application makes delayed ACK distinct from a delayed false call. New false calls re-read current Dart listeners before dispatch."
+    },
+    {
+      "location": "media_kit_video/lib/src/video_controller/android_video_controller/real.dart:1108-1113",
+      "finding": "invokeMethod<void> matches setter Future<void> contract and unchanged native null success reply. Caller errors remain Future failures, so explicit retries are possible; existing Session best-effort catchError behavior is unchanged."
+    },
+    {
+      "location": "media_kit_video/lib/src/video_controller/android_video_controller/real.dart:1873,2088-2110; media_kit_video/lib/src/hdr/hdr_video_session.dart:1550-1590",
+      "finding": "First setter use initializes actual inbound MethodCall handler. Handler snapshots listeners and Session callback re-queries its target/source. Tests use this real path through forTesting provider, not an injected replacement callback dispatcher."
+    }
+  ],
+  "authored_test_assessment": [
+    {
+      "name": "disposing one Session preserves the surviving capability refresh",
+      "lines": "112-137",
+      "evidence": "Two real forTesting Sessions. Disposing A keeps nativeEnabled true; incoming Changed encoded through actual TestDefaultBinaryMessenger invokes surviving B capability provider and yields B HdrCapabilityChangedEvent. A provider remains 0, B becomes 1. Repeated A dispose sends no extra call, final B dispose sends false. Old forwarded-false implementation fails direct keepsSubscription/nativeEnabled assertion before event wait."
+    },
+    {
+      "name": "listener registration and repeated enables do not count extra owners",
+      "lines": "139-161",
+      "evidence": "One real surviving Session plus same manual listener registered twice; remove succeeds once only. Repeated explicit true adds no retained owner; false preserves real Session and final dispose closes."
+    },
+    {
+      "name": "a late disable cannot unsubscribe a replacement Session",
+      "lines": "163-177",
+      "evidence": "Previous last Session disposes, replacement registers. A deliberately late setter false is dispatched while replacement lives and projects true. Final replacement dispose still closes."
+    },
+    {
+      "name": "a delayed native acknowledgement does not retain a disposed owner",
+      "lines": "179-200",
+      "evidence": "First enable applies immediately at mock receipt while its ACK Future is held. Second Session lives through first dispose. Releasing ACK introduces no ghost ownership; final dispose closes."
+    },
+    {
+      "name": "native failures preserve current ownership and permit a retry",
+      "lines": "202-230",
+      "evidence": "Explicit false with real owner projects true, returns PlatformException before mock apply; retry preserves true. Last real Session.dispose then sends false but failure leaves native enabled under existing caught-error behavior. Explicit false fails again, then successful retry disables. Recorded booleans true,true,true,false,false,false."
+    }
+  ],
+  "test_harness_assessment": [
+    "Mock mutates nativeEnabled on receipt, before awaiting an optional held ACK. The injected synchronous exception occurs before native apply; this does not model impossible late mutation after later FIFO calls.",
+    "Helpers subscribe to broadcast nativeCalls before construction/disposal, so synchronous native receipt is not missed. First inbound-event test asserts subscription true before awaiting provider event, so baseline bug fails directly.",
+    "TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger is statically TestDefaultBinaryMessenger. Its handlePlatformMessage returns Future<ByteData?> and null callback is supported. Base BinaryMessenger Future<void> signature does not apply to inferred messenger. No compile-blocking use-of-void finding from this call.",
+    "All five are plain test(), not testWidgets(); FakeAsync microtask-pump warning for testWidgets handlers does not by itself imply these awaits hang.",
+    "Test imports existing public FakeBackend fixture, constructs real Session with isAndroid true and injected provider/backend, and does not create native Player or perform open/native codec work.",
+    "tearDown resets failure hook, releases held replies, unregisters manual listeners, disposes all Sessions, explicitly disables once, closes call stream, and removes outbound mock."
+  ],
+  "nonblocking_notes": [
+    {
+      "priority": "P3",
+      "location": "media_kit_video/lib/src/hdr/hdr_video_session.dart:282-285",
+      "text": "Unchanged constructor comment still says Phase 1 assumes one Session per process. Setter comment now correctly explains listener-owned lifetime. Updating this old comment would improve consistency, but Session is outside this slice and was not edited; this is not a functional blocker."
+    }
+  ],
+  "api_evidence": [
+    {
+      "url": "https://api.flutter.dev/flutter/flutter_test/TestDefaultBinaryMessengerBinding/defaultBinaryMessenger.html",
+      "fact": "Getter declared TestDefaultBinaryMessenger and casts inherited getter to that type. Official current API source."
+    },
+    {
+      "url": "https://api.flutter.dev/flutter/flutter_test/TestDefaultBinaryMessenger/handlePlatformMessage.html",
+      "fact": "Override returns Future<ByteData?>, supports null callback, returns inbound handler result. Documentation FakeAsync note specifically concerns testWidgets."
+    },
+    {
+      "url": "https://api.flutter.dev/flutter/services/MethodChannel-class.html",
+      "fact": "Built-in MethodChannel guarantees receive FIFO. invokeMethod<T> returns Future<T?>."
+    }
+  ],
+  "verification": {
+    "executed": [
+      "git diff --check (passed)",
+      "read-only source and exact diff inspection",
+      "Git blob and SHA256 manifest capture",
+      "official Flutter API/source signature inspection"
+    ],
+    "not_executed": [
+      "Dart analyzer",
+      "Dart formatter",
+      "Flutter targeted tests",
+      "Flutter full suite",
+      "native plugin build",
+      "real device display/HDR/lifecycle/performance validation"
+    ],
+    "local_runtime": "No local Dart/Flutter/compiler/native SDK available in established host environment. API and source review is not a compile or runtime pass."
+  },
+  "remaining_acceptance": [
+    "Root to run or verify hosted analyze plus five targeted new tests on exact pushed candidate SHA, then relevant existing Session/full package gates. Record run/attempt/artifact/source vector; old runs do not prove these dirty bytes.",
+    "Native/real-device event registration and actual display changes remain DEVICE acceptance. This patch does not prove HDR output, decoder identity, owner/carrier resource lifecycle, sustained performance, or native input acceptance.",
+    "Existing Session catchError treats subscription failure as best effort; failed last disable may leave native subscription until an explicit retry/engine teardown. Test documents retry possibility, not an automatic Session retry feature.",
+    "No cross-engine ownership protocol added; Dart listener lifetime and native plugin instance are reviewed within one engine/isolate scope.",
+    "DV004 user diagnostic/real-switch semantics remain unresolved, separate from this slice; no native recipes, SDK, Java, Session, planner, output slots or App policy edited."
+  ]
+}

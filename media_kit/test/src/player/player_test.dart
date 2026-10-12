@@ -2550,6 +2550,50 @@ void main() {
     },
     skip: !UniversalPlatform.isWeb,
   );
+  for (final sharedMedia in [false, true]) {
+    test(
+      'player-set-shuffle-equal-uris-${sharedMedia ? 'same' : 'distinct'}-instances',
+      () async {
+        final player = Player();
+        final playlistEvents = player.stream.playlist.toList();
+        final shuffleEvents = player.stream.shuffle.toList();
+        final media = Media(sources.platform.first);
+        final medias = [
+          for (int i = 0; i < 3; i++)
+            sharedMedia
+                ? media
+                : Media(sources.platform.first, extras: {'entry': i}),
+        ];
+        final playable = Playlist(medias, index: 2);
+
+        try {
+          await player.open(playable, play: false);
+          final opened = player.state.playlist;
+          for (int round = 0; round < 2; round++) {
+            for (final enabled in [true, true, false, false]) {
+              await player.setShuffle(enabled);
+              final current = player.state.playlist;
+              expect(player.state.shuffle, enabled);
+              expect(current.index, playable.index);
+              expect(current.medias.length, medias.length);
+              for (int i = 0; i < medias.length; i++) {
+                expect(current.medias[i], same(medias[i]));
+                expect(opened.medias[i], same(medias[i]));
+              }
+            }
+          }
+        } finally {
+          await player.dispose();
+        }
+
+        // Equal playlist values stay distinct-filtered; mode changes still
+        // arrive, and a repeated request does not emit another mode change.
+        expect(await playlistEvents, [playable]);
+        expect(await shuffleEvents, [false, true, false, true, false]);
+      },
+      skip: !UniversalPlatform.isWeb,
+    );
+  }
   test(
     'player-buffering-file',
     () async {
