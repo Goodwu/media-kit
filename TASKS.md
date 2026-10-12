@@ -6,13 +6,14 @@
 
 ## MK-ROUTING-20261011（CORE继任）
 
-- 状态：进行中；唯一公共主线 routing/MK-ROUTING-20261011，CORE 负责集成，DEVICE 保持 native 构建/实机认领，所有主 PR 未合并。
-- 已实现 query/DASH/unknownDV/F01/R01/有效配置闭环，34 info 已清零；产品 experimental 默认 false 保持，true 主验证+false 回归及 LG YUV8/owner 门不变。
-- 已归并 PR5 公共矩阵至库38ffb729，27 mock/fixture 回归与 R4 审查通过；DV0011095a43 修复及八 APK/HDR/持续性能仍待回交，不能整项结案。
-- 当前 Appa05dfe1be+库38ffb729 独立 source CI API success，归档正在独立核验；上一个完整核验组合6d349+3817证据保留，不重标为新SHA。
-- macOS 当前源码前置三文件独立 Critical PASS_WITH_SCOPE/56 contracts，已App36053e801提交回读，待 hosted；iOS/Linux/Windows 已真实源码前置通过但当前 native 输入缺失，Android批准ledger空。所有 native/device 验收仍开放。
-- 本轮补入库 CI 27 项 synthetic/mocked matrix 回归，本机27通过，实际 hosted 待验；不代表App/native/APK执行。
-- 精确测试向量、失败历史、恢复材料与剩余范围见唯一 context `archives/conversations/media-kit-routing-20261011.md`；旧 TASKS 快照已存该 context History。
+- 状态：进行中；唯一主线 `routing/MK-ROUTING-20261011`。CORE 唯一集成，DEVICE 在原 DV001 PR 维护 native recipe/build/device acceptance。主 PR 不自动合并/关闭/发布。
+- 当前 heads：App `a3b577f3794634b497c6f82369bcc98d39d91fa2`；media-kit `e269d9669becb5812663200e7521901e8254c8bd`；FFmpeg `9aba43cf`；DV001 `1095a43acb4d0973b8bca59c5da4e300657bdb29`；PR #5 `dc41787082752f234fed85db7fb7be3bd855cc45`。
+- App source run `38255581451` 对 `a3b577f3 + e269d966` 成功：四平台 Flutter 各268，analyze无finding，Python504 pass/2 skip，bundle/freshness通过。证据 `docs/plans/core-source-ci-a3b577-e269d-checkpoint-20261012.json`，SHA256 `156cd314f670a3d958cea70beb3818a4ea3b6dba0d3e9d944e20b8d1858705da`。旧34 info已过时。App Build `38255582037` 在 native input gates 失败关闭，无验收APK/native产物。
+- media-kit source `38255531539`、query `38255531454`、Darwin `38255531401` 成功；OHOS `38255531417` 仅unsigned HAP hosted build。general run `38255531407` 上次核对仍运行。
+- PR #5 部分归并：matrix已集成（27 synthetic/mocked tests）；DV003/DV004 critical review已带来源哈希归档。PR5新 `dc417870` 两脚本仅来源登记，不导入/不执行；`66aa28e` 上游冲突解决移除了三份历史来源banner，当前档案保留并记录。DV004为REQUEST_CHANGES，两项用户决定待确认，不实现。
+- DV001仍`1095a43`且无新DEVICE回交；符号读取失败、两个Vulkan符号、失败传播、clean staging、精确三库成员/链接来源仍待DEVICE原PR修复，CORE复审。PR5与DV001完整native、产物、设备归并仍未完成。
+- 已实现 query/DASH/unknownDV/F01/R01/有效auto/prefer/require闭环。PR #3 DV003 Critical REQUEST_CHANGES；不另开DEVICE线。剩余：fresh native输入/来源、ABI/签名、普通Session/YUV carrier/owner、最新P5/P8.4 true/false、实体HDR/持续性能。experimental默认false，保持LG YUV8/FULL/range1及owner/ACK/lease。
+- 唯一详细上下文：`archives/conversations/media-kit-routing-20261011.md`。
 
 ## 接手快照（2026-10-10 更新；换 agent 从这里开始）
 
