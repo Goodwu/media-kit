@@ -1154,6 +1154,9 @@ class WebPlayer extends PlatformPlayer {
 
       if (shuffle && _shuffle.isEmpty) {
         _shuffle.addAll(_playlist);
+        // open / add / remove / move may have published this list. Keep those
+        // Playlist snapshots unchanged when updating the internal queue.
+        _playlist = [..._playlist];
         if (_playlist.length > 1) {
           while (ListEquality().equals(_shuffle, _playlist)) {
             _playlist.shuffle();
@@ -1175,8 +1178,7 @@ class WebPlayer extends PlatformPlayer {
           shuffleController.add(shuffle);
         }
       } else if (!shuffle && _shuffle.isNotEmpty) {
-        _playlist.clear();
-        _playlist.addAll(_shuffle);
+        _playlist = [..._shuffle];
         _index = _playlist.indexOf(current);
         _shuffle.clear();
 
