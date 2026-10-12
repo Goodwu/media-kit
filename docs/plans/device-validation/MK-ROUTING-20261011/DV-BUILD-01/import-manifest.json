@@ -30,8 +30,20 @@
     }
   ],
   "excludedScripts": [
-    "assemble-jar-arm64.sh",
-    "matrix-device-build.sh"
+    {
+      "path": "assemble-jar-arm64.sh",
+      "sourceCommit": "dc41787082752f234fed85db7fb7be3bd855cc45",
+      "sourceGitBlob": "5363de29053303d3b3672aab81b565d6341f4019",
+      "sourceSha256": "9df01982361945da565832d6729d327ce71cb268ffadccd0004e1b4897bc455c",
+      "reason": "device-only duplicate recipe; failed nm read can become no-import success; checks only one Vulkan target; DV001 blockers remain open"
+    },
+    {
+      "path": "matrix-device-build.sh",
+      "sourceCommit": "dc41787082752f234fed85db7fb7be3bd855cc45",
+      "sourceGitBlob": "33abc7195e898d859177bfbb1baed9062a443c55",
+      "sourceSha256": "bf54737f08351c71877e2257beb8c6031e7a7aed754b26ceb64ddec0222b498b",
+      "reason": "hard-coded local/device recipe duplicates the public matrix tool and deletes build intermediates; not imported or executed"
+    }
   ],
   "importHistory": [
     {
@@ -45,6 +57,48 @@
     {
       "sourceCommit": "644908c93f09083f21720699227eb4e7a14d9c7a",
       "scope": "exact-DV003-specialist-review-note-import; historical-design-only; no-implementation-acceptance"
+    },
+    {
+      "sourceCommit": "dc41787082752f234fed85db7fb7be3bd855cc45",
+      "scope": "exact-DV004-critical-review-note-import; preserve user-decision boundary; review REQUEST_CHANGES; exclude both native/device scripts with recorded source hashes"
+    }
+  ],
+  "latestSourceHead": "dc41787082752f234fed85db7fb7be3bd855cc45",
+  "latestSourceMerge": "66aa28e2bd2736d22b9adb148bfa01be3bcc5bb9",
+  "sourceHeadReview": {
+    "path": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/dv004-critical-review.md",
+    "sourceCommit": "dc41787082752f234fed85db7fb7be3bd855cc45",
+    "sourceGitBlob": "3b370535ff15b948669f62e7d231ab06f2e0d665",
+    "sourceSha256": "9f52d93ebb6c55ca21ba3a616f9cd8f764dc928942da179a7e29c142a72c6359",
+    "importedSha256": "9f52d93ebb6c55ca21ba3a616f9cd8f764dc928942da179a7e29c142a72c6359",
+    "scope": "critical-review-evidence-only; REQUEST_CHANGES; two user decisions pending; no implementation authorization"
+  },
+  "upstreamChanges": [
+    {
+      "sourceMergeCommit": "66aa28e2bd2736d22b9adb148bfa01be3bcc5bb9",
+      "sourceMergeParents": [
+        "644908c93f09083f21720699227eb4e7a14d9c7a",
+        "e269d9669becb5812663200e7521901e8254c8bd"
+      ],
+      "comparisonParent": "e269d9669becb5812663200e7521901e8254c8bd",
+      "mergeResolution": "removed the two-line historical provenance banner from each of these three files compared with the integrated branch; this branch retains the banners",
+      "files": [
+        {
+          "path": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/critical-review-define-promotion.md",
+          "sourceGitBlob": "d942b28c056f8bfe228ab7c36da7eec1c5388fa4",
+          "removedLines": 2
+        },
+        {
+          "path": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/device-results.md",
+          "sourceGitBlob": "6cb37491477a81e7a55860e095a4c6f4a1d53d87",
+          "removedLines": 2
+        },
+        {
+          "path": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/input-vector.md",
+          "sourceGitBlob": "7c50515fda24109e92e4e8d308e1c3faa59ae0e3",
+          "removedLines": 2
+        }
+      ]
     }
   ]
 }

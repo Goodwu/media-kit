@@ -2,21 +2,19 @@
 
 ## Current State
 
-唯一公共集成分支 `routing/MK-ROUTING-20261011`；CORE 是唯一公共代码和审查集成者，DEVICE 继续原 DV001 native 构建与实机认领。当前分支回读：App `36053e801b0803268b351aab80cdec20b6f46ac2`，media-kit `4824db1e92d947d8528e986dc1665c57b796ff75`，FFmpeg `9aba43cf`。DV001 PR #1 head `1095a43acb4d0973b8bca59c5da4e300657bdb29`；PR #5 head `644908c93f09083f21720699227eb4e7a14d9c7a`。主 PR 均未合并、关闭或发布。
+唯一公共集成分支 `routing/MK-ROUTING-20261011`；CORE 是唯一公共代码和审查集成者，DEVICE 继续原 DV001 native recipe/build/device acceptance。最新回读 heads：App `a3b577f3794634b497c6f82369bcc98d39d91fa2`，media-kit `e269d9669becb5812663200e7521901e8254c8bd`，FFmpeg `9aba43cf`；DV001 PR #1 `1095a43acb4d0973b8bca59c5da4e300657bdb29`；PR #5 `dc41787082752f234fed85db7fb7be3bd855cc45`。主 PR 均未合并、关闭或发布。
 
-query/DASH/unknown DV/F01/R01、auto/prefer/require 有效配置闭环、FFmpeg e8df200c 和失败感知 SDR 兜底等已完成项继续保留。App 原 34 条 info 已不是当前分析结果：App run 38253419649 的四平台 analyze 均无问题。experimental 产品默认 false，true 主验证并测 false；LG YUV8/FULL/range1、精确设备门、owner/ACK/lease 保持，10-bit 与 lease 融合不重开。
+query/DASH/unknown DV/F01/R01、auto/prefer/require 有效配置闭环、FFmpeg e8df200c、失败感知 SDR 兜底等已实现项保持完成。旧“34 info”不再是待修债务：App source run 38255581451 四平台 analyze 均无 finding。experimental 产品默认 false，true 主验证、false 回归；LG YUV8/FULL/range1、精确设备门、owner/ACK/lease 保持，不重开10-bit与lease融合。
 
-App run 38253419649 捕获 App `36053e801` + library `4824db1e`。四平台 bootstrap/analyze/Flutter tests/Dart bundle 均成功，各平台 268 tests；五个 artifact ZIP SHA 匹配 API digest，source.txt、57 步 fresh receipts、before/after/final vector 与十个 package roots 一致。整体 run 失败仅因 Python 中旧 workflow 断言仍要求 `if: success()` 字面值；实际值为带 routing guard 的 success 条件。Python 505 项为 502 pass、1 fail、2 skip。断言已修复，本机全量 Python 测试 506/506 通过，待新 hosted run。checkpoint 已存 `docs/plans/core-source-ci-36053-4824-checkpoint-20261012.json`，SHA256 `84019dbd6bcdb404fe8648483721c43760cf0a49e18993ac6f4d215d894be568`；kernel bytes 未从 artifact 独立重哈希。
+App run 38255581451 attempt 1 对准确向量 App `a3b577f3` + media-kit `e269d966` 为 SUCCESS：四平台 Flutter 各 268 项，analyze 无问题，Python 504 pass/2 skip，Dart bundle/source freshness 通过；artifact ZIP/API digest、source.txt、57步 fresh receipts、前后 source vector 和十个 package roots 已核验。证据 `docs/plans/core-source-ci-a3b577-e269d-checkpoint-20261012.json` SHA256 `156cd314f670a3d958cea70beb3818a4ea3b6dba0d3e9d944e20b8d1858705da`。App Build run 38255582037 失败关闭于 native input acquisition/selection gates，没有可验收 native/APK 产物。
 
-PR #5 的公共 matrix 功能已集成到本分支；media-kit source CI `38253137789` 在 `4824db1e` 上通过，27 个测试明确属于 synthetic/mocked 回归。PR #5 最新 `644908c` 的 DV003 历史审查记录已按原始字节写入 DV-BUILD-01 档案，manifest 绑定 source commit、Git blob 和 SHA。shell recipe 仍排除，留 DEVICE 在原 DV001 PR 单写。PR #5 与 DV001 的完整 native 源码、产物和证据整合尚未验收。
+media-kit source run 38255531539、query 38255531454、Darwin 38255531401 成功；OHOS run 38255531417 为 unsigned HAP hosted build，不代表设备验收。general run 38255531407 最近一次核对仍运行，继任者需读取终态。
 
-DV001 当前仍是 `1095a43`，最新评论没有 DEVICE 修复回交。review5483753705/comment6110373174 要求：ELF 符号读取失败不能算无导入；两个 Vulkan 目标分别检测；构建失败传播；干净 staging；准确 JAR 成员、最终哈希及真实链接输入来源可复核。CORE 不接管配方或并行写一份，等待 DEVICE 在原 PR 修复后复审。
+PR #5 已部分归并：公共 matrix 功能已进入库，27项是 synthetic/mocked 回归。DV003及新 DV004 critical review 作为历史审查按 source commit/blob/SHA 记录；DV004为 REQUEST_CHANGES，两项决定待用户方向，不据归档启动实现。最新 PR5 `dc417870` 的 `assemble-jar-arm64.sh` 与 `matrix-device-build.sh` 源码哈希已记录但不导入/执行：前者仍有 nm 读取失败误放行且只检查一个 Vulkan 符号；后者为硬编码重复配方并删除 build intermediates。PR5 merge `66aa28e` 冲突解决移除三份先前导入文档的 provenance banner；本分支保留，并在 `DV-BUILD-01/import-manifest.json` 记录差异。PR #5 与 DV001 的完整 native/产物/设备归并未完成。
 
-独立 Critical V2 对 App PR #3 DV003 为 REQUEST_CHANGES：HTTP Range 响应硬上界/超时、按 revision 隔离缓存并处理旧请求竞态、嗅探事实传入实际 Session hint、DOVI 与轨道绑定及冲突处理四处 P1。该基线 PR 不原样归并，不新增 DEVICE 工作线；报告与证据归档。
+DV001 PR #1 仍在 `1095a43`，无 DEVICE 新修复回交。review5483753705、comment6110373174、6111479264、6111836233、6112842188 中的读取器失败闭合、两个 Vulkan 符号分别覆盖、失败传播、clean staging、精确三库成员与真实链接来源/patch manifest 要求仍未关闭。DEVICE 在原 PR 单写；CORE 不接管或另写配方。
 
-本轮切片包括 App 的两条 Python workflow contract 修正及 TASKS/context，media-kit 的 PR #5 导入记录及 context，DV003 审查和 App/library 同一份 source CI checkpoint。按先库后 App 的顺序 push；App hosted run 捕获两仓最终 heads 后冻结输入，不在运行中再改分支。完成新 run 的 artifact/log/source.txt 核验和中央 PR #4 更新后，交接唯一集成职责给继任 CORE 并暂停。
-
-native APK、设备 HDR、普通 Session、owner/carrier、生命周期和持续性能仍待真实验收；宿主测试、bundle、native build 与实机观察分别记录，不能互相替代。
+PR #3 DV003 仍为 Critical REQUEST_CHANGES，不原样归并，也不开第二 DEVICE 线。继续验收需最新 native producer 输入、APK/ABI/签名来源、普通 Session 和实际 YUV carrier/owner、P5/P8.4 true/false 与可见 HDR/持续性能。宿主 CI、bundle、native build 和设备显示分别报告，不互相替代。
 
 ## History
 
