@@ -1,7 +1,7 @@
 {
   "sourcePr": "https://github.com/Goodwu/media-kit/pull/5",
   "sourceCommit": "5b27961137a3b03e687dddbeb05a0320fcf6c60c",
-  "scope": "historical-markdown-only",
+  "scope": "historical-markdown-and-exact-non-executable-source-archive; native-recipe-acceptance-open",
   "files": [
     {
       "path": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/input-vector.md",
@@ -35,14 +35,18 @@
       "sourceCommit": "dc41787082752f234fed85db7fb7be3bd855cc45",
       "sourceGitBlob": "5363de29053303d3b3672aab81b565d6341f4019",
       "sourceSha256": "9df01982361945da565832d6729d327ce71cb268ffadccd0004e1b4897bc455c",
-      "reason": "device-only duplicate recipe; failed nm read can become no-import success; checks only one Vulkan target; DV001 blockers remain open"
+      "reason": "device-only duplicate recipe; failed nm read can become no-import success; checks only one Vulkan target; DV001 blockers remain open",
+      "archivePath": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/source-snapshot/assemble-jar-arm64.sh.txt",
+      "exclusionScope": "excluded-from-executable-recipes; exact original source now archived as .txt"
     },
     {
       "path": "matrix-device-build.sh",
       "sourceCommit": "dc41787082752f234fed85db7fb7be3bd855cc45",
       "sourceGitBlob": "33abc7195e898d859177bfbb1baed9062a443c55",
       "sourceSha256": "bf54737f08351c71877e2257beb8c6031e7a7aed754b26ceb64ddec0222b498b",
-      "reason": "hard-coded local/device recipe duplicates the public matrix tool and deletes build intermediates; not imported or executed"
+      "reason": "hard-coded local/device recipe duplicates the public matrix tool and deletes build intermediates; not executable-imported or executed",
+      "archivePath": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/source-snapshot/matrix-device-build.sh.txt",
+      "exclusionScope": "excluded-from-executable-recipes; exact original source now archived as .txt"
     }
   ],
   "importHistory": [
@@ -61,6 +65,28 @@
     {
       "sourceCommit": "dc41787082752f234fed85db7fb7be3bd855cc45",
       "scope": "exact-DV004-critical-review-note-import; preserve user-decision boundary; review REQUEST_CHANGES; exclude both native/device scripts with recorded source hashes"
+    },
+    {
+      "sourceCommit": "dc41787082752f234fed85db7fb7be3bd855cc45",
+      "scope": "USER_REQUESTED_GIT_ANCESTRY_AND_SOURCE_ARCHIVE_INTEGRATION",
+      "claim": "https://github.com/Goodwu/media-kit/pull/4#issuecomment-6128883314",
+      "resolution": "https://github.com/Goodwu/media-kit/pull/4#issuecomment-6128920010",
+      "previousExcludedScripts": [
+        {
+          "path": "assemble-jar-arm64.sh",
+          "sourceCommit": "dc41787082752f234fed85db7fb7be3bd855cc45",
+          "sourceGitBlob": "5363de29053303d3b3672aab81b565d6341f4019",
+          "sourceSha256": "9df01982361945da565832d6729d327ce71cb268ffadccd0004e1b4897bc455c",
+          "reason": "device-only duplicate recipe; failed nm read can become no-import success; checks only one Vulkan target; DV001 blockers remain open"
+        },
+        {
+          "path": "matrix-device-build.sh",
+          "sourceCommit": "dc41787082752f234fed85db7fb7be3bd855cc45",
+          "sourceGitBlob": "33abc7195e898d859177bfbb1baed9062a443c55",
+          "sourceSha256": "bf54737f08351c71877e2257beb8c6031e7a7aed754b26ceb64ddec0222b498b",
+          "reason": "hard-coded local/device recipe duplicates the public matrix tool and deletes build intermediates; not imported or executed"
+        }
+      ]
     }
   ],
   "latestSourceHead": "dc41787082752f234fed85db7fb7be3bd855cc45",
@@ -100,5 +126,39 @@
         }
       ]
     }
-  ]
+  ],
+  "currentIntegration": {
+    "sourceCommit": "dc41787082752f234fed85db7fb7be3bd855cc45",
+    "publicParent": "ebb00b8a0dedec42a68b84a4ec6e7dffb6c17f02",
+    "gitAncestryIncluded": true,
+    "allThreeHistoricalBannersRetained": true,
+    "executableRecipeImported": false,
+    "scriptsExecuted": false,
+    "sourceArchives": [
+      {
+        "repository": "Goodwu/media-kit",
+        "sourceCommit": "dc41787082752f234fed85db7fb7be3bd855cc45",
+        "sourcePath": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/assemble-jar-arm64.sh",
+        "archivePath": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/source-snapshot/assemble-jar-arm64.sh.txt",
+        "archiveMode": "100644",
+        "exactBytes": true,
+        "bytes": 2195,
+        "sha256": "9df01982361945da565832d6729d327ce71cb268ffadccd0004e1b4897bc455c",
+        "gitBlob": "5363de29053303d3b3672aab81b565d6341f4019"
+      },
+      {
+        "repository": "Goodwu/media-kit",
+        "sourceCommit": "dc41787082752f234fed85db7fb7be3bd855cc45",
+        "sourcePath": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/matrix-device-build.sh",
+        "archivePath": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/source-snapshot/matrix-device-build.sh.txt",
+        "archiveMode": "100644",
+        "exactBytes": true,
+        "bytes": 2578,
+        "sha256": "bf54737f08351c71877e2257beb8c6031e7a7aed754b26ceb64ddec0222b498b",
+        "gitBlob": "33abc7195e898d859177bfbb1baed9062a443c55"
+      }
+    ],
+    "approvedNativeInputs": 0,
+    "mandatoryRemaining": "DV001 canonical recipe corrections, fresh linked inputs/JAR/APK provenance, device HDR and sustained performance"
+  }
 }

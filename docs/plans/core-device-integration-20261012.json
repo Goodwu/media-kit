@@ -1,0 +1,371 @@
+{
+  "schema": 1,
+  "taskId": "MK-ROUTING-20261011",
+  "phase": "CORE-DEVICE-INTEGRATION-20261012",
+  "status": "CODE_INTEGRATED_WITH_EXPLICIT_RESOLUTIONS_ACCEPTANCE_OPEN",
+  "userInstruction": "先把DEVICE的修改合并进来，ci等其它工作暂停。",
+  "claims": [
+    "https://github.com/Goodwu/media-kit/pull/4#issuecomment-6128883314",
+    "https://github.com/Goodwu/media-kit/pull/4#issuecomment-6128920010"
+  ],
+  "inputs": {
+    "mediaKitPublicParent": "ebb00b8a0dedec42a68b84a4ec6e7dffb6c17f02",
+    "appPublicParent": "ed0dc2bfc7f51ac3dc14a7f676451db27ecea6a7",
+    "pr5": "dc41787082752f234fed85db7fb7be3bd855cc45",
+    "pr6": "9a2c5768dd10e71975b7c3e76bb7125460a43e5b",
+    "appPr3": "9895e7dc040cdc06a33cceba4d4379eba3f596b5",
+    "nativeDV001": "1095a43acb4d0973b8bca59c5da4e300657bdb29",
+    "ffmpeg": "9aba43cfbee182ade060cdccbe15340a0fbe3e83"
+  },
+  "publication": {
+    "mediaKitParents": [
+      "ebb00b8a0dedec42a68b84a4ec6e7dffb6c17f02",
+      "9a2c5768dd10e71975b7c3e76bb7125460a43e5b",
+      "dc41787082752f234fed85db7fb7be3bd855cc45"
+    ],
+    "appParents": [
+      "ed0dc2bfc7f51ac3dc14a7f676451db27ecea6a7",
+      "9895e7dc040cdc06a33cceba4d4379eba3f596b5"
+    ],
+    "target": "routing/MK-ROUTING-20261011",
+    "exactResultCommitIds": "recorded in the central PR4 publication receipt; this file belongs to the resulting commit",
+    "commitMarker": "[skip ci]",
+    "forcePush": false,
+    "formalBaseBranchesMerged": false
+  },
+  "mergePreflight": [
+    {
+      "repository": "Goodwu/media-kit",
+      "source": "9a2c5768dd10e71975b7c3e76bb7125460a43e5b",
+      "mergeBase": "e269d9669becb5812663200e7521901e8254c8bd",
+      "exitCode": 0,
+      "unresolvedTextConflicts": 0,
+      "automaticTree": "a2364d371f1c50591e2f93202d541a0e1d55524c"
+    },
+    {
+      "repository": "Goodwu/media-kit",
+      "source": "dc41787082752f234fed85db7fb7be3bd855cc45",
+      "mergeBase": "e269d9669becb5812663200e7521901e8254c8bd",
+      "exitCode": 0,
+      "unresolvedTextConflicts": 0,
+      "automaticTree": "2c8fff89f7d7716ce1b49c3ffff6e48486bf2a01"
+    },
+    {
+      "repository": "Goodwu/PiliPlusX",
+      "source": "9895e7dc040cdc06a33cceba4d4379eba3f596b5",
+      "mergeBase": "1970d440b5b9d9ffc001866064581e4005b26b30",
+      "exitCode": 0,
+      "unresolvedTextConflicts": 0,
+      "automaticTree": "fbd05f0a336c77057fbc96fb78e1a87bc8f4fde7"
+    }
+  ],
+  "app": {
+    "status": "CODE_INTEGRATED_KNOWN_ISSUES_OPEN",
+    "exactSourceFiles": [
+      {
+        "path": "android/app/build.gradle.kts",
+        "sourceCommit": "9895e7dc040cdc06a33cceba4d4379eba3f596b5",
+        "disposition": "EXACT_DEVICE_CODE_IMPORTED_KNOWN_ISSUES_OPEN",
+        "bytes": 3057,
+        "sha256": "e7ca1476c52ac272a305644f19150a42a8fcf6f8232efb54c0a96c9947811eef",
+        "gitBlob": "64aa199df9e5fb24fc37a540ca67fb7c6258597e"
+      },
+      {
+        "path": "android/app/src/main/kotlin/com/example/piliplusx/MainActivity.kt",
+        "sourceCommit": "9895e7dc040cdc06a33cceba4d4379eba3f596b5",
+        "disposition": "EXACT_DEVICE_CODE_IMPORTED_KNOWN_ISSUES_OPEN",
+        "bytes": 4915,
+        "sha256": "1257fcad2d392112ad8ab12bbbc1391cfc9b063869caa6f656095870363c2179",
+        "gitBlob": "d967a664d2690ce0bc313569ea60755fcdc3845d"
+      },
+      {
+        "path": "android/app/src/main/kotlin/com/example/piliplusx/ScreenBrightnessHandler.kt",
+        "sourceCommit": "9895e7dc040cdc06a33cceba4d4379eba3f596b5",
+        "disposition": "EXACT_DEVICE_CODE_IMPORTED_KNOWN_ISSUES_OPEN",
+        "bytes": 8294,
+        "sha256": "ac1ffcc4e451fe71cfa12ba25ff1a311dcc06fe3f8effaac79fda389722a75bd",
+        "gitBlob": "e1be883ee1a0fa55826415cdb25e82beac2eac74"
+      },
+      {
+        "path": "lib/pages/video/controller.dart",
+        "sourceCommit": "9895e7dc040cdc06a33cceba4d4379eba3f596b5",
+        "disposition": "EXACT_DEVICE_CODE_IMPORTED_KNOWN_ISSUES_OPEN",
+        "bytes": 74764,
+        "sha256": "9978268db891b601dd05a147506e6542bd2c4dd4a9d3adb7fdf79c069e13c142",
+        "gitBlob": "baf63f24eae937c263f782bd1a6b90f6ca881868"
+      },
+      {
+        "path": "lib/plugin/pl_player/controller.dart",
+        "sourceCommit": "9895e7dc040cdc06a33cceba4d4379eba3f596b5",
+        "disposition": "EXACT_DEVICE_CODE_IMPORTED_KNOWN_ISSUES_OPEN",
+        "bytes": 143250,
+        "sha256": "84b1005646bf9954120fdc24e1f986f917ce388da8b923ec30e47d40f3e30e0f",
+        "gitBlob": "4fb76fec28957af8a2e623e0c9d2e800f70d4285"
+      },
+      {
+        "path": "lib/plugin/pl_player/dovi_sniff.dart",
+        "sourceCommit": "9895e7dc040cdc06a33cceba4d4379eba3f596b5",
+        "disposition": "EXACT_DEVICE_CODE_IMPORTED_KNOWN_ISSUES_OPEN",
+        "bytes": 7760,
+        "sha256": "aba14c40e645f486f55f41b5cf91db9a745ef6f3e32adc7f833d2f01d7637879",
+        "gitBlob": "1e14cfab7a73ed5d8ce170befc3b3b96bf2abb66"
+      },
+      {
+        "path": "lib/plugin/pl_player/hdr_output.dart",
+        "sourceCommit": "9895e7dc040cdc06a33cceba4d4379eba3f596b5",
+        "disposition": "EXACT_DEVICE_CODE_IMPORTED_KNOWN_ISSUES_OPEN",
+        "bytes": 9591,
+        "sha256": "b71488e3fa7f43707354edf4430bd2a88fe9fd2c8a762d992a93e130f40e21ef",
+        "gitBlob": "e308350cb007fa1cf592dfbfea7fc9659a67bebb"
+      },
+      {
+        "path": "lib/plugin/pl_player/source_selection.dart",
+        "sourceCommit": "9895e7dc040cdc06a33cceba4d4379eba3f596b5",
+        "disposition": "EXACT_DEVICE_CODE_IMPORTED_KNOWN_ISSUES_OPEN",
+        "bytes": 5973,
+        "sha256": "a41788bce176730566b381f57280cb1eca1824daf8b5f3129ca7e82900c1a517",
+        "gitBlob": "9106a9b2c9ca54093f5e875285bd32b28a19398f"
+      },
+      {
+        "path": "test/plugin/pl_player/dovi_sniff_test.dart",
+        "sourceCommit": "9895e7dc040cdc06a33cceba4d4379eba3f596b5",
+        "disposition": "EXACT_DEVICE_CODE_IMPORTED_KNOWN_ISSUES_OPEN",
+        "bytes": 14618,
+        "sha256": "f20a9e6470401bff614333a8f6ccb826f8414d45a33617d36ec9306d635ccb31",
+        "gitBlob": "8a65ab400693bdd72feb391fab0d37277ee0d852"
+      }
+    ],
+    "historicalDocument": {
+      "path": "archives/conversations/dv003-dolby-tier-gray-20261012.md",
+      "original": {
+        "bytes": 5450,
+        "sha256": "c6eb58a4f19bcb300802dd267208de59e4a54b66735a272acb6b70ad2b27772d",
+        "gitBlob": "0dc67f9399e09d396b9a7501030e7260ad0722ff"
+      },
+      "transformations": [
+        "prepend provenance/current-ledger banner",
+        "rename original Current State heading as historical"
+      ]
+    },
+    "taskLedger": "public current facts reconciled; stale DEVICE acceptance/only-LG-remains claims not adopted",
+    "debugApplicationIdChange": "DEVICE removes .debug suffix; retained as requested source integration; no App installed",
+    "deviceGestureReport": {
+      "source": "https://github.com/Goodwu/PiliPlusX/pull/3#issuecomment-6128050177",
+      "scope": "DEVICE reports user LYA gesture brightness linkage and automatic-to-manual switch; no independent reset/event/lifecycle acceptance"
+    }
+  },
+  "pr5": {
+    "status": "ANCESTRY_AND_SOURCE_ARCHIVE_INTEGRATED_RECIPE_EXCLUDED",
+    "scriptSources": [
+      {
+        "repository": "Goodwu/media-kit",
+        "sourceCommit": "dc41787082752f234fed85db7fb7be3bd855cc45",
+        "sourcePath": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/assemble-jar-arm64.sh",
+        "archivePath": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/source-snapshot/assemble-jar-arm64.sh.txt",
+        "archiveMode": "100644",
+        "exactBytes": true,
+        "bytes": 2195,
+        "sha256": "9df01982361945da565832d6729d327ce71cb268ffadccd0004e1b4897bc455c",
+        "gitBlob": "5363de29053303d3b3672aab81b565d6341f4019"
+      },
+      {
+        "repository": "Goodwu/media-kit",
+        "sourceCommit": "dc41787082752f234fed85db7fb7be3bd855cc45",
+        "sourcePath": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/matrix-device-build.sh",
+        "archivePath": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/source-snapshot/matrix-device-build.sh.txt",
+        "archiveMode": "100644",
+        "exactBytes": true,
+        "bytes": 2578,
+        "sha256": "bf54737f08351c71877e2257beb8c6031e7a7aed754b26ceb64ddec0222b498b",
+        "gitBlob": "33abc7195e898d859177bfbb1baed9062a443c55"
+      }
+    ],
+    "historicalBannersRetained": [
+      "critical-review-define-promotion.md",
+      "device-results.md",
+      "input-vector.md"
+    ],
+    "existingDv004ReviewRetainedExact": true,
+    "executableRecipesAdded": [],
+    "scriptsExecuted": false
+  },
+  "pr6": {
+    "status": "ANCESTRY_AND_COMPATIBLE_TESTS_INTEGRATED_PRODUCTION_POLICY_DEFERRED",
+    "sourceArchives": [
+      {
+        "repository": "Goodwu/media-kit",
+        "sourceCommit": "9a2c5768dd10e71975b7c3e76bb7125460a43e5b",
+        "sourcePath": "media_kit_video/lib/src/hdr/hdr_decoder_review.dart",
+        "archivePath": "docs/plans/device-validation/MK-ROUTING-20261011/DV004/source-snapshot/hdr_decoder_review.dart.txt",
+        "archiveMode": "100644",
+        "exactBytes": true,
+        "bytes": 14380,
+        "sha256": "d7584bd4fee91f9ff6bb1ea9dbbc79b468e9e0d1152dcc6a335afe51169dca39",
+        "gitBlob": "ec2850fa646cbe96bef112c64f9eeb3ace9e00f9"
+      },
+      {
+        "repository": "Goodwu/media-kit",
+        "sourceCommit": "9a2c5768dd10e71975b7c3e76bb7125460a43e5b",
+        "sourcePath": "media_kit_video/test/hdr_decoder_review_test.dart",
+        "archivePath": "docs/plans/device-validation/MK-ROUTING-20261011/DV004/source-snapshot/hdr_decoder_review_test.dart.txt",
+        "archiveMode": "100644",
+        "exactBytes": true,
+        "bytes": 13647,
+        "sha256": "786e34833d97180695c535e36f77b6f19a8c6811ae7da036ee1b28c3b531158c",
+        "gitBlob": "70e3c98a515fc107ea68d3ac3315b6dcd11ff067"
+      }
+    ],
+    "productionFile": {
+      "path": "media_kit_video/lib/src/hdr/hdr_decoder_review.dart",
+      "disposition": "KEEP_PUBLIC_EXACT_BYTES",
+      "bytes": 13108,
+      "sha256": "495b5bd10572c127948686b6c54ab874667f46e0df2cbb1978215fc7ab8de01b",
+      "gitBlob": "80979951400981a5be20d5f56e04031088cb4908"
+    },
+    "tests": {
+      "path": "media_kit_video/test/hdr_decoder_review_test.dart",
+      "existingCrossRoundAssertionRetained": true,
+      "compatiblePlanNegativesImported": 2,
+      "runtimeExecuted": false,
+      "adaptation": "MIME case is complete first round; remove unreachable callback; leave existing Sample helper unchanged"
+    },
+    "deferred": [
+      "first-complete-only authorization policy",
+      "logical-to-actual name publication positive case and helper"
+    ],
+    "followupRule": "Future DEVICE increments must recheck dispositions, not infer approval from merged ancestry."
+  },
+  "native": {
+    "repository": "Goodwu/libmpv-android-video-build-dv-experiment",
+    "publicBranch": "routing/MK-ROUTING-20261011",
+    "head": "1095a43acb4d0973b8bca59c5da4e300657bdb29",
+    "tree": "c85648fc202e6c0621513f376ba05f26a12c3eaa",
+    "status": "PUBLIC_SOURCE_REF_CREATED_AND_READ_BACK",
+    "sourceEdits": 0,
+    "newPullRequests": 0,
+    "deviceHeadUnchanged": "1095a43acb4d0973b8bca59c5da4e300657bdb29",
+    "featureHeadUnchanged": "72c574d14bf207c81f9a7504d5cf1bfb05175b6d",
+    "mainHeadUnchanged": "dd2bfba8209bcd22e2d4c79f125b40e619e637ed",
+    "originalPr1StillOpen": true,
+    "buildsExecuted": 0,
+    "approvedInputs": 0
+  },
+  "openIssues": [
+    {
+      "id": "DV003_CACHE_IDENTITY",
+      "status": "OPEN_AFTER_CODE_IMPORT",
+      "detail": "Producer uses revision/cid/baseUrl, selection consumes spec.key; in-flight Set does not share an awaited result."
+    },
+    {
+      "id": "DV003_HTTP_AND_FACTS",
+      "status": "OPEN_AFTER_CODE_IMPORT",
+      "detail": "Successful body can wait without an absolute deadline; error take counts chunks; track/sample-entry and BL/RPU/color/codec/compatibility bindings remain incomplete."
+    },
+    {
+      "id": "DV003_LOCAL_SOURCE_AND_LOGGING",
+      "status": "OPEN_AFTER_CODE_IMPORT",
+      "detail": "videoUrl! precedes FileSource handling; full signed URL logging remains. Reopen initialDoviFacts forwarding is implemented and retained."
+    },
+    {
+      "id": "DV006_BRIGHTNESS",
+      "status": "OPEN_AFTER_CODE_IMPORT",
+      "review": "https://github.com/Goodwu/PiliPlusX/pull/3#pullrequestreview-5493423824",
+      "detail": "NaN reset, callback thread, application event emission, system permission/write result and cached-engine Activity handlers remain open."
+    },
+    {
+      "id": "DV004_IDENTITY_POLICY",
+      "status": "PRODUCTION_CHANGE_DEFERRED_PUBLIC_ASSERTION_RETAINED",
+      "review": "https://github.com/Goodwu/media-kit/pull/6#pullrequestreview-5492587336",
+      "detail": "Actual decoder sequence and both user decisions remain open; first-complete-only behavior is not enabled."
+    },
+    {
+      "id": "DV001_NATIVE_ACCEPTANCE",
+      "status": "SOURCE_INTEGRATED_NATIVE_ACCEPTANCE_OPEN",
+      "review": "https://github.com/Goodwu/libmpv-android-video-build-dv-experiment/pull/1#pullrequestreview-5483753705",
+      "detail": "Failed symbol reads reject; cover each Vulkan symbol and weak/none/tool-failure/bad-ELF combinations; propagate build failure, clean staging, exact members, linked inputs/patch/NDK/helper/JAR/APK provenance."
+    }
+  ],
+  "validation": {
+    "scope": "merge structure, exact source bytes, preserved gates and publication readback only",
+    "ci": "PAUSED_BY_USER; no queries, dispatches or new acceptance claims in this phase",
+    "newFlutterDartKotlinNativeRuntimeResults": null,
+    "priorTestVectorNotRelabelled": {
+      "app": "3884d3e8f4f38ebd6043c9be5c8dc6cef46e4377",
+      "mediaKit": "4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2"
+    },
+    "preserved": [
+      "experimental=false default",
+      "auto/prefer/require",
+      "library unknown-DV/color admission assertions; App fact-binding issues remain open",
+      "LG YUV8/FULL/range1 and exact device gates",
+      "owner/ACK/lease",
+      "empty native accepted-input ledgers",
+      "CORE Web shuffle and capability subscription fixes",
+      "SDK/bootstrap and CI workflows"
+    ],
+    "deferred": [
+      "CI verification",
+      "native build/artifact acceptance",
+      "ordinary Session/owner/carrier/full lifecycle",
+      "device HDR/sustained performance",
+      "10-bit/lease fusion"
+    ]
+  },
+  "independentReviews": [
+    {
+      "path": "docs/plans/core-app-pr3-code-merge-review-20261012.json",
+      "sha256": "1c6bbb03cd31975583de50139786209ef44bbfdf2ab5f72b34e3aac26645d9a4",
+      "bytes": 29157,
+      "copiedExact": true
+    },
+    {
+      "path": "docs/plans/core-device-pr6-pr5-merge-review-20261012.json",
+      "sha256": "7b7e9899294854d3fd768bd46b7d5696e6921e874585d31f0b09dd59b79d2185",
+      "bytes": 43101,
+      "copiedExact": true
+    },
+    {
+      "path": "docs/plans/core-dv001-pr5-source-integration-review-20261012.json",
+      "sha256": "19713fe245dde7e360055139ce13b0a082dd975ff8be5b13754675030f6940c1",
+      "bytes": 51595,
+      "copiedExact": true
+    },
+    {
+      "path": "docs/plans/core-device-pr6-pr5-overlay-final-review-20261012.json",
+      "sha256": "47a69fdbf20523f7cf3d8e9e375b331951041b857706863a2e27e8cfaad18ef9",
+      "bytes": 3563,
+      "copiedExact": true
+    }
+  ],
+  "finalSourceConsistencyReview": {
+    "appNineSourceFiles": "PASS exact bytes/blob/SHA against9895",
+    "appHistoricalSource": "PASS only banner and historical heading adaptation",
+    "libraryOverlay": "PASS 36-line addition/two compatible negatives; original helper/assertions unchanged",
+    "runtimeExecuted": false
+  },
+  "mergedBranchCleanup": {
+    "authorization": "User: 确定已合并的情况下，删除相应分支",
+    "condition": "Delete only after remote merge-parent/ancestor and source-disposition readback; require the source ref still equals the frozen source SHA.",
+    "candidates": [
+      {
+        "repository": "Goodwu/media-kit",
+        "branch": "device/MK-ROUTING-20261011/DV004",
+        "head": "9a2c5768dd10e71975b7c3e76bb7125460a43e5b"
+      },
+      {
+        "repository": "Goodwu/media-kit",
+        "branch": "device/MK-ROUTING-20261011/DV-BUILD-01",
+        "head": "dc41787082752f234fed85db7fb7be3bd855cc45"
+      },
+      {
+        "repository": "Goodwu/PiliPlusX",
+        "branch": "device/MK-ROUTING-20261011/DV003",
+        "head": "9895e7dc040cdc06a33cceba4d4379eba3f596b5"
+      }
+    ],
+    "retained": "All public routing refs and original native DEVICE PR1 branch; its feature-base PR remains unmerged and DEVICE recipe corrections continue there.",
+    "sourcePreservation": "Merge parents retain original source commits; PR6 deferred production policy and PR5 script source also remain as exact archived bytes.",
+    "receipt": "Actual deletion and ref readback results will be recorded in the central PR4 completion receipt.",
+    "followupOwnership": "Same existing DEVICE agent; native fixes stay in original PR1. After merged-source branch deletion, later App/DV004 changes start from the public integration head with a fresh central scope claim."
+  }
+}

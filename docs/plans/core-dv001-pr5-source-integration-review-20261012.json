@@ -1,0 +1,580 @@
+{
+  "schemaVersion": 1,
+  "task": "MK-ROUTING-20261011",
+  "reportKind": "CORE read-only DV001 public source integration and PR5 source disposition review",
+  "frozenAtUtc": "2026-10-12 17:10:14 UTC",
+  "auditor": "/root/ci_artifact_followthrough",
+  "scope": {
+    "latestInstruction": "Prioritize integration of DEVICE changes; CI and other work are paused.",
+    "permittedWork": "Read-only repository refs, PR comments/review, immutable source and topology; standalone scratch evidence.",
+    "noCiRunJobArtifactQueriesDuringThisTask": true,
+    "noCiTestsBuildsOrRecipesExecuted": true,
+    "noCheckoutEditsCommitsPushesCommentsOrBranchMutationsByAuditor": true,
+    "publicIntegrator": "/root",
+    "deviceRecipeOwner": "Existing DEVICE agent on original native PR #1 / DEVICE branch; no new DEVICE work line.",
+    "copiedNativeSourceArchives": 0,
+    "distinction": "Public source reachability is recorded separately from recipe approval, accepted native inputs, original PR merge and device acceptance."
+  },
+  "result": {
+    "nativePublicSourceIntegration": "COMPLETED_AND_INDEPENDENTLY_READ_BACK",
+    "nativePublicRef": "refs/heads/routing/MK-ROUTING-20261011",
+    "nativePublicHead": "1095a43acb4d0973b8bca59c5da4e300657bdb29",
+    "nativePublicTree": "c85648fc202e6c0621513f376ba05f26a12c3eaa",
+    "threeOriginalDeviceCommitsReachableFromPublicRouting": true,
+    "originalDeviceBranchUnchanged": true,
+    "featureBaseUnchanged": true,
+    "mainUnchanged": true,
+    "originalNativePrMerged": false,
+    "newNativePrOpenedByThisAction": false,
+    "nativeRecipeApproved": false,
+    "newAcceptedNativeInputs": 0,
+    "nativeDeviceAcceptanceCompleted": false,
+    "pr5SnapshotDisposition": "Root has claimed exact-byte non-executable .sh.txt source snapshots; this report verifies upstream bytes and does not claim the later public snapshot commit has been read back.",
+    "remainingDv001AndPr5Acceptance": "OPEN"
+  },
+  "authorizationAndClaim": {
+    "source": "Root instruction and independently read central PR #4 comments",
+    "centralClaim": {
+      "id": 6128883314,
+      "url": "https://github.com/Goodwu/media-kit/pull/4#issuecomment-6128883314",
+      "createdAt": "2026-10-12T17:03:32Z",
+      "updatedAt": "2026-10-12T17:03:32Z",
+      "body": "## [CORE-SUCCESSOR][CORE-CLAIM] DEVICE 源码归并优先，CI 与其它开发暂停\n\n用户最新指令为“先把 DEVICE 的修改合并进来，ci 等其它工作暂停”。本轮据此进入实际归并，不再轮询 CI，不开始其它代码切片。\n\n### 本轮冻结输入（已重新读取真实 ref，并检查隔离工作树）\n| 仓库 / PR | HEAD |\n| --- | --- |\n| media-kit 公共 PR4 | `ebb00b8a0dedec42a68b84a4ec6e7dffb6c17f02` |\n| PiliPlusX 公共 PR1 | `ed0dc2bfc7f51ac3dc14a7f676451db27ecea6a7` |\n| media-kit DEVICE PR5 | `dc41787082752f234fed85db7fb7be3bd855cc45` |\n| media-kit DEVICE PR6 / DV004 | `9a2c5768dd10e71975b7c3e76bb7125460a43e5b` |\n| PiliPlusX DEVICE PR3 / DV003、DV005、DV006 | `9895e7dc040cdc06a33cceba4d4379eba3f596b5` |\n| native DEVICE PR1 / DV001 | `1095a43acb4d0973b8bca59c5da4e300657bdb29` |\n| FFmpeg 公共 PR1 | `9aba43cfbee182ade060cdccbe15340a0fbe3e83` |\n\n两公共隔离 checkout 的真实 origin 均为 Goodwu 对应仓库、routing 分支，clean/ahead0/behind0；不触碰未知原 checkout。此前 ebb/ed0 仅归档已完成宿主证据，旧测试组合仍为3884+4d1d，不能借给本轮 DEVICE 合成结果。PR API 内嵌旧 base.sha 不作为当前 merge-base。\n\n### 集成认领 / 移交边界\nCORE 本轮认领**公共分支中的归并与必要冲突解决**：\n- 库 `media_kit_video/lib/src/hdr/hdr_decoder_review.dart::gatherDecoderReviewFacts` 及 `hdr_decoder_review_test.dart`；先处理 DV004 与既有 decoder 断言的语义冲突，保留尚未决定的诊断/验收决策点，不以源码合入自动宣布验收契约改变。\n- App `lib/pages/video/controller.dart`、`lib/plugin/pl_player/{controller,hdr_output,source_selection,dovi_sniff}.dart` 和 DOVI 测试；`android/app/build.gradle.kts`、`MainActivity.kt` 及新增 `ScreenBrightnessHandler.kt`。按三方差异保留当前公共 SDK/bootstrap、native gate 与其它 CORE 修复。\n- PR5/DV001 的来源记录、历史文件、脚本原文与 import manifest；保留公共三份 provenance banner，不把历史脚本升级为已批准配方或运行它们。\n- 两仓 TASKS、唯一 routing conversation、当前交接记录和本次逐路径归并清单。\n\n现有 DEVICE 仍单写原 PR 的 native 配方修复、构建/实机与后续修订；本 CORE 不新增 DEVICE 工作线、不在原 DEVICE branch 并行改写。新增的三个子任务仅只读检查三方差异。此次用户授权改变“先审完/CI 完再合”的工作顺序；已知 HTTP/cache/track、brightness、decoder identity 和 DV001 provenance 问题继续作为合入后的开放项，不标作已修复或批准。主 PR 继续 open/draft、未向各自正式 base 合并、未发布。\n\n只做本次归并所需的结构/一致性检查与提交回读；CI 验收、native 构建和设备验证分别保持未完成。本轮完成后发布准确新 HEAD、源文件处置及仍开放的问题。"
+    },
+    "centralDisposition": {
+      "id": 6128920010,
+      "url": "https://github.com/Goodwu/media-kit/pull/4#issuecomment-6128920010",
+      "createdAt": "2026-10-12T17:06:00Z",
+      "updatedAt": "2026-10-12T17:06:00Z",
+      "body": "### [CORE-SUCCESSOR][MERGE-RESOLUTION] 本轮归并处置与 native 公共分支\n\n实际三方 merge-base 已验证：库 PR5/PR6 均为 `e269d966`，App PR3 为 `1970d440`；三次 `git merge-tree --write-tree` 均无文本冲突，仍需处理以下事实/语义冲突。\n\n1. App PR3 的9个代码/测试文件按 `9895e7dc` 原字节归入；DEVICE 历史档案带来源说明归入，旧 Current State 改标历史，唯一 routing Current State 继续权威。TASKS 保留公共状态并记录合入后的已知问题。新读原 PR comment6128050177 的 LYA 手势用户验收按 DEVICE 回报记录，不替代 reset/线程/事件/生命周期问题修复。\n2. PR5 两脚本原文作为 `source-snapshot/*.sh.txt` 非执行证据收入，保留源 blob/SHA；生产 recipe 排除和 native fail-closed 门不变。三历史 provenance banner 明确保留。\n3. PR6 两个文件原文精确归档；公共 `gatherDecoderReviewFacts` 保留旧跨轮身份拒绝，保留旧回归断言。归入可兼容的两项 final-plan 负例。FIRST-complete-only 行为与成功夹具不启用，理由是用户此前明确保留的两个 DV004 决策点尚未解决。本轮 git ancestry 可以归并其源提交，但 disposition 将显式记录该生产差异，后续 DEVICE 增量不得因 ancestry 已相连而忽略它。\n4. native 仓当前只有 main、feature/android-dv-build 和 DEVICE 三分支，没有公共 routing。CORE 将建立唯一 `routing/MK-ROUTING-20261011` 公共集成 ref，指向现有 `1095a43a`，完整纳入三笔原 DEVICE 提交；不改源配方、原 DEVICE head 或 feature/main，不开新 PR。原 PR1 和所有 native 验收缺口保持开放。已核其 workflow 只在 push main/PR/dispatch 触发，此次同名分支创建没有这些事件。\n\n本次两仓归并提交使用 `[skip ci]`，遵从用户暂停 CI 指令；现有 workflows、保护门和已有 runs 不改动，不查询或借用任何新结果。只做归并结构、一致性与实际远端回读。"
+    }
+  },
+  "nativeRefs": {
+    "repository": "Goodwu/libmpv-android-video-build-dv-experiment",
+    "endpoint": "https://api.github.com/repos/Goodwu/libmpv-android-video-build-dv-experiment/git/refs/heads",
+    "beforeCreation": {
+      "refCount": 3,
+      "routingRefPresent": false,
+      "refs": [
+        {
+          "ref": "refs/heads/device/MK-ROUTING-20261011/DV001",
+          "sha": "1095a43acb4d0973b8bca59c5da4e300657bdb29",
+          "type": "commit",
+          "url": "https://api.github.com/repos/Goodwu/libmpv-android-video-build-dv-experiment/git/refs/heads/device/MK-ROUTING-20261011/DV001"
+        },
+        {
+          "ref": "refs/heads/feature/android-dv-build",
+          "sha": "72c574d14bf207c81f9a7504d5cf1bfb05175b6d",
+          "type": "commit",
+          "url": "https://api.github.com/repos/Goodwu/libmpv-android-video-build-dv-experiment/git/refs/heads/feature/android-dv-build"
+        },
+        {
+          "ref": "refs/heads/main",
+          "sha": "dd2bfba8209bcd22e2d4c79f125b40e619e637ed",
+          "type": "commit",
+          "url": "https://api.github.com/repos/Goodwu/libmpv-android-video-build-dv-experiment/git/refs/heads/main"
+        }
+      ]
+    },
+    "afterCreation": {
+      "checkedAtUtc": "2026-10-12 17:07:49 UTC",
+      "refCount": 4,
+      "routingRefPresent": true,
+      "refs": [
+        {
+          "ref": "refs/heads/device/MK-ROUTING-20261011/DV001",
+          "sha": "1095a43acb4d0973b8bca59c5da4e300657bdb29",
+          "type": "commit",
+          "url": "https://api.github.com/repos/Goodwu/libmpv-android-video-build-dv-experiment/git/refs/heads/device/MK-ROUTING-20261011/DV001"
+        },
+        {
+          "ref": "refs/heads/feature/android-dv-build",
+          "sha": "72c574d14bf207c81f9a7504d5cf1bfb05175b6d",
+          "type": "commit",
+          "url": "https://api.github.com/repos/Goodwu/libmpv-android-video-build-dv-experiment/git/refs/heads/feature/android-dv-build"
+        },
+        {
+          "ref": "refs/heads/main",
+          "sha": "dd2bfba8209bcd22e2d4c79f125b40e619e637ed",
+          "type": "commit",
+          "url": "https://api.github.com/repos/Goodwu/libmpv-android-video-build-dv-experiment/git/refs/heads/main"
+        },
+        {
+          "ref": "refs/heads/routing/MK-ROUTING-20261011",
+          "sha": "1095a43acb4d0973b8bca59c5da4e300657bdb29",
+          "type": "commit",
+          "url": "https://api.github.com/repos/Goodwu/libmpv-android-video-build-dv-experiment/git/refs/heads/routing/MK-ROUTING-20261011"
+        }
+      ]
+    },
+    "preservedExistingRefs": [
+      {
+        "ref": "refs/heads/device/MK-ROUTING-20261011/DV001",
+        "before": "1095a43acb4d0973b8bca59c5da4e300657bdb29",
+        "after": "1095a43acb4d0973b8bca59c5da4e300657bdb29",
+        "unchanged": true
+      },
+      {
+        "ref": "refs/heads/feature/android-dv-build",
+        "before": "72c574d14bf207c81f9a7504d5cf1bfb05175b6d",
+        "after": "72c574d14bf207c81f9a7504d5cf1bfb05175b6d",
+        "unchanged": true
+      },
+      {
+        "ref": "refs/heads/main",
+        "before": "dd2bfba8209bcd22e2d4c79f125b40e619e637ed",
+        "after": "dd2bfba8209bcd22e2d4c79f125b40e619e637ed",
+        "unchanged": true
+      }
+    ],
+    "actionOrigin": "Root reported creating the public ref; auditor independently verified the four resulting heads via GET only."
+  },
+  "topology": {
+    "nativeHead": "1095a43acb4d0973b8bca59c5da4e300657bdb29",
+    "nativeTree": "c85648fc202e6c0621513f376ba05f26a12c3eaa",
+    "headCommitApiUrl": "https://api.github.com/repos/Goodwu/libmpv-android-video-build-dv-experiment/git/commits/1095a43acb4d0973b8bca59c5da4e300657bdb29",
+    "mainToFeature": {
+      "endpoint": "https://api.github.com/repos/Goodwu/libmpv-android-video-build-dv-experiment/compare/dd2bfba8209bcd22e2d4c79f125b40e619e637ed...72c574d14bf207c81f9a7504d5cf1bfb05175b6d",
+      "status": "ahead",
+      "aheadBy": 7,
+      "behindBy": 0,
+      "mergeBase": "dd2bfba8209bcd22e2d4c79f125b40e619e637ed"
+    },
+    "featureToDeviceAndPublic": {
+      "endpoint": "https://api.github.com/repos/Goodwu/libmpv-android-video-build-dv-experiment/compare/72c574d14bf207c81f9a7504d5cf1bfb05175b6d...1095a43acb4d0973b8bca59c5da4e300657bdb29",
+      "status": "ahead",
+      "aheadBy": 3,
+      "behindBy": 0,
+      "mergeBase": "72c574d14bf207c81f9a7504d5cf1bfb05175b6d",
+      "totalCommits": 3
+    },
+    "commits": [
+      {
+        "sha": "77fc8230a3f40f52a7d3a51070d846982b386490",
+        "parents": [
+          "72c574d14bf207c81f9a7504d5cf1bfb05175b6d"
+        ],
+        "url": "https://github.com/Goodwu/libmpv-android-video-build-dv-experiment/commit/77fc8230a3f40f52a7d3a51070d846982b386490",
+        "message": "[DEVICE DV001] 构建输入审计修正：depinfo 钉定更新至最新适用源码并归档已收编补丁\n\n- FFmpeg b4d2ea4ffb → 9aba43cf（routing/MK-ROUTING-20261011，含 e8df200c 生产修复）\n- mpv d24c59905b → c11426b67a（media-kit/android 远端 tip：LG P8.4 YUV 收口、native DV bridge 内省、surfacetexture 直连、skipinfo P5 hvcC、vulkan Properties2 修正、mediacodec-embed render-mode）\n- libplacebo c9fd8798 → ea700489（optimize/dovi-linear-decode 重写后 tip；980742df/9b6e0834/6a2f2063/ea700489 已收编旧补丁内容）\n- 归档 libplacebo_external_yuv_sampler / libplacebo_gles_r32f_p5 至 patches-archived（新线已收编，旧补丁不再可应用）；fix_gles、fix_shaderc 两补丁在新 tip 仍可干净应用，保留\n\n背景：DEVICE 接手登记（media-kit PR#4 comment 6109258398）+ 用户整改指令（本地有代码的组件一律从最新代码构建）。实机候选 DV-BUILD-01 按此向量重建。",
+        "reachableFromPublicRouting": true,
+        "messageClaimsAreNotIndependentBuildEvidence": true
+      },
+      {
+        "sha": "7a1f4db01d15a0ab20794bf75da5a91a51111cb3",
+        "parents": [
+          "77fc8230a3f40f52a7d3a51070d846982b386490"
+        ],
+        "url": "https://github.com/Goodwu/libmpv-android-video-build-dv-experiment/commit/7a1f4db01d15a0ab20794bf75da5a91a51111cb3",
+        "message": "[DEVICE DV001] scripts/libplacebo.sh 移除旧线 external_yuv 补丁硬引用\n\n新线（ea700489）已收编该补丁内容为提交；旧引用在补丁归档后必然 fail-fast（can't open → exit 1）。此缺陷曾因调用方未启用 shebang -e 被静默吞掉，导致 libplacebo 未重建而 mpv 照常链接旧库——本轮重建改用直接执行以恢复 fail-fast 语义。",
+        "reachableFromPublicRouting": true,
+        "messageClaimsAreNotIndependentBuildEvidence": true
+      },
+      {
+        "sha": "1095a43acb4d0973b8bca59c5da4e300657bdb29",
+        "parents": [
+          "7a1f4db01d15a0ab20794bf75da5a91a51111cb3"
+        ],
+        "url": "https://github.com/Goodwu/libmpv-android-video-build-dv-experiment/commit/1095a43acb4d0973b8bca59c5da4e300657bdb29",
+        "message": "[DEVICE DV001] bundle 弱化步骤改为符号缺失时跳过\n\nmpv c11426b67a（12030b9c39）已把 Properties2 族查询改为 vkGetInstanceProcAddr 运行时解析，新构建不再导入两个 Vulkan 1.1 符号；弱化在新源码上是 no-op。按符号存在性跳过，保持对旧 libmpv 构建的向后兼容。",
+        "reachableFromPublicRouting": true,
+        "messageClaimsAreNotIndependentBuildEvidence": true
+      }
+    ],
+    "inclusionMethod": "The new CORE routing ref points directly to existing DEVICE HEAD 1095a43a, preserving all three original commits and their complete original tree. No recipe file was rewritten, executed, or cherry-picked into an alternative DEVICE recipe.",
+    "scopeOfSixPathDiff": "Six changed paths relative to feature/android-dv-build; renamed patches also remove their previous paths.",
+    "nativeTreeInspection": {
+      "url": "https://api.github.com/repos/Goodwu/libmpv-android-video-build-dv-experiment/git/trees/1095a43acb4d0973b8bca59c5da4e300657bdb29?recursive=1",
+      "truncated": false,
+      "entryCount": 88,
+      "taskOrAgentOrConversationPaths": []
+    }
+  },
+  "nativePr": {
+    "url": "https://github.com/Goodwu/libmpv-android-video-build-dv-experiment/pull/1",
+    "apiUrl": "https://api.github.com/repos/Goodwu/libmpv-android-video-build-dv-experiment/pulls/1",
+    "number": 1,
+    "state": "open",
+    "draft": true,
+    "merged": false,
+    "updatedAt": "2026-10-11T19:29:35Z",
+    "headRef": "device/MK-ROUTING-20261011/DV001",
+    "head": "1095a43acb4d0973b8bca59c5da4e300657bdb29",
+    "baseRef": "feature/android-dv-build",
+    "base": "72c574d14bf207c81f9a7504d5cf1bfb05175b6d",
+    "commitCount": 3,
+    "changedFileCount": 6,
+    "repairReturnObserved": false,
+    "latestIssueCommentId": 6112842188,
+    "review": {
+      "id": 5483753705,
+      "url": "https://github.com/Goodwu/libmpv-android-video-build-dv-experiment/pull/1#pullrequestreview-5483753705",
+      "apiState": "COMMENTED",
+      "submittedAt": "2026-10-11T14:57:07Z",
+      "commit": "1095a43acb4d0973b8bca59c5da4e300657bdb29",
+      "body": "[CORE / MK-ROUTING-20261011 / DV001] 已审阅当前6文件diff；输入前移及移除已收编补丁方向正确，暂不合入，以下配方闭合项仍需由DEVICE在本PR补齐：\n\n1. bundle_default.sh新增的`if nm ... 2>/dev/null | grep -q ...; then ... else skipped`把工具失败/文件解析失败也解释为“没有Vulkan1.1导入”。而且只检查Properties2一个名字，另一个待处理符号单独存在时会漏过。请使用显式NDK工具或现有ELF解析器，先独立验证读取成功，再检查完整目标集合；无符号仅在成功解析后才能no-op。增加坏ELF/缺工具/两符号各自单独出现/均不存在的负向用例。不得以清空stderr或管道失败作为no-op证据。\n2. 当前入库bundle没有失败即停的执行保证；download/patch/build/helper/unzip/copy失败后仍可能继续，`*.so`从已有prefix/temp拷贝也会混入旧文件。请落实失败传播、每轮隔离干净staging和精确成员白名单；保存所需libc++_shared来自本轮NDK sysroot与helper输出的来源。历史目录中有文件不能作为当前构建成功证据。\n3. 请把本轮实际成功使用的命令/改动及manifest保存到PR，不只留本机路径；完整APK/JAR SHA256、source vector、应用的两项libplacebo patch哈希、实际链接输入与安装验证应可复核。mtime或字符串marker仅为补充。\n\n这不是要求恢复旧源码/旧JAR。新mpv已消除目标导入时允许受验证的no-op；CORE不在并行分支另写这些构建文件。设备SDR观察保留为其精确向量证据，不自动推广到后续Session源事实接线或HDR验收。",
+      "reviewDisposition": "Changes remain required by the review body and public ledger. GitHub API state is COMMENTED; this report does not relabel it as a formal GitHub REQUEST_CHANGES state."
+    },
+    "commentsEndpoint": "https://api.github.com/repos/Goodwu/libmpv-android-video-build-dv-experiment/issues/1/comments?per_page=100",
+    "comments": [
+      {
+        "id": 6110010936,
+        "url": "https://github.com/Goodwu/libmpv-android-video-build-dv-experiment/pull/1#issuecomment-6110010936",
+        "createdAt": "2026-10-11T14:23:41Z",
+        "updatedAt": "2026-10-11T14:23:41Z",
+        "body": "## [CORE] DV001 review at1095a43a：构建检查不能把探测失败当作无导入\n\n已审查当前diff，认可最新产品源码与已收编补丁的迁移方向；尚未合入，三件套可复现打包仍请DEVICE在本PR完成。\n\n`bundle_default.sh`新加的 `if nm ... 2>/dev/null | grep -q vkGetPhysicalDeviceProperties2` 有两个需要修正的边界：\n\n1. nm不存在、不支持目标ELF或读取失败时同样走else并宣称“无Vulkan1.1导入”，属于fail-open。应选明确的目标ELF工具（例如当前NDK llvm-readelf/nm），单独检查执行退出码，失败就停止并保留诊断。\n2. 目前只查Properties2，遗漏 `vkGetPhysicalDeviceQueueFamilyProperties2`。若只剩后者会直接跳过；若只剩前者，现有Python脚本会修改文件后因第二符号缺失退出。请把“解析成功且两者均不存在”的合法no-op、“存在任一目标则处理实际存在集合”、“已WEAK”、“解析失败”分开，并在完成后重新验证没有不允许的强未定义导入。\n\n补相应正负例：两者都有、各自单独、两者无、已weak、工具失败/畸形ELF。脚本当前只支持ELF64而bundle循环包含32-bit ABI；请准确限定本轮arm64入口并对不支持ABI明确拒绝，或实现对应格式支持，不能通过探测失败跳过来假装完成多ABI。\n\n保持DEVICE对本PR的单写；CORE不另写同一打包补丁。该反馈是源码审查，不是本机/实机执行结果。还请保留链接输入/实际helper与NDK libc++来源的manifest和最终JAR哈希，不能只用字符串marker证明静态依赖已链接。"
+      },
+      {
+        "id": 6110373174,
+        "url": "https://github.com/Goodwu/libmpv-android-video-build-dv-experiment/pull/1#issuecomment-6110373174",
+        "createdAt": "2026-10-11T15:03:58Z",
+        "updatedAt": "2026-10-11T15:03:58Z",
+        "body": "[CORE / DV001] 对 review5483753705 的第一项做了隔离宿主复现，未改DEVICE文件、未访问产品二进制：保留当前bundle的原始`if nm ... | grep -q \"vkGetPhysicalDeviceProperties2\"`判定，仅替换nm为受控函数。4种输入实际结果：读取器return2 → NO_IMPORTS/exit0（错误放行）；仅有vkGetPhysicalDeviceQueueFamilyProperties2 → NO_IMPORTS/exit0（漏检）；两符号都有 → WEAKEN；两者都无但读取成功 → NO_IMPORTS。最后两项为对照，前两项需修。现有weaken脚本列出的完整集合正是Properties2和QueueFamilyProperties2。请由DEVICE把修复与对应负例放到本既有分支；这不是完整ELF/实机测试，也不影响已记录的无这两个导入的新mpv样本观察。"
+      },
+      {
+        "id": 6110543077,
+        "url": "https://github.com/Goodwu/libmpv-android-video-build-dv-experiment/pull/1#issuecomment-6110543077",
+        "createdAt": "2026-10-11T15:22:32Z",
+        "updatedAt": "2026-10-11T15:22:32Z",
+        "body": "## [CORE-OUTGOING] CORE更换，DEVICE继续原认领 / MK-ROUTING-20261011\n\n用户要求由新agent接替当前CORE。全文接手指令已保存于Goodwu/media-kit **1e1e0d97**：`docs/plans/media-kit-routing-core-takeover-20261011.md`，中央登记 **media-kit PR#4 comment6110537166**。原CORE停止推进生产实现；继任CORE在中央线程登记后承接审查和唯一集成职责。**DEVICE继续本DV001分支/PR，不重开、不直接push集成分支。**\n\n当前核对头仍 **1095a43**；review5483753705和comment6110373174的符号检查反例、失败传播、干净staging和三件套/manifest来源要求保留，由DEVICE在本PR修正。新CORE不能另写同一配方，也不能仅因交接把本PR标为已通过/已合入。请向中央线程及本PR更新后续修复SHA、实际测试、完整来源和持久证据。\n\nCORE最新已验证源码组合为库 **6e7570fc** + App **569138fa**（库随后只有上述交接文档提交）；a3cdbda2模型阶段设备结果不能当成后继F01 Session接线验收。每轮候选重新取最新适用源码，保持来源与有效experimental配置可复现；已开始向量的观察按向量保留，整合后再复测。"
+      },
+      {
+        "id": 6111479264,
+        "url": "https://github.com/Goodwu/libmpv-android-video-build-dv-experiment/pull/1#issuecomment-6111479264",
+        "createdAt": "2026-10-11T17:03:29Z",
+        "updatedAt": "2026-10-11T17:03:29Z",
+        "body": "[CORE-INTEGRATION] 最新独立 critical 复核，DV001/PR#5 归并继续\n\nHEAD仍1095a43；PR5最新86c186f。CORE先部分归并3份历史MD及来源哈希索引，两个shell附件不作为批准配方归入；不标两PR已完成。\n\nreview5483753705的问题仍可复现：原nm条件在受控读取exit2或仅QueueFamilyProperties2时返回NO_IMPORTS/exit0，即使set-euo-pipefail也不保证此if管道失败闭合。请独立先验证解析成功，再处理完整符号集合，保留缺工具/坏ELF/两目标各自单独/都有/均无/已weak测试。\n\n新增需明确：现弱化器仅ELF64，但bundle遍历四ABI；且可能先写文件再因缺另一个目标退出。需要先验证整个操作可行、匹配ABI和目标集合，再写并验证结果，不能留下部分修改产物。bundle仍无完整失败传播，temp/zip更新/*so可能混旧成员；要求隔离新staging、每一步原exit传播、精确成员清单、NDK/helper/libmpv实际链接来源、两项libplacebo补丁及helper ndkVersion本地修改完整记录。\n\n历史input-vector d688/b830/77fc与device-results a3/8bed无法自动拼成一个APK向量。请补每APK完整SHA+source/patch/toolchain/成员manifest，真实P8.4 defines配方及前后来源核对，并同步PR5附件。DEVICE继续在原PR修，CORE不并行重写配方。修后再审并完成归并，从届时最新源码构建整合P5/P8.4与true/false及普通Session/生命周期复测。\n"
+      },
+      {
+        "id": 6111836233,
+        "url": "https://github.com/Goodwu/libmpv-android-video-build-dv-experiment/pull/1#issuecomment-6111836233",
+        "createdAt": "2026-10-11T17:42:39Z",
+        "updatedAt": "2026-10-11T17:42:39Z",
+        "body": "[CORE-CI05] DV001回交输入合同已落库，原配方修复仍需继续\n\nCORE未改本DV001配方，HEAD仍1095a43。公共消费者输入门已于App08accb63df8c4cab62d00946fb2159dd3781e0ee提交，合同：https://github.com/Goodwu/PiliPlusX/blob/08accb63df8c4cab62d00946fb2159dd3781e0ee/docs/plans/routing-native-input-contract-20261012.md 。CORE接受账本现在为空；不会用历史JAR或manifest自述reviewStatus授权。\n\n请在原认领修复review5483753705/6110373174/6111479264，并按合同回交实际FFmpeg/mpv/libplacebo/helper/recipe commit/tree/ordered patches、toolchain、干净staging、精确三成员及真实链接输入/BuildID/SONAME/NEEDED，原始证据附件与JAR/APK完整hash；持久的producer run/attempt/artifact ID用于绑定下载来源。若当前构建仅本机没有该持久artifact，先如实报告现有证据位置与缺项，不虚构CI run或修改样本来对齐；CORE消费者接线将失败关闭，等待真实已审回交。\n\n消费者门的独立真实LLVM审查复现进一步确认：nm exit0但stderr no symbols也不能算无导入（去section header而动态强QueueFamily导入仍在）；完整dynsym不可读要拒绝/明确支持读取方式。CORE门不修改二进制、不会替DEVICE另写弱化配方。每个目标单独/工具异常/实际ABI/clean staging仍需本PR自己的正负例。\n\n库R01d8b98已推（普通当前decoder事实）；R01e有限SDR Texture copy/software catalog正由CORE实现，不动nativeDV owner/YUV arm。PR5最新5b仅历史文档增量已归主线，不代表整项完成。最新整合P5/P8.4、experimental true/false、普通Session与owner/YUV实际carrier验收仍须同向量重建并记录，旧8bed+a3/AVC EOS不重标HDR新向量。\n"
+      },
+      {
+        "id": 6112842188,
+        "url": "https://github.com/Goodwu/libmpv-android-video-build-dv-experiment/pull/1#issuecomment-6112842188",
+        "createdAt": "2026-10-11T19:29:35Z",
+        "updatedAt": "2026-10-11T19:29:35Z",
+        "body": "[CORE-INTEGRATION] LG claim修复与构建来源/SDK接线检查点已push回读\n\n当前库751d0cdd69c26374d452fbf672c5600ce59f2387 + App6c4c1b4787fe2ce5459ee1d775279192fe432416；FFmpeg仍9aba43cf。库仅已审4文件+记录：LG专用setter pre-mutation拒绝与解析失败前消费claim，独立lab298/video775/4额外边界/两strict0；原lab失败记录保留。App仅已审native16+记录：来源scopePASS与SDK窄CI PASS_WITH_PENDING_HOSTED，444Python/36contract/真实parser7+identity/actionlint，16提交树hash逐一一致。所有主PR未合并/发布。\n\n新hosted source/Build将捕获最新组合，CI真实prepared receipt/exactHEAD parser正向和完整最新clean Android/Pink prepare正在核验，未先称通过。接受selector/ledger仍null/空，缺接受项应preAPI/prestaging/Gradle失败，不下载旧JAR兜底；native/APK/sign/parity/device仍未验。来源YAML/plugins真实反例和历史receipt/缺SDK拒绝证据完整落handoff。\n\n刚重新读DV0011095a43/PR5 5b279611与最新评论，无新修复回交。DEVICE继续原recipe/构建/实机认领，请向同一中央线程/原PR回交当前修复SHA、实际运行阶段或准确阻塞：review5483753705/6110373174/6111479264符号读取与各目标、失败传播、clean staging/精确成员链接补丁manifest仍未关闭。公共consumer合同已在新App提交生效，CORE不另写配方；从构建开始时最新适用源码重取并记录，不把本评论SHA当长期固定输入。PR5两脚本/完整产物manifest及最新P5/P8.4 truefalse/普通Session/owner实际carrier/可见HDR与持续性能仍需完成，历史文档部分归入不等整项完成。\n"
+      }
+    ],
+    "historicalReproductionBoundary": "Comment 6110373174 contains prior CORE host reproductions. They were read as historical evidence and were not rerun during the CI pause."
+  },
+  "sourceHashVerification": {
+    "method": "Read original bytes from immutable Git blob responses, retaining original final newline. For each file compute SHA256, byte length, and Git SHA1 of b'blob '+decimal_length+b'\\0'+content; compare to tree/API blob SHA.",
+    "verifiedGitBlobCount": 9,
+    "nativeChangedFileCount": 6,
+    "pr5ScriptCount": 2,
+    "workflowCount": 1,
+    "allListedGitBlobsVerified": true,
+    "nativeChangedFiles": [
+      {
+        "path": "buildscripts/bundle_default.sh",
+        "sha": "4939bbfc9a80087352f7c452040066c41c84f33b",
+        "status": "modified",
+        "additions": 9,
+        "deletions": 1,
+        "mode": "100755",
+        "bytes": 3357,
+        "sha256": "c96780c0b2f3eb8bd20510a81e3d6cb680071dedd4eb8c2fe2c1035aab328cdb",
+        "git_blob_verified": true,
+        "sourceCommit": "1095a43acb4d0973b8bca59c5da4e300657bdb29",
+        "blobApiUrl": "https://api.github.com/repos/Goodwu/libmpv-android-video-build-dv-experiment/git/blobs/4939bbfc9a80087352f7c452040066c41c84f33b",
+        "immutableSourceUrl": "https://github.com/Goodwu/libmpv-android-video-build-dv-experiment/blob/1095a43acb4d0973b8bca59c5da4e300657bdb29/buildscripts/bundle_default.sh"
+      },
+      {
+        "path": "buildscripts/include/depinfo.sh",
+        "sha": "26cfe6b4ebb7582f6218d0b29ec315a37f5d6c29",
+        "status": "modified",
+        "additions": 4,
+        "deletions": 4,
+        "mode": "100755",
+        "bytes": 1789,
+        "sha256": "4aae3c1d08693787cd9a4893b77dce559b1c73edf2be0337e6a972d0644831c1",
+        "git_blob_verified": true,
+        "sourceCommit": "1095a43acb4d0973b8bca59c5da4e300657bdb29",
+        "blobApiUrl": "https://api.github.com/repos/Goodwu/libmpv-android-video-build-dv-experiment/git/blobs/26cfe6b4ebb7582f6218d0b29ec315a37f5d6c29",
+        "immutableSourceUrl": "https://github.com/Goodwu/libmpv-android-video-build-dv-experiment/blob/1095a43acb4d0973b8bca59c5da4e300657bdb29/buildscripts/include/depinfo.sh"
+      },
+      {
+        "path": "buildscripts/patches-archived/libplacebo-old-lineage-integrated/README.md",
+        "sha": "6b72e79b01690df89da2831bac8e176429a8dc52",
+        "status": "added",
+        "additions": 15,
+        "deletions": 0,
+        "mode": "100644",
+        "bytes": 976,
+        "sha256": "bcd23190b295d7d8b9803e94dfd6ff204a26473a0f95129d0d5bb65c648965d1",
+        "git_blob_verified": true,
+        "sourceCommit": "1095a43acb4d0973b8bca59c5da4e300657bdb29",
+        "blobApiUrl": "https://api.github.com/repos/Goodwu/libmpv-android-video-build-dv-experiment/git/blobs/6b72e79b01690df89da2831bac8e176429a8dc52",
+        "immutableSourceUrl": "https://github.com/Goodwu/libmpv-android-video-build-dv-experiment/blob/1095a43acb4d0973b8bca59c5da4e300657bdb29/buildscripts/patches-archived/libplacebo-old-lineage-integrated/README.md"
+      },
+      {
+        "path": "buildscripts/patches-archived/libplacebo-old-lineage-integrated/libplacebo_external_yuv_sampler.patch",
+        "sha": "d8a29bba7950954cb6070036aaf9ea42329ea518",
+        "status": "renamed",
+        "additions": 0,
+        "deletions": 0,
+        "previous_filename": "buildscripts/patches/libplacebo/libplacebo_external_yuv_sampler.patch",
+        "mode": "100644",
+        "bytes": 4431,
+        "sha256": "9d63aaddae523da67511b6a91b88f249cbcf09c2eb76cf2026490649ad0467f4",
+        "git_blob_verified": true,
+        "sourceCommit": "1095a43acb4d0973b8bca59c5da4e300657bdb29",
+        "blobApiUrl": "https://api.github.com/repos/Goodwu/libmpv-android-video-build-dv-experiment/git/blobs/d8a29bba7950954cb6070036aaf9ea42329ea518",
+        "immutableSourceUrl": "https://github.com/Goodwu/libmpv-android-video-build-dv-experiment/blob/1095a43acb4d0973b8bca59c5da4e300657bdb29/buildscripts/patches-archived/libplacebo-old-lineage-integrated/libplacebo_external_yuv_sampler.patch"
+      },
+      {
+        "path": "buildscripts/patches-archived/libplacebo-old-lineage-integrated/libplacebo_gles_r32f_p5.patch",
+        "sha": "99ddc22b6fab18a05e588ca8a210cc51cfc6d302",
+        "status": "renamed",
+        "additions": 0,
+        "deletions": 0,
+        "previous_filename": "buildscripts/patches/libplacebo/libplacebo_gles_r32f_p5.patch",
+        "mode": "100644",
+        "bytes": 1928,
+        "sha256": "376d2638e888ec507115493505ac8d46733ae5276e4a6d940db43c96b6bfd5f7",
+        "git_blob_verified": true,
+        "sourceCommit": "1095a43acb4d0973b8bca59c5da4e300657bdb29",
+        "blobApiUrl": "https://api.github.com/repos/Goodwu/libmpv-android-video-build-dv-experiment/git/blobs/99ddc22b6fab18a05e588ca8a210cc51cfc6d302",
+        "immutableSourceUrl": "https://github.com/Goodwu/libmpv-android-video-build-dv-experiment/blob/1095a43acb4d0973b8bca59c5da4e300657bdb29/buildscripts/patches-archived/libplacebo-old-lineage-integrated/libplacebo_gles_r32f_p5.patch"
+      },
+      {
+        "path": "buildscripts/scripts/libplacebo.sh",
+        "sha": "6f11da66fbed0cb8e4e90ab06c60d2a1b9b2363d",
+        "status": "modified",
+        "additions": 5,
+        "deletions": 9,
+        "mode": "100644",
+        "bytes": 1013,
+        "sha256": "64ce74851fd812fc92bffe985c3385fd74047e1efea1c90936fec6b00b7c548b",
+        "git_blob_verified": true,
+        "sourceCommit": "1095a43acb4d0973b8bca59c5da4e300657bdb29",
+        "blobApiUrl": "https://api.github.com/repos/Goodwu/libmpv-android-video-build-dv-experiment/git/blobs/6f11da66fbed0cb8e4e90ab06c60d2a1b9b2363d",
+        "immutableSourceUrl": "https://github.com/Goodwu/libmpv-android-video-build-dv-experiment/blob/1095a43acb4d0973b8bca59c5da4e300657bdb29/buildscripts/scripts/libplacebo.sh"
+      }
+    ]
+  },
+  "nativeRecordedInputs": {
+    "sourceUrl": "https://github.com/Goodwu/libmpv-android-video-build-dv-experiment/blob/1095a43acb4d0973b8bca59c5da4e300657bdb29/buildscripts/include/depinfo.sh",
+    "scope": "Constants in the incorporated 1095 source tree, not a newly approved or executed producer vector.",
+    "ffmpeg": "9aba43cfbee182ade060cdccbe15340a0fbe3e83",
+    "mpv": "c11426b67a96747c74dfd2a1b0a0340af9696103",
+    "libplacebo": "ea700489fbf27703d8c1f64874a1c6138f17ad28",
+    "helper": "b768ce102cfa9b5ddec618bb939d689d1b0899fa",
+    "ndk": "27.2.12479018",
+    "sdkTools": "9123335_latest",
+    "buildTools": "34.0.0",
+    "patchDisposition": "external_yuv_sampler and gles_r32f_p5 archived as integrated upstream lineage; fix_gles_shader_compile_error and fix_shaderc_vulkan_dismatch remain recipe patch inputs requiring actual application/link provenance."
+  },
+  "workflowSourceEvidence": {
+    "path": ".github/workflows/build.yaml",
+    "sha": "c55a5945c6c854a6a13c4cc9cbe29e4d968a03b5",
+    "bytes": 2406,
+    "sha256": "71224506697c117cfeed932da00c2607c5e7e1fc554c49e9bb9a38f385193a26",
+    "git_blob_verified": true,
+    "sourceCommit": "1095a43acb4d0973b8bca59c5da4e300657bdb29",
+    "mode": "100644",
+    "immutableSourceUrl": "https://github.com/Goodwu/libmpv-android-video-build-dv-experiment/blob/1095a43acb4d0973b8bca59c5da4e300657bdb29/.github/workflows/build.yaml",
+    "blobApiUrl": "https://api.github.com/repos/Goodwu/libmpv-android-video-build-dv-experiment/git/blobs/c55a5945c6c854a6a13c4cc9cbe29e4d968a03b5",
+    "workflowPaths": [
+      ".github/workflows/build.yaml"
+    ],
+    "sourceText": "name: Build libmpv-android\n\non:\n  push:\n    branches:\n      - main\n  workflow_dispatch:\n    inputs:\n      logLevel:\n        description: 'Log level'\n        required: true\n        default: 'warning'\n      release:\n        description: 'Create draft release'\n        required: false\n        type: boolean\n        default: false\n  pull_request:\n\npermissions:\n  contents: write\n\njobs:\n  build:\n    name: Build\n    runs-on: ubuntu-24.04\n    container: docker.io/debian:bookworm-slim\n    steps:\n      - name: Checkout repository\n        uses: actions/checkout@v4\n      - name: Install dependency\n        run: |\n          echo \"deb http://deb.debian.org/debian bookworm-backports main\" | tee /etc/apt/sources.list.d/bookworm-backports.list\n          apt update\n          apt install -y sudo git gcc-multilib libc-dev make automake pkg-config libtool nasm python3-jsonschema wget python3-jinja2 zip python3-pip\n          apt install -y -t bookworm-backports meson\n      - name: Set up JDK 17\n        uses: actions/setup-java@v4\n        with:\n          java-version: '17'\n          distribution: 'temurin'\n      - name: Setup Gradle\n        uses: gradle/actions/setup-gradle@v3\n      - name: Setup Android SDK\n        uses: android-actions/setup-android@v3\n      - uses: nttld/setup-ndk@v1\n        with:\n          link-to-sdk: true\n          ndk-version: r27c\n      - name: Symlink SDK\n        working-directory: ./buildscripts\n        run: |\n          mkdir sdk\n          ln -s ${ANDROID_HOME} ./sdk/android-sdk-linux\n      - name: Bundle (default)\n        working-directory: ./buildscripts\n        run: |\n          sed -i -e 's/sudo//g' *.sh\n          sed -i 's/download-sdk\\.sh/download-sdk-debian\\.sh/g' download.sh\n          sed -i -e '/git reset --hard/d' patch.sh\n          sudo chmod +x include/download-sdk-debian.sh\n          sudo chmod +x bundle_default.sh\n          ./bundle_default.sh\n      - uses: actions/upload-artifact@v4\n        with:\n          name: artifact\n          path: /home/runner/work/libmpv-android-video-build/libmpv-android-video-build/buildscripts/*.jar\n      - uses: softprops/action-gh-release@v1\n        if: github.ref == 'refs/heads/main' || inputs.release == true\n        with:\n          draft: true\n          prerelease: false\n          tag_name: \"vnext\"\n          files: |\n            /home/runner/work/libmpv-android-video-build/libmpv-android-video-build/buildscripts/*.jar\n",
+    "sourceTriggers": {
+      "pushBranches": [
+        "main"
+      ],
+      "pullRequestUnfiltered": true,
+      "workflowDispatch": true,
+      "createEvent": false
+    },
+    "bundleStep": "Bundle (default) invokes ./bundle_default.sh without an event guard inside the build job.",
+    "releaseCondition": "github.ref == 'refs/heads/main' || inputs.release == true",
+    "inferenceForThisAction": "Creating/pushing routing/MK-ROUTING-20261011 does not match this source workflow's push-main filter, and no PR or dispatch was created. Opening a new PR would match the unfiltered pull_request event and therefore is deferred during the user's CI pause.",
+    "executionBoundary": "Only source event definitions were inspected. No CI run endpoint was queried, and no runtime assertion that a job did or did not execute is inferred from job history."
+  },
+  "pr5": {
+    "url": "https://github.com/Goodwu/media-kit/pull/5",
+    "apiUrl": "https://api.github.com/repos/Goodwu/media-kit/pulls/5",
+    "state": "open",
+    "draft": true,
+    "merged": false,
+    "headRef": "device/MK-ROUTING-20261011/DV-BUILD-01",
+    "head": "dc41787082752f234fed85db7fb7be3bd855cc45",
+    "updatedAt": "2026-10-12T13:38:25Z",
+    "baseRef": "routing/MK-ROUTING-20261011",
+    "embeddedBaseSha": "e269d9669becb5812663200e7521901e8254c8bd",
+    "independentlyObservedPublicRoutingHead": "ebb00b8a0dedec42a68b84a4ec6e7dffb6c17f02",
+    "publicRefEndpoint": "https://api.github.com/repos/Goodwu/media-kit/git/refs/heads/routing/MK-ROUTING-20261011",
+    "baseCaveat": "The embedded PR base.sha remains e269d966; the separately read live public ref was ebb00b8a. Do not overwrite public ledgers using the embedded base object.",
+    "sourceTreeEndpoint": "https://api.github.com/repos/Goodwu/media-kit/git/trees/dc41787082752f234fed85db7fb7be3bd855cc45?recursive=1",
+    "sourceTreeTruncated": false,
+    "scripts": [
+      {
+        "path": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/assemble-jar-arm64.sh",
+        "sha": "5363de29053303d3b3672aab81b565d6341f4019",
+        "bytes": 2195,
+        "sha256": "9df01982361945da565832d6729d327ce71cb268ffadccd0004e1b4897bc455c",
+        "git_blob_verified": true,
+        "mode": "100644",
+        "sourceCommit": "dc41787082752f234fed85db7fb7be3bd855cc45",
+        "blobApiUrl": "https://api.github.com/repos/Goodwu/media-kit/git/blobs/5363de29053303d3b3672aab81b565d6341f4019",
+        "immutableSourceUrl": "https://github.com/Goodwu/media-kit/blob/dc41787082752f234fed85db7fb7be3bd855cc45/docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/assemble-jar-arm64.sh",
+        "plannedSnapshotPath": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/source-snapshot/assemble-jar-arm64.sh.txt",
+        "plannedSnapshotContent": "exact source blob bytes, with a .txt destination filename",
+        "publicImportReadbackByThisReport": false,
+        "productionRecipeApproved": false,
+        "executionPerformed": false
+      },
+      {
+        "path": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/matrix-device-build.sh",
+        "sha": "33abc7195e898d859177bfbb1baed9062a443c55",
+        "bytes": 2578,
+        "sha256": "bf54737f08351c71877e2257beb8c6031e7a7aed754b26ceb64ddec0222b498b",
+        "git_blob_verified": true,
+        "mode": "100644",
+        "sourceCommit": "dc41787082752f234fed85db7fb7be3bd855cc45",
+        "blobApiUrl": "https://api.github.com/repos/Goodwu/media-kit/git/blobs/33abc7195e898d859177bfbb1baed9062a443c55",
+        "immutableSourceUrl": "https://github.com/Goodwu/media-kit/blob/dc41787082752f234fed85db7fb7be3bd855cc45/docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/matrix-device-build.sh",
+        "plannedSnapshotPath": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/source-snapshot/matrix-device-build.sh.txt",
+        "plannedSnapshotContent": "exact source blob bytes, with a .txt destination filename",
+        "publicImportReadbackByThisReport": false,
+        "productionRecipeApproved": false,
+        "executionPerformed": false
+      }
+    ],
+    "snapshotDispositionSource": "https://github.com/Goodwu/media-kit/pull/4#issuecomment-6128920010",
+    "publicImportPlan": [
+      "Store each exact original script blob as source-snapshot/<original-name>.txt and record source commit, original path, Git mode/blob, length and SHA256.",
+      "Keep production-recipe exclusion and native fail-closed selection gates. Do not execute, port or concurrently repair these historical scripts.",
+      "Retain the three existing public historical provenance banners; record the DEVICE merge's banner deletions without adopting them.",
+      "Retain previously imported DV003/DV004 critical reviews, historical vectors and original review disposition; do not let ancestry or source archiving imply acceptance.",
+      "Update public README/import manifest/TASKS/unique conversation to distinguish source inclusion from unresolved recipe, artifact and device acceptance."
+    ],
+    "retainHistoricalBanners": [
+      "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/input-vector.md",
+      "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/device-results.md",
+      "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/critical-review-define-promotion.md"
+    ],
+    "sourceMergeWhichDeletedBanners": "66aa28e2bd2736d22b9adb148bfa01be3bcc5bb9",
+    "sourceMergeParents": [
+      "644908c93f09083f21720699227eb4e7a14d9c7a",
+      "e269d9669becb5812663200e7521901e8254c8bd"
+    ],
+    "historicalVectorBoundary": {
+      "inputVectorRecord": {
+        "mediaKit": "d68871f7",
+        "app": "b8303a9c",
+        "nativeBuild": "77fc823"
+      },
+      "deviceResultsRecord": {
+        "mediaKit": "a3cdbda2",
+        "app": "8bed4a4f"
+      },
+      "cannotCombineIntoOneAcceptedVector": true,
+      "source": "Current public DV-BUILD-01 README.md and import-manifest.json at ebb00b8a"
+    }
+  },
+  "openFindings": [
+    {
+      "id": "DV001-SYMBOL-READ-FAIL-CLOSED",
+      "owner": "Existing DEVICE on native PR #1",
+      "status": "OPEN",
+      "paths": [
+        "buildscripts/bundle_default.sh",
+        "buildscripts/scripts/weaken_undefined_imports.py"
+      ],
+      "sourceUrls": [
+        "https://github.com/Goodwu/libmpv-android-video-build-dv-experiment/blob/1095a43acb4d0973b8bca59c5da4e300657bdb29/buildscripts/bundle_default.sh#L62",
+        "https://github.com/Goodwu/libmpv-android-video-build-dv-experiment/pull/1#issuecomment-6110373174",
+        "https://github.com/Goodwu/libmpv-android-video-build-dv-experiment/pull/1#issuecomment-6111836233"
+      ],
+      "finding": "The nm/grep condition suppresses stderr and routes reader/tool/ELF failure to the no-import branch; it tests only vkGetPhysicalDeviceProperties2.",
+      "required": "Validate symbol reading independently before accepting absence; cover Properties2-only, QueueFamilyProperties2-only, both, already weak, mixed weak/strong, neither, missing/failing tool and malformed/unsupported ELF. A zero tool exit without valid symbol-table evidence is insufficient."
+    },
+    {
+      "id": "DV001-WEAKENER-ATOMICITY-ABI",
+      "owner": "Existing DEVICE on native PR #1",
+      "status": "OPEN",
+      "paths": [
+        "buildscripts/scripts/weaken_undefined_imports.py"
+      ],
+      "sourceUrls": [
+        "https://github.com/Goodwu/libmpv-android-video-build-dv-experiment/blob/1095a43acb4d0973b8bca59c5da4e300657bdb29/buildscripts/scripts/weaken_undefined_imports.py",
+        "https://github.com/Goodwu/libmpv-android-video-build-dv-experiment/pull/1#issuecomment-6111479264"
+      ],
+      "unchangedWeakenerBlob": "e78aabb6ff6a58338a669a4a15d7b5c81f808c43",
+      "finding": "The existing weakener assumes ELF64 while the bundle enumerates four ABIs, requires both target names, and writes the destination before reporting missing target names.",
+      "required": "Explicitly validate supported ELF/ABI and bounds, reject unsupported inputs, define verified no-op behavior, prevent partial publication, and verify both target symbols after modification."
+    },
+    {
+      "id": "DV001-FAILURE-STAGING-MEMBERS",
+      "owner": "Existing DEVICE on native PR #1",
+      "status": "OPEN",
+      "sourceUrls": [
+        "https://github.com/Goodwu/libmpv-android-video-build-dv-experiment/blob/1095a43acb4d0973b8bca59c5da4e300657bdb29/buildscripts/bundle_default.sh",
+        "https://github.com/Goodwu/libmpv-android-video-build-dv-experiment/pull/1#pullrequestreview-5483753705"
+      ],
+      "finding": "The bundle does not establish reliable failure propagation across dependency download, patches, builds, helper, unzip, copy and zip; existing prefix/temp contents and wildcard library copies can retain stale inputs.",
+      "required": "Fail on each failed prerequisite, isolate a clean staging directory for each attempt, publish only an exact reviewed library-member whitelist, and prove helper/libc++ origin."
+    },
+    {
+      "id": "DV001-PROVENANCE-AND-PRODUCT",
+      "owner": "Existing DEVICE produces; CORE reviews",
+      "status": "OPEN",
+      "sourceUrls": [
+        "https://github.com/Goodwu/libmpv-android-video-build-dv-experiment/pull/1#pullrequestreview-5483753705",
+        "https://github.com/Goodwu/libmpv-android-video-build-dv-experiment/pull/1#issuecomment-6112842188"
+      ],
+      "required": "Preserve exact source commits/trees, ordered local patch hashes, NDK/helper sources, actual linker input paths and hashes, ELF build IDs/SONAME/NEEDED, final JAR/APK SHA256 and complete member hashes. Preserve attempt/run/artifact identity when producer work resumes; source strings or mtimes alone are insufficient.",
+      "acceptedProducerInputCreatedBySourceIntegration": false
+    },
+    {
+      "id": "PR5-ASSEMBLE-SNAPSHOT-ONLY",
+      "owner": "Existing DEVICE on original recipe PR",
+      "status": "OPEN",
+      "sourceUrl": "https://github.com/Goodwu/media-kit/blob/dc41787082752f234fed85db7fb7be3bd855cc45/docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/assemble-jar-arm64.sh",
+      "finding": "The script repeats the one-target nm conditional, hard-codes a macOS workspace/toolchain and removes temporary/JAR paths before copying existing local prefix/helper outputs. set -euo pipefail does not turn failure inside the conditional pipeline into validated absence.",
+      "disposition": "Exact non-executable .txt source evidence only; recipe approval and execution remain false."
+    },
+    {
+      "id": "PR5-MATRIX-SNAPSHOT-ONLY",
+      "owner": "Existing DEVICE on original recipe PR",
+      "status": "OPEN",
+      "sourceUrl": "https://github.com/Goodwu/media-kit/blob/dc41787082752f234fed85db7fb7be3bd855cc45/docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/matrix-device-build.sh",
+      "finding": "The historical script hard-codes local user/JDK/device paths, injects a local arm64 JAR, invokes release APK builds and deletes build/.gradle, build/app/intermediates and build/app/tmp.",
+      "disposition": "Exact non-executable .txt source evidence only; do not replace the separate public matrix implementation or execute this historical script."
+    },
+    {
+      "id": "NATIVE-DEVICE-FULL-ACCEPTANCE",
+      "owner": "Existing DEVICE validation; CORE integration/review",
+      "status": "OPEN",
+      "required": "After recipe remediation and explicit accepted native input, rebuild the current complete integrated vector and verify P5/P8.4, ordinary Session, owner/carrier, lifecycle, HDR and sustained performance separately. experimental remains false by default, true is the main validation scenario and false is a regression scenario. Preserve approved LG YUV8/FULL/range1, exact device gates and owner/ACK/lease. 10-bit and lease fusion remain deferred.",
+      "sourceIntegrationIsNotDeviceAcceptance": true,
+      "originalPrsRemainOpenUnmergedAndUnreleased": true
+    }
+  ],
+  "acceptanceBoundary": {
+    "sourceIncludedNativeThreeCommits": true,
+    "recipeRepairCompleted": false,
+    "recipeApproved": false,
+    "nativeInputAccepted": false,
+    "acceptanceLedgerUpdated": false,
+    "jarOrApkBuiltInThisAction": false,
+    "hostTestRunInThisAction": false,
+    "deviceValidationRunInThisAction": false,
+    "sourceArchiveProvesCurrentDeviceVector": false,
+    "nativePr1MustRemainOpen": true,
+    "pr5FullAcceptanceMustRemainOpen": true,
+    "dv003Dv004DecisionsOrDefectsClosedByThisReport": false
+  },
+  "rootFollowThrough": {
+    "nativeRefCreation": "Completed and independently verified above.",
+    "pr5TwoSnapshotImport": "Root performs exact-byte snapshots and public ledger updates; this report supplies source hashes, not a claim that the resulting public commit has been read back.",
+    "preserveCurrentPublicCodeAndLedgers": true,
+    "nextVerification": "Root reads back its public integration commit and exact snapshot blob hashes. No CI polling is needed or authorized for this source-integration checkpoint."
+  }
+}
