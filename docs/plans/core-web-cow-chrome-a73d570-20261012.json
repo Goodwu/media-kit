@@ -1,0 +1,223 @@
+{
+  "schema": "core-web-cow-chrome-acceptance-v1",
+  "collected_utc": "2026-10-12T16:34:39.752506+00:00",
+  "repository": "Goodwu/media-kit",
+  "run_id": 38272288190,
+  "attempt": 1,
+  "run_head": "a73d570b633a949aab6a31e8f68ec03a13643c31",
+  "run_status_at_observation": "in_progress",
+  "run_conclusion_at_observation": null,
+  "actual_checkout_merge": "97fd1956f300e275f128cb1a19c54531bb7b3f2a",
+  "actual_checkout_tree": "235b40d62e5f242fb494ad3bb4b2190c8ae6ff21",
+  "merge_parents": [
+    "d761922721ad8da6bb186abd270bb096100944ea",
+    "a73d570b633a949aab6a31e8f68ec03a13643c31"
+  ],
+  "job": {
+    "id": 114893652768,
+    "name": "package:media_kit tests (Web)",
+    "status": "completed",
+    "conclusion": "success",
+    "run_id": 38272288190,
+    "logs_url": null,
+    "steps": [
+      {
+        "name": "Set up job",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 1
+      },
+      {
+        "name": "Run actions/checkout@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 2
+      },
+      {
+        "name": "Run sudo apt-get update",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 3
+      },
+      {
+        "name": "Run sudo apt-get install clang cmake ninja-build pkg-config libgtk-3-dev mpv libmpv-dev dpkg-dev p7zip-full p7zip-rar",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 4
+      },
+      {
+        "name": "Run subosito/flutter-action@v2",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 5
+      },
+      {
+        "name": "Run rm -r test/src/player/native",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 6
+      },
+      {
+        "name": "Run dart pub get",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 7
+      },
+      {
+        "name": "Verify Web shuffle playlist snapshots",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 8
+      },
+      {
+        "name": "Run dart test --platform chrome",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 9
+      },
+      {
+        "name": "Post Run subosito/flutter-action@v2",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 17
+      },
+      {
+        "name": "Post Run actions/checkout@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 18
+      },
+      {
+        "name": "Complete job",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 19
+      }
+    ]
+  },
+  "log_bytes": 255500,
+  "log_sha256": "43941c93ec2cc11ebdf3915fabdc3cedb30fcc732b7e83a803c5f4882a8230db",
+  "checkout_evidence": [
+    {
+      "line": 141,
+      "text": "2026-10-12T15:54:34.8896929Z [command]/usr/bin/git log -1 --format=%H"
+    },
+    {
+      "line": 142,
+      "text": "2026-10-12T15:54:34.8922345Z 97fd1956f300e275f128cb1a19c54531bb7b3f2a"
+    }
+  ],
+  "targeted": {
+    "command": "dart test --platform chrome test/src/player/player_test.dart --name '^player-set-shuffle' --reporter expanded",
+    "step": {
+      "name": "Verify Web shuffle playlist snapshots",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 8
+    },
+    "counts": {
+      "passed": 4,
+      "skipped": 0,
+      "failed": 0
+    },
+    "case_names": [
+      "player-set-shuffle",
+      "player-set-shuffle-consecutive",
+      "player-set-shuffle-preserves-playlist-snapshots",
+      "player-set-shuffle-restore-preserves-published-playlist"
+    ],
+    "runtime_case_name_evidence": [
+      {
+        "line": 2054,
+        "text": "2026-10-12T15:56:31.0725626Z 00:00 +0: player-set-shuffle"
+      },
+      {
+        "line": 2088,
+        "text": "2026-10-12T15:56:34.4604350Z 00:03 +1: player-set-shuffle-consecutive"
+      },
+      {
+        "line": 2122,
+        "text": "2026-10-12T15:56:37.4692059Z 00:06 +2: player-set-shuffle-preserves-playlist-snapshots"
+      },
+      {
+        "line": 2123,
+        "text": "2026-10-12T15:56:37.4741233Z 00:06 +3: player-set-shuffle-restore-preserves-published-playlist"
+      }
+    ],
+    "summary_evidence": [
+      {
+        "line": 2124,
+        "text": "2026-10-12T15:56:37.4842273Z 00:06 +4: All tests passed!"
+      }
+    ],
+    "case_names_and_counts_read_from_actual_log": true
+  },
+  "full_web": {
+    "command": "dart test --platform chrome",
+    "step": {
+      "name": "Run dart test --platform chrome",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 9
+    },
+    "counts": {
+      "passed": 63,
+      "failed": 0,
+      "skipped": 27
+    },
+    "summary_evidence": [
+      {
+        "line": 2839,
+        "text": "2026-10-12T16:26:45.5024638Z 🎉 63 tests passed, 27 skipped."
+      }
+    ],
+    "shuffle_case_evidence": [
+      {
+        "line": 2408,
+        "text": "2026-10-12T16:20:27.4145464Z ✅ test/src/player/player_test.dart: player-set-shuffle"
+      },
+      {
+        "line": 2442,
+        "text": "2026-10-12T16:20:30.4224579Z ✅ test/src/player/player_test.dart: player-set-shuffle-consecutive"
+      },
+      {
+        "line": 2476,
+        "text": "2026-10-12T16:20:30.4280143Z ✅ test/src/player/player_test.dart: player-set-shuffle-preserves-playlist-snapshots"
+      },
+      {
+        "line": 2477,
+        "text": "2026-10-12T16:20:30.4294532Z ✅ test/src/player/player_test.dart: player-set-shuffle-restore-preserves-published-playlist"
+      }
+    ],
+    "retry_failure_evidence": []
+  },
+  "source_files": {
+    "media_kit/lib/src/player/web/player/real.dart": {
+      "git_blob": "1864968fd3128586c30b70e1fc6ff8833390565e",
+      "sha256": "7bdd28f5606da42f4931e13ec0fe274a866f9e75b2bed294c60e43b53374462d"
+    },
+    "media_kit/test/src/player/player_test.dart": {
+      "git_blob": "cd8a27fe29f1bc558f6594d589515794aa71d010",
+      "sha256": "b1e20203b0bd5d0f1698b650db24201c0e06d344461a6dc6235178effd3f5c59"
+    },
+    ".github/workflows/ci.yml": {
+      "git_blob": "38ae4d0aa0bd044e1e1312846d91a5b79fbdf04e",
+      "sha256": "02da549c4b38e3c27c3e219fbfd165dae755c742a17fe7eee1d927c5f932b6bb"
+    }
+  },
+  "acceptance": {
+    "targeted_four_cases_passed": true,
+    "full_web_passed": true,
+    "whole_general_suite_claimed_complete": false,
+    "native_provenance": false,
+    "device_hdr": false,
+    "performance": false,
+    "release": false
+  },
+  "scope": "This is the actual a73d570b Web COW implementation and two added Chrome snapshot regressions, plus the historical two shuffle cases and complete browser package suite. It is separate from pre-COW 0c6ffeaf run38266780432, App source/Build vectors, native producer inputs and DEVICE PRs.",
+  "limitations": [
+    "Raw complete job logs bind checkout SHA and both commands; metadata-only targeted success observed earlier was not treated as four actual passes until these logs became available.",
+    "Browser host tests do not establish native decoding, output owner/carrier resources, LG/DV/HDR behavior, fresh DV001/PR5 producer acceptance or sustained playback performance.",
+    "Any other general-platform jobs still running are left at their own status and are not accepted through the Web result."
+  ]
+}
