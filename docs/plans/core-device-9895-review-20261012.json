@@ -1,0 +1,633 @@
+{
+  "schema": "core-incremental-device-review/v1",
+  "task": "MK-ROUTING-20261011",
+  "scope": "PiliPlusX PR3 new DV006 brightness native handler only; prior DOVI issues carried by verified unchanged blobs",
+  "reviewer": "CORE independent read-only helper /root/device_return_review. No repo edits, native recipe changes, public comments/reviews/push or new DEVICE work line.",
+  "review_status": "REQUEST_CHANGES",
+  "observation_time_utc": "2026-10-12 16:10:29 UTC",
+  "created_at_utc": "2026-10-12T16:16:55.438558+00:00",
+  "repository": "Goodwu/PiliPlusX",
+  "pr_number": 3,
+  "pr_url": "https://github.com/Goodwu/PiliPlusX/pull/3",
+  "base_head": "b18086d0d654a5f523296b41bdfb869c588cd3f0",
+  "reviewed_head": "9895e7dc040cdc06a33cceba4d4379eba3f596b5",
+  "fresh_pr_head": "9895e7dc040cdc06a33cceba4d4379eba3f596b5",
+  "commit_created_at": "2026-10-12T16:05:23Z",
+  "delta": {
+    "commits": 1,
+    "additions": 219,
+    "deletions": 0,
+    "files": [
+      {
+        "filename": "android/app/src/main/kotlin/com/example/piliplusx/MainActivity.kt",
+        "status": "modified",
+        "additions": 9,
+        "deletions": 0,
+        "changes": 9,
+        "previous_filename": null
+      },
+      {
+        "filename": "android/app/src/main/kotlin/com/example/piliplusx/ScreenBrightnessHandler.kt",
+        "status": "added",
+        "additions": 210,
+        "deletions": 0,
+        "changes": 210,
+        "previous_filename": null
+      }
+    ],
+    "no_dovi_cache_http_controller_test_changes": true
+  },
+  "central_new_return": [
+    {
+      "id": 6127973022,
+      "created_at": "2026-10-12T16:05:47Z",
+      "body": "## [DEVICE] DV006：亮度手势全平台无效根因与原生实现（已推送，待 review 后定归并）/ MK-ROUTING-20261011\n\n用户报告亮度手势在多台安卓设备上均无效（数字变、亮度不变）。定位与修复：\n\n### 根因（结构缺失）\n\nApp 只依赖 `screen_brightness_platform_interface`（2.1.2，纯 Dart 接口包），通道 `github.com/aaassseee/screen_brightness` 在 Android 原生侧**无任何 handler**（lock 无平台实现包、原生目录无处理代码）→ 全部调用抛 `MissingPluginException` → `setBrightness` 的 `catch (_) {}` 静默吞掉 → overlay 数字（本地值）变化而实际亮度永不变化。多机一致 = 结构性通道缺失。\n\n### 修复（PiliPlusX DV003 分支 9895e7dc0）\n\n`ScreenBrightnessHandler.kt`（原生，MainActivity attach/onDestroy stop）：\n- MethodChannel 全方法：get/setSystemScreenBrightness（Settings.System 归一化 0..1；**写入时若处于自动亮度模式先切手动**——否则写值无可见效果，即用户报告的直接原因之一）、get/set/resetApplicationScreenBrightness（Activity window screenBrightness，NaN=清除）、hasApplicationScreenBrightnessChanged/isAutoReset/setAutoReset/isAnimate/setAnimate/canChangeSystemBrightness\n- system_brightness_changed EventChannel：ContentObserver 监听系统亮度\n- application_brightness_changed EventChannel：sink 注册/注销\n\n### 验证状态（如实）\n\n- 启动期无 MissingPluginException（通道注册成功）\n- **手势与亮度联动待用户手动滑动复核**——合成输入（adb swipe）无法触发该 Flutter 手势，自动化验证不可用\n- 屏幕已灭屏\n\n### 边界说明\n\n- system 写入自动切手动模式：业界常规，但属行为变更，请 review 确认\n- reset 语义与退出播放还原链（controller.dart:3973）保持既有设计\n- 该修复与 DV003/004/005（126 链路）独立；已 push 至 device/MK-ROUTING-20261011/DV003 分支头（9895e7dc0），**未经 review 前不请求归并**\n",
+      "url": "https://github.com/Goodwu/media-kit/pull/4#issuecomment-6127973022"
+    }
+  ],
+  "pr_new_comments_after_previous_review": [],
+  "previous_checkpoint_preserved": {
+    "path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/end-refresh-20261012/core-device-final-refresh-20261012.json",
+    "sha256": "7b2b22b3fa835220abf49b7947b8061768628f299ffe174b368a95d7860f32da",
+    "bound_head": "b18086d0d654a5f523296b41bdfb869c588cd3f0",
+    "unchanged": true,
+    "note": "16:02:33 checkpoint remains evidence for b180 before DV006. This separate report does not relabel or rewrite it."
+  },
+  "current_source_manifest": [
+    {
+      "path": "android/app/src/main/kotlin/com/example/piliplusx/ScreenBrightnessHandler.kt",
+      "git_blob": "e1be883ee1a0fa55826415cdb25e82beac2eac74",
+      "url": "https://github.com/Goodwu/PiliPlusX/blob/9895e7dc040cdc06a33cceba4d4379eba3f596b5/android/app/src/main/kotlin/com/example/piliplusx/ScreenBrightnessHandler.kt",
+      "bytes": 8294,
+      "sha256": "ac1ffcc4e451fe71cfa12ba25ff1a311dcc06fe3f8effaac79fda389722a75bd",
+      "b180_frozen_exists": false,
+      "identical_to_b180_frozen": null
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/example/piliplusx/MainActivity.kt",
+      "git_blob": "d967a664d2690ce0bc313569ea60755fcdc3845d",
+      "url": "https://github.com/Goodwu/PiliPlusX/blob/9895e7dc040cdc06a33cceba4d4379eba3f596b5/android/app/src/main/kotlin/com/example/piliplusx/MainActivity.kt",
+      "bytes": 4915,
+      "sha256": "1257fcad2d392112ad8ab12bbbc1391cfc9b063869caa6f656095870363c2179",
+      "b180_frozen_exists": false,
+      "identical_to_b180_frozen": null
+    },
+    {
+      "path": "pubspec.lock",
+      "git_blob": "7e49a213708bd30f2f856929b7c7eec4670a4547",
+      "url": "https://github.com/Goodwu/PiliPlusX/blob/9895e7dc040cdc06a33cceba4d4379eba3f596b5/pubspec.lock",
+      "bytes": 62511,
+      "sha256": "dffa0195977e24920c9cfcd6c8d992c0899a411e58b5472bd439228cbe181b82",
+      "b180_frozen_exists": false,
+      "identical_to_b180_frozen": null
+    },
+    {
+      "path": "android/app/src/main/AndroidManifest.xml",
+      "git_blob": "59bff4226e51651975d46a0a30d6487a72191c87",
+      "url": "https://github.com/Goodwu/PiliPlusX/blob/9895e7dc040cdc06a33cceba4d4379eba3f596b5/android/app/src/main/AndroidManifest.xml",
+      "bytes": 12028,
+      "sha256": "365dc674abd7090f8ad1f787bd477aa787acf4752be0c3371ce347af31c90537",
+      "b180_frozen_exists": false,
+      "identical_to_b180_frozen": null
+    },
+    {
+      "path": "lib/plugin/pl_player/view/view.dart",
+      "git_blob": "d701e6991d0d60c3d643c40ce97edf7f1a895b21",
+      "url": "https://github.com/Goodwu/PiliPlusX/blob/9895e7dc040cdc06a33cceba4d4379eba3f596b5/lib/plugin/pl_player/view/view.dart",
+      "bytes": 100741,
+      "sha256": "5131fc0eb2deb5381c0591a34f6e1da47e15946bf04ad16e78b7ec781ed401bc",
+      "b180_frozen_exists": false,
+      "identical_to_b180_frozen": null
+    },
+    {
+      "path": "lib/pages/video/view.dart",
+      "git_blob": "8a2a99ccf5355f4deb48941b6c0ff9104eb2dd0b",
+      "url": "https://github.com/Goodwu/PiliPlusX/blob/9895e7dc040cdc06a33cceba4d4379eba3f596b5/lib/pages/video/view.dart",
+      "bytes": 72481,
+      "sha256": "6aec623fecc84aaa68625345ff7efe67534fcbcb9b172be98857d62c35c2be3b",
+      "b180_frozen_exists": false,
+      "identical_to_b180_frozen": null
+    },
+    {
+      "path": "lib/pages/live_room/view.dart",
+      "git_blob": "eb6113cb89dd83fa4943aa6d7bbfe41de936dcb0",
+      "url": "https://github.com/Goodwu/PiliPlusX/blob/9895e7dc040cdc06a33cceba4d4379eba3f596b5/lib/pages/live_room/view.dart",
+      "bytes": 37642,
+      "sha256": "9f6e9dcc221a168a08b6fe67c24ed5ac7c495ea84a40bbaa10ed51c1ecbd6101",
+      "b180_frozen_exists": false,
+      "identical_to_b180_frozen": null
+    },
+    {
+      "path": "lib/main_native.dart",
+      "git_blob": "eb2ab882eefead5b33edbd4c4d3d30484cb8a8c2",
+      "url": "https://github.com/Goodwu/PiliPlusX/blob/9895e7dc040cdc06a33cceba4d4379eba3f596b5/lib/main_native.dart",
+      "bytes": 16056,
+      "sha256": "69cfa0d88e689a299d55ad41c7123f92439e565b62c41f25dc2a213b01627382",
+      "b180_frozen_exists": false,
+      "identical_to_b180_frozen": null
+    },
+    {
+      "path": "lib/pages/video/controller.dart",
+      "git_blob": "baf63f24eae937c263f782bd1a6b90f6ca881868",
+      "url": "https://github.com/Goodwu/PiliPlusX/blob/9895e7dc040cdc06a33cceba4d4379eba3f596b5/lib/pages/video/controller.dart",
+      "bytes": 74764,
+      "sha256": "9978268db891b601dd05a147506e6542bd2c4dd4a9d3adb7fdf79c069e13c142",
+      "b180_frozen_exists": true,
+      "identical_to_b180_frozen": true
+    },
+    {
+      "path": "lib/plugin/pl_player/controller.dart",
+      "git_blob": "4fb76fec28957af8a2e623e0c9d2e800f70d4285",
+      "url": "https://github.com/Goodwu/PiliPlusX/blob/9895e7dc040cdc06a33cceba4d4379eba3f596b5/lib/plugin/pl_player/controller.dart",
+      "bytes": 143250,
+      "sha256": "84b1005646bf9954120fdc24e1f986f917ce388da8b923ec30e47d40f3e30e0f",
+      "b180_frozen_exists": true,
+      "identical_to_b180_frozen": true
+    },
+    {
+      "path": "lib/plugin/pl_player/dovi_sniff.dart",
+      "git_blob": "1e14cfab7a73ed5d8ce170befc3b3b96bf2abb66",
+      "url": "https://github.com/Goodwu/PiliPlusX/blob/9895e7dc040cdc06a33cceba4d4379eba3f596b5/lib/plugin/pl_player/dovi_sniff.dart",
+      "bytes": 7760,
+      "sha256": "aba14c40e645f486f55f41b5cf91db9a745ef6f3e32adc7f833d2f01d7637879",
+      "b180_frozen_exists": true,
+      "identical_to_b180_frozen": true
+    },
+    {
+      "path": "lib/plugin/pl_player/source_selection.dart",
+      "git_blob": "9106a9b2c9ca54093f5e875285bd32b28a19398f",
+      "url": "https://github.com/Goodwu/PiliPlusX/blob/9895e7dc040cdc06a33cceba4d4379eba3f596b5/lib/plugin/pl_player/source_selection.dart",
+      "bytes": 5973,
+      "sha256": "a41788bce176730566b381f57280cb1eca1824daf8b5f3129ca7e82900c1a517",
+      "b180_frozen_exists": true,
+      "identical_to_b180_frozen": true
+    },
+    {
+      "path": "lib/plugin/pl_player/hdr_output.dart",
+      "git_blob": "e308350cb007fa1cf592dfbfea7fc9659a67bebb",
+      "url": "https://github.com/Goodwu/PiliPlusX/blob/9895e7dc040cdc06a33cceba4d4379eba3f596b5/lib/plugin/pl_player/hdr_output.dart",
+      "bytes": 9591,
+      "sha256": "b71488e3fa7f43707354edf4430bd2a88fe9fd2c8a762d992a93e130f40e21ef",
+      "b180_frozen_exists": true,
+      "identical_to_b180_frozen": true
+    }
+  ],
+  "previous_review_issues": {
+    "reference": "https://github.com/Goodwu/PiliPlusX/pull/3#pullrequestreview-5492931759",
+    "identical_five_files": [
+      {
+        "path": "lib/pages/video/controller.dart",
+        "git_blob": "baf63f24eae937c263f782bd1a6b90f6ca881868",
+        "sha256": "9978268db891b601dd05a147506e6542bd2c4dd4a9d3adb7fdf79c069e13c142"
+      },
+      {
+        "path": "lib/plugin/pl_player/controller.dart",
+        "git_blob": "4fb76fec28957af8a2e623e0c9d2e800f70d4285",
+        "sha256": "84b1005646bf9954120fdc24e1f986f917ce388da8b923ec30e47d40f3e30e0f"
+      },
+      {
+        "path": "lib/plugin/pl_player/dovi_sniff.dart",
+        "git_blob": "1e14cfab7a73ed5d8ce170befc3b3b96bf2abb66",
+        "sha256": "aba14c40e645f486f55f41b5cf91db9a745ef6f3e32adc7f833d2f01d7637879"
+      },
+      {
+        "path": "lib/plugin/pl_player/source_selection.dart",
+        "git_blob": "9106a9b2c9ca54093f5e875285bd32b28a19398f",
+        "sha256": "a41788bce176730566b381f57280cb1eca1824daf8b5f3129ca7e82900c1a517"
+      },
+      {
+        "path": "lib/plugin/pl_player/hdr_output.dart",
+        "git_blob": "e308350cb007fa1cf592dfbfea7fc9659a67bebb",
+        "sha256": "b71488e3fa7f43707354edf4430bd2a88fe9fd2c8a762d992a93e130f40e21ef"
+      }
+    ],
+    "still_open": [
+      "Controller cache media identity key vs selection spec.key mismatch",
+      "HTTP body total budget/bytes/cancellation, malformed URL and cleanup",
+      "In-flight Set returns empty result to concurrent current revision probe",
+      "Local-file videoUrl null assertion before branch",
+      "DOVI selected-track/layer/color/compat integrity",
+      "Full source URL diagnostics and accessible exact test evidence"
+    ],
+    "previously_fixed_and_still_fixed": [
+      "initialDoviFacts on reopen",
+      "bounded success accumulation and limited candidates",
+      "connect/headers shared deadline",
+      "old-revision cache write guard",
+      "sniffer exception redaction",
+      "accidental local JAR property reverted"
+    ],
+    "new_commit_closes_old_p1": false
+  },
+  "new_findings": [
+    {
+      "id": "DV006-P1-RESET",
+      "priority": "P1",
+      "path": "android/app/src/main/kotlin/com/example/piliplusx/ScreenBrightnessHandler.kt",
+      "lines": "92-94,191-200",
+      "title": "Reset stores NaN instead of Android no-override sentinel",
+      "reason": "Double.NaN passes through Double.coerceIn(0,1); both comparisons are false and Kotlin returns the receiver. It is written into window.attributes.screenBrightness. Getter tests attr<0 (false for NaN), returns NaN, and upstream interface range check rejects it. hasChanged >=0 is false despite the invalid attribute.",
+      "actual_app_path": "Pref.setSystemBrightness defaults false (storage_pref.dart:1079-1080); video view didPushNext and didPopNext invoke reset at 485-486 and 528-542. pl_player/controller.dart:3973-3974 resets when final Android player disposes; live page reset also exists. App application getter async .then has no catch at pl_player/view/view.dart:195-200.",
+      "source_derived_reproduction": [
+        "set application brightness 0.8",
+        "invoke reset; attribute becomes NaN instead of -1f",
+        "get application brightness; returns NaN and Dart range validation throws",
+        "This is source-derived reasoning. No Kotlin/native/Dart execution or actual screen outcome claimed."
+      ],
+      "required_fix_and_validation": "Use actual BRIGHTNESS_OVERRIDE_NONE, preserve finite getter fallback, and validate set/reset/get plus leave/reenter and system following using real native contract.",
+      "primary_sources": [
+        "https://developer.android.com/reference/android/view/WindowManager.LayoutParams#BRIGHTNESS_OVERRIDE_NONE",
+        "https://pub.dev/documentation/screen_brightness_platform_interface/latest/method_channel_screen_brightness/MethodChannelScreenBrightness-class.html",
+        "https://raw.githubusercontent.com/JetBrains/kotlin/v2.2.20/libraries/stdlib/common/src/generated/_Ranges.kt"
+      ]
+    },
+    {
+      "id": "DV006-P2-THREAD",
+      "priority": "P2",
+      "path": "android/app/src/main/kotlin/com/example/piliplusx/ScreenBrightnessHandler.kt",
+      "lines": "56-61,122-129",
+      "title": "Content observer can emit on a notification/Binder thread",
+      "reason": "ContentObserver has null Handler, so onChange is invoked immediately on dispatching thread, with no main-thread hop before EventSink.success. Default Flutter BinaryMessenger sends are UI/platform-thread calls. Callback is outside MethodCall handler try/catch.",
+      "source_derived_reproduction": [
+        "Subscribe to system brightness event in actual App system mode.",
+        "System settings provider notifies from outside UI thread.",
+        "Observer directly sends Flutter event from notification thread; contract is violated and send may fail. Actual device failure trace not captured by this review."
+      ],
+      "required_fix_and_validation": "Bind observer/event emission to appropriate platform thread and check real settings/control-center notification with thread assertion.",
+      "primary_sources": [
+        "https://developer.android.com/reference/android/database/ContentObserver",
+        "https://api.flutter.dev/javadoc/io/flutter/plugin/common/BinaryMessenger.html"
+      ]
+    },
+    {
+      "id": "DV006-P2-APPLICATION-EVENTS",
+      "priority": "P2",
+      "path": "android/app/src/main/kotlin/com/example/piliplusx/ScreenBrightnessHandler.kt",
+      "lines": "49,112-120,197-208",
+      "title": "Application EventChannel never emits any event",
+      "reason": "applicationSink is assigned or cleared but never called. set/reset do not emit, and system observer registration occurs only when systemEvents has a listener. App default application mode subscribes only application stream, so system-following changes and native set/reset cannot reach that subscription.",
+      "actual_app_path": "pl_player/view/view.dart:340-344 subscribes onApplicationScreenBrightnessChanged; 165-169 applies event to brightness state and gesture baseline when not currently dragging.",
+      "required_fix_and_validation": "Emit interface-prescribed set/reset and effective application brightness changes; cover cleared override follows system, overridden brightness policy, stream cancellation and actual view listener.",
+      "primary_sources": [
+        "https://pub.dev/documentation/screen_brightness_platform_interface/latest/method_channel_screen_brightness/MethodChannelScreenBrightness-class.html"
+      ]
+    },
+    {
+      "id": "DV006-P2-SYSTEM-WRITE",
+      "priority": "P2",
+      "path": "android/app/src/main/kotlin/com/example/piliplusx/ScreenBrightnessHandler.kt",
+      "lines": "72-78,104,168-188",
+      "title": "Permission capability is constant true and system write results are ignored",
+      "reason": "Manifest declares WRITE_SETTINGS but API23+ requires separately granted write-settings capability. canChangeSystemBrightness returns true unconditionally. Both Settings.System.putInt Boolean results are ignored; exception turns into generic channel error, which existing App setter swallows; false result becomes success.",
+      "actual_app_path": "User optional system-brightness preference defaults false. System-mode getter/subscription and setter are pl_player/view/view.dart:333-338,411-420. Review concerns enabling this optional mode without granted permission, revocation and provider false, not default application-mode authorization.",
+      "required_fix_and_validation": "Query real canWrite on applicable APIs; handle permission state and write failures without reporting false success; verify granted/denied/revoked/provider-failure paths.",
+      "behavior_scope_note": "Automatic-to-manual changes a persistent global setting. DEVICE central 6127973022 acknowledges the behavior change and asks review. This audit does not infer product approval from the channel repair claim and does not introduce or decide a new user policy.",
+      "primary_sources": [
+        "https://developer.android.com/reference/android/provider/Settings.System#canWrite(android.content.Context)"
+      ]
+    },
+    {
+      "id": "DV006-P2-DETACH",
+      "priority": "P2",
+      "path": "android/app/src/main/kotlin/com/example/piliplusx/ScreenBrightnessHandler.kt",
+      "lines": "33-39,66-67,112-137,204-208",
+      "related_path": "android/app/src/main/kotlin/com/example/piliplusx/MainActivity.kt:17-25,95-98",
+      "title": "stop does not unregister Activity-capturing channel handlers",
+      "reason": "stop only unregisters observer and clears sinks. MethodChannel and EventChannel handlers remain registered and capture this handler and strong Activity. Pinned AudioServiceActivity returns AudioServicePlugin.getFlutterEngine; pinned plugin caches the engine and its dispose method may retain it if an activity is attached. In a retained-engine detach/recreation scenario, stale handlers can access old Activity or re-register observer on later listen.",
+      "scope_qualification": "Not a claim that every Activity destruction retains engine or necessarily leaks permanently. This is a retained/reused-engine correctness path exposed by current dependency and incomplete detach.",
+      "required_fix_and_validation": "Implement matching attach/detach ownership and cleanup for handlers/observer/activity references. Test same engine with Activity detach/recreate, including old detach after new attach not removing new owner bindings.",
+      "primary_sources": [
+        "https://raw.githubusercontent.com/bggRGjQaUbCoE/audio_service/e0860cf42618880b7e4fc5843d1e297c93d23922/audio_service/android/src/main/java/com/ryanheise/audioservice/AudioServiceActivity.java",
+        "https://raw.githubusercontent.com/bggRGjQaUbCoE/audio_service/e0860cf42618880b7e4fc5843d1e297c93d23922/audio_service/android/src/main/java/com/ryanheise/audioservice/AudioServicePlugin.java"
+      ]
+    }
+  ],
+  "non_findings_and_limits": [
+    "MethodChannel and EventChannel names match upstream interface; events are raw doubles, not map payloads. No protocol payload type mismatch alleged.",
+    "isAutoReset/setAutoReset and isAnimate/setAnimate are documented iOS-only in upstream interface. Their Android no-op/false replies are not listed as blockers.",
+    "Unused imports and unused duplicate applicationEventsHandler are nonblocking cleanup and not used to inflate findings.",
+    "Default application brightness path does not require system WRITE_SETTINGS permission. Permission finding applies to optional system mode and truthful capability/write results.",
+    "No local compile, Kotlin/Dart test, APK inspection or device screen brightness run was performed. Source-derived reproduction is distinguished from executed reproduction."
+  ],
+  "dependency_reference_evidence": {
+    "locked_brightness_interface": {
+      "version": "2.1.2",
+      "pub_archive_sha256": "2de60c0ba569b898950029cc1f7e9dd72bda44a22beb5054aac331cb6fce2ff2"
+    },
+    "upstream_brightness_tree": "dfc2f2e6fe4cd1ac300287078243db04f8bbcb5d",
+    "reference_pubspec_self_declared_version": "2.1.2",
+    "reference_status": "Upstream interface/channel/method/range-check source was read and frozen with immutable tree/blob context and self-declared version 2.1.2; locked hosted package tarball was not independently downloaded or digest-verified. Public versioned API contract and own new handler are sufficient for reset/event findings.",
+    "audio_service_git_ref": "e0860cf42618880b7e4fc5843d1e297c93d23922",
+    "kotlin_reference_tag": "v2.2.20; source of primitive Double.coerceIn read, no claim of local Kotlin execution or matching actual compiled stdlib artifact."
+  },
+  "new_build": {
+    "run_id": 38274961135,
+    "run_attempt": 1,
+    "url": "https://github.com/Goodwu/PiliPlusX/actions/runs/38274961135",
+    "head_sha": "9895e7dc040cdc06a33cceba4d4379eba3f596b5",
+    "status": "completed",
+    "conclusion": "failure",
+    "updated_at": "2026-10-12T16:10:15Z",
+    "jobs": [
+      {
+        "id": 114898040649,
+        "name": "Capture one current App/library input vector",
+        "status": "completed",
+        "conclusion": "success",
+        "failed_steps": []
+      },
+      {
+        "id": 114898042243,
+        "name": "linux_arm64",
+        "status": "completed",
+        "conclusion": "skipped",
+        "failed_steps": []
+      },
+      {
+        "id": 114898094478,
+        "name": "Release Android",
+        "status": "completed",
+        "conclusion": "failure",
+        "failed_steps": [
+          {
+            "name": "Apply Patch",
+            "status": "completed",
+            "conclusion": "failure",
+            "number": 20
+          }
+        ]
+      },
+      {
+        "id": 114898094769,
+        "name": "mac / macOS workflow (ARM64 hosted)",
+        "status": "completed",
+        "conclusion": "failure",
+        "failed_steps": [
+          {
+            "name": "Validate source and approved shared inputs",
+            "status": "completed",
+            "conclusion": "failure",
+            "number": 15
+          }
+        ]
+      },
+      {
+        "id": 114898094909,
+        "name": "win_x64 / Windows x64 workflow",
+        "status": "completed",
+        "conclusion": "failure",
+        "failed_steps": [
+          {
+            "name": "Apply Patch",
+            "status": "completed",
+            "conclusion": "failure",
+            "number": 17
+          }
+        ]
+      },
+      {
+        "id": 114898094916,
+        "name": "ios / iOS workflow",
+        "status": "completed",
+        "conclusion": "failure",
+        "failed_steps": [
+          {
+            "name": "Verify media-kit lock",
+            "status": "completed",
+            "conclusion": "failure",
+            "number": 25
+          }
+        ]
+      },
+      {
+        "id": 114898094922,
+        "name": "pink / Release Android Pink",
+        "status": "completed",
+        "conclusion": "failure",
+        "failed_steps": [
+          {
+            "name": "Apply Patch",
+            "status": "completed",
+            "conclusion": "failure",
+            "number": 23
+          }
+        ]
+      },
+      {
+        "id": 114898094971,
+        "name": "linux_x64 / Linux x64 workflow",
+        "status": "completed",
+        "conclusion": "failure",
+        "failed_steps": [
+          {
+            "name": "Apply Patch",
+            "status": "completed",
+            "conclusion": "failure",
+            "number": 16
+          }
+        ]
+      },
+      {
+        "id": 114898096015,
+        "name": "Current-source App validation / Capture one current routing source vector",
+        "status": "completed",
+        "conclusion": "failure",
+        "failed_steps": [
+          {
+            "name": "Capture exact media-kit HEAD once for all source jobs",
+            "status": "completed",
+            "conclusion": "failure",
+            "number": 2
+          }
+        ]
+      },
+      {
+        "id": 114898138790,
+        "name": "Current-source App validation / App analyze, tests and Dart bundle (latest media-kit source)",
+        "status": "completed",
+        "conclusion": "skipped",
+        "failed_steps": []
+      },
+      {
+        "id": 114898138939,
+        "name": "Current-source App validation / App Python regression tests (macOS)",
+        "status": "completed",
+        "conclusion": "skipped",
+        "failed_steps": []
+      },
+      {
+        "id": 114898139348,
+        "name": "Current-source App validation / Source bootstrap and validation (${{ matrix.platform }})",
+        "status": "completed",
+        "conclusion": "skipped",
+        "failed_steps": []
+      },
+      {
+        "id": 114898465759,
+        "name": "Verify Android/Pink native parity",
+        "status": "completed",
+        "conclusion": "skipped",
+        "failed_steps": []
+      }
+    ],
+    "evidence_limit": "This review read new run metadata and full step statuses. Did not reuse prior b180 job logs as 9895 log evidence or claim precise new underlying log errors. Android build/test release steps and source analyze/Flutter/Python dependents were skipped, so this hosted run gives no Kotlin/native/functional pass for DV006."
+  },
+  "device_claims": {
+    "source_comment": 6127973022,
+    "claimed": "Startup without MissingPluginException; manual gesture verification pending; screen off.",
+    "review_acceptance": "Self-report preserved, not promoted to exact source/build/APK/native or functional acceptance. No new test file added in delta."
+  },
+  "required_device_followup": [
+    "Fix new handler issues within existing DEVICE ownership and return reviewed SHA.",
+    "Provide actual native build/Kotlin validation and targeted channel/reset/event/thread/permission/retained-engine tests.",
+    "Record exact App/media-kit/native/SDK/APK identity for gesture, leave/reenter/reset and ordinary player observations.",
+    "Continue original DOVI/App, PR6, DV001/PR5 fixes; do not claim new brightness code closes them."
+  ],
+  "preserved_boundaries": [
+    "DV0011095/PR5dc417 and PR6 9a2 remain under their own previous review; this review does not mutate or re-approve them.",
+    "DV004 user decisions on diagnostic scope and final plan versus actual decoder switching remain open.",
+    "No merge, close or release. Experimental default, LG YUV8/FULL/range1 device gate/owner/ACK/lease policies were not changed."
+  ],
+  "review_draft": {
+    "path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/app9895-review/pr3-review-9895-draft.md",
+    "bytes": 5611,
+    "sha256": "364b546aada19a4e658a699833c6770b4045a9f35671498bf3fb27aa68bf23b2"
+  },
+  "frozen_evidence_manifest": [
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/app9895-review/pr3-review-9895-draft.md",
+      "bytes": 5611,
+      "sha256": "364b546aada19a4e658a699833c6770b4045a9f35671498bf3fb27aa68bf23b2"
+    },
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/app9895-review/reference/AudioServiceActivity.java",
+      "bytes": 428,
+      "sha256": "4bf3674ac3484a8d9d9ae5690692849368fd14fbbf4998ee458e6f642ee039f8"
+    },
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/app9895-review/reference/AudioServicePlugin.java",
+      "bytes": 56602,
+      "sha256": "afd40121a51d32ac4aed3b8142897e62460b57524df0ecdd0bfc97313262b1e0"
+    },
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/app9895-review/reference/Kotlin-v2.2.20-_Ranges.kt",
+      "bytes": 50000,
+      "sha256": "e16f3e3f1becbcae5fab24d7c6c022cf261b2c4514d5b4d7c286eb4832a11002"
+    },
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/app9895-review/reference/ScreenBrightnessAndroidPlugin.kt",
+      "bytes": 15257,
+      "sha256": "1f2737c1cda67f72a66ebc961b447d83df4cb6f2593f73eb475069bb40375277"
+    },
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/app9895-review/reference/method_channel_screen_brightness.dart",
+      "bytes": 11026,
+      "sha256": "b6a9225aff8007e817e8cdcb9d461a178ca95877afd4a853ea55d4d637ccb919"
+    },
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/app9895-review/reference/method_name.dart",
+      "bytes": 765,
+      "sha256": "678232a0b485a757ee94916f99373c3dc52be58546db76e7283bb937be3cded1"
+    },
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/app9895-review/reference/num_extension.dart",
+      "bytes": 187,
+      "sha256": "e19e6760ea4e67080707af18be01c12ea2e7f0f2b41f9ac1361fa49b9a041aee"
+    },
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/app9895-review/reference/play_settings-lines95-130.dart",
+      "bytes": 1180,
+      "sha256": "c13cbfc211411b098ed06e7a114d799a98eecd7aa61fbfe5130a24cc66a918d0"
+    },
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/app9895-review/reference/plugin_channel.dart",
+      "bytes": 687,
+      "sha256": "28b29d1dca80e1cc1e4f3a0a768e41cb1b6c5304d11d3f6174017e155860b1d4"
+    },
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/app9895-review/reference/pubspec.yaml",
+      "bytes": 648,
+      "sha256": "cbb780116d781f61927636bc06e7dc8ce14dcdece0f497d06d487d287971e125"
+    },
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/app9895-review/reference/storage_pref-lines1070-1088.dart",
+      "bytes": 682,
+      "sha256": "891175e2d60e4d633ecfe77c6c70ea7f3d34d2898f2087f7f65f4dfef4f1db55"
+    },
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/app9895-review/snapshot.json",
+      "bytes": 342235,
+      "sha256": "9326bd132df1c6338de0ac8f3c66aabbc610d202b6be0761fac9e47cdd03e5d3"
+    },
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/app9895-review/source/android/app/src/main/AndroidManifest.xml",
+      "bytes": 12028,
+      "sha256": "365dc674abd7090f8ad1f787bd477aa787acf4752be0c3371ce347af31c90537"
+    },
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/app9895-review/source/android/app/src/main/kotlin/com/example/piliplusx/MainActivity.kt",
+      "bytes": 4915,
+      "sha256": "1257fcad2d392112ad8ab12bbbc1391cfc9b063869caa6f656095870363c2179"
+    },
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/app9895-review/source/android/app/src/main/kotlin/com/example/piliplusx/ScreenBrightnessHandler.kt",
+      "bytes": 8294,
+      "sha256": "ac1ffcc4e451fe71cfa12ba25ff1a311dcc06fe3f8effaac79fda389722a75bd"
+    },
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/app9895-review/source/lib/main_native.dart",
+      "bytes": 16056,
+      "sha256": "69cfa0d88e689a299d55ad41c7123f92439e565b62c41f25dc2a213b01627382"
+    },
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/app9895-review/source/lib/pages/live_room/view.dart",
+      "bytes": 37642,
+      "sha256": "9f6e9dcc221a168a08b6fe67c24ed5ac7c495ea84a40bbaa10ed51c1ecbd6101"
+    },
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/app9895-review/source/lib/pages/video/controller.dart",
+      "bytes": 74764,
+      "sha256": "9978268db891b601dd05a147506e6542bd2c4dd4a9d3adb7fdf79c069e13c142"
+    },
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/app9895-review/source/lib/pages/video/view.dart",
+      "bytes": 72481,
+      "sha256": "6aec623fecc84aaa68625345ff7efe67534fcbcb9b172be98857d62c35c2be3b"
+    },
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/app9895-review/source/lib/plugin/pl_player/controller.dart",
+      "bytes": 143250,
+      "sha256": "84b1005646bf9954120fdc24e1f986f917ce388da8b923ec30e47d40f3e30e0f"
+    },
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/app9895-review/source/lib/plugin/pl_player/dovi_sniff.dart",
+      "bytes": 7760,
+      "sha256": "aba14c40e645f486f55f41b5cf91db9a745ef6f3e32adc7f833d2f01d7637879"
+    },
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/app9895-review/source/lib/plugin/pl_player/hdr_output.dart",
+      "bytes": 9591,
+      "sha256": "b71488e3fa7f43707354edf4430bd2a88fe9fd2c8a762d992a93e130f40e21ef"
+    },
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/app9895-review/source/lib/plugin/pl_player/source_selection.dart",
+      "bytes": 5973,
+      "sha256": "a41788bce176730566b381f57280cb1eca1824daf8b5f3129ca7e82900c1a517"
+    },
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/app9895-review/source/lib/plugin/pl_player/view/view.dart",
+      "bytes": 100741,
+      "sha256": "5131fc0eb2deb5381c0591a34f6e1da47e15946bf04ad16e78b7ec781ed401bc"
+    },
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/app9895-review/source/pubspec.lock",
+      "bytes": 62511,
+      "sha256": "dffa0195977e24920c9cfcd6c8d992c0899a411e58b5472bd439228cbe181b82"
+    },
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/app9895-review/source-manifest.json",
+      "bytes": 5563,
+      "sha256": "be2e4be5448f3fa03676342f944b483d7bb6c16277621a7721690e48ebe8c713"
+    }
+  ]
+}
