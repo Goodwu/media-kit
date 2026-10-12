@@ -2,13 +2,13 @@
 
 ## Current State（2026-10-13 收口）
 
-**回归结论：通过（4/5 台设备；1 项新发现间歇性缺陷、2 条人工目视旗标、1 台 blocked 待用户解锁）。** 分支 routing/MK-ROUTING-20261011 @ 5834ce5b + mpv c11426b67a + FFmpeg d4bb79394b 世代（native 层与 10-10 基线逐字节一致，JAR lib 槽位 5f8fc04c）。测试链产四 APK（p5/p84/hdr10/sdr）。设备结果：
+**回归结论：通过（5/5 台在线手机全数完成；1 项新发现间歇性缺陷、2 条人工目视旗标）。** 分支 routing/MK-ROUTING-20261011 @ 5834ce5b + mpv c11426b67a + FFmpeg d4bb79394b 世代（native 层与 10-10 基线逐字节一致，JAR lib 槽位 5f8fc04c）。测试链产四 APK（p5/p84/hdr10/sdr）。设备结果：
 
 - **LYA-AL00**：3/3 绿。路由与 10-10 基线逐格一致（p5 reshape→PQ、p84 HLG 直出、hdr10 baseLayerDirect），全片轮 EOS + dispose 正常，截图真实内容。
 - **marble**：p5/p84 绿（nativeDV 默认直达保持，timed/boolean）；hdr10 首跑被**新解码履行复核门竞态**拒绝（HdrDecoderReviewFailure，同路由复跑 marble5 完整通过：time-pos 5.9→87.9 推进、零丢帧、dispose 正常）——间歇性 flake（同路由今日 1/4），待修非确定性回归。p5 post-EOS BACK dispose 缺失为已知问题②。
 - **LG H870DS**：3/3 对照 LG 线基线通过。P5 nativeDV verified（=10-09 收口验收路由；最新源码 JAR 在 API24 正常加载）、全片 EOS、丢帧 3。p84=baseLayerConvert+mediacodec-copy（=10-09 YUV HWC 机制，SF 实锤 HWC 合成）+`degrade=dataSpaceApplyFailed`；hdr10=baseLayerDirect（默认策略上探，与 LG 旧严格门下的 convert 不同）。**旗标：p84/hdr10 色彩未经人验，建议 30s 目视复核。**
 - **Mi Note 3 (jason)**：2/2 对照 09-30 观察基线通过（P5 toneMapSdr/verified + 84% VO 丢帧=文档在案 SD660 设备限制精确复现；SDR sdrDirect/verified 零丢帧）。
-- **Redmi Note 5A (ugg)**：blocked——安全锁屏（`inputRestricted=true`），自动化不可越过，sdr 轮未跑；设备已还原原状，素材就位，**待用户手动解锁后补 1 轮 90s SDR**。
+- **Redmi Note 5A (ugg)**：用户解锁后补跑 ugg5-sdr 通过（05/13 07:55）——`sdrDirect/verified playable`（SDR 设备预期路由）、render_failures=0、fatal=0、EOS（eof-reached=yes@t=90）、dispose 闭合；跑后卸载还原（PACKAGE_ABSENT、旋转 0/0、亮度 mode=1、熄屏）。**至此 5/5 台全数通过，目标闭环。**
 
 **新发现/修正**：① 新解码履行复核门竞态（见 marble4-hdr10，待修：hdr_decoder_review.dart "Observed decoder changed" 在初始化期误触发）；② 已知问题 post-EOS BACK 不 dispose 本轮在 LG(API24)/jason(API35) 复现——原"HyperOS API35 × post-EOS"归因不成立，修正为设备相关（复现 marble/jason/LG，LYA 通过），共性因子待查；③ `tool/build-android-test.sh` 定稿缺陷修复（flutter 步骤 melos 根必失败，53ede203 引入）；④ LG ROM setprop 32 字符上限——轮次脚本调试属性需 `|| true` 兜底；⑤ tap 协议修正：app 横屏渲染时输入空间为横屏，tap=(输入逻辑短边/2, 短边/2)，轮前旋转设置钉定 1/1、轮后还原（首组六轮因竖屏中心坐标全数作废，根因入 tap-root-cause.md）。
 
