@@ -66,8 +66,9 @@ $platform_view && base_defines+=("--dart-define=MEDIA_KIT_ANDROID_PLATFORM_VIEW=
 export ORG_GRADLE_PROJECT_mediaKitLocalArm64Jar="$jar"
 export ORG_GRADLE_PROJECT_mediaKitArm64Only=true
 mode=(); [[ "$variant" == debug ]] && mode=(--debug)
-flutter build apk "${mode[@]}" --target-platform android-arm64 \
-  "${base_defines[@]}" "${extra[@]}"
+# flutter 工程在 media_kit_hdr_lab/（仓库根是 melos workspace，无 lib/main.dart）
+(cd media_kit_hdr_lab && flutter build apk "${mode[@]}" --target-platform android-arm64 \
+  "${base_defines[@]}" "${extra[@]}")
 apk="media_kit_hdr_lab/build/app/outputs/flutter-apk/app-${variant}.apk"
 cp "$apk" "media_kit_hdr_lab/build/app/outputs/flutter-apk/$tag-$variant.apk"
 echo "=== DONE: $tag-$variant.apk ==="
