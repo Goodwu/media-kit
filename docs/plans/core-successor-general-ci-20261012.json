@@ -1,0 +1,1509 @@
+{
+  "schemaVersion": 1,
+  "task": "MK-ROUTING-20261011",
+  "reportId": "CORE-SUCCESSOR-GENERAL-CI-20261012",
+  "auditedAtUtc": "2026-10-12T14:52:32Z",
+  "method": "Reconcile GitHub run/jobs/artifacts/merge metadata with complete previously fetched job logs and downloaded artifact bytes. This pass is evidence review only; no production edits, native build, device action, workflow rerun, PR merge, close, or release publication.",
+  "conclusion": "GENERAL_CI_FAILED_WEB_SHUFFLE",
+  "run": {
+    "id": 38255531407,
+    "name": "Github Actions",
+    "path": ".github/workflows/ci.yml",
+    "event": "pull_request",
+    "run_number": 160,
+    "run_attempt": 1,
+    "head_branch": "routing/MK-ROUTING-20261011",
+    "head_sha": "e269d9669becb5812663200e7521901e8254c8bd",
+    "status": "completed",
+    "conclusion": "failure",
+    "created_at": "2026-10-12T13:24:58Z",
+    "run_started_at": "2026-10-12T13:24:58Z",
+    "updated_at": "2026-10-12T14:21:34Z",
+    "html_url": "https://github.com/Goodwu/media-kit/actions/runs/38255531407"
+  },
+  "runEvidenceUrls": {
+    "attempt": "https://github.com/Goodwu/media-kit/actions/runs/38255531407/attempts/1",
+    "runApi": "https://api.github.com/repos/Goodwu/media-kit/actions/runs/38255531407",
+    "attemptJobsApi": "https://api.github.com/repos/Goodwu/media-kit/actions/runs/38255531407/attempts/1/jobs",
+    "artifactsApi": "https://api.github.com/repos/Goodwu/media-kit/actions/runs/38255531407/artifacts"
+  },
+  "sourceIdentity": {
+    "runHeadCommit": "e269d9669becb5812663200e7521901e8254c8bd",
+    "actualCheckoutMergeCommit": "811c7ba6c52d40a12a7d9c33a42505ee2834e4cb",
+    "mergeParentsInOrder": ["d761922721ad8da6bb186abd270bb096100944ea", "e269d9669becb5812663200e7521901e8254c8bd"],
+    "checkoutTree": "b8040c8c682e11bb92658a5605dffd4ef75d9896",
+    "runHeadTree": "b8040c8c682e11bb92658a5605dffd4ef75d9896",
+    "mergeTreeEqualsRunHeadTree": true,
+    "mergeCommitDateUtc": "2026-10-12T13:24:56Z",
+    "mergeUrl": "https://github.com/Goodwu/media-kit/commit/811c7ba6c52d40a12a7d9c33a42505ee2834e4cb",
+    "mergeApiUrl": "https://api.github.com/repos/Goodwu/media-kit/commits/811c7ba6c52d40a12a7d9c33a42505ee2834e4cb",
+    "logVerifiedJobs": [114833067747, 114833068178, 114833068229, 114833068315, 114833068377],
+    "apiEmbeddedPrHeadAtSnapshot": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+    "scope": "All four package-test logs and the Android build log show checkout of pull/4/merge at 811c7ba6. Its tree equals e269d966. Artifact API workflow_run fields bind all eight artifacts to run 38255531407 and e269d966; this does not substitute for per-job source.txt or native producer source-vector receipts.",
+    "doNotRelabel": "The embedded PR head 5834ce5b is a later PR snapshot, not the run head. Results cannot be relabeled as 5834ce5b, App 13b139b7, or any later integration vector. This is not the App source run proving a3b577f3 + e269d966.",
+    "sdkScope": "Workflow and logs select Flutter 3.47.2; cache keys advertise d3b14c876900e553bc736ca19295fc09e3853e8e. Cache identity is recorded as observed; it is not a fresh SDK Git/tree/patch receipt."
+  },
+  "jobs": {
+    "total": 24,
+    "conclusions": {
+      "failure": 1,
+      "success": 22,
+      "skipped": 1
+    },
+    "allCompleted": true,
+    "allRunAttempt": 1,
+    "allApiHeadSha": "e269d9669becb5812663200e7521901e8254c8bd",
+    "columns": ["id", "name", "conclusion", "startedAtUtc", "completedAtUtc"],
+    "rows": [
+      [114833067747, "package:media_kit tests (Web)", "failure", "2026-10-12T13:26:25Z", "2026-10-12T13:58:02Z"],
+      [114833068119, "Windows", "success", "2026-10-12T13:27:44Z", "2026-10-12T13:31:01Z"],
+      [114833068178, "package:media_kit tests (Linux)", "success", "2026-10-12T13:26:25Z", "2026-10-12T14:08:59Z"],
+      [114833068229, "package:media_kit tests (Windows)", "success", "2026-10-12T13:29:04Z", "2026-10-12T14:13:06Z"],
+      [114833068249, "libmpv jar identity (Android)", "success", "2026-10-12T13:29:50Z", "2026-10-12T13:29:56Z"],
+      [114833068294, "Build Flutter Web", "success", "2026-10-12T13:27:46Z", "2026-10-12T13:29:51Z"],
+      [114833068302, "Windows (optional libs)", "success", "2026-10-12T13:26:29Z", "2026-10-12T13:29:48Z"],
+      [114833068315, "package:media_kit tests (macOS)", "success", "2026-10-12T13:33:26Z", "2026-10-12T14:21:34Z"],
+      [114833068343, "iOS", "success", "2026-10-12T13:32:46Z", "2026-10-12T13:35:03Z"],
+      [114833068351, "media_kit_hdr_lab analyze & Android build", "success", "2026-10-12T13:29:44Z", "2026-10-12T13:34:59Z"],
+      [114833068361, "Linux", "success", "2026-10-12T13:30:17Z", "2026-10-12T13:33:19Z"],
+      [114833068377, "Android", "success", "2026-10-12T13:29:47Z", "2026-10-12T13:34:51Z"],
+      [114833068430, "Android (optional libs)", "success", "2026-10-12T13:31:32Z", "2026-10-12T13:36:35Z"],
+      [114833068465, "Windows ARM64", "success", "2026-10-12T13:29:58Z", "2026-10-12T13:35:39Z"],
+      [114833068472, "macOS (audio libs)", "success", "2026-10-12T13:29:43Z", "2026-10-12T13:33:20Z"],
+      [114833068493, "macOS", "success", "2026-10-12T13:32:26Z", "2026-10-12T13:37:37Z"],
+      [114833068516, "Android (audio libs)", "success", "2026-10-12T13:31:03Z", "2026-10-12T13:35:02Z"],
+      [114833068528, "macOS (optional libs)", "success", "2026-10-12T13:38:07Z", "2026-10-12T13:41:46Z"],
+      [114833068537, "Linux (audio libs)", "success", "2026-10-12T13:31:05Z", "2026-10-12T13:33:48Z"],
+      [114833068558, "Linux (optional libs)", "success", "2026-10-12T13:29:47Z", "2026-10-12T13:32:12Z"],
+      [114833068585, "iOS (audio libs)", "success", "2026-10-12T13:35:09Z", "2026-10-12T13:38:54Z"],
+      [114833068588, "iOS (optional libs)", "success", "2026-10-12T13:33:58Z", "2026-10-12T13:37:26Z"],
+      [114833068599, "Windows (audio libs)", "success", "2026-10-12T13:29:53Z", "2026-10-12T13:33:12Z"],
+      [114837535101, "Release manifest and checksums", "skipped", "2026-10-12T13:37:38Z", "2026-10-12T13:37:37Z"]
+    ],
+    "failedJobId": 114833067747,
+    "failedStep": {
+      "name": "Run dart test --platform chrome",
+      "status": "completed",
+      "conclusion": "failure",
+      "number": 8,
+      "started_at": "2026-10-12T13:27:43Z",
+      "completed_at": "2026-10-12T13:58:00Z"
+    },
+    "skippedJobId": 114837535101,
+    "skippedJobNote": "Release manifest and checksums is skipped. Its API timestamps are preserved verbatim, including the one-second inverted started/completed order; no Release acceptance follows from successful bundle jobs."
+  },
+  "packageTests": [
+    {
+      "platform": "Web",
+      "jobId": 114833067747,
+      "jobUrl": "https://github.com/Goodwu/media-kit/actions/runs/38255531407/job/114833067747",
+      "jobConclusion": "failure",
+      "startedAtUtc": "2026-10-12T13:26:25Z",
+      "completedAtUtc": "2026-10-12T13:58:02Z",
+      "workingDirectoryInRepository": "media_kit",
+      "testCommand": "dart test --platform chrome",
+      "finalReportedCounts": {
+        "passed": 60,
+        "failed": 1,
+        "skipped": 27,
+        "total": 88
+      },
+      "actualCheckoutCommit": "811c7ba6c52d40a12a7d9c33a42505ee2834e4cb",
+      "checkoutEvidence": [
+        {
+          "line": 141,
+          "text": "2026-10-12T13:26:29.3102716Z [command]/usr/bin/git log -1 --format=%H"
+        },
+        {
+          "line": 142,
+          "text": "2026-10-12T13:26:29.3131814Z 811c7ba6c52d40a12a7d9c33a42505ee2834e4cb"
+        }
+      ],
+      "commandEvidence": [
+        {
+          "line": 2034,
+          "text": "2026-10-12T13:27:43.4036862Z ##[group]Run dart test --platform chrome"
+        }
+      ],
+      "summaryEvidence": [
+        {
+          "line": 2789,
+          "text": "2026-10-12T13:58:00.0667877Z ##[error]60 tests passed, 1 failed, 27 skipped."
+        }
+      ],
+      "sdkEvidence": [
+        {
+          "line": 1874,
+          "text": "2026-10-12T13:27:27.9801614Z   flutter-version: 3.47.2"
+        },
+        {
+          "line": 1926,
+          "text": "2026-10-12T13:27:40.4115600Z Cache restored from key: flutter-linux-stable-3.47.2-x64-d3b14c876900e553bc736ca19295fc09e3853e8e"
+        },
+        {
+          "line": 2038,
+          "text": "2026-10-12T13:27:43.4102848Z   FLUTTER_ROOT: /opt/hostedtoolcache/flutter/stable-3.47.2-x64/flutter"
+        }
+      ],
+      "log": {
+        "downloadUrl": "https://api.github.com/repos/Goodwu/media-kit/actions/jobs/114833067747/logs",
+        "snapshotKey": "general-logs.json:0.content",
+        "logicalLineCount": 2811,
+        "encoding": "UTF-8 of the exact decoded GitHub tool content string, preserving BOM and CR/LF",
+        "bytes": 252453,
+        "sha256": "62ae31ffb2d120cdb7c577ab8c5d349798216ecd9a90dfbdc50720f045cbacad"
+      },
+      "sourcePreparation": "Workflow explicitly removes media_kit/test/src/player/native before this browser suite; the initial checkout tree is not a claim that those native tests ran on Web.",
+      "failure": {
+        "test": "test/src/player/player_test.dart: player-set-shuffle",
+        "fullFailureGroupLines": [2318, 2392],
+        "observedMismatch": "The distinct playlist stream emitted the initial playlist then closed; it did not emit the expected playlist event with the same ten entries in a different order. The expected sequence was initial playlist, shuffled playlist, original playlist.",
+        "selectedExactLogLines": [
+          {
+            "line": 2318,
+            "text": "2026-10-12T13:51:41.9511482Z ##[group]❌ test/src/player/player_test.dart: player-set-shuffle (failed)"
+          },
+          {
+            "line": 2330,
+            "text": "2026-10-12T13:51:41.9525825Z Expected: should do the following in order:"
+          },
+          {
+            "line": 2332,
+            "text": "2026-10-12T13:51:41.9546012Z           • emit an event that <Instance of 'Playlist'> with `have same entries`: equals ["
+          },
+          {
+            "line": 2343,
+            "text": "2026-10-12T13:51:41.9570857Z             ] unordered and `do not have same order`: not ["
+          },
+          {
+            "line": 2356,
+            "text": "2026-10-12T13:51:41.9612696Z   Actual: <Instance of '_DistinctStream<Playlist>'>"
+          },
+          {
+            "line": 2358,
+            "text": "2026-10-12T13:51:41.9637128Z                   x Stream closed."
+          },
+          {
+            "line": 2359,
+            "text": "2026-10-12T13:51:41.9637916Z             which didn't emit an event that <Instance of 'Playlist'> with `have same entries`: equals ["
+          },
+          {
+            "line": 2383,
+            "text": "2026-10-12T13:51:41.9688188Z org-dartlang-sdk:///lib/_internal/js_runtime/lib/js_helper.dart 1424:15  Object.throwExpression"
+          },
+          {
+            "line": 2384,
+            "text": "2026-10-12T13:51:41.9689195Z package:matcher                                                          _expect.<fn>"
+          },
+          {
+            "line": 2385,
+            "text": "2026-10-12T13:51:41.9690163Z org-dartlang-sdk:///lib/async/zone_root.dart 48:39                       StaticClosure._rootRunUnary"
+          },
+          {
+            "line": 2789,
+            "text": "2026-10-12T13:58:00.0667877Z ##[error]60 tests passed, 1 failed, 27 skipped."
+          },
+          {
+            "line": 2790,
+            "text": "2026-10-12T13:58:00.1700729Z ##[error]Process completed with exit code 1."
+          }
+        ],
+        "consecutiveShuffleControl": [
+          {
+            "line": 2394,
+            "text": "2026-10-12T13:51:44.9633275Z ✅ test/src/player/player_test.dart: player-set-shuffle-consecutive"
+          }
+        ],
+        "rootCause": "UNCONFIRMED; static candidate locations are listed below. No reproduction, code fix, or successful rerun is claimed in this report."
+      }
+    },
+    {
+      "platform": "Linux",
+      "jobId": 114833068178,
+      "jobUrl": "https://github.com/Goodwu/media-kit/actions/runs/38255531407/job/114833068178",
+      "jobConclusion": "success",
+      "startedAtUtc": "2026-10-12T13:26:25Z",
+      "completedAtUtc": "2026-10-12T14:08:59Z",
+      "workingDirectoryInRepository": "media_kit",
+      "testCommand": "dart test",
+      "finalReportedCounts": {
+        "passed": 81,
+        "failed": 0,
+        "skipped": 16,
+        "total": 97
+      },
+      "actualCheckoutCommit": "811c7ba6c52d40a12a7d9c33a42505ee2834e4cb",
+      "checkoutEvidence": [
+        {
+          "line": 141,
+          "text": "2026-10-12T13:26:31.7916815Z [command]/usr/bin/git log -1 --format=%H"
+        },
+        {
+          "line": 142,
+          "text": "2026-10-12T13:26:31.7945403Z 811c7ba6c52d40a12a7d9c33a42505ee2834e4cb"
+        }
+      ],
+      "commandEvidence": [
+        {
+          "line": 2034,
+          "text": "2026-10-12T13:27:44.7890708Z ##[group]Run dart test"
+        }
+      ],
+      "summaryEvidence": [
+        {
+          "line": 4162,
+          "text": "2026-10-12T14:08:55.3767835Z 🎉 81 tests passed, 16 skipped."
+        }
+      ],
+      "sdkEvidence": [
+        {
+          "line": 1874,
+          "text": "2026-10-12T13:27:21.2460113Z   flutter-version: 3.47.2"
+        },
+        {
+          "line": 1933,
+          "text": "2026-10-12T13:27:40.9476941Z Cache restored from key: flutter-linux-stable-3.47.2-x64-d3b14c876900e553bc736ca19295fc09e3853e8e"
+        },
+        {
+          "line": 2038,
+          "text": "2026-10-12T13:27:44.7954111Z   FLUTTER_ROOT: /opt/hostedtoolcache/flutter/stable-3.47.2-x64/flutter"
+        }
+      ],
+      "log": {
+        "downloadUrl": "https://api.github.com/repos/Goodwu/media-kit/actions/jobs/114833068178/logs",
+        "snapshotKey": "general-logs.json:1.content",
+        "logicalLineCount": 4187,
+        "encoding": "UTF-8 of the exact decoded GitHub tool content string, preserving BOM and CR/LF",
+        "bytes": 342324,
+        "sha256": "e33d51ab4cc430aea4f9b3ee4c39d20bc16ed3a92e9e3be69c6fb6515c9f14a8"
+      },
+      "nonFatalLogObservation": {
+        "message": "PipeWire client-rt.conf diagnostics occur while the final suite succeeds; they are not additional failed jobs.",
+        "example": [
+          {
+            "line": 2054,
+            "text": "2026-10-12T13:27:57.1369528Z [E][00174.844814] pw.conf      | [          conf.c: 1060 pw_conf_load_conf_for_context()] can't load config client-rt.conf: No such file or directory"
+          }
+        ]
+      }
+    },
+    {
+      "platform": "Windows",
+      "jobId": 114833068229,
+      "jobUrl": "https://github.com/Goodwu/media-kit/actions/runs/38255531407/job/114833068229",
+      "jobConclusion": "success",
+      "startedAtUtc": "2026-10-12T13:29:04Z",
+      "completedAtUtc": "2026-10-12T14:13:06Z",
+      "workingDirectoryInRepository": "media_kit",
+      "testCommand": "dart test -j 1 --reporter expanded",
+      "finalReportedCounts": {
+        "passed": 81,
+        "failed": 0,
+        "skipped": 16,
+        "total": 97
+      },
+      "actualCheckoutCommit": "811c7ba6c52d40a12a7d9c33a42505ee2834e4cb",
+      "checkoutEvidence": [
+        {
+          "line": 127,
+          "text": "2026-10-12T13:29:18.8813112Z [command]\"C:\\Program Files\\Git\\bin\\git.exe\" log -1 --format=%H"
+        },
+        {
+          "line": 128,
+          "text": "2026-10-12T13:29:18.9131635Z 811c7ba6c52d40a12a7d9c33a42505ee2834e4cb"
+        }
+      ],
+      "commandEvidence": [
+        {
+          "line": 317,
+          "text": "2026-10-12T13:31:31.3574016Z ##[group]Run dart test -j 1 --reporter expanded"
+        }
+      ],
+      "summaryEvidence": [
+        {
+          "line": 2325,
+          "text": "2026-10-12T14:13:01.1339291Z 41:20 +81 ~16: All tests passed!"
+        }
+      ],
+      "sdkEvidence": [
+        {
+          "line": 131,
+          "text": "2026-10-12T13:29:18.9773748Z   flutter-version: 3.47.2"
+        },
+        {
+          "line": 195,
+          "text": "2026-10-12T13:30:32.8003745Z Cache restored from key: flutter-windows-stable-3.47.2-x64-d3b14c876900e553bc736ca19295fc09e3853e8e"
+        },
+        {
+          "line": 321,
+          "text": "2026-10-12T13:31:31.3657861Z   FLUTTER_ROOT: C:\\hostedtoolcache\\windows\\flutter\\stable-3.47.2-x64/flutter"
+        }
+      ],
+      "log": {
+        "downloadUrl": "https://api.github.com/repos/Goodwu/media-kit/actions/jobs/114833068229/logs",
+        "snapshotKey": "general-logs.json:2.content",
+        "logicalLineCount": 2350,
+        "encoding": "UTF-8 of the exact decoded GitHub tool content string, preserving BOM and CR/LF",
+        "bytes": 160769,
+        "sha256": "9eeea80d12e6fc13c38ede090d24fbdac02d4c03d2604e1629c6b93a9a517dc2"
+      }
+    },
+    {
+      "platform": "macOS",
+      "jobId": 114833068315,
+      "jobUrl": "https://github.com/Goodwu/media-kit/actions/runs/38255531407/job/114833068315",
+      "jobConclusion": "success",
+      "startedAtUtc": "2026-10-12T13:33:26Z",
+      "completedAtUtc": "2026-10-12T14:21:34Z",
+      "workingDirectoryInRepository": "media_kit",
+      "testCommand": "dart test",
+      "finalReportedCounts": {
+        "passed": 88,
+        "failed": 0,
+        "skipped": 15,
+        "total": 103
+      },
+      "actualCheckoutCommit": "811c7ba6c52d40a12a7d9c33a42505ee2834e4cb",
+      "checkoutEvidence": [
+        {
+          "line": 126,
+          "text": "2026-10-12T13:33:32.5175040Z [command]/opt/homebrew/bin/git log -1 --format=%H"
+        },
+        {
+          "line": 127,
+          "text": "2026-10-12T13:33:32.5240700Z 811c7ba6c52d40a12a7d9c33a42505ee2834e4cb"
+        }
+      ],
+      "commandEvidence": [
+        {
+          "line": 390,
+          "text": "2026-10-12T13:34:32.7695320Z ##[group]Run dart test"
+        }
+      ],
+      "summaryEvidence": [
+        {
+          "line": 2254,
+          "text": "2026-10-12T14:21:28.3865140Z 🎉 88 tests passed, 15 skipped."
+        }
+      ],
+      "sdkEvidence": [
+        {
+          "line": 202,
+          "text": "2026-10-12T13:33:36.8071060Z   flutter-version: 3.47.2"
+        },
+        {
+          "line": 284,
+          "text": "2026-10-12T13:34:23.1387850Z Cache restored from key: flutter-macos-stable-3.47.2-arm64-d3b14c876900e553bc736ca19295fc09e3853e8e"
+        },
+        {
+          "line": 395,
+          "text": "2026-10-12T13:34:32.7752730Z   FLUTTER_ROOT: /Users/runner/hostedtoolcache/flutter/stable-3.47.2-arm64/flutter"
+        }
+      ],
+      "log": {
+        "downloadUrl": "https://api.github.com/repos/Goodwu/media-kit/actions/jobs/114833068315/logs",
+        "snapshotKey": "general-logs.json:3.content",
+        "logicalLineCount": 2280,
+        "encoding": "UTF-8 of the exact decoded GitHub tool content string, preserving BOM and CR/LF",
+        "bytes": 179535,
+        "sha256": "bb41b2265486ae1757394ccaee0855fa8573ad75c862f7075cfedf54d4e2a6f8"
+      },
+      "retryHistory": {
+        "test": "test/src/player/player_test.dart: player-subtitle",
+        "failedGroupLines": [2084, 2216],
+        "retryMessagesObserved": 3,
+        "selectedExactLogLines": [
+          {
+            "line": 2084,
+            "text": "2026-10-12T14:18:53.1657250Z ##[group]❌ test/src/player/player_test.dart: player-subtitle (failed)"
+          },
+          {
+            "line": 2099,
+            "text": "2026-10-12T14:18:53.1818210Z Retry: player-subtitle"
+          },
+          {
+            "line": 2114,
+            "text": "2026-10-12T14:18:53.1918940Z Retry: player-subtitle"
+          },
+          {
+            "line": 2129,
+            "text": "2026-10-12T14:18:53.1969670Z Retry: player-subtitle"
+          },
+          {
+            "line": 2157,
+            "text": "2026-10-12T14:18:53.2065930Z   Actual: <Instance of '_DistinctStream<List<String>>'>"
+          },
+          {
+            "line": 2169,
+            "text": "2026-10-12T14:18:53.2092950Z             which didn't emit an event that <Instance of 'List<String>'> with `subtitle`: true because it emitted an event that has `subtitle` with value <false>"
+          },
+          {
+            "line": 2171,
+            "text": "2026-10-12T14:18:53.2095130Z package:test_api  OutstandingWork.complete"
+          },
+          {
+            "line": 2191,
+            "text": "2026-10-12T14:18:53.2141610Z             which didn't emit an event that <Instance of 'List<String>'> with `subtitle`: true because it emitted an event that has `subtitle` with value <false>"
+          },
+          {
+            "line": 2193,
+            "text": "2026-10-12T14:18:53.2142940Z package:test_api  OutstandingWork.complete"
+          },
+          {
+            "line": 2213,
+            "text": "2026-10-12T14:18:53.2169540Z             which didn't emit an event that <Instance of 'List<String>'> with `subtitle`: true because it emitted an event that has `subtitle` with value <false>"
+          },
+          {
+            "line": 2215,
+            "text": "2026-10-12T14:18:53.2170260Z package:test_api  OutstandingWork.complete"
+          },
+          {
+            "line": 2254,
+            "text": "2026-10-12T14:21:28.3865140Z 🎉 88 tests passed, 15 skipped."
+          }
+        ],
+        "interpretation": "Retain the failure/retry history alongside final job success and the reported 88 passed / 15 skipped. This report does not claim a clean first attempt for every test or independently certify subtitle stability.",
+        "sourcePolicy": "media_kit/test/src/player/player_test.dart:3033-3034 declares player-subtitle with retry: 3 and an existing TODO to fix flakiness."
+      }
+    }
+  ],
+  "androidNativeEvidence": {
+    "jobId": 114833068377,
+    "jobUrl": "https://github.com/Goodwu/media-kit/actions/runs/38255531407/job/114833068377",
+    "jobConclusion": "success",
+    "log": {
+      "downloadUrl": "https://api.github.com/repos/Goodwu/media-kit/actions/jobs/114833068377/logs",
+      "snapshotKey": "general-android-build-log.json:content",
+      "logicalLineCount": 18217,
+      "encoding": "UTF-8 of the exact decoded GitHub tool content string, preserving BOM and CR/LF",
+      "bytes": 2846235,
+      "sha256": "536155a184b02684eeafd58aa9fe75087099a3504177c323ab03241a17f88f93"
+    },
+    "checkoutEvidence": [
+      {
+        "line": 144,
+        "text": "2026-10-12T13:29:51.7699383Z [command]/usr/bin/git log -1 --format=%H"
+      },
+      {
+        "line": 145,
+        "text": "2026-10-12T13:29:51.7730823Z 811c7ba6c52d40a12a7d9c33a42505ee2834e4cb"
+      }
+    ],
+    "actualHistoricalInputDownload": {
+      "evidence": [
+        {
+          "line": 5778,
+          "text": "2026-10-12T13:32:10.8300934Z [        ] Compiling build file '/home/runner/work/media-kit/media-kit/libs/android/media_kit_libs_android_video/android/build.gradle' using BuildScriptTransformer."
+        },
+        {
+          "line": 5780,
+          "text": "2026-10-12T13:32:11.2330768Z [ +101 ms] Downloading file from: https://github.com/Goodwu/media-kit/releases/download/libmpv-android-v2026.013/media-kit-d24c59905-ffmpeg-b4d2ea4-arm64-v8a-vkweak.jar"
+        }
+      ],
+      "releaseTag": "libmpv-android-v2026.013",
+      "url": "https://github.com/Goodwu/media-kit/releases/download/libmpv-android-v2026.013/media-kit-d24c59905-ffmpeg-b4d2ea4-arm64-v8a-vkweak.jar",
+      "declaredMpvRevision": "d24c59905",
+      "declaredFfmpegRevision": "b4d2ea4",
+      "configuredJarSha256": "0e06f383b580507cb42ab49634a0789fa67707f237d92bb753ce09bec06d3818",
+      "configuredHashScope": "Read from build.gradle at e269d966; this report independently hashes the final APK and its members, not a separately retained downloaded JAR byte stream."
+    },
+    "apkInspections": [
+      {
+        "artifactId": 11750507506,
+        "apkName": "media_kit_test_android-x86_64.apk",
+        "apkSha256": "18d44284181e7501fc18cfac9eae81359b0f1073f2c197859f3f01b4eadf31d5",
+        "nativeLibraries": [
+          {
+            "name": "lib/x86_64/libapp.so",
+            "size": 6488968,
+            "sha256": "ac571c335b0eff44e14723e06b15bfc045113fab5de2556d3f5fca298a31a24f"
+          },
+          {
+            "name": "lib/x86_64/libdartjni.so",
+            "size": 116640,
+            "sha256": "bb49071b99b5416f0caaeb60597132c7c3e4555801505b15260f57fa3f30512b"
+          },
+          {
+            "name": "lib/x86_64/libflutter.so",
+            "size": 13051424,
+            "sha256": "bf332effcc407a658cb477b94417f83ce8df11b1676a06ee42ff754817b4197a"
+          },
+          {
+            "name": "lib/x86_64/libmedia_kit_video_hdr_bridge.so",
+            "size": 355856,
+            "sha256": "87e488d051a9de23cb6791e301906a8d85eec010ebe48428305a90e83de0231c"
+          }
+        ],
+        "mpvMembers": [],
+        "vcsMetadata": {
+          "path": "META-INF/version-control-info.textproto",
+          "bytes": 46,
+          "sha256": "38d377afa76b6364e5bf551cf4ffec1a881a46102a0047f523fbf148e0df6928",
+          "content": "generate_error_reason: NO_SUPPORTED_VCS_FOUND\n"
+        }
+      },
+      {
+        "artifactId": 11750462423,
+        "apkName": "media_kit_test_android-armeabi-v7a.apk",
+        "apkSha256": "5b6db7776fd8a7de9a866d4132999804a157687ef886e3bddc34ac838b3de7e4",
+        "nativeLibraries": [
+          {
+            "name": "lib/armeabi-v7a/libapp.so",
+            "size": 6881864,
+            "sha256": "dbc7b76a97b217132491a38d6dab500f91eff249e07391b26d743677bac92dbc"
+          },
+          {
+            "name": "lib/armeabi-v7a/libdartjni.so",
+            "size": 81444,
+            "sha256": "67b683b3677ee96cf9f77e4285e925198038c8bee1d454817e340a1a56e9b898"
+          },
+          {
+            "name": "lib/armeabi-v7a/libflutter.so",
+            "size": 8615900,
+            "sha256": "f0d234bc9bee0cf4f52ebe2f162364baefbb2fe4539bd819515a44f7984be384"
+          },
+          {
+            "name": "lib/armeabi-v7a/libmedia_kit_video_hdr_bridge.so",
+            "size": 225744,
+            "sha256": "98246bab74a9a54718ce44c8655e79116a551f888e223888637813fc0165e532"
+          }
+        ],
+        "mpvMembers": [],
+        "vcsMetadata": {
+          "path": "META-INF/version-control-info.textproto",
+          "bytes": 46,
+          "sha256": "38d377afa76b6364e5bf551cf4ffec1a881a46102a0047f523fbf148e0df6928",
+          "content": "generate_error_reason: NO_SUPPORTED_VCS_FOUND\n"
+        }
+      },
+      {
+        "artifactId": 11750432524,
+        "apkName": "media_kit_test_android-arm64-v8a.apk",
+        "apkSha256": "6b353ca6d39581d963dfa51a432f7a9963fde89128729135bd9d410395f5cee3",
+        "nativeLibraries": [
+          {
+            "name": "lib/arm64-v8a/libapp.so",
+            "size": 6292360,
+            "sha256": "b56765221e809615ca0e4cc2ddcb2ef2b22d0b0f577bea94fac1fd656ef7d6cb"
+          },
+          {
+            "name": "lib/arm64-v8a/libc++_shared.so",
+            "size": 1292904,
+            "sha256": "4397241b4bd20a8e579bfb41d21107857e12985f6a01ca0c2a5f83380d1270b4"
+          },
+          {
+            "name": "lib/arm64-v8a/libdartjni.so",
+            "size": 131248,
+            "sha256": "618271a9950119588db807b976eeaeed29545024249dafc69f94c8bd8a9d0ac9"
+          },
+          {
+            "name": "lib/arm64-v8a/libflutter.so",
+            "size": 11747864,
+            "sha256": "d70bbedc2b157630f90123a32ca894a6fa1816ec10cda9f335bada0692b376ee"
+          },
+          {
+            "name": "lib/arm64-v8a/libmedia_kit_video_hdr_bridge.so",
+            "size": 363576,
+            "sha256": "2287e82af47b8aa6a1728ed529731d691266c372e1a6936e3bdd5d1d6af14c6e"
+          },
+          {
+            "name": "lib/arm64-v8a/libmediakitandroidhelper.so",
+            "size": 386584,
+            "sha256": "a6862031015e390aa8a64536411132cf4df6a5a9dcf782f0d68b995380a1cccb"
+          },
+          {
+            "name": "lib/arm64-v8a/libmpv.so",
+            "size": 21747712,
+            "sha256": "176bc5a6248cda28980fcdb86141a16a800f94d1c9e25aeaa0d134bbc11ab3c7"
+          }
+        ],
+        "mpvMembers": ["lib/arm64-v8a/libmpv.so"],
+        "vcsMetadata": {
+          "path": "META-INF/version-control-info.textproto",
+          "bytes": 46,
+          "sha256": "38d377afa76b6364e5bf551cf4ffec1a881a46102a0047f523fbf148e0df6928",
+          "content": "generate_error_reason: NO_SUPPORTED_VCS_FOUND\n"
+        }
+      }
+    ],
+    "scope": "The Android job compiled the example APK while acquiring an old released native JAR at 2026-10-12T13:32:11.2330768Z. This is not a fresh DV001 native build or proof of current FFmpeg e8df200c/9aba43cf, mpv/libplacebo/helper/NDK/patch/link inputs.",
+    "otherAbiObservation": "The x86_64 and armeabi-v7a APKs each contain four .so members and no libmpv.so, libmediakitandroidhelper.so, or libc++_shared.so. The arm64 APK contains seven .so members including these three. Member absence is directly established from complete APK inventories; no playback capability is inferred from APK build success.",
+    "vcsLimitation": "All three APK META-INF/version-control-info.textproto files contain generate_error_reason: NO_SUPPORTED_VCS_FOUND. This field is not source provenance. No source.txt exists in the eight inspected payload inventories.",
+    "dv001ApprovalGranted": false,
+    "nativeAcceptanceLedgerChanged": false
+  },
+  "artifactEvidence": {
+    "enumeratedCount": 8,
+    "downloadedAndZipRehashedCount": 8,
+    "allApiDigestAndSizeMatch": true,
+    "totalZipBytes": 123151000,
+    "outerPayloadCount": 8,
+    "totalInnerFiles": 450,
+    "apkInnerFilesIndependentlyRehashedThisPass": 213,
+    "sevenZipInnerFilesRetainedFromCompletedInspection": 237,
+    "memberEncoding": "Exact member path is exactPathPrefix + pathSuffix; suffixes and Windows backslashes are preserved. Each inner-file row carries byte count and SHA256. ZIP digest, contained APK/7z digest, and inner-member digest are different levels.",
+    "artifacts": [
+      {
+        "id": 11750617841,
+        "name": "media_kit_test_macos_universal",
+        "artifactUrl": "https://github.com/Goodwu/media-kit/actions/runs/38255531407/artifacts/11750617841",
+        "metadataUrl": "https://api.github.com/repos/Goodwu/media-kit/actions/artifacts/11750617841",
+        "downloadUrl": "https://api.github.com/repos/Goodwu/media-kit/actions/artifacts/11750617841/zip",
+        "createdAtUtc": "2026-10-12T13:37:25Z",
+        "updatedAtUtc": "2026-10-12T13:37:25Z",
+        "expiresAtUtc": "2027-01-10T13:24:58Z",
+        "expiredAtApiSnapshot": false,
+        "runId": 38255531407,
+        "runAttempt": 1,
+        "apiWorkflowHeadSha": "e269d9669becb5812663200e7521901e8254c8bd",
+        "zipBytes": 22450176,
+        "zipSha256": "a0cabe28c2ba20367f5376545e1d1de7ae25d1f69f8201b8fac215d031964cff",
+        "apiDigest": "sha256:a0cabe28c2ba20367f5376545e1d1de7ae25d1f69f8201b8fac215d031964cff",
+        "apiSizeBytes": 22450176,
+        "apiDigestAndSizeMatch": true,
+        "outerMemberCount": 1,
+        "containers": [
+          {
+            "name": "media_kit_test_macos_universal.7z",
+            "format": "7z",
+            "bytes": 22443220,
+            "sha256": "58b2d6f78bfdb6ddc27229c9033a760a2daaee6c22479e2da73ba6dc2f261a23",
+            "fileCount": 90,
+            "exactPathPrefix": "build/macos/Build/Products/Release/media_kit_test.app/Contents/",
+            "memberColumns": ["pathSuffix", "bytes", "sha256"],
+            "members": [
+              ["Frameworks/App.framework/Versions/A/App", 13564496, "ea6399b0203de2217f6360936c376326af527c3de8a10853fdd3f24b7a69dc56"],
+              ["Frameworks/App.framework/Versions/A/Resources/Info.plist", 666, "08b03b58e4ff25c66f5e60193b2728ab5246563bc4f253211a5c4835bbc1d333"],
+              ["Frameworks/App.framework/Versions/A/Resources/flutter_assets/AssetManifest.bin", 99, "6c7a835aeddb9915a160d145f39f27e3e81cc561adb0a5aeeb4ff0178a826dc1"],
+              ["Frameworks/App.framework/Versions/A/Resources/flutter_assets/FontManifest.json", 82, "28b1eb2b3d2e1ad60b8c8b0f9100b1ccbf492f7fa97f5bebb51ea97e73926e7d"],
+              ["Frameworks/App.framework/Versions/A/Resources/flutter_assets/NOTICES.Z", 108827, "c958c23fc3be9818eea2a8cf830ac66c7a6117c938e5958514f290f896b6bc63"],
+              ["Frameworks/App.framework/Versions/A/Resources/flutter_assets/NativeAssetsManifest.json", 252, "946e6ecdc4a6c37fa42fbfdd752a0b8515792b57ea6042463d683eb511bbb8be"],
+              ["Frameworks/App.framework/Versions/A/Resources/flutter_assets/fonts/MaterialIcons-Regular.otf", 2664, "97a064b602f67f364f3ab55bf7bf8e9c549800d48bb563b15b3f49f32911751e"],
+              ["Frameworks/App.framework/Versions/A/Resources/flutter_assets/packages/wakelock_plus/assets/no_sleep.js", 13669, "726c644cda17bf271d996fb629806a59409607e9b00e0dfbf75adfd3986bbb7e"],
+              ["Frameworks/App.framework/Versions/A/Resources/flutter_assets/shaders/ink_sparkle.frag", 11992, "c4b3f5d1db405d50b8b7678d8bb446237f37ead86501e32c7a77fac963baff2d"],
+              ["Frameworks/App.framework/Versions/A/Resources/flutter_assets/shaders/stretch_effect.frag", 10192, "50c8c225a68bcb36805a9d3fde5be28e315e666fd1c142a2d88f3fb5dfc7d9ff"],
+              ["Frameworks/App.framework/Versions/A/_CodeSignature/CodeResources", 4712, "493e186af647e53c611963d57d7b3f85bff8c6f620e5c0f80b6ecce96fbb8418"],
+              ["Frameworks/Ass.framework/Versions/A/Ass", 656000, "f73a40f6066f34531752535c1b207d8edb3a04c9e5fc5ddc2674455bb45b52ab"],
+              ["Frameworks/Ass.framework/Versions/A/Resources/Info.plist", 215, "4b13959c5526496ee4d09ae7b5fd1ee3284ec407f677af9efe752fbaf67405f5"],
+              ["Frameworks/Ass.framework/Versions/A/_CodeSignature/CodeResources", 2514, "32477bd6b228f429670e2c95feca0ac875558c764180017c898764bd08813bbb"],
+              ["Frameworks/Avcodec.framework/Versions/A/Avcodec", 7515024, "ebaa01d2dc26f2167de47603e4d8807c149d2fac3c15337b989f3d008b6b4df4"],
+              ["Frameworks/Avcodec.framework/Versions/A/Resources/Info.plist", 223, "03184cf1a27bbed7bdedafc22cfaaf5b6dec7a74820cf634da988f027df7930a"],
+              ["Frameworks/Avcodec.framework/Versions/A/_CodeSignature/CodeResources", 2514, "d9352517c647ea3a47e40916d1ed17709e60a7028ea61baa50e1e02d4cc8ed49"],
+              ["Frameworks/Avfilter.framework/Versions/A/Avfilter", 431392, "a98dc79d6ab9add521413beac6fb4c33fdbf221e2f55642ab0152f818cc75442"],
+              ["Frameworks/Avfilter.framework/Versions/A/Resources/Info.plist", 225, "4b93144b9a6240c9a3f41b168b5fc9ec4f6c53c3bc70e3294c623cb8d596fb3f"],
+              ["Frameworks/Avfilter.framework/Versions/A/_CodeSignature/CodeResources", 2514, "47262500632c63b0071715885a5aabf1c631ff1b887c65374cad1071bda4d221"],
+              ["Frameworks/Avformat.framework/Versions/A/Avformat", 1836032, "1d8370bd951d99dad9085a89ae744d990b7c908df47e3ec70993d8f2318dcf04"],
+              ["Frameworks/Avformat.framework/Versions/A/Resources/Info.plist", 225, "d413bb8c994673348341f9a6172293fe99ad65d3adfcfbfbcdcc5851aa30312b"],
+              ["Frameworks/Avformat.framework/Versions/A/_CodeSignature/CodeResources", 2514, "8f170dab2215b1ab2af6b00876594e484c236dc603f1b0a11233b1bf4cd1d1fb"],
+              ["Frameworks/Avutil.framework/Versions/A/Avutil", 1015648, "1a115f93991ab7e1bb3b8a9d18af307e40672ce8ba4a3409ec44b544b328e070"],
+              ["Frameworks/Avutil.framework/Versions/A/Resources/Info.plist", 221, "c5a9822dce7ab923126755dc67d044abc8c790c56b439e41d3f2775b35b86b43"],
+              ["Frameworks/Avutil.framework/Versions/A/_CodeSignature/CodeResources", 2514, "395fc5a54ee68e30c7e5d3db6d5767ca6451e1825cbd4f872cd1bc74082671ce"],
+              ["Frameworks/Dav1d.framework/Versions/A/Dav1d", 1570688, "b81b6581c3e4b96ace7da6539d3c8c66481aa1fb91c8ad941fa7ba3b617857a0"],
+              ["Frameworks/Dav1d.framework/Versions/A/Resources/Info.plist", 219, "a6fceaf252007e11714a5a05791b791f7c10f62df93394ad4a99df0f620bfbf7"],
+              ["Frameworks/Dav1d.framework/Versions/A/_CodeSignature/CodeResources", 2514, "9cacf6111183f1525de0d8241d52ed11b59742793862d4ea9fae769eb8922d15"],
+              ["Frameworks/FlutterMacOS.framework/Versions/A/FlutterMacOS", 30035744, "29a276c261d5f8fba57f5becff49b6d24731f7fec84d7d8df57fd95832ddd3f0"],
+              ["Frameworks/FlutterMacOS.framework/Versions/A/Resources/Info.plist", 850, "2d2494adf485909f99e197856c637f1f4165ae53caf58cca83e9ff4319ebccbb"],
+              ["Frameworks/FlutterMacOS.framework/Versions/A/Resources/PrivacyInfo.xcprivacy", 325, "42542470043a0a3af3ab452ae4355bf764b916b7a442d3c814f362241a794454"],
+              ["Frameworks/FlutterMacOS.framework/Versions/A/Resources/icudtl.dat", 864880, "325a86063d26334c2eabe1743cea073b612540fbf3d8fc2ef0b5708e3763a8c7"],
+              ["Frameworks/FlutterMacOS.framework/Versions/A/_CodeSignature/CodeResources", 2916, "5871d4eccb363447811aa0f96902c0bceeabe08e1106da932b35f2fa72d336d4"],
+              ["Frameworks/Freetype.framework/Versions/A/Freetype", 2573744, "f57f11ea030d07984f9939f1c7140fa161d0481de838d546eeb0008566d34da4"],
+              ["Frameworks/Freetype.framework/Versions/A/Resources/Info.plist", 225, "0ff9b062cb793b1c43e933d3726db417f485e37fb20a3ffd094003a56f994066"],
+              ["Frameworks/Freetype.framework/Versions/A/_CodeSignature/CodeResources", 2514, "4c6aacf7adf8ae644e4a2ddd9dfa91bfafe9d7fca853245a1771b89a5abafd9d"],
+              ["Frameworks/Fribidi.framework/Versions/A/Fribidi", 413072, "cb37bc3fb7edd99a73275a2f6120ae88b2276c9a1a45728b27531d7574038ac0"],
+              ["Frameworks/Fribidi.framework/Versions/A/Resources/Info.plist", 223, "b1c85d51e02c34dc73cc755a66376fb33f00c1e9083cc012cce4b78c5e22e834"],
+              ["Frameworks/Fribidi.framework/Versions/A/_CodeSignature/CodeResources", 2514, "1a3b300957fc626fea0b7c0f57394edffbc84b774cd2e7892ba8b1e98509af0f"],
+              ["Frameworks/Harfbuzz.framework/Versions/A/Harfbuzz", 10618288, "4510178ecbc4ffacc8b3d91aeb70297b4eee2fa75adba335fb7774a0f11e9ebb"],
+              ["Frameworks/Harfbuzz.framework/Versions/A/Resources/Info.plist", 225, "f1366f16746a9057ac4bcbc7da43a5c1ea726fbb87a81230a2909cab362d4f73"],
+              ["Frameworks/Harfbuzz.framework/Versions/A/_CodeSignature/CodeResources", 2514, "6b31d510a54c1ddda24c585be0dbdd4562f62d037af84feafb745d821b5b1ad0"],
+              ["Frameworks/Mbedcrypto.framework/Versions/A/Mbedcrypto", 1836672, "f9b6e2505620f056ae869da316b7c01871a4e53944fc69997b0a32985488bd93"],
+              ["Frameworks/Mbedcrypto.framework/Versions/A/Resources/Info.plist", 229, "a461c875379af98399f1b3b7a1cd0888dab49e80f0fa711a0e3d021177f93a3e"],
+              ["Frameworks/Mbedcrypto.framework/Versions/A/_CodeSignature/CodeResources", 2514, "95f3c2b896ea093b02a63d45ad599ac80f1cbac90b57299e1faf4000a9533b4b"],
+              ["Frameworks/Mbedtls.framework/Versions/A/Mbedtls", 731520, "f1ac41e420530d344b3fe5db039c8560a974eac584d39d2c2773b6f00ebda526"],
+              ["Frameworks/Mbedtls.framework/Versions/A/Resources/Info.plist", 223, "9c420615e42bfd5517591a5474f8544583cbc7cc0c4132d8b97a601a2fa166fc"],
+              ["Frameworks/Mbedtls.framework/Versions/A/_CodeSignature/CodeResources", 2514, "73184ee8b1173819623e177b9d7a7e7d78247454643419e52a5023afb77d08fe"],
+              ["Frameworks/Mbedx509.framework/Versions/A/Mbedx509", 326096, "55986532f96d5047459f36708b36f56c1c06d40bc1132090d0059df0ba982c17"],
+              ["Frameworks/Mbedx509.framework/Versions/A/Resources/Info.plist", 225, "189988bce57068631f87039f972a524db060059106173951969c2af05ce532f6"],
+              ["Frameworks/Mbedx509.framework/Versions/A/_CodeSignature/CodeResources", 2514, "a6a9d5a0276281e9f6c9ae3d38e8602b56f52aacc95081accc77edb7dc111e97"],
+              ["Frameworks/Mpv.framework/Versions/A/Mpv", 7359120, "c4944574fa7a44e16a31b954057eaa6925cc7f4835a4a3455ad8d1d0540cab70"],
+              ["Frameworks/Mpv.framework/Versions/A/Resources/Info.plist", 215, "da9207b6fabdb31b1721deaf31d9ce50b80673013d1ece072c82e1415ea0ae48"],
+              ["Frameworks/Mpv.framework/Versions/A/_CodeSignature/CodeResources", 2514, "fd3ddcdba4ec250f940c57a4a00af8450efe25546d493059eacbbc0834596d8a"],
+              ["Frameworks/Png16.framework/Versions/A/Png16", 796384, "011fdfc9c224ffb653e9f59c8b9a912dad51dc0217cb549d81db944a90b02376"],
+              ["Frameworks/Png16.framework/Versions/A/Resources/Info.plist", 219, "412989f0873d1944889f28587cf08a932b280f47b25a51b4941aeaa8198be720"],
+              ["Frameworks/Png16.framework/Versions/A/_CodeSignature/CodeResources", 2514, "a6259b33e6ea5e53b5ccad93ad15a008e798e00547750e5147251e29ff7963f9"],
+              ["Frameworks/Swresample.framework/Versions/A/Resources/Info.plist", 229, "bdd465d2c10a61e0eb90f95b8351a372e21526a3461e63b1af9f999ebf635ae9"],
+              ["Frameworks/Swresample.framework/Versions/A/Swresample", 252880, "bcdcb23b2ba46a05a99c7fb6f7550c27039c12d3e15464f6e197038293a20d65"],
+              ["Frameworks/Swresample.framework/Versions/A/_CodeSignature/CodeResources", 2514, "3efd03cbc21a56225180fdf1c4f5ecef6b7ddc5ebed0ac8966ab21758665347b"],
+              ["Frameworks/Swscale.framework/Versions/A/Resources/Info.plist", 223, "dd5a28bd7e6f76d2b4b3dab52a2866db37528b869904a17ed8ea4098739d85a3"],
+              ["Frameworks/Swscale.framework/Versions/A/Swscale", 779472, "6af50ee19a933991cfb2704793d80b6eb2277c22ba711754a8b7a92481695cd5"],
+              ["Frameworks/Swscale.framework/Versions/A/_CodeSignature/CodeResources", 2514, "06b1c5121a0fb8b020a16f0a76f7f47da53b9dceb5b72a397d2be564d16a5d32"],
+              ["Frameworks/Uchardet.framework/Versions/A/Resources/Info.plist", 225, "f0d99a8df7d27143e1b2cb0163f4d118855a6cf36dc664651d576a44c43b58ed"],
+              ["Frameworks/Uchardet.framework/Versions/A/Uchardet", 570912, "896183574f74aa760cddec6fcef091a9a80287f82917adbd31ec8e6ce2e10386"],
+              ["Frameworks/Uchardet.framework/Versions/A/_CodeSignature/CodeResources", 2514, "889254268bc7b474c8c9da19c47f8288a0402c84559aca470908ea6d26798723"],
+              ["Frameworks/Xml2.framework/Versions/A/Resources/Info.plist", 217, "e4e8be4060cbe2ddbff1df90f59bb3e3a425876e47c9fe43b11c3c93efc245fe"],
+              ["Frameworks/Xml2.framework/Versions/A/Xml2", 3846400, "b5a28cd4166859d4369636e3de66a0980e540aa86ea64df75d1a0c209971dcd9"],
+              ["Frameworks/Xml2.framework/Versions/A/_CodeSignature/CodeResources", 2514, "9b0ed9f166884f1a2b5558f084627c5987313155ccb0ea638325fa99c688a8d4"],
+              ["Frameworks/objective_c.framework/Versions/A/Resources/Info.plist", 739, "57f0160881d1040458efd11a5256f761775e915a0060496b4a79ccb902f8485c"],
+              ["Frameworks/objective_c.framework/Versions/A/_CodeSignature/CodeResources", 2442, "8d91bc8b7e125eed13b8800bbb5edb28f94cf67d749b9b6db670eb5727f86c4c"],
+              ["Frameworks/objective_c.framework/Versions/A/objective_c", 398864, "1934cbe673a51ab9402db0eabbffaf9ea64fc5b84fdd63ff71f3af3cbbdfe42c"],
+              ["Info.plist", 1676, "7298ba7c52bb970f18293fa444f89b92f6fe84a14c9b12c7681831ba82e8ce72"],
+              ["MacOS/media_kit_test", 2363536, "a288e78c36f65419c05ab1a842ab0b2c4c4f1912ca536019c8bfd71c3e52a2f5"],
+              ["PkgInfo", 8, "82502191c9484b04d685374f9879a0066069c49b8acae7a04b01d38d07e8eca0"],
+              ["Resources/AppIcon.icns", 21421, "7269175e84f1f99523142e74a032f80a66fa7fefa8040f703de8e522b6bbd867"],
+              ["Resources/Assets.car", 153320, "8ef33b93706b7c9af2f72c88170e57a18b85bd3150c70f0af8b3195192ff43b5"],
+              ["Resources/Base.lproj/MainMenu.nib", 16232, "019cd76f71af3eeec259f066dd2fe7f25cd8776480bb9cda2db6c3cae9b38ae4"],
+              ["Resources/file_picker_darwin_file_picker_darwin.bundle/Contents/Info.plist", 1173, "8bf7970161b7c19046b2ee90b0e704ac2162392af1aa2f268c14f731333d9e4a"],
+              ["Resources/file_picker_darwin_file_picker_darwin.bundle/Contents/Resources/PrivacyInfo.xcprivacy", 325, "204d035a88eab2281b3d914f46c796766ae78e3cb82537711928dca9e28dbbb8"],
+              ["Resources/media_kit_libs_macos_video_media_kit_libs_macos_video.bundle/Contents/Info.plist", 1199, "eb4d6201233ddc5374e7e637befc140c4e8f7289196b732c548d2b923086850d"],
+              ["Resources/media_kit_libs_macos_video_media_kit_libs_macos_video.bundle/Contents/Resources/PrivacyInfo.xcprivacy", 373, "6d2da0d8d930227d428c1d9363b0ad6e3a12e2c9b68c5ce297158a7412fc8c31"],
+              ["Resources/media_kit_video_media_kit_video.bundle/Contents/Info.plist", 1155, "cee7ecc8bb1d46df69e02d5bad3ec05be32579a73cb3522da3e5f301f58cdbcf"],
+              ["Resources/media_kit_video_media_kit_video.bundle/Contents/Resources/PrivacyInfo.xcprivacy", 373, "6d2da0d8d930227d428c1d9363b0ad6e3a12e2c9b68c5ce297158a7412fc8c31"],
+              ["Resources/package_info_plus_package_info_plus.bundle/Contents/Info.plist", 1170, "d754c0a13b9fe4eb4718d82aa22e373a58c35483085855de834cba0649fe3150"],
+              ["Resources/package_info_plus_package_info_plus.bundle/Contents/Resources/PrivacyInfo.xcprivacy", 325, "204d035a88eab2281b3d914f46c796766ae78e3cb82537711928dca9e28dbbb8"],
+              ["Resources/wakelock_plus_wakelock_plus.bundle/Contents/Info.plist", 1153, "dca57d2bc77ddd29bb7ca5270cc91f4a4c9be1b46871146bfa705d0e8d6d60e7"],
+              ["Resources/wakelock_plus_wakelock_plus.bundle/Contents/Resources/PrivacyInfo.xcprivacy", 325, "204d035a88eab2281b3d914f46c796766ae78e3cb82537711928dca9e28dbbb8"],
+              ["_CodeSignature/CodeResources", 14417, "6b542db0f018f04fb2178d2020791820ed6685c8f71530622510c76a986418c7"]
+            ],
+            "sourceTxtMembers": [],
+            "verificationMethod": "ZIP and contained 7z bytes independently rehashed in this report pass; every extracted inner-file hash is preserved from the already completed general-members.json artifact inspection."
+          }
+        ]
+      },
+      {
+        "id": 11750507506,
+        "name": "media_kit_test_android-x86_64",
+        "artifactUrl": "https://github.com/Goodwu/media-kit/actions/runs/38255531407/artifacts/11750507506",
+        "metadataUrl": "https://api.github.com/repos/Goodwu/media-kit/actions/artifacts/11750507506",
+        "downloadUrl": "https://api.github.com/repos/Goodwu/media-kit/actions/artifacts/11750507506/zip",
+        "createdAtUtc": "2026-10-12T13:34:47Z",
+        "updatedAtUtc": "2026-10-12T13:34:47Z",
+        "expiresAtUtc": "2027-01-10T13:24:58Z",
+        "expiredAtApiSnapshot": false,
+        "runId": 38255531407,
+        "runAttempt": 1,
+        "apiWorkflowHeadSha": "e269d9669becb5812663200e7521901e8254c8bd",
+        "zipBytes": 8964570,
+        "zipSha256": "d0685aff085c78f6e0c44bd82c71fa1583930d50eac5a41dab6adf266fe7de65",
+        "apiDigest": "sha256:d0685aff085c78f6e0c44bd82c71fa1583930d50eac5a41dab6adf266fe7de65",
+        "apiSizeBytes": 8964570,
+        "apiDigestAndSizeMatch": true,
+        "outerMemberCount": 1,
+        "containers": [
+          {
+            "name": "media_kit_test_android-x86_64.apk",
+            "format": "zip",
+            "bytes": 20581047,
+            "sha256": "18d44284181e7501fc18cfac9eae81359b0f1073f2c197859f3f01b4eadf31d5",
+            "fileCount": 70,
+            "exactPathPrefix": "",
+            "memberColumns": ["pathSuffix", "bytes", "sha256"],
+            "members": [
+              ["META-INF/com/android/build/gradle/app-metadata.properties", 57, "001e962ded2a4883b57c7bb61282f0fa6d9820d48679eeb191742458f8e7b037"],
+              ["META-INF/version-control-info.textproto", 46, "38d377afa76b6364e5bf551cf4ffec1a881a46102a0047f523fbf148e0df6928"],
+              ["assets/dexopt/baseline.prof", 189, "bcf1d78e52879c17680e1db6fc07e12ec1aa25d5814757cfc4f45ef2aec445df"],
+              ["assets/dexopt/baseline.profm", 66, "8afeb906c82c8e1e6ee807e44f95b9a2eefe10c47962d04009e76c7b200cfda1"],
+              ["classes.dex", 655996, "1d42c1eeff4f6322a8df187a9276d0e9c7504dbb9bb9fe261c06c358b4b3eb90"],
+              ["lib/x86_64/libapp.so", 6488968, "ac571c335b0eff44e14723e06b15bfc045113fab5de2556d3f5fca298a31a24f"],
+              ["lib/x86_64/libdartjni.so", 116640, "bb49071b99b5416f0caaeb60597132c7c3e4555801505b15260f57fa3f30512b"],
+              ["lib/x86_64/libflutter.so", 13051424, "bf332effcc407a658cb477b94417f83ce8df11b1676a06ee42ff754817b4197a"],
+              ["lib/x86_64/libmedia_kit_video_hdr_bridge.so", 355856, "87e488d051a9de23cb6791e301906a8d85eec010ebe48428305a90e83de0231c"],
+              ["assets/flutter_assets/AssetManifest.bin", 99, "6c7a835aeddb9915a160d145f39f27e3e81cc561adb0a5aeeb4ff0178a826dc1"],
+              ["assets/flutter_assets/FontManifest.json", 82, "28b1eb2b3d2e1ad60b8c8b0f9100b1ccbf492f7fa97f5bebb51ea97e73926e7d"],
+              ["assets/flutter_assets/NOTICES.Z", 108827, "99cd6568eb99305bbb783ecb08007775421872eb8195e78eaf8f6f5bc26d08bf"],
+              ["assets/flutter_assets/NativeAssetsManifest.json", 45, "9548a31e4a048135c1d94f919328bfb62ae2c7bb3cab96557c7941daa97776cb"],
+              ["assets/flutter_assets/fonts/MaterialIcons-Regular.otf", 2664, "97a064b602f67f364f3ab55bf7bf8e9c549800d48bb563b15b3f49f32911751e"],
+              ["assets/flutter_assets/packages/wakelock_plus/assets/no_sleep.js", 13669, "726c644cda17bf271d996fb629806a59409607e9b00e0dfbf75adfd3986bbb7e"],
+              ["assets/flutter_assets/shaders/ink_sparkle.frag", 21856, "1fe8436a743884cb65078fe8c7b38e18f5365f2a2961270916f426fd13c604af"],
+              ["assets/flutter_assets/shaders/stretch_effect.frag", 17616, "bc7599dbbbaab310efe41520574138d21fb18a88c8fe4495ed79315309336f6f"],
+              ["DebugProbesKt.bin", 1728, "4d13bd92f86a0b1415062b8ed57655c0738ccfbdf0786c1d730d988b27fd4400"],
+              ["META-INF/androidx.activity_activity.version", 6, "25cec9739d3218e48acc5d8c3d4333e1d624121c5b7ab3bcddc71d0fa0134b83"],
+              ["META-INF/androidx.annotation_annotation-experimental.version", 6, "7d072b48526b023950e4c48db01e8c273554a6401119f5691e7589ba9bc65d9d"],
+              ["META-INF/androidx.arch.core_core-runtime.version", 67, "1b7c606370188534dac5561fba2b2988093829697fce9e6e8832e9291d24ed00"],
+              ["META-INF/androidx.core_core-ktx.version", 7, "04d659518a1793d5396007fcabdc9211a8c1db8406bf4e0fa8069171fdb06518"],
+              ["META-INF/androidx.core_core-viewtree.version", 6, "59854984853104df5c353e2f681a15fc7924742f9a2e468c29af248dce45ce03"],
+              ["META-INF/androidx.core_core.version", 7, "04d659518a1793d5396007fcabdc9211a8c1db8406bf4e0fa8069171fdb06518"],
+              ["META-INF/androidx.customview_customview.version", 6, "59854984853104df5c353e2f681a15fc7924742f9a2e468c29af248dce45ce03"],
+              ["META-INF/androidx.exifinterface_exifinterface.version", 6, "7d072b48526b023950e4c48db01e8c273554a6401119f5691e7589ba9bc65d9d"],
+              ["META-INF/androidx.fragment_fragment.version", 6, "249182a01164b81a5f7af87e5c5cdbd3344a80a7a66dfca624cecfb1501b2420"],
+              ["META-INF/androidx.interpolator_interpolator.version", 6, "59854984853104df5c353e2f681a15fc7924742f9a2e468c29af248dce45ce03"],
+              ["META-INF/androidx.lifecycle_lifecycle-livedata-core-ktx.version", 7, "d2dbab0fd36c72f378865aeea0bb1d7b27e3e1637a4f3b0de0a108ecba8b48e1"],
+              ["META-INF/androidx.lifecycle_lifecycle-livedata-core.version", 7, "d2dbab0fd36c72f378865aeea0bb1d7b27e3e1637a4f3b0de0a108ecba8b48e1"],
+              ["META-INF/androidx.lifecycle_lifecycle-livedata.version", 7, "d2dbab0fd36c72f378865aeea0bb1d7b27e3e1637a4f3b0de0a108ecba8b48e1"],
+              ["META-INF/androidx.lifecycle_lifecycle-process.version", 7, "d2dbab0fd36c72f378865aeea0bb1d7b27e3e1637a4f3b0de0a108ecba8b48e1"],
+              ["META-INF/androidx.lifecycle_lifecycle-runtime.version", 7, "d2dbab0fd36c72f378865aeea0bb1d7b27e3e1637a4f3b0de0a108ecba8b48e1"],
+              ["META-INF/androidx.lifecycle_lifecycle-viewmodel-savedstate.version", 7, "d2dbab0fd36c72f378865aeea0bb1d7b27e3e1637a4f3b0de0a108ecba8b48e1"],
+              ["META-INF/androidx.lifecycle_lifecycle-viewmodel.version", 7, "d2dbab0fd36c72f378865aeea0bb1d7b27e3e1637a4f3b0de0a108ecba8b48e1"],
+              ["META-INF/androidx.loader_loader.version", 6, "59854984853104df5c353e2f681a15fc7924742f9a2e468c29af248dce45ce03"],
+              ["META-INF/androidx.profileinstaller_profileinstaller.version", 6, "78b591400c56b7b67b8cb3b2b8a8e65e9093897f02ce0878e6b5405c68620fa7"],
+              ["META-INF/androidx.savedstate_savedstate.version", 6, "78b591400c56b7b67b8cb3b2b8a8e65e9093897f02ce0878e6b5405c68620fa7"],
+              ["META-INF/androidx.startup_startup-runtime.version", 6, "cc52f678848b814373757b460383bf61960e4943c203735adde0a350b3e50989"],
+              ["META-INF/androidx.tracing_tracing.version", 6, "1e5b51cde515396a9fa762909cf8ca6584ccc564b325d2eebeea76175fe95c4d"],
+              ["META-INF/androidx.versionedparcelable_versionedparcelable.version", 6, "cc52f678848b814373757b460383bf61960e4943c203735adde0a350b3e50989"],
+              ["META-INF/androidx.viewpager_viewpager.version", 6, "59854984853104df5c353e2f681a15fc7924742f9a2e468c29af248dce45ce03"],
+              ["META-INF/androidx.window.extensions.core_core.version", 6, "59854984853104df5c353e2f681a15fc7924742f9a2e468c29af248dce45ce03"],
+              ["META-INF/androidx.window_window-java.version", 6, "1e5b51cde515396a9fa762909cf8ca6584ccc564b325d2eebeea76175fe95c4d"],
+              ["META-INF/androidx.window_window.version", 6, "1e5b51cde515396a9fa762909cf8ca6584ccc564b325d2eebeea76175fe95c4d"],
+              ["META-INF/androidx/annotation/annotation/LICENSE.txt", 10175, "809fa1ed21450f59827d1e9aec720bbc4b687434fa22283c6cb5dd82a47ab9c0"],
+              ["META-INF/androidx/lifecycle/lifecycle-common-java8/LICENSE.txt", 10175, "809fa1ed21450f59827d1e9aec720bbc4b687434fa22283c6cb5dd82a47ab9c0"],
+              ["META-INF/androidx/lifecycle/lifecycle-common/LICENSE.txt", 10175, "809fa1ed21450f59827d1e9aec720bbc4b687434fa22283c6cb5dd82a47ab9c0"],
+              ["META-INF/kotlinx_coroutines_android.version", 5, "7717cbf90c63a3b096008763a02066239916fa9916f98254d1aa3b2470830fcd"],
+              ["META-INF/kotlinx_coroutines_core.version", 5, "7717cbf90c63a3b096008763a02066239916fa9916f98254d1aa3b2470830fcd"],
+              ["META-INF/services/s1.a", 5, "bb216b163bbfb02e73f7fe2ba83b899acdec206ffa0ee6e476c496d143203ebe"],
+              ["META-INF/services/s1.b", 5, "365d5aba04e7aeb21606b5324feec4c84dd379cb52eb49047019fc939ff3bf27"],
+              ["kotlin-tooling-metadata.json", 625, "3be652d32615c24f2b4b066a50121befcd0bf8348d5ee05f232ddd42bb9613f4"],
+              ["kotlin/annotation/annotation.kotlin_builtins", 1006, "5f75d4352e432664b2a235c472b991cf88365c73f5fcb5e1f9cc2cbe4b410abe"],
+              ["kotlin/collections/collections.kotlin_builtins", 8308, "0e654e03a38e119de0f4d11633711bd57e1e8b1a876eda74a90100a2a6e7daa4"],
+              ["kotlin/concurrent/atomics/atomics.kotlin_builtins", 2674, "955035527393d165a22da4cb9d992f42b4a30b6f070918f3e2b1f2678f83cc9d"],
+              ["kotlin/coroutines/coroutines.kotlin_builtins", 137, "98ab3a3c18fcb237528dd63fa489815c583e1d6c13debd2a27ac6d74ccf8717b"],
+              ["kotlin/internal/internal.kotlin_builtins", 590, "64712f94840e6b3f8123f522f32d08c46f083d87c312a74901f7c00224de775e"],
+              ["kotlin/kotlin.kotlin_builtins", 29399, "c4240215bc20e71b01cc62b43edebd02749b3249d7daa8e7f1dc1514f064c274"],
+              ["kotlin/ranges/ranges.kotlin_builtins", 4184, "f9d35b836ccb5380803aab5e6c76d708b1536fc6c82f27185e8cff5913824e1c"],
+              ["kotlin/reflect/reflect.kotlin_builtins", 4827, "23ecbc7cbb354f31ba37a1be1793d3bb53c00c92cdcf3867759d09d938a1d7c3"],
+              ["AndroidManifest.xml", 6788, "10a7ac1fc3935f91773161ce6947fb426eb6652546e8d93f35dce87523d6cec9"],
+              ["res/9w.png", 405, "cc4124781925826220b41a8b683177e13bb153a77db4bd28663e8683137d8dea"],
+              ["res/FS.png", 684, "13e04da6cc1e64add738bcfacb4a5eba799996d20ae9b4f0c8ed21c2e4650d59"],
+              ["res/RJ.png", 994, "703e3845e8f6df2d4a74d977db539295e81a2a897345ce993a03901feabc80e7"],
+              ["res/Zn.xml", 344, "a0817afbf505cdd5c39871a1183c7016ac77d6702ca32642c8a1e413dd08e28a"],
+              ["res/_y.xml", 612, "71fc3748917bc307fc706d56ba47b97ea08692251b220d740a1b1bae3423d30d"],
+              ["res/o-.png", 1406, "2a715d56915cd304c46ff34acaf256a644c24ed5c9a4e2de46ddc6d10a5f49f4"],
+              ["res/yn.png", 507, "e78ecdfaaf02a10c1d8ac1906b0dd149e72956c74e1819cb778849b25f2d3682"],
+              ["resources.arsc", 48888, "be0827e0d6836aa1ef6bacc79bb94a6d84eddfd747a0cd54bc6acf538315a8c1"]
+            ],
+            "sourceTxtMembers": [],
+            "verificationMethod": "All APK members independently reread and SHA256 recomputed in this report pass."
+          }
+        ]
+      },
+      {
+        "id": 11750462423,
+        "name": "media_kit_test_android-armeabi-v7a",
+        "artifactUrl": "https://github.com/Goodwu/media-kit/actions/runs/38255531407/artifacts/11750462423",
+        "metadataUrl": "https://api.github.com/repos/Goodwu/media-kit/actions/artifacts/11750462423",
+        "downloadUrl": "https://api.github.com/repos/Goodwu/media-kit/actions/artifacts/11750462423/zip",
+        "createdAtUtc": "2026-10-12T13:34:43Z",
+        "updatedAtUtc": "2026-10-12T13:34:43Z",
+        "expiresAtUtc": "2027-01-10T13:24:58Z",
+        "expiredAtApiSnapshot": false,
+        "runId": 38255531407,
+        "runAttempt": 1,
+        "apiWorkflowHeadSha": "e269d9669becb5812663200e7521901e8254c8bd",
+        "zipBytes": 8236838,
+        "zipSha256": "e9ad36365da578ab5f64c6a9a77cc546214ae2c3edb7551bb9138f7da391c7f3",
+        "apiDigest": "sha256:e9ad36365da578ab5f64c6a9a77cc546214ae2c3edb7551bb9138f7da391c7f3",
+        "apiSizeBytes": 8236838,
+        "apiDigestAndSizeMatch": true,
+        "outerMemberCount": 1,
+        "containers": [
+          {
+            "name": "media_kit_test_android-armeabi-v7a.apk",
+            "format": "zip",
+            "bytes": 16354955,
+            "sha256": "5b6db7776fd8a7de9a866d4132999804a157687ef886e3bddc34ac838b3de7e4",
+            "fileCount": 70,
+            "exactPathPrefix": "",
+            "memberColumns": ["pathSuffix", "bytes", "sha256"],
+            "members": [
+              ["META-INF/com/android/build/gradle/app-metadata.properties", 57, "001e962ded2a4883b57c7bb61282f0fa6d9820d48679eeb191742458f8e7b037"],
+              ["META-INF/version-control-info.textproto", 46, "38d377afa76b6364e5bf551cf4ffec1a881a46102a0047f523fbf148e0df6928"],
+              ["assets/dexopt/baseline.prof", 189, "bcf1d78e52879c17680e1db6fc07e12ec1aa25d5814757cfc4f45ef2aec445df"],
+              ["assets/dexopt/baseline.profm", 66, "8afeb906c82c8e1e6ee807e44f95b9a2eefe10c47962d04009e76c7b200cfda1"],
+              ["classes.dex", 655996, "1d42c1eeff4f6322a8df187a9276d0e9c7504dbb9bb9fe261c06c358b4b3eb90"],
+              ["lib/armeabi-v7a/libapp.so", 6881864, "dbc7b76a97b217132491a38d6dab500f91eff249e07391b26d743677bac92dbc"],
+              ["lib/armeabi-v7a/libdartjni.so", 81444, "67b683b3677ee96cf9f77e4285e925198038c8bee1d454817e340a1a56e9b898"],
+              ["lib/armeabi-v7a/libflutter.so", 8615900, "f0d234bc9bee0cf4f52ebe2f162364baefbb2fe4539bd819515a44f7984be384"],
+              ["lib/armeabi-v7a/libmedia_kit_video_hdr_bridge.so", 225744, "98246bab74a9a54718ce44c8655e79116a551f888e223888637813fc0165e532"],
+              ["assets/flutter_assets/AssetManifest.bin", 99, "6c7a835aeddb9915a160d145f39f27e3e81cc561adb0a5aeeb4ff0178a826dc1"],
+              ["assets/flutter_assets/FontManifest.json", 82, "28b1eb2b3d2e1ad60b8c8b0f9100b1ccbf492f7fa97f5bebb51ea97e73926e7d"],
+              ["assets/flutter_assets/NOTICES.Z", 108827, "99cd6568eb99305bbb783ecb08007775421872eb8195e78eaf8f6f5bc26d08bf"],
+              ["assets/flutter_assets/NativeAssetsManifest.json", 45, "9548a31e4a048135c1d94f919328bfb62ae2c7bb3cab96557c7941daa97776cb"],
+              ["assets/flutter_assets/fonts/MaterialIcons-Regular.otf", 2664, "97a064b602f67f364f3ab55bf7bf8e9c549800d48bb563b15b3f49f32911751e"],
+              ["assets/flutter_assets/packages/wakelock_plus/assets/no_sleep.js", 13669, "726c644cda17bf271d996fb629806a59409607e9b00e0dfbf75adfd3986bbb7e"],
+              ["assets/flutter_assets/shaders/ink_sparkle.frag", 21856, "1fe8436a743884cb65078fe8c7b38e18f5365f2a2961270916f426fd13c604af"],
+              ["assets/flutter_assets/shaders/stretch_effect.frag", 17616, "bc7599dbbbaab310efe41520574138d21fb18a88c8fe4495ed79315309336f6f"],
+              ["DebugProbesKt.bin", 1728, "4d13bd92f86a0b1415062b8ed57655c0738ccfbdf0786c1d730d988b27fd4400"],
+              ["META-INF/androidx.activity_activity.version", 6, "25cec9739d3218e48acc5d8c3d4333e1d624121c5b7ab3bcddc71d0fa0134b83"],
+              ["META-INF/androidx.annotation_annotation-experimental.version", 6, "7d072b48526b023950e4c48db01e8c273554a6401119f5691e7589ba9bc65d9d"],
+              ["META-INF/androidx.arch.core_core-runtime.version", 67, "1b7c606370188534dac5561fba2b2988093829697fce9e6e8832e9291d24ed00"],
+              ["META-INF/androidx.core_core-ktx.version", 7, "04d659518a1793d5396007fcabdc9211a8c1db8406bf4e0fa8069171fdb06518"],
+              ["META-INF/androidx.core_core-viewtree.version", 6, "59854984853104df5c353e2f681a15fc7924742f9a2e468c29af248dce45ce03"],
+              ["META-INF/androidx.core_core.version", 7, "04d659518a1793d5396007fcabdc9211a8c1db8406bf4e0fa8069171fdb06518"],
+              ["META-INF/androidx.customview_customview.version", 6, "59854984853104df5c353e2f681a15fc7924742f9a2e468c29af248dce45ce03"],
+              ["META-INF/androidx.exifinterface_exifinterface.version", 6, "7d072b48526b023950e4c48db01e8c273554a6401119f5691e7589ba9bc65d9d"],
+              ["META-INF/androidx.fragment_fragment.version", 6, "249182a01164b81a5f7af87e5c5cdbd3344a80a7a66dfca624cecfb1501b2420"],
+              ["META-INF/androidx.interpolator_interpolator.version", 6, "59854984853104df5c353e2f681a15fc7924742f9a2e468c29af248dce45ce03"],
+              ["META-INF/androidx.lifecycle_lifecycle-livedata-core-ktx.version", 7, "d2dbab0fd36c72f378865aeea0bb1d7b27e3e1637a4f3b0de0a108ecba8b48e1"],
+              ["META-INF/androidx.lifecycle_lifecycle-livedata-core.version", 7, "d2dbab0fd36c72f378865aeea0bb1d7b27e3e1637a4f3b0de0a108ecba8b48e1"],
+              ["META-INF/androidx.lifecycle_lifecycle-livedata.version", 7, "d2dbab0fd36c72f378865aeea0bb1d7b27e3e1637a4f3b0de0a108ecba8b48e1"],
+              ["META-INF/androidx.lifecycle_lifecycle-process.version", 7, "d2dbab0fd36c72f378865aeea0bb1d7b27e3e1637a4f3b0de0a108ecba8b48e1"],
+              ["META-INF/androidx.lifecycle_lifecycle-runtime.version", 7, "d2dbab0fd36c72f378865aeea0bb1d7b27e3e1637a4f3b0de0a108ecba8b48e1"],
+              ["META-INF/androidx.lifecycle_lifecycle-viewmodel-savedstate.version", 7, "d2dbab0fd36c72f378865aeea0bb1d7b27e3e1637a4f3b0de0a108ecba8b48e1"],
+              ["META-INF/androidx.lifecycle_lifecycle-viewmodel.version", 7, "d2dbab0fd36c72f378865aeea0bb1d7b27e3e1637a4f3b0de0a108ecba8b48e1"],
+              ["META-INF/androidx.loader_loader.version", 6, "59854984853104df5c353e2f681a15fc7924742f9a2e468c29af248dce45ce03"],
+              ["META-INF/androidx.profileinstaller_profileinstaller.version", 6, "78b591400c56b7b67b8cb3b2b8a8e65e9093897f02ce0878e6b5405c68620fa7"],
+              ["META-INF/androidx.savedstate_savedstate.version", 6, "78b591400c56b7b67b8cb3b2b8a8e65e9093897f02ce0878e6b5405c68620fa7"],
+              ["META-INF/androidx.startup_startup-runtime.version", 6, "cc52f678848b814373757b460383bf61960e4943c203735adde0a350b3e50989"],
+              ["META-INF/androidx.tracing_tracing.version", 6, "1e5b51cde515396a9fa762909cf8ca6584ccc564b325d2eebeea76175fe95c4d"],
+              ["META-INF/androidx.versionedparcelable_versionedparcelable.version", 6, "cc52f678848b814373757b460383bf61960e4943c203735adde0a350b3e50989"],
+              ["META-INF/androidx.viewpager_viewpager.version", 6, "59854984853104df5c353e2f681a15fc7924742f9a2e468c29af248dce45ce03"],
+              ["META-INF/androidx.window.extensions.core_core.version", 6, "59854984853104df5c353e2f681a15fc7924742f9a2e468c29af248dce45ce03"],
+              ["META-INF/androidx.window_window-java.version", 6, "1e5b51cde515396a9fa762909cf8ca6584ccc564b325d2eebeea76175fe95c4d"],
+              ["META-INF/androidx.window_window.version", 6, "1e5b51cde515396a9fa762909cf8ca6584ccc564b325d2eebeea76175fe95c4d"],
+              ["META-INF/androidx/annotation/annotation/LICENSE.txt", 10175, "809fa1ed21450f59827d1e9aec720bbc4b687434fa22283c6cb5dd82a47ab9c0"],
+              ["META-INF/androidx/lifecycle/lifecycle-common-java8/LICENSE.txt", 10175, "809fa1ed21450f59827d1e9aec720bbc4b687434fa22283c6cb5dd82a47ab9c0"],
+              ["META-INF/androidx/lifecycle/lifecycle-common/LICENSE.txt", 10175, "809fa1ed21450f59827d1e9aec720bbc4b687434fa22283c6cb5dd82a47ab9c0"],
+              ["META-INF/kotlinx_coroutines_android.version", 5, "7717cbf90c63a3b096008763a02066239916fa9916f98254d1aa3b2470830fcd"],
+              ["META-INF/kotlinx_coroutines_core.version", 5, "7717cbf90c63a3b096008763a02066239916fa9916f98254d1aa3b2470830fcd"],
+              ["META-INF/services/s1.a", 5, "bb216b163bbfb02e73f7fe2ba83b899acdec206ffa0ee6e476c496d143203ebe"],
+              ["META-INF/services/s1.b", 5, "365d5aba04e7aeb21606b5324feec4c84dd379cb52eb49047019fc939ff3bf27"],
+              ["kotlin-tooling-metadata.json", 625, "3be652d32615c24f2b4b066a50121befcd0bf8348d5ee05f232ddd42bb9613f4"],
+              ["kotlin/annotation/annotation.kotlin_builtins", 1006, "5f75d4352e432664b2a235c472b991cf88365c73f5fcb5e1f9cc2cbe4b410abe"],
+              ["kotlin/collections/collections.kotlin_builtins", 8308, "0e654e03a38e119de0f4d11633711bd57e1e8b1a876eda74a90100a2a6e7daa4"],
+              ["kotlin/concurrent/atomics/atomics.kotlin_builtins", 2674, "955035527393d165a22da4cb9d992f42b4a30b6f070918f3e2b1f2678f83cc9d"],
+              ["kotlin/coroutines/coroutines.kotlin_builtins", 137, "98ab3a3c18fcb237528dd63fa489815c583e1d6c13debd2a27ac6d74ccf8717b"],
+              ["kotlin/internal/internal.kotlin_builtins", 590, "64712f94840e6b3f8123f522f32d08c46f083d87c312a74901f7c00224de775e"],
+              ["kotlin/kotlin.kotlin_builtins", 29399, "c4240215bc20e71b01cc62b43edebd02749b3249d7daa8e7f1dc1514f064c274"],
+              ["kotlin/ranges/ranges.kotlin_builtins", 4184, "f9d35b836ccb5380803aab5e6c76d708b1536fc6c82f27185e8cff5913824e1c"],
+              ["kotlin/reflect/reflect.kotlin_builtins", 4827, "23ecbc7cbb354f31ba37a1be1793d3bb53c00c92cdcf3867759d09d938a1d7c3"],
+              ["AndroidManifest.xml", 6788, "8925e661af439a5196b3926452ffb3c091c4dfb958a56dd61b583c6a84050ffa"],
+              ["res/9w.png", 405, "cc4124781925826220b41a8b683177e13bb153a77db4bd28663e8683137d8dea"],
+              ["res/FS.png", 684, "13e04da6cc1e64add738bcfacb4a5eba799996d20ae9b4f0c8ed21c2e4650d59"],
+              ["res/RJ.png", 994, "703e3845e8f6df2d4a74d977db539295e81a2a897345ce993a03901feabc80e7"],
+              ["res/Zn.xml", 344, "a0817afbf505cdd5c39871a1183c7016ac77d6702ca32642c8a1e413dd08e28a"],
+              ["res/_y.xml", 612, "71fc3748917bc307fc706d56ba47b97ea08692251b220d740a1b1bae3423d30d"],
+              ["res/o-.png", 1406, "2a715d56915cd304c46ff34acaf256a644c24ed5c9a4e2de46ddc6d10a5f49f4"],
+              ["res/yn.png", 507, "e78ecdfaaf02a10c1d8ac1906b0dd149e72956c74e1819cb778849b25f2d3682"],
+              ["resources.arsc", 48888, "be0827e0d6836aa1ef6bacc79bb94a6d84eddfd747a0cd54bc6acf538315a8c1"]
+            ],
+            "sourceTxtMembers": [],
+            "verificationMethod": "All APK members independently reread and SHA256 recomputed in this report pass."
+          }
+        ]
+      },
+      {
+        "id": 11750432524,
+        "name": "media_kit_test_android-arm64-v8a",
+        "artifactUrl": "https://github.com/Goodwu/media-kit/actions/runs/38255531407/artifacts/11750432524",
+        "metadataUrl": "https://api.github.com/repos/Goodwu/media-kit/actions/artifacts/11750432524",
+        "downloadUrl": "https://api.github.com/repos/Goodwu/media-kit/actions/artifacts/11750432524/zip",
+        "createdAtUtc": "2026-10-12T13:34:45Z",
+        "updatedAtUtc": "2026-10-12T13:34:45Z",
+        "expiresAtUtc": "2027-01-10T13:24:58Z",
+        "expiredAtApiSnapshot": false,
+        "runId": 38255531407,
+        "runAttempt": 1,
+        "apiWorkflowHeadSha": "e269d9669becb5812663200e7521901e8254c8bd",
+        "zipBytes": 18862216,
+        "zipSha256": "a52f68a77790717488ffa967145f4a1bf6a739858934f99184d248bdb935d27d",
+        "apiDigest": "sha256:a52f68a77790717488ffa967145f4a1bf6a739858934f99184d248bdb935d27d",
+        "apiSizeBytes": 18862216,
+        "apiDigestAndSizeMatch": true,
+        "outerMemberCount": 1,
+        "containers": [
+          {
+            "name": "media_kit_test_android-arm64-v8a.apk",
+            "format": "zip",
+            "bytes": 42562975,
+            "sha256": "6b353ca6d39581d963dfa51a432f7a9963fde89128729135bd9d410395f5cee3",
+            "fileCount": 73,
+            "exactPathPrefix": "",
+            "memberColumns": ["pathSuffix", "bytes", "sha256"],
+            "members": [
+              ["META-INF/com/android/build/gradle/app-metadata.properties", 57, "001e962ded2a4883b57c7bb61282f0fa6d9820d48679eeb191742458f8e7b037"],
+              ["META-INF/version-control-info.textproto", 46, "38d377afa76b6364e5bf551cf4ffec1a881a46102a0047f523fbf148e0df6928"],
+              ["assets/dexopt/baseline.prof", 189, "bcf1d78e52879c17680e1db6fc07e12ec1aa25d5814757cfc4f45ef2aec445df"],
+              ["assets/dexopt/baseline.profm", 66, "8afeb906c82c8e1e6ee807e44f95b9a2eefe10c47962d04009e76c7b200cfda1"],
+              ["classes.dex", 655996, "1d42c1eeff4f6322a8df187a9276d0e9c7504dbb9bb9fe261c06c358b4b3eb90"],
+              ["lib/arm64-v8a/libapp.so", 6292360, "b56765221e809615ca0e4cc2ddcb2ef2b22d0b0f577bea94fac1fd656ef7d6cb"],
+              ["lib/arm64-v8a/libc++_shared.so", 1292904, "4397241b4bd20a8e579bfb41d21107857e12985f6a01ca0c2a5f83380d1270b4"],
+              ["lib/arm64-v8a/libdartjni.so", 131248, "618271a9950119588db807b976eeaeed29545024249dafc69f94c8bd8a9d0ac9"],
+              ["lib/arm64-v8a/libflutter.so", 11747864, "d70bbedc2b157630f90123a32ca894a6fa1816ec10cda9f335bada0692b376ee"],
+              ["lib/arm64-v8a/libmedia_kit_video_hdr_bridge.so", 363576, "2287e82af47b8aa6a1728ed529731d691266c372e1a6936e3bdd5d1d6af14c6e"],
+              ["lib/arm64-v8a/libmediakitandroidhelper.so", 386584, "a6862031015e390aa8a64536411132cf4df6a5a9dcf782f0d68b995380a1cccb"],
+              ["lib/arm64-v8a/libmpv.so", 21747712, "176bc5a6248cda28980fcdb86141a16a800f94d1c9e25aeaa0d134bbc11ab3c7"],
+              ["assets/flutter_assets/AssetManifest.bin", 99, "6c7a835aeddb9915a160d145f39f27e3e81cc561adb0a5aeeb4ff0178a826dc1"],
+              ["assets/flutter_assets/FontManifest.json", 82, "28b1eb2b3d2e1ad60b8c8b0f9100b1ccbf492f7fa97f5bebb51ea97e73926e7d"],
+              ["assets/flutter_assets/NOTICES.Z", 108827, "99cd6568eb99305bbb783ecb08007775421872eb8195e78eaf8f6f5bc26d08bf"],
+              ["assets/flutter_assets/NativeAssetsManifest.json", 45, "9548a31e4a048135c1d94f919328bfb62ae2c7bb3cab96557c7941daa97776cb"],
+              ["assets/flutter_assets/fonts/MaterialIcons-Regular.otf", 2664, "97a064b602f67f364f3ab55bf7bf8e9c549800d48bb563b15b3f49f32911751e"],
+              ["assets/flutter_assets/packages/wakelock_plus/assets/no_sleep.js", 13669, "726c644cda17bf271d996fb629806a59409607e9b00e0dfbf75adfd3986bbb7e"],
+              ["assets/flutter_assets/shaders/ink_sparkle.frag", 21856, "1fe8436a743884cb65078fe8c7b38e18f5365f2a2961270916f426fd13c604af"],
+              ["assets/flutter_assets/shaders/stretch_effect.frag", 17616, "bc7599dbbbaab310efe41520574138d21fb18a88c8fe4495ed79315309336f6f"],
+              ["DebugProbesKt.bin", 1728, "4d13bd92f86a0b1415062b8ed57655c0738ccfbdf0786c1d730d988b27fd4400"],
+              ["META-INF/androidx.activity_activity.version", 6, "25cec9739d3218e48acc5d8c3d4333e1d624121c5b7ab3bcddc71d0fa0134b83"],
+              ["META-INF/androidx.annotation_annotation-experimental.version", 6, "7d072b48526b023950e4c48db01e8c273554a6401119f5691e7589ba9bc65d9d"],
+              ["META-INF/androidx.arch.core_core-runtime.version", 67, "1b7c606370188534dac5561fba2b2988093829697fce9e6e8832e9291d24ed00"],
+              ["META-INF/androidx.core_core-ktx.version", 7, "04d659518a1793d5396007fcabdc9211a8c1db8406bf4e0fa8069171fdb06518"],
+              ["META-INF/androidx.core_core-viewtree.version", 6, "59854984853104df5c353e2f681a15fc7924742f9a2e468c29af248dce45ce03"],
+              ["META-INF/androidx.core_core.version", 7, "04d659518a1793d5396007fcabdc9211a8c1db8406bf4e0fa8069171fdb06518"],
+              ["META-INF/androidx.customview_customview.version", 6, "59854984853104df5c353e2f681a15fc7924742f9a2e468c29af248dce45ce03"],
+              ["META-INF/androidx.exifinterface_exifinterface.version", 6, "7d072b48526b023950e4c48db01e8c273554a6401119f5691e7589ba9bc65d9d"],
+              ["META-INF/androidx.fragment_fragment.version", 6, "249182a01164b81a5f7af87e5c5cdbd3344a80a7a66dfca624cecfb1501b2420"],
+              ["META-INF/androidx.interpolator_interpolator.version", 6, "59854984853104df5c353e2f681a15fc7924742f9a2e468c29af248dce45ce03"],
+              ["META-INF/androidx.lifecycle_lifecycle-livedata-core-ktx.version", 7, "d2dbab0fd36c72f378865aeea0bb1d7b27e3e1637a4f3b0de0a108ecba8b48e1"],
+              ["META-INF/androidx.lifecycle_lifecycle-livedata-core.version", 7, "d2dbab0fd36c72f378865aeea0bb1d7b27e3e1637a4f3b0de0a108ecba8b48e1"],
+              ["META-INF/androidx.lifecycle_lifecycle-livedata.version", 7, "d2dbab0fd36c72f378865aeea0bb1d7b27e3e1637a4f3b0de0a108ecba8b48e1"],
+              ["META-INF/androidx.lifecycle_lifecycle-process.version", 7, "d2dbab0fd36c72f378865aeea0bb1d7b27e3e1637a4f3b0de0a108ecba8b48e1"],
+              ["META-INF/androidx.lifecycle_lifecycle-runtime.version", 7, "d2dbab0fd36c72f378865aeea0bb1d7b27e3e1637a4f3b0de0a108ecba8b48e1"],
+              ["META-INF/androidx.lifecycle_lifecycle-viewmodel-savedstate.version", 7, "d2dbab0fd36c72f378865aeea0bb1d7b27e3e1637a4f3b0de0a108ecba8b48e1"],
+              ["META-INF/androidx.lifecycle_lifecycle-viewmodel.version", 7, "d2dbab0fd36c72f378865aeea0bb1d7b27e3e1637a4f3b0de0a108ecba8b48e1"],
+              ["META-INF/androidx.loader_loader.version", 6, "59854984853104df5c353e2f681a15fc7924742f9a2e468c29af248dce45ce03"],
+              ["META-INF/androidx.profileinstaller_profileinstaller.version", 6, "78b591400c56b7b67b8cb3b2b8a8e65e9093897f02ce0878e6b5405c68620fa7"],
+              ["META-INF/androidx.savedstate_savedstate.version", 6, "78b591400c56b7b67b8cb3b2b8a8e65e9093897f02ce0878e6b5405c68620fa7"],
+              ["META-INF/androidx.startup_startup-runtime.version", 6, "cc52f678848b814373757b460383bf61960e4943c203735adde0a350b3e50989"],
+              ["META-INF/androidx.tracing_tracing.version", 6, "1e5b51cde515396a9fa762909cf8ca6584ccc564b325d2eebeea76175fe95c4d"],
+              ["META-INF/androidx.versionedparcelable_versionedparcelable.version", 6, "cc52f678848b814373757b460383bf61960e4943c203735adde0a350b3e50989"],
+              ["META-INF/androidx.viewpager_viewpager.version", 6, "59854984853104df5c353e2f681a15fc7924742f9a2e468c29af248dce45ce03"],
+              ["META-INF/androidx.window.extensions.core_core.version", 6, "59854984853104df5c353e2f681a15fc7924742f9a2e468c29af248dce45ce03"],
+              ["META-INF/androidx.window_window-java.version", 6, "1e5b51cde515396a9fa762909cf8ca6584ccc564b325d2eebeea76175fe95c4d"],
+              ["META-INF/androidx.window_window.version", 6, "1e5b51cde515396a9fa762909cf8ca6584ccc564b325d2eebeea76175fe95c4d"],
+              ["META-INF/androidx/annotation/annotation/LICENSE.txt", 10175, "809fa1ed21450f59827d1e9aec720bbc4b687434fa22283c6cb5dd82a47ab9c0"],
+              ["META-INF/androidx/lifecycle/lifecycle-common-java8/LICENSE.txt", 10175, "809fa1ed21450f59827d1e9aec720bbc4b687434fa22283c6cb5dd82a47ab9c0"],
+              ["META-INF/androidx/lifecycle/lifecycle-common/LICENSE.txt", 10175, "809fa1ed21450f59827d1e9aec720bbc4b687434fa22283c6cb5dd82a47ab9c0"],
+              ["META-INF/kotlinx_coroutines_android.version", 5, "7717cbf90c63a3b096008763a02066239916fa9916f98254d1aa3b2470830fcd"],
+              ["META-INF/kotlinx_coroutines_core.version", 5, "7717cbf90c63a3b096008763a02066239916fa9916f98254d1aa3b2470830fcd"],
+              ["META-INF/services/s1.a", 5, "bb216b163bbfb02e73f7fe2ba83b899acdec206ffa0ee6e476c496d143203ebe"],
+              ["META-INF/services/s1.b", 5, "365d5aba04e7aeb21606b5324feec4c84dd379cb52eb49047019fc939ff3bf27"],
+              ["kotlin-tooling-metadata.json", 625, "3be652d32615c24f2b4b066a50121befcd0bf8348d5ee05f232ddd42bb9613f4"],
+              ["kotlin/annotation/annotation.kotlin_builtins", 1006, "5f75d4352e432664b2a235c472b991cf88365c73f5fcb5e1f9cc2cbe4b410abe"],
+              ["kotlin/collections/collections.kotlin_builtins", 8308, "0e654e03a38e119de0f4d11633711bd57e1e8b1a876eda74a90100a2a6e7daa4"],
+              ["kotlin/concurrent/atomics/atomics.kotlin_builtins", 2674, "955035527393d165a22da4cb9d992f42b4a30b6f070918f3e2b1f2678f83cc9d"],
+              ["kotlin/coroutines/coroutines.kotlin_builtins", 137, "98ab3a3c18fcb237528dd63fa489815c583e1d6c13debd2a27ac6d74ccf8717b"],
+              ["kotlin/internal/internal.kotlin_builtins", 590, "64712f94840e6b3f8123f522f32d08c46f083d87c312a74901f7c00224de775e"],
+              ["kotlin/kotlin.kotlin_builtins", 29399, "c4240215bc20e71b01cc62b43edebd02749b3249d7daa8e7f1dc1514f064c274"],
+              ["kotlin/ranges/ranges.kotlin_builtins", 4184, "f9d35b836ccb5380803aab5e6c76d708b1536fc6c82f27185e8cff5913824e1c"],
+              ["kotlin/reflect/reflect.kotlin_builtins", 4827, "23ecbc7cbb354f31ba37a1be1793d3bb53c00c92cdcf3867759d09d938a1d7c3"],
+              ["AndroidManifest.xml", 6788, "21f1d64e70c28f92b929042e174881ae64c9c026de4d34fb2e2eb031d8854fa4"],
+              ["res/9w.png", 405, "cc4124781925826220b41a8b683177e13bb153a77db4bd28663e8683137d8dea"],
+              ["res/FS.png", 684, "13e04da6cc1e64add738bcfacb4a5eba799996d20ae9b4f0c8ed21c2e4650d59"],
+              ["res/RJ.png", 994, "703e3845e8f6df2d4a74d977db539295e81a2a897345ce993a03901feabc80e7"],
+              ["res/Zn.xml", 344, "a0817afbf505cdd5c39871a1183c7016ac77d6702ca32642c8a1e413dd08e28a"],
+              ["res/_y.xml", 612, "71fc3748917bc307fc706d56ba47b97ea08692251b220d740a1b1bae3423d30d"],
+              ["res/o-.png", 1406, "2a715d56915cd304c46ff34acaf256a644c24ed5c9a4e2de46ddc6d10a5f49f4"],
+              ["res/yn.png", 507, "e78ecdfaaf02a10c1d8ac1906b0dd149e72956c74e1819cb778849b25f2d3682"],
+              ["resources.arsc", 48888, "be0827e0d6836aa1ef6bacc79bb94a6d84eddfd747a0cd54bc6acf538315a8c1"]
+            ],
+            "sourceTxtMembers": [],
+            "verificationMethod": "All APK members independently reread and SHA256 recomputed in this report pass."
+          }
+        ]
+      },
+      {
+        "id": 11750403077,
+        "name": "media_kit_test_win32_arm64",
+        "artifactUrl": "https://github.com/Goodwu/media-kit/actions/runs/38255531407/artifacts/11750403077",
+        "metadataUrl": "https://api.github.com/repos/Goodwu/media-kit/actions/artifacts/11750403077",
+        "downloadUrl": "https://api.github.com/repos/Goodwu/media-kit/actions/artifacts/11750403077/zip",
+        "createdAtUtc": "2026-10-12T13:35:19Z",
+        "updatedAtUtc": "2026-10-12T13:35:19Z",
+        "expiresAtUtc": "2027-01-10T13:24:58Z",
+        "expiredAtApiSnapshot": false,
+        "runId": 38255531407,
+        "runAttempt": 1,
+        "apiWorkflowHeadSha": "e269d9669becb5812663200e7521901e8254c8bd",
+        "zipBytes": 19152165,
+        "zipSha256": "2cfefc50440b843d0c677fc87c77f1be7edcc474978bb3fa479a1a6f5f62acb6",
+        "apiDigest": "sha256:2cfefc50440b843d0c677fc87c77f1be7edcc474978bb3fa479a1a6f5f62acb6",
+        "apiSizeBytes": 19152165,
+        "apiDigestAndSizeMatch": true,
+        "outerMemberCount": 1,
+        "containers": [
+          {
+            "name": "media_kit_test_win32_arm64.7z",
+            "format": "7z",
+            "bytes": 19146148,
+            "sha256": "58dd13a1934199e36ffc276097923a1b9cf2e22a6dba796ceb08d66b93562992",
+            "fileCount": 16,
+            "exactPathPrefix": "build\\windows\\arm64\\runner\\Release/",
+            "memberColumns": ["pathSuffix", "bytes", "sha256"],
+            "members": [
+              ["dartjni.dll", 82944, "60e7aed5b5e695a35fdec22b2b5afb0b97b077b95d5e26f5a7e6b5ad4143cc50"],
+              ["data/app.so", 7062408, "1cb2d9cf859c08c91a094d21bc58cce11048750f5523271aa63d02da93ad8ee5"],
+              ["data/flutter_assets/AssetManifest.bin", 99, "6c7a835aeddb9915a160d145f39f27e3e81cc561adb0a5aeeb4ff0178a826dc1"],
+              ["data/flutter_assets/FontManifest.json", 82, "28b1eb2b3d2e1ad60b8c8b0f9100b1ccbf492f7fa97f5bebb51ea97e73926e7d"],
+              ["data/flutter_assets/fonts/MaterialIcons-Regular.otf", 2664, "97a064b602f67f364f3ab55bf7bf8e9c549800d48bb563b15b3f49f32911751e"],
+              ["data/flutter_assets/NativeAssetsManifest.json", 45, "9548a31e4a048135c1d94f919328bfb62ae2c7bb3cab96557c7941daa97776cb"],
+              ["data/flutter_assets/NOTICES.Z", 109053, "07413b5e8da13ac5f2dfcd5a47d6ff8e6eef1814dc2bcca7543557f6db1eeb40"],
+              ["data/flutter_assets/packages/wakelock_plus/assets/no_sleep.js", 13669, "726c644cda17bf271d996fb629806a59409607e9b00e0dfbf75adfd3986bbb7e"],
+              ["data/flutter_assets/shaders/ink_sparkle.frag", 21856, "1fe8436a743884cb65078fe8c7b38e18f5365f2a2961270916f426fd13c604af"],
+              ["data/flutter_assets/shaders/stretch_effect.frag", 17616, "bc7599dbbbaab310efe41520574138d21fb18a88c8fe4495ed79315309336f6f"],
+              ["data/icudtl.dat", 864880, "325a86063d26334c2eabe1743cea073b612540fbf3d8fc2ef0b5708e3763a8c7"],
+              ["flutter_windows.dll", 19445248, "9de50cd2b9430cae46a9e00f5e3bb3b17997d40846b26e5c6065538c4070825d"],
+              ["libmpv-2.dll", 34921984, "634840b9fde80c1f17114e5995d0cc0ba93e07728b8a6ca772ae94e268792f2c"],
+              ["media_kit_libs_windows_video_plugin.dll", 13824, "bbb0a331192135c58e2c2f9c751b4996c024d8c3815ed792835ed8c4149761cb"],
+              ["media_kit_test.exe", 90112, "1da43b1cbf30019ec296985ac58115effc738781a2f0fd0657a551c13dc845c5"],
+              ["media_kit_video_plugin.dll", 172032, "557954f6f32d2f0ac44ce82d75636aec25915575bb9cb9db2e47a432520c475a"]
+            ],
+            "sourceTxtMembers": [],
+            "verificationMethod": "ZIP and contained 7z bytes independently rehashed in this report pass; every extracted inner-file hash is preserved from the already completed general-members.json artifact inspection."
+          }
+        ]
+      },
+      {
+        "id": 11749883423,
+        "name": "media_kit_test_linux_x64",
+        "artifactUrl": "https://github.com/Goodwu/media-kit/actions/runs/38255531407/artifacts/11749883423",
+        "metadataUrl": "https://api.github.com/repos/Goodwu/media-kit/actions/artifacts/11749883423",
+        "downloadUrl": "https://api.github.com/repos/Goodwu/media-kit/actions/artifacts/11749883423/zip",
+        "createdAtUtc": "2026-10-12T13:33:17Z",
+        "updatedAtUtc": "2026-10-12T13:33:17Z",
+        "expiresAtUtc": "2027-01-10T13:24:58Z",
+        "expiredAtApiSnapshot": false,
+        "runId": 38255531407,
+        "runAttempt": 1,
+        "apiWorkflowHeadSha": "e269d9669becb5812663200e7521901e8254c8bd",
+        "zipBytes": 13930021,
+        "zipSha256": "ed20668ec462d60940adcafd52cfac51799e5e289a459fbc5a60e92714371a2f",
+        "apiDigest": "sha256:ed20668ec462d60940adcafd52cfac51799e5e289a459fbc5a60e92714371a2f",
+        "apiSizeBytes": 13930021,
+        "apiDigestAndSizeMatch": true,
+        "outerMemberCount": 1,
+        "containers": [
+          {
+            "name": "media_kit_test_linux_x64.7z",
+            "format": "7z",
+            "bytes": 13925603,
+            "sha256": "89e6559ae75593389e73d8dd544afe2f5c58162528633580d28579399bf68e76",
+            "fileCount": 17,
+            "exactPathPrefix": "build/linux/x64/release/bundle/",
+            "memberColumns": ["pathSuffix", "bytes", "sha256"],
+            "members": [
+              ["data/flutter_assets/AssetManifest.bin", 99, "6c7a835aeddb9915a160d145f39f27e3e81cc561adb0a5aeeb4ff0178a826dc1"],
+              ["data/flutter_assets/FontManifest.json", 82, "28b1eb2b3d2e1ad60b8c8b0f9100b1ccbf492f7fa97f5bebb51ea97e73926e7d"],
+              ["data/flutter_assets/NOTICES.Z", 108827, "99cd6568eb99305bbb783ecb08007775421872eb8195e78eaf8f6f5bc26d08bf"],
+              ["data/flutter_assets/NativeAssetsManifest.json", 45, "9548a31e4a048135c1d94f919328bfb62ae2c7bb3cab96557c7941daa97776cb"],
+              ["data/flutter_assets/fonts/MaterialIcons-Regular.otf", 2664, "97a064b602f67f364f3ab55bf7bf8e9c549800d48bb563b15b3f49f32911751e"],
+              ["data/flutter_assets/packages/wakelock_plus/assets/no_sleep.js", 13669, "726c644cda17bf271d996fb629806a59409607e9b00e0dfbf75adfd3986bbb7e"],
+              ["data/flutter_assets/shaders/ink_sparkle.frag", 21856, "1fe8436a743884cb65078fe8c7b38e18f5365f2a2961270916f426fd13c604af"],
+              ["data/flutter_assets/shaders/stretch_effect.frag", 17616, "bc7599dbbbaab310efe41520574138d21fb18a88c8fe4495ed79315309336f6f"],
+              ["data/flutter_assets/version.json", 101, "2a20dfc882433c83e8ad3d061aff4d9f8c255abcece4b97707dc1bf1464bad7d"],
+              ["data/icudtl.dat", 864880, "325a86063d26334c2eabe1743cea073b612540fbf3d8fc2ef0b5708e3763a8c7"],
+              ["lib/libapp.so", 7078792, "5764aaaa060591ac90069a632d6cabbbdfd23860076e4d71884d9683f838790f"],
+              ["lib/libdartjni.so", 157320, "fe35d502b24fa2dfda9ae09b5f82d80330628b9dd9398ad2ba95754e06d2bded"],
+              ["lib/libflutter_linux_gtk.so", 17218152, "c6992ba778360217695a8193828286ae73c971e0e1f47bdb1b98c5190497cb24"],
+              ["lib/libmedia_kit_libs_linux_plugin.so", 15744, "31ca05e92a0929e53a1e37ec270ab89da2d1ef899e16bfadf2e9fa67f70338cb"],
+              ["lib/libmedia_kit_video_plugin.so", 70952, "215d7654984704b468ba8feef911ab7bdc83a5ff5ece3907b144655dd72a2dc3"],
+              ["lib/libmpv.so.2", 22218936, "6c74ad711f48b7ee32ff651a5c761665e8e675b4112d6d8d929b025ac8239443"],
+              ["media_kit_test", 177008, "08ec60e92f2284fedbd3c1cfe7816760cc176a41c81e91ac57b216b903b93c82"]
+            ],
+            "sourceTxtMembers": [],
+            "verificationMethod": "ZIP and contained 7z bytes independently rehashed in this report pass; every extracted inner-file hash is preserved from the already completed general-members.json artifact inspection."
+          }
+        ]
+      },
+      {
+        "id": 11749813750,
+        "name": "media_kit_test_ios_arm64",
+        "artifactUrl": "https://github.com/Goodwu/media-kit/actions/runs/38255531407/artifacts/11749813750",
+        "metadataUrl": "https://api.github.com/repos/Goodwu/media-kit/actions/artifacts/11749813750",
+        "downloadUrl": "https://api.github.com/repos/Goodwu/media-kit/actions/artifacts/11749813750/zip",
+        "createdAtUtc": "2026-10-12T13:34:58Z",
+        "updatedAtUtc": "2026-10-12T13:34:58Z",
+        "expiresAtUtc": "2027-01-10T13:24:58Z",
+        "expiredAtApiSnapshot": false,
+        "runId": 38255531407,
+        "runAttempt": 1,
+        "apiWorkflowHeadSha": "e269d9669becb5812663200e7521901e8254c8bd",
+        "zipBytes": 10001153,
+        "zipSha256": "e6b5714c15a2cd8cbca53ad64ca74d4ab4f1eb7074956ed50051bb74e77c0e1e",
+        "apiDigest": "sha256:e6b5714c15a2cd8cbca53ad64ca74d4ab4f1eb7074956ed50051bb74e77c0e1e",
+        "apiSizeBytes": 10001153,
+        "apiDigestAndSizeMatch": true,
+        "outerMemberCount": 1,
+        "containers": [
+          {
+            "name": "media_kit_test_ios_arm64.7z",
+            "format": "7z",
+            "bytes": 9997930,
+            "sha256": "4883f1abfc2b78c950fea5868b371103a301c095043c93054ebaa8df4a40f57f",
+            "fileCount": 98,
+            "exactPathPrefix": "build/ios/iphoneos/Runner.app/",
+            "memberColumns": ["pathSuffix", "bytes", "sha256"],
+            "members": [
+              ["AppFrameworkInfo.plist", 347, "275c1f7273e185d2d65f8b447af25841e2be7fbdb3df89feb6324634f33ce317"],
+              ["AppIcon60x60@2x.png", 987, "9d328d1d45f386375e28736159b4ffa53c4930e3962016dbf98b029a4e80121c"],
+              ["AppIcon76x76@2x~ipad.png", 1362, "29a53a06908d2de7e2c0d4b50d967cc61acb33f76689c207e43f28e9724c3996"],
+              ["Assets.car", 66920, "f718b33ef4760c4e4073d4943e9688d3e4bd7147d7470ced5079cdb4b6987352"],
+              ["Base.lproj/LaunchScreen.storyboardc/01J-lp-oVM-view-Ze5-6b-2t3.nib", 2281, "6f2e96b21c175a06c4622032d9bbe1d14b634956b7130c9290d15cd456b319d6"],
+              ["Base.lproj/LaunchScreen.storyboardc/Info.plist", 258, "1f255d5cc53b531e3f29a9406a8df49a958e2bf9443d3e20bd8374f707f7d5c8"],
+              ["Base.lproj/LaunchScreen.storyboardc/UIViewController-01J-lp-oVM.nib", 924, "54f3637f671feba5f19e82ec4f4a7fb448bb3cfc0fb180f089aa571fc8f053e2"],
+              ["Base.lproj/Main.storyboardc/BYZ-38-t0r-view-8bC-Xf-vdC.nib", 1835, "058fe138c3b415c0a5f2608c42a8d56c579bf10f7b7351bd947b1c7eca4714d9"],
+              ["Base.lproj/Main.storyboardc/Info.plist", 258, "3e9bdaa408d1eb6ae5e989b813a8644e0a4a981202c536905de52a7291e69aa4"],
+              ["Base.lproj/Main.storyboardc/UIViewController-BYZ-38-t0r.nib", 951, "cbdd28d89423b2c9beef2b27ce2c9608d30d6c6a9d2e7679f79a53814444e53f"],
+              ["Frameworks/App.framework/App", 6722128, "ea394644f96df0e59f1dacf026edc91c8a02570937e7b004696389758026fdaf"],
+              ["Frameworks/App.framework/Info.plist", 754, "448bf45fc4afbdf5a384e44425f995ab5318901915a4f766809b44bed1b1930d"],
+              ["Frameworks/App.framework/_CodeSignature/CodeResources", 3916, "bd7b159f24346e5ecf5700fa2c430301fd097f10b0ae3f2aa1e8dbfe688e2894"],
+              ["Frameworks/App.framework/flutter_assets/AssetManifest.bin", 99, "6c7a835aeddb9915a160d145f39f27e3e81cc561adb0a5aeeb4ff0178a826dc1"],
+              ["Frameworks/App.framework/flutter_assets/FontManifest.json", 82, "28b1eb2b3d2e1ad60b8c8b0f9100b1ccbf492f7fa97f5bebb51ea97e73926e7d"],
+              ["Frameworks/App.framework/flutter_assets/NOTICES.Z", 108827, "c958c23fc3be9818eea2a8cf830ac66c7a6117c938e5958514f290f896b6bc63"],
+              ["Frameworks/App.framework/flutter_assets/NativeAssetsManifest.json", 147, "625b2ddedce42e3d218ceb8869bc9119e8dea8650a6cb24ab779d5008055b141"],
+              ["Frameworks/App.framework/flutter_assets/fonts/MaterialIcons-Regular.otf", 2664, "97a064b602f67f364f3ab55bf7bf8e9c549800d48bb563b15b3f49f32911751e"],
+              ["Frameworks/App.framework/flutter_assets/packages/wakelock_plus/assets/no_sleep.js", 13669, "726c644cda17bf271d996fb629806a59409607e9b00e0dfbf75adfd3986bbb7e"],
+              ["Frameworks/App.framework/flutter_assets/shaders/ink_sparkle.frag", 4960, "62ce4ba6e34254371ffdfb8e0670afcc5314f4452edf5ee70afcf079f2ed7ea2"],
+              ["Frameworks/App.framework/flutter_assets/shaders/stretch_effect.frag", 4408, "21cdf2ecc9b113671fb228620d952ebae0f102a78a39a9df89b6ebdf6aec315a"],
+              ["Frameworks/Ass.framework/Ass", 341592, "4881ad48c9f607f17b032c71483a3ee77e97fc144cf40bba828f13def26b2c57"],
+              ["Frameworks/Ass.framework/Info.plist", 208, "d297fa74d3996d3b57f59f6dc375bbdc8c8441da1859fcc1ac1f92ca99eda207"],
+              ["Frameworks/Avcodec.framework/Avcodec", 3535864, "6682a18b9c5159abed43cc728dd84c6ebf90474947d80d207169b7b7ae338d93"],
+              ["Frameworks/Avcodec.framework/Info.plist", 216, "d6dc6ea55b418e19b62f9105ec77342cc9f64e70e85bfa420f3faef49894644b"],
+              ["Frameworks/Avfilter.framework/Avfilter", 199304, "815e2975e14b92343738f1977ebc6534fbc10b646c99e252d6130e3095e60b76"],
+              ["Frameworks/Avfilter.framework/Info.plist", 218, "31099bf6a43e6e2a5c9046a4c322126fbb40823bc778be0d0998f43c261e0a19"],
+              ["Frameworks/Avformat.framework/Avformat", 864472, "410c67bf72cba2d90b2ff65a501f178350facd3ab0c6de270109810dd02b88f6"],
+              ["Frameworks/Avformat.framework/Info.plist", 218, "a0a0e61bd297cf387ff62b04ad2422a0164c3be3efa12ea86c205a6826980df5"],
+              ["Frameworks/Avutil.framework/Avutil", 537080, "fe8dd82618c36b46d1537f78b5a387d1b7adb80e3066a7201a637a2b508f5316"],
+              ["Frameworks/Avutil.framework/Info.plist", 214, "a0a849da7536b92c9dd482d7e586b121ea573ae05a94e6a8259b672552833bd6"],
+              ["Frameworks/Dav1d.framework/Dav1d", 714336, "03328458cd1500e351d1472b9dbf26b5958085beefe651f4e0a42420caf50983"],
+              ["Frameworks/Dav1d.framework/Info.plist", 212, "cd59a88d98aee8819c7c571e55535e0c355867e5ed2d646a3549f1f373df12e2"],
+              ["Frameworks/Flutter.framework/Flutter", 9416112, "586c15653abc0fc21fd53c9c4661f06f42f5a3bd90c484c44ab3572379eca10a"],
+              ["Frameworks/Flutter.framework/Headers/Flutter.h", 921, "c1f5b26a03d82c2451dbec13b8645bb56df3df3d80592f98171ba204e15d4a36"],
+              ["Frameworks/Flutter.framework/Headers/FlutterAppDelegate.h", 2283, "ebf60356f3456e2054548d873f08674ea2cdb5d7518d7530a328b5e81d867ba3"],
+              ["Frameworks/Flutter.framework/Headers/FlutterBinaryMessenger.h", 3761, "1170e4e2dfbba82a724246abfaaf561ea63d6dc2bc7b2a210b0195b41261332f"],
+              ["Frameworks/Flutter.framework/Headers/FlutterCallbackCache.h", 1724, "d21f7ebcae4afabf26a13b221817ecebe4ccf50a20d3cf5a7c7032de06dcc035"],
+              ["Frameworks/Flutter.framework/Headers/FlutterChannels.h", 18414, "920d7de42def64b88e9fc29e150532ec3a15b80f55643a6aa012d59fae2e19a2"],
+              ["Frameworks/Flutter.framework/Headers/FlutterCodecs.h", 15290, "672aa51d8b996e915ebd57a7cbd59d974ad51604bbb33232b2c4a20b269a7853"],
+              ["Frameworks/Flutter.framework/Headers/FlutterDartProject.h", 3914, "53cabfd086edf6ae0ed8732c09d530213b49753c7c2e3865c7ed1a63cddf1fab"],
+              ["Frameworks/Flutter.framework/Headers/FlutterEngine.h", 21724, "29528cda49a2619ac88f2a31be72b314af4e543918315dfaf11e5622c200742a"],
+              ["Frameworks/Flutter.framework/Headers/FlutterEngineGroup.h", 4755, "4aacef231a815c427753d2c9df6842117b2b1f63f5ea0ba643e810c7a3dd95fe"],
+              ["Frameworks/Flutter.framework/Headers/FlutterHeadlessDartRunner.h", 3927, "9e6663669bc5097af281fe14f5a3e4362f15708edc2f902d03e098e6e51620bd"],
+              ["Frameworks/Flutter.framework/Headers/FlutterHourFormat.h", 536, "43848b1528212ffe441493f22e0ecf362f49ff1a645557f3ae8d15422407b6b6"],
+              ["Frameworks/Flutter.framework/Headers/FlutterMacros.h", 1823, "79b0551d265c52701b378851718ab7b6db7afbecf561b73c2954988554e80f99"],
+              ["Frameworks/Flutter.framework/Headers/FlutterPlatformViews.h", 1966, "d1a53db8ce90729ce6669b8560e6e3f5d1a51849132a8c0f304449410745d8fe"],
+              ["Frameworks/Flutter.framework/Headers/FlutterPlugin.h", 19326, "349bc734c4eec7babf27b476f7c7a3bcfa01f4b0114bfbc7eae8ed9b09947838"],
+              ["Frameworks/Flutter.framework/Headers/FlutterPluginAppLifeCycleDelegate.h", 5318, "f8f327fb94838f655de9153c09022dfc9625dd3fbc0e1a7b1c89aa033a1ca0d9"],
+              ["Frameworks/Flutter.framework/Headers/FlutterSceneDelegate.h", 893, "1bdbab65e137d7695d6b391e3ffeecbadd2dda103795f72ec47452b8b9a3fa06"],
+              ["Frameworks/Flutter.framework/Headers/FlutterSceneLifeCycle.h", 8387, "b4d90b84efbe3ce2f8db38397e312fe7f0c97d0ad7bbca8763a24b6ebf2d2217"],
+              ["Frameworks/Flutter.framework/Headers/FlutterTexture.h", 2263, "25ca4de1af6cbfac729e50f7462eb5d4de72f87a2ea545a9da1cab21707f23c6"],
+              ["Frameworks/Flutter.framework/Headers/FlutterViewController.h", 10734, "e2336e4d76c2899c2aa71d253a64dd292183b3ebaba237681a95ce2bac09a9a5"],
+              ["Frameworks/Flutter.framework/Info.plist", 1078, "e95047d1273cbbd05eb1f791aa92144eea820c1c0677de1b15eefd96b5fd3e6e"],
+              ["Frameworks/Flutter.framework/Modules/module.modulemap", 95, "d158eb891a59ec065968fff498c00f3093e18ba2e8301e0c857ccbe63db8b46b"],
+              ["Frameworks/Flutter.framework/PrivacyInfo.xcprivacy", 845, "9f95d7e7862a4b56b66ed926bd6d622d2a6545a827d19847278b438d571d4212"],
+              ["Frameworks/Flutter.framework/_CodeSignature/CodeResources", 7070, "3613fee2fc64d9d81dfd63d5506064679e42ec33ce16e7afb7aba884525a0afe"],
+              ["Frameworks/Flutter.framework/icudtl.dat", 864880, "325a86063d26334c2eabe1743cea073b612540fbf3d8fc2ef0b5708e3763a8c7"],
+              ["Frameworks/Freetype.framework/Freetype", 1322256, "db971302890ff9d24ceb0404b060b20a5d9fb3c7a802c6da276e22904afa616a"],
+              ["Frameworks/Freetype.framework/Info.plist", 218, "55a86305febad826ad8ab122c84f12d2a31ae0db68d2ae2db0c282016a480a74"],
+              ["Frameworks/Fribidi.framework/Fribidi", 213648, "4914b2da30f46decc45ebbb4f13d778149f518f41b55256beccd5dd7643fada6"],
+              ["Frameworks/Fribidi.framework/Info.plist", 216, "b21788b2cdb0992945212c2892775d0c24878063661862674cf067fc90864857"],
+              ["Frameworks/Harfbuzz.framework/Harfbuzz", 5340024, "180026bb3dc03589b5a481699e825d799f47ce4139adf62911b74fbb543085e7"],
+              ["Frameworks/Harfbuzz.framework/Info.plist", 218, "b9887deae0301a5493959ee3e043c7d65055982397e609017e5d02bf6bb982fb"],
+              ["Frameworks/Mbedcrypto.framework/Info.plist", 222, "fc010b2fd8afc91f5bdb4b77dabc29a808937403c23362ccb374d3fb3a64aafa"],
+              ["Frameworks/Mbedcrypto.framework/Mbedcrypto", 946832, "f3a4ebda8bd1944565a9a7abf8e4394fb9a0466eb54e2be8521aedad970ad369"],
+              ["Frameworks/Mbedtls.framework/Info.plist", 216, "b2a12459b6e8ecacba66267105c0da9d247f0017bc11a0aa1d23cb4ee53d7242"],
+              ["Frameworks/Mbedtls.framework/Mbedtls", 367792, "a4d2f1070b54b72d780faf6bdeb9a6144629c136eaf3bb25d3644b5ae2c400f9"],
+              ["Frameworks/Mbedx509.framework/Info.plist", 218, "be7208d1a404b01fae81a56243613120c160f2ecd31da0e934864006d4bad226"],
+              ["Frameworks/Mbedx509.framework/Mbedx509", 176048, "9105244ea4c3a8c00008be1109897e11251842a80f2f21c95ac96b103a0ddb97"],
+              ["Frameworks/Mpv.framework/Info.plist", 208, "eaac9fd2ca9df7fdbe503dc4e68982d5ef04b3e1c3797829130813674989dafe"],
+              ["Frameworks/Mpv.framework/Mpv", 1906400, "02a6cf314a381eec0f07c9ff25c0386fffcb9c05d368dd276774486db0ee5274"],
+              ["Frameworks/Png16.framework/Info.plist", 212, "9e9e099861bd0285cf0f4ca05d3963b6dc60d1b084d535d10c805d17bd2d6f25"],
+              ["Frameworks/Png16.framework/Png16", 416184, "8634326eece32603b394fb4d7567f8ee876da5415beb5fc9acdbc913061fe80d"],
+              ["Frameworks/Swresample.framework/Info.plist", 222, "6ff97376264c7e723a1fe3d02dcd5811df65a46e45f7ed4beb6a94dbd9fbe46f"],
+              ["Frameworks/Swresample.framework/Swresample", 119344, "8280f0a7c0daaa2926874f61e3beffc52b7462cfe7f200e0397833c3beaae15b"],
+              ["Frameworks/Swscale.framework/Info.plist", 216, "94f765e249e63782a3f962e3670d31ea09ce29f4ccd8560cb6a53d2e073865c2"],
+              ["Frameworks/Swscale.framework/Swscale", 350296, "0bf26e2f4ffcc30021d4eb53bf86e98a5761b2b5e02ac11aef82cd0b92e8782e"],
+              ["Frameworks/Uchardet.framework/Info.plist", 218, "0c6734ec9d4fe606b7a5526b01ac700b8370b8dfb4018ad85fc4e331dfc0341d"],
+              ["Frameworks/Uchardet.framework/Uchardet", 289400, "83cbb5d2c5aa44b185c4b6808bb8ad3bbb6b41d61dd03d5545d6b2038fdbad1d"],
+              ["Frameworks/Xml2.framework/Info.plist", 210, "1d6104a3d8488b9618182ed5bc0c9135142b2f7926540b4d60eaf9c9f3194572"],
+              ["Frameworks/Xml2.framework/Xml2", 2051992, "77b5b2d9f48e74b7c69b2bdce6f1c6772a932b290ef6835af8037e166a2468d2"],
+              ["Frameworks/objective_c.framework/Info.plist", 791, "21eabba1ce090680496e14367008f7952305d214d3828af85e395761384e28b0"],
+              ["Frameworks/objective_c.framework/_CodeSignature/CodeResources", 1798, "7a252af6354af3aaa2889d61ec172fe729fff9c0f9a25f1395bed3c830cceebc"],
+              ["Frameworks/objective_c.framework/objective_c", 219904, "436af54ca8cb863b16e577f47385424e79cfa11b708c4863d133203546cf40e5"],
+              ["Info.plist", 1554, "a1d33655ff8c6ebfb97789e2a584c3a22878b42ce4da64d068565258a424d81c"],
+              ["PkgInfo", 8, "82502191c9484b04d685374f9879a0066069c49b8acae7a04b01d38d07e8eca0"],
+              ["Runner", 728096, "2452690ba93e732d6752345b2b37be95de9dd476aaeaa34fdcb15f1be23e3ff0"],
+              ["file_picker_darwin_file_picker_darwin.bundle/Info.plist", 725, "bc090ba87ffedf7de1d3d1ad506c0690c88493fbf4ae4f48315de0f8a6b12a79"],
+              ["file_picker_darwin_file_picker_darwin.bundle/PrivacyInfo.xcprivacy", 325, "204d035a88eab2281b3d914f46c796766ae78e3cb82537711928dca9e28dbbb8"],
+              ["media_kit_libs_ios_video_media_kit_libs_ios_video.bundle/Info.plist", 743, "8dd64ecaea5af7b74b932f4fda34d5e32eed037a9b8fd7cafca7ed7818ab6eb8"],
+              ["media_kit_libs_ios_video_media_kit_libs_ios_video.bundle/PrivacyInfo.xcprivacy", 373, "6d2da0d8d930227d428c1d9363b0ad6e3a12e2c9b68c5ce297158a7412fc8c31"],
+              ["media_kit_video_media_kit_video.bundle/Info.plist", 707, "93bdc806187d6530fc0c3e94e664d06d4ad25443b7cdd1d4750aa649df3be197"],
+              ["media_kit_video_media_kit_video.bundle/PrivacyInfo.xcprivacy", 373, "6d2da0d8d930227d428c1d9363b0ad6e3a12e2c9b68c5ce297158a7412fc8c31"],
+              ["package_info_plus_package_info_plus.bundle/Info.plist", 722, "3b09c095de01a63cc8abbb8918a02d9a9a3d9d13a576839f72ff9377fff4f7d2"],
+              ["package_info_plus_package_info_plus.bundle/PrivacyInfo.xcprivacy", 373, "6d2da0d8d930227d428c1d9363b0ad6e3a12e2c9b68c5ce297158a7412fc8c31"],
+              ["wakelock_plus_wakelock_plus.bundle/Info.plist", 705, "fb53ae3ced683333263caba7aa86485ba051e45a2f83c570ea30a62467190b76"],
+              ["wakelock_plus_wakelock_plus.bundle/PrivacyInfo.xcprivacy", 373, "6d2da0d8d930227d428c1d9363b0ad6e3a12e2c9b68c5ce297158a7412fc8c31"]
+            ],
+            "sourceTxtMembers": [],
+            "verificationMethod": "ZIP and contained 7z bytes independently rehashed in this report pass; every extracted inner-file hash is preserved from the already completed general-members.json artifact inspection."
+          }
+        ]
+      },
+      {
+        "id": 11749783159,
+        "name": "media_kit_test_win32_x64",
+        "artifactUrl": "https://github.com/Goodwu/media-kit/actions/runs/38255531407/artifacts/11749783159",
+        "metadataUrl": "https://api.github.com/repos/Goodwu/media-kit/actions/artifacts/11749783159",
+        "downloadUrl": "https://api.github.com/repos/Goodwu/media-kit/actions/artifacts/11749783159/zip",
+        "createdAtUtc": "2026-10-12T13:30:58Z",
+        "updatedAtUtc": "2026-10-12T13:30:58Z",
+        "expiresAtUtc": "2027-01-10T13:24:58Z",
+        "expiredAtApiSnapshot": false,
+        "runId": 38255531407,
+        "runAttempt": 1,
+        "apiWorkflowHeadSha": "e269d9669becb5812663200e7521901e8254c8bd",
+        "zipBytes": 21553861,
+        "zipSha256": "0c984ab5d46e588b1084c5fe389da844bce5be9e8c38db507559cffe6b2c17de",
+        "apiDigest": "sha256:0c984ab5d46e588b1084c5fe389da844bce5be9e8c38db507559cffe6b2c17de",
+        "apiSizeBytes": 21553861,
+        "apiDigestAndSizeMatch": true,
+        "outerMemberCount": 1,
+        "containers": [
+          {
+            "name": "media_kit_test_win32_x64.7z",
+            "format": "7z",
+            "bytes": 21547113,
+            "sha256": "a66de0706e68bbd67fa7fa108771d4f127345565eed499eaefc47d547d068a04",
+            "fileCount": 16,
+            "exactPathPrefix": "build\\windows\\x64\\runner\\Release/",
+            "memberColumns": ["pathSuffix", "bytes", "sha256"],
+            "members": [
+              ["dartjni.dll", 58368, "10152e1fea2d1e2a42bbeabab3452893cdde1e21f532d09cb3aabb9a43304006"],
+              ["data/app.so", 7291784, "49a724acab3aad2a393a1ada8f7c9c7ce0b4ccd624c29876096680377e79a47a"],
+              ["data/flutter_assets/AssetManifest.bin", 99, "6c7a835aeddb9915a160d145f39f27e3e81cc561adb0a5aeeb4ff0178a826dc1"],
+              ["data/flutter_assets/FontManifest.json", 82, "28b1eb2b3d2e1ad60b8c8b0f9100b1ccbf492f7fa97f5bebb51ea97e73926e7d"],
+              ["data/flutter_assets/fonts/MaterialIcons-Regular.otf", 2664, "97a064b602f67f364f3ab55bf7bf8e9c549800d48bb563b15b3f49f32911751e"],
+              ["data/flutter_assets/NativeAssetsManifest.json", 45, "9548a31e4a048135c1d94f919328bfb62ae2c7bb3cab96557c7941daa97776cb"],
+              ["data/flutter_assets/NOTICES.Z", 109053, "07413b5e8da13ac5f2dfcd5a47d6ff8e6eef1814dc2bcca7543557f6db1eeb40"],
+              ["data/flutter_assets/packages/wakelock_plus/assets/no_sleep.js", 13669, "726c644cda17bf271d996fb629806a59409607e9b00e0dfbf75adfd3986bbb7e"],
+              ["data/flutter_assets/shaders/ink_sparkle.frag", 21856, "1fe8436a743884cb65078fe8c7b38e18f5365f2a2961270916f426fd13c604af"],
+              ["data/flutter_assets/shaders/stretch_effect.frag", 17616, "bc7599dbbbaab310efe41520574138d21fb18a88c8fe4495ed79315309336f6f"],
+              ["data/icudtl.dat", 864880, "325a86063d26334c2eabe1743cea073b612540fbf3d8fc2ef0b5708e3763a8c7"],
+              ["flutter_windows.dll", 21274112, "58aacd64492877c08a4b9566d2d9bd53cd475d31eb8d42b34f2a035e64a326e2"],
+              ["libmpv-2.dll", 39142912, "24e848f59c047c9442501fdbe619ad39b98be7d4dd402691f79931c852c0070a"],
+              ["media_kit_libs_windows_video_plugin.dll", 12288, "00fefdea968b682464980e74adab0c6d6ca70ec3ca0e1fd8e432525d571b3419"],
+              ["media_kit_test.exe", 91136, "01a3424003b54fc730ccb75a459de2a74923e901d2b206f44a8e410e176300b1"],
+              ["media_kit_video_plugin.dll", 158208, "551348ccd75eb7325131394666941641e45e4e21fcee3b6b7c743bcf8b610736"]
+            ],
+            "sourceTxtMembers": [],
+            "verificationMethod": "ZIP and contained 7z bytes independently rehashed in this report pass; every extracted inner-file hash is preserved from the already completed general-members.json artifact inspection."
+          }
+        ]
+      }
+    ]
+  },
+  "sourceFiles": [
+    {
+      "repository": "Goodwu/media-kit",
+      "commit": "e269d9669becb5812663200e7521901e8254c8bd",
+      "path": ".github/workflows/ci.yml",
+      "blob": "4d6e7676e471317bd34dc89fb7e235136790d5f8",
+      "bytes": 25885,
+      "sha256": "795561ea0a5362525fd9b0cca7f0c9ba66087d23a92b1b68e43821ccea96c79d",
+      "lineRanges": [
+        [23, 110],
+        [286, 333],
+        [714, 728]
+      ],
+      "url": "https://github.com/Goodwu/media-kit/blob/e269d9669becb5812663200e7521901e8254c8bd/.github/workflows/ci.yml",
+      "purpose": "General test setup, package root, Web native-test exclusion, APK build/upload and historical release-JAR identity job."
+    },
+    {
+      "repository": "Goodwu/media-kit",
+      "commit": "e269d9669becb5812663200e7521901e8254c8bd",
+      "path": "media_kit/test/src/player/player_test.dart",
+      "blob": "50f4a893f252cf3e9ba7ff33edb043363233a666",
+      "bytes": 102706,
+      "sha256": "9b7b71915e1bd6a2e8d7736e0b7b1f4bbd8bbe7e0b5c9d95c77e0445ab13d1d5",
+      "lineRanges": [
+        [2322, 2389],
+        [2390, 2465],
+        [3033, 3034]
+      ],
+      "url": "https://github.com/Goodwu/media-kit/blob/e269d9669becb5812663200e7521901e8254c8bd/media_kit/test/src/player/player_test.dart",
+      "purpose": "Failing shuffle test, consecutive control and existing subtitle retry policy."
+    },
+    {
+      "repository": "Goodwu/media-kit",
+      "commit": "e269d9669becb5812663200e7521901e8254c8bd",
+      "path": "media_kit/lib/src/player/web/player/real.dart",
+      "blob": "c6feb91a11698ff89dd09448a091bd13f5f4670e",
+      "bytes": 49461,
+      "sha256": "f4ea53f059b86e0e3f7524c86fa6063dde66addbc3b5a9d0c0a56a54b455d0a6",
+      "lineRanges": [
+        [1142, 1204]
+      ],
+      "url": "https://github.com/Goodwu/media-kit/blob/e269d9669becb5812663200e7521901e8254c8bd/media_kit/lib/src/player/web/player/real.dart",
+      "purpose": "Web setShuffle implementation candidate for the next separately claimed reproduction slice; no root-cause conclusion."
+    },
+    {
+      "repository": "Goodwu/media-kit",
+      "commit": "e269d9669becb5812663200e7521901e8254c8bd",
+      "path": "libs/android/media_kit_libs_android_video/android/build.gradle",
+      "blob": "20e075d5a26662e8ebff07428931e9ccdcdd54af",
+      "bytes": 6274,
+      "sha256": "6978fcc0126d17f23bae567101af948286c7282e86e594a402b24cadc5877d19",
+      "lineRanges": [
+        [59, 92]
+      ],
+      "url": "https://github.com/Goodwu/media-kit/blob/e269d9669becb5812663200e7521901e8254c8bd/libs/android/media_kit_libs_android_video/android/build.gradle",
+      "purpose": "Configured historical JAR URL/SHA256 and arm64-only input selection policy."
+    },
+    {
+      "repository": "Goodwu/media-kit",
+      "commit": "e269d9669becb5812663200e7521901e8254c8bd",
+      "path": "tool/routing_ci/android_jar_identity.py",
+      "blob": "400b28e537640dc494998e7438e4d2bc7e36eeed",
+      "bytes": 3202,
+      "sha256": "ae5b58221f1d622303a8a9a1fb7db6e1055abacc1cf68ba042e385c4a2f621b3",
+      "lineRanges": [
+        [1, 79]
+      ],
+      "url": "https://github.com/Goodwu/media-kit/blob/e269d9669becb5812663200e7521901e8254c8bd/tool/routing_ci/android_jar_identity.py",
+      "purpose": "Identity check reads an already released JAR; it is not a DV001 native producer."
+    }
+  ],
+  "evidenceInputFingerprints": [
+    {
+      "auditFile": "api-snapshots.json",
+      "bytes": 238097,
+      "sha256": "644f956a1a4f21fcae2fffb38cdb24f6fb7d3292ca4ad30cd1ea963161fc51fb",
+      "retention": "Scratch audit input; raw large logs and downloaded ZIPs are deliberately not part of the repository deliverable."
+    },
+    {
+      "auditFile": "general-logs.json",
+      "bytes": 952179,
+      "sha256": "f7c306236274856959eab393195422d68f6c8777a78ee4b5a2b1cb50607fcf0e",
+      "retention": "Scratch audit input; raw large logs and downloaded ZIPs are deliberately not part of the repository deliverable."
+    },
+    {
+      "auditFile": "artifacts/inventory.json",
+      "bytes": 107934,
+      "sha256": "7359bf5574bb04d06b6baea2b8d9e5939eecdb39dac1d3b9097a67f8e4866976",
+      "retention": "Scratch audit input; raw large logs and downloaded ZIPs are deliberately not part of the repository deliverable."
+    },
+    {
+      "auditFile": "artifacts/general-members.json",
+      "bytes": 106722,
+      "sha256": "adda07811c6918e33dde9769378b3cd477aa19f0acc8c536713dce1f39296c76",
+      "retention": "Scratch audit input; raw large logs and downloaded ZIPs are deliberately not part of the repository deliverable."
+    },
+    {
+      "auditFile": "general-android-build-log.json",
+      "bytes": 2865896,
+      "sha256": "1a79bcd692b2317c8256a61dcbbe9987b73c6acd27fb6080a16c7080c25fba12",
+      "retention": "Scratch audit input; raw large logs and downloaded ZIPs are deliberately not part of the repository deliverable."
+    },
+    {
+      "auditFile": "coordination-snapshot.json",
+      "bytes": 1186077,
+      "sha256": "b1481ad08ed75c8e569440690a5225fb6617892d5372f9ec88e570189c58decc",
+      "retention": "Scratch audit input; raw large logs and downloaded ZIPs are deliberately not part of the repository deliverable."
+    }
+  ],
+  "relatedImplementationIndex": {
+    "auditFile": "audit-native-review/implementation-source-index.json",
+    "bytes": 54611,
+    "sha256": "29b329a4998dc586a436fcb26e367da608dd8881af1154a50c3249ecb239b0bd",
+    "scope": "Separate read-only existence/source index at media-kit 5834ce5b and App 13b139b7. It locates already implemented query/F01/R01/config/source provenance entry points; it neither changes this general-run vector nor supplies test/native/device acceptance."
+  },
+  "acceptance": {
+    "generalWorkflow": "FAILED",
+    "packageTests": "Web final failure; Linux and Windows final success; macOS final success with subtitle retry/error history retained.",
+    "exampleBundles": "Eight actual downloaded artifacts identified and inspected; build output only.",
+    "freshNative": "NOT_ESTABLISHED",
+    "deviceHdr": "NOT_EVALUATED",
+    "sustainedPerformance": "NOT_EVALUATED",
+    "release": "NOT_PUBLISHED_BY_THIS_REVIEW; release metadata job skipped",
+    "productionChangesInThisReview": false
+  },
+  "nextSlice": {
+    "status": "PENDING_SEPARATE_CORE_CLAIM_AFTER_CI_AND_HANDOFF_LEDGER_UPDATE",
+    "candidateScope": ["media_kit/lib/src/player/web/player/real.dart:setShuffle", "media_kit/test/src/player/player_test.dart:player-set-shuffle and player-set-shuffle-consecutive"],
+    "requiredFirstAction": "Reproduce and trace playlist state/event/identity behavior at an explicitly recorded source vector before deciding a change. Root cause remains a candidate; no code fix or rerun success is claimed.",
+    "coordination": "Shared Session/planner/backend/realizer/output slot/App controller/CI/SDK changes require central ownership check. DEVICE alone retains native recipe fixes/builds and device validation; DV001 and PR5 exclusions remain open."
+  }
+}
