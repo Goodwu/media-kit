@@ -188,30 +188,78 @@ void main() {
 
   test('pre-completeness logical decoder name is not an authorization baseline',
       () async {
-    // DV004: before frame facts complete, current-tracks/video/decoder
-    // carries mpv's logical selection name; the first decoded frame
-    // republishes it as the actual AVCodec name
-    // (f_decoder_wrapper.c:452-463 → av_common.c:449-457). That name
-    // publication is not a decoder switch, so a partial round's logical
-    // name must not fail the first complete round. Real post-establishment
-    // decoder switches remain guarded by the session's final plan
-    // comparison.
+    // DV004 real-device sequence (LYA, 120-AVC): round 1 records the logical
+    // name "h264" with hwdec/pixel/gamma/primaries absent; the first decoded
+    // frame republishes decoder as "h264_mediacodec" (mediacodec-copy, OMX
+    // hisi avc, nv12 CPU frames). The name publication is not a decoder
+    // switch: the first complete sample must return facts, and that final
+    // snapshot must still satisfy the plan (validateDecoderObservation).
     final s = Sample();
     s.props['current-tracks/video/decoder'] = 'h264';
+    s.props['current-tracks/video/decoder-desc'] = '';
+    s.props['current-tracks/video/codec'] = 'h264';
+    s.props['video-format'] = 'h264';
+    s.props['android-mediacodec-info'] =
+        '{"api":1,"mime":"video/avc","codec":"OMX.hisi.video.decoder.avc","native-dv-active":false}';
+    s.props['hwdec-current'] = 'mediacodec-copy';
     s.props['video-params/pixelformat'] = '';
+    s.props['video-params/gamma'] = 'bt.1886';
+    s.props['video-params/primaries'] = 'bt.709';
     var rounds = 0;
     final facts = await s.gather(betweenRounds: () {
       if (++rounds == 1) {
-        // First decoded frame: mpv republishes the logical name as the
-        // actual AVCodec name and frame facts become available.
         s.props['current-tracks/video/decoder'] = 'h264_mediacodec';
-        s.props['video-params/pixelformat'] = 'mediacodec';
-        s.props['hwdec-current'] = 'mediacodec-copy';
+        s.props['current-tracks/video/decoder-desc'] = 'h264 (mediacodec)';
+        s.props['video-params/pixelformat'] = 'nv12';
       }
     });
     expect(facts.decoderObservation!.decoder, 'h264_mediacodec');
     expect(facts.hwdecCurrent, 'mediacodec-copy');
     expect(facts.decoderObservation!.decoderIdentityKnown, isTrue);
+    // The published final snapshot satisfies the plan: SDR copy route with
+    // an AVC hardware component and nv12 CPU frames.
+    expect(
+      () => validateDecoderObservation(
+          route(vo: 'gpu-next', hwdec: 'mediacodec-copy'), facts),
+      returnsNormally,
+    );
+  });
+
+  test('a complete snapshot that violates the plan is still rejected', () async {
+    // Same name-publicution sequence, but the underlying component is HEVC
+    // while the track codec is h264: the final snapshot must fail plan
+    // validation even though gathering itself succeeded.
+    final s = Sample();
+    s.props['current-tracks/video/decoder'] = 'h264';
+    s.props['current-tracks/video/codec'] = 'h264';
+    s.props['video-format'] = 'h264';
+    s.props['android-mediacodec-info'] =
+        '{"api":1,"mime":"video/hevc","codec":"c2.hevc.sw","native-dv-active":false}';
+    s.props['hwdec-current'] = 'mediacodec-copy';
+    s.props['video-params/pixelformat'] = 'nv12';
+    s.props['video-params/gamma'] = 'bt.1886';
+    s.props['video-params/primaries'] = 'bt.709';
+    final facts = await s.gather(betweenRounds: () {
+      s.props['current-tracks/video/decoder'] = 'h264_mediacodec';
+    });
+    expect(
+      () => validateDecoderObservation(
+          route(vo: 'gpu-next', hwdec: 'mediacodec-copy'), facts),
+      throwsA(isA<HdrPlaybackBlocked>()),
+    );
+  });
+
+  test('copy route without a CPU frame format is rejected by plan validation',
+      () async {
+    final s = Sample();
+    s.props['hwdec-current'] = 'mediacodec-copy';
+    s.props['video-params/pixelformat'] = 'mediacodec';
+    final facts = await s.gather();
+    expect(
+      () => validateDecoderObservation(
+          route(vo: 'gpu-next', hwdec: 'mediacodec-copy'), facts),
+      throwsA(isA<HdrPlaybackBlocked>()),
+    );
   });
 
   test('same URI new epoch is not owned entry', () async {
