@@ -1,0 +1,127 @@
+{
+  "schema": "mk-routing-pr5-script-inventory/v1",
+  "observedAt": "2026-10-12",
+  "readOnly": true,
+  "currentHeads": {
+    "mediaKitIntegrationBranch": {
+      "repo": "Goodwu/media-kit",
+      "branch": "routing/MK-ROUTING-20261011",
+      "sha": "751d0cdd69c26374d452fbf672c5600ce59f2387",
+      "remoteConfirmed": true
+    },
+    "mediaKitPR5": {
+      "head": "device/MK-ROUTING-20261011/DV-BUILD-01",
+      "sha": "5b27961137a3b03e687dddbeb05a0320fcf6c60c",
+      "base": "routing/MK-ROUTING-20261011",
+      "baseSha": "1e1e0d97f35f7d02185665f1c9837939ba172ca7",
+      "state": "OPEN"
+    },
+    "devicePR1": {
+      "repo": "Goodwu/libmpv-android-video-build-dv-experiment",
+      "head": "device/MK-ROUTING-20261011/DV001",
+      "sha": "1095a43acb4d0973b8bca59c5da4e300657bdb29",
+      "base": "feature/android-dv-build",
+      "baseSha": "72c574d14bf207c81f9a7504d5cf1bfb05175b6d",
+      "state": "OPEN"
+    }
+  },
+  "scripts": [
+    {
+      "path": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/assemble-jar-arm64.sh",
+      "introducedBy": "cbcc6bb88e66dd43ba1eb38ec0dde131736aeb07",
+      "unchangedAtPr5Head": true,
+      "bytes": 2195,
+      "gitBlobSha1": "5363de29053303d3b3672aab81b565d6341f4019",
+      "sha256": "9df01982361945da565832d6729d327ce71cb268ffadccd0004e1b4897bc455c",
+      "evidenceUrl": "https://github.com/Goodwu/media-kit/blob/5b27961137a3b03e687dddbeb05a0320fcf6c60c/docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/assemble-jar-arm64.sh",
+      "observations": [
+        "Arm64-only JAR assembly using prefix/libmpv.so, helper APK extraction, and NDK libc++_shared.so.",
+        "Explicitly says it replicates the arm64 subset of bundle_default.sh.",
+        "Duplicates the current DV001 bundle path for staging/copy/weakening/timestamp/ZIP and uses the same fail-open nm|grep Properties2-only gate; it does not independently prove the complete 3-member/link provenance contract.",
+        "Contains hard-coded local workspace paths."
+      ]
+    },
+    {
+      "path": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/matrix-device-build.sh",
+      "introducedBy": "cbcc6bb88e66dd43ba1eb38ec0dde131736aeb07",
+      "unchangedAtPr5Head": true,
+      "bytes": 2578,
+      "gitBlobSha1": "33abc7195e898d859177bfbb1baed9062a443c55",
+      "sha256": "bf54737f08351c71877e2257b7eb8c6031e7a7aed754b26ceb64ddec0222b498b",
+      "evidenceUrl": "https://github.com/Goodwu/media-kit/blob/5b27961137a3b03e687dddbeb05a0320fcf6c60c/docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/matrix-device-build.sh",
+      "observations": [
+        "Runs a local Flutter APK matrix with injected arm64 JAR and P5/P8.4/HDR10/HLG defines.",
+        "Uses hard-coded local paths and calls existing lab build outputs; it is a test/matrix driver, not a native producer recipe.",
+        "Consumes output of assemble-jar-arm64.sh; acceptance vector and complete APK/source manifest are not established by the script alone."
+      ]
+    }
+  ],
+  "alreadyIntegrated": {
+    "commits": [
+      "e162cb3c7575219e09cb007398e62be9ac7fbf1a",
+      "aeafc6c38a064ba13368d069334b0b4ca2cdc868"
+    ],
+    "ancestorOfCurrentMediaKitHead": true,
+    "files": [
+      "input-vector.md",
+      "device-results.md",
+      "critical-review-define-promotion.md",
+      "import-manifest.json",
+      "README.md"
+    ],
+    "scope": "three historical Markdown records plus device-results 16-line append; manifest records source/import hashes and excludes both shell scripts",
+    "manifestPath": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/import-manifest.json",
+    "manifestSourcePrHead": "5b27961137a3b03e687dddbeb05a0320fcf6c60c"
+  },
+  "latestEvidence": {
+    "mediaKitPR5Comment": {
+      "id": 6111768962,
+      "url": "https://github.com/Goodwu/media-kit/pull/5#issuecomment-6111768962",
+      "fact": "latest PR5 issue comment observed; confirms MD append integrated and two shell scripts still excluded; PR5 itself remains open"
+    },
+    "devicePR1Review": {
+      "id": 5483753705,
+      "url": "https://github.com/Goodwu/libmpv-android-video-build-dv-experiment/pull/1#pullrequestreview-5483753705",
+      "fact": "REQUEST_CHANGES: probe read failures must fail closed, check both Vulkan symbols, preserve failure propagation/clean staging/exact members/link provenance"
+    },
+    "devicePR1Comments": [
+      {
+        "id": 6110373174,
+        "url": "https://github.com/Goodwu/libmpv-android-video-build-dv-experiment/pull/1#issuecomment-6110373174",
+        "fact": "controlled reproduction: nm exit 2 and QueueFamily-only both were misclassified NO_IMPORTS/exit 0"
+      },
+      {
+        "id": 6111479264,
+        "url": "https://github.com/Goodwu/libmpv-android-video-build-dv-experiment/pull/1#issuecomment-6111479264",
+        "fact": "adds ELF64 vs four ABIs, partial writes, no full fail-fast/staging/member/source manifest, APK vector completeness requirements"
+      },
+      {
+        "id": 6112842188,
+        "url": "https://github.com/Goodwu/libmpv-android-video-build-dv-experiment/pull/1#issuecomment-6112842188",
+        "fact": "latest PR1 issue comment observed; still requests fixes/evidence and says PR5 scripts/manifest and current device validation remain open"
+      }
+    ],
+    "centralPR4Latest": {
+      "id": 6112985520,
+      "url": "https://github.com/Goodwu/media-kit/pull/4#issuecomment-6112985520",
+      "fact": "latest central note observed; DEVICE remains sole native recipe/device writer; DV001 and PR5 scripts/manifest still open"
+    }
+  },
+  "mergePlacementAssessment": {
+    "recipeFixes": "Goodwu/libmpv-android-video-build-dv-experiment existing DV001 PR #1 only; DEVICE is the single writer. Update/synchronize PR5 evidence scripts only after that recipe correction, avoiding two independent weakening/bundling implementations.",
+    "historicalAndMatrixRecords": "Goodwu/media-kit existing integration branch/PR #4; its PR #5 documentation slice is already integrated. The matrix script is an evidence runner, while assembly script overlaps the producer bundling recipe and should not be accepted as a second canonical recipe.",
+    "notDone": "Neither PR is merged; no native artifact, test, or device acceptance is inferred from this inventory."
+  },
+  "evidenceIndex": [
+    "gh pr view 5 --repo Goodwu/media-kit --json ... (head/base/state/files)",
+    "gh pr view 1 --repo Goodwu/libmpv-android-video-build-dv-experiment --json ... (head/base/state/files)",
+    "git ls-tree -r --long 5b27961137a3b03e687dddbeb05a0320fcf6c60c -- docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01",
+    "git log --all --follow for both shell paths: both first introduced at cbcc6bb88e66dd43ba1eb38ec0dde131736aeb07",
+    "current imported README.md and import-manifest.json; commits e162cb3c and aeafc6c3 are ancestors of 751d0cdd",
+    "GitHub comments/reviews IDs 6111768962, 5483753705, 6110373174, 6111479264, 6112842188, 6112985520"
+  ],
+  "subsequentIntegrationHeadReadback": {
+    "sha": "d91639401862d84c68406aae3b2029400a4cfbd6",
+    "scope": "docs-only evidence checkpoint after inventory began; earlier751d is the inspected source ancestor, not current remote HEAD"
+  }
+}
