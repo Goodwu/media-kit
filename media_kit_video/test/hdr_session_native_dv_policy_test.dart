@@ -1,5 +1,9 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:media_kit_video/src/routing/video_route_options.dart';
+import 'package:media_kit_video/src/routing/video_route_option_review.dart';
+import 'package:media_kit_video/src/routing/video_source_spec.dart';
+import 'package:media_kit_video/src/routing/video_decoder_support.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:media_kit/media_kit.dart';
@@ -599,6 +603,93 @@ void main() {
     expect(budget.hdrAttempts, 2);
   });
 
+  test(
+      'five complete route admissions are finite and same vo does not erase contract identity',
+      () {
+    final budget = HdrSessionAttemptPolicy();
+    final hdr =
+        HdrRoutePlanner.plan(source: _hdr10, capabilities: _caps(sdk: 29))
+            .selected
+            .route!;
+    final native = _Environment().plan().route;
+    final sdr = HdrRoutePlanner.plan(
+            source: _hdr10,
+            capabilities: _caps(sdk: 29),
+            preference: HdrOutputPreference.off)
+        .candidates
+        .where((c) => c.feasible)
+        .map((c) => c.route!)
+        .toList();
+    budget.admit(native);
+    budget.admit(hdr);
+    for (final route in sdr) {
+      budget.admit(route);
+    }
+    expect(budget.attempted, hasLength(5));
+    expect(budget.hdrAttempts, 2);
+    expect(sdr.map((r) => r.vo).toSet(), {'gpu-next'});
+    expect(sdr.toSet(), hasLength(3));
+    expect(() => budget.admit(sdr.first),
+        throwsA(isA<HdrSessionRouteBudgetFailure>()));
+    expect(
+        () => budget
+            .admit(sdr.first.withExecution(hwdec: 'extra', dependencies: {})),
+        throwsA(isA<HdrSessionRouteBudgetFailure>()));
+    final fresh = HdrSessionAttemptPolicy()..admit(sdr.first);
+    expect(() => fresh.admit(sdr.first),
+        throwsA(isA<HdrSessionRouteBudgetFailure>()));
+    expect(() => fresh.attempted.clear(), throwsUnsupportedError);
+  });
+
+  for (final kind in [
+    VideoDecoderKind.hardware,
+    VideoDecoderKind.unknown,
+    VideoDecoderKind.software
+  ]) {
+    test(
+        'actual native Session require HW validates configured native codec kind $kind',
+        () async {
+      final env = _Environment();
+      final backend = _Backend()..review = ((_) async => env.facts());
+      final spec =
+          VideoSourceSpec(codec: 'dvhe.05.06', width: 1920, height: 1080);
+      final capabilities = _caps().withSourceSupport(VideoSourceSupport(
+          source: spec,
+          censusComplete: true,
+          decoders: [
+            VideoDecoderSupport(
+                name: 'OMX.qcom.video.decoder.dolby-vision',
+                mime: 'video/dolby-vision',
+                kind: kind,
+                support: VideoSupport.supported,
+                reason: 'synthetic',
+                path: 'nativeDv')
+          ],
+          reason: 'test'));
+      final session = env.session(backend, capabilities: capabilities);
+      final options = EffectiveVideoRouteOptions.resolve(
+          application: const VideoRouteOptions(
+              experimental: true,
+              decode: VideoRouteSelection.require(VideoDecodeTarget.hardware),
+              failurePolicy: VideoRouteFailurePolicy.stop));
+      await session.open(env.media,
+          hint: _p5, sourceSpec: spec, options: options);
+      expect(session.report.value.options, same(options));
+      if (kind == VideoDecoderKind.hardware) {
+        expect(session.report.value.verified, isTrue);
+        expect(session.report.value.optionFulfillment!.decode,
+            VideoRouteOptionStatus.fulfilled);
+        expect(backend.opened.single.route.strategy,
+            HdrStrategy.nativeDolbyVision);
+      } else {
+        expect(session.report.value.verified, isFalse);
+        expect(session.report.value.actual, isNull);
+        expect(session.report.value.error, isA<HdrPlaybackBlocked>());
+      }
+      await session.dispose();
+    });
+  }
+
   group('actual Session/coordinator flow with synthetic evidence', () {
     test('superseded review cannot plan or spend successor generation state',
         () async {
@@ -725,7 +816,8 @@ void main() {
             [HdrStrategy.nativeDolbyVision, HdrStrategy.metadataReshape]);
         expect(backend.opened.last.excluded,
             contains(HdrRouteDependency.nativeDolbyVision));
-        expect(session.report.value.actual!.strategy, HdrStrategy.metadataReshape);
+        expect(
+            session.report.value.actual!.strategy, HdrStrategy.metadataReshape);
         expect(session.report.value.degradeReason,
             HdrDegradeReason.nativeDvUnavailable);
         await session.dispose();
@@ -763,7 +855,8 @@ void main() {
         HdrStrategy.nativeDolbyVision,
         HdrStrategy.metadataReshape
       ]);
-      expect(session.report.value.actual!.strategy, HdrStrategy.metadataReshape);
+      expect(
+          session.report.value.actual!.strategy, HdrStrategy.metadataReshape);
       expect(session.report.value.verified, isTrue);
       await session.dispose();
     });
@@ -847,7 +940,9 @@ void main() {
       expect(session.report.value.generation, 2);
       await session.dispose();
     });
-    test('real planner selects nativeDolbyVision with allowExperimental on a DV-capable device', () async {
+    test(
+        'real planner selects nativeDolbyVision with allowExperimental on a DV-capable device',
+        () async {
       final env = _Environment();
       final backend = _Backend()
         ..review = ((plan) async => HdrReviewFacts(
@@ -878,10 +973,14 @@ void main() {
           source.indexOf('  /// Test seam:'));
       expect(ordinaryConstructor, isNot(contains('routePlanner')));
       expect(ordinaryConstructor, isNot(contains('readNative')));
-      expect(source,
-          contains('_routePlanner = routePlanner ?? HdrRoutePlanner.plan'));
+      expect(source, contains('_customPlanner = routePlanner'));
+      expect(source, contains('if (custom == null)'));
+      expect(source, contains('return HdrRoutePlanner.plan('));
+      expect(source, contains('options: options'));
+      expect(source, contains('applyVideoRouteOptions('));
     });
-    test('real planner selects nativeDolbyVision by default (no '
+    test(
+        'real planner selects nativeDolbyVision by default (no '
         'allowExperimental) on a DV-capable device', () async {
       final env = _Environment();
       final backend = _Backend()

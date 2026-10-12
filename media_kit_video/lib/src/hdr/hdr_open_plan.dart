@@ -7,10 +7,13 @@ import 'package:media_kit/media_kit.dart' show Media, VideoParams;
 
 import '../routing/video_output_target.dart';
 import '../routing/video_source_spec.dart';
+import '../routing/video_route_options.dart';
 import 'hdr_capabilities.dart';
 import 'hdr_route.dart';
 import 'hdr_source_descriptor.dart';
+import 'hdr_source_facts.dart';
 import 'hdr_native_dv_review_evidence.dart';
+import 'hdr_decoder_review.dart';
 
 /// Where a plan's [HdrSourceDescriptor] came from.
 ///
@@ -27,12 +30,19 @@ class HdrOpenRequest {
     this.hint, {
     this.target = const VideoOutputTarget.applicationView(),
     this.sourceSpec,
+    this.options,
     this.capabilitiesOverride,
+    this.sourceFacts,
   });
 
   final VideoOutputTarget target;
   final VideoSourceSpec? sourceSpec;
+  final EffectiveVideoRouteOptions? options;
   final HdrCapabilities? capabilitiesOverride;
+
+  /// Internal same-source configuration rebuild seed. A public Session.open
+  /// never supplies it; per-open failure/review retries carry their plan.
+  final HdrSourceFacts? sourceFacts;
 
   final Media media;
 
@@ -55,8 +65,13 @@ class HdrOpenPlan {
     required this.prediction,
     required this.route,
     this.excluded = const <String, HdrDegradeReason>{},
+    this.sourceFacts,
+    this.options,
+    this.sourceSpec,
   });
 
+  final EffectiveVideoRouteOptions? options;
+  final VideoSourceSpec? sourceSpec;
   final Media media;
 
   /// The description the [route] was planned against.
@@ -64,6 +79,12 @@ class HdrOpenPlan {
 
   /// Whether [source] came from the caller hint or from the decoder review.
   final HdrReportSource? sourceOrigin;
+
+  /// Immutable evidence for this logical source. Shared only by retries of
+  /// this open, never by a new open (even for the same URI). The coarse
+  /// [sourceOrigin] is not a per-field verification claim; inspect the origins
+  /// here for hint/track/decoder-inference distinctions.
+  final HdrSourceFacts? sourceFacts;
 
   /// The capability snapshot the route was planned against.
   final HdrCapabilities capabilities;
@@ -85,6 +106,7 @@ class HdrOpenPlan {
     HdrRoutePrediction? prediction,
     HdrRoute? route,
     Map<String, HdrDegradeReason>? excluded,
+    HdrSourceFacts? sourceFacts,
   }) {
     return HdrOpenPlan(
       media: media,
@@ -94,6 +116,9 @@ class HdrOpenPlan {
       prediction: prediction ?? this.prediction,
       route: route ?? this.route,
       excluded: excluded ?? this.excluded,
+      sourceFacts: sourceFacts ?? this.sourceFacts,
+      options: options,
+      sourceSpec: sourceSpec,
     );
   }
 
@@ -116,6 +141,7 @@ class HdrReviewFacts {
     this.dvElPresent,
     this.hdrVivid,
     this.nativeDvEvidence,
+    this.decoderObservation,
   });
 
   /// Latest decoder-reported video parameters (`video-params`).
@@ -160,6 +186,9 @@ class HdrReviewFacts {
 
   /// Internal configured-codec/source/output sample, never presentation proof.
   final HdrNativeDvReviewEvidence? nativeDvEvidence;
+
+  /// Ordinary current-source decode snapshot; independent of source metadata.
+  final HdrDecoderObservation? decoderObservation;
 }
 
 /// Backend observation pulled by the session to build a report (R4.2):
@@ -189,7 +218,11 @@ class HdrBackendObservation {
 /// is missing would render wrongly colored output, so the library refuses
 /// to open the media.
 class HdrPlaybackBlocked implements Exception {
-  const HdrPlaybackBlocked(this.reason);
+  const HdrPlaybackBlocked(this.reason, {this.sourceFacts});
+
+  /// Evidence that caused a review to block. Preserved in the failed report,
+  /// not promoted to an accepted route or discarded in favor of the old hint.
+  final HdrSourceFacts? sourceFacts;
 
   /// Why playback is blocked; [HdrDegradeReason.p5PipelineUnavailable] in
   /// Phase 1.
@@ -216,7 +249,7 @@ class HdrDataSpaceApplyException implements Exception {
   /// Applied path reported by the native side, when known.
   final String? path;
 
-  /// Readback reported by the native side, when known.
+  /// The readback reported by the native side, when known.
   final String? readback;
 
   /// [HdrDegradeReason.dataSpaceApplyFailed] or

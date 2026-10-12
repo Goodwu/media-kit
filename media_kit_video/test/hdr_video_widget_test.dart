@@ -95,9 +95,13 @@ class _FakeHdrVideoSession implements HdrVideoSession {
     HdrSourceDescriptor? hint,
     VideoSourceSpec? sourceSpec,
     VideoOutputTarget? target,
+    EffectiveVideoRouteOptions? options,
     bool play = true,
     Duration? start,
   }) async {}
+
+  @override
+  Future<void> setOptions(EffectiveVideoRouteOptions options) async {}
 
   @override
   Future<void> setPreference(HdrOutputPreference preference) async {}

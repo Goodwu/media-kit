@@ -1,0 +1,70 @@
+{
+  "scope": "CORE PR5 public matrix integration",
+  "status": "REQUEST_CHANGES-first-review",
+  "libraryHead": "d91639401862d84c68406aae3b2029400a4cfbd6",
+  "files": [
+    {
+      "path": "tool/matrix-build.sh",
+      "sha256": "55c54040a13b65af30d4b5e2379d7670622909c6757560278b47c6f9474bf00b"
+    },
+    {
+      "path": "tool/routing_matrix.py",
+      "sha256": "ac09a06afdef723249af312f63e55e4b13b7d5bab710e1177afaeedc543c8622"
+    },
+    {
+      "path": "tool/test_routing_matrix.py",
+      "sha256": "cab2952aa8ca8a49d314e04a12e0a7635c60e63da241d418bb54423f983c8e26"
+    },
+    {
+      "path": "tool/README.md",
+      "sha256": "3bd0b57acd90ca1cc8f6934c0d7d18ee9b730f8848b325e0bdb72405539ebfb2"
+    }
+  ],
+  "authorTests": {
+    "unittest": 12,
+    "py_compile": "passed per author",
+    "cliHelp": "passed per author",
+    "diffCheck": "passed per author"
+  },
+  "matrixSemantics": {
+    "sources": [
+      "P5",
+      "P8.4",
+      "HDR10",
+      "HLG"
+    ],
+    "allowExperimental": [
+      false,
+      true
+    ],
+    "hdrPolicyExperimental": false,
+    "policyFlagMeaning": "Preserves default P8.4 order; gate true actually allows experimental routes"
+  },
+  "pending": [
+    "Independent V2",
+    "Real current source bootstrap and ffprobe fixture validation",
+    "Accepted latest native producer",
+    "Eight actual APK builds, ABI and signature validation",
+    "Device fixture identity and ordinary Session HDR/performance"
+  ],
+  "producerOwnership": "DEVICE retains DV001 canonical bundler; no copied assembly implementation",
+  "pr5SourceHead": "5b27961137a3b03e687dddbeb05a0320fcf6c60c",
+  "review": {
+    "sha256": "c25e45d8027c8de30b9ff44d4a36b9d17984cd8ef6ce6319ec5b64bfb6346c52",
+    "path": "/tmp/mk-pr5-matrix-critical-review.json",
+    "findings": [
+      "Lab self package excluded from valid roots",
+      "APK JAR closure wrongly used as total Flutter native set",
+      "Unsupported Flutter build apk --build-dir option",
+      "Successful final receipt not persisted",
+      "P5 non-SDR-compatible semantics cannot require plain BT2020 VUI"
+    ],
+    "authorCorrection": "first correction authorized; same four-file ownership",
+    "terminal": true,
+    "severityCounts": {
+      "P1": 3,
+      "P2": 2
+    },
+    "additionalGateRequirement": "Freeze and recheck actual isolated inputs around build; no automatic pubget drift"
+  }
+}

@@ -141,6 +141,55 @@ void main() {
         reason: 'the surfacetexture carrier presents the actual YUV shape; '
             'the offscreen contract is required regardless of the pq/pq-itu '
             'request (P8.4 A5 V2 review fix)');
+    expect(yuvRoute.dependencies,
+        contains(HdrRouteDependency.hwdecSurfaceTexture));
+
+    final policy = HdrRoutingPolicy(
+      preferences: const {
+        HdrSourceClass.hlg: [HdrStrategy.baseLayerConvert],
+      },
+      allowExperimental: true,
+    );
+    const source = HdrSourceDescriptor(transfer: 'hlg');
+    final excludedCopy = HdrRoutePlanner.plan(
+      source: source,
+      capabilities: pqCapabilities,
+      policy: policy,
+      excluded: const {
+        HdrRouteDependency.hwdecMediacodecCopy:
+            HdrDegradeReason.hwdecMismatch,
+      },
+    );
+    expect(excludedCopy.selected.strategy, HdrStrategy.baseLayerConvert,
+        reason: 'SurfaceTexture execution is independent of copy-mode failure');
+    expect(excludedCopy.selected.route!.hwdec, 'surfacetexture');
+
+    final excludedSurfaceTexture = HdrRoutePlanner.plan(
+      source: source,
+      capabilities: pqCapabilities,
+      policy: policy,
+      excluded: const {
+        HdrRouteDependency.hwdecSurfaceTexture:
+            HdrDegradeReason.hwdecMismatch,
+      },
+    );
+    expect(excludedSurfaceTexture.selected.strategy, HdrStrategy.toneMapSdr,
+        reason: 'a failed SurfaceTexture execution must not be selected again');
+    expect(
+      excludedSurfaceTexture.candidates
+          .firstWhere((candidate) =>
+              candidate.strategy == HdrStrategy.baseLayerConvert)
+          .skipReason,
+      HdrDegradeReason.hwdecMismatch,
+    );
+
+    HdrStrategyRealizer.mkstBridgeProbeOverride = () => false;
+    final copyRoute = realizeBaseLayerConvert(pqCapabilities)!;
+    expect(copyRoute.hwdec, 'mediacodec-copy');
+    expect(copyRoute.dependencies,
+        contains(HdrRouteDependency.hwdecMediacodecCopy));
+    expect(copyRoute.dependencies,
+        isNot(contains(HdrRouteDependency.hwdecSurfaceTexture)));
     HdrStrategyRealizer.mkstBridgeProbeOverride = () => true;
     expect(realizeBaseLayerDirect(lgCapabilities)!.offscreenTransfer, isNull);
     HdrStrategyRealizer.mkstBridgeProbeOverride = null;

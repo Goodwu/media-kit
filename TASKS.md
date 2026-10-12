@@ -4,6 +4,16 @@
 
 **路径映射（2026-10-05 起）**：`archives/experiments/` 已整体迁移至独立仓库 **`~/src/media-kit-experiments`**（实验记录/证据/交接/索引全量归档）。本文件及 conversations 中所有 `archives/experiments/` 前缀路径均映射到该库根目录。**主库历史已剥离该路径（2026-10-06，main 51ef66cc→ee28accd，树零变化）**：剥离前提交历史不再在主库，查备份仓 `Goodwu/media-kit-history-archive`（分支 `pre-strip-20261006`）；旧哈希换算用 `~/src/media-kit-build/history-strip-20261006/commit-map.json`。
 
+## MK-ROUTING-20261011（CORE继任）
+
+- 状态：进行中；唯一公共主线 routing/MK-ROUTING-20261011，CORE 负责集成，DEVICE 保持 native 构建/实机认领，所有主 PR 未合并。
+- 已实现 query/DASH/unknownDV/F01/R01/有效配置闭环，34 info 已清零；产品 experimental 默认 false 保持，true 主验证+false 回归及 LG YUV8/owner 门不变。
+- 已归并 PR5 公共矩阵至库38ffb729，27 mock/fixture 回归与 R4 审查通过；DV0011095a43 修复及八 APK/HDR/持续性能仍待回交，不能整项结案。
+- 当前 Appa05dfe1be+库38ffb729 独立 source CI API success，归档正在独立核验；上一个完整核验组合6d349+3817证据保留，不重标为新SHA。
+- macOS 当前源码前置三文件独立 Critical PASS_WITH_SCOPE/56 contracts，已App36053e801提交回读，待 hosted；iOS/Linux/Windows 已真实源码前置通过但当前 native 输入缺失，Android批准ledger空。所有 native/device 验收仍开放。
+- 本轮补入库 CI 27 项 synthetic/mocked matrix 回归，本机27通过，实际 hosted 待验；不代表App/native/APK执行。
+- 精确测试向量、失败历史、恢复材料与剩余范围见唯一 context `archives/conversations/media-kit-routing-20261011.md`；旧 TASKS 快照已存该 context History。
+
 ## 接手快照（2026-10-10 更新；换 agent 从这里开始）
 
 - **事实源与范围**：本文件是任务状态；`archives/README.md` 是主题导航。主题上下文（各 conversation 顶部 Current State）：Android HDR/P5 主线 `archives/conversations/android-hdr-dv-display-plan-20260922.md`；LG/marble 线 `archives/conversations/lg-h870ds-hdr-demo-20261004.md`；整改主题 `archives/conversations/architecture-review-remediation-20260930.md`。LG followup 单一计划=`docs/plans/lg-p84-hdr-followup-plan-20261009.md`（v4.1，全部出清，触发式候选/重开条件在案）。接手后先重读 Git/设备状态，快照仅是入口。

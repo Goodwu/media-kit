@@ -1,3 +1,4 @@
+import 'video_route_options.dart';
 import 'package:flutter/services.dart';
 
 import '../hdr/hdr_capabilities.dart';
@@ -73,11 +74,12 @@ class VideoRouteCapabilities {
   HdrRoutePrediction predict(
     HdrSourceDescriptor source, {
     required VideoSourceSpec specification,
-    HdrRoutingPolicy policy = HdrRoutingPolicy.defaults,
-    HdrOutputPreference preference = HdrOutputPreference.auto,
+    HdrRoutingPolicy? policy,
+    HdrOutputPreference? preference,
+    EffectiveVideoRouteOptions? options,
   }) =>
       forHdrSource(specification)
-          .predict(source, policy: policy, preference: preference);
+          .predict(source, policy: policy, preference: preference, options: options);
 
   static const _channel = MethodChannel('com.alexmercerind/media_kit_video');
 

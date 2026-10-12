@@ -302,7 +302,7 @@ void main() {
         'baseLayerDirect:ok,'
         'baseLayerConvert:ok,'
         'metadataReshape:experimentalStrategySkipped,'
-        'toneMapSdr:ok',
+        'toneMapSdr:ok,toneMapSdr:ok,toneMapSdr:ok',
       );
       expect(
         keysOf(lines.single),
@@ -329,6 +329,8 @@ void main() {
         'baseLayerDirect:ok',
         'baseLayerConvert:ok',
         'metadataReshape:experimentalStrategySkipped',
+        'toneMapSdr:ok',
+        'toneMapSdr:ok',
         'toneMapSdr:ok',
       ]);
     });

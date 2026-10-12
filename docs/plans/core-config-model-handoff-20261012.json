@@ -1,0 +1,48 @@
+{
+  "stage": "CORE-CONFIG-model",
+  "baseline": {
+    "media-kit": "8b98c67a293876bd4af3f36ff245968ca848b41e",
+    "app": "08accb63df8c4cab62d00946fb2159dd3781e0ee"
+  },
+  "files": {
+    "media-kit": [
+      {
+        "path": "media_kit_video/lib/src/routing/video_route_options.dart",
+        "sha256": "539a0c4f5b641b2512ac6187b14809eb6da0df1913b350d9b7abe5177295410d"
+      },
+      {
+        "path": "media_kit_video/test/video_route_options_test.dart",
+        "sha256": "aacee02ec606ad0b25705a61d951eca6154d632aec45424644f988af248d6ab9"
+      },
+      {
+        "path": "media_kit_video/lib/media_kit_video.dart",
+        "sha256": "6c9852fded4ea3b2aa6e8b03a9bad50f5e7a9c60515ce321637e21b362dda14d"
+      }
+    ],
+    "app": [
+      {
+        "path": "lib/plugin/pl_player/route_options.dart",
+        "sha256": "c5694eea95ee44685bc1e55cdcab70e70c6592ae22a3c4919e7b94134aa09055"
+      },
+      {
+        "path": "test/route_options_test.dart",
+        "sha256": "0b996aec809a796b406f482a5b79c82f87938394c00066450ba73a3eaac347fd"
+      }
+    ]
+  },
+  "validation": {
+    "libraryTests": 35,
+    "appAdapterTests": 22,
+    "independentExtraCases": 4,
+    "targetStrict": "No issues",
+    "authorReceipt": "/private/tmp/mk-route-options-tests-20261012/receipt.json",
+    "reviewReceipt": "/tmp/mk-route-options-v1-review-receipt.json"
+  },
+  "notComplete": [
+    "App source selection entry wiring",
+    "planner and Session frozen effective options",
+    "generation and configuration revision checks",
+    "successful/failed report options and fulfillment",
+    "native and device execution"
+  ]
+}

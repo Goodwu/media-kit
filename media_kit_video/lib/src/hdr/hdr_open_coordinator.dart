@@ -136,6 +136,29 @@ class HdrReviewDecision<P> {
   final P? nextPlan;
 }
 
+/// Only created at an actual output-readiness wait. Other phase timeouts
+/// cannot establish a failed output topology. The original timeout remains
+/// available to callers and backend diagnostics retain their original error.
+class HdrOutputBindTimeout extends TimeoutException {
+  HdrOutputBindTimeout(this.cause) : super(cause.message, cause.duration);
+
+  final TimeoutException cause;
+
+  static Future<void> waitFor(Future<void> readiness) async {
+    try {
+      await readiness;
+    } on TimeoutException catch (error, stack) {
+      if (error is HdrOutputBindTimeout) rethrow;
+      Error.throwWithStackTrace(HdrOutputBindTimeout(error), stack);
+    }
+  }
+}
+
+/// An unresolved review cannot be accepted after the configured reopen budget.
+class HdrReviewReopenLimit implements Exception {
+  const HdrReviewReopenLimit();
+}
+
 class OpenSuperseded implements Exception {
   const OpenSuperseded();
 }
@@ -169,11 +192,16 @@ class HdrOpenCoordinator<R, P> {
     this.review,
     this.retry,
     this.maxRetries = 0,
+    this.maxReviewReopens = 1,
     this.onPhase,
     this.onBackendCallDiagnostic,
     this.diagnosticSessionGeneration,
     this.outputTimeout = const Duration(seconds: 10),
-  });
+  }) {
+    if (maxReviewReopens < 0 || maxReviewReopens > 4) {
+      throw ArgumentError.value(maxReviewReopens, 'maxReviewReopens', 'Expected 0..4');
+    }
+  }
 
   final HdrOpenBackend<P> backend;
 
@@ -190,6 +218,10 @@ class HdrOpenCoordinator<R, P> {
 
   /// How many times [retry] may replace a plan within one open.
   final int maxRetries;
+
+  /// Default single source-review rebuild. Session may use a bounded larger
+  /// value for distinct SDR requests while enforcing its own admission gates.
+  final int maxReviewReopens;
 
   final Duration outputTimeout;
   final void Function(int generation, String phase, int elapsedMicros)? onPhase;
@@ -304,7 +336,7 @@ class HdrOpenCoordinator<R, P> {
       var diagnosticAttempt = _diagnosticAttempt(generation, attemptPlan);
       var currentStart = start;
       var retriesUsed = 0;
-      var rebuilt = false;
+      var reviewReopens = 0;
       while (true) {
         try {
           _check(generation);
@@ -523,6 +555,9 @@ class HdrOpenCoordinator<R, P> {
                 HdrBackendDiagnosticPurpose.normal,
                 error: error,
                 stack: stack);
+            if (error is TimeoutException && error is! HdrOutputBindTimeout) {
+              Error.throwWithStackTrace(HdrOutputBindTimeout(error), stack);
+            }
             rethrow;
           }
           _emitBackendCall(
@@ -593,9 +628,12 @@ class HdrOpenCoordinator<R, P> {
               ? HdrReviewDecision<P>.accept()
               : await decide(attemptPlan, facts);
           _check(generation);
-          if (decision.reopen && !rebuilt) {
-            // One review-driven in-place reopen per open (plan 1.4 step 8).
-            rebuilt = true;
+          if (decision.reopen && reviewReopens >= maxReviewReopens) {
+            throw const HdrReviewReopenLimit();
+          }
+          if (decision.reopen) {
+            // Review-driven replacement shares the same finite transaction.
+            reviewReopens++;
             attemptPlan = decision.nextPlan as P;
             diagnosticAttempt = _diagnosticAttempt(generation, attemptPlan);
             currentStart = decision.position;
@@ -621,7 +659,10 @@ class HdrOpenCoordinator<R, P> {
           // configuration behind. Like hdr_lab, a failure before the
           // transaction began switching (e.g. validate) leaves the currently
           // playing media untouched.
-          if (!switching || error is OpenSuperseded || _invalid(generation)) {
+          if (!switching ||
+              error is OpenSuperseded ||
+              error is HdrReviewReopenLimit ||
+              _invalid(generation)) {
             if (switching) {
               try {
                 _emitBackendCall(
@@ -853,6 +894,42 @@ class HdrOpenCoordinator<R, P> {
 
   /// Invalidates callbacks immediately; in-flight native calls finish before
   /// the owner disposes its Player. This does not dispose the Player itself.
+  /// Invalidate queued/preparing work, then stop/restore on the same side-effect
+  /// queue. This cannot interrupt synchronous native FFI. Debt is retained if
+  /// either operation fails; later opens must clear it before any configure.
+  Future<void> stopAndReset() {
+    if (_disposed) throw StateError('Open coordinator is disposed');
+    final generation = ++_generation;
+    final stopping = _tail.then((_) async {
+      if (!_activeMedia && !_pendingRollback) return;
+      _pendingRollback = true;
+      for (final method in [HdrBackendDiagnosticMethod.stop,
+          HdrBackendDiagnosticMethod.resetOwnedConfiguration]) {
+        _emitBackendCall(method, HdrBackendDiagnosticBoundary.entered,
+            generation, null, HdrBackendDiagnosticPurpose.rollback);
+        try {
+          if (method == HdrBackendDiagnosticMethod.stop) {
+            await backend.stop();
+          } else {
+            await backend.resetOwnedConfiguration();
+          }
+        } catch (error, stack) {
+          _emitBackendCall(method, HdrBackendDiagnosticBoundary.failed,
+              generation, null, HdrBackendDiagnosticPurpose.rollback,
+              error: error, stack: stack);
+          rethrow;
+        }
+        _emitBackendCall(method, HdrBackendDiagnosticBoundary.returned,
+            generation, null, HdrBackendDiagnosticPurpose.rollback);
+      }
+      _pendingRollback = false;
+      _activeMedia = false;
+      _diagnosticOwner = null;
+    });
+    _tail = stopping.then<void>((_) {}, onError: (Object _, StackTrace __) {});
+    return stopping;
+  }
+
   Future<void> dispose() {
     final existing = _disposeFuture;
     if (existing != null) return existing;
