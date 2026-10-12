@@ -1,0 +1,222 @@
+{
+  "schema": 1,
+  "taskId": "MK-ROUTING-20261011",
+  "slice": "CORE-BOOTSTRAP-VERSION-01",
+  "capturedAtUtc": "2026-10-12T16:06:24.058466+00:00",
+  "parent": "1fcc367cd98e77a217f8a70a388fcfcdaf92aad4",
+  "claims": [
+    6127809360,
+    6127846798
+  ],
+  "reason": {
+    "run": 38272335840,
+    "attempt": 1,
+    "job": 114889416872,
+    "vector": {
+      "app": "1fcc367cd98e77a217f8a70a388fcfcdaf92aad4",
+      "mediaKit": "a73d570b633a949aab6a31e8f68ec03a13643c31"
+    },
+    "actualFailure": "choco yq HTTP504; next flutter-action setup step yq not found; before private SDK/source bootstrap; no fresh-source receipt",
+    "upstream": "subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2",
+    "actionYamlBlob": "644170e5eb88b15006d7f4fc748c6532b62d30c0",
+    "confirmedSourceBehavior": "Only nonempty flutter-version-file requests yq; explicit flutter-version does not."
+  },
+  "files": [
+    {
+      "path": ".github/actions/routing-bootstrap/action.yml",
+      "parentBlob": "df0cd41a1c9bb7c593162165a4bd1c4ed1d8b40e",
+      "candidateBlob": "6f22053c3a6d6356b9f967625271997075a204eb",
+      "bytes": 3934,
+      "sha256": "218606a4744edada180389019ed0441a2f164c4f37e694f79ae92b24eb687d0a"
+    },
+    {
+      "path": "scripts/prepare_routing_ci.py",
+      "parentBlob": "f4ba6019f4818efcadee50e8929f81315ded46f0",
+      "candidateBlob": "94684e1b03435f3e43c2c64fa87104a325a8534c",
+      "bytes": 30209,
+      "sha256": "460d94b21d6798a4efa0dede74b796bf9c47259dfa9dd9869878a35c58e50340"
+    },
+    {
+      "path": "scripts/routing_flutter_version.py",
+      "parentBlob": null,
+      "candidateBlob": "b79e05e27a1371c4568eb1d4bd5823c99d19f7dd",
+      "bytes": 3644,
+      "sha256": "6077ff2fd6afd37ebec54708bbfacf3c7189bdfa8758eaf5a32d5a85989d4f9e"
+    },
+    {
+      "path": "scripts/verify_routing_linux_native.py",
+      "parentBlob": "4ae53af249b6ea8c5beea1236a6b50e98b216a44",
+      "candidateBlob": "18e3428ba2f8c43e6f05c1d1f87c37ea28219590",
+      "bytes": 67002,
+      "sha256": "66d1d3487396e4d7ee1f19dc210891ec94ef8b58d3d74ee23724869a073d00c1"
+    },
+    {
+      "path": "test/routing_flutter_version_test.py",
+      "parentBlob": null,
+      "candidateBlob": "1484105106b1df29a6f032a625c7d767f70d9a28",
+      "bytes": 5327,
+      "sha256": "8beaaeb4cf92e21d267ee7696491b9e92e2466d9fe2893b9437d8fd0990d48af"
+    },
+    {
+      "path": "test/verify_routing_linux_native_test.py",
+      "parentBlob": "9316d24b73670b5fe5c15964a957e1dc6199e16f",
+      "candidateBlob": "c27a664f0c46f9c8e549daba34f4b00352eb324c",
+      "bytes": 29316,
+      "sha256": "f4c57e56fd7187ec21524e8e21417471cd9caa3a4b8c98d57d80245c813fa9d3"
+    }
+  ],
+  "implementation": [
+    "Read the existing exact unquoted environment.flutter X.Y.Z pin with Python already installed by the shared routing action.",
+    "Reject ambiguous/quoted/escaped duplicate keys, scalar continuations, cross-line quotes/flow and unsupported syntax; current repository and bare-word platform lists remain supported.",
+    "Share the same parser with the post-install frameworkVersion comparison; no hardcoded SDK version or new YAML/network dependency.",
+    "Add helper to Linux consumer allowed and required provenance sets, with real Git altered/deleted helper rejection.",
+    "Preserve all original source/SDK patch receipts, current-vector checks, private paths, no-cache behavior, legacy workflows and fail-closed native ledgers."
+  ],
+  "localValidation": {
+    "focusedPassed": 109,
+    "focused": {
+      "scope": "Final six-file bootstrap candidate focused Python suite, not full App pass.",
+      "cwd": "/workspace/scratch/bb7931e64549/checkouts/PiliPlusX",
+      "TMPDIR": "/workspace/scratch/bb7931e64549/audit-bootstrap-version/isolated-long-path-fixtures-for-sdk-input-provenance",
+      "runs": [
+        {
+          "pattern": "routing_flutter_version_test.py",
+          "argv": [
+            "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+            "-m",
+            "unittest",
+            "discover",
+            "-s",
+            "test",
+            "-p",
+            "routing_flutter_version_test.py"
+          ],
+          "exitCode": 0,
+          "logSha256": "fb6fd884223aacddced204472625912919e232f7e93c17ae492dfe9de85f637c",
+          "logBytes": 110,
+          "log": "...........\n----------------------------------------------------------------------\nRan 11 tests in 0.089s\n\nOK\n"
+        },
+        {
+          "pattern": "prepare_routing_ci_test.py",
+          "argv": [
+            "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+            "-m",
+            "unittest",
+            "discover",
+            "-s",
+            "test",
+            "-p",
+            "prepare_routing_ci_test.py"
+          ],
+          "exitCode": 0,
+          "logSha256": "c0e8a6538e355ce115e56d5724758114149261ee834ea3c2319fa6a85b6b07e0",
+          "logBytes": 130,
+          "log": "...............................\n----------------------------------------------------------------------\nRan 31 tests in 0.828s\n\nOK\n"
+        },
+        {
+          "pattern": "reusable_workflow_contract_test.py",
+          "argv": [
+            "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+            "-m",
+            "unittest",
+            "discover",
+            "-s",
+            "test",
+            "-p",
+            "reusable_workflow_contract_test.py"
+          ],
+          "exitCode": 0,
+          "logSha256": "47e09de6109a39ba972d2da86c9875d276c1ca301aa1608c3303ee2a5bb7bcc7",
+          "logBytes": 156,
+          "log": ".........................................................\n----------------------------------------------------------------------\nRan 57 tests in 0.366s\n\nOK\n"
+        },
+        {
+          "pattern": "verify_routing_linux_native_test.py",
+          "argv": [
+            "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+            "-m",
+            "unittest",
+            "discover",
+            "-s",
+            "test",
+            "-p",
+            "verify_routing_linux_native_test.py"
+          ],
+          "exitCode": 0,
+          "logSha256": "4084ba4a325fb32a8fe3295cf007845f9803a3f1060071062c70d0fb59d89f5d",
+          "logBytes": 109,
+          "log": "..........\n----------------------------------------------------------------------\nRan 10 tests in 0.319s\n\nOK\n"
+        }
+      ]
+    },
+    "earlierFullAttempt": {
+      "argv": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "test",
+        "-p",
+        "*_test.py"
+      ],
+      "cwd": "/workspace/scratch/bb7931e64549/checkouts/PiliPlusX",
+      "environment": {
+        "TMPDIR": "/workspace/scratch/bb7931e64549/audit-bootstrap-version/isolated-long-path-fixtures-for-sdk-input-provenance"
+      },
+      "exitCode": 1,
+      "logBytes": 9136,
+      "logSha256": "e5c1997831b72249220c61215766fa1de8d84994e97df0f25426230ddd3e7c1d",
+      "logTail": [
+        "ERROR: setUpClass (parse_routing_manifest_test.ManifestTests)",
+        "----------------------------------------------------------------------",
+        "Traceback (most recent call last):",
+        "  File \"/workspace/scratch/bb7931e64549/checkouts/PiliPlusX/test/parse_routing_manifest_test.py\", line 76, in setUpClass",
+        "    cls.bootstrap = {'sdkCommit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=cls.sdk, text=True).strip(),",
+        "                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+        "  File \"/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py\", line 466, in check_output",
+        "    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,",
+        "           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+        "  File \"/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py\", line 548, in run",
+        "    with Popen(*popenargs, **kwargs) as process:",
+        "         ^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+        "  File \"/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py\", line 1026, in __init__",
+        "    self._execute_child(args, executable, preexec_fn, close_fds,",
+        "  File \"/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py\", line 1955, in _execute_child",
+        "    raise child_exception_type(errno_num, err_msg, err_filename)",
+        "FileNotFoundError: [Errno 2] No such file or directory: PosixPath('/workspace/scratch/bb7931e64549/checkouts/.runtime/flutter')",
+        "",
+        "======================================================================",
+        "FAIL: test_mock_changed_code_rejected (macos_shared_ci_inputs_test.AcquisitionTests.test_mock_changed_code_rejected)",
+        "----------------------------------------------------------------------",
+        "ValueError: Xcode signing host requires macOS",
+        "",
+        "During handling of the above exception, another exception occurred:",
+        "",
+        "Traceback (most recent call last):",
+        "  File \"/workspace/scratch/bb7931e64549/checkouts/PiliPlusX/test/macos_shared_ci_inputs_test.py\", line 365, in test_mock_changed_code_rejected",
+        "    with self.assertRaisesRegex(ValueError, 'code payload'):",
+        "         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+        "AssertionError: \"code payload\" does not match \"Xcode signing host requires macOS\"",
+        "",
+        "----------------------------------------------------------------------",
+        "Ran 509 tests in 31.620s",
+        "",
+        "FAILED (failures=1, errors=5, skipped=5)"
+      ],
+      "priorDefaultTmpRun": {
+        "test": "prepare_routing_ci_test.py",
+        "ran": 31,
+        "failure": "test_real_dirty_binary_saves_all_diffs_and_exact_hashes_before_refusal: 237 not greater than 260",
+        "reason": "Fixture depends on an absolute path longer than 260; production behavior was not changed."
+      }
+    },
+    "earlierFullLog": "........................................................................................sss.....EE.........usage: python -m unittest [-h] --prepared-source PREPARED_SOURCE\n                          --source-manifest SOURCE_MANIFEST\n                          input_app output_app arm64 x86_64 slice_manifest\npython -m unittest: error: invalid bootstrap pending value; expected true or absent\n....E.........FAIL: reviewed media-kit revision unavailable\n........................usage: python -m unittest [-h]\n                          {fetch,verify,sign-contexts,verify-contexts} ...\npython -m unittest: error: unrecognized arguments: --url https://evil.invalid\n........FE......./opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/zipfile/__init__.py:1625: UserWarning: Duplicate name: 'same'\n  return self._open_to_write(zinfo, force_zip64=force_zip64)\n...........................................................E...................................ss.................................................................................................release manifest verified: 1 files\nrelease manifest verified: 1 files\nrelease manifest verified: 4 files\nrelease manifest verified: 1 files\nrelease assets verified: android, ios, macos, ohos\n..................................................................................................artifact ABI: OK (android, arm64-v8a, /workspace/scratch/bb7931e64549/audit-bootstrap-version/isolated-long-path-fixtures-for-sdk-input-provenance/tmp6z585s02/app.apk)\n.artifact ABI: OK (ohos, arm64-v8a, /workspace/scratch/bb7931e64549/audit-bootstrap-version/isolated-long-path-fixtures-for-sdk-input-provenance/tmp5i_58cs9/entry-default-unsigned.hap)\n.......................................................\n======================================================================\nERROR: test_core_full_chain_clears_only_private_copy_and_publishes_last (macos_shared_bootstrap_test.BootstrapTests.test_core_full_chain_clears_only_private_copy_and_publishes_last)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/scratch/bb7931e64549/checkouts/PiliPlusX/test/macos_shared_bootstrap_test.py\", line 201, in test_core_full_chain_clears_only_private_copy_and_publishes_last\n    self.package()\n  File \"/workspace/scratch/bb7931e64549/checkouts/PiliPlusX/test/macos_shared_bootstrap_test.py\", line 188, in package\n    m.main(self.argv)\n  File \"/workspace/scratch/bb7931e64549/checkouts/PiliPlusX/scripts/package_macos_shared_core.py\", line 220, in main\n    publish(staged_app, args.output_app)\n  File \"/workspace/scratch/bb7931e64549/checkouts/PiliPlusX/scripts/package_macos_shared_core.py\", line 101, in publish\n    publish_absent(staged, output)\n  File \"/workspace/scratch/bb7931e64549/checkouts/PiliPlusX/scripts/package_macos_shared_core.py\", line 78, in publish_absent\n    raise RuntimeError(\"exclusive application publication requires macOS\")\nRuntimeError: exclusive application publication requires macOS\n\n======================================================================\nERROR: test_core_normal_source_remains_supported (macos_shared_bootstrap_test.BootstrapTests.test_core_normal_source_remains_supported)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/scratch/bb7931e64549/checkouts/PiliPlusX/test/macos_shared_bootstrap_test.py\", line 209, in test_core_normal_source_remains_supported\n    self.package()\n  File \"/workspace/scratch/bb7931e64549/checkouts/PiliPlusX/test/macos_shared_bootstrap_test.py\", line 188, in package\n    m.main(self.argv)\n  File \"/workspace/scratch/bb7931e64549/checkouts/PiliPlusX/scripts/package_macos_shared_core.py\", line 220, in main\n    publish(staged_app, args.output_app)\n  File \"/workspace/scratch/bb7931e64549/checkouts/PiliPlusX/scripts/package_macos_shared_core.py\", line 101, in publish\n    publish_absent(staged, output)\n  File \"/workspace/scratch/bb7931e64549/checkouts/PiliPlusX/scripts/package_macos_shared_core.py\", line 78, in publish_absent\n    raise RuntimeError(\"exclusive application publication requires macOS\")\nRuntimeError: exclusive application publication requires macOS\n\n======================================================================\nERROR: test_safe_relative_framework_link_copy_remains_supported (macos_shared_bootstrap_test.BootstrapTests.test_safe_relative_framework_link_copy_remains_supported)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/scratch/bb7931e64549/checkouts/PiliPlusX/test/macos_shared_bootstrap_test.py\", line 264, in test_safe_relative_framework_link_copy_remains_supported\n    self.package()\n  File \"/workspace/scratch/bb7931e64549/checkouts/PiliPlusX/test/macos_shared_bootstrap_test.py\", line 188, in package\n    m.main(self.argv)\n  File \"/workspace/scratch/bb7931e64549/checkouts/PiliPlusX/scripts/package_macos_shared_core.py\", line 220, in main\n    publish(staged_app, args.output_app)\n  File \"/workspace/scratch/bb7931e64549/checkouts/PiliPlusX/scripts/package_macos_shared_core.py\", line 101, in publish\n    publish_absent(staged, output)\n  File \"/workspace/scratch/bb7931e64549/checkouts/PiliPlusX/scripts/package_macos_shared_core.py\", line 78, in publish_absent\n    raise RuntimeError(\"exclusive application publication requires macOS\")\nRuntimeError: exclusive application publication requires macOS\n\n======================================================================\nERROR: test_mock_complete_signing_and_final_path_seal (macos_shared_ci_inputs_test.AcquisitionTests.test_mock_complete_signing_and_final_path_seal)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/scratch/bb7931e64549/checkouts/PiliPlusX/test/macos_shared_ci_inputs_test.py\", line 333, in test_mock_complete_signing_and_final_path_seal\n    result, signed, logs = self.sign()\n                           ^^^^^^^^^^^\n  File \"/workspace/scratch/bb7931e64549/checkouts/PiliPlusX/test/macos_shared_ci_inputs_test.py\", line 326, in sign\n    result = ci.signing_contexts(self.output, output, logs)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/scratch/bb7931e64549/checkouts/PiliPlusX/scripts/fetch_macos_shared_ci_inputs.py\", line 676, in signing_contexts\n    fail('Xcode signing host requires macOS')\n  File \"/workspace/scratch/bb7931e64549/checkouts/PiliPlusX/scripts/fetch_macos_shared_ci_inputs.py\", line 159, in fail\n    raise ValueError(message)\nValueError: Xcode signing host requires macOS\n\n======================================================================\nERROR: setUpClass (parse_routing_manifest_test.ManifestTests)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/scratch/bb7931e64549/checkouts/PiliPlusX/test/parse_routing_manifest_test.py\", line 76, in setUpClass\n    cls.bootstrap = {'sdkCommit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=cls.sdk, text=True).strip(),\n                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py\", line 466, in check_output\n    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py\", line 548, in run\n    with Popen(*popenargs, **kwargs) as process:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py\", line 1026, in __init__\n    self._execute_child(args, executable, preexec_fn, close_fds,\n  File \"/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py\", line 1955, in _execute_child\n    raise child_exception_type(errno_num, err_msg, err_filename)\nFileNotFoundError: [Errno 2] No such file or directory: PosixPath('/workspace/scratch/bb7931e64549/checkouts/.runtime/flutter')\n\n======================================================================\nFAIL: test_mock_changed_code_rejected (macos_shared_ci_inputs_test.AcquisitionTests.test_mock_changed_code_rejected)\n----------------------------------------------------------------------\nValueError: Xcode signing host requires macOS\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/workspace/scratch/bb7931e64549/checkouts/PiliPlusX/test/macos_shared_ci_inputs_test.py\", line 365, in test_mock_changed_code_rejected\n    with self.assertRaisesRegex(ValueError, 'code payload'):\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: \"code payload\" does not match \"Xcode signing host requires macOS\"\n\n----------------------------------------------------------------------\nRan 509 tests in 31.620s\n\nFAILED (failures=1, errors=5, skipped=5)\n",
+    "fullScope": "Earlier intermediate helper revision; full local attempt is FAILED, not evidence of candidate full pass. macOS-only publication/signing operations and absent real Flutter SDK blocked it. Final candidate re-ran only the relevant109 passing cases.",
+    "sdkVersionReadFromRealPubspec": "3.47.2",
+    "localDartFlutterChromePwshNativeTests": "unavailable / not executed"
+  },
+  "independentReview": "separate immutable report; prior P2 counterexamples repaired before final review",
+  "nativeAccepted": false,
+  "hostedValidation": "required on containing commit and exact App+library pair"
+}
