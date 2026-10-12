@@ -31,9 +31,22 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p ci-tool-results
-          git rev-parse HEAD | tee ci-tool-results/source.txt
+          source_sha="$(git rev-parse HEAD)"
+          source_tree="$(git rev-parse 'HEAD^{tree}')"
+          {
+            printf 'task=MK-ROUTING-20261011\nscope=library-python-tool-tests\n'
+            printf 'library_head=%s\nlibrary_tree=%s\n' "$source_sha" "$source_tree"
+            printf 'app_helper_exercised=false\nnative_build=false\napk_build=false\ndevice_test=false\n'
+          } | tee ci-tool-results/source.txt
           python3 -m unittest discover -s tool/routing_native_audit -v 2>&1 | tee ci-tool-results/extractor.log
           python3 -m unittest discover -s tool/routing_ci -v 2>&1 | tee ci-tool-results/repair-tool.log
+          git diff --exit-code
+      - name: Run synthetic and mocked routing matrix regression tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PYTHONDONTWRITEBYTECODE=1
+          python3 -B -m unittest discover -s tool -p 'test_routing_matrix.py' -v 2>&1 | tee ci-tool-results/matrix-regression.log
           git diff --exit-code
       - uses: actions/upload-artifact@v4
         if: always()

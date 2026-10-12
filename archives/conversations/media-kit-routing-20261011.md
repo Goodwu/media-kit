@@ -2,7 +2,46 @@
 
 ## Current State
 
-唯一集成分支 routing/MK-ROUTING-20261011。本轮push回读远端 App6d349a06db9103996274e639c31d7d2a7554540a、库3817b8f3cbda43ec5efbb3bffeae8e9f7812d251；FFmpeg9aba43cf、DV0011095a43、PR5 5b279611仍按各自证据归属。root唯一公共集成者，DEVICE继续原native配方/构建/实机职责。所有主PR未合并、关闭或发布；未知dirty和恢复材料保护。
+唯一公共集成分支为 routing/MK-ROUTING-20261011；root 为 CORE 唯一集成者，DEVICE 保持原 native 配方、构建和实机认领。当前远端观察 App a05dfe1bea85e78a7b214b0e4044eab7902a3e06、库 38ffb72920550d76c41948daa56aa01b4393681d、FFmpeg 9aba43cf、DV001 1095a43；主 PR 均未合并、关闭或发布。未知 dirty、原 SDK 和恢复材料保护。
+
+query/DASH/unknown DV/F01/FFmpeg e8df200c、R01 实际依赖与输出资源契约、decoder 复核和有界 copy/软件路线，以及 auto/prefer/require 有效配置闭环已实现。App 原 34 info 已清零，禁止按旧 planned 重做。experimental 产品默认 false，主验证 true 并保留 false 回归；LG YUV8/FULL/range1/精确设备/owner ACK lease 不变，10bit 与 lease 融合仍延期。
+
+PR5 公共矩阵四文件已于库 38ffb729 整合并回读，27 synthetic/mocked 回归测试独立通过，四 committed blob 与 R4 Critical 冻结一致。原重复 JAR bundler 保持 DEVICE canonical。DV001 原 PR 仍无新修复回交；符号读取失败拒绝、两个 Vulkan 目标独立覆盖、构建失败传播、clean staging、最终成员和真实链接补丁来源待 DEVICE 修复。公共脚本归并不能代表 DV001 验收闭合，也未运行新八 APK 或实机。
+
+最新组合 a05dfe1be+38ffb729：App 独立 source 38250698262、库 source 38250657319 已 API success；准确测试数、attempt/artifact/source.txt/ZIP SHA 正在独立回读，不借旧归档。排除 App 同 SHA cancelled 38250692692。库 query 38250657360、Darwin 38250657547、OHOS 38250657787 已 API success；一般 CI 与 Build 38250698496 尚待终态。此处不将源码成功扩写为 native/device 验收。
+
+上一已完整核验组合 6d349a06+3817b8f3：App 四平台各 268 Flutter/0skip、Python 499=497通过+2原 iOS 缺共享 SDK 跳过、Web DOM1；库 video772+3原 mac 专用 Linux 跳过、lab298、audit6+12。App SDK3.47.2、库 SDK3.47.7分开；8 artifact ZIP SHA 与 API digest/source.txt 已核。Build iOS/Linux/Windows 源码前置均完成 bootstrap57steps、实际 bundle 和 fresh finalize，准确 native-input-unavailable 失败，非 Release 成功。两份 core-*-6d349-checkpoint JSON 保留该历史向量。
+
+macOS routing 三文件本轮 Critical PASS_WITH_SCOPE：56 contracts 独立通过、actionlint、9 shellcheck、22检查含实际 preflight/tee exit37/native blocker/条件链通过；legacy step bodies 保持。报告 core-macos-routing-workflow-review-20261012.json SHA256 1aff365943e3913986a6cca4a89260f3b3a8ed918bc51f753d1f904ef85b567a。已于 App36053e801b0803268b351aab80cdec20b6f46ac2 提交/push/远端回读，三 committed source blob 与冻结相同；等待新组合 hosted 源码前置验收，未运行本切片真实 bundle/native。Linux B 当前已有受审 consumer，但 generated fullBundleProvenanceVerified=false/releaseVerified=false；各平台当前批准 native 输入缺失，Android/Pink ledger 为空。
+
+旧缓存清理授权未扩大：受审固定100批次只删4项，第5项 hardlink 元数据变化即停止，96项保留；新 cache/donors/SDK/App/库后验不变。实际释放85,913,600bytes，系统后续空间变化不归该清理。PREPARE6116072490、PARTIAL6116651070及原失败记录保留；清理已结束。真实新源码/native产物/八矩阵 APK/普通 Session 与 owner carrier/可见 HDR、生命周期和持续性能仍未验收，任务保持进行中。
+
+库 source CI 本轮新增独立 synthetic/mocked matrix-regression.log 步骤，实际27tests本机通过（2.331s）；仅库源码/Python夹具，不执行真实App helper、SDK、native、八APK或设备。已有audit6+12与always artifact/失败传播保留。workflow SHA256 9c8bc39d35e308eed782d4b948f9cc485592a02586a45cef14bb082a1e3fa477；actionlint语法语义通过，默认ShellCheck已有Flutter job两SC1083未归此次修复，不虚称默认全绿。待该新增CI实际hosted运行。
+
+## History
+
+### 2026-10-12 TASKS 旧状态快照（历史）
+
+## MK-ROUTING-20261011（CORE继任，2026-10-11）
+
+- 当前已核对源码向量：库751d0cdd + App6c4c1b478。库CI38168100713 video772+3原mac Linux跳过/lab298/两strict0；App38168113931 SUCCESS及Build38168114089内四平台各268/strict0/bundle/finalize，hosted Python实际两次444、parser/kernel7与身份前后稳定。Build整体六Release仍失败；Android/Pink空accepted selector实际preAPI/preGradle拒绝，非native通过。精简证据docs/plans/core-native-ci-checkpoint-20261012.json；原失败/旧向量保留。
+
+- 状态：进行中；唯一集成分支 `routing/MK-ROUTING-20261011`，主PR media-kit#4/App#1/FFmpeg#1；context=`archives/conversations/media-kit-routing-20261011.md`。主PR不自动合并或发布。
+- 当前推送源码：库a31269ba + Appabc149；FFmpeg9aba43cf。CONFIG模型检查点独立35库/22App/4额外反例与target strict通过，实际DASH/planner/Session/report同一配置闭环仍未完成。
+- CORE-F01、DASH逐候选过滤、query迁移及FFmpeg e8df200c已完成，不重新开发。旧6e757+569138的192Flutter/34info属于历史向量；34info已在CORE-CI03清零。
+- 最新完整App源码验证：08acc+8b98 source38160661703四平台SUCCESS，各211Flutter/strict0/bundle/来源/freshness，实际359Python；Build38160661882六Release仍FAIL。新abc149+87eb CI06 source38161696564四平台SUCCESS，各233Flutter/strict0/bundle/finalize/来源与freshness；Build38161696805源码矩阵SUCCESS但六Release失败，Python本轮各359；库source38161681107 video663+3原mac Linux跳过/lab298/两strict通过。不得跨向量重标。
+- R01a/b/c/d/e已提交保留。CONFIG实际DASH/planner/Session/report同快照、实际require履行和串行停止/cleanup重试已宿主V2 PASS：库v3作者762/独立774/strict0，AppR1作者268/strict0/bundle/独立90+1，20/16hash一致。准确CONFIG切片已集成push/readback，最新组合CI、native/设备验收与DV001/PR5整体归并仍开放。
+- DV001与PR#5必须完成归并：PR5 86c三Markdown与5b279611追加16行已分别归入e162/aeaf并独立原文/hash/链接核验；两个配方脚本未导入，不能标整项完成。2026-10-12本轮重新读远端，DV001仍1095a43，PR5仍5b279611。DV001原review5483753705/6110373174未修，DEVICE继续原PR单写，CORE审查整合。
+- DV001剩余门：符号读取失败关闭、两Vulkan目标独立检查、构建失败传播、干净staging、最终成员/链接/补丁来源；需受审完整manifest及最新适用源码产物。旧8bed+a3+JARcd5的188/34info/244仅DEVICE声称，AVC EOS不能代替dvh1/HDR验收。最新P5/P8.4、experimental true/false、普通Session与可见输出/持续性能仍必需。
+- native输入gate08acc独立critical通过；CORE接受账本空。Android/Pink实际Release接线作者114/全Python412通过，但V2确认新增res/assets/shaders/jniLibs输入漏检阻断，原writer第一轮修复中；未获受审输入必须明确阻断，不用旧默认JAR。Windows完整bootstrap已解阻，旧PNG唯一因果未证明。actualYUV carrier/owner arm仍DEVICE范围；产品experimental默认false不变。
+
+- General长suite旧两向量已取消且日志持续推进，无挂死证据；ci.yml仅本任务routing分支保留live运行，其他分支取消策略不变。三处旧action已迁移checkoutv4/softpropsv2并完整actionlint通过；不推定general通过。
+
+### 2026-10-12 macOS 前置整合前状态快照（历史）
+
+## Current State
+
+唯一集成分支 routing/MK-ROUTING-20261011。本轮push回读远端 Appa05dfe1bea85e78a7b214b0e4044eab7902a3e06、库38ffb72920550d76c41948daa56aa01b4393681d；FFmpeg9aba43cf、DV0011095a43、PR5 5b279611仍按各自证据归属。root唯一公共集成者，DEVICE继续原native配方/构建/实机职责。所有主PR未合并、关闭或发布；未知dirty和恢复材料保护。
 
 query/DASH/未知DV/F01/FFmpeg e8df200c、R01依赖与资源契约/decoder复核/有限copy软件路线、有效auto/prefer/require及代次/清理债务已实现，禁止按旧planned重做。App34info已清零；产品experimental默认false保持，主验证true另测false；LG FULL/range1/YUV8/精确设备/ownerACKlease保留，不重开10bit/lease融合。
 
@@ -14,7 +53,7 @@ iOS六文件已1970准确提交/回读，第二修正Critical PASS_WITH_SCOPE。
 
 Linux B最终R2九文件V2 PASS_WITH_SCOPE，19实际测试+14独立micro probes；逐requester ORIGIN与全部DSO ABI门恢复，unknown generated明确unbound，fullBundleProvenanceVerified=false/releaseVerified=false。未重跑本轮完整acquire→CMake链，真实producer/编译链接/运行未验，生产ledger仍空。精确文件hash与范围保存在core-linux-native-consumer-final-review-20261012.json；已于库3817b8f3/Appdb6df51e提交并推送，九source committed blobs同V2冻结；不能扩大native批准。
 
-DV001与PR5必须完整归并。历史三MD已归台账；公共matrix归唯一tool入口，重复JAR bundler归原DEVICE canonical，不复制第二配方。PR5四文件第二修正因ENOSPC未完成，PR5公共矩阵四文件最后R4 V2 PASS_WITH_SCOPE，27tests独立通过；92包/37生成正常，SDK真实asset bundler与隐式2.0x/prefix3x变体成员一致，变体新增/删除/内容/mode/link变化可检出，正常Gradle build输出未误冻结，SDK内部链接目标闭包已关。源CLI、源/SDK/资源/七SO/独立artifact批准/每APK来源签名/失败传播公共功能归唯一tool入口。正在root集成，原SDK/资源/PUB生成三轮失败与ENOSPC材料保留；未运行新precache/pubget、真实八APK/native或设备。八实际APK/四源truefalse/普通Session/owner实际carrier/可见HDR性能未完成；DV001符号读取失败、两个Vulkan目标、失败传播、clean staging、最终成员/链接补丁来源仍需原DEVICE修复。
+DV001与PR5必须完整归并。历史三MD已归台账；公共matrix归唯一tool入口，重复JAR bundler归原DEVICE canonical，不复制第二配方。PR5四文件第二修正因ENOSPC未完成，PR5公共矩阵四文件最后R4 V2 PASS_WITH_SCOPE，27tests独立通过；92包/37生成正常，SDK真实asset bundler与隐式2.0x/prefix3x变体成员一致，变体新增/删除/内容/mode/link变化可检出，正常Gradle build输出未误冻结，SDK内部链接目标闭包已关。源CLI、源/SDK/资源/七SO/独立artifact批准/每APK来源签名/失败传播公共功能归唯一tool入口。已库38ffb729/Appa05dfe1be准确commit/push/readback，四matrix committed blobs同R4冻结，两个repo源切片clean；原SDK/资源/PUB生成三轮失败与ENOSPC材料保留；未运行新precache/pubget、真实八APK/native或设备。八实际APK/四源truefalse/普通Session/owner实际carrier/可见HDR性能未完成；DV001符号读取失败、两个Vulkan目标、失败传播、clean staging、最终成员/链接补丁来源仍需原DEVICE修复。
 
 用户授权只移除已核旧cache重复文件。固定100小批次经V2与remote PREPARE6116072490持久化后，仅4项实际删除；第5项与前项旧hardlink共inode导致nlink/ctime变化，严格STOP，余96保留。新cache/donors/SDK/App/库全后验相同。实测释放85,913,600bytes，随后系统释放不能归此次清理。原runtime远端log超时失败保留，PARTIAL重试已6116651070双API回读通过；raw checkpoint /tmp/mk-ios-cache-delete-partial-checkpoint.json与恢复材料保留。清理结束，不继续删除。实际角色容量错误已记录并续接原角色，禁止换generic/directlauncher。
 
@@ -22,7 +61,9 @@ DV001与PR5必须完整归并。历史三MD已归台账；公共matrix归唯一t
 
 PR5原matrix-device-build.sh功能归现tool/matrix-build.sh + routing_matrix.py，原assemble-jar-arm64.sh重复配方仍归DEVICE DV001；此是脚本功能归并，DV001未修复/未回交且八包实机未验，因此整项仍开放。
 
-## History
+新适用组合a05dfe1be+38ffb729复验已启动：库source38250657319，Appsource38250698262/Build38250698496（排除同SHA cancelled38250692692），未重标上一6d349+3817结果。
+
+
 
 ### 2026-10-12 A hosted终态前阶段记录（历史）
 
