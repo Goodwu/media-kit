@@ -1,0 +1,589 @@
+{
+  "schema": "mk-routing-core-successor-checkpoint/v1",
+  "taskId": "MK-ROUTING-20261011",
+  "checkpoint": "CORE-SUCCESSOR-CI-TAKEOVER-20261012",
+  "collectedAtUtc": "2026-10-12T14:52:58Z",
+  "verdict": "requested_CI_terminal_artifact_audit_and_DEVICE_review_complete; native_device_integration_not_complete",
+  "writeScope": "documentation and evidence only; no production/CI/SDK/native recipe modification",
+  "currentObservedHeads": {
+    "phase": "remote readback before this documentation checkpoint; these are inspected/tested inputs, not the subsequently committed documentation HEADs",
+    "app": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+    "mediaKit": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+    "ffmpeg": "9aba43cfbee182ade060cdccbe15340a0fbe3e83",
+    "deviceDV001": "1095a43acb4d0973b8bca59c5da4e300657bdb29",
+    "pr5": "dc41787082752f234fed85db7fb7be3bd855cc45",
+    "deviceDV004PR6": "0fb163c6ec8d54c46698227175b9a21468605246",
+    "appDV003DV005PR3": "15551ede06b0cbec859d61e6d16f8dba2054bba1"
+  },
+  "githubReadback": {
+    "readbackStartedUtc": "2026-10-12 14:51:57 UTC",
+    "pr4": {
+      "repo": "Goodwu/media-kit",
+      "number": 4,
+      "state": "open",
+      "draft": true,
+      "merged": false,
+      "head": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+      "headRef": "routing/MK-ROUTING-20261011",
+      "base": "main",
+      "url": "https://github.com/Goodwu/media-kit/pull/4"
+    },
+    "pr1app": {
+      "repo": "Goodwu/PiliPlusX",
+      "number": 1,
+      "state": "open",
+      "draft": true,
+      "merged": false,
+      "head": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+      "headRef": "routing/MK-ROUTING-20261011",
+      "base": "fix/darwin-video-output-rebuild-barrier",
+      "url": "https://github.com/Goodwu/PiliPlusX/pull/1"
+    },
+    "pr1ff": {
+      "repo": "Goodwu/FFmpeg",
+      "number": 1,
+      "state": "open",
+      "draft": true,
+      "merged": false,
+      "head": "9aba43cfbee182ade060cdccbe15340a0fbe3e83",
+      "headRef": "routing/MK-ROUTING-20261011",
+      "base": "lg-p84-d1-vui-fix-20261010",
+      "url": "https://github.com/Goodwu/FFmpeg/pull/1"
+    },
+    "dv001": {
+      "repo": "Goodwu/libmpv-android-video-build-dv-experiment",
+      "number": 1,
+      "state": "open",
+      "draft": true,
+      "merged": false,
+      "head": "1095a43acb4d0973b8bca59c5da4e300657bdb29",
+      "headRef": "device/MK-ROUTING-20261011/DV001",
+      "base": "feature/android-dv-build",
+      "url": "https://github.com/Goodwu/libmpv-android-video-build-dv-experiment/pull/1"
+    },
+    "pr5": {
+      "repo": "Goodwu/media-kit",
+      "number": 5,
+      "state": "open",
+      "draft": true,
+      "merged": false,
+      "head": "dc41787082752f234fed85db7fb7be3bd855cc45",
+      "headRef": "device/MK-ROUTING-20261011/DV-BUILD-01",
+      "base": "routing/MK-ROUTING-20261011",
+      "url": "https://github.com/Goodwu/media-kit/pull/5"
+    },
+    "pr6": {
+      "repo": "Goodwu/media-kit",
+      "number": 6,
+      "state": "open",
+      "draft": true,
+      "merged": false,
+      "head": "0fb163c6ec8d54c46698227175b9a21468605246",
+      "headRef": "device/MK-ROUTING-20261011/DV004",
+      "base": "routing/MK-ROUTING-20261011",
+      "url": "https://github.com/Goodwu/media-kit/pull/6"
+    },
+    "pr3": {
+      "repo": "Goodwu/PiliPlusX",
+      "number": 3,
+      "state": "open",
+      "draft": true,
+      "merged": false,
+      "head": "15551ede06b0cbec859d61e6d16f8dba2054bba1",
+      "headRef": "device/MK-ROUTING-20261011/DV003",
+      "base": "routing/MK-ROUTING-20261011",
+      "url": "https://github.com/Goodwu/PiliPlusX/pull/3"
+    },
+    "comments": [
+      {
+        "id": 6126383144,
+        "url": "https://github.com/Goodwu/media-kit/pull/4#issuecomment-6126383144",
+        "createdAt": "2026-10-12T14:33:29Z",
+        "updatedAt": "2026-10-12T14:33:29Z",
+        "body": "## [CORE-SUCCESSOR] 接替登记与首轮核验范围 / MK-ROUTING-20261011\n\n根据用户本轮交接指令，我接替已暂停的原 CORE，继续唯一公共开发、审查和集成职责；已有 DEVICE 继续原 native 构建与实机工作，不新增 DEVICE 工作线。\n\n已读取当前 routing 分支的接手文档、v3、两仓 TASKS/唯一 conversation Current State、F01/R01/config/CI 增量与证据，以及本线程最新评论（包括 6125650042 和更新的 6125963183）。旧 planned/pending 与 34 info 不作为重开发依据；已有 query/DASH/unknown DV/F01/R01/配置闭环、FFmpeg e8df200c 与失败感知兜底保留。\n\n### 重新核对的远端输入\n| 仓库/PR | 当前 head | base |\n| --- | --- | --- |\n| media-kit #4 | `5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f` | `main` |\n| PiliPlusX #1 | `13b139b797aa65d853cafb5cb207d17a6e7aceac` | `fix/darwin-video-output-rebuild-barrier` |\n| FFmpeg #1 | `9aba43cfbee182ade060cdccbe15340a0fbe3e83` | `lg-p84-d1-vui-fix-20261010` |\n| native build DV001 #1 | `1095a43acb4d0973b8bca59c5da4e300657bdb29` | `feature/android-dv-build` |\n| media-kit DEVICE #5 | `dc41787082752f234fed85db7fb7be3bd855cc45` | `routing/MK-ROUTING-20261011` |\n| media-kit DEVICE DV004 #6（本轮新增回交） | `0fb163c6ec8d54c46698227175b9a21468605246` | `routing/MK-ROUTING-20261011` |\n\n上列 PR 当前均 OPEN/DRAFT、未合并。PR #5 API 的 base.sha 快照仍为 e269d966，不将它误认作公共分支当前 HEAD。\n\n### 工作区与能力\n通过 GitHub 插件读取 refs/PR/Actions、下载实际 artifacts，并可通过受保护的非 force ref 更新提交；隔离 Linux 工作区具备 Git、Python、Node。没有本地 Flutter/Dart/ADB/native SDK，不声称已本机执行这些测试或设备操作；实际测试依据 hosted CI 和 DEVICE 可审计回交。\n另通过既有工作区连接只读核对：原 media-kit main 有 TASKS/新文档 dirty；原 App 位于 fix/android7-lg-launch-libmpv-vulkan，有 AGENTS.local/TASKS dirty 及未跟踪 .zcodeignore/文档；原 FFmpeg 产品分支有 configure dirty 和未跟踪项。可见 upstream 均 ahead=0。这些与本轮 routing 集成工作区分离，全部保留。此前 CORE 的两个原集成工作树没有暴露为连接 root，不冒称已核对其当前 clean；本轮采用独立 clone，并核对 origin、HEAD、dirty 和 ahead/behind。\n\n### 第一工作项与文件认领\n本轮先做 **CORE-CI-TAKEOVER：现有 CI 终态/实际 artifact 审计 + DV001/PR5/DV004 回交复审 + 中央台账归并**。目前 API 终态已查到 App source 38258403604 SUCCESS、App Build 38258404288 FAILURE、media-kit general 38255531407 FAILURE；各项只按自己的 attempt、实际源码向量和产物结论登记。完整 artifact/log 审计进行中，38258394875 CANCELLED 不作为验收。\n\n本阶段拟修改仅两仓 `TASKS.md`、`archives/conversations/media-kit-routing-20261011.md`、现有中央/App handoff JSON 的当前状态字段，以及 `docs/plans/core-successor-*-20261012.json` / CI 审计证据；必要时更新 PR5 import manifest 的审查索引。**不修改生产函数或共享 CI/SDK 补丁。** 先完成此检查点，再登记下一代码切片。\n\nDEVICE 保持 DV001 原 PR 的 recipe 单写范围；读取器失败闭合、双 Vulkan 符号、失败传播、clean staging、成员/链接/patch/toolchain 来源要求仍开放。PR5 两个排除脚本继续排除，公共 provenance banner 保留。\n已收到 DV004 PR6 回交，正在按当前源码和原 Critical REQUEST_CHANGES 复审；不能仅凭“126 已出图”将 App PR3 或库 PR6 标为可合入。DV004 诊断范围及最终 plan 履行/捕获任何真实切换的两项用户决策保持未决；本登记不批准放宽跨轮断言。PR6 的 gatherDecoderObservation 及对应测试保持原 DEVICE 修订范围，CORE 本轮只审不并写；App PR3 同理。\n\n所有主 PR 保持未合并、未关闭、未发布；宿主/source bundle、native build、设备 HDR、持续性能分别验收。experimental 默认 false、true 主验证且回归 false；LG YUV8/FULL/range1、精确设备门与 owner/ACK/lease 不变，10-bit/lease 融合继续延期。"
+      },
+      {
+        "id": 6126388894,
+        "url": "https://github.com/Goodwu/media-kit/pull/4#issuecomment-6126388894",
+        "createdAt": "2026-10-12T14:33:50Z",
+        "updatedAt": "2026-10-12T14:33:50Z",
+        "body": "## [DEVICE] DV005：126 打开路径 facts 传递缺口补全（PiliPlusX PR#3 a2478d04c）/ MK-ROUTING-20261011\n\n用户复测反馈 126 仍无图。复现定位：上次\"出图\"截图实为 120 档残影（切换未发生，日志无 DV003_OPEN）——用户实测后捕获真实失败：126 冷启动 30ms 内被 **`sourceMetadataUnknown`** 阻断、解码器未建（open126-full.log）。\n\n### 根因\n\nDV003 只修了菜单准入（DashRouteSelection selection 侧）；**打开路径** pl_player/controller.dart 的 session.open hint 构造 `descriptorFromDash(quality, codec)` 未传嗅探 facts——126 档 hvc1 串在 Session 侧仍是\"未知 DV\"，planner 按 B1b 阻断。即 DV003 的 facts 只到菜单、未到播放器。\n\n### 修复（App 侧，PiliPlusX PR#3 追加提交 a2478d04c）\n\n`setDataSource` 新增 `initialDoviFacts` 参数（页面 controller 从 `_doviFactsCache` 按 rendition spec.key 传入），`_hdrDoviHint` 在两处 session.open hint 构造中消费。本地诊断源不传。\n\n### LYA 真机闭环验收（126 冷启动）\n\n- `HDR dvProfile stats: dvProfile=8, compatId=4, strategy=baseLayerDirect, presentation=nativeHdr, confidence=verified, degrade=none, quality=126, codec=hevc`\n- 解码器：`OMX.hisi.video.decoder.hevc`\n- 画面渲染（明亮夕阳场景，dv005-frame1.png）、帧推进、零 FATAL\n- pl_player 186 tests、analyze 0 issues\n\n### 完整链路状态（LYA）\n\n126 档：菜单可选（DV003）→ 打开不被复核误杀（DV004, media-kit PR#6）→ hint 携带 facts 不被 planner 阻断（DV005, 本提交）→ **出图 verified**。待 CORE 归并后在 LG（PQ 面板）复测 convert/tone-map 路径。\n"
+      },
+      {
+        "id": 6126444208,
+        "url": "https://github.com/Goodwu/media-kit/pull/4#issuecomment-6126444208",
+        "createdAt": "2026-10-12T14:37:05Z",
+        "updatedAt": "2026-10-12T14:37:05Z",
+        "body": "[CORE-SUCCESSOR / 文档证据范围补充]\n\n本轮只读逐字核验发现 `docs/plans/core-pr5-script-inventory-20261012.json` 的 `matrix-device-build.sh.sha256` 为65位笔误（第50行）；PR5@dc417870 的 Git blob `33abc719` 原始2578字节与当前 import-manifest 双核，正确 SHA256 是 `bf54737f08351c71877e2257beb8c6031e7a7aed754b26ceb64ddec0222b498b`。将此文件纳入本阶段档案修正，记录旧值与核验来源；不改变两个 recipe 排除结论，也不执行/改写脚本。\n\n已完成独立source run38258403604/attempt1五ZIP与2705源码全量哈希复核，证据仍严格绑定 App13b139b7 + media-kit5834ce5b。general38255531407实际测试 checkout 是 PR merge `811c7ba6c52d40a12a7d9c33a42505ee2834e4cb`（head e269d966 + main d7619227），将明确保存 merge/ref 与 head，不能标为5834的原生验收。Web失败是 `player-set-shuffle`，60 pass/1 fail/27 skip；Linux81 pass/16skip、Windows81pass/16skip、macOS88pass/15skip，三者终态success。Build38258404288所有11ZIP与general8ZIP摘要和大小已实际匹配，继续核内部源码/诊断与已有native依赖范围。"
+      },
+      {
+        "id": 6126499419,
+        "url": "https://github.com/Goodwu/media-kit/pull/4#issuecomment-6126499419",
+        "createdAt": "2026-10-12T14:40:21Z",
+        "updatedAt": "2026-10-12T14:40:21Z",
+        "body": "[CORE-SUCCESSOR / DV001、PR5、DV003/DV004/DV005 复审回交]\n\n本轮审查绑定：DV001 `1095a43a`、PR5 `dc417870`、库PR6 `0fb163c6`、AppPR3 `15551ede`（生产增量 `a2478d04`，后一提交仅档案）。DV001/PR5没有新的配方修复回交，符号读取失败闭合、双目标各自覆盖、失败传播、干净staging、精确三库/链接patch/NDK/helper及每APK来源仍须原DEVICE在原PR处理；CORE本轮没有并行实现native配方，批准ledger保持空。\n\n已在原回交PR发布并回读带 `REQUEST_CHANGES` 结论的审查评论：\n- media-kit PR6 [review5492283452](https://github.com/Goodwu/media-kit/pull/6#pullrequestreview-5492283452)：required-facts前移使所有partial轮不写identity，首个完整轮立即返回，跨轮拒绝分支不可达；最终route/hwdec比较不能证明组件未切换。新fixture混用AVC decoder和HEVC/MIME，copy却是hardware pixel，只测gather不能证明Session通过。诊断/验收语义两个用户决策仍未关闭。\n- PiliPlusX PR3 [review5492283684](https://github.com/Goodwu/PiliPlusX/pull/3#pullrequestreview-5492283684)：DV005首次/refresh hint确已接线，旧“完全未接线”状态仅保留历史；但intent.reopen遗漏initialDoviFacts，设置重开会清空。新增playerInit无条件 `Uri.parse(videoUrl!)` 在本地FileSource/诊断分流前崩溃，需回归；完整签名URL日志需脱敏。HTTP总deadline/字节上界、spec-key串源竞态、轨道绑定/颜色与层冲突三个原P1仍未修。\n\n这两次 GitHub API review 状态是 COMMENTED，审查正文结论为 REQUEST_CHANGES；不伪称其为正式阻止合并状态。原DV001 review5483753705同样是COMMENTED且整改正文仍有效。\n\n已读 DEVICE 新comment6126388894：此前“126出图”被明确撤回为120残影/切换未发生；新的DV005 HEVC/P8.4/verified声称按新候选记为DEVICE reported、CORE evidence pending，不能借旧AVC序列或截图文件名闭合实际126、native来源和持续性能，更不能写成仅剩LG复测。\n\n请现有DEVICE继续原PR单写修订；本阶段CORE公共写入仍限已认领台账/证据及65位digest笔误，不接管controller/sniffer/gather。主PR保持open/unmerged/unreleased；DV001/PR5完整归并继续是必需范围。"
+      },
+      {
+        "id": 6126637477,
+        "url": "https://github.com/Goodwu/media-kit/pull/4#issuecomment-6126637477",
+        "createdAt": "2026-10-12T14:48:40Z",
+        "updatedAt": "2026-10-12T14:48:40Z",
+        "body": "## [DEVICE][CRITICAL-REVIEW] DV003/004/005 组合终审：REQUEST_CHANGES（四项阻断）/ MK-ROUTING-20261011\n\n应要求对三修复做归并前终审。**裁决：REQUEST_CHANGES——修复方向成立（DV004 名称发布误判机制被实机序列证实；LYA 126 出图链路证据属实），但组合不可按当前状态归并。** 全文随附。\n\n### 阻断项（归并前必须修复）\n\n- **B1（高）**：dovi_sniff 未实现声明的 ≤64KB/4s——`_rangeGet` 接受 HTTP 200 并无界 fold 整个响应（CDN 忽略 Range 可整片下载）；getUrl/drain 无超时；headers/body 各 4s 独立、备选 URL 串行；且嗅探位于初始播放主路径，126 内容首帧被拖住。\n- **B2（高）**：`_doviFactsCache` 以 spec.key（codec/尺寸/帧率/码率）为键——非媒体身份；无代次清理、迟到写入无 revision 检查：A 内容 facts 可污染同规格 B 内容（P8.4→P5 错配），且 Session 复核对\"未报告 profile 的流保留 hint\"不能兜底——实质安全问题。\n- **B3（中）**：DV004 契约表述过度（完整轮立即 return facts，跨轮比较实际不可达；Session 只验收单次快照）+ 新 fixture 是无效组合（h264 decoder 配 HEVC MIME、copy 配 mediacodec pixel，validateDecoderObservation 会拒）——需按实机 AVC 组合重写并连接验证层；DIAG 打点须实际移除出新 SHA。\n- **B4（中）**：归档引用的 dv003-flutter-test.log/analyze.log 实为**失败记录**（+223 -5 / undefined_identifier）——需提供绑定受审 SHA 的真实成功日志。\n\n另确认的必改小项：`_RouteSourceIntent.reopen` 转发 quality/codec 但漏 `initialDoviFacts`（无页面回调的配置重开会退回未知 126）。\n\n### 被确认有效的部分\n\n位布局与 FFmpeg 一致；DV004 修复方向（不把初始化期逻辑名当授权基线）成立；LYA 126 出图证据属实（dvProfile=8/compat4/nativeHdr verified + hevc 解码器 + 两帧不同画面）；fail-closed 不猜 profile 是正确安全选择。\n\n### 修复顺序（reviewer 建议）\n\n库 PR#6 先（B3+DIAG 移除出新 SHA 复审）→ App PR#3（B1+B2+reopen）→ 先库后 App 归并、冻结联合向量 → LYA 回归 + LG/SDR/P5 补验收。DEVICE 即按此执行，完成后按复审触发条件重新提交。\n"
+      }
+    ],
+    "readbackFinishedUtc": "2026-10-12 14:51:58 UTC"
+  },
+  "succession": {
+    "role": "CORE-SUCCESSOR",
+    "solePublicIntegrator": true,
+    "registration": 6126383144,
+    "scopeSupplement": 6126444208,
+    "deviceReviewReply": 6126499419,
+    "nativeDeviceOwner": "existing DEVICE agent; no new DEVICE line",
+    "deviceBuildIntegration": "required_and_blocked_pending_original_PR_fixes",
+    "deviceArchivePR": 5,
+    "deviceArchiveHead": "dc41787082752f234fed85db7fb7be3bd855cc45",
+    "deviceArchiveStatus": "partial_common_matrix_and_historical_records_integrated_native_artifact_device_remaining",
+    "baseline": {
+      "phase": "remote readback before this documentation checkpoint; these are inspected/tested inputs, not the subsequently committed documentation HEADs",
+      "app": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+      "mediaKit": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+      "ffmpeg": "9aba43cfbee182ade060cdccbe15340a0fbe3e83",
+      "deviceDV001": "1095a43acb4d0973b8bca59c5da4e300657bdb29",
+      "pr5": "dc41787082752f234fed85db7fb7be3bd855cc45",
+      "deviceDV004PR6": "0fb163c6ec8d54c46698227175b9a21468605246",
+      "appDV003DV005PR3": "15551ede06b0cbec859d61e6d16f8dba2054bba1"
+    },
+    "productionAppChanged": false,
+    "productionLibraryChanged": false
+  },
+  "latestValidation": {
+    "scope": "hosted_source_tests_analyze_Dart_assets_bundle_and_Web_build_only; native_build_device_HDR_and_performance_not_accepted",
+    "vector": {
+      "app": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+      "mediaKit": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+      "appTree": "464e4ed20cd327dd31644d40f75e01f7e1267fd5",
+      "mediaKitTree": "6736c16afed90cc9e55b4694d0cdcf7f7876379f"
+    },
+    "app": {
+      "run": 38258403604,
+      "attempt": 1,
+      "conclusion": "success",
+      "jobs": 6,
+      "flutterPassedEachPlatform": 268,
+      "analyzeIssuesEachPlatform": 0,
+      "platforms": [
+        "Android/source on Ubuntu",
+        "Linux",
+        "macOS",
+        "Windows"
+      ],
+      "pythonTotal": 506,
+      "pythonPassed": 504,
+      "pythonSkipped": 2,
+      "pythonSkipReason": "shared Flutter Git source is not present; two iOS actual SDK tests",
+      "webDOMPassed": 1,
+      "webBuild": "success",
+      "dartAssetsBundleEach": "success",
+      "actualArtifactZIPs": 5,
+      "sourceHashesIndependentlyRecomputed": 2705,
+      "appLibTestHashes": 1442,
+      "mediaKitAllTrackedHashes": 1263,
+      "totalPackageRootsEach": 261,
+      "mediaKitPackageRootsEach": 10,
+      "bootstrapStepsEach": 57,
+      "bootstrapStatus": "fresh-source-only",
+      "kernelAndWebOutputBytesIndependentlyRehashed": false,
+      "evidence": "docs/plans/core-successor-app-source-ci-20261012.json"
+    },
+    "appBuild": {
+      "run": 38258404288,
+      "attempt": 1,
+      "conclusion": "failure",
+      "jobTotals": {
+        "success": 7,
+        "failure": 6,
+        "skipped": 2
+      },
+      "actualArtifactZIPs": 11,
+      "embeddedSourceValidation": "own jobs/artifacts pass with the same 268/504+2 results; not borrowed from standalone38258403604",
+      "androidAndPink": "native acquisition stage=selection, commands=[], explicit selected manifest is empty",
+      "otherPlatforms": {
+        "platforms": [
+          "macOS",
+          "iOS",
+          "Windows x64",
+          "Linux x64"
+        ],
+        "status": "SOURCE_PREPARED_NATIVE_BLOCKED",
+        "producerReceipt": null,
+        "nativeInputRootExists": false
+      },
+      "iosVariant": "1918 base files verified; exactly two approved source transforms independently replayed and matched; 260/261 package roots unchanged; bundle success, Xcode build not started",
+      "acceptedNativeCandidates": 0,
+      "evidence": "docs/plans/core-successor-app-build-ci-20261012.json"
+    },
+    "libraryGeneral": {
+      "run": 38255531407,
+      "attempt": 1,
+      "conclusion": "failure",
+      "runHead": "e269d9669becb5812663200e7521901e8254c8bd",
+      "actualTestCheckout": "811c7ba6c52d40a12a7d9c33a42505ee2834e4cb",
+      "mergeParents": [
+        "d761922721ad8da6bb186abd270bb096100944ea",
+        "e269d9669becb5812663200e7521901e8254c8bd"
+      ],
+      "mergeTree": "b8040c8c682e11bb92658a5605dffd4ef75d9896",
+      "jobTotals": {
+        "success": 22,
+        "failure": 1,
+        "skipped": 1
+      },
+      "web": {
+        "passed": 60,
+        "failed": 1,
+        "skipped": 27,
+        "failure": "player-set-shuffle"
+      },
+      "linux": {
+        "passed": 81,
+        "skipped": 16
+      },
+      "windows": {
+        "passed": 81,
+        "skipped": 16
+      },
+      "macos": {
+        "passed": 88,
+        "skipped": 15
+      },
+      "macosRetryLimit": "job ultimately succeeded; subtitle retry/OutstandingWork failures occurred earlier in its log and are not erased by the final summary",
+      "actualArtifactZIPs": 8,
+      "nativeLimit": "test app artifacts exist; Android build downloaded the old released v2026.013 arm64 JAR (mpv d24c59905/FFmpeg b4d2ea4), so these do not establish fresh DV001/current native acceptance",
+      "evidence": "docs/plans/core-successor-general-ci-20261012.json"
+    },
+    "excluded": {
+      "run": 38258394875,
+      "attempt": 1,
+      "conclusion": "cancelled",
+      "accepted": false
+    },
+    "historicalExactPair": {
+      "run": 38255581451,
+      "attempt": 1,
+      "conclusion": "success",
+      "app": "a3b577f3794634b497c6f82369bcc98d39d91fa2",
+      "mediaKit": "e269d9669becb5812663200e7521901e8254c8bd",
+      "evidence": "docs/plans/core-source-ci-a3b577-e269d-checkpoint-20261012.json",
+      "sha256": "156cd314f670a3d958cea70beb3818a4ea3b6dba0d3e9d944e20b8d1858705da",
+      "relabelled": false
+    },
+    "evidenceRepository": "Goodwu/media-kit",
+    "evidence": [
+      "docs/plans/core-successor-app-source-ci-20261012.json",
+      "docs/plans/core-successor-app-build-ci-20261012.json",
+      "docs/plans/core-successor-general-ci-20261012.json",
+      "docs/plans/core-successor-checkpoint-20261012.json"
+    ],
+    "fullNativeAPKAcceptance": false,
+    "deviceAcceptance": false,
+    "allReleaseGreen": false
+  },
+  "deviceReviews": {
+    "dv001": {
+      "head": "1095a43acb4d0973b8bca59c5da4e300657bdb29",
+      "status": "REQUEST_CHANGES_requirements_still_open",
+      "nativeRecipeOwner": "existing DEVICE on original native-build PR1",
+      "review": 5483753705,
+      "githubReviewState": "COMMENTED",
+      "required": [
+        "symbol reader errors reject; no error-to-NO_IMPORTS conversion",
+        "independent coverage of both Vulkan symbols including single, both, absent, weak, mixed, tool failure and malformed ELF",
+        "supported ABI/ELF handling; avoid partial mutation on failure",
+        "build failure propagation; clean staging; exact three-library member allowlist",
+        "real linked inputs, patches, NDK/helper and final JAR/APK/member hashes"
+      ]
+    },
+    "pr5": {
+      "head": "dc41787082752f234fed85db7fb7be3bd855cc45",
+      "status": "partially_integrated_full_native_artifact_device_integration_required",
+      "publicMatrix": "implemented; 27 synthetic/mocked tests are historical host evidence only",
+      "excludedScripts": [
+        "assemble-jar-arm64.sh",
+        "matrix-device-build.sh"
+      ],
+      "historicalProvenanceBanners": "three public banners retained; current PR5 raw bytes match after removing only the two-line banner",
+      "inventoryDigestCorrection": {
+        "old": "bf54737f08351c71877e2257b7eb8c6031e7a7aed754b26ceb64ddec0222b498b",
+        "new": "bf54737f08351c71877e2257beb8c6031e7a7aed754b26ceb64ddec0222b498b",
+        "sourceBlob": "33abc7195e898d859177bfbb1baed9062a443c55",
+        "sourceBytes": 2578
+      }
+    },
+    "dv004PR6": {
+      "head": "0fb163c6ec8d54c46698227175b9a21468605246",
+      "verdict": "REQUEST_CHANGES",
+      "review": 5492283452,
+      "githubReviewState": "COMMENTED",
+      "blocking": [
+        "partial rounds return before storing decoder identity; first complete round returns immediately, so cross-round guard is ineffective",
+        "new fixture mixes AVC identity, HEVC config and hardware pixels on a copy route; gather-only success does not prove Session validation"
+      ],
+      "owner": "existing DEVICE; CORE review only"
+    },
+    "dv003DV005PR3": {
+      "head": "15551ede06b0cbec859d61e6d16f8dba2054bba1",
+      "codeHead": "a2478d04cfdc3fd19a12631e88bf38be8684fccb",
+      "verdict": "REQUEST_CHANGES",
+      "review": 5492283684,
+      "githubReviewState": "COMMENTED",
+      "partiallyRepaired": "initial and refresh Session hints now consume sniffed facts; do not repeat the old wholly-unwired finding",
+      "blocking": [
+        "no total HTTP deadline or enforced streaming byte bound; error drain and backups unbounded",
+        "cache is not isolated by source identity and lacks a revision guard",
+        "intent.reopen loses initialDoviFacts; settings reopen clears the hint",
+        "DOVI facts not bound to the selected video sample entry; layer/color/profile conflicts unresolved",
+        "new unconditional Uri.parse(videoUrl!) runs before local FileSource/DirectFileSource selection",
+        "full signed media URL in new diagnostic logging"
+      ],
+      "owner": "existing DEVICE; CORE review only"
+    },
+    "device126Correction": {
+      "comment": 6126388894,
+      "priorClaim": "retracted by DEVICE: old 120 residual frame; switch did not happen; real 126 was blocked sourceMetadataUnknown before decoder creation",
+      "newDV005Claim": "DEVICE reports HEVC/P8.4/verified/frame progression and local tests; CORE raw-evidence acceptance pending",
+      "requiredEvidence": "raw decoder identity sequence, exact App/library/native/JAR/APK inputs, track/open generation, PTS, screenshot bytes and continuous playback evidence"
+    },
+    "latestDeviceCI": {
+      "checkedAtUtc": "2026-10-12T14:45:42Z",
+      "appBuild38263795883": {
+        "head": "a2478d04cfdc3fd19a12631e88bf38be8684fccb",
+        "attempt": 1,
+        "conclusion": "cancelled"
+      },
+      "appBuild38263881419": {
+        "head": "15551ede06b0cbec859d61e6d16f8dba2054bba1",
+        "attempt": 1,
+        "conclusion": "failure"
+      },
+      "sourceVectorJobs": [
+        114860777554,
+        114861539661
+      ],
+      "sourceFailure": "routing App HEAD differs from DEVICE PR EXPECTED_APP_SHA; exit1 before final vector output; downstream source/Flutter/Python/bundle skipped",
+      "pr6ExactHeadActionsRunCount": 0,
+      "reported186And775TestsIndependentlyVerified": false,
+      "evidence": "docs/plans/core-successor-device-ci-recheck-20261012.json"
+    },
+    "latestDeviceCriticalReview": {
+      "comment": 6126637477,
+      "createdAtUtc": "2026-10-12T14:48:40Z",
+      "verdict": "REQUEST_CHANGES",
+      "reportedBlocking": [
+        "B1 HTTP64KB/4s not enforced",
+        "B2 cache source-identity/revision isolation",
+        "B3 unreachable cross-round guard, invalid fixture, diagnostic removal in a new SHA",
+        "B4 named old Flutter/analyze logs reportedly contain223pass5fail/undefined_identifier; successful reviewed-SHA logs required",
+        "intent.reopen missing initialDoviFacts"
+      ],
+      "deviceReviewerClaim": "Reviewer reports real new LYA126 HEVC/P8.4 frames, while still rejecting combined integration",
+      "coreEvidenceBoundary": "The public comment contains the reviewer conclusion but no raw log/image bytes or complete native input vector; not an independent CORE artifact acceptance",
+      "ownership": "DEVICE states it will repair libraryPR6 then AppPR3 on the original branches; CORE does not overlap"
+    },
+    "userDecisionsOpen": [
+      "permitted temporary diagnostic scope",
+      "accept final plan fulfillment or require capture/rejection of any actual decoder switch"
+    ],
+    "claimBoundary": "no assertion relaxation or parallel writes to native recipes, controllers/sniffer, Session/gather, planner/backend/realizer/output, CI or SDK patches in this checkpoint"
+  },
+  "evidenceReports": [
+    {
+      "path": "docs/plans/core-successor-app-source-ci-20261012.json",
+      "originalReportName": "source-ci-38258403604-checkpoint-20261012.json",
+      "sha256": "ad5bd4e0065788e4b952684780a3610d16e8277004b1b35370150af1ce807e82",
+      "bytes": 124270,
+      "copyPolicy": "exact original report bytes; renamed for the public evidence index"
+    },
+    {
+      "path": "docs/plans/core-successor-app-build-ci-20261012.json",
+      "originalReportName": "build-ci-38258404288-checkpoint-20261012.json",
+      "sha256": "5bcf6304147af7acea600989b4a3c266d232b68031541abb0dd34520d840852d",
+      "bytes": 310441,
+      "copyPolicy": "exact original report bytes; renamed for the public evidence index"
+    },
+    {
+      "path": "docs/plans/core-successor-general-ci-20261012.json",
+      "originalReportName": "core-successor-general-ci-20261012.json",
+      "sha256": "8c35d3a90da551f5ae4d4528136fb47ef8c34ca768d83f566ed4a6615e09e514",
+      "bytes": 112433,
+      "copyPolicy": "exact original report bytes; renamed for the public evidence index"
+    },
+    {
+      "path": "docs/plans/core-successor-native-review-20261012.json",
+      "originalReportName": "native-handoff-review.json",
+      "sha256": "129278c26df024a74e5679f894a34f4babfc87842b41c568d074bcee74a21013",
+      "bytes": 14600,
+      "copyPolicy": "exact original report bytes; renamed for the public evidence index"
+    },
+    {
+      "path": "docs/plans/core-successor-dv003-dv004-review-20261012.json",
+      "originalReportName": "core-dv004-dv003-successor-review-20261012.json",
+      "sha256": "29d5633a57abdc81325e9b5c3d59a0607201007e720218847021b8fdaeec31b2",
+      "bytes": 15101,
+      "copyPolicy": "exact original report bytes; renamed for the public evidence index"
+    },
+    {
+      "path": "docs/plans/core-successor-pr5-byte-checks-20261012.json",
+      "originalReportName": "manifest-byte-checks.json",
+      "sha256": "9242e8bddf5f15983ee28896bedc4f8725cc56447dd96712b0c2f6f5dc5645ca",
+      "bytes": 2241,
+      "copyPolicy": "exact original report bytes; renamed for the public evidence index"
+    },
+    {
+      "path": "docs/plans/core-successor-implementation-index-20261012.json",
+      "originalReportName": "implementation-source-index.json",
+      "sha256": "29b329a4998dc586a436fcb26e367da608dd8881af1154a50c3249ecb239b0bd",
+      "bytes": 54611,
+      "copyPolicy": "exact original report bytes; renamed for the public evidence index"
+    },
+    {
+      "path": "docs/plans/core-successor-device-ci-recheck-20261012.json",
+      "originalReportName": "core-dv003-dv004-ci-terminal-followup-20261012.json",
+      "sha256": "a97004be4c4805d064cafd035eab6789ab14a841f62c50f6f75fbe2e0687bc7a",
+      "bytes": 14873,
+      "copyPolicy": "exact original report bytes; renamed for the public evidence index"
+    }
+  ],
+  "nextCodeSlice": {
+    "id": "CORE-WEB-SHUFFLE-01",
+    "status": "next bounded candidate; public ownership registration follows successful checkpoint commit/push/readback",
+    "reason": "general run38255531407 Web player-set-shuffle failed; the source-level mutable Playlist snapshot explanation requires a deterministic regression",
+    "files": [
+      "media_kit/lib/src/player/web/player/real.dart",
+      "media_kit/test/src/player/player_test.dart"
+    ],
+    "functions": [
+      "WebPlayer.setShuffle",
+      "existing shuffle tests and an immutable emitted Playlist snapshot regression"
+    ],
+    "method": "first capture an emitted Playlist and independent media copy; verify prior snapshots remain unchanged; then evaluate local copy-on-write in enable and restore branches",
+    "sourceIdentity": {
+      "inspectedHead": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+      "testedMerge": "811c7ba6c52d40a12a7d9c33a42505ee2834e4cb",
+      "webRealBlob": "c6feb91a11698ff89dd09448a091bd13f5f4670e",
+      "playerTestBlob": "50f4a893f252cf3e9ba7ff33edb043363233a666"
+    },
+    "verification": "Chrome targeted regression then full Web package, exact run/attempt/SHA; no local Flutter/Dart available in this CORE environment",
+    "excludedChanges": [
+      "global Playlist/Media equality",
+      "stream distinct removal",
+      "lock/lifecycle changes without new evidence",
+      "larger random fixtures, retries or longer waits as a replacement for a mechanism fix",
+      "DEVICE-owned native/controller/sniffer/gather code"
+    ],
+    "adjacentRisks": "URI equality permits duplicate occurrences; all-equal shuffle and indexOf behavior require bounded investigation, not an unverified claim that they caused this run",
+    "productionChangedInThisCheckpoint": false
+  },
+  "workspaceProtection": {
+    "ownIsolatedClonesBeforeEdits": {
+      "mediaKit": {
+        "origin": "https://github.com/Goodwu/media-kit.git",
+        "head": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+        "dirty": false,
+        "ahead": 0,
+        "behind": 0
+      },
+      "app": {
+        "origin": "https://github.com/Goodwu/PiliPlusX.git",
+        "head": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+        "dirty": false,
+        "ahead": 0,
+        "behind": 0
+      }
+    },
+    "originalConnectorRootsObserved": [
+      {
+        "repo": "media-kit",
+        "branch": "main",
+        "head": "d761922721ad8da6bb186abd270bb096100944ea",
+        "ahead": 0,
+        "behind": 0,
+        "preserved": [
+          "modified TASKS.md",
+          "untracked conversations/debug-build-source-policy-20261012.md",
+          "untracked conversations/hdr-lab-runtime-scenario-batch-20261011.md",
+          "untracked docs/plans/hdr-lab-runtime-scenario-batch-20261011.md"
+        ]
+      },
+      {
+        "repo": "PiliPlusX",
+        "branch": "fix/android7-lg-launch-libmpv-vulkan",
+        "headPrefix": "30434b3eb",
+        "upstream": "personal/fix/android7-lg-launch-libmpv-vulkan",
+        "ahead": 0,
+        "behind": 0,
+        "preserved": [
+          "modified AGENTS.local.md",
+          "modified TASKS.md",
+          "untracked .zcodeignore",
+          "untracked conversations/debug-build-source-policy-20261012.md"
+        ]
+      },
+      {
+        "repo": "FFmpeg",
+        "branch": "lg-p84-d1-vui-fix-20261010",
+        "headPrefix": "d4bb79394b",
+        "ahead": 0,
+        "behind": 0,
+        "preserved": [
+          "modified configure",
+          "untracked .zcodeignore",
+          "untracked _build-mks/"
+        ]
+      }
+    ],
+    "originalCOREWorktrees": "not exposed as connector roots; not independently claimed clean",
+    "oldCloudScratchCheckout": "observed unrelated media-kit main dirty; untouched",
+    "destructiveOrForceOperations": false
+  },
+  "capabilities": {
+    "available": [
+      "GitHub plugin",
+      "Git",
+      "Python",
+      "Node",
+      "ZIP hashing",
+      "readelf",
+      "libarchive nested 7z reading"
+    ],
+    "unavailableLocally": [
+      "Flutter",
+      "Dart",
+      "ADB",
+      "native SDK"
+    ],
+    "testExecutionClaim": "Actual hosted CI logs/artifacts inspected; no local Flutter/native/device test performed"
+  },
+  "acceptanceStillRequired": [
+    "DV001 and PR5 full integration",
+    "accepted current native producer and linked JAR/APK proof",
+    "ordinary Session",
+    "actual owner/carrier",
+    "lifecycle",
+    "P5/P8.4 true and false",
+    "device HDR",
+    "sustained performance"
+  ],
+  "policy": {
+    "primaryPRsStayOpenDraftUnmergedUnreleased": true,
+    "experimentalDefault": false,
+    "primaryValidationExperimental": true,
+    "falseRegressionRequired": true,
+    "lg": "approved YUV8/FULL/range1; exact device gate; owner/ACK/lease",
+    "deferred": [
+      "10-bit",
+      "lease fusion"
+    ],
+    "futureBuildRule": "capture current complete input vector before each build; no pull during a build; remote advances do not relabel earlier results"
+  }
+}

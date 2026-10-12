@@ -1,0 +1,370 @@
+{
+  "schema": 1,
+  "taskId": "MK-ROUTING-20261011",
+  "scope": "Read-only CI follow-up to successor DV004/DV003 review; no rerun, mutations, artifact downloads or device operations",
+  "observedAtUtc": "2026-10-12 14:45:42 UTC",
+  "note": "These two IDs are top-level Build workflows (event=pull_request) containing source-validation jobs, not successful standalone source runs.",
+  "runs": [
+    {
+      "id": 38263795883,
+      "name": "Build",
+      "headSha": "a2478d04cfdc3fd19a12631e88bf38be8684fccb",
+      "attempt": 1,
+      "event": "pull_request",
+      "status": "completed",
+      "conclusion": "cancelled",
+      "updatedAt": "2026-10-12T14:35:25Z",
+      "url": "https://github.com/Goodwu/PiliPlusX/actions/runs/38263795883",
+      "jobs": [
+        {
+          "id": 114860733571,
+          "name": "Capture one current App/library input vector",
+          "conclusion": "success",
+          "failedSteps": [],
+          "cancelledSteps": []
+        },
+        {
+          "id": 114860736090,
+          "name": "linux_arm64",
+          "conclusion": "skipped",
+          "failedSteps": [],
+          "cancelledSteps": []
+        },
+        {
+          "id": 114860776894,
+          "name": "Release Android",
+          "conclusion": "cancelled",
+          "failedSteps": [
+            "Apply Patch"
+          ],
+          "cancelledSteps": []
+        },
+        {
+          "id": 114860776967,
+          "name": "linux_x64 / Linux x64 workflow",
+          "conclusion": "cancelled",
+          "failedSteps": [],
+          "cancelledSteps": [
+            "Setup flutter"
+          ]
+        },
+        {
+          "id": 114860777113,
+          "name": "pink / Release Android Pink",
+          "conclusion": "cancelled",
+          "failedSteps": [
+            "Apply Patch"
+          ],
+          "cancelledSteps": []
+        },
+        {
+          "id": 114860777189,
+          "name": "win_x64 / Windows x64 workflow",
+          "conclusion": "cancelled",
+          "failedSteps": [],
+          "cancelledSteps": [
+            "Setup flutter"
+          ]
+        },
+        {
+          "id": 114860777211,
+          "name": "mac / macOS workflow (ARM64 hosted)",
+          "conclusion": "failure",
+          "failedSteps": [
+            "Validate source and approved shared inputs"
+          ],
+          "cancelledSteps": []
+        },
+        {
+          "id": 114860777254,
+          "name": "ios / iOS workflow",
+          "conclusion": "cancelled",
+          "failedSteps": [],
+          "cancelledSteps": [
+            "Setup flutter"
+          ]
+        },
+        {
+          "id": 114860777554,
+          "name": "Current-source App validation / Capture one current routing source vector",
+          "conclusion": "failure",
+          "failedSteps": [
+            "Capture exact media-kit HEAD once for all source jobs"
+          ],
+          "cancelledSteps": []
+        },
+        {
+          "id": 114860822770,
+          "name": "Current-source App validation / App Python regression tests (macOS)",
+          "conclusion": "skipped",
+          "failedSteps": [],
+          "cancelledSteps": []
+        },
+        {
+          "id": 114860822870,
+          "name": "Current-source App validation / Source bootstrap and validation (${{ matrix.platform }})",
+          "conclusion": "skipped",
+          "failedSteps": [],
+          "cancelledSteps": []
+        },
+        {
+          "id": 114860823034,
+          "name": "Current-source App validation / App analyze, tests and Dart bundle (latest media-kit source)",
+          "conclusion": "skipped",
+          "failedSteps": [],
+          "cancelledSteps": []
+        },
+        {
+          "id": 114861259266,
+          "name": "Verify Android/Pink native parity",
+          "conclusion": "cancelled",
+          "failedSteps": [],
+          "cancelledSteps": []
+        }
+      ]
+    },
+    {
+      "id": 38263881419,
+      "name": "Build",
+      "headSha": "15551ede06b0cbec859d61e6d16f8dba2054bba1",
+      "attempt": 1,
+      "event": "pull_request",
+      "status": "completed",
+      "conclusion": "failure",
+      "updatedAt": "2026-10-12T14:40:00Z",
+      "url": "https://github.com/Goodwu/PiliPlusX/actions/runs/38263881419",
+      "jobs": [
+        {
+          "id": 114861499711,
+          "name": "Capture one current App/library input vector",
+          "conclusion": "success",
+          "failedSteps": [],
+          "cancelledSteps": []
+        },
+        {
+          "id": 114861501483,
+          "name": "linux_arm64",
+          "conclusion": "skipped",
+          "failedSteps": [],
+          "cancelledSteps": []
+        },
+        {
+          "id": 114861538869,
+          "name": "Release Android",
+          "conclusion": "failure",
+          "failedSteps": [
+            "Apply Patch"
+          ],
+          "cancelledSteps": []
+        },
+        {
+          "id": 114861539096,
+          "name": "mac / macOS workflow (ARM64 hosted)",
+          "conclusion": "failure",
+          "failedSteps": [
+            "Validate source and approved shared inputs"
+          ],
+          "cancelledSteps": []
+        },
+        {
+          "id": 114861539114,
+          "name": "ios / iOS workflow",
+          "conclusion": "failure",
+          "failedSteps": [
+            "Verify media-kit lock"
+          ],
+          "cancelledSteps": []
+        },
+        {
+          "id": 114861539116,
+          "name": "pink / Release Android Pink",
+          "conclusion": "failure",
+          "failedSteps": [
+            "Apply Patch"
+          ],
+          "cancelledSteps": []
+        },
+        {
+          "id": 114861539129,
+          "name": "win_x64 / Windows x64 workflow",
+          "conclusion": "failure",
+          "failedSteps": [
+            "Setup flutter"
+          ],
+          "cancelledSteps": []
+        },
+        {
+          "id": 114861539142,
+          "name": "linux_x64 / Linux x64 workflow",
+          "conclusion": "failure",
+          "failedSteps": [
+            "Apply Patch"
+          ],
+          "cancelledSteps": []
+        },
+        {
+          "id": 114861539661,
+          "name": "Current-source App validation / Capture one current routing source vector",
+          "conclusion": "failure",
+          "failedSteps": [
+            "Capture exact media-kit HEAD once for all source jobs"
+          ],
+          "cancelledSteps": []
+        },
+        {
+          "id": 114861576664,
+          "name": "Current-source App validation / App Python regression tests (macOS)",
+          "conclusion": "skipped",
+          "failedSteps": [],
+          "cancelledSteps": []
+        },
+        {
+          "id": 114861576716,
+          "name": "Current-source App validation / Source bootstrap and validation (${{ matrix.platform }})",
+          "conclusion": "skipped",
+          "failedSteps": [],
+          "cancelledSteps": []
+        },
+        {
+          "id": 114861576880,
+          "name": "Current-source App validation / App analyze, tests and Dart bundle (latest media-kit source)",
+          "conclusion": "skipped",
+          "failedSteps": [],
+          "cancelledSteps": []
+        },
+        {
+          "id": 114861932539,
+          "name": "Verify Android/Pink native parity",
+          "conclusion": "skipped",
+          "failedSteps": [],
+          "cancelledSteps": []
+        }
+      ]
+    }
+  ],
+  "sourceGates": [
+    {
+      "key": "source-a2478",
+      "run": 38263795883,
+      "job": 114860777554,
+      "expected": "a2478d04cfdc3fd19a12631e88bf38be8684fccb",
+      "step": "Capture exact media-kit HEAD once for all source jobs",
+      "stepConclusion": "failure",
+      "exitCode": 1,
+      "gate": "App HEAD must equal the unique routing branch HEAD before capture of media-kit SHA",
+      "precision": "The logged script reads refs/heads/routing/MK-ROUTING-20261011 then executes test \"$app_head\" = \"$EXPECTED_APP_SHA\". The expected SHA is the DEVICE PR head. The log has no resolved app_head value and no final app/media-kit vector output; interpret as branch/vector gate rejection, not a Flutter/native implementation test result.",
+      "logExcerpt": [
+        "2026-10-12T14:33:43.3436716Z app_head=$(git ls-remote --exit-code https://github.com/Goodwu/PiliPlusX.git refs/heads/routing/MK-ROUTING-20261011 | cut -f1)",
+        "2026-10-12T14:33:43.3437797Z test \"$app_head\" = \"$EXPECTED_APP_SHA\"",
+        "2026-10-12T14:33:43.3440592Z   library_head=$(git ls-remote --exit-code https://github.com/Goodwu/media-kit.git refs/heads/routing/MK-ROUTING-20261011 | cut -f1)",
+        "2026-10-12T14:33:43.8281175Z   SUPPLIED_MEDIA_SHA: ",
+        "2026-10-12T14:33:43.8281823Z   EXPECTED_APP_SHA: a2478d04cfdc3fd19a12631e88bf38be8684fccb",
+        "2026-10-12T14:33:44.5173104Z ##[error]Process completed with exit code 1."
+      ],
+      "downstream": "Source bootstrap, App analyze/tests/Dart bundle, App Python regression jobs all skipped."
+    },
+    {
+      "key": "source-15551",
+      "run": 38263881419,
+      "job": 114861539661,
+      "expected": "15551ede06b0cbec859d61e6d16f8dba2054bba1",
+      "step": "Capture exact media-kit HEAD once for all source jobs",
+      "stepConclusion": "failure",
+      "exitCode": 1,
+      "gate": "App HEAD must equal the unique routing branch HEAD before capture of media-kit SHA",
+      "precision": "The logged script reads refs/heads/routing/MK-ROUTING-20261011 then executes test \"$app_head\" = \"$EXPECTED_APP_SHA\". The expected SHA is the DEVICE PR head. The log has no resolved app_head value and no final app/media-kit vector output; interpret as branch/vector gate rejection, not a Flutter/native implementation test result.",
+      "logExcerpt": [
+        "2026-10-12T14:35:33.9531326Z app_head=$(git ls-remote --exit-code https://github.com/Goodwu/PiliPlusX.git refs/heads/routing/MK-ROUTING-20261011 | cut -f1)",
+        "2026-10-12T14:35:33.9533574Z test \"$app_head\" = \"$EXPECTED_APP_SHA\"",
+        "2026-10-12T14:35:33.9616688Z   library_head=$(git ls-remote --exit-code https://github.com/Goodwu/media-kit.git refs/heads/routing/MK-ROUTING-20261011 | cut -f1)",
+        "2026-10-12T14:35:34.0438534Z   SUPPLIED_MEDIA_SHA: ",
+        "2026-10-12T14:35:34.0439189Z   EXPECTED_APP_SHA: 15551ede06b0cbec859d61e6d16f8dba2054bba1",
+        "2026-10-12T14:35:34.2416287Z ##[error]Process completed with exit code 1."
+      ],
+      "downstream": "Source bootstrap, App analyze/tests/Dart bundle, App Python regression jobs all skipped."
+    }
+  ],
+  "latestNativeGates": [
+    {
+      "job": 114861538869,
+      "step": "Apply Patch",
+      "reason": "private PUB_CACHE directory is missing: /home/runner/.pub-cache",
+      "exitCode": 1,
+      "logExcerpt": [
+        "2026-10-12T14:36:11.6145947Z      | private PUB_CACHE directory is missing: /home/runner/.pub-cache",
+        "2026-10-12T14:36:11.6653512Z ##[error]Process completed with exit code 1."
+      ]
+    },
+    {
+      "job": 114861539116,
+      "step": "Apply Patch",
+      "reason": "private PUB_CACHE directory is missing: /home/runner/.pub-cache",
+      "exitCode": 1,
+      "logExcerpt": [
+        "2026-10-12T14:36:23.3734013Z      | private PUB_CACHE directory is missing: /home/runner/.pub-cache",
+        "2026-10-12T14:36:23.4157831Z ##[error]Process completed with exit code 1."
+      ]
+    },
+    {
+      "job": 114861539142,
+      "step": "Apply Patch",
+      "reason": "private PUB_CACHE directory is missing: /home/runner/.pub-cache",
+      "exitCode": 1,
+      "logExcerpt": [
+        "2026-10-12T14:37:08.0673016Z      | private PUB_CACHE directory is missing: /home/runner/.pub-cache",
+        "2026-10-12T14:37:08.1069040Z ##[error]Process completed with exit code 1."
+      ]
+    },
+    {
+      "job": 114861539096,
+      "step": "Validate source and approved shared inputs",
+      "reason": "release tag is not an accepted vMAJOR.MINOR.PATCH tag",
+      "exitCode": 2,
+      "logExcerpt": [
+        "2026-10-12T14:35:47.7217860Z FAIL: release tag is not an accepted vMAJOR.MINOR.PATCH tag",
+        "2026-10-12T14:35:47.7306110Z ##[error]Process completed with exit code 2."
+      ]
+    },
+    {
+      "job": 114861539114,
+      "step": "Verify media-kit lock",
+      "reason": "media_kit/media_kit_android_dataspace_vendor/media_kit_video resolved-ref does not equal required 0fa6afe9cd9af8d8437919257d81a27c643f2f63",
+      "exitCode": 1,
+      "logExcerpt": [
+        "2026-10-12T14:39:51.0242300Z media-kit lock verification failed:",
+        "2026-10-12T14:39:51.0242940Z media_kit: resolved-ref is not 0fa6afe9cd9af8d8437919257d81a27c643f2f63",
+        "2026-10-12T14:39:51.0243700Z media_kit_android_dataspace_vendor: resolved-ref is not 0fa6afe9cd9af8d8437919257d81a27c643f2f63",
+        "2026-10-12T14:39:51.0244240Z media_kit_video: resolved-ref is not 0fa6afe9cd9af8d8437919257d81a27c643f2f63",
+        "2026-10-12T14:39:51.0458300Z ##[error]Process completed with exit code 1."
+      ]
+    },
+    {
+      "job": 114861539129,
+      "step": "Setup flutter",
+      "reason": "Chocolatey yq fetch returned 504; yq not found; Flutter setup aborted",
+      "exitCode": 1,
+      "logExcerpt": [
+        "2026-10-12T14:36:03.7633825Z Failed to fetch results from V2 feed at 'https://community.chocolatey.org/api/v2/Packages(Id='yq',Version='4.54.1')' with following message : Response status code does not indicate success: 504 (Gateway Timeout).",
+        "2026-10-12T14:36:03.8359556Z Unable to find package 'yq'. Existing packages must be restored before performing an install or update.",
+        "2026-10-12T14:36:04.3828091Z yq not found. Install it from https://mikefarah.gitbook.io/yq",
+        "2026-10-12T14:36:04.3891725Z ##[error]Process completed with exit code 1."
+      ]
+    }
+  ],
+  "pr6": {
+    "repository": "Goodwu/media-kit",
+    "pr": 6,
+    "exactHead": "0fb163c6ec8d54c46698227175b9a21468605246",
+    "queriedUrl": "https://api.github.com/repos/Goodwu/media-kit/actions/runs?head_sha=0fb163c6ec8d54c46698227175b9a21468605246&per_page=100",
+    "totalCount": 0,
+    "workflowRuns": []
+  },
+  "acceptance": {
+    "deviceClaim186": "DEVICE-reported PlPlayer tests for DV005; neither of these hosted runs supplies a passing App source/test result.",
+    "deviceClaim775": "DEVICE-reported media_kit_video full tests/analyze0; exact PR6 head still has no hosted workflow run in the query.",
+    "ordinarySourceCI": "Not passed for either DEVICE App head; all downstream source/test jobs skipped after source-vector gate.",
+    "nativeCI": "Latest App Build failed during preparation/SDK/source-lock/tag gates. No passed candidate native/APK acceptance inferred.",
+    "deviceHdrPerformance": "Not evaluated by these hosted results; separate exact artifact/source/runtime evidence remains required.",
+    "previousApprovedSourceVector": "No change to a3b577f3 + e269d966 / run38255581451; never relabel previous evidence to DEVICE heads."
+  }
+}

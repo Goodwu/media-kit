@@ -1,0 +1,54 @@
+[
+  {
+    "path": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/assemble-jar-arm64.sh",
+    "recordedSha256": "9df01982361945da565832d6729d327ce71cb268ffadccd0004e1b4897bc455c",
+    "recordedSha256Length": 64,
+    "actualSha256": "9df01982361945da565832d6729d327ce71cb268ffadccd0004e1b4897bc455c",
+    "match": true
+  },
+  {
+    "path": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/matrix-device-build.sh",
+    "recordedSha256": "bf54737f08351c71877e2257b7eb8c6031e7a7aed754b26ceb64ddec0222b498b",
+    "recordedSha256Length": 65,
+    "actualSha256": "bf54737f08351c71877e2257beb8c6031e7a7aed754b26ceb64ddec0222b498b",
+    "match": false
+  },
+  {
+    "path": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/input-vector.md",
+    "publicBlob": "532e2c8067931a7315f5812b4748121041f03e65",
+    "pr5Blob": "7c50515fda24109e92e4e8d308e1c3faa59ae0e3",
+    "originalHashMatches": true,
+    "publicHashMatches": true,
+    "publicExceptTwoLineBannerEqualsPr5": true
+  },
+  {
+    "path": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/device-results.md",
+    "publicBlob": "864d859914a09552fac4b0758eeb860ee7408740",
+    "pr5Blob": "6cb37491477a81e7a55860e095a4c6f4a1d53d87",
+    "originalHashMatches": true,
+    "publicHashMatches": true,
+    "publicExceptTwoLineBannerEqualsPr5": true
+  },
+  {
+    "path": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/critical-review-define-promotion.md",
+    "publicBlob": "3ee0b3267dfd6e7ce19a7663343a1ca4252e1b5c",
+    "pr5Blob": "d942b28c056f8bfe228ab7c36da7eec1c5388fa4",
+    "originalHashMatches": true,
+    "publicHashMatches": true,
+    "publicExceptTwoLineBannerEqualsPr5": true
+  },
+  {
+    "path": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/dv003-specialist-review.md",
+    "publicBlob": "4e5869669234140442c3f21d70d85c4b004e8a3d",
+    "pr5Blob": "4e5869669234140442c3f21d70d85c4b004e8a3d",
+    "originalHashMatches": true,
+    "publicHashMatches": true,
+    "publicExceptTwoLineBannerEqualsPr5": true
+  },
+  {
+    "path": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/dv004-critical-review.md",
+    "sourceHashMatches": true,
+    "publicHashMatches": true,
+    "publicEqualsPr5": true
+  }
+]

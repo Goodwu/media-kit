@@ -1,0 +1,280 @@
+{
+  "schema": "mk-routing-core-native-handoff-review/v1",
+  "checkedAt": "2026-10-12T14:36:32Z",
+  "role": "CORE internal read-only reviewer, not DEVICE",
+  "scope": {
+    "nativeBuildExecuted": false,
+    "elfFixtureExecuted": false,
+    "deviceAccess": false,
+    "productionChanges": false,
+    "githubMessagesSent": false,
+    "artifactApprovalGranted": false,
+    "sourceAndHashInspection": true
+  },
+  "baseline": {
+    "mediaKit": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+    "app": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+    "dv001": "1095a43acb4d0973b8bca59c5da4e300657bdb29",
+    "pr5": "dc41787082752f234fed85db7fb7be3bd855cc45"
+  },
+  "verdict": "DV001 repair and complete PR5/native/artifact/device integration remain blocked. No new DV001 repair return. Existing partial public documentation/matrix integration is confirmed and must not be reimplemented. Keep fixed native acceptance ledger empty.",
+  "latestReadback": {
+    "dv001IssueComment": 6112842188,
+    "dv001CommentCount": 7,
+    "pr5IssueComment": 6111768962,
+    "pr5CommentCount": 3,
+    "centralCommentReadThrough": 6126388894,
+    "centralNewDeviceItem": "DV005/App PR3 a2478d04c; parent notified, separately reviewed",
+    "allReviewedPrsOpen": true,
+    "allReviewedPrsUnmerged": true,
+    "dv001GitHubReview": {
+      "id": 5483753705,
+      "formalState": "COMMENTED",
+      "interpretation": "Text withholds integration and requests fixes; not a formal GitHub REQUEST_CHANGES review"
+    },
+    "dv001InlineThreads": 0
+  },
+  "findings": [
+    {
+      "id": "N1",
+      "severity": "blocking",
+      "topic": "Reader failure conflated with absent symbols",
+      "paths": [
+        {
+          "path": "buildscripts/bundle_default.sh",
+          "lines": "60-67",
+          "gitBlob": "4939bbfc9a80087352f7c452040066c41c84f33b"
+        },
+        {
+          "path": "DV-BUILD-01/assemble-jar-arm64.sh",
+          "lines": "29-33",
+          "gitBlob": "5363de29053303d3b3672aab81b565d6341f4019"
+        }
+      ],
+      "finding": "Both use nm -D --undefined-only with stderr discarded inside if pipeline and grep only Properties2. Missing tool, unsupported/corrupt ELF, reader nonzero, or successful no-symbols diagnostic can enter skip branch. set -euo pipefail in PR5 script does not make a conditional pipeline failure fatal.",
+      "requiredOwner": "DEVICE original DV001 PR",
+      "requiredChange": "Independently validate complete symbol-reader success and diagnostic status; prove readable complete dynsym before absent/no-op; retain error/exit/stdout/stderr. Do not replace with the same conditional under set -e."
+    },
+    {
+      "id": "N2",
+      "severity": "blocking",
+      "topic": "Both Vulkan targets, partial writes, and ABI",
+      "paths": [
+        {
+          "path": "buildscripts/bundle_default.sh",
+          "lines": "61-63",
+          "gitBlob": "4939bbfc9a80087352f7c452040066c41c84f33b"
+        },
+        {
+          "path": "buildscripts/scripts/weaken_undefined_imports.py",
+          "lines": "33-36,43-46,70-96",
+          "gitBlob": "e78aabb6ff6a58338a669a4a15d7b5c81f808c43"
+        }
+      ],
+      "finding": "QueueFamilyProperties2-only bypasses weakening. Properties2-only invokes default two-target weakener, which writes bytes at87-88 before discovering missing second target at94-96. Weakener is ELF64/little-endian-specific while bundle iterates 4 ABIs including32-bit. No complete post-write verification or atomic publish exists.",
+      "requiredChange": "Handle actual present target set separately; validate support/operation before any write, atomically commit final output and re-read it. Cover each target alone, both, absent, already weak, mixed weak/global, tool failure, malformed/unsupported ELF. Explicitly constrain arm64 or implement every advertised ABI."
+    },
+    {
+      "id": "N3",
+      "severity": "blocking",
+      "topic": "Command failure propagation",
+      "paths": [
+        {
+          "path": "buildscripts/bundle_default.sh",
+          "lines": "1-48,62-94",
+          "gitBlob": "4939bbfc9a80087352f7c452040066c41c84f33b"
+        },
+        {
+          "path": "buildscripts/build.sh",
+          "lines": "1,113-116,163",
+          "gitBlob": "03271d8c838f783adc5b4366cc91032791ea77f3"
+        },
+        {
+          "path": "buildscripts/scripts/libplacebo.sh",
+          "lines": "1,25-33",
+          "gitBlob": "6f11da66fbed0cb8e4e90ab06c60d2a1b9b2363d"
+        }
+      ],
+      "finding": "Canonical bundle itself has no fail-fast guarantee across download/patch/build/helper/unzip/copy/weakener/ZIP. build.sh invokes component scripts with bash, which does not inherit #!/bin/bash -e merely by reading the child shebang; later successful commands can mask failure when no explicit propagation exists.",
+      "requiredChange": "Propagate original exit from every critical stage and child invocation; inject controlled failures for each stage and demonstrate no success artifact/candidate or stale link can follow. This finding is static inspection, not a new native execution."
+    },
+    {
+      "id": "N4",
+      "severity": "blocking",
+      "topic": "Clean staging and exact member set",
+      "paths": [
+        {
+          "path": "buildscripts/bundle_default.sh",
+          "lines": "31,40-48,85-88",
+          "gitBlob": "4939bbfc9a80087352f7c452040066c41c84f33b"
+        },
+        {
+          "path": "DV-BUILD-01/assemble-jar-arm64.sh",
+          "lines": "9-23,39-43",
+          "gitBlob": "5363de29053303d3b3672aab81b565d6341f4019"
+        }
+      ],
+      "finding": "Canonical temp is mkdir-p reused; prefix *.so and find all files may include stale/unexpected members, and zip updates pre-existing archives. PR5 assembly explicitly copies3 libraries and clears temp/JAR, but remains a hard-coded duplicate with destructive shared paths and no complete final membership/source audit.",
+      "requiredChange": "Fresh isolated producer staging; reject stale/unknown/symlink inputs; exact3 arm64 members libmpv.so/libmediakitandroidhelper.so/libc++_shared.so with final SHA256/BuildID/SONAME/NEEDED/ELF validation; no wildcard acceptance or preexisting archive updates."
+    },
+    {
+      "id": "N5",
+      "severity": "blocking",
+      "topic": "Actual link, patch, toolchain and per-APK provenance",
+      "paths": [
+        {
+          "path": "DV-BUILD-01/input-vector.md",
+          "lines": "10-16,28,32-39,49-53",
+          "gitBlob": "7c50515fda24109e92e4e8d308e1c3faa59ae0e3"
+        },
+        {
+          "path": "DV-BUILD-01/device-results.md",
+          "lines": "7,51-53,70,117-129",
+          "gitBlob": "6cb37491477a81e7a55860e095a4c6f4a1d53d87"
+        }
+      ],
+      "finding": "Historical full JAR SHA is recorded, but3 member MD5/string markers/local evidence paths and a truncated APK SHA do not supply current full source/link/patch/toolchain closure. input-vector names d688+b830+recipe77fc while device-results names a3+8bed. helper dirty=0 table conflicts with documented local ndkVersion override; mpv CONFIGURATION patch referenced only in local manifests path. No new producer run/attempt/two artifact IDs and full per-APK manifest have been returned on DV001/PR5.",
+      "requiredChange": "Submit exact actually used FFmpeg/mpv/libplacebo/helper/recipe repository/commit/tree and ordered local patch bytes/hashes; NDK/compiler/sysroot and helper override source; actual link command/object/static-library hashes; final3 ELF member metadata/JAR/APK hashes; install/load binding; durable source evidence and producer run/attempt/artifact identities per current App contract. Local-only evidence must be labeled honestly."
+    },
+    {
+      "id": "P5-1",
+      "severity": "integration-boundary",
+      "topic": "Two old scripts unchanged and excluded",
+      "paths": [
+        {
+          "path": "DV-BUILD-01/assemble-jar-arm64.sh",
+          "lines": "1-43",
+          "gitBlob": "5363de29053303d3b3672aab81b565d6341f4019"
+        },
+        {
+          "path": "DV-BUILD-01/matrix-device-build.sh",
+          "lines": "5-8,24-53",
+          "gitBlob": "33abc7195e898d859177bfbb1baed9062a443c55"
+        }
+      ],
+      "finding": "No new修复 in either current blob. Matrix still hardcodes local source/JDK/JAR/output, deletes build intermediates at33, and runs6 legacy rows rather than current8-row accepted-input matrix. Do not cherry-pick entire PR5."
+    },
+    {
+      "id": "P5-2",
+      "severity": "confirmed",
+      "topic": "Historical provenance banners and imported review bytes",
+      "finding": "All3 public historical docs minus the2-line provenance banner equal PR5 current source bytes; source/import SHA256s all match manifest. DV003 and DV004 review files match source blobs/bytes/hash exactly. Merge66aa28e parents independently match644908c and e269d966; public banners must remain.",
+      "evidence": "manifest-byte-checks.json"
+    },
+    {
+      "id": "P5-3",
+      "severity": "confirmed-with-limited-scope",
+      "topic": "Public matrix implementation exists",
+      "paths": [
+        {
+          "path": "tool/matrix-build.sh",
+          "lines": "1-4",
+          "gitBlob": "568b7c43d4e71cbb9eb2ff0e914b8c0e5fb5cbd0"
+        },
+        {
+          "path": "tool/routing_matrix.py",
+          "lines": "1-7,26-43,776-781,1409",
+          "gitBlob": "7299fe535fef6da3317de6f13569d8a93c509a15"
+        }
+      ],
+      "finding": "Single existing public entry calls routing_matrix.py, enumerates4 source classes×false/true, and consumes existing App acquirer/verifier/ledger. It is not a native producer. Existing27 synthetic/mocked tests and historical source CI are not8 actual APK/native/device acceptance."
+    },
+    {
+      "id": "D1",
+      "severity": "documentation-correction",
+      "topic": "Historical inventory SHA256 typo",
+      "path": "docs/plans/core-pr5-script-inventory-20261012.json",
+      "line": 50,
+      "gitBlob": "94b1f31a6fbdd34310d99e5d9fb6441ac237d0bb",
+      "badSha256": "bf54737f08351c71877e2257b7eb8c6031e7a7aed754b26ceb64ddec0222b498b",
+      "badLength": 65,
+      "correctSha256": "bf54737f08351c71877e2257beb8c6031e7a7aed754b26ceb64ddec0222b498b",
+      "correctLength": 64,
+      "sourceBytes": 2578,
+      "sourceGitBlob": "33abc7195e898d859177bfbb1baed9062a443c55",
+      "independentVerification": "Python SHA1('blob 2578\\0'+raw source bytes) equals GitHub blob; SHA256(raw source bytes) equals correct64-digit digest and latest import-manifest.json. No source script change.",
+      "requiredOwner": "CORE documentation integrity slice; parent notified"
+    }
+  ],
+  "symbolCaseAssessment": [
+    {
+      "input": "Properties2 + QueueFamilyProperties2 strong",
+      "currentSource": "Condition enters weakener; default script can weaken both, but no post-read validation",
+      "status": "Needs explicit regression/postcondition"
+    },
+    {
+      "input": "Properties2 strong only",
+      "currentSource": "Writes weakened Properties2 then exits missing QueueFamily; bundle may continue",
+      "status": "Broken"
+    },
+    {
+      "input": "QueueFamilyProperties2 strong only",
+      "currentSource": "grep misses it; skip/no-import branch",
+      "status": "Broken"
+    },
+    {
+      "input": "Both already WEAK",
+      "currentSource": "Weakener has already-WEAK branch, but no reviewed per-artifact weak-import contract",
+      "status": "Needs regression/contract"
+    },
+    {
+      "input": "One target WEAK, other absent or GLOBAL",
+      "currentSource": "Asymmetric outer check/default target set; missing-target case may error after write",
+      "status": "Needs each target/mixed regression"
+    },
+    {
+      "input": "Both absent after complete successful read",
+      "currentSource": "Intended skip/no-op, not distinguished from reader failure",
+      "status": "Needs proven complete successful read"
+    },
+    {
+      "input": "Missing tool/reader nonzero/no-symbols stderr",
+      "currentSource": "stderr discarded; if pipeline false -> skip",
+      "status": "Broken"
+    },
+    {
+      "input": "Malformed or unsupported ELF/32-bit",
+      "currentSource": "Reader failure can skip; inner weakener only ELF64",
+      "status": "Broken or explicitly unsupported, must fail closed"
+    }
+  ],
+  "nativeAcceptanceLedger": {
+    "path": "Goodwu/PiliPlusX/docs/plans/routing-native-accepted-inputs.json",
+    "gitBlob": "82f81a26d91ce0d40ef2b8ad154fac2b06e418ca",
+    "sha256": "d0731f943df85a52ff3e53385bcb805a046b7b64bd9f8627439d753397ad28b8",
+    "selectedManifestSha256": null,
+    "entries": [],
+    "consumerAcquirerSelectionLine": 164,
+    "disposition": "Keep empty; no reviewed current native input returned"
+  },
+  "deviceReturnNext": [
+    "Continue original DV001 PR/branch, report current修复SHA or exact stage/blocker in PR1 and central PR4; no second DEVICE/native recipe implementation.",
+    "Fix N1-N4 with committed source and bounded positive/negative tests, including single-target/weak/tool/ELF/ABI and every-stage failures.",
+    "Return N5 complete immutable producer manifest/actual link artifacts and exact A/JAR+B/evidence artifact IDs; do not self-approve via manifest.",
+    "After CORE review, integrate canonical recipe and synchronized PR5 evidence without overwriting public provenance banners; preserve source-to-integration SHA mapping.",
+    "Use current applicable full source vector for native/App products; finish8-row/source experimental true+false and ordinary Session/owner/carrier/lifecycle/HDR/performance acceptance separately."
+  ],
+  "publicImplementationPresence": {
+    "evidence": "implementation-source-index.json",
+    "fileCount": 24,
+    "allWorkingSourceBlobsMatchHead": true,
+    "scope": "query, platform dispatch, DASH caller/filter/Session handoff, F01 source/report, R01 dependencies/contract/review/bounded routes, effective options, actual SDK/source/bootstrap/provenance, native input gate, public matrix; no semantic approval or test pass inferred"
+  },
+  "evidenceFiles": [
+    "github-snapshot.json",
+    "final-snapshot.json",
+    "source-hashes.json",
+    "extra-source-hashes.json",
+    "manifest-byte-checks.json",
+    "implementation-source-index.json"
+  ],
+  "retainedBoundaries": [
+    "LG approved YUV8/FULL/range1 exact device gate",
+    "owner/ACK/lease",
+    "product experimental default false; true main validation and false regression",
+    "10-bit and lease fusion deferred",
+    "ordinary Session/actual YUV carrier/native owner proof remains independent",
+    "All main PRs remain unmerged/unclosed/unpublished",
+    "DV003/DV004/DV005 latest correction reviewed separately"
+  ]
+}
