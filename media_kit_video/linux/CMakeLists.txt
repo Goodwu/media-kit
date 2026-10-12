@@ -30,6 +30,98 @@ endif()
 
 message(STATUS "Detected architecture: ${ARCH_NAME}")
 
+set(LIBMPV_BUNDLE_FILES)
+set(_routing_native_inputs_set FALSE)
+foreach(_input MEDIA_KIT_LINUX_NATIVE_ROOT MEDIA_KIT_LINUX_NATIVE_RECEIPT MEDIA_KIT_LINUX_NATIVE_APP_ROOT MEDIA_KIT_LINUX_NATIVE_APP_SHA MEDIA_KIT_LINUX_NATIVE_MEDIA_KIT_SHA)
+  if(DEFINED ${_input} AND NOT "${${_input}}" STREQUAL "")
+    set(_routing_native_inputs_set TRUE)
+  endif()
+endforeach()
+
+if(MEDIA_KIT_ROUTING_MODE)
+  if(NOT ARCH_NAME STREQUAL "x86_64")
+    message(FATAL_ERROR "routing Linux native inputs currently require x86_64")
+  endif()
+  if(NOT MEDIA_KIT_LIBS_AVAILABLE)
+    message(FATAL_ERROR "routing Linux mode requires the media_kit_libs_linux package")
+  endif()
+  foreach(_input MEDIA_KIT_LINUX_NATIVE_ROOT MEDIA_KIT_LINUX_NATIVE_RECEIPT MEDIA_KIT_LINUX_NATIVE_APP_ROOT MEDIA_KIT_LINUX_NATIVE_APP_SHA MEDIA_KIT_LINUX_NATIVE_MEDIA_KIT_SHA)
+    if(NOT DEFINED ${_input} OR "${${_input}}" STREQUAL "")
+      message(FATAL_ERROR "routing Linux mode requires ${_input}")
+    endif()
+    if(_input MATCHES "_SHA$")
+      string(LENGTH "${${_input}}" _routing_sha_length)
+      if(NOT _routing_sha_length EQUAL 40 OR NOT "${${_input}}" MATCHES "^[0-9a-f]+$")
+        message(FATAL_ERROR "routing Linux ${_input} must be a lowercase Git SHA")
+      endif()
+    elseif(NOT IS_ABSOLUTE "${${_input}}" OR NOT "${${_input}}" MATCHES "^[A-Za-z0-9_./+-]+$")
+      message(FATAL_ERROR "routing Linux ${_input} must be absolute and use safe path characters")
+    endif()
+  endforeach()
+  if(NOT IS_DIRECTORY "${MEDIA_KIT_LINUX_NATIVE_ROOT}" OR NOT EXISTS "${MEDIA_KIT_LINUX_NATIVE_RECEIPT}" OR NOT IS_DIRECTORY "${MEDIA_KIT_LINUX_NATIVE_APP_ROOT}")
+    message(FATAL_ERROR "routing Linux native root, receipt, or trusted App root is missing")
+  endif()
+  find_program(ROUTING_PYTHON3 NAMES python3)
+  find_program(ROUTING_READELF NAMES readelf)
+  if(NOT ROUTING_PYTHON3 OR NOT ROUTING_READELF)
+    message(FATAL_ERROR "routing Linux native verification requires python3 and readelf")
+  endif()
+  get_filename_component(MEDIA_KIT_LINUX_NATIVE_MEDIA_KIT_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../.." REALPATH)
+  if(NOT "${MEDIA_KIT_LINUX_NATIVE_MEDIA_KIT_ROOT}" MATCHES "^[A-Za-z0-9_./+-]+$")
+    message(FATAL_ERROR "media-kit source root contains unsafe path characters")
+  endif()
+  set(_routing_verifier "${CMAKE_CURRENT_SOURCE_DIR}/verify_routing_linux_native_local.py")
+  if(NOT EXISTS "${_routing_verifier}")
+    message(FATAL_ERROR "trusted media-kit Linux native preflight is missing")
+  endif()
+  set(_routing_data "-")
+  execute_process(
+    COMMAND "${ROUTING_PYTHON3}" "${_routing_verifier}"
+      --app-root "${MEDIA_KIT_LINUX_NATIVE_APP_ROOT}"
+      --media-kit-root "${MEDIA_KIT_LINUX_NATIVE_MEDIA_KIT_ROOT}"
+      --expected-app-sha "${MEDIA_KIT_LINUX_NATIVE_APP_SHA}"
+      --expected-media-kit-sha "${MEDIA_KIT_LINUX_NATIVE_MEDIA_KIT_SHA}"
+      --root "${MEDIA_KIT_LINUX_NATIVE_ROOT}"
+      --receipt "${MEDIA_KIT_LINUX_NATIVE_RECEIPT}"
+      --readelf "${ROUTING_READELF}" --local-input --write-cmake "${_routing_data}"
+    RESULT_VARIABLE _routing_verify_result
+    OUTPUT_VARIABLE _routing_data_lines
+    ERROR_VARIABLE _routing_verify_stderr
+  )
+  if(NOT _routing_verify_result EQUAL 0)
+    message(FATAL_ERROR "routing Linux native verification failed: ${_routing_data_lines}${_routing_verify_stderr}")
+  endif()
+  string(REGEX REPLACE "\n$" "" _routing_data_lines "${_routing_data_lines}")
+  string(REPLACE "\n" ";" _routing_lines "${_routing_data_lines}")
+  set(_routing_schema_count 0)
+  set(_routing_libmpv_count 0)
+  set(_routing_include_count 0)
+  foreach(_line IN LISTS _routing_lines)
+    if(_line MATCHES "^schema=1$")
+      math(EXPR _routing_schema_count "${_routing_schema_count} + 1")
+    elseif(_line MATCHES "^libmpv=([A-Za-z0-9_./+-]+)$")
+      math(EXPR _routing_libmpv_count "${_routing_libmpv_count} + 1")
+      set(_routing_libmpv "${CMAKE_MATCH_1}")
+    elseif(_line MATCHES "^include=([A-Za-z0-9_./+-]+)$")
+      math(EXPR _routing_include_count "${_routing_include_count} + 1")
+      set(_routing_include "${CMAKE_MATCH_1}")
+    elseif(_line MATCHES "^bundle=([A-Za-z0-9_./+-]+)$")
+      list(APPEND LIBMPV_BUNDLE_FILES "${CMAKE_MATCH_1}")
+    else()
+      message(FATAL_ERROR "routing Linux verifier emitted unknown or unsafe CMake data")
+    endif()
+  endforeach()
+  if(NOT _routing_schema_count EQUAL 1 OR NOT _routing_libmpv_count EQUAL 1 OR NOT _routing_include_count EQUAL 1 OR NOT LIBMPV_BUNDLE_FILES)
+    message(FATAL_ERROR "routing Linux verifier emitted incomplete CMake data")
+  endif()
+  set(LIBMPV_PATH "${MEDIA_KIT_LINUX_NATIVE_ROOT}/lib")
+  set(LIBMPV_HEADER_UNZIP_DIR "${MEDIA_KIT_LINUX_NATIVE_ROOT}/include")
+  if(NOT "${_routing_libmpv}" STREQUAL "${LIBMPV_PATH}/libmpv.so.2" OR NOT "${_routing_include}" STREQUAL "${LIBMPV_HEADER_UNZIP_DIR}")
+    message(FATAL_ERROR "routing Linux verifier output escaped the accepted payload layout")
+  endif()
+elseif(_routing_native_inputs_set)
+  message(FATAL_ERROR "Linux native root/receipt/App inputs require MEDIA_KIT_ROUTING_MODE=ON")
+else()
 if(ARCH_NAME STREQUAL "x86_64")
   set(LIBMPV_ZIP_URL "https://github.com/Predidit/libmpv-linux-build/releases/download/20260810/libmpv_x86_64.zip")
   set(LIBMPV_ZIP_SHA256 "45922100e5240bf69a72fa2ae140d5b54e1ed03993a8a3746dc798e3ae8ad6e4")
@@ -120,6 +212,8 @@ else()
   message(STATUS "unzip libmpv header success.")
 endif()
 
+endif()
+
 if(MEDIA_KIT_LIBS_AVAILABLE)
   add_library(
     ${PLUGIN_NAME} SHARED
@@ -156,7 +250,7 @@ if(MEDIA_KIT_LIBS_AVAILABLE)
 
   set_target_properties(
     libmpv PROPERTIES
-    IMPORTED_LOCATION "${LIBMPV_UNZIP_DIR}/libmpv.so.2"
+    IMPORTED_LOCATION "${LIBMPV_PATH}/libmpv.so.2"
   )
 
   target_compile_definitions(
@@ -225,13 +319,39 @@ else()
   )
 endif()
 
+# The reviewed Linux bundle places the plugin and all accepted DSOs side by
+# side in bundle/lib. Do not let CMake append acquisition/build paths to its
+# runtime search path in routing mode.
+if(MEDIA_KIT_ROUTING_MODE)
+  set_target_properties(${PLUGIN_NAME} PROPERTIES
+    INSTALL_RPATH "$ORIGIN"
+    INSTALL_RPATH_USE_LINK_PATH FALSE)
+endif()
+
 message(STATUS "create libmpv install directory ${CMAKE_BINARY_DIR}/mpv")
 file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/mpv")
 
+if(MEDIA_KIT_ROUTING_MODE)
+  set(_routing_postbuild_result "${CMAKE_BINARY_DIR}/routing-linux-native-plugin.json")
+  add_custom_command(TARGET ${PLUGIN_NAME} POST_BUILD
+    COMMAND "${ROUTING_PYTHON3}" "${_routing_verifier}"
+      --postbuild-plugin "$<TARGET_FILE:${PLUGIN_NAME}>"
+      --app-root "${MEDIA_KIT_LINUX_NATIVE_APP_ROOT}"
+      --media-kit-root "${MEDIA_KIT_LINUX_NATIVE_MEDIA_KIT_ROOT}"
+      --expected-app-sha "${MEDIA_KIT_LINUX_NATIVE_APP_SHA}"
+      --expected-media-kit-sha "${MEDIA_KIT_LINUX_NATIVE_MEDIA_KIT_SHA}"
+      --root "${MEDIA_KIT_LINUX_NATIVE_ROOT}"
+      --receipt "${MEDIA_KIT_LINUX_NATIVE_RECEIPT}"
+      --result "${_routing_postbuild_result}"
+      --readelf "${ROUTING_READELF}"
+    VERBATIM
+  )
+endif()
+
 # install(FILES "${LIBMPV_PATH}/libmpv.so.2" DESTINATION lib)
 
-set(
-  media_kit_video_bundled_libraries
-  "${LIBMPV_PATH}/libmpv.so.2"
-  PARENT_SCOPE
-)
+if(MEDIA_KIT_ROUTING_MODE)
+  set(media_kit_video_bundled_libraries ${LIBMPV_BUNDLE_FILES} PARENT_SCOPE)
+else()
+  set(media_kit_video_bundled_libraries "${LIBMPV_PATH}/libmpv.so.2" PARENT_SCOPE)
+endif()
