@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
+
 import 'package:media_kit/media_kit.dart' show FileLoadedRecord, VideoParams;
 import 'package:synchronized/synchronized.dart';
 
@@ -245,7 +247,18 @@ Future<HdrReviewFacts> gatherDecoderReviewFacts({
     'hwdec-current',
     'android-mediacodec-info',
   ];
+  // DV004-DIAG (temporary, behavior-preserving): logs observed values at the
+  // existing throw sites and required-fact gaps per poll round. Remove with
+  // the DV004 fix.
+  var round = 0;
+  void diag(String event, Map<String, Object?> fields) {
+    debugPrint('DV004_DIAG event=$event round=$round '
+        'elapsedMs=${now().inMilliseconds} entry=$playlistEntryId '
+        'epoch=${loaded.epoch} $fields');
+  }
+
   while (true) {
+    round += 1;
     final result = await bounded(() => lock.synchronized(() async {
           remaining(); // A late lock admission must perform no reads.
           await identity();
@@ -261,9 +274,26 @@ Future<HdrReviewFacts> gatherDecoderReviewFacts({
             final value = a[key]!;
             final observed = observedDecoderEndpoints[key];
             if (observed != null && value != observed) {
+              diag('observedDecoderChanged', {
+                'key': key,
+                'old': observed,
+                'new': value,
+                'decoder': a['current-tracks/video/decoder'],
+                'decoderDesc': a['current-tracks/video/decoder-desc'],
+                'hwdecCurrent': a['hwdec-current'],
+                'mediaCodecInfo': a['android-mediacodec-info'],
+                'codec': a['current-tracks/video/codec'],
+                'pixelFormat': a['video-params/pixelformat'],
+                'gamma': a['video-params/gamma'],
+              });
               throw HdrDecoderReviewFailure('Observed decoder changed: $key');
             }
-            if (value.isNotEmpty) observedDecoderEndpoints[key] = value;
+            if (value.isNotEmpty) {
+              if (observed == null) {
+                diag('identityRecorded', {'key': key, 'value': value});
+              }
+              observedDecoderEndpoints[key] = value;
+            }
           }
           final profile =
               int.tryParse(a['current-tracks/video/dolby-vision-profile']!);
@@ -290,6 +320,14 @@ Future<HdrReviewFacts> gatherDecoderReviewFacts({
               primaries.isEmpty ||
               a['video-format']!.isEmpty ||
               a['current-tracks/video/codec']!.isEmpty) {
+            diag('requiredFactsMissing', {
+              'hwdec': hwdec,
+              'pixelFormat': pixel,
+              'gamma': gamma,
+              'primaries': primaries,
+              'videoFormat': a['video-format'],
+              'codec': a['current-tracks/video/codec'],
+            });
             return null;
           }
           String? optional(String key) => a[key]!.isEmpty ? null : a[key];
