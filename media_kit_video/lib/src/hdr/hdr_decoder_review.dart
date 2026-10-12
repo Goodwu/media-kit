@@ -1,7 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
-
 import 'package:media_kit/media_kit.dart' show FileLoadedRecord, VideoParams;
 import 'package:synchronized/synchronized.dart';
 
@@ -240,6 +238,17 @@ Future<HdrReviewFacts> gatherDecoderReviewFacts({
     return values;
   }
 
+  // Contract note (DV004): pre-completeness rounds carry mpv's logical
+  // decoder selection name, which the first decoded frame republishes as the
+  // actual AVCodec name (f_decoder_wrapper.c:452-463 →
+  // av_common.c:449-457). The review authorizes the FIRST complete sample:
+  // this loop returns as soon as required facts are present, so the
+  // cross-round map below is a defensive invariant (unreachable while the
+  // complete round returns immediately), NOT a continuous-identity guard.
+  // Post-establishment protection is the session's final plan validation of
+  // the returned snapshot; capturing any real switch that finishes before
+  // the first complete sample would require native decoder-generation
+  // evidence and is deliberately out of scope for this semantics.
   final observedDecoderEndpoints = <String, String>{};
   const decoderIdentityEndpoints = <String>[
     'current-tracks/video/decoder',
@@ -247,18 +256,7 @@ Future<HdrReviewFacts> gatherDecoderReviewFacts({
     'hwdec-current',
     'android-mediacodec-info',
   ];
-  // DV004-DIAG (temporary, behavior-preserving): logs observed values at the
-  // existing throw sites and required-fact gaps per poll round. Remove with
-  // the DV004 fix.
-  var round = 0;
-  void diag(String event, Map<String, Object?> fields) {
-    debugPrint('DV004_DIAG event=$event round=$round '
-        'elapsedMs=${now().inMilliseconds} entry=$playlistEntryId '
-        'epoch=${loaded.epoch} $fields');
-  }
-
   while (true) {
-    round += 1;
     final result = await bounded(() => lock.synchronized(() async {
           remaining(); // A late lock admission must perform no reads.
           await identity();
@@ -287,40 +285,15 @@ Future<HdrReviewFacts> gatherDecoderReviewFacts({
             // samples keeps that name publication from failing the review;
             // real post-establishment switches remain guarded by the
             // session's final plan comparison.
-            diag('requiredFactsMissing', {
-              'hwdec': hwdec,
-              'pixelFormat': pixel,
-              'gamma': gamma,
-              'primaries': primaries,
-              'videoFormat': a['video-format'],
-              'codec': a['current-tracks/video/codec'],
-            });
             return null;
           }
           for (final key in decoderIdentityEndpoints) {
             final value = a[key]!;
             final observed = observedDecoderEndpoints[key];
             if (observed != null && value != observed) {
-              diag('observedDecoderChanged', {
-                'key': key,
-                'old': observed,
-                'new': value,
-                'decoder': a['current-tracks/video/decoder'],
-                'decoderDesc': a['current-tracks/video/decoder-desc'],
-                'hwdecCurrent': a['hwdec-current'],
-                'mediaCodecInfo': a['android-mediacodec-info'],
-                'codec': a['current-tracks/video/codec'],
-                'pixelFormat': a['video-params/pixelformat'],
-                'gamma': a['video-params/gamma'],
-              });
               throw HdrDecoderReviewFailure('Observed decoder changed: $key');
             }
-            if (value.isNotEmpty) {
-              if (observed == null) {
-                diag('identityRecorded', {'key': key, 'value': value});
-              }
-              observedDecoderEndpoints[key] = value;
-            }
+            if (value.isNotEmpty) observedDecoderEndpoints[key] = value;
           }
           final profile =
               int.tryParse(a['current-tracks/video/dolby-vision-profile']!);
