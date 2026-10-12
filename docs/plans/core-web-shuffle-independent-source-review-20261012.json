@@ -1,0 +1,159 @@
+{
+  "review": "CORE-WEB-SHUFFLE-01 read-only independent review",
+  "capturedAtUtc": "2026-10-12T15:30:57.245031+00:00",
+  "repository": "Goodwu/media-kit",
+  "sourceHead": "0c6ffeaf2f509c38f8c76eca42ee255bd69b8cd2",
+  "reviewer": "CORE review assistant; not DEVICE; no repository writes or public actions",
+  "verificationLevel": "Source control-flow review only. No Dart/Flutter/Chrome execution in this environment; all three binaries unavailable on PATH.",
+  "sourceFiles": [
+    {
+      "path": "media_kit/lib/src/player/web/player/real.dart",
+      "gitBlob": "c6feb91a11698ff89dd09448a091bd13f5f4670e",
+      "bytes": 49461,
+      "sha256": "f4ea53f059b86e0e3f7524c86fa6063dde66addbc3b5a9d0c0a56a54b455d0a6"
+    },
+    {
+      "path": "media_kit/lib/src/player/platform_player.dart",
+      "gitBlob": "2aa5583ba19930413b7d11f7071378e82b4aea5c",
+      "bytes": 23041,
+      "sha256": "9e5227561213ec3239e17baf88265a61b7b8c90d726b96e634bde5710f1b8008"
+    },
+    {
+      "path": "media_kit/lib/src/models/playlist.dart",
+      "gitBlob": "1f1a77a6bd7a76290e82c3b0651f7a07a129b23d",
+      "bytes": 2096,
+      "sha256": "5531d1d19a7f8d4d911f20a4fd218cb4badfb12ec3b8666a69328f1b977f2d29"
+    },
+    {
+      "path": "media_kit/lib/src/models/media/media_web.dart",
+      "gitBlob": "4cf8fa421e48eb14402d3b4616afad7c913069da",
+      "bytes": 6045,
+      "sha256": "35333f82805e064ce14665fc763b88a8fbca763c454bad01bf7072d4e8d82c40"
+    },
+    {
+      "path": "media_kit/lib/src/player/native/player/real.dart",
+      "gitBlob": "96e01c6f6c912e0e7e727d570ef21a960c8fce90",
+      "bytes": 112789,
+      "sha256": "f9d5a235b292756a8f55a30efc41816c182fef622567065e9b2c018c04bda038"
+    },
+    {
+      "path": "media_kit/test/src/player/player_test.dart",
+      "gitBlob": "50f4a893f252cf3e9ba7ff33edb043363233a666",
+      "bytes": 102706,
+      "sha256": "9b7b71915e1bd6a2e8d7736e0b7b1f4bbd8bbe7e0b5c9d95c77e0445ab13d1d5"
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "gitBlob": "4d6e7676e471317bd34dc89fb7e235136790d5f8",
+      "bytes": 25885,
+      "sha256": "795561ea0a5362525fd9b0cca7f0c9ba66087d23a92b1b68e43821ccea96c79d"
+    }
+  ],
+  "rootCause": {
+    "open": "real.dart 393-409 assigns the same mutable local playlist list to _playlist and both publicly published Playlist objects.",
+    "enable": "real.dart 1155-1159 shuffles _playlist in place; for any input with at least two unequal Media values its rejection loop exits only once visible order changed. Thus retained open state/stream snapshots change deterministically.",
+    "equality": "Playlist 55-60 compares lists elementwise and index; media_web.dart 136-140 compares only URI; PlatformPlayer 117-119 deduplicates using this equality.",
+    "eventLossCondition": "When the shuffled first URI equals the current first URI, indexOf(current) stays 0. The last emitted event has already been mutated to the new order. The new event then equals the retained previous event and distinct suppresses it. On restore, clear/addAll mutates the same retained open list back and can suppress restore as well.",
+    "matchesObservedFailure": "general38255531407 reported initial playlist only then stream close in player-set-shuffle; causal condition is source-proven but no exact old-run random permutation/runtime state was captured.",
+    "minimalFix": "Detach _playlist with a copy before shuffling. On restore assign a new copy of _shuffle rather than clear/addAll. Do not change Playlist/Media equality, stream distinct, locks or native code.",
+    "relatedMutators": "add/remove/move generally replace _playlist before publishing. This supports the localized copy-on-write ownership convention. An add after enabling shuffle exposes a separately published _playlist list that restore would otherwise mutate."
+  },
+  "deterministicRegression": {
+    "scope": "Web-only new regression with four unique URIs, not a larger random duplicate fixture.",
+    "setup": "Register public stream listeners and first event before open(play:false,index:2); await open/first and retain old state and event Playlist references with independent expected medias copies.",
+    "redAssertion": "Immediately after setShuffle(true), assert old state/event medias still equal the original list. This fails independently of which permutation or current index occurred, without awaiting a possibly suppressed event.",
+    "positiveAssertions": [
+      "same members",
+      "same selected unique Media with its current index",
+      "restored exact original order and index",
+      "old snapshots unchanged after subsequent operations",
+      "repeat true and repeat false are no-ops",
+      "second true/false cycle retains snapshots",
+      "all public playlist and shuffle events checked after dispose closes streams"
+    ],
+    "scheduling": "No multi-second delays/retries. Use command completion and stream completion. try/finally disposes even on the red assertion; do not wait on a suppressed event before checking the deterministic state assertion.",
+    "restoreMutationVariant": "Implemented as the second new Web-only regression: shuffle then add a fifth entry using the first existing URI, capture state and actual stream event, disable, and assert both historical snapshots retain their copied five members and index. This does not assert the restored queue membership policy.",
+    "existingTests": "The old comments claiming ten duplicate-URI entries remove unchanged-order flakiness are inaccurate on Web. Preserve original native test behavior unless separately reviewing that platform."
+  },
+  "hostedPath": {
+    "existingWorkflow": ".github/workflows/ci.yml",
+    "job": "media_kit-tests-web",
+    "runner": "ubuntu-latest",
+    "sdk": "Flutter3.47.2",
+    "steps": [
+      "checkout PR merge/ref according to event",
+      "remove test/src/player/native",
+      "dart pub get",
+      "dart test --platform chrome"
+    ],
+    "dispatchInput": "run_package_tests only; no existing targeted selector",
+    "minimalCIAddition": "One targeted dart test --platform chrome test/src/player/player_test.dart --name ^player-set-shuffle --reporter expanded step before the full existing Web command, only after shared CI scope claim.",
+    "redGreen": "Test-only checkpoint first, then production copy-on-write with the same regression source. Archive actual targeted/full job logs and exact run/test checkout SHAs. Do not relabel prior source or App artifacts.",
+    "targetedCases": 4,
+    "targetedCommand": "dart test --platform chrome test/src/player/player_test.dart --name '^player-set-shuffle' --reporter expanded"
+  },
+  "outOfScopeConfirmedAdjacentBugs": [
+    {
+      "name": "all-URI-equal synchronous unbounded shuffle",
+      "proof": "For length>1 and every Media equal by URI, every permutation remains ListEquality-equal to _shuffle; real.dart1158 never exits. Do not run this case in the red baseline, because it blocks the browser synchronously.",
+      "neededFollowUp": "Bounded shuffle behavior with explicit unchanged visible-order semantics; retain separate current entry/occurrence caveat."
+    },
+    {
+      "name": "duplicate URI current entry collapse",
+      "proof": "real.dart1162/1180 indexOf uses URI equality, not exact Media identity. A current later item sharing URI with an earlier item is replaced by the first URI-equal item and restoration returns to that first index. Distinct extras do not protect identity.",
+      "neededFollowUp": "An occurrence/permutation design, including repeated references to the same Media object and mutations while shuffled. Replacing indexOf with identical fixes only distinct-object duplicates and must not be described as complete."
+    }
+  ],
+  "boundedSingleShuffleAssessment": {
+    "algorithm": "Shuffle a fresh candidate once; if visible order remains equal, find two unequal entries and deterministically exchange them. If no unequal pair exists, allow unchanged visible order and complete shuffle-mode transition.",
+    "termination": "Bounded list scanning and one shuffle avoids the infinite rejection loop and handles all-URI-equal lists.",
+    "behaviorRisk": "It changes the output distribution: for four unique entries the old rejection model gives 1/23 for each changed permutation; one shuffle plus a fixed fallback gives the selected swap 2/24 and each other changed permutation 1/24. This is an explicit bias, not equivalent uniform sampling.",
+    "entryRisk": "Executing the formerly unreachable all-equal path reveals indexOf collapsing nonzero current index to zero. Reordering URI-equal objects may also change extras-bearing identity despite equal URI. Bounded termination alone does not resolve current occurrence tracking.",
+    "testRisk": "Do not assert a playlist event for an all-equal unchanged visible playlist: existing distinct intentionally suppresses equal playlist values; assert completion and shuffle state/stream and separately specify current-entry semantics.",
+    "scopeRecommendation": "Independent follow-up claim after minimal COW red/green; do not silently combine a global identity/equality contract change with the alias fix."
+  },
+  "repositoryMutation": false,
+  "reviewedWorkingTreeAtUtc": "2026-10-12T15:33:16.017720+00:00",
+  "finalDiffVerdict": "READY_FOR_HOSTED_RED_GREEN after correcting the dispose event expectation; static review only, not executed acceptance.",
+  "reviewedWorkingTreeFiles": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "bytes": 26060,
+      "sha256": "02da549c4b38e3c27c3e219fbfd165dae755c742a17fe7eee1d927c5f932b6bb",
+      "gitBlob": "38ae4d0aa0bd044e1e1312846d91a5b79fbdf04e"
+    },
+    {
+      "path": "media_kit/lib/src/player/web/player/real.dart",
+      "bytes": 49622,
+      "sha256": "7bdd28f5606da42f4931e13ec0fe274a866f9e75b2bed294c60e43b53374462d",
+      "gitBlob": "1864968fd3128586c30b70e1fc6ff8833390565e"
+    },
+    {
+      "path": "media_kit/test/src/player/player_test.dart",
+      "bytes": 105962,
+      "sha256": "b1e20203b0bd5d0f1698b650db24201c0e06d344461a6dc6235178effd3f5c59",
+      "gitBlob": "cd8a27fe29f1bc558f6594d589515794aa71d010"
+    }
+  ],
+  "reviewedProductionChanges": [
+    "Detach _playlist before shuffling the enabled queue; retain existing order-change loop and indexOf semantics.",
+    "Restore by assigning a fresh copy of _shuffle rather than clear/addAll; retain other logic."
+  ],
+  "targetedTests": [
+    "player-set-shuffle",
+    "player-set-shuffle-consecutive",
+    "player-set-shuffle-preserves-playlist-snapshots",
+    "player-set-shuffle-restore-preserves-published-playlist"
+  ],
+  "targetedTestCount": 4,
+  "finalDiffReview": {
+    "compilerReview": "Source-only Dart API review: Media.new constructor tear-off, orderedEquals, same, Stream.toList/first/firstWhere and skip predicate are compatible with existing Dart>=3.1 source usage. No Dart analyzer/compiler was available to execute.",
+    "streamLifecycle": "Both toList listeners and first-event listener are created before open. open(play:false) sends one Playlist but not an empty stop event. Web dispose pauses, clears tracks/DOM and closes stream controllers without emitting an empty Playlist. The corrected expectation is exactly the five captured expected playlist values. Stream collection is awaited after finally.dispose closes it.",
+    "independentEnableRegression": "Four unique URI Media values and index2 permit same(current) checks. The baseline shuffle loop only exits after a changed URI order. Thus the first-round retained opened state/event list assertions fail deterministically before waiting for any missing shuffled event.",
+    "independentRestoreRegression": "Enable shuffle; register firstWhere(length==5) before add; add a Media using the first existing URI; await actual add event and retain its state/event list plus a copied five-item expected list. Baseline clear/addAll necessarily shortens the shared historical list to four, so both snapshot assertions can expose restore mutation independently of the enable fix.",
+    "restoreScope": "The added item shares the first URI, while the original current index2 has a different URI. No current-entry ambiguity is introduced into the tested path. The test asserts only historical list/index retention; it does not assert which members unshuffle should retain and does not approve the pre-existing add/restore membership behavior.",
+    "idempotence": "The main regression executes two true/false rounds, repeats both values, checks unchanged state Playlist identity on each repetition, and verifies exactly five playlist events and false/true/false/true/false shuffle events after disposal.",
+    "scope": "No code change to open, global Playlist/Media equality, distinct, locks, native code or shared Session. Existing two general shuffle tests only have misleading fixture comments corrected. One targeted CI step precedes the unchanged whole Web test step.",
+    "noExecutionClaims": true
+  }
+}
