@@ -68,6 +68,8 @@ List<HdrCandidate> applyVideoRouteOptions(List<HdrCandidate> input,
             strategy: candidate.strategy,
             maturity: candidate.maturity,
             isSafetyNet: candidate.isSafetyNet,
+            sourceClass: candidate.sourceClass,
+            stage: candidate.stage,
             skipReason: HdrDegradeReason.routeOptionsUnsatisfied)
       else
         candidate
@@ -112,6 +114,11 @@ List<HdrCandidate> applyVideoRouteOptions(List<HdrCandidate> input,
       MapEntry(index, candidates[index])
   ];
   indexed.sort((a, b) {
+    // A caller's prefer setting can only reorder implementations inside one
+    // C1–C4 stage. Never let it promote a fallback baseline above mapping.
+    final stageOrder = (a.value.stage?.index ?? 4)
+        .compareTo(b.value.stage?.index ?? 4);
+    if (stageOrder != 0) return stageOrder;
     final order = score(a.value).compareTo(score(b.value));
     if (order != 0) return order;
     final contractOrder =
@@ -120,12 +127,8 @@ List<HdrCandidate> applyVideoRouteOptions(List<HdrCandidate> input,
     final importOrder = importer(a.value).compareTo(importer(b.value));
     return importOrder == 0 ? a.key.compareTo(b.key) : importOrder;
   });
-  // Preserve original diagnostic ordering when no preference was requested.
-  if (options.output.preference != VideoRoutePreference.prefer &&
-      options.decode.preference != VideoRoutePreference.prefer &&
-      options.importPreference == VideoImportPreference.auto) {
-    return candidates;
-  }
+  // Even without a preference the stage order is canonical. Unstaged ad-hoc
+  // callers retain their original order through the stable index tie-breaker.
   return [for (final entry in indexed) entry.value];
 }
 

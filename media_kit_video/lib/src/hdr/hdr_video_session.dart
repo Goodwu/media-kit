@@ -953,6 +953,8 @@ class HdrVideoSession {
               strategy: candidate.strategy,
               maturity: candidate.maturity,
               isSafetyNet: candidate.isSafetyNet,
+              sourceClass: candidate.sourceClass,
+              stage: candidate.stage,
               route: candidate.route,
               skipReason: HdrDegradeReason.candidateExhausted)
         else
