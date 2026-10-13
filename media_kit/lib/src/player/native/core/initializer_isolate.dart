@@ -104,6 +104,13 @@ class InitializerIsolate {
     }
   }
 
+  /// The main-loop port of the pump isolate owning [handleAddress], or null
+  /// when no pump is registered for it. Synchronous property & hook access
+  /// must be routed through this port ([MpvApiIsolate]) so that it executes
+  /// on the pump thread instead of contending with `mpv_wait_event()`.
+  static SendPort? portFor(int handleAddress) =>
+      _instance?._ports[handleAddress];
+
   static void _mainloop(SendPort port) async {
     Completer completer = Completer();
 
