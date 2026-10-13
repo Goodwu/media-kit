@@ -583,7 +583,7 @@ void main() {
         throwsA(isA<HdrSessionRouteBudgetFailure>()));
     expect(HdrSessionAttemptPolicy().nativeDvAttempted, isFalse);
   });
-  test('both native DV and ordinary native HDR consume the two-HDR budget', () {
+  test('HDR accounting is telemetry and repeated concrete routes are rejected', () {
     final env = _Environment(), budget = HdrSessionAttemptPolicy();
     final hdr = HdrRoutePlanner.plan(source: _hdr10, capabilities: _caps())
         .selected
@@ -604,7 +604,7 @@ void main() {
   });
 
   test(
-      'five complete route admissions are finite and same vo does not erase contract identity',
+      'route admissions are unique, not capped at five or two HDR attempts',
       () {
     final budget = HdrSessionAttemptPolicy();
     final hdr =
@@ -631,9 +631,11 @@ void main() {
     expect(sdr.toSet(), hasLength(3));
     expect(() => budget.admit(sdr.first),
         throwsA(isA<HdrSessionRouteBudgetFailure>()));
-    expect(
-        () => budget
-            .admit(sdr.first.withExecution(hwdec: 'extra', dependencies: {})),
+    final independent =
+        sdr.first.withExecution(hwdec: 'extra', dependencies: {});
+    budget.admit(independent);
+    expect(budget.attempted, hasLength(6));
+    expect(() => budget.admit(independent),
         throwsA(isA<HdrSessionRouteBudgetFailure>()));
     final fresh = HdrSessionAttemptPolicy()..admit(sdr.first);
     expect(() => fresh.admit(sdr.first),
