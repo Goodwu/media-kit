@@ -824,25 +824,15 @@ class HdrVideoSession {
     } else {
       reason = HdrDegradeReason.unsupportedStrategy;
     }
-    final cls = HdrSourceClass.of(failed.source);
-    final full = _policy.preferencesFor(cls);
-    final index = full.indexOf(failed.route.strategy);
-    // SDR output candidates share a strategy, so exhausting a strategy would
-    // discard independent copy/software requests before they can execute.
-    final remaining = _isSdrTexture(failed.route)
-        ? full
-        : index >= 0
-            ? full.sublist(index + 1)
-            : full;
-    final slicedPolicy = HdrRoutingPolicy(
-      preferences: <HdrSourceClass, List<HdrStrategy>>{cls: remaining},
-      allowExperimental: _policy.allowExperimental,
-    );
+    // Always re-plan the complete stage-ordered catalog. A failed C2 may
+    // legitimately continue to C3/C4; slicing an older strategy preference
+    // list would silently discard those still-eligible candidates.
+    // _selectUnattempted rejects every previously admitted execution route.
     final prediction = _planNextAttempt(
       options: failed.options!,
       source: failed.source,
       capabilities: failed.capabilities,
-      policy: slicedPolicy,
+      policy: _policy,
       excluded: excluded,
     );
     if (!prediction.playable) return null;

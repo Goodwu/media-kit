@@ -64,15 +64,15 @@ class HdrRoutingPolicy {
     ],
     HdrSourceClass.dvP81: <HdrStrategy>[
       HdrStrategy.nativeDolbyVision,
-      HdrStrategy.baseLayerDirect,
       HdrStrategy.metadataReshape,
+      HdrStrategy.baseLayerDirect,
       HdrStrategy.toneMapSdr,
     ],
     HdrSourceClass.dvP84: <HdrStrategy>[
       HdrStrategy.nativeDolbyVision,
+      HdrStrategy.metadataReshape,
       HdrStrategy.baseLayerDirect,
       HdrStrategy.baseLayerConvert,
-      HdrStrategy.metadataReshape,
       HdrStrategy.toneMapSdr,
     ],
     HdrSourceClass.dvP82: <HdrStrategy>[
@@ -81,8 +81,9 @@ class HdrRoutingPolicy {
       HdrStrategy.sdrDirect,
     ],
     HdrSourceClass.dvP7: <HdrStrategy>[
-      HdrStrategy.baseLayerDirect,
+      HdrStrategy.nativeDolbyVision,
       HdrStrategy.metadataReshape,
+      HdrStrategy.baseLayerDirect,
       HdrStrategy.toneMapSdr,
     ],
     HdrSourceClass.hdr10: <HdrStrategy>[
