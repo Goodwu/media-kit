@@ -597,7 +597,7 @@ void main() {
         'the HDR list blocks', () {
       const HdrRoutingPolicy convertFirst = HdrRoutingPolicy(
         preferences: <HdrSourceClass, List<HdrStrategy>>{
-          HdrSourceClass.hdr10: <HdrStrategy>[
+          HdrSourceClass.hlg: <HdrStrategy>[
             HdrStrategy.baseLayerConvert,
             HdrStrategy.metadataReshape,
             HdrStrategy.toneMapSdr,
@@ -617,7 +617,7 @@ void main() {
         });
 
         final HdrRoutePrediction hdr = caps(sdkInt: sdk).predict(
-          sources[HdrSourceClass.hdr10]!,
+          sources[HdrSourceClass.hlg]!,
           policy: convertFirst,
         );
         expect(hdr.candidates[0].skipReason,
@@ -647,7 +647,7 @@ void main() {
         'dataspace the HDR list blocks', () {
       const HdrRoutingPolicy convertFirst = HdrRoutingPolicy(
         preferences: <HdrSourceClass, List<HdrStrategy>>{
-          HdrSourceClass.hdr10: <HdrStrategy>[
+          HdrSourceClass.hlg: <HdrStrategy>[
             HdrStrategy.baseLayerConvert,
             HdrStrategy.metadataReshape,
             HdrStrategy.toneMapSdr,
@@ -667,7 +667,7 @@ void main() {
         });
 
         final HdrRoutePrediction hdr = caps(sdkInt: sdk).predict(
-          sources[HdrSourceClass.hdr10]!,
+          sources[HdrSourceClass.hlg]!,
           policy: convertFirst,
         );
         expect(hdr.candidates[0].skipReason,
@@ -688,7 +688,7 @@ void main() {
         () {
       const HdrRoutingPolicy convertFirst = HdrRoutingPolicy(
         preferences: <HdrSourceClass, List<HdrStrategy>>{
-          HdrSourceClass.hdr10: <HdrStrategy>[
+          HdrSourceClass.hlg: <HdrStrategy>[
             HdrStrategy.baseLayerConvert,
             HdrStrategy.metadataReshape,
             HdrStrategy.toneMapSdr,
@@ -698,7 +698,7 @@ void main() {
       );
       for (final int sdk in <int>[28, 29, 34]) {
         final HdrRoutePrediction hdr = caps(sdkInt: sdk).predict(
-          sources[HdrSourceClass.hdr10]!,
+          sources[HdrSourceClass.hlg]!,
           policy: convertFirst,
         );
         expect(hdr.selected.strategy, HdrStrategy.baseLayerConvert);
@@ -726,7 +726,7 @@ void main() {
           'mediacodec');
       expect(
         unknownSdk
-            .predict(sources[HdrSourceClass.hdr10]!, policy: convertFirst)
+            .predict(sources[HdrSourceClass.hlg]!, policy: convertFirst)
             .selected
             .strategy,
         HdrStrategy.baseLayerConvert,
@@ -989,21 +989,15 @@ void main() {
           noDvSignaling.selected.route!.outputTransfer, HdrOutputTransfer.hlg);
     });
 
-    test('hdr10 baseLayerConvert is default-reachable (preferGpuOutput route)',
-        () {
-      // Default policy: the PQ conversion sits right behind the verified
-      // direct route with no maturity skip (verified 2026-10-10, LG
-      // genbump2 full-route round).
-      final HdrRoutePrediction prediction =
-          lyaCaps().predict(sources[HdrSourceClass.hdr10]!);
-      final HdrCandidate convert = prediction.candidates.firstWhere(
+    test('HDR10 PQ base cannot enter C4 even when requested first', () {
+      final prediction = lyaCaps().predict(sources[HdrSourceClass.hdr10]!);
+      final convert = prediction.candidates.firstWhere(
           (HdrCandidate c) => c.strategy == HdrStrategy.baseLayerConvert);
       expect(convert.maturity, HdrStrategyMaturity.verified);
-      expect(convert.skipReason, isNull);
-      expect(convert.feasible, isTrue);
-      // The preferGpuOutput scenario — an app preferring the gpu output
-      // route — selects it with the default gate closed.
-      const HdrRoutingPolicy convertFirst = HdrRoutingPolicy(
+      expect(convert.feasible, isFalse);
+      expect(convert.skipReason, HdrDegradeReason.unsupportedStrategy);
+
+      const convertFirst = HdrRoutingPolicy(
         preferences: <HdrSourceClass, List<HdrStrategy>>{
           HdrSourceClass.hdr10: <HdrStrategy>[
             HdrStrategy.baseLayerConvert,
@@ -1012,12 +1006,12 @@ void main() {
           ],
         },
       );
-      final HdrRoutePrediction preferred = lyaCaps()
-          .predict(sources[HdrSourceClass.hdr10]!, policy: convertFirst);
-      expect(preferred.selected.strategy, HdrStrategy.baseLayerConvert);
-      expect(preferred.selected.maturity, HdrStrategyMaturity.verified);
-      expect(preferred.selected.skipReason, isNull);
-      expect(preferred.selected.route!.surfaceTransfer, 'pq');
+      final preferred = lyaCaps().predict(
+          sources[HdrSourceClass.hdr10]!, policy: convertFirst);
+      // A caller preference cannot make PQ->PQ masquerade as conversion.
+      expect(preferred.selected.strategy, HdrStrategy.baseLayerDirect);
+      expect(preferred.candidates.first.skipReason,
+          HdrDegradeReason.unsupportedStrategy);
     });
 
     test('hdr10 metadataReshape is verified and selectable (2026-10-10)', () {
@@ -1247,8 +1241,9 @@ void main() {
       // the preferGpuOutput route) are feasible with the gate closed. The
       // tone-map entries are refused: this HDR-capable display never
       // receives an implicit SDR output (MK-ROUTING-20261011).
-      expect(prediction.candidates[1].skipReason, isNull);
-      expect(prediction.candidates[1].feasible, isTrue);
+      expect(prediction.candidates[1].skipReason,
+          HdrDegradeReason.unsupportedStrategy);
+      expect(prediction.candidates[1].feasible, isFalse);
       for (final int blocked in const <int>[2, 3, 4]) {
         expect(prediction.candidates[blocked].feasible, isFalse,
             reason: 'candidate $blocked');
@@ -1512,19 +1507,17 @@ void main() {
           HdrRouteDependency.presenterGpuTexture
         },
       );
-      // Conversion to HLG (HDR10 base on an HLG-only display, gate open —
-      // the direct route is infeasible without display HDR10) carries
-      // dataspace:hlg.
+      // C4 converts HLG base on a PQ-only display and carries dataspace:pq.
       final HdrRoutePrediction converted = HdrRoutePlanner.plan(
-        source: sources[HdrSourceClass.hdr10]!,
-        capabilities: caps(displayHdrTypes: const <int>{3}),
+        source: sources[HdrSourceClass.hlg]!,
+        capabilities: caps(displayHdrTypes: const <int>{2}),
         policy: const HdrRoutingPolicy(allowExperimental: true),
       );
       expect(converted.selected.strategy, HdrStrategy.baseLayerConvert);
       expect(converted.selected.route!.dependencies, <String>{
         HdrRouteDependency.hwdecMediacodec,
         HdrRouteDependency.topologyPlatformView,
-        HdrRouteDependency.dataspaceHlg,
+        HdrRouteDependency.dataspacePq,
         HdrRouteDependency.decoderMediacodec,
       });
     });
