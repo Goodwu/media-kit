@@ -371,6 +371,7 @@ class HdrCandidate {
     this.route,
     this.sourceClass,
     this.stage,
+    this.executionId,
   });
 
   final HdrStrategy strategy;
@@ -379,9 +380,13 @@ class HdrCandidate {
   final HdrSourceClass? sourceClass;
   final HdrRouteStage? stage;
 
+  /// Preserved across later rejection/wrapping when a realizable execution
+  /// is converted to an infeasible candidate (e.g. HDR cannot fall to SDR).
+  final String? executionId;
+
   /// Stable within a planning snapshot; the snapshot identity itself is owned
   /// by the caller and must be checked again before execution.
-  String get candidateId => [
+  String get candidateId => executionId ?? [
         sourceClass?.name ?? 'unknown',
         stage?.name ?? 'sdr',
         strategy.name,
@@ -390,6 +395,7 @@ class HdrCandidate {
         route?.outputTransfer.name ?? 'none',
         route?.surfaceTransfer ?? 'none',
         route?.offscreenTransfer ?? 'none',
+        route?.vdLavcOptions ?? 'none',
       ].join('/');
 
   HdrCandidate withRoutingIdentity(HdrSourceClass cls, HdrRouteStage? phase) =>
@@ -402,6 +408,17 @@ class HdrCandidate {
         route: route,
         sourceClass: cls,
         stage: phase,
+        executionId: [
+          cls.name,
+          phase?.name ?? 'sdr',
+          strategy.name,
+          route?.vo ?? 'none',
+          route?.hwdec ?? 'none',
+          route?.outputTransfer.name ?? 'none',
+          route?.surfaceTransfer ?? 'none',
+          route?.offscreenTransfer ?? 'none',
+          route?.vdLavcOptions ?? 'none',
+        ].join('/'),
       );
 
   final HdrStrategyMaturity maturity;
@@ -444,6 +461,7 @@ class HdrCandidate {
         other.isSafetyNet == isSafetyNet &&
         other.sourceClass == sourceClass &&
         other.stage == stage &&
+        other.executionId == executionId &&
         other.skipReason == skipReason &&
         other.route == route;
   }
@@ -451,7 +469,7 @@ class HdrCandidate {
   @override
   int get hashCode =>
       Object.hash(strategy, maturity, feasible, isSafetyNet, skipReason, route,
-          sourceClass, stage);
+          sourceClass, stage, executionId);
 
   @override
   String toString() => 'HdrCandidate(${strategy.name}, ${maturity.name}, '

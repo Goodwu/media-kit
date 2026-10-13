@@ -206,7 +206,8 @@ class HdrRoutePlanner {
                 maturity: candidate.maturity,
                 skipReason: HdrDegradeReason.displayLacksTransfer,
             sourceClass: candidate.sourceClass,
-            stage: candidate.stage)
+            stage: candidate.stage,
+            executionId: candidate.executionId)
             : candidate;
         candidates.add(effective);
         if (effective.feasible) selected ??= effective;
