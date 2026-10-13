@@ -198,6 +198,42 @@ void main() {
     await expectLater(s.gather(), throwsA(isA<HdrDecoderReviewFailure>()));
   });
 
+  // DV004 final-plan negatives are compatible with the existing cross-round
+  // identity guard. Its first-complete-only policy remains unapproved.
+  test('a complete snapshot that violates the plan is still rejected', () async {
+    // This is complete in the first round: no decoder-publication transition
+    // is claimed. The HEVC component conflicts with the AVC track.
+    final s = Sample();
+    s.props['current-tracks/video/decoder'] = 'h264';
+    s.props['current-tracks/video/codec'] = 'h264';
+    s.props['video-format'] = 'h264';
+    s.props['android-mediacodec-info'] =
+        '{"api":1,"mime":"video/hevc","codec":"c2.hevc.sw","native-dv-active":false}';
+    s.props['hwdec-current'] = 'mediacodec-copy';
+    s.props['video-params/pixelformat'] = 'nv12';
+    s.props['video-params/gamma'] = 'bt.1886';
+    s.props['video-params/primaries'] = 'bt.709';
+    final facts = await s.gather();
+    expect(
+      () => validateDecoderObservation(
+          route(vo: 'gpu-next', hwdec: 'mediacodec-copy'), facts),
+      throwsA(isA<HdrPlaybackBlocked>()),
+    );
+  });
+
+  test('copy route without a CPU frame format is rejected by plan validation',
+      () async {
+    final s = Sample();
+    s.props['hwdec-current'] = 'mediacodec-copy';
+    s.props['video-params/pixelformat'] = 'mediacodec';
+    final facts = await s.gather();
+    expect(
+      () => validateDecoderObservation(
+          route(vo: 'gpu-next', hwdec: 'mediacodec-copy'), facts),
+      throwsA(isA<HdrPlaybackBlocked>()),
+    );
+  });
+
   test('same URI new epoch is not owned entry', () async {
     final s = Sample();
     s.onRead = (p) async {

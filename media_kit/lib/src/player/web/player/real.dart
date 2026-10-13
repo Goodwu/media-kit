@@ -1154,12 +1154,17 @@ class WebPlayer extends PlatformPlayer {
 
       if (shuffle && _shuffle.isEmpty) {
         _shuffle.addAll(_playlist);
-        if (_playlist.length > 1) {
+        // open / add / remove / move may have published this list. Keep those
+        // Playlist snapshots unchanged when updating the internal queue.
+        _playlist = [..._playlist];
+        // Equal-URI entries cannot produce a distinct order. Keep their exact
+        // occurrences in place and change only the shuffle mode.
+        if (_playlist.any((media) => media != current)) {
           while (ListEquality().equals(_shuffle, _playlist)) {
             _playlist.shuffle();
           }
+          _index = _playlist.indexOf(current);
         }
-        _index = _playlist.indexOf(current);
 
         state = state.copyWith(
           playlist: Playlist(
@@ -1175,9 +1180,13 @@ class WebPlayer extends PlatformPlayer {
           shuffleController.add(shuffle);
         }
       } else if (!shuffle && _shuffle.isNotEmpty) {
-        _playlist.clear();
-        _playlist.addAll(_shuffle);
-        _index = _playlist.indexOf(current);
+        final sameEntries = const ListEquality<Media>(IdentityEquality<Media>())
+            .equals(_playlist, _shuffle);
+        _playlist = [..._shuffle];
+        // An unchanged entry order retains the same occurrence and index.
+        if (!sameEntries) {
+          _index = _playlist.indexOf(current);
+        }
         _shuffle.clear();
 
         state = state.copyWith(

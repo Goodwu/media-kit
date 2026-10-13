@@ -1,0 +1,348 @@
+import 'dart:async';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:media_kit/media_kit.dart' show FileLoadedRecord;
+import 'package:media_kit_video/src/hdr/hdr_decoder_review.dart';
+import 'package:media_kit_video/src/hdr/hdr_open_plan.dart';
+import 'package:media_kit_video/src/hdr/hdr_route.dart';
+import 'package:media_kit_video/src/hdr/hdr_strategy.dart';
+import 'package:synchronized/synchronized.dart';
+
+class Sample {
+  final lock = Lock();
+  Duration elapsed = Duration.zero;
+  int epoch = 4;
+  bool current = true;
+  final reads = <String>[];
+  final props = <String, String>{
+    'path': 'test://same',
+    'playlist/0/filename': 'test://same',
+    'playlist/0/id': '7',
+    'current-tracks/video/decoder': 'hevc_mediacodec',
+    'current-tracks/video/decoder-desc': 'MediaCodec HEVC',
+    'current-tracks/video/codec': 'hevc',
+    'hwdec-current': 'mediacodec',
+    'android-mediacodec-info':
+        '{"api":1,"mime":"video/hevc","codec":"c2.hevc","native-dv-active":false}',
+    'video-format': 'hevc',
+    'video-params/pixelformat': 'mediacodec',
+    'video-params/hw-pixelformat': 'nv12',
+    'video-params/gamma': 'pq',
+    'video-params/primaries': 'bt.2020',
+  };
+  Future<String> Function(String)? onRead;
+  Future<FileLoadedRecord> Function(int, int)? onLoaded;
+  Future<String> read(String p) async {
+    reads.add(p);
+    return onRead == null ? props[p] ?? '' : await onRead!(p);
+  }
+
+  Future<HdrReviewFacts> gather(
+          {Duration budget = const Duration(seconds: 1),
+          void Function()? betweenRounds}) =>
+      gatherDecoderReviewFacts(
+        lock: lock,
+        mediaUri: 'test://same',
+        readProperty: read,
+        waitForFileLoadedEntry:
+            onLoaded ?? ((id, epoch) async => FileLoadedRecord(epoch + 1, id)),
+        playlistEntryId: 7,
+        openedAfterEpoch: 3,
+        fileLoadedEpoch: () => epoch,
+        isCurrent: () => current,
+        budget: budget,
+        monotonicNow: () => elapsed,
+        delay: (duration) async {
+          elapsed += duration;
+          betweenRounds?.call();
+        },
+      );
+}
+
+HdrRoute route({String vo = 'gpu-next', String hwdec = 'mediacodec'}) =>
+    HdrRoute(
+      strategy: HdrStrategy.sdrDirect,
+      presentation: HdrPresentation.sdr,
+      outputTransfer: HdrOutputTransfer.sdr,
+      appliesDynamicMetadata: false,
+      topology: HdrTopology.texture,
+      vo: vo,
+      hwdec: hwdec,
+      targetPrim: null,
+      targetTrc: null,
+      surfaceTransfer: null,
+      stripDvRpu: false,
+    );
+void main() {
+  test('snapshot binds scalar frame, decoder and track facts to entry',
+      () async {
+    final facts = await Sample().gather();
+    expect(facts.decoderObservation!.playlistEntryId, 7);
+    expect(facts.decoderObservation!.fileLoadedEpoch, 4);
+    expect(facts.decoderObservation!.decoderIdentityKnown, isTrue);
+    expect(facts.videoParams!.pixelformat, 'mediacodec');
+    expect(facts.videoParams!.gamma, 'pq');
+    expect(facts.codec, 'hevc');
+    expect(
+        () => validateDecoderObservation(route(vo: 'mediacodec_embed'), facts),
+        returnsNormally);
+  });
+  test('unknown name does not reject an unnamed default decoder', () async {
+    final s = Sample();
+    s.props['current-tracks/video/decoder'] = '';
+    s.props['android-mediacodec-info'] =
+        '{"api":1,"mime":"video/hevc","codec":"","native-dv-active":false}';
+    final facts = await s.gather();
+    expect(facts.decoderObservation!.decoderIdentityKnown, isFalse);
+    expect(() => validateDecoderObservation(route(), facts), returnsNormally);
+  });
+  test('no is explicit software while empty hwdec cannot verify', () async {
+    final s = Sample();
+    s.props['hwdec-current'] = 'no';
+    s.props['video-params/pixelformat'] = 'yuv420p';
+    s.props['android-mediacodec-info'] = '';
+    final facts = await s.gather();
+    expect(facts.decoderObservation!.softwareDecoded, isTrue);
+    expect(() => validateDecoderObservation(route(hwdec: 'no'), facts),
+        returnsNormally);
+    s.props['hwdec-current'] = '';
+    await expectLater(s.gather(), throwsA(isA<HdrDecoderReviewTimeout>()));
+  });
+  test('embed rejects CPU frame despite same hwdec', () async {
+    final s = Sample();
+    s.props['video-params/pixelformat'] = 'nv12';
+    final facts = await s.gather();
+    expect(
+        () => validateDecoderObservation(route(vo: 'mediacodec_embed'), facts),
+        throwsA(isA<HdrPlaybackBlocked>()));
+  });
+  test('missing track codec cannot authorize wrong MIME using video-format',
+      () async {
+    final s = Sample();
+    s.props['current-tracks/video/codec'] = '';
+    s.props['android-mediacodec-info'] =
+        '{"api":1,"mime":"video/avc","codec":"c2.avc","native-dv-active":false}';
+    await expectLater(s.gather(), throwsA(isA<HdrDecoderReviewTimeout>()));
+    // A custom backend cannot use missing source codec to bypass the consumer.
+    final known = await Sample().gather();
+    final missing = HdrReviewFacts(
+      hwdecCurrent: known.hwdecCurrent,
+      decoderObservation: known.decoderObservation,
+    );
+    expect(
+        () => validateDecoderObservation(route(), missing),
+        throwsA(isA<HdrPlaybackBlocked>().having((error) => error.reason,
+            'reason', HdrDegradeReason.sourceMetadataUnknown)));
+  });
+
+  test('same hwdec with wrong actual MIME rejects route', () async {
+    final s = Sample();
+    s.props['android-mediacodec-info'] =
+        '{"api":1,"mime":"video/avc","codec":"c2.avc","native-dv-active":false}';
+    final facts = await s.gather();
+    expect(() => validateDecoderObservation(route(), facts),
+        throwsA(isA<HdrPlaybackBlocked>()));
+  });
+  test('missing config is optional but malformed is not missing', () async {
+    final s = Sample();
+    s.props['android-mediacodec-info'] = '';
+    expect(
+        (await s.gather()).decoderObservation!.mediaCodecConfiguration, isNull);
+    s.props['android-mediacodec-info'] = '{broken';
+    await expectLater(s.gather(), throwsA(isA<HdrDecoderReviewFailure>()));
+  });
+  test('native DV cannot bypass owned consumer', () async {
+    final s = Sample();
+    s.props['android-mediacodec-info'] =
+        '{"api":1,"mime":"video/dolby-vision","codec":"c2.dv","native-dv-active":true}';
+    await expectLater(s.gather(), throwsA(isA<HdrDecoderReviewFailure>()));
+  });
+  for (final key in [
+    'hwdec-current',
+    'current-tracks/video/decoder',
+    'android-mediacodec-info',
+    'video-params/pixelformat',
+    'video-params/gamma'
+  ]) {
+    test('A/B mixed snapshot rejects $key', () async {
+      final s = Sample();
+      var n = 0;
+      s.onRead = (p) async {
+        if (p == key && ++n == 2) return 'different';
+        return s.props[p] ?? '';
+      };
+      await expectLater(s.gather(), throwsA(isA<HdrDecoderReviewFailure>()));
+    });
+  }
+  test('first-frame wait permits initialization without borrowing old frame',
+      () async {
+    final s = Sample();
+    var pixelReads = 0;
+    s.onRead = (p) async {
+      if (p == 'video-params/pixelformat' && ++pixelReads <= 2) return '';
+      return s.props[p] ?? '';
+    };
+    final facts = await s.gather();
+    expect(s.elapsed, const Duration(milliseconds: 50));
+    expect(facts.decoderObservation!.pixelFormat, 'mediacodec');
+  });
+
+  test('pre-completeness logical decoder name is not an authorization baseline',
+      () async {
+    // DV004 real-device sequence (LYA, 120-AVC): round 1 records the logical
+    // name "h264" with hwdec/pixel/gamma/primaries absent; the first decoded
+    // frame republishes decoder as "h264_mediacodec" (mediacodec-copy, OMX
+    // hisi avc, nv12 CPU frames). The name publication is not a decoder
+    // switch: the first complete sample must return facts, and that final
+    // snapshot must still satisfy the plan (validateDecoderObservation).
+    final s = Sample();
+    s.props['current-tracks/video/decoder'] = 'h264';
+    s.props['current-tracks/video/decoder-desc'] = '';
+    s.props['current-tracks/video/codec'] = 'h264';
+    s.props['video-format'] = 'h264';
+    s.props['android-mediacodec-info'] =
+        '{"api":1,"mime":"video/avc","codec":"OMX.hisi.video.decoder.avc","native-dv-active":false}';
+    s.props['hwdec-current'] = 'mediacodec-copy';
+    s.props['video-params/pixelformat'] = '';
+    s.props['video-params/gamma'] = 'bt.1886';
+    s.props['video-params/primaries'] = 'bt.709';
+    var rounds = 0;
+    final facts = await s.gather(betweenRounds: () {
+      if (++rounds == 1) {
+        s.props['current-tracks/video/decoder'] = 'h264_mediacodec';
+        s.props['current-tracks/video/decoder-desc'] = 'h264 (mediacodec)';
+        s.props['video-params/pixelformat'] = 'nv12';
+      }
+    });
+    expect(facts.decoderObservation!.decoder, 'h264_mediacodec');
+    expect(facts.hwdecCurrent, 'mediacodec-copy');
+    expect(facts.decoderObservation!.decoderIdentityKnown, isTrue);
+    // The published final snapshot satisfies the plan: SDR copy route with
+    // an AVC hardware component and nv12 CPU frames.
+    expect(
+      () => validateDecoderObservation(
+          route(vo: 'gpu-next', hwdec: 'mediacodec-copy'), facts),
+      returnsNormally,
+    );
+  });
+
+  test('a complete snapshot that violates the plan is still rejected', () async {
+    // Same name-publicution sequence, but the underlying component is HEVC
+    // while the track codec is h264: the final snapshot must fail plan
+    // validation even though gathering itself succeeded.
+    final s = Sample();
+    s.props['current-tracks/video/decoder'] = 'h264';
+    s.props['current-tracks/video/codec'] = 'h264';
+    s.props['video-format'] = 'h264';
+    s.props['android-mediacodec-info'] =
+        '{"api":1,"mime":"video/hevc","codec":"c2.hevc.sw","native-dv-active":false}';
+    s.props['hwdec-current'] = 'mediacodec-copy';
+    s.props['video-params/pixelformat'] = 'nv12';
+    s.props['video-params/gamma'] = 'bt.1886';
+    s.props['video-params/primaries'] = 'bt.709';
+    final facts = await s.gather(betweenRounds: () {
+      s.props['current-tracks/video/decoder'] = 'h264_mediacodec';
+    });
+    expect(
+      () => validateDecoderObservation(
+          route(vo: 'gpu-next', hwdec: 'mediacodec-copy'), facts),
+      throwsA(isA<HdrPlaybackBlocked>()),
+    );
+  });
+
+  test('copy route without a CPU frame format is rejected by plan validation',
+      () async {
+    final s = Sample();
+    s.props['hwdec-current'] = 'mediacodec-copy';
+    s.props['video-params/pixelformat'] = 'mediacodec';
+    final facts = await s.gather();
+    expect(
+      () => validateDecoderObservation(
+          route(vo: 'gpu-next', hwdec: 'mediacodec-copy'), facts),
+      throwsA(isA<HdrPlaybackBlocked>()),
+    );
+  });
+
+  test('same URI new epoch is not owned entry', () async {
+    final s = Sample();
+    s.onRead = (p) async {
+      if (p == 'video-params/hdr-vivid') s.epoch++;
+      return s.props[p] ?? '';
+    };
+    await expectLater(s.gather(), throwsA(isA<HdrDecoderReviewFailure>()));
+  });
+  test('loaded and property waits spend one monotonic budget', () async {
+    final s = Sample();
+    s.onLoaded = (id, epoch) async {
+      s.elapsed += const Duration(milliseconds: 60);
+      return FileLoadedRecord(epoch + 1, id);
+    };
+    s.onRead = (p) async {
+      s.elapsed += const Duration(milliseconds: 15);
+      return s.props[p] ?? '';
+    };
+    await expectLater(s.gather(budget: const Duration(milliseconds: 100)),
+        throwsA(isA<HdrDecoderReviewTimeout>()));
+    expect(s.elapsed.inMilliseconds, lessThanOrEqualTo(105));
+  });
+  test('late property completion performs no more reads', () async {
+    final s = Sample();
+    final pending = Completer<String>();
+    s.onRead = (_) => pending.future;
+    await expectLater(s.gather(budget: const Duration(milliseconds: 20)),
+        throwsA(isA<HdrDecoderReviewTimeout>()));
+    pending.complete('test://same');
+    await pumpEventQueue();
+    expect(s.reads, ['path']);
+  });
+  test('late lock admission cannot sample', () async {
+    final s = Sample();
+    final release = Completer<void>();
+    final blocker = s.lock.synchronized(() => release.future);
+    await pumpEventQueue();
+    await expectLater(s.gather(budget: const Duration(milliseconds: 20)),
+        throwsA(isA<HdrDecoderReviewTimeout>()));
+    s.elapsed = const Duration(milliseconds: 30);
+    release.complete();
+    await blocker;
+    await pumpEventQueue();
+    expect(s.reads, isEmpty);
+  });
+  test('superseded sampling cannot proceed after await', () async {
+    final s = Sample();
+    s.onRead = (p) async {
+      s.current = false;
+      return s.props[p] ?? '';
+    };
+    await expectLater(s.gather(), throwsA(isA<HdrDecoderReviewFailure>()));
+    expect(s.reads, ['path']);
+  });
+  test('open locks epoch and entry before external same URI open', () async {
+    final lock = Lock();
+    var epoch = 9;
+    var entry = '12';
+    final entered = Completer<void>();
+    final release = Completer<void>();
+    final opened = captureDecoderOpenUnderLock(
+        lock: lock,
+        mediaUri: 'test://same',
+        fileLoadedEpoch: () => epoch,
+        openWithoutLock: () async {
+          entered.complete();
+          await release.future;
+        },
+        readProperty: (p) async => p.endsWith('/id') ? entry : 'test://same',
+        isCurrent: () => true);
+    await entered.future;
+    final other = lock.synchronized(() async {
+      entry = '13';
+      epoch++;
+    });
+    release.complete();
+    final own = await opened;
+    await other;
+    expect(own.openedAfterEpoch, 9);
+    expect(own.playlistEntryId, 12);
+    final s = Sample()..epoch = 5;
+    await expectLater(s.gather(), throwsA(isA<HdrDecoderReviewFailure>()));
+  });
+}

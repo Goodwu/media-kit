@@ -2,6 +2,221 @@
 
 ## Current State
 
+CORE 按用户最新“先合 DEVICE、CI 等其它工作暂停”的指令完成本次源码归并。唯一公共集成分支仍为 `routing/MK-ROUTING-20261011`，公共主 PR 不向正式 base 合并、不发布。原 DEVICE 继续 native 原 PR 的配方修复与实机工作，没有新增 DEVICE 工作线。归并认领与显式处置见 [6128883314](https://github.com/Goodwu/media-kit/pull/4#issuecomment-6128883314)、[6128920010](https://github.com/Goodwu/media-kit/pull/4#issuecomment-6128920010)。
+
+### 本次归并与来源
+
+| 范围 | 来源与处置 |
+| --- | --- |
+| App PR3 | `9895e7dc040cdc06a33cceba4d4379eba3f596b5` 的9个代码/测试文件原字节归入：DV003 嗅探/缓存/选源、DV005 Session hint/reopen 透传、DV006 Android亮度通道，以及 debug去除`.debug` suffix。状态为 `CODE_INTEGRATED_KNOWN_ISSUES_OPEN`。 |
+| 库 PR6 / DV004 | `9a2c5768dd10e71975b7c3e76bb7125460a43e5b` 原始两文件完整归档；保留公共 gather 和既有跨轮拒绝断言，仅归入两项兼容 final-plan 负例。FIRST-complete-only 生产行为与成功夹具未启用，两个用户决定仍开放。 |
+| 库 PR5 | `dc41787082752f234fed85db7fb7be3bd855cc45` 归入 Git 来源历史，两脚本精确归档为非执行`.sh.txt`；已有公共matrix/审查文档及三provenance banner保留。两脚本继续排除于可执行配方。 |
+| native DV001 | 已建立同名公共 routing ref，指向 `1095a43acb4d0973b8bca59c5da4e300657bdb29`，完整纳入3笔原 DEVICE 提交。原 DEVICE/feature/main 未改、原PR1仍开放。仅源码纳入，没有运行或批准配方。 |
+
+本次归并的公共父提交为库 `ebb00b8a0dedec42a68b84a4ec6e7dffb6c17f02` 与 App `ed0dc2bfc7f51ac3dc14a7f676451db27ecea6a7`；来源、完整文件blob/SHA与每项保留/归档/延后处置在 `Goodwu/media-kit:docs/plans/core-device-integration-20261012.json`。最终发布的准确新HEAD由本提交及中央回读回执绑定。FFmpeg仍为`9aba43cfbee182ade060cdccbe15340a0fbe3e83`。
+
+### 合入后仍开放
+
+- DV003：producer的revision/cid/baseUrl键与selection的spec.key消费断接，in-flight不共享等待；成功HTTP body仍可能无期限等下一chunk、错误take按chunk而非byte；本地videoUrl空值、完整签名URL日志、轨道/sample-entry与BL/RPU/颜色冲突门仍需修复。reopen的initialDoviFacts透传已修并保留。
+- DV006：NaN reset、事件线程、应用亮度事件不发送、系统权限/写入结果、cached engine残留Activity handler继续按review5493423824开放。新读[DEVICE回报6128050177](https://github.com/Goodwu/PiliPlusX/pull/3#issuecomment-6128050177)称用户已在LYA手动确认手势数字/实际亮度联动、自动切手动；这项观察不覆盖上述问题。
+- DV004：实际decoder identity序列、临时诊断范围与“最终plan履行/捕获真实切换”的语义未决定。保留公共断言，不能把Git ancestry合入写成行为修复。后续DEVICE增量必须对照 disposition 核完整生产文件，不能仅看增量diff。
+- **DV001/PR5的配方整改、fresh native、JAR/APK来源、设备HDR与持续性能验收仍为必需、未完成范围。** 读取失败拒绝、双Vulkan独立组合、失败传播、clean staging、精确成员、实际链接/patch/NDK/helper与产物哈希仍待原DEVICE补齐；接受ledger空，批准native输入0。
+
+### 暂停范围与既有证据
+
+本次提交使用`[skip ci]`，CI跟进/新构建/其它代码切片按用户指令暂停；没有查询本阶段的新CI结果，也没有把旧结果借给新合成向量。本机仅做Git三方结构、逐文件来源、保留项与提交回读检查；没有新Flutter/Dart/Kotlin/native执行结果。现有workflow和批准门不变，原有runs不改动。
+
+此前完整受验组合仍严格为App`3884d3e8`+库`4d1d4b7d`，其宿主证据已由ebb/ed0归档，索引`docs/plans/core-lifecycle-bootstrap-host-ci-checkpoint-20261012.json`。旧general38275707106仅保留16:49:33 UTC的最后观察；本阶段不续查或预设其终态。历史a3b577+e269d报告SHA256`156cd314f670a3d958cea70beb3818a4ea3b6dba0d3e9d944e20b8d1858705da`保持原字节。
+
+当前CORE Web快照/等值URI修复、Session订阅修复、精确Flutter pin引导及源码来源门继续保留；已完成query/DASH/F01/R01/config/FFmpeg不重开发。experimental默认false、true主验并回归false；LG YUV8/FULL/range1、精确设备门和owner/ACK/lease保持。普通Session、owner/carrier、完整生命周期、HDR与持续性能继续分层验，10-bit与lease融合继续延期。
+
+### 后续边界
+
+用户已追加授权“确定已合并的情况下，删除相应分支”。逐一回读归并父提交、源文件处置和未前进的来源HEAD后，清理已确认归并的App PR3、库PR5/PR6来源分支；实际删除与ref回读登记中央PR4。全部公共routing保留；native原PR1仍未合到feature base，保留其DEVICE分支供原配方修订。已删除来源分支的App/DV004后继修改由同一DEVICE从公共HEAD出发，先中央认领，原review问题持续跟踪。CI与其它开发维持暂停；DV004两个决策点不在本轮代为裁决。
+
+### 2026-10-13 路由设计复核、目标态裁决与本分支两笔代码修复（本合并带入）
+
+2026-10-13 Lead 派发 Specialist 完成"含 experimental 面的完整路由合理性"只读复核（未改码）。72 格 = 37 experimental / 21 unsupported / 13 verified / 1 inherited；experimental 按入口分：默认偏好表 12 + 列表外安全网 2（dvP82、hdr10Plus × toneMapSdr）+ 仅自定义偏好 13 + realizer 恒拒 10；dvP81/dvP7 × metadataReshape 初次规划被 baseLayerDirect 支配，经会话失败重试截断列表仍可达（三种可达口径需区分）。关键问题：安全网 gateMaturity=false 一并豁免 unsupported（dvP10 × toneMapSdr 被选中，且 planner_test 已编码该行为，属文档/测试与需求状态表的契约矛盾）；DV 源 toneMapSdr 保留 RPU 却报 appliesDynamicMetadata=false（dvP82 与 sdrDirect 的显式 strip 不一致，原生是否消费 RPU 未验证）；realizer 读取 mkst bridge FFI 动态状态，同 source/caps/options 非纯确定函数；P7 "仅 MEL" 准入实为 enhancementLayer==false，现数据模型分不出 MEL/FEL。优化方案：第一批 A（安全网契约拆分，保守/兼容两案待用户裁决）+ F（isSafetyNet/成熟度豁免可观测性与证据分层）；第二批 B（SDR 源元数据处理显式契约，dvP82 优先）+ C（bridge readiness 快照化）；第三批 D（experimental 按格 allowlist，保留全局开关）+ E（10 恒拒格改 unsupported、默认列表 3 个恒拒占位标记、表测试加唯一键/完整性/可达性见证）。不建议仅凭 verified 将 hdr10 × metadataReshape 纳入默认列表（verified=准入≠默认偏好，且 appliesDynamicMetadata=false 非真重建）。实施待用户方向。
+
+2026-10-13 用户裁决路由目标态：experimental 只是开发阶段不作路由类别，未实现/未验证进积压清单；四原则（HDR显示+HDR解码禁 tone-map／可解码且显示匹配用直通／不匹配走 reshape/convert／SDR 显示播 HDR 用 tone-map）。Specialist 两轮交付设计骨架（3 主判断、nativeDV 归直通、HDR 显示全链失败阻断不落 SDR 兜底、off/require 冲突报 routeOptionsUnsatisfied、P8.2/P10-compat2 SDR 层直用、缺报≠SDR）后两次流断开，按失败封顶规则 Lead 回接收编成完整目标态方案（决策树＋12 源类映射表＋能力三值口径＋积压矩阵取代成熟度门＋迁移三批）已呈报；待用户裁决 4 点：off/require SDR 冲突取向、HDR 全链失败阻断确认、显示能力缺报阻断确认、allowExperimental 废弃节奏。
+
+同日设计迭代四轮用户裁决：① dvP5+非DV HDR 显示走 reshape（P5 管线→PQ，verified 路由，Lead 初版表误标阻断）；② HDR10/HLG 删假 reshape 档；③ PQ 基线源（hdr10/dvP81/dvP7/hdr10Plus）删 ④convert——所有 HDR 面板支持 PQ、不做 PQ→HLG；④ dvP82 删 ④SDR→PQ 上变换（非标准操作、丢弃 RPU 伪 HDR，无 P5 管线→阻断，已确认）；⑤ 立不变量"HDR 可得不交 SDR：SDR 输出仅在源本身 SDR 或显示明确 SDR"；⑥ 阶梯定序 动态元数据优先：①DV原生直通 → ②reshape（仅 DV，P5 管线→PQ，P7 限无EL）→ ③基线直通（PQ 恒可行/HLG 需声明）→ ④convert（仅 HLG→PQ）→ 阻断。hdrVivid/hdr10Plus reshape 为待实现积压，播放不依赖（基线直通/convert 已覆盖）。映射表 v5 与决策树已交付，等待 4 点裁决后开工批 1（planner 决策树重写）。
+
+2026-10-13 平台线程 ANR 修复提交（media_kit）：引擎合并线程拓扑下 Dart 根 isolate 运行于平台线程，同步 libmpv 调用取 `mp_dispatch_lock`，该锁在启动/复核/输出重建期间可被 VO 等待平台线程 surface 工作时持有——平台线程等 mpv、mpv 等平台线程，死锁成 ANR。改动：① `Initializer` 主 isolate 事件泵去 `kDebugMode` 限定（release/测试同走 isolate pump，`mpv_wait_event()` 固定在泵线程），`dispose` 与 `create` 镜像同路；② 新增 `media_kit/lib/src/player/native/core/mpv_api_isolate.dart` 专用 API isolate（与事件泵刻意分离——属性读阻塞在 core lock 上不得妨碍泵 drain 事件队列，否则事件队列饱和反压 core 整体死锁），`getProperty`/属性观察读值/hook 内 `http-header-fields` 写入与置空/`playlist-pos` 读/`hook_continue`/`setPropertyString` 全部改经该 isolate 执行（仅 `configuration.async`；`allowDisposed` 直接路径保留保释放顺序），同步手写 FFI 分配释放随之下线；③ `mpv_set_property_async` 回复超时 5s→30s（首帧 VO 初始化 GPU context+shader 编译在慢 GPU/模拟器合法超时，await 异步不占平台线程）。验证：改动文件 `dart analyze` 零 finding；真机验证未跑，待平台线程拓扑设备复验。
+
+2026-10-13 解码履行复核门竞态修复提交（media_kit_video `hdr_decoder_review.dart`）：五机回归 marble hdr10 首跑的 `HdrDecoderReviewFailure("Observed decoder changed")` 间歇 flake（同路由复跑通过）根因是双采样落进 decoder 正在打开/视频参数尚未稳定的窗口。改动：双采样一侧为空视为 decoder opening、`video-params/*` 差异视为 settling，均重试取稳定样本；decoder 身份 endpoint 双侧均已稳定仍不同才判失败（该异常正是此检查存在目的，不放松）。DEVICE 侧 DV004 同文件修复 `0fb163c6` 已在终审整改 `9a2c5768` 回退，远端净零，本修复为该竞态现行修法。验证：`dart analyze` 零 finding；marble hdr10 复跑待验。
+
+## History
+
+### 2026-10-12：用户要求优先归并DEVICE之前的Current State（历史快照）
+
+唯一公共集成分支 `routing/MK-ROUTING-20261011`；CORE 唯一公共集成，原 DEVICE 继续 native 构建、实机及原 PR 修订。主 PR 保持 OPEN/DRAFT、未合并、未关闭、未发布。两个隔离 checkout 的实现提交已推送回读；未知原 checkout 修改与 App `.zcodeignore` 未触碰。
+
+### 已完成的实现与当前宿主验证
+
+- Web `setShuffle` 快照写时复制与所有 URI 等值时的同步死循环修复已实现，保留确切条目/index；定向测试现为6项。新general38275707106@4d1d已实际运行；Web定向步骤16:46:55–16:47:22的metadata为success，完整Chrome从16:47:22继续执行。预期6项的实际case日志尚未取得，不能称已读6通过或full完成。
+- Android能力通知按存活 listener 集合保留订阅，一个 Session 退出不关闭其他 Session 的通知。新增5项真实 Session/MethodChannel 用例已实际通过，全套777通过、3跳过；native显示器事件、多engine/视图和完整owner/ACK/lease仍另验。最后disable失败的自动重试未实现。
+- App使用已有Python读取唯一精确Flutter pin，在SDK安装前直接传版本并在安装后复核；Linux consumer来源包含新helper。Windows实际job已跳过yq、使用3.47.2并完成fresh bootstrap，旧HTTP504引导阻断消除。
+- 本机相关Python109通过及独立源码审查保留。旧本机全量509 ran/1fail/5errors/5skip和短/tmp夹具失败均属已归档历史，不能改写；本次完整hosted Python515通过、2跳过另有实际证据。
+
+### 精确组合与实际产物
+
+本轮完整受验组合为 App `3884d3e8f4f38ebd6043c9be5c8dc6cef46e4377`（tree `babf93595feed078058608d6aada5c4dd014ddd5`）+ media-kit `4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2`（tree `34dfc9a45c039e2f1da327f057dc8807f1cf3df3`）。本次台账归档提交不继承该组合的测试标签。
+
+| run / attempt1 | 已核事实 |
+| --- | --- |
+| App source38275714484 | SUCCESS；5实际ZIP全核，四平台Flutter各268/analyze0，Python515通过+2跳过=517，Chrome DOM1/Web compile及各Dart/资源bundle成功。 |
+| App Build38275715109 | FAILURE；7success/6failure/2skip，11实际ZIP全核；其自身5个source子job全部通过，没有借用standalone证据。Android/Pink为空accepted manifest，commands=[]；Linux/Windows/macOS/iOS为SOURCE_PREPARED_NATIVE_BLOCKED。 |
+| library source38275707566 | SUCCESS；3实际ZIP全核，video777通过+3跳过（新增5项确实执行）、lab298、analyze0、工具45。 |
+
+16份App ZIP的57步fresh收据、2733源码hash（App lib/test1443+media-kit tracked1290）、261package roots/10本地库包及SDK源码/补丁身份均已独立核验。其中10份source ZIP另核source.txt，6份native诊断由bootstrap与vector收据绑定。App SDK为Flutter3.47.2/Dart3.13.2，库source为3.47.7/3.13.5，分开记录。App诊断ZIP只含kernel/完整Web输出哈希与步骤证据，没有独立归档这些二进制字节。
+
+iOS本轮1920文件、两份批准patch已独立重放；5814条数组commands全部exit0，其中5760=1920×3逐blob读取，其余54条。没有启动native Xcode构建。Windows job114900616789/artifact11758389846已完成fresh准备并抵达native gate；这证明引导修复，不是native批准。
+
+上一轮a73 general38272288190已SUCCESS（23success/1release skip）：Web实际定向4通过、full63通过/27跳过；Linux/Windows各81通过/18跳过，macOS88通过/17跳过。mac有2次Retry、2条OutstandingWork及1条失败标记，按重试后成功保留。8实际ZIP/450内层文件、6上传job日志全核；payload中无source.txt，Android仍为旧发布JAR，不能替代fresh DV001。
+
+query38275707339实际34断言与Android plugin Java编译通过；Darwin38275707332实际9项。OHOS38275707109用独立PR merge3222682893e9659fe44fbaa8977b160aa9bfe99a及另一SDK，HAP未独立下载，不合并为此组合的设备/HDR验收。旧1fcc+a73、a98+0c、13b+5834、a3b+e269报告保留原向量；历史156cd314…报告两仓原字节不变。
+
+### DEVICE 最新复审与必需剩余
+
+AppPR3 `9895e7dc040cdc06a33cceba4d4379eba3f596b5` 的DV006已在[原PR review5493423824](https://github.com/Goodwu/PiliPlusX/pull/3#pullrequestreview-5493423824)回交并逐字回读：正文REQUEST_CHANGES，GitHub状态COMMENTED。新增P1为NaN reset使后续亮度getter范围校验失败；四项P2为线程派发、应用亮度事件未发送、系统权限/写入结果未核及cached engine遗留Activity handlers。原五份DOVI/selection/controller文件与b180相同，key/HTTP body预算/in-flight竞态、本地URL/签名日志、轨道与颜色冲突仍在；9895自身Build38274961135失败，不借旧日志解释它的新run。原DEVICE在原PR继续修，当前公共实现未归入这份回交。
+
+**DV001/PR5完整native、产物和设备归并必需未完，批准native输入仍0。** DV001仍1095a43a，PR5仍dc417870；符号读取失败拒绝、双Vulkan独立覆盖、失败传播/clean staging/精确成员、实际链接/patch/NDK/helper与最终JAR/APK可复核性由原DEVICE补齐，CORE复审。两recipe继续排除，三历史provenance banner保留。
+
+PR6@9a2仍REQUEST_CHANGES；实际decoder identity序列、跨轮guard以及用户对临时诊断范围、最终plan/真实切换验收的两项决定继续开放。普通Session/owner/carrier/完整生命周期、HDR与持续性能继续分层验，不能以宿主测试或旧发布JAR代替。experimental默认false、true主验并测false；LG YUV8/FULL/range1、精确设备门、owner/ACK/lease保持，10-bit/lease融合延期。
+
+### 下一步与证据入口
+
+核当前general38275707106的Web6与完整套件实际日志/产物；保留已执行的4d1d输入。原DEVICE在原PR补DV001/PR5与PR3/PR6修订，CORE续审。下一生产切片须先核认领。
+
+完整证据索引为 `Goodwu/media-kit:docs/plans/core-lifecycle-bootstrap-host-ci-checkpoint-20261012.json`；冻结报告按原字节及SHA归档。中央[实现推送6128112984](https://github.com/Goodwu/media-kit/pull/4#issuecomment-6128112984)、[DV006复审6128220148](https://github.com/Goodwu/media-kit/pull/4#issuecomment-6128220148)及[本轮源码终态6128436938](https://github.com/Goodwu/media-kit/pull/4#issuecomment-6128436938)保留；新的准确HEAD与执行观察继续发布中央PR4。不得把已完成query/DASH/F01/R01/config/FFmpeg/SDK接线按旧planned字段重做。
+
+
+### 2026-10-12：宿主CI终态归档前的Current State（历史快照）
+
+唯一公共集成分支 `routing/MK-ROUTING-20261011`；CORE 唯一公共集成，现有 DEVICE 保留 native/实机和原 PR 的单写范围。所有主 PR OPEN/DRAFT，未合并、未关闭、未发布。未知原 checkout 修改和 App `.zcodeignore` 未触碰。
+
+### 本阶段已实现，当前提交尚待 hosted 验证
+
+- `CORE-WEB-SHUFFLE-02`：所有 URI 等值时跳过不可能结束的同步 shuffle 循环，保持确切条目/index；恢复时相同 identity 序列保持当前重复条目。新增2项确定性测试，结合前阶段4项后定向共6项。普通混合 URI 的随机方式保留；混合重复 URI 与增删队列映射仍另立未完项。
+- `CORE-CAPABILITY-SUBSCRIPTION-01`：Android shared channel 的 enable 按 caller=true 或仍有 listener 计算；一个 Session 销毁不能关闭其他 Session 的显示能力通知。新增5项真实 forTesting Session/MethodChannel 测试，包括存活 Session 实际 re-query、重复注册、迟到 false、延迟 ACK、失败与显式重试。未加计数器/状态缓存，未改 Session/gather、Java、owner/ACK/lease。最后 disable 失败的自动重试不在本切片。
+- `CORE-BOOTSTRAP-VERSION-01`：已安装 Python 读取 App pubspec 的唯一精确 Flutter pin，直接传 flutter-version，避免安装 yq；SDK 安装后复用同一解析器严格核 frameworkVersion。拒绝歧义/引号重复键/多行值，保留当前 pubspec 与 platform lists。新 helper 加入 Linux 固定 consumer 来源集合，旧 native 门不变。
+
+认领 [6127642516](https://github.com/Goodwu/media-kit/pull/4#issuecomment-6127642516)、[6127809360](https://github.com/Goodwu/media-kit/pull/4#issuecomment-6127809360)、[6127846798](https://github.com/Goodwu/media-kit/pull/4#issuecomment-6127846798) 已发布回读。三项独立源码审查均通过；本机最终相关 Python **109项通过**（11+31+57+10），diff检查通过。完整本机尝试失败：509 ran / 1 fail / 5 errors / 5 skipped，原因是 macOS 专用操作及缺少真实 Flutter SDK；不能写成本机全量通过。早前短/tmp造成既有260字符夹具失败也保留，最终相关测试在记录的较长临时根通过。本机无 Dart/Flutter/Chrome/Pwsh/ADB，新 Dart 测试尚未运行。
+
+### 已完成的准确 CI 组合
+
+本阶段写入前公共 HEAD 为 App `1fcc367cd98e77a217f8a70a388fcfcdaf92aad4` + media-kit `a73d570b633a949aab6a31e8f68ec03a13643c31`；下表只证明该组合，不能重标给包含本阶段修复的随后提交。
+
+| run / attempt1 | 实际终态与可证明范围 |
+| --- | --- |
+| App source38272335487 | SUCCESS；5实际ZIP全核，四平台各Flutter268/analyze0，Python504pass+2skip=506，bundle/Chrome DOM1/Web成功。57fresh receipts、2720源码hash、261roots/10库包全核。 |
+| App Build38272335840 | FAILURE；7success/6failure/2skip，10实际ZIP全核。Android/Pink空selected manifest、commands=[]；Linux/macOS/iOS为SOURCE_PREPARED_NATIVE_BLOCKED。Windows在yq下载HTTP504后退出，未开始private SDK/source bootstrap，无fresh receipt或artifact。批准native候选0。 |
+| library source38272288163 | SUCCESS；3实际ZIP全核，video772pass+3skip、lab298、analyze0、Python tools45。App SDK3.47.2/Dart3.13.2；本库独立source SDK3.47.7/Dart3.13.5，分开记录。 |
+
+旧 general38266780432（head0c6ffeaf，实际merge65531539）现已SUCCESS，23success/1skip；Web61+27skip、Linux/Windows各81+16skip、mac88+15skip。mac日志的字幕失败、两次retry和OutstandingWork保留。8真实ZIP/450内层文件已核，但Android使用v2026.013旧JAR，不能替代fresh DV001。新 general38272288190@a73d的Web定向step metadata已成功，完整suite仍运行；尚未获得终态日志，不能把预期4条写成实际已读4pass，也不覆盖本阶段新增6/5测试。
+
+iOS1918base文件/两批准patch重放和5808receipt commands（5754逐blob读取+54其它）均只属源码证据，未Xcode构建。旧a98+0c、13b+5834、a3b+e269各报告继续保留原向量，历史SHA156cd314f670a3d958cea70beb3818a4ea3b6dba0d3e9d944e20b8d1858705da两仓原字节不变。
+
+### DEVICE 回交与必需剩余范围
+
+DV001仍1095a43acb4d0973b8bca59c5da4e300657bdb29，PR5仍dc41787082752f234fed85db7fb7be3bd855cc45，PR6仍9a2c5768dd10e71975b7c3e76bb7125460a43e5b。**DV001/PR5完整native、产物、设备归并必需未完**：读取失败闭合、双Vulkan独立全组合、失败传播/干净staging/精确成员、真实链接/patch/NDK/helper/JAR/APK均待原DEVICE修与CORE复审。公共matrix及历史审查已部分归入，三个provenance banner保留，两shell recipe继续排除，native接受ledger仍空。
+
+AppPR3 b180旧受审代码仍有producer/consumer key断接、HTTP body期限/in-flight竞态、本地URL空值/签名日志、轨道/颜色冲突，review5492931759正文REQUEST_CHANGES/API COMMENTED。其Build38270385174已FAILURE：各平台实际source/patch/lock/输入门失败，source子job在routing SHA门停止；唯一380B诊断ZIP不是产物。16:05后新AppPR3头9895e7dc040cdc06a33cceba4d4379eba3f596b5只加DV006 Kotlin亮度通道，与上述修复无关；中央6127973022已读，正在原PR增量复审，不继承旧报告的受审SHA或视为批准。
+
+PR6@9a2 review5492587336仍REQUEST_CHANGES；跨轮guard和用户两项DV004诊断/验收语义决定仍未解决，CORE不放宽。普通Session、实际owner/carrier、完整生命周期、HDR与持续性能继续分层验收；experimental默认false、true主验并回归false，LG YUV8/FULL/range1、精确设备门、owner/ACK/lease保持，10-bit/lease融合延期。
+
+### 下一步与证据入口
+
+本阶段commit/push/readback后核准确新向量的Web6项定向/完整suite、video新增5项/完整suite、App引导与完整source结果；保留进行中的a73旧run，不为插队取消或重标。继续原DEVICE新回交复审，不并写native/sniffer/gather。代码和各CI的冻结报告均在 `Goodwu/media-kit:docs/plans/core-lifecycle-bootstrap-checkpoint-20261012.json` 索引；后续真实HEAD与run capture发布中央PR4，旧结果只证明旧组合。
+
+### 2026-10-12：生命周期/引导检查点之前的Current State（历史快照）
+
+唯一公共集成分支 `routing/MK-ROUTING-20261011`；CORE 唯一公共集成，原 DEVICE 继续 native 构建、实机和原 PR 修订。主 PR 保持 OPEN/DRAFT、未合并、未关闭、未发布。原 checkout 未知 dirty/untracked（含 App `.zcodeignore`）未触碰；两个隔离 routing 工作树在开始本切片前均 clean、ahead0/behind0。
+
+### 当前 Web 实现检查点
+
+`CORE-WEB-SHUFFLE-01` 已完成生产改动和独立源码审查，**新代码的 hosted 执行仍待验收**。原认领6126963656，新增 Web CI 写范围 [6127346332](https://github.com/Goodwu/media-kit/pull/4#issuecomment-6127346332) 已发布回读。`real.dart::setShuffle` 在启用和恢复时使用新列表，避免改写已经公开的 state/stream Playlist；不改 equality、distinct、native 或共享 Session。新增两个 Web-only 确定性回归分别检出启用和恢复分支的旧快照改写，验证当前唯一条目/index、成员、两轮 true/false 和重复调用事件数量。恢复分支回归仅验旧快照不可变，不为 shuffle 中增删队列的既有成员策略背书。
+
+原两项 shuffle 测试保留，纠正“增加随机样本即可消除故障”的误导注释。`ci.yml` 只在 Web job 的原完整 Chrome suite 前增加4项 shuffle 定向执行。独立静审确认可提交；修正了 dispose 不发送空 Playlist 的测试误设。`git diff --check` 通过。本地没有 Dart/Flutter/Chrome，未执行新红/绿用例；旧失败38255531407仍只证明原向量，不写成已对候选执行红测。完整静审和源码/blob/hash 见本检查点索引。
+
+另发现两个真实相邻问题，未夹带修复或称完成：所有 URI 等值时现有 while 不会结束；indexOf 按URI比较会丢重复条目身份。需要后续独立认领与确定性验证，不采用扩大随机列表、重试、延时或简单 identical 替代完整条目语义。
+
+### 本检查点之前的最新准确源码验收
+
+本次写入前远端为 App `a98a57f2892592d5b8a25d6533ede4580d412ae5` + media-kit `0c6ffeaf2f509c38f8c76eca42ee255bd69b8cd2`；以下运行只证明该组合，随后 Web/文档提交必须另验。FFmpeg `9aba43cfbee182ade060cdccbe15340a0fbe3e83`；DV001 `1095a43acb4d0973b8bca59c5da4e300657bdb29`；PR5 `dc41787082752f234fed85db7fb7be3bd855cc45`；PR6 `9a2c5768dd10e71975b7c3e76bb7125460a43e5b`；App PR3 `b18086d0d654a5f523296b41bdfb869c588cd3f0`。
+
+| 运行 / attempt1 | 精确输入 | 本轮实际结论 |
+| --- | --- | --- |
+| App source38266831541 | a98a57f + 0c6ffeaf | SUCCESS；5真实ZIP全部摘要/size匹配；四平台Flutter各268、analyze0，Python504pass+2skip=506，bundle、Chrome DOM1/Web成功。 |
+| App Build38266831911 | 同组合，独立jobs/artifacts | FAILURE；7success/6failure/2skip；11真实ZIP全核。Android/Pink native selected manifest空、commands=[]；其他四平台SOURCE_PREPARED_NATIVE_BLOCKED。 |
+| library source38266780378 | 0c6ffeaf | SUCCESS；3真实ZIP全核；video772pass/3skip、lab298、两analyze0、Python工具6+12+27通过。 |
+| library general38266780432 | run head0c6ffeaf，实际merge65531539 | 取证时仍in_progress；四平台package tests终态与全部artifact内层审计待续，不能称绿。 |
+
+App source/Build的57步fresh receipts、before/after/final向量、261 package roots中的10个库包均匹配。新源码清单为 **2714项**（App lib/test1442 + 库tracked1272）；固定Git树独立重算全部匹配，39个Swift symlink按同树目标解析。iOS1918个base文件和恰好两个批准patch变换已独立重放一致，bundle后停native门，未运行Xcode。App SDK是Flutter3.47.2/Dart3.13.2；库独立source实际使用3.47.7/3.13.5，不混标工具链。kernel/完整Web编译产物字节未归档，只承认日志与digest收据，不声称独立重算这些binary。
+
+历史13b139b+5834ce5b的source38258403604/Build38258404288、a3b577f+e269d966的38255581451及general38255531407保留原向量。历史报告SHA `156cd314f670a3d958cea70beb3818a4ea3b6dba0d3e9d944e20b8d1858705da` 两仓原字节不变。38266821993、38258394875取消结果不计验收。general测试包中的旧发布JAR仍不能替代DV001当前native候选。
+
+### DEVICE 当前回交与仍须完成的归并
+
+App PR3@b180 已由CORE在原PR发布 [review5492931759](https://github.com/Goodwu/PiliPlusX/pull/3#pullrequestreview-5492931759)，正文REQUEST_CHANGES，GitHub状态COMMENTED。确认reopen facts、连接/响应头共享期限、成功累积buffer上限、两backup、旧revision写入拒绝等改善；本机JAR误提交已经撤回，不重复列为当前缺陷。但新revision/cid/baseUrl缓存键未接通仍读spec.key的selection，成功嗅探也不能授权真实126；HTTP成功体停顿仍可无限等待、错误take按chunk计数，in-flight Set不共享等待会使新serial发布空facts。本地source分流前videoUrl!及完整签名URL日志、DOVI轨道绑定/BL/RPU/颜色兼容冲突仍未修。284/analyze0只提供本机日志路径，未获CORE原始证据核验；dd76 hosted在routing SHA门失败、下游skip，07953取消，b180构建取证时运行中。debug包身份变更须与产品集成范围分开说明。
+
+PR6@9a2已移除DIAG并修正AVC/nv12/copy fixture；[review5492587336](https://github.com/Goodwu/media-kit/pull/6#pullrequestreview-5492587336)仍为REQUEST_CHANGES，跨轮guard不可达及“FIRST complete sample”擅自收窄契约未解决。用户关于临时诊断范围和最终plan履行/真实切换验收的两项决定保持未决，CORE不放宽既有断言。旧“126出图”已撤回为120残影；新的DEVICE HEVC/P8.4画面报告不替代当前完整native/JAR/APK/轨道/代次/PTS/持续播放验收，不写成仅剩LG复测。
+
+**DV001与PR5完整native、产物、设备归并必需且未完成。** 无新配方修复或移交；DEVICE仍在原PR单写符号读取失败闭合、双Vulkan独立全组合、失败传播/原子处理、干净staging、精确成员及真实链接/patch/NDK/helper/JAR/APK来源。批准native ledger仍空，失败关闭保持。PR5公共matrix和历史审查已部分归档，27项为synthetic/mocked；三个provenance banner保留；两个shell recipe继续排除。
+
+### 接续与不可混用的验收层级
+
+提交、推送并回读本阶段后，先取新SHA的Web定向/完整suite结果；一般CI中未终态的旧run持续按各自向量取证，过渡进度发PR4，不为轮询频繁改文档。随后按认领推进无需用户决策的独立代码或复审。原DEVICE的App/sniffer/gather/native配方不并写；普通Session、owner/carrier、生命周期、HDR与持续性能均仍必需。query/DASH/unknownDV/F01/R01/FFmpeg/config/SDK/source CI已有实现不按旧planned重做。experimental默认false，true主验证并回归false；LG YUV8/FULL/range1、精确设备门与owner/ACK/lease不变；10-bit/lease融合延期。
+
+规范证据索引：`Goodwu/media-kit:docs/plans/core-web-shuffle-cow-checkpoint-20261012.json`，包含五份逐字节冻结报告：新App source、Build、库source、Web静审、DEVICE b180复审；各自的SHA256/字节数/source blobs和限制均独立记录。
+
+
+### 2026-10-12：Web COW检查点之前的Current State（历史快照）
+
+唯一公共集成分支 `routing/MK-ROUTING-20261011`；新 CORE 已接手，登记 [6126383144](https://github.com/Goodwu/media-kit/pull/4#issuecomment-6126383144)，范围补充 [6126444208](https://github.com/Goodwu/media-kit/pull/4#issuecomment-6126444208)，复审回交 [6126499419](https://github.com/Goodwu/media-kit/pull/4#issuecomment-6126499419)。CORE 唯一公共集成；现有 DEVICE 继续原 native/实机与 PR3/PR6 修订，不新增 DEVICE 工作线。所有主 PR 保持 OPEN/DRAFT、未合并、未关闭、未发布。
+
+本检查点写入前重新回读：App `13b139b797aa65d853cafb5cb207d17a6e7aceac`；media-kit `5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f`；FFmpeg `9aba43cfbee182ade060cdccbe15340a0fbe3e83`；DV001 `1095a43acb4d0973b8bca59c5da4e300657bdb29`；PR5 `dc41787082752f234fed85db7fb7be3bd855cc45`；库 PR6 `0fb163c6ec8d54c46698227175b9a21468605246`；App PR3 `15551ede06b0cbec859d61e6d16f8dba2054bba1`（生产增量 `a2478d04`，后一笔仅档案）。这些是受审/受验输入，不是本次随后文档提交的 SHA；新提交不得借用旧 run 改标通过。
+
+已核源码中的 query/DASH/P5/P8.4/unknown DV、CORE-F01、失败感知 SDR 兜底、FFmpeg e8df200c、CORE-R01 资源/decoder/copy/software 契约、有效 auto/prefer/require 和 SDK/source/CI 接线；LG config claim 回归也已修。保留完成记录，不按旧 planned/pending 或“34 info”重做。产品 experimental 默认 false，true 主验证并回归 false；LG YUV8/FULL/range1、精确设备门、owner/ACK/lease 保持，10-bit 与 lease 融合继续延期。
+
+### 已核验的 CI 终态与层级
+
+| run / attempt | 精确源码 | 终态及可证明范围 |
+| --- | --- | --- |
+| App source [38258403604](https://github.com/Goodwu/PiliPlusX/actions/runs/38258403604) / 1 | App `13b139b7` + media-kit `5834ce5b` | SUCCESS；6 jobs。四平台各 Flutter 268、analyze 0；Python 504 pass + 2 skip = 506；Dart/assets bundle 成功；Chrome DOM 1、Web build 成功。 |
+| App Build [38258404288](https://github.com/Goodwu/PiliPlusX/actions/runs/38258404288) / 1 | 同上，但有本 run 独立 jobs/artifacts | FAILURE；7 success / 6 failure / 2 skipped。Android/Pink 在 selection 门因 selected manifest 为空停止，commands=[]；macOS/iOS/Windows x64/Linux x64 为 SOURCE_PREPARED_NATIVE_BLOCKED。批准 native 候选为 0。 |
+| media-kit general [38255531407](https://github.com/Goodwu/media-kit/actions/runs/38255531407) / 1 | run head `e269d966`，实际测试 checkout 为 merge `811c7ba6`（main `d7619227` + `e269d966`） | FAILURE；22 success / 1 failure / 1 skipped。Web 60 pass / 1 fail / 27 skip，仅 player-set-shuffle；Linux、Windows 各 81 pass / 16 skip；macOS 88 pass / 15 skip。 |
+
+本轮实际读取 24 个 ZIP（独立 source 5、Build 11、general 8），全部 bytes/size/API digest 匹配。16 份 source/Build bootstrap 均 fresh-source-only、57 步 exit 0、同一向量；独立重算 App lib/test 1442 + media-kit 全 tracked 1263 = 2705 项源码 SHA256 全匹配，261 个 package roots 中 10 个 media-kit 包均在当次 checkout。iOS 1918 个 base 文件已核，恰好两个批准变换经独立 patch 重放匹配；bundle 成功后 native 门停止，未开始 Xcode 构建。归档没有完整 kernel/Web 输出 bytes，不声称独立重算这些编译产物。
+
+general 的八个测试 app artifact 确实存在并已检查内部成员；Android arm64 构建实际下载旧发布 v2026.013 JAR（mpv d24c59905 / FFmpeg b4d2ea4 世代），不能当作 DV001 当前 native 或 App Release 通过。App source `38258394875` 已 CANCELLED，排除。历史 `38255581451` 只证明 App `a3b577f3` + media-kit `e269d966`，原报告 SHA256 `156cd314f670a3d958cea70beb3818a4ea3b6dba0d3e9d944e20b8d1858705da` 保持不变；上一 Build `38255582037` 仍是失败关闭。此前库 source/query/Darwin 成功和 OHOS unsigned HAP 仅保留原向量/原层级历史证据。
+
+### DEVICE 回交及必须保留的剩余范围
+
+DV001 仍 `1095a43a`，PR5 仍 `dc417870`，没有新配方修复回交。review5483753705、comment6110373174 等要求继续开放：符号读取失败必须拒绝、两个 Vulkan 符号单独/已 weak/均无/工具失败/坏 ELF 等完整覆盖、失败传播、原子失败处理、干净 staging、精确三库成员、真实链接输入/patch/NDK/helper 及最终 JAR/APK/member 哈希。DEVICE 在原 PR 单写，CORE 复审；批准输入 ledger 保持空。
+
+PR5 公共 matrix 已集成，27 项仅为 synthetic/mocked 回归；历史文档及 DV003/DV004 审查已部分归档。三个 provenance banner 本分支继续保留。`assemble-jar-arm64.sh` 与 `matrix-device-build.sh` 继续排除，不作为批准 recipe；本次只纠正 inventory 的 65 位 digest 笔误，正确值 `bf54737f08351c71877e2257beb8c6031e7a7aed754b26ceb64ddec0222b498b` 对应 PR5 blob `33abc719` 的 2578 原始字节。**DV001 与 PR5 的完整 native、产物、设备归并都是必需且未完成的范围。**
+
+库 PR6 / DV004 对 `0fb163c6` 的 [review5492283452](https://github.com/Goodwu/media-kit/pull/6#pullrequestreview-5492283452) 结论为 REQUEST_CHANGES：partial 轮在写 identity 前返回，首个完整轮又立即返回，跨轮 guard 实际失效；最终 route/hwdec 比较不能证明真实组件未切换。新 fixture 混用 AVC identity 与 HEVC/MIME、copy 路线与 hardware pixel，仅 gather 返回不构成 Session 验收。用户关于临时诊断范围和“最终 plan 履行／捕获任何真实切换”的两项决定继续未决，不擅自放宽断言。
+
+App PR3 / DV003、DV005 对 `15551ede` 的 [review5492283684](https://github.com/Goodwu/PiliPlusX/pull/3#pullrequestreview-5492283684) 同为 REQUEST_CHANGES。首次/refresh hint 已接线，应改记部分修复；intent.reopen 仍漏 initialDoviFacts。HTTP 总 deadline/流式字节上界、按源身份隔离缓存及竞态、视频轨道绑定/颜色和层冲突仍开放；新 playerInit 无条件 `Uri.parse(videoUrl!)` 在本地分流前可抛空值异常，完整签名 URL 日志需收敛。这些 review 的 GitHub API 状态为 COMMENTED，正文结论为 REQUEST_CHANGES，不冒称正式合并保护状态。
+
+DEVICE [6126388894](https://github.com/Goodwu/media-kit/pull/4#issuecomment-6126388894) 已撤回旧“126 出图”为 120 残影/切换未发生，真实 126 原先在 decoder 创建前被 sourceMetadataUnknown 阻断。新的 DV005 HEVC/P8.4/verified/连续画面及本地测试声称仅按 DEVICE reported、CORE 原始证据待补登记；不能据截图文件名、旧 AVC 序列或只改档案写成仅剩 LG 复测。14:45:42 UTC 补核 PR3 Build38263795883（a2478，attempt1）终态 CANCELLED、Build38263881419（15551，attempt1）FAILURE；两者 source 子作业均在 routing App HEAD 与 DEVICE EXPECTED_APP_SHA 一致性门退出，Flutter/Python/bundle 均未运行。PR6 精确0fb163c6 的 Actions 查询仍0个 run；186/775测试尚无独立 hosted 背书。general macOS 的88通过为最终汇总，日志含字幕重试和 OutstandingWork 失败历史，不能据终态抹去。
+
+最新 DEVICE [6126637477](https://github.com/Goodwu/media-kit/pull/4#issuecomment-6126637477)（14:48:40 UTC）组合终审也为 REQUEST_CHANGES，确认 HTTP/cache/reopen、跨轮契约与 fixture 阻断，并要求移除 DIAG 后新 SHA 复审；其 B4 另报旧 dv003 Flutter/analyze 日志实为223pass5fail/undefined_identifier，需补受审 SHA 的真实成功日志。该 reviewer 报告新 LYA126 HEVC/P8.4 两帧有效；此是已读回交结论，公开评论未提供原始日志/截图字节及完整 native 向量，CORE 独立产物验收仍待。DEVICE 已声明继续原分支按库 PR6→App PR3 修订；本 CORE 不并写。
+
+### 接续范围与证据
+
+本检查点仅更新 TASKS、唯一 conversation 和 JSON 证据/当前台账，未修改生产函数、CI/SDK 或 native recipe。原用户 checkout 的 dirty/untracked（含 App `.zcodeignore`、FFmpeg configure）均未触碰；本 CORE 使用独立干净 routing clone。当前 Linux 环境具 Git/Python/Node 及字节取证工具，没有本地 Flutter/Dart/ADB/native SDK；测试结论来自实际 hosted run，不冒称本机/实机执行。
+
+提交、推送、回读此检查点后，下一候选 `CORE-WEB-SHUFFLE-01` 才登记写范围：Web `real.dart::setShuffle` 与 `player_test.dart` 两个 shuffle 用例/已发 Playlist 快照回归。可变列表原地改写并被 stream distinct 吞事件是源码候选，尚非已证根因；先确定性复现，再评估启用/恢复分支的局部 copy-on-write，验证 Chrome 定向和完整 Web 包。共享 Session/planner/backend/realizer/output slot、App hdr_output/controller、CI/SDK 仍不在本 CORE 代码认领内。
+
+native 之后还须同向量验普通 Session、实际 owner/carrier、生命周期、最新 P5/P8.4 true/false、实体 HDR 和持续性能。各层分别验收，不因宿主、bundle、旧 APK 或部分文档归并而结项。完整证据索引：`Goodwu/media-kit:docs/plans/core-successor-checkpoint-20261012.json`；三份 CI 报告 `core-successor-app-source-ci-20261012.json`、`core-successor-app-build-ci-20261012.json`、`core-successor-general-ci-20261012.json`，以及 native/PR3/PR6/字节来源/source index 均有独立 SHA256。
+
+
+### 2026-10-12：CORE successor 更新前的 Current State（历史快照，已被顶部取代）
+
 唯一公共集成分支 `routing/MK-ROUTING-20261011`；CORE 是唯一公共代码和审查集成者，DEVICE 继续原 DV001 native recipe/build/device acceptance。最新回读 heads：App `a3b577f3794634b497c6f82369bcc98d39d91fa2`，media-kit `e269d9669becb5812663200e7521901e8254c8bd`，FFmpeg `9aba43cf`；DV001 PR #1 `1095a43acb4d0973b8bca59c5da4e300657bdb29`；PR #5 `dc41787082752f234fed85db7fb7be3bd855cc45`。主 PR 均未合并、关闭或发布。
 
 query/DASH/unknown DV/F01/R01、auto/prefer/require 有效配置闭环、FFmpeg e8df200c、失败感知 SDR 兜底等已实现项保持完成。旧“34 info”不再是待修债务：App source run 38255581451 四平台 analyze 均无 finding。experimental 产品默认 false，true 主验证、false 回归；LG YUV8/FULL/range1、精确设备门、owner/ACK/lease 保持，不重开10-bit与lease融合。
@@ -15,18 +230,6 @@ PR #5 已部分归并：公共 matrix 功能已进入库，27项是 synthetic/mo
 DV001 PR #1 仍在 `1095a43`，无 DEVICE 新修复回交。review5483753705、comment6110373174、6111479264、6111836233、6112842188 中的读取器失败闭合、两个 Vulkan 符号分别覆盖、失败传播、clean staging、精确三库成员与真实链接来源/patch manifest 要求仍未关闭。DEVICE 在原 PR 单写；CORE 不接管或另写配方。
 
 PR #3 DV003 仍为 Critical REQUEST_CHANGES，不原样归并，也不开第二 DEVICE 线。继续验收需最新 native producer 输入、APK/ABI/签名来源、普通 Session 和实际 YUV carrier/owner、P5/P8.4 true/false 与可见 HDR/持续性能。宿主 CI、bundle、native build 和设备显示分别报告，不互相替代。
-
-2026-10-13 Lead 派发 Specialist 完成"含 experimental 面的完整路由合理性"只读复核（未改码）。72 格 = 37 experimental / 21 unsupported / 13 verified / 1 inherited；experimental 按入口分：默认偏好表 12 + 列表外安全网 2（dvP82、hdr10Plus × toneMapSdr）+ 仅自定义偏好 13 + realizer 恒拒 10；dvP81/dvP7 × metadataReshape 初次规划被 baseLayerDirect 支配，经会话失败重试截断列表仍可达（三种可达口径需区分）。关键问题：安全网 gateMaturity=false 一并豁免 unsupported（dvP10 × toneMapSdr 被选中，且 planner_test 已编码该行为，属文档/测试与需求状态表的契约矛盾）；DV 源 toneMapSdr 保留 RPU 却报 appliesDynamicMetadata=false（dvP82 与 sdrDirect 的显式 strip 不一致，原生是否消费 RPU 未验证）；realizer 读取 mkst bridge FFI 动态状态，同 source/caps/options 非纯确定函数；P7 "仅 MEL" 准入实为 enhancementLayer==false，现数据模型分不出 MEL/FEL。优化方案：第一批 A（安全网契约拆分，保守/兼容两案待用户裁决）+ F（isSafetyNet/成熟度豁免可观测性与证据分层）；第二批 B（SDR 源元数据处理显式契约，dvP82 优先）+ C（bridge readiness 快照化）；第三批 D（experimental 按格 allowlist，保留全局开关）+ E（10 恒拒格改 unsupported、默认列表 3 个恒拒占位标记、表测试加唯一键/完整性/可达性见证）。不建议仅凭 verified 将 hdr10 × metadataReshape 纳入默认列表（verified=准入≠默认偏好，且 appliesDynamicMetadata=false 非真重建）。实施待用户方向。
-
-2026-10-13 用户裁决路由目标态：experimental 只是开发阶段不作路由类别，未实现/未验证进积压清单；四原则（HDR显示+HDR解码禁 tone-map／可解码且显示匹配用直通／不匹配走 reshape/convert／SDR 显示播 HDR 用 tone-map）。Specialist 两轮交付设计骨架（3 主判断、nativeDV 归直通、HDR 显示全链失败阻断不落 SDR 兜底、off/require 冲突报 routeOptionsUnsatisfied、P8.2/P10-compat2 SDR 层直用、缺报≠SDR）后两次流断开，按失败封顶规则 Lead 回接收编成完整目标态方案（决策树＋12 源类映射表＋能力三值口径＋积压矩阵取代成熟度门＋迁移三批）已呈报；待用户裁决 4 点：off/require SDR 冲突取向、HDR 全链失败阻断确认、显示能力缺报阻断确认、allowExperimental 废弃节奏。
-
-同日设计迭代四轮用户裁决：① dvP5+非DV HDR 显示走 reshape（P5 管线→PQ，verified 路由，Lead 初版表误标阻断）；② HDR10/HLG 删假 reshape 档；③ PQ 基线源（hdr10/dvP81/dvP7/hdr10Plus）删 ④convert——所有 HDR 面板支持 PQ、不做 PQ→HLG；④ dvP82 删 ④SDR→PQ 上变换（非标准操作、丢弃 RPU 伪 HDR，无 P5 管线→阻断，已确认）；⑤ 立不变量"HDR 可得不交 SDR：SDR 输出仅在源本身 SDR 或显示明确 SDR"；⑥ 阶梯定序 动态元数据优先：①DV原生直通 → ②reshape（仅 DV，P5 管线→PQ，P7 限无EL）→ ③基线直通（PQ 恒可行/HLG 需声明）→ ④convert（仅 HLG→PQ）→ 阻断。hdrVivid/hdr10Plus reshape 为待实现积压，播放不依赖（基线直通/convert 已覆盖）。映射表 v5 与决策树已交付，等待 4 点裁决后开工批 1（planner 决策树重写）。
-
-2026-10-13 平台线程 ANR 修复提交（media_kit）：引擎合并线程拓扑下 Dart 根 isolate 运行于平台线程，同步 libmpv 调用取 `mp_dispatch_lock`，该锁在启动/复核/输出重建期间可被 VO 等待平台线程 surface 工作时持有——平台线程等 mpv、mpv 等平台线程，死锁成 ANR。改动：① `Initializer` 主 isolate 事件泵去 `kDebugMode` 限定（release/测试同走 isolate pump，`mpv_wait_event()` 固定在泵线程），`dispose` 与 `create` 镜像同路；② 新增 `media_kit/lib/src/player/native/core/mpv_api_isolate.dart` 专用 API isolate（与事件泵刻意分离——属性读阻塞在 core lock 上不得妨碍泵 drain 事件队列，否则事件队列饱和反压 core 整体死锁），`getProperty`/属性观察读值/hook 内 `http-header-fields` 写入与置空/`playlist-pos` 读/`hook_continue`/`setPropertyString` 全部改经该 isolate 执行（仅 `configuration.async`；`allowDisposed` 直接路径保留保释放顺序），同步手写 FFI 分配释放随之下线；③ `mpv_set_property_async` 回复超时 5s→30s（首帧 VO 初始化 GPU context+shader 编译在慢 GPU/模拟器合法超时，await 异步不占平台线程）。验证：改动文件 `dart analyze` 零 finding；真机验证未跑，待平台线程拓扑设备复验。
-
-2026-10-13 解码履行复核门竞态修复提交（media_kit_video `hdr_decoder_review.dart`）：五机回归 marble hdr10 首跑的 `HdrDecoderReviewFailure("Observed decoder changed")` 间歇 flake（同路由复跑通过）根因是双采样落进 decoder 正在打开/视频参数尚未稳定的窗口。改动：双采样一侧为空视为 decoder opening、`video-params/*` 差异视为 settling，均重试取稳定样本；decoder 身份 endpoint 双侧均已稳定仍不同才判失败（该异常正是此检查存在目的，不放松）。验证：`dart analyze` 零 finding；marble hdr10 复跑待验，TASKS.md flake 待修项已同步标记。
-
-## History
 
 ### 2026-10-12 TASKS 旧状态快照（历史）
 
@@ -47,7 +250,7 @@ PR #3 DV003 仍为 Critical REQUEST_CHANGES，不原样归并，也不开第二 
 
 ### 2026-10-12 macOS 前置整合前状态快照（历史）
 
-## Current State
+#### Archived Current State（历史快照）
 
 唯一集成分支 routing/MK-ROUTING-20261011。本轮push回读远端 Appa05dfe1bea85e78a7b214b0e4044eab7902a3e06、库38ffb72920550d76c41948daa56aa01b4393681d；FFmpeg9aba43cf、DV0011095a43、PR5 5b279611仍按各自证据归属。root唯一公共集成者，DEVICE继续原native配方/构建/实机职责。所有主PR未合并、关闭或发布；未知dirty和恢复材料保护。
 

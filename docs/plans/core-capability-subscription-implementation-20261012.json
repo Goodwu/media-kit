@@ -1,0 +1,273 @@
+{
+  "schema": 1,
+  "task": "MK-ROUTING-20261011",
+  "slice": "CORE-CAPABILITY-SUBSCRIPTION-01",
+  "author_agent": "/root/web_shuffle_review",
+  "recorded_at_utc": "2026-10-12T15:56:03.567335+00:00",
+  "status": "IMPLEMENTED_STATIC_CHECKS_ONLY_AWAITING_INDEPENDENT_REVIEW_AND_HOSTED_TESTS",
+  "authorization": {
+    "central_claim": "https://github.com/Goodwu/media-kit/pull/4#issuecomment-6127642516",
+    "claim_read_back": true,
+    "integrator": "/root",
+    "allowed_modified_repo_paths": [
+      "media_kit_video/lib/src/video_controller/android_video_controller/real.dart",
+      "media_kit_video/test/android_hdr_capability_subscription_test.dart"
+    ],
+    "no_git_add_commit_push_or_public_comment_by_this_agent": true,
+    "native_and_device_work_retained_by_existing_DEVICE": true
+  },
+  "source_vector": {
+    "repository": "https://github.com/Goodwu/media-kit",
+    "branch": "routing/MK-ROUTING-20261011",
+    "baseline_commit": "a73d570b633a949aab6a31e8f68ec03a13643c31",
+    "observed_head_at_report": "a73d570b633a949aab6a31e8f68ec03a13643c31",
+    "app_commit_context_only_not_executed": "1fcc367cd98e77a217f8a70a388fcfcdaf92aad4"
+  },
+  "modified_files": [
+    {
+      "path": "media_kit_video/lib/src/video_controller/android_video_controller/real.dart",
+      "absolute_path": "/workspace/scratch/bb7931e64549/checkouts/media-kit/media_kit_video/lib/src/video_controller/android_video_controller/real.dart",
+      "bytes": 83379,
+      "lines": 2120,
+      "sha256": "8a0073c434aa8606491902e5659abac732039fc071dc845f1fe9f5f284d57609",
+      "git_blob": "27e21ca1ebf3d07d5d62f040e08d47a3fc7d4748",
+      "baseline_blob": "0f063a8d6e54bf69cecd8aeb17fadd951d5bbb23",
+      "baseline_sha256": "7ed6915bdf5d99ea2798ab2a1230d740604d7de81bd0d4f8a1b0d9bec985e8d5"
+    },
+    {
+      "path": "media_kit_video/test/android_hdr_capability_subscription_test.dart",
+      "absolute_path": "/workspace/scratch/bb7931e64549/checkouts/media-kit/media_kit_video/test/android_hdr_capability_subscription_test.dart",
+      "bytes": 7929,
+      "lines": 231,
+      "sha256": "b61386dc3b0e7099f5a9ae3f60303ff2e65e716ddb55f67892cf10cbf2dfde8b",
+      "git_blob": "4a699a0d95e2470956252dcd1fba811346f18566",
+      "baseline_blob": null,
+      "baseline_sha256": null
+    }
+  ],
+  "reference_source_files": [
+    {
+      "path": "media_kit_video/lib/src/hdr/hdr_video_session.dart",
+      "absolute_path": "/workspace/scratch/bb7931e64549/checkouts/media-kit/media_kit_video/lib/src/hdr/hdr_video_session.dart",
+      "bytes": 66236,
+      "lines": 1747,
+      "sha256": "38006cbb22c0808776efc97faa6b3a583f584e632e43a00d27d1443b7d80710e",
+      "git_blob": "b7afbf0f28f5a782c61071f36e8ebe1dd57fe63d",
+      "baseline_blob": "b7afbf0f28f5a782c61071f36e8ebe1dd57fe63d",
+      "baseline_sha256": "38006cbb22c0808776efc97faa6b3a583f584e632e43a00d27d1443b7d80710e"
+    },
+    {
+      "path": "media_kit_video/lib/src/video_controller/platform_video_controller.dart",
+      "absolute_path": "/workspace/scratch/bb7931e64549/checkouts/media-kit/media_kit_video/lib/src/video_controller/platform_video_controller.dart",
+      "bytes": 15090,
+      "lines": 415,
+      "sha256": "0179ceca76e980a5eff8c65dbcc40e8130e3b4bd99ae0a8e075885bbb21b7709",
+      "git_blob": "0737c739b5ca842105ad86f549071d3ef1549acd",
+      "baseline_blob": "0737c739b5ca842105ad86f549071d3ef1549acd",
+      "baseline_sha256": "0179ceca76e980a5eff8c65dbcc40e8130e3b4bd99ae0a8e075885bbb21b7709"
+    },
+    {
+      "path": "media_kit_video/android/src/main/java/com/alexmercerind/media_kit_video/MediaKitVideoPlugin.java",
+      "absolute_path": "/workspace/scratch/bb7931e64549/checkouts/media-kit/media_kit_video/android/src/main/java/com/alexmercerind/media_kit_video/MediaKitVideoPlugin.java",
+      "bytes": 17027,
+      "lines": 360,
+      "sha256": "2f0f3b784048419f03c31cdc94d90e5f1e985945486c9182ae3a2c25dfcd3205",
+      "git_blob": "45437af035c790f0a1f63480e83bcc540228f6a8",
+      "baseline_blob": "45437af035c790f0a1f63480e83bcc540228f6a8",
+      "baseline_sha256": "2f0f3b784048419f03c31cdc94d90e5f1e985945486c9182ae3a2c25dfcd3205"
+    },
+    {
+      "path": "media_kit_video/test/hdr_video_session_test.dart",
+      "absolute_path": "/workspace/scratch/bb7931e64549/checkouts/media-kit/media_kit_video/test/hdr_video_session_test.dart",
+      "bytes": 45149,
+      "lines": 1199,
+      "sha256": "798fb880ef0a3fa87ceb62acf8744431bc34c707d10643c4b77f98fe36a5821b",
+      "git_blob": "8ef3c6c46d38c6503001fae582add9779c95148d",
+      "baseline_blob": "8ef3c6c46d38c6503001fae582add9779c95148d",
+      "baseline_sha256": "798fb880ef0a3fa87ceb62acf8744431bc34c707d10643c4b77f98fe36a5821b"
+    },
+    {
+      "path": ".github/workflows/routing-source.yml",
+      "absolute_path": "/workspace/scratch/bb7931e64549/checkouts/media-kit/.github/workflows/routing-source.yml",
+      "bytes": 5479,
+      "lines": 130,
+      "sha256": "9c8bc39d35e308eed782d4b948f9cc485592a02586a45cef14bb082a1e3fa477",
+      "git_blob": "41afdd0cfbbcc9e75c1642899013ad9cb304949b",
+      "baseline_blob": "41afdd0cfbbcc9e75c1642899013ad9cb304949b",
+      "baseline_sha256": "9c8bc39d35e308eed782d4b948f9cc485592a02586a45cef14bb082a1e3fa477"
+    }
+  ],
+  "diff": {
+    "production": "diff --git a/media_kit_video/lib/src/video_controller/android_video_controller/real.dart b/media_kit_video/lib/src/video_controller/android_video_controller/real.dart\nindex 0f063a8d..27e21ca1 100644\n--- a/media_kit_video/lib/src/video_controller/android_video_controller/real.dart\n+++ b/media_kit_video/lib/src/video_controller/android_video_controller/real.dart\n@@ -1100,14 +1100,15 @@ class AndroidVideoController extends PlatformVideoController {\n   /// Every matching change re-sends the full `HdrCapabilities.Get` snapshot\n   /// as a `HdrCapabilities.Changed` method call on the shared channel.\n   ///\n-  /// The enable is a shared channel switch, not per-subscriber: with several\n-  /// [HdrVideoSession]s alive, one disposing closes the subscription for the\n-  /// survivors. Phase 1 assumes a single session per process; revisit with a\n-  /// reference count if that ever changes.\n+  /// Sessions register before enabling and unregister before disabling.\n+  /// Keep the shared native subscription enabled while any registered\n+  /// listener remains, including when a previous owner sends a late disable.\n+  /// The idempotent listener collection owns this lifetime; repeated calls\n+  /// do not acquire or release additional ownership.\n   static Future<void> setHdrCapabilitiesChangedEnabled(bool enabled) {\n-    return _channel.invokeMethod<Object?>(\n+    return _channel.invokeMethod<void>(\n       'HdrCapabilities.Changed',\n-      {'enable': enabled},\n+      {'enable': enabled || _hdrCapabilitiesChangedListeners.isNotEmpty},\n     );\n   }\n \n",
+    "new_test": "diff --git a/media_kit_video/test/android_hdr_capability_subscription_test.dart b/media_kit_video/test/android_hdr_capability_subscription_test.dart\nnew file mode 100644\nindex 00000000..4a699a0d\n--- /dev/null\n+++ b/media_kit_video/test/android_hdr_capability_subscription_test.dart\n@@ -0,0 +1,231 @@\n+import 'dart:async';\n+\n+import 'package:flutter/services.dart';\n+import 'package:flutter_test/flutter_test.dart';\n+import 'package:media_kit_video/src/hdr/hdr_capabilities.dart';\n+import 'package:media_kit_video/src/hdr/hdr_output_event.dart';\n+import 'package:media_kit_video/src/hdr/hdr_video_session.dart';\n+import 'package:media_kit_video/src/video_controller/android_video_controller/real.dart';\n+\n+import 'hdr_video_session_test.dart' as fixture;\n+\n+void main() {\n+  TestWidgetsFlutterBinding.ensureInitialized();\n+  const channel = MethodChannel('com.alexmercerind/media_kit_video');\n+  final messenger =\n+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;\n+  const capabilities = HdrCapabilities(\n+    sdkInt: 29,\n+    displayHdrTypes: {2},\n+    hevcDecoders: [],\n+    dolbyVisionDecoders: [],\n+    p5PipelineAvailable: true,\n+    dataSpaceBridgeLoaded: true,\n+    dataSpaceExt: null,\n+  );\n+\n+  final sessions = <HdrVideoSession>[];\n+  final manualListeners = <void Function(Map<Object?, Object?>)>[];\n+  final nativeReplies = <Completer<Object?>>[];\n+  final calls = <bool>[];\n+  late StreamController<bool> nativeCalls;\n+  var nativeEnabled = false;\n+  FutureOr<Object?> Function(bool enabled)? reply;\n+\n+  setUp(() {\n+    sessions.clear();\n+    manualListeners.clear();\n+    nativeReplies.clear();\n+    calls.clear();\n+    nativeCalls = StreamController<bool>.broadcast(sync: true);\n+    nativeEnabled = false;\n+    reply = null;\n+    messenger.setMockMethodCallHandler(channel, (call) async {\n+      expect(call.method, 'HdrCapabilities.Changed');\n+      final enabled = (call.arguments as Map)['enable'] as bool;\n+      calls.add(enabled);\n+      nativeCalls.add(enabled);\n+      final response = reply?.call(enabled);\n+      // Model the Java plugin's shared switch. A held response delays the\n+      // acknowledgement, not the synchronous native registration operation.\n+      nativeEnabled = enabled;\n+      return await response;\n+    });\n+  });\n+\n+  tearDown(() async {\n+    reply = null;\n+    for (final response in nativeReplies) {\n+      if (!response.isCompleted) response.complete(null);\n+    }\n+    for (final listener in manualListeners) {\n+      AndroidVideoController.unregisterHdrCapabilitiesChangedListener(listener);\n+    }\n+    for (final session in sessions) {\n+      await session.dispose();\n+    }\n+    await AndroidVideoController.setHdrCapabilitiesChangedEnabled(false);\n+    expect(nativeEnabled, isFalse);\n+    await nativeCalls.close();\n+    messenger.setMockMethodCallHandler(channel, null);\n+  });\n+\n+  Future<HdrVideoSession> createSession({void Function()? onQuery}) async {\n+    final enabled = nativeCalls.stream.first;\n+    final session = HdrVideoSession.forTesting(\n+      isAndroid: true,\n+      backend: fixture.FakeBackend(),\n+      capabilitiesProvider: () async {\n+        onQuery?.call();\n+        return capabilities;\n+      },\n+    );\n+    sessions.add(session);\n+    expect(await enabled, isTrue);\n+    return session;\n+  }\n+\n+  Future<void> disposeSession(\n+    HdrVideoSession session, {\n+    required bool keepsSubscription,\n+  }) async {\n+    final enabled = nativeCalls.stream.first;\n+    await session.dispose();\n+    expect(await enabled, keepsSubscription);\n+  }\n+\n+  Future<void> sendDisplayChange() async {\n+    // A disabled native listener sends no event. Tests check the switch\n+    // before awaiting a Session event, so a lost subscription fails directly.\n+    if (!nativeEnabled) return;\n+    final response = await messenger.handlePlatformMessage(\n+      channel.name,\n+      channel.codec.encodeMethodCall(\n+        const MethodCall('HdrCapabilities.Changed', <String, Object?>{}),\n+      ),\n+      null,\n+    );\n+    expect(response, isNotNull);\n+    expect(channel.codec.decodeEnvelope(response!), isNull);\n+  }\n+\n+  test('disposing one Session preserves the surviving capability refresh',\n+      () async {\n+    var firstQueries = 0;\n+    var secondQueries = 0;\n+    final first = await createSession(onQuery: () => firstQueries++);\n+    final second = await createSession(onQuery: () => secondQueries++);\n+\n+    await disposeSession(first, keepsSubscription: true);\n+    expect(nativeEnabled, isTrue);\n+    final changed = second.events.firstWhere(\n+      (event) => event is HdrCapabilityChangedEvent,\n+    );\n+    await sendDisplayChange();\n+    await changed;\n+    expect(firstQueries, 0);\n+    expect(secondQueries, 1);\n+\n+    final count = calls.length;\n+    await first.dispose();\n+    expect(calls, hasLength(count));\n+    expect(nativeEnabled, isTrue);\n+\n+    await disposeSession(second, keepsSubscription: false);\n+    expect(calls, [true, true, true, false]);\n+    expect(nativeEnabled, isFalse);\n+  });\n+\n+  test('listener registration and repeated enables do not count extra owners',\n+      () async {\n+    final survivor = await createSession();\n+    void listener(Map<Object?, Object?> snapshot) {}\n+    manualListeners.add(listener);\n+    AndroidVideoController.registerHdrCapabilitiesChangedListener(listener);\n+    AndroidVideoController.registerHdrCapabilitiesChangedListener(listener);\n+    await AndroidVideoController.setHdrCapabilitiesChangedEnabled(true);\n+    await AndroidVideoController.setHdrCapabilitiesChangedEnabled(true);\n+\n+    expect(\n+      AndroidVideoController.unregisterHdrCapabilitiesChangedListener(listener),\n+      isTrue,\n+    );\n+    expect(\n+      AndroidVideoController.unregisterHdrCapabilitiesChangedListener(listener),\n+      isFalse,\n+    );\n+    await AndroidVideoController.setHdrCapabilitiesChangedEnabled(false);\n+    expect(nativeEnabled, isTrue);\n+    await disposeSession(survivor, keepsSubscription: false);\n+    expect(calls, [true, true, true, true, false]);\n+  });\n+\n+  test('a late disable cannot unsubscribe a replacement Session', () async {\n+    final previous = await createSession();\n+    await disposeSession(previous, keepsSubscription: false);\n+    final replacement = await createSession();\n+    final releaseLateCall = Completer<void>();\n+    final lateDisable = releaseLateCall.future.then(\n+      (_) => AndroidVideoController.setHdrCapabilitiesChangedEnabled(false),\n+    );\n+\n+    releaseLateCall.complete();\n+    await lateDisable;\n+    expect(nativeEnabled, isTrue);\n+    await disposeSession(replacement, keepsSubscription: false);\n+    expect(calls, [true, false, true, true, false]);\n+  });\n+\n+  test('a delayed native acknowledgement does not retain a disposed owner',\n+      () async {\n+    final held = Completer<Object?>();\n+    nativeReplies.add(held);\n+    var holdNext = true;\n+    reply = (_) {\n+      if (holdNext) {\n+        holdNext = false;\n+        return held.future;\n+      }\n+      return null;\n+    };\n+    final first = await createSession();\n+    final second = await createSession();\n+    await disposeSession(first, keepsSubscription: true);\n+    held.complete(null);\n+    await held.future;\n+\n+    await disposeSession(second, keepsSubscription: false);\n+    expect(calls, [true, true, true, false]);\n+    expect(nativeEnabled, isFalse);\n+  });\n+\n+  test('native failures preserve current ownership and permit a retry',\n+      () async {\n+    final session = await createSession();\n+    reply = (_) => throw PlatformException(code: 'subscription-failed');\n+    await expectLater(\n+      AndroidVideoController.setHdrCapabilitiesChangedEnabled(false),\n+      throwsA(isA<PlatformException>().having(\n+        (error) => error.code,\n+        'code',\n+        'subscription-failed',\n+      )),\n+    );\n+    reply = null;\n+    await AndroidVideoController.setHdrCapabilitiesChangedEnabled(false);\n+    expect(nativeEnabled, isTrue);\n+\n+    reply = (_) => throw PlatformException(code: 'subscription-failed');\n+    await disposeSession(session, keepsSubscription: false);\n+    expect(nativeEnabled, isTrue);\n+\n+    await expectLater(\n+      AndroidVideoController.setHdrCapabilitiesChangedEnabled(false),\n+      throwsA(isA<PlatformException>()),\n+    );\n+    reply = null;\n+    await AndroidVideoController.setHdrCapabilitiesChangedEnabled(false);\n+    expect(calls, [true, true, true, false, false, false]);\n+    expect(nativeEnabled, isFalse);\n+  });\n+}\n"
+  },
+  "implementation": {
+    "root_cause": "The native channel has one shared display-change subscription. Every Session unregisters its own Dart listener then issues false when disposed; forwarding that false unchanged disables notifications for remaining live Sessions.",
+    "actual_enable_argument": "enabled || _hdrCapabilitiesChangedListeners.isNotEmpty",
+    "owner_fact": "The existing idempotent listener collection. No counter, cached native state, or asynchronous transition queue is introduced.",
+    "public_future_contract": "Future<void> is preserved using MethodChannel.invokeMethod<void>. A failed call still completes with its native error; subsequent calls freshly derive the current owner state.",
+    "registration_and_unregistration_unchanged": true,
+    "source_anchors": [
+      "real.dart:1078-1097 existing idempotent listener collection",
+      "real.dart:1103-1115 changed comment and single enable projection",
+      "hdr_video_session.dart:279-288 register-before-enable in the real Session constructor",
+      "hdr_video_session.dart:1653-1671 first-dispose unregister-before-disable and repeat-dispose guard",
+      "hdr_video_session.dart:1550-1572 native invalidation queries the current Session capabilities provider",
+      "MediaKitVideoPlugin.java:218-221 applies native enable synchronously before result.success",
+      "MediaKitVideoPlugin.java:268-305 idempotent native DisplayListener registration",
+      "real.dart:2090-2105 production inbound method handler snapshots and invokes current listeners"
+    ]
+  },
+  "tests": {
+    "runner": "flutter test, host Dart VM, real test-zone microtasks (test rather than testWidgets)",
+    "test_count": 5,
+    "fixture": "Actual HdrVideoSession.forTesting(isAndroid: true) and existing FakeBackend imported from hdr_video_session_test.dart; no Player or native library.",
+    "native_model": "Mock MethodChannel call handling applies the enable value on receipt. A held Completer delays acknowledgement only. A scripted PlatformException before assignment models an unsuccessful native call. The actual production inbound handler is exercised using TestDefaultBinaryMessenger.handlePlatformMessage.",
+    "cases": [
+      {
+        "name": "disposing one Session preserves the surviving capability refresh",
+        "proof": "Create actual Sessions A and B; dispose A and assert native remains enabled; deliver actual native method event; B provider re-queries once and publishes HdrCapabilityChangedEvent while A provider stays at zero; repeated A dispose adds no native call; B final dispose disables.",
+        "expected_calls": [
+          true,
+          true,
+          true,
+          false
+        ],
+        "baseline_red_predicate_not_executed": "A.dispose forwards false while B lives; the direct projected-value assertion fails before waiting for a missing event."
+      },
+      {
+        "name": "listener registration and repeated enables do not count extra owners",
+        "proof": "Duplicate registration of one callback plus repeated true calls does not add ownership count. One unregister removes that callback, second returns false; the actual remaining Session keeps false projected to true; its final dispose turns the switch off.",
+        "expected_calls": [
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        "baseline_red_predicate_not_executed": "Explicit false after manual callback removal wrongly disables the surviving actual Session."
+      },
+      {
+        "name": "a late disable cannot unsubscribe a replacement Session",
+        "proof": "Dispose one real Session then create a replacement. Release a deferred old false call after replacement registration; it must project to true, with no stale owner count.",
+        "expected_calls": [
+          true,
+          false,
+          true,
+          true,
+          false
+        ],
+        "baseline_red_predicate_not_executed": "Late false is forwarded unchanged and disables the replacement."
+      },
+      {
+        "name": "a delayed native acknowledgement does not retain a disposed owner",
+        "proof": "Hold the first Session enable acknowledgement after native registration, create B and dispose A before releasing the old reply. B keeps the switch enabled, and final B dispose disables even after the old reply completes.",
+        "expected_calls": [
+          true,
+          true,
+          true,
+          false
+        ],
+        "baseline_red_predicate_not_executed": "A.dispose forwards false despite B ownership; no artificial delayed native operation is modeled."
+      },
+      {
+        "name": "native failures preserve current ownership and permit a retry",
+        "proof": "A failed explicit setter retains listener ownership; retry computes true while a Session lives. Failure of the last real Session dispose leaves native enabled but no Dart owner. Another explicit failed false propagates PlatformException; a fresh false retry succeeds and closes native.",
+        "expected_calls": [
+          true,
+          true,
+          true,
+          false,
+          false,
+          false
+        ],
+        "baseline_red_predicate_not_executed": "The successful retry of false while the Session still lives wrongly switches native off."
+      }
+    ],
+    "determinism": "Stream observations subscribe before operations; Completers provide explicit ordering; no sleeps, randomization, test retries, or extended timeouts. Teardown releases held replies, disposes actual Sessions and unregisters owned manual callbacks.",
+    "executed": false
+  },
+  "local_verification": {
+    "tracked_diff_check": {
+      "command": [
+        "git",
+        "diff",
+        "--check",
+        "a73d570b633a949aab6a31e8f68ec03a13643c31",
+        "--",
+        "media_kit_video/lib/src/video_controller/android_video_controller/real.dart"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    "new_file_no_index_check": {
+      "command": [
+        "git",
+        "diff",
+        "--no-index",
+        "--check",
+        "--",
+        "/dev/null",
+        "media_kit_video/test/android_hdr_capability_subscription_test.dart"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": ""
+    },
+    "new_file_check_note": "git --no-index reports a difference from /dev/null with exit 1; stdout and stderr are empty under --check. A separate direct byte/whitespace scan passes for both authorized files.",
+    "whitespace_scan": {
+      "media_kit_video/lib/src/video_controller/android_video_controller/real.dart": {
+        "trailing_whitespace_lines": [],
+        "ends_with_newline": true,
+        "contains_cr": false
+      },
+      "media_kit_video/test/android_hdr_capability_subscription_test.dart": {
+        "trailing_whitespace_lines": [],
+        "ends_with_newline": true,
+        "contains_cr": false
+      }
+    },
+    "tool_availability": {
+      "dart": null,
+      "flutter": null,
+      "chromium": null,
+      "google-chrome": null,
+      "adb": null
+    },
+    "compile_analyze_flutter_runtime_native_build_device_test_all_not_run": true
+  },
+  "hosted_verification_plan_not_executed": {
+    "working_directory": "media_kit_video",
+    "targeted_command": "flutter test --no-pub --concurrency=1 --reporter expanded test/android_hdr_capability_subscription_test.dart",
+    "analysis_command": "flutter analyze --no-pub",
+    "full_command": "flutter test --no-pub --concurrency=1 --reporter expanded",
+    "existing_workflow": ".github/workflows/routing-source.yml",
+    "job": "flutter-source, matrix.package=media_kit_video",
+    "automatic_coverage": "Existing full package test discovery includes the new *_test.dart file. No CI file change is needed for full coverage. A separate targeted step requires root ownership if requested.",
+    "evidence_requirements": "Record exact source commit and tree, run attempt and job, source.txt and actual tests.log/artifact identity. Existing greens from earlier vectors do not validate this worktree.",
+    "red_green": "Old-production failure predicates are statically identified only; no baseline red or patched green has been executed locally."
+  },
+  "boundaries": {
+    "not_modified": [
+      "Session",
+      "capability query/gather",
+      "planner/backend/realizer/output-slot",
+      "Java/native",
+      "App",
+      "CI/SDK",
+      "public docs"
+    ],
+    "not_proven": [
+      "real Android plugin build/runtime",
+      "real display HDR delivery",
+      "multiple Flutter engines or isolates",
+      "ordinary LG owner/carrier",
+      "native HDR playback",
+      "device lifetime and sustained performance"
+    ],
+    "unchanged_error_policy": "Session still catches its unawaited enable/disable errors. This slice permits explicit retry with current ownership; it adds no automatic native retry or resource observer recovery.",
+    "stale_out_of_scope_comment": "hdr_video_session.dart:281-284 still states Phase1 assumes one Session. Left unchanged because Session edits were expressly outside this delegated claim; parent has been notified.",
+    "other_worktree_edits": "Parent concurrently owns Web shuffle production/test edits. They were observed and protected, not modified or reverted by this agent."
+  }
+}

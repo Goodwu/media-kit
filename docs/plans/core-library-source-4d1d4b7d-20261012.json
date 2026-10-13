@@ -1,0 +1,1431 @@
+{
+  "schemaVersion": 1,
+  "task": "MK-ROUTING-20261011",
+  "checkpoint": "CORE-LIBRARY-SOURCE-4D1D4B7D-20261012",
+  "reviewer": "CORE successor read-only CI verifier /root/web_shuffle_review",
+  "frozenAtUtc": "2026-10-12T16:27:44.153727+00:00",
+  "verdict": "PASS_HOST_SOURCE_AND_FIVE_SUBSCRIPTION_TESTS_FOR_EXACT_LIBRARY_HEAD",
+  "sourceVector": {
+    "repository": "Goodwu/media-kit",
+    "head": "4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2",
+    "tree": "34dfc9a45c039e2f1da327f057dc8807f1cf3df3",
+    "appHead": null,
+    "appScope": "Library-only workflow; no App vector accepted or relabeled by this report.",
+    "runAttempt": 1,
+    "checkoutPath": "/home/runner/work/media-kit/media-kit",
+    "primaryRunCheckout": "Explicit pull_request.head.sha; equality assertion and actual git checkout log both checked."
+  },
+  "primaryRun": {
+    "id": 38275707566,
+    "name": "Routing source checks",
+    "event": "pull_request",
+    "status": "completed",
+    "conclusion": "success",
+    "head_sha": "4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2",
+    "head_branch": "routing/MK-ROUTING-20261011",
+    "run_attempt": 1,
+    "created_at": "2026-10-12T16:11:56Z",
+    "updated_at": "2026-10-12T16:15:22Z",
+    "html_url": "https://github.com/Goodwu/media-kit/actions/runs/38275707566",
+    "path": ".github/workflows/routing-source.yml"
+  },
+  "primaryJobs": [
+    {
+      "id": 114901096514,
+      "name": "Source analyze and tests (media_kit_hdr_lab)",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": null,
+      "run_attempt": null,
+      "started_at": null,
+      "completed_at": null,
+      "html_url": null,
+      "steps": [
+        {
+          "number": 1,
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 2,
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 3,
+          "name": "Run subosito/flutter-action@v2",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 4,
+          "name": "Record the source under test",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 5,
+          "name": "Resolve current source packages",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 6,
+          "name": "Analyze source",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 7,
+          "name": "Run source tests",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 8,
+          "name": "Compile and execute the OHOS facade on JavaScript",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "number": 9,
+          "name": "Compile the OHOS facade on WebAssembly",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "number": 10,
+          "name": "Check that testing did not rewrite source",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 11,
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 21,
+          "name": "Post Run subosito/flutter-action@v2",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 22,
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 23,
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 114901096712,
+      "name": "Routing audit utility tests",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": null,
+      "run_attempt": null,
+      "started_at": null,
+      "completed_at": null,
+      "html_url": null,
+      "steps": [
+        {
+          "number": 1,
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 2,
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 3,
+          "name": "Run extraction and guarded-repair utility tests",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 4,
+          "name": "Run synthetic and mocked routing matrix regression tests",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 5,
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 10,
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 11,
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 114901096810,
+      "name": "Source analyze and tests (media_kit_video)",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": null,
+      "run_attempt": null,
+      "started_at": null,
+      "completed_at": null,
+      "html_url": null,
+      "steps": [
+        {
+          "number": 1,
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 2,
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 3,
+          "name": "Run subosito/flutter-action@v2",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 4,
+          "name": "Record the source under test",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 5,
+          "name": "Resolve current source packages",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 6,
+          "name": "Analyze source",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 7,
+          "name": "Run source tests",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 8,
+          "name": "Compile and execute the OHOS facade on JavaScript",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 9,
+          "name": "Compile the OHOS facade on WebAssembly",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 10,
+          "name": "Check that testing did not rewrite source",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 11,
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 21,
+          "name": "Post Run subosito/flutter-action@v2",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 22,
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "number": 23,
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    }
+  ],
+  "primaryArtifacts": [
+    {
+      "artifact": {
+        "id": 11758563900,
+        "node_id": "MDg6QXJ0aWZhY3QxMTc1ODU2MzkwMA==",
+        "name": "routing-tools-4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2",
+        "size_in_bytes": 2319,
+        "url": "https://api.github.com/repos/Goodwu/media-kit/actions/artifacts/11758563900",
+        "archive_download_url": "https://api.github.com/repos/Goodwu/media-kit/actions/artifacts/11758563900/zip",
+        "expired": false,
+        "digest": "sha256:a46521be27e67a173d1c3155e59fee74e83ebb60ff1e960b70c8e32f0f8191ee",
+        "created_at": "2026-10-12T16:13:35Z",
+        "updated_at": "2026-10-12T16:13:35Z",
+        "expires_at": "2027-01-10T16:11:57Z",
+        "workflow_run": {
+          "id": 38275707566,
+          "repository_id": 1353304641,
+          "head_repository_id": 1353304641,
+          "head_branch": "routing/MK-ROUTING-20261011",
+          "head_sha": "4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2"
+        }
+      },
+      "zipPath": "/workspace/scratch/bb7931e64549/audit-library-source-4d1d4b7d/11758563900.zip",
+      "zipBytes": 2319,
+      "zipSha256": "a46521be27e67a173d1c3155e59fee74e83ebb60ff1e960b70c8e32f0f8191ee",
+      "apiDigestMatches": true,
+      "apiSizeMatches": true,
+      "zipCRC": "pass",
+      "members": [
+        {
+          "path": "extractor.log",
+          "bytes": 818,
+          "sha256": "84ed74d0771db41a0760eac21c7a75b0eab2b2db9bf74261a3811b422d54bb5d",
+          "localPath": "/workspace/scratch/bb7931e64549/audit-library-source-4d1d4b7d/artifact-11758563900/extractor.log"
+        },
+        {
+          "path": "matrix-regression.log",
+          "bytes": 4631,
+          "sha256": "30e6adcf8d74ee1a3fa30dcf88d1a26779f493a680924030e4d74560bf60211f",
+          "localPath": "/workspace/scratch/bb7931e64549/audit-library-source-4d1d4b7d/artifact-11758563900/matrix-regression.log"
+        },
+        {
+          "path": "repair-tool.log",
+          "bytes": 1785,
+          "sha256": "d6ea5faf5d52600de76d7b8c11443efd7cf65bddf6b4c24978ef590d1f1fb397",
+          "localPath": "/workspace/scratch/bb7931e64549/audit-library-source-4d1d4b7d/artifact-11758563900/repair-tool.log"
+        },
+        {
+          "path": "source.txt",
+          "bytes": 245,
+          "sha256": "b3abd9b4f56ed2f1d0b0494db0eb1fac4d9cc143b610a4e316d87e751d392307",
+          "localPath": "/workspace/scratch/bb7931e64549/audit-library-source-4d1d4b7d/artifact-11758563900/source.txt"
+        }
+      ],
+      "bytes": 2319,
+      "sha256": "a46521be27e67a173d1c3155e59fee74e83ebb60ff1e960b70c8e32f0f8191ee"
+    },
+    {
+      "artifact": {
+        "id": 11758258908,
+        "name": "routing-source-media_kit_hdr_lab-4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2",
+        "size_in_bytes": 11390,
+        "url": "https://api.github.com/repos/Goodwu/media-kit/actions/artifacts/11758258908",
+        "archive_download_url": "https://api.github.com/repos/Goodwu/media-kit/actions/artifacts/11758258908/zip",
+        "expired": false,
+        "created_at": "2026-10-12T16:14:50Z",
+        "expires_at": "2027-01-10T16:11:57Z",
+        "updated_at": "2026-10-12T16:14:50Z",
+        "digest": "sha256:5afa6b4e98792720db44b06a922d37ab1754cad5c27ad84e59a894952cbc796f",
+        "workflow_run": {
+          "id": 38275707566,
+          "repository_id": 1353304641,
+          "head_repository_id": 1353304641,
+          "head_branch": "routing/MK-ROUTING-20261011",
+          "head_sha": "4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2"
+        }
+      },
+      "zipPath": "/workspace/scratch/bb7931e64549/audit-library-source-4d1d4b7d/11758258908.zip",
+      "bytes": 11390,
+      "sha256": "5afa6b4e98792720db44b06a922d37ab1754cad5c27ad84e59a894952cbc796f",
+      "apiDigestMatches": true,
+      "apiSizeMatches": true,
+      "zipCRC": "pass",
+      "members": [
+        {
+          "path": "analyze.log",
+          "bytes": 97,
+          "sha256": "ae19f53c46ce66df76d62c80940e92f9a6658fa0763989832f3d4e0526225f07"
+        },
+        {
+          "path": "source.txt",
+          "bytes": 568,
+          "sha256": "81b8536d62576513f3772559c6b2234f928fca96603a4619c2d9bbb34e24bc57"
+        },
+        {
+          "path": "pub-get.log",
+          "bytes": 3417,
+          "sha256": "b531dbed92a07977e1640dbb71941cf5a2ac5427ee129a1139f0f2718b12757b"
+        },
+        {
+          "path": "tests.log",
+          "bytes": 63749,
+          "sha256": "e0061cdff27680a07b8bb07b0eabb82f9df97f97248eaa742e501fa1678f09f4"
+        }
+      ]
+    },
+    {
+      "artifact": {
+        "id": 11758209135,
+        "name": "routing-source-media_kit_video-4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2",
+        "size_in_bytes": 33192,
+        "url": "https://api.github.com/repos/Goodwu/media-kit/actions/artifacts/11758209135",
+        "archive_download_url": "https://api.github.com/repos/Goodwu/media-kit/actions/artifacts/11758209135/zip",
+        "expired": false,
+        "created_at": "2026-10-12T16:15:18Z",
+        "expires_at": "2027-01-10T16:11:57Z",
+        "updated_at": "2026-10-12T16:15:18Z",
+        "digest": "sha256:375d34ddaecbcae9c7759957fb47d8852577663134790006604811ed320b79d1",
+        "workflow_run": {
+          "id": 38275707566,
+          "repository_id": 1353304641,
+          "head_repository_id": 1353304641,
+          "head_branch": "routing/MK-ROUTING-20261011",
+          "head_sha": "4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2"
+        }
+      },
+      "zipPath": "/workspace/scratch/bb7931e64549/audit-library-source-4d1d4b7d/11758209135.zip",
+      "bytes": 33192,
+      "sha256": "375d34ddaecbcae9c7759957fb47d8852577663134790006604811ed320b79d1",
+      "apiDigestMatches": true,
+      "apiSizeMatches": true,
+      "zipCRC": "pass",
+      "members": [
+        {
+          "path": "analyze.log",
+          "bytes": 97,
+          "sha256": "c9860dca780e94a2b492d7957045a964807d5e29af26e43ae2c1621de22ab5c4"
+        },
+        {
+          "path": "ohos-js-compile.log",
+          "bytes": 110,
+          "sha256": "4acb636361db2c70370c8854a30db83313dd49c8406d157cae1f2ae60837a5a5"
+        },
+        {
+          "path": "ohos-js-run.log",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "ohos-smoke.js",
+          "bytes": 11664,
+          "sha256": "18115ab0c8f23e6b7ac75e7fcecb56a23d92674b88ab1b8513b7c9b040e64627"
+        },
+        {
+          "path": "ohos-smoke.js.deps",
+          "bytes": 11744,
+          "sha256": "378b8c7bc78082c70796511b8ddfbeec1e879aae87066ecf5c16906d5651ebb0"
+        },
+        {
+          "path": "ohos-smoke.js.map",
+          "bytes": 1359,
+          "sha256": "cd2124870451001dea1b92013ba55e8923af7a9c7c5f1ac41e322b95a4337998"
+        },
+        {
+          "path": "ohos-smoke.mjs",
+          "bytes": 6206,
+          "sha256": "c2db018fcaa8b25d2c832dda752219eb9a972dd32b7b7bf3bcb12b90a25f0bbe"
+        },
+        {
+          "path": "ohos-smoke.support.js",
+          "bytes": 200,
+          "sha256": "9b329fbb5f775a8c37a85ede978db00aa0e9543edbadb520c2f1fb0aac403140"
+        },
+        {
+          "path": "ohos-smoke.wasm",
+          "bytes": 406,
+          "sha256": "8ebaea49bf20e2091781c23dc2a0d2007fe046a98fd26b6da285ccc424100d59"
+        },
+        {
+          "path": "ohos-smoke.wasm.map",
+          "bytes": 2278,
+          "sha256": "89fbb6052eec22659510908062677f6203d01a6449c5bb1f9ab81369fdea7638"
+        },
+        {
+          "path": "ohos-wasm-compile.log",
+          "bytes": 208,
+          "sha256": "ab241587fb00271a91415901385b5c5ad21d35f5daca4d6b00272d1a8d954b22"
+        },
+        {
+          "path": "pub-get.log",
+          "bytes": 1635,
+          "sha256": "eb1f8d2bc84094716b5603e07ab50cb0b7aaaa3e4188e986ef545e5db73d4dc0"
+        },
+        {
+          "path": "source.txt",
+          "bytes": 568,
+          "sha256": "81b8536d62576513f3772559c6b2234f928fca96603a4619c2d9bbb34e24bc57"
+        },
+        {
+          "path": "tests.log",
+          "bytes": 148656,
+          "sha256": "dad7b3e48610f988791c16a369d55f199fcffc13bdbab3fd6dd83e1db0e84d28"
+        }
+      ]
+    }
+  ],
+  "artifactMethod": {
+    "primaryZipCount": 3,
+    "ancillarySmallZipCount": 2,
+    "method": "Purpose-built GitHub artifact download returned signed file references; actual bytes fetched, stored, and checked against API digest and size; ZIP CRC, unique safe member paths, member bytes and SHA256 checked.",
+    "frozenRevalidation": "All five ZIP files and extracted members were reread and compared during report generation.",
+    "signedDownloadUrlsRetained": false,
+    "artifactIdsAreNotPassEvidenceAlone": true
+  },
+  "librarySdk": {
+    "flutterVersion": "3.47.7",
+    "dartVersion": "3.13.5",
+    "devToolsVersion": "2.60.0",
+    "channel": "stable",
+    "frameworkRevision": "abaf9c5237",
+    "engineHash": "d8a2d6c768c334d53e16277f837970ffa1e2de81",
+    "engineRevision": "deb287481e",
+    "resolvedFlutterAction": "1a449444c387b1966244ae4d4f8c696479add0b2",
+    "sourceTxt": "task=MK-ROUTING-20261011\nscope=host-source-tests\nsource_sha=4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2\nsource_tree=34dfc9a45c039e2f1da327f057dc8807f1cf3df3\nFlutter 3.47.7 • channel stable • https://github.com/flutter/flutter.git\nFramework • revision abaf9c5237 (4 days ago) • 2026-10-08 09:51:21 -0700\nEngine • hash d8a2d6c768c334d53e16277f837970ffa1e2de81 (revision deb287481e) (5 days ago) • 2026-10-07 17:09:12.000Z\nTools • Dart 3.13.5 • DevTools 2.60.0\n\nNo prebuilt libmpv is installed by this job.\nThis job is not native-build or device acceptance.\n",
+    "bothPackageSourceTxtBytesIdentical": true,
+    "scope": "This is the library host workflow stable SDK, not App pinned/patched SDK verification."
+  },
+  "analyze": [
+    {
+      "package": "media_kit_video",
+      "artifactId": 11758209135,
+      "result": "No issues found",
+      "raw": "Analyzing media_kit_video...                                    \nNo issues found! (ran in 10.2s)\n",
+      "log": {
+        "path": "artifact-11758209135/analyze.log",
+        "bytes": 97,
+        "sha256": "c9860dca780e94a2b492d7957045a964807d5e29af26e43ae2c1621de22ab5c4"
+      }
+    },
+    {
+      "package": "media_kit_hdr_lab",
+      "artifactId": 11758258908,
+      "result": "No issues found",
+      "raw": "Analyzing media_kit_hdr_lab...                                  \nNo issues found! (ran in 15.1s)\n",
+      "log": {
+        "path": "artifact-11758258908/analyze.log",
+        "bytes": 97,
+        "sha256": "ae19f53c46ce66df76d62c80940e92f9a6658fa0763989832f3d4e0526225f07"
+      }
+    }
+  ],
+  "tests": {
+    "command": "flutter test --no-pub --concurrency=1 --reporter expanded",
+    "video": {
+      "passed": 777,
+      "skipped": 3,
+      "failed": 0,
+      "rawSummary": "00:39 +777 ~3: All tests passed!",
+      "log": {
+        "path": "artifact-11758209135/tests.log",
+        "bytes": 148656,
+        "sha256": "dad7b3e48610f988791c16a369d55f199fcffc13bdbab3fd6dd83e1db0e84d28"
+      }
+    },
+    "lab": {
+      "passed": 298,
+      "skipped": 0,
+      "failed": 0,
+      "rawSummary": "00:29 +298: All tests passed!",
+      "log": {
+        "path": "artifact-11758258908/tests.log",
+        "bytes": 63749,
+        "sha256": "e0061cdff27680a07b8bb07b0eabb82f9df97f97248eaa742e501fa1678f09f4"
+      }
+    },
+    "newCapabilitySubscriptionTests": [
+      {
+        "name": "disposing one Session preserves the surviving capability refresh",
+        "result": "passed",
+        "artifactId": 11758209135,
+        "logMember": "tests.log",
+        "startLine": 712,
+        "startRecord": "00:35 +645 ~3: /home/runner/work/media-kit/media-kit/media_kit_video/test/android_hdr_capability_subscription_test.dart: disposing one Session preserves the surviving capability refresh",
+        "nextProgressLine": 715,
+        "nextProgressRecord": "00:35 +646 ~3: /home/runner/work/media-kit/media-kit/media_kit_video/test/android_hdr_capability_subscription_test.dart: listener registration and repeated enables do not count extra owners",
+        "skipCounterUnchanged": 3
+      },
+      {
+        "name": "listener registration and repeated enables do not count extra owners",
+        "result": "passed",
+        "artifactId": 11758209135,
+        "logMember": "tests.log",
+        "startLine": 715,
+        "startRecord": "00:35 +646 ~3: /home/runner/work/media-kit/media-kit/media_kit_video/test/android_hdr_capability_subscription_test.dart: listener registration and repeated enables do not count extra owners",
+        "nextProgressLine": 716,
+        "nextProgressRecord": "00:35 +647 ~3: /home/runner/work/media-kit/media-kit/media_kit_video/test/android_hdr_capability_subscription_test.dart: a late disable cannot unsubscribe a replacement Session",
+        "skipCounterUnchanged": 3
+      },
+      {
+        "name": "a late disable cannot unsubscribe a replacement Session",
+        "result": "passed",
+        "artifactId": 11758209135,
+        "logMember": "tests.log",
+        "startLine": 716,
+        "startRecord": "00:35 +647 ~3: /home/runner/work/media-kit/media-kit/media_kit_video/test/android_hdr_capability_subscription_test.dart: a late disable cannot unsubscribe a replacement Session",
+        "nextProgressLine": 717,
+        "nextProgressRecord": "00:35 +648 ~3: /home/runner/work/media-kit/media-kit/media_kit_video/test/android_hdr_capability_subscription_test.dart: a delayed native acknowledgement does not retain a disposed owner",
+        "skipCounterUnchanged": 3
+      },
+      {
+        "name": "a delayed native acknowledgement does not retain a disposed owner",
+        "result": "passed",
+        "artifactId": 11758209135,
+        "logMember": "tests.log",
+        "startLine": 717,
+        "startRecord": "00:35 +648 ~3: /home/runner/work/media-kit/media-kit/media_kit_video/test/android_hdr_capability_subscription_test.dart: a delayed native acknowledgement does not retain a disposed owner",
+        "nextProgressLine": 718,
+        "nextProgressRecord": "00:35 +649 ~3: /home/runner/work/media-kit/media-kit/media_kit_video/test/android_hdr_capability_subscription_test.dart: native failures preserve current ownership and permit a retry",
+        "skipCounterUnchanged": 3
+      },
+      {
+        "name": "native failures preserve current ownership and permit a retry",
+        "result": "passed",
+        "artifactId": 11758209135,
+        "logMember": "tests.log",
+        "startLine": 718,
+        "startRecord": "00:35 +649 ~3: /home/runner/work/media-kit/media-kit/media_kit_video/test/android_hdr_capability_subscription_test.dart: native failures preserve current ownership and permit a retry",
+        "nextProgressLine": 719,
+        "nextProgressRecord": "00:35 +650 ~3: loading /home/runner/work/media-kit/media-kit/media_kit_video/test/hdr_execution_catalog_test.dart",
+        "skipCounterUnchanged": 3
+      }
+    ],
+    "newSubscriptionScope": "Five real HdrVideoSession.forTesting cases with FakeHdrBackend and mocked MethodChannel; hosted Dart compilation/analyzer and actual test execution are accepted, no native display or device result inferred.",
+    "nativeSurfaceSkips": {
+      "count": 3,
+      "file": "media_kit_video/test/native_surface_viewport_test.dart",
+      "condition": "skip: !Platform.isMacOS",
+      "names": [
+        "production Video keeps one native view on promotion and resize",
+        "production native-window path retains decoder-sized legacy fit",
+        "production native surface rejects nonfinite rect before toInt"
+      ],
+      "separateDarwinRunExecutesFullFile": true,
+      "uniqueCountsNotAddedAcrossOverlappingSuites": true
+    },
+    "artifactToDecodedRawJobProgressComparison": [
+      {
+        "artifactLog": "artifact-11758209135/tests.log",
+        "rawJobLog": "job-114901096810-video.raw.log",
+        "actualProgressRecords": 838,
+        "allRecordsPresentInRawJobLog": true
+      },
+      {
+        "artifactLog": "artifact-11758258908/tests.log",
+        "rawJobLog": "job-114901096514-lab.raw.log",
+        "actualProgressRecords": 318,
+        "allRecordsPresentInRawJobLog": true
+      }
+    ]
+  },
+  "pythonTools": {
+    "passed": 45,
+    "suites": [
+      {
+        "log": {
+          "path": "artifact-11758563900/extractor.log",
+          "bytes": 818,
+          "sha256": "84ed74d0771db41a0760eac21c7a75b0eab2b2db9bf74261a3811b422d54bb5d"
+        },
+        "passed": 6,
+        "rawResultLines": [
+          "Ran 6 tests in 0.001s",
+          "OK"
+        ]
+      },
+      {
+        "log": {
+          "path": "artifact-11758563900/repair-tool.log",
+          "bytes": 1785,
+          "sha256": "d6ea5faf5d52600de76d7b8c11443efd7cf65bddf6b4c24978ef590d1f1fb397"
+        },
+        "passed": 12,
+        "rawResultLines": [
+          "Ran 12 tests in 0.012s",
+          "OK"
+        ]
+      },
+      {
+        "log": {
+          "path": "artifact-11758563900/matrix-regression.log",
+          "bytes": 4631,
+          "sha256": "30e6adcf8d74ee1a3fa30dcf88d1a26779f493a680924030e4d74560bf60211f"
+        },
+        "passed": 27,
+        "rawResultLines": [
+          "Ran 27 tests in 0.378s",
+          "OK"
+        ]
+      }
+    ],
+    "sourceTxt": "task=MK-ROUTING-20261011\nscope=library-python-tool-tests\nlibrary_head=4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2\nlibrary_tree=34dfc9a45c039e2f1da327f057dc8807f1cf3df3\napp_helper_exercised=false\nnative_build=false\napk_build=false\ndevice_test=false\n",
+    "scope": "Library audit extraction/guarded repair utilities plus synthetic or mocked routing matrix tests; no App native helper, native build, APK or device test.",
+    "expectedNegativeDiagnostic": "matrix-regression.log contains expected failed-receipt diagnostics inside successful negative tests; actual unittest summary is 27 tests OK."
+  },
+  "javascriptAndWasm": {
+    "source": "media_kit_video/test/web/ohos_sw_render_smoke.dart",
+    "javascriptCompile": "passed; actual 11664-byte ohos-smoke.js member hashed in video artifact",
+    "javascriptExecution": "passed in hosted node command under set -euo pipefail; empty ohos-js-run.log is expected for assertion-only smoke; the overall step completed successfully.",
+    "javascriptCompileLog": "Compiled 10,749,787 input bytes (5,319,685 characters source) to 11,664 characters JavaScript in 0.22 seconds\n",
+    "javascriptRunStdoutBytes": 0,
+    "wasmCompile": "passed; actual 406-byte ohos-smoke.wasm plus JS init/support/maps members hashed in video artifact",
+    "wasmCompileLog": "Generated wasm module '/home/runner/work/media-kit/media-kit/.ci-results/media_kit_video/ohos-smoke.wasm', and JS init file '/home/runner/work/media-kit/media-kit/.ci-results/media_kit_video/ohos-smoke.mjs'.\n",
+    "wasmExecution": "not performed by this workflow",
+    "scope": "Non-OHOS facade/stub compile and JavaScript unavailability assertions; not Web Player Chrome shuffle regression or native OHOS rendering."
+  },
+  "packageRootEvidence": [
+    {
+      "package": "media_kit_video",
+      "artifactId": 11758209135,
+      "workingDirectory": "/home/runner/work/media-kit/media-kit/media_kit_video",
+      "pubGetPathDependencyRecords": [
+        "! media_kit 1.2.1 from path ../media_kit (overridden in ./pubspec_overrides.yaml)"
+      ]
+    },
+    {
+      "package": "media_kit_hdr_lab",
+      "artifactId": 11758258908,
+      "workingDirectory": "/home/runner/work/media-kit/media-kit/media_kit_hdr_lab",
+      "pubGetPathDependencyRecords": [
+        "! media_kit 1.2.1 from path ../media_kit (overridden in ./pubspec_overrides.yaml)",
+        "+ media_kit_android_dataspace_vendor 1.0.0+1 from path ../libs/android/media_kit_android_dataspace_vendor",
+        "! media_kit_libs_android_video 1.3.8 from path ../libs/android/media_kit_libs_android_video (overridden in ./pubspec_overrides.yaml)",
+        "! media_kit_libs_ios_video 1.1.4 from path ../libs/ios/media_kit_libs_ios_video (overridden in ./pubspec_overrides.yaml)",
+        "! media_kit_libs_linux 1.2.1 from path ../libs/linux/media_kit_libs_linux (overridden in ./pubspec_overrides.yaml)",
+        "! media_kit_libs_macos_video 1.1.4 from path ../libs/macos/media_kit_libs_macos_video (overridden in ./pubspec_overrides.yaml)",
+        "! media_kit_libs_ohos 1.0.0 from path ../libs/ohos/media_kit_libs_ohos (overridden in ./pubspec_overrides.yaml)",
+        "! media_kit_libs_video 1.0.5 from path ../libs/universal/media_kit_libs_video (overridden in ./pubspec_overrides.yaml)",
+        "! media_kit_libs_windows_video 1.0.11 from path ../libs/windows/media_kit_libs_windows_video (overridden in ./pubspec_overrides.yaml)",
+        "! media_kit_video 1.3.1+1 from path ../media_kit_video (overridden in ./pubspec_overrides.yaml)"
+      ]
+    }
+  ],
+  "freshness": {
+    "headAndTreeBoundByActualSourceTxt": true,
+    "actualCheckoutAndRevParseCheckedInAllPrimaryRawJobLogs": true,
+    "sourceTestWorkingDirectoriesBoundByExpandedAbsolutePaths": true,
+    "sourceStabilityGate": "Both source jobs executed git diff --exit-code -- lib test; utility steps executed git diff --exit-code. All corresponding steps completed successfully.",
+    "sourceFilesCopiedFromExactCommit": [
+      {
+        "path": "source-files/.github/workflows/ohos.yml",
+        "bytes": 8474,
+        "sha256": "e2f0e7ed328feb5f0fe873704f3a3e36aa2279ac4d69befc29c44cd261d5c429",
+        "repoPath": ".github/workflows/ohos.yml",
+        "commit": "4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2",
+        "gitBlob": "a481249aba0f02674d6825535876c0e0e1d00519"
+      },
+      {
+        "path": "source-files/.github/workflows/routing-darwin-tests.yml",
+        "bytes": 1835,
+        "sha256": "456746acdb6445fc340c8c543927c106646b537eaf53b5905f3d1841679a5462",
+        "repoPath": ".github/workflows/routing-darwin-tests.yml",
+        "commit": "4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2",
+        "gitBlob": "1c18fc6bb01840c88ed19a7ae47bec456eeea438"
+      },
+      {
+        "path": "source-files/.github/workflows/routing-query-tests.yml",
+        "bytes": 2300,
+        "sha256": "fcbe2d37aa3383019cc99256e3bed6f95cfa5491dabc168939d1235ed6b4e352",
+        "repoPath": ".github/workflows/routing-query-tests.yml",
+        "commit": "4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2",
+        "gitBlob": "aa2c5ed2345012f4670cd0452120e910765f4900"
+      },
+      {
+        "path": "source-files/.github/workflows/routing-source.yml",
+        "bytes": 5479,
+        "sha256": "9c8bc39d35e308eed782d4b948f9cc485592a02586a45cef14bb082a1e3fa477",
+        "repoPath": ".github/workflows/routing-source.yml",
+        "commit": "4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2",
+        "gitBlob": "41afdd0cfbbcc9e75c1642899013ad9cb304949b"
+      },
+      {
+        "path": "source-files/media_kit_hdr_lab/pubspec.yaml",
+        "bytes": 964,
+        "sha256": "9172dc878d2f8fefa30fc83d50a721df79a107a327d14023adf9ea00ad13d4f7",
+        "repoPath": "media_kit_hdr_lab/pubspec.yaml",
+        "commit": "4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2",
+        "gitBlob": "0b876193b6e9fc497423c41cab68822a2fb950a6"
+      },
+      {
+        "path": "source-files/media_kit_hdr_lab/pubspec_overrides.yaml",
+        "bytes": 1042,
+        "sha256": "42a5af31da4d55b651835dadfeed1eae4bf4e305645e86451e7577429326df6e",
+        "repoPath": "media_kit_hdr_lab/pubspec_overrides.yaml",
+        "commit": "4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2",
+        "gitBlob": "b4643f48b5dc9732421dbef7624726ca6f9ac2ff"
+      },
+      {
+        "path": "source-files/media_kit_video/lib/src/video_controller/android_video_controller/real.dart",
+        "bytes": 83379,
+        "sha256": "8a0073c434aa8606491902e5659abac732039fc071dc845f1fe9f5f284d57609",
+        "repoPath": "media_kit_video/lib/src/video_controller/android_video_controller/real.dart",
+        "commit": "4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2",
+        "gitBlob": "27e21ca1ebf3d07d5d62f040e08d47a3fc7d4748"
+      },
+      {
+        "path": "source-files/media_kit_video/pubspec.yaml",
+        "bytes": 1218,
+        "sha256": "29483295ddcb67881160965e27f15384ea4d50e706e073dc641b96c49e7343d2",
+        "repoPath": "media_kit_video/pubspec.yaml",
+        "commit": "4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2",
+        "gitBlob": "fbaf8a26e7d2a31a5e3ca7338eefaf71a02ad224"
+      },
+      {
+        "path": "source-files/media_kit_video/pubspec_overrides.yaml",
+        "bytes": 106,
+        "sha256": "490253e634b98e900c23c8153f403005c9083a792ba220e8935f545c5e46eb65",
+        "repoPath": "media_kit_video/pubspec_overrides.yaml",
+        "commit": "4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2",
+        "gitBlob": "70f2793f92afd0263c61755a65884f4a67481e15"
+      },
+      {
+        "path": "source-files/media_kit_video/test/android_hdr_capability_subscription_test.dart",
+        "bytes": 7929,
+        "sha256": "b61386dc3b0e7099f5a9ae3f60303ff2e65e716ddb55f67892cf10cbf2dfde8b",
+        "repoPath": "media_kit_video/test/android_hdr_capability_subscription_test.dart",
+        "commit": "4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2",
+        "gitBlob": "4a699a0d95e2470956252dcd1fba811346f18566"
+      },
+      {
+        "path": "source-files/media_kit_video/test/native_surface_viewport_test.dart",
+        "bytes": 12660,
+        "sha256": "f643043372ea4d043d2b4b8f7b5551d5dcf9cf292bd4ef54b62f4b2c6ed228d3",
+        "repoPath": "media_kit_video/test/native_surface_viewport_test.dart",
+        "commit": "4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2",
+        "gitBlob": "0ee48f2a4500add3f2cd6a5310a5c1a5acf64b82"
+      },
+      {
+        "path": "source-files/media_kit_video/test/web/ohos_sw_render_smoke.dart",
+        "bytes": 738,
+        "sha256": "3e285ab90f1fe2cce8cfbca240986d9197998f615f3453528466751c256d50b0",
+        "repoPath": "media_kit_video/test/web/ohos_sw_render_smoke.dart",
+        "commit": "4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2",
+        "gitBlob": "2b061fc90a33163d876d3a2070023922ed31aea2"
+      }
+    ]
+  },
+  "excludedCompetingRun": {
+    "run": {
+      "id": 38275699290,
+      "name": "Routing source checks",
+      "event": "push",
+      "status": "completed",
+      "conclusion": "cancelled",
+      "head_sha": "4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2",
+      "head_branch": "routing/MK-ROUTING-20261011",
+      "run_attempt": 1,
+      "created_at": "2026-10-12T16:11:52Z",
+      "updated_at": "2026-10-12T16:13:26Z",
+      "html_url": "https://github.com/Goodwu/media-kit/actions/runs/38275699290",
+      "path": ".github/workflows/routing-source.yml"
+    },
+    "acceptance": "excluded; canceled push attempt is not substituted for successful PR attempt"
+  },
+  "ancillary": {
+    "query": {
+      "run": {
+        "id": 38275707339,
+        "name": "Routing target and source query checks",
+        "event": "pull_request",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2",
+        "head_branch": "routing/MK-ROUTING-20261011",
+        "run_attempt": 1,
+        "created_at": "2026-10-12T16:11:56Z",
+        "updated_at": "2026-10-12T16:18:35Z",
+        "html_url": "https://github.com/Goodwu/media-kit/actions/runs/38275707339",
+        "path": ".github/workflows/routing-query-tests.yml"
+      },
+      "jobs": [
+        {
+          "id": 114901099598,
+          "name": "android-query",
+          "status": "completed",
+          "conclusion": "success",
+          "head_sha": null,
+          "run_attempt": null,
+          "started_at": null,
+          "completed_at": null,
+          "html_url": null,
+          "steps": [
+            {
+              "number": 1,
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 2,
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 3,
+              "name": "Run actions/setup-java@v4",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 4,
+              "name": "Run subosito/flutter-action@v2",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 5,
+              "name": "Record scope and test current Java query with host fixtures",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 6,
+              "name": "Resolve current lab and compile actual Android plugin Java",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 7,
+              "name": "Check source stayed unchanged",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 8,
+              "name": "Run actions/upload-artifact@v4",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 14,
+              "name": "Post Run subosito/flutter-action@v2",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 15,
+              "name": "Post Run actions/setup-java@v4",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 16,
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 17,
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success"
+            }
+          ]
+        }
+      ],
+      "artifact": {
+        "artifact": {
+          "id": 11758939107,
+          "name": "routing-query-4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2",
+          "size_in_bytes": 4587,
+          "url": "https://api.github.com/repos/Goodwu/media-kit/actions/artifacts/11758939107",
+          "archive_download_url": "https://api.github.com/repos/Goodwu/media-kit/actions/artifacts/11758939107/zip",
+          "expired": false,
+          "created_at": "2026-10-12T16:18:31Z",
+          "expires_at": "2027-01-10T16:11:56Z",
+          "updated_at": "2026-10-12T16:18:31Z",
+          "digest": "sha256:6ed848f1977c18e4c6d7d284629d2b3d32629088e663b62b65a9678845886f74",
+          "workflow_run": {
+            "id": 38275707339,
+            "repository_id": 1353304641,
+            "head_repository_id": 1353304641,
+            "head_branch": "routing/MK-ROUTING-20261011",
+            "head_sha": "4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2"
+          }
+        },
+        "zipPath": "/workspace/scratch/bb7931e64549/audit-library-source-4d1d4b7d/11758939107.zip",
+        "bytes": 4587,
+        "sha256": "6ed848f1977c18e4c6d7d284629d2b3d32629088e663b62b65a9678845886f74",
+        "apiDigestMatches": true,
+        "apiSizeMatches": true,
+        "zipCRC": "pass",
+        "members": [
+          {
+            "path": "android-java.log",
+            "bytes": 15939,
+            "sha256": "6c0d6de7288833efebc07b060a744d21ce0194f0d419e73c53744bffbd97fb80"
+          },
+          {
+            "path": "host-java.log",
+            "bytes": 432,
+            "sha256": "c44f7463f4baa878ecea25095f9601223bc8a578284b3b1ce6c316e5c2d0f904"
+          },
+          {
+            "path": "pub-get.log",
+            "bytes": 3417,
+            "sha256": "b531dbed92a07977e1640dbb71941cf5a2ac5427ee129a1139f0f2718b12757b"
+          },
+          {
+            "path": "scope.txt",
+            "bytes": 108,
+            "sha256": "08f40e563cca003ff27bb2c43caa67cf7ed3d5cf738573fe3ccff16efabc9149"
+          },
+          {
+            "path": "source.txt",
+            "bytes": 41,
+            "sha256": "e6f25741d59fe5c61aa72f5d101891e7adb8fa6a6e0f63b3b874b059e1374892"
+          }
+        ]
+      },
+      "actualCheckout": "4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2",
+      "actualPythonTestsPassed": 1,
+      "actualJavaFixtureAssertionsPassed": 34,
+      "hostJavaRaw": "test_current_production_query_with_host_fixtures (test_android_query.AndroidQueryTest.test_current_production_query_with_host_fixtures) ... Note: /tmp/tmpgg14sek2/com/alexmercerind/media_kit_video/QueryTest.java uses unchecked or unsafe operations.\nNote: Recompile with -Xlint:unchecked for details.\nhost_query_assertions_passed=34\nok\n\n----------------------------------------------------------------------\nRan 1 test in 4.396s\n\nOK\n",
+      "actualPluginCompileResult": "BUILD SUCCESSFUL in 3m 23s",
+      "actualPluginCompileTask": ":media_kit_video:compileDebugJavaWithJavac",
+      "scopeTxt": "Host query fixtures and Android plugin Java compilation only; no native player binary or device acceptance.\n",
+      "limits": "Host query fixture and actual Android plugin Java compilation; no native player binary, device or lifecycle acceptance. Fixture unchecked-operation note is retained in raw log."
+    },
+    "darwin": {
+      "run": {
+        "id": 38275707332,
+        "name": "Routing Darwin viewport checks",
+        "event": "pull_request",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2",
+        "head_branch": "routing/MK-ROUTING-20261011",
+        "run_attempt": 1,
+        "created_at": "2026-10-12T16:11:56Z",
+        "updated_at": "2026-10-12T16:13:28Z",
+        "html_url": "https://github.com/Goodwu/media-kit/actions/runs/38275707332",
+        "path": ".github/workflows/routing-darwin-tests.yml"
+      },
+      "jobs": [
+        {
+          "id": 114900533486,
+          "name": "Darwin viewport widget tests (macOS)",
+          "status": "completed",
+          "conclusion": "success",
+          "head_sha": null,
+          "run_attempt": null,
+          "started_at": null,
+          "completed_at": null,
+          "html_url": null,
+          "steps": [
+            {
+              "number": 1,
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 2,
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 3,
+              "name": "Run subosito/flutter-action@v2",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 4,
+              "name": "Resolve current source and record provenance",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 5,
+              "name": "Exercise cases skipped by Linux host tests",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 6,
+              "name": "Run actions/upload-artifact@v4",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 11,
+              "name": "Post Run subosito/flutter-action@v2",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 12,
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 13,
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success"
+            }
+          ]
+        }
+      ],
+      "artifact": {
+        "artifact": {
+          "id": 11758887426,
+          "name": "routing-darwin-4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2",
+          "size_in_bytes": 1810,
+          "url": "https://api.github.com/repos/Goodwu/media-kit/actions/artifacts/11758887426",
+          "archive_download_url": "https://api.github.com/repos/Goodwu/media-kit/actions/artifacts/11758887426/zip",
+          "expired": false,
+          "created_at": "2026-10-12T16:13:24Z",
+          "expires_at": "2027-01-10T16:11:56Z",
+          "updated_at": "2026-10-12T16:13:24Z",
+          "digest": "sha256:be70adec5dc9bfd4f06b87d3e9beafd0916efc94fceaa31161388277a2751791",
+          "workflow_run": {
+            "id": 38275707332,
+            "repository_id": 1353304641,
+            "head_repository_id": 1353304641,
+            "head_branch": "routing/MK-ROUTING-20261011",
+            "head_sha": "4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2"
+          }
+        },
+        "zipPath": "/workspace/scratch/bb7931e64549/audit-library-source-4d1d4b7d/11758887426.zip",
+        "bytes": 1810,
+        "sha256": "be70adec5dc9bfd4f06b87d3e9beafd0916efc94fceaa31161388277a2751791",
+        "apiDigestMatches": true,
+        "apiSizeMatches": true,
+        "zipCRC": "pass",
+        "members": [
+          {
+            "path": "pub-get.log",
+            "bytes": 1635,
+            "sha256": "eb1f8d2bc84094716b5603e07ab50cb0b7aaaa3e4188e986ef545e5db73d4dc0"
+          },
+          {
+            "path": "source.txt",
+            "bytes": 431,
+            "sha256": "bc6a135d4d961307820689b7396ec7ed4bd95809e2843ee78a66960ef871597d"
+          },
+          {
+            "path": "tests.log",
+            "bytes": 782,
+            "sha256": "90174c5e281f6d3d8f06f72f24a76bd78e5c85f2a77e43288ef3cc3040ecebe7"
+          }
+        ]
+      },
+      "actualCheckout": "4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2",
+      "suite": "media_kit_video/test/native_surface_viewport_test.dart",
+      "tests": {
+        "passed": 9,
+        "skipped": 0,
+        "failed": 0,
+        "rawSummary": "00:00 +9: All tests passed!",
+        "log": {
+          "path": "artifact-11758887426/tests.log",
+          "bytes": 782,
+          "sha256": "90174c5e281f6d3d8f06f72f24a76bd78e5c85f2a77e43288ef3cc3040ecebe7"
+        }
+      },
+      "sourceTxt": "4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2\nFlutter 3.47.7 • channel stable • https://github.com/flutter/flutter.git\nFramework • revision abaf9c5237 (4 days ago) • 2026-10-08 09:51:21 -0700\nEngine • hash d8a2d6c768c334d53e16277f837970ffa1e2de81 (revision deb287481e) (5 days ago) • 2026-10-07 17:09:12.000Z\nTools • Dart 3.13.5 • DevTools 2.60.0\n\nScope: mocked platform-view widget tests, not native/device acceptance.\n",
+      "scope": "Mocked platform-view widgets on macOS host, including three cases skipped on Linux; not native renderer/device acceptance."
+    },
+    "ohos": {
+      "run": {
+        "id": 38275707109,
+        "name": "Build OHOS unsigned HAP",
+        "event": "pull_request",
+        "status": "completed",
+        "conclusion": "success",
+        "head_sha": "4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2",
+        "head_branch": "routing/MK-ROUTING-20261011",
+        "run_attempt": 1,
+        "created_at": "2026-10-12T16:11:56Z",
+        "updated_at": "2026-10-12T16:15:55Z",
+        "html_url": "https://github.com/Goodwu/media-kit/actions/runs/38275707109",
+        "path": ".github/workflows/ohos.yml"
+      },
+      "jobs": [
+        {
+          "id": 114900529796,
+          "name": "OHOS arm64 unsigned HAP",
+          "status": "completed",
+          "conclusion": "success",
+          "head_sha": null,
+          "run_attempt": null,
+          "started_at": null,
+          "completed_at": null,
+          "html_url": null,
+          "steps": [
+            {
+              "number": 1,
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 2,
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 3,
+              "name": "Install build dependencies",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 4,
+              "name": "Set up HarmonyOS toolchain",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 5,
+              "name": "Set up Java",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 6,
+              "name": "Set up Flutter OHOS (pinned mirror + patch branch)",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 7,
+              "name": "Verify Flutter OHOS toolchain",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 8,
+              "name": "Verify native libmpv provenance",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 9,
+              "name": "Resolve locked dependencies",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 10,
+              "name": "Upload OHOS lock candidate",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 11,
+              "name": "Build unsigned HAP",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 12,
+              "name": "Verify HAP is unsigned and arm64",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 13,
+              "name": "Generate OHOS release metadata",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 14,
+              "name": "Run actions/upload-artifact@v4",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 26,
+              "name": "Post Set up Java",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 27,
+              "name": "Post Set up HarmonyOS toolchain",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 28,
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "number": 29,
+              "name": "Complete job",
+              "status": "completed",
+              "conclusion": "success"
+            }
+          ]
+        }
+      ],
+      "apiHeadSha": "4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2",
+      "actualCheckoutRef": "refs/remotes/pull/4/merge",
+      "actualCheckout": "3222682893e9659fe44fbaa8977b160aa9bfe99a",
+      "mergeBaseCommit": "d761922721ad8da6bb186abd270bb096100944ea",
+      "framework": "Flutter 3.44.9+ohos",
+      "dart": "3.12.2",
+      "flutterOhosPatchCommit": "2ece1aaeb4bb386c66708e9992e03aafb8dc73da",
+      "flutterOhosBaseCommit": "4f1a4267afdd99ef58f81ae825fae7fb5603c67e",
+      "actualRawBuildResult": "Built build/ohos/hap/entry-default-unsigned.hap (61.1MB).",
+      "artifactIdReportedByJob": 11759401099,
+      "artifactBytesReportedByJob": 27336132,
+      "hapSha256ReportedByJob": "1b8bacb8e0fc6b25c7fee6d653f0e824b37daef29df6f17f1f0bfd1020e84a13",
+      "hapArtifactDownloadedByThisReview": false,
+      "scope": "Only terminal status and actual raw build/checkout logs reviewed. Success binds merge tree above, not exact head-only source. HAP bytes independently unverified here; no native HDR or DEVICE approval."
+    }
+  },
+  "generalObservation": {
+    "observedUtc": "2026-10-12T16:25:00Z",
+    "newGeneral": {
+      "id": 38275707106,
+      "name": "Github Actions",
+      "event": "pull_request",
+      "status": "pending",
+      "conclusion": null,
+      "head_sha": "4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2",
+      "head_branch": "routing/MK-ROUTING-20261011",
+      "run_attempt": 1,
+      "created_at": "2026-10-12T16:11:56Z",
+      "updated_at": "2026-10-12T16:11:57Z",
+      "html_url": "https://github.com/Goodwu/media-kit/actions/runs/38275707106",
+      "path": ".github/workflows/ci.yml"
+    },
+    "oldGeneral": {
+      "id": 38272288190,
+      "name": "Github Actions",
+      "event": "pull_request",
+      "status": "in_progress",
+      "conclusion": null,
+      "head_sha": "a73d570b633a949aab6a31e8f68ec03a13643c31",
+      "head_branch": "routing/MK-ROUTING-20261011",
+      "run_attempt": 1,
+      "created_at": "2026-10-12T15:43:13Z",
+      "updated_at": "2026-10-12T15:58:27Z",
+      "html_url": "https://github.com/Goodwu/media-kit/actions/runs/38272288190",
+      "path": ".github/workflows/ci.yml"
+    },
+    "scope": "One status read per requested run. New head general remains pending; old a73 general remains in progress. Neither is accepted as complete or relabeled. No continued polling or cancellation.",
+    "webShuffleSixTargetedCases": "No execution result claimed from this library-source workflow; new general is pending."
+  },
+  "rawLogs": [
+    {
+      "path": "job-114901096514-lab.raw.log",
+      "bytes": 108293,
+      "sha256": "1ca4e69a08b222a8cb41bbb5ffba265c5c5f75a581ea4875a73ae2ff5b399d1a",
+      "characters": 108275,
+      "encoding": "UTF-8, decoded raw job-log response preserved including initial BOM",
+      "sha256Scope": "decoded response saved as UTF-8; not original GitHub log archive bytes"
+    },
+    {
+      "path": "job-114901096810-video.raw.log",
+      "bytes": 208958,
+      "sha256": "3fe0a24a8c148bdb5595403875d86135a539b73338ffaa0613759d359c82331b",
+      "characters": 208887,
+      "encoding": "UTF-8, decoded raw job-log response preserved including initial BOM",
+      "sha256Scope": "decoded response saved as UTF-8; not original GitHub log archive bytes"
+    },
+    {
+      "path": "job-114901096712-tools.raw.log",
+      "bytes": 25461,
+      "sha256": "d15f681492c841e11bc4741a930f194457451192a2a8c0aca4068875c7d2f916",
+      "characters": 25459,
+      "encoding": "UTF-8, decoded raw job-log response preserved including initial BOM",
+      "sha256Scope": "decoded response saved as UTF-8; not original GitHub log archive bytes"
+    },
+    {
+      "path": "job-114900533486-darwin.raw.log",
+      "bytes": 31011,
+      "sha256": "7245b90892a275f0b497e331d8ec74d145e44bc3756ef8087f7a42c4ba6f6b60",
+      "characters": 30993,
+      "encoding": "UTF-8, decoded raw job-log response preserved including initial BOM",
+      "sha256Scope": "decoded response saved as UTF-8; not original GitHub log archive bytes"
+    },
+    {
+      "path": "job-114901099598-query.raw.log",
+      "bytes": 58039,
+      "sha256": "ae1c1ffe45d8717c097e2e5ed6f521adace994e42d9cf959931368d8d330d056",
+      "characters": 58037,
+      "encoding": "UTF-8, decoded raw job-log response preserved including initial BOM",
+      "sha256Scope": "decoded response saved as UTF-8; not original GitHub log archive bytes"
+    },
+    {
+      "path": "job-114900529796-ohos.raw.log",
+      "bytes": 75251,
+      "sha256": "07cd495e01807ba384c2290d0078ffa958ee55b2301d526d175f8356e63e03bc",
+      "characters": 75145,
+      "encoding": "UTF-8, decoded raw job-log response preserved including initial BOM",
+      "sha256Scope": "decoded response saved as UTF-8; not original GitHub log archive bytes"
+    }
+  ],
+  "apiSnapshotFiles": [
+    {
+      "path": "api-final-snapshots.json",
+      "bytes": 91410,
+      "sha256": "1b3d477d56f4df8189e6c3f5436ffec6ff9fcaaf5932444efb6b2927363bf4e3"
+    },
+    {
+      "path": "api-general-observation.json",
+      "bytes": 29359,
+      "sha256": "7109a3a285437d0ac79292ae649bc82214221af8c593a66a2221186603e2ddec"
+    },
+    {
+      "path": "source-run.json",
+      "bytes": 14120,
+      "sha256": "ff2d6552605afe381a9bb28c1bb77f5b2db791ef50b66002b4feb743157fdaa4"
+    },
+    {
+      "path": "source-jobs.json",
+      "bytes": 5861,
+      "sha256": "cfb9d54e7fca98c72477da7930a76dad37811aecb2eb2d516020147880826ae9"
+    },
+    {
+      "path": "source-artifacts.json",
+      "bytes": 2465,
+      "sha256": "f28182ae143c439b2048b4fcb0d4696360079a28daa47db56706dd213e803a8a"
+    }
+  ],
+  "limitationsAndRemainingWork": [
+    "Only exact library HEAD 4d1d4b7d is accepted by primary source, query and Darwin evidence; no prior a73/0c or App evidence relabeled.",
+    "New general/Web Chrome targeted and full suite remain pending; old a73 general remains in progress as of one-shot observation.",
+    "No local Dart/Flutter/Chrome/native test was run; all passing Flutter evidence above comes from hosted logs and actual downloaded artifacts.",
+    "No Android native player binary, final APK/JAR, device HDR, owner/ACK/lease or sustained performance result accepted.",
+    "DV001 and PR #5 required integration remain open; excluded native recipes, DEVICE claims and ledger fail-closed gates unchanged.",
+    "DV003/DV004/DV006 review and unresolved diagnostic/acceptance decisions are outside this source CI result.",
+    "Three Linux platform-specific skips are preserved and explained; separate Darwin nine-test result overlaps existing cross-platform cases.",
+    "Artifact logs prove build/test outputs and source receipt; node action deprecation warnings do not alter clean Dart analyze result.",
+    "All main PRs remain unmerged/unclosed/unreleased; this verifier made no repository, comment or workflow mutations."
+  ]
+}
