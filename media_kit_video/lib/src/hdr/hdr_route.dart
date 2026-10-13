@@ -349,6 +349,8 @@ class HdrRoute {
       'stripRpu: $stripDvRpu, deps: $dependencies)';
 }
 
+enum HdrRouteStage { c1, c2, c3, c4 }
+
 enum HdrCandidateStatus { ready, skipped, unavailable, error }
 
 /// {@template hdr_candidate}
@@ -367,9 +369,40 @@ class HdrCandidate {
     this.isSafetyNet = false,
     this.skipReason,
     this.route,
+    this.sourceClass,
+    this.stage,
   });
 
   final HdrStrategy strategy;
+
+  /// The source classification and immutable C1–C4 order of this candidate.
+  final HdrSourceClass? sourceClass;
+  final HdrRouteStage? stage;
+
+  /// Stable within a planning snapshot; the snapshot identity itself is owned
+  /// by the caller and must be checked again before execution.
+  String get candidateId => [
+        sourceClass?.name ?? 'unknown',
+        stage?.name ?? 'sdr',
+        strategy.name,
+        route?.vo ?? 'none',
+        route?.hwdec ?? 'none',
+        route?.outputTransfer.name ?? 'none',
+        route?.surfaceTransfer ?? 'none',
+        route?.offscreenTransfer ?? 'none',
+      ].join('/');
+
+  HdrCandidate withRoutingIdentity(HdrSourceClass cls, HdrRouteStage? phase) =>
+      HdrCandidate(
+        strategy: strategy,
+        maturity: maturity,
+        feasible: feasible,
+        isSafetyNet: isSafetyNet,
+        skipReason: skipReason,
+        route: route,
+        sourceClass: cls,
+        stage: phase,
+      );
 
   final HdrStrategyMaturity maturity;
 
@@ -409,13 +442,16 @@ class HdrCandidate {
         other.maturity == maturity &&
         other.feasible == feasible &&
         other.isSafetyNet == isSafetyNet &&
+        other.sourceClass == sourceClass &&
+        other.stage == stage &&
         other.skipReason == skipReason &&
         other.route == route;
   }
 
   @override
   int get hashCode =>
-      Object.hash(strategy, maturity, feasible, isSafetyNet, skipReason, route);
+      Object.hash(strategy, maturity, feasible, isSafetyNet, skipReason, route,
+          sourceClass, stage);
 
   @override
   String toString() => 'HdrCandidate(${strategy.name}, ${maturity.name}, '

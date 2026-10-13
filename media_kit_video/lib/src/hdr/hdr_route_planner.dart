@@ -204,7 +204,9 @@ class HdrRoutePlanner {
             ? HdrCandidate(
                 strategy: candidate.strategy,
                 maturity: candidate.maturity,
-                skipReason: HdrDegradeReason.displayLacksTransfer)
+                skipReason: HdrDegradeReason.displayLacksTransfer,
+            sourceClass: candidate.sourceClass,
+            stage: candidate.stage)
             : candidate;
         candidates.add(effective);
         if (effective.feasible) selected ??= effective;
@@ -272,6 +274,27 @@ class HdrRoutePlanner {
     return prediction;
   }
 
+  static HdrRouteStage? _stageFor(
+      HdrStrategy strategy, HdrSourceClass cls) {
+    switch (strategy) {
+      case HdrStrategy.nativeDolbyVision:
+      case HdrStrategy.nativeHdr10Plus:
+      case HdrStrategy.nativeHdrVivid:
+        return HdrRouteStage.c1;
+      case HdrStrategy.metadataReshape:
+        return HdrRouteStage.c2;
+      case HdrStrategy.baseLayerDirect:
+        return cls == HdrSourceClass.hdr10 || cls == HdrSourceClass.hlg
+            ? HdrRouteStage.c1
+            : HdrRouteStage.c3;
+      case HdrStrategy.baseLayerConvert:
+        return HdrRouteStage.c4;
+      case HdrStrategy.toneMapSdr:
+      case HdrStrategy.sdrDirect:
+        return null;
+    }
+  }
+
   static List<HdrCandidate> _evaluateCandidates(
     HdrStrategy strategy, {
     required HdrSourceDescriptor source,
@@ -292,7 +315,8 @@ class HdrRoutePlanner {
             policy: policy,
             excluded: excluded,
             gateMaturity: gateMaturity,
-            realization: realization),
+            realization: realization)
+          .withRoutingIdentity(sourceClass, _stageFor(strategy, sourceClass)),
     ];
     // Maturity blocks the strategy before any execution can be attempted.
     // Keep one strategy rejection; a relaxed safety net still lists every
