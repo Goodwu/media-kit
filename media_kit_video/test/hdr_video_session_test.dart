@@ -399,6 +399,12 @@ void main() {
 
   test('the already admitted second HDR attempt may still pass review',
       () async {
+    // The C1-C4 stage order is canonical even when a legacy preference list
+    // names the baseline first: the plan enters at the C2 reshape, and after
+    // its dataspace failure the retry re-plans the complete stage-ordered
+    // catalog. The second attempt (C3 direct) is admitted, opens, and must
+    // pass review — an already admitted execution route is not re-litigated
+    // against the original preference order.
     final backend = FakeBackend()
       ..attemptScripts.add(const AttemptScript(dataSpaceApplyFailed: true));
     final session = makeSession(
@@ -407,8 +413,9 @@ void main() {
       policy: const HdrRoutingPolicy(
         preferences: {
           HdrSourceClass.dvP84: [
-            HdrStrategy.baseLayerConvert,
             HdrStrategy.baseLayerDirect,
+            HdrStrategy.baseLayerConvert,
+            HdrStrategy.metadataReshape,
             HdrStrategy.toneMapSdr,
           ],
         },
@@ -418,11 +425,17 @@ void main() {
     await session.open(media, hint: p84);
     expect(backend.preparedPlans, hasLength(2));
     expect(backend.preparedPlans.first.route.strategy,
-        HdrStrategy.baseLayerConvert);
+        HdrStrategy.metadataReshape);
+    expect(backend.preparedPlans.first.prediction.selected.stage,
+        HdrRouteStage.c2);
     expect(
         backend.preparedPlans.last.route.strategy, HdrStrategy.baseLayerDirect);
+    expect(backend.preparedPlans.last.prediction.selected.stage,
+        HdrRouteStage.c3);
     expect(backend.opened, hasLength(1));
     expect(session.report.value.verified, isTrue);
+    expect(session.report.value.degradeReason,
+        HdrDegradeReason.dataSpaceApplyFailed);
     expect(session.report.value.actual!.strategy, HdrStrategy.baseLayerDirect);
     await session.dispose();
   });
@@ -430,36 +443,21 @@ void main() {
   test(
       'dataspace failure degrades to the next HDR candidate; a following '
       'bind timeout blocks instead of an SDR fallback', () async {
-    // Convert(PQ) fails its dataspace application; the next HDR candidate
-    // (direct HLG, an independent dataspace dependency) is tried and fails
-    // on the output bind. On an HDR-capable display the remaining tone-map
-    // candidate is SDR output, so HDR exhausted means blocked — playback
-    // stops with the typed timeout instead of a silent SDR downgrade.
+    // C2 reshape(PQ) fails its dataspace application. The retry re-plans the
+    // complete stage-ordered catalog — the dataspace-excluded C4 entry stays
+    // listed instead of being sliced away — and the independent C3 HLG
+    // direct candidate is tried next. Its output bind times out; the timeout
+    // is attributed to the platform-view topology every remaining HDR
+    // candidate shares, so HDR exhausted means blocked — playback stops with
+    // the typed timeout instead of a silent SDR downgrade.
     final backend = FakeBackend()
       ..attemptScripts.addAll(const [
         AttemptScript(dataSpaceApplyFailed: true),
         AttemptScript(bindTimeout: true),
-      ])
-      ..factsForOpen.add(gammaFacts(gamma: 'hlg', profile: 8))
-      ..factsForOpen.add(gammaFacts(gamma: 'hlg', profile: 8))
-      ..factsForOpen.add(gammaFacts(gamma: 'hlg', profile: 8));
-    // `baseLayerConvert` for P8.4 is experimental; the gate must be open so
-    // the dataspace-dependent candidate is actually selected first.
-    final policy = const HdrRoutingPolicy(
-      preferences: {
-        HdrSourceClass.dvP84: [
-          HdrStrategy.baseLayerConvert,
-          HdrStrategy.baseLayerDirect,
-          HdrStrategy.toneMapSdr,
-        ],
-      },
-      allowExperimental: true,
-    );
-    final session = makeSession(
-      backend: backend,
-      capabilities: caps(),
-      policy: policy,
-    );
+      ]);
+    // No preference override: the default catalog evaluates C1-C4 in stage
+    // order, so the dataspace-dependent C2 reshape is the first attempt.
+    final session = makeSession(backend: backend, capabilities: caps());
     final events = <HdrOutputEvent>[];
     session.events.listen(events.add);
 
@@ -467,14 +465,14 @@ void main() {
         throwsA(isA<HdrOutputBindTimeout>()));
     await pumpEventQueue();
 
-    // Neither HDR attempt reached the media open: the convert attempt failed
+    // Neither HDR attempt reached the media open: the reshape attempt failed
     // at its dataspace (before the media opens) and the direct attempt at
     // the output bind.
     expect(backend.opened, isEmpty);
     expect(backend.calls,
-        contains('configure:baseLayerConvert:pq')); // First HDR attempt.
+        contains('configure:metadataReshape:pq')); // First HDR attempt (C2).
     expect(backend.calls,
-        contains('configure:baseLayerDirect:-')); // Next HDR candidate.
+        contains('configure:baseLayerDirect:-')); // Next candidate (C3).
     final degraded = events.whereType<HdrDegradedEvent>().toList();
     expect(degraded, hasLength(1));
     expect(degraded[0].reason, HdrDegradeReason.dataSpaceApplyFailed);
@@ -482,9 +480,21 @@ void main() {
     final errors = events.whereType<HdrErrorEvent>().toList();
     expect(errors, hasLength(1));
     expect(errors.single.error, isA<HdrOutputBindTimeout>());
-    // The retried plan excluded the failed dataspace dependency.
+    // The retried plan excluded the failed dataspace dependency and still
+    // carries the complete catalog: C4 remains listed with the carried
+    // reason rather than being truncated at the failed strategy index.
     expect(
         backend.preparedPlans.last.excluded[HdrRouteDependency.dataspacePq],
+        HdrDegradeReason.dataSpaceApplyFailed);
+    final retried = backend.preparedPlans.last.prediction;
+    expect(
+        retried.candidates.map((candidate) => candidate.strategy),
+        containsAll(
+            [HdrStrategy.baseLayerDirect, HdrStrategy.baseLayerConvert]));
+    expect(
+        retried.candidates
+            .firstWhere((c) => c.strategy == HdrStrategy.baseLayerConvert)
+            .skipReason,
         HdrDegradeReason.dataSpaceApplyFailed);
     final report = session.report.value;
     expect(report.verified, isFalse);
@@ -495,11 +505,44 @@ void main() {
   });
 
   test(
-      'a HDR Vivid side-data fact reclassifies an HDR10 hint and blocks '
-      'when every hdrVivid route stays gated off', () async {
+      'a C2 dataspace failure continues down the catalog to a verified C3 '
+      'baseline', () async {
+    // The full-catalog retry: after the C2 reshape loses its PQ dataspace,
+    // the next stage-ordered candidate (C3 HLG direct, an independent
+    // dataspace dependency) opens and passes review — the failure does not
+    // strand the session on the first candidate nor fall through to SDR.
     final backend = FakeBackend()
-      ..factsForOpen
-          .add(facts(gamma: 'pq', primaries: 'bt.2020', hdrVivid: true))
+      ..attemptScripts.add(const AttemptScript(dataSpaceApplyFailed: true));
+    final session = makeSession(backend: backend, capabilities: caps());
+    final events = <HdrOutputEvent>[];
+    session.events.listen(events.add);
+
+    await session.open(media, hint: p84);
+    await pumpEventQueue();
+
+    expect(backend.opened, hasLength(1));
+    expect(backend.opened.single.route.strategy, HdrStrategy.baseLayerDirect);
+    final degraded = events.whereType<HdrDegradedEvent>().single;
+    expect(degraded.reason, HdrDegradeReason.dataSpaceApplyFailed);
+    expect(degraded.from!.strategy, HdrStrategy.metadataReshape);
+    expect(degraded.to!.strategy, HdrStrategy.baseLayerDirect);
+    expect(events.whereType<HdrErrorEvent>(), isEmpty);
+    final report = session.report.value;
+    expect(report.verified, isTrue);
+    expect(report.actual!.strategy, HdrStrategy.baseLayerDirect);
+    expect(report.degradeReason, HdrDegradeReason.dataSpaceApplyFailed);
+    expect(
+        backend.preparedPlans.last.excluded[HdrRouteDependency.dataspacePq],
+        HdrDegradeReason.dataSpaceApplyFailed);
+    expect(events.whereType<HdrRouteAppliedEvent>(), hasLength(1));
+    await session.dispose();
+  });
+
+  test(
+      'a HDR Vivid side-data fact reclassifies an HDR10 hint and the '
+      'applicable HDR baseline keeps playback with dynamic errors preserved',
+      () async {
+    final backend = FakeBackend()
       ..factsForOpen
           .add(facts(gamma: 'pq', primaries: 'bt.2020', hdrVivid: true));
     final session = makeSession(backend: backend, capabilities: caps());
@@ -509,23 +552,35 @@ void main() {
     await session.open(media, hint: hdr10);
     await pumpEventQueue();
 
-    // hdrVivid class maturity (hdr_strategy.dart, locked by the table test):
-    // baseLayerDirect experimental, metadataReshape unsupported,
-    // toneMapSdr experimental — every default candidate is gated off. The
-    // tone-map safety net no longer exists, so the review blocks the open
-    // with the first candidate's typed reason instead of a gated fallback.
+    // Reclassification to the hdrVivid class plans C1 native Vivid and C2
+    // metadata mapping as explicit routeNotImplemented errors — there is no
+    // "gated off" state — while the C3 PQ baseline stays applicable. The
+    // already-open PQ route is the reclassified prediction's selection too,
+    // so the review accepts it without a rebuild; the unimplemented dynamic
+    // routes remain typed errors in the accepted report's candidate list
+    // (the baseline's success must not erase them).
     expect(backend.opened, hasLength(1));
     expect(backend.opened.single.route.strategy, HdrStrategy.baseLayerDirect);
     final report = session.report.value;
-    expect(report.verified, isFalse);
+    expect(report.verified, isTrue);
     expect(report.source!.dynamicMetadata, HdrDynamicMetadata.hdrVivid);
     expect(report.sourceOrigin, HdrReportSource.decoder);
-    expect(report.degradeReason, HdrDegradeReason.experimentalStrategySkipped);
-    final errors = events.whereType<HdrErrorEvent>().toList();
-    expect(errors, hasLength(1));
-    expect(errors.single.reason, HdrDegradeReason.experimentalStrategySkipped);
-    expect(events.whereType<HdrRouteAppliedEvent>(), isEmpty);
-    expect(events.whereType<HdrReclassifiedEvent>(), isEmpty);
+    expect(report.actual!.strategy, HdrStrategy.baseLayerDirect);
+    expect(report.degradeReason, isNull);
+    final reclassified = events.whereType<HdrReclassifiedEvent>().toList();
+    expect(reclassified, hasLength(1));
+    expect(reclassified.single.rebuilt, isFalse);
+    final candidates = report.prediction!.candidates;
+    expect(candidates[0].strategy, HdrStrategy.nativeHdrVivid);
+    expect(candidates[0].skipReason, HdrDegradeReason.routeNotImplemented);
+    expect(candidates[0].status, HdrCandidateStatus.error);
+    expect(candidates[1].strategy, HdrStrategy.metadataReshape);
+    expect(candidates[1].skipReason, HdrDegradeReason.routeNotImplemented);
+    expect(candidates[1].status, HdrCandidateStatus.error);
+    expect(report.prediction!.selected.strategy, HdrStrategy.baseLayerDirect);
+    expect(events.whereType<HdrErrorEvent>(), isEmpty);
+    expect(events.whereType<HdrDegradedEvent>(), isEmpty);
+    expect(events.whereType<HdrRouteAppliedEvent>(), hasLength(1));
     expect(backend.calls, contains('stop'));
     expect(backend.calls, contains('reset'));
     await session.dispose();
@@ -651,11 +706,15 @@ void main() {
             targetTrc: null,
             surfaceTransfer: null,
             stripDvRpu: false);
-        const candidate = HdrCandidate(
-            strategy: HdrStrategy.nativeDolbyVision,
-            maturity: HdrStrategyMaturity.unsupported,
-            route: nativeRoute,
-            feasible: true);
+        // Native DV is the dvP5 catalog's C1 candidate; the injected entry
+        // must carry that routing identity so the canonical stage sort keeps
+        // it ahead of the C2 reshape instead of demoting the unstaged entry.
+        final candidate = const HdrCandidate(
+                strategy: HdrStrategy.nativeDolbyVision,
+                maturity: HdrStrategyMaturity.unsupported,
+                route: nativeRoute,
+                feasible: true)
+            .withRoutingIdentity(HdrSourceClass.dvP5, HdrRouteStage.c1);
         return HdrRoutePrediction(
             source: source,
             selected: candidate,
@@ -943,8 +1002,13 @@ void main() {
     await pumpEventQueue();
 
     expect(backend.opened, hasLength(1));
+    // Only the P8.4 open reached the backend, and it enters at the canonical
+    // C2 stage: with the P5 pipeline available the metadata reshape to PQ is
+    // the legal HDR output (P8.2 invariant). Native DV has no admission here
+    // and the C3 baseline follows only behind the reshape.
+    expect(backend.opened.single.route.strategy, HdrStrategy.metadataReshape);
     expect(backend.opened.single.route.outputTransfer,
-        HdrOutputTransfer.hlg); // Only the P8.4 open reached the backend.
+        HdrOutputTransfer.pq); // The C2 reshape output, not an SDR downgrade.
     // The aborted transaction rolled back before the newer one ran.
     final firstConfigure = backend.calls
         .indexWhere((call) => call.startsWith('configure:baseLayerDirect:-'));
@@ -953,7 +1017,8 @@ void main() {
     final report = session.report.value;
     expect(report.generation, 2);
     expect(report.verified, isTrue);
-    expect(report.actual!.outputTransfer, HdrOutputTransfer.hlg);
+    expect(report.actual!.strategy, HdrStrategy.metadataReshape);
+    expect(report.actual!.outputTransfer, HdrOutputTransfer.pq);
     expect(
       events.whereType<HdrRouteAppliedEvent>().single.generation,
       2,

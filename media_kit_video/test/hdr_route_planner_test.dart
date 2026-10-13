@@ -139,13 +139,8 @@ void checkInvariants(
   HdrRoutePrediction prediction, {
   required HdrSourceClass cls,
   required HdrCapabilities capabilities,
-  required bool allowExperimental,
   bool explicitSdrRequest = false,
 }) {
-  final HdrStrategy fallback = cls == HdrSourceClass.sdr
-      ? HdrStrategy.sdrDirect
-      : HdrStrategy.toneMapSdr;
-
   // Unknown DV must remain blocked independently of the decoder/display/P5
   // pipeline.
   if (cls == HdrSourceClass.dvUnknown) {
@@ -210,20 +205,8 @@ void checkInvariants(
       expect(candidate.feasible, isTrue, reason: '$candidate');
       expect(candidate.route, isNotNull, reason: '$candidate');
     }
-    // With the gate closed, an experimental strategy may only become the
-    // selection through the explicit safety-net block; the same for
-    // an unsupported maturity (e.g. profile 10's safety net).
-    if (candidate.skipReason == null &&
-        (candidate.maturity == HdrStrategyMaturity.experimental &&
-                !allowExperimental ||
-            candidate.maturity == HdrStrategyMaturity.unsupported)) {
-      expect(
-        candidate.isSafetyNet,
-        isTrue,
-        reason: 'gated candidate selected outside the safety net: $candidate',
-      );
-      expect(candidate.strategy, fallback, reason: '$candidate');
-    }
+    // Maturity is a diagnostic label in v7.3: it never admits or rejects a
+    // route, so no maturity value constrains which candidate is selected.
   }
 
   // Presentation follows the selected route (or the strategy when the
@@ -249,17 +232,12 @@ void checkInvariants(
     reason: 'confidence for $cls (ext: $ext)',
   );
 
-  // Property (verification 2): when any maturity-allowed feasible candidate
-  // presents native HDR, the selection must not be a tone-map/SDR route.
-  bool maturityAllowed(HdrStrategyMaturity maturity) =>
-      maturity == HdrStrategyMaturity.verified ||
-      maturity == HdrStrategyMaturity.inherited ||
-      (maturity == HdrStrategyMaturity.experimental && allowExperimental);
+  // Property (verification 2): when any feasible candidate presents native
+  // HDR, the selection must not be a tone-map/SDR route. Maturity labels do
+  // not participate: every applicable path is always evaluated (v7.3).
   final bool hasFeasibleHdr = prediction.candidates.any(
     (HdrCandidate c) =>
-        c.feasible &&
-        maturityAllowed(c.maturity) &&
-        c.route!.presentation == HdrPresentation.nativeHdr,
+        c.feasible && c.route!.presentation == HdrPresentation.nativeHdr,
   );
   if (hasFeasibleHdr) {
     expect(
@@ -427,11 +405,10 @@ void main() {
       );
     });
 
-    test('planner selects native DV for eligible P5.0 once maturity allows',
-        () {
-      // Gate explicitly open: still selects (the promotion did not change
-      // the gate-open behavior; see the maturity-gate group for the
-      // gate-closed default selection).
+    test('planner selects native DV for eligible P5.0 with the realizer '
+        'grounds met', () {
+      // The legacy switch is set but inert: the selection comes from the
+      // realizer grounds (DV display, profile-32 decoder, bridge v1).
       final HdrRoutePrediction prediction = caps(
         displayHdrTypes: const <int>{1},
         dvDecoders: const <HdrDecoderInfo>[nativeDvDecoder],
@@ -539,10 +516,8 @@ void main() {
               final HdrRoutePrediction at34Plan =
                   HdrRoutePlanner.plan(source: source, capabilities: at34);
 
-              checkInvariants(at29Plan,
-                  cls: cls, capabilities: at29, allowExperimental: false);
-              checkInvariants(at34Plan,
-                  cls: cls, capabilities: at34, allowExperimental: false);
+              checkInvariants(at29Plan, cls: cls, capabilities: at29);
+              checkInvariants(at34Plan, cls: cls, capabilities: at34);
 
               // The Phase 1 planner does not read sdkInt (the rgb10_a2
               // output format and the dataspace application path are
@@ -559,7 +534,7 @@ void main() {
       expect(combos, 504);
     });
 
-    test('gate open (allowExperimental): same matrix holds without skips', () {
+    test('legacy allowExperimental=true: same matrix holds without skips', () {
       const HdrRoutingPolicy policy = HdrRoutingPolicy(allowExperimental: true);
       var combos = 0;
       for (final HdrSourceClass cls in HdrSourceClass.values) {
@@ -571,13 +546,18 @@ void main() {
                   caps(displayHdrTypes: display, p5: p5, ext: ext);
               final HdrRoutePrediction prediction = HdrRoutePlanner.plan(
                   source: source, capabilities: capabilities, policy: policy);
-              checkInvariants(prediction,
-                  cls: cls,
-                  capabilities: capabilities,
-                  allowExperimental: true);
+              checkInvariants(prediction, cls: cls, capabilities: capabilities);
+              // The legacy switch cannot change the plan: admission is
+              // switch-independent (v7.3), so every route and error equals
+              // the default-policy prediction.
+              final HdrRoutePrediction defaults = HdrRoutePlanner.plan(
+                  source: source, capabilities: capabilities);
+              expect(prediction.selected, defaults.selected,
+                  reason: '$cls display: $display p5: $p5 ext: $ext');
+              expect(prediction.playable, defaults.playable);
               for (final HdrCandidate candidate in prediction.candidates) {
-                // The gate is open: nothing is skipped for maturity. dvP5
-                // and dvP84 nativeDolbyVision now proceed to the realizer
+                // Nothing is refused by the removed maturity gate: dvP5 and
+                // dvP84 nativeDolbyVision proceed to the realizer
                 // (display/decoder/bridge grounds); other classes keep the
                 // R7 refusal, locked by the maturity table test.
                 expect(candidate.skipReason,
@@ -603,7 +583,6 @@ void main() {
             HdrStrategy.toneMapSdr,
           ],
         },
-        allowExperimental: true,
       );
       for (final int sdk in <int>[24, 25]) {
         final HdrRoutePrediction sdr =
@@ -620,13 +599,22 @@ void main() {
           sources[HdrSourceClass.hlg]!,
           policy: convertFirst,
         );
+        // Canonical stage order: the C2 reshape (an ordinary HLG stream has
+        // no dynamic metadata to rebuild) is evaluated first and refuses as
+        // unsupported; the C4 conversion then reports the missing GPU HDR
+        // dataspace.
+        expect(hdr.candidates[0].strategy, HdrStrategy.metadataReshape);
         expect(hdr.candidates[0].skipReason,
-            HdrDegradeReason.gpuHdrDataSpaceUnavailable);
+            HdrDegradeReason.unsupportedStrategy);
+        expect(hdr.candidates[1].strategy, HdrStrategy.baseLayerConvert);
         expect(hdr.candidates[1].skipReason,
             HdrDegradeReason.gpuHdrDataSpaceUnavailable);
         // The display is HDR-capable: once the HDR candidates are refused on
         // the dataspace ground the plan blocks — no tone-map fallback is
-        // synthesized (MK-ROUTING-20261011).
+        // synthesized (MK-ROUTING-20261011). The blocking selection is the
+        // first rejected entry of the caller's preference order (the C4
+        // conversion here), while the candidate list is displayed in
+        // canonical stage order.
         expect(hdr.playable, isFalse);
         expect(hdr.selected.strategy, HdrStrategy.baseLayerConvert);
         expect(hdr.selected.skipReason,
@@ -653,7 +641,6 @@ void main() {
             HdrStrategy.toneMapSdr,
           ],
         },
-        allowExperimental: true,
       );
       for (final int sdk in <int>[26, 27]) {
         final HdrRoutePrediction sdr =
@@ -670,12 +657,19 @@ void main() {
           sources[HdrSourceClass.hlg]!,
           policy: convertFirst,
         );
+        // Canonical stage order: the C2 reshape refuses as unsupported for a
+        // dynamic-metadata-free HLG stream; the C4 conversion reports the
+        // missing GPU HDR dataspace.
+        expect(hdr.candidates[0].strategy, HdrStrategy.metadataReshape);
         expect(hdr.candidates[0].skipReason,
-            HdrDegradeReason.gpuHdrDataSpaceUnavailable);
+            HdrDegradeReason.unsupportedStrategy);
+        expect(hdr.candidates[1].strategy, HdrStrategy.baseLayerConvert);
         expect(hdr.candidates[1].skipReason,
             HdrDegradeReason.gpuHdrDataSpaceUnavailable);
         // The display is HDR-capable: the exhausted HDR list blocks instead
-        // of falling through to a tone-map route (MK-ROUTING-20261011).
+        // of falling through to a tone-map route (MK-ROUTING-20261011). The
+        // blocking selection is the first rejected entry of the caller's
+        // preference order; the candidate list is in canonical stage order.
         expect(hdr.playable, isFalse);
         expect(hdr.selected.strategy, HdrStrategy.baseLayerConvert);
         expect(hdr.selected.skipReason,
@@ -811,30 +805,29 @@ void main() {
                 capabilities: capabilities,
                 policy: effectivePolicy,
               );
-              checkInvariants(prediction,
-                  cls: cls,
-                  capabilities: capabilities,
-                  allowExperimental: allowExperimental);
+              checkInvariants(prediction, cls: cls, capabilities: capabilities);
               checked++;
             }
           }
         }
       }
-      // 2 gate states × 12 classes × 7 displays × 2 P5 pipelines. The
-      // extension dimension is irrelevant to this property (it only moves
-      // confidence) and is covered by the matrix tests.
+      // 2 legacy switch states (identical by contract) × 12 classes ×
+      // 7 displays × 2 P5 pipelines. The extension dimension is irrelevant
+      // to this property (it only moves confidence) and is covered by the
+      // matrix tests.
       expect(checked, 336);
     });
 
-    test('empty candidate directory synthesizes a blocking placeholder', () {
-      // hdr10Plus has no default preference row (requirement 3.4 never
-      // listed it), so with no caller override the candidate directory
-      // starts empty. On an HDR-capable display no SDR fallback may be
-      // synthesized either: the planner must still return a well-formed
-      // blocked prediction with a typed reason and no route.
+    test('classes without a preference row synthesize a blocking placeholder',
+        () {
+      // dvP10 (AV1) is out of Phase 1 scope and has no default preference
+      // row, so with no caller override the candidate directory starts
+      // empty. On an HDR-capable display no SDR fallback may be synthesized
+      // either: the planner must still return a well-formed blocked
+      // prediction with a typed reason and no route.
       final HdrCapabilities lya = lyaCaps();
       final HdrRoutePrediction prediction =
-          lya.predict(sources[HdrSourceClass.hdr10Plus]!);
+          lya.predict(sources[HdrSourceClass.dvP10]!);
       expect(prediction.playable, isFalse);
       expect(prediction.selected.feasible, isFalse);
       expect(prediction.selected.route, isNull);
@@ -842,10 +835,7 @@ void main() {
       expect(prediction.selected.skipReason,
           HdrDegradeReason.unsupportedStrategy);
       expect(prediction.candidates, <HdrCandidate>[prediction.selected]);
-      checkInvariants(prediction,
-          cls: HdrSourceClass.hdr10Plus,
-          capabilities: lya,
-          allowExperimental: false);
+      checkInvariants(prediction, cls: HdrSourceClass.dvP10, capabilities: lya);
       // The unresolved-DV flavor of the same empty-directory path reports
       // its own source-ground reason.
       expect(
@@ -853,42 +843,65 @@ void main() {
         HdrDegradeReason.sourceMetadataUnknown,
       );
     });
+
+    test('hdr10Plus plans through the fixed catalog; C1/C2 errors stay '
+        'visible while the baseline plays', () {
+      // v7.3 gives hdr10Plus a default row (native C1 + reshape C2 +
+      // baseline). The missing implementations are explicit typed errors,
+      // not silent deletions, and the C3 PQ baseline still plays.
+      final HdrCapabilities lya = lyaCaps();
+      final HdrRoutePrediction prediction =
+          lya.predict(sources[HdrSourceClass.hdr10Plus]!);
+      expect(prediction.playable, isTrue);
+      expect(prediction.candidates[0].strategy, HdrStrategy.nativeHdr10Plus);
+      expect(prediction.candidates[0].stage, HdrRouteStage.c1);
+      expect(prediction.candidates[0].status, HdrCandidateStatus.error);
+      expect(prediction.candidates[0].skipReason,
+          HdrDegradeReason.routeNotImplemented);
+      expect(prediction.candidates[1].strategy, HdrStrategy.metadataReshape);
+      expect(prediction.candidates[1].stage, HdrRouteStage.c2);
+      expect(prediction.candidates[1].status, HdrCandidateStatus.error);
+      expect(prediction.candidates[1].skipReason,
+          HdrDegradeReason.routeNotImplemented);
+      expect(prediction.selected.strategy, HdrStrategy.baseLayerDirect);
+      expect(prediction.selected.stage, HdrRouteStage.c3);
+      expect(prediction.selected.route!.outputTransfer, HdrOutputTransfer.pq);
+      checkInvariants(prediction,
+          cls: HdrSourceClass.hdr10Plus, capabilities: lya);
+    });
   });
 
-  group('maturity gate (verification 3)', () {
-    test('gate closed: experimental strategies are skipped with a reason', () {
+  group('maturity labels are diagnostic (verification 3)', () {
+    test('P7 plans to the C3 baseline direct by default, without any switch',
+        () {
       final HdrCapabilities lya = lyaCaps();
-      // P7: direct/reshape/tone-map are all experimental for the dvP7 class
-      // (no long P7 sample has validated them), so the gate-closed default
-      // policy skips every entry — and on this HDR-capable display the
-      // exhausted list blocks instead of tone-mapping via a safety net.
+      // P7: native DV keeps the R7 refusal and the reshape refuses on the
+      // unknown enhancement layer; the C3 baseline direct is evaluated like
+      // every applicable path (v7.3 removed the maturity admission gate).
+      // The tone-map entries are refused by the HDR-capable display.
       final HdrRoutePrediction prediction =
           lya.predict(sources[HdrSourceClass.dvP7]!);
-      expect(prediction.playable, isFalse);
+      expect(prediction.playable, isTrue);
       expect(prediction.selected.strategy, HdrStrategy.baseLayerDirect);
-      expect(prediction.selected.skipReason,
-          HdrDegradeReason.experimentalStrategySkipped);
-      expect(prediction.candidates, hasLength(3));
-      expect(prediction.candidates[0].strategy, HdrStrategy.baseLayerDirect);
+      expect(prediction.selected.maturity, HdrStrategyMaturity.experimental);
+      expect(prediction.candidates[0].strategy, HdrStrategy.nativeDolbyVision);
       expect(prediction.candidates[0].skipReason,
-          HdrDegradeReason.experimentalStrategySkipped);
+          HdrDegradeReason.unsupportedStrategy);
       expect(prediction.candidates[1].strategy, HdrStrategy.metadataReshape);
       expect(prediction.candidates[1].skipReason,
-          HdrDegradeReason.experimentalStrategySkipped);
-      expect(prediction.candidates[2].strategy, HdrStrategy.toneMapSdr);
-      expect(prediction.candidates[2].skipReason,
-          HdrDegradeReason.experimentalStrategySkipped);
-      expect(
-        prediction.candidates.map((c) => c.feasible),
-        everyElement(isFalse),
-      );
-      checkInvariants(prediction,
-          cls: HdrSourceClass.dvP7,
-          capabilities: lya,
-          allowExperimental: false);
+          HdrDegradeReason.unsupportedStrategy);
+      expect(prediction.candidates[2].strategy, HdrStrategy.baseLayerDirect);
+      expect(prediction.candidates[2].skipReason, isNull);
+      for (final int blocked in const <int>[3, 4, 5]) {
+        expect(prediction.candidates[blocked].strategy, HdrStrategy.toneMapSdr,
+            reason: 'candidate $blocked');
+        expect(prediction.candidates[blocked].feasible, isFalse,
+            reason: 'candidate $blocked');
+      }
+      checkInvariants(prediction, cls: HdrSourceClass.dvP7, capabilities: lya);
     });
 
-    test('gate open: the same experimental strategy is selected', () {
+    test('legacy allowExperimental=true selects the identical P7 route', () {
       final HdrCapabilities lya = lyaCaps();
       final HdrRoutePrediction prediction = lya.predict(
         sources[HdrSourceClass.dvP7]!,
@@ -898,25 +911,36 @@ void main() {
       expect(prediction.selected.maturity, HdrStrategyMaturity.experimental);
       expect(prediction.selected.route!.vo, 'mediacodec_embed');
       expect(prediction.selected.route!.outputTransfer, HdrOutputTransfer.pq);
-      checkInvariants(prediction,
-          cls: HdrSourceClass.dvP7, capabilities: lya, allowExperimental: true);
+      // The legacy switch cannot change the plan.
+      expect(prediction, lya.predict(sources[HdrSourceClass.dvP7]!));
+      checkInvariants(prediction, cls: HdrSourceClass.dvP7, capabilities: lya);
     });
 
-    test('inherited maturity is selected with the gate closed', () {
+    test('P8.1 takes the C2 reshape ahead of the inherited C3 direct', () {
       final HdrCapabilities lya = lyaCaps();
       final HdrRoutePrediction prediction =
           lya.predict(sources[HdrSourceClass.dvP81]!);
-      expect(prediction.selected.strategy, HdrStrategy.baseLayerDirect);
-      expect(prediction.selected.maturity, HdrStrategyMaturity.inherited);
+      // Canonical DV order (4e6b29ab): the C2 reshape is evaluated before
+      // the C3 baseline and is feasible on this PQ-capable display.
+      expect(prediction.selected.strategy, HdrStrategy.metadataReshape);
+      expect(prediction.selected.stage, HdrRouteStage.c2);
+      expect(prediction.selected.route!.outputTransfer, HdrOutputTransfer.pq);
+      expect(prediction.playable, isTrue);
+      // The inherited direct route stays a feasible C3 fallback; its
+      // maturity label remains diagnostic.
+      final HdrCandidate direct = prediction.candidates.firstWhere(
+          (HdrCandidate c) => c.strategy == HdrStrategy.baseLayerDirect);
+      expect(direct.feasible, isTrue);
+      expect(direct.maturity, HdrStrategyMaturity.inherited);
+      expect(direct.stage, HdrRouteStage.c3);
     });
 
-    test(
-        'dvP5 reaches nativeDolbyVision by default, without allowExperimental '
-        '(2026-10-10 promotion)', () {
+    test('dvP5 reaches nativeDolbyVision by default (2026-10-10 promotion)',
+        () {
       // DV-capable device (declares DV, profile-32 hardware decoder, bridge
-      // v1) with the default policy: the gate stays closed, yet the P5
-      // source goes straight to the native route — the old behavior (skip
-      // with experimentalStrategySkipped unless the gate was open) is gone.
+      // v1) with the default policy: the P5 source goes straight to the
+      // native route — the old behavior (skip with
+      // experimentalStrategySkipped unless a switch was set) is gone.
       final HdrRoutePrediction prediction = caps(
         displayHdrTypes: const <int>{1},
         dvDecoders: const <HdrDecoderInfo>[nativeDvDecoder],
@@ -936,12 +960,11 @@ void main() {
             displayHdrTypes: const <int>{1},
             dvDecoders: const <HdrDecoderInfo>[nativeDvDecoder],
             nativeDvBridgeApi: 1,
-          ),
-          allowExperimental: false);
+          ));
 
       // Contrast (scope red line): on the same device the R7-reserved
       // classes never route natively — dvP81's nativeDolbyVision stays
-      // realizer-refused (unsupportedStrategy), gate state aside.
+      // realizer-refused (unsupportedStrategy), legacy switch state aside.
       final HdrRoutePrediction p81 = caps(
         displayHdrTypes: const <int>{1, 2},
         dvDecoders: const <HdrDecoderInfo>[nativeDvDecoder],
@@ -956,10 +979,10 @@ void main() {
 
     test(
         'dvP84 reaches nativeDolbyVision by default on capable caps; a panel '
-        'without DV declaration stays infeasible', () {
-      // marble r30g acceptance promoted this cell: with the default policy
-      // (gate closed) a DV-capable device takes the P8.4 native route —
-      // immediate release (boolean render mode), unlike P5's timed one.
+        'without DV declaration takes the C2 reshape', () {
+      // marble r30g acceptance promoted this cell: with the default policy a
+      // DV-capable device takes the P8.4 native route — immediate release
+      // (boolean render mode), unlike P5's timed one.
       final HdrRoutePrediction prediction = caps(
         displayHdrTypes: const <int>{1, 2},
         dvDecoders: const <HdrDecoderInfo>[nativeDvDecoder],
@@ -974,7 +997,9 @@ void main() {
 
       // This fixture is an HLG-capable display without DV, not the LG
       // display (which declares DV and PQ, but not HLG). Decoder and
-      // display requirements are independent.
+      // display requirements are independent: the native entry is refused
+      // on the display ground, and the canonical order then selects the
+      // C2 reshape (which precedes the C3 baseline).
       final HdrRoutePrediction noDvSignaling = caps(
         displayHdrTypes: const <int>{2, 3},
         dvDecoders: const <HdrDecoderInfo>[nativeDvDecoder],
@@ -984,9 +1009,15 @@ void main() {
           (HdrCandidate c) => c.strategy == HdrStrategy.nativeDolbyVision);
       expect(native.maturity, HdrStrategyMaturity.verified);
       expect(native.skipReason, HdrDegradeReason.displayLacksTransfer);
-      expect(noDvSignaling.selected.strategy, HdrStrategy.baseLayerDirect);
+      expect(noDvSignaling.selected.strategy, HdrStrategy.metadataReshape);
+      expect(noDvSignaling.selected.stage, HdrRouteStage.c2);
       expect(
-          noDvSignaling.selected.route!.outputTransfer, HdrOutputTransfer.hlg);
+          noDvSignaling.selected.route!.outputTransfer, HdrOutputTransfer.pq);
+      // The HLG direct remains a feasible C3 fallback.
+      final HdrCandidate direct = noDvSignaling.candidates.firstWhere(
+          (HdrCandidate c) => c.strategy == HdrStrategy.baseLayerDirect);
+      expect(direct.feasible, isTrue);
+      expect(direct.route!.outputTransfer, HdrOutputTransfer.hlg);
     });
 
     test('HDR10 PQ base cannot enter C4 even when requested first', () {
@@ -1008,15 +1039,25 @@ void main() {
       );
       final preferred = lyaCaps().predict(
           sources[HdrSourceClass.hdr10]!, policy: convertFirst);
-      // A caller preference cannot make PQ->PQ masquerade as conversion.
+      // A caller preference cannot make PQ->PQ masquerade as conversion, and
+      // the fixed stage order keeps the C4 entry behind the same-stage C1
+      // direct even when it is listed first.
+      expect(preferred.candidates.first.strategy, HdrStrategy.baseLayerDirect);
+      expect(preferred.candidates.first.stage, HdrRouteStage.c1);
+      expect(preferred.candidates.first.feasible, isTrue);
       expect(preferred.selected.strategy, HdrStrategy.baseLayerDirect);
-      expect(preferred.candidates.first.skipReason,
-          HdrDegradeReason.unsupportedStrategy);
+      final HdrCandidate preferredConvert = preferred.candidates.firstWhere(
+          (HdrCandidate c) => c.strategy == HdrStrategy.baseLayerConvert);
+      expect(preferredConvert.skipReason, HdrDegradeReason.unsupportedStrategy);
     });
 
-    test('hdr10 metadataReshape is verified and selectable (2026-10-10)', () {
-      // Indirect-evidence cell (pipeline verified at dvP5 + user
-      // adjudication): the reshape is no longer behind the gate for HDR10.
+    test('hdr10 carries no dynamic metadata, so a C2-first row cannot '
+        'select the reshape', () {
+      // The maturity label of hdr10 × metadataReshape says verified, but
+      // labels are diagnostic (v7.3): an ordinary HDR10 stream has no
+      // dynamic metadata to rebuild and the realizer refuses the C2 entry
+      // structurally. On this HDR-capable display the exhausted list then
+      // blocks — the rejected C2 entry records the reason.
       const HdrRoutingPolicy reshapeFirst = HdrRoutingPolicy(
         preferences: <HdrSourceClass, List<HdrStrategy>>{
           HdrSourceClass.hdr10: <HdrStrategy>[
@@ -1027,12 +1068,16 @@ void main() {
       );
       final HdrRoutePrediction prediction = lyaCaps()
           .predict(sources[HdrSourceClass.hdr10]!, policy: reshapeFirst);
+      expect(prediction.playable, isFalse);
       expect(prediction.selected.strategy, HdrStrategy.metadataReshape);
+      expect(prediction.selected.stage, HdrRouteStage.c2);
       expect(prediction.selected.maturity, HdrStrategyMaturity.verified);
-      expect(prediction.selected.skipReason, isNull);
-      // An HDR10 source carries no dynamic metadata to re-apply.
-      expect(prediction.selected.route!.appliesDynamicMetadata, isFalse);
-      expect(prediction.selected.route!.surfaceTransfer, 'pq');
+      expect(prediction.selected.skipReason,
+          HdrDegradeReason.unsupportedStrategy);
+      expect(prediction.selected.route, isNull);
+      for (final HdrCandidate candidate in prediction.candidates) {
+        expect(candidate.feasible, isFalse, reason: '$candidate');
+      }
     });
 
     test(
@@ -1052,14 +1097,17 @@ void main() {
             HdrStrategy.toneMapSdr,
           ],
         },
-        allowExperimental: true,
       );
       final HdrRoutePrediction hdr10 =
           lya.predict(sources[HdrSourceClass.hdr10]!, policy: policy);
       expect(hdr10.selected.strategy, HdrStrategy.baseLayerDirect);
-      expect(hdr10.candidates.first.strategy, HdrStrategy.nativeDolbyVision);
-      expect(hdr10.candidates.first.skipReason,
-          HdrDegradeReason.unsupportedStrategy);
+      // Both entries are C1 for an HDR10 source; within one stage the
+      // feasible direct ranks ahead of the refused native entry, which
+      // stays visible with its reason.
+      final HdrCandidate hdr10Native = hdr10.candidates.firstWhere(
+          (HdrCandidate c) => c.strategy == HdrStrategy.nativeDolbyVision);
+      expect(hdr10Native.stage, HdrRouteStage.c1);
+      expect(hdr10Native.skipReason, HdrDegradeReason.unsupportedStrategy);
 
       final HdrRoutePrediction p5 =
           lya.predict(sources[HdrSourceClass.dvP5]!, policy: policy);
@@ -1073,17 +1121,31 @@ void main() {
   });
 
   group('excluded stages and degradation (verification 4)', () {
-    test('P8.4 on an HDR10-only display converts to PQ (gate open)', () {
+    test('P8.4 on an HDR10-only display: C2 reshape first, C4 HLG-to-PQ '
+        'conversion feasible', () {
+      // The HDR10-only report is a real PQ display: the HLG compatibility
+      // base layer of P8.4 may convert to PQ (C4), and the canonical DV
+      // order selects the C2 reshape before the C3 baseline.
       final HdrRoutePrediction prediction = HdrRoutePlanner.plan(
         source: sources[HdrSourceClass.dvP84]!,
         capabilities: caps(displayHdrTypes: const <int>{2}),
-        policy: const HdrRoutingPolicy(allowExperimental: true),
       );
-      expect(prediction.selected.strategy, HdrStrategy.baseLayerConvert);
+      expect(prediction.selected.strategy, HdrStrategy.metadataReshape);
+      expect(prediction.selected.stage, HdrRouteStage.c2);
       expect(prediction.selected.route!.outputTransfer, HdrOutputTransfer.pq);
       expect(prediction.selected.route!.surfaceTransfer, 'pq');
-      expect(prediction.selected.route!.stripDvRpu, isTrue);
+      expect(prediction.selected.route!.stripDvRpu, isFalse);
       expect(prediction.selected.route!.dependencies,
+          contains(HdrRouteDependency.dataspacePq));
+      // The C4 conversion stays feasible: same PQ output, but the ignored
+      // RPU must be stripped from the bitstream.
+      final HdrCandidate convert = prediction.candidates.firstWhere(
+          (HdrCandidate c) => c.strategy == HdrStrategy.baseLayerConvert);
+      expect(convert.stage, HdrRouteStage.c4);
+      expect(convert.feasible, isTrue);
+      expect(convert.route!.outputTransfer, HdrOutputTransfer.pq);
+      expect(convert.route!.stripDvRpu, isTrue);
+      expect(convert.route!.dependencies,
           contains(HdrRouteDependency.dataspacePq));
     });
 
@@ -1116,11 +1178,11 @@ void main() {
       expect(reshape.skipReason, HdrDegradeReason.dataSpaceApplyFailed);
       checkInvariants(prediction,
           cls: HdrSourceClass.dvP84,
-          capabilities: caps(displayHdrTypes: const <int>{2}),
-          allowExperimental: true);
+          capabilities: caps(displayHdrTypes: const <int>{2}));
     });
 
-    test('gate order: a closed gate reasons before an excluded stage', () {
+    test('excluded stage: the reshape reports the carried failure, and the '
+        'default policy needs no switch', () {
       final HdrRoutePrediction prediction = HdrRoutePlanner.plan(
         source: sources[HdrSourceClass.dvP84]!,
         capabilities: caps(displayHdrTypes: const <int>{2}),
@@ -1130,11 +1192,11 @@ void main() {
       );
       final HdrCandidate reshape = prediction.candidates.firstWhere(
           (HdrCandidate c) => c.strategy == HdrStrategy.metadataReshape);
-      // The maturity gate runs first, so the experimental reshape is
-      // reported as gated, not as excluded. The HDR-capable display blocks
-      // the exhausted list; the first rejected entry (native DV) is the
-      // selection carrying its own reason.
-      expect(reshape.skipReason, HdrDegradeReason.experimentalStrategySkipped);
+      // Without the maturity gate there is no earlier refusal: the excluded
+      // dataspace stage is the reshape's reported reason. The HDR-capable
+      // display blocks the exhausted list; the first rejected entry (native
+      // DV) is the selection carrying its own reason.
+      expect(reshape.skipReason, HdrDegradeReason.dataSpaceApplyFailed);
       expect(prediction.playable, isFalse);
       expect(prediction.selected.strategy, HdrStrategy.nativeDolbyVision);
       expect(
@@ -1166,7 +1228,8 @@ void main() {
   });
 
   group('prediction/execution homogeneity (verification 5)', () {
-    test('predict() equals plan() for every combo and both gate states', () {
+    test('predict() equals plan() for every combo and both legacy switch '
+        'states', () {
       var combos = 0;
       for (final bool allowExperimental in const <bool>[false, true]) {
         final HdrRoutingPolicy policy = allowExperimental
@@ -1238,7 +1301,7 @@ void main() {
         ],
       );
       // Default policy: direct and the PQ conversion (verified 2026-10-10,
-      // the preferGpuOutput route) are feasible with the gate closed. The
+      // the preferGpuOutput route) are both feasible by default. The
       // tone-map entries are refused: this HDR-capable display never
       // receives an implicit SDR output (MK-ROUTING-20261011).
       expect(prediction.candidates[1].skipReason,
@@ -1253,28 +1316,40 @@ void main() {
         expect(prediction.candidates[blocked].route, isNull,
             reason: 'candidate $blocked');
       }
-      // The C4 input constraint is independent of the legacy maturity gate:
-      // PQ cannot become an HLG-to-PQ conversion even when it is open.
-      final HdrRoutePrediction gateOpen = lyaCaps().predict(
+      // The C4 input constraint is independent of the legacy switch:
+      // PQ cannot become an HLG-to-PQ conversion.
+      final HdrRoutePrediction switchOn = lyaCaps().predict(
         sources[HdrSourceClass.hdr10]!,
         policy: const HdrRoutingPolicy(allowExperimental: true),
       );
-      expect(gateOpen.candidates[0].feasible, isTrue);
-      expect(gateOpen.candidates[1].feasible, isFalse);
-      expect(gateOpen.candidates[1].skipReason,
+      expect(switchOn.candidates[0].feasible, isTrue);
+      expect(switchOn.candidates[1].feasible, isFalse);
+      expect(switchOn.candidates[1].skipReason,
           HdrDegradeReason.unsupportedStrategy);
-      expect(gateOpen.selected, prediction.selected);
+      expect(switchOn.selected, prediction.selected);
     });
 
-    test('P8.4 takes the verified HLG direct route', () {
+    test('P8.4 takes the C2 RPU reshape; the HLG direct stays a C3 fallback',
+        () {
       final HdrRoutePrediction prediction =
           lyaCaps().predict(sources[HdrSourceClass.dvP84]!);
-      expect(prediction.selected.strategy, HdrStrategy.baseLayerDirect);
-      expect(prediction.selected.maturity, HdrStrategyMaturity.verified);
-      expect(prediction.selected.route!.outputTransfer, HdrOutputTransfer.hlg);
+      // Canonical DV order: the reshape (C2) is evaluated before the
+      // baseline direct (C3) and is feasible on this PQ+HLG display.
+      expect(prediction.selected.strategy, HdrStrategy.metadataReshape);
+      expect(prediction.selected.stage, HdrRouteStage.c2);
+      expect(prediction.selected.route!.outputTransfer, HdrOutputTransfer.pq);
+      expect(prediction.selected.route!.appliesDynamicMetadata, isTrue);
       expect(prediction.selected.route!.stripDvRpu, isFalse);
       expect(prediction.presentation, HdrPresentation.nativeHdr);
       expect(prediction.playable, isTrue);
+      // The verified HLG direct route remains a feasible C3 fallback.
+      final HdrCandidate direct = prediction.candidates.firstWhere(
+          (HdrCandidate c) => c.strategy == HdrStrategy.baseLayerDirect);
+      expect(direct.feasible, isTrue);
+      expect(direct.maturity, HdrStrategyMaturity.verified);
+      expect(direct.stage, HdrRouteStage.c3);
+      expect(direct.route!.outputTransfer, HdrOutputTransfer.hlg);
+      expect(direct.route!.stripDvRpu, isFalse);
     });
 
     test('tone-map texture execution matches the Texture branch of decide', () {
@@ -1323,13 +1398,19 @@ void main() {
       expect(prediction.playable, isTrue);
     });
 
-    test('P8.1 takes the inherited direct route with the gate closed', () {
+    test('P8.1 snapshot: the C2 reshape wins over the inherited direct', () {
       final HdrRoutePrediction prediction =
           lyaCaps().predict(sources[HdrSourceClass.dvP81]!);
-      expect(prediction.selected.strategy, HdrStrategy.baseLayerDirect);
-      expect(prediction.selected.maturity, HdrStrategyMaturity.inherited);
+      expect(prediction.selected.strategy, HdrStrategy.metadataReshape);
+      expect(prediction.selected.stage, HdrRouteStage.c2);
       expect(prediction.selected.route!.outputTransfer, HdrOutputTransfer.pq);
       expect(prediction.playable, isTrue);
+      // The inherited C3 direct stays available as the next baseline.
+      final HdrCandidate direct = prediction.candidates.firstWhere(
+          (HdrCandidate c) => c.strategy == HdrStrategy.baseLayerDirect);
+      expect(direct.feasible, isTrue);
+      expect(direct.maturity, HdrStrategyMaturity.inherited);
+      expect(direct.route!.outputTransfer, HdrOutputTransfer.pq);
     });
 
     test('P5 without the pipeline is never playable, tone-map included', () {
@@ -1393,20 +1474,29 @@ void main() {
             HdrStrategy.toneMapSdr,
           ],
         },
-        allowExperimental: true,
       );
       final HdrRoutePrediction prediction =
           lyaCaps().predict(sources[HdrSourceClass.dvP84]!, policy: policy);
       expect(prediction.selected.strategy, HdrStrategy.metadataReshape);
       expect(prediction.selected.route!.surfaceTransfer, 'pq');
       expect(prediction.selected.route!.appliesDynamicMetadata, isTrue);
-      // The default policy still picks the HLG direct route.
+      // The override row replaces the class catalog: the C4 conversion entry
+      // the default row carries is gone from the plan.
+      expect(
+        prediction.candidates
+            .where((HdrCandidate c) =>
+                c.strategy == HdrStrategy.baseLayerConvert)
+            .toList(),
+        isEmpty,
+      );
+      // Since 4e6b29ab the canonical default order already evaluates C2
+      // before C3, so the default policy selects the same reshaping route.
       expect(
           lyaCaps().predict(sources[HdrSourceClass.dvP84]!).selected.strategy,
-          HdrStrategy.baseLayerDirect);
+          HdrStrategy.metadataReshape);
     });
 
-    test('override without allowExperimental skips to the next entry', () {
+    test('an override row selects the reshape without any legacy switch', () {
       const HdrRoutingPolicy policy = HdrRoutingPolicy(
         preferences: <HdrSourceClass, List<HdrStrategy>>{
           HdrSourceClass.dvP84: <HdrStrategy>[
@@ -1418,9 +1508,19 @@ void main() {
       );
       final HdrRoutePrediction prediction =
           lyaCaps().predict(sources[HdrSourceClass.dvP84]!, policy: policy);
-      expect(prediction.selected.strategy, HdrStrategy.baseLayerDirect);
-      expect(prediction.candidates.first.skipReason,
-          HdrDegradeReason.experimentalStrategySkipped);
+      // The refusal the removed maturity gate used to produce no longer
+      // exists anywhere in the plan; the C2 reshape is selected directly.
+      expect(prediction.selected.strategy, HdrStrategy.metadataReshape);
+      expect(prediction.selected.stage, HdrRouteStage.c2);
+      expect(prediction.selected.skipReason, isNull);
+      expect(prediction.playable, isTrue);
+      expect(
+        prediction.candidates
+            .map((HdrCandidate c) => c.skipReason)
+            .whereType<HdrDegradeReason>()
+            .toList(),
+        isNot(contains(HdrDegradeReason.experimentalStrategySkipped)),
+      );
     });
 
     test('preference off: HDR sources tone-map, SDR stays direct', () {
@@ -1439,7 +1539,6 @@ void main() {
         checkInvariants(prediction,
             cls: cls,
             capabilities: lyaCaps(),
-            allowExperimental: false,
             explicitSdrRequest: true);
       }
     });
@@ -1491,7 +1590,7 @@ void main() {
       );
       // The tone-map route has no dataspace/platformView dependency. It is
       // obtained through an explicit off request here: the default path on
-      // this HDR-capable display blocks once the gated dvP7 strategies are
+      // this HDR-capable display blocks once the HDR candidates are
       // exhausted (MK-ROUTING-20261011).
       expect(
         lya

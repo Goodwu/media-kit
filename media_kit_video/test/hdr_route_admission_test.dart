@@ -60,7 +60,7 @@ HdrStrategyRealization native(HdrSourceDescriptor source, HdrCapabilities caps) 
 void main() {
   for (final gateOpen in [false, true]) {
     final policy = HdrRoutingPolicy(allowExperimental: gateOpen);
-    group('experimental=$gateOpen does not grant capabilities', () {
+    group('experimental=$gateOpen cannot change admission', () {
       test('P8.4 accepts profile256 without requiring profile32', () {
         final prediction = capabilities(decoders: [decoder([256])])
             .predict(dvSource(8), policy: policy);
@@ -74,8 +74,15 @@ void main() {
             .predict(dvSource(8), policy: policy);
         expect(prediction.candidates.first.skipReason,
             HdrDegradeReason.nativeDvUnavailable);
-        expect(prediction.selected.strategy, HdrStrategy.baseLayerDirect);
-        expect(prediction.selected.route!.outputTransfer, HdrOutputTransfer.hlg);
+        // The refusal removes only the C1 entry; the canonical DV order then
+        // selects the C2 reshape (C2 precedes the C3 baseline).
+        expect(prediction.selected.strategy, HdrStrategy.metadataReshape);
+        expect(prediction.selected.route!.outputTransfer, HdrOutputTransfer.pq);
+        // The HLG C3 direct stays feasible on the HLG-declaring panel.
+        final direct = prediction.candidates.singleWhere(
+            (candidate) => candidate.strategy == HdrStrategy.baseLayerDirect);
+        expect(direct.feasible, isTrue);
+        expect(direct.route!.outputTransfer, HdrOutputTransfer.hlg);
       });
 
       test('P5 native does not depend on the GPU P5 pipeline', () {
@@ -112,7 +119,14 @@ void main() {
         final direct = prediction.candidates.singleWhere(
             (candidate) => candidate.strategy == HdrStrategy.baseLayerDirect);
         expect(direct.skipReason, HdrDegradeReason.displayLacksTransfer);
-        expect(prediction.selected.strategy, HdrStrategy.baseLayerConvert);
+        // The PQ report is a real conversion target: C4 HLG→PQ is feasible,
+        // but the canonical order selects the C2 reshape first — either way
+        // the plan never grants an HLG direct output.
+        final convert = prediction.candidates.singleWhere(
+            (candidate) => candidate.strategy == HdrStrategy.baseLayerConvert);
+        expect(convert.feasible, isTrue);
+        expect(convert.route!.outputTransfer, HdrOutputTransfer.pq);
+        expect(prediction.selected.strategy, HdrStrategy.metadataReshape);
         expect(prediction.selected.route!.outputTransfer, HdrOutputTransfer.pq);
       });
 

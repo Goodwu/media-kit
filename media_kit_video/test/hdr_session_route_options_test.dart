@@ -923,18 +923,24 @@ void main() {
   });
 
   test(
-      'explicit legacy conflicts rejected, implicit default accepts experimental snapshot',
-      () {
+      'legacy experimental value cannot reject effective options, off '
+      'conflict still rejected', () {
     final o = options();
+    // Implicit default (no legacy experimental value specified) accepts the
+    // experimental snapshot.
     expect(
         () => resolveHdrRouteOptions(
             options: o, policy: const HdrRoutingPolicy()),
         returnsNormally);
-    expect(
-        () => resolveHdrRouteOptions(
-            options: o,
-            policy: const HdrRoutingPolicy(allowExperimental: false)),
-        throwsArgumentError);
+    // An explicit legacy experimental value contradicting the effective
+    // options no longer rejects: the legacy field has no routing semantics
+    // and cannot shadow the active output options.
+    final converted = resolveHdrRouteOptions(
+        options: o, policy: const HdrRoutingPolicy(allowExperimental: false));
+    expect(converted, same(o));
+    expect(converted.experimental, isTrue);
+    // A legacy HDR-off request contradicting the effective output options is
+    // an explicit contradiction that cannot be ignored.
     expect(
         () => resolveHdrRouteOptions(
             options: o, preference: HdrOutputPreference.off),

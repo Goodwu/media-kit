@@ -291,25 +291,29 @@ void main() {
   });
 
   group('predict layer', () {
-    test('full candidate list with unsupported and gate skips (golden)', () {
+    test('full candidate list with unavailable and display-gated entries '
+        '(golden)', () {
       enable();
       // P8.4 on the LYA-like snapshot with the default policy: the native DV
       // strategy is verified since 2026-10-10 but this snapshot has no DV
-      // decoder, so the realizer refuses it (nativeDvUnavailable); the RPU
-      // reshape is behind the experimental gate, direct, the PQ conversion
-      // (verified since 2026-10-10) and tone-map are feasible. The HDR10/HLG
-      // capable display does not authorize SDR output, so every tone-map
-      // execution carries the display transfer gate instead of ok.
+      // decoder, so the realizer refuses it (nativeDvUnavailable). There is
+      // no maturity admission gate: the C2 RPU reshape is evaluated like
+      // every route and, with the P5 pipeline available and a PQ-capable
+      // display, realizes feasibly — the canonical stage order (C2 before
+      // C3/C4) makes it the selected route. The C3 direct and the C4
+      // HLG-to-PQ conversion stay feasible behind it; tone-map executions
+      // are blocked because the HDR10/HLG display does not authorize SDR
+      // output (display transfer gate, not a maturity gate).
       HdrRoutePlanner.plan(source: p84, capabilities: caps());
       expect(
         lines.single,
         'HdrDiag HDR predict: source=hevc,hlg,bt.2020,dolbyVision,8,4,false '
-        'class=dvP84 selected=baseLayerDirect maturity=verified '
+        'class=dvP84 selected=metadataReshape maturity=experimental '
         'presentation=nativeHdr confidence=verified playable=true '
         'candidates=nativeDolbyVision:nativeDvUnavailable,'
+        'metadataReshape:ok,'
         'baseLayerDirect:ok,'
         'baseLayerConvert:ok,'
-        'metadataReshape:experimentalStrategySkipped,'
         'toneMapSdr:displayLacksTransfer,'
         'toneMapSdr:displayLacksTransfer,'
         'toneMapSdr:displayLacksTransfer',
@@ -329,16 +333,16 @@ void main() {
       );
     });
 
-    test('every candidate and skip reason appears for the gated P8.4', () {
+    test('every candidate and skip reason appears for the P8.4 catalog', () {
       enable();
       HdrRoutePlanner.plan(source: p84, capabilities: caps());
       final candidates =
           lines.single.split('candidates=')[1].split(',');
       expect(candidates, <String>[
         'nativeDolbyVision:nativeDvUnavailable',
+        'metadataReshape:ok',
         'baseLayerDirect:ok',
         'baseLayerConvert:ok',
-        'metadataReshape:experimentalStrategySkipped',
         'toneMapSdr:displayLacksTransfer',
         'toneMapSdr:displayLacksTransfer',
         'toneMapSdr:displayLacksTransfer',
@@ -485,21 +489,14 @@ void main() {
         ..factsForOpen.add(facts(gamma: 'hlg', profile: 8))
         ..factsForOpen.add(facts(gamma: 'hlg', profile: 8))
         ..factsForOpen.add(facts(gamma: 'hlg', profile: 8));
-      final policy = const HdrRoutingPolicy(
-        preferences: {
-          HdrSourceClass.dvP84: [
-            HdrStrategy.baseLayerConvert,
-            HdrStrategy.baseLayerDirect,
-            HdrStrategy.toneMapSdr,
-          ],
-        },
-        allowExperimental: true,
-      );
       final session = makeSession(
-          backend: backend, capabilities: caps(), policy: policy);
-      // The dataspace step degrades to the next HDR candidate; the following
-      // bind timeout has no non-SDR successor on this HDR-capable display,
-      // so the open blocks instead of degrading to tone-map.
+          backend: backend, capabilities: caps());
+      // Canonical stage order plans C2 (metadataReshape) first; its dataspace
+      // step fails and degrades to the next stage's candidate (C3 direct).
+      // The following bind timeout excludes the platform-view topology, which
+      // also blocks the C4 conversion on this HDR-capable display, so the
+      // open blocks instead of degrading to tone-map. Cross-stage preference
+      // reordering no longer exists, so the default catalog is used.
       await expectLater(
           session.open(media, hint: p84), throwsA(isA<HdrOutputBindTimeout>()));
       await pumpEventQueueTimes(3);
@@ -509,7 +506,7 @@ void main() {
       expect(degrades, hasLength(1));
       expect(degrades[0],
           startsWith('HdrDiag HDR degrade: gen=1 '
-              'reason=dataSpaceApplyFailed from=baseLayerConvert '
+              'reason=dataSpaceApplyFailed from=metadataReshape '
               'to=baseLayerDirect diagnostic=HdrDataSpaceApplyException'));
       // No applied decision: the generation never reached a verified route.
       expect(

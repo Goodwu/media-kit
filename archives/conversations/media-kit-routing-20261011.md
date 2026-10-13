@@ -499,3 +499,12 @@ Linux B第1修正V2仍REQUEST_CHANGES：18原tests/49独立probe及实际generat
 **未实施（维持第 4—7 节原状，不误记完成）**：4.1 候选 stage/candidateId 与 HdrRoutingPolicy 去 allowExperimental/experimental、4.2 显式候选评估/错误模型（routeNotImplemented 等）、4.3 候选表、4.4 snapshotId+有序 candidateId 重试、4.5 元数据所有权与输出报告扩展、A 包 HDR10+/Vivid C1/C2 入口、C4 仅 HLG→PQ 修正、PiliPlusX 配置迁移与共用报告（App 侧未动）、docs/validation 验收矩阵 JSON、native B1—B4 及一切设备验收。F4 与"阻断路径 report.degradeReason 为 null（typed 错误由 report.error 携带）"两观察项归入 4.2 设计。
 
 **后续**：本地两提交（迁移+台账）待用户逐次请示推送；推送后最终 CI 必须在实际新头取得 success 方可记最终验收；随后按检查点第 4 步核对 mpv/FFmpeg/libplacebo 实际构建输入再进 native 包。
+
+## 2026-10-14 v7.3 第一批实施本地收绿（续接远端 §10 交接，ZCode Lead）
+
+远端 Codex agent 在 `e1993351` 之上以十提交（`fa5cb8a2..d5a270a7`）实施 v7.3 主体（C4 仅 HLG 兼容输入→真实 PQ 显示、HDR10+/Vivid 独立 C1 身份与 C2 routeNotImplemented、HdrRouteStage C1—C4 与 candidateId、用户 prefer 仅同 stage 重排、DV P8.1/P8.4/P7 默认序 C2 在 C3 前、Session 失败后重估完整候选目录、成熟度准入门删除、legacy experimental 字段转兼容记录），并于方案 §10 交接"hosted 36 FAIL 待本地迁移"。本地接手处置：
+
+- 基线 d3a4ab23 全量：lab 298/298 绿；video 失败 31 项（compact 截断初计 18、expanded 复核 31——教训：compact 报告器截断长用例名，失败清单一律 expanded 口径）。
+- 四 Worker 两轮迁移全部 31 项，0 ESCALATED（未发现实现缺陷）；无删用例、无弱化、无开关；+2 新增用例钉住覆盖缺口（hdr10Plus 固定目录错误保留、C2 错误后 C3 续走 verified）。要点：P8.2 规格级用例按 §10.3.3 双态语义迁移（p5=true C2→PQ 合法入选 / p5=false 阻断，双分支均断言无可行 SDR 候选）；一处 session 夹具按真实 planner API `withRoutingIdentity` 复刻候选身份（V1 确认非绕过）；diagnostics golden 经语义核对后重生成；legacy experimental 冲突断言按 cbd446d4 实际行为翻转（off 冲突仍拒绝）。
+- §10.3.4 四点时序核验覆盖在案。终态 **media_kit_video 808/808、media_kit_hdr_lab 298/298，双包 analyze 零 finding**（Flutter 3.47.2）；V1 复核可提交，2 条范围外跟进（planner lib 注释已顺手修正；两测试文件既有旧 gate 措辞留 §10.3.5 清理）。
+- 回执入方案 §10；本地提交未推送（push 逐次请示）。下一步 §10.3.5：`allowExperimental/experimental` 字段整体删除（库序列化/比较/配置一次迁移、Lab、App）+ PiliPlusX dirty 迁移；§10.3.6 功能项（metadata ownership、P7 残差/EL、HDR10+/Vivid 逐帧元数据、C1 原生显示链、native 构建与设备输出）维持未实施。

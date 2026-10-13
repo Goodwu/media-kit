@@ -187,9 +187,17 @@ void main() {
         (call) async => response([small]),
       );
       caps = await VideoRouteCapabilities.query(sources: [small]);
+      final prediction = caps.predict(p84, specification: small);
+      // Base codec support authorizes the codec-path candidates only: the
+      // canonical C2 reshape (selected ahead of the C3 baseline) plays, while
+      // the native DV candidate stays rejected by its own nativeDv census.
+      expect(prediction.selected.strategy, HdrStrategy.metadataReshape);
+      expect(prediction.selected.stage, HdrRouteStage.c2);
       expect(
-        caps.predict(p84, specification: small).selected.strategy,
-        HdrStrategy.baseLayerDirect,
+        prediction.candidates
+            .singleWhere((c) => c.strategy == HdrStrategy.nativeDolbyVision)
+            .feasible,
+        isFalse,
       );
     },
   );
