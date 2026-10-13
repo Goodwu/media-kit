@@ -24,6 +24,8 @@ PR #3 DV003 仍为 Critical REQUEST_CHANGES，不原样归并，也不开第二 
 
 2026-10-13 平台线程 ANR 修复提交（media_kit）：引擎合并线程拓扑下 Dart 根 isolate 运行于平台线程，同步 libmpv 调用取 `mp_dispatch_lock`，该锁在启动/复核/输出重建期间可被 VO 等待平台线程 surface 工作时持有——平台线程等 mpv、mpv 等平台线程，死锁成 ANR。改动：① `Initializer` 主 isolate 事件泵去 `kDebugMode` 限定（release/测试同走 isolate pump，`mpv_wait_event()` 固定在泵线程），`dispose` 与 `create` 镜像同路；② 新增 `media_kit/lib/src/player/native/core/mpv_api_isolate.dart` 专用 API isolate（与事件泵刻意分离——属性读阻塞在 core lock 上不得妨碍泵 drain 事件队列，否则事件队列饱和反压 core 整体死锁），`getProperty`/属性观察读值/hook 内 `http-header-fields` 写入与置空/`playlist-pos` 读/`hook_continue`/`setPropertyString` 全部改经该 isolate 执行（仅 `configuration.async`；`allowDisposed` 直接路径保留保释放顺序），同步手写 FFI 分配释放随之下线；③ `mpv_set_property_async` 回复超时 5s→30s（首帧 VO 初始化 GPU context+shader 编译在慢 GPU/模拟器合法超时，await 异步不占平台线程）。验证：改动文件 `dart analyze` 零 finding；真机验证未跑，待平台线程拓扑设备复验。
 
+2026-10-13 解码履行复核门竞态修复提交（media_kit_video `hdr_decoder_review.dart`）：五机回归 marble hdr10 首跑的 `HdrDecoderReviewFailure("Observed decoder changed")` 间歇 flake（同路由复跑通过）根因是双采样落进 decoder 正在打开/视频参数尚未稳定的窗口。改动：双采样一侧为空视为 decoder opening、`video-params/*` 差异视为 settling，均重试取稳定样本；decoder 身份 endpoint 双侧均已稳定仍不同才判失败（该异常正是此检查存在目的，不放松）。验证：`dart analyze` 零 finding；marble hdr10 复跑待验，TASKS.md flake 待修项已同步标记。
+
 ## History
 
 ### 2026-10-12 TASKS 旧状态快照（历史）

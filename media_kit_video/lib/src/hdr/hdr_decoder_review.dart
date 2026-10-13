@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:media_kit/media_kit.dart' show FileLoadedRecord, VideoParams;
 import 'package:synchronized/synchronized.dart';
 
@@ -253,9 +254,22 @@ Future<HdrReviewFacts> gatherDecoderReviewFacts({
           final b = await endpoint();
           await identity();
           for (final key in endpoints) {
-            if (a[key] != b[key]) {
-              throw HdrDecoderReviewFailure('Decoder endpoint changed: $key');
+            if (a[key] == b[key]) continue;
+            // An endpoint still populating (empty on one side) is the decoder
+            // opening, not a switch: retry for a stable sample. Video params
+            // also legitimately settle while the first frames are decoded.
+            // Both settled but different is a real mid-read change: decoder
+            // identity endpoints fail the review (that anomaly is what this
+            // check exists to catch); other endpoints retry.
+            if (a[key]!.isEmpty || b[key]!.isEmpty) {
+              debugPrint('HDR decoder review: $key populating, retrying sample');
+              return null;
             }
+            if (key.startsWith('video-params/')) {
+              debugPrint('HDR decoder review: $key settling, retrying sample');
+              return null;
+            }
+            throw HdrDecoderReviewFailure('Decoder endpoint changed: $key');
           }
           for (final key in decoderIdentityEndpoints) {
             final value = a[key]!;
