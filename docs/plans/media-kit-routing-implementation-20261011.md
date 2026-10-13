@@ -287,3 +287,40 @@ HDR10+ 用有效变化曲线测试，Vivid 用正式语义向量和独立CPU参�
 - 处置：40 项旧用例全部按第 1 节不变量迁移（0 ESCALATED；无删用例、无断言弱化、无新开关；审查确认）；附带删除 `hdr_video_session.dart` review 路径 `hdrAttempts>=2→off` 死控制流（仓库级"hdrAttempts 仅统计"由此成立）与三处过时注释；新增空候选目录阻断占位专测 1 项。终态：media_kit_video 788/788、media_kit_hdr_lab 298/298，双 exit 0。
 - 未实施（维持第 4—7 节原状）：4.1 stage/candidateId 与去 experimental 开关、4.2 显式错误模型、4.3 候选表、4.4 快照重试、4.5 元数据所有权、A 包 HDR10+/Vivid routeNotImplemented 入口、C4 仅 HLG→PQ 修正、PiliPlusX 配置/报告共用、验收矩阵 JSON、native B1—B4 与设备验收。已知设计遗留：planner 以 `displayLacksTransfer` 复用表达策略性禁 SDR、阻断路径 `report.degradeReason` 为 null（typed 错误由 `report.error` 携带），均归入 4.2 错误模型设计。
 - 后续：本地提交待用户批准推送；推送后最终 CI 须在实际新头取得 success 方可记最终验收；再按第 4 步核对 mpv/FFmpeg/libplacebo 实际构建输入进 native 包。
+
+## 10. 2026-10-14 主仓实施与源码验证阻断（本地 agent 接手）
+
+**代码已提交，功能未验收。本节是本轮唯一续接事实，不重启旧工作或新开实现分支。**
+
+### 10.1 代码身份与范围
+
+原权威分支仍为 `Goodwu/media-kit:routing/MK-ROUTING-20261011`。本轮基点为本地 agent 已验证的 `e1993351dccc25149dc2543bf268a47dfec7b368`（本地对旧 40 项测试迁移后 788/788 video、298/298 lab；实机回归另有 LG P8.4 的实际 PQ 输出链失败）。本轮新代码最终变更头在下方；均 GitHub API 在相同原分支顺序写入并逐次成功回读，不是对本地旧副本重新开发。未写入 PiliPlusX/FFmpeg 的 dirty 文件或 mpv/libplacebo。不要将旧基点的 Flutter/设备成功标记继承给新头。
+
+本轮按序提交：
+1. `fa5cb8a2` + `c1885ecc`：C4 执行约束仅 HLG 基线→PQ，且 PQ 显示可用；新增六项纯执行器回归。
+2. `79f8cc38`：旧 C4 HDR10 PQ 伪转换测试迁移，保留真实 HLG 路线、SurfaceTexture 故障和不得 SDR 接管的负向断言。
+3. `6dd3c33b` + `3084e1d9`：HDR10+/Vivid 独立 C1 原生候选身份、C2 动态映射缺失时显式 `routeNotImplemented`，源不适用与显示缺报不冒充实现错误；普通 HDR10/HLG 的 C2 不可误标动态映射成功。加入 `HdrCandidateStatus` 与四项回归。
+4. `f0472a4c`：修正旧 HDR10 C4 gate-open 误断言。
+5. `c55ebb91` + `90a993f8`：`HdrRouteStage` C1—C4、候选 `candidateId`，prefer 同阶段排序，四项新阶段回归。
+6. `9e41c0c1`：拒绝/过滤候选仍保持独立执行实例的稳定 ID（防止三个 SDR decoder 变体 ID 碰撞）。
+7. `4e6b29ab`：DV P8.1/P8.4/P7 默认顺序以 C2 在 C3 前为准；Session 回退重新评估完整候选，保留 attempted/excluded，不能按旧策略索引裁掉 C3/C4。
+8. `ede11fc0` + `a0975fbb`：移除 planner 对成熟度的真实执行准入门；新增无需 experimental 开关的测试。**过渡 API 仍包含旧 experimental 字段：仅记录/兼容，后续必须整体从库、Lab、App 删除。**
+9. `cbd446d4` + `d5a270a7`：禁止旧 allowExperimental 与 effective options 的真假冲突阻断路由及回归测试。
+
+### 10.2 实际 hosted CI 结果（不冒充功能通过）
+
+- `c1885ecc` 的 routing source run `38436756113`：video tests **12 FAIL**（旧 C4 PQ→PQ/PQ→HLG 假契约），lab/tools SUCCESS；已在 `79f8cc38` 测试迁移。
+- `79f8cc38` 的 routing source run `38437598785`：video **1 FAIL**（残留 gate-open 旧断言），lab/tools SUCCESS；由 `f0472a4c` 修订。
+- `a0975fbb` 的 routing source run `38439230656`：`media_kit_video` **36 FAIL**（主要由于固定阶段顺序与成熟度开关废除，旧测试仍假设原准入/回退；包含新 stage 测试与旧 experimental policy 冲突），`media_kit_hdr_lab` SUCCESS、Python tools SUCCESS；video 的 `flutter analyze` 已执行且没有 compile/error finding（失败来自 Flutter tests）。原始 run/job `115441457858` 和日志留存，不能记为绿。末端两提交 `cbd446d4/d5a270a7` 已修复其中真实的旧开关冲突及添回归，**但未获末端全量绿**。
+- 上述 hosted source 测试使用 GitHub runner 的 Flutter 3.47.7，不是本次模型在本地运行。此环境无 Dart/Flutter/Android SDK/ADB，不具备本地全量编译/设备检验条件。新 native 渲染端到端一概仍未验证。
+
+### 10.3 必须先完成的本地验证/修正
+
+1. 先查 `Goodwu/media-kit:routing/MK-ROUTING-20261011` 最新远端 HEAD，保留全部当前 dirty 工作，`fetch` 后安全快进/合并，**不要 checkout/reset 重来、不要产生重复开发分支**。运行前记录精确主仓/App/mpv/FFmpeg/libplacebo refs 与工作树补丁/二进制输入身份。
+2. 对最新 HEAD 执行 `media_kit_video`、`media_kit_hdr_lab` 的全量 `flutter analyze` 与 `flutter test`。核对新 `hdr_v73_c4_hlg_to_pq_test.dart`、`hdr_v73_dynamic_candidate_errors_test.dart`、`hdr_v73_candidate_stage_test.dart`、`hdr_v73_no_maturity_gate_test.dart` 以及原 `hdr_v73_no_implicit_sdr_test.dart`。从 run `38439230656` 的 36 FAIL 开始逐项复核。
+3. 旧测试应迁移到已裁决的不变量，而不是删测试、仅开某个 experimental 开关、把动态映射未实现当成功、或者把 P8.2 的真实 C2→PQ 判成不允许的 SDR→HDR。注重现实区别：P8.2 `p5PipelineAvailable=true` 的 C2 可正确输出 PQ；`false` 时才要求 C2 不可行和 HDR 分支阻断。
+4. 特别查 `HdrRoutePlanner` 与 `HdrVideoSession` 的选中/恢复/重建时序：C2 错误后 C3/C4 能走完、同一执行 candidateId 不重复、未实现错误保留；不放宽 owner/ACK/lease、无信令 DV、数据空间和软件/硬解安全门。
+5. 源码 full suite 通过且与最新远端一致后再继续删除旧 `allowExperimental/experimental` 配置/API 字段，并迁移 PiliPlusX dirty 的 `lib/plugin/pl_player/route_options.dart`、`test/route_options_test.dart` 与其他调用点。不能通过保留另一个实验性启用开关解决测试。
+6. 核对未实施：metadata ownership 的 `preserve/consume/baseline` 合同、P7 残差与 EL、HDR10+/Vivid 的真实逐帧元数据交付+映射、C1 原生动态显示链、真实 native 最新源码构建与 LG/marble 设备输出。 `routeNotImplemented` 的合同测试通过不等于这些功能完成。
+
+**当期阻断性质：本轮无本地 Dart/Flutter 运行器，hosted source 36 FAIL 尚需本地 agent 的全量用例迁移与独立审核。** 因此停在验证交接点，不继续修改 FFmpeg/mpv/libplacebo 或产品 App，避免在尚未通过源码门前扩大未验差异。已提交代码保持 implemented / unverified，而不是退回 planned。
