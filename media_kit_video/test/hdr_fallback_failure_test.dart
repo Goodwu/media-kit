@@ -91,6 +91,10 @@ void main() {
         expect(candidate.feasible, isFalse, reason: '$candidate');
         expect(candidate.skipReason, HdrDegradeReason.displayLacksTransfer,
             reason: '$candidate');
+      } else if (candidate.strategy == HdrStrategy.baseLayerConvert) {
+        // PQ input has no C4 HLG-to-PQ conversion candidate.
+        expect(candidate.skipReason, HdrDegradeReason.unsupportedStrategy,
+            reason: '$candidate');
       } else {
         expect(candidate.skipReason, HdrDegradeReason.outputBindTimeout,
             reason: '$candidate');

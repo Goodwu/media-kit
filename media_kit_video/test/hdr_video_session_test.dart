@@ -406,7 +406,7 @@ void main() {
       capabilities: caps(),
       policy: const HdrRoutingPolicy(
         preferences: {
-          HdrSourceClass.hdr10: [
+          HdrSourceClass.dvP84: [
             HdrStrategy.baseLayerConvert,
             HdrStrategy.baseLayerDirect,
             HdrStrategy.toneMapSdr,
@@ -415,7 +415,7 @@ void main() {
         allowExperimental: true,
       ),
     );
-    await session.open(media, hint: hdr10);
+    await session.open(media, hint: p84);
     expect(backend.preparedPlans, hasLength(2));
     expect(backend.preparedPlans.first.route.strategy,
         HdrStrategy.baseLayerConvert);
@@ -798,15 +798,15 @@ void main() {
       HdrStrategyRealizer.mkstBridgeProbeOverride = () => true;
       final backend = FakeBackend()
         ..factsForOpen.addAll([
-          facts(gamma: 'pq', primaries: 'bt.2020', hwdec: 'mediacodec'),
-          facts(gamma: 'pq', primaries: 'bt.2020', hwdec: 'no'),
+          facts(gamma: 'hlg', profile: 8, hwdec: 'mediacodec'),
+          facts(gamma: 'hlg', profile: 8, hwdec: 'no'),
         ]);
       final session = makeSession(
         backend: backend,
         capabilities: lgPqCaps(),
         policy: HdrRoutingPolicy(
           preferences: const {
-            HdrSourceClass.hdr10: [
+            HdrSourceClass.dvP84: [
               HdrStrategy.baseLayerConvert,
               HdrStrategy.toneMapSdr,
             ],
@@ -818,7 +818,7 @@ void main() {
       final events = <HdrOutputEvent>[];
       session.events.listen(events.add);
 
-      await session.open(media, hint: hdr10);
+      await session.open(media, hint: p84);
       await pumpEventQueue();
 
       // The mismatched surfacetexture carrier is excluded at the review, but
@@ -852,15 +852,15 @@ void main() {
       HdrStrategyRealizer.mkstBridgeProbeOverride = () => true;
       final backend = FakeBackend()
         ..factsForOpen.addAll([
-          facts(gamma: 'pq', primaries: 'bt.2020', hwdec: 'mediacodec'),
-          facts(gamma: 'pq', primaries: 'bt.2020', hwdec: 'mediacodec-copy'),
+          facts(gamma: 'hlg', profile: 8, hwdec: 'mediacodec'),
+          facts(gamma: 'hlg', profile: 8, hwdec: 'mediacodec-copy'),
         ]);
       final session = makeSession(
         backend: backend,
         capabilities: lgPqCaps(),
         policy: HdrRoutingPolicy(
           preferences: const {
-            HdrSourceClass.hdr10: [
+            HdrSourceClass.dvP84: [
               HdrStrategy.baseLayerConvert,
               HdrStrategy.toneMapSdr,
             ],
@@ -872,7 +872,7 @@ void main() {
       final events = <HdrOutputEvent>[];
       session.events.listen(events.add);
 
-      await session.open(media, hint: hdr10);
+      await session.open(media, hint: p84);
       await pumpEventQueue();
 
       // The mediacodec-copy carrier is independent of the failed

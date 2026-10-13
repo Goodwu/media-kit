@@ -70,6 +70,10 @@ void main() {
     dvCompatibilityId: 4,
     enhancementLayer: false,
   );
+  const hlg = HdrSourceDescriptor(
+    codec: 'hevc', transfer: 'hlg', primaries: 'bt.2020',
+    enhancementLayer: false,
+  );
   const p5 = HdrSourceDescriptor(
     codec: 'hevc',
     dynamicMetadata: HdrDynamicMetadata.dolbyVision,
@@ -395,7 +399,7 @@ void main() {
       expect(
         decisions[0],
         contains('candidates=baseLayerDirect:ok,'
-            'baseLayerConvert:ok,'
+            'baseLayerConvert:unsupportedStrategy,'
             'toneMapSdr:displayLacksTransfer'),
       );
 
@@ -410,25 +414,24 @@ void main() {
     test('a dataspace route logs requested/path/readback in the applied '
         'decision', () async {
       enable();
-      // Force a dataspace route: an HLG-only display has no PQ support, so
-      // the conversion targets HLG (dataspace hlg) with the gate open.
+      // C4 requires an HLG input and a PQ-capable display.
       final backend = FakeBackend()
-        ..factsForOpen.add(facts(gamma: 'pq'))
-        ..factsForOpen.add(facts(gamma: 'pq'));
+        ..factsForOpen.add(facts(gamma: 'hlg'))
+        ..factsForOpen.add(facts(gamma: 'hlg'));
       final session = makeSession(
         backend: backend,
-        capabilities: caps(types: const {3}),
+        capabilities: caps(types: const {2}),
         policy: const HdrRoutingPolicy(allowExperimental: true),
       );
-      await session.open(media, hint: hdr10);
+      await session.open(media, hint: hlg);
       await pumpEventQueueTimes(3);
 
       final applied = lines
           .where((l) => l.startsWith('HdrDiag HDR decision:'))
           .where((l) => l.contains('phase=applied'))
           .single;
-      expect(applied, contains('surface=hlg'));
-      expect(applied, contains('requested=hlg path=ext:lya-pq'));
+      expect(applied, contains('surface=pq'));
+      expect(applied, contains('requested=pq path=ext:lya-pq'));
       expect(applied, contains('readback=DATASPACE_BT2020_PQ'));
       await session.dispose();
     });
