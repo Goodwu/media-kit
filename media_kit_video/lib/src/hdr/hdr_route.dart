@@ -25,6 +25,9 @@ enum HdrPresentation {
     switch (strategy) {
       case HdrStrategy.nativeDolbyVision:
         return HdrPresentation.nativeDolbyVision;
+      case HdrStrategy.nativeHdr10Plus:
+      case HdrStrategy.nativeHdrVivid:
+        return HdrPresentation.nativeHdr;
       case HdrStrategy.baseLayerDirect:
       case HdrStrategy.baseLayerConvert:
       case HdrStrategy.metadataReshape:
@@ -107,6 +110,11 @@ enum HdrDegradeReason {
   /// rebuild (not implemented), or reshape on a P7 stream whose
   /// enhancement layer may be FEL.
   unsupportedStrategy,
+
+  /// The selected, structurally applicable route has no implementation in
+  /// this build. This is not display/decoder unavailability and is reported
+  /// even if a later baseline HDR candidate plays successfully.
+  routeNotImplemented,
 
   /// A Dolby Vision source needs the fork's P5 dovi rescale pipeline and it
   /// is not available; the library refuses to output a wrongly colored
@@ -341,6 +349,8 @@ class HdrRoute {
       'stripRpu: $stripDvRpu, deps: $dependencies)';
 }
 
+enum HdrCandidateStatus { ready, skipped, unavailable, error }
+
 /// {@template hdr_candidate}
 ///
 /// One entry of a prediction's candidate list: a strategy from the
@@ -373,6 +383,20 @@ class HdrCandidate {
   /// candidate is feasible — including a feasible non-selected candidate
   /// kept for display, and the final safety-net candidate.
   final HdrDegradeReason? skipReason;
+
+  /// An explicit planning state. Runtime playback success is a separate
+  /// observation; a later fallback must not erase this candidate's error.
+  HdrCandidateStatus get status {
+    if (feasible) return HdrCandidateStatus.ready;
+    if (skipReason == HdrDegradeReason.routeNotImplemented) {
+      return HdrCandidateStatus.error;
+    }
+    if (skipReason == HdrDegradeReason.unsupportedStrategy ||
+        skipReason == HdrDegradeReason.experimentalStrategySkipped) {
+      return HdrCandidateStatus.skipped;
+    }
+    return HdrCandidateStatus.unavailable;
+  }
 
   /// The realized route when [feasible] is true.
   final HdrRoute? route;
