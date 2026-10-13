@@ -324,3 +324,13 @@ HDR10+ 用有效变化曲线测试，Vivid 用正式语义向量和独立CPU参�
 6. 核对未实施：metadata ownership 的 `preserve/consume/baseline` 合同、P7 残差与 EL、HDR10+/Vivid 的真实逐帧元数据交付+映射、C1 原生动态显示链、真实 native 最新源码构建与 LG/marble 设备输出。 `routeNotImplemented` 的合同测试通过不等于这些功能完成。
 
 **当期阻断性质：本轮无本地 Dart/Flutter 运行器，hosted source 36 FAIL 尚需本地 agent 的全量用例迁移与独立审核。** 因此停在验证交接点，不继续修改 FFmpeg/mpv/libplacebo 或产品 App，避免在尚未通过源码门前扩大未验差异。已提交代码保持 implemented / unverified，而不是退回 planned。
+
+### 本地验证回执（2026-10-14，本地 agent，d3a4ab23）
+
+- 基线：fetch 快进至 `d3a4ab23`（含 §10.1 全部十提交），工作树净、无 dirty 冲突。
+- 全量首验：双包 `flutter analyze` 零 finding；media_kit_hdr_lab 298/298 全绿（与 hosted 一致）；media_kit_video 失败 31 项（compact 报告器截断初计 18，expanded 复核实为 31；与 hosted a0975fbb 36 项之差为末两提交已修项及 Flutter 3.47.2/3.47.7 环境差，未逐项对账）。
+- 迁移：四 Worker 两轮将失败项全部迁移至已裁决契约，**0 ESCALATED（未发现实现缺陷）**；无删用例、无断言弱化、无新开关（V1 复核逐条核对）；新增用例 2 个（hdr10Plus 固定目录 C1/C2 routeNotImplemented 错误在 C3 基线成功下保留；C2 dataspace 错误后 C3 续走至 verified）；规格级 `hdr_v73_no_implicit_sdr_test` P8.2 用例按 §10.3.3 双态语义迁移（p5=true C2→PQ 合法且入选、p5=false 阻断，两分支均断言无可行 SDR 候选，"SDR 基线不得冒充 HDR"保护保留）；一处 session 测试夹具按真实 planner API（`withRoutingIdentity`）补挂候选身份，经复核为复刻真实身份而非绕过。
+- §10.3.4 时序核验：C2 错误后 C3/C4 走完、同 candidateId 不重复尝试、routeNotImplemented 在 C3 成功后保留、清理失败/不可归因 timeout 立即停止——四点均由具名测试覆盖（含新增用例钉住缺口 a）。
+- 终态：**media_kit_video 808/808、media_kit_hdr_lab 298/298，双 exit 0**（Flutter 3.47.2）。V1 复核可提交；两条范围外低优先级跟进：planner lib 注释两处已顺手修正；两个既有测试文件的旧 gate 措辞留待 §10.3.5 批次清理。
+- 本批本地提交：10 个测试文件迁移 + planner 注释修正 + 本回执与台账。
+- 后续（§10.3.5）：删除旧 `allowExperimental/experimental` 配置/API 字段（库、Lab、App）与 PiliPlusX dirty 文件迁移，另批实施；§10.3.6 未实施项维持（metadata ownership 合同、P7 残差/EL、HDR10+/Vivid 逐帧元数据交付与映射、C1 原生动态显示链、native 最新源码构建与 LG/marble 设备输出）——routeNotImplemented 合同测试通过不等于这些功能完成。

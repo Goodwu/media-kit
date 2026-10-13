@@ -769,17 +769,25 @@ void main() {
             hwdecCurrent: plan.route.hwdec));
       final session = env.session(backend, capabilities: _caps(sdk: 29));
       await session.open(env.media, hint: _p5);
+      // C1 native fails at configure; the full catalog continues instead of
+      // blocking or falling back: C2 reshape opens as the compatible HDR
+      // candidate. The review reclassifies the actual source to P8.1, whose
+      // stage-ordered catalog still selects the open C2 route, so it is
+      // accepted without a further reopen.
       expect(backend.configured.map((p) => p.route.strategy), [
         HdrStrategy.nativeDolbyVision,
         HdrStrategy.metadataReshape,
-        HdrStrategy.baseLayerDirect,
       ]);
       expect(
           backend.configured
               .where((p) => HdrSessionAttemptPolicy.isHdr(p.route)),
-          hasLength(3));
-      expect(session.report.value.actual!.strategy, HdrStrategy.baseLayerDirect);
-      expect(backend.opened.last.excluded,
+          hasLength(2));
+      expect(session.report.value.verified, isTrue);
+      expect(session.report.value.source!.dvProfile, 8);
+      expect(session.report.value.source!.dvCompatibilityId, 1);
+      expect(
+          session.report.value.actual!.strategy, HdrStrategy.metadataReshape);
+      expect(backend.opened.single.excluded,
           contains(HdrRouteDependency.nativeDolbyVision));
       await session.dispose();
     });

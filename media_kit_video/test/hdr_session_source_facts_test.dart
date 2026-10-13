@@ -80,7 +80,10 @@ void main() {
     await session.open(Media('test://source'));
     expect(backend.opened, hasLength(2));
     expect(backend.opened.first.route.strategy, HdrStrategy.sdrDirect);
-    expect(backend.opened.last.route.strategy, HdrStrategy.baseLayerDirect);
+    // The retained DV evidence replans to the canonical catalog: the C2
+    // reshape (P5 pipeline available, PQ-capable display) is evaluated
+    // without a maturity gate and selected ahead of the C3 baseline.
+    expect(backend.opened.last.route.strategy, HdrStrategy.metadataReshape);
     final report = session.report.value;
     expect(report.source, _p84);
     expect(report.sourceFacts!.initialHint, isNull);

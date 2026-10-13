@@ -29,9 +29,9 @@ enum HdrOutputPreference { auto, off }
 /// Preferences only contain cross-platform strategy names — no vo, hwdec,
 /// SDK or device knowledge — so an application may ship them as plain
 /// configuration. A class missing from a custom map falls back to
-/// [defaultPreferences]; a class missing from both (profile 10 and HDR10+
-/// have no default row in requirement 3.4) yields an empty list and the
-/// planner's safety net picks the route.
+/// [defaultPreferences]; a class missing from both (profile 10 has no
+/// default row) yields an empty list and the planner blocks with the
+/// placeholder candidate.
 ///
 /// {@endtemplate}
 class HdrRoutingPolicy {
@@ -52,10 +52,11 @@ class HdrRoutingPolicy {
   /// The default preference order per source class: HDR output first with
   /// direct routes preferred, tone-map last (requirement 3.4).
   ///
-  /// `dvP10` and `hdr10Plus` intentionally have no row (requirement 3.4
-  /// does not list them; Phase 1 does not cover AV1 and mpv cannot read
-  /// HDR10+ metadata yet) — those classes plan to the blocking placeholder
-  /// candidate instead of any SDR fallback.
+  /// `dvP10` intentionally has no row (requirement 3.4 does not list it;
+  /// Phase 1 does not cover AV1) — that class plans to the blocking
+  /// placeholder candidate instead of any SDR fallback. `hdr10Plus` plans
+  /// through the fixed C1–C3 catalog with explicit not-implemented errors
+  /// on its dynamic candidates.
   static const Map<HdrSourceClass, List<HdrStrategy>> defaultPreferences =
       <HdrSourceClass, List<HdrStrategy>>{
     HdrSourceClass.dvP5: <HdrStrategy>[
