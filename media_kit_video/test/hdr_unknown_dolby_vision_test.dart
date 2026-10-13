@@ -36,27 +36,24 @@ void main() {
         expect(source.hasUnresolvedDolbyVision, isTrue);
         expect(source.kind, HdrMediaKind.dolbyVisionUnknown);
         expect(HdrSourceClass.of(source), HdrSourceClass.dvUnknown);
-        for (final experimental in <bool>[false, true]) {
-          final policy = HdrRoutingPolicy(
-            allowExperimental: experimental,
-            preferences: <HdrSourceClass, List<HdrStrategy>>{
-              HdrSourceClass.dvUnknown: HdrStrategy.values,
-            },
+        const policy = HdrRoutingPolicy(
+          preferences: <HdrSourceClass, List<HdrStrategy>>{
+            HdrSourceClass.dvUnknown: HdrStrategy.values,
+          },
+        );
+        for (final preference in HdrOutputPreference.values) {
+          final prediction = HdrRoutePlanner.plan(
+            source: source,
+            capabilities: _capabilities,
+            policy: policy,
+            preference: preference,
           );
-          for (final preference in HdrOutputPreference.values) {
-            final prediction = HdrRoutePlanner.plan(
-              source: source,
-              capabilities: _capabilities,
-              policy: policy,
-              preference: preference,
-            );
-            expect(prediction.playable, isFalse);
-            expect(prediction.confidence, HdrPredictionConfidence.unverified);
-            for (final candidate in prediction.candidates) {
-              expect(candidate.route, isNull);
-              expect(candidate.feasible, isFalse);
-              expect(candidate.skipReason, HdrDegradeReason.sourceMetadataUnknown);
-            }
+          expect(prediction.playable, isFalse);
+          expect(prediction.confidence, HdrPredictionConfidence.unverified);
+          for (final candidate in prediction.candidates) {
+            expect(candidate.route, isNull);
+            expect(candidate.feasible, isFalse);
+            expect(candidate.skipReason, HdrDegradeReason.sourceMetadataUnknown);
           }
         }
       });

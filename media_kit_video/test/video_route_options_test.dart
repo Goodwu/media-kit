@@ -13,11 +13,10 @@ void main() {
   const sdr =
       VideoRouteSelection<VideoOutputIntent>.require(VideoOutputIntent.sdr);
 
-  test('default is automatic with experimental disabled', () {
+  test('default is automatic with alternatives allowed', () {
     final options = EffectiveVideoRouteOptions.resolve();
     expect(options.decode.preference, VideoRoutePreference.auto);
     expect(options.output.preference, VideoRoutePreference.auto);
-    expect(options.experimental, false);
     expect(options.failurePolicy, VideoRouteFailurePolicy.allowAlternatives);
     expect(options.origins.values.toSet(),
         {VideoRouteOptionOrigin.libraryDefault});
@@ -47,12 +46,11 @@ void main() {
 
   test('unset inherits application and partial library defaults', () {
     final options = EffectiveVideoRouteOptions.resolve(
-      libraryDefaults: const VideoRouteOptions(output: hdr, experimental: true),
+      libraryDefaults: const VideoRouteOptions(output: hdr),
       application: const VideoRouteOptions(decode: hardware),
     );
     expect(options.decode, hardware);
     expect(options.output, hdr);
-    expect(options.experimental, true);
     expect(options.failurePolicy, VideoRouteFailurePolicy.allowAlternatives);
     expect(options.origins['decode'], VideoRouteOptionOrigin.application);
     expect(options.origins['output'], VideoRouteOptionOrigin.libraryDefault);
@@ -72,39 +70,31 @@ void main() {
     expect(options.application.output, hdr);
   });
 
-  test('explicit false and allowAlternatives reset their lower values', () {
+  test('explicit allowAlternatives resets the lower stop requirement', () {
     final options = EffectiveVideoRouteOptions.resolve(
       application: const VideoRouteOptions(
-        experimental: true,
         failurePolicy: VideoRouteFailurePolicy.stop,
       ),
       openOverride: const VideoRouteOptions(
-        experimental: false,
         failurePolicy: VideoRouteFailurePolicy.allowAlternatives,
       ),
     );
-    expect(options.experimental, false);
     expect(options.failurePolicy, VideoRouteFailurePolicy.allowAlternatives);
     expect(
-        options.origins['experimental'], VideoRouteOptionOrigin.openOverride);
+        options.origins['failurePolicy'], VideoRouteOptionOrigin.openOverride);
   });
 
-  for (final experimental in [false, true]) {
-    for (final policy in VideoRouteFailurePolicy.values) {
-      test(
-          'requirements survive experimental=$experimental failure=${policy.name}',
-          () {
-        final options = EffectiveVideoRouteOptions.resolve(
-          application: const VideoRouteOptions(decode: software, output: hdr),
-          openOverride: VideoRouteOptions(
-              experimental: experimental, failurePolicy: policy),
-        );
-        expect(options.decode, software);
-        expect(options.output, hdr);
-        expect(options.decode.isRequired, true);
-        expect(options.output.isRequired, true);
-      });
-    }
+  for (final policy in VideoRouteFailurePolicy.values) {
+    test('requirements survive failure=${policy.name}', () {
+      final options = EffectiveVideoRouteOptions.resolve(
+        application: const VideoRouteOptions(decode: software, output: hdr),
+        openOverride: VideoRouteOptions(failurePolicy: policy),
+      );
+      expect(options.decode, software);
+      expect(options.output, hdr);
+      expect(options.decode.isRequired, true);
+      expect(options.output.isRequired, true);
+    });
   }
 
   test('higher required target replaces lower required target', () {
@@ -180,15 +170,12 @@ void main() {
   });
 
   test('requested values have equality and canonical JSON roundtrip', () {
-    const options =
-        VideoRouteOptions(decode: software, output: sdr, experimental: false);
+    const options = VideoRouteOptions(decode: software, output: sdr);
     final fromJson = VideoRouteOptions.fromMap(
         jsonDecode(options.key) as Map<String, Object?>);
     expect(fromJson, options);
     expect(fromJson.hashCode, options.hashCode);
     expect(fromJson.key, options.key);
-    expect(const VideoRouteOptions(),
-        isNot(const VideoRouteOptions(experimental: false)));
   });
 
   test('explicit auto and unset are different requested values', () {
@@ -225,7 +212,8 @@ void main() {
     final effective =
         EffectiveVideoRouteOptions.resolve(application: requested);
     final map = effective.toMap();
-    expect(() => map['experimental'] = true, throwsUnsupportedError);
+    expect(map.containsKey('experimental'), isFalse);
+    expect(() => map['failurePolicy'] = 'stop', throwsUnsupportedError);
     expect(() => (map['decode'] as Map<String, Object?>)['target'] = 'hardware',
         throwsUnsupportedError);
     expect(
@@ -270,7 +258,6 @@ void main() {
     'nested unknown field': {
       'output': {'preference': 'auto', 'hdr': 'require'}
     },
-    'non boolean experiment': {'experimental': 'false'},
     'unknown fallback': {'failurePolicy': 'ignore'},
     'non object selection': {'decode': 'auto'},
   };
@@ -280,4 +267,24 @@ void main() {
           () => VideoRouteOptions.fromMap(entry.value), throwsFormatException);
     });
   }
+
+  test('legacy persisted experimental key is dropped once on read', () {
+    // Migration contract: old persisted configurations may still carry the
+    // removed `experimental` key. It is accepted, silently dropped, and
+    // never written back.
+    expect(VideoRouteOptions.fromMap({'experimental': true}),
+        const VideoRouteOptions());
+    expect(VideoRouteOptions.fromMap({'experimental': false}),
+        const VideoRouteOptions());
+    expect(VideoRouteOptions.fromMap({'experimental': 'false'}),
+        const VideoRouteOptions());
+    final legacy = VideoRouteOptions.fromMap({
+      'decode': {'preference': 'require', 'target': 'software'},
+      'experimental': true,
+    });
+    expect(legacy, const VideoRouteOptions(decode: software));
+    expect(legacy.toMap().containsKey('experimental'), isFalse);
+    expect(EffectiveVideoRouteOptions.resolve(application: legacy).toMap()
+        .containsKey('experimental'), isFalse);
+  });
 }

@@ -28,7 +28,6 @@ void main() {
     final result = HdrRoutePlanner.plan(
       source: p84, capabilities: caps({2, 3}),
       policy: const HdrRoutingPolicy(
-        allowExperimental: true,
         preferences: {
           HdrSourceClass.dvP84: [
             HdrStrategy.baseLayerDirect,
@@ -50,7 +49,6 @@ void main() {
         decode: VideoRouteSelection.prefer(VideoDecodeTarget.hardware)));
     final result = HdrRoutePlanner.plan(
       source: p84, capabilities: caps({2, 3}),
-      policy: const HdrRoutingPolicy(allowExperimental: true),
       options: options);
     expect(result.selected.stage, HdrRouteStage.c2);
     expect(result.selected.strategy, HdrStrategy.metadataReshape);
@@ -59,10 +57,10 @@ void main() {
   test('dynamic errors retain candidate IDs and stage before C3 baseline', () {
     final a = HdrRoutePlanner.plan(
       source: hdr10Plus, capabilities: caps({2}),
-      policy: const HdrRoutingPolicy(allowExperimental: true));
+      );
     final b = HdrRoutePlanner.plan(
       source: hdr10Plus, capabilities: caps({2}),
-      policy: const HdrRoutingPolicy(allowExperimental: true));
+      );
     expect(a.candidates[0].stage, HdrRouteStage.c1);
     expect(a.candidates[1].stage, HdrRouteStage.c2);
     expect(a.selected.stage, HdrRouteStage.c3);
@@ -75,7 +73,7 @@ void main() {
     const source = HdrSourceDescriptor(codec: 'hevc', transfer: 'hlg');
     final result = HdrRoutePlanner.plan(
       source: source, capabilities: caps({2}),
-      policy: const HdrRoutingPolicy(allowExperimental: true));
+      );
     expect(result.selected.stage, HdrRouteStage.c4);
     expect(result.selected.route!.outputTransfer, HdrOutputTransfer.pq);
     expect(result.candidates.first.stage, HdrRouteStage.c1);

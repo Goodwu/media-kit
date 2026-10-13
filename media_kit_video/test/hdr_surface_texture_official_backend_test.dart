@@ -148,7 +148,6 @@ void main() {
       preferences: const {
         HdrSourceClass.hlg: [HdrStrategy.baseLayerConvert],
       },
-      allowExperimental: true,
     );
     const source = HdrSourceDescriptor(transfer: 'hlg');
     final excludedCopy = HdrRoutePlanner.plan(

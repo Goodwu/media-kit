@@ -107,31 +107,28 @@ void main() {
       (call) async => response([large], codecSupport: 'unsupported'),
     );
     final caps = await VideoRouteCapabilities.query(sources: [large]);
-    for (final enabled in [false, true]) {
-      final prediction = caps.predict(
-        hdr10,
-        specification: large,
-        policy: HdrRoutingPolicy(allowExperimental: enabled),
-      );
-      // The exact MC negative excludes every MediaCodec carrier...
-      expect(prediction.playable, isFalse);
-      final decodeBlocked = prediction.candidates
-          .where((c) => c.skipReason == HdrDegradeReason.sourceDecodeUnsupported)
-          .toList();
-      expect(decodeBlocked, isNotEmpty);
-      expect(
-          decodeBlocked.every((c) => c.route == null || c.route!.hwdec != 'no'),
-          isTrue);
-      // ...without poisoning the software (FFmpeg) request: on this
-      // HDR-capable display its tone-map execution is gated by the display
-      // transfer, not by the MC negative. FFmpeg stays conditional on its
-      // own admission instead of being blanket-blocked or auto-selected.
-      expect(
-          prediction.candidates
-              .where((c) => c.skipReason == HdrDegradeReason.displayLacksTransfer),
-          isNotEmpty);
-      expect(caps.forSource(large).support(), VideoSupport.unsupported);
-    }
+    final prediction = caps.predict(
+      hdr10,
+      specification: large,
+    );
+    // The exact MC negative excludes every MediaCodec carrier...
+    expect(prediction.playable, isFalse);
+    final decodeBlocked = prediction.candidates
+        .where((c) => c.skipReason == HdrDegradeReason.sourceDecodeUnsupported)
+        .toList();
+    expect(decodeBlocked, isNotEmpty);
+    expect(
+        decodeBlocked.every((c) => c.route == null || c.route!.hwdec != 'no'),
+        isTrue);
+    // ...without poisoning the software (FFmpeg) request: on this
+    // HDR-capable display its tone-map execution is gated by the display
+    // transfer, not by the MC negative. FFmpeg stays conditional on its
+    // own admission instead of being blanket-blocked or auto-selected.
+    expect(
+        prediction.candidates
+            .where((c) => c.skipReason == HdrDegradeReason.displayLacksTransfer),
+        isNotEmpty);
+    expect(caps.forSource(large).support(), VideoSupport.unsupported);
   });
 
   test('one source resolution/rate cannot authorize another', () async {

@@ -19,13 +19,11 @@ final source = VideoSourceSpec(codec: 'hevc', width: 1920, height: 1080);
 final media = Media('test://require');
 final hardware = EffectiveVideoRouteOptions.resolve(
     application: const VideoRouteOptions(
-        experimental: true,
         decode: VideoRouteSelection.require(VideoDecodeTarget.hardware)));
 HdrRoute route(String mode, {HdrStrategy strategy = HdrStrategy.sdrDirect}) {
   final prediction = HdrRoutePlanner.plan(
       source: catalog.sdr,
-      capabilities: catalog.caps(),
-      policy: const HdrRoutingPolicy(allowExperimental: true));
+      capabilities: catalog.caps());
   return changed(
       prediction.candidates
           .firstWhere((c) => c.feasible && c.route!.hwdec == mode)
@@ -81,8 +79,7 @@ HdrOpenPlan plan(
           reason: 'test'));
   final prediction = HdrRoutePlanner.plan(
       source: catalog.sdr,
-      capabilities: caps,
-      policy: const HdrRoutingPolicy(allowExperimental: true));
+      capabilities: caps);
   return HdrOpenPlan(
       media: media,
       source: catalog.sdr,

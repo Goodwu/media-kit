@@ -20,14 +20,12 @@ EffectiveVideoRouteOptions options(
         {VideoRouteSelection<VideoDecodeTarget>? decode,
         VideoRouteSelection<VideoOutputIntent>? output,
         VideoImportPreference? importer,
-        bool experimental = true,
         VideoRouteFailurePolicy? failure}) =>
     EffectiveVideoRouteOptions.resolve(
         application: VideoRouteOptions(
             decode: decode,
             output: output,
             importPreference: importer,
-            experimental: experimental,
             failurePolicy: failure));
 HdrCapabilities capabilities(
         {VideoDecoderKind kind = VideoDecoderKind.hardware,
@@ -123,7 +121,7 @@ void main() {
           () async {
         final b = Backend();
         final query = Completer<HdrCapabilities>();
-        const initialPolicy = HdrRoutingPolicy(allowExperimental: true);
+        const initialPolicy = HdrRoutingPolicy();
         HdrRoutingPolicy? plannedPolicy;
         final s = HdrVideoSession.forTesting(
             backend: b,
@@ -180,8 +178,7 @@ void main() {
                 importer: VideoImportPreference.preferCopy))
             : setter == 'preference'
                 ? s.setPreference(HdrOutputPreference.off)
-                : s.setPolicy(const HdrRoutingPolicy(
-                    preferences: {}, allowExperimental: false));
+: s.setPolicy(const HdrRoutingPolicy(preferences: {}));
         await expectLater(operation, throwsStateError);
         expect(s.report.value, same(priorReport));
         expect(b.stops, stops);
@@ -196,9 +193,6 @@ void main() {
           await pending;
           expect(s.report.value.verified, isTrue);
           expect(plannedPolicy!.preferences, initialPolicy.preferences);
-          expect(plannedPolicy!.allowExperimental,
-              initialPolicy.allowExperimental);
-          expect(b.plans.single.options!.experimental, isTrue);
           expect(b.plans.single.options!.decode.preference,
               VideoRoutePreference.auto);
           expect(b.plans.single.options!.output.preference,
@@ -282,25 +276,21 @@ void main() {
     expect(b.opened.last.hwdec, 'mediacodec');
     expect(
         s.report.value.options!.importPreference, VideoImportPreference.auto);
-    expect(s.report.value.options!.experimental, isFalse);
     await s.dispose();
   });
-  for (final experimental in [true, false]) {
-    test(
-        'require hardware actual source census positive experimental=$experimental',
-        () async {
-      final b = Backend();
-      final s = session(b);
-      final o = options(
-          decode: const VideoRouteSelection.require(VideoDecodeTarget.hardware),
-          experimental: experimental);
-      await open(s, b, o);
-      expect(s.report.value.optionFulfillment!.decode,
-          VideoRouteOptionStatus.fulfilled);
-      expect(s.report.value.options, same(o));
-      await s.dispose();
-    });
-  }
+  test(
+      'require hardware actual source census positive',
+      () async {
+    final b = Backend();
+    final s = session(b);
+    final o = options(
+        decode: const VideoRouteSelection.require(VideoDecodeTarget.hardware));
+    await open(s, b, o);
+    expect(s.report.value.optionFulfillment!.decode,
+        VideoRouteOptionStatus.fulfilled);
+    expect(s.report.value.options, same(o));
+    await s.dispose();
+  });
   for (final bad in [VideoDecoderKind.unknown, VideoDecoderKind.software]) {
     test('require hardware refuses actual codec census kind $bad', () async {
       final b = Backend();
@@ -533,38 +523,34 @@ void main() {
       expect(outputCalls, 2);
     });
   }
-  for (final experimental in [true, false]) {
-    test(
-        'rejected settings cleanup cannot overwrite successor report experimental=$experimental',
-        () async {
-      final b = Backend();
-      final s = session(b);
-      await open(s, b, options(experimental: experimental));
-      final oldStops = b.stops;
-      b.stopHold = Completer<void>();
-      final rejected = options(
-          output: const VideoRouteSelection.require(VideoOutputIntent.hdr),
-          experimental: experimental);
-      final failed = s.setOptions(rejected);
-      while (b.stops == oldStops) {
-        await Future<void>.delayed(Duration.zero);
-      }
-      expect(s.report.value.options, same(rejected));
-      expect(s.report.value.actual, isNull);
-      final successor = options(
-          importer: VideoImportPreference.preferCopy,
-          experimental: experimental);
-      final newest = open(s, b, successor);
-      b.stopHold!.complete();
-      await failed;
-      await newest;
-      expect(s.report.value.options, same(successor));
-      expect(s.report.value.verified, isTrue);
-      expect(s.report.value.error, isNull);
-      expect(s.report.value.actual!.hwdec, 'mediacodec-copy');
-      await s.dispose();
-    });
-  }
+  test(
+      'rejected settings cleanup cannot overwrite successor report',
+      () async {
+    final b = Backend();
+    final s = session(b);
+    await open(s, b, options());
+    final oldStops = b.stops;
+    b.stopHold = Completer<void>();
+    final rejected = options(
+        output: const VideoRouteSelection.require(VideoOutputIntent.hdr));
+    final failed = s.setOptions(rejected);
+    while (b.stops == oldStops) {
+      await Future<void>.delayed(Duration.zero);
+    }
+    expect(s.report.value.options, same(rejected));
+    expect(s.report.value.actual, isNull);
+    final successor = options(
+        importer: VideoImportPreference.preferCopy);
+    final newest = open(s, b, successor);
+    b.stopHold!.complete();
+    await failed;
+    await newest;
+    expect(s.report.value.options, same(successor));
+    expect(s.report.value.verified, isTrue);
+    expect(s.report.value.error, isNull);
+    expect(s.report.value.actual!.hwdec, 'mediacodec-copy');
+    await s.dispose();
+  });
   test(
       'failed required-config cleanup debt prevents any new open until actual clean retry',
       () async {
@@ -609,118 +595,112 @@ void main() {
     expect(backendCalls, 1);
     expect(s.lastDisposeReport!.clean, isTrue);
   });
-  for (final experimental in [true, false]) {
-    test(
-        'settings supersede the first pending query and await new transaction experimental=$experimental',
-        () async {
-      final q = Completer<HdrCapabilities>();
-      final b = Backend();
-      final s = session(b, query: () => q.future);
-      final initial = open(s, b, options(experimental: experimental));
-      final required = options(
-          decode: const VideoRouteSelection.require(VideoDecodeTarget.software),
-          experimental: experimental);
-      var settingDone = false;
-      final setting = s.setOptions(required)
-        ..then((_) {
-          settingDone = true;
-        });
+  test(
+      'settings supersede the first pending query and await new transaction',
+      () async {
+    final q = Completer<HdrCapabilities>();
+    final b = Backend();
+    final s = session(b, query: () => q.future);
+    final initial = open(s, b, options());
+    final required = options(
+        decode: const VideoRouteSelection.require(VideoDecodeTarget.software));
+    var settingDone = false;
+    final setting = s.setOptions(required)
+      ..then((_) {
+        settingDone = true;
+      });
+    await Future<void>.delayed(Duration.zero);
+    final returnedEarly = settingDone;
+    q.complete(capabilities());
+    await initial;
+    await setting;
+    expect(returnedEarly, isFalse);
+    expect(s.report.value.options, same(required));
+    expect(b.opened.map((r) => r.hwdec), ['no']);
+    expect(s.report.value.verified, isTrue);
+    await s.dispose();
+  });
+  test(
+      'settings during source B query use atomic B intent after source A',
+      () async {
+    final q = Completer<HdrCapabilities>();
+    var reads = 0;
+    final b = Backend();
+    final s = session(b,
+        query: () => ++reads == 1 ? Future.value(capabilities()) : q.future);
+    await open(s, b, options());
+    final second = Media('test://source-B');
+    final secondSpec =
+        VideoSourceSpec(codec: 'hevc', width: 3840, height: 2160);
+    final pending = s.open(second,
+        hint: b.source,
+        sourceSpec: secondSpec,
+        options: options(),
+        start: const Duration(seconds: 37),
+        play: false);
+    final required = options(
+        decode: const VideoRouteSelection.require(VideoDecodeTarget.software));
+    final setting = s.setOptions(required);
+    q.complete(capabilities());
+    await pending;
+    await setting;
+    expect(b.plans.last.media.uri, second.uri);
+    expect(b.plans.last.sourceSpec, same(secondSpec));
+    expect(b.starts.last, const Duration(seconds: 37));
+    expect(b.plays.last, isFalse);
+    expect(b.opened.map((r) => r.hwdec), ['mediacodec', 'no']);
+    expect(s.report.value.options, same(required));
+    expect(s.report.value.verified, isTrue);
+    await s.dispose();
+  });
+  test(
+      'settings during B review cannot pair A media with B source',
+      () async {
+    final b = Backend();
+    final s = session(b);
+    await open(s, b, options());
+    final hold = Completer<void>();
+    b.reviewHold = hold.future;
+    final second = Media('test://source-B-review');
+    final secondSpec =
+        VideoSourceSpec(codec: 'hevc', width: 3840, height: 2160);
+    final pending = s.open(second,
+        hint: b.source,
+        sourceSpec: secondSpec,
+        options: options());
+    while (b.reviewed.length < 2) {
       await Future<void>.delayed(Duration.zero);
-      final returnedEarly = settingDone;
-      q.complete(capabilities());
-      await initial;
-      await setting;
-      expect(returnedEarly, isFalse);
-      expect(s.report.value.options, same(required));
-      expect(b.opened.map((r) => r.hwdec), ['no']);
-      expect(s.report.value.verified, isTrue);
-      await s.dispose();
-    });
-    test(
-        'settings during source B query use atomic B intent after source A experimental=$experimental',
-        () async {
-      final q = Completer<HdrCapabilities>();
-      var reads = 0;
-      final b = Backend();
-      final s = session(b,
-          query: () => ++reads == 1 ? Future.value(capabilities()) : q.future);
-      await open(s, b, options(experimental: experimental));
-      final second = Media('test://source-B');
-      final secondSpec =
-          VideoSourceSpec(codec: 'hevc', width: 3840, height: 2160);
-      final pending = s.open(second,
-          hint: b.source,
-          sourceSpec: secondSpec,
-          options: options(experimental: experimental),
-          start: const Duration(seconds: 37),
-          play: false);
-      final required = options(
-          decode: const VideoRouteSelection.require(VideoDecodeTarget.software),
-          experimental: experimental);
-      final setting = s.setOptions(required);
-      q.complete(capabilities());
-      await pending;
-      await setting;
-      expect(b.plans.last.media.uri, second.uri);
-      expect(b.plans.last.sourceSpec, same(secondSpec));
-      expect(b.starts.last, const Duration(seconds: 37));
-      expect(b.plays.last, isFalse);
-      expect(b.opened.map((r) => r.hwdec), ['mediacodec', 'no']);
-      expect(s.report.value.options, same(required));
-      expect(s.report.value.verified, isTrue);
-      await s.dispose();
-    });
-    test(
-        'settings during B review cannot pair A media with B source experimental=$experimental',
-        () async {
-      final b = Backend();
-      final s = session(b);
-      await open(s, b, options(experimental: experimental));
-      final hold = Completer<void>();
-      b.reviewHold = hold.future;
-      final second = Media('test://source-B-review');
-      final secondSpec =
-          VideoSourceSpec(codec: 'hevc', width: 3840, height: 2160);
-      final pending = s.open(second,
-          hint: b.source,
-          sourceSpec: secondSpec,
-          options: options(experimental: experimental));
-      while (b.reviewed.length < 2) {
-        await Future<void>.delayed(Duration.zero);
-      }
-      final required = options(
-          decode: const VideoRouteSelection.require(VideoDecodeTarget.software),
-          experimental: experimental);
-      final setting = s.setOptions(required);
-      hold.complete();
-      await pending;
-      await setting;
-      expect(b.plans.last.media.uri, second.uri);
-      expect(b.plans.last.sourceSpec, same(secondSpec));
-      expect(b.opened.last.hwdec, 'no');
-      expect(s.report.value.options, same(required));
-      await s.dispose();
-    });
-    test(
-        'same route fresh census removes actual HW decoder and stops verified output experimental=$experimental',
-        () async {
-      final b = Backend();
-      final s = session(b);
-      final required = options(
-          decode: const VideoRouteSelection.require(VideoDecodeTarget.hardware),
-          experimental: experimental);
-      await open(s, b, required);
-      final reviews = b.reviewed.length;
-      await s.handleCapabilitiesChanged(
-          capabilities(name: 'another.hardware.decoder'));
-      expect(b.reviewed.length, greaterThan(reviews));
-      expect(s.report.value.verified, isFalse);
-      expect(s.report.value.actual, isNull);
-      expect(s.report.value.options, same(required));
-      expect(s.report.value.error, isA<HdrPlaybackBlocked>());
-      await s.dispose();
-    });
-  }
+    }
+    final required = options(
+        decode: const VideoRouteSelection.require(VideoDecodeTarget.software));
+    final setting = s.setOptions(required);
+    hold.complete();
+    await pending;
+    await setting;
+    expect(b.plans.last.media.uri, second.uri);
+    expect(b.plans.last.sourceSpec, same(secondSpec));
+    expect(b.opened.last.hwdec, 'no');
+    expect(s.report.value.options, same(required));
+    await s.dispose();
+  });
+  test(
+      'same route fresh census removes actual HW decoder and stops verified output',
+      () async {
+    final b = Backend();
+    final s = session(b);
+    final required = options(
+        decode: const VideoRouteSelection.require(VideoDecodeTarget.hardware));
+    await open(s, b, required);
+    final reviews = b.reviewed.length;
+    await s.handleCapabilitiesChanged(
+        capabilities(name: 'another.hardware.decoder'));
+    expect(b.reviewed.length, greaterThan(reviews));
+    expect(s.report.value.verified, isFalse);
+    expect(s.report.value.actual, isNull);
+    expect(s.report.value.options, same(required));
+    expect(s.report.value.error, isA<HdrPlaybackBlocked>());
+    await s.dispose();
+  });
 
   test(
       'fresh same decoder census actually re-reviews HW without inventing degradation',
@@ -779,134 +759,126 @@ void main() {
     await s.dispose();
   });
 
-  for (final experimental in [true, false]) {
-    test(
-        'public refresh keeps pending software settings authoritative experimental=$experimental',
-        () async {
-      var reads = 0;
-      final query = Completer<HdrCapabilities>();
-      final b = Backend();
-      final s = session(b,
-          query: () =>
-              ++reads == 2 ? query.future : Future.value(capabilities()));
-      final hardware = options(
-          decode: const VideoRouteSelection.require(VideoDecodeTarget.hardware),
-          experimental: experimental);
-      final software = options(
-          decode: const VideoRouteSelection.require(VideoDecodeTarget.software),
-          experimental: experimental);
-      await open(s, b, hardware);
-      final changing = s.setOptions(software);
-      await s.refreshCapabilities();
-      query.complete(capabilities());
-      await changing;
-      expect(b.opened.map((route) => route.hwdec), ['mediacodec', 'no']);
-      expect(s.report.value.options, same(software));
-      expect(s.report.value.actual!.hwdec, 'no');
-      expect(s.report.value.optionFulfillment!.decode,
-          VideoRouteOptionStatus.fulfilled);
-      expect(s.report.value.verified, isTrue);
-      await s.dispose();
-    });
-    test(
-        'public refresh uses pending source B settings start and play experimental=$experimental',
-        () async {
-      final query = Completer<HdrCapabilities>();
-      var reads = 0;
-      final b = Backend();
-      final s = session(b,
-          query: () => ++reads == 2 || reads == 3
-              ? query.future
-              : Future.value(capabilities()));
-      await open(s, b, options(experimental: experimental));
-      final second = Media('test://source-B-refresh');
-      final secondSpec =
-          VideoSourceSpec(codec: 'hevc', width: 3840, height: 2160);
-      final pending = s.open(second,
-          hint: b.source,
-          sourceSpec: secondSpec,
-          options: options(experimental: experimental),
-          start: const Duration(seconds: 41),
-          play: false);
-      final software = options(
-          decode: const VideoRouteSelection.require(VideoDecodeTarget.software),
-          experimental: experimental);
-      final changing = s.setOptions(software);
-      await s.refreshCapabilities();
-      query.complete(capabilities());
-      await Future.wait([pending, changing]);
-      expect(b.opened.map((route) => route.hwdec), ['mediacodec', 'no']);
-      expect(b.plans.last.media.uri, second.uri);
-      expect(b.plans.last.sourceSpec, same(secondSpec));
-      expect(b.plans.last.options, same(software));
-      expect(b.starts.last, const Duration(seconds: 41));
-      expect(b.plays.last, isFalse);
-      expect(s.report.value.options, same(software));
-      expect(s.report.value.verified, isTrue);
-      await s.dispose();
-    });
-    test(
-        'public refresh during source B review applies fresh census to B experimental=$experimental',
-        () async {
-      var reads = 0;
-      final b = Backend();
-      final s = session(b,
-          query: () async => ++reads == 3
-              ? capabilities(name: 'another.hardware.decoder')
-              : capabilities());
-      final hardware = options(
-          decode: const VideoRouteSelection.require(VideoDecodeTarget.hardware),
-          experimental: experimental);
-      await open(s, b, hardware);
-      final hold = Completer<void>();
-      b.reviewHold = hold.future;
-      final second = Media('test://source-B-refresh-review');
-      final pending =
-          s.open(second, hint: b.source, sourceSpec: spec, options: hardware);
-      while (b.reviewed.length < 2) {
-        await Future<void>.delayed(Duration.zero);
-      }
-      final refreshing = s.refreshCapabilities();
+  test(
+      'public refresh keeps pending software settings authoritative',
+      () async {
+    var reads = 0;
+    final query = Completer<HdrCapabilities>();
+    final b = Backend();
+    final s = session(b,
+        query: () =>
+            ++reads == 2 ? query.future : Future.value(capabilities()));
+    final hardware = options(
+        decode: const VideoRouteSelection.require(VideoDecodeTarget.hardware));
+    final software = options(
+        decode: const VideoRouteSelection.require(VideoDecodeTarget.software));
+    await open(s, b, hardware);
+    final changing = s.setOptions(software);
+    await s.refreshCapabilities();
+    query.complete(capabilities());
+    await changing;
+    expect(b.opened.map((route) => route.hwdec), ['mediacodec', 'no']);
+    expect(s.report.value.options, same(software));
+    expect(s.report.value.actual!.hwdec, 'no');
+    expect(s.report.value.optionFulfillment!.decode,
+        VideoRouteOptionStatus.fulfilled);
+    expect(s.report.value.verified, isTrue);
+    await s.dispose();
+  });
+  test(
+      'public refresh uses pending source B settings start and play',
+      () async {
+    final query = Completer<HdrCapabilities>();
+    var reads = 0;
+    final b = Backend();
+    final s = session(b,
+        query: () => ++reads == 2 || reads == 3
+            ? query.future
+            : Future.value(capabilities()));
+    await open(s, b, options());
+    final second = Media('test://source-B-refresh');
+    final secondSpec =
+        VideoSourceSpec(codec: 'hevc', width: 3840, height: 2160);
+    final pending = s.open(second,
+        hint: b.source,
+        sourceSpec: secondSpec,
+        options: options(),
+        start: const Duration(seconds: 41),
+        play: false);
+    final software = options(
+        decode: const VideoRouteSelection.require(VideoDecodeTarget.software));
+    final changing = s.setOptions(software);
+    await s.refreshCapabilities();
+    query.complete(capabilities());
+    await Future.wait([pending, changing]);
+    expect(b.opened.map((route) => route.hwdec), ['mediacodec', 'no']);
+    expect(b.plans.last.media.uri, second.uri);
+    expect(b.plans.last.sourceSpec, same(secondSpec));
+    expect(b.plans.last.options, same(software));
+    expect(b.starts.last, const Duration(seconds: 41));
+    expect(b.plays.last, isFalse);
+    expect(s.report.value.options, same(software));
+    expect(s.report.value.verified, isTrue);
+    await s.dispose();
+  });
+  test(
+      'public refresh during source B review applies fresh census to B',
+      () async {
+    var reads = 0;
+    final b = Backend();
+    final s = session(b,
+        query: () async => ++reads == 3
+            ? capabilities(name: 'another.hardware.decoder')
+            : capabilities());
+    final hardware = options(
+        decode: const VideoRouteSelection.require(VideoDecodeTarget.hardware));
+    await open(s, b, hardware);
+    final hold = Completer<void>();
+    b.reviewHold = hold.future;
+    final second = Media('test://source-B-refresh-review');
+    final pending =
+        s.open(second, hint: b.source, sourceSpec: spec, options: hardware);
+    while (b.reviewed.length < 2) {
       await Future<void>.delayed(Duration.zero);
-      hold.complete();
-      await Future.wait([pending, refreshing]);
-      expect(b.plans.last.media.uri, second.uri);
-      expect(b.plans.last.sourceSpec, same(spec));
-      expect(b.reviewed, hasLength(3));
-      expect(s.report.value.options, same(hardware));
-      expect(s.report.value.verified, isFalse);
-      expect(s.report.value.actual, isNull);
-      expect(s.report.value.error, isA<HdrPlaybackBlocked>());
-      await s.dispose();
-    });
-    test(
-        'older public refresh cannot replace newly completed source settings experimental=$experimental',
-        () async {
-      var reads = 0;
-      final query = Completer<HdrCapabilities>();
-      final b = Backend();
-      final s = session(b,
-          query: () =>
-              ++reads == 2 ? query.future : Future.value(capabilities()));
-      final hardware = options(
-          decode: const VideoRouteSelection.require(VideoDecodeTarget.hardware),
-          experimental: experimental);
-      await open(s, b, hardware);
-      final refreshing = s.refreshCapabilities();
-      final second = Media('test://source-B-refresh-stale');
-      final software = options(
-          decode: const VideoRouteSelection.require(VideoDecodeTarget.software),
-          experimental: experimental);
-      await s.open(second, hint: b.source, sourceSpec: spec, options: software);
-      query.complete(capabilities(name: 'another.hardware.decoder'));
-      await refreshing;
-      expect(b.opened.map((route) => route.hwdec), ['mediacodec', 'no']);
-      expect(b.plans.last.media.uri, second.uri);
-      expect(s.report.value.options, same(software));
-      expect(s.report.value.verified, isTrue);
-      await s.dispose();
-    });
-  }
+    }
+    final refreshing = s.refreshCapabilities();
+    await Future<void>.delayed(Duration.zero);
+    hold.complete();
+    await Future.wait([pending, refreshing]);
+    expect(b.plans.last.media.uri, second.uri);
+    expect(b.plans.last.sourceSpec, same(spec));
+    expect(b.reviewed, hasLength(3));
+    expect(s.report.value.options, same(hardware));
+    expect(s.report.value.verified, isFalse);
+    expect(s.report.value.actual, isNull);
+    expect(s.report.value.error, isA<HdrPlaybackBlocked>());
+    await s.dispose();
+  });
+  test(
+      'older public refresh cannot replace newly completed source settings',
+      () async {
+    var reads = 0;
+    final query = Completer<HdrCapabilities>();
+    final b = Backend();
+    final s = session(b,
+        query: () =>
+            ++reads == 2 ? query.future : Future.value(capabilities()));
+    final hardware = options(
+        decode: const VideoRouteSelection.require(VideoDecodeTarget.hardware));
+    await open(s, b, hardware);
+    final refreshing = s.refreshCapabilities();
+    final second = Media('test://source-B-refresh-stale');
+    final software = options(
+        decode: const VideoRouteSelection.require(VideoDecodeTarget.software));
+    await s.open(second, hint: b.source, sourceSpec: spec, options: software);
+    query.complete(capabilities(name: 'another.hardware.decoder'));
+    await refreshing;
+    expect(b.opened.map((route) => route.hwdec), ['mediacodec', 'no']);
+    expect(b.plans.last.media.uri, second.uri);
+    expect(s.report.value.options, same(software));
+    expect(s.report.value.verified, isTrue);
+    await s.dispose();
+  });
 
   test('nonAndroid unavailable reviewer fails explicit require without opening',
       () async {
@@ -922,23 +894,12 @@ void main() {
     await expectLater(s.open(media), throwsStateError);
   });
 
-  test(
-      'legacy experimental value cannot reject effective options, off '
-      'conflict still rejected', () {
+  test('effective options pass through unchanged, off conflict still rejected',
+      () {
     final o = options();
-    // Implicit default (no legacy experimental value specified) accepts the
-    // experimental snapshot.
-    expect(
-        () => resolveHdrRouteOptions(
-            options: o, policy: const HdrRoutingPolicy()),
-        returnsNormally);
-    // An explicit legacy experimental value contradicting the effective
-    // options no longer rejects: the legacy field has no routing semantics
-    // and cannot shadow the active output options.
-    final converted = resolveHdrRouteOptions(
-        options: o, policy: const HdrRoutingPolicy(allowExperimental: false));
-    expect(converted, same(o));
-    expect(converted.experimental, isTrue);
+    // Without any legacy field left, effective options are returned as-is.
+    expect(() => resolveHdrRouteOptions(options: o), returnsNormally);
+    expect(resolveHdrRouteOptions(options: o), same(o));
     // A legacy HDR-off request contradicting the effective output options is
     // an explicit contradiction that cannot be ignored.
     expect(

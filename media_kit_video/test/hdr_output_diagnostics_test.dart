@@ -425,7 +425,6 @@ void main() {
       final session = makeSession(
         backend: backend,
         capabilities: caps(types: const {2}),
-        policy: const HdrRoutingPolicy(allowExperimental: true),
       );
       await session.open(media, hint: hlg);
       await pumpEventQueueTimes(3);

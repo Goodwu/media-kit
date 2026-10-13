@@ -71,13 +71,11 @@ class AndroidSurfaceTextureExperiment {
         },
         // This experiment class is a diagnostic tool explicitly opted in by
         // the double define pair (MEDIA_KIT_ANDROID_SURFACETEXTURE_DIAG +
-        // _POC); hlg x baseLayerConvert is `experimental` in the production
-        // maturity table and the diagnostic round deliberately exercises that
-        // route. The production maturity table and the default (define-off)
-        // behavior are unchanged: this gate only opens inside this lab
-        // validator's own planner call, and the source-class whitelist above
-        // still bounds what can reach it.
-        allowExperimental: true,
+        // _POC); hlg x baseLayerConvert carries the `experimental` maturity
+        // label, which is diagnostic only — no gate argument exists or is
+        // needed. The production table and the default (define-off) behavior
+        // are unchanged, and the source-class whitelist above still bounds
+        // what can reach this lab validator's own planner call.
       ),
       preference: preference,
       excluded: excluded,

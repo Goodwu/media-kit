@@ -407,8 +407,8 @@ void main() {
 
     test('planner selects native DV for eligible P5.0 with the realizer '
         'grounds met', () {
-      // The legacy switch is set but inert: the selection comes from the
-      // realizer grounds (DV display, profile-32 decoder, bridge v1).
+      // The selection comes from the realizer grounds (DV display,
+      // profile-32 decoder, bridge v1); the policy only carries preferences.
       final HdrRoutePrediction prediction = caps(
         displayHdrTypes: const <int>{1},
         dvDecoders: const <HdrDecoderInfo>[nativeDvDecoder],
@@ -422,7 +422,6 @@ void main() {
               HdrStrategy.toneMapSdr,
             ],
           },
-          allowExperimental: true,
         ),
       );
       expect(
@@ -534,8 +533,8 @@ void main() {
       expect(combos, 504);
     });
 
-    test('legacy allowExperimental=true: same matrix holds without skips', () {
-      const HdrRoutingPolicy policy = HdrRoutingPolicy(allowExperimental: true);
+    test('explicit default policy: same matrix holds without skips', () {
+      const HdrRoutingPolicy policy = HdrRoutingPolicy.defaults;
       var combos = 0;
       for (final HdrSourceClass cls in HdrSourceClass.values) {
         final HdrSourceDescriptor source = sources[cls]!;
@@ -547,9 +546,9 @@ void main() {
               final HdrRoutePrediction prediction = HdrRoutePlanner.plan(
                   source: source, capabilities: capabilities, policy: policy);
               checkInvariants(prediction, cls: cls, capabilities: capabilities);
-              // The legacy switch cannot change the plan: admission is
-              // switch-independent (v7.3), so every route and error equals
-              // the default-policy prediction.
+              // An explicit default policy is identical to omitting the
+              // policy: admission has no switch (v7.3), so every route and
+              // error equals the implicit prediction.
               final HdrRoutePrediction defaults = HdrRoutePlanner.plan(
                   source: source, capabilities: capabilities);
               expect(prediction.selected, defaults.selected,
@@ -688,7 +687,6 @@ void main() {
             HdrStrategy.toneMapSdr,
           ],
         },
-        allowExperimental: true,
       );
       for (final int sdk in <int>[28, 29, 34]) {
         final HdrRoutePrediction hdr = caps(sdkInt: sdk).predict(
@@ -789,33 +787,27 @@ void main() {
     test('"HDR first, tone-map last" holds for every combo (verification 2)',
         () {
       var checked = 0;
-      for (final bool allowExperimental in const <bool>[false, true]) {
-        const HdrRoutingPolicy policy =
-            HdrRoutingPolicy(allowExperimental: true);
-        final HdrRoutingPolicy effectivePolicy =
-            allowExperimental ? policy : HdrRoutingPolicy.defaults;
-        for (final HdrSourceClass cls in HdrSourceClass.values) {
-          final HdrSourceDescriptor source = sources[cls]!;
-          for (final Set<int>? display in displays) {
-            for (final bool p5 in const <bool>[true, false]) {
-              final HdrCapabilities capabilities =
-                  caps(displayHdrTypes: display, p5: p5);
-              final HdrRoutePrediction prediction = HdrRoutePlanner.plan(
-                source: source,
-                capabilities: capabilities,
-                policy: effectivePolicy,
-              );
-              checkInvariants(prediction, cls: cls, capabilities: capabilities);
-              checked++;
-            }
+      const HdrRoutingPolicy policy = HdrRoutingPolicy.defaults;
+      for (final HdrSourceClass cls in HdrSourceClass.values) {
+        final HdrSourceDescriptor source = sources[cls]!;
+        for (final Set<int>? display in displays) {
+          for (final bool p5 in const <bool>[true, false]) {
+            final HdrCapabilities capabilities =
+                caps(displayHdrTypes: display, p5: p5);
+            final HdrRoutePrediction prediction = HdrRoutePlanner.plan(
+              source: source,
+              capabilities: capabilities,
+              policy: policy,
+            );
+            checkInvariants(prediction, cls: cls, capabilities: capabilities);
+            checked++;
           }
         }
       }
-      // 2 legacy switch states (identical by contract) × 12 classes ×
-      // 7 displays × 2 P5 pipelines. The extension dimension is irrelevant
-      // to this property (it only moves confidence) and is covered by the
-      // matrix tests.
-      expect(checked, 336);
+      // 12 classes × 7 displays × 2 P5 pipelines. The extension dimension
+      // is irrelevant to this property (it only moves confidence) and is
+      // covered by the matrix tests.
+      expect(checked, 168);
     });
 
     test('classes without a preference row synthesize a blocking placeholder',
@@ -901,17 +893,17 @@ void main() {
       checkInvariants(prediction, cls: HdrSourceClass.dvP7, capabilities: lya);
     });
 
-    test('legacy allowExperimental=true selects the identical P7 route', () {
+    test('an explicit default policy selects the identical P7 route', () {
       final HdrCapabilities lya = lyaCaps();
       final HdrRoutePrediction prediction = lya.predict(
         sources[HdrSourceClass.dvP7]!,
-        policy: const HdrRoutingPolicy(allowExperimental: true),
+        policy: HdrRoutingPolicy.defaults,
       );
       expect(prediction.selected.strategy, HdrStrategy.baseLayerDirect);
       expect(prediction.selected.maturity, HdrStrategyMaturity.experimental);
       expect(prediction.selected.route!.vo, 'mediacodec_embed');
       expect(prediction.selected.route!.outputTransfer, HdrOutputTransfer.pq);
-      // The legacy switch cannot change the plan.
+      // Passing the default policy cannot change the plan.
       expect(prediction, lya.predict(sources[HdrSourceClass.dvP7]!));
       checkInvariants(prediction, cls: HdrSourceClass.dvP7, capabilities: lya);
     });
@@ -1155,7 +1147,6 @@ void main() {
       final HdrRoutePrediction prediction = HdrRoutePlanner.plan(
         source: sources[HdrSourceClass.dvP84]!,
         capabilities: caps(displayHdrTypes: const <int>{2}),
-        policy: const HdrRoutingPolicy(allowExperimental: true),
         excluded: const <String, HdrDegradeReason>{
           HdrRouteDependency.dataspacePq: HdrDegradeReason.dataSpaceApplyFailed,
         },
@@ -1207,7 +1198,6 @@ void main() {
       final HdrRoutePrediction prediction = HdrRoutePlanner.plan(
         source: sources[HdrSourceClass.dvP84]!,
         capabilities: caps(displayHdrTypes: const <int>{2, 3}),
-        policy: const HdrRoutingPolicy(allowExperimental: true),
         excluded: const <String, HdrDegradeReason>{
           HdrRouteDependency.dataspacePq: HdrDegradeReason.dataSpaceApplyFailed,
           HdrRouteDependency.dataspaceHlg:
@@ -1228,38 +1218,34 @@ void main() {
   });
 
   group('prediction/execution homogeneity (verification 5)', () {
-    test('predict() equals plan() for every combo and both legacy switch '
-        'states', () {
+    test('predict() equals plan() for every combo with the default policy',
+        () {
       var combos = 0;
-      for (final bool allowExperimental in const <bool>[false, true]) {
-        final HdrRoutingPolicy policy = allowExperimental
-            ? const HdrRoutingPolicy(allowExperimental: true)
-            : HdrRoutingPolicy.defaults;
-        for (final HdrSourceClass cls in HdrSourceClass.values) {
-          final HdrSourceDescriptor source = sources[cls]!;
-          for (final Set<int>? display in displays) {
-            for (final bool p5 in const <bool>[true, false]) {
-              for (final HdrDataSpaceExtInfo? ext in extensions) {
-                final HdrCapabilities capabilities =
-                    caps(displayHdrTypes: display, p5: p5, ext: ext);
-                final HdrRoutePrediction predicted = capabilities.predict(
-                  source,
-                  policy: policy,
-                );
-                final HdrRoutePrediction planned = HdrRoutePlanner.plan(
-                  source: source,
-                  capabilities: capabilities,
-                  policy: policy,
-                );
-                expect(predicted, planned,
-                    reason: '$cls display: $display p5: $p5 ext: $ext');
-                combos++;
-              }
+      const HdrRoutingPolicy policy = HdrRoutingPolicy.defaults;
+      for (final HdrSourceClass cls in HdrSourceClass.values) {
+        final HdrSourceDescriptor source = sources[cls]!;
+        for (final Set<int>? display in displays) {
+          for (final bool p5 in const <bool>[true, false]) {
+            for (final HdrDataSpaceExtInfo? ext in extensions) {
+              final HdrCapabilities capabilities =
+                  caps(displayHdrTypes: display, p5: p5, ext: ext);
+              final HdrRoutePrediction predicted = capabilities.predict(
+                source,
+                policy: policy,
+              );
+              final HdrRoutePrediction planned = HdrRoutePlanner.plan(
+                source: source,
+                capabilities: capabilities,
+                policy: policy,
+              );
+              expect(predicted, planned,
+                  reason: '$cls display: $display p5: $p5 ext: $ext');
+              combos++;
             }
           }
         }
       }
-      expect(combos, 1008);
+      expect(combos, 504);
     });
 
     test('predict() default arguments use the default policy and auto', () {
@@ -1316,11 +1302,11 @@ void main() {
         expect(prediction.candidates[blocked].route, isNull,
             reason: 'candidate $blocked');
       }
-      // The C4 input constraint is independent of the legacy switch:
+      // The C4 input constraint holds under an explicit default policy too:
       // PQ cannot become an HLG-to-PQ conversion.
       final HdrRoutePrediction switchOn = lyaCaps().predict(
         sources[HdrSourceClass.hdr10]!,
-        policy: const HdrRoutingPolicy(allowExperimental: true),
+        policy: HdrRoutingPolicy.defaults,
       );
       expect(switchOn.candidates[0].feasible, isTrue);
       expect(switchOn.candidates[1].feasible, isFalse);
@@ -1610,7 +1596,6 @@ void main() {
       final HdrRoutePrediction converted = HdrRoutePlanner.plan(
         source: sources[HdrSourceClass.hlg]!,
         capabilities: caps(displayHdrTypes: const <int>{2}),
-        policy: const HdrRoutingPolicy(allowExperimental: true),
       );
       expect(converted.selected.strategy, HdrStrategy.baseLayerConvert);
       expect(converted.selected.route!.dependencies, <String>{

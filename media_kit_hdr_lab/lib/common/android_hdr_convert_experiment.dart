@@ -116,7 +116,6 @@ class AndroidHdrConvertExperiment {
         preferences: {
           HdrSourceClass.of(source): const [HdrStrategy.baseLayerConvert],
         },
-        allowExperimental: policy.allowExperimental,
       ),
       preference: preference,
       excluded: excluded,
