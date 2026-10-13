@@ -777,16 +777,11 @@ class HdrVideoSession {
 
   /// Failure-driven plan replacement inside the open generation (plan 1.4
   /// step 5): map the failure to a dependency stage, re-plan past the failed
-  /// candidate, and allow at most one further HDR candidate before the
-  /// tone-map/SDR fallback.
+  /// candidate. HDR failures never authorize a silent SDR fallback.
   Future<HdrOpenPlan?> _retry(HdrOpenPlan failed, Object error) async {
     final generation = _generationOf(failed);
     if (generation != _serial || _disposed) return null;
     if (failed.options?.failurePolicy == VideoRouteFailurePolicy.stop) {
-      return null;
-    }
-    if (error is HdrSessionRouteBudgetFailure &&
-        _attemptPolicy.attempted.length >= 5) {
       return null;
     }
     if (error is HdrPlaybackBlocked ||
@@ -883,7 +878,7 @@ class HdrVideoSession {
     required Map<String, HdrDegradeReason> excluded,
   }) {
     final nextExcluded = _attemptPolicy.exclusions(excluded, nextAttempt: true);
-    var prediction = _plan(
+    final prediction = _plan(
       options: options,
       source: source,
       capabilities: capabilities,
@@ -891,18 +886,6 @@ class HdrVideoSession {
       preference: HdrOutputPreference.auto,
       excluded: nextExcluded,
     );
-    if (prediction.playable &&
-        HdrSessionAttemptPolicy.isHdr(prediction.selected.route!) &&
-        _attemptPolicy.hdrAttempts >= 2) {
-      prediction = _plan(
-        options: options,
-        source: source,
-        capabilities: capabilities,
-        policy: policy,
-        preference: HdrOutputPreference.off,
-        excluded: nextExcluded,
-      );
-    }
     return _selectUnattempted(prediction);
   }
 
