@@ -96,8 +96,17 @@ class HdrRoutingPolicy {
       HdrStrategy.toneMapSdr,
     ],
     HdrSourceClass.hdrVivid: <HdrStrategy>[
-      HdrStrategy.baseLayerDirect,
+      HdrStrategy.nativeHdrVivid,
       HdrStrategy.metadataReshape,
+      HdrStrategy.baseLayerDirect,
+      HdrStrategy.baseLayerConvert,
+      HdrStrategy.toneMapSdr,
+    ],
+    HdrSourceClass.hdr10Plus: <HdrStrategy>[
+      HdrStrategy.nativeHdr10Plus,
+      HdrStrategy.metadataReshape,
+      HdrStrategy.baseLayerDirect,
+      HdrStrategy.baseLayerConvert,
       HdrStrategy.toneMapSdr,
     ],
     HdrSourceClass.sdr: <HdrStrategy>[HdrStrategy.sdrDirect],
@@ -322,6 +331,15 @@ class HdrRoutePlanner {
         maturity: maturity,
         isSafetyNet: !gateMaturity,
         skipReason: HdrDegradeReason.sourceMetadataUnknown,
+      );
+    }
+    // Missing code is a genuine path error, not an experimental switch
+    // rejection. The route stays visible even when a baseline can follow.
+    if (realization.infeasibleReason == HdrDegradeReason.routeNotImplemented) {
+      return HdrCandidate(
+        strategy: strategy,
+        maturity: maturity,
+        skipReason: HdrDegradeReason.routeNotImplemented,
       );
     }
     if (gateMaturity) {

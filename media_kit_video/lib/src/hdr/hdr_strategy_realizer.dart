@@ -61,6 +61,18 @@ class HdrStrategyRealizer {
     switch (strategy) {
       case HdrStrategy.nativeDolbyVision:
         return _nativeDolbyVision(source, sourceClass, capabilities);
+      case HdrStrategy.nativeHdr10Plus:
+        return HdrStrategyRealization.infeasible(
+            sourceClass == HdrSourceClass.hdr10Plus &&
+                    source.dynamicMetadata == HdrDynamicMetadata.hdr10Plus
+                ? HdrDegradeReason.routeNotImplemented
+                : HdrDegradeReason.unsupportedStrategy);
+      case HdrStrategy.nativeHdrVivid:
+        return HdrStrategyRealization.infeasible(
+            sourceClass == HdrSourceClass.hdrVivid &&
+                    source.dynamicMetadata == HdrDynamicMetadata.hdrVivid
+                ? HdrDegradeReason.routeNotImplemented
+                : HdrDegradeReason.unsupportedStrategy);
       case HdrStrategy.baseLayerDirect:
         return _withOrdinaryDecoderDependency(
             _baseLayerDirect(source, sourceClass, capabilities));
@@ -394,11 +406,29 @@ class HdrStrategyRealizer {
     HdrSourceClass cls,
     HdrCapabilities capabilities,
   ) {
-    if (cls == HdrSourceClass.hdrVivid || cls == HdrSourceClass.dvP10) {
+    if (cls == HdrSourceClass.hdrVivid ||
+        cls == HdrSourceClass.hdr10Plus) {
+      // The format is a valid C2 target, but full metadata mapping is not
+      // implemented. Do not silently emit PQ while ignoring the metadata.
+      final reason = _displayTransferCheck(HdrOutputTransfer.pq, capabilities);
+      if (reason != null) return HdrStrategyRealization.infeasible(reason);
+      if (_gpuHdrDataSpaceUnavailable(capabilities)) {
+        return const HdrStrategyRealization.infeasible(
+            HdrDegradeReason.gpuHdrDataSpaceUnavailable);
+      }
+      return const HdrStrategyRealization.infeasible(
+          HdrDegradeReason.routeNotImplemented);
+    }
+    if (cls == HdrSourceClass.dvP10) {
       return const HdrStrategyRealization.infeasible(
           HdrDegradeReason.unsupportedStrategy);
     }
     final bool isDv = source.dynamicMetadata == HdrDynamicMetadata.dolbyVision;
+    if (!isDv) {
+      // Ordinary PQ/HLG contains no dynamic metadata to rebuild.
+      return const HdrStrategyRealization.infeasible(
+          HdrDegradeReason.unsupportedStrategy);
+    }
     if (isDv) {
       if (!capabilities.p5PipelineAvailable) {
         return const HdrStrategyRealization.infeasible(
