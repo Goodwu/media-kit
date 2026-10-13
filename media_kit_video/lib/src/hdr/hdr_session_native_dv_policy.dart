@@ -12,8 +12,9 @@ import 'hdr_route.dart';
 import 'hdr_strategy.dart';
 
 /// State of actual candidate admissions in one Session open generation.
-/// Display-only planning never spends a slot. Native DV may run only once;
-/// the two HDR slots include both native HDR and native Dolby Vision.
+/// Display-only planning never spends a slot. Each concrete route is admitted
+/// at most once per session generation; native DV may run only once.
+/// HDR attempt count is telemetry, never a budget or an SDR fallback trigger.
 class HdrSessionAttemptPolicy {
   int hdrAttempts = 0;
   bool nativeDvAttempted = false;
@@ -26,11 +27,9 @@ class HdrSessionAttemptPolicy {
       route.presentation == HdrPresentation.nativeDolbyVision;
 
   void admit(HdrRoute route) {
-    if (_attempted.length >= 5 ||
-        _attempted.contains(route) ||
+    if (_attempted.contains(route) ||
         (route.strategy == HdrStrategy.nativeDolbyVision &&
-            nativeDvAttempted) ||
-        (isHdr(route) && hdrAttempts >= 2)) {
+            nativeDvAttempted)) {
       throw const HdrSessionRouteBudgetFailure();
     }
     _attempted.add(route);
