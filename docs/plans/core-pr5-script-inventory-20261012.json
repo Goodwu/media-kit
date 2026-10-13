@@ -47,7 +47,7 @@
       "unchangedAtPr5Head": true,
       "bytes": 2578,
       "gitBlobSha1": "33abc7195e898d859177bfbb1baed9062a443c55",
-      "sha256": "bf54737f08351c71877e2257b7eb8c6031e7a7aed754b26ceb64ddec0222b498b",
+      "sha256": "bf54737f08351c71877e2257beb8c6031e7a7aed754b26ceb64ddec0222b498b",
       "evidenceUrl": "https://github.com/Goodwu/media-kit/blob/5b27961137a3b03e687dddbeb05a0320fcf6c60c/docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/matrix-device-build.sh",
       "observations": [
         "Runs a local Flutter APK matrix with injected arm64 JAR and P5/P8.4/HDR10/HLG defines.",
@@ -123,5 +123,17 @@
   "subsequentIntegrationHeadReadback": {
     "sha": "d91639401862d84c68406aae3b2029400a4cfbd6",
     "scope": "docs-only evidence checkpoint after inventory began; earlier751d is the inspected source ancestor, not current remote HEAD"
+  },
+  "successorCorrection": {
+    "checkedAtUtc": "2026-10-12T14:52:58Z",
+    "scope": "one erroneous 65-character digest corrected; historical observed heads and recipe exclusion unchanged",
+    "previousValue": "bf54737f08351c71877e2257b7eb8c6031e7a7aed754b26ceb64ddec0222b498b",
+    "correctValue": "bf54737f08351c71877e2257beb8c6031e7a7aed754b26ceb64ddec0222b498b",
+    "sourcePR5Head": "dc41787082752f234fed85db7fb7be3bd855cc45",
+    "sourceBlob": "33abc7195e898d859177bfbb1baed9062a443c55",
+    "sourceBytes": 2578,
+    "verification": "actual raw PR5 bytes and current import-manifest agree; see successor byte checks",
+    "evidence": "docs/plans/core-successor-pr5-byte-checks-20261012.json",
+    "centralScopeComment": 6126444208
   }
 }

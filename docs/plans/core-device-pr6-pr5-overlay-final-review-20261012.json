@@ -1,0 +1,89 @@
+{
+  "verdict": "PASS_STATIC_SOURCE_DISPOSITION_REVIEW",
+  "base": "ebb00b8a0dedec42a68b84a4ec6e7dffb6c17f02",
+  "centralResolution": "https://github.com/Goodwu/media-kit/pull/4#issuecomment-6128920010",
+  "centralBodyRead": true,
+  "scope": "media-kit final overlay source/test/snapshot/readme/disposition only; excludes unfinished TASKS/handoff and actual commit/ref publication",
+  "testDiff": {
+    "onlyInsertions": true,
+    "insertedLines": 36,
+    "newNegativeTests": 2,
+    "existingSampleHelperExactlyUnchanged": true,
+    "allOriginalTestsExactlyUnchanged": true,
+    "runtimeExecuted": false
+  },
+  "sourceSnapshots": [
+    {
+      "path": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/source-snapshot/assemble-jar-arm64.sh.txt",
+      "bytes": 2195,
+      "sha256": "9df01982361945da565832d6729d327ce71cb268ffadccd0004e1b4897bc455c",
+      "gitBlob": "5363de29053303d3b3672aab81b565d6341f4019",
+      "sourceBytesEqual": true,
+      "fileMode": "0o644"
+    },
+    {
+      "path": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/source-snapshot/matrix-device-build.sh.txt",
+      "bytes": 2578,
+      "sha256": "bf54737f08351c71877e2257beb8c6031e7a7aed754b26ceb64ddec0222b498b",
+      "gitBlob": "33abc7195e898d859177bfbb1baed9062a443c55",
+      "sourceBytesEqual": true,
+      "fileMode": "0o644"
+    },
+    {
+      "path": "docs/plans/device-validation/MK-ROUTING-20261011/DV004/source-snapshot/hdr_decoder_review.dart.txt",
+      "bytes": 14380,
+      "sha256": "d7584bd4fee91f9ff6bb1ea9dbbc79b468e9e0d1152dcc6a335afe51169dca39",
+      "gitBlob": "ec2850fa646cbe96bef112c64f9eeb3ace9e00f9",
+      "sourceBytesEqual": true,
+      "fileMode": "0o644"
+    },
+    {
+      "path": "docs/plans/device-validation/MK-ROUTING-20261011/DV004/source-snapshot/hdr_decoder_review_test.dart.txt",
+      "bytes": 13647,
+      "sha256": "786e34833d97180695c535e36f77b6f19a8c6811ae7da036ee1b28c3b531158c",
+      "gitBlob": "70e3c98a515fc107ea68d3ac3315b6dcd11ff067",
+      "sourceBytesEqual": true,
+      "fileMode": "0o644"
+    }
+  ],
+  "productionGatherKeptByOmission": {
+    "path": "media_kit_video/lib/src/hdr/hdr_decoder_review.dart",
+    "disposition": "KEEP_PUBLIC_EXACT_BYTES",
+    "bytes": 13108,
+    "sha256": "495b5bd10572c127948686b6c54ab874667f46e0df2cbb1978215fc7ab8de01b",
+    "gitBlob": "80979951400981a5be20d5f56e04031088cb4908"
+  },
+  "threeBannersKeptByOmission": true,
+  "coreShuffleSubscriptionSessionCiKeptByOmission": true,
+  "dispositionMatchesCentralReadback": true,
+  "futureAncestryDeferredBehaviorWarningPresent": true,
+  "findings": [],
+  "reviewedFiles": [
+    {
+      "path": "media_kit_video/test/hdr_decoder_review_test.dart",
+      "bytes": 12124,
+      "sha256": "ea0e929ab77d6a53418a7607bad995735a61627308b2156870d831977e139412"
+    },
+    {
+      "path": "docs/plans/device-validation/MK-ROUTING-20261011/DV004/README.md",
+      "bytes": 1405,
+      "sha256": "c891c5013d638b1bc848f2ae716382f005537fb3508958759383a6fe4f0efbe7"
+    },
+    {
+      "path": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/README.md",
+      "bytes": 6413,
+      "sha256": "3f504d8019056cee5ff1a907262c22546e559f6677b976fc56c968bab1a7c5ff"
+    },
+    {
+      "path": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/import-manifest.json",
+      "bytes": 8716,
+      "sha256": "5da0fa3991e2b2701fa24e2a323fcba5527331c455e07e46c9809552cf33b391"
+    }
+  ],
+  "notPerformed": [
+    "CI queries",
+    "Dart/Flutter tests",
+    "native/device work",
+    "public repository mutations/comments"
+  ]
+}

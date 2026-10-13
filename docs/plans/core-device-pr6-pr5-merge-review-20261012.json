@@ -1,0 +1,850 @@
+{
+  "schema": "core-device-pr6-pr5-source-integration-review-v1",
+  "task": "MK-ROUTING-20261011",
+  "reviewer": "/root/web_shuffle_review (CORE read-only helper, not DEVICE)",
+  "createdAtUtc": "2026-10-12T17:06:42.234499+00:00",
+  "scope": "Latest PR6 and PR5 merge-base, complete incoming file inventory, textual merge simulation, semantic preservation and conservative disposition review only.",
+  "ciQueriesDuringThisTask": 0,
+  "repositoryMutationsByReviewer": false,
+  "repository": "Goodwu/media-kit",
+  "publicHead": "ebb00b8a0dedec42a68b84a4ec6e7dffb6c17f02",
+  "incomingHeads": {
+    "PR6": "9a2c5768dd10e71975b7c3e76bb7125460a43e5b",
+    "PR5": "dc41787082752f234fed85db7fb7be3bd855cc45"
+  },
+  "mergeBases": {
+    "6": "e269d9669becb5812663200e7521901e8254c8bd",
+    "5": "e269d9669becb5812663200e7521901e8254c8bd"
+  },
+  "remoteEvidence": {
+    "path": "/workspace/scratch/bb7931e64549/audit-device-pr6-pr5-merge/remote-pr-discussions.json",
+    "sha256": "00f9d5d74f4437382bcece86fbf1f0be55cc04336430252eb97a59d6fcacf6a6"
+  },
+  "latestReviewRead": {
+    "PR6": {
+      "id": 5492587336,
+      "url": "https://github.com/Goodwu/media-kit/pull/6#pullrequestreview-5492587336",
+      "apiState": "COMMENTED",
+      "bodyConclusion": "REQUEST_CHANGES"
+    },
+    "PR5": {
+      "id": 6111768962,
+      "url": "https://github.com/Goodwu/media-kit/pull/5#issuecomment-6111768962"
+    }
+  },
+  "gitVersion": "git version 2.51.1",
+  "incomingChanges": {
+    "PR6": [
+      {
+        "statusFromBase": "M",
+        "path": "media_kit_video/lib/src/hdr/hdr_decoder_review.dart",
+        "base": {
+          "gitBlob": "80979951400981a5be20d5f56e04031088cb4908",
+          "bytes": 13108,
+          "sha256": "495b5bd10572c127948686b6c54ab874667f46e0df2cbb1978215fc7ab8de01b"
+        },
+        "public": {
+          "gitBlob": "80979951400981a5be20d5f56e04031088cb4908",
+          "bytes": 13108,
+          "sha256": "495b5bd10572c127948686b6c54ab874667f46e0df2cbb1978215fc7ab8de01b"
+        },
+        "incoming": {
+          "gitBlob": "ec2850fa646cbe96bef112c64f9eeb3ace9e00f9",
+          "bytes": 14380,
+          "sha256": "d7584bd4fee91f9ff6bb1ea9dbbc79b468e9e0d1152dcc6a335afe51169dca39"
+        }
+      },
+      {
+        "statusFromBase": "M",
+        "path": "media_kit_video/test/hdr_decoder_review_test.dart",
+        "base": {
+          "gitBlob": "59ecae8c925955ccd64cf6442e1a9441c3ad3b31",
+          "bytes": 10606,
+          "sha256": "8a1bf172248c71d032683d596d545f91e4b84082ecdbf7b16cde4ec94cba53da"
+        },
+        "public": {
+          "gitBlob": "59ecae8c925955ccd64cf6442e1a9441c3ad3b31",
+          "bytes": 10606,
+          "sha256": "8a1bf172248c71d032683d596d545f91e4b84082ecdbf7b16cde4ec94cba53da"
+        },
+        "incoming": {
+          "gitBlob": "70e3c98a515fc107ea68d3ac3315b6dcd11ff067",
+          "bytes": 13647,
+          "sha256": "786e34833d97180695c535e36f77b6f19a8c6811ae7da036ee1b28c3b531158c"
+        }
+      }
+    ],
+    "PR5": [
+      {
+        "statusFromBase": "A",
+        "path": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/assemble-jar-arm64.sh",
+        "base": null,
+        "public": null,
+        "incoming": {
+          "gitBlob": "5363de29053303d3b3672aab81b565d6341f4019",
+          "bytes": 2195,
+          "sha256": "9df01982361945da565832d6729d327ce71cb268ffadccd0004e1b4897bc455c"
+        }
+      },
+      {
+        "statusFromBase": "M",
+        "path": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/critical-review-define-promotion.md",
+        "base": {
+          "gitBlob": "3ee0b3267dfd6e7ce19a7663343a1ca4252e1b5c",
+          "bytes": 16537,
+          "sha256": "cb00d09aff09299c9d8f403895b6bf58dd2cccb1f3421e379e140a482bb9a59f"
+        },
+        "public": {
+          "gitBlob": "3ee0b3267dfd6e7ce19a7663343a1ca4252e1b5c",
+          "bytes": 16537,
+          "sha256": "cb00d09aff09299c9d8f403895b6bf58dd2cccb1f3421e379e140a482bb9a59f"
+        },
+        "incoming": {
+          "gitBlob": "d942b28c056f8bfe228ab7c36da7eec1c5388fa4",
+          "bytes": 16298,
+          "sha256": "ead9bf0e762646c997bc38f83b21c15432a53d16ae93305a41c32e8fc72ea645"
+        }
+      },
+      {
+        "statusFromBase": "M",
+        "path": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/device-results.md",
+        "base": {
+          "gitBlob": "864d859914a09552fac4b0758eeb860ee7408740",
+          "bytes": 14962,
+          "sha256": "32839c686a3eaac526e615d1fb1a449095deb455b39889f335291ce1fb5c9989"
+        },
+        "public": {
+          "gitBlob": "864d859914a09552fac4b0758eeb860ee7408740",
+          "bytes": 14962,
+          "sha256": "32839c686a3eaac526e615d1fb1a449095deb455b39889f335291ce1fb5c9989"
+        },
+        "incoming": {
+          "gitBlob": "6cb37491477a81e7a55860e095a4c6f4a1d53d87",
+          "bytes": 14723,
+          "sha256": "20574e0be0d598912e98eacd975e86662c04fb349a9640bfd2e6b95a0f639844"
+        }
+      },
+      {
+        "statusFromBase": "A",
+        "path": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/dv004-critical-review.md",
+        "base": null,
+        "public": {
+          "gitBlob": "3b370535ff15b948669f62e7d231ab06f2e0d665",
+          "bytes": 3803,
+          "sha256": "9f52d93ebb6c55ca21ba3a616f9cd8f764dc928942da179a7e29c142a72c6359"
+        },
+        "incoming": {
+          "gitBlob": "3b370535ff15b948669f62e7d231ab06f2e0d665",
+          "bytes": 3803,
+          "sha256": "9f52d93ebb6c55ca21ba3a616f9cd8f764dc928942da179a7e29c142a72c6359"
+        }
+      },
+      {
+        "statusFromBase": "M",
+        "path": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/input-vector.md",
+        "base": {
+          "gitBlob": "532e2c8067931a7315f5812b4748121041f03e65",
+          "bytes": 5447,
+          "sha256": "63a02d698a70748ddc5f4f4f1277014324e390fcf36d109a39fbb4d1cb957bba"
+        },
+        "public": {
+          "gitBlob": "532e2c8067931a7315f5812b4748121041f03e65",
+          "bytes": 5447,
+          "sha256": "63a02d698a70748ddc5f4f4f1277014324e390fcf36d109a39fbb4d1cb957bba"
+        },
+        "incoming": {
+          "gitBlob": "7c50515fda24109e92e4e8d308e1c3faa59ae0e3",
+          "bytes": 5208,
+          "sha256": "9cd1fd4446ceba4ec5c778d00277e21a7866d84c1e113b8090c0acd62991a988"
+        }
+      },
+      {
+        "statusFromBase": "A",
+        "path": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/matrix-device-build.sh",
+        "base": null,
+        "public": null,
+        "incoming": {
+          "gitBlob": "33abc7195e898d859177bfbb1baed9062a443c55",
+          "bytes": 2578,
+          "sha256": "bf54737f08351c71877e2257beb8c6031e7a7aed754b26ceb64ddec0222b498b"
+        }
+      }
+    ]
+  },
+  "publicChangesSinceMergeBase": [
+    "M\t.github/workflows/ci.yml",
+    "M\tTASKS.md",
+    "M\tarchives/conversations/media-kit-routing-20261011.md",
+    "A\tdocs/plans/core-bootstrap-version-implementation-20261012.json",
+    "A\tdocs/plans/core-bootstrap-version-independent-review-20261012.json",
+    "A\tdocs/plans/core-build-ci-3884d3e-4d1d4b7-checkpoint-20261012.json",
+    "A\tdocs/plans/core-build-ci-a98a57-0c6ffe-checkpoint-20261012.json",
+    "A\tdocs/plans/core-capability-subscription-implementation-20261012.json",
+    "A\tdocs/plans/core-capability-subscription-independent-review-20261012.json",
+    "A\tdocs/plans/core-device-9895-review-20261012.json",
+    "A\tdocs/plans/core-device-9895-review-publication-receipt-20261012.json",
+    "A\tdocs/plans/core-device-final-refresh-20261012.json",
+    "A\tdocs/plans/core-device-return-b180-review-20261012.json",
+    "A\tdocs/plans/core-general-ci-0c6ffe-terminal-20261012.json",
+    "A\tdocs/plans/core-general-ci-a73d570-terminal-20261012.json",
+    "A\tdocs/plans/core-library-source-4d1d4b7d-20261012.json",
+    "A\tdocs/plans/core-library-source-ci-0c6ffe-checkpoint-20261012.json",
+    "A\tdocs/plans/core-lifecycle-bootstrap-checkpoint-20261012.json",
+    "A\tdocs/plans/core-lifecycle-bootstrap-host-ci-checkpoint-20261012.json",
+    "M\tdocs/plans/core-pr5-script-inventory-20261012.json",
+    "A\tdocs/plans/core-source-3884-4d1d-independent-crosscheck-20261012.json",
+    "A\tdocs/plans/core-source-ci-3884d3e-4d1d4b7-checkpoint-20261012.json",
+    "A\tdocs/plans/core-source-ci-a3b577-e269d-checkpoint-20261012.json",
+    "A\tdocs/plans/core-source-ci-a98a57-0c6ffe-checkpoint-20261012.json",
+    "A\tdocs/plans/core-successor-app-build-ci-20261012.json",
+    "A\tdocs/plans/core-successor-app-source-ci-20261012.json",
+    "A\tdocs/plans/core-successor-checkpoint-20261012.json",
+    "A\tdocs/plans/core-successor-device-ci-recheck-20261012.json",
+    "A\tdocs/plans/core-successor-dv003-dv004-review-20261012.json",
+    "A\tdocs/plans/core-successor-general-ci-20261012.json",
+    "A\tdocs/plans/core-successor-implementation-index-20261012.json",
+    "A\tdocs/plans/core-successor-native-review-20261012.json",
+    "A\tdocs/plans/core-successor-pr5-byte-checks-20261012.json",
+    "A\tdocs/plans/core-web-cow-app-build-1fcc367-a73d570-20261012.json",
+    "A\tdocs/plans/core-web-cow-app-source-1fcc367-a73d570-20261012.json",
+    "A\tdocs/plans/core-web-cow-chrome-a73d570-20261012.json",
+    "A\tdocs/plans/core-web-cow-library-source-a73d570-20261012.json",
+    "A\tdocs/plans/core-web-shuffle-cow-checkpoint-20261012.json",
+    "A\tdocs/plans/core-web-shuffle-independent-source-review-20261012.json",
+    "A\tdocs/plans/core-web02-independent-review-20261012.json",
+    "M\tdocs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/README.md",
+    "A\tdocs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/dv004-critical-review.md",
+    "M\tdocs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/import-manifest.json",
+    "M\tdocs/plans/media-kit-routing-handoff-20261011.json",
+    "M\tmedia_kit/lib/src/player/web/player/real.dart",
+    "M\tmedia_kit/test/src/player/player_test.dart",
+    "M\tmedia_kit_video/lib/src/video_controller/android_video_controller/real.dart",
+    "A\tmedia_kit_video/test/android_hdr_capability_subscription_test.dart"
+  ],
+  "commitAncestry": {
+    "6": [
+      "9a2c5768dd10e71975b7c3e76bb7125460a43e5b 0fb163c6ec8d54c46698227175b9a21468605246 [DEVICE DV004] 终审整改：移除 DIAG 打点、收紧契约注释、按实机 AVC 序列重写测试并连接 plan 验证",
+      "0fb163c6ec8d54c46698227175b9a21468605246 9cc70571ec18a7eff751df690f2a1aeebdc0b2ba [DEVICE DV004] 修复 HDR/4K 档打开即 HdrDecoderReviewFailure：identity 基线仅在事实齐备轮建立",
+      "9cc70571ec18a7eff751df690f2a1aeebdc0b2ba e269d9669becb5812663200e7521901e8254c8bd [DEVICE DV004-DIAG] decoder 复核临时诊断打点（行为不变，按终审补证清单）"
+    ],
+    "5": [
+      "dc41787082752f234fed85db7fb7be3bd855cc45 66aa28e2bd2736d22b9adb148bfa01be3bcc5bb9 [DEVICE DV004] critical reviewer 终审归档：REQUEST_CHANGES，mpv 首帧名称改写候选机制 + 补证清单",
+      "66aa28e2bd2736d22b9adb148bfa01be3bcc5bb9 644908c93f09083f21720699227eb4e7a14d9c7a e269d9669becb5812663200e7521901e8254c8bd Merge remote-tracking branch 'origin/routing/MK-ROUTING-20261011' into device/MK-ROUTING-20261011/DV-BUILD-01",
+      "644908c93f09083f21720699227eb4e7a14d9c7a 5b27961137a3b03e687dddbeb05a0320fcf6c60c [DEVICE DV003] specialist 架构评审归档：分层可取、嗅探优先、三态准入、不伪造 P5",
+      "5b27961137a3b03e687dddbeb05a0320fcf6c60c 86c186f000c9b9399d4f91227f740ab2669cb83c [DEVICE] PiliPlusX 测试套件补全：flutter 188 全过/analyze 34info 0err/Python 244 OK/DV 分P EOS e2e",
+      "86c186f000c9b9399d4f91227f740ab2669cb83c 6976a8cbe930486cb79d01a7af1649adc0a2811d [DEVICE DV002] 呈现验收人眼通过：P8.4 HLG→PQ 颜色亮度基本正常；黑位/高亮为既有画质项留待分轮",
+      "6976a8cbe930486cb79d01a7af1649adc0a2811d 48ba8e4e768a880e37e1a061500510c3906c980a [DEVICE] critical reviewer 转正审核终版归档：REQUEST_CHANGES，逐 define 判定与转正前置条件清单",
+      "48ba8e4e768a880e37e1a061500510c3906c980a 84f55037c3fef0c56187d62e7e92a5a82c2b2f7e [DEVICE DV002] 三轮定性：NV12 缓冲在位/HWC 合成正常，黑为捕获限制；呈现待人眼验收；FULL/limited 按已验收配方对齐",
+      "84f55037c3fef0c56187d62e7e92a5a82c2b2f7e f290ac1d8cc953cad1f95d3a22c993cd3c3267b4 [DEVICE DV002] 归因边界修正：收口提交与黑屏因果未证；登记 reviewer 两项转正新阻塞",
+      "f290ac1d8cc953cad1f95d3a22c993cd3c3267b4 2610ef95099ac3120fa373271fed997f053eeefb [DEVICE DV002] 证据强化：SF 无缓冲投递坐实窗口 leg 断点；FULL/limited 契约失配并列登记",
+      "2610ef95099ac3120fa373271fed997f053eeefb cbcc6bb88e66dd43ba1eb38ec0dde131736aeb07 [DEVICE DV002] P8.4 更正：素材/配方核对后路由正确但窗口黑屏（tip 链显示 leg 断点）",
+      "cbcc6bb88e66dd43ba1eb38ec0dde131736aeb07 a3cdbda2ab1e872e9f3b0d381fc5737e9c819d88 [DEVICE DV-BUILD-01] 实机验证档案：全链最新源码重建输入向量与自动路由矩阵结果"
+    ]
+  },
+  "evidenceFiles": [
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-pr6-pr5-merge/pr6-incoming.patch",
+      "bytes": 8260,
+      "sha256": "97a67d5a83c3cecfcdc474f7ba6be0179f341b75d6e1391c56c9147d0650593e"
+    },
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-pr6-pr5-merge/pr6-merge-tree.txt",
+      "bytes": 7986,
+      "sha256": "5711b874a3c8176679fafd95d890b63e124de0886c4d3bc6902faf9d249495a6"
+    },
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-pr6-pr5-merge/pr5-incoming.patch",
+      "bytes": 12540,
+      "sha256": "26039265d6a54aad5812668786cb5bed703419f60265372416a7f0e2230269a3"
+    },
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-pr6-pr5-merge/pr5-merge-tree.txt",
+      "bytes": 7671,
+      "sha256": "8d7f4d3dc29989fc516d41e3079e4640e15de447b754158e4d9b6ee1ff97385c"
+    }
+  ],
+  "textualMergeSimulation": {
+    "PR6": {
+      "command": "git merge-tree e269d9669becb5812663200e7521901e8254c8bd ebb00b8a0dedec42a68b84a4ec6e7dffb6c17f02 9a2c5768dd10e71975b7c3e76bb7125460a43e5b",
+      "mode": "legacy three-tree read-only simulation; no checkout/index/ref change",
+      "exitCode": 0,
+      "hasConflictMarkers": false,
+      "textConflictPaths": [],
+      "semanticConflictsRemain": true
+    },
+    "PR5": {
+      "command": "git merge-tree e269d9669becb5812663200e7521901e8254c8bd ebb00b8a0dedec42a68b84a4ec6e7dffb6c17f02 dc41787082752f234fed85db7fb7be3bd855cc45",
+      "mode": "legacy three-tree read-only simulation; no checkout/index/ref change",
+      "exitCode": 0,
+      "hasConflictMarkers": false,
+      "textConflictPaths": [],
+      "semanticConflictsRemain": true
+    }
+  },
+  "exactSourceSnapshots": [
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-pr6-pr5-merge/source-snapshot/pr6/hdr_decoder_review.dart.txt",
+      "bytes": 14380,
+      "sha256": "d7584bd4fee91f9ff6bb1ea9dbbc79b468e9e0d1152dcc6a335afe51169dca39",
+      "sourceCommit": "9a2c5768dd10e71975b7c3e76bb7125460a43e5b",
+      "sourcePath": "media_kit_video/lib/src/hdr/hdr_decoder_review.dart",
+      "sourceGitBlob": "ec2850fa646cbe96bef112c64f9eeb3ace9e00f9",
+      "encoding": "unmodified UTF-8 source bytes; no banner inserted",
+      "executable": false
+    },
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-pr6-pr5-merge/source-snapshot/pr6/hdr_decoder_review_test.dart.txt",
+      "bytes": 13647,
+      "sha256": "786e34833d97180695c535e36f77b6f19a8c6811ae7da036ee1b28c3b531158c",
+      "sourceCommit": "9a2c5768dd10e71975b7c3e76bb7125460a43e5b",
+      "sourcePath": "media_kit_video/test/hdr_decoder_review_test.dart",
+      "sourceGitBlob": "70e3c98a515fc107ea68d3ac3315b6dcd11ff067",
+      "encoding": "unmodified UTF-8 source bytes; no banner inserted",
+      "executable": false
+    },
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-pr6-pr5-merge/source-snapshot/pr5/assemble-jar-arm64.sh.txt",
+      "bytes": 2195,
+      "sha256": "9df01982361945da565832d6729d327ce71cb268ffadccd0004e1b4897bc455c",
+      "sourceCommit": "dc41787082752f234fed85db7fb7be3bd855cc45",
+      "sourcePath": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/assemble-jar-arm64.sh",
+      "sourceGitBlob": "5363de29053303d3b3672aab81b565d6341f4019",
+      "encoding": "unmodified UTF-8 source bytes; no banner inserted",
+      "executable": false
+    },
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-pr6-pr5-merge/source-snapshot/pr5/matrix-device-build.sh.txt",
+      "bytes": 2578,
+      "sha256": "bf54737f08351c71877e2257beb8c6031e7a7aed754b26ceb64ddec0222b498b",
+      "sourceCommit": "dc41787082752f234fed85db7fb7be3bd855cc45",
+      "sourcePath": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/matrix-device-build.sh",
+      "sourceGitBlob": "33abc7195e898d859177bfbb1baed9062a443c55",
+      "encoding": "unmodified UTF-8 source bytes; no banner inserted",
+      "executable": false
+    }
+  ],
+  "provenanceBannerChecks": [
+    {
+      "path": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/critical-review-define-promotion.md",
+      "public": {
+        "gitBlob": "3ee0b3267dfd6e7ce19a7663343a1ca4252e1b5c",
+        "bytes": 16537,
+        "sha256": "cb00d09aff09299c9d8f403895b6bf58dd2cccb1f3421e379e140a482bb9a59f"
+      },
+      "PR5": {
+        "gitBlob": "d942b28c056f8bfe228ab7c36da7eec1c5388fa4",
+        "bytes": 16298,
+        "sha256": "ead9bf0e762646c997bc38f83b21c15432a53d16ae93305a41c32e8fc72ea645"
+      },
+      "publicWithoutFirstTwoLinesEqualsPR5": true,
+      "disposition": "KEEP_PUBLIC_VERBATIM; upstream change is only banner deletion; no new historical body remains to import"
+    },
+    {
+      "path": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/device-results.md",
+      "public": {
+        "gitBlob": "864d859914a09552fac4b0758eeb860ee7408740",
+        "bytes": 14962,
+        "sha256": "32839c686a3eaac526e615d1fb1a449095deb455b39889f335291ce1fb5c9989"
+      },
+      "PR5": {
+        "gitBlob": "6cb37491477a81e7a55860e095a4c6f4a1d53d87",
+        "bytes": 14723,
+        "sha256": "20574e0be0d598912e98eacd975e86662c04fb349a9640bfd2e6b95a0f639844"
+      },
+      "publicWithoutFirstTwoLinesEqualsPR5": true,
+      "disposition": "KEEP_PUBLIC_VERBATIM; upstream change is only banner deletion; no new historical body remains to import"
+    },
+    {
+      "path": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/input-vector.md",
+      "public": {
+        "gitBlob": "532e2c8067931a7315f5812b4748121041f03e65",
+        "bytes": 5447,
+        "sha256": "63a02d698a70748ddc5f4f4f1277014324e390fcf36d109a39fbb4d1cb957bba"
+      },
+      "PR5": {
+        "gitBlob": "7c50515fda24109e92e4e8d308e1c3faa59ae0e3",
+        "bytes": 5208,
+        "sha256": "9cd1fd4446ceba4ec5c778d00277e21a7866d84c1e113b8090c0acd62991a988"
+      },
+      "publicWithoutFirstTwoLinesEqualsPR5": true,
+      "disposition": "KEEP_PUBLIC_VERBATIM; upstream change is only banner deletion; no new historical body remains to import"
+    }
+  ],
+  "alreadyIntegratedChecks": [
+    {
+      "path": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/dv003-specialist-review.md",
+      "base": {
+        "gitBlob": "4e5869669234140442c3f21d70d85c4b004e8a3d",
+        "bytes": 7216,
+        "sha256": "c1a5899e7f3deba84c3464f9d2896c35f1394b0d4e4cab6d440e244573f5c581"
+      },
+      "public": {
+        "gitBlob": "4e5869669234140442c3f21d70d85c4b004e8a3d",
+        "bytes": 7216,
+        "sha256": "c1a5899e7f3deba84c3464f9d2896c35f1394b0d4e4cab6d440e244573f5c581"
+      },
+      "PR5": {
+        "gitBlob": "4e5869669234140442c3f21d70d85c4b004e8a3d",
+        "bytes": 7216,
+        "sha256": "c1a5899e7f3deba84c3464f9d2896c35f1394b0d4e4cab6d440e244573f5c581"
+      },
+      "publicExactlyEqualsPR5": true,
+      "disposition": "KEEP_PUBLIC; already integrated exact blob"
+    },
+    {
+      "path": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/dv004-critical-review.md",
+      "base": null,
+      "public": {
+        "gitBlob": "3b370535ff15b948669f62e7d231ab06f2e0d665",
+        "bytes": 3803,
+        "sha256": "9f52d93ebb6c55ca21ba3a616f9cd8f764dc928942da179a7e29c142a72c6359"
+      },
+      "PR5": {
+        "gitBlob": "3b370535ff15b948669f62e7d231ab06f2e0d665",
+        "bytes": 3803,
+        "sha256": "9f52d93ebb6c55ca21ba3a616f9cd8f764dc928942da179a7e29c142a72c6359"
+      },
+      "publicExactlyEqualsPR5": true,
+      "disposition": "KEEP_PUBLIC; already integrated exact blob"
+    },
+    {
+      "path": "tool/routing_matrix.py",
+      "base": {
+        "gitBlob": "7299fe535fef6da3317de6f13569d8a93c509a15",
+        "bytes": 93041,
+        "sha256": "62ca4703be69a69f7addd8b347f9fe43a582c5ed12459a5a0b9237f4d6f6894e"
+      },
+      "public": {
+        "gitBlob": "7299fe535fef6da3317de6f13569d8a93c509a15",
+        "bytes": 93041,
+        "sha256": "62ca4703be69a69f7addd8b347f9fe43a582c5ed12459a5a0b9237f4d6f6894e"
+      },
+      "PR5": {
+        "gitBlob": "7299fe535fef6da3317de6f13569d8a93c509a15",
+        "bytes": 93041,
+        "sha256": "62ca4703be69a69f7addd8b347f9fe43a582c5ed12459a5a0b9237f4d6f6894e"
+      },
+      "publicExactlyEqualsPR5": true,
+      "disposition": "KEEP_PUBLIC; already integrated exact blob"
+    },
+    {
+      "path": "tool/test_routing_matrix.py",
+      "base": {
+        "gitBlob": "f39dd5949d771dd19232a69c7b37c66ba939377b",
+        "bytes": 56286,
+        "sha256": "680beffc23d9c856a8713e174c509f1d4fa2410d55b167e55a65af6a47a19a4b"
+      },
+      "public": {
+        "gitBlob": "f39dd5949d771dd19232a69c7b37c66ba939377b",
+        "bytes": 56286,
+        "sha256": "680beffc23d9c856a8713e174c509f1d4fa2410d55b167e55a65af6a47a19a4b"
+      },
+      "PR5": {
+        "gitBlob": "f39dd5949d771dd19232a69c7b37c66ba939377b",
+        "bytes": 56286,
+        "sha256": "680beffc23d9c856a8713e174c509f1d4fa2410d55b167e55a65af6a47a19a4b"
+      },
+      "publicExactlyEqualsPR5": true,
+      "disposition": "KEEP_PUBLIC; already integrated exact blob"
+    },
+    {
+      "path": "tool/README.md",
+      "base": {
+        "gitBlob": "585354af4fef73554f6bedd4d58832db0f0ce40c",
+        "bytes": 13253,
+        "sha256": "1cf1dc291fd94afd0f0d0a74f4562bc2ed54886acd485f3b07d652f225a3643d"
+      },
+      "public": {
+        "gitBlob": "585354af4fef73554f6bedd4d58832db0f0ce40c",
+        "bytes": 13253,
+        "sha256": "1cf1dc291fd94afd0f0d0a74f4562bc2ed54886acd485f3b07d652f225a3643d"
+      },
+      "PR5": {
+        "gitBlob": "585354af4fef73554f6bedd4d58832db0f0ce40c",
+        "bytes": 13253,
+        "sha256": "1cf1dc291fd94afd0f0d0a74f4562bc2ed54886acd485f3b07d652f225a3643d"
+      },
+      "publicExactlyEqualsPR5": true,
+      "disposition": "KEEP_PUBLIC; already integrated exact blob"
+    },
+    {
+      "path": "tool/matrix-build.sh",
+      "base": {
+        "gitBlob": "568b7c43d4e71cbb9eb2ff0e914b8c0e5fb5cbd0",
+        "bytes": 172,
+        "sha256": "55c54040a13b65af30d4b5e2379d7670622909c6757560278b47c6f9474bf00b"
+      },
+      "public": {
+        "gitBlob": "568b7c43d4e71cbb9eb2ff0e914b8c0e5fb5cbd0",
+        "bytes": 172,
+        "sha256": "55c54040a13b65af30d4b5e2379d7670622909c6757560278b47c6f9474bf00b"
+      },
+      "PR5": {
+        "gitBlob": "568b7c43d4e71cbb9eb2ff0e914b8c0e5fb5cbd0",
+        "bytes": 172,
+        "sha256": "55c54040a13b65af30d4b5e2379d7670622909c6757560278b47c6f9474bf00b"
+      },
+      "publicExactlyEqualsPR5": true,
+      "disposition": "KEEP_PUBLIC; already integrated exact blob"
+    }
+  ],
+  "publicPreservationAnchors": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "public": {
+        "gitBlob": "38ae4d0aa0bd044e1e1312846d91a5b79fbdf04e",
+        "bytes": 26060,
+        "sha256": "02da549c4b38e3c27c3e219fbfd165dae755c742a17fe7eee1d927c5f932b6bb"
+      },
+      "PR6": {
+        "gitBlob": "4d6e7676e471317bd34dc89fb7e235136790d5f8",
+        "bytes": 25885,
+        "sha256": "795561ea0a5362525fd9b0cca7f0c9ba66087d23a92b1b68e43821ccea96c79d"
+      },
+      "PR5": {
+        "gitBlob": "4d6e7676e471317bd34dc89fb7e235136790d5f8",
+        "bytes": 25885,
+        "sha256": "795561ea0a5362525fd9b0cca7f0c9ba66087d23a92b1b68e43821ccea96c79d"
+      },
+      "disposition": "Preserve pinned public implementation; parent may append explicit integration ledger updates but never replace from DEVICE branch"
+    },
+    {
+      "path": "media_kit/lib/src/player/web/player/real.dart",
+      "public": {
+        "gitBlob": "c5ad7ca432b1cb62b37f0f4a120b44501ea1ddda",
+        "bytes": 50029,
+        "sha256": "928e1ab8a91812e80230c1a65fd74c5941d45d5be47678f573c2efff4f9a9b42"
+      },
+      "PR6": {
+        "gitBlob": "c6feb91a11698ff89dd09448a091bd13f5f4670e",
+        "bytes": 49461,
+        "sha256": "f4ea53f059b86e0e3f7524c86fa6063dde66addbc3b5a9d0c0a56a54b455d0a6"
+      },
+      "PR5": {
+        "gitBlob": "c6feb91a11698ff89dd09448a091bd13f5f4670e",
+        "bytes": 49461,
+        "sha256": "f4ea53f059b86e0e3f7524c86fa6063dde66addbc3b5a9d0c0a56a54b455d0a6"
+      },
+      "disposition": "Preserve pinned public implementation; parent may append explicit integration ledger updates but never replace from DEVICE branch"
+    },
+    {
+      "path": "media_kit/test/src/player/player_test.dart",
+      "public": {
+        "gitBlob": "0495efa2fcb9f50684a18d182986b15d34f0761e",
+        "bytes": 107691,
+        "sha256": "3f0d13d76f5f2e78e6524710244de604d9cf1d38730c9f5b869e830afadee3c2"
+      },
+      "PR6": {
+        "gitBlob": "50f4a893f252cf3e9ba7ff33edb043363233a666",
+        "bytes": 102706,
+        "sha256": "9b7b71915e1bd6a2e8d7736e0b7b1f4bbd8bbe7e0b5c9d95c77e0445ab13d1d5"
+      },
+      "PR5": {
+        "gitBlob": "50f4a893f252cf3e9ba7ff33edb043363233a666",
+        "bytes": 102706,
+        "sha256": "9b7b71915e1bd6a2e8d7736e0b7b1f4bbd8bbe7e0b5c9d95c77e0445ab13d1d5"
+      },
+      "disposition": "Preserve pinned public implementation; parent may append explicit integration ledger updates but never replace from DEVICE branch"
+    },
+    {
+      "path": "media_kit_video/lib/src/video_controller/android_video_controller/real.dart",
+      "public": {
+        "gitBlob": "27e21ca1ebf3d07d5d62f040e08d47a3fc7d4748",
+        "bytes": 83379,
+        "sha256": "8a0073c434aa8606491902e5659abac732039fc071dc845f1fe9f5f284d57609"
+      },
+      "PR6": {
+        "gitBlob": "0f063a8d6e54bf69cecd8aeb17fadd951d5bbb23",
+        "bytes": 83261,
+        "sha256": "7ed6915bdf5d99ea2798ab2a1230d740604d7de81bd0d4f8a1b0d9bec985e8d5"
+      },
+      "PR5": {
+        "gitBlob": "0f063a8d6e54bf69cecd8aeb17fadd951d5bbb23",
+        "bytes": 83261,
+        "sha256": "7ed6915bdf5d99ea2798ab2a1230d740604d7de81bd0d4f8a1b0d9bec985e8d5"
+      },
+      "disposition": "Preserve pinned public implementation; parent may append explicit integration ledger updates but never replace from DEVICE branch"
+    },
+    {
+      "path": "media_kit_video/test/android_hdr_capability_subscription_test.dart",
+      "public": {
+        "gitBlob": "4a699a0d95e2470956252dcd1fba811346f18566",
+        "bytes": 7929,
+        "sha256": "b61386dc3b0e7099f5a9ae3f60303ff2e65e716ddb55f67892cf10cbf2dfde8b"
+      },
+      "PR6": null,
+      "PR5": null,
+      "disposition": "Preserve pinned public implementation; parent may append explicit integration ledger updates but never replace from DEVICE branch"
+    },
+    {
+      "path": "media_kit_video/lib/src/hdr/hdr_video_session.dart",
+      "public": {
+        "gitBlob": "b7afbf0f28f5a782c61071f36e8ebe1dd57fe63d",
+        "bytes": 66236,
+        "sha256": "38006cbb22c0808776efc97faa6b3a583f584e632e43a00d27d1443b7d80710e"
+      },
+      "PR6": {
+        "gitBlob": "b7afbf0f28f5a782c61071f36e8ebe1dd57fe63d",
+        "bytes": 66236,
+        "sha256": "38006cbb22c0808776efc97faa6b3a583f584e632e43a00d27d1443b7d80710e"
+      },
+      "PR5": {
+        "gitBlob": "b7afbf0f28f5a782c61071f36e8ebe1dd57fe63d",
+        "bytes": 66236,
+        "sha256": "38006cbb22c0808776efc97faa6b3a583f584e632e43a00d27d1443b7d80710e"
+      },
+      "disposition": "Preserve pinned public implementation; parent may append explicit integration ledger updates but never replace from DEVICE branch"
+    },
+    {
+      "path": "media_kit_video/lib/src/hdr/hdr_decoder_review.dart",
+      "public": {
+        "gitBlob": "80979951400981a5be20d5f56e04031088cb4908",
+        "bytes": 13108,
+        "sha256": "495b5bd10572c127948686b6c54ab874667f46e0df2cbb1978215fc7ab8de01b"
+      },
+      "PR6": {
+        "gitBlob": "ec2850fa646cbe96bef112c64f9eeb3ace9e00f9",
+        "bytes": 14380,
+        "sha256": "d7584bd4fee91f9ff6bb1ea9dbbc79b468e9e0d1152dcc6a335afe51169dca39"
+      },
+      "PR5": {
+        "gitBlob": "80979951400981a5be20d5f56e04031088cb4908",
+        "bytes": 13108,
+        "sha256": "495b5bd10572c127948686b6c54ab874667f46e0df2cbb1978215fc7ab8de01b"
+      },
+      "disposition": "Preserve pinned public implementation; parent may append explicit integration ledger updates but never replace from DEVICE branch"
+    },
+    {
+      "path": "TASKS.md",
+      "public": {
+        "gitBlob": "a4f84c94f04fe388650069ef2bf4a25348af6fb0",
+        "bytes": 38598,
+        "sha256": "1bbf5d8df93f6d0fbddaeeba5134098ec509a8cab0a546b540e7afb2f0b7e9a5"
+      },
+      "PR6": {
+        "gitBlob": "b5e21ffe311095bc9344f789ee6ae950d44db22a",
+        "bytes": 37323,
+        "sha256": "848993366f1b4fd49eb0dd414834f45581c5a386246bcd5e26c7006b96de8aff"
+      },
+      "PR5": {
+        "gitBlob": "b5e21ffe311095bc9344f789ee6ae950d44db22a",
+        "bytes": 37323,
+        "sha256": "848993366f1b4fd49eb0dd414834f45581c5a386246bcd5e26c7006b96de8aff"
+      },
+      "disposition": "Preserve pinned public implementation; parent may append explicit integration ledger updates but never replace from DEVICE branch"
+    },
+    {
+      "path": "archives/conversations/media-kit-routing-20261011.md",
+      "public": {
+        "gitBlob": "55b6c130838d0666b0611b8752341bfd77312f7f",
+        "bytes": 87200,
+        "sha256": "04d7644b347e40e3df736f38115cec2404d09ecece67a101e57ca4a0cbc805b6"
+      },
+      "PR6": {
+        "gitBlob": "f5bd100d18b4e869d29fc46cf24fb47004823317",
+        "bytes": 58014,
+        "sha256": "ecdfacea89eef832a7ec252a2da286be6dd2c2921728aacfd34fc217d0635a9d"
+      },
+      "PR5": {
+        "gitBlob": "f5bd100d18b4e869d29fc46cf24fb47004823317",
+        "bytes": 58014,
+        "sha256": "ecdfacea89eef832a7ec252a2da286be6dd2c2921728aacfd34fc217d0635a9d"
+      },
+      "disposition": "Preserve pinned public implementation; parent may append explicit integration ledger updates but never replace from DEVICE branch"
+    },
+    {
+      "path": "docs/plans/media-kit-routing-handoff-20261011.json",
+      "public": {
+        "gitBlob": "ae61c81ca8d0f693f50ed1c3c4074045b9812201",
+        "bytes": 148612,
+        "sha256": "ccdfa774c798090b1919ab60894640612e0c356d1688b0af04170e77a4a6c783"
+      },
+      "PR6": {
+        "gitBlob": "f789aaa0ef6840b054bb78d061bf1365b56088c5",
+        "bytes": 28950,
+        "sha256": "16e5e196b3689ce39d01470dda47a3c94e449025fbf26a3ea8e99e181397649d"
+      },
+      "PR5": {
+        "gitBlob": "f789aaa0ef6840b054bb78d061bf1365b56088c5",
+        "bytes": 28950,
+        "sha256": "16e5e196b3689ce39d01470dda47a3c94e449025fbf26a3ea8e99e181397649d"
+      },
+      "disposition": "Preserve pinned public implementation; parent may append explicit integration ledger updates but never replace from DEVICE branch"
+    },
+    {
+      "path": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/README.md",
+      "public": {
+        "gitBlob": "23e3414e32412d30ff23dc0b8fe35446da7bbee8",
+        "bytes": 4802,
+        "sha256": "fad3b27db49642501cf86dbe87347a5a1c141c69b5545e21ba9e038d95b447e0"
+      },
+      "PR6": {
+        "gitBlob": "48af2cd5007644b696eb92f405151ba31f3b751e",
+        "bytes": 4363,
+        "sha256": "c864d833c3fb113d5f2735d8a0405c6d04e448cee86d2db550fd07cfbc8e428d"
+      },
+      "PR5": {
+        "gitBlob": "48af2cd5007644b696eb92f405151ba31f3b751e",
+        "bytes": 4363,
+        "sha256": "c864d833c3fb113d5f2735d8a0405c6d04e448cee86d2db550fd07cfbc8e428d"
+      },
+      "disposition": "Preserve pinned public implementation; parent may append explicit integration ledger updates but never replace from DEVICE branch"
+    },
+    {
+      "path": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/import-manifest.json",
+      "public": {
+        "gitBlob": "113a80bb5619827c117c3872e4bdc228c508015b",
+        "bytes": 5200,
+        "sha256": "ee2af9c8356a01183e7fa802d22d984a51f8ec7d6ffff6d860541880ae4354b8"
+      },
+      "PR6": {
+        "gitBlob": "b30d9199529b4e68b8d5c38680adb555a9207644",
+        "bytes": 2265,
+        "sha256": "de4b185f3ddf049f3fe51d66d9c936d0050af5bb5ff6784ff74aa268722d6397"
+      },
+      "PR5": {
+        "gitBlob": "b30d9199529b4e68b8d5c38680adb555a9207644",
+        "bytes": 2265,
+        "sha256": "de4b185f3ddf049f3fe51d66d9c936d0050af5bb5ff6784ff74aa268722d6397"
+      },
+      "disposition": "Preserve pinned public implementation; parent may append explicit integration ledger updates but never replace from DEVICE branch"
+    }
+  ],
+  "findings": [
+    {
+      "id": "PR6-SEMANTIC-P1",
+      "severity": "P1",
+      "activeProductionImportApproved": false,
+      "path": "media_kit_video/lib/src/hdr/hdr_decoder_review.dart",
+      "detail": "PR6 moves all completeness checks ahead of observedDecoderEndpoints and native configuration validation. Every incomplete round returns null before recording identity; first complete round records then returns facts and exits gather. Existing cross-round rejection is no longer exercised. Same entry/epoch, stable per-round A/B, known component A/hwdec/MIME with missing pixel then component B with complete facts is accepted by incoming gather. Public map rejects. Same MIME/hwdec final validation does not reconstruct the earlier component.",
+      "sourceAnchors": {
+        "publicMap": "public lines 241-267",
+        "publicConfigBeforeCompleteness": "public lines 274-294",
+        "publicExit": "public lines 332-338",
+        "sessionSnapshotOnly": "hdr_video_session.dart lines 1128-1134,1195-1225"
+      },
+      "incomingLineRanges": {
+        "contractNote": [
+          241,
+          251
+        ],
+        "incompleteReturnBeforeIdentity": [
+          271,
+          289
+        ],
+        "crossRoundMap": [
+          290,
+          297
+        ],
+        "nativeConfigValidation": [
+          304,
+          312
+        ],
+        "factsReturn": [
+          314,
+          350
+        ],
+        "gatherExit": 352
+      }
+    },
+    {
+      "id": "PR6-ASSERTION-P1",
+      "severity": "P1",
+      "path": "media_kit_video/test/hdr_decoder_review_test.dart",
+      "detail": "Incoming changes replace the existing observed-decoder-between-rounds failure test with a logical-name success test. Retaining Session source alone does not retain this gather assertion. Keep the entire public old rejection test and all public A/B, timeout, epoch, superseded, malformed/native-DV tests."
+    },
+    {
+      "id": "PR6-FIXTURE-P2",
+      "severity": "P2",
+      "path": "media_kit_video/test/hdr_decoder_review_test.dart",
+      "detail": "AVC/copy success fixture is internally much better, but its comment claims absent hwdec/gamma/primaries while it actually prepopulates all three and only clears pixel. MIME-negative is already complete on first round, so its betweenRounds callback is not invoked. Do not call these a verified complete real-device replay or evidence of cross-round protection."
+    },
+    {
+      "id": "PR5-BANNERS-P2",
+      "severity": "P2",
+      "paths": [
+        "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/critical-review-define-promotion.md",
+        "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/device-results.md",
+        "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/input-vector.md"
+      ],
+      "detail": "Plain clean Git merge deletes three previously preserved two-line provenance banners. Historical bodies are byte-identical to public after banner removal. Explicitly keep public files; record incoming deletion as rejected resolution."
+    },
+    {
+      "id": "PR5-RECIPE-P1",
+      "severity": "P1",
+      "path": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/assemble-jar-arm64.sh",
+      "detail": "Known unapproved recipe unchanged: conditional nm pipeline redirects errors and maps nonzero to no-import success; only vkGetPhysicalDeviceProperties2 is queried, leaving the other Vulkan symbol uncovered. Native input acceptance remains closed; do not activate recipe. Historical raw source may be archived as non-executable .txt."
+    },
+    {
+      "id": "PR5-RECIPE-P2",
+      "severity": "P2",
+      "path": "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/matrix-device-build.sh",
+      "detail": "Known excluded recipe unchanged: hard-coded workstation/SDK/JAR paths and rm -rf of build intermediates; public matrix tool is already integrated. No duplicate active recipe should be created."
+    }
+  ],
+  "recommendedParentDisposition": {
+    "verdict": "READY_FOR_CONSERVATIVE_SOURCE_AND_COMPATIBLE_TEST_INTEGRATION; DV004_PRODUCTION_BEHAVIOR_DEFERRED",
+    "PR6": {
+      "sourceArchive": [
+        "docs/plans/device-validation/MK-ROUTING-20261011/DV004/source-snapshot/hdr_decoder_review.dart.txt",
+        "docs/plans/device-validation/MK-ROUTING-20261011/DV004/source-snapshot/hdr_decoder_review_test.dart.txt"
+      ],
+      "byteContract": "Copy raw snapshot bytes above; provenance/header belongs in adjacent README/manifest, not inserted into raw source files.",
+      "production": "Retain public gather byte-identical at blob 80979951400981a5be20d5f56e04031088cb4908 and Session source unchanged. No new diagnostic scope or native protocol.",
+      "tests": "Keep all public tests including old cross-round rejection; optionally integrate only incoming two final-plan negatives: AVC track with HEVC component/MIME on a copy route, and copy route without CPU frame format. MIME negative should be adapted to remove inactive betweenRounds callback and inaccurate sequence comment; no Sample.gather helper change required.",
+      "whyCompatible": "Both negatives use a first-round complete A/B-stable sample and then existing validateDecoderObservation. No cross-round loosened behavior is needed. Existing MIME test covers reverse HEVC track/AVC component and ordinary route; new incoming fixture can retain copy-specific context but should not be represented as a new production capability.",
+      "testBoundary": "Static compatibility review only. No Dart/Flutter runtime installed here; no tests/CI started in this paused phase.",
+      "smallerEquivalentConservativeOption": "Archive both sources and disposition with ancestry, omit both production/test changes. This is source-archive-only integration and must be labeled as such; two compatible negative tests are a reasonable small additional executable slice."
+    },
+    "PR5": {
+      "keepPublicExact": [
+        "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/critical-review-define-promotion.md",
+        "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/device-results.md",
+        "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/input-vector.md",
+        "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/dv003-specialist-review.md",
+        "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/dv004-critical-review.md",
+        "tool/routing_matrix.py",
+        "tool/test_routing_matrix.py",
+        "tool/README.md",
+        "tool/matrix-build.sh"
+      ],
+      "rawRemainingSource": [
+        "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/assemble-jar-arm64.sh",
+        "docs/plans/device-validation/MK-ROUTING-20261011/DV-BUILD-01/matrix-device-build.sh"
+      ],
+      "recommendedArchive": "Archive each original script as .sh.txt under source-snapshot, hash it and keep scripts inactive/excluded from approved recipe. No new source contribution remains beyond these two raw files and already-imported history.",
+      "ledger": "Preserve current public TASKS/conversation/README/import manifest and historical CI report vectors. Append explicit source integration resolution, never overwrite them from stale DEVICE tree.",
+      "nativeAcceptance": "DV001 recipe repairs, final JAR/APK/library/link/patch/NDK/helper provenance and actual device HDR/performance acceptance remain required and incomplete; accepted native inputs remain zero."
+    },
+    "ancestryHonesty": {
+      "allowed": "Parent may use a true two-parent integration commit recording exact DEVICE head, with deliberate ours resolution for deferred production and public banners plus exact raw archives/test slice.",
+      "requiredLanguage": "sourceArchived / ancestryRecorded / compatibleTestsIntegrated (if chosen) / productionBehaviorDeferred / acceptanceOpen; never DV004 fixed/approved or full native/PR5 accepted.",
+      "futureMergeRisk": "After ancestry includes 9a2 or dc417, Git considers that history consumed. A later DEVICE patch may only contain deltas relative to the deferred implementation; it can textually merge while missing the original deferred hunk. Every future review must consult disposition manifest and compare full production function/source to accepted public baseline and full new DEVICE candidate, not just incremental diff.",
+      "noHiddenConflict": "Record both textualClean and semanticResolution; a clean Git merge is not a review approval."
+    },
+    "unchangedDecisions": [
+      "DV004 temporary diagnostics scope remains undecided",
+      "final-plan fulfillment versus any-real-switch acceptance remains undecided",
+      "experimental defaults false; true primary verification plus false regression",
+      "LG YUV8/FULL/range1 and exact-device owner/ACK/lease remain",
+      "10-bit and lease fusion remain deferred",
+      "public main PRs not merged/closed/published automatically"
+    ]
+  },
+  "verificationPerformed": [
+    "Read fresh remote PR heads/ref metadata and complete PR6/PR5 returned discussions",
+    "Read actual common ancestor and all incoming name-status/diffs from pinned local objects",
+    "Run legacy read-only three-tree simulation for both PRs; both had zero textual conflict markers",
+    "Hash original incoming source bytes, source snapshots and public preservation anchors",
+    "Verify all three bannerless historical bodies exactly equal public minus their two-line provenance banners",
+    "Verify public matrix four files plus DV003/DV004 review bodies exactly match PR5 blobs",
+    "Read pinned public gather, existing test suite and Session final validation; no repository code edited"
+  ],
+  "notPerformed": [
+    "CI queries or builds",
+    "Flutter/Dart tests or analyzer",
+    "DEVICE/native builds or execution",
+    "Real hardware/HDR/performance acceptance",
+    "Repository file edits, staging, commit, push, PR merge, public comments"
+  ]
+}

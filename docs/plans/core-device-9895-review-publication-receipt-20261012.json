@@ -1,0 +1,46 @@
+{
+  "schema": "core_review_publication_receipt_v1",
+  "task": "MK-ROUTING-20261011",
+  "reviewer_role": "CORE independent read-only review assistant",
+  "observed_at_utc": "2026-10-12 16:19:42 UTC",
+  "api_url": "https://api.github.com/repos/Goodwu/PiliPlusX/pulls/3/reviews/5493423824",
+  "publication": {
+    "id": 5493423824,
+    "html_url": "https://github.com/Goodwu/PiliPlusX/pull/3#pullrequestreview-5493423824",
+    "commit_id": "9895e7dc040cdc06a33cceba4d4379eba3f596b5",
+    "state": "COMMENTED",
+    "submitted_at": "2026-10-12T16:16:01Z",
+    "author_login": "Goodwu",
+    "body": "## [CORE-SUCCESSOR][DV006 9895 增量复审] REQUEST_CHANGES\n\n本次绑定 `9895e7dc040cdc06a33cceba4d4379eba3f596b5`，相对 `b18086d0d654a5f523296b41bdfb869c588cd3f0`。实际仅新增一个 commit、两个 Kotlin 文件（+219）：MainActivity 接入和 ScreenBrightnessHandler。已读中央 [6127973022](https://github.com/Goodwu/media-kit/pull/4#issuecomment-6127973022)、实际 App 调用、锁定接口与 AudioService 依赖。本次为源码/API复审，未执行本地 Kotlin、Flutter 或实机测试。\n\n### P1 — reset 写入 NaN，默认应用亮度路径会返回非法值\n\n`ScreenBrightnessHandler.kt:92–94,191–200` 将 reset 转为 `setApplicationBrightness(Double.NaN)`。Kotlin `coerceIn(0.0, 1.0)` 不会把 NaN 转成 -1；NaN 被写入 window.screenBrightness。随后 getter 的 `attr < 0f` 对 NaN 为 false，继续返回 NaN，接口的 0..1 检查会抛 RangeError。\n\nAndroid 的无覆盖值是 [BRIGHTNESS_OVERRIDE_NONE = -1f](https://developer.android.com/reference/android/view/WindowManager.LayoutParams#BRIGHTNESS_OVERRIDE_NONE)，接口也明确 Android reset 使用 -1。实际 App 默认 `Pref.setSystemBrightness=false`；视频页 didPushNext/didPopNext（view.dart:485–486,528–542）、直播退出及最后播放器释放（pl_player/controller.dart:3973–3974）都会触发此路径。请使用真实清除覆盖语义，并补 set→reset→get 的有限范围值、退出/再进入、系统亮度跟随回归。不能用 hasChanged 对 NaN 返回 false 证明已还原。\n\n### P2 — 系统变化回调没有回到 Flutter 平台线程\n\n`ScreenBrightnessHandler.kt:56–61` 使用 `ContentObserver(null)` 后直接 `systemSink.success`。Android 在未给 Handler 时直接在通知线程调用 onChange；系统/Binder 通知没有主线程保证，而默认 [BinaryMessenger.send 要求平台/UI线程](https://api.flutter.dev/javadoc/io/flutter/plugin/common/BinaryMessenger.html)。这里的回调也不在 MethodCall handler 的 try/catch 内。请把 observer/event emission 约束在正确线程，并验证控制中心或设置修改触发的真实事件。仅启动时通道存在不能覆盖此路径。\n\n### P2 — application 事件通道没有任何事件发送\n\n`ScreenBrightnessHandler.kt:112–120,197–201` 只保存/清空 applicationSink，整个文件没有一次 applicationSink.success；set/reset 都不发布事件，只有 system stream 的 onListen 才注册 observer。App 默认应用模式在 `pl_player/view/view.dart:340–344` 实际订阅 application stream。系统亮度变化、窗口 set/reset 无法更新该订阅的状态和下一次手势基线。请完整实现接口规定的 application 变化事件，覆盖应用覆盖存在/清除时的系统通知、set/reset、取消后停止事件。\n\n### P2 — 系统权限和写入失败没有成为可靠结果\n\n`ScreenBrightnessHandler.kt:104,168–188` 将 canChangeSystemBrightness 恒报 true，并忽略两次 Settings.System.putInt 的 Boolean 返回值。Manifest 虽声明 WRITE_SETTINGS，但 API23+ 还需要用户授予修改系统设置能力，应以 [Settings.System.canWrite](https://developer.android.com/reference/android/provider/Settings.System#canWrite(android.content.Context)) 查询。权限未授予/被撤回时，异常只转为通用 error，现有 App setBrightness 又吞掉异常；provider 返回 false 时甚至回 success，仍可出现数字改变而实际未变。\n\n请接通真实能力/授权状态与写入失败传播，补未授权、撤回授权、provider失败和成功后读取核验。中央已承认 automatic→manual 是额外行为变化；请把其适用范围和退出后的系统状态单独说明，不能把“补齐通道”直接等同于批准这项系统策略变化。\n\n### P2 — stop 没有解除绑定到 Activity 的 channel handlers\n\n`ScreenBrightnessHandler.kt:33–39,66–67,112–137,204–208` 的 handlers 持有 activity；stop 只清理 observer/sink，没有解除 method/event channel handlers。实际锁定的 AudioServiceActivity 通过 AudioServicePlugin 获取 cached FlutterEngine，Activity销毁不等同于 engine必定销毁。在保留 engine 的 detach/重建场景中，旧 handler 可继续引用已销毁 Activity，后续 listen 还能重新注册 observer。请按 engine/Activity 生命周期解除旧绑定并覆盖复用；旧 detach 也不能误清新 Activity 的绑定。\n\n### 前次阻断与验收边界\n\n本次五份 DOVI/选源/controller 文件逐字等于此前 b180 冻结源码，未修 [review5492931759](https://github.com/Goodwu/PiliPlusX/pull/3#pullrequestreview-5492931759) 的缓存键生产/消费断接、HTTP body 总预算/取消、in-flight 竞态、本地源 null URL、轨道/layer/颜色及诊断问题。此前已修的 reopen facts 透传保留为已修，不重新记作缺口。\n\n新 `38274961135/attempt1` 已 completed/failure（16:10:15Z）：Android/Pink/Windows/Linux 仍在 Apply Patch 失败，macOS 输入验证失败，iOS lock 检查失败；source capture 失败，analyze/Flutter/Python 下游跳过。本次以新 run 的实际 step 状态为证，不将旧 run 的具体错误日志冒充新日志。没有新增测试文件或可访问的本轮 Kotlin 成功构建、手势、reset/lifecycle 验证证据；中央的启动观察和手动滑动待验状态继续按 DEVICE 自报记录。\n\n该两文件 DV006 修复尚不批准归并。现有 DEVICE 在原分支受限修订；CORE 不并写该实现。PR6、DV001/PR5 及两项 DV004 用户决定仍按各自原结论开放，主 PR 保持未合并、未关闭、未发布。\n\n\n本次 GitHub review event 使用 COMMENT；正文审查结论为 REQUEST_CHANGES，不将其写成 GitHub 正式 blocking review 状态。\n",
+    "body_bytes_utf8": 5752,
+    "body_sha256": "1edd9cf9ff2fb1fba79f311db440d85513291335caf40fb33104b425e6bca4d1"
+  },
+  "interpretation": {
+    "body_conclusion": "REQUEST_CHANGES",
+    "formal_github_review_state": "COMMENTED",
+    "formal_blocking_review": false,
+    "published_by": "root / sole public integrator",
+    "assistant_action": "Independent GET readback only; no public writes",
+    "integration_status": "Not integrated into the public routing branch; root reported this boundary",
+    "original_frozen_evidence_unchanged": true
+  },
+  "verification": {
+    "id_matches": true,
+    "commit_matches": true,
+    "state_matches": true,
+    "body_starts_with_exact_frozen_draft": true,
+    "only_appended_text": "\n本次 GitHub review event 使用 COMMENT；正文审查结论为 REQUEST_CHANGES，不将其写成 GitHub 正式 blocking review 状态。\n",
+    "frozen_evidence": [
+      {
+        "path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/app9895-review/core-device-9895-review-20261012.json",
+        "bytes": 34489,
+        "sha256": "28b48edf0c95cc536f8e8761779715c17e7dfae22087ed4a90e91837afdc9d81"
+      },
+      {
+        "path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/app9895-review/pr3-review-9895-draft.md",
+        "bytes": 5611,
+        "sha256": "364b546aada19a4e658a699833c6770b4045a9f35671498bf3fb27aa68bf23b2"
+      }
+    ]
+  }
+}

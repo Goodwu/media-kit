@@ -107,6 +107,8 @@ jobs:
       # Delete tests which import native code & depend upon dart:ffi
       - run: rm -r test/src/player/native
       - run: dart pub get
+      - name: Verify Web shuffle playlist snapshots
+        run: dart test --platform chrome test/src/player/player_test.dart --name '^player-set-shuffle' --reporter expanded
       - run: dart test --platform chrome
       
 

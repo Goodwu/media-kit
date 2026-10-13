@@ -1,0 +1,350 @@
+{
+  "schema": "core-device-followthrough-refresh/v1",
+  "task": "MK-ROUTING-20261011",
+  "observed_at_utc": "2026-10-12 16:02:33 UTC",
+  "created_at_utc": "2026-10-12T16:04:29.440247+00:00",
+  "role": "CORE independent read-only helper; root is sole public integrator; existing DEVICE remains native recipe/build/device owner",
+  "summary": "No new code or handoff in four monitored PRs. Existing source review is not repeated. App b180 Build 38270385174 attempt 1 is terminal failure and yields only one verified failure-diagnostic artifact; no native or App acceptance result.",
+  "pull_requests": [
+    {
+      "url": "https://github.com/Goodwu/libmpv-android-video-build-dv-experiment/pull/1",
+      "head_sha": "1095a43acb4d0973b8bca59c5da4e300657bdb29",
+      "unchanged_from_previous_review": true,
+      "state": "open",
+      "draft": true,
+      "merged": false,
+      "timeline_item_count": 7,
+      "latest_timeline_item": {
+        "id": 6112842188,
+        "url": "https://github.com/Goodwu/libmpv-android-video-build-dv-experiment/pull/1#issuecomment-6112842188",
+        "created_at": "2026-10-11T19:29:35Z",
+        "updated_at": "2026-10-11T19:29:35Z",
+        "review": null
+      }
+    },
+    {
+      "url": "https://github.com/Goodwu/media-kit/pull/5",
+      "head_sha": "dc41787082752f234fed85db7fb7be3bd855cc45",
+      "unchanged_from_previous_review": true,
+      "state": "open",
+      "draft": true,
+      "merged": false,
+      "timeline_item_count": 3,
+      "latest_timeline_item": {
+        "id": 6111768962,
+        "url": "https://github.com/Goodwu/media-kit/pull/5#issuecomment-6111768962",
+        "created_at": "2026-10-11T17:35:13Z",
+        "updated_at": "2026-10-11T17:35:13Z",
+        "review": null
+      }
+    },
+    {
+      "url": "https://github.com/Goodwu/media-kit/pull/6",
+      "head_sha": "9a2c5768dd10e71975b7c3e76bb7125460a43e5b",
+      "unchanged_from_previous_review": true,
+      "state": "open",
+      "draft": true,
+      "merged": false,
+      "timeline_item_count": 2,
+      "latest_timeline_item": {
+        "id": 5492587336,
+        "url": "https://github.com/Goodwu/media-kit/pull/6#pullrequestreview-5492587336",
+        "created_at": "2026-10-12T15:05:46Z",
+        "updated_at": null,
+        "review": "COMMENTED"
+      }
+    },
+    {
+      "url": "https://github.com/Goodwu/PiliPlusX/pull/3",
+      "head_sha": "b18086d0d654a5f523296b41bdfb869c588cd3f0",
+      "unchanged_from_previous_review": true,
+      "state": "open",
+      "draft": true,
+      "merged": false,
+      "timeline_item_count": 4,
+      "latest_timeline_item": {
+        "id": 5492931759,
+        "url": "https://github.com/Goodwu/PiliPlusX/pull/3#pullrequestreview-5492931759",
+        "created_at": "2026-10-12T15:36:34Z",
+        "updated_at": null,
+        "review": "COMMENTED"
+      }
+    }
+  ],
+  "central": {
+    "url": "https://github.com/Goodwu/media-kit/pull/4",
+    "anchor_id": 6127846798,
+    "anchor_created_at": "2026-10-12T15:58:02Z",
+    "queried_since": "https://api.github.com/repos/Goodwu/media-kit/issues/4/comments?since=2026-10-12T15%3A58%3A02Z&per_page=100",
+    "returned_ids": [
+      6127846798
+    ],
+    "ids_after_anchor": [],
+    "new_code_or_explicit_handoff_observed": false,
+    "pagination_note": "API per_page=100 returned only the anchor comment (1 item), no subsequent comments. Anchor is excluded from after-anchor count."
+  },
+  "preserved_review_outcomes": [
+    {
+      "scope": "DV001 + media-kit PR5",
+      "outcome": "Still mandatory unresolved integration. No recipe fixes or new accepted producer artifact returned. Read failure fail-closed, independent Vulkan targets, malformed ELF/tool failures, failure propagation, clean staging, exact members/link/patch/NDK/helper provenance requirements remain open.",
+      "references": [
+        "https://github.com/Goodwu/libmpv-android-video-build-dv-experiment/pull/1#pullrequestreview-5483753705",
+        "https://github.com/Goodwu/libmpv-android-video-build-dv-experiment/pull/1#issuecomment-6110373174"
+      ],
+      "excluded_scripts": [
+        "assemble-jar-arm64.sh",
+        "matrix-device-build.sh"
+      ],
+      "note": "Historical document/matrix partial imports do not complete PR5. Public provenance banners/manifest remain authoritative. No script executed, copied into public checkout, or edited."
+    },
+    {
+      "scope": "media-kit PR6 DV004",
+      "outcome": "REQUEST_CHANGES preserved in review body; official submitted review event is COMMENTED. No new source review on unchanged 9a2.",
+      "reference": "https://github.com/Goodwu/media-kit/pull/6#pullrequestreview-5492587336"
+    },
+    {
+      "scope": "PiliPlusX PR3 DV003/DV005",
+      "outcome": "REQUEST_CHANGES preserved in review body; official submitted review event is COMMENTED. No new source review on unchanged b180. Cache producer/consumer key mismatch, successful HTTP body budget/cancellation, in-flight race, local-file null URL, track/layer/color integrity, diagnostic redaction and reproducible test evidence remain as reviewed.",
+      "reference": "https://github.com/Goodwu/PiliPlusX/pull/3#pullrequestreview-5492931759"
+    }
+  ],
+  "app_build": {
+    "url": "https://github.com/Goodwu/PiliPlusX/actions/runs/38270385174",
+    "run_id": 38270385174,
+    "run_attempt": 1,
+    "event": "pull_request",
+    "run_name": "Build",
+    "head_branch": "device/MK-ROUTING-20261011/DV003",
+    "metadata_head_sha": "b18086d0d654a5f523296b41bdfb869c588cd3f0",
+    "status": "completed",
+    "conclusion": "failure",
+    "created_at": "2026-10-12T15:27:34Z",
+    "updated_at": "2026-10-12T15:36:53Z",
+    "top_capture": {
+      "job_id": 114884638909,
+      "conclusion": "success",
+      "routing_mode": false,
+      "media_kit_sha": null,
+      "evidence": "Executed script has HEAD_NAME=device/MK-ROUTING-20261011/DV003, so it outputs routing-mode=false and empty media-kit-sha. This successful dispatch job did not capture a current App/library integration vector."
+    },
+    "checkout_distinction": {
+      "android_pink_windows_linux_x64": {
+        "actual_checkout_sha": "3ba66efc3043f35cf839dcfb039e47578918037f",
+        "kind": "GitHub synthetic PR merge",
+        "merge_inputs": {
+          "head": "b18086d0d654a5f523296b41bdfb869c588cd3f0",
+          "base": "a98a57f2892592d5b8a25d6533ede4580d412ae5"
+        },
+        "evidence": "Each checkout log reports HEAD is now at 3ba66efc3 Merge b180 into a98a and git log -1 --format=%H prints full synthetic merge SHA."
+      },
+      "macos_ios": {
+        "actual_checkout_sha": "b18086d0d654a5f523296b41bdfb869c588cd3f0",
+        "kind": "explicit exact ref checkout"
+      }
+    },
+    "failed_jobs": [
+      {
+        "job_id": 114884681888,
+        "url": "https://github.com/Goodwu/PiliPlusX/actions/runs/38270385174/job/114884681888",
+        "name": "Release Android",
+        "platform": "Android",
+        "status": "completed",
+        "conclusion": "failure",
+        "actual_checkout_sha": "3ba66efc3043f35cf839dcfb039e47578918037f",
+        "failed_step": "Apply Patch",
+        "failed_step_number": 20,
+        "observed_log_reason": "private PUB_CACHE directory is missing: /home/runner/.pub-cache",
+        "exit": "step exit 1",
+        "log_path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/end-refresh-20261012/logs/114884681888.log"
+      },
+      {
+        "job_id": 114884682006,
+        "url": "https://github.com/Goodwu/PiliPlusX/actions/runs/38270385174/job/114884682006",
+        "name": "pink / Release Android Pink",
+        "platform": "Pink",
+        "status": "completed",
+        "conclusion": "failure",
+        "actual_checkout_sha": "3ba66efc3043f35cf839dcfb039e47578918037f",
+        "failed_step": "Apply Patch",
+        "failed_step_number": 23,
+        "observed_log_reason": "private PUB_CACHE directory is missing: /home/runner/.pub-cache",
+        "exit": "step exit 1",
+        "log_path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/end-refresh-20261012/logs/114884682006.log"
+      },
+      {
+        "job_id": 114884682012,
+        "url": "https://github.com/Goodwu/PiliPlusX/actions/runs/38270385174/job/114884682012",
+        "name": "win_x64 / Windows x64 workflow",
+        "platform": "Windows x64",
+        "status": "completed",
+        "conclusion": "failure",
+        "actual_checkout_sha": "3ba66efc3043f35cf839dcfb039e47578918037f",
+        "failed_step": "Apply Patch",
+        "failed_step_number": 17,
+        "observed_log_reason": "path dependency media_kit_libs_windows_video is absent at ../media-kit/libs/windows/media_kit_libs_windows_video; flutter pub get fails with exit 66",
+        "exit": "pub get exit 66; step exit 1",
+        "log_path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/end-refresh-20261012/logs/114884682012.log"
+      },
+      {
+        "job_id": 114884682066,
+        "url": "https://github.com/Goodwu/PiliPlusX/actions/runs/38270385174/job/114884682066",
+        "name": "mac / macOS workflow (ARM64 hosted)",
+        "platform": "macOS ARM64",
+        "status": "completed",
+        "conclusion": "failure",
+        "actual_checkout_sha": "b18086d0d654a5f523296b41bdfb869c588cd3f0",
+        "failed_step": "Validate source and approved shared inputs",
+        "failed_step_number": 15,
+        "observed_log_reason": "release tag is not an accepted vMAJOR.MINOR.PATCH tag; supplied tag is empty",
+        "exit": "step exit 2",
+        "log_path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/end-refresh-20261012/logs/114884682066.log"
+      },
+      {
+        "job_id": 114884682134,
+        "url": "https://github.com/Goodwu/PiliPlusX/actions/runs/38270385174/job/114884682134",
+        "name": "ios / iOS workflow",
+        "platform": "iOS",
+        "status": "completed",
+        "conclusion": "failure",
+        "actual_checkout_sha": "b18086d0d654a5f523296b41bdfb869c588cd3f0",
+        "failed_step": "Verify media-kit lock",
+        "failed_step_number": 25,
+        "observed_log_reason": "media_kit, media_kit_android_dataspace_vendor and media_kit_video resolved-ref is not 0fa6afe9cd9af8d8437919257d81a27c643f2f63",
+        "exit": "step exit 1",
+        "log_path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/end-refresh-20261012/logs/114884682134.log"
+      },
+      {
+        "job_id": 114884682165,
+        "url": "https://github.com/Goodwu/PiliPlusX/actions/runs/38270385174/job/114884682165",
+        "name": "linux_x64 / Linux x64 workflow",
+        "platform": "Linux x64",
+        "status": "completed",
+        "conclusion": "failure",
+        "actual_checkout_sha": "3ba66efc3043f35cf839dcfb039e47578918037f",
+        "failed_step": "Apply Patch",
+        "failed_step_number": 16,
+        "observed_log_reason": "private PUB_CACHE directory is missing: /home/runner/.pub-cache",
+        "exit": "step exit 1",
+        "log_path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/end-refresh-20261012/logs/114884682165.log"
+      },
+      {
+        "job_id": 114884682720,
+        "url": "https://github.com/Goodwu/PiliPlusX/actions/runs/38270385174/job/114884682720",
+        "name": "Current-source App validation / Capture one current routing source vector",
+        "platform": "Current-source App validation capture",
+        "status": "completed",
+        "conclusion": "failure",
+        "actual_checkout_sha": null,
+        "failed_step": "Capture exact media-kit HEAD once for all source jobs",
+        "failed_step_number": 2,
+        "observed_log_reason": "EXPECTED_APP_SHA=b180; script checks current public routing App head for equality and exits before media-kit/final source vector output. Equality-guard diagnosis is inferred from executed script, exit 1 and absent final output; log does not print actual remote App head.",
+        "exit": "step exit 1",
+        "log_path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/end-refresh-20261012/logs/114884682720.log"
+      }
+    ],
+    "skipped_jobs": [
+      {
+        "id": 114884640386,
+        "name": "linux_arm64"
+      },
+      {
+        "id": 114884723603,
+        "name": "Current-source App validation / App analyze, tests and Dart bundle (latest media-kit source)"
+      },
+      {
+        "id": 114884723819,
+        "name": "Current-source App validation / Source bootstrap and validation (${{ matrix.platform }})"
+      },
+      {
+        "id": 114884724317,
+        "name": "Current-source App validation / App Python regression tests (macOS)"
+      },
+      {
+        "id": 114885122550,
+        "name": "Verify Android/Pink native parity"
+      }
+    ],
+    "artifact": {
+      "id": 11757261264,
+      "name": "macos-shared-release-failure-38270385174-1",
+      "api_url": "https://api.github.com/repos/Goodwu/PiliPlusX/actions/artifacts/11757261264",
+      "bytes": 380,
+      "api_digest": "sha256:ec25c995fc1b5a7a33ac1ccf478ff34ffb7857f86f7d03988939c0f2e8d79263",
+      "downloaded_sha256": "ec25c995fc1b5a7a33ac1ccf478ff34ffb7857f86f7d03988939c0f2e8d79263",
+      "digest_match": true,
+      "path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/end-refresh-20261012/app-b180-build-38270385174-attempt1-macos-failure.zip",
+      "members": [
+        {
+          "name": "result.json",
+          "bytes": 392,
+          "sha256": "776f6fde11caf16bf3f2acb6f87e697f24db68bfb14b19ad85c51da886af0eaf",
+          "text": "{\n  \"commands\": [],\n  \"error\": \"release tag is not an accepted vMAJOR.MINOR.PATCH tag\",\n  \"mode\": \"production-shared-release\",\n  \"report_path\": \"/Users/runner/work/_temp/piliplusx-shared-candidate-diagnostics/result.json\",\n  \"run_dir\": \"/Users/runner/work/_temp/piliplusx-shared-candidate/38270385174-1\",\n  \"schema_version\": 1,\n  \"source\": {\n    \"release_tag\": \"\"\n  },\n  \"status\": \"failed\"\n}\n"
+        }
+      ],
+      "interpretation": "Only result.json, status failed, commands [], mode production-shared-release, empty source.release_tag. No JAR/APK/native library, source.txt or successful source/build receipt exists in this artifact."
+    },
+    "acceptance": "No passing App analyze/Flutter/Python source evidence in this run; source-validation dependents skipped. No successful native/Release/device evidence. Do not reuse public routing Build SOURCE_PREPARED_NATIVE_BLOCKED label: this DEVICE PR run selected routing-mode=false, used differing actual App checkouts, and stopped at the concrete failures above."
+  },
+  "unchanged_decision_boundaries": [
+    "User decisions on temporary DV004 diagnostic scope and final-plan fulfillment versus capturing any real decoder switch remain unresolved. No assertion weakened or native protocol selected.",
+    "No new accepted native input observed; existing fail-closed acceptance ledger policy remains in force. Prior DEVICE claims of test counts/native status do not substitute for accessible logs or approved producer artifacts.",
+    "Existing DEVICE remains single writer for original native recipes and its PR fixes; CORE reviews and integrates only after appropriate evidence. No new DEVICE line, no public repository write, no GitHub comment/review, no merge/close/release occurred in this refresh."
+  ],
+  "frozen_evidence_manifest": [
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/end-refresh-20261012/app-b180-build-38270385174-attempt1-macos-failure.zip",
+      "bytes": 380,
+      "sha256": "ec25c995fc1b5a7a33ac1ccf478ff34ffb7857f86f7d03988939c0f2e8d79263"
+    },
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/end-refresh-20261012/artifact-inspection.json",
+      "bytes": 862,
+      "sha256": "697c406ebf142c11493a0d5fa407496911af214fbc89044d316123c327855d7a"
+    },
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/end-refresh-20261012/logs/114884638909.log",
+      "bytes": 3465,
+      "sha256": "2844a9b82211178d753bae1a7017d5221cdfcfd5c637005255ddda21dd7c2c8d"
+    },
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/end-refresh-20261012/logs/114884681888.log",
+      "bytes": 70896,
+      "sha256": "e7d1784718ef98106358d44e099972beec918ff4720fbe6e82664a9944290c81"
+    },
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/end-refresh-20261012/logs/114884682006.log",
+      "bytes": 73367,
+      "sha256": "9a6d755c08159dd688fe951cc00f11262c5a56808694c54fef0b1676c81d845b"
+    },
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/end-refresh-20261012/logs/114884682012.log",
+      "bytes": 76876,
+      "sha256": "96f3ce2d96e4478977ece7f867b56e80ead47a163c9d60f498ca9cfc792cb30f"
+    },
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/end-refresh-20261012/logs/114884682066.log",
+      "bytes": 49964,
+      "sha256": "af3451d2f568fe17733b44e033f59d2728fe67e488425506158bcee02c44e770"
+    },
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/end-refresh-20261012/logs/114884682134.log",
+      "bytes": 92660,
+      "sha256": "f75171744d94b608f1caeae76d3844850799469e9c62f7b7002eb60f5d3dafce"
+    },
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/end-refresh-20261012/logs/114884682165.log",
+      "bytes": 320684,
+      "sha256": "172e0ed6cae394c4ec763465e291d5b8f234c3687c269e1498abd3ea9bf44e16"
+    },
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/end-refresh-20261012/logs/114884682720.log",
+      "bytes": 3725,
+      "sha256": "9bd84fb92967b6153df905ab9ddd63b8b6b73056d1a0100b4728a666edf9db82"
+    },
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/end-refresh-20261012/remote-snapshot.json",
+      "bytes": 93174,
+      "sha256": "2ea31c710323fb56778bb3783294f628c1e6f47996024ca3e90dced53e68c436"
+    }
+  ]
+}

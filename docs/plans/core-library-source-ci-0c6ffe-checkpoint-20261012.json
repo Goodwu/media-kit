@@ -1,0 +1,678 @@
+{
+  "schema": "core-successor-library-source-ci-audit-v1",
+  "collected_utc": "2026-10-12T15:35:14.647624+00:00",
+  "repository": "Goodwu/media-kit",
+  "run": {
+    "id": 38266780378,
+    "name": "Routing source checks",
+    "head_branch": "routing/MK-ROUTING-20261011",
+    "head_sha": "0c6ffeaf2f509c38f8c76eca42ee255bd69b8cd2",
+    "path": ".github/workflows/routing-source.yml",
+    "event": "pull_request",
+    "status": "completed",
+    "conclusion": "success",
+    "run_attempt": 1,
+    "created_at": "2026-10-12T14:58:16Z",
+    "updated_at": "2026-10-12T15:03:07Z",
+    "html_url": "https://github.com/Goodwu/media-kit/actions/runs/38266780378",
+    "head_commit": {
+      "id": "0c6ffeaf2f509c38f8c76eca42ee255bd69b8cd2",
+      "tree_id": "b72b6dc2a47282bc3992ddc64c298f8e83baf182",
+      "message": "docs(routing): audit CORE successor CI and DEVICE handoff\n\nBind source 38258403604 and Build 38258404288 to App 13b139b7 + media-kit 5834ce5b, and general 38255531407 to its actual merge checkout. Archive actual artifact and review evidence, preserve historical acceptance boundaries, and keep DV001/PR5 native integration blocked pending DEVICE fixes.\n\nUpdate the sole Current State and central ledger; correct the PR5 matrix script digest typo. No production, CI, SDK, or native recipe changes.",
+      "timestamp": "2026-10-12T14:58:04Z",
+      "author": {
+        "name": "Goodwu",
+        "email": "Goodwu@users.noreply.github.com"
+      },
+      "committer": {
+        "name": "Goodwu",
+        "email": "Goodwu@users.noreply.github.com"
+      }
+    },
+    "pull_requests": [
+      {
+        "url": "https://api.github.com/repos/Goodwu/media-kit/pulls/4",
+        "id": 4812760724,
+        "number": 4,
+        "head": {
+          "ref": "routing/MK-ROUTING-20261011",
+          "sha": "0c6ffeaf2f509c38f8c76eca42ee255bd69b8cd2",
+          "repo": {
+            "id": 1353304641,
+            "url": "https://api.github.com/repos/Goodwu/media-kit",
+            "name": "media-kit"
+          }
+        },
+        "base": {
+          "ref": "main",
+          "sha": "d761922721ad8da6bb186abd270bb096100944ea",
+          "repo": {
+            "id": 1353304641,
+            "url": "https://api.github.com/repos/Goodwu/media-kit",
+            "name": "media-kit"
+          }
+        }
+      }
+    ]
+  },
+  "source_identity": {
+    "head": "0c6ffeaf2f509c38f8c76eca42ee255bd69b8cd2",
+    "tree": "b72b6dc2a47282bc3992ddc64c298f8e83baf182",
+    "three_job_checkout_logs_and_source_txt_match": true
+  },
+  "verdict": "LIBRARY_HOST_SOURCE_TESTS_SUCCESS_FOR_EXACT_0c6ffeaf_ONLY",
+  "pagination": {
+    "attempt": 1,
+    "jobs_total": 3,
+    "jobs_count": 3,
+    "attempt_jobs_match_latest": true,
+    "artifacts_count": 3
+  },
+  "jobs": [
+    {
+      "id": 114871452223,
+      "run_id": 38266780378,
+      "workflow_name": "Routing source checks",
+      "head_branch": "routing/MK-ROUTING-20261011",
+      "run_url": "https://api.github.com/repos/Goodwu/media-kit/actions/runs/38266780378",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOUKnKQc8AAAAavt9CPw",
+      "head_sha": "0c6ffeaf2f509c38f8c76eca42ee255bd69b8cd2",
+      "url": "https://api.github.com/repos/Goodwu/media-kit/actions/jobs/114871452223",
+      "html_url": "https://github.com/Goodwu/media-kit/actions/runs/38266780378/job/114871452223",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-12T14:59:47Z",
+      "started_at": "2026-10-12T14:59:50Z",
+      "completed_at": "2026-10-12T14:59:58Z",
+      "name": "Routing audit utility tests",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-12T14:59:50Z",
+          "completed_at": "2026-10-12T14:59:51Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-12T14:59:51Z",
+          "completed_at": "2026-10-12T14:59:53Z"
+        },
+        {
+          "name": "Run extraction and guarded-repair utility tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-12T14:59:53Z",
+          "completed_at": "2026-10-12T14:59:54Z"
+        },
+        {
+          "name": "Run synthetic and mocked routing matrix regression tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-12T14:59:54Z",
+          "completed_at": "2026-10-12T14:59:54Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-12T14:59:54Z",
+          "completed_at": "2026-10-12T14:59:56Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-12T14:59:56Z",
+          "completed_at": "2026-10-12T14:59:56Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-10-12T14:59:56Z",
+          "completed_at": "2026-10-12T14:59:56Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/Goodwu/media-kit/check-runs/114871452223",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000004788,
+      "runner_name": "GitHub Actions 1000004788",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions",
+      "decoded_log_file_sha256": "91dfd67e1ace07d56ecc379174d36ac13d42fd6a79d8f6d5ed986824cbf4f97f"
+    },
+    {
+      "id": 114871452587,
+      "run_id": 38266780378,
+      "workflow_name": "Routing source checks",
+      "head_branch": "routing/MK-ROUTING-20261011",
+      "run_url": "https://api.github.com/repos/Goodwu/media-kit/actions/runs/38266780378",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOUKnKQc8AAAAavt9Dqw",
+      "head_sha": "0c6ffeaf2f509c38f8c76eca42ee255bd69b8cd2",
+      "url": "https://api.github.com/repos/Goodwu/media-kit/actions/jobs/114871452587",
+      "html_url": "https://github.com/Goodwu/media-kit/actions/runs/38266780378/job/114871452587",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-12T14:59:47Z",
+      "started_at": "2026-10-12T15:01:36Z",
+      "completed_at": "2026-10-12T15:03:06Z",
+      "name": "Source analyze and tests (media_kit_hdr_lab)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-12T15:01:36Z",
+          "completed_at": "2026-10-12T15:01:38Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-12T15:01:38Z",
+          "completed_at": "2026-10-12T15:01:40Z"
+        },
+        {
+          "name": "Run subosito/flutter-action@v2",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-12T15:01:40Z",
+          "completed_at": "2026-10-12T15:01:59Z"
+        },
+        {
+          "name": "Record the source under test",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-12T15:01:59Z",
+          "completed_at": "2026-10-12T15:01:59Z"
+        },
+        {
+          "name": "Resolve current source packages",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-12T15:01:59Z",
+          "completed_at": "2026-10-12T15:02:00Z"
+        },
+        {
+          "name": "Analyze source",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-12T15:02:00Z",
+          "completed_at": "2026-10-12T15:02:17Z"
+        },
+        {
+          "name": "Run source tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-12T15:02:17Z",
+          "completed_at": "2026-10-12T15:03:02Z"
+        },
+        {
+          "name": "Compile and execute the OHOS facade on JavaScript",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 8,
+          "started_at": "2026-10-12T15:03:02Z",
+          "completed_at": "2026-10-12T15:03:02Z"
+        },
+        {
+          "name": "Compile the OHOS facade on WebAssembly",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 9,
+          "started_at": "2026-10-12T15:03:02Z",
+          "completed_at": "2026-10-12T15:03:02Z"
+        },
+        {
+          "name": "Check that testing did not rewrite source",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-12T15:03:02Z",
+          "completed_at": "2026-10-12T15:03:02Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-10-12T15:03:02Z",
+          "completed_at": "2026-10-12T15:03:03Z"
+        },
+        {
+          "name": "Post Run subosito/flutter-action@v2",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 21,
+          "started_at": "2026-10-12T15:03:03Z",
+          "completed_at": "2026-10-12T15:03:03Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 22,
+          "started_at": "2026-10-12T15:03:03Z",
+          "completed_at": "2026-10-12T15:03:03Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 23,
+          "started_at": "2026-10-12T15:03:03Z",
+          "completed_at": "2026-10-12T15:03:03Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/Goodwu/media-kit/check-runs/114871452587",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000004790,
+      "runner_name": "GitHub Actions 1000004790",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions",
+      "decoded_log_file_sha256": "436189f8cb056b9c2fda235ea7ac59a3bb0307bcaf15a82f81c73d1af55a4f7e"
+    },
+    {
+      "id": 114871452607,
+      "run_id": 38266780378,
+      "workflow_name": "Routing source checks",
+      "head_branch": "routing/MK-ROUTING-20261011",
+      "run_url": "https://api.github.com/repos/Goodwu/media-kit/actions/runs/38266780378",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOUKnKQc8AAAAavt9Dvw",
+      "head_sha": "0c6ffeaf2f509c38f8c76eca42ee255bd69b8cd2",
+      "url": "https://api.github.com/repos/Goodwu/media-kit/actions/jobs/114871452607",
+      "html_url": "https://github.com/Goodwu/media-kit/actions/runs/38266780378/job/114871452607",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-12T14:59:47Z",
+      "started_at": "2026-10-12T15:00:00Z",
+      "completed_at": "2026-10-12T15:01:37Z",
+      "name": "Source analyze and tests (media_kit_video)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-12T15:00:00Z",
+          "completed_at": "2026-10-12T15:00:01Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-12T15:00:01Z",
+          "completed_at": "2026-10-12T15:00:03Z"
+        },
+        {
+          "name": "Run subosito/flutter-action@v2",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-12T15:00:03Z",
+          "completed_at": "2026-10-12T15:00:18Z"
+        },
+        {
+          "name": "Record the source under test",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-12T15:00:18Z",
+          "completed_at": "2026-10-12T15:00:20Z"
+        },
+        {
+          "name": "Resolve current source packages",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-12T15:00:20Z",
+          "completed_at": "2026-10-12T15:00:21Z"
+        },
+        {
+          "name": "Analyze source",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-12T15:00:21Z",
+          "completed_at": "2026-10-12T15:00:36Z"
+        },
+        {
+          "name": "Run source tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-12T15:00:36Z",
+          "completed_at": "2026-10-12T15:01:32Z"
+        },
+        {
+          "name": "Compile and execute the OHOS facade on JavaScript",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-12T15:01:32Z",
+          "completed_at": "2026-10-12T15:01:33Z"
+        },
+        {
+          "name": "Compile the OHOS facade on WebAssembly",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-12T15:01:33Z",
+          "completed_at": "2026-10-12T15:01:34Z"
+        },
+        {
+          "name": "Check that testing did not rewrite source",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-12T15:01:34Z",
+          "completed_at": "2026-10-12T15:01:34Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-10-12T15:01:34Z",
+          "completed_at": "2026-10-12T15:01:35Z"
+        },
+        {
+          "name": "Post Run subosito/flutter-action@v2",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 21,
+          "started_at": "2026-10-12T15:01:35Z",
+          "completed_at": "2026-10-12T15:01:35Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 22,
+          "started_at": "2026-10-12T15:01:35Z",
+          "completed_at": "2026-10-12T15:01:35Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 23,
+          "started_at": "2026-10-12T15:01:35Z",
+          "completed_at": "2026-10-12T15:01:35Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/Goodwu/media-kit/check-runs/114871452607",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000004789,
+      "runner_name": "GitHub Actions 1000004789",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions",
+      "decoded_log_file_sha256": "4c872e01ffe459227d83706c9b5493e761734845d77167cfb2da931841080349"
+    }
+  ],
+  "artifacts": [
+    {
+      "artifact": {
+        "id": 11755480979,
+        "node_id": "MDg6QXJ0aWZhY3QxMTc1NTQ4MDk3OQ==",
+        "name": "routing-source-media_kit_video-0c6ffeaf2f509c38f8c76eca42ee255bd69b8cd2",
+        "size_in_bytes": 33000,
+        "url": "https://api.github.com/repos/Goodwu/media-kit/actions/artifacts/11755480979",
+        "archive_download_url": "https://api.github.com/repos/Goodwu/media-kit/actions/artifacts/11755480979/zip",
+        "expired": false,
+        "digest": "sha256:81851384e331218fe7be8ee7e559aa8cfc536501cd4188ef879683ab9128772f",
+        "created_at": "2026-10-12T15:01:35Z",
+        "updated_at": "2026-10-12T15:01:35Z",
+        "expires_at": "2027-01-10T14:58:16Z",
+        "workflow_run": {
+          "id": 38266780378,
+          "repository_id": 1353304641,
+          "head_repository_id": 1353304641,
+          "head_branch": "routing/MK-ROUTING-20261011",
+          "head_sha": "0c6ffeaf2f509c38f8c76eca42ee255bd69b8cd2"
+        }
+      },
+      "zip_sha256": "81851384e331218fe7be8ee7e559aa8cfc536501cd4188ef879683ab9128772f",
+      "zip_size": 33000,
+      "api_digest_size_and_job_upload_match": true,
+      "zip_crc_ok": true,
+      "job_id": 114871452607,
+      "job_url": "https://github.com/Goodwu/media-kit/actions/runs/38266780378/job/114871452607",
+      "run_attempt": 1,
+      "source_txt_actual": "task=MK-ROUTING-20261011\nscope=host-source-tests\nsource_sha=0c6ffeaf2f509c38f8c76eca42ee255bd69b8cd2\nsource_tree=b72b6dc2a47282bc3992ddc64c298f8e83baf182\nFlutter 3.47.7 • channel stable • https://github.com/flutter/flutter.git\nFramework • revision abaf9c5237 (4 days ago) • 2026-10-08 09:51:21 -0700\nEngine • hash d8a2d6c768c334d53e16277f837970ffa1e2de81 (revision deb287481e) (5 days ago) • 2026-10-07 17:09:12.000Z\nTools • Dart 3.13.5 • DevTools 2.60.0\n\nNo prebuilt libmpv is installed by this job.\nThis job is not native-build or device acceptance.\n",
+      "member_count": 14,
+      "member_sha256": {
+        "analyze.log": "0bedbaddc1ce8d833802ce77b2de1a7a9fdaba6337c6a3b178eb503f4fb7c02c",
+        "ohos-js-run.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "ohos-js-compile.log": "519093a99bb1bbf43befa35547e270b0f70998615dcafc3c6cd298658ea68ddb",
+        "ohos-smoke.js": "18115ab0c8f23e6b7ac75e7fcecb56a23d92674b88ab1b8513b7c9b040e64627",
+        "ohos-smoke.js.deps": "378b8c7bc78082c70796511b8ddfbeec1e879aae87066ecf5c16906d5651ebb0",
+        "ohos-smoke.js.map": "cd2124870451001dea1b92013ba55e8923af7a9c7c5f1ac41e322b95a4337998",
+        "ohos-smoke.mjs": "c2db018fcaa8b25d2c832dda752219eb9a972dd32b7b7bf3bcb12b90a25f0bbe",
+        "ohos-smoke.support.js": "9b329fbb5f775a8c37a85ede978db00aa0e9543edbadb520c2f1fb0aac403140",
+        "ohos-smoke.wasm": "8ebaea49bf20e2091781c23dc2a0d2007fe046a98fd26b6da285ccc424100d59",
+        "ohos-smoke.wasm.map": "89fbb6052eec22659510908062677f6203d01a6449c5bb1f9ab81369fdea7638",
+        "ohos-wasm-compile.log": "ab241587fb00271a91415901385b5c5ad21d35f5daca4d6b00272d1a8d954b22",
+        "pub-get.log": "eb1f8d2bc84094716b5603e07ab50cb0b7aaaa3e4188e986ef545e5db73d4dc0",
+        "source.txt": "b5a203b073ac6cfec16fb815d49fb70ada2cda2dd58f7621e4b979f169666b59",
+        "tests.log": "19f0bc0d6cfb21de95f1b9dccc4aebcf7d6cff8bc9b8af1f634bf65fef5b2767"
+      },
+      "native_build_acceptance": false,
+      "device_acceptance": false,
+      "tests": {
+        "passed": 772,
+        "skipped": 3,
+        "failed": 0,
+        "total": 775,
+        "final_actual_line": "00:40 +772 ~3: All tests passed!",
+        "analyze_actual": "Analyzing media_kit_video...                                    \nNo issues found! (ran in 14.8s)",
+        "skip_context": []
+      },
+      "toolchain_observed": {
+        "flutter": "3.47.7",
+        "dart": "3.13.5",
+        "framework_revision_prefix": "abaf9c5237",
+        "engine_revision_prefix": "deb287481e",
+        "private_sdk_fresh_provenance_receipt": false
+      },
+      "ohos_facade": {
+        "javascript_compile_and_node_execution_success": true,
+        "wasm_compile_success": true,
+        "javascript_actual_bytes_sha256": "18115ab0c8f23e6b7ac75e7fcecb56a23d92674b88ab1b8513b7c9b040e64627",
+        "wasm_actual_bytes_sha256": "8ebaea49bf20e2091781c23dc2a0d2007fe046a98fd26b6da285ccc424100d59",
+        "wasm_bytes_size": 406,
+        "wasm_executed": false,
+        "hap_or_device_acceptance": false
+      }
+    },
+    {
+      "artifact": {
+        "id": 11755451377,
+        "node_id": "MDg6QXJ0aWZhY3QxMTc1NTQ1MTM3Nw==",
+        "name": "routing-source-media_kit_hdr_lab-0c6ffeaf2f509c38f8c76eca42ee255bd69b8cd2",
+        "size_in_bytes": 11393,
+        "url": "https://api.github.com/repos/Goodwu/media-kit/actions/artifacts/11755451377",
+        "archive_download_url": "https://api.github.com/repos/Goodwu/media-kit/actions/artifacts/11755451377/zip",
+        "expired": false,
+        "digest": "sha256:9d1660c33b64569807ab546e7d1e9e01a5f00360f3f7f9c335524a7cc3b68453",
+        "created_at": "2026-10-12T15:03:02Z",
+        "updated_at": "2026-10-12T15:03:02Z",
+        "expires_at": "2027-01-10T14:58:16Z",
+        "workflow_run": {
+          "id": 38266780378,
+          "repository_id": 1353304641,
+          "head_repository_id": 1353304641,
+          "head_branch": "routing/MK-ROUTING-20261011",
+          "head_sha": "0c6ffeaf2f509c38f8c76eca42ee255bd69b8cd2"
+        }
+      },
+      "zip_sha256": "9d1660c33b64569807ab546e7d1e9e01a5f00360f3f7f9c335524a7cc3b68453",
+      "zip_size": 11393,
+      "api_digest_size_and_job_upload_match": true,
+      "zip_crc_ok": true,
+      "job_id": 114871452587,
+      "job_url": "https://github.com/Goodwu/media-kit/actions/runs/38266780378/job/114871452587",
+      "run_attempt": 1,
+      "source_txt_actual": "task=MK-ROUTING-20261011\nscope=host-source-tests\nsource_sha=0c6ffeaf2f509c38f8c76eca42ee255bd69b8cd2\nsource_tree=b72b6dc2a47282bc3992ddc64c298f8e83baf182\nFlutter 3.47.7 • channel stable • https://github.com/flutter/flutter.git\nFramework • revision abaf9c5237 (4 days ago) • 2026-10-08 09:51:21 -0700\nEngine • hash d8a2d6c768c334d53e16277f837970ffa1e2de81 (revision deb287481e) (5 days ago) • 2026-10-07 17:09:12.000Z\nTools • Dart 3.13.5 • DevTools 2.60.0\n\nNo prebuilt libmpv is installed by this job.\nThis job is not native-build or device acceptance.\n",
+      "member_count": 4,
+      "member_sha256": {
+        "analyze.log": "065dc82063ea14d459af7671bf5989310b4bf4ceafa817ab4fd05fa3bfe7390d",
+        "source.txt": "b5a203b073ac6cfec16fb815d49fb70ada2cda2dd58f7621e4b979f169666b59",
+        "pub-get.log": "b531dbed92a07977e1640dbb71941cf5a2ac5427ee129a1139f0f2718b12757b",
+        "tests.log": "438f35e64c89c2b912dccd0be37b994d056b2f1b7bccd95fd6d06e490d147b2c"
+      },
+      "native_build_acceptance": false,
+      "device_acceptance": false,
+      "tests": {
+        "passed": 298,
+        "skipped": 0,
+        "failed": 0,
+        "total": 298,
+        "final_actual_line": "00:29 +298: All tests passed!",
+        "analyze_actual": "Analyzing media_kit_hdr_lab...                                  \nNo issues found! (ran in 15.5s)",
+        "skip_context": []
+      },
+      "toolchain_observed": {
+        "flutter": "3.47.7",
+        "dart": "3.13.5",
+        "framework_revision_prefix": "abaf9c5237",
+        "engine_revision_prefix": "deb287481e",
+        "private_sdk_fresh_provenance_receipt": false
+      }
+    },
+    {
+      "artifact": {
+        "id": 11754957934,
+        "node_id": "MDg6QXJ0aWZhY3QxMTc1NDk1NzkzNA==",
+        "name": "routing-tools-0c6ffeaf2f509c38f8c76eca42ee255bd69b8cd2",
+        "size_in_bytes": 2321,
+        "url": "https://api.github.com/repos/Goodwu/media-kit/actions/artifacts/11754957934",
+        "archive_download_url": "https://api.github.com/repos/Goodwu/media-kit/actions/artifacts/11754957934/zip",
+        "expired": false,
+        "digest": "sha256:b7e3c76eaffbff778998c0a652ad8635a982ab2cd327270fbd8c50318c7c50af",
+        "created_at": "2026-10-12T14:59:55Z",
+        "updated_at": "2026-10-12T14:59:55Z",
+        "expires_at": "2027-01-10T14:58:16Z",
+        "workflow_run": {
+          "id": 38266780378,
+          "repository_id": 1353304641,
+          "head_repository_id": 1353304641,
+          "head_branch": "routing/MK-ROUTING-20261011",
+          "head_sha": "0c6ffeaf2f509c38f8c76eca42ee255bd69b8cd2"
+        }
+      },
+      "zip_sha256": "b7e3c76eaffbff778998c0a652ad8635a982ab2cd327270fbd8c50318c7c50af",
+      "zip_size": 2321,
+      "api_digest_size_and_job_upload_match": true,
+      "zip_crc_ok": true,
+      "job_id": 114871452223,
+      "job_url": "https://github.com/Goodwu/media-kit/actions/runs/38266780378/job/114871452223",
+      "run_attempt": 1,
+      "source_txt_actual": "task=MK-ROUTING-20261011\nscope=library-python-tool-tests\nlibrary_head=0c6ffeaf2f509c38f8c76eca42ee255bd69b8cd2\nlibrary_tree=b72b6dc2a47282bc3992ddc64c298f8e83baf182\napp_helper_exercised=false\nnative_build=false\napk_build=false\ndevice_test=false\n",
+      "member_count": 4,
+      "member_sha256": {
+        "extractor.log": "84ed74d0771db41a0760eac21c7a75b0eab2b2db9bf74261a3811b422d54bb5d",
+        "matrix-regression.log": "c1d3174e73fce7ea63dbe40f6007eabb2b8a55a395f9dec58a6cfac2f0ff5534",
+        "repair-tool.log": "fe33b4c2f9663206ce1f2f4203699e82e5700108e053b34a2d2a41f61acbd83b",
+        "source.txt": "46eb00a5c459177699f67429b2a5a6db79411d5ba702a8c95d90f883898f58b8"
+      },
+      "native_build_acceptance": false,
+      "device_acceptance": false,
+      "tests": {
+        "groups": {
+          "extractor.log": {
+            "passed": 6,
+            "failed": 0,
+            "skipped": 0
+          },
+          "repair-tool.log": {
+            "passed": 12,
+            "failed": 0,
+            "skipped": 0
+          },
+          "matrix-regression.log": {
+            "passed": 27,
+            "failed": 0,
+            "skipped": 0
+          }
+        },
+        "total_passed": 45,
+        "native_recipe_or_device_executed": false
+      }
+    }
+  ],
+  "test_summary": {
+    "media_kit_video": {
+      "passed": 772,
+      "skipped": 3,
+      "failed": 0,
+      "analyze_issues": 0
+    },
+    "media_kit_hdr_lab": {
+      "passed": 298,
+      "skipped": 0,
+      "failed": 0,
+      "analyze_issues": 0
+    },
+    "python_tools": {
+      "passed": 45,
+      "groups": [
+        6,
+        12,
+        27
+      ]
+    },
+    "ohos_facade": {
+      "javascript_compile_and_node_execution": true,
+      "wasm_compile": true,
+      "wasm_execution": false
+    }
+  },
+  "source_files": {
+    ".github/workflows/routing-source.yml": {
+      "sha256": "9c8bc39d35e308eed782d4b948f9cc485592a02586a45cef14bb082a1e3fa477",
+      "git_blob": "41afdd0cfbbcc9e75c1642899013ad9cb304949b"
+    },
+    "media_kit_video/lib/src/hdr/hdr_video_session.dart": {
+      "sha256": "38006cbb22c0808776efc97faa6b3a583f584e632e43a00d27d1443b7d80710e",
+      "git_blob": "b7afbf0f28f5a782c61071f36e8ebe1dd57fe63d"
+    },
+    "media_kit_video/lib/src/hdr/hdr_decoder_review.dart": {
+      "sha256": "495b5bd10572c127948686b6c54ab874667f46e0df2cbb1978215fc7ab8de01b",
+      "git_blob": "80979951400981a5be20d5f56e04031088cb4908"
+    }
+  },
+  "limitations": [
+    "This library-only workflow selected Flutter 3.47.7 / Dart 3.13.5, distinct from the App source and Build private SDK 3.47.2 / Dart 3.13.2; these results are not combined into a single toolchain claim.",
+    "The library source artifacts contain actual JS/WASM smoke outputs and their hashes, but not a private SDK Git/tree/patch/bootstrap receipt or complete source/package-root hash manifest. Source identity is bound by pinned checkout logs, source.txt, and unchanged-source step.",
+    "Host tests, JS execution and WASM compilation do not establish native-build provenance, ordinary Session runtime, HDR output, HAP/APK/JAR acceptance, real-device behavior or sustained performance.",
+    "The exact tested 0c6ffeaf commit predates any subsequent CORE Web change or DEVICE branch integration; do not relabel these results."
+  ]
+}

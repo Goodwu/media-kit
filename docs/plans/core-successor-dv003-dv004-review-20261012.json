@@ -1,0 +1,209 @@
+{
+  "schema": 1,
+  "taskId": "MK-ROUTING-20261011",
+  "reviewer": "CORE internal read-only independent reviewer",
+  "reviewedAtUtc": "2026-10-12 14:35:56 UTC",
+  "verdict": "REQUEST_CHANGES",
+  "actualReviewMutation": "none; no GitHub comment/review/merge/push performed",
+  "scope": "media-kit PR6 DV004 and PiliPlusX PR3 DV003/DV005; source, patch, comments, reported evidence and CI metadata only; not a DEVICE work line",
+  "inputs": {
+    "mediaKitPublic": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+    "mediaKitPr6": {
+      "head": "0fb163c6ec8d54c46698227175b9a21468605246",
+      "base": "routing/MK-ROUTING-20261011",
+      "state": "open",
+      "draft": true,
+      "merged": false,
+      "files": 2,
+      "formalReviews": 0,
+      "comments": 0,
+      "ciRunsForExactHead": 0
+    },
+    "appPr3": {
+      "head": "15551ede06b0cbec859d61e6d16f8dba2054bba1",
+      "codeHead": "a2478d04cfdc3fd19a12631e88bf38be8684fccb",
+      "previousHead": "e9c19cf842467c9db03733b5f17d7a9276ab3471",
+      "reportedBaseSha": "1970d440b5b9d9ffc001866064581e4005b26b30",
+      "state": "open",
+      "draft": true,
+      "merged": false,
+      "files": 8,
+      "formalReviews": 0,
+      "headProgression": "e9c19cf8 -> a2478d04 two controller files +21/-0 -> 15551ede archive +4 only"
+    },
+    "sessionAtPr6EqualsPublic": {
+      "blob": "b7afbf0f28f5a782c61071f36e8ebe1dd57fe63d",
+      "verified": true
+    }
+  },
+  "primarySources": [
+    "https://github.com/Goodwu/media-kit/pull/4#issuecomment-6125397037",
+    "https://github.com/Goodwu/media-kit/pull/4#issuecomment-6125963183",
+    "https://github.com/Goodwu/media-kit/pull/6",
+    "https://github.com/Goodwu/PiliPlusX/pull/3#issuecomment-6126388241",
+    "https://github.com/Goodwu/PiliPlusX/commit/a2478d04cfdc3fd19a12631e88bf38be8684fccb",
+    "https://github.com/Goodwu/PiliPlusX/commit/15551ede06b0cbec859d61e6d16f8dba2054bba1",
+    "https://github.com/Goodwu/media-kit/blob/5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f/docs/plans/core-dv003-critical-review-20261012.json",
+    "https://github.com/Goodwu/media-kit/blob/5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f/docs/plans/media-kit-routing-implementation-20261011.md"
+  ],
+  "findings": [
+    {
+      "id": "DV004-SR-01",
+      "priority": "P1",
+      "kind": "behavior regression / unresolved acceptance semantics",
+      "location": "media_kit_video/lib/src/hdr/hdr_decoder_review.dart:277-324,341-379 at 0fb163c6; hdr_video_session.dart:1128-1134,1195-1196,1225-1243",
+      "finding": "required-facts 前移不仅放行逻辑名发布演化，而是令跨轮 identity 拒绝分支不可达。",
+      "reason": "每个 partial 轮在 observedDecoderEndpoints 写入前 return null；首个完整轮写入 map 后立即返回 HdrReviewFacts，外层379随即返回。不存在已有非空 observed 且可再次进入同一 gather 下一轮的正常路径。",
+      "counterexample": "同一 entry/epoch，round1 a=b 为 hevc_mediacodec、hwdec=mediacodec、MIME=video/hevc、component=c2.vendor.hevc，但pixel或gamma缺失；round2 a=b component=c2.other.hevc 且帧事实齐全。原实现观测到组件非空->另一非空会拒；PR6静默丢弃round1，返回round2。generic validateDecoderObservation仅复核当前资源/MIME；Session仅比较最终route/hwdec，两个组件使用同MIME/hwdec时仍可能accept。",
+      "required": "保留用户未决语义，不能将任意真实切换检测自行降为最终plan校验；原PR内提交能区分名称发布与实际组件/模式变更的受限规则及回归。若需要更强的任意真实切换保证，native generation证据的成本/授权仍由用户决策；原方案本就不能证明ABA缺席，勿反向夸大旧保证。",
+      "testsNeeded": [
+        "真实捕获且字段一致的逻辑名->实际AVCodec名称成功场景",
+        "partial轮已知hwdec变化拒绝",
+        "同MIME/hwdec但实际MediaCodec组件变化拒绝",
+        "A/B变化、空补全、超时、epoch/superseded、异常config不回退",
+        "实际Session层同路由/同hwdec但不同组件反例"
+      ]
+    },
+    {
+      "id": "DV004-SR-02",
+      "priority": "P2",
+      "kind": "test evidence",
+      "location": "media_kit_video/test/hdr_decoder_review_test.dart:16-30,189-214 at 0fb163c6; hdr_decoder_review.dart:91-94",
+      "finding": "替换的“真机序列fixture”字段不一致，且只测gather返回，不能支持Session通过或真切换防线仍在。",
+      "reason": "Sample保留HEVC track/video-format、MIME video/hevc、component c2.hevc和PQ/BT.2020，却只把decoder改为h264->h264_mediacodec；还把hwdec从mediacodec改为mediacodec-copy但pixel仍mediacodec。该facts传给validateDecoderObservation会因copy路线非CPU frame被拒。旧跨轮任意变化失败断言被删除，未补实际切换反例。",
+      "required": "改用同一次原始捕获中完整一致的AVC或HEVC序列，mediacodec-copy配CPU格式；测试要贯穿Session并保留真实切换失败用例。775全包/0issues自报只说明所运行断言通过，不能替代缺失断言。"
+    },
+    {
+      "id": "DV003-V2-01",
+      "priority": "P1",
+      "kind": "existing blocker unchanged",
+      "location": "lib/plugin/pl_player/dovi_sniff.dart:69-86,102-117 at 15551ede (same source as 8f06fcdf)",
+      "finding": "HTTP实际字节上界与总deadline仍未实现。",
+      "reason": "getUrl无timeout；错误状态drain无timeout；200/206完整fold可收全视频后才截断；headers/body各用独立timeout，backup候选与并行renditions未界定。注入fetch测试绕过实际HTTP路径。",
+      "counterexample": "既有Critical V2已执行精确逻辑：64B Range收到262144B；100ms预算的403 drain耗619ms。本轮未重跑，已核对当前同源hash，反例仍适用。",
+      "required": "单总deadline覆盖connect/headers/body/backups，流式字节上界和及时cancel，验证Content-Range并限制候选/并发；补真实HttpClient错误/超限/慢响应测试。"
+    },
+    {
+      "id": "DV003-V2-02",
+      "priority": "P1",
+      "kind": "existing blocker unchanged and now reaches Session",
+      "location": "lib/pages/video/controller.dart:143-146,323-350,1194-1196 at 15551ede; lib/plugin/pl_player/source_selection.dart:40-50",
+      "finding": "按decoder规格缓存DOVI facts，仍可跨URL/内容/revision串源；DV005现在把该错配facts送进Session。",
+      "reason": "spec key故意不含媒体URL/bvid/cid/init range/revision。cache命中跳过sniff；旧异步completion不核isClosed/revision就写共享map；guard在await后只阻止selection发布，不能撤销cache污染。并发同spec项互相覆盖。",
+      "counterexample": "A=P8.4、B=P5拥有相同codec/size/fps/bitrate且URL不同；A的facts被B复用，或者迟到A覆盖B，再由1196授予B错误hint。",
+      "required": "能力查询spec key与源身份键分开；不可变源身份+revision、守卫/取消旧completion、有限cache/pending；同spec不同URL/late completion/dispose/concurrent不同facts回归。"
+    },
+    {
+      "id": "DV003-V2-03",
+      "priority": "P1",
+      "kind": "partially repaired; lifecycle not closed",
+      "location": "lib/plugin/pl_player/controller.dart:1037,1044-1070,1087,2402-2405,2445-2448; ensureRouteSourceOptions:542-564 at 15551ede",
+      "finding": "a2478已补首次/refresh open 的initialDoviFacts接线，但_RouteSourceIntent.reopen遗漏参数，重开又退回未知DV。",
+      "reason": "setDataSource赋_hdrDoviHint=initialDoviFacts，两处Session.open消费；但1048-1070的reopen闭包重调用setDataSource仅转发quality/codec，无initialDoviFacts。ensureRouteSourceOptions在首开被配置变化失效/未建Session或无外部回调时走intent.reopen，会把已解析hint清成null。DataSource仍无源绑定descriptor，withRouteOptions不能保留此事实。",
+      "counterexample": "126+hvc1+P8.4首次源意图已保存，私有首开未发布时改变有效选项并触发intent恢复；第二次setDataSource省略DOVI事实，planner再因sourceMetadataUnknown拒绝。",
+      "required": "将同一不可变源绑定declaration完整保留在源意图/重开中，含initial/refresh/settings reopen/switch；补真实Session路径+true/false和auto/prefer/require回归。旧状态“完全未接线”只能保留为e9c19cf8历史，不能继续描述15551ede。"
+    },
+    {
+      "id": "DV003-V2-04",
+      "priority": "P1",
+      "kind": "existing blocker unchanged",
+      "location": "lib/plugin/pl_player/dovi_sniff.dart:138-180; lib/plugin/pl_player/hdr_output.dart:93-121 at 15551ede (same source as 8f06fcdf)",
+      "finding": "首个任意DOVI box被当作本视频sample entry事实，矛盾颜色/层字段被丢弃或改写。",
+      "reason": "top-level dvvC亦被接受；无track/video sample binding、多记录冲突检测；BL=false/RPU=false不拒，P5强制compat0，P10硬写hevc。facts无法保证属于实际选中媒体和受支持组合。",
+      "required": "绑定已验证video sample entry，拒decoy/多轨冲突/畸形/无BL/RPU等组合；保留codec与compat证据，未知继续fail-closed；增加对应反例。"
+    },
+    {
+      "id": "DV005-SR-01",
+      "priority": "P1",
+      "kind": "new regression",
+      "location": "lib/pages/video/controller.dart:1141-1145 at 15551ede; initialization:579-594,630-641",
+      "finding": "新增无条件DV003_OPEN日志对videoUrl!解引用，导致本地下载视频和本地诊断源在open前崩溃。",
+      "reason": "isFileSource/DirectFileSource从本地目录/path构造源，初始化不赋videoUrl（默认null）；日志先于1147-1166的FileSource/DirectFileSource分流执行Uri.parse(videoUrl!)，抛Null check operator used on a null value。",
+      "required": "将诊断移至已选定且安全的源信息，避免网络URL假设；增加普通下载文件和本地诊断源playerInit回归。该变更不应以诊断为名破坏原普通Session/SDR基线。"
+    },
+    {
+      "id": "DV005-SR-02",
+      "priority": "P2",
+      "kind": "diagnostic hygiene",
+      "location": "lib/pages/video/controller.dart:1142-1144 at 15551ede; dovi_sniff.dart:89-90",
+      "finding": "新增日志无条件输出完整videoUrl（含签名query），旧sniffer还直接打印异常。",
+      "required": "诊断仅保留脱敏源身份/host/哈希；原始签名URL不要进入常规日志或公共台账。"
+    },
+    {
+      "id": "DV004-DV005-EVIDENCE",
+      "priority": "P1",
+      "kind": "acceptance blocker, not proof of runtime failure",
+      "location": "media-kit PR4 comment6125963183; PiliPlusX PR3 comment6126388241; archives/conversations/dv003-dolby-tier-gray-20261012.md:14-16 at 15551ede",
+      "finding": "DEVICE新验收声称未由可审计原始数据闭合，文档“仅剩LG复测”不成立。",
+      "reason": "h264->h264_mediacodec的摘要与mpv名称发布机制相符，但round1缺hwdec/component等事实，不能据round2组件名证明无真实切换；无native创建/释放/generation序列。先前“126已修”实际AVC日志已被a2478承认的126 sourceMetadataUnknown、decoder未建事实进一步推翻。新comment声称HEVC/verified/截图，仅给本地文件名dv005-frame1.png、dv005-verify.log；PR6两源码文件、PR3八文件均无原始截图/日志/完整APK-JAR源码向量或持续播放取证。",
+      "required": "旧126声称归类为未经核验/被后续修正；新a2478+PR6场景可记DEVICE reported，独立验收仍pending。回交准确App/media-kit/mpv/FFmpeg/helper/patch/NDK向量、APK/JAR哈希与原始轨道open/codec/PTS/画面证据；native HDR与持续性能单独验收。"
+    }
+  ],
+  "decisionsStillOpen": [
+    "DV004临时库诊断范围及共享文件认领未由本审查批准；保留用户待决状态。",
+    "最终plan履行 vs 捕获任何真实切换的验收语义仍由用户决定，不能把DEVICE提交/自报当批准。",
+    "不合并/不关闭/不发布PR；不并行重写DEVICE native配方，DV001/PR5必须继续原owner回交。"
+  ],
+  "ci": {
+    "pr6": {
+      "head": "0fb163c6ec8d54c46698227175b9a21468605246",
+      "exactHeadWorkflowRuns": 0,
+      "hostClaims": "775 Flutter tests and analyze0 reported by DEVICE; raw logs absent from inspected PR"
+    },
+    "previousApp": {
+      "head": "e9c19cf842467c9db03733b5f17d7a9276ab3471",
+      "run": 38256847564,
+      "attempt": 1,
+      "status": "completed",
+      "conclusion": "failure",
+      "sourceVectorJob": 114837033391,
+      "sourceVectorFailure": "test app_head == EXPECTED_APP_SHA, exit1",
+      "sourceTests": "all skipped; not a test pass"
+    },
+    "dv005Code": {
+      "head": "a2478d04cfdc3fd19a12631e88bf38be8684fccb",
+      "run": 38263795883,
+      "attempt": 1,
+      "statusAt143508": "in_progress",
+      "sourceVectorJob": 114860777554,
+      "sourceVectorConclusion": "failure",
+      "sourceTests": "all skipped",
+      "nativeJobs": "some cancelled/failed, remaining executing"
+    },
+    "latestDocs": {
+      "head": "15551ede06b0cbec859d61e6d16f8dba2054bba1",
+      "run": 38263881419,
+      "attempt": 1,
+      "statusAt143556": "in_progress",
+      "conclusion": null
+    },
+    "localReviewExecution": "Static read-only review, source hash verification via Python. No Dart/Flutter binaries present. No host Flutter/native/device tests run by reviewer."
+  },
+  "integrationBoundary": {
+    "acceptedForLedger": "Remote head/status facts, exact source-hash comparison, self-reported evidence with unverified label, review conclusions and required changes with provenance.",
+    "notApproved": "PR6 behavior/test slice; PR3/DV005 production code; temporary diagnostics; DEVICE claim that only LG remains; any native/HDR/performance acceptance.",
+    "nextOwnerAction": "CORE records this checkpoint and sends scoped findings in central thread. Existing DEVICE revises original PRs under agreed claim; keep DV001 and PR5 mandatory and pending; root is sole public integrator."
+  },
+  "sourceHashVerification": {
+    "previousCriticalReport": "docs/plans/core-dv003-critical-review-20261012.json at 5834ce5b",
+    "e9c19cf8AllFiveFilesEqualReviewed8f06": true,
+    "unchangedThrough15551": [
+      "lib/plugin/pl_player/dovi_sniff.dart",
+      "lib/plugin/pl_player/hdr_output.dart",
+      "lib/plugin/pl_player/source_selection.dart",
+      "test/plugin/pl_player/dovi_sniff_test.dart"
+    ],
+    "hashValues": {
+      "lib/plugin/pl_player/dovi_sniff.dart": "bd871b299d8cae8fd8c81b8ec1e5868e42cda2fb61f246e358dca2fb78995e3b",
+      "lib/plugin/pl_player/hdr_output.dart": "b71488e3fa7f43707354edf4430bd2a88fe9fd2c8a762d992a93e130f40e21ef",
+      "lib/plugin/pl_player/source_selection.dart": "a41788bce176730566b381f57280cb1eca1824daf8b5f3129ca7e82900c1a517",
+      "test/plugin/pl_player/dovi_sniff_test.dart": "761682d12f32223f5c4286c5330c982f27f440fa30c1dddfe4d5fa73ba78db61"
+    }
+  },
+  "auditFiles": [
+    "github-evidence.json",
+    "source-response-evidence.json",
+    "latest-a2478-evidence.json",
+    "latest-15551-evidence.json"
+  ]
+}

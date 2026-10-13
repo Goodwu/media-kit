@@ -2326,10 +2326,8 @@ void main() {
 
       final playable = Playlist(
         [
-          // 10 entries cycling the platform sources: with 4 entries a random
-          // shuffle lands back on the identical order 1-in-24 times, and the
-          // distinct playlist stream then emits no event for it, failing the
-          // order-change expectation below.
+          // Retain the native shuffle fixture. Web snapshot isolation is
+          // checked independently below without relying on a random index.
           for (int i = 0; i < 10; i++)
             Media(sources.platform[i % sources.platform.length], extras: {'i': i}),
         ],
@@ -2394,8 +2392,7 @@ void main() {
 
       final playable = Playlist(
         [
-          // See player-set-shuffle: 10 entries make an unchanged shuffle
-          // order practically impossible (the distinct stream would drop it).
+          // Keep the same entries as player-set-shuffle.
           for (int i = 0; i < 10; i++)
             Media(sources.platform[i % sources.platform.length], extras: {'i': i}),
         ],
@@ -2461,6 +2458,142 @@ void main() {
     },
     timeout: Timeout(const Duration(minutes: 1)),
   );
+  test(
+    'player-set-shuffle-preserves-playlist-snapshots',
+    () async {
+      final player = Player();
+      final playlistEvents = player.stream.playlist.toList();
+      final shuffleEvents = player.stream.shuffle.toList();
+      final firstEvent = player.stream.playlist.first;
+      final medias = sources.platform.map(Media.new).toList();
+      final playable = Playlist(medias, index: 2);
+      final current = medias[playable.index];
+      final expectedPlaylists = <Playlist>[playable];
+
+      try {
+        await player.open(playable, play: false);
+        final opened = player.state.playlist;
+        final published = await firstEvent;
+
+        for (int round = 0; round < 2; round++) {
+          await player.setShuffle(true);
+          final shuffled = player.state.playlist;
+          final shuffledMedias = [...shuffled.medias];
+
+          // The old implementation shuffled the list owned by both of these
+          // previously published snapshots. Distinct could then drop an event.
+          expect(opened.medias, orderedEquals(medias));
+          expect(published.medias, orderedEquals(medias));
+          expect(opened.index, playable.index);
+          expect(published.index, playable.index);
+          expect(shuffled.medias, unorderedEquals(medias));
+          expect(shuffled.medias, isNot(orderedEquals(medias)));
+          expect(shuffled.medias[shuffled.index], same(current));
+          expect(player.state.shuffle, isTrue);
+          expectedPlaylists.add(
+            Playlist(shuffledMedias, index: shuffled.index),
+          );
+
+          await player.setShuffle(true);
+          expect(player.state.playlist, same(shuffled));
+
+          await player.setShuffle(false);
+          final restored = player.state.playlist;
+          expect(shuffled.medias, orderedEquals(shuffledMedias));
+          expect(restored, playable);
+          expect(restored.medias[restored.index], same(current));
+          expect(player.state.shuffle, isFalse);
+          expectedPlaylists.add(playable);
+
+          await player.setShuffle(false);
+          expect(player.state.playlist, same(restored));
+        }
+      } finally {
+        await player.dispose();
+      }
+
+      expect(await playlistEvents, expectedPlaylists);
+      expect(await shuffleEvents, [false, true, false, true, false]);
+    },
+    skip: !UniversalPlatform.isWeb,
+  );
+  test(
+    'player-set-shuffle-restore-preserves-published-playlist',
+    () async {
+      final player = Player();
+
+      try {
+        await player.open(
+          Playlist(sources.platform.map(Media.new).toList(), index: 2),
+          play: false,
+        );
+        await player.setShuffle(true);
+        final addedEvent = player.stream.playlist.firstWhere(
+          (playlist) => playlist.medias.length == sources.platform.length + 1,
+        );
+        await player.add(Media(sources.platform.first));
+        final added = player.state.playlist;
+        final published = await addedEvent;
+        final addedMedias = [...added.medias];
+        final addedIndex = added.index;
+
+        await player.setShuffle(false);
+
+        // Restoring the queue must not rewrite a snapshot emitted by add.
+        expect(added.medias, orderedEquals(addedMedias));
+        expect(published.medias, orderedEquals(addedMedias));
+        expect(added.index, addedIndex);
+        expect(published.index, addedIndex);
+      } finally {
+        await player.dispose();
+      }
+    },
+    skip: !UniversalPlatform.isWeb,
+  );
+  for (final sharedMedia in [false, true]) {
+    test(
+      'player-set-shuffle-equal-uris-${sharedMedia ? 'same' : 'distinct'}-instances',
+      () async {
+        final player = Player();
+        final playlistEvents = player.stream.playlist.toList();
+        final shuffleEvents = player.stream.shuffle.toList();
+        final media = Media(sources.platform.first);
+        final medias = [
+          for (int i = 0; i < 3; i++)
+            sharedMedia
+                ? media
+                : Media(sources.platform.first, extras: {'entry': i}),
+        ];
+        final playable = Playlist(medias, index: 2);
+
+        try {
+          await player.open(playable, play: false);
+          final opened = player.state.playlist;
+          for (int round = 0; round < 2; round++) {
+            for (final enabled in [true, true, false, false]) {
+              await player.setShuffle(enabled);
+              final current = player.state.playlist;
+              expect(player.state.shuffle, enabled);
+              expect(current.index, playable.index);
+              expect(current.medias.length, medias.length);
+              for (int i = 0; i < medias.length; i++) {
+                expect(current.medias[i], same(medias[i]));
+                expect(opened.medias[i], same(medias[i]));
+              }
+            }
+          }
+        } finally {
+          await player.dispose();
+        }
+
+        // Equal playlist values stay distinct-filtered; mode changes still
+        // arrive, and a repeated request does not emit another mode change.
+        expect(await playlistEvents, [playable]);
+        expect(await shuffleEvents, [false, true, false, true, false]);
+      },
+      skip: !UniversalPlatform.isWeb,
+    );
+  }
   test(
     'player-buffering-file',
     () async {

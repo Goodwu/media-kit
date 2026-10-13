@@ -1,0 +1,690 @@
+{
+  "schemaVersion": 1,
+  "task": "MK-ROUTING-20261011",
+  "reviewId": "CORE-DEVICE-RETURN-R2-20261012",
+  "createdAtUtc": "2026-10-12T15:35:36.390238+00:00",
+  "actor": "CORE successor read-only review assistant; sole public writer remains root CORE",
+  "verdict": "REQUEST_CHANGES",
+  "reviewScope": "App PR3 incremental return; PR6/DV001/PR5 latest handoff readback. No public checkout/native recipe changes, execution, reviews, comments, pushes, or merges by this assistant.",
+  "authoritativeInputs": {
+    "app": {
+      "repository": "Goodwu/PiliPlusX",
+      "pr": 3,
+      "head": "b18086d0d654a5f523296b41bdfb869c588cd3f0",
+      "base": "routing/MK-ROUTING-20261011",
+      "baseSha": "1970d440b5b9d9ffc001866064581e4005b26b30",
+      "tree": "9c7a2a68294a32462287ad9be3849bc356c35188",
+      "state": "open",
+      "draft": true,
+      "updatedAt": "2026-10-12T15:27:28Z"
+    },
+    "mediaKitPr6": {
+      "repository": "Goodwu/media-kit",
+      "pr": 6,
+      "head": "9a2c5768dd10e71975b7c3e76bb7125460a43e5b",
+      "base": "routing/MK-ROUTING-20261011",
+      "updatedAt": "2026-10-12T15:05:46Z",
+      "priorReview": "https://github.com/Goodwu/media-kit/pull/6#pullrequestreview-5492587336"
+    },
+    "native": {
+      "repository": "Goodwu/libmpv-android-video-build-dv-experiment",
+      "pr": 1,
+      "head": "1095a43acb4d0973b8bca59c5da4e300657bdb29",
+      "base": "feature/android-dv-build",
+      "updatedAt": "2026-10-11T19:29:35Z"
+    },
+    "pr5": {
+      "repository": "Goodwu/media-kit",
+      "pr": 5,
+      "head": "dc41787082752f234fed85db7fb7be3bd855cc45",
+      "base": "routing/MK-ROUTING-20261011",
+      "updatedAt": "2026-10-12T13:38:25Z"
+    },
+    "publicAppAcceptedLedger": {
+      "head": "a98a57f2892592d5b8a25d6533ede4580d412ae5",
+      "path": "docs/plans/routing-native-accepted-inputs.json",
+      "gitBlob": "82f81a26d91ce0d40ef2b8ad154fac2b06e418ca",
+      "value": {
+        "schemaVersion": 1,
+        "task": "MK-ROUTING-20261011",
+        "selectedManifestSha256": null,
+        "entries": []
+      }
+    },
+    "publicLibrarySourceSpec": {
+      "head": "0c6ffeaf2f509c38f8c76eca42ee255bd69b8cd2",
+      "path": "media_kit_video/lib/src/routing/video_source_spec.dart",
+      "gitBlob": "706e1e07f2936ff30e50ca90bd81171521a6b0a8"
+    }
+  },
+  "commitsReviewed": [
+    {
+      "sha": "dd76cf839b189ab165b3c81992ebe3078c284323",
+      "parents": [
+        "15551ede06b0cbec859d61e6d16f8dba2054bba1"
+      ],
+      "message": "[DEVICE DV004 终审整改] B1 网络硬预算 + B2 facts 缓存身份隔离 + reopen 通道补齐\n\nB1（终审阻断一）：dovi_sniff 传输改为单一绝对 deadline 覆盖连接/响应头/\n体/全部备选 URL；响应体流式读取并按声明的初始化长度硬截断（忽略 Range 的\n200/超长 206 不再整片缓冲）；错误状态 drain 受同一上限；候选 URL 限主+2\n备选。新增 3 项负例测试（超长 200 截断、不结束的错误响应、备选数量上限）。\n\nB2（终审阻断二）：DOVI facts 缓存键从 VideoSourceSpec.key（仅 codec/几何，\n非媒体身份）改为 rendition 身份键（playUrlDataRevision/cid/baseUrl）；嗅探\n启动记录代次，迟到结果仅在 revision 仍当前时写入；in-flight 去重防同\nrendition 并发嗅探。同规格不同内容不再复用旧 facts。\n\n另补：_RouteSourceIntent.reopen 转发 initialDoviFacts（无页面回调的配置\n重开不再退回未知 126）。\n\nflutter analyze 0 issues；dovi_sniff_test 16/16（新增 B1 负例 3 项）。"
+    },
+    {
+      "sha": "07953d09e9b756bdf72f9ac175a2f2713f2b935a",
+      "parents": [
+        "dd76cf839b189ab165b3c81992ebe3078c284323"
+      ],
+      "message": "[DEVICE] 归档证据更正（终审 B4）：替换失败日志引用为绑定 dd76cf839 的真实成功日志"
+    },
+    {
+      "sha": "fdbb3a8170ecb8ff5e62cadd1a716629c4a030c0",
+      "parents": [
+        "07953d09e9b756bdf72f9ac175a2f2713f2b935a"
+      ],
+      "message": "[DEVICE] 还原 gradle.properties：本地 jar 注入路径属设备本机配置，不入库（07953d09e 误提交；本地构建以未跟踪修改保留）\n\ndebug 构建去除 .debug applicationIdSuffix（同 07953d09e 中 build.gradle.kts 部分）为用户要求的诊断配置，保留。"
+    },
+    {
+      "sha": "b18086d0d654a5f523296b41bdfb869c588cd3f0",
+      "parents": [
+        "fdbb3a8170ecb8ff5e62cadd1a716629c4a030c0"
+      ],
+      "message": "[DEVICE] 归档证据更正（终审 B4）：以绑定 dd76cf839 的真实成功日志替换早期失败记录；登记四项阻断整改位置"
+    }
+  ],
+  "changedFilesSince15551": [
+    {
+      "path": "android/app/build.gradle.kts",
+      "gitBlob": "64aa199df9e5fb24fc37a540ca67fb7c6258597e",
+      "status": "modified",
+      "additions": 2,
+      "deletions": 1
+    },
+    {
+      "path": "archives/conversations/dv003-dolby-tier-gray-20261012.md",
+      "gitBlob": "0dc67f9399e09d396b9a7501030e7260ad0722ff",
+      "status": "modified",
+      "additions": 1,
+      "deletions": 0
+    },
+    {
+      "path": "lib/pages/video/controller.dart",
+      "gitBlob": "baf63f24eae937c263f782bd1a6b90f6ca881868",
+      "status": "modified",
+      "additions": 24,
+      "deletions": 7
+    },
+    {
+      "path": "lib/plugin/pl_player/controller.dart",
+      "gitBlob": "4fb76fec28957af8a2e623e0c9d2e800f70d4285",
+      "status": "modified",
+      "additions": 1,
+      "deletions": 0
+    },
+    {
+      "path": "lib/plugin/pl_player/dovi_sniff.dart",
+      "gitBlob": "1e14cfab7a73ed5d8ce170befc3b3b96bf2abb66",
+      "status": "modified",
+      "additions": 76,
+      "deletions": 50
+    },
+    {
+      "path": "test/plugin/pl_player/dovi_sniff_test.dart",
+      "gitBlob": "8a65ab400693bdd72feb391fab0d37277ee0d852",
+      "status": "modified",
+      "additions": 82,
+      "deletions": 0
+    }
+  ],
+  "priorReviews": {
+    "app": "https://github.com/Goodwu/PiliPlusX/pull/3#pullrequestreview-5492283684",
+    "deviceCombined": "https://github.com/Goodwu/media-kit/pull/4#issuecomment-6126637477",
+    "native": "https://github.com/Goodwu/libmpv-android-video-build-dv-experiment/pull/1#pullrequestreview-5483753705",
+    "nativeComment6110373174": "https://github.com/Goodwu/libmpv-android-video-build-dv-experiment/pull/1#issuecomment-6110373174"
+  },
+  "fixedOrImproved": [
+    "initialDoviFacts now forwarded by _RouteSourceIntent.reopen (1070), first/refresh path remains wired",
+    "connect/headers use one absolute deadline; at most two backups",
+    "success-response accumulated byte list bounded by requested initialization length",
+    "stale playback revision cache writes rejected; rendition cache key separates media identity from decoder capability spec key",
+    "sniffer exception runtimeType only, no raw exception URL",
+    "fdbb3a8 restores gradle.properties after07953 accidentally committed machine-local JAR path; this current-head defect is closed",
+    "b180 acknowledges historical+223/-5 and analyze2 records were failed evidence"
+  ],
+  "findings": [
+    {
+      "id": "DV003-R2-F01",
+      "priority": "P1",
+      "status": "new_regression",
+      "title": "facts 缓存的新身份键没有接通 selection 的读取键，126 重新灰禁",
+      "locations": [
+        {
+          "path": "lib/pages/video/controller.dart",
+          "lines": [
+            327,
+            367
+          ]
+        },
+        {
+          "path": "lib/pages/video/controller.dart",
+          "lines": [
+            288,
+            303
+          ]
+        },
+        {
+          "path": "lib/plugin/pl_player/source_selection.dart",
+          "lines": [
+            110,
+            146
+          ]
+        }
+      ],
+      "reason": "_doviFactsKey 现在生成 playbackDataRevision/cid/baseUrl；_resolveDoviFacts 原样返回整个此键空间的缓存，_probeRoutingCapabilities 原样传入 DashRouteSelection.query。prediction 与 allows 仍以 VideoSourceSpec.key 查找 doviFacts（第118/144行）。实际 spec.key 是编码/尺寸等约束的 JSON array，从不等于 revision/cid/URL 字符串。成功嗅探无法进入真实 selection 的 descriptor，126+hvc1 又被 hasUnresolvedDolbyVision 第146行拒绝。",
+      "reproduction": "同一 revision 的 126+hvc1 rendition 嗅探出有效 P8.4 后，经实际 VideoDetailController.probeRoutingForTesting 或正常 _probeRoutingCapabilities 调用 DashRouteSelection，观察其 allows(item) 仍 false；不要像当前 dovi_sniff_test 的菜单例那样手工按 spec.key 注入绕过 controller。",
+      "suggestedFixScope": "原 DEVICE 统一 rendition identity 从缓存/异步结果到 selection prediction/allows 再到首次/refresh/reopen hint 的合同；能力查询 spec.key 仍只用于能力，不能简单全局改回 spec.key。补同规格不同源与真实 controller→selection 链回归。",
+      "evidenceClass": "source_proven; no new Flutter execution"
+    },
+    {
+      "id": "DV003-R2-F02",
+      "priority": "P1",
+      "status": "partially_fixed_still_blocking",
+      "title": "真实 HTTP 的 body 等待仍可超过总 deadline，错误 body 的 take 是 chunk 上界",
+      "locations": [
+        {
+          "path": "lib/plugin/pl_player/dovi_sniff.dart",
+          "lines": [
+            112,
+            145
+          ]
+        },
+        {
+          "path": "lib/plugin/pl_player/dovi_sniff.dart",
+          "lines": [
+            71,
+            95
+          ]
+        },
+        {
+          "path": "test/plugin/pl_player/dovi_sniff_test.dart",
+          "lines": [
+            240,
+            318
+          ]
+        }
+      ],
+      "reason": "connect 和 headers 已共享 deadline，成功 body 的累积 List 已限 initEnd，主+2 backup 也已限。但成功分支 await-for 仅收到新 chunk 后才看时钟；发送206 headers/一个字节后暂停且保持连接，下一轮等待没有任何 deadline/timer，finally 无机会关闭 HttpClient。错误分支 response.take(byteCount) 对 Stream<List<int>> 限制事件数，不是字节，817个大chunk可远超817 bytes。206 Content-Range/offset仍不校验。",
+      "reproduction": "使用真实 loopback HttpServer/HttpClient，不传 fetch：206 headers flush后发一字节、余体停住；配置100ms deadline，调用不会在该期限完成。另403以多大chunk返回，统计实际body bytes而非事件数。补 Range响应offset/声明/截断/连接断开和备选总预算用例。",
+      "testLimit": "三项新增用例全部传 fetch，绕过 _rangeGet。超长200例只把maxServed局部变量置4096，实际返回1024-byte fixture，并不测试HttpClient、200 status、读取/取消。error例只是一个30秒Future被外层timeout。",
+      "suggestedFixScope": "统一有界取消覆盖成功与错误 response 的每次等待；按字节计量并在达到上限/失败/期限时结束订阅和client；保持有限候选、对响应range一致性失败关闭。",
+      "evidenceClass": "source_proven; no claim of new real-HTTP execution"
+    },
+    {
+      "id": "DV003-R2-F03",
+      "priority": "P1",
+      "status": "new_regression",
+      "title": "in-flight 去重跳过等待，较新的 probe 可发布空 facts 并使完成结果被丢弃",
+      "locations": [
+        {
+          "path": "lib/pages/video/controller.dart",
+          "lines": [
+            284,
+            317
+          ]
+        },
+        {
+          "path": "lib/pages/video/controller.dart",
+          "lines": [
+            330,
+            367
+          ]
+        }
+      ],
+      "reason": "_doviFactsInFlight 是 Set。发现同键in-flight时直接continue，而非等待共享future。probe A serial1开始嗅探；同revision的display/options probe B增加serial2，见in-flight即返回空缓存并发布unknown selection。A最终写入缓存后被serial检查拒绝，没有触发新的probe；B拿到的是更早的不可变空map。修正F01的读取键后此时序仍会留下126灰禁。",
+      "reproduction": "以Completer控制第一嗅探未完成，在同一playback revision触发第二次probe/配置或target更新，先让第二次query完成，再完成第一嗅探；断言最终公开selection携带当前facts且旧probe不会覆盖。",
+      "suggestedFixScope": "以per-identity共享Future表示in-flight，所有当前调用等同一结果；缓存写/结果发布用同一源与生命周期代次门，失败用finally清理；不要仅去重而丢掉当前订阅者。",
+      "evidenceClass": "source_control_flow_proof; not executed"
+    },
+    {
+      "id": "DV003-R2-F04",
+      "priority": "P1",
+      "status": "previous_request_unchanged",
+      "title": "本地下载/本地诊断仍在 source 分流前解引用网络 videoUrl",
+      "locations": [
+        {
+          "path": "lib/pages/video/controller.dart",
+          "lines": [
+            1158,
+            1177
+          ]
+        },
+        {
+          "path": "lib/pages/video/controller.dart",
+          "lines": [
+            596,
+            614
+          ]
+        },
+        {
+          "path": "lib/pages/video/controller.dart",
+          "lines": [
+            645,
+            658
+          ]
+        }
+      ],
+      "reason": "新DV003_OPEN日志仍无条件Uri.parse(videoUrl!)；initFileSource/本地诊断只设置firstVideo与data，不设置该network URL。进入playerInit会在FileSource/DirectFileSource创建之前抛空值异常。",
+      "reproduction": "分别从已下载内容入口与isLocalVideoDiagnosticArgs入口执行playerInit，不设置network videoUrl，要求正常走各自source并调用播放器；新增日志不应决定播放成败。",
+      "suggestedFixScope": "从已经选择的可空source身份构造脱敏诊断，并补两个真实入口回归。",
+      "evidenceClass": "source_proven; unchanged since review5492283684"
+    },
+    {
+      "id": "DV003-R2-F05",
+      "priority": "P1",
+      "status": "previous_request_unchanged",
+      "title": "DOVI box 未绑定所选视频轨，原始层/颜色/codec 冲突仍被改写或丢弃",
+      "locations": [
+        {
+          "path": "lib/plugin/pl_player/dovi_sniff.dart",
+          "lines": [
+            35,
+            49
+          ]
+        },
+        {
+          "path": "lib/plugin/pl_player/dovi_sniff.dart",
+          "lines": [
+            164,
+            210
+          ]
+        },
+        {
+          "path": "lib/plugin/pl_player/hdr_output.dart",
+          "lines": [
+            93,
+            122
+          ]
+        }
+      ],
+      "reason": "walk在任意深度看见首个dvcC/dvvC/dvwC就返回；不要求video handler/指定track/sample entry，不遍历确认后续冲突记录。rpuPresent/blPresent虽解析却不参与准入；P5 compatibility无条件重写0；P10强制codec=hevc。新增补丁仅格式化parser，不改变上述逻辑；hdr_output blob仍e308350cb007fa1cf592dfbfea7fc9659a67bebb。",
+      "reproduction": "top-level/错误track的decoy DV box；两个sample entry或records互相冲突；BL/RPU关闭/EL冲突；P5非0 compat、P10 AV1 vs HEVC声明；保持未知或拒绝，不生成已知可授权descriptor。",
+      "suggestedFixScope": "由原DEVICE将返回facts绑定当前视频track/sample-entry与实际codec，保留原flags/compat/color声明，拒绝不一致或不支持组合。不要依赖Session在容器缺失profile时保留hint来替代App自身正确性。",
+      "evidenceClass": "source_proven; original Critical V2 remains applicable"
+    },
+    {
+      "id": "DV003-R2-F06",
+      "priority": "P2",
+      "status": "new_fail_closed_regression",
+      "title": "Uri.parse 已移到 try 外，畸形候选可向主播放路径抛错并滞留 in-flight 标记",
+      "locations": [
+        {
+          "path": "lib/plugin/pl_player/dovi_sniff.dart",
+          "lines": [
+            71,
+            76
+          ]
+        },
+        {
+          "path": "lib/pages/video/controller.dart",
+          "lines": [
+            353,
+            365
+          ]
+        }
+      ],
+      "reason": "主/backup全部Uri.parse在try之前构造，任一个畸形URL如无闭合IPv6host即可使async future失败，而非按函数合同返回null。Future.wait之后的removeAll无finally，该rendition key会留在in-flight集合。",
+      "reproduction": "主URL有效且某backup为畸形URI，或主URL本身畸形；调用应返回null/有限尝试且清理标记，不让页面播放主路径抛异常，后续修正URL请求可以重试。",
+      "suggestedFixScope": "解析及候选校验处于受控失败边界，清理in-flight用finally；不将字段解析错误升格播放异常。",
+      "evidenceClass": "source_control_flow_proof"
+    },
+    {
+      "id": "DV003-R2-F07",
+      "priority": "P2",
+      "status": "previous_request_partially_fixed",
+      "title": "sniffer 异常已脱敏，但 playerInit 仍输出完整签名 URL",
+      "locations": [
+        {
+          "path": "lib/pages/video/controller.dart",
+          "lines": [
+            1158,
+            1162
+          ]
+        },
+        {
+          "path": "lib/plugin/pl_player/dovi_sniff.dart",
+          "lines": [
+            83,
+            95
+          ]
+        }
+      ],
+      "reason": "sniffer的catch现在仅打印runtimeType，这一部分已修复；DV003_OPEN仍videoUrl=$videoUrl，把完整query签名输出至日志/潜在归档。",
+      "suggestedFixScope": "保留必要host/稳定source摘要/质量/codec，去除完整query；与F04统一处理。",
+      "evidenceClass": "source_proven"
+    },
+    {
+      "id": "DV003-R2-F08",
+      "priority": "P2",
+      "status": "evidence_not_closed",
+      "title": "b180 文档称四阻断均整改，但源码和当前可访问测试证据不支持",
+      "locations": [
+        {
+          "path": "archives/conversations/dv003-dolby-tier-gray-20261012.md",
+          "lines": [
+            5,
+            17
+          ]
+        },
+        {
+          "path": "archives/conversations/dv003-dolby-tier-gray-20261012.md",
+          "lines": [
+            25,
+            30
+          ]
+        }
+      ],
+      "reason": "b180第11行如实承认旧+223/-5及analyze2问题，但只给manifests/dv003-final-tests-dd76cf83.log与-analyze路径并称284通过/0issue。完整受审树2515条无这些文件；没有附件或可访问原始成功日志。当前doc还说B1/B2/B3已整改、仅剩LG，但F01/F02/F03及PR6原guard/语义阻断仍在。",
+      "runtimeEvidence": "dd76 run38269870720/attempt1最终cancelled。其source capture114881247990明确EXPECTED_APP_SHA=dd76cf839...，脚本校验公共routing HEAD时exit1，未输出最终source vector，下游App analyze/tests、Python和platform source全部skipped。b180 Build38270385174 pending/0jobs at15:31:48Z，07953 Build38270201194 queued，不能作284pass背书。",
+      "suggestedFixScope": "提供准确App/库/SDK/package roots、命令、退出码与可读取完整成功日志/持久artifact，保留旧失败记录；把部分已修与仍blocked/DEVICE-reported/CORE-verified分别写清，勿据日志文件名或commit标题标完成。",
+      "evidenceClass": "API tree+raw hosted log read; local success logs inaccessible"
+    }
+  ],
+  "sourceFileHashEvidence": {
+    "note": "10 files independently fetched at07953 and exact Git blobs/SHA256 matched. At b180 all production files remain identical; archive document and gradle.properties differ as recorded in current tree. Full b180 manifest is generated alongside this report.",
+    "historical07953": [
+      {
+        "path": "lib/pages/video/controller.dart",
+        "gitBlob": "baf63f24eae937c263f782bd1a6b90f6ca881868",
+        "bytes": 74764,
+        "sha256": "9978268db891b601dd05a147506e6542bd2c4dd4a9d3adb7fdf79c069e13c142",
+        "gitBlobVerified": true
+      },
+      {
+        "path": "lib/plugin/pl_player/controller.dart",
+        "gitBlob": "4fb76fec28957af8a2e623e0c9d2e800f70d4285",
+        "bytes": 143250,
+        "sha256": "84b1005646bf9954120fdc24e1f986f917ce388da8b923ec30e47d40f3e30e0f",
+        "gitBlobVerified": true
+      },
+      {
+        "path": "lib/plugin/pl_player/dovi_sniff.dart",
+        "gitBlob": "1e14cfab7a73ed5d8ce170befc3b3b96bf2abb66",
+        "bytes": 7760,
+        "sha256": "aba14c40e645f486f55f41b5cf91db9a745ef6f3e32adc7f833d2f01d7637879",
+        "gitBlobVerified": true
+      },
+      {
+        "path": "lib/plugin/pl_player/source_selection.dart",
+        "gitBlob": "9106a9b2c9ca54093f5e875285bd32b28a19398f",
+        "bytes": 5973,
+        "sha256": "a41788bce176730566b381f57280cb1eca1824daf8b5f3129ca7e82900c1a517",
+        "gitBlobVerified": true
+      },
+      {
+        "path": "lib/plugin/pl_player/hdr_output.dart",
+        "gitBlob": "e308350cb007fa1cf592dfbfea7fc9659a67bebb",
+        "bytes": 9591,
+        "sha256": "b71488e3fa7f43707354edf4430bd2a88fe9fd2c8a762d992a93e130f40e21ef",
+        "gitBlobVerified": true
+      },
+      {
+        "path": "test/plugin/pl_player/dovi_sniff_test.dart",
+        "gitBlob": "8a65ab400693bdd72feb391fab0d37277ee0d852",
+        "bytes": 14618,
+        "sha256": "f20a9e6470401bff614333a8f6ccb826f8414d45a33617d36ec9306d635ccb31",
+        "gitBlobVerified": true
+      },
+      {
+        "path": "archives/conversations/dv003-dolby-tier-gray-20261012.md",
+        "gitBlob": "944c3d0edb8e04fe76e84ec53d7e21e5ac5443ea",
+        "bytes": 4763,
+        "sha256": "68381d3e3d044169dcda382fd0f343e961ecf754f4fb74900257a20ed539ee86",
+        "gitBlobVerified": true
+      },
+      {
+        "path": "android/app/build.gradle.kts",
+        "gitBlob": "64aa199df9e5fb24fc37a540ca67fb7c6258597e",
+        "bytes": 3057,
+        "sha256": "e7ca1476c52ac272a305644f19150a42a8fcf6f8232efb54c0a96c9947811eef",
+        "gitBlobVerified": true
+      },
+      {
+        "path": "android/gradle.properties",
+        "gitBlob": "6fcb281520bf716fac04e1ec0b835bfdf80cb682",
+        "bytes": 362,
+        "sha256": "de86163f367c4b74b25437fd3a862b1ec59919da75d273ee7b59fc560258cb2e",
+        "gitBlobVerified": true
+      },
+      {
+        "path": "test/plugin/pl_player/source_selection_test.dart",
+        "gitBlob": "c80340a1aa3192da4d57d75f27eb43a8145defc2",
+        "bytes": 13310,
+        "sha256": "a2950acfbe1b0c2f95df707272288302087cc72ec6ba413e8d8e6fb5ea1e76c4",
+        "gitBlobVerified": true
+      }
+    ],
+    "currentTreeCount": 2515,
+    "currentTreeTruncated": false,
+    "newSuccessfulLogPathsPresent": [],
+    "currentB180": [
+      {
+        "path": "lib/pages/video/controller.dart",
+        "bytes": 74764,
+        "gitBlob": "baf63f24eae937c263f782bd1a6b90f6ca881868",
+        "sha256": "9978268db891b601dd05a147506e6542bd2c4dd4a9d3adb7fdf79c069e13c142",
+        "currentHead": "b18086d0d654a5f523296b41bdfb869c588cd3f0",
+        "gitBlobVerified": true
+      },
+      {
+        "path": "lib/plugin/pl_player/controller.dart",
+        "bytes": 143250,
+        "gitBlob": "4fb76fec28957af8a2e623e0c9d2e800f70d4285",
+        "sha256": "84b1005646bf9954120fdc24e1f986f917ce388da8b923ec30e47d40f3e30e0f",
+        "currentHead": "b18086d0d654a5f523296b41bdfb869c588cd3f0",
+        "gitBlobVerified": true
+      },
+      {
+        "path": "lib/plugin/pl_player/dovi_sniff.dart",
+        "bytes": 7760,
+        "gitBlob": "1e14cfab7a73ed5d8ce170befc3b3b96bf2abb66",
+        "sha256": "aba14c40e645f486f55f41b5cf91db9a745ef6f3e32adc7f833d2f01d7637879",
+        "currentHead": "b18086d0d654a5f523296b41bdfb869c588cd3f0",
+        "gitBlobVerified": true
+      },
+      {
+        "path": "lib/plugin/pl_player/source_selection.dart",
+        "bytes": 5973,
+        "gitBlob": "9106a9b2c9ca54093f5e875285bd32b28a19398f",
+        "sha256": "a41788bce176730566b381f57280cb1eca1824daf8b5f3129ca7e82900c1a517",
+        "currentHead": "b18086d0d654a5f523296b41bdfb869c588cd3f0",
+        "gitBlobVerified": true
+      },
+      {
+        "path": "lib/plugin/pl_player/hdr_output.dart",
+        "bytes": 9591,
+        "gitBlob": "e308350cb007fa1cf592dfbfea7fc9659a67bebb",
+        "sha256": "b71488e3fa7f43707354edf4430bd2a88fe9fd2c8a762d992a93e130f40e21ef",
+        "currentHead": "b18086d0d654a5f523296b41bdfb869c588cd3f0",
+        "gitBlobVerified": true
+      },
+      {
+        "path": "test/plugin/pl_player/dovi_sniff_test.dart",
+        "bytes": 14618,
+        "gitBlob": "8a65ab400693bdd72feb391fab0d37277ee0d852",
+        "sha256": "f20a9e6470401bff614333a8f6ccb826f8414d45a33617d36ec9306d635ccb31",
+        "currentHead": "b18086d0d654a5f523296b41bdfb869c588cd3f0",
+        "gitBlobVerified": true
+      },
+      {
+        "path": "archives/conversations/dv003-dolby-tier-gray-20261012.md",
+        "bytes": 5450,
+        "gitBlob": "0dc67f9399e09d396b9a7501030e7260ad0722ff",
+        "sha256": "c6eb58a4f19bcb300802dd267208de59e4a54b66735a272acb6b70ad2b27772d",
+        "currentHead": "b18086d0d654a5f523296b41bdfb869c588cd3f0",
+        "gitBlobVerified": true
+      },
+      {
+        "path": "android/app/build.gradle.kts",
+        "bytes": 3057,
+        "gitBlob": "64aa199df9e5fb24fc37a540ca67fb7c6258597e",
+        "sha256": "e7ca1476c52ac272a305644f19150a42a8fcf6f8232efb54c0a96c9947811eef",
+        "currentHead": "b18086d0d654a5f523296b41bdfb869c588cd3f0",
+        "gitBlobVerified": true
+      },
+      {
+        "path": "android/gradle.properties",
+        "bytes": 184,
+        "gitBlob": "2f0b4caddd76c0846ef654a3423fbb67c2c99e8c",
+        "sha256": "bf9b04c288c3b94091a9e4948d58dea8920ab2236a46b734cb88c5411f835ed4",
+        "currentHead": "b18086d0d654a5f523296b41bdfb869c588cd3f0",
+        "gitBlobVerified": true
+      },
+      {
+        "path": "test/plugin/pl_player/source_selection_test.dart",
+        "bytes": 13310,
+        "gitBlob": "c80340a1aa3192da4d57d75f27eb43a8145defc2",
+        "sha256": "a2950acfbe1b0c2f95df707272288302087cc72ec6ba413e8d8e6fb5ea1e76c4",
+        "currentHead": "b18086d0d654a5f523296b41bdfb869c588cd3f0",
+        "gitBlobVerified": true
+      }
+    ]
+  },
+  "testEvidence": {
+    "newFlutterExecutedByThisAssistant": false,
+    "newNativeOrDeviceExecuted": false,
+    "sourceProofs": "Exact current blob reads, commit/tree comparison, control-flow review, full tree inventory; Python independently counted1024-byte fixture, not4096; no claim static model is Flutter execution.",
+    "newTestCases": 16,
+    "newTransportTestCases": 3,
+    "transportTestInjection": "All3 use fetch and bypass _rangeGet; no new real HttpClient read/cancel/error-body test in this delta.",
+    "localLogs": {
+      "status": "DEVICE_REPORTED_NOT_INDEPENDENTLY_VERIFIED",
+      "appShaClaim": "dd76cf839b189ab165b3c81992ebe3078c284323",
+      "testsClaim": "284 pass",
+      "analyzeClaim": "No issues found",
+      "paths": [
+        "manifests/dv003-final-tests-dd76cf83.log",
+        "manifests/dv003-final-analyze-dd76cf83.log"
+      ],
+      "accessibleViaGit": false,
+      "connectorCheck": "Both available C2C workspace_info connectors returned MCP Internal error; no attempts to read outside approved roots."
+    },
+    "hosted": {
+      "dd76": {
+        "runId": 38269870720,
+        "attempt": 1,
+        "status": "completed",
+        "conclusion": "cancelled",
+        "sourceCaptureJobId": 114881247990,
+        "sourceCaptureExitCode": 1,
+        "expectedAppSha": "dd76cf839b189ab165b3c81992ebe3078c284323",
+        "gate": "App public routing HEAD must equal EXPECTED_APP_SHA; no finalized source vector emitted",
+        "downstreamSourceTests": "skipped",
+        "logRecordedLocally": "api-b180-final-snapshot.json::dd76CaptureLog",
+        "actualWorkflowMergeSha": "10bda05a51a7303488c30cb1b0f49de064eef4c7"
+      },
+      "head07953": {
+        "runId": 38270201194,
+        "attempt": 1,
+        "status": "queued",
+        "conclusion": null,
+        "asOfUtc": "2026-10-12T15:31:48Z",
+        "acceptance": "none; nonterminal"
+      },
+      "headb180": {
+        "runId": 38270385174,
+        "attempt": 1,
+        "status": "pending",
+        "conclusion": null,
+        "jobsObserved": 0,
+        "asOfUtc": "2026-10-12T15:31:48Z",
+        "acceptance": "none; nonterminal"
+      },
+      "media6Exact9a2": {
+        "allEventsRunCount": 0,
+        "asOfUtc": "2026-10-12T15:27:00Z",
+        "acceptance": "777/analyze0 remains reported only"
+      }
+    }
+  },
+  "dv004Readback": {
+    "newHead": false,
+    "newTimelineSincePriorReview": false,
+    "status": "Prior review5492587336 remains current; no duplicate review recommended solely for unchanged9a2",
+    "stillOpen": [
+      "required-facts before observed map removes reachable cross-round identity rejection",
+      "Session final snapshot/route/hwdec/resource check does not retain prior observed component history",
+      "Do not redefine FIRST complete sample acceptance or claim any actual switch guarantee without user decision"
+    ],
+    "completedNarrowly": [
+      "DV004_DIAG removal",
+      "main AVC/copy/nv12 fixture consistency and validateDecoderObservation call"
+    ],
+    "userDecisions": [
+      "temporary diagnostic scope",
+      "final plan fulfillment versus detecting any real decoder switch (including observation boundary/native generation if chosen)"
+    ],
+    "rootAction": "Do not duplicate changes; link prior review and keep both decisions open."
+  },
+  "nativeAndPr5": {
+    "newRecipeCommits": false,
+    "newFixHandoffOrTransfer": false,
+    "newApprovedArtifactsFound": false,
+    "latestNativeIssueComment": {
+      "id": 6112842188,
+      "createdAt": "2026-10-11T19:29:35Z"
+    },
+    "latestPr5IssueComment": {
+      "id": 6111768962,
+      "createdAt": "2026-10-11T17:35:13Z"
+    },
+    "readAllTimelineCounts": {
+      "native": 7,
+      "pr5": 3,
+      "pr6": 2,
+      "app3": 3
+    },
+    "centralPagesRead": {
+      "page1": 100,
+      "page2": 2,
+      "latestComment": 6127346332
+    },
+    "remainingRequired": [
+      "Symbol reader/tool/dynsym/ELF failure must reject rather than 'no imports'",
+      "Both Vulkan targets independent: either/both/neither/already weak/mixed/tool fail/bad ELF and all actual ABIs; avoid partial binary mutation",
+      "Propagate every build failure; clean isolated staging; exact members whitelist",
+      "Final JAR/APK hashes and each library member, actual linked inputs, ordered patches, NDK/helper provenance and persistent producer run/attempt/artifact input binding",
+      "Fresh integrated true-primary/false-regression P5/P8.4/ordinary Session/owner-carrier/lifecycle/HDR/performance device acceptance"
+    ],
+    "excludedScripts": [
+      "assemble-jar-arm64.sh",
+      "matrix-device-build.sh"
+    ],
+    "exclusionsMaintained": true,
+    "historyProvenanceBannersMaintained": true,
+    "fullIntegration": "mandatory_not_complete",
+    "owner": "existing DEVICE original PR only; CORE review; no parallel native recipe rewrite"
+  },
+  "reviewDraft": "## [CORE-SUCCESSOR][DV003/DV005 增量复审] REQUEST_CHANGES\n\n审查绑定当前 `b18086d0d654a5f523296b41bdfb869c588cd3f0`，相对前次 `15551ede06b0cbec859d61e6d16f8dba2054bba1`。已读取 dd76cf、07953、fdbb3a8、b180 的实际 commits/diff、完整源码和当前评论；不按提交标题判断改动范围。本次是只读复审，未并写 DEVICE 文件，也未声称执行本地 Flutter/实机测试。\n\n### 确认已修或改善\n\n`_RouteSourceIntent.reopen` 第1070行已转发 initialDoviFacts；先前“重开未传”的具体缺口已修。sniffer 的 connect/headers 现在共用 deadline、候选限主+2 backup，成功响应的累积 List 已按 init 长度截断，异常日志只打印 runtimeType。缓存改 rendition 身份且拒绝旧 playback revision 的写入，方向正确。07953 误纳入的本机 JAR 绝对路径已由 fdbb3a8 撤回；当前 gradle.properties 不再含它，不将历史误提交继续当当前未修。\n\n### P1 — 新缓存键未接通消费者，真实 126 选源重新失败\n\n`lib/pages/video/controller.dart:327–367` 以 `revision/cid/baseUrl` 为键写缓存并原样返回；`_probeRoutingCapabilities:288–303` 原样传给 selection。但 `lib/plugin/pl_player/source_selection.dart:118,144` 仍按 `doviFacts[spec.key]` 读。spec.key 是编码/尺寸等约束的 JSON array，不是媒体/init 身份，两个键空间不相等。\n\n因此实际 controller 即使嗅探出 P8.4，selection 仍拿到 null facts，126+hvc1 再次被第146行 unknown-DV gate 灰禁。当前菜单测试手工按 spec.key 注入，绕过了断开的 controller→selection 链，不能发现此回归。请统一 rendition facts 的生产/消费合同，保留能力键与媒体身份的分工，并补实际页面 probe/菜单/自动选档→open 链测试。不能简单退回以 spec.key 缓存。\n\n### P1 — HTTP 成功 body 仍可无限等待；新增测试绕过真实读取\n\n`dovi_sniff.dart:133–145` 的 await-for 只在收到下一个 chunk 后检查时钟。真实206先送 headers/一字节后保持连接但不再发体，下一次等待没有 deadline/timer，finally 无法关闭 client。该操作位于初始播放路径，故仍不能声称总4秒预算。\n\n错误分支第125–129行的 `response.take(byteCount)` 对 Stream<List<int>> 数的是 chunk，不能限制接收字节；Content-Range/offset 仍未校验。第72–75行又把 Uri.parse 移到 try 外，畸形主/backup URL可抛出而不是返回null；controller的in-flight removeAll无finally，会残留标记。\n\n新增3项测试全部使用 fetch，从未进入 _rangeGet。所谓超长200用例只把局部变量maxServed设成4096，实际返回1024字节fixture；“不结束错误响应”只是Future.timeout，不是HTTP错误body。请用真实 loopback HttpServer/HttpClient，覆盖成功体停顿、错误大chunk、Range错位、超限/截断、取消、畸形候选及全部backup共享预算。当前成功响应累积缓冲已受限的改善可以保留。\n\n### P1 — in-flight Set 去重会使新 probe 发布空 facts\n\n`pages/video/controller.dart:338–365` 见同键in-flight就continue，不等待共享Future。确定时序：probe A(serial1)等待嗅探；同revision的display/options probe B(serial2)跳过嗅探，取得空的不可变map并发布unknown；A完成后写cache，但外层serial门将其结果丢弃，cache完成不触发新的probe。即使先修上面的键断接，此序列仍可能让126一直灰禁。\n\n请对当前身份共享进行中的Future并等待结果，用同一代次约束缓存写和公开selection，失败/关闭路径可靠清理。补Completer控制的A/B交叠、旧revision晚到与同规格不同媒体回归。\n\n### 原 P1/P2 仍开放\n\n- **本地源 P1**：`pages/video/controller.dart:1158–1162` 仍在 FileSource/DirectFileSource 分流前执行 `Uri.parse(videoUrl!)`。普通下载的initFileSource(596–614)和本地诊断初始化(645–658)不设network URL，仍会先崩溃。请补两个真实入口回归。\n- **轨道/颜色 P1**：`dovi_sniff.dart:164–210` 仍接受任意路径首个DOVI box，不绑定所选video track/sample-entry或核对多个记录冲突；BL/RPU虽解析却不参与准入。`hdr_output.dart:93–122` 仍将P5 compat改0、P10强制HEVC。此文件blob及核心逻辑未变；请保留原始layer/compat/codec/颜色事实并拒绝decoy/冲突/畸形，未知继续失败关闭。\n- **诊断 P2**：sniffer异常已脱敏，但 `DV003_OPEN` 第1161行仍输出完整videoUrl/query签名。应与本地源修复一起改为可空、脱敏身份。\n\n### B4 与当前证据不能标作闭合\n\nb180 文档新增的更正已承认旧 `+223 -5 / analyze 2 issues` 不能作绿证，这一点保留。但“284全过/0issue”的新内容仍只有两个本机 manifests 日志路径；受审递归树2515条未包含原始日志，也未见可访问附件。不能由引用名称确认命令/退出码、库/SDK/package roots或源码向量。\n\n实际 hosted `38269870720/attempt1`（dd76）已cancelled；source capture `114881247990` 用 EXPECTED_APP_SHA=dd76 校验公共routing分支时exit1，无最终source vector，下游App analyze/tests、Python与platform source全部skip。b180的 `38270385174` 仍pending，07953的 `38270201194` 未终态；这些均不证明284通过。本次未冒称读到DEVICE本机的成功日志。\n\n文档“终审四项阻断已整改/仅剩LG”应改为逐项准确状态。库PR6仍9a2，原 [review5492587336](https://github.com/Goodwu/media-kit/pull/6#pullrequestreview-5492587336) 对实际跨轮guard和未决语义的阻断没有解除；DIAG删除和fixture改善不等于B3全部完成。用户诊断范围与“最终plan/真实切换”两项决定保持开放。\n\ndebug applicationIdSuffix 的删除仍在本PR；fdbb3a8 commit称其为用户诊断要求。请在回交中明确该诊断配置与产品集成的适用范围及受验APK身份，CORE不凭提交说明推定所有产品构建都应替换release安装。\n\n请现有 DEVICE 在原PR继续修订上述范围并回交真实成功日志；CORE保持只审不并写。DV001/PR5未出现新配方回交，接受ledger仍空，native/JAR/APK/设备HDR/持续性能另行验收。主PR保持OPEN/DRAFT、未合并、未关闭、未发布。本review若经COMMENT发布，GitHub状态为COMMENTED，正文结论为REQUEST_CHANGES。\n",
+  "localEvidenceFiles": [
+    {
+      "name": "api-initial-snapshot.json",
+      "bytes": 746660,
+      "sha256": "763b93a12152a5f89e5a606a750ff5ea7b71d7db49cc6d54aff4e1fc3bd2127b"
+    },
+    {
+      "name": "api-b180-final-snapshot.json",
+      "bytes": 1083480,
+      "sha256": "7542cec3ce92f29ab231562d9e2a60c0fa7aca43971b787975fb17390760fedb"
+    },
+    {
+      "name": "source-file-hashes.json",
+      "bytes": 2517,
+      "sha256": "7ca1079e18c1fb2b0850ea79e2ab2a25fd97ade6af99a61640d85cc891db789f"
+    },
+    {
+      "name": "source-b180-file-hashes.json",
+      "bytes": 3147,
+      "sha256": "2d17a8b3f0e1990ba0833eae572eff4ada23537f2dad5633aaea49f804afcc97"
+    },
+    {
+      "name": "pr3-review-b180-draft.md",
+      "bytes": 6393,
+      "sha256": "363d0dc07b6f38b6b4de7edd91be8f9fa3d4c1bd1ce0ca342a54cdf6e7d217b9"
+    }
+  ]
+}

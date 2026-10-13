@@ -6,15 +6,17 @@
 
 ## MK-ROUTING-20261011（CORE继任）
 
-- 状态：进行中；唯一主线 `routing/MK-ROUTING-20261011`。CORE 唯一集成，DEVICE 在原 DV001 PR 维护 native recipe/build/device acceptance。主 PR 不自动合并/关闭/发布。
-- 当前 heads：App `a3b577f3794634b497c6f82369bcc98d39d91fa2`；media-kit `e269d9669becb5812663200e7521901e8254c8bd`；FFmpeg `9aba43cf`；DV001 `1095a43acb4d0973b8bca59c5da4e300657bdb29`；PR #5 `dc41787082752f234fed85db7fb7be3bd855cc45`。
-- App source run `38255581451` 对 `a3b577f3 + e269d966` 成功：四平台 Flutter 各268，analyze无finding，Python504 pass/2 skip，bundle/freshness通过。证据 `docs/plans/core-source-ci-a3b577-e269d-checkpoint-20261012.json`，SHA256 `156cd314f670a3d958cea70beb3818a4ea3b6dba0d3e9d944e20b8d1858705da`。旧34 info已过时。App Build `38255582037` 在 native input gates 失败关闭，无验收APK/native产物。
-- media-kit source `38255531539`、query `38255531454`、Darwin `38255531401` 成功；OHOS `38255531417` 仅unsigned HAP hosted build。general run `38255531407` 上次核对仍运行。
-- PR #5 部分归并：matrix已集成（27 synthetic/mocked tests）；DV003/DV004 critical review已带来源哈希归档。PR5新 `dc417870` 两脚本仅来源登记，不导入/不执行；`66aa28e` 上游冲突解决移除了三份历史来源banner，当前档案保留并记录。DV004为REQUEST_CHANGES，两项用户决定待确认，不实现。
-- DV001仍`1095a43`且无新DEVICE回交；符号读取失败、两个Vulkan符号、失败传播、clean staging、精确三库成员/链接来源仍待DEVICE原PR修复，CORE复审。PR5与DV001完整native、产物、设备归并仍未完成。
-- 已实现 query/DASH/unknownDV/F01/R01/有效auto/prefer/require闭环。PR #3 DV003 Critical REQUEST_CHANGES；不另开DEVICE线。剩余：fresh native输入/来源、ABI/签名、普通Session/YUV carrier/owner、最新P5/P8.4 true/false、实体HDR/持续性能。experimental默认false，保持LG YUV8/FULL/range1及owner/ACK/lease。
-- 唯一详细上下文：`archives/conversations/media-kit-routing-20261011.md`。
+- 用户最新优先级：DEVICE源码归并；CI跟进、新构建与其它开发暂停。本次两仓提交带`[skip ci]`；公共主PR不向正式base合并、不发布。
+- App PR3@9895e7dc的9代码/测试文件已按源字节归入，含DV003/DV005/DV006和debug applicationId变化；状态CODE_INTEGRATED_KNOWN_ISSUES_OPEN。HTTP/cache/track/localURL与亮度reset/事件/权限/lifecycle问题继续开放。
+- 库PR6@9a2c5768归入来源历史并完整归档原文；公共gather及跨轮拒绝断言保留，新增2兼容plan负例。FIRST-complete-only行为未启用，实际decoder序列和两个用户决策继续开放。
+- PR5@dc417870的两脚本原文归档为`.sh.txt`，继续排除于可执行配方；公共matrix/已有审查文档和三provenance banner不覆盖。
+- native同名公共routing已指向1095a43a，包含3笔DEVICE原提交；原DEVICE/feature/main与原PR1不变。DV001/PR5配方整改、fresh native、最终JAR/APK、设备HDR与持续性能验收必需未完，接受ledger空、批准native0。
+- DV006新增读取DEVICE comment6128050177的LYA用户手势观察；该回报不关闭NaN reset/事件/权限/Activity handlers问题。原review结论继续有效，旧“暂不归并”的排期由本次用户指令更新。
+- 本次只核三方归并、精确source/blob/SHA、保留门与提交回读；没有新Flutter/Kotlin/native运行结论。此前App3884+库4d1d受验结果与历史a3b+e269结果保留原标签；general38275707106的最后已读观察停在16:49:33 UTC，本阶段不续查。
+- CORE Web/订阅/Flutter pin与既有query/DASH/F01/R01/config保留。experimental默认false，true主验并测false；LG YUV8/FULL/range1/精确设备/ownerACKlease保持，10-bit/lease融合延期。
+- 完整处置与来源索引：`docs/plans/core-device-integration-20261012.json`（库中央含独立报告）；唯一`archives/conversations/media-kit-routing-20261011.md`。用户已授权确认归并后删除相应来源分支；逐ref核HEAD/祖先/处置后清理，结果回读登记中央PR4。保留全部公共routing及未合并的native原PR1分支。后续同一DEVICE从公共HEAD认领App/DV004修订，native仍原PR1；CI与其它代码维持暂停。
 - 2026-10-13 安卓构建+五机回归（routing@5834ce5b）：测试链四 APK（p5/p84/hdr10/sdr，lib 槽位 5f8fc04c 与 10-10 基线一致）；顺带修复 `tool/build-android-test.sh` flutter 步骤 melos 根必失败缺陷（53ede203 引入，定稿版此前从未端到端跑通）。结果：LYA 3/3 绿（与 10-10 基线逐格一致）；marble p5/p84 绿+hdr10 首跑触发**新解码履行复核门竞态**（HdrDecoderReviewFailure "Observed decoder changed"，同路由复跑 marble5 完整通过——间歇 flake 待修；2026-10-13 修复已提交：未稳定样本改重试，analyze 零 finding，设备复跑待验）；LG 3/3 对照 LG 基线通过（P5 nativeDV verified、API24 加载正常；p84/hdr10 色彩留 30s 人工目视旗标）；jason 2/2 对照 09-30 基线通过；ugg 用户解锁后补跑 ugg5-sdr 通过（sdrDirect/verified、零 fatal、EOS/dispose 闭合）——**五机 5/5 全数通过，目标闭环**。②post-EOS BACK 不 dispose 本轮复现于 LG(API24)/jason(API35)——"HyperOS API35"归因不成立，修正为设备相关待查（复现 marble/jason/LG，LYA 通过）。tap 协议修正：横屏输入空间 tap=(逻辑短边/2,同)，旋转设置轮前 1/1 轮后还原。context：`archives/conversations/regression-two-device-20261013.md`；证据 `~/src/media-kit-build/evidence/regression-two-device-20261013/`。
+- 2026-10-13 本分支两笔代码修复（本合并带入，未推送）：① 平台线程 ANR——主 isolate 事件泵去 kDebugMode、新增 mpv API isolate（`media_kit/lib/src/player/native/core/mpv_api_isolate.dart`）承接同步属性/hook 调用、set_property async 超时 5s→30s；② 解码履行复核门竞态——未稳定样本改重试（即上条 marble hdr10 flake 的修法；DEVICE 侧同文件修复 `0fb163c6` 已被终审 `9a2c5768` 回退、远端净零）。均 analyze 零 finding，设备复验待跑；详见归档 2026-10-13 段。
 
 ## 接手快照（2026-10-10 更新；换 agent 从这里开始）
 
@@ -71,11 +73,11 @@
   - next: mpv 终止与音频-only 宿主接线是下一增量；核验清理中再次点击、失败重试和全屏组合；通用失败 disposal/global-ref 定量闭合、连续可见帧与 mpv WID 回读；P5 专属项已归 P3 完成。
 
 - [ ] player-set-shuffle(-consecutive) 概率性 flaky 测试处置（上游同源）
-  - status: in_progress（Native 修复已推送待 CI 验证；Web 侧机制另立待排期）
-  - context: archives/experiments/ci-fix-20261002.md（终验节：机制与证据链）
-  - acceptance: 随机洗牌未变序时测试不再误报（本地无法跑 player 套件，需 CI run 验证）；Web 侧处置定案（本地改测试 vs 提报上游）。
-  - latest: 机制=setShuffle 状态门控（false→true 跃迁才洗牌），单次 4 项随机排列 1/24 概率回原序被 `_DistinctStream` 吞事件；Native 修复=两测试列表扩至 10 项（碰撞 1/10!≈2.8e-7），CI Linux/macOS 过。Web 失败非碰撞——WebPlayer 自带"洗到不同序为止"守卫，疑似 synchronized 锁等待×网络样片（5→10 项可能加重），失败签名一致（仅初始事件后 Stream closed）。
-  - next: Web 侧三选项排期：①测试改非网络 Media；②查 WebPlayer 锁与 open 网络加载交互；③提报上游。Native 修复保留。
+  - status: in_progress（Web快照与全等URI循环修复已实现；完整duplicate occurrence/队列编辑仍开放）
+  - context: archives/conversations/media-kit-routing-20261011.md；docs/plans/core-lifecycle-bootstrap-host-ci-checkpoint-20261012.json；历史 archives/experiments/ci-fix-20261002.md
+  - acceptance: 快照不被后续shuffle修改；等值队列保持当前occurrence/index且不死循环；定向与完整Chrome结果分别绑定准确源码。
+  - latest: a73d570b实际Web定向4通过、full63通过/27跳过；4d1d新增两项形成定向6。新general38275707106@4d1d已实际运行；Web定向步骤16:46:55–16:47:22的metadata为success，完整Chrome从16:47:22继续执行。预期6项的实际case日志尚未取得，不能称已读6通过或full完成。 Native历史随机测试修复保持。
+  - next: 核完当前定向6及full；混合重复URI、增删队列与恢复映射另行认领，不能以全等队列修复代替。
 
 - [ ] FFmpeg P5 RPU T3 单帧位移定性（b4d2ea4 世代已知项）
   - status: planned
