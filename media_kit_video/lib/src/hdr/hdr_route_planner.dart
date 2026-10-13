@@ -160,6 +160,12 @@ class HdrRoutePlanner {
         ? HdrOutputPreference.off
         : preference ?? HdrOutputPreference.auto;
     final HdrSourceClass cls = HdrSourceClass.of(source);
+    // In automatic mode an HDR source may use SDR only when the display
+    // explicitly reports SDR-only capabilities. A missing report is unknown,
+    // not an SDR panel. The explicit off/require-SDR request is separate.
+    final bool allowSdrOutput = cls == HdrSourceClass.sdr ||
+        preference == HdrOutputPreference.off ||
+        capabilities.displayHdrTypes?.isEmpty == true;
     final HdrStrategy fallback = cls == HdrSourceClass.sdr
         ? HdrStrategy.sdrDirect
         : HdrStrategy.toneMapSdr;
@@ -177,12 +183,21 @@ class HdrRoutePlanner {
           policy: policy,
           excluded: excluded,
           options: options)) {
-        candidates.add(candidate);
-        if (candidate.feasible) selected ??= candidate;
+        final effective = !allowSdrOutput &&
+                candidate.feasible &&
+                candidate.route?.outputTransfer == HdrOutputTransfer.sdr
+            ? HdrCandidate(
+                strategy: candidate.strategy,
+                maturity: candidate.maturity,
+                skipReason: HdrDegradeReason.displayLacksTransfer)
+            : candidate;
+        candidates.add(effective);
+        if (effective.feasible) selected ??= effective;
       }
     }
-    if (selected == null) {
-      // The safety net relaxes maturity, never source or failed dependencies.
+    if (selected == null && allowSdrOutput) {
+      // SDR fallback is limited to an explicit SDR request or a confirmed
+      // SDR-only display. It must not become a hidden HDR failure exit.
       final fallbackCandidates = _evaluateCandidates(fallback,
           source: source,
           sourceClass: cls,
@@ -197,6 +212,17 @@ class HdrRoutePlanner {
           orElse: () => fallbackCandidates.first);
     }
 
+    // No fallback candidate is synthesized for HDR-capable or unknown
+    // displays. Preserve the first rejected candidate as the blocking reason.
+    selected ??= candidates.isNotEmpty
+        ? candidates.first
+        : HdrCandidate(
+            strategy: HdrStrategy.metadataReshape,
+            maturity: HdrStrategyMaturity.unsupported,
+            skipReason: cls == HdrSourceClass.dvUnknown
+                ? HdrDegradeReason.sourceMetadataUnknown
+                : HdrDegradeReason.unsupportedStrategy);
+    if (candidates.isEmpty) candidates.add(selected);
     final ordered = applyVideoRouteOptions(candidates, capabilities, options);
     selected = ordered.firstWhere((candidate) => candidate.feasible,
         orElse: () => selected!);
