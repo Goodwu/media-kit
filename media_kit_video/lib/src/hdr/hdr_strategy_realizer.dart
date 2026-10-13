@@ -274,15 +274,17 @@ class HdrStrategyRealizer {
     );
   }
 
-  /// `gpu-next` conversion of the base layer to a display-supported HDR
-  /// transfer function on a `rgb10_a2` PlatformView surface, PQ preferred.
-  /// DV sources strip the RPU on this route; profile 5 never applies.
+  /// C4: `gpu-next` conversion of an HLG compatibility base layer to PQ on
+  /// a `rgb10_a2` PlatformView. An existing PQ or SDR base layer is never
+  /// transformed here. DV sources strip their RPU; profile 5 is excluded.
   static HdrStrategyRealization _baseLayerConvert(
     HdrSourceDescriptor source,
     HdrSourceClass cls,
     HdrCapabilities capabilities,
   ) {
-    if (cls == HdrSourceClass.dvP5 || cls == HdrSourceClass.dvP10) {
+    if (cls == HdrSourceClass.dvP5 ||
+        cls == HdrSourceClass.dvP10 ||
+        _baseLayerTransfer(source, cls) != HdrOutputTransfer.hlg) {
       return const HdrStrategyRealization.infeasible(
           HdrDegradeReason.unsupportedStrategy);
     }
@@ -295,22 +297,17 @@ class HdrStrategyRealizer {
       return const HdrStrategyRealization.infeasible(
           HdrDegradeReason.noDisplayCapabilityReport);
     }
-    final HdrOutputTransfer output;
-    if (types.contains(HdrOutputPolicy.displayHdrTypeHdr10)) {
-      output = HdrOutputTransfer.pq;
-    } else if (types.contains(HdrOutputPolicy.displayHdrTypeHlg)) {
-      output = HdrOutputTransfer.hlg;
-    } else {
+    if (!types.contains(HdrOutputPolicy.displayHdrTypeHdr10)) {
       return const HdrStrategyRealization.infeasible(
           HdrDegradeReason.displayLacksTransfer);
     }
-    if (output == HdrOutputTransfer.pq &&
-        (_convertPqSurfaceTransfer != 'pq' &&
-            (_convertPqSurfaceTransfer != 'pq-itu' ||
-                !_convertRouteLock ||
-                capabilities.sdkInt != 24 ||
-                capabilities.dataSpaceExt?.id != 'lg-pq' ||
-                capabilities.dataSpaceExt?.applicable != true))) {
+    const HdrOutputTransfer output = HdrOutputTransfer.pq;
+    if (_convertPqSurfaceTransfer != 'pq' &&
+        (_convertPqSurfaceTransfer != 'pq-itu' ||
+            !_convertRouteLock ||
+            capabilities.sdkInt != 24 ||
+            capabilities.dataSpaceExt?.id != 'lg-pq' ||
+            capabilities.dataSpaceExt?.applicable != true)) {
       return const HdrStrategyRealization.infeasible(
           HdrDegradeReason.unsupportedStrategy);
     }
