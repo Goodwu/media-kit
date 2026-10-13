@@ -34,7 +34,7 @@ CORE 按用户最新“先合 DEVICE、CI 等其它工作暂停”的指令完�
 
 用户已追加授权“确定已合并的情况下，删除相应分支”。逐一回读归并父提交、源文件处置和未前进的来源HEAD后，清理已确认归并的App PR3、库PR5/PR6来源分支；实际删除与ref回读登记中央PR4。全部公共routing保留；native原PR1仍未合到feature base，保留其DEVICE分支供原配方修订。已删除来源分支的App/DV004后继修改由同一DEVICE从公共HEAD出发，先中央认领，原review问题持续跟踪。CI与其它开发维持暂停；DV004两个决策点不在本轮代为裁决。
 
-### 2026-10-13 路由设计复核、目标态裁决与本分支两笔代码修复（本合并带入）
+### 2026-10-13 路由设计复核、目标态裁决与本分支代码变更（本合并带入）
 
 2026-10-13 Lead 派发 Specialist 完成"含 experimental 面的完整路由合理性"只读复核（未改码）。72 格 = 37 experimental / 21 unsupported / 13 verified / 1 inherited；experimental 按入口分：默认偏好表 12 + 列表外安全网 2（dvP82、hdr10Plus × toneMapSdr）+ 仅自定义偏好 13 + realizer 恒拒 10；dvP81/dvP7 × metadataReshape 初次规划被 baseLayerDirect 支配，经会话失败重试截断列表仍可达（三种可达口径需区分）。关键问题：安全网 gateMaturity=false 一并豁免 unsupported（dvP10 × toneMapSdr 被选中，且 planner_test 已编码该行为，属文档/测试与需求状态表的契约矛盾）；DV 源 toneMapSdr 保留 RPU 却报 appliesDynamicMetadata=false（dvP82 与 sdrDirect 的显式 strip 不一致，原生是否消费 RPU 未验证）；realizer 读取 mkst bridge FFI 动态状态，同 source/caps/options 非纯确定函数；P7 "仅 MEL" 准入实为 enhancementLayer==false，现数据模型分不出 MEL/FEL。优化方案：第一批 A（安全网契约拆分，保守/兼容两案待用户裁决）+ F（isSafetyNet/成熟度豁免可观测性与证据分层）；第二批 B（SDR 源元数据处理显式契约，dvP82 优先）+ C（bridge readiness 快照化）；第三批 D（experimental 按格 allowlist，保留全局开关）+ E（10 恒拒格改 unsupported、默认列表 3 个恒拒占位标记、表测试加唯一键/完整性/可达性见证）。不建议仅凭 verified 将 hdr10 × metadataReshape 纳入默认列表（verified=准入≠默认偏好，且 appliesDynamicMetadata=false 非真重建）。实施待用户方向。
 
@@ -44,7 +44,7 @@ CORE 按用户最新“先合 DEVICE、CI 等其它工作暂停”的指令完�
 
 2026-10-13 平台线程 ANR 修复提交（media_kit）：引擎合并线程拓扑下 Dart 根 isolate 运行于平台线程，同步 libmpv 调用取 `mp_dispatch_lock`，该锁在启动/复核/输出重建期间可被 VO 等待平台线程 surface 工作时持有——平台线程等 mpv、mpv 等平台线程，死锁成 ANR。改动：① `Initializer` 主 isolate 事件泵去 `kDebugMode` 限定（release/测试同走 isolate pump，`mpv_wait_event()` 固定在泵线程），`dispose` 与 `create` 镜像同路；② 新增 `media_kit/lib/src/player/native/core/mpv_api_isolate.dart` 专用 API isolate（与事件泵刻意分离——属性读阻塞在 core lock 上不得妨碍泵 drain 事件队列，否则事件队列饱和反压 core 整体死锁），`getProperty`/属性观察读值/hook 内 `http-header-fields` 写入与置空/`playlist-pos` 读/`hook_continue`/`setPropertyString` 全部改经该 isolate 执行（仅 `configuration.async`；`allowDisposed` 直接路径保留保释放顺序），同步手写 FFI 分配释放随之下线；③ `mpv_set_property_async` 回复超时 5s→30s（首帧 VO 初始化 GPU context+shader 编译在慢 GPU/模拟器合法超时，await 异步不占平台线程）。验证：改动文件 `dart analyze` 零 finding；真机验证未跑，待平台线程拓扑设备复验。
 
-2026-10-13 解码履行复核门竞态修复提交（media_kit_video `hdr_decoder_review.dart`）：五机回归 marble hdr10 首跑的 `HdrDecoderReviewFailure("Observed decoder changed")` 间歇 flake（同路由复跑通过）根因是双采样落进 decoder 正在打开/视频参数尚未稳定的窗口。改动：双采样一侧为空视为 decoder opening、`video-params/*` 差异视为 settling，均重试取稳定样本；decoder 身份 endpoint 双侧均已稳定仍不同才判失败（该异常正是此检查存在目的，不放松）。DEVICE 侧 DV004 同文件修复 `0fb163c6` 已在终审整改 `9a2c5768` 回退，远端净零，本修复为该竞态现行修法。验证：`dart analyze` 零 finding；marble hdr10 复跑待验。
+2026-10-13 解码履行复核门竞态修复尝试与回退（media_kit_video `hdr_decoder_review.dart`）：针对五机回归 marble hdr10 首跑的 `HdrDecoderReviewFailure("Observed decoder changed")` 间歇 flake（同路由复跑通过），本分支曾提交"未稳定样本改重试"修复（一侧为空视为 decoder opening、`video-params/*` 差异视为 settling）。并入远端 DEVICE 归并线时经契约测试证伪回退：既有测试编码的契约是已稳定差异必须拒绝（"A/B mixed snapshot rejects video-params/pixelformat|gamma"），空值窗口由既有首帧等待机制处理，与本尝试无关；且 flake 报错来自跨轮 identity 基线循环（observed 对比），不在 A/B 循环，尝试未触及根因。DEVICE 侧同类策略 `0fb163c6`（identity 基线仅在事实齐备轮建立，first-complete-only）已由终审 `9a2c5768` 回退且该策略明记"仍未批准"。处理：源码还原公共原版（与 merge-base blob 一致），`hdr_decoder_review_test` 23 项全绿；flake 保持待修，修复策略属 DV004 两项开放决定（实际 decoder identity 序列、临时诊断范围与最终 plan 履行语义），待用户/DEVICE 裁决，不单方实现。
 
 ## History
 
