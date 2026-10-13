@@ -186,7 +186,6 @@ class HdrVideoSession {
     _disposeBackendForTesting = disposeBackendForTesting;
     _player = player;
     _legacyPreference = preference;
-    _legacyPolicy = policy;
     _policy = policy ?? HdrRoutingPolicy.defaults;
     _target = target;
     _configuration = configuration;
@@ -294,7 +293,6 @@ class HdrVideoSession {
   late VideoControllerConfiguration _configuration;
   HdrSessionRoutePlanner? _customPlanner;
   HdrOutputPreference? _legacyPreference;
-  HdrRoutingPolicy? _legacyPolicy;
   EffectiveVideoRouteOptions? _configuredOptions;
   VideoRouteOptionFulfillment? _optionFulfillment;
 
@@ -443,7 +441,6 @@ class HdrVideoSession {
     }
     final frozenOptions = resolveHdrRouteOptions(
         options: options ?? _configuredOptions,
-        policy: _configuredOptions == null ? _legacyPolicy : null,
         preference: _configuredOptions == null ? _legacyPreference : null);
     if (_disposed) throw StateError('HdrVideoSession is disposed');
     if (!_isAndroid) {
@@ -896,8 +893,7 @@ class HdrVideoSession {
                       : HdrStrategy.toneMapSdr
                 ]
               }
-            : policy.preferences,
-        allowExperimental: options.experimental);
+            : policy.preferences);
     if (custom == null) {
       return HdrRoutePlanner.plan(
           source: source,
@@ -1369,13 +1365,11 @@ class HdrVideoSession {
 
   VideoRouteOptions _settingsValues() {
     final value = _configuredOptions ??
-        resolveHdrRouteOptions(
-            policy: _legacyPolicy, preference: _legacyPreference);
+        resolveHdrRouteOptions(preference: _legacyPreference);
     return VideoRouteOptions(
         decode: value.decode,
         output: value.output,
         importPreference: value.importPreference,
-        experimental: value.experimental,
         failurePolicy: value.failurePolicy);
   }
 
@@ -1399,9 +1393,10 @@ class HdrVideoSession {
   Future<void> setPolicy(HdrRoutingPolicy policy) async {
     _ensureConfigurationChangeAllowed();
     _policy = policy;
-    await setOptions(EffectiveVideoRouteOptions.resolve(
-        application: _settingsValues()
-            .merge(VideoRouteOptions(experimental: policy.allowExperimental))));
+    // The policy carries preference lists only; publishing the unchanged
+    // settings still replans pending work under the new policy.
+    await setOptions(
+        EffectiveVideoRouteOptions.resolve(application: _settingsValues()));
   }
 
   /// Consumes a capability snapshot change (R1.6/R3.4): always publishes

@@ -43,7 +43,7 @@ void main() {
   test('HDR10+ cannot masquerade as dynamic native or mapped PQ', () {
     final p = HdrRoutePlanner.plan(
         source: hdr10Plus, capabilities: _caps({2}),
-        policy: const HdrRoutingPolicy(allowExperimental: true));
+        );
     _expectMissingDynamic(p, HdrStrategy.nativeHdr10Plus);
     expect(p.playable, isTrue);
     expect(p.selected.strategy, HdrStrategy.baseLayerDirect);
@@ -53,7 +53,7 @@ void main() {
   test('Vivid PQ maps to explicit C1/C2 errors before PQ baseline', () {
     final p = HdrRoutePlanner.plan(
         source: vividPq, capabilities: _caps({2}),
-        policy: const HdrRoutingPolicy(allowExperimental: true));
+        );
     _expectMissingDynamic(p, HdrStrategy.nativeHdrVivid);
     expect(p.playable, isTrue);
     expect(p.selected.strategy, HdrStrategy.baseLayerDirect);
@@ -62,7 +62,7 @@ void main() {
   test('Vivid HLG with PQ-only panel can still reach C4', () {
     final p = HdrRoutePlanner.plan(
         source: vividHlg, capabilities: _caps({2}),
-        policy: const HdrRoutingPolicy(allowExperimental: true));
+        );
     _expectMissingDynamic(p, HdrStrategy.nativeHdrVivid);
     expect(p.candidates.firstWhere((c) =>
         c.strategy == HdrStrategy.baseLayerDirect).feasible, isFalse);
@@ -74,7 +74,7 @@ void main() {
   test('missing PQ capability is unavailable, not C2 implementation error', () {
     final p = HdrRoutePlanner.plan(
         source: hdr10Plus, capabilities: _caps({3}),
-        policy: const HdrRoutingPolicy(allowExperimental: true));
+        );
     expect(p.candidates[0].skipReason,
         HdrDegradeReason.routeNotImplemented);
     expect(p.candidates[1].skipReason,

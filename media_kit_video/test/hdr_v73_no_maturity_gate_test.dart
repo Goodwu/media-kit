@@ -28,23 +28,23 @@ void main() {
     expect(defaultPlan.selected.stage, HdrRouteStage.c3);
   });
 
-  test('legacy experimental toggles cannot change the route or errors', () {
-    final no = HdrRoutePlanner.plan(
+  test('no enable switch exists: route and errors are fixed', () {
+    final withDefaults = HdrRoutePlanner.plan(
       source: vividPq, capabilities: caps(),
-      policy: const HdrRoutingPolicy(allowExperimental: false));
-    final yes = HdrRoutePlanner.plan(
-      source: vividPq, capabilities: caps(),
-      policy: const HdrRoutingPolicy(allowExperimental: true));
-    expect(no.selected.strategy, yes.selected.strategy);
-    expect(no.candidates.map((c) => c.skipReason).toList(),
-        yes.candidates.map((c) => c.skipReason).toList());
+      policy: HdrRoutingPolicy.defaults);
+    final withoutPolicy = HdrRoutePlanner.plan(
+      source: vividPq, capabilities: caps());
+    expect(withDefaults.selected.strategy, withoutPolicy.selected.strategy);
+    expect(withDefaults.candidates.map((c) => c.skipReason).toList(),
+        withoutPolicy.candidates.map((c) => c.skipReason).toList());
+    expect(withDefaults.candidates[0].status, HdrCandidateStatus.error);
+    expect(withDefaults.candidates[1].status, HdrCandidateStatus.error);
   });
 
-  test('mismatched legacy experimental hints do not reject valid options', () {
+  test('valid options are accepted without any legacy hint', () {
     final options = EffectiveVideoRouteOptions.resolve();
     final result = HdrRoutePlanner.plan(
       source: vividPq, capabilities: caps(),
-      policy: const HdrRoutingPolicy(allowExperimental: true),
       options: options,
     );
     expect(result.playable, isTrue);

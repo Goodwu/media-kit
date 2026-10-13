@@ -24,7 +24,7 @@ const _hdr10 = HdrSourceDescriptor(
   enhancementLayer: false,
 );
 
-HdrVideoSession _session(FakeBackend backend, {bool experimental = true}) =>
+HdrVideoSession _session(FakeBackend backend) =>
     HdrVideoSession.forTesting(
       capabilitiesProvider: () async => const HdrCapabilities(
         sdkInt: 29, displayHdrTypes: {1, 2, 3},
@@ -35,7 +35,6 @@ HdrVideoSession _session(FakeBackend backend, {bool experimental = true}) =>
       positionProvider: () => Duration.zero,
       isAndroid: true,
       backend: backend,
-      policy: HdrRoutingPolicy(allowExperimental: experimental),
     );
 
 HdrReviewFacts _facts({
@@ -51,23 +50,21 @@ HdrReviewFacts _facts({
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  for (final experimental in [false, true]) {
-    test('partial review preserves hinted DV with experiment=$experimental', () async {
-      final backend = FakeBackend()..factsForOpen.add(_facts());
-      final session = _session(backend, experimental: experimental);
-      addTearDown(session.dispose);
-      await session.open(Media('test://source'), hint: _p84);
-      expect(backend.opened, hasLength(1));
-      final report = session.report.value;
-      expect(report.source, _p84);
-      expect(report.verified, isTrue);
-      expect(report.sourceFacts!.reviewCount, 1);
-      expect(report.sourceFacts!.initialHint, _p84);
-      expect(report.sourceFacts!.origins[HdrSourceField.dvProfile],
-          HdrSourceFactOrigin.hint);
-      expect(report.sourceFacts!.videoParams!.gamma, 'hlg');
-    });
-  }
+  test('partial review preserves hinted DV', () async {
+    final backend = FakeBackend()..factsForOpen.add(_facts());
+    final session = _session(backend);
+    addTearDown(session.dispose);
+    await session.open(Media('test://source'), hint: _p84);
+    expect(backend.opened, hasLength(1));
+    final report = session.report.value;
+    expect(report.source, _p84);
+    expect(report.verified, isTrue);
+    expect(report.sourceFacts!.reviewCount, 1);
+    expect(report.sourceFacts!.initialHint, _p84);
+    expect(report.sourceFacts!.origins[HdrSourceField.dvProfile],
+        HdrSourceFactOrigin.hint);
+    expect(report.sourceFacts!.videoParams!.gamma, 'hlg');
+  });
 
   test('first observed DV survives missing profile after a topology reopen', () async {
     final backend = FakeBackend()
@@ -100,10 +97,10 @@ void main() {
         _facts(gamma: 'pq', vivid: true),
         _facts(gamma: 'pq', vivid: false),
       ]);
-    // The explicit experimental unlock makes the reclassified hdrVivid row
-    // selectable; without it the reclassification blocks (no implicit SDR
-    // fallback) and the retention scenario never reaches a second review.
-    final session = _session(backend, experimental: true);
+    // The reclassified hdrVivid row is selectable by default now that
+    // maturity never gates admission; the retention scenario reaches a
+    // second review.
+    final session = _session(backend);
     addTearDown(session.dispose);
     await session.open(Media('test://source'));
     expect(backend.opened, hasLength(2));

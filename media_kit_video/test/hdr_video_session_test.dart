@@ -275,34 +275,31 @@ void main() {
       () async {
     addTearDown(() => HdrStrategyRealizer.mkstBridgeProbeOverride = null);
     HdrStrategyRealizer.mkstBridgeProbeOverride = () => false;
-    for (final experimental in [true, false]) {
-      final backend = FakeBackend()
-        ..factsForOpen.addAll([
-          gammaFacts(gamma: 'pq', hwdec: 'mediacodec-copy'),
-          gammaFacts(gamma: 'pq', hwdec: 'no'),
-        ]);
-      final session = makeSession(
-        backend: backend,
-        capabilities: lgPqCaps(),
-        policy: HdrRoutingPolicy(allowExperimental: experimental),
-      );
-      final events = <HdrOutputEvent>[];
-      session.events.listen(events.add);
-      await session.open(media);
-      await pumpEventQueue();
-      expect(backend.opened, hasLength(2));
-      expect(backend.opened.first.route.strategy, HdrStrategy.sdrDirect);
-      expect(backend.opened.last.route.strategy, HdrStrategy.baseLayerDirect);
-      expect(session.report.value.verified, isFalse);
-      expect(
-          session.report.value.degradeReason, HdrDegradeReason.hwdecMismatch);
-      expect(session.report.value.sourceFacts?.source, hdr10);
-      expect(events.whereType<HdrRouteAppliedEvent>(), isEmpty);
-      expect(events.whereType<HdrErrorEvent>().single.reason,
-          HdrDegradeReason.hwdecMismatch);
-      expect(backend.calls.skip(backend.calls.length - 2), ['stop', 'reset']);
-      await session.dispose();
-    }
+    final backend = FakeBackend()
+      ..factsForOpen.addAll([
+        gammaFacts(gamma: 'pq', hwdec: 'mediacodec-copy'),
+        gammaFacts(gamma: 'pq', hwdec: 'no'),
+      ]);
+    final session = makeSession(
+      backend: backend,
+      capabilities: lgPqCaps(),
+    );
+    final events = <HdrOutputEvent>[];
+    session.events.listen(events.add);
+    await session.open(media);
+    await pumpEventQueue();
+    expect(backend.opened, hasLength(2));
+    expect(backend.opened.first.route.strategy, HdrStrategy.sdrDirect);
+    expect(backend.opened.last.route.strategy, HdrStrategy.baseLayerDirect);
+    expect(session.report.value.verified, isFalse);
+    expect(
+        session.report.value.degradeReason, HdrDegradeReason.hwdecMismatch);
+    expect(session.report.value.sourceFacts?.source, hdr10);
+    expect(events.whereType<HdrRouteAppliedEvent>(), isEmpty);
+    expect(events.whereType<HdrErrorEvent>().single.reason,
+        HdrDegradeReason.hwdecMismatch);
+    expect(backend.calls.skip(backend.calls.length - 2), ['stop', 'reset']);
+    await session.dispose();
   });
 
   test('persistent route-only disagreement blocks with an accurate reason',
@@ -419,7 +416,6 @@ void main() {
             HdrStrategy.toneMapSdr,
           ],
         },
-        allowExperimental: true,
       ),
     );
     await session.open(media, hint: p84);
@@ -853,52 +849,46 @@ void main() {
     addTearDown(() {
       HdrStrategyRealizer.mkstBridgeProbeOverride = null;
     });
-    for (final allowExperimental in [false, true]) {
-      HdrStrategyRealizer.mkstBridgeProbeOverride = () => true;
-      final backend = FakeBackend()
-        ..factsForOpen.addAll([
-          facts(gamma: 'hlg', profile: 8, hwdec: 'mediacodec'),
-          facts(gamma: 'hlg', profile: 8, hwdec: 'no'),
-        ]);
-      final session = makeSession(
-        backend: backend,
-        capabilities: lgPqCaps(),
-        policy: HdrRoutingPolicy(
-          preferences: const {
-            HdrSourceClass.dvP84: [
-              HdrStrategy.baseLayerConvert,
-              HdrStrategy.toneMapSdr,
-            ],
-          },
-          allowExperimental: allowExperimental,
-        ),
-        position: const Duration(seconds: 2),
-      );
-      final events = <HdrOutputEvent>[];
-      session.events.listen(events.add);
+    HdrStrategyRealizer.mkstBridgeProbeOverride = () => true;
+    final backend = FakeBackend()
+      ..factsForOpen.addAll([
+        facts(gamma: 'hlg', profile: 8, hwdec: 'mediacodec'),
+        facts(gamma: 'hlg', profile: 8, hwdec: 'no'),
+      ]);
+    final session = makeSession(
+      backend: backend,
+      capabilities: lgPqCaps(),
+      policy: HdrRoutingPolicy(
+        preferences: const {
+          HdrSourceClass.dvP84: [
+            HdrStrategy.baseLayerConvert,
+            HdrStrategy.toneMapSdr,
+          ],
+        },
+      ),
+      position: const Duration(seconds: 2),
+    );
+    final events = <HdrOutputEvent>[];
+    session.events.listen(events.add);
 
-      await session.open(media, hint: p84);
-      await pumpEventQueue();
+    await session.open(media, hint: p84);
+    await pumpEventQueue();
 
-      // The mismatched surfacetexture carrier is excluded at the review, but
-      // the remaining tone-map candidate is SDR output and the display
-      // reports HDR10: no implicit SDR takeover, the open blocks instead.
-      // experimental=$allowExperimental does not change this (toneMapSdr for
-      // hdr10 is verified; it fails the display transfer gate, not maturity).
-      expect(backend.opened.map((o) => o.route.hwdec), ['surfacetexture'],
-          reason: 'experimental=$allowExperimental');
-      expect(backend.opened.single.route.strategy,
-          HdrStrategy.baseLayerConvert);
-      expect(session.report.value.verified, isFalse);
-      expect(
-          session.report.value.degradeReason, HdrDegradeReason.hwdecMismatch);
-      expect(events.whereType<HdrRouteAppliedEvent>(), isEmpty);
-      final errors = events.whereType<HdrErrorEvent>().toList();
-      expect(errors, hasLength(1));
-      expect(errors.single.reason, HdrDegradeReason.hwdecMismatch);
-      expect(backend.calls, contains('reset'));
-      await session.dispose();
-    }
+    // The mismatched surfacetexture carrier is excluded at the review, but
+    // the remaining tone-map candidate is SDR output and the display
+    // reports HDR10: no implicit SDR takeover, the open blocks instead.
+    expect(backend.opened.map((o) => o.route.hwdec), ['surfacetexture']);
+    expect(backend.opened.single.route.strategy,
+        HdrStrategy.baseLayerConvert);
+    expect(session.report.value.verified, isFalse);
+    expect(
+        session.report.value.degradeReason, HdrDegradeReason.hwdecMismatch);
+    expect(events.whereType<HdrRouteAppliedEvent>(), isEmpty);
+    final errors = events.whereType<HdrErrorEvent>().toList();
+    expect(errors, hasLength(1));
+    expect(errors.single.reason, HdrDegradeReason.hwdecMismatch);
+    expect(backend.calls, contains('reset'));
+    await session.dispose();
   });
 
   test(
@@ -907,51 +897,46 @@ void main() {
     addTearDown(() {
       HdrStrategyRealizer.mkstBridgeProbeOverride = null;
     });
-    for (final allowExperimental in [false, true]) {
-      HdrStrategyRealizer.mkstBridgeProbeOverride = () => true;
-      final backend = FakeBackend()
-        ..factsForOpen.addAll([
-          facts(gamma: 'hlg', profile: 8, hwdec: 'mediacodec'),
-          facts(gamma: 'hlg', profile: 8, hwdec: 'mediacodec-copy'),
-        ]);
-      final session = makeSession(
-        backend: backend,
-        capabilities: lgPqCaps(),
-        policy: HdrRoutingPolicy(
-          preferences: const {
-            HdrSourceClass.dvP84: [
-              HdrStrategy.baseLayerConvert,
-              HdrStrategy.toneMapSdr,
-            ],
-          },
-          allowExperimental: allowExperimental,
-        ),
-        position: const Duration(seconds: 2),
-      );
-      final events = <HdrOutputEvent>[];
-      session.events.listen(events.add);
+    HdrStrategyRealizer.mkstBridgeProbeOverride = () => true;
+    final backend = FakeBackend()
+      ..factsForOpen.addAll([
+        facts(gamma: 'hlg', profile: 8, hwdec: 'mediacodec'),
+        facts(gamma: 'hlg', profile: 8, hwdec: 'mediacodec-copy'),
+      ]);
+    final session = makeSession(
+      backend: backend,
+      capabilities: lgPqCaps(),
+      policy: HdrRoutingPolicy(
+        preferences: const {
+          HdrSourceClass.dvP84: [
+            HdrStrategy.baseLayerConvert,
+            HdrStrategy.toneMapSdr,
+          ],
+        },
+      ),
+      position: const Duration(seconds: 2),
+    );
+    final events = <HdrOutputEvent>[];
+    session.events.listen(events.add);
 
-      await session.open(media, hint: p84);
-      await pumpEventQueue();
+    await session.open(media, hint: p84);
+    await pumpEventQueue();
 
-      // The mediacodec-copy carrier is independent of the failed
-      // surfacetexture decoder, but it only carries the tone-map route —
-      // SDR output that an HDR10-capable display does not authorize. The
-      // copy route is therefore never prepared and the open blocks.
-      expect(backend.opened.map((o) => o.route.hwdec), ['surfacetexture'],
-          reason: 'experimental=$allowExperimental');
-      expect(backend.calls,
-          isNot(contains('configure:toneMapSdr:-')),
-          reason: 'experimental=$allowExperimental');
-      expect(session.report.value.verified, isFalse);
-      expect(session.report.value.hwdecCurrent, isNull);
-      expect(session.report.value.actual, isNull);
-      expect(events.whereType<HdrRouteAppliedEvent>(), isEmpty);
-      final errors = events.whereType<HdrErrorEvent>().toList();
-      expect(errors, hasLength(1));
-      expect(errors.single.reason, HdrDegradeReason.hwdecMismatch);
-      await session.dispose();
-    }
+    // The mediacodec-copy carrier is independent of the failed
+    // surfacetexture decoder, but it only carries the tone-map route —
+    // SDR output that an HDR10-capable display does not authorize. The
+    // copy route is therefore never prepared and the open blocks.
+    expect(backend.opened.map((o) => o.route.hwdec), ['surfacetexture']);
+    expect(backend.calls,
+        isNot(contains('configure:toneMapSdr:-')));
+    expect(session.report.value.verified, isFalse);
+    expect(session.report.value.hwdecCurrent, isNull);
+    expect(session.report.value.actual, isNull);
+    expect(events.whereType<HdrRouteAppliedEvent>(), isEmpty);
+    final errors = events.whereType<HdrErrorEvent>().toList();
+    expect(errors, hasLength(1));
+    expect(errors.single.reason, HdrDegradeReason.hwdecMismatch);
+    await session.dispose();
   });
 
   test(

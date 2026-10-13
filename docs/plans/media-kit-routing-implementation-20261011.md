@@ -334,3 +334,11 @@ HDR10+ 用有效变化曲线测试，Vivid 用正式语义向量和独立CPU参�
 - 终态：**media_kit_video 808/808、media_kit_hdr_lab 298/298，双 exit 0**（Flutter 3.47.2）。V1 复核可提交；两条范围外低优先级跟进：planner lib 注释两处已顺手修正；两个既有测试文件的旧 gate 措辞留待 §10.3.5 批次清理。
 - 本批本地提交：10 个测试文件迁移 + planner 注释修正 + 本回执与台账。
 - 后续（§10.3.5）：删除旧 `allowExperimental/experimental` 配置/API 字段（库、Lab、App）与 PiliPlusX dirty 文件迁移，另批实施；§10.3.6 未实施项维持（metadata ownership 合同、P7 残差/EL、HDR10+/Vivid 逐帧元数据交付与映射、C1 原生动态显示链、native 最新源码构建与 LG/marble 设备输出）——routeNotImplemented 合同测试通过不等于这些功能完成。
+
+### §10.3.5a 执行回执（2026-10-14，media_kit 侧）
+
+- 删除完成：`HdrRoutingPolicy.allowExperimental/experimentalWasSpecified`（构造参数/字段/resolve policy 形参；off×require 冲突检查原样保留）；`VideoRouteOptions/EffectiveVideoRouteOptions.experimental`（字段/merge/==/hashCode/toMap/fromMap 全链）。序列化迁移契约：`fromMap` 允许集保留 legacy `experimental` key 并静默丢弃（含非 bool 脏值）=持久配置一次迁移，`toMap` 不再输出，新增契约测试钉住。
+- 附带清理：session 写死不读的 `_legacyPolicy` 字段删除（setPolicy 改发未变 settings 保留 replan 触发语义）；Lab 三个实验 common/页面调用点去参（GATE_OPEN 分支返回 defaults）；`experimentalStrategySkipped` 枚举保留（降级原因词表，文档注明"已删门的 legacy 原因，不再产生"）。
+- 测试同步 16 文件：[false,true] 参数化循环折叠为单趟 defaults（video 808→783，逐文件核对均为循环折叠，无断言本意删减）；"开关不影响评估"负向断言改为直接结果断言；`video_player_media_kit` 无代码引用（real.dart 的 'strict=experimental' 是 mpv flag 字符串，无关未动）。
+- 验证：media_kit_video 783/783、media_kit_hdr_lab 298/298，双包 analyze 零 finding，exit 0。无 ESCALATED（未发现删除后改变评估结果的隐藏依赖）。
+- 范围外事项：`video_player_media_kit/analysis_options.yaml` 出现一处非本批改动（新增 exclude build/**），按改动保护原则未入提交、保持工作树 dirty，待用户裁定。PiliPlusX 侧迁移另批（其依赖 override 钉旧 ref，App 提交与 pin 更新须待主库推送后）。

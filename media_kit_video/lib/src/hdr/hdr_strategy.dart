@@ -70,8 +70,8 @@ enum HdrStrategyMaturity {
   /// differing parts have no effect. Selected by default like [verified].
   inherited,
 
-  /// Never verified. Only selected when the routing policy explicitly sets
-  /// `allowExperimental`.
+  /// Never verified. Diagnostic label only; it never gates admission and
+  /// the strategy is selected like any other when the pipeline realizes it.
   experimental,
 
   /// The current pipeline cannot implement the combination. Never selected
@@ -241,7 +241,7 @@ class HdrStrategyMaturityTable {
       // 代际 LG 原文件直通 ACTUAL=nativeDolbyVision 30s 实时（dvProfile 5
       // verified、decDrop=0、vfps=24.0 源率），用户人工观察通过；历史证据
       // r26b（2026-10-07 LG，"P5 nativeDV 画面没问题"）与 r30b（marble，
-      // "颜色正常/画面流畅"）。`allowExperimental` 门槛与其它格零改动。
+      // "颜色正常/画面流畅"）。成熟度仅为诊断标签，与其它格零改动。
       HdrStrategy.nativeDolbyVision: HdrStrategyMaturity.verified,
       HdrStrategy.nativeHdr10Plus: HdrStrategyMaturity.experimental,
       HdrStrategy.nativeHdrVivid: HdrStrategyMaturity.experimental,

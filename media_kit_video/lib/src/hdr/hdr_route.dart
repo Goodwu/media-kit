@@ -100,8 +100,9 @@ enum HdrDegradeReason {
   /// routes are never selected on a guess.
   noDisplayCapabilityReport,
 
-  /// The strategy is `experimental` and the routing policy did not set
-  /// `allowExperimental` (requirement 3.5).
+  /// Legacy reason of the removed maturity admission gate. The planner no
+  /// longer produces it — maturity never gates admission — and it is kept
+  /// only as part of the typed reason vocabulary.
   experimentalStrategySkipped,
 
   /// The strategy cannot be realized on the current pipeline at all: a

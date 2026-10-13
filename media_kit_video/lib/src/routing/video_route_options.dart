@@ -49,42 +49,42 @@ class VideoRouteSelection<T extends Enum> {
 }
 
 /// Requested values only. This object does not query or authorize capabilities.
-/// Null fields inherit; explicit auto/false/allowAlternatives reset lower layers.
+/// Null fields inherit; explicit auto/allowAlternatives reset lower layers.
 class VideoRouteOptions {
   const VideoRouteOptions({
     this.decode,
     this.output,
     this.importPreference,
     this.failurePolicy,
-    this.experimental,
   });
 
   final VideoRouteSelection<VideoDecodeTarget>? decode;
   final VideoRouteSelection<VideoOutputIntent>? output;
   final VideoImportPreference? importPreference;
   final VideoRouteFailurePolicy? failurePolicy;
-  final bool? experimental;
 
   VideoRouteOptions merge(VideoRouteOptions overrides) => VideoRouteOptions(
         decode: overrides.decode ?? decode,
         output: overrides.output ?? output,
         importPreference: overrides.importPreference ?? importPreference,
         failurePolicy: overrides.failurePolicy ?? failurePolicy,
-        experimental: overrides.experimental ?? experimental,
       );
 
   /// Canonical field order and deeply immutable values, suitable for reports.
+  /// The removed legacy `experimental` key is intentionally not emitted;
+  /// persisted configurations carrying it migrate once through [fromMap].
   Map<String, Object?> toMap() => Map<String, Object?>.unmodifiable({
         'decode': decode?.toMap(),
         'output': output?.toMap(),
         'importPreference': importPreference?.name,
         'failurePolicy': failurePolicy?.name,
-        'experimental': experimental,
       });
 
   String get key => jsonEncode(toMap());
 
   factory VideoRouteOptions.fromMap(Map<String, Object?> map) {
+    // One-time persistence migration: a legacy `experimental` key is accepted
+    // and silently dropped; it has no field to populate anymore.
     _checkKeys(map, const {
       'decode',
       'output',
@@ -92,10 +92,6 @@ class VideoRouteOptions {
       'failurePolicy',
       'experimental'
     });
-    final experimental = map['experimental'];
-    if (experimental != null && experimental is! bool) {
-      throw const FormatException('experimental must be a boolean or null');
-    }
     return VideoRouteOptions(
       decode: _selection(map['decode'], VideoDecodeTarget.values),
       output: _selection(map['output'], VideoOutputIntent.values),
@@ -103,7 +99,6 @@ class VideoRouteOptions {
           _enumValue(map['importPreference'], VideoImportPreference.values),
       failurePolicy:
           _enumValue(map['failurePolicy'], VideoRouteFailurePolicy.values),
-      experimental: experimental as bool?,
     );
   }
 
@@ -113,24 +108,22 @@ class VideoRouteOptions {
       decode == other.decode &&
       output == other.output &&
       importPreference == other.importPreference &&
-      failurePolicy == other.failurePolicy &&
-      experimental == other.experimental;
+      failurePolicy == other.failurePolicy;
 
   @override
-  int get hashCode => Object.hash(
-      decode, output, importPreference, failurePolicy, experimental);
+  int get hashCode =>
+      Object.hash(decode, output, importPreference, failurePolicy);
 }
 
 /// One effective configuration for selection, planning, execution and reporting.
 /// Resolution applies library defaults, then application, then per-open values.
-/// It never changes require because experimental is false or fallback is enabled.
+/// It never changes require or the SDR fallback.
 class EffectiveVideoRouteOptions {
   EffectiveVideoRouteOptions._({
     required this.decode,
     required this.output,
     required this.importPreference,
     required this.failurePolicy,
-    required this.experimental,
     required this.libraryDefaults,
     required this.application,
     required this.openOverride,
@@ -142,7 +135,6 @@ class EffectiveVideoRouteOptions {
     output: VideoRouteSelection<VideoOutputIntent>.auto(),
     importPreference: VideoImportPreference.auto,
     failurePolicy: VideoRouteFailurePolicy.allowAlternatives,
-    experimental: false,
   );
 
   factory EffectiveVideoRouteOptions.resolve({
@@ -165,7 +157,6 @@ class EffectiveVideoRouteOptions {
       output: result.output!,
       importPreference: result.importPreference!,
       failurePolicy: result.failurePolicy!,
-      experimental: result.experimental!,
       libraryDefaults: libraryDefaults,
       application: application,
       openOverride: openOverride,
@@ -177,7 +168,6 @@ class EffectiveVideoRouteOptions {
   final VideoRouteSelection<VideoOutputIntent> output;
   final VideoImportPreference importPreference;
   final VideoRouteFailurePolicy failurePolicy;
-  final bool experimental;
   final VideoRouteOptions libraryDefaults;
   final VideoRouteOptions application;
   final VideoRouteOptions openOverride;
@@ -188,7 +178,6 @@ class EffectiveVideoRouteOptions {
         'output': output.toMap(),
         'importPreference': importPreference.name,
         'failurePolicy': failurePolicy.name,
-        'experimental': experimental,
         'origins': Map<String, Object?>.unmodifiable({
           for (final entry in origins.entries) entry.key: entry.value.name,
         }),

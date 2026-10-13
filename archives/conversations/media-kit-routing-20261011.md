@@ -508,3 +508,5 @@ Linux B第1修正V2仍REQUEST_CHANGES：18原tests/49独立probe及实际generat
 - 四 Worker 两轮迁移全部 31 项，0 ESCALATED（未发现实现缺陷）；无删用例、无弱化、无开关；+2 新增用例钉住覆盖缺口（hdr10Plus 固定目录错误保留、C2 错误后 C3 续走 verified）。要点：P8.2 规格级用例按 §10.3.3 双态语义迁移（p5=true C2→PQ 合法入选 / p5=false 阻断，双分支均断言无可行 SDR 候选）；一处 session 夹具按真实 planner API `withRoutingIdentity` 复刻候选身份（V1 确认非绕过）；diagnostics golden 经语义核对后重生成；legacy experimental 冲突断言按 cbd446d4 实际行为翻转（off 冲突仍拒绝）。
 - §10.3.4 四点时序核验覆盖在案。终态 **media_kit_video 808/808、media_kit_hdr_lab 298/298，双包 analyze 零 finding**（Flutter 3.47.2）；V1 复核可提交，2 条范围外跟进（planner lib 注释已顺手修正；两测试文件既有旧 gate 措辞留 §10.3.5 清理）。
 - 回执入方案 §10；本地提交未推送（push 逐次请示）。下一步 §10.3.5：`allowExperimental/experimental` 字段整体删除（库序列化/比较/配置一次迁移、Lab、App）+ PiliPlusX dirty 迁移；§10.3.6 功能项（metadata ownership、P7 残差/EL、HDR10+/Vivid 逐帧元数据、C1 原生显示链、native 构建与设备输出）维持未实施。
+
+同日 §10.3.5a（media_kit 侧）执行完成：experimental 字段全链删除（policy 两字段 + options 序列化），fromMap 丢 legacy key=持久配置一次迁移（契约测试钉住），session `_legacyPolicy` 死字段清理，Lab 调用点去参，16 测试文件同步（808→783 为参数化折叠）；video 783/783 + lab 298/298 全绿、analyze 零 finding、无 ESCALATED。`video_player_media_kit/analysis_options.yaml` 非本批改动按保护原则未入提交。PiliPlusX 迁移进行中（代码迁移保持未提交，pin 更新与提交待主库推送）。

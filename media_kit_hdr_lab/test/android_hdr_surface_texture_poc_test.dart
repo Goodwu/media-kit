@@ -119,18 +119,14 @@ void main() {
     }
   });
   test(
-      'hlg convert maturity: the double-define diag opt-in overrides an '
-      'outer allowExperimental=false policy', () {
+      'hlg convert maturity: the diag opt-in plans the experimental-labeled '
+      'route in its own planner call', () {
     // Device OES-round contract: the named hlg patch fixture classifies as a
-    // bare HLG source (codec null, transfer hlg); hlg x baseLayerConvert is
-    // `experimental` in the production maturity table, and the device open
-    // ran with the outer Session policy at allowExperimental=false (the
-    // defaults below), which made the planner skip the convert route and the
-    // validator throw the generic unsupportedStrategy. The experiment class
-    // is the explicit diagnostic opt-in: its own planner call opens the
-    // maturity gate deliberately, without touching the production table or
-    // the default define-off behavior.
-    expect(HdrRoutingPolicy.defaults.allowExperimental, isFalse);
+    // bare HLG source (codec null, transfer hlg); hlg x baseLayerConvert
+    // carries the `experimental` maturity label, which is diagnostic only.
+    // The experiment class is the explicit diagnostic opt-in: its own
+    // planner call plans the convert route without any gate, without
+    // touching the production table or the default define-off behavior.
     final hlgSource = HdrSourceDescriptor.fromKind(HdrMediaKind.hlg);
     expect(hlgSource.codec, isEmpty);
     expect(hlgSource.transfer, 'hlg');

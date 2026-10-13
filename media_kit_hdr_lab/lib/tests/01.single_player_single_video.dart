@@ -1016,8 +1016,8 @@ class _SinglePlayerSingleVideoScreenState
   //   (`sdr`, `hdr10` or `p84`) to trigger the single review rebuild.
   // - no-hint: opens without any hint; the session classifies from decoder
   //   facts and rebuilds if needed.
-  // - policy-experimental: allowExperimental + metadataReshape first for the
-  //   P8.4 source class (A6 RPU-reshape PQ route).
+  // - policy-experimental: metadataReshape first for the P8.4 source class
+  //   (A6 RPU-reshape PQ route).
   // - preference/policy swap timers: mid-playback setPreference/setPolicy
   //   probes (A5).
   static const _androidHdrSimulateNoHlg = bool.fromEnvironment(
@@ -3070,11 +3070,12 @@ class _SinglePlayerSingleVideoScreenState
   }
 
   /// The routing policy from the A6 experiment switch: defaults, or
-  /// allowExperimental with `metadataReshape` first for the P8.4 class.
+  /// `metadataReshape` first for the P8.4 class. There is no enable switch
+  /// field anymore; the gates only select preference orders.
   HdrRoutingPolicy _hdrRoutingPolicy() {
     if (_androidHdrGateOpen) {
-      debugPrint('HDR_GATE_OPEN default order, allowExperimental=true');
-      return const HdrRoutingPolicy(allowExperimental: true);
+      debugPrint('HDR_GATE_OPEN default order');
+      return HdrRoutingPolicy.defaults;
     }
     if (_androidHdrPreferConvert) {
       // HLG→PQ color-accuracy experiment: prefer the GPU convert route over
@@ -3105,7 +3106,6 @@ class _SinglePlayerSingleVideoScreenState
       preferences: <HdrSourceClass, List<HdrStrategy>>{
         HdrSourceClass.dvP84: reordered,
       },
-      allowExperimental: true,
     );
   }
 

@@ -36,18 +36,11 @@ enum HdrOutputPreference { auto, off }
 /// {@endtemplate}
 class HdrRoutingPolicy {
   /// {@macro hdr_routing_policy}
-  const HdrRoutingPolicy({this.preferences, bool? allowExperimental})
-      : allowExperimental = allowExperimental ?? false,
-        experimentalWasSpecified = allowExperimental != null;
+  const HdrRoutingPolicy({this.preferences});
 
   /// Caller overrides keyed by source class. Treated as immutable; callers
   /// must not mutate a map after handing it to a policy.
   final Map<HdrSourceClass, List<HdrStrategy>>? preferences;
-
-  /// Deprecated compatibility data; this value does not gate candidates.
-  /// Remove with the application/config API migration.
-  final bool allowExperimental;
-  final bool experimentalWasSpecified;
 
   /// The default preference order per source class: HDR output first with
   /// direct routes preferred, tone-map last (requirement 3.4).
@@ -115,8 +108,8 @@ class HdrRoutingPolicy {
     HdrSourceClass.sdr: <HdrStrategy>[HdrStrategy.sdrDirect],
   };
 
-  /// The library default policy: requirement 3.4 preferences, experimental
-  /// strategies gated off.
+  /// The library default policy: requirement 3.4 preferences only. There is
+  /// no enable switch; maturity never gates admission.
   static const HdrRoutingPolicy defaults = HdrRoutingPolicy();
 
   /// The preference list for [cls]: the caller's row when present, otherwise
@@ -168,11 +161,8 @@ class HdrRoutePlanner {
     EffectiveVideoRouteOptions? options,
     Map<String, HdrDegradeReason> excluded = const <String, HdrDegradeReason>{},
   }) {
-    options = resolveHdrRouteOptions(
-        options: options, policy: policy, preference: preference);
-    policy = HdrRoutingPolicy(
-        preferences: policy?.preferences,
-        allowExperimental: options.experimental);
+    options = resolveHdrRouteOptions(options: options, preference: preference);
+    policy = HdrRoutingPolicy(preferences: policy?.preferences);
     preference = options.output.isRequired &&
             options.output.target == VideoOutputIntent.sdr
         ? HdrOutputPreference.off
@@ -411,7 +401,6 @@ class HdrRoutePlanner {
 /// Convert legacy callers once; explicit contradictory inputs cannot be ignored.
 EffectiveVideoRouteOptions resolveHdrRouteOptions(
     {EffectiveVideoRouteOptions? options,
-    HdrRoutingPolicy? policy,
     HdrOutputPreference? preference}) {
   if (options != null) {
     if (preference == HdrOutputPreference.off &&
@@ -420,8 +409,6 @@ EffectiveVideoRouteOptions resolveHdrRouteOptions(
       throw ArgumentError(
           'Legacy HDR off conflicts with effective output options');
     }
-    // The legacy experimental field has no routing semantics. Do not reject
-    // otherwise valid requests merely because old app/config layers disagree.
     return options;
   }
   return EffectiveVideoRouteOptions.resolve(
@@ -430,8 +417,5 @@ EffectiveVideoRouteOptions resolveHdrRouteOptions(
               ? null
               : preference == HdrOutputPreference.off
                   ? const VideoRouteSelection.require(VideoOutputIntent.sdr)
-                  : const VideoRouteSelection<VideoOutputIntent>.auto(),
-          experimental: policy?.experimentalWasSpecified == true
-              ? policy!.allowExperimental
-              : null));
+                  : const VideoRouteSelection<VideoOutputIntent>.auto()));
 }

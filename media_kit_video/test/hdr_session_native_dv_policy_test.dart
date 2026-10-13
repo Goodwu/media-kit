@@ -671,7 +671,6 @@ void main() {
       final session = env.session(backend, capabilities: capabilities);
       final options = EffectiveVideoRouteOptions.resolve(
           application: const VideoRouteOptions(
-              experimental: true,
               decode: VideoRouteSelection.require(VideoDecodeTarget.hardware),
               failurePolicy: VideoRouteFailurePolicy.stop));
       await session.open(env.media,
@@ -951,8 +950,8 @@ void main() {
       await session.dispose();
     });
     test(
-        'real planner selects nativeDolbyVision with allowExperimental on a DV-capable device',
-        () async {
+        'real planner selects nativeDolbyVision by default on a DV-capable '
+        'device', () async {
       final env = _Environment();
       final backend = _Backend()
         ..review = ((plan) async => HdrReviewFacts(
@@ -965,12 +964,12 @@ void main() {
       final session = HdrVideoSession.forTesting(
           backend: backend,
           isAndroid: true,
-          policy: const HdrRoutingPolicy(allowExperimental: true),
+          policy: HdrRoutingPolicy.defaults,
           capabilitiesProvider: () async => _caps());
       await session.open(env.media, hint: _p5);
-      // 2026-10-06 dvP5 maturity unlock: the real planner now picks the
-      // native DV route on a DV-declaring device with the bridge loaded —
-      // exactly the LG direct-path this unlock enables.
+      // 2026-10-06 dvP5 unlock then 2026-10-10 default promotion: the real
+      // planner picks the native DV route on a DV-declaring device with the
+      // bridge loaded — exactly the LG direct-path this enables.
       expect(
           backend.opened
               .any((p) => p.route.strategy == HdrStrategy.nativeDolbyVision),
@@ -988,34 +987,6 @@ void main() {
       expect(source, contains('return HdrRoutePlanner.plan('));
       expect(source, contains('options: options'));
       expect(source, contains('applyVideoRouteOptions('));
-    });
-    test(
-        'real planner selects nativeDolbyVision by default (no '
-        'allowExperimental) on a DV-capable device', () async {
-      final env = _Environment();
-      final backend = _Backend()
-        ..review = ((plan) async => HdrReviewFacts(
-            path: env.media.uri,
-            codec: 'hevc',
-            dolbyVisionProfile: 5,
-            dvCompatibilityId: 0,
-            dvElPresent: false,
-            hwdecCurrent: plan.route.hwdec));
-      // 2026-10-10 dvP5 direct-path default promotion: the default policy
-      // (gate closed) reaches the native DV route on a DV-capable device —
-      // the previous requirement of an explicit allowExperimental here is
-      // gone for dvP5.
-      final session = HdrVideoSession.forTesting(
-          backend: backend,
-          isAndroid: true,
-          policy: HdrRoutingPolicy.defaults,
-          capabilitiesProvider: () async => _caps());
-      await session.open(env.media, hint: _p5);
-      expect(
-          backend.opened
-              .any((p) => p.route.strategy == HdrStrategy.nativeDolbyVision),
-          isTrue);
-      await session.dispose();
     });
   });
 }
