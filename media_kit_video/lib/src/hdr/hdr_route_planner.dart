@@ -419,11 +419,8 @@ EffectiveVideoRouteOptions resolveHdrRouteOptions(
       throw ArgumentError(
           'Legacy HDR off conflicts with effective output options');
     }
-    if (policy?.experimentalWasSpecified == true &&
-        policy!.allowExperimental != options.experimental) {
-      throw ArgumentError(
-          'Legacy experimental policy conflicts with effective options');
-    }
+    // The legacy experimental field has no routing semantics. Do not reject
+    // otherwise valid requests merely because old app/config layers disagree.
     return options;
   }
   return EffectiveVideoRouteOptions.resolve(
