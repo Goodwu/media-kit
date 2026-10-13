@@ -22,6 +22,8 @@ PR #3 DV003 仍为 Critical REQUEST_CHANGES，不原样归并，也不开第二 
 
 同日设计迭代四轮用户裁决：① dvP5+非DV HDR 显示走 reshape（P5 管线→PQ，verified 路由，Lead 初版表误标阻断）；② HDR10/HLG 删假 reshape 档；③ PQ 基线源（hdr10/dvP81/dvP7/hdr10Plus）删 ④convert——所有 HDR 面板支持 PQ、不做 PQ→HLG；④ dvP82 删 ④SDR→PQ 上变换（非标准操作、丢弃 RPU 伪 HDR，无 P5 管线→阻断，已确认）；⑤ 立不变量"HDR 可得不交 SDR：SDR 输出仅在源本身 SDR 或显示明确 SDR"；⑥ 阶梯定序 动态元数据优先：①DV原生直通 → ②reshape（仅 DV，P5 管线→PQ，P7 限无EL）→ ③基线直通（PQ 恒可行/HLG 需声明）→ ④convert（仅 HLG→PQ）→ 阻断。hdrVivid/hdr10Plus reshape 为待实现积压，播放不依赖（基线直通/convert 已覆盖）。映射表 v5 与决策树已交付，等待 4 点裁决后开工批 1（planner 决策树重写）。
 
+2026-10-13 平台线程 ANR 修复提交（media_kit）：引擎合并线程拓扑下 Dart 根 isolate 运行于平台线程，同步 libmpv 调用取 `mp_dispatch_lock`，该锁在启动/复核/输出重建期间可被 VO 等待平台线程 surface 工作时持有——平台线程等 mpv、mpv 等平台线程，死锁成 ANR。改动：① `Initializer` 主 isolate 事件泵去 `kDebugMode` 限定（release/测试同走 isolate pump，`mpv_wait_event()` 固定在泵线程），`dispose` 与 `create` 镜像同路；② 新增 `media_kit/lib/src/player/native/core/mpv_api_isolate.dart` 专用 API isolate（与事件泵刻意分离——属性读阻塞在 core lock 上不得妨碍泵 drain 事件队列，否则事件队列饱和反压 core 整体死锁），`getProperty`/属性观察读值/hook 内 `http-header-fields` 写入与置空/`playlist-pos` 读/`hook_continue`/`setPropertyString` 全部改经该 isolate 执行（仅 `configuration.async`；`allowDisposed` 直接路径保留保释放顺序），同步手写 FFI 分配释放随之下线；③ `mpv_set_property_async` 回复超时 5s→30s（首帧 VO 初始化 GPU context+shader 编译在慢 GPU/模拟器合法超时，await 异步不占平台线程）。验证：改动文件 `dart analyze` 零 finding；真机验证未跑，待平台线程拓扑设备复验。
+
 ## History
 
 ### 2026-10-12 TASKS 旧状态快照（历史）

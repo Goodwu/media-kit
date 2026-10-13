@@ -30,6 +30,7 @@ import 'package:media_kit/src/native_wakeup_callback.dart';
 import 'package:media_kit/src/player/native/core/fallback_bitrate_handler.dart';
 import 'package:media_kit/src/player/native/core/initializer.dart';
 import 'package:media_kit/src/player/native/core/initializer_native_callable.dart';
+import 'package:media_kit/src/player/native/core/mpv_api_isolate.dart';
 import 'package:media_kit/src/player/native/core/native_library.dart';
 import 'package:media_kit/src/player/native/utils/android_asset_loader.dart';
 import 'package:media_kit/src/player/native/utils/android_helper.dart';
@@ -1560,6 +1561,15 @@ class NativePlayer extends PlatformPlayer {
       await waitForVideoControllerInitializationIfAttached;
     }
 
+    if (configuration.async) {
+      // A synchronous libmpv call here takes `mp_dispatch_lock`, which can be
+      // held while the core waits on the VO; the VO may in turn wait on
+      // platform-thread surface work. On engines that run Dart on the
+      // platform thread that deadlocks into an ANR, so serve the read from
+      // the API isolate instead.
+      final value = await MpvApiIsolate.getPropertyString(ctx.address, property);
+      return value ?? '';
+    }
     final name = property.toNativeUtf8();
     final value = mpv.mpv_get_property_string(ctx, name.cast());
     if (value != nullptr) {
@@ -2375,14 +2385,24 @@ class NativePlayer extends PlatformPlayer {
         if (prop.ref.format == generated.mpv_format.MPV_FORMAT_NONE) {
           final fn = observed[prop.ref.name.cast<Utf8>().toDartString()];
           if (fn != null) {
-            final data = mpv.mpv_get_property_string(ctx, prop.ref.name);
-            if (data != nullptr) {
-              late final String value;
-              try {
-                value = data.cast<Utf8>().toDartString();
-              } finally {
-                mpv.mpv_free(data.cast());
+            final name = prop.ref.name.cast<Utf8>().toDartString();
+            final String? value;
+            if (configuration.async) {
+              // Route through the API isolate (see [getProperty]).
+              value = await MpvApiIsolate.getPropertyString(ctx.address, name);
+            } else {
+              final data = mpv.mpv_get_property_string(ctx, prop.ref.name);
+              if (data == nullptr) {
+                value = null;
+              } else {
+                try {
+                  value = data.cast<Utf8>().toDartString();
+                } finally {
+                  mpv.mpv_free(data.cast());
+                }
               }
+            }
+            if (value != null) {
               try {
                 await fn.call(value);
               } catch (exception, stacktrace) {
@@ -2464,70 +2484,33 @@ class NativePlayer extends PlatformPlayer {
         // --------------------------------------------------
         // Handle HTTP headers specified in the [Media].
         try {
-          final name = 'path'.toNativeUtf8();
-          final uri = mpv.mpv_get_property_string(
-            ctx,
-            name.cast(),
-          );
+          final uri =
+              await MpvApiIsolate.getPropertyString(ctx.address, 'path') ??
+              '';
           // Get the headers for current [Media] by looking up [uri] in the [HashMap].
-          final headers = Media(uri.cast<Utf8>().toDartString()).httpHeaders;
+          final headers = Media(uri).httpHeaders;
           if (headers != null) {
-            final property = 'http-header-fields'.toNativeUtf8();
-            // Allocate & fill the [mpv_node] with the headers.
-            final value = calloc<generated.mpv_node>();
-            value.ref.format = generated.mpv_format.MPV_FORMAT_NODE_ARRAY;
-            value.ref.u.list = calloc<generated.mpv_node_list>();
-            value.ref.u.list.ref.num = headers.length;
-            value.ref.u.list.ref.values = calloc<generated.mpv_node>(
-              headers.length,
+            final entries = <String>[
+              for (final entry in headers.entries) '${entry.key}: ${entry.value}',
+            ];
+            await MpvApiIsolate.setPropertyStringListNode(
+              ctx.address,
+              'http-header-fields',
+              entries,
             );
-            final entries = headers.entries.toList();
-            for (int i = 0; i < entries.length; i++) {
-              final k = entries[i].key;
-              final v = entries[i].value;
-              final data = '$k: $v'.toNativeUtf8();
-              value.ref.u.list.ref.values[i].format =
-                  generated.mpv_format.MPV_FORMAT_STRING;
-              value.ref.u.list.ref.values[i].u.string = data.cast();
-            }
-            mpv.mpv_set_property(
-              ctx,
-              property.cast(),
-              generated.mpv_format.MPV_FORMAT_NODE,
-              value.cast(),
-            );
-            // Free the allocated memory.
-            calloc.free(property);
-            for (int i = 0; i < value.ref.u.list.ref.num; i++) {
-              calloc.free(value.ref.u.list.ref.values[i].u.string);
-            }
-            calloc.free(value.ref.u.list.ref.values);
-            calloc.free(value.ref.u.list);
-            calloc.free(value);
           }
-          mpv.mpv_free(uri.cast());
-          calloc.free(name);
         } catch (exception, stacktrace) {
           print(exception);
           print(stacktrace);
         }
         // Handle start & end position specified in the [Media].
         try {
-          final name = 'playlist-pos'.toNativeUtf8();
-          final value = calloc<Int64>();
-          value.value = -1;
-
-          mpv.mpv_get_property(
-            ctx,
-            name.cast(),
-            generated.mpv_format.MPV_FORMAT_INT64,
-            value.cast(),
-          );
-
-          final index = value.value;
-
-          calloc.free(name.cast());
-          calloc.free(value.cast());
+          final index =
+              await MpvApiIsolate.getPropertyInt64(
+                ctx.address,
+                'playlist-pos',
+              ) ??
+              -1;
 
           if (index >= 0) {
             final start = current[index].start;
@@ -2561,10 +2544,7 @@ class NativePlayer extends PlatformPlayer {
           }
         } catch (_) {}
         // --------------------------------------------------
-        mpv.mpv_hook_continue(
-          ctx,
-          prop.ref.id,
-        );
+        await MpvApiIsolate.hookContinue(ctx.address, prop.ref.id);
       }
       if (prop.ref.name.cast<Utf8>().toDartString() == 'on_unload') {
         // --------------------------------------------------
@@ -2579,17 +2559,10 @@ class NativePlayer extends PlatformPlayer {
         // --------------------------------------------------
         // Set http-header-fields as [generated.mpv_format.MPV_FORMAT_NONE] [generated.mpv_node].
         try {
-          final property = 'http-header-fields'.toNativeUtf8();
-          final value = calloc<generated.mpv_node>();
-          value.ref.format = generated.mpv_format.MPV_FORMAT_NONE;
-          mpv.mpv_set_property(
-            ctx,
-            property.cast(),
-            generated.mpv_format.MPV_FORMAT_NODE,
-            value.cast(),
+          await MpvApiIsolate.setPropertyNodeNone(
+            ctx.address,
+            'http-header-fields',
           );
-          calloc.free(property);
-          calloc.free(value);
         } catch (exception, stacktrace) {
           print(exception);
           print(stacktrace);
@@ -2616,10 +2589,7 @@ class NativePlayer extends PlatformPlayer {
           print(stacktrace);
         }
         // --------------------------------------------------
-        mpv.mpv_hook_continue(
-          ctx,
-          prop.ref.id,
-        );
+        await MpvApiIsolate.hookContinue(ctx.address, prop.ref.id);
       }
     }
   }
@@ -2971,7 +2941,11 @@ class NativePlayer extends PlatformPlayer {
         }
         try {
           final reply = await completer.future.timeout(
-            const Duration(seconds: 5),
+            // The reply waits for the core to reach the request; first VO
+            // initialization (GPU context + shader compile) can legitimately
+            // exceed a few seconds on slow GPUs and emulators. This await is
+            // asynchronous and never blocks the platform thread.
+            const Duration(seconds: 30),
             onTimeout: () => throw TimeoutException(
               'mpv_set_property_async($name) reply timed out',
             ),
@@ -3006,6 +2980,18 @@ class NativePlayer extends PlatformPlayer {
     if (waitForInitialization) {
       await waitForPlayerInitialization;
       await waitForVideoControllerInitializationIfAttached;
+    }
+
+    if (configuration.async && !allowDisposed) {
+      // Route through the API isolate: see the note in [getProperty]. The
+      // release path keeps direct access to preserve its disposal ordering.
+      final result = await MpvApiIsolate.setPropertyString(
+        ctx.address,
+        property,
+        value,
+      );
+      _throwIfMpvError(result, 'mpv_set_property_string($property)');
+      return;
     }
 
     final name = property.toNativeUtf8();
