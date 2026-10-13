@@ -306,26 +306,31 @@ void main() {
     }
   });
   test(
-      'ordinary HDR decoder failure excludes both SDR MC requests but retains FFmpeg',
+      'ordinary HDR decoder failure excludes both SDR MC requests and blocks without SDR output',
       () async {
+    // The decoder:mediacodec failure is attributed and excludes every
+    // ordinary MediaCodec carrier (direct and both SDR texture requests).
+    // FFmpeg stays unpoisoned, but on an HDR-capable display its SDR-output
+    // tone-map is not authorized, so the open blocks instead of an implicit
+    // SDR fallback.
     final backend = Backend(hdr10)
       ..reviewErrors['mediacodec'] = const HdrExecutionDependencyFailure(
           HdrRouteDependency.decoderMediacodec,
           HdrDegradeReason.sourceDecodeUnsupported);
     final player = session(backend);
-    await player.open(Media('test://hdr'), hint: hdr10);
-    expect(backend.configured.map((r) => r.hwdec), ['mediacodec', 'no']);
-    expect(backend.configured.first.strategy, HdrStrategy.baseLayerDirect);
-    expect(backend.configured.last.strategy, HdrStrategy.toneMapSdr);
-    expect(player.report.value.verified, isTrue);
-    expect(player.report.value.degradeReason,
-        HdrDegradeReason.sourceDecodeUnsupported);
-    expect(
-        player.report.value.prediction!.candidates.where(
-            (c) => c.skipReason == HdrDegradeReason.sourceDecodeUnsupported),
-        isNotEmpty);
-    expect(player.report.value.actual!.dependencies,
-        isNot(contains(HdrRouteDependency.decoderMediacodec)));
+    await expectLater(
+      player.open(Media('test://hdr'), hint: hdr10),
+      throwsA(isA<HdrExecutionDependencyFailure>()),
+    );
+    await pumpEventQueue();
+    expect(backend.configured.map((r) => r.hwdec), ['mediacodec']);
+    expect(backend.configured.single.strategy, HdrStrategy.baseLayerDirect);
+    final report = player.report.value;
+    expect(report.verified, isFalse);
+    expect(report.actual, isNull);
+    expect(report.error, isA<HdrExecutionDependencyFailure>());
+    // The failed carrier was created once and never rebuilt.
+    expect(backend.resources, ['create:mediacodec']);
     await player.dispose();
   });
   test('shared presenter and CPU uploader failures cannot be forgotten',

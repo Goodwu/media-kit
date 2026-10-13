@@ -332,8 +332,12 @@ void main() {
   });
 
   for (final phase in ['prepare', 'configure']) {
-    test('actual output readiness timeout in $phase excludes its topology',
-        () async {
+    test('actual output readiness timeout in $phase blocks when every '
+        'remaining HDR candidate shares the failed topology', () async {
+      // The bind timeout is attributed to its output topology, but on an
+      // HDR-capable display the only further candidates are the other
+      // PlatformView HDR route and the SDR-output tone-map (no implicit SDR
+      // fallback). HDR exhausted means blocked, never a texture SDR retry.
       final raw = TimeoutException('actual output readiness');
       final typed = HdrOutputBindTimeout(raw);
       final backend = FakeBackend()
@@ -344,17 +348,21 @@ void main() {
       final session = makeSession(backend: backend, capabilities: caps());
       final events = <HdrOutputEvent>[];
       session.events.listen(events.add);
-      await session.open(media, hint: hdr10);
+      await expectLater(
+          session.open(media, hint: hdr10), throwsA(same(typed)));
       await pumpEventQueue();
-      expect(backend.opened, hasLength(1));
-      expect(backend.opened.single.route.strategy, HdrStrategy.toneMapSdr);
-      expect(
-          backend.preparedPlans.last
-              .excluded[HdrRouteDependency.topologyPlatformView],
-          HdrDegradeReason.outputBindTimeout);
-      expect(events.whereType<HdrDegradedEvent>().single.reason,
-          HdrDegradeReason.outputBindTimeout);
-      expect(session.report.value.verified, isTrue);
+      expect(backend.opened, isEmpty);
+      expect(backend.preparedPlans, hasLength(1));
+      expect(events.whereType<HdrDegradedEvent>(), isEmpty);
+      expect(events.whereType<HdrRouteAppliedEvent>(), isEmpty);
+      final errors = events.whereType<HdrErrorEvent>().toList();
+      expect(errors, hasLength(1));
+      expect(errors.single.error, same(typed));
+      final report = session.report.value;
+      expect(report.verified, isFalse);
+      expect(report.error, same(typed));
+      // The failed attempt's partial configuration is rolled back.
+      expect(backend.calls.skip(backend.calls.length - 2), ['stop', 'reset']);
       await session.dispose();
     });
   }
@@ -420,11 +428,13 @@ void main() {
   });
 
   test(
-      'dataspace failure degrades along the candidates, tone-map keeps '
-      'playing, every step emits an event', () async {
+      'dataspace failure degrades to the next HDR candidate; a following '
+      'bind timeout blocks instead of an SDR fallback', () async {
     // Convert(PQ) fails its dataspace application; the next HDR candidate
-    // (direct HLG) is tried and fails on the output bind; the fallback
-    // tone-map route opens and playback continues.
+    // (direct HLG, an independent dataspace dependency) is tried and fails
+    // on the output bind. On an HDR-capable display the remaining tone-map
+    // candidate is SDR output, so HDR exhausted means blocked — playback
+    // stops with the typed timeout instead of a silent SDR downgrade.
     final backend = FakeBackend()
       ..attemptScripts.addAll(const [
         AttemptScript(dataSpaceApplyFailed: true),
@@ -453,39 +463,40 @@ void main() {
     final events = <HdrOutputEvent>[];
     session.events.listen(events.add);
 
-    await session.open(media, hint: p84);
+    await expectLater(session.open(media, hint: p84),
+        throwsA(isA<HdrOutputBindTimeout>()));
     await pumpEventQueue();
 
-    // The convert attempt fails at its dataspace (before the media opens)
-    // and the direct attempt fails at the output bind, so only the
-    // tone-map fallback opens — playback continues on it.
-    expect(backend.opened, hasLength(1));
-    expect(backend.opened.single.route.strategy, HdrStrategy.toneMapSdr);
+    // Neither HDR attempt reached the media open: the convert attempt failed
+    // at its dataspace (before the media opens) and the direct attempt at
+    // the output bind.
+    expect(backend.opened, isEmpty);
     expect(backend.calls,
         contains('configure:baseLayerConvert:pq')); // First HDR attempt.
     expect(backend.calls,
         contains('configure:baseLayerDirect:-')); // Next HDR candidate.
-    expect(backend.calls, contains('configure:toneMapSdr:-'));
     final degraded = events.whereType<HdrDegradedEvent>().toList();
-    expect(degraded, hasLength(2));
+    expect(degraded, hasLength(1));
     expect(degraded[0].reason, HdrDegradeReason.dataSpaceApplyFailed);
     expect(degraded[0].to!.strategy, HdrStrategy.baseLayerDirect);
-    expect(degraded[1].reason, HdrDegradeReason.outputBindTimeout);
-    expect(degraded[1].to!.strategy, HdrStrategy.toneMapSdr);
-    final report = session.report.value;
-    expect(report.verified, isTrue);
-    expect(report.actual!.strategy, HdrStrategy.toneMapSdr);
+    final errors = events.whereType<HdrErrorEvent>().toList();
+    expect(errors, hasLength(1));
+    expect(errors.single.error, isA<HdrOutputBindTimeout>());
+    // The retried plan excluded the failed dataspace dependency.
     expect(
-        backend.preparedPlans.last
-            .excluded[HdrRouteDependency.topologyPlatformView],
-        HdrDegradeReason.outputBindTimeout);
-    expect(events.whereType<HdrRouteAppliedEvent>(), hasLength(1));
+        backend.preparedPlans.last.excluded[HdrRouteDependency.dataspacePq],
+        HdrDegradeReason.dataSpaceApplyFailed);
+    final report = session.report.value;
+    expect(report.verified, isFalse);
+    expect(report.actual, isNull);
+    expect(events.whereType<HdrRouteAppliedEvent>(), isEmpty);
+    expect(backend.calls.skip(backend.calls.length - 2), ['stop', 'reset']);
     await session.dispose();
   });
 
   test(
-      'a HDR Vivid side-data fact reclassifies an HDR10 hint and rebuilds '
-      'on the hdrVivid maturity row', () async {
+      'a HDR Vivid side-data fact reclassifies an HDR10 hint and blocks '
+      'when every hdrVivid route stays gated off', () async {
     final backend = FakeBackend()
       ..factsForOpen
           .add(facts(gamma: 'pq', primaries: 'bt.2020', hdrVivid: true))
@@ -500,24 +511,32 @@ void main() {
 
     // hdrVivid class maturity (hdr_strategy.dart, locked by the table test):
     // baseLayerDirect experimental, metadataReshape unsupported,
-    // toneMapSdr experimental — every default candidate is gated off, so
-    // the tone-map safety net is selected; the route changes and the
-    // single per-open rebuild applies at the playback position.
-    expect(backend.opened, hasLength(2));
-    expect(backend.opened.first.route.strategy, HdrStrategy.baseLayerDirect);
-    expect(backend.opened.last.route.strategy, HdrStrategy.toneMapSdr);
+    // toneMapSdr experimental — every default candidate is gated off. The
+    // tone-map safety net no longer exists, so the review blocks the open
+    // with the first candidate's typed reason instead of a gated fallback.
+    expect(backend.opened, hasLength(1));
+    expect(backend.opened.single.route.strategy, HdrStrategy.baseLayerDirect);
     final report = session.report.value;
-    expect(report.verified, isTrue);
+    expect(report.verified, isFalse);
     expect(report.source!.dynamicMetadata, HdrDynamicMetadata.hdrVivid);
     expect(report.sourceOrigin, HdrReportSource.decoder);
-    expect(report.actual!.strategy, HdrStrategy.toneMapSdr);
-    expect(events.whereType<HdrReclassifiedEvent>().single.rebuilt, isTrue);
+    expect(report.degradeReason, HdrDegradeReason.experimentalStrategySkipped);
+    final errors = events.whereType<HdrErrorEvent>().toList();
+    expect(errors, hasLength(1));
+    expect(errors.single.reason, HdrDegradeReason.experimentalStrategySkipped);
+    expect(events.whereType<HdrRouteAppliedEvent>(), isEmpty);
+    expect(events.whereType<HdrReclassifiedEvent>(), isEmpty);
+    expect(backend.calls, contains('stop'));
+    expect(backend.calls, contains('reset'));
     await session.dispose();
   });
 
   test(
-      'hwdec mismatch reaches independent SDR software without reusing failed requests',
-      () async {
+      'hwdec mismatch on an HDR-capable display blocks without an SDR '
+      'software fallback', () async {
+    // Every HDR candidate for hdr10 needs the failed mediacodec carrier;
+    // the independent copy/software requests only serve SDR output, which
+    // an HDR-capable display does not authorize. HDR exhausted = blocked.
     final backend = FakeBackend()
       ..factsForOpen.add(facts(gamma: 'pq', primaries: 'bt.2020', hwdec: 'no'));
     final session = makeSession(
@@ -529,14 +548,14 @@ void main() {
     session.events.listen(events.add);
     await session.open(media, hint: hdr10);
     await pumpEventQueue();
-    expect(backend.opened.map((o) => o.route.hwdec),
-        ['mediacodec', 'mediacodec-copy', 'no']);
-    expect(backend.opened.first.route.strategy, HdrStrategy.baseLayerDirect);
-    expect(backend.opened.last.route.strategy, HdrStrategy.toneMapSdr);
-    expect(session.report.value.verified, isTrue);
-    expect(backend.opened.map((o) => o.route).toSet(), hasLength(3));
-    expect(events.whereType<HdrRouteAppliedEvent>(), hasLength(1));
-    expect(events.whereType<HdrErrorEvent>(), isEmpty);
+    expect(backend.opened.map((o) => o.route.hwdec), ['mediacodec']);
+    expect(backend.opened.single.route.strategy, HdrStrategy.baseLayerDirect);
+    expect(session.report.value.verified, isFalse);
+    expect(session.report.value.degradeReason, HdrDegradeReason.hwdecMismatch);
+    expect(events.whereType<HdrRouteAppliedEvent>(), isEmpty);
+    final errors = events.whereType<HdrErrorEvent>().toList();
+    expect(errors, hasLength(1));
+    expect(errors.single.reason, HdrDegradeReason.hwdecMismatch);
     expect(backend.calls, contains('stop'));
     expect(backend.calls, contains('reset'));
     await session.dispose();
@@ -771,8 +790,7 @@ void main() {
     await session.dispose();
   });
 
-  test('SurfaceTexture mismatch is excluded and rebuild remains bounded',
-      () async {
+  test('SurfaceTexture mismatch blocks without an SDR takeover', () async {
     addTearDown(() {
       HdrStrategyRealizer.mkstBridgeProbeOverride = null;
     });
@@ -803,20 +821,30 @@ void main() {
       await session.open(media, hint: hdr10);
       await pumpEventQueue();
 
-      expect(backend.opened.map((o) => o.route.hwdec),
-          ['surfacetexture', 'mediacodec-copy', 'no']);
-      expect(backend.opened.map((o) => o.route).toSet(), hasLength(3));
-      expect(backend.opened.last.route.strategy, HdrStrategy.toneMapSdr);
-      expect(session.report.value.verified, isTrue);
-      expect(events.whereType<HdrRouteAppliedEvent>(), hasLength(1));
-      expect(events.whereType<HdrErrorEvent>(), isEmpty);
+      // The mismatched surfacetexture carrier is excluded at the review, but
+      // the remaining tone-map candidate is SDR output and the display
+      // reports HDR10: no implicit SDR takeover, the open blocks instead.
+      // experimental=$allowExperimental does not change this (toneMapSdr for
+      // hdr10 is verified; it fails the display transfer gate, not maturity).
+      expect(backend.opened.map((o) => o.route.hwdec), ['surfacetexture'],
+          reason: 'experimental=$allowExperimental');
+      expect(backend.opened.single.route.strategy,
+          HdrStrategy.baseLayerConvert);
+      expect(session.report.value.verified, isFalse);
+      expect(
+          session.report.value.degradeReason, HdrDegradeReason.hwdecMismatch);
+      expect(events.whereType<HdrRouteAppliedEvent>(), isEmpty);
+      final errors = events.whereType<HdrErrorEvent>().toList();
+      expect(errors, hasLength(1));
+      expect(errors.single.reason, HdrDegradeReason.hwdecMismatch);
       expect(backend.calls, contains('reset'));
       await session.dispose();
     }
   });
 
-  test('SurfaceTexture mismatch can recover through independent copy mode',
-      () async {
+  test(
+      'SurfaceTexture mismatch cannot recover through the SDR copy route on '
+      'an HDR-capable display', () async {
     addTearDown(() {
       HdrStrategyRealizer.mkstBridgeProbeOverride = null;
     });
@@ -847,30 +875,33 @@ void main() {
       await session.open(media, hint: hdr10);
       await pumpEventQueue();
 
-      expect(backend.opened, hasLength(2),
-          reason: 'one replan is the per-open bound; experimental='
-              '$allowExperimental');
-      expect(backend.opened.first.route.hwdec, 'surfacetexture');
-      expect(backend.opened.last.route.hwdec, 'mediacodec-copy');
-      expect(backend.opened.last.route.strategy, HdrStrategy.toneMapSdr);
-      expect(session.report.value.hwdecCurrent, 'mediacodec-copy');
-      expect(session.report.value.actual!.hwdec, 'mediacodec-copy');
-      expect(session.report.value.verified, isTrue);
-      expect(events.whereType<HdrRouteAppliedEvent>(), hasLength(1));
-      expect(
-        backend.preparedPlans.last.excluded,
-        contains(HdrRouteDependency.hwdecSurfaceTexture),
-      );
-      expect(
-        backend.preparedPlans.last.excluded,
-        isNot(contains(HdrRouteDependency.hwdecMediacodecCopy)),
-      );
+      // The mediacodec-copy carrier is independent of the failed
+      // surfacetexture decoder, but it only carries the tone-map route —
+      // SDR output that an HDR10-capable display does not authorize. The
+      // copy route is therefore never prepared and the open blocks.
+      expect(backend.opened.map((o) => o.route.hwdec), ['surfacetexture'],
+          reason: 'experimental=$allowExperimental');
+      expect(backend.calls,
+          isNot(contains('configure:toneMapSdr:-')),
+          reason: 'experimental=$allowExperimental');
+      expect(session.report.value.verified, isFalse);
+      expect(session.report.value.hwdecCurrent, isNull);
+      expect(session.report.value.actual, isNull);
+      expect(events.whereType<HdrRouteAppliedEvent>(), isEmpty);
+      final errors = events.whereType<HdrErrorEvent>().toList();
+      expect(errors, hasLength(1));
+      expect(errors.single.reason, HdrDegradeReason.hwdecMismatch);
       await session.dispose();
     }
   });
 
-  test('missing P5 pipeline publishes Error and never opens the media',
-      () async {
+  test(
+      'an unavailable native DV admission blocks a P5 hint and never opens '
+      'the media', () async {
+    // Native DV is the first (verified) dvP5 candidate since the 2026-10-10
+    // promotion; without the bridge/decoder admission it fails before the
+    // P5 rescale-pipeline dependency is ever consulted. The gated reshape/
+    // tone-map rows are not an implicit fallback.
     final backend = FakeBackend();
     final session = makeSession(
       backend: backend,
@@ -886,10 +917,10 @@ void main() {
     expect(backend.calls.where((call) => call.startsWith('open:')), isEmpty);
     final report = session.report.value;
     expect(report.verified, isFalse);
-    expect(report.degradeReason, HdrDegradeReason.p5PipelineUnavailable);
+    expect(report.degradeReason, HdrDegradeReason.nativeDvUnavailable);
     final errors = events.whereType<HdrErrorEvent>().toList();
     expect(errors, hasLength(1));
-    expect(errors.single.reason, HdrDegradeReason.p5PipelineUnavailable);
+    expect(errors.single.reason, HdrDegradeReason.nativeDvUnavailable);
     expect(events.whereType<HdrRouteAppliedEvent>(), isEmpty);
     await session.dispose();
   });
@@ -1000,9 +1031,11 @@ void main() {
     await session.dispose();
   });
 
-  test('capability loss degrades and rebuilds; recovery only emits the event',
-      () async {
+  test(
+      'capability loss degrades to tone-map; capability recovery rebuilds '
+      'the HDR route', () async {
     final backend = FakeBackend()
+      ..factsForOpen.add(facts(gamma: 'pq', primaries: 'bt.2020'))
       ..factsForOpen.add(facts(gamma: 'pq', primaries: 'bt.2020'))
       ..factsForOpen.add(facts(gamma: 'pq', primaries: 'bt.2020'));
     final session = makeSession(
@@ -1029,14 +1062,24 @@ void main() {
     );
     expect(session.report.value.degradeReason, HdrDegradeReason.capabilityLost);
 
-    // Recovery: only a CapabilityChanged event, never an automatic upgrade.
-    final eventsBefore = events.length;
+    // Recovery: the confirmed HDR display invalidates the resting SDR-output
+    // route (no implicit SDR resting state for an HDR source), so the same
+    // capabilityLost path rebuilds onto the HDR route.
+    final degradesBefore = events.whereType<HdrDegradedEvent>().length;
     await session.handleCapabilitiesChanged(caps());
     await pumpEventQueue();
-    expect(backend.opened, hasLength(2));
-    expect(events.length, eventsBefore + 1);
-    expect(events.last, isA<HdrCapabilityChangedEvent>());
-    expect(session.report.value.actual!.strategy, HdrStrategy.toneMapSdr);
+    expect(backend.opened, hasLength(3));
+    expect(backend.opened.last.route.strategy, HdrStrategy.baseLayerDirect);
+    expect(backend.opened.last.start, const Duration(seconds: 6));
+    final degrades = events.whereType<HdrDegradedEvent>().toList();
+    expect(degrades, hasLength(degradesBefore + 1));
+    expect(degrades.last.reason, HdrDegradeReason.capabilityLost);
+    expect(degrades.last.from!.strategy, HdrStrategy.toneMapSdr);
+    expect(degrades.last.to!.strategy, HdrStrategy.baseLayerDirect);
+    expect(session.report.value.actual!.strategy, HdrStrategy.baseLayerDirect);
+    expect(
+        events.whereType<HdrRouteAppliedEvent>().last.route.strategy,
+        HdrStrategy.baseLayerDirect);
     await session.dispose();
   });
 }

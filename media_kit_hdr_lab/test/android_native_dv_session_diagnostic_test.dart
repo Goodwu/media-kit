@@ -1162,33 +1162,46 @@ void main() {
       );
       expect(refusedNative.maturity, HdrStrategyMaturity.verified);
       expect(refusedNative.skipReason, HdrDegradeReason.nativeDvUnavailable);
-      expect(refused.selected.strategy, isNot(HdrStrategy.nativeDolbyVision));
+      // The realizer gate precedes the bypass: without bridge v1 the native
+      // route stays refused. With no SDR fallback on this DV-only display,
+      // the refused native candidate is retained as the blocking reason
+      // (playable=false) instead of any route being forced through.
+      expect(refused.playable, isFalse);
+      expect(refused.selected.strategy, HdrStrategy.nativeDolbyVision);
+      expect(refused.selected.skipReason, HdrDegradeReason.nativeDvUnavailable);
+      expect(refusedDiagnostic.playable, isFalse);
       expect(
-          refusedDiagnostic.selected.strategy,
+          refusedDiagnostic.selected.strategy, HdrStrategy.nativeDolbyVision);
+      expect(refusedDiagnostic.selected.skipReason,
+          HdrDegradeReason.nativeDvUnavailable);
+      // An explicit SDR request returns the ordinary plan; on this
+      // DV-only, pipeline-less snapshot it blocks on tone-map without ever
+      // forcing the native route through.
+      final offDiagnostic = planAndroidNativeDvSessionDiagnostic(
+        source: source,
+        capabilities: caps,
+        policy: HdrRoutingPolicy.defaults,
+        preference: HdrOutputPreference.off,
+        excluded: const {},
+      );
+      expect(offDiagnostic.playable, isFalse);
+      expect(offDiagnostic.selected.strategy,
           isNot(HdrStrategy.nativeDolbyVision));
-      expect(
-        planAndroidNativeDvSessionDiagnostic(
-          source: source,
-          capabilities: caps,
-          policy: HdrRoutingPolicy.defaults,
-          preference: HdrOutputPreference.off,
-          excluded: const {},
-        ).selected.strategy,
-        isNot(HdrStrategy.nativeDolbyVision),
+      // An excluded native dependency returns the ordinary plan where the
+      // exclusion refuses the native candidate; the bypass is not applied.
+      final excludedDiagnostic = planAndroidNativeDvSessionDiagnostic(
+        source: source,
+        capabilities: caps,
+        policy: HdrRoutingPolicy.defaults,
+        preference: HdrOutputPreference.auto,
+        excluded: const {
+          HdrRouteDependency.nativeDolbyVision:
+              HdrDegradeReason.nativeDvUnavailable,
+        },
       );
-      expect(
-        planAndroidNativeDvSessionDiagnostic(
-          source: source,
-          capabilities: caps,
-          policy: HdrRoutingPolicy.defaults,
-          preference: HdrOutputPreference.auto,
-          excluded: const {
-            HdrRouteDependency.nativeDolbyVision:
-                HdrDegradeReason.nativeDvUnavailable,
-          },
-        ).selected.strategy,
-        isNot(HdrStrategy.nativeDolbyVision),
-      );
+      expect(excludedDiagnostic.playable, isFalse);
+      expect(excludedDiagnostic.selected.skipReason,
+          HdrDegradeReason.nativeDvUnavailable);
     });
   });
 }

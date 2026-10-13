@@ -53,7 +53,8 @@ class HdrRoutingPolicy {
   ///
   /// `dvP10` and `hdr10Plus` intentionally have no row (requirement 3.4
   /// does not list them; Phase 1 does not cover AV1 and mpv cannot read
-  /// HDR10+ metadata yet) — those classes fall through to the safety net.
+  /// HDR10+ metadata yet) — those classes plan to the blocking placeholder
+  /// candidate instead of any SDR fallback.
   static const Map<HdrSourceClass, List<HdrStrategy>> defaultPreferences =
       <HdrSourceClass, List<HdrStrategy>>{
     HdrSourceClass.dvP5: <HdrStrategy>[
@@ -107,7 +108,8 @@ class HdrRoutingPolicy {
   static const HdrRoutingPolicy defaults = HdrRoutingPolicy();
 
   /// The preference list for [cls]: the caller's row when present, otherwise
-  /// the default row, otherwise an empty list (safety net only).
+  /// the default row, otherwise an empty list (planning then blocks with the
+  /// placeholder candidate).
   List<HdrStrategy> preferencesFor(HdrSourceClass cls) {
     return preferences?[cls] ??
         defaultPreferences[cls] ??
@@ -124,14 +126,18 @@ class HdrRoutingPolicy {
 /// route that actually gets applied cannot drift apart (R1.3).
 ///
 /// Algorithm (plan 1.3): classify the source, take the preference list for
-/// the class (`off` short-circuits to the safety-net strategy), and pick
+/// the class (`off` short-circuits to the explicit SDR strategy), and pick
 /// the first entry that passes the maturity gate, realizes feasibly, and
 /// does not depend on an excluded pipeline stage. Skipped entries stay in
-/// the candidate list with their typed reason. When nothing survives, the
-/// safety net (tone-mapped SDR, SDR direct for SDR sources) keeps playback
-/// going only when it satisfies the source and execution constraints too.
-/// Known failures retain their original reason. A P5 source without the
-/// rescale pipeline remains blocked (never output a wrongly colored picture).
+/// the candidate list with their typed reason. The SDR safety net (tone-map
+/// for HDR sources, SDR direct for SDR sources) exists only when an SDR
+/// output is allowed: a plain SDR source, an explicit off/require-SDR
+/// request, or a display whose report is present and empty. On an
+/// HDR-capable or unknown display (any non-empty report, or no report at
+/// all), an exhausted HDR candidate list blocks playback instead of
+/// synthesizing an implicit tone-map fallback; the first rejected
+/// candidate's reason is preserved. A P5 source without the rescale
+/// pipeline remains blocked (never output a wrongly colored picture).
 ///
 /// {@endtemplate}
 class HdrRoutePlanner {

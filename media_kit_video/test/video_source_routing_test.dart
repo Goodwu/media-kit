@@ -113,11 +113,23 @@ void main() {
         specification: large,
         policy: HdrRoutingPolicy(allowExperimental: enabled),
       );
-      expect(prediction.playable, isTrue);
-      expect(prediction.selected.route!.hwdec, 'no');
-      expect(prediction.confidence, HdrPredictionConfidence.unverified);
-      expect(prediction.candidates.where((c) => c.skipReason == HdrDegradeReason.sourceDecodeUnsupported), isNotEmpty);
-      expect(prediction.candidates.where((c) => c.feasible).every((c) => c.route!.hwdec == 'no'), isTrue);
+      // The exact MC negative excludes every MediaCodec carrier...
+      expect(prediction.playable, isFalse);
+      final decodeBlocked = prediction.candidates
+          .where((c) => c.skipReason == HdrDegradeReason.sourceDecodeUnsupported)
+          .toList();
+      expect(decodeBlocked, isNotEmpty);
+      expect(
+          decodeBlocked.every((c) => c.route == null || c.route!.hwdec != 'no'),
+          isTrue);
+      // ...without poisoning the software (FFmpeg) request: on this
+      // HDR-capable display its tone-map execution is gated by the display
+      // transfer, not by the MC negative. FFmpeg stays conditional on its
+      // own admission instead of being blanket-blocked or auto-selected.
+      expect(
+          prediction.candidates
+              .where((c) => c.skipReason == HdrDegradeReason.displayLacksTransfer),
+          isNotEmpty);
       expect(caps.forSource(large).support(), VideoSupport.unsupported);
     }
   });
@@ -236,11 +248,14 @@ void main() {
     },
   );
 
-  test('MC negative Session only admits FFmpeg and cannot verify before current review', () async {
+  test('MC negative Session only admits FFmpeg on an SDR-only display and cannot verify before current review', () async {
+    // SDR output for the HDR source is only authorized by a confirmed
+    // SDR-only display; the exact MC negative then leaves FFmpeg ('no') as
+    // the single admissible execution, unverified until the decoder review.
     messenger.setMockMethodCallHandler(
       channel,
       (call) async => call.method == 'VideoRouteCapabilities.Get'
-          ? response([large], codecSupport: 'unsupported')
+          ? response([large], codecSupport: 'unsupported', hdrTypes: const [])
           : null,
     );
     final release = Completer<void>();
@@ -261,9 +276,9 @@ void main() {
     expect(session.report.value.prediction!.confidence, HdrPredictionConfidence.unverified);
   });
 
-  test('MC negative cannot accept observed hardware or unknown CPU format as FFmpeg', () async {
+  test('MC negative cannot accept observed hardware or unknown CPU format as FFmpeg on an SDR-only display', () async {
     messenger.setMockMethodCallHandler(channel, (call) async =>
-      call.method == 'VideoRouteCapabilities.Get' ? response([large], codecSupport: 'unsupported') : null);
+      call.method == 'VideoRouteCapabilities.Get' ? response([large], codecSupport: 'unsupported', hdrTypes: const []) : null);
     for (final hardware in [true, false]) {
       final backend = Backend(hdr10);
       if (hardware) { backend.hwdecOverrides['no'] = 'mediacodec'; }

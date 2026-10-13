@@ -279,3 +279,11 @@ HDR10+ 用有效变化曲线测试，Vivid 用正式语义向量和独立CPU参�
 5. 全部改动均回到既有唯一方案、本仓台账及 App 台账；最终 CI 必须是最终源头的 success，设备真实性与功能验收分开记账。
 
 本检查点不改变 v4 的完整目标表，不以临时局部修复代替其剩余任务，也不以“待实现已返回错误”当作 HDR10+/Vivid C2 的功能完成。
+
+### 本地验证回执（2026-10-13，本地 agent）
+
+- 合入：本地 `979e04eb` 严格落后，dirty 归档先行快照（`~/src/media-kit-build/local-dirty-snapshots/media-kit-routing-20261011-pre-e40cef8f.diff`）后 `git merge --ff-only` 至 `e40cef8f`；未 reset/未 force push/未开新分支，六个提交 SHA 全部核实在案。
+- 首验证（`e40cef8f` 原样，Flutter 3.47.2）：两包 `flutter analyze` 零 finding；`hdr_v73_no_implicit_sdr_test` 5/5、`hdr_session_native_dv_policy_test` 58/58 通过；全量首跑 media_kit_video 748/39 失败、media_kit_hdr_lab 297/1 失败——40 项均为编码已废隐式 SDR 契约的未迁移旧用例（V1 复核与运行结果一致）。CI 回读该头：38417189657 两包 `Source analyze and tests` job failure 与本地一致；38417189624/89783/89602 success，38417189664 构建类 job 全绿。
+- 处置：40 项旧用例全部按第 1 节不变量迁移（0 ESCALATED；无删用例、无断言弱化、无新开关；审查确认）；附带删除 `hdr_video_session.dart` review 路径 `hdrAttempts>=2→off` 死控制流（仓库级"hdrAttempts 仅统计"由此成立）与三处过时注释；新增空候选目录阻断占位专测 1 项。终态：media_kit_video 788/788、media_kit_hdr_lab 298/298，双 exit 0。
+- 未实施（维持第 4—7 节原状）：4.1 stage/candidateId 与去 experimental 开关、4.2 显式错误模型、4.3 候选表、4.4 快照重试、4.5 元数据所有权、A 包 HDR10+/Vivid routeNotImplemented 入口、C4 仅 HLG→PQ 修正、PiliPlusX 配置/报告共用、验收矩阵 JSON、native B1—B4 与设备验收。已知设计遗留：planner 以 `displayLacksTransfer` 复用表达策略性禁 SDR、阻断路径 `report.degradeReason` 为 null（typed 错误由 `report.error` 携带），均归入 4.2 错误模型设计。
+- 后续：本地提交待用户批准推送；推送后最终 CI 须在实际新头取得 success 方可记最终验收；再按第 4 步核对 mpv/FFmpeg/libplacebo 实际构建输入进 native 包。

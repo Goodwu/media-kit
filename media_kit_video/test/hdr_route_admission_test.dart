@@ -94,8 +94,15 @@ void main() {
         expect(prediction.candidates.first.skipReason,
             HdrDegradeReason.nativeDvUnavailable);
         expect(prediction.playable, isFalse);
+        // The HDR-capable display blocks; the first preference entry (native
+        // DV) records the decoder ground, while the P5 pipeline gate refuses
+        // every P5-processing strategy independently of the decoder profiles.
         expect(prediction.selected.skipReason,
-            HdrDegradeReason.p5PipelineUnavailable);
+            HdrDegradeReason.nativeDvUnavailable);
+        expect(prediction.selected.route, isNull);
+        final reshape = prediction.candidates
+            .singleWhere((c) => c.strategy == HdrStrategy.metadataReshape);
+        expect(reshape.skipReason, HdrDegradeReason.p5PipelineUnavailable);
       });
 
       test('DV plus PQ display does not grant HLG direct output', () {
@@ -119,8 +126,14 @@ void main() {
         final direct = prediction.candidates.singleWhere(
             (candidate) => candidate.strategy == HdrStrategy.baseLayerDirect);
         expect(direct.skipReason, HdrDegradeReason.displayLacksTransfer);
-        expect(prediction.selected.strategy, HdrStrategy.toneMapSdr);
-        expect(prediction.selected.route!.outputTransfer, HdrOutputTransfer.sdr);
+        // A DV-only report is an HDR-capable display: the exhausted HDR list
+        // blocks — it does not receive the bare HLG source as tone-mapped SDR
+        // (MK-ROUTING-20261011).
+        expect(prediction.playable, isFalse);
+        expect(prediction.selected.strategy, HdrStrategy.baseLayerDirect);
+        expect(prediction.selected.skipReason,
+            HdrDegradeReason.displayLacksTransfer);
+        expect(prediction.selected.route, isNull);
       });
 
       test('an actual HLG declaration still permits HLG direct', () {
@@ -184,8 +197,13 @@ void main() {
         (candidate) => candidate.strategy == HdrStrategy.baseLayerConvert);
     expect(direct.skipReason, HdrDegradeReason.displayLacksTransfer);
     expect(convert.skipReason, HdrDegradeReason.gpuHdrDataSpaceUnavailable);
-    expect(prediction.selected.strategy, HdrStrategy.toneMapSdr);
-    expect(prediction.selected.route!.hwdec, 'mediacodec-copy');
+    // The DV-capable display blocks the exhausted HDR list instead of
+    // tone-mapping (MK-ROUTING-20261011); the first rejected entry records
+    // its decoder ground.
+    expect(prediction.playable, isFalse);
+    expect(prediction.selected.strategy, HdrStrategy.nativeDolbyVision);
+    expect(prediction.selected.skipReason, HdrDegradeReason.nativeDvUnavailable);
+    expect(prediction.selected.route, isNull);
     // This does not claim the separately authorized LG YUV route is ready.
   });
 }
