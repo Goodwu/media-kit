@@ -70,6 +70,7 @@ List<HdrCandidate> applyVideoRouteOptions(List<HdrCandidate> input,
             isSafetyNet: candidate.isSafetyNet,
             sourceClass: candidate.sourceClass,
             stage: candidate.stage,
+            executionId: candidate.executionId,
             skipReason: HdrDegradeReason.routeOptionsUnsatisfied)
       else
         candidate

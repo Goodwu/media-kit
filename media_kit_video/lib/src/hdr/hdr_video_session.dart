@@ -955,6 +955,7 @@ class HdrVideoSession {
               isSafetyNet: candidate.isSafetyNet,
               sourceClass: candidate.sourceClass,
               stage: candidate.stage,
+              executionId: candidate.executionId,
               route: candidate.route,
               skipReason: HdrDegradeReason.candidateExhausted)
         else
