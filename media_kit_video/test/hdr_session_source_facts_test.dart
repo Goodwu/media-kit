@@ -97,10 +97,15 @@ void main() {
         _facts(gamma: 'pq', vivid: true),
         _facts(gamma: 'pq', vivid: false),
       ]);
-    final session = _session(backend, experimental: false);
+    // The explicit experimental unlock makes the reclassified hdrVivid row
+    // selectable; without it the reclassification blocks (no implicit SDR
+    // fallback) and the retention scenario never reaches a second review.
+    final session = _session(backend, experimental: true);
     addTearDown(session.dispose);
-    await session.open(Media('test://source'), hint: _hdr10);
+    await session.open(Media('test://source'));
     expect(backend.opened, hasLength(2));
+    expect(backend.opened.first.route.strategy, HdrStrategy.sdrDirect);
+    expect(backend.opened.last.route.strategy, HdrStrategy.baseLayerDirect);
     final report = session.report.value;
     expect(report.source!.dynamicMetadata, HdrDynamicMetadata.hdrVivid);
     expect(report.sourceFacts!.hdrVividOnFrame, isFalse);

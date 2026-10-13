@@ -173,8 +173,16 @@ void main() {
             HdrDegradeReason.hwdecMismatch,
       },
     );
-    expect(excludedSurfaceTexture.selected.strategy, HdrStrategy.toneMapSdr,
+    // A failed SurfaceTexture execution must not be selected again — and on
+    // this HDR-capable display the exhausted list blocks instead of falling
+    // back to tone-map (MK-ROUTING-20261011); the failed execution is the
+    // recorded blocking reason.
+    expect(excludedSurfaceTexture.playable, isFalse);
+    expect(excludedSurfaceTexture.selected.strategy, HdrStrategy.baseLayerConvert,
         reason: 'a failed SurfaceTexture execution must not be selected again');
+    expect(excludedSurfaceTexture.selected.route, isNull);
+    expect(excludedSurfaceTexture.selected.skipReason,
+        HdrDegradeReason.hwdecMismatch);
     expect(
       excludedSurfaceTexture.candidates
           .firstWhere((candidate) =>

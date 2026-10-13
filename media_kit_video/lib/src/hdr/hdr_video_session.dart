@@ -1149,13 +1149,10 @@ class HdrVideoSession {
       throw HdrPlaybackBlocked(error.reason, sourceFacts: sourceFacts);
     }
     final reclassified = descriptor != plan.source;
-    // A previously admitted HDR route may still be reviewed at the limit.
-    // A non-HDR route selected after exhausting the two HDR attempts must
-    // keep that effective SDR constraint instead of predicting a new upgrade.
-    final reviewPreference = !HdrSessionAttemptPolicy.isHdr(plan.route) &&
-            _attemptPolicy.hdrAttempts >= 2
-        ? HdrOutputPreference.off
-        : HdrOutputPreference.auto;
+    // The decoder review never rewrites the user's output preference: HDR
+    // failures block instead of degrading, and off/require SDR is an
+    // independent user request only (hdrAttempts is telemetry).
+    const reviewPreference = HdrOutputPreference.auto;
     final prediction = _preferCurrent(
         _plan(
           options: plan.options!,
@@ -1251,7 +1248,7 @@ class HdrVideoSession {
 
     _rebuildUsed = true;
     // A review reopen is an actual new attempt too. Persist native-once
-    // exclusions and enforce the same two-HDR budget as failure retries.
+    // exclusions so the rebuilt plan cannot re-enter the native DV route.
     excludedForRebuild = _attemptPolicy.exclusions(
       excludedForRebuild,
       nextAttempt: true,

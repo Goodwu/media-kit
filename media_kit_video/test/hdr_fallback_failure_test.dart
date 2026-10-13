@@ -65,7 +65,7 @@ void main() {
     expect(result.selected.strategy, HdrStrategy.baseLayerDirect);
   });
 
-  test('platform-view failure still permits an independent SDR output', () {
+  test('platform-view failure exhausts the HDR list on an HDR-capable display', () {
     const caps = HdrCapabilities(
       sdkInt: 29, displayHdrTypes: {2}, hevcDecoders: [],
       dolbyVisionDecoders: [], p5PipelineAvailable: true,
@@ -77,7 +77,24 @@ void main() {
       policy: const HdrRoutingPolicy(allowExperimental: true),
       excluded: const {HdrRouteDependency.topologyPlatformView: HdrDegradeReason.outputBindTimeout},
     );
-    expect(result.playable, isTrue);
-    expect(result.selected.strategy, HdrStrategy.toneMapSdr);
+    // Every HDR candidate renders through the platform-view stage; on this
+    // HDR-capable display the exhausted list blocks — no independent SDR
+    // output is synthesized (MK-ROUTING-20261011).
+    expect(result.playable, isFalse);
+    expect(result.selected.strategy, HdrStrategy.baseLayerDirect);
+    expect(result.selected.skipReason, HdrDegradeReason.outputBindTimeout);
+    expect(result.selected.route, isNull);
+    for (final candidate in result.candidates) {
+      if (candidate.strategy == HdrStrategy.toneMapSdr) {
+        // The tone-map entries carry the SDR-block marker, not a fallback
+        // admission.
+        expect(candidate.feasible, isFalse, reason: '$candidate');
+        expect(candidate.skipReason, HdrDegradeReason.displayLacksTransfer,
+            reason: '$candidate');
+      } else {
+        expect(candidate.skipReason, HdrDegradeReason.outputBindTimeout,
+            reason: '$candidate');
+      }
+    }
   });
 }
