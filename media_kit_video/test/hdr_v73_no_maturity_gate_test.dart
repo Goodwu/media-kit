@@ -4,6 +4,7 @@ import 'package:media_kit_video/src/hdr/hdr_route.dart';
 import 'package:media_kit_video/src/hdr/hdr_route_planner.dart';
 import 'package:media_kit_video/src/hdr/hdr_source_descriptor.dart';
 import 'package:media_kit_video/src/hdr/hdr_strategy.dart';
+import 'package:media_kit_video/src/routing/video_route_options.dart';
 
 const vividPq = HdrSourceDescriptor(
   codec: 'hevc', transfer: 'pq',
@@ -37,6 +38,17 @@ void main() {
     expect(no.selected.strategy, yes.selected.strategy);
     expect(no.candidates.map((c) => c.skipReason).toList(),
         yes.candidates.map((c) => c.skipReason).toList());
+  });
+
+  test('mismatched legacy experimental hints do not reject valid options', () {
+    final options = EffectiveVideoRouteOptions.resolve();
+    final result = HdrRoutePlanner.plan(
+      source: vividPq, capabilities: caps(),
+      policy: const HdrRoutingPolicy(allowExperimental: true),
+      options: options,
+    );
+    expect(result.playable, isTrue);
+    expect(result.selected.strategy, HdrStrategy.baseLayerDirect);
   });
 
   test('HLG C4 may run by default with no maturity admission gate', () {
