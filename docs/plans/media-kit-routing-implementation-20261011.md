@@ -1,116 +1,251 @@
-# media-kit 路由修正与 PiliPlusX 对接：执行方案 v3
+# media-kit HDR 路由与 PiliPlusX 对接：执行方案 v4
 
-任务 ID：MK-ROUTING-20261011。更新日期：2026-10-11。
-状态：已获开发、提交、推送和环境允许范围内测试授权；实现、编译和 CI 结论以精确提交及实际结果为准。
-本文件是唯一执行方案。v3 纳入用户确认的显示目标查询、源规格解码过滤、跨平台公共语义和高级配置方向；不是重新启动 RFC v1 的大范围重写。
+任务 ID：MK-ROUTING-20261011。更新日期：2026-10-13。
+状态：设计稿；本次仅更新方案，不代表以下改动已实施或验证。本文件继续作为原任务唯一执行方案，替代 v3 的成熟度准入、实验开关、候选顺序和自动 SDR 兜底规定；历史版本由 Git 保留。中央实现台账中的既有 implemented/verified 记录不因本次设计变为 planned。
 
-## 1. 用户已确认的要求（不得丢失）
+## 1. 已确定的约束
 
-1. HdrCapabilities.query(player:) 是自有接口，无兼容包袱。能力查询不依赖已创建 Player；新入口为 VideoRouteCapabilities.query(target:, sources:)。迁移调用点后删除无效 player 参数，不建立长期 V1/V2 兼容框架。
-2. 源规格是必需的产品能力：选源前按实际 codec/profile/level、位深、coded size、帧率等组合查询解码支持，不能只判断显示器 HDR 或各维度独立最大值。sources 列表允许为空以仅查询环境；有源时必须使用其规格。
-3. 使用最小正确闭环，优先复用现有 native 能力，不同时铺开 Android/FFmpeg/mpv 大改。完成原三批及 PiliPlusX 接入；第三批逐项核实 native 缺口，无缺口用证据关闭，不为完成批次制造改动。
-4. 普通自动模式以 allowExperimental=true 为主要验证场景，同时测试 false。实验门只改变成熟度，不授予能力、不绕过颜色正确性和 owner 安全门。
-5. 及时全文落盘、提交和推送，维护唯一台账。严禁下一轮把已提交实现重做在另一个分支。已实现和已验证分开记载。
-6. 测试候选使用相关仓库最新源码及全部适用修改，不用旧钉定源码、APK/JAR/so 替代。记录解析到的 SHA 是溯源而非选择过时输入；编译器按当前 App 声明的契约使用。
-7. GitHub CI 必须实际运行并核对最终候选，不能以已添加/触发/排队代替 success；PiliPlusX 构建与测试不是可选后续。
-8. 保留 LG 已批准 YUV8、成熟度提升、像素与颜色配方及 owner/ACK/lease 协议。不重开已延后 10-bit、lease 融合课题。
+整个项目当前均为实验性。只有一套完整候选和默认执行路径，不划分生产/实验可行集，不以验证状态决定准入，不新增功能启用开关。待验证实现正常执行；适用路径未实现，在对应路径返回结构化错误。全部既定必需路径取得验收证据后才上线。
 
-## 2. 范围与执行路径
+固定顺序：C1 原生直通 → C2 动态重建/映射 → C3 兼容基线直通 → C4 HLG→PQ；全部耗尽则阻断。HDR10+/Vivid 不得在 C1 以 PQ/HLG 基线提前命中。普通 SDR 不升 HDR；P8.2 的 SDR 基线不得成为 HDR 分支出口；不增加 SDR→HDR 或 PQ→HLG。
 
-### B1：现有路由与复核纠错
-- 已完成的 profile32/256、native 显式 EL=false、删除 HLG-over-DV 放行和分类器保留未知 EL 均继续保留，不重做。
-- 未知 P8/冲突信息不得推成 SDR；原始源与处理后帧事实不得互相擦除。
-- 增量表达真实 importer/presenter、依赖和输出重建要求，不建立任意组件笛卡尔积。
-- 使用现有 android-mediacodec-info 复核实际 decoder/MIME/native-active，不把 configure 成功当作呈现证明。
-- 按失败环节保留 exclusions；兜底不重用已知错误链、不违反用户硬约束。重试有界且保留根因。
-- 保留成熟度产品决策，补负向、生命周期和常规 SDR 回归。
+HDR 分支失败不得自动转 SDR。现有 off/require SDR 是用户明确要求 SDR 的独立请求，不是重试内部可写的降级开关；require HDR 与 off 冲突先报错。普通 SDR 若与 require HDR 不相容，报告约束不满足，而不是升 HDR。
 
-### B2：统一查询接口、源规格匹配、最小 Android 接线
+保留真实的源/解码/元数据/输出前提、ABI 检查、设备适配条件和 owner/ACK/lease 安全约束。删除实验开关不等于删除 native_dv、元数据处理模式等执行路径必需参数；这些参数由选中的路由写入，不由用户额外开启。
 
-#### B2a 数据契约
-- VideoSourceSpec：codec 或明确的 codec 标识、profile/level、位深、coded width/height、frame rate；未知字段保留未知。验证非法/非有限/非正数、过大批量和重复输入。规格不包含媒体 URI，查询不下载或打开媒体。
-- VideoOutputTarget：明确区分无目标、FlutterView、显式 OS display、显式默认显示器。Flutter view ID、OS display ID、window/Surface/Player handle 不能混用。
-- 不传 target 只查询设备/运行库/解码能力，显示部分为 unresolved。显式无效目标不得默默回落 DEFAULT_DISPLAY。
-- 快照分为 runtime/device、display target、逐源逐 decoder 支持与执行期待验证条件。状态至少为 supported / unsupported / unknown；查询故障不伪装成空能力成功。
-- 区分“系统声明可解码”“符合当前路线要求”“可实时播放”“实际已经输出 HDR”。源过滤不以可解码冒充 HDR 可呈现，也不以显示不支持 HDR否定 HDR 源可被正确 tone-map。
+继续复用 VideoRouteCapabilities.query(target:, sources:)、VideoSourceSpec、目标显示绑定、现有 planner/realizer/Session，以及 PiliPlusX 的 DASH 查询接入。不重建旧查询接口，不为跨平台统一命名重写全部播放器，不做 importer/renderer/decoder 任意笛卡尔积。
 
-#### B2b 平台采集和纯预测
-- 新公开入口 VideoRouteCapabilities.query(target:, sources:)；无 Player 参数、无应用 Player 创建、无 decoder configure、无 Surface/EGL/lease 或私有 ABI 试调。
-- Android 批量复用 MediaCodecList，按一个完整源规格在同一个 decoder 上匹配。尺寸和帧率联合查询；profile/level 使用平台定义的对应规则，不对所有编码直接比较任意整数大小。
-- 显示查询绑定实际目标；FlutterView 必须通过可验证的原生关联解析，不把 Flutter display.id 数字直接当 Android Display ID。不能解析则 unknown/unresolved。
-- 普通 HDR/SDR 及 native DV 的 decoder 约束分别表达；存在系统 decoder 不证明 mpv 已选中它，严格 native 路线仍复核现有事实。
-- predict 保持同步纯函数，缺少指定源匹配时返回未确定/条件结果，不能偷偷查询或沿用其他源规格的支持。
-- 默认无持久跨目标缓存；后续缓存按 runtime/target/mode/source revision 键控。能力变化时重新查询/规划，旧快照不能作为新 Surface 的授权。
-- 删除旧查询中无效 Player 参数，迁移库内、lab 与 App 调用和测试；单个实施检查点可暂存迁移未完项，但最终不能只加新 API 而 App 仍走旧逻辑。
+## 2. 本次核对的代码基线与交接保护
 
-#### B2c LG 及其他平台
-- 普通 Session 的 LG 输出必须经过精确设备门、bridge owner、Surface tuple、完整 YUV 契约；选中 baseLayerConvert 不等于自动接通验收过的 YUV 链。
-- 资源 owner 与严格实验许可分离，不绕过 native 授权，不修改验收像素/metadata 数值。
-- 统一源规格、约束、候选、原因和报告；平台 adapter 保留可靠执行器。未接入的平台显式 unknown/unsupportedControls，不把 Android 枚举硬套到其他系统。
-- 逐平台接入公共 planner/Session，先有实际实现再暴露支持。VideoRouteSession 是后续统一命名方向，不以重命名替代能力。
+以下为阅读时的观察值，不是未来构建钉定值：
 
-### B3：按证据补齐 native 缺口
-- 已有 ac4f7889 的提取工具与实际 P8 MIME-only 选错 decoder 反例继续使用；定点修复需要覆盖空 profile 列表与多 decoder，不重建同一 harness。
-- 优先复用现有 P5/P8 Android profile 映射、dovi=auto/on/off、mpv decoder-info v1 与容器事实。逐项验证原始源/元数据交付，而非只证明选项存在。
-- 不默认引入 Dart 点名 decoder 协议。on_preloaded、全新跨平台执行器不是源规格查询的前置。
-- 每项输出修复+测试或已有能力/明确范围+依据；未实测不标全完成。
+| 仓库/工作根 | 阅读基线 | 处理原则 |
+|---|---|---|
+| Goodwu/media-kit | main=d7619227；routing/MK-ROUTING-20261011=979e04eb | 以现有 routing 开发链增量修改；不从 main 重做 |
+| Goodwu/PiliPlusX | routing/MK-ROUTING-20261011=71d568775 | 延续现有 App 开发链 |
+| Goodwu/mpv | media-kit/android=c11426b67a | 保留已有 DV bridge、P5 修正及 importer/presenter |
+| Goodwu/FFmpeg | lg-p84-d1-vui-fix-20261010=d4bb79394b | 定点补原生元数据/输入缺口，不默认重写解码层 |
+| Goodwu/libplacebo 工作根 | optimize/dovi-linear-decode=ea700489 | 与实际 Android/Darwin 构建消费来源另行核对，不能把工作根 HEAD 当作已链接代码 |
+| Goodwu/libmpv-android-video-build-dv-experiment | main 的 depinfo 仍含固定旧代际 | 作为已发现的历史构建入口核对，不能未经确认就当作当前权威测试构建器 |
+| media-kit-build / ohos-native-build | 本地构建目录，不是 Git 仓库 | 配方和必要补丁必须进入可追踪仓库；产物保留清单 |
 
-### APP：PiliPlusX 源过滤与实际使用
-- 继续既有 PR#1 分支及已实现 portable overrides、源码绑定检查器和 CI，禁止从旧观察重建 App 分支。
-- 从 DASH 读取每个候选的 codec、coded size、frame rate 等构造 VideoSourceSpec，一次批量查询并按对应源结果过滤，不以 viewport 尺寸替代 coded size。
-- 确定不支持的源排除；unknown 与支持分别呈现，由显式选择策略决定是否受控尝试，不静默假报支持。无法获得规格的候选不凭质量编号断言 decoder 能力。
-- 当前 View/display target 在创建 Player 前即可传入。App 不维护 SDK、型号、decoder 私有适配规则。
-- query/predict/report 使用同一目标和规格；HDR 选档同时考虑解码支持与 HDR 路线，不将任一等同于另一。
-- 删除查询失败后无条件 lastCapabilities 回退和“无 Player 则无 P5”旧说明。能力改变刷新；最终执行用实际事实复核。
-- 保持最新 media-kit 源码依赖，运行全部 App 测试、严格 analyze 和可用编译；bundle 明确不等于完整 native APK。
+工作区观察：media-kit 有未提交 conversation 修改；PiliPlusX 有未提交 route_options.dart、route_options_test.dart、conversation 及新计划文件；FFmpeg 为 dirty。实施前逐项 diff 对账，不覆盖、不清理、不以 checkout/reset 获得假干净树。本次不修改这些文件。
 
-## 3. 高级配置方向（纳入计划，按能力逐项交付）
+现有权威文档位置：本文件；docs/plans/media-kit-routing-handoff-20261011.json；App 的 docs/plans/media-kit-routing-app-handoff-20261011.json。既有 PR 链延续，实施前回读其当前状态。每个工作包记录 implementation SHA、测试命令/退出码、实际构建输入、CI run/head、未完成项和下一步。已提交但 CI 未完成仍是已实现，不另开分支重复实现。
 
-采用一个 VideoRouteOptions/约束模型，避免并行私有 mpv 开关。维度分别是解码、帧导入、渲染、GPU API、HDR/动态元数据、输出精度、性能和失败策略。
+## 3. 已核实的差距，而非重新假设从零开发
 
-每项区分 auto / prefer / require：prefer 只排序，require 过滤并在不可满足时解释失败，不静默覆盖。实验门独立。全局默认、应用偏好、用户覆盖先合并成一份不可变有效选项，同一 planner 消费；实际能力和正确性/所有权规则不能被覆盖。
+1. hdr_route_planner.dart 仍以 allowExperimental 和 HdrStrategyMaturityTable 过滤；P8.1/P8.4/Vivid 的默认顺序仍基线优先，HDR10+ 无默认行，并有通用 SDR safety net。[R1]
+2. hdr_video_session.dart 的 _planNextAttempt 在 hdrAttempts >= 2 时改用 off；_retry 按 strategy 截断列表。仅改 planner 无法保证 C3/C4 获得执行机会。[R2]
+3. video_route_option_review.dart 对整个候选列表打分排序，会影响跨阶段顺序。v7.3 要求 C1-C4 优先级不可被 decode/import prefer 颠倒。[R3]
+4. mpv 已读取 AV_FRAME_DATA_DYNAMIC_HDR_PLUS 并调用 pl_map_hdr_metadata；HDR Vivid 当前仅记录存在性，不映射元数据。不能沿用 Dart 注释中“HDR10+ 完全无法读取”的概括。[R4]
+5. libplacebo 已有 HDR10+ 场景数据和 Bezier/OOTF 映射；所读实现只处理 application_version < 2，并使用 params[0]。这不是所有 HDR10+ 元数据形态完整支持的证明。[R5]
+6. FFmpeg native DV 接受 BL+RPU、无 EL 的 P5/P8；Dart realizer 当前只放行 P5/P8.4。P8.1/P8.2 应先核对现有链路；P7 不得通过放宽单层检查假装获得双层支持。[R6]
+7. PiliPlusX 已有按完整 DASH 规格批量查询、显示 revision 一致性检查和预测。保留这些实现，更新配置和结果消费，不重建接入。[R7]
+8. tool/build-android-test.sh 仍描述并使用历史 JAR 底包替换；tool/routing_matrix.py 当前只覆盖 p5/p84/hdr10/hlg 四类的既有构建矩阵，不能作为 v7.3 全路径验收矩阵。[R8]
 
-先开放有真实执行路径的硬解/软解偏好及约束、HDR/SDR目标和失败策略；后续增加 decoder/backend、导入、画质和功耗设置。系统未提供可靠性能/功耗数据时标未知，不制造分数。GPU API、renderer、importer 不是任意互换组合。
+## 4. 核心数据和执行设计
 
-提供候选列表与拒绝/待验证原因，区分 requested/effective/observed。影响 Surface/decoder 的选项按现有事务重建，支持原位更新的参数另行标识；旧 generation 不得写新 owner。严格诊断 route lock 独立于普通高级偏好。
+### 4.1 候选与执行实例分开编号，不增加第二套路由模型
 
-## 4. 唯一开发记录与防重复交接
+在现有 HdrCandidate 上增加 stage、candidateId 和稳定顺序。stage 只有 C1/C2/C3/C4；candidateId 同时标识源类、基线、具体执行契约。一个阶段可以包含已有的真实硬解/软件或导入实现，但不凭空组合不存在的路径。
 
-方案：本文件。中央机器台账：docs/plans/media-kit-routing-handoff-20261011.json。
-media-kit 权威链：Goodwu/media-kit:routing/MK-ROUTING-20261011 / PR#4。
-App 权威链：Goodwu/PiliPlusX:routing/MK-ROUTING-20261011 / PR#1，基于 fix/darwin-video-output-rebuild-barrier 的最新已合并工作。App 台账为 docs/plans/media-kit-routing-app-handoff-20261011.json。
+保留 HdrStrategy 大部分现有命名及实现；C2 的现有 metadataReshape 入口改成按元数据制式分发，对外统一展示“动态重建/映射”。增加 nativeHdr10Plus/nativeHdrVivid 实现身份，不能复用 nativeDolbyVision 冒充其他原生制式。普通 HDR10/HLG 可复用 baseLayerDirect 执行器，但 stage=C1；动态源基线回退使用同类执行器时 stage=C3。
 
-每轮先读台账、refs、PR 与最新结果评论。已实现但 CI 失败仍是 implemented，不退回 planned，不重新开发、不 force-push/reset 远端或用户 dirty tree。每个可恢复阶段提交并推送、回读确认；长构建前和交接前不能仅留临时文件。
+HdrRoutingPolicy 不再允许任意跨 C1-C4 重排/删除候选；删除 allowExperimental、experimentalWasSpecified。VideoRouteOptions/EffectiveVideoRouteOptions 删除 experimental；序列化、比较、配置迁移、Lab/App 及所有测试同步更新，不能只把默认值改成 true。已有持久配置只做一次迁移去掉旧字段，不保留长期真假两套行为。
 
-记录 taskId、状态、仓库/分支、基线、实现 SHA 或可解析 commitAnchor、测试范围/命令/退出码、CI run/head、依赖、未完成项和下一步唯一动作。源码正在验证时可以 PR 评论保存结果，后续代码提交同步台账，不以文档更新反复取消构建。
+require 仍是硬约束；decode/import prefer 只排序同一阶段的真实执行实例。所有实例需满足相同的目标输出及元数据语义。强制软解不能假借硬解路线满足，也不能导致 C3 抢先于 C2。
 
-## 5. 构建输入纪律
+### 4.2 显式结果，不让单个 feasible 布尔承载全部语义
 
-- 开始构建前确认相关权威 ref 最新头，包含全部适用修改；构建后重新确认。变化后的结果只能证明记录的输入，不能覆盖新头。
-- 不回退历史 known-good 源或旧二进制作为候选。只允许与当前完整输入可证明一致的中间缓存；源码 SHA/工作树摘要和产物哈希用于溯源。
-- FFmpeg 原有 configure dirty 将 FFMPEG_CONFIGURATION 置空，保留并查明实际构建意义，不擅自清理。
-- 现有外部 relink/r22 helper JAR 配方未证明为完整最新构建，需审计并构建所有适用输入，不能因 ninja 成功就宣称整包最新。
-- 不从本地存在 so/JAR 推断实际链接来源；核对最终包。旧包仅用于明确标注的对照。
-- 不提交凭据、私有媒体或未经清理的环境日志。
+建议增加 HdrCandidateEvaluation/HdrRouteFailure（名称为拟议接口）：
 
-## 6. 测试和验收
+- skipped：结构不适用/重复候选，例如普通 HLG 的 C2/C3。
+- unavailable：真实环境或输入前提不满足；区分 displayUnknown、transferUnavailable、decoderUnsupported、metadataUnknown 等原因。
+- error：routeNotImplemented、metadataFormUnsupported、metadataMalformed、metadataNotDelivered、metadataNotApplied、outputContractMismatch 等实现/执行错误。
+- ready：计划可选，但不表示已完成真实播放或验收。
 
-L0：原准入与成熟度反例；新增源规格验证、完整相等键、profile/level、Main10、4K60 vs 4K30/1080p60、缺帧率/尺寸、多个 decoder、软件与硬件分别支持、unknown/unsupported/query error、不可变快照、源结果与请求一一对应；require 不可被回退绕过。
+每条记录包含 candidateId、stage、source/profile、inputTransfer、outputTransfer、failureStage、reason、dependencyKey、snapshotId；保留 cause 链。源字段缺失/解码或显示查询未知不得伪装成“确定不支持”。缺少可用本地实现不得改写成设备不支持。
 
-L1：目标无 Player、未挂载/销毁、多 engine/View、换屏/mode、查询返回乱序与失效；纯 predict 不跨 channel；源/query/Session 一致。保留并发 open、迟到事实、旧 owner、重建/超时/清理失败/多 Session/fullscreen/seek/前后台测试。
+planner 仍是同步纯函数：从不可变快照运行候选的纯评估/描述入口，入口缺实现立即返回 routeNotImplemented。不得为了暴露错误在预测时创建 Player、decoder、Surface 或 EGL。执行阶段仅在 Session/Backend 中准备资源。两者复用同一候选定义和错误契约，不维护相互漂移的两张列表。
 
-L2：Android 查询只读无 configure、无 EGL/Surface 创建；目标 Display 解析、源规格组合 API、畸形输入/空 census/查询异常、软件识别来源。平台真实能力验证与宿主模拟证据分开。
+原生库报告的是当前二进制的真实 ABI/实现信息，不是启用开关。若映射入口缺失，仍保留该候选及其明确实现错误；不能将 capability=false 当作无痕删行依据。
 
-L3：media_kit_video/lab analyze 和全量单测、相关 Android JVM/编译、App 全量 Python/Flutter tests、严格 analyze、Dart/assets 编译以及最新 native 产品构建。实际相关 CI 对候选头完成 success 才验收，不能禁用失败用例或降低检查代替修复。
+### 4.3 候选表
 
-L4：设备接口真实可用才测 LG/PQ-HLG/现代 DV/普通 SDR；颜色与性能分轮。无设备不伪造。LG presented-FPS 已知不可观测，不把 vfps/提交帧率当面板呈现率。
+| 源 | C1 原生直通 | C2 动态重建/映射→PQ | C3 兼容基线 | C4 |
+|---|---|---|---|---|
+| P5 | DV | DV reshape | 跳过：IPT 非兼容基线 | 跳过 |
+| P8.1 | DV | DV reshape | PQ | 跳过 |
+| P8.4 | DV | DV reshape | HLG | HLG→PQ |
+| P8.2 | DV | DV reshape | HDR分支跳过：SDR基线 | 跳过 |
+| P7 | DV原生对应输入路径 | 无EL残差重建依赖且输入可处理 | 可独立解码的PQ BL | 跳过 |
+| HDR10 | PQ | 跳过 | 跳过：不重复C1 | 跳过 |
+| HLG | HLG | 跳过 | 跳过：不重复C1 | HLG→PQ |
+| HDR10+ | HDR10+原生 | HDR10+动态映射 | PQ | 跳过 |
+| Vivid-PQ | Vivid原生 | Vivid动态映射 | PQ | 跳过 |
+| Vivid-HLG | Vivid原生 | Vivid动态映射 | HLG | HLG→PQ |
 
-完成条件：原三批逐项闭合、App 确实使用新接口按源规格过滤、最新源码测试与编译完成、相关 CI 成功；不覆盖项明确记录，不能把新查询实现等同于全部跨平台执行器或完整 native 验收。
+表中适用路径未实现一律显式报错，不设置开关。普通 SDR 另走 sdrDirect；明确 SDR 显示下 P8.2 使用正确清理信令后的 SDR 基线，其余 HDR 走 toneMapSdr，P5 必须先正确重建。显示缺报不能归入 SDR。P10/AV1 保留当前路径的明确未实现/不支持错误，不使用“所有 AV1 不可解码”的全局判断。
 
-## 7. 本次续接检查点与立即实施顺序
+C4 只接受可信 HLG 基线；不仅“面板不支持 HLG”时可用，HLG 输出实例失败后也可继续判断。PQ 是否可用由完整输出契约决定，不是恒真。
 
-续接观察：media-kit PR#4=ef3951eb239d48747f4cbb2c3c2749fde40ff274；App PR#1=8fc8f2c618b96b60b29d576e4242d0e153fd00bd。这些是观察值，不是未来构建钉定值。
+### 4.4 快照与 Session 重试
 
-已有源码/viewport/OHOS CI success 与 App 231 Python/156 Flutter tests、bundle success 见两 PR 最新结果记录；App analyze85 info、旧Build startup_failure 和完整 native 构建仍开放。旧台账中的 App branch=null 已过期，本轮同步修正。
+Snapshot 使用原始 source revision、target/display/mode revision、解码与运行库事实、effective options。原始信令不被重建后 video-params 覆盖。Vivid 的 PQ/HLG 使用基线 transfer 字段区分，无须复制两套 source 类型；增加动态元数据 present/absent/unknown 的可观测性。
 
-当前优先级：先推送本 v3 计划，再实施 B2a/B2b 的可测试完整小阶段（源规格、目标查询、支持状态），及时保存；随后迁移 Session/lab/App 调用并把 DASH 候选实际纳入过滤，独立 CI 验证。高级配置分阶段开放有实现的项，不伪造未接入平台能力。继续保留 B1余项、LG 接线及 B3定点修复，不因新增 API 忘记它们。
+替换 _retry、_planNextAttempt、HdrSessionAttemptPolicy 的“两次 HDR 后转 SDR”和按 strategy 截断行为。采用 snapshotId + 有序 execution candidateId + attempted 集合；失败后清理当前资源，继续剩余实例。预算等于该快照有限执行实例数，不用固定 2 或 5 截断合法候选。同一实例最多尝试一次。
+
+只排除已确定失败的依赖：C2 映射器失败不禁用 C4；若确认共享 PQ presenter 失败，则使用该 presenter 的 C2/C4 均不可重试。未知错误不扩大成全部 GPU/全部 HDR 失败。
+
+清理/owner 失败、无法安全归因的 timeout、过期 generation 沿用现有立即停止语义。不得绕过资源安全来“尽量继续”。新源、换屏、输出格式或候选资格改变生成新快照；正常逐帧动态参数变化由当前管线处理，不每帧重规划。失败续走始终从原始源或明确基线输入开始，不能消费前一条路径残留的半转换结果。
+
+### 4.5 元数据所有权与输出报告
+
+将 stripDvRpu 的单一布尔提升/映射为明确的元数据处理策略：preserveForNative、consumeForMapping、baselineOnly。C1 保留并交付动态元数据；C2 消费后输出普通 PQ，不能将原始动态元数据再交给显示端重复应用；C3/C4 明确剥离/禁用对应动态语义。P7 的 BL 提取还须正确排除 EL，不能只移除 RPU。
+
+复用并扩展 HdrOutputContract/HdrOutputReport：保留 requested/effective/observed，新增 attemptedCandidates、metadataFormat、metadataDelivered、metadataConsumed、metadataForwarded、mappingBackend、outputTransfer、snapshot/PTS epoch 等证据。预期 appliesDynamicMetadata 不能充当实际消费证明。面板呈现不可观测时明确记录 unknown，不以 configure 成功或应用内标记替代。
+
+## 5. 分仓库实施包
+
+### A. media-kit：统一候选、错误、重试和测试契约
+
+主要修改：
+- media_kit_video/lib/src/hdr/hdr_route_planner.dart、hdr_strategy_realizer.dart、hdr_strategy.dart、hdr_route.dart。
+- hdr_source_descriptor.dart、hdr_source_classifier.dart、hdr_source_facts.dart、hdr_open_plan.dart。
+- hdr_video_session.dart、hdr_session_native_dv_policy.dart、hdr_player_backend.dart、hdr_open_coordinator.dart。
+- hdr_output_contract.dart、hdr_output_report.dart、hdr_output_diagnostics.dart。
+- lib/src/routing/video_route_options.dart、video_route_option_review.dart、video_route_capabilities.dart。
+
+仅在必要位置增加候选结果/错误模型文件；成熟度表退出运行逻辑，可迁入验收数据，不能以改名后继续作准入条件。检查 HdrOutputPolicy 和其他旧入口，必须委托同一规划规则，避免旁路仍保留 SDR safety net。
+
+在这一包直接建立 HDR10+/Vivid 适用入口；缺实现返回 routeNotImplemented，使默认构建能够测试完整错误与回退链。该阶段允许合同测试通过，但对应功能验收仍不通过。
+
+### B1. FFmpeg：复用解析器，补硬解侧逐帧交付
+
+复用已存在的 libavcodec/h2645_sei.c、dynamic_hdr_vivid.c、hevc/hevcdec.c 中 HDR10+/Vivid 解析及 side data；不重写 T.35 解析器。[R9]
+
+重点审计 libavcodec/mediacodecdec.c、mediacodec_dovi.c/h、mediacodecdec_common.c：当前已有 DV 输入跟踪/输出附加机制。先验证软件、mediacodec、mediacodec-copy、surfacetexture 各真实载体的 metadata 交付；缺口处复用队列生命周期，增加类型化 HDR10+/Vivid 载荷，而非建立另一套解码框架。
+
+输入按访问单元解析元数据，绑定 PTS、解码序列和 flush epoch；输出帧按同一关联交付对应 AVFrame side data。覆盖 B 帧重排、重复 PTS、无 PTS、seek/flush、丢帧、EOS、元数据更新及格式规定的有效期。不以“最近一次元数据”跨 seek 复用，不假定每帧必须重复携带相同 SEI。损坏或超出实现能力的元数据返回明确错误。
+
+C1 native DV：保留 profile32/256、BL/RPU、codec/config 和实际 decoder 复核；P8.1/P8.2 先扩展 Dart 的真实输入准入与对应复核测试。P7 原生若需要双层输入，必须有正确解复用、BL/EL 时序与真实设备消费链，不能删除 el_present_flag 检查后宣称完成。P10 单独报告未实现输入路径。
+
+复核原有 P8 MIME-only 多 decoder 选错问题；继续使用现有 native_selection_harness，只有尚未闭合的缺口才修改，不重复实现已完成修正。
+
+### B2. mpv：源事实、动态处理分发和消费证据
+
+修改重点：video/mp_image.c/h、player/command.c、video/filter/vf_format.c、video/out/vo_gpu_next.c 及对应 decoder/output 复核接线。
+
+HDR10+：已有 AVFrame→pl_map_hdr_metadata 链保留；新增可查询的原始存在性/状态，并检查硬解导入、帧复制和过滤后的保存。C2 使用真实 HDR10+ 动态映射设置，不能仅写 target-trc=pq。libplacebo 的 st2094-40 可消费 OOTF/Bezier，但缺元数据会回退固定曲线，因此必须单独复核有效输入与实际消费。[R4][R5][R10]
+
+Vivid：从仅 hdr_vivid 布尔升级为有引用生命周期的真实元数据载荷；传给共享映射器，复制/释放/flush 对称。仅保留存在性不算已实现。
+
+C3/C4：显式禁用 DV/HDR10+/Vivid 动态语义并清理残留状态。复用现有 vf_format 的 dolbyvision/hdr10plus 处理能力，但核对它与解码入口的作用位置；不能把解码后的帧过滤冒充送入原生 decoder 前的码流清理。
+
+P7 C2：报告残差依赖和映射支持性，替换 Dart 的 enhancementLayer==false 唯一判据。所读 mpv 仅在 disable_residual_flag 时映射 DV，而 libplacebo 工作根还有 trivial-NLQ 判断；先对齐实际构建版本的支持函数。仅在元数据证明不需要 EL 残差重建时使用 BL+RPU，不伪造完整 FEL 重建。
+
+### B3. libplacebo：HDR10+ 复用；Vivid 为真正新增算法
+
+HDR10+ 不另写现成算法。核对当前编译版本对 application_version、窗口、曲线及颜色控制的覆盖；所读 params[0] 路径不能冒充完整多窗口支持。未处理的必要形态返回 metadataFormUnsupported，并保留该功能工作项。全路径验收不能靠默默忽略字段完成。[R5]
+
+Vivid 新增公共元数据模型、FFmpeg 结构映射、CPU 参考实现、共享 shader 实现与测试。建议文件：src/include/libplacebo/hdr_vivid.h、src/hdr_vivid.c、src/shaders/hdr_vivid.c、src/tests/hdr_vivid.c，具体组织遵循实际 libplacebo 构建树。
+
+算法合同：按正式 Vivid 规范和合法测试向量处理源 PQ/HLG 解释、目标显示参数、基曲线/样条及颜色控制；将输出交给现有目标色域与 PQ 编码阶段。FFmpeg 元数据结构只证明语法存在，不是显示算法规范。不得把 Vivid 字段机械塞入 HDR10+ Bezier 并宣称等价，也不得以普通 HLG→PQ 冒充 Vivid C2。
+
+目标峰值来自有效显示报告或明确的渲染策略值，并在报告注明来源；无测量证据不得标为实测 nits。CPU/GPU 对拍的阈值、量化模式和参考向量在实现前入库，不能看完结果再放宽。
+
+共享实现让 Android/Darwin 等使用相同数学内核；不为每个平台复制 shader。HDR10+ 与 Vivid 的 C1 原生路径单独验证 decoder→Surface→display 的元数据交付；仅显示 HDR 类型或应用标记不算原生链完成。
+
+### B4. Android 与其他平台边界
+
+Android 的 HdrCapabilities.java、VideoRouteCapabilities.java、MediaKitVideoPlugin.java 按需扩展真实输出/动态制式事实。保留只读查询、实际 target、联合源规格匹配、unknown/error 区分，不创建预热 Player 或 decoder。继续使用现有 native pipeline probe，而非让 Dart define 声称某管线存在。
+
+C1/C2/C3/C4 使用各自真实 presenter 与像素/信令契约。保留 LG 已接受的 YUV8 配方及所有 owner/ACK/lease 约束，不夹带 10-bit 或 lease 融合重构。HDR 的 Surface 路径和显示事实需逐平台核对，不能只凭 PQ 码值或泛化 HDR 标签认定端到端成功。[R11]
+
+当前 VideoRouteCapabilities 主要为 Android adapter；其他平台缺实现时显式返回 adapterUnavailable/routeNotImplemented，不把 Android 枚举硬套过去。Darwin 已有共享 renderer、OHOS 已有播放器和构建链继续保留。共享映射与公共契约变化须跑其编译/生命周期回归；跨平台 HDR 端到端支持仍按平台单独验收，不将 Android 通过外推为全部平台通过。
+
+### C1. PiliPlusX：迁移配置、消费同一结果、不再复制路由
+
+修改 lib/plugin/pl_player/route_options.dart、hdr_output.dart、source_selection.dart、models/hdr.dart、controller.dart 及其测试。先与本地未提交修改对账。
+
+删除 experimental 参数与配置项；保留现有按 codec/coded size/frame rate 构造规格、批量查询和显示 revision 保护。源选择、预测、Session 执行与报告使用同一规格/目标/有效选项。未知 DV 信令继续明确处理，不以质量编号或文件名猜 profile。
+
+UI 至少区分“原生动态 HDR”“本地动态映射→PQ”“兼容基线回退”和“阻断”，并能查看被放弃候选的错误。C2 未实现而 C3 成功不得显示“动态映射成功”。App 不持有设备白名单、SDK/decoder 私有规则或另一张 C1-C4 表。
+
+### C2. 构建与 CI：完整最新输入，不能只换主库
+
+统一 tool/build-android-test.sh、tool/matrix-build.sh、tool/routing_matrix.py 与 App 原生输入验证脚本的来源契约。先确认权威构建入口；把必要的本地配方/补丁纳入追踪，不能让 CI 依赖工作站路径。
+
+每次构建解析当前权威分支及全部适用修改，形成 build-inputs 清单：各仓库 commit/tree/patch、工具链、构建选项、依赖输入及产物哈希。随后对这一次解析结果一致构建，避免构建过程中混用移动分支。这里记录精确 SHA 是溯源，不是回退旧源。
+
+重建全部适用的 FFmpeg/libplacebo/mpv/helper/JNI；未改且输入完全一致的中间产物可缓存，但不得沿用无法证明来源的旧 JAR 底包。核对最终 JAR/APK 内的 so 与加载库身份，而非只看 ninja 成功、目录时间或库名。
+
+扩展已有 routing-source、routing-query、routing-darwin、handoff-source workflows，增加 native 元数据/映射合同测试、无实验开关检查和功能验收汇总。保留 App 全量 tests/analyze/真实 APK 构建，以及共享变更涉及的 Darwin/OHOS 回归。工作流必须读取本次候选的实际源码；不能以绿色的历史 run 证明新头。
+
+## 6. 测试与验收矩阵
+
+验收矩阵独立于实现注册表维护，建议 docs/validation/hdr-route-matrix-v7.3.json；不从当前支持的路径反推必测范围。每行有 caseId、目标候选/执行实例、源基线/元数据形态、显示链、解码条件、输入身份、expectedResult 和所需证据。该矩阵控制验收，不控制运行期路由准入。
+
+### L0：纯规划与配置
+
+覆盖所有源行、SDR/PQ/HLG/PQ+HLG/原生动态显示/缺报、硬解/软解/未知/不支持及 require 冲突。重点断言：
+- HLG+仅PQ：C1不可行→C2/C3结构跳过→C4；不能提前阻断。
+- P8.4、HDR10+、Vivid-PQ/HLG：C1原生不可行时，C2在C3前；任何prefer不能颠倒。
+- C2适用但未实现：保留routeNotImplemented，C3回退成功不抹错。
+- P8.2+HDR：C1/C2均失败后阻断；P8.2+SDR可走清理后的SDR基线。
+- P5缺重建、DV信令未解析、显示缺报、P7残差依赖未知/需重建、P10未实现分别保留明确原因。
+- 成熟度/验证标签变化不能改变候选或选择结果；代码和构建不需要启用experimental。
+- HDR-only路径永不合成SDR候选；显式off和require冲突单独测试。
+
+### L1：Session / Backend / App
+
+复用并扩展 hdr_route_planner_test、hdr_fallback_failure_test、hdr_video_session_test、hdr_session_source_facts_test、hdr_session_route_options_test、hdr_output_contract_test、hdr_execution_catalog_test。新增 ordered-candidate、metadata-processing、acceptance-coverage 合同测试。
+
+测试 C1→C2→C3→C4 逐项失败、第三/第四项最终成功、全部耗尽、同阶段替代执行、共享依赖排除、局部映射失败不误伤C4、清理失败立即停止、换屏重规划、旧generation迟到事实、并发open/seek/fullscreen/前后台/dispose。App 覆盖查询失败、目标revision变化、选源与实际执行一致、回退展示及旧配置迁移。
+
+### L2：原生元数据和映射
+
+软件与所有实际硬解载体检查同一PTS/epoch上的元数据内容；覆盖B帧、重复/缺失PTS、flush/EOS、格式有效期、畸形字段和容量上限，做ASan/UBSan及解析fuzz。C1保留、C2消费、C3/C4禁用各有阳性/阴性用例。
+
+HDR10+ 用有效变化曲线测试，Vivid 用正式语义向量和独立CPU参考；比较CPU/GPU输出、黑白端点、连续性、单调性及颜色误差。选择确实应改变映射的向量证明元数据生效；不要求数学上应为恒等映射的所有场景都产生像素差异。PQ/HLG信号范围及二次映射错误另测。
+
+### L3：设备端到端
+
+设备按实际能力选取，覆盖原生DV、PQ-only、HLG、HDR10+原生及Vivid原生所需链路；缺少设备或样本明确标incomplete，不编造通过。现有设备/素材能覆盖哪些行由实测快照决定，不能把P5/P8.4回归外推到其他格式。
+
+每个正向功能行要求目标候选实际进入并成功，元数据按预期交付/消费，输出契约成立，以及可用的呈现/颜色证据。软件模拟的显示能力不能替代真实面板证据；普通截图不能单独证明HDR亮度呈现。颜色与性能分开报告；4K60、丢帧、seek/切源/生命周期继续保留。
+
+### L4：防止假全绿
+
+“routeNotImplemented准确报错”的负向用例可以通过；该功能的正向行必须仍为未完成/失败。“C2失败、C3成功”只计回退机制通过，不计C2功能通过。未触达目标候选、skip/xfail、缺设备、缺样本、缺消费证据均不能计正向通过。
+
+自动汇总核对 expected caseId 与实际结果，缺行/重复/覆盖不足/不同构建身份都不能通过上线验收。阶段性合同CI可以绿；总功能验收未完成时，汇总与上线检查必须清楚地不通过，不能展示“全部路径已验证”。不得删除用例、降低阈值或引入开关规避。
+
+## 7. 三批实施顺序与完成定义
+
+| 批次 | 工作包 | 输出与完成条件 |
+|---|---|---|
+| 第一批 | A + App配置最小同步 + 固定验收矩阵 | 去除门控；C1-C4及显式错误；Session无HDR→SDR暗退；默认构建合同测试；未实现功能仍如实未完成 |
+| 第二批 | B1/B2/B3/B4，优先复用DV/HLG与HDR10+，再实现Vivid | 逐帧元数据交付、真实映射/基线处理、消费证据；按源/profile/元数据形态独立验证，未完成原生输入路径继续明确报错 |
+| 第三批 | C1/C2 + 全量L0-L4 | App实际使用；完整最新源码构建；最终候选CI与设备矩阵闭合；全部既定必需行通过后才上线 |
+
+第一批不是“上线子集”，第二批不是可选后续，第三批也不是仅补文档。每个小提交先有失败用例再改实现，保持可复核，沿原分支提交。第一批推进时保留原B1/B2/B3台账已完成项；未完成的decoder选择、LG接线、跨平台回归及App构建问题不得因新路由任务被遗忘。
+
+本轮之后的唯一第一步：回读当前Git/台账并对账本地dirty修改，然后实施第一批的候选结果模型及无开关测试；不得先从旧main重新开发查询或App接入。
+
+## 8. 证据入口与范围说明
+
+以下引用用于设计依据；源码存在、单测通过、二进制编译、真实HDR呈现是不同证据层级。本轮没有运行项目测试、原生构建或设备验收，未独立宣布任何新功能完成。
+
+[R1] media-kit@979e04eb，media_kit_video/lib/src/hdr/hdr_route_planner.dart，尤其默认表、_evaluate成熟度门和safety net。
+[R2] 同提交 hdr_video_session.dart，_retry/_planNextAttempt（约779–907行）；hdr_session_native_dv_policy.dart。
+[R3] 同提交 lib/src/routing/video_route_option_review.dart、video_route_options.dart、video_route_capabilities.dart。
+[R4] https://github.com/Goodwu/mpv/blob/c11426b67a/video/mp_image.c （约1170–1212行）；video/filter/vf_format.c。
+[R5] https://github.com/Goodwu/libplacebo/blob/ea700489/src/include/libplacebo/utils/libav_internal.h （约340–383及950–1028行）。该工作根版本不等于已链接Android版本。
+[R6] https://github.com/Goodwu/FFmpeg/blob/d4bb79394b/libavcodec/mediacodecdec.c （约397–453行）；media-kit hdr_strategy_realizer.dart 的_nativeDolbyVision。
+[R7] https://github.com/Goodwu/PiliPlusX/blob/71d568775/lib/plugin/pl_player/source_selection.dart 及hdr_output.dart/route_options.dart。
+[R8] media-kit@979e04eb tool/build-android-test.sh、tool/routing_matrix.py；Android构建实验仓buildscripts/include/depinfo.sh。
+[R9] FFmpeg@d4bb79394b libavcodec/h2645_sei.c、dynamic_hdr_vivid.c、hevc/hevcdec.c、mediacodec_dovi.c及mediacodecdec.c。
+[R10] https://libplacebo.org/options/ （st2094-40使用OOTF/Bezier；缺元数据时会采用固定曲线）。
+[R11] https://developer.android.com/media/grow/hdr-playback 及 https://developer.android.com/reference/android/view/Display.HdrCapabilities 。
