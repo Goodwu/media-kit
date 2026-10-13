@@ -249,3 +249,33 @@ HDR10+ 用有效变化曲线测试，Vivid 用正式语义向量和独立CPU参�
 [R9] FFmpeg@d4bb79394b libavcodec/h2645_sei.c、dynamic_hdr_vivid.c、hevc/hevcdec.c、mediacodec_dovi.c及mediacodecdec.c。
 [R10] https://libplacebo.org/options/ （st2094-40使用OOTF/Bezier；缺元数据时会采用固定曲线）。
 [R11] https://developer.android.com/media/grow/hdr-playback 及 https://developer.android.com/reference/android/view/Display.HdrCapabilities 。
+
+## 9. 2026-10-13 远端实施检查点：供本地 agent 续接
+
+**状态：第一批部分实施，尚未验收；以下不是完成声明。** 本轮只更新 Goodwu/media-kit 的既有 `routing/MK-ROUTING-20261011` 分支；其他关联仓库未改动。本地 Codex 工作根仍显示旧 commit `979e04eb`，并非最新远端提交。**先 fetch 后对账，勿从本地旧 HEAD 重新实现，也勿 reset/clean 覆盖用户未提交改动。**
+
+### 已提交源码及测试（按提交顺序）
+
+- `5b29be1cec866e2e95876cf432bdd74d38e9120e`：`hdr_session_native_dv_policy.dart` 移除两次 HDR/五次总数硬预算，保留逐条 route 去重、native DV 单次准入；`hdrAttempts` 仅用于统计。
+- `7fc330706dedb45b77e0a955e937a0c39b460036`：`hdr_video_session.dart` 删除两次 HDR 后改 `preference.off` 重规划及固定五次停止条件。
+- `5cc150340a29e21998bcc27747f1aa4c5c68e874`：更新 `hdr_session_native_dv_policy_test.dart` 的 admission 预算测试。
+- `e186c5420051ce6c36133410573534c9ea987d45`：`hdr_route_planner.dart` 防止 HDR-capable/unknown display 自动落到 SDR 候选；仅显式 SDR 要求、普通 SDR 源或确定 SDR-only display 允许 SDR 输出。保留既有明确请求语义。
+- `fe649e872307e279bbec15d839176958e45c529c`：新增 `hdr_v73_no_implicit_sdr_test.dart` 五个针对性 host 回归。
+- `3063442f689bea9dc17507b22fabca3f5f1f4c99`：修正旧 Session 测试，从“第三次强制 SDR”改为“继续尝试 HDR 兼容基线”。
+
+### 真实验证结果与限制
+
+- GitHub Actions 对 `5cc1503` 的 `Routing source checks` / media_kit_video 运行 `38416157875`，测试编译、analyze 均已执行；该中间版本 **Flutter tests FAIL（1 项）**：`hdr_session_native_dv_policy_test.dart` 原用例把第三候选写死为 `toneMapSdr`，实际为 `baseLayerDirect`。已由 `3063442` 更新用例。该历史失败不得记为最终成功。
+- 更新 `e186c54` 之后的最终候选 CI 仍需回读该实际 head 的 workflow runs 和 job conclusions，不能用历史 CI success 替代。
+- 当前 ChatGPT 执行容器没有 Dart/Flutter/Android SDK、ADB，也无法 DNS 访问 github.com；Codex workspace 连接为 read-only，未实际执行本地构建/设备验证。本轮通过 GitHub 内容 API 写入上述源码，CI 是唯一可用的自动测试来源。
+- 之前的 local dirty：media-kit conversation 文档；PiliPlusX conversation、`lib/plugin/pl_player/route_options.dart`、`test/route_options_test.dart` 和 MKSURF 计划；FFmpeg `configure` 与生成目录。未修改这些本地文件。
+
+### 本地 agent 接手顺序（必须）
+
+1. 检查远端 `Goodwu/media-kit:routing/MK-ROUTING-20261011` 最新 head。保存本地 dirty diff，`git fetch` 后决定如何安全合入以上提交；**不要 checkout 新分支重复开发，禁止 reset/force push**。
+2. 对真实最新头运行 `flutter analyze`、`flutter test`（至少 media_kit_video 全量 + media_kit_hdr_lab 全量），核对 `hdr_v73_no_implicit_sdr_test.dart`、Session 的三次 HDR 回退和当前输出偏好测试。检查有无未复核的旧用例期望、未覆盖的空候选 `HdrCandidate` 以及 `nullable` 静态分析问题。记录命令、exit code、源码 SHA。
+3. 继续执行第 4—7 节剩余事项：固定 C1—C4 顺序、移除全部实验开关和成熟度准入、HDR10+/Vivid 的 C1/C2 明确入口与 routeNotImplemented、完善逐候选错误/重试、修正 C4 仅 HLG→PQ、与 PiliPlusX 共用报告。**这些在本检查点均未实施，不能误记完成。**
+4. 仅当 Dart/host tests 通过后，核对 mpv/FFmpeg/libplacebo 实际被构建的源版本与最新输入；按 v4 逐包实施 native 改动和元数据时序测试。遇到缺设备或无法完成真实 HDR 输出验证时停止并交回实机验收，勿伪造。
+5. 全部改动均回到既有唯一方案、本仓台账及 App 台账；最终 CI 必须是最终源头的 success，设备真实性与功能验收分开记账。
+
+本检查点不改变 v4 的完整目标表，不以临时局部修复代替其剩余任务，也不以“待实现已返回错误”当作 HDR10+/Vivid C2 的功能完成。
