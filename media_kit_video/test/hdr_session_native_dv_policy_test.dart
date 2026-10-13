@@ -749,7 +749,7 @@ void main() {
       expect(session.report.value.verified, isTrue);
       await session.dispose();
     });
-    test('native DV and GPU HDR attempts exhaust budget before review upgrades',
+    test('native and GPU HDR failures continue to a compatible HDR candidate',
         () async {
       final env = _Environment();
       final backend = _Backend()
@@ -772,13 +772,13 @@ void main() {
       expect(backend.configured.map((p) => p.route.strategy), [
         HdrStrategy.nativeDolbyVision,
         HdrStrategy.metadataReshape,
-        HdrStrategy.toneMapSdr,
+        HdrStrategy.baseLayerDirect,
       ]);
       expect(
           backend.configured
               .where((p) => HdrSessionAttemptPolicy.isHdr(p.route)),
-          hasLength(2));
-      expect(session.report.value.actual!.strategy, HdrStrategy.toneMapSdr);
+          hasLength(3));
+      expect(session.report.value.actual!.strategy, HdrStrategy.baseLayerDirect);
       expect(backend.opened.last.excluded,
           contains(HdrRouteDependency.nativeDolbyVision));
       await session.dispose();
