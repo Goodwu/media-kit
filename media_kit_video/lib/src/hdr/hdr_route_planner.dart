@@ -22,8 +22,9 @@ enum HdrOutputPreference { auto, off }
 ///
 /// HdrRoutingPolicy
 /// ----------------
-/// The caller-tunable part of routing: an ordered strategy list per source
-/// class and the `allowExperimental` gate (requirement 3.3/3.5).
+/// Legacy source-specific lists are retained while applications migrate to
+/// the fixed C1–C4 catalog. Maturity labels are diagnostic facts only;
+/// they never authorize or suppress execution.
 ///
 /// Preferences only contain cross-platform strategy names — no vo, hwdec,
 /// SDK or device knowledge — so an application may ship them as plain
@@ -43,8 +44,8 @@ class HdrRoutingPolicy {
   /// must not mutate a map after handing it to a policy.
   final Map<HdrSourceClass, List<HdrStrategy>>? preferences;
 
-  /// Whether `experimental` strategies may be selected (requirement 3.5).
-  /// `verified` and `inherited` are always allowed.
+  /// Deprecated compatibility data; this value does not gate candidates.
+  /// Remove with the application/config API migration.
   final bool allowExperimental;
   final bool experimentalWasSpecified;
 
@@ -137,7 +138,7 @@ class HdrRoutingPolicy {
 ///
 /// Algorithm (plan 1.3): classify the source, take the preference list for
 /// the class (`off` short-circuits to the explicit SDR strategy), and pick
-/// the first entry that passes the maturity gate, realizes feasibly, and
+/// the first entry that realizes feasibly, and
 /// does not depend on an excluded pipeline stage. Skipped entries stay in
 /// the candidate list with their typed reason. The SDR safety net (tone-map
 /// for HDR sources, SDR direct for SDR sources) exists only when an SDR
@@ -320,16 +321,7 @@ class HdrRoutePlanner {
             realization: realization)
           .withRoutingIdentity(sourceClass, _stageFor(strategy, sourceClass)),
     ];
-    // Maturity blocks the strategy before any execution can be attempted.
-    // Keep one strategy rejection; a relaxed safety net still lists every
-    // distinct executable route and retains all source/dependency gates.
-    if (gateMaturity &&
-        candidates.every((candidate) =>
-            candidate.skipReason ==
-                HdrDegradeReason.experimentalStrategySkipped ||
-            candidate.skipReason == HdrDegradeReason.unsupportedStrategy)) {
-      return [candidates.first];
-    }
+    // Maturity is recorded but never used as a routing admission check.
     return applyVideoRouteOptions(candidates, capabilities, options);
   }
 
@@ -368,25 +360,9 @@ class HdrRoutePlanner {
         skipReason: HdrDegradeReason.routeNotImplemented,
       );
     }
-    if (gateMaturity) {
-      if (maturity == HdrStrategyMaturity.unsupported) {
-        return HdrCandidate(
-          strategy: strategy,
-          maturity: maturity,
-          isSafetyNet: !gateMaturity,
-          skipReason: HdrDegradeReason.unsupportedStrategy,
-        );
-      }
-      if (maturity == HdrStrategyMaturity.experimental &&
-          !policy.allowExperimental) {
-        return HdrCandidate(
-          strategy: strategy,
-          maturity: maturity,
-          isSafetyNet: !gateMaturity,
-          skipReason: HdrDegradeReason.experimentalStrategySkipped,
-        );
-      }
-    }
+    // A route with experimental or unsupported *historical evidence* is
+    // evaluated like every other route. Structural eligibility and the
+    // actual implementation, not maturity, decide its outcome.
     final HdrRoute? route = realization.route;
     if (route == null) {
       return HdrCandidate(
