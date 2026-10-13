@@ -42,3 +42,23 @@ marble6-{p5,p84,hdr10}：未执行（设备不可达，见 Current State）。
 - [ ] LG P8.4 无 HDR 输出路径——并入 v4 A 包候选表设计（不恢复 SDR 兜底）。
 - [ ] `tool/matrix-round.sh` OPEN 判定 grep 过时（path= 格式），下次触碰 tool 时一并修。
 - [ ] ab1c7ca9 推送仍待用户逐次请示批准；推送后 CI 新头复跑。
+
+## v7.3 tip 回归轮（2026-10-14 晚，regression-v73-20261014，routing@01fd8e39）
+
+**全部在线设备（4/4 台）回归完成；三样片解码测试通过标准达成：P5 于 3 台通过、P8.4 于 LYA 通过（LG 为契约允许的显式阻断）、HDR10 于 2 台通过；零 fatal、零 crash、已知 flake 未复现；设备全部逐字节还原。** 构建源=01fd8e39（含 v7.3 十提交 + 31 项测试迁移 + experimental 删除，本地未推送），三 APK exit 0；native 层与基线逐键一致（lib 槽位 5f8fc04c、libmpv 69d4afff、FFmpeg 六库全同；sourceManifestSha256 变化为 Dart 树预期输入）。
+
+| 轮 | 路由（verified/playable） | 结果 |
+| --- | --- | --- |
+| lya6-p5 | metadataReshape(C2)→pq/gpu-next platformView | EOS 98.77s、dispose ✓、0/0 |
+| lya6-p84 | **metadataReshape(C2)→pq（路由变化实锤：stage 序 C2 先于 C3，上轮为 baseLayerDirect→HLG）**，readback BT2020_PQ | 257s 连续、SF 实锤 PQ 层、dispose ✓、0/0 |
+| lya6-hdr10 | baseLayerDirect→pq/mediacodec_embed | 257.4s 零丢帧、SF PQ 层、dispose ✓ |
+| lgh6-p5 | nativeDolbyVision(C1)→dolbyVision timed | EOS 98.92s；post-EOS BACK 不 dispose=已知问题②同款 |
+| lgh6-hdr10 | baseLayerDirect→pq/mediacodec_embed | 244s 零丢帧、dispose ✓ |
+| lgh6-p84 | **契约允许的 blocked-with-reason**：C2 reshape 选中后 `lgPqApply window-format-not-43…` → `HdrDataSpaceApplyException(dataSpaceApplyFailed)` 显式失败，无 SDR 兜底、无 crash；失败族与上轮同（PQ dataspace 落盘），失败候选由 C4 移至 C2（stage 序提前） | LG P8.4 PQ 输出链缺口维持开放 |
+| jason5-p5 | toneMapSdr→sdr/gpu-next texture（SDR-only 兜底许可，SF `hdr10=false hlg=false dv=false`） | EOS 98.94s、VO 丢帧 84%=SD660 在案限制 |
+
+- ugg（SD425/API37）：**三样片不可行有确定性能力证据**——硬解 OMX.qcom HEVC size-range 64x64-1920x1088（4K 超限）、软解 c2.android.hevc block 上限≈4.19M 像素<8.29M、显示 `mSupportedHdrTypes=[]`；未跑全轮（evidence/ugg-capability-probe.log + dump 全量）。
+- marble（dede0cd2）仍不在 adb 列表，缺席记录，未绕行。
+- 已知 flake（HdrDecoderReviewFailure）7 份轮日志零命中。
+- 设备还原：LG/jason 装回包逐字节一致、LYA/ugg PACKAGE_ABSENT 原状、旋转/亮度 mode 原值、四台熄屏。
+- 证据 `~/src/media-kit-build/evidence/regression-v73-20261014/`（apks/三包+日志、precheck、7 轮 round-*.out/device.log/截图/SF dump、ugg 探测、final-restore-check）。
