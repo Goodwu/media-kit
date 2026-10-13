@@ -16,6 +16,12 @@ DV001 PR #1 仍在 `1095a43`，无 DEVICE 新修复回交。review5483753705、c
 
 PR #3 DV003 仍为 Critical REQUEST_CHANGES，不原样归并，也不开第二 DEVICE 线。继续验收需最新 native producer 输入、APK/ABI/签名来源、普通 Session 和实际 YUV carrier/owner、P5/P8.4 true/false 与可见 HDR/持续性能。宿主 CI、bundle、native build 和设备显示分别报告，不互相替代。
 
+2026-10-13 Lead 派发 Specialist 完成"含 experimental 面的完整路由合理性"只读复核（未改码）。72 格 = 37 experimental / 21 unsupported / 13 verified / 1 inherited；experimental 按入口分：默认偏好表 12 + 列表外安全网 2（dvP82、hdr10Plus × toneMapSdr）+ 仅自定义偏好 13 + realizer 恒拒 10；dvP81/dvP7 × metadataReshape 初次规划被 baseLayerDirect 支配，经会话失败重试截断列表仍可达（三种可达口径需区分）。关键问题：安全网 gateMaturity=false 一并豁免 unsupported（dvP10 × toneMapSdr 被选中，且 planner_test 已编码该行为，属文档/测试与需求状态表的契约矛盾）；DV 源 toneMapSdr 保留 RPU 却报 appliesDynamicMetadata=false（dvP82 与 sdrDirect 的显式 strip 不一致，原生是否消费 RPU 未验证）；realizer 读取 mkst bridge FFI 动态状态，同 source/caps/options 非纯确定函数；P7 "仅 MEL" 准入实为 enhancementLayer==false，现数据模型分不出 MEL/FEL。优化方案：第一批 A（安全网契约拆分，保守/兼容两案待用户裁决）+ F（isSafetyNet/成熟度豁免可观测性与证据分层）；第二批 B（SDR 源元数据处理显式契约，dvP82 优先）+ C（bridge readiness 快照化）；第三批 D（experimental 按格 allowlist，保留全局开关）+ E（10 恒拒格改 unsupported、默认列表 3 个恒拒占位标记、表测试加唯一键/完整性/可达性见证）。不建议仅凭 verified 将 hdr10 × metadataReshape 纳入默认列表（verified=准入≠默认偏好，且 appliesDynamicMetadata=false 非真重建）。实施待用户方向。
+
+2026-10-13 用户裁决路由目标态：experimental 只是开发阶段不作路由类别，未实现/未验证进积压清单；四原则（HDR显示+HDR解码禁 tone-map／可解码且显示匹配用直通／不匹配走 reshape/convert／SDR 显示播 HDR 用 tone-map）。Specialist 两轮交付设计骨架（3 主判断、nativeDV 归直通、HDR 显示全链失败阻断不落 SDR 兜底、off/require 冲突报 routeOptionsUnsatisfied、P8.2/P10-compat2 SDR 层直用、缺报≠SDR）后两次流断开，按失败封顶规则 Lead 回接收编成完整目标态方案（决策树＋12 源类映射表＋能力三值口径＋积压矩阵取代成熟度门＋迁移三批）已呈报；待用户裁决 4 点：off/require SDR 冲突取向、HDR 全链失败阻断确认、显示能力缺报阻断确认、allowExperimental 废弃节奏。
+
+同日设计迭代四轮用户裁决：① dvP5+非DV HDR 显示走 reshape（P5 管线→PQ，verified 路由，Lead 初版表误标阻断）；② HDR10/HLG 删假 reshape 档；③ PQ 基线源（hdr10/dvP81/dvP7/hdr10Plus）删 ④convert——所有 HDR 面板支持 PQ、不做 PQ→HLG；④ dvP82 删 ④SDR→PQ 上变换（非标准操作、丢弃 RPU 伪 HDR，无 P5 管线→阻断，已确认）；⑤ 立不变量"HDR 可得不交 SDR：SDR 输出仅在源本身 SDR 或显示明确 SDR"；⑥ 阶梯定序 动态元数据优先：①DV原生直通 → ②reshape（仅 DV，P5 管线→PQ，P7 限无EL）→ ③基线直通（PQ 恒可行/HLG 需声明）→ ④convert（仅 HLG→PQ）→ 阻断。hdrVivid/hdr10Plus reshape 为待实现积压，播放不依赖（基线直通/convert 已覆盖）。映射表 v5 与决策树已交付，等待 4 点裁决后开工批 1（planner 决策树重写）。
+
 ## History
 
 ### 2026-10-12 TASKS 旧状态快照（历史）
