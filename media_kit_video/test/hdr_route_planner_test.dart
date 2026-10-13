@@ -1253,16 +1253,16 @@ void main() {
         expect(prediction.candidates[blocked].route, isNull,
             reason: 'candidate $blocked');
       }
-      // Gate open changes nothing for this class any more: the same list,
-      // with the same SDR block.
+      // The C4 input constraint is independent of the legacy maturity gate:
+      // PQ cannot become an HLG-to-PQ conversion even when it is open.
       final HdrRoutePrediction gateOpen = lyaCaps().predict(
         sources[HdrSourceClass.hdr10]!,
         policy: const HdrRoutingPolicy(allowExperimental: true),
       );
-      expect(
-        gateOpen.candidates.take(2).every((HdrCandidate c) => c.feasible),
-        isTrue,
-      );
+      expect(gateOpen.candidates[0].feasible, isTrue);
+      expect(gateOpen.candidates[1].feasible, isFalse);
+      expect(gateOpen.candidates[1].skipReason,
+          HdrDegradeReason.unsupportedStrategy);
       expect(gateOpen.selected, prediction.selected);
     });
 
