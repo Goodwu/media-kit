@@ -1562,6 +1562,9 @@ void main() {
           HdrRouteDependency.hwdecMediacodec,
           HdrRouteDependency.topologyPlatformView,
           HdrRouteDependency.dataspacePq,
+          // DV dynamic mapping and PQ presentation are independent failure
+          // dependencies; a mapper error must not eliminate C4 HLG→PQ.
+          HdrRouteDependency.mapperDolbyVision,
           HdrRouteDependency.decoderMediacodec,
         },
       );
