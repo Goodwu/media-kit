@@ -525,3 +525,17 @@ Linux B第1修正V2仍REQUEST_CHANGES：18原tests/49独立probe及实际generat
 | SonyBraviaOLED4KDemo.vivid_bd265_4k.mp4 | `4e1b9331…` | HEVC Main10 4K PQ | 采样窗未见动态元数据（文件名存疑，备用） |
 
 覆盖候选表 HDR10+ C1/C2、Vivid-PQ、Vivid-HLG 各行动态载荷需求。三支 4K 主样片以规范名推送 **LG**（`media-kit-hdr10plus-pa.mkv`/`media-kit-hdrvivid-pq.mp4`/`media-kit-hdrvivid-hlg.mp4`，设备侧 md5 与本地逐字节一致）；推送时 LYA/jason/ugg 已从 adb 断开（仅 LG+模拟器在线），LYA 补推待其重新上线。工作树盘点：FFmpeg `~/src/FFmpeg` @d4bb79394b（lg-p84-d1-vui-fix-20261010，dirty 仅 configure+`_build-mks/` 生成目录=既有构建常态机制，tracked 源码净）；mpv `~/src/mpv` @c11426b67a（media-kit/android，全净）——**B1/B2 C 代码工作树就绪**。
+
+### 2026-10-14 B1 审计里程碑：元数据交付缺口地图 + LG 运行时基线（ZCode Lead）
+
+**静态缺口地图**（Scout 双 fork 审计，全部 file:line 在案）：
+- 已存在：FFmpeg 软解路径 HDR10+（h2645_sei.c:217-235 → hevc/hevcdec.c:3068-3077）与 Vivid（h2645_sei.c:201-215 → hevcdec.c:3089-3098）解析+AVFrame 附加均完整，无 export 标志门，side data 随帧绑定；mpv 读 HDR10+（mp_image.c:1173-1179→pl_map_hdr_metadata，实际已消费）；mkv demuxer 已有 HDR10+ packet 侧导出（matroskadec.c:3953 → decode.c:1517 自动落 AVFrame，对 mediacodec wrapper 同样生效——mkv 载体 HDR10+ 可能已被静默消费）。
+- 缺失：MediaCodec 路径对两制式零处理（mediacodec_dovi.c 的 pts_us/epoch 输入跟踪+输出附加模板仅 DV 用；copy 与直出 surface 共用同一 attach 点，补法相同）；CUVA005 无 AV_PKT_DATA 类型（MP4/TS 载体两制式均无 packet 侧导出）；mpv 对 Vivid 仅存在位（mp_image.c:1181-1182），vf_format 无 vivid 选项（C3/C4 码流清理不可表达），vo_gpu_next/libplacebo 无 Vivid 映射；Dart 分类器不识别两制式（运行时实锤，见下）。
+- 待核三项：hevc_mediacodec_decoder 的 select 集是否含 hevc_sei；直出 surface 的 mp_image 构造是否保留 side data（结构上是）；configure 未提交改动内容。
+
+**LG 运行时基线**（b1-probe-20261014，3 APK 三轮，证据 ~/src/media-kit-build/evidence/b1-probe-20261014/）：
+- hdr10plus-pa：分类=静态 PQ（none），走 baseLayerDirect→pq/mediacodec_embed verified 播到 EOS，零失败——分类器/事实链无 2094 识别，路由从未给 HDR10+ C1/C2。
+- vivid-pq：分类=静态 PQ，重分类后 `HdrDecoderReviewFailure(Decoder endpoint changed)` 打开中止（待复跑区分已知 flake/真实问题）。
+- vivid-hlg：分类=静态 HLG，重建后打 C4 PQ dataspace（LG 已知 PQ 输出缺口）`dataSpaceApplyFailed` 中止——与 p84 同族，契约路径一致。
+- 协议异常记录：三轮 AUTO_PLAYER_DISPOSE 均缺失、截图全黑（screencap 采不到 SurfaceView 层）、t45→t90 间钉定横屏被转竖屏——探测协议待查项，不影响事实采集。
+- B1 实施顺序由此确定：①Dart 分类/事实链识别 HDR10+/Vivid（mpv 已有 hdr-vivid 属性可桥，HDR10+ 需等价暴露）②FFmpeg mediacodec_dovi 模板泛化（2094-40/CUVA005 输入跟踪+输出附加，覆盖 MP4/TS 与 mkv-Vivid 缺口）③B2 mpv Vivid 载荷读取与 vf_format 清理选项、C3/C4 禁用语义。
