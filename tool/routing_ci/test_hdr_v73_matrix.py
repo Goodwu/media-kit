@@ -1,0 +1,54 @@
+"""Guard the independent v7.3 release matrix against false-positive acceptance."""
+import json
+from pathlib import Path
+import unittest
+
+MATRIX = Path(__file__).resolve().parents[2] / "docs" / "validation" / "hdr-route-matrix-v7.3.json"
+SOURCES = ["dvP5","dvP81","dvP82","dvP84","dvP7","hdr10","hlg","hdr10Plus","hdrVividPq","hdrVividHlg","sdr","dvP10","dvUnknown"]
+STAGES = ("c1", "c2", "c3", "c4")
+
+class HdrRouteMatrixContractTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.data = json.loads(MATRIX.read_text(encoding="utf-8"))
+
+    def test_complete_independent_source_stage_catalog(self):
+        rows = self.data["cases"]
+        actual = [row["id"] for row in rows]
+        expected = [f"{source}/{stage}" for source in SOURCES for stage in STAGES]
+        self.assertEqual(actual, expected)
+        self.assertEqual(len(actual), len(set(actual)))
+
+    def test_structural_skips_cannot_pass_as_accepted(self):
+        for row in self.data["cases"]:
+            with self.subTest(row=row["id"]):
+                self.assertEqual(row["applicable"], row["route"] is not None)
+                if not row["applicable"]:
+                    self.assertEqual(row["acceptance"], "notApplicable")
+                    self.assertEqual(row["implementation"], "notApplicable")
+                else:
+                    self.assertIn(row["implementation"], ("pendingImplementation", "requiresValidation"))
+                    self.assertIn(row["acceptance"], ("pending", "accepted"))
+
+    def test_no_acceptance_without_reproducible_path_evidence(self):
+        for row in self.data["cases"]:
+            if row["acceptance"] == "accepted":
+                self.assertTrue(row["evidence"], row["id"])
+                for item in row["evidence"]:
+                    self.assertTrue(item.get("sourceSha"), row["id"])
+                    self.assertTrue(item.get("deviceOrReference"), row["id"])
+                    self.assertTrue(item.get("candidateId"), row["id"])
+                    self.assertTrue(item.get("resultArtifact"), row["id"])
+                    self.assertEqual(item["validatedStage"], row["stage"])
+
+    def test_release_gate_is_fail_closed(self):
+        applicable = [row for row in self.data["cases"] if row["applicable"]]
+        additional = self.data["requiredAdditionalCases"]
+        self.assertEqual(len(additional), len(set(additional)))
+        accepted = all(row["acceptance"] == "accepted" for row in applicable)
+        self.assertEqual(self.data["releaseReady"], accepted and not additional,
+                         "Release is forbidden until each stage and extra case is attested")
+        self.assertNotIn("experimental", json.dumps(self.data).lower())
+
+if __name__ == "__main__":
+    unittest.main()
