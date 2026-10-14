@@ -135,6 +135,10 @@ enum HdrDegradeReason {
   /// even if a later baseline HDR candidate plays successfully.
   routeNotImplemented,
 
+  /// The dynamic metadata mapper failed on a route that actually depends on
+  /// it. A compatible static HDR baseline may still be separately usable.
+  metadataMappingFailed,
+
   /// A Dolby Vision source needs the fork's P5 dovi rescale pipeline and it
   /// is not available; the library refuses to output a wrongly colored
   /// picture (R3.3).
@@ -196,6 +200,12 @@ abstract class HdrRouteDependency {
 
   /// The route renders through the platform view topology.
   static const String topologyPlatformView = 'topology:platformView';
+
+  /// The DV RPU-to-PQ mapping stage, independent of the shared PQ presenter.
+  /// A verified mapper failure must not exclude C4 HLG-base-to-PQ conversion
+  /// or C3 compatibility decoding. Do not use this tag for dataspace/owner
+  /// failures, which have their own exact dependencies.
+  static const String mapperDolbyVision = 'mapper:dolbyVision';
 
   /// Shared ordinary MediaCodec decode, independent of frame import mode.
   static const String decoderMediacodec = 'decoder:mediacodec';

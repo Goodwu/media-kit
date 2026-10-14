@@ -436,6 +436,56 @@ void main() {
     await session.dispose();
   });
 
+  test('a C2 mapper-only failure keeps independent C4 HLG-to-PQ', () async {
+    // A PQ-only panel cannot take the P8.4 HLG base directly. C2 reshape
+    // is first, followed by C3 (unavailable) and the C4 HLG-to-PQ route.
+    // This is a synthetic typed failure, not proof of native mapping.
+    final backend = FakeBackend()
+      ..attemptScripts.add(const AttemptScript(
+        configureError: HdrExecutionDependencyFailure(
+          HdrRouteDependency.mapperDolbyVision,
+          HdrDegradeReason.metadataMappingFailed,
+        ),
+      ));
+    final session = makeSession(
+      backend: backend,
+      capabilities: caps(types: const {2}),
+    );
+    final events = <HdrOutputEvent>[];
+    session.events.listen(events.add);
+    await session.open(media, hint: p84);
+    await pumpEventQueue();
+
+    expect(backend.preparedPlans, hasLength(2));
+    expect(backend.preparedPlans[0].route.strategy,
+        HdrStrategy.metadataReshape);
+    expect(backend.preparedPlans[0].prediction.selected.stage,
+        HdrRouteStage.c2);
+    expect(backend.preparedPlans[1].route.strategy,
+        HdrStrategy.baseLayerConvert);
+    expect(backend.preparedPlans[1].prediction.selected.stage,
+        HdrRouteStage.c4);
+    expect(backend.opened, hasLength(1));
+    expect(backend.opened.single.route.outputTransfer, HdrOutputTransfer.pq);
+
+    final excluded = backend.preparedPlans[1].excluded;
+    expect(excluded[HdrRouteDependency.mapperDolbyVision],
+        HdrDegradeReason.metadataMappingFailed);
+    expect(excluded, isNot(contains(HdrRouteDependency.dataspacePq)));
+    expect(excluded, isNot(contains(HdrRouteDependency.topologyPlatformView)));
+    expect(backend.preparedPlans[1].prediction.candidates
+        .firstWhere((c) => c.stage == HdrRouteStage.c2)
+        .skipReason, HdrDegradeReason.metadataMappingFailed);
+    expect(session.report.value.degradeReason,
+        HdrDegradeReason.metadataMappingFailed);
+    expect(session.report.value.actual!.strategy,
+        HdrStrategy.baseLayerConvert);
+    expect(events.whereType<HdrErrorEvent>(), isEmpty);
+    expect(events.whereType<HdrDegradedEvent>().single.to!.strategy,
+        HdrStrategy.baseLayerConvert);
+    await session.dispose();
+  });
+
   test(
       'dataspace failure degrades to the next HDR candidate; a following '
       'bind timeout blocks instead of an SDR fallback', () async {

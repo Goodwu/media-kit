@@ -496,6 +496,7 @@ class HdrStrategyRealizer {
           HdrRouteDependency.hwdecMediacodec,
           HdrRouteDependency.topologyPlatformView,
           HdrRouteDependency.dataspacePq,
+          HdrRouteDependency.mapperDolbyVision,
         },
       ),
     );
