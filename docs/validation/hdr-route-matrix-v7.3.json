@@ -20,6 +20,7 @@
     "dvUnknown": "Unresolved Dolby Vision signaling must block"
   },
   "requiredAdditionalCases": [
+    "sdrDirect",
     "hdrDisplayMissingMustBlock",
     "hdrNoSdrFallback",
     "sdrOnlyToneMap",
@@ -445,10 +446,10 @@
       "id": "sdr/c1",
       "source": "sdr",
       "stage": "c1",
-      "route": "sdrDirect",
-      "applicable": true,
-      "implementation": "requiresValidation",
-      "acceptance": "pending",
+      "route": null,
+      "applicable": false,
+      "implementation": "notApplicable",
+      "acceptance": "notApplicable",
       "evidence": []
     },
     {
