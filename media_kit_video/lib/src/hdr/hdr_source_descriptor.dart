@@ -11,8 +11,8 @@ import 'hdr_output_policy.dart' show HdrMediaKind;
 /// it is knowable on this platform. Dolby Vision is detected from the
 /// decoder-reported `dolby-vision-profile`; HDR Vivid from the fork's
 /// per-frame `video-params/hdr-vivid` side-data fact (0f7e6bec32+); HDR10+
-/// is not exposed by mpv yet and stays [HdrDynamicMetadata.none] until a
-/// source for it exists.
+/// from the fork's `video-params/hdr10-plus` presence fact. A missing
+/// property from older native binaries remains unknown, not evidence of none.
 ///
 /// {@endtemplate}
 enum HdrDynamicMetadata {

@@ -972,6 +972,12 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
         : hdrVividRaw == 'no'
             ? false
             : null;
+    final hdr10PlusRaw = await readProperty('video-params/hdr10-plus');
+    final hdr10Plus = hdr10PlusRaw == 'yes'
+        ? true
+        : hdr10PlusRaw == 'no'
+            ? false
+            : null;
     return HdrReviewFacts(
       videoParams: latestVideoParams(),
       dolbyVisionProfile: profile,
@@ -981,6 +987,7 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
       dvCompatibilityId: dvCompatibilityId,
       dvElPresent: dvElPresent,
       hdrVivid: hdrVivid,
+      hdr10Plus: hdr10Plus,
     );
   }
 

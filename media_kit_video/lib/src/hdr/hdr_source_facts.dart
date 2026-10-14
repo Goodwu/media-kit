@@ -38,7 +38,7 @@ class HdrSourceFactConflict {
 /// Never cache it by URI or on a process-wide classifier.
 ///
 /// [source] describes the original stream as far as it is known. [videoParams]
-/// and [hdrVividOnFrame] are the latest decoder observation, including missing
+///, [hdrVividOnFrame] and [hdr10PlusOnFrame] are decoder observations, including missing
 /// values; they are not overwritten to make them agree with the source.
 /// `video-params` is decoder output (with mpv overrides), not proof of original
 /// bitstream colors or final window/panel output. Only ordinary color-preserving
@@ -52,6 +52,7 @@ class HdrSourceFacts {
     required List<HdrSourceFactConflict> conflicts,
     this.videoParams,
     this.hdrVividOnFrame,
+    this.hdr10PlusOnFrame,
     this.reviewCount = 0,
   }) : origins = Map.unmodifiable(origins),
        conflicts = List.unmodifiable(conflicts);
@@ -87,6 +88,7 @@ class HdrSourceFacts {
   final List<HdrSourceFactConflict> conflicts;
   final VideoParams? videoParams;
   final bool? hdrVividOnFrame;
+  final bool? hdr10PlusOnFrame;
   final int reviewCount;
 
   bool get hasConflict => conflicts.isNotEmpty;
@@ -99,6 +101,7 @@ class HdrSourceFacts {
     int? dvCompatibilityId,
     bool? dvElPresent,
     bool? hdrVivid,
+    bool? hdr10Plus,
     required bool inferSourceColorFromDecoder,
   }) {
     final nextOrigins = Map<HdrSourceField, HdrSourceFactOrigin>.of(origins);
@@ -166,12 +169,34 @@ class HdrSourceFacts {
       metadata = HdrDynamicMetadata.dolbyVision;
       nextOrigins[HdrSourceField.dynamicMetadata] =
           nextOrigins[HdrSourceField.dvProfile] ?? HdrSourceFactOrigin.track;
-    } else if (metadata != HdrDynamicMetadata.dolbyVision && hdrVivid == true) {
-      metadata = HdrDynamicMetadata.hdrVivid;
-      nextOrigins[HdrSourceField.dynamicMetadata] = HdrSourceFactOrigin.decoder;
+    } else if (metadata != HdrDynamicMetadata.dolbyVision) {
+      final observed = hdrVivid == true
+          ? HdrDynamicMetadata.hdrVivid
+          : hdr10Plus == true
+              ? HdrDynamicMetadata.hdr10Plus
+              : null;
+      // Two different affirmative formats in one logical open are unsafe;
+      // absence on a later frame is not contradictory. A caller hint alone
+      // is weaker than the first decoder observation.
+      if (hdrVivid == true && hdr10Plus == true) {
+        nextConflicts.add(const HdrSourceFactConflict(
+            HdrSourceField.dynamicMetadata, HdrDynamicMetadata.hdrVivid,
+            HdrDynamicMetadata.hdr10Plus));
+      } else if (observed != null) {
+        if (metadata != HdrDynamicMetadata.none &&
+            metadata != observed &&
+            origins[HdrSourceField.dynamicMetadata] ==
+                HdrSourceFactOrigin.decoder) {
+          nextConflicts.add(HdrSourceFactConflict(
+              HdrSourceField.dynamicMetadata, metadata, observed));
+        }
+        metadata = observed;
+        nextOrigins[HdrSourceField.dynamicMetadata] =
+            HdrSourceFactOrigin.decoder;
+      }
     }
-    // A frame without side data cannot disprove the stream's dynamic metadata.
-    // This also preserves HDR10+ hints on backends lacking an HDR10+ property.
+    // Missing/negative frame side data does not disprove dynamic metadata.
+    // This also preserves HDR10+/Vivid hints on older mpv binaries.
     var transfer = profileChanged ? null : source.transfer;
     var primaries = profileChanged ? null : source.primaries;
     final gamma = _nonempty(videoParams?.gamma);
@@ -253,6 +278,7 @@ class HdrSourceFacts {
       conflicts: nextConflicts,
       videoParams: videoParams,
       hdrVividOnFrame: hdrVivid,
+      hdr10PlusOnFrame: hdr10Plus,
       reviewCount: reviewCount + 1,
     );
   }

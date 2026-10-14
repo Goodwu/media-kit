@@ -38,8 +38,9 @@ import 'hdr_source_descriptor.dart';
 /// fact stays unknown for every supported DV profile. HDR Vivid is
 /// observable as a per-frame side-data fact (`video-params/hdr-vivid`): a
 /// reported `true` classifies a profile-less source as
-/// [HdrDynamicMetadata.hdrVivid]. HDR10+ remains not observable through mpv
-/// and stays [HdrDynamicMetadata.none].
+/// [HdrDynamicMetadata.hdrVivid]. The fork also exposes per-frame HDR10+
+/// side-data presence as `video-params/hdr10-plus`. Neither positive fact
+/// certifies that the metadata was actually mapped or forwarded.
 ///
 /// When no decoder facts are available at all ([VideoParams] and the profile
 /// both absent), the optional [hint] descriptor is returned as-is so a hint
@@ -72,8 +73,10 @@ class HdrSourceClassifier {
     int? dvCompatibilityId,
     bool? dvElPresent,
     bool? hdrVivid,
+    bool? hdr10Plus,
   }) {
-    final bool hasFacts = videoParams != null || dolbyVisionProfile != null;
+    final bool hasFacts = videoParams != null || dolbyVisionProfile != null ||
+        hdrVivid == true || hdr10Plus == true;
     final HdrSourceDescriptor descriptor = _classify(
       videoParams: videoParams,
       dolbyVisionProfile: dolbyVisionProfile,
@@ -81,6 +84,7 @@ class HdrSourceClassifier {
       dvCompatibilityId: dvCompatibilityId,
       dvElPresent: dvElPresent,
       hdrVivid: hdrVivid,
+      hdr10Plus: hdr10Plus,
     );
     // `HDR classify:` layer (R4.3): the description plus where it came from.
     // Short-circuits inside while disabled; no strings are built here.
@@ -98,11 +102,13 @@ class HdrSourceClassifier {
     int? dvCompatibilityId,
     bool? dvElPresent,
     bool? hdrVivid,
+    bool? hdr10Plus,
   }) {
     // No decoder facts yet: the hint (if any) is the only description
     // available. Without a hint the source stays undescribed/SDR until the
     // decoder reports.
-    if (videoParams == null && dolbyVisionProfile == null) {
+    if (videoParams == null && dolbyVisionProfile == null &&
+        hdrVivid != true && hdr10Plus != true) {
       return hint ?? const HdrSourceDescriptor();
     }
     final gamma = videoParams?.gamma;
@@ -142,15 +148,18 @@ class HdrSourceClassifier {
         enhancementLayer: enhancementLayer,
       );
     }
-    // Profile-less sources: HDR Vivid side data observed on a frame is the
-    // only detectable dynamic metadata; false/unknown stays none.
+    // DV wins over frame metadata; for profile-less streams Vivid takes
+    // precedence over HDR10+ in a conflicting observation. Persistent
+    // affirmative format conflicts are rejected by HdrSourceFacts.
     return HdrSourceDescriptor(
       codec: hint?.codec ?? '',
       transfer: gamma,
       primaries: primaries,
       dynamicMetadata: hdrVivid == true
           ? HdrDynamicMetadata.hdrVivid
-          : HdrDynamicMetadata.none,
+          : hdr10Plus == true
+              ? HdrDynamicMetadata.hdr10Plus
+              : HdrDynamicMetadata.none,
       // Base-layer-only sources never carry an enhancement layer.
       enhancementLayer: false,
     );
