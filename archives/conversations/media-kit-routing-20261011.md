@@ -510,3 +510,18 @@ Linux B第1修正V2仍REQUEST_CHANGES：18原tests/49独立probe及实际generat
 - 回执入方案 §10；本地提交未推送（push 逐次请示）。下一步 §10.3.5：`allowExperimental/experimental` 字段整体删除（库序列化/比较/配置一次迁移、Lab、App）+ PiliPlusX dirty 迁移；§10.3.6 功能项（metadata ownership、P7 残差/EL、HDR10+/Vivid 逐帧元数据、C1 原生显示链、native 构建与设备输出）维持未实施。
 
 同日 §10.3.5a（media_kit 侧）执行完成：experimental 字段全链删除（policy 两字段 + options 序列化），fromMap 丢 legacy key=持久配置一次迁移（契约测试钉住），session `_legacyPolicy` 死字段清理，Lab 调用点去参，16 测试文件同步（808→783 为参数化折叠）；video 783/783 + lab 298/298 全绿、analyze 零 finding、无 ESCALATED。`video_player_media_kit/analysis_options.yaml` 非本批改动按保护原则未入提交。PiliPlusX 迁移进行中（代码迁移保持未提交，pin 更新与提交待主库推送）。
+
+### 2026-10-14 B1/B2 前置就绪：HDR10+/Vivid 测试样片入库与工作树盘点（ZCode Lead）
+
+用户提供 6 支新样片（~/Downloads/test-clips，ffprobe-full 帧级采样定性）：
+
+| 样片 | SHA-256 | 载体 | 动态元数据（3–8s 窗逐帧） |
+| --- | --- | --- | --- |
+| HDR10Plus_PA_DTSX.mkv | `9fc54031…` | HEVC Main10 4K PQ BT.2020（mkv/DTS:X） | **HDR10+ SMPTE2094-40 逐帧**（141/141） |
+| HDR10Plus_PB_EAC3JOC.mkv | `c751f824…` | HEVC Main10 4K PQ | **HDR10+ SMPTE2094-40 逐帧**（144/144） |
+| 4kHdrVividDemo.mp4 | `f9b0a569…` | HEVC Main10 4K PQ | **Vivid CUVA 005 逐帧**（190/190，PQ 载体） |
+| vivid20240702001.mp4 | `8701fbe9…` | HEVC Rext 1080p PQ | Vivid CUVA 005（备用小片） |
+| hdr-vivid.mp4 | `18c7c05a…` | HEVC Main10 4K HLG | **Vivid CUVA 005 逐帧**（HLG 载体） |
+| SonyBraviaOLED4KDemo.vivid_bd265_4k.mp4 | `4e1b9331…` | HEVC Main10 4K PQ | 采样窗未见动态元数据（文件名存疑，备用） |
+
+覆盖候选表 HDR10+ C1/C2、Vivid-PQ、Vivid-HLG 各行动态载荷需求。三支 4K 主样片以规范名推送 **LG**（`media-kit-hdr10plus-pa.mkv`/`media-kit-hdrvivid-pq.mp4`/`media-kit-hdrvivid-hlg.mp4`，设备侧 md5 与本地逐字节一致）；推送时 LYA/jason/ugg 已从 adb 断开（仅 LG+模拟器在线），LYA 补推待其重新上线。工作树盘点：FFmpeg `~/src/FFmpeg` @d4bb79394b（lg-p84-d1-vui-fix-20261010，dirty 仅 configure+`_build-mks/` 生成目录=既有构建常态机制，tracked 源码净）；mpv `~/src/mpv` @c11426b67a（media-kit/android，全净）——**B1/B2 C 代码工作树就绪**。
