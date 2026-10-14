@@ -639,6 +639,52 @@ void main() {
   });
 
   test(
+      'HDR10+ affirmative frame fact rebuilds static PQ baseline without '
+      'claiming dynamic rendering', () async {
+    // Native mpv exposes metadata presence independently from the mapped
+    // scene values. Synthetic review facts exercise Session reclassification,
+    // not proof of actual native frame-side delivery.
+    final backend = FakeBackend()
+      ..factsForOpen.add(const HdrReviewFacts(
+        codec: 'hevc',
+        videoParams: VideoParams(gamma: 'pq', primaries: 'bt.2020'),
+        hwdecCurrent: 'mediacodec',
+        path: 'test://media',
+        hdr10Plus: true,
+      ));
+    final session = makeSession(backend: backend, capabilities: caps());
+    final events = <HdrOutputEvent>[];
+    session.events.listen(events.add);
+    await session.open(media, hint: hdr10);
+    await pumpEventQueue();
+
+    expect(backend.opened, hasLength(2));
+    expect(backend.opened.first.route.metadataHandling,
+        HdrMetadataHandling.none);
+    expect(backend.opened.last.route.metadataHandling,
+        HdrMetadataHandling.baselineOnly);
+    final report = session.report.value;
+    expect(report.verified, isTrue);
+    expect(report.source!.dynamicMetadata, HdrDynamicMetadata.hdr10Plus);
+    expect(report.sourceFacts!.hdr10PlusOnFrame, isTrue);
+    expect(report.requestedMetadataHandling,
+        HdrMetadataHandling.baselineOnly);
+    expect(report.metadataHandlingObserved, isNull);
+    expect(report.prediction!.selected.strategy,
+        HdrStrategy.baseLayerDirect);
+    expect(report.prediction!.selected.stage, HdrRouteStage.c3);
+    expect(report.prediction!.candidates[0].strategy,
+        HdrStrategy.nativeHdr10Plus);
+    expect(report.prediction!.candidates[0].skipReason,
+        HdrDegradeReason.routeNotImplemented);
+    expect(report.prediction!.candidates[1].skipReason,
+        HdrDegradeReason.routeNotImplemented);
+    expect(events.whereType<HdrReclassifiedEvent>().single.rebuilt, isTrue);
+    expect(events.whereType<HdrErrorEvent>(), isEmpty);
+    await session.dispose();
+  });
+
+  test(
       'hwdec mismatch on an HDR-capable display blocks without an SDR '
       'software fallback', () async {
     // Every HDR candidate for hdr10 needs the failed mediacodec carrier;
