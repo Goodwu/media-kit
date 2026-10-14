@@ -44,10 +44,21 @@ class HdrRouteMatrixContractTest(unittest.TestCase):
     def test_release_gate_is_fail_closed(self):
         applicable = [row for row in self.data["cases"] if row["applicable"]]
         additional = self.data["requiredAdditionalCases"]
-        self.assertEqual(len(additional), len(set(additional)))
+        required = ["sdrDirect","hdrDisplayMissingMustBlock","hdrNoSdrFallback","sdrOnlyToneMap","dvUnknownBlock","requireOutputConflict","metadataNotImplementedReturnsError","metadataErrorPreservedAfterBaseline","p82HdrNoSdrBaseExit","p82SdrDisplayDirect","c2FailureThenC3","c2FailureThenC4","staleGenerationRejected","ownerDebtBlocksRetry","presentationObservedNotImplied"]
+        self.assertEqual([item["id"] for item in additional], required)
+        for item in additional:
+            self.assertIn(item["acceptance"], ("pending", "accepted"))
+            if item["acceptance"] == "accepted":
+                self.assertTrue(item["evidence"], item["id"])
+                for evidence in item["evidence"]:
+                    self.assertTrue(evidence.get("sourceSha"), item["id"])
+                    self.assertTrue(evidence.get("deviceOrReference"), item["id"])
+                    self.assertTrue(evidence.get("resultArtifact"), item["id"])
+                    self.assertEqual(evidence.get("validatedCase"), item["id"])
         accepted = all(row["acceptance"] == "accepted" for row in applicable)
-        self.assertEqual(self.data["releaseReady"], accepted and not additional,
-                         "Release is forbidden until each stage and extra case is attested")
+        extras_accepted = all(item["acceptance"] == "accepted" for item in additional)
+        self.assertEqual(self.data["releaseReady"], accepted and extras_accepted,
+                         "Release is forbidden until every stage and extra case is attested")
         self.assertNotIn("experimental", json.dumps(self.data).lower())
 
 if __name__ == "__main__":
