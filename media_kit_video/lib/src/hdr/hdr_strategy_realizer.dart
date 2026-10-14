@@ -91,6 +91,32 @@ class HdrStrategyRealizer {
     }
   }
 
+  /// Compute the immutable *request* before realizing the route. Neither this
+  /// value nor appliesDynamicMetadata is a runtime observation.
+  static HdrMetadataHandling metadataHandlingFor(
+      HdrSourceDescriptor source, HdrStrategy strategy) {
+    if (source.dynamicMetadata == HdrDynamicMetadata.none) {
+      return HdrMetadataHandling.none;
+    }
+    switch (strategy) {
+      case HdrStrategy.nativeDolbyVision:
+      case HdrStrategy.nativeHdr10Plus:
+      case HdrStrategy.nativeHdrVivid:
+        return HdrMetadataHandling.preserveForNative;
+      case HdrStrategy.metadataReshape:
+        return HdrMetadataHandling.consumeForMapping;
+      case HdrStrategy.toneMapSdr:
+        return source.dvProfile == 5 &&
+                source.dynamicMetadata == HdrDynamicMetadata.dolbyVision
+            ? HdrMetadataHandling.consumeForMapping
+            : HdrMetadataHandling.baselineOnly;
+      case HdrStrategy.baseLayerDirect:
+      case HdrStrategy.baseLayerConvert:
+      case HdrStrategy.sdrDirect:
+        return HdrMetadataHandling.baselineOnly;
+    }
+  }
+
   // These mpv requests all use the ordinary MediaCodec decode implementation.
   // Native DV owns a different configured decoder contract; hwdec=no is FFmpeg.
   static HdrStrategyRealization _withOrdinaryDecoderDependency(
@@ -224,6 +250,7 @@ class HdrStrategyRealizer {
         targetTrc: null,
         surfaceTransfer: null,
         stripDvRpu: false,
+        metadataHandling: metadataHandlingFor(source, HdrStrategy.nativeDolbyVision),
         dependencies: const <String>{
           HdrRouteDependency.nativeDolbyVision,
           HdrRouteDependency.hwdecMediacodec,
@@ -278,6 +305,7 @@ class HdrStrategyRealizer {
         surfaceTransfer: null,
         // The decoder ignores the RPU on the compat path; nothing to strip.
         stripDvRpu: false,
+        metadataHandling: metadataHandlingFor(source, HdrStrategy.baseLayerDirect),
         dependencies: const <String>{
           HdrRouteDependency.hwdecMediacodec,
           HdrRouteDependency.topologyPlatformView,
@@ -385,6 +413,7 @@ class HdrStrategyRealizer {
             ? HdrYuvPresentationContract.offscreenTransfer
             : null,
         stripDvRpu: source.dynamicMetadata == HdrDynamicMetadata.dolbyVision,
+        metadataHandling: metadataHandlingFor(source, HdrStrategy.baseLayerConvert),
         dependencies: <String>{
           hwdecDependency,
           HdrRouteDependency.topologyPlatformView,
@@ -462,6 +491,7 @@ class HdrStrategyRealizer {
         surfaceTransfer: 'pq',
         // The RPU is the input of the rebuild; it must survive.
         stripDvRpu: false,
+        metadataHandling: metadataHandlingFor(source, HdrStrategy.metadataReshape),
         dependencies: const <String>{
           HdrRouteDependency.hwdecMediacodec,
           HdrRouteDependency.topologyPlatformView,
@@ -498,6 +528,7 @@ class HdrStrategyRealizer {
         targetTrc: 'bt.1886',
         surfaceTransfer: null,
         stripDvRpu: cls == HdrSourceClass.dvP84,
+        metadataHandling: metadataHandlingFor(source, HdrStrategy.toneMapSdr),
         dependencies: <String>{
           useMediacodecCopy
               ? HdrRouteDependency.hwdecMediacodecCopy
@@ -535,6 +566,7 @@ class HdrStrategyRealizer {
         surfaceTransfer: null,
         // P8.2 strips its RPU; plain SDR carries none.
         stripDvRpu: source.dynamicMetadata == HdrDynamicMetadata.dolbyVision,
+        metadataHandling: metadataHandlingFor(source, HdrStrategy.sdrDirect),
         dependencies: <String>{
           useMediacodecCopy
               ? HdrRouteDependency.hwdecMediacodecCopy

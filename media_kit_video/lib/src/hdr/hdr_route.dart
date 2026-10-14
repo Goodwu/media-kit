@@ -58,6 +58,24 @@ enum HdrOutputTransfer {
 /// (decoder-composited `mediacodec_embed` or the GPU HDR dataspace surface).
 enum HdrTopology { texture, platformView }
 
+/// Intended ownership of *source* dynamic metadata. This is a requested
+/// route contract, never proof that a decoder/renderer consumed or forwarded
+/// a frame's metadata. Actual delivery/consumption needs runtime evidence.
+enum HdrMetadataHandling {
+  /// Ordinary SDR/HDR without an applicable dynamic payload.
+  none,
+
+  /// Keep original dynamic signaling for an actual native HDR decoder.
+  preserveForNative,
+
+  /// Consume per-frame metadata in the local GPU mapping/tone-map pipeline.
+  consumeForMapping,
+
+  /// Use only the independently decodable compatible base layer.
+  /// The execution adapter must not claim dynamic HDR was rendered.
+  baselineOnly,
+}
+
 /// Confidence that the predicted route will actually come up on this device
 /// (requirement R1.5). Orthogonal to [HdrStrategyMaturity]: maturity says
 /// whether this kind of route has ever been verified, confidence says
@@ -218,6 +236,7 @@ class HdrRoute {
     required this.targetTrc,
     required this.surfaceTransfer,
     required this.stripDvRpu,
+    this.metadataHandling = HdrMetadataHandling.none,
     this.offscreenTransfer,
     this.dependencies = const <String>{},
   });
@@ -275,6 +294,10 @@ class HdrRoute {
   /// Whether the Dolby Vision RPU must be stripped from the bitstream.
   final bool stripDvRpu;
 
+  /// Intent only. For C3/C4 the output must be reported as a static
+  /// compatibility baseline, not as native or mapped dynamic HDR.
+  final HdrMetadataHandling metadataHandling;
+
   /// The pipeline stages this route depends on (see [HdrRouteDependency]).
   final Set<String> dependencies;
 
@@ -297,6 +320,7 @@ class HdrRoute {
         surfaceTransfer: surfaceTransfer,
         offscreenTransfer: offscreenTransfer,
         stripDvRpu: stripDvRpu,
+        metadataHandling: metadataHandling,
         dependencies: Set<String>.unmodifiable(dependencies),
       );
 
@@ -318,6 +342,7 @@ class HdrRoute {
         other.surfaceTransfer == surfaceTransfer &&
         other.offscreenTransfer == offscreenTransfer &&
         other.stripDvRpu == stripDvRpu &&
+        other.metadataHandling == metadataHandling &&
         setEquals(other.dependencies, dependencies);
   }
 
@@ -337,6 +362,7 @@ class HdrRoute {
         surfaceTransfer,
         offscreenTransfer,
         stripDvRpu,
+        metadataHandling,
         Object.hashAllUnordered(dependencies),
       );
 
@@ -347,7 +373,8 @@ class HdrRoute {
       'vd-lavc-o: $vdLavcOptions, render-mode: $mediacodecEmbedRenderMode, '
       'prim: $targetPrim, trc: $targetTrc, surface: $surfaceTransfer, '
       'offscreen: ${offscreenTransfer ?? 'none'}, '
-      'stripRpu: $stripDvRpu, deps: $dependencies)';
+      'stripRpu: $stripDvRpu, metadata: ${metadataHandling.name}, '
+      'deps: $dependencies)';
 }
 
 enum HdrRouteStage { c1, c2, c3, c4 }

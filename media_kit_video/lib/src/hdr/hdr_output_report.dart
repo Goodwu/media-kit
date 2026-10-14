@@ -77,6 +77,16 @@ class HdrOutputReport {
   final VideoRouteOptionFulfillment? optionFulfillment;
   final List<HdrRoute> attemptedRoutes;
 
+  /// Metadata treatment requested by the effective route. This is not
+  /// evidence of frame-side metadata delivery/consumption or panel output.
+  HdrMetadataHandling? get requestedMetadataHandling =>
+      actual?.metadataHandling ?? requested?.metadataHandling;
+
+  /// Frame-side metadata proof is not yet provided by the native backend.
+  /// Keeping this null prevents plan success from masquerading as C1/C2
+  /// metadata handling success.
+  bool? get metadataHandlingObserved => null;
+
   /// Dataspace requested for the GPU surface (`pq`/`hlg`), when the route
   /// needs one.
   final String? dataSpaceRequested;
