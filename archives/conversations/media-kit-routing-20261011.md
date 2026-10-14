@@ -539,3 +539,11 @@ Linux B第1修正V2仍REQUEST_CHANGES：18原tests/49独立probe及实际generat
 - vivid-hlg：分类=静态 HLG，重建后打 C4 PQ dataspace（LG 已知 PQ 输出缺口）`dataSpaceApplyFailed` 中止——与 p84 同族，契约路径一致。
 - 协议异常记录：三轮 AUTO_PLAYER_DISPOSE 均缺失、截图全黑（screencap 采不到 SurfaceView 层）、t45→t90 间钉定横屏被转竖屏——探测协议待查项，不影响事实采集。
 - B1 实施顺序由此确定：①Dart 分类/事实链识别 HDR10+/Vivid（mpv 已有 hdr-vivid 属性可桥，HDR10+ 需等价暴露）②FFmpeg mediacodec_dovi 模板泛化（2094-40/CUVA005 输入跟踪+输出附加，覆盖 MP4/TS 与 mkv-Vivid 缺口）③B2 mpv Vivid 载荷读取与 vf_format 清理选项、C3/C4 禁用语义。
+
+### 2026-10-14 用户裁决：HDR10+/Vivid 缺失功能列待办，过渡态=报日志、走兼容基线（ZCode Lead）
+
+用户裁决后 LG 复跑定性（b1-replicate-20261014，证据 21 件）：
+- **vivid-pq 3/3 走通**：静态 PQ 兼容基线 baseLayerDirect→pq/mediacodec_embed verified，三轮一致播到 EOS（≈72.2s、completed=true、render_failures=0）；上轮 HdrDecoderReviewFailure 为已知间歇 flake 家族（3/3 未复现，保持待修记录）。
+- **vivid-hlg 阻断确定性（2/2 同签名）**：HLG 源按 C4 HLG→PQ 打到 LG 已知 PQ 输出缺口（第一 format=43 窗 lg-pq ext accepted、第二 format=278/0x116 窗 refused→applied=false→HdrDataSpaceApplyException），与 lgh5/lgh6-p84 同族同位——设备特有缺口维持开放记账，非新缺陷；在 HLG/PQ 能力齐备的显示上该样片按契约走 C1 HLG 直通基线。
+- 过渡态契约即当前行为：分类日志如实报静态分类与候选/路由链（报日志），HDR10+→静态 PQ 基线、Vivid→静态 PQ/HLG 基线（走兼容基线）；动态 C1/C2 不合成（无隐式 SDR、无伪实现）。B1（FFmpeg mediacodec 两制式交付）与 B2（mpv Vivid 载荷/清理/映射）+ Dart 分类识别列为待办项，实施基础=上节缺口地图（B1 实施顺序三步在案）。
+- 附带事实：四轮 post-EOS/中止后均 NO_DISPOSE（已知问题②同族）；NO_SF_DUMP 为脚本 grep 口径（dump 实存、API24 无 dataspace 字段）。
