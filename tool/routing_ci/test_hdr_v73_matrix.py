@@ -41,6 +41,36 @@ class HdrRouteMatrixContractTest(unittest.TestCase):
                     self.assertTrue(item.get("resultArtifact"), row["id"])
                     self.assertEqual(item["validatedStage"], row["stage"])
 
+    def test_user_deferral_preserves_full_matrix_without_requiring_dynamic_for_static(self):
+        scope = self.data["currentPhase"]
+        self.assertEqual(scope["mode"], "staticCompatibilityOnly")
+        self.assertEqual(scope["deferredPackages"], ["B1", "B2", "B3", "B4"])
+        self.assertFalse(scope["requiresDeferredDynamicFeaturesForStaticAcceptance"])
+        expected_dynamic = {
+            f"{name}/{stage}"
+            for name in ("hdr10Plus", "hdrVividPq", "hdrVividHlg")
+            for stage in ("c1", "c2")
+        }
+        self.assertEqual(set(scope["deferredCandidateIds"]), expected_dynamic)
+        rows = {row["id"]: row for row in self.data["cases"]}
+        self.assertEqual(
+            {row["id"] for row in rows.values()
+             if row.get("scheduling") == "deferredByUser"},
+            expected_dynamic)
+        for key in expected_dynamic:
+            row = rows[key]
+            self.assertTrue(row["applicable"], key)
+            self.assertEqual(row["acceptance"], "pending", key)
+            self.assertNotEqual(row["implementation"], "notApplicable", key)
+        expected_static = {
+            "hdr10Plus/c3", "hdrVividPq/c3", "hdrVividHlg/c3", "hdrVividHlg/c4",
+        }
+        self.assertEqual(set(scope["baselineCandidateIds"]), expected_static)
+        for key in expected_static:
+            self.assertEqual(rows[key].get("scheduling"), "currentStaticCompatibility")
+            self.assertEqual(rows[key]["acceptance"], "pending")
+        self.assertFalse(self.data["releaseReady"])
+
     def test_release_gate_is_fail_closed(self):
         applicable = [row for row in self.data["cases"] if row["applicable"]]
         additional = self.data["requiredAdditionalCases"]
