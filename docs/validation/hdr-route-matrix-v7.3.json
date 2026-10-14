@@ -389,7 +389,8 @@
       "applicable": true,
       "implementation": "pendingImplementation",
       "acceptance": "pending",
-      "evidence": []
+      "evidence": [],
+      "scheduling": "deferredByUser"
     },
     {
       "id": "hdr10Plus/c2",
@@ -399,7 +400,8 @@
       "applicable": true,
       "implementation": "pendingImplementation",
       "acceptance": "pending",
-      "evidence": []
+      "evidence": [],
+      "scheduling": "deferredByUser"
     },
     {
       "id": "hdr10Plus/c3",
@@ -409,7 +411,8 @@
       "applicable": true,
       "implementation": "requiresValidation",
       "acceptance": "pending",
-      "evidence": []
+      "evidence": [],
+      "scheduling": "currentStaticCompatibility"
     },
     {
       "id": "hdr10Plus/c4",
@@ -429,7 +432,8 @@
       "applicable": true,
       "implementation": "pendingImplementation",
       "acceptance": "pending",
-      "evidence": []
+      "evidence": [],
+      "scheduling": "deferredByUser"
     },
     {
       "id": "hdrVividPq/c2",
@@ -439,7 +443,8 @@
       "applicable": true,
       "implementation": "pendingImplementation",
       "acceptance": "pending",
-      "evidence": []
+      "evidence": [],
+      "scheduling": "deferredByUser"
     },
     {
       "id": "hdrVividPq/c3",
@@ -449,7 +454,8 @@
       "applicable": true,
       "implementation": "requiresValidation",
       "acceptance": "pending",
-      "evidence": []
+      "evidence": [],
+      "scheduling": "currentStaticCompatibility"
     },
     {
       "id": "hdrVividPq/c4",
@@ -469,7 +475,8 @@
       "applicable": true,
       "implementation": "pendingImplementation",
       "acceptance": "pending",
-      "evidence": []
+      "evidence": [],
+      "scheduling": "deferredByUser"
     },
     {
       "id": "hdrVividHlg/c2",
@@ -479,7 +486,8 @@
       "applicable": true,
       "implementation": "pendingImplementation",
       "acceptance": "pending",
-      "evidence": []
+      "evidence": [],
+      "scheduling": "deferredByUser"
     },
     {
       "id": "hdrVividHlg/c3",
@@ -489,7 +497,8 @@
       "applicable": true,
       "implementation": "requiresValidation",
       "acceptance": "pending",
-      "evidence": []
+      "evidence": [],
+      "scheduling": "currentStaticCompatibility"
     },
     {
       "id": "hdrVividHlg/c4",
@@ -500,7 +509,8 @@
       "implementation": "requiresValidation",
       "acceptance": "pending",
       "evidence": [],
-      "condition": "HLGBaseAndPqOutput"
+      "condition": "HLGBaseAndPqOutput",
+      "scheduling": "currentStaticCompatibility"
     },
     {
       "id": "sdr/c1",
@@ -622,5 +632,34 @@
       "acceptance": "notApplicable",
       "evidence": []
     }
-  ]
+  ],
+  "currentPhase": {
+    "decisionDate": "2026-10-14",
+    "decision": "HDR10+ and HDR Vivid static PQ/HLG compatibility output only; no native dynamic passthrough, dynamic mapping, or B1-B4 implementation in this phase.",
+    "mode": "staticCompatibilityOnly",
+    "deferredPackages": [
+      "B1",
+      "B2",
+      "B3",
+      "B4"
+    ],
+    "deferredCandidateIds": [
+      "hdr10Plus/c1",
+      "hdr10Plus/c2",
+      "hdrVividPq/c1",
+      "hdrVividPq/c2",
+      "hdrVividHlg/c1",
+      "hdrVividHlg/c2"
+    ],
+    "baselineCandidateIds": [
+      "hdr10Plus/c3",
+      "hdrVividPq/c3",
+      "hdrVividHlg/c3",
+      "hdrVividHlg/c4"
+    ],
+    "hlgToPqRule": "Existing C4 HLG-to-PQ static compatibility conversion only when HLG display support is unavailable and real PQ output is available; never count as Vivid C2",
+    "requiresDeferredDynamicFeaturesForStaticAcceptance": false,
+    "originalFullMatrixReleaseReadyField": "releaseReady continues to represent future full v7.3 acceptance; keep deferred applicable paths pending, not notApplicable or accepted",
+    "resumption": "Only after a new explicit user decision; do not auto-implement or auto-enable native HDR10+/Vivid dynamic C1/C2"
+  }
 }
