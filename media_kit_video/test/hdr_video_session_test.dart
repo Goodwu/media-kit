@@ -551,12 +551,18 @@ void main() {
     // Reclassification to the hdrVivid class plans C1 native Vivid and C2
     // metadata mapping as explicit routeNotImplemented errors — there is no
     // "gated off" state — while the C3 PQ baseline stays applicable. The
-    // already-open PQ route is the reclassified prediction's selection too,
-    // so the review accepts it without a rebuild; the unimplemented dynamic
-    // routes remain typed errors in the accepted report's candidate list
-    // (the baseline's success must not erase them).
-    expect(backend.opened, hasLength(1));
-    expect(backend.opened.single.route.strategy, HdrStrategy.baseLayerDirect);
+    // Although the same base-layer executor is selected, its metadata
+    // ownership changes from none (HDR10) to baselineOnly (Vivid). Rebuild
+    // the execution under the new source-fact contract rather than adopting
+    // an open configured before the dynamic metadata was observed.
+    // Unimplemented C1/C2 remain typed errors after baseline fallback.
+    expect(backend.opened, hasLength(2));
+    expect(backend.opened.first.route.strategy, HdrStrategy.baseLayerDirect);
+    expect(backend.opened.first.route.metadataHandling,
+        HdrMetadataHandling.none);
+    expect(backend.opened.last.route.strategy, HdrStrategy.baseLayerDirect);
+    expect(backend.opened.last.route.metadataHandling,
+        HdrMetadataHandling.baselineOnly);
     final report = session.report.value;
     expect(report.verified, isTrue);
     expect(report.source!.dynamicMetadata, HdrDynamicMetadata.hdrVivid);
@@ -565,7 +571,7 @@ void main() {
     expect(report.degradeReason, isNull);
     final reclassified = events.whereType<HdrReclassifiedEvent>().toList();
     expect(reclassified, hasLength(1));
-    expect(reclassified.single.rebuilt, isFalse);
+    expect(reclassified.single.rebuilt, isTrue);
     final candidates = report.prediction!.candidates;
     expect(candidates[0].strategy, HdrStrategy.nativeHdrVivid);
     expect(candidates[0].skipReason, HdrDegradeReason.routeNotImplemented);
