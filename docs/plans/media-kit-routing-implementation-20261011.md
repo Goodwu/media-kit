@@ -364,3 +364,36 @@ HDR10+ 用有效变化曲线测试，Vivid 用正式语义向量和独立CPU参�
 - V1 复核（0 blocking）：重分类重建由 HdrRoute equality 含 metadataHandling 驱动、经 _preferCurrent/attempted/admit 正常门，candidateId 因源类派生必然不同；`metadataHandlingObserved` 为恒 null getter、无任何赋值路径（"不伪造已被应用"结构性成立）；矩阵 52 格与 §4.3 逐格一致，accepted/releaseReady 门在 JSON 与 Python 两侧 fail-closed 强制。
 - 记录在案的后续项：§4.4 "C2 映射器失败不禁用 C4"当前依赖层不可表达（C2/C4 共享 dataspacePq/topologyPlatformView 标签，无仅属 C2 的依赖可注入），矩阵以 `c2FailureThenC4` pending 必测项承认；`requestedMetadataHandling` 的 `?? requested` 回退分支无专测；矩阵 hdr10×C2-C4 notApplicable 与现行运行路由的分歧为已知分阶段状态（矩阵只控验收不控准入）。
 - 下一步（§11 原文）：FFmpeg/mpv/libplacebo 真实逐帧元数据交付（B1/B2）前置条件盘点——需要 HDR10+/Vivid 合法测试样片（现素材仅 p5/p84/hdr10）、在线设备与 FFmpeg/mpv 工作树 dirty 对账；App 侧 dirty 集成收口待用户提交 PiliPlusX WIP。
+## 12. 2026-10-14 B1/B2 元数据识别与映射故障归因（实现后验证交接）
+
+**状态**：B1/B2 部分代码已实施并分仓库提交；Dart 源码宿主测试已 green，mpv 原生源码的编译、最终产品链接和真实设备观察仍未验证，故在此停于本地 native 验证门。继续使用唯一权威开发分支，不开新支路，不修改用户 dirty。
+
+### 12.1 可核对的最新源身份
+
+- `Goodwu/media-kit:routing/MK-ROUTING-20261011`：本轮基于本地 agent 已提交的 `d62fb72c0fbeb30e47ef7e1167e07d1be669d50a` 快进，按序 `497bf0b2`（mapper 独立依赖）、`36b3e304`（修正测试依赖集）、`c193b67d`（HDR10+ 源事实链）、`78d0f11e`（八项用例）、`36148f52ae6744d33fa3240f2108b0c9f0e1be19`（Session 回归）。文档之后的 SHA 仅为交接归档，不将上一代码 SHA 的 CI 篡改为新的构建验证。
+- `Goodwu/mpv:media-kit/android`：`c11426b67a96747c74dfd2a1b0a0340af9696103` → `4f036f5cfa493e53dbe8fe2aa2cd5e356b2fc7b1`。修改 `video/mp_image.h`、`video/mp_image.c`、`player/command.c`，基于当前 `AV_FRAME_DATA_DYNAMIC_HDR_PLUS` 设置每帧 `hdr10_plus` presence，正确参与动态更新、复制与非静态比较，公开 `video-params/hdr10-plus` bool 子属性。映射是否真实执行及动态显示链是否转发不由 presence 位证明。
+- `Goodwu/FFmpeg:lg-p84-d1-vui-fix-20261010` 当前远端 `d4bb79394b98d6247887e169998778474f43887e`；本轮未更改，原本本地 `configure` dirty 与生成目录保留。现有 HEVC/Vivid/HDR10+ SEI parser 不重写；是否走完整 MediaCodec 逐帧 side data 需要实测后才定点补缺口。
+- `Goodwu/libplacebo` 当前工作根 `ea700489`（已知并不必然是最终链接版本）；未更改。现有 HDR10+ mapping 与其支持窗口/版本限制另行核对；Vivid 的规范映射尚未实施。
+- PiliPlusX `routing/MK-ROUTING-20261011` 仍有原本 WIP：`hdr_output.dart`、`route_options.dart`、`pubspec.yaml`、测试与任务记录等；主仓本地 `TASKS.md` 与 LG P8.4 计划也 dirty。均未修改、重置、强推。继续原 App WIP 对接，不得将该分支误认为新代码已使用。
+
+### 12.2 已实现的具体行为
+
+- **C2 映射器特有失败**：增加 `HdrRouteDependency.mapperDolbyVision` 和 `HdrDegradeReason.metadataMappingFailed`，仅挂于可实现的 DV `metadataReshape` 执行实例。若实际执行器能精确抛出 `HdrExecutionDependencyFailure(mapperDolbyVision, metadataMappingFailed)`，Session 只排除这个 mapper；其它依赖同一 PQ dataspace 的 C4 HLG→PQ 不受误排除。新增真实 Session forTesting 故障注入确保 `P8.4 + PQ-only panel: C2 failure → C3 不可行 → C4 succeeds`，没有任何 SDR 出口。本次**仅接好了异常契约和测试注入，native 执行器具体错误上报与实机复核仍未实现，不能冒充 C2 映射器已可靠检测故障**。
+- **HDR10+ 每帧源识别**：mpv 原有 `pl_map_hdr_metadata`/通用 `ff_side_data` 保留，新增不依赖 scene statistics 的原始帧事实；库内 `HdrReviewFacts`、locked double sample decoder review、player backend、`HdrSourceClassifier`、`HdrSourceFacts` 和 Session 统一消费三值 `hdr10Plus`。DV 优先于动态帧事实；profile-less 时 Vivid 优先于 HDR10+；同一逻辑 open 两种不同动态制式的肯定事实形成冲突并阻断，不以错误的猜测继续播放。缺失/false 不擦除先前肯定 HDR10+，但新媒体的 open 重新归零来源事实。旧二进制没有 `video-params/hdr10-plus` 时读到空值一律为 unknown，不伪装 false。
+- **HDR10+ 分类/静态基线回退**：新增 8 项 `hdr10_plus_source_fact_test.dart`，另外新增 Session 实际 reclassification→rebuild 的 mock 回归（静态 C3 PQ 兼容基线，保留 C1/C2 `routeNotImplemented`，`metadataHandlingObserved=null`）。这些只证明 Dart 合同，不构成原生动态 HDR 成功证据。
+
+### 12.3 实际验证和停止条件
+
+- 代码 SHA `497bf0b2` 的 hosted Routing source run `38502992831`，Python tools / Lab 成功，video **1 FAIL**（旧依赖精确集合缺少 mapper token）；已于 `36b3e304` 迁移回归，没有放宽安全门。
+- **最终源码候选** `36148f52ae6744d33fa3240f2108b0c9f0e1be19` 的 `Routing source checks` run **`38503650492` = success**：`media_kit_video` analyze 零 finding、795 项 pass、3 项平台跳过；`media_kit_hdr_lab` analyze 零 finding、298 项 pass；Python audit utility 通过。新增八项源事实及完整 Session 回归确实在日志执行。Darwin viewport run `38503650482` 已读 success；OHOS、query、general 工作流的最后状态要按各自 run 再核，不能提前全绿或把 app/native/device 接受混入 source。
+- `Goodwu/mpv@4f036f5c` GitHub Actions 没有发现针对该 commit 的原生 build run，且当前模型环境无法运行目标编译器/NDK、链接 libmpv 并在 Android 上 ADB 实测。**原生验证条件尚不满足，按用户约定停止扩大 FFmpeg/mpv/libplacebo 改动**。源头和已有主库测试不回退；后续本地 agent 在同分支继续，不从 c11426 或 d62fb72c 重做代码。
+
+### 12.4 本地 agent 必须执行的核验
+
+1. 先 `git status` / `git fetch` 各仓库并备份 dirty WIP，分别确认 media-kit 代码 `36148f52`（及其随后归档文档 commit）、mpv `4f036f5c`、FFmpeg/renderer 实际源码输入；禁止 reset、force push 或从历史 pinned JAR/so 代替最新修订构建。
+2. 按精确库源码运行 Flutter analyze/full test 与 `tool/routing_ci/test_hdr_v73_matrix.py`（合格输出绑定 code SHA）；在 native 侧重新从当前最新 mpv、FFmpeg、libplacebo、helper 及有效补丁构建和链接，审最终 JAR/APK 的 so 哈希、构建选项和来源；不能把已有旧产物当成验证结果。
+3. 用 `TASKS.md` 2026-10-14 列出的 HDR10+ PA/PB、Vivid-PQ/Vivid-HLG 样片核每帧 `video-params/hdr10-plus`、`video-params/hdr-vivid` 的 yes/no/unknown 与 bitstream 真实 SEI、各 source revision、PTS/重排、seek/flush/切源。特别分开 MediaCodec direct/copy、SurfaceTexture 和软件：硬解没有交付时应报告缺口，**不得拿 PQ/HLG 色值或静态基线播放成功伪造动态元数据已交付**。
+4. 如果硬解侧丢失：沿 FFmpeg `mediacodecdec.c` 的现有 DV 按输入 AU/PTS/flush epoch 附加机制定点审计 HDR10+/Vivid；补实现前冻结重复 PTS/无 PTS、乱序、seek/EOS 的阳性/阴性预期。HDR10+ 完整版本/窗口映射与 Vivid 标准色彩算法仍须真实实现及参考向量；P7 EL residual 与 LG PQ 输出门照原计划独立待验。
+5. 所有源/样片/设备/编译元信息写回本文件及 `docs/validation/hdr-route-matrix-v7.3.json`；仅对应候选真实交付后方可设 acceptance=accepted。不把 `routeNotImplemented` 的合同测试 PASS 当作功能完成。
+
+本阶段 PR#4 [具体交接评论 6159870759](https://github.com/Goodwu/media-kit/pull/4#issuecomment-6159870759) 为源码/CI 结果索引。保持单一 v4 计划与单一开发分支，下一轮从本节最新源码继续。
