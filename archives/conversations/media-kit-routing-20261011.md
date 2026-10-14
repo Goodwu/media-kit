@@ -558,3 +558,4 @@ Linux B第1修正V2仍REQUEST_CHANGES：18原tests/49独立probe及实际generat
 
 **修复轮定性（b1hpfix-r1，LG 回线后实跑）**：分类仍 `none`、无 nativeHdr10Plus——结合 ffprobe 决定性证据（该 mkv **无 packet 级 side data、无 Block Addition Mapping**，HDR10+ 仅以码流内 SEI 存在；此前帧级数据来自 ffprobe 软解解析），根因闭环：**hwdec 路径码流直送 MediaCodec、FFmpeg 不解析 SEI，故无元数据可导出**；9141961531 的 packet 转发修复对 SEI 载体 inert（对含 Block Addition Mapping 的文件仍正确，保留）。B1 待办核心工作随之精确化：**mediacodec_dovi 模板泛化——输入侧按 AU 解析 SEI 2094-40/CUVA005（ff_h2645 packet_split + T.35 分派），pts_us/epoch 跟踪，输出侧现有 attach 点挂 AV_FRAME_DATA_DYNAMIC_HDR_PLUS/VIVID**；configure 需为 hevc_mediacodec_decoder 补 SEI 机制 select。软解载体可交付（hevcdec.c:3068/3089），但默认路由为硬解，Dart 三值链的设备端 hdr10Plus=true 验证须待 B1 完成后进行——维持矩阵 pending、不过渡记 accepted。EOS/还原/零失败照常。
 **用户追加裁决（2026-10-14）：SEI 交付工包记为 HDR10+ reshape（C2）实现的前置条件**，已录入方案 §12 尾（范围/实证/依赖链三条：mediacodec_dovi 模板泛化 + configure select → 属性可读 → 分类 → reshape 有输入；Vivid C2 同理随批）。
+**追加（方案显式化）**：过渡态契约原文已补记入方案 §12 尾共同约束小节（此前 PR#4 接手评论与方案正文均未显式记载，远端续接漏读风险已消除）。

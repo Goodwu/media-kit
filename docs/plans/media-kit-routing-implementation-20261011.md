@@ -405,3 +405,12 @@ HDR10+ 用有效变化曲线测试，Vivid 用正式语义向量和独立CPU参�
 - 范围：mediacodec_dovi 模板泛化——输入侧按 AU 解析 SEI 2094-40（及 CUVA 005，同机制同批可覆盖），pts_us/epoch 跟踪，输出侧现有 attach 点挂 `AV_FRAME_DATA_DYNAMIC_HDR_PLUS`/`AV_FRAME_DATA_DYNAMIC_HDR_VIVID`；configure 为 `hevc_mediacodec_decoder` 补 hevc_sei 机制 select。
 - 依据（实证）：测试 mkv 的 HDR10+ 仅以码流内 SEI 存在（无 packet 级 side data、无 Block Addition Mapping），hwdec 路径码流直送 MediaCodec 无 SEI 解析 → 元数据全程不可达 → `video-params/hdr10-plus` 恒 false → Dart 三值分类恒 none → reshape 无元数据可消费。证据：`b1hpfix-r1` 轮 + ffprobe packet/stream 级双空 + mpv 本地修复 `9141961531`（packet 转发对 SEI 载体 inert，仅覆盖 Block Addition Mapping 文件）。
 - 依赖链：**该工包 → `video-params/hdr10-plus` 设备端可读 true → Dart 三值分类 hdr10Plus → C2 reshape 有真实输入可映射**；缺该工包时 HDR10+ 源维持过渡态契约（静态分类日志 + C3 静态 PQ 兼容基线直通，动态 C1/C2 不合成，矩阵 pending）。Vivid C2 的逐帧载荷依赖同理（CUVA 005 同机制），随批实施。
+
+### HDR10+/Vivid 过渡态契约（2026-10-14 用户裁决，接手双方共同约束）
+
+用户裁决原文：**这两个格式（HDR10+、HDR Vivid）的缺失功能列为待办项；目前报日志、走兼容基线。**
+
+- 过渡态行为即现行行为：源分类/候选/路由日志如实报告（含静态分类事实）；HDR10+ 源走静态 PQ 兼容基线、Vivid 源走静态 PQ/HLG 兼容基线；动态 C1/C2 不合成（无隐式 SDR、无伪实现）；`hdr-route-matrix-v7.3.json` 相关行维持 pending。
+- 待办范围：FFmpeg hwdec 逐帧 SEI 交付（mediacodec_dovi 模板泛化，见上文前置条件段）、mpv Vivid 载荷读取/清理/映射、C1 原生 passthrough、C2 完整动态映射。实施基础=B1 缺口地图与三步实施顺序（主仓归档 2026-10-14 B1 审计段）。
+- 约束：不得以过渡态基线播放冒充动态功能完成；识别链落地后过渡态行为不得单方面改变，须由用户另行裁决。
+- LG 实证：HDR10+ PA 与 Vivid PQ 样片基线直通 EOS（vivid-pq 3/3）；vivid-hlg 阻断于 LG PQ 输出缺口（设备特有，同 p84 族）。
