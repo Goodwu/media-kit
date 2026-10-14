@@ -342,3 +342,18 @@ HDR10+ 用有效变化曲线测试，Vivid 用正式语义向量和独立CPU参�
 - 测试同步 16 文件：[false,true] 参数化循环折叠为单趟 defaults（video 808→783，逐文件核对均为循环折叠，无断言本意删减）；"开关不影响评估"负向断言改为直接结果断言；`video_player_media_kit` 无代码引用（real.dart 的 'strict=experimental' 是 mpv flag 字符串，无关未动）。
 - 验证：media_kit_video 783/783、media_kit_hdr_lab 298/298，双包 analyze 零 finding，exit 0。无 ESCALATED（未发现删除后改变评估结果的隐藏依赖）。
 - 范围外事项：`video_player_media_kit/analysis_options.yaml` 出现一处非本批改动（新增 exclude build/**），按改动保护原则未入提交、保持工作树 dirty，待用户裁定。PiliPlusX 侧迁移另批（其依赖 override 钉旧 ref，App 提交与 pin 更新须待主库推送后）。
+
+## 11. 2026-10-14 元数据所有权与独立验收矩阵（续接检查点）
+
+状态：**源码已提交，未通过当前最新 SHA 的全部 CI，也未取得原生/设备证据**。继续唯一 `Goodwu/media-kit:routing/MK-ROUTING-20261011` 分支，没有创建新分支；用户本地 dirty 的 App 与 FFmpeg 未触碰。详细交接及下一步在 PR#4 [评论 6158407545](https://github.com/Goodwu/media-kit/pull/4#issuecomment-6158407545)。
+
+- 上一验证基线为 `7ef40c4b`，对应父提交 `7a53bc78` 的 hosted workflows source/query/Darwin/OHOS/general 均 success（具体 run IDs 在 PR 评论）；本地 agent 之前 video 783/783、lab 298/298、analyze 零 finding。该事实仅绑定旧源码。
+- `1407ce43`：`HdrRoute` 增加显式 `HdrMetadataHandling.none/preserveForNative/consumeForMapping/baselineOnly`，由 source×strategy realizer 计算并跨 `withExecution`、equality、hashCode 保留；`HdrOutputReport.requestedMetadataHandling` 为路由意图，`metadataHandlingObserved=null` 明确表示当前没有逐帧实际消费/转发证明。没有开关，也没有伪造元数据已被应用的结论。
+- `c1cbf7d3`：新增 `hdr_metadata_ownership_contract_test.dart` 五项，覆盖 P5、P8.4、HDR10+、Vivid、SDR 及输出重建契约。
+- `0608f891`：CI 中间版本仅一个旧 Session 用例失败，其原断言要求“从 HDR10 重新分类为 Vivid 后同一 vo/hwdec 不重建”。由于现在元数据处理模式从 `none` 变为 `baselineOnly`，路由身份变化必须重建以免采用旧执行契约。已改测试要求重建并断言前后模式；最终源码尚须重新跑全量确认。
+- `a5cbcb49`、`e30857cf`、`8202e189`、`021bf1dc`：增加独立 `docs/validation/hdr-route-matrix-v7.3.json` 和 Python CI 校验 `tool/routing_ci/test_hdr_v73_matrix.py`。13 个源组×C1-C4 共 52 格、29 个适用路径、15 个额外边界/生命周期必测项目。普通 SDR 不进入 HDR 的 C1；只走独立 sdrDirect 预检。当前所有适用路径均为 pending，`releaseReady=false`；没有对应 path/case 源码 SHA、设备/参考目标、candidateId/stage 和证据产物时，不允许置 accepted。任何回退播放成功均不能替前序路径验收。
+- 本轮最新实现提交 `021bf1dc60a8019342a0c678128d74641a5edf5e`。截至最后实际查询，该头 `Routing source checks` run `38492518746` 状态 queued；其它同 SHA workflow 仍有 pending/in_progress，不得把中间版本、取消运行或旧源码的成功沿用为此头通过。
+
+本轮尚未完成：真实 FFmpeg/mpv 逐帧元数据交付与 C3/C4 的实际清理证明、HDR10+ 和 Vivid 完整 C1/C2 实现、P7 残差/增强层、LG P8.4 的 PQ 实际输出路径、PiliPlusX dirty 配置/版本迁移收口、全量最新源码原生构建与设备验收。**切勿把本轮的意图模型或待实现错误返回当成动态映射功能完成。**
+
+本地接手下一步：`fetch` 远端真实 routing HEAD，先保留现有工作树 dirty 差异（主仓 `video_player_media_kit/analysis_options.yaml`、PiliPlusX 多文件、FFmpeg `configure`），禁止 `reset/force-push` 或另起分支重做。按该 SHA 跑 media_kit_video 与 media_kit_hdr_lab 的严格 analyze / 全量 flutter test，额外跑 Python matrix test；重点核对 HDR10→Vivid 来源重分类是否在 output owner 安全门下按需重建、失败注入后续路由及元数据状态报告的真实性。CI/本地验证未通过前不扩大到 FFmpeg/mpv/libplacebo。通过后续接 App 原有 dirty 集成及真正 native 路径实现，所有验收与源码身份分别入账。
