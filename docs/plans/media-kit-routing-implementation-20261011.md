@@ -397,3 +397,11 @@ HDR10+ 用有效变化曲线测试，Vivid 用正式语义向量和独立CPU参�
 5. 所有源/样片/设备/编译元信息写回本文件及 `docs/validation/hdr-route-matrix-v7.3.json`；仅对应候选真实交付后方可设 acceptance=accepted。不把 `routeNotImplemented` 的合同测试 PASS 当作功能完成。
 
 本阶段 PR#4 [具体交接评论 6159870759](https://github.com/Goodwu/media-kit/pull/4#issuecomment-6159870759) 为源码/CI 结果索引。保持单一 v4 计划与单一开发分支，下一轮从本节最新源码继续。
+
+### HDR10+ reshape 前置条件（2026-10-14 用户裁决记录）
+
+实现 HDR10+ 的 C2 metadataReshape 的**前置条件**为 hwdec 载体逐帧元数据交付工包（2026-10-14 已实证定型）：
+
+- 范围：mediacodec_dovi 模板泛化——输入侧按 AU 解析 SEI 2094-40（及 CUVA 005，同机制同批可覆盖），pts_us/epoch 跟踪，输出侧现有 attach 点挂 `AV_FRAME_DATA_DYNAMIC_HDR_PLUS`/`AV_FRAME_DATA_DYNAMIC_HDR_VIVID`；configure 为 `hevc_mediacodec_decoder` 补 hevc_sei 机制 select。
+- 依据（实证）：测试 mkv 的 HDR10+ 仅以码流内 SEI 存在（无 packet 级 side data、无 Block Addition Mapping），hwdec 路径码流直送 MediaCodec 无 SEI 解析 → 元数据全程不可达 → `video-params/hdr10-plus` 恒 false → Dart 三值分类恒 none → reshape 无元数据可消费。证据：`b1hpfix-r1` 轮 + ffprobe packet/stream 级双空 + mpv 本地修复 `9141961531`（packet 转发对 SEI 载体 inert，仅覆盖 Block Addition Mapping 文件）。
+- 依赖链：**该工包 → `video-params/hdr10-plus` 设备端可读 true → Dart 三值分类 hdr10Plus → C2 reshape 有真实输入可映射**；缺该工包时 HDR10+ 源维持过渡态契约（静态分类日志 + C3 静态 PQ 兼容基线直通，动态 C1/C2 不合成，矩阵 pending）。Vivid C2 的逐帧载荷依赖同理（CUVA 005 同机制），随批实施。
