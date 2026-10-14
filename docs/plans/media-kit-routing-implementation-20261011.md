@@ -351,9 +351,16 @@ HDR10+ 用有效变化曲线测试，Vivid 用正式语义向量和独立CPU参�
 - `1407ce43`：`HdrRoute` 增加显式 `HdrMetadataHandling.none/preserveForNative/consumeForMapping/baselineOnly`，由 source×strategy realizer 计算并跨 `withExecution`、equality、hashCode 保留；`HdrOutputReport.requestedMetadataHandling` 为路由意图，`metadataHandlingObserved=null` 明确表示当前没有逐帧实际消费/转发证明。没有开关，也没有伪造元数据已被应用的结论。
 - `c1cbf7d3`：新增 `hdr_metadata_ownership_contract_test.dart` 五项，覆盖 P5、P8.4、HDR10+、Vivid、SDR 及输出重建契约。
 - `0608f891`：CI 中间版本仅一个旧 Session 用例失败，其原断言要求“从 HDR10 重新分类为 Vivid 后同一 vo/hwdec 不重建”。由于现在元数据处理模式从 `none` 变为 `baselineOnly`，路由身份变化必须重建以免采用旧执行契约。已改测试要求重建并断言前后模式；最终源码尚须重新跑全量确认。
-- `a5cbcb49`、`e30857cf`、`8202e189`、`021bf1dc`：增加独立 `docs/validation/hdr-route-matrix-v7.3.json` 和 Python CI 校验 `tool/routing_ci/test_hdr_v73_matrix.py`。13 个源组×C1-C4 共 52 格、29 个适用路径、15 个额外边界/生命周期必测项目。普通 SDR 不进入 HDR 的 C1；只走独立 sdrDirect 预检。当前所有适用路径均为 pending，`releaseReady=false`；没有对应 path/case 源码 SHA、设备/参考目标、candidateId/stage 和证据产物时，不允许置 accepted。任何回退播放成功均不能替前序路径验收。
+- `a5cbcb49`、`e30857cf`、`8202e189`、`021bf1dc`：增加独立 `docs/validation/hdr-route-matrix-v7.3.json` 和 Python CI 校验 `tool/routing_ci/test_hdr_v73_matrix.py`。13 个源组×C1-C4 共 52 格、28 个适用路径、15 个额外边界/生命周期必测项目（29 为笔误，程序化清点 28，本地复核已更正）。普通 SDR 不进入 HDR 的 C1；只走独立 sdrDirect 预检。当前所有适用路径均为 pending，`releaseReady=false`；没有对应 path/case 源码 SHA、设备/参考目标、candidateId/stage 和证据产物时，不允许置 accepted。任何回退播放成功均不能替前序路径验收。
 - 本轮最新实现提交 `021bf1dc60a8019342a0c678128d74641a5edf5e`。截至最后实际查询，该头 `Routing source checks` run `38492518746` 状态 queued；其它同 SHA workflow 仍有 pending/in_progress，不得把中间版本、取消运行或旧源码的成功沿用为此头通过。
 
 本轮尚未完成：真实 FFmpeg/mpv 逐帧元数据交付与 C3/C4 的实际清理证明、HDR10+ 和 Vivid 完整 C1/C2 实现、P7 残差/增强层、LG P8.4 的 PQ 实际输出路径、PiliPlusX dirty 配置/版本迁移收口、全量最新源码原生构建与设备验收。**切勿把本轮的意图模型或待实现错误返回当成动态映射功能完成。**
 
 本地接手下一步：`fetch` 远端真实 routing HEAD，先保留现有工作树 dirty 差异（主仓 `video_player_media_kit/analysis_options.yaml`、PiliPlusX 多文件、FFmpeg `configure`），禁止 `reset/force-push` 或另起分支重做。按该 SHA 跑 media_kit_video 与 media_kit_hdr_lab 的严格 analyze / 全量 flutter test，额外跑 Python matrix test；重点核对 HDR10→Vivid 来源重分类是否在 output owner 安全门下按需重建、失败注入后续路由及元数据状态报告的真实性。CI/本地验证未通过前不扩大到 FFmpeg/mpv/libplacebo。通过后续接 App 原有 dirty 集成及真正 native 路径实现，所有验收与源码身份分别入账。
+
+### §11 本地验证回执（2026-10-14，本地 agent，ba97ab2c）
+
+- 严格验证：双包 `flutter analyze` 零 finding；media_kit_video 788/788（含 5 项元数据所有权契约测试）、media_kit_hdr_lab 298/298；`tool/routing_ci/test_hdr_v73_matrix.py` 4/4 OK。hosted 该头 Routing source checks = success（Darwin viewport/query/OHOS 同绿）。
+- V1 复核（0 blocking）：重分类重建由 HdrRoute equality 含 metadataHandling 驱动、经 _preferCurrent/attempted/admit 正常门，candidateId 因源类派生必然不同；`metadataHandlingObserved` 为恒 null getter、无任何赋值路径（"不伪造已被应用"结构性成立）；矩阵 52 格与 §4.3 逐格一致，accepted/releaseReady 门在 JSON 与 Python 两侧 fail-closed 强制。
+- 记录在案的后续项：§4.4 "C2 映射器失败不禁用 C4"当前依赖层不可表达（C2/C4 共享 dataspacePq/topologyPlatformView 标签，无仅属 C2 的依赖可注入），矩阵以 `c2FailureThenC4` pending 必测项承认；`requestedMetadataHandling` 的 `?? requested` 回退分支无专测；矩阵 hdr10×C2-C4 notApplicable 与现行运行路由的分歧为已知分阶段状态（矩阵只控验收不控准入）。
+- 下一步（§11 原文）：FFmpeg/mpv/libplacebo 真实逐帧元数据交付（B1/B2）前置条件盘点——需要 HDR10+/Vivid 合法测试样片（现素材仅 p5/p84/hdr10）、在线设备与 FFmpeg/mpv 工作树 dirty 对账；App 侧 dirty 集成收口待用户提交 PiliPlusX WIP。
