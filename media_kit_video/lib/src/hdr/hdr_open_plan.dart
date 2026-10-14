@@ -140,6 +140,7 @@ class HdrReviewFacts {
     this.dvCompatibilityId,
     this.dvElPresent,
     this.hdrVivid,
+    this.hdr10Plus,
     this.nativeDvEvidence,
     this.decoderObservation,
   });
@@ -183,6 +184,12 @@ class HdrReviewFacts {
   /// has no such sub-property). The review samples this once — it is a
   /// frame fact, not a watched property.
   final bool? hdrVivid;
+
+  /// Per-frame HDR10+ side-data presence from
+  /// `video-params/hdr10-plus`; true is metadata presence, not proof of
+  /// mapping, native forwarding or successful HDR presentation.
+  /// Missing property/legacy native binary remains unknown, never false.
+  final bool? hdr10Plus;
 
   /// Internal configured-codec/source/output sample, never presentation proof.
   final HdrNativeDvReviewEvidence? nativeDvEvidence;

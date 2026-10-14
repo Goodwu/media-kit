@@ -229,6 +229,7 @@ Future<HdrReviewFacts> gatherDecoderReviewFacts({
     'current-tracks/video/dolby-vision-compatibility-id',
     'current-tracks/video/dolby-vision-el-present',
     'video-params/hdr-vivid',
+    'video-params/hdr10-plus',
   ];
   Future<Map<String, String>> endpoint() async {
     final values = <String, String>{};
@@ -271,6 +272,7 @@ Future<HdrReviewFacts> gatherDecoderReviewFacts({
               a['current-tracks/video/dolby-vision-compatibility-id']!);
           final el = a['current-tracks/video/dolby-vision-el-present']!;
           final vivid = a['video-params/hdr-vivid']!;
+          final hdr10Plus = a['video-params/hdr10-plus']!;
           final rawConfig = a['android-mediacodec-info']!;
           final config = AndroidMediaCodecConfiguration.parse(rawConfig);
           if (rawConfig.isNotEmpty && config == null) {
@@ -317,6 +319,11 @@ Future<HdrReviewFacts> gatherDecoderReviewFacts({
             hdrVivid: vivid == 'yes'
                 ? true
                 : vivid == 'no'
+                    ? false
+                    : null,
+            hdr10Plus: hdr10Plus == 'yes'
+                ? true
+                : hdr10Plus == 'no'
                     ? false
                     : null,
             decoderObservation: HdrDecoderObservation(

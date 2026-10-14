@@ -1117,6 +1117,7 @@ class HdrVideoSession {
       dvCompatibilityId: facts.dvCompatibilityId,
       dvElPresent: facts.dvElPresent,
       hdrVivid: facts.hdrVivid,
+      hdr10Plus: facts.hdr10Plus,
       inferSourceColorFromDecoder:
           plan.route.strategy != HdrStrategy.nativeDolbyVision,
     );
