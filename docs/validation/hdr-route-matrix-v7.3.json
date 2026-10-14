@@ -20,21 +20,81 @@
     "dvUnknown": "Unresolved Dolby Vision signaling must block"
   },
   "requiredAdditionalCases": [
-    "sdrDirect",
-    "hdrDisplayMissingMustBlock",
-    "hdrNoSdrFallback",
-    "sdrOnlyToneMap",
-    "dvUnknownBlock",
-    "requireOutputConflict",
-    "metadataNotImplementedReturnsError",
-    "metadataErrorPreservedAfterBaseline",
-    "p82HdrNoSdrBaseExit",
-    "p82SdrDisplayDirect",
-    "c2FailureThenC3",
-    "c2FailureThenC4",
-    "staleGenerationRejected",
-    "ownerDebtBlocksRetry",
-    "presentationObservedNotImplied"
+    {
+      "id": "sdrDirect",
+      "acceptance": "pending",
+      "evidence": []
+    },
+    {
+      "id": "hdrDisplayMissingMustBlock",
+      "acceptance": "pending",
+      "evidence": []
+    },
+    {
+      "id": "hdrNoSdrFallback",
+      "acceptance": "pending",
+      "evidence": []
+    },
+    {
+      "id": "sdrOnlyToneMap",
+      "acceptance": "pending",
+      "evidence": []
+    },
+    {
+      "id": "dvUnknownBlock",
+      "acceptance": "pending",
+      "evidence": []
+    },
+    {
+      "id": "requireOutputConflict",
+      "acceptance": "pending",
+      "evidence": []
+    },
+    {
+      "id": "metadataNotImplementedReturnsError",
+      "acceptance": "pending",
+      "evidence": []
+    },
+    {
+      "id": "metadataErrorPreservedAfterBaseline",
+      "acceptance": "pending",
+      "evidence": []
+    },
+    {
+      "id": "p82HdrNoSdrBaseExit",
+      "acceptance": "pending",
+      "evidence": []
+    },
+    {
+      "id": "p82SdrDisplayDirect",
+      "acceptance": "pending",
+      "evidence": []
+    },
+    {
+      "id": "c2FailureThenC3",
+      "acceptance": "pending",
+      "evidence": []
+    },
+    {
+      "id": "c2FailureThenC4",
+      "acceptance": "pending",
+      "evidence": []
+    },
+    {
+      "id": "staleGenerationRejected",
+      "acceptance": "pending",
+      "evidence": []
+    },
+    {
+      "id": "ownerDebtBlocksRetry",
+      "acceptance": "pending",
+      "evidence": []
+    },
+    {
+      "id": "presentationObservedNotImplied",
+      "acceptance": "pending",
+      "evidence": []
+    }
   ],
   "cases": [
     {
