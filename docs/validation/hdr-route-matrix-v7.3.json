@@ -2,7 +2,7 @@
   "schema": 1,
   "taskId": "MK-ROUTING-20261011",
   "specification": "HDR v7.3 fixed first-feasible C1-C4",
-  "releasePolicy": "All applicable paths require actual path-specific evidence; fallback success cannot accept an earlier candidate; no experimental switches.",
+  "releasePolicy": "All applicable paths require actual path-specific evidence; fallback success cannot accept an earlier candidate; no feature-enable switches.",
   "releaseReady": false,
   "sourceNotes": {
     "dvP5": "Native DV or RPU-based PQ reshape; IPT has no safe C3",
