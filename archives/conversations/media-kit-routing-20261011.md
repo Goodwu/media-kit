@@ -547,3 +547,11 @@ Linux B第1修正V2仍REQUEST_CHANGES：18原tests/49独立probe及实际generat
 - **vivid-hlg 阻断确定性（2/2 同签名）**：HLG 源按 C4 HLG→PQ 打到 LG 已知 PQ 输出缺口（第一 format=43 窗 lg-pq ext accepted、第二 format=278/0x116 窗 refused→applied=false→HdrDataSpaceApplyException），与 lgh5/lgh6-p84 同族同位——设备特有缺口维持开放记账，非新缺陷；在 HLG/PQ 能力齐备的显示上该样片按契约走 C1 HLG 直通基线。
 - 过渡态契约即当前行为：分类日志如实报静态分类与候选/路由链（报日志），HDR10+→静态 PQ 基线、Vivid→静态 PQ/HLG 基线（走兼容基线）；动态 C1/C2 不合成（无隐式 SDR、无伪实现）。B1（FFmpeg mediacodec 两制式交付）与 B2（mpv Vivid 载荷/清理/映射）+ Dart 分类识别列为待办项，实施基础=上节缺口地图（B1 实施顺序三步在案）。
 - 附带事实：四轮 post-EOS/中止后均 NO_DISPOSE（已知问题②同族）；NO_SF_DUMP 为脚本 grep 口径（dump 实存、API24 无 dataspace 字段）。
+
+### 2026-10-14 §12 接手：三值链设备断链根因修复（mpv 9141961531，设备验证待 LG 回线）
+
+§12.4 本地核验执行：本地严格验证全绿（video 798/798 含 8 项 hdr10_plus 源事实测试 + Session 回归、lab 298/298、矩阵 4/4）；当前头 1388dc16 hosted source checks = success。mpv fetch 切至 4f036f5c 后从最新源真实增量构建（libSha256 5f8fc04c→4f812e30，新代码确认编入）。
+
+**LG 首轮实证：三值链设备断链**——分类仍 `dynamicMetadata: none`、无 nativeHdr10Plus/routeNotImplemented 候选，与旧 mpv 日志逐字段一致；C3 静态基线播放本身正常（EOS、零失败）。Worker 端到端定位根因：**hwdec wrapper 输出帧未走 `ff_decode_frame_props`，packet 侧 HDR10+ side data 在 mediacodec 路径被丢弃**（mkv demuxer 导出的 packet 数据到不了 mp_image）。
+
+修复：mpv fork 本地提交 **`9141961531`**（"fix(vd_lavc,mp_image): 补传被 hwdec 丢弃的 HDR10+ packet side data"，vd_lavc.c +94 / mp_image.c +4，未推送）。修复后 APK 已重建（`b1hp-fix-20261014-release.apk` sha256 `48a4626f…`，APK 内 libmpv.so=`8de38a2d…`=构建回执三层哈希闭合）。设备验证轮因 LG 从 adb 掉线未跑成（Verifier 拒绝模拟器替代，判据为 LG 特有行为）；重跑命令与还原包（`restored-base.apk` sha256 `09c22c95…`）已备齐，接回即跑：`ANDROID_SERIAL=LGH870DS42e27764 MEDIA_KIT_ORIGINAL_APK=~/src/media-kit-build/evidence/b1-hdr10plus-verify-20261014/restored-base.apk bash ~/src/media-kit-build/evidence/b1hp-fix-20261014/round-lgh-b1hp-fix.sh <apk> b1hpfix-r1 120 media-kit-hdr10plus-pa.mkv`。mpv 修复提交随 LG 验证通过后一并申请推送。
