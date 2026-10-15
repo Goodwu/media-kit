@@ -6,6 +6,17 @@
 
 import 'hdr_output_contract.dart';
 
+/// Awaitable internal preparation an output attempt must complete inside
+/// [HdrOutputSlot.ensure] before the output it describes is created or
+/// reused (plan C: the YUV window presentation arm runs here — after the
+/// previous output's disposal retired its Surface, before the new output's
+/// creation triggers VO initialization). The hook only reads this attempt's
+/// immutable [HdrOutputContract]; its failure must fail the attempt without
+/// creating a new output.
+typedef HdrOutputInternalPrepare = Future<void> Function(
+  HdrOutputContract contract,
+);
+
 /// Serial output replacement is called only from the open coordinator's
 /// native side-effect queue. A replacement is published before waiting for
 /// its Surface, so Flutter can mount the new PlatformView.
@@ -37,7 +48,13 @@ class HdrOutputSlot<T> {
   bool _initialPending = true;
   T? get current => _current;
 
-  Future<void> ensure(HdrOutputContract contract) async {
+  /// Brings the slot to [contract]. [internalPrepare] — when given — is an
+  /// awaited barrier inside this attempt: on replacement it runs after the
+  /// old output's [disposeForRebuild] completed and strictly before the new
+  /// output is created; on reuse it runs before the existing output is
+  /// accepted. Its failure fails this attempt without creating a new output.
+  Future<void> ensure(HdrOutputContract contract,
+      {HdrOutputInternalPrepare? internalPrepare}) async {
     final old = _current;
     if (old != null) {
       String? oldVo;
@@ -51,6 +68,9 @@ class HdrOutputSlot<T> {
           !_failed &&
           oldVo == contract.vo &&
           _currentContract == contract) {
+        if (internalPrepare != null) {
+          await internalPrepare(contract);
+        }
         try {
           await waitReady(old);
           return;
@@ -66,6 +86,13 @@ class HdrOutputSlot<T> {
       _current = null;
       _currentContract = null;
       publish(null);
+    }
+
+    // The arm ACK barrier: awaited for every creation — the first output of
+    // an empty slot and the replacement after a retirement alike — strictly
+    // before the new output is created.
+    if (internalPrepare != null) {
+      await internalPrepare(contract);
     }
 
     final next = create(contract);

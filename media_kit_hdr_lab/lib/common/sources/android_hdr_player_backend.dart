@@ -12,84 +12,18 @@ import 'android_hdr_output_slot.dart';
 import 'android_hdr_playback_policy.dart';
 import 'android_hdr_sample_identity.dart';
 
-/// WP-C SurfaceTexture PoC (phase1-design-spec §5): lab-only opt-in that
-/// overrides the routed hwdec with the experimental `surfacetexture`
-/// importer at the hwdec write point and hard-verifies the active importer
-/// after open. The default empty define keeps every routed value and the
-/// failure behavior exactly as before the PoC existed; the PoC path never
-/// falls back to mediacodec-copy/SDR.
-class AndroidSurfaceTexturePoc {
-  const AndroidSurfaceTexturePoc._();
-
-  /// Compile-time opt-in. Empty (default) = off.
-  static const String define = String.fromEnvironment(
-    'MEDIA_KIT_ANDROID_SURFACETEXTURE_POC',
-  );
-
-  static const bool enabled = define != '';
-
-  /// The only route field the PoC is allowed to replace (at the hwdec write
-  /// point); every other route field stays exactly as routed.
-  static const String hwdec = 'surfacetexture';
-
-  /// Grep-able evidence markers (phase1-design-spec §2.12/§5).
-  static const String tag = 'MKSURF-POC:';
-  static const String versionMarker = 'MKSURF: version';
-
-  /// hwdec value to write for the routed [routeHwdec] under PoC state
-  /// [enabled]; identity when off.
-  static String hwdecToWrite(String routeHwdec, {bool? enabled}) =>
-      (enabled ?? AndroidSurfaceTexturePoc.enabled) ? hwdec : routeHwdec;
-
-  static bool isVersionEntry(String entry) => entry.contains(versionMarker);
-
-  /// Post-open active-importer verdict for the page-level PoC transaction
-  /// (V2 review): applies whenever the override was applied for this open,
-  /// regardless of the open outcome — a vd_lavc software fallback after
-  /// bridge init failure degrades the session but must hard-fail exactly
-  /// like missing version evidence. There is no fallback path.
-  static String? verdictFailure({
-    required String hwdecCurrent,
-    required bool versionObserved,
-  }) {
-    final reasons = <String>[
-      if (hwdecCurrent != hwdec) 'hwdec-current=$hwdecCurrent expected=$hwdec',
-      if (!versionObserved)
-        'no "$versionMarker" entry in the captured mpv log stream',
-    ];
-    if (reasons.isEmpty) return null;
-    return reasons.join('; ');
-  }
-
-  /// Null when the post-open importer evidence is complete; otherwise the
-  /// reason the transaction must hard-fail. The `MKSURF: version` line is
-  /// only demanded when the mpv log stream produced any entry at all (PoC
-  /// builds run trace-level logging; a fully silent stream means the log
-  /// evidence is not obtainable and only the hwdec-current verdict stands).
-  static String? versionLogFailure({
-    required bool logsAvailable,
-    required bool versionObserved,
-  }) {
-    if (logsAvailable && !versionObserved) {
-      return 'no "$versionMarker" entry in the captured mpv log stream';
-    }
-    return null;
-  }
-}
-
 /// WP-C SurfaceTexture diagnostics (lab-only opt-in): compile-time switch for
 /// the small-area readback diagnostic legs around the 01 page's open. The
 /// default empty define keeps every diag call site a compile-time no-op, so
-/// the off state is exactly the previous behavior. The two legs are mutually
-/// exclusive on the PoC state:
-/// - OES leg (PoC define also on): the surfacetexture importer routes the
-///   open and the bridge Java switch (`MediaCodecSurfaceTextureBridge`
-///   diagnostics) enables the importer-side per-frame readback
-///   (`MKSURF: diag` lines in the mpv log stream).
-/// - copy leg (PoC define off): the locked convert route stays the baseline
-///   `mediacodec-copy` path; the page appends an unlabeled
-///   `lavfi=[signalstats]` vf probe and polls its metadata
-///   (`MKSURF-COPY-DIAG:` lines).
+/// the off state is exactly the previous behavior. The OES leg (diag define
+/// on) enables the importer-side per-frame readback (`MKSURF: diag` lines in
+/// the mpv log stream) around the open.
+///
+/// W2 (plan lg-p84-yuv-window-reopen-20261014): the companion
+/// `AndroidSurfaceTexturePoc` class was deleted with its
+/// MEDIA_KIT_ANDROID_SURFACETEXTURE_POC define — the `surfacetexture`
+/// importer is the derived YUV-window carrier (W1 channel derivation), not a
+/// define override.
 class AndroidSurfaceTextureDiag {
   const AndroidSurfaceTextureDiag._();
 
@@ -128,12 +62,6 @@ class AndroidHdrPlayerBackend implements AndroidHdrOpenBackend {
   final bool p5PlatformSdrDiagnostic;
   final bool textureCopyDiagnostic;
   AndroidHdrPlaybackPolicy? _validatedPolicy;
-  String? _configuredHwdec;
-  StreamSubscription<PlayerLog>? _surfaceTexturePocLogs;
-  bool _surfaceTexturePocLogsObserved = false;
-  // Sticky: set on the first matching entry so a later bounded-buffer
-  // eviction can never lose the verdict (V1 review P1).
-  bool _surfaceTexturePocVersionObserved = false;
 
   final Map<String, String> _originalProperties = {};
   final Set<String> _ownedProperties = {};
@@ -158,51 +86,6 @@ class AndroidHdrPlayerBackend implements AndroidHdrOpenBackend {
     }
   }
 
-  /// Captures `MKSURF:` evidence from the mpv log stream for the PoC
-  /// transaction. No-op and never subscribed when the PoC define is off.
-  void _startSurfaceTexturePocLogCapture() {
-    unawaited(_surfaceTexturePocLogs?.cancel());
-    _surfaceTexturePocLogsObserved = false;
-    _surfaceTexturePocVersionObserved = false;
-    _surfaceTexturePocLogs = player.stream.log.listen((log) {
-      _surfaceTexturePocLogsObserved = true;
-      if (AndroidSurfaceTexturePoc.isVersionEntry(log.text)) {
-        _surfaceTexturePocVersionObserved = true;
-      }
-    });
-  }
-
-  void _stopSurfaceTexturePocLogCapture() {
-    unawaited(_surfaceTexturePocLogs?.cancel());
-    _surfaceTexturePocLogs = null;
-  }
-
-  /// Hard-verifies the PoC importer evidence after the hwdec-current check
-  /// passed (phase1-design-spec §5): any missing evidence fails the
-  /// transaction; there is no fallback to mediacodec-copy/SDR.
-  void _finishSurfaceTexturePocVerification() {
-    try {
-      if (!_surfaceTexturePocLogsObserved) {
-        debugPrint('${AndroidSurfaceTexturePoc.tag} MKSURF version log '
-            'unavailable: mpv log stream produced no entries');
-      }
-      final failure = AndroidSurfaceTexturePoc.versionLogFailure(
-        logsAvailable: _surfaceTexturePocLogsObserved,
-        versionObserved: _surfaceTexturePocVersionObserved,
-      );
-      if (failure != null) {
-        debugPrint('${AndroidSurfaceTexturePoc.tag} '
-            'active-importer-verify-fail $failure');
-        throw StateError('SurfaceTexture PoC active-importer verification '
-            'failed: $failure');
-      }
-      debugPrint('${AndroidSurfaceTexturePoc.tag} '
-          'active-importer=surfacetexture verified');
-    } finally {
-      _stopSurfaceTexturePocLogCapture();
-    }
-  }
-
   @override
   Future<void> stop() async {
     await player.stop();
@@ -215,8 +98,6 @@ class AndroidHdrPlayerBackend implements AndroidHdrOpenBackend {
 
   @override
   Future<void> resetOwnedConfiguration() async {
-    _stopSurfaceTexturePocLogCapture();
-    _configuredHwdec = null;
     if (_p84FilterApplied) {
       await player.command(['vf', 'remove', '@media-kit-p84-base']);
       _p84FilterApplied = false;
@@ -285,15 +166,10 @@ class AndroidHdrPlayerBackend implements AndroidHdrOpenBackend {
       }
     }
     await _setOwned('cache-on-disk', 'no');
-    var hwdec = policy.hwdec;
-    if (AndroidSurfaceTexturePoc.enabled) {
-      debugPrint('${AndroidSurfaceTexturePoc.tag} hwdec override $hwdec -> '
-          '${AndroidSurfaceTexturePoc.hwdec}');
-      hwdec = AndroidSurfaceTexturePoc.hwdecToWrite(hwdec);
-      _configuredHwdec = hwdec;
-      _startSurfaceTexturePocLogCapture();
-    }
-    await _setOwned('hwdec', hwdec);
+    // W2: the routed policy hwdec is written unchanged. The `surfacetexture`
+    // carrier is part of the realized route itself since W1 (channel
+    // derivation); there is no define override at the write point anymore.
+    await _setOwned('hwdec', policy.hwdec);
     if (identity.sample == AndroidHdrSample.dolbyVisionP5 &&
         policy.vo == 'gpu-next') {
       // Player initialization disables these globally. Restore gpu-next's
@@ -399,10 +275,10 @@ class AndroidHdrPlayerBackend implements AndroidHdrOpenBackend {
     // for the decoder instead of treating the initial empty property as a
     // software-decoding verdict.
     var hwdec = '';
-    // PoC on: the overridden write value is the expected active importer;
-    // PoC off: _configuredHwdec stays null and this resolves exactly to the
-    // routed policy hwdec as before.
-    final expectedHwdec = _configuredHwdec ?? _validatedPolicy?.hwdec;
+    // W2: the active decoder is verified against the routed policy hwdec —
+    // under W1 this is the derived carrier itself (e.g. `surfacetexture` on
+    // a yuv-only device), so no separate override bookkeeping remains.
+    final expectedHwdec = _validatedPolicy?.hwdec;
     if (expectedHwdec == null) {
       throw StateError('No validated decoder policy for track verification');
     }
@@ -412,18 +288,9 @@ class AndroidHdrPlayerBackend implements AndroidHdrOpenBackend {
       }
       hwdec = await player.getProperty('hwdec-current');
       if (hwdec == expectedHwdec) {
-        if (AndroidSurfaceTexturePoc.enabled) {
-          _finishSurfaceTexturePocVerification();
-        }
         return;
       }
       await Future<void>.delayed(const Duration(milliseconds: 50));
-    }
-    if (AndroidSurfaceTexturePoc.enabled) {
-      debugPrint('${AndroidSurfaceTexturePoc.tag} '
-          'active-importer-verify-fail hwdec-current=$hwdec '
-          'expected=$expectedHwdec');
-      _stopSurfaceTexturePocLogCapture();
     }
     throw StateError('Expected $expectedHwdec output, got $hwdec');
   }

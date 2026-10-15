@@ -87,6 +87,24 @@ public class LyaPqDataSpaceExt implements PlatformVideoView.SurfaceDataSpaceExt 
                 && FINGERPRINT.equals(fingerprint.get());
     }
 
+    /**
+     * PQ presentation self-report (plan W1): on this device the validated PQ
+     * presentation carrier is the RGB 10-bit window surface (rgba1010102 +
+     * the ext dataspace apply, read-back verified); no YUV window carrier is
+     * used.
+     */
+    @Override
+    @Nullable
+    public Boolean pqPresentationRgbSurface() {
+        return true;
+    }
+
+    @Override
+    @Nullable
+    public Boolean pqPresentationYuvWindow() {
+        return false;
+    }
+
     @Override
     public boolean applyDataSpace(@Nullable Surface surface, int dataSpace) {
         // Read-only gate re-checked on every call, before any native touch:

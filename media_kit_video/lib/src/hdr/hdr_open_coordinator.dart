@@ -154,6 +154,18 @@ class HdrOutputBindTimeout extends TimeoutException {
   }
 }
 
+/// The per-execution-attempt terminal cleanup failed (plan C: the YUV window
+/// arm's awaited disarm). Wraps the owner's original cleanup error; the
+/// coordinator never retries an attempt whose terminal cleanup failed — the
+/// owner retains its cleanup debt and blocks successor output preparation
+/// until the debt clears.
+class HdrAttemptCleanupFailure implements Exception {
+  const HdrAttemptCleanupFailure(this.cause);
+  final Object cause;
+  @override
+  String toString() => 'HdrAttemptCleanupFailure: $cause';
+}
+
 /// An unresolved review cannot be accepted after the configured reopen budget.
 class HdrReviewReopenLimit implements Exception {
   const HdrReviewReopenLimit();
@@ -197,13 +209,24 @@ class HdrOpenCoordinator<R, P> {
     this.onBackendCallDiagnostic,
     this.diagnosticSessionGeneration,
     this.outputTimeout = const Duration(seconds: 10),
+    this.attemptCleanup,
   }) {
     if (maxReviewReopens < 0 || maxReviewReopens > 4) {
-      throw ArgumentError.value(maxReviewReopens, 'maxReviewReopens', 'Expected 0..4');
+      throw ArgumentError.value(
+          maxReviewReopens, 'maxReviewReopens', 'Expected 0..4');
     }
   }
 
   final HdrOpenBackend<P> backend;
+
+  /// Awaited terminal cleanup for every execution attempt (plan C: the
+  /// YUV window arm disarm). Called with the attempt's plan at each attempt
+  /// end — success (before the result completes), candidate retry,
+  /// review-reopen, failure rollback and supersede — and once more,
+  /// best-effort, at [dispose]. The owner keys the cleanup on the plan so a
+  /// stale attempt's late cleanup cannot clear a successor's arm. Null (the
+  /// default) keeps the coordinator's behavior unchanged.
+  final Future<void> Function(P plan)? attemptCleanup;
 
   /// The pre-queue plan production (capability snapshot + planning for the
   /// session). A failure here fails the open before any native side effect.
@@ -290,8 +313,28 @@ class HdrOpenCoordinator<R, P> {
   // its own policy validation fails.
   bool _pendingRollback = false;
   bool _activeMedia = false;
+  // The plan of the most recently started execution attempt; only read after
+  // the side-effect queue drains (dispose), so the terminal best-effort
+  // cleanup can re-run the last attempt's owner cleanup idempotently.
+  P? _lastAttemptPlan;
 
   bool _invalid(int generation) => _disposed || generation != _generation;
+
+  /// Runs the injected attempt cleanup, wrapping any failure as
+  /// [HdrAttemptCleanupFailure] so the transaction treats it as a terminal
+  /// (non-retryable) outcome.
+  Future<void> _finishAttempt(P plan) async {
+    final cleanup = attemptCleanup;
+    if (cleanup == null) return;
+    try {
+      await cleanup(plan);
+    } catch (error, stack) {
+      if (error is HdrAttemptCleanupFailure) {
+        Error.throwWithStackTrace(error, stack);
+      }
+      Error.throwWithStackTrace(HdrAttemptCleanupFailure(error), stack);
+    }
+  }
 
   void _check(int generation) {
     if (_invalid(generation)) throw const OpenSuperseded();
@@ -338,6 +381,7 @@ class HdrOpenCoordinator<R, P> {
       var retriesUsed = 0;
       var reviewReopens = 0;
       while (true) {
+        _lastAttemptPlan = attemptPlan;
         try {
           _check(generation);
           mark('queue_entered');
@@ -632,6 +676,9 @@ class HdrOpenCoordinator<R, P> {
             throw const HdrReviewReopenLimit();
           }
           if (decision.reopen) {
+            // The replaced attempt ends here: its terminal cleanup must
+            // succeed before the reopen's plan can execute (and re-arm).
+            await _finishAttempt(attemptPlan);
             // Review-driven replacement shares the same finite transaction.
             reviewReopens++;
             attemptPlan = decision.nextPlan as P;
@@ -641,6 +688,18 @@ class HdrOpenCoordinator<R, P> {
             continue;
           }
           mark('track_verified');
+          // The attempt's terminal cleanup is an awaited barrier before the
+          // result completes: a successor may only observe a completed open
+          // once this attempt's route-scoped arms are disarmed (or the open
+          // fails with the cleanup failure and the retained debt).
+          await _finishAttempt(attemptPlan);
+          mark('attempt_cleaned');
+          // B6: the terminal cleanup is an awaited suspension point. A
+          // request that superseded this generation — or a dispose — while
+          // the cleanup was pending must not observe this attempt as a
+          // completed success; the invalidated attempt takes the controlled
+          // rollback path below instead of publishing an active media.
+          _check(generation);
           _pendingRollback = false;
           _activeMedia = true;
           result.complete(
@@ -662,6 +721,7 @@ class HdrOpenCoordinator<R, P> {
           if (!switching ||
               error is OpenSuperseded ||
               error is HdrReviewReopenLimit ||
+              error is HdrAttemptCleanupFailure ||
               _invalid(generation)) {
             if (switching) {
               try {
@@ -721,6 +781,12 @@ class HdrOpenCoordinator<R, P> {
               } catch (_) {
                 // Preserve the failure that caused this transaction to abort.
               }
+            }
+            try {
+              await _finishAttempt(attemptPlan);
+            } catch (_) {
+              // The owner retains its cleanup debt; the original failure
+              // that ended this attempt stands.
             }
             result.completeError(error, stack);
             return;
@@ -788,20 +854,42 @@ class HdrOpenCoordinator<R, P> {
               } catch (_) {
                 // Preserve the failure that caused this transaction to abort.
               }
+              // B4: a retry hook that itself throws still ends its attempt —
+              // the exit edge runs the same terminal cleanup as every other
+              // failure path (the owner retains its debt on a failed
+              // cleanup; the failure that ended this attempt stands).
+              try {
+                await _finishAttempt(attemptPlan);
+              } catch (_) {
+                // The owner retains its cleanup debt; the original failure
+                // that ended this attempt stands.
+              }
               result.completeError(error, stack);
               return;
             }
           }
           if (next != null && !_invalid(generation)) {
-            retriesUsed++;
-            attemptPlan = next;
-            diagnosticAttempt = _diagnosticAttempt(generation, attemptPlan);
-            currentStart = start;
-            mark('retry_planned');
-            // Re-enter the transaction: the loop-top rollback and the stop/
-            // reset phases roll back the partial configuration of the failed
-            // attempt (plan 1.4 step 5, "回到第 3 步").
-            continue;
+            // The failed attempt ends before its successor is admitted: its
+            // terminal cleanup must clear the route-scoped arms first. A
+            // failed cleanup keeps the owner's debt and the original failure
+            // instead of arming a successor attempt over uncleared state.
+            var cleanupDone = true;
+            try {
+              await _finishAttempt(attemptPlan);
+            } catch (_) {
+              cleanupDone = false;
+            }
+            if (cleanupDone) {
+              retriesUsed++;
+              attemptPlan = next;
+              diagnosticAttempt = _diagnosticAttempt(generation, attemptPlan);
+              currentStart = start;
+              mark('retry_planned');
+              // Re-enter the transaction: the loop-top rollback and the stop/
+              // reset phases roll back the partial configuration of the failed
+              // attempt (plan 1.4 step 5, "回到第 3 步").
+              continue;
+            }
           }
           try {
             _emitBackendCall(
@@ -860,6 +948,12 @@ class HdrOpenCoordinator<R, P> {
           } catch (_) {
             // Preserve the failure that caused this transaction to abort.
           }
+          try {
+            await _finishAttempt(attemptPlan);
+          } catch (_) {
+            // The owner retains its cleanup debt; the original failure that
+            // ended this attempt stands.
+          }
           result.completeError(error, stack);
           return;
         }
@@ -903,8 +997,10 @@ class HdrOpenCoordinator<R, P> {
     final stopping = _tail.then((_) async {
       if (!_activeMedia && !_pendingRollback) return;
       _pendingRollback = true;
-      for (final method in [HdrBackendDiagnosticMethod.stop,
-          HdrBackendDiagnosticMethod.resetOwnedConfiguration]) {
+      for (final method in [
+        HdrBackendDiagnosticMethod.stop,
+        HdrBackendDiagnosticMethod.resetOwnedConfiguration
+      ]) {
         _emitBackendCall(method, HdrBackendDiagnosticBoundary.entered,
             generation, null, HdrBackendDiagnosticPurpose.rollback);
         try {
@@ -946,6 +1042,18 @@ class HdrOpenCoordinator<R, P> {
     ++_generation;
     await Future.wait(_preparations.toList());
     await _tail;
+    // Terminal best-effort: re-run the last started attempt's owner cleanup
+    // (idempotent for an owner that already disarmed; a second dispose
+    // returns the same future and runs this at most once). Failure keeps the
+    // owner's cleanup debt.
+    final lastPlan = _lastAttemptPlan;
+    if (attemptCleanup != null && lastPlan != null) {
+      try {
+        await attemptCleanup!(lastPlan);
+      } catch (_) {
+        // The owner retains its cleanup debt.
+      }
+    }
     if (_activeMedia || _pendingRollback) {
       _emitBackendCall(
           HdrBackendDiagnosticMethod.stop,

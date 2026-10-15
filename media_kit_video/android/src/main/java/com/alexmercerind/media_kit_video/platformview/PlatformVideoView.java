@@ -103,6 +103,30 @@ public final class PlatformVideoView implements PlatformView {
         default boolean isApplicable() {
             return true;
         }
+
+        /**
+         * Vendor self-report (plan W1): whether PQ can be presented through
+         * the RGB {@code rgb10_a2} window surface on this device. Tri-state:
+         * {@code null} means this extension does not declare the structure
+         * at all (legacy adapter), in which case the whole
+         * {@code pqPresentation} report is omitted — never partially sent.
+         */
+        @Nullable
+        default Boolean pqPresentationRgbSurface() {
+            return null;
+        }
+
+        /**
+         * Vendor self-report (plan W1): whether PQ can be presented through
+         * the vendor YUV window carrier on this device. Tri-state: {@code
+         * null} means this extension does not declare the structure at all
+         * (legacy adapter), in which case the whole {@code pqPresentation}
+         * report is omitted — never partially sent.
+         */
+        @Nullable
+        default Boolean pqPresentationYuvWindow() {
+            return null;
+        }
     }
 
     @Nullable
@@ -132,7 +156,10 @@ public final class PlatformVideoView implements PlatformView {
     /**
      * {@code id}/{@code isApplicable} of the currently registered dataspace
      * extension for the capability query and reports, or null when none is
-     * registered. Only the read-only accessors are consulted; the extension's
+     * registered. Extensions that declare their PQ presentation channels
+     * additionally report {@code pqPresentation}
+     * ({@code rgbSurface}/{@code yuvWindow}, both booleans or the key is
+     * omitted). Only the read-only accessors are consulted; the extension's
      * apply path is never probed from here.
      */
     @Nullable
@@ -144,6 +171,20 @@ public final class PlatformVideoView implements PlatformView {
         final Map<String, Object> info = new HashMap<>();
         info.put("id", ext.id());
         info.put("isApplicable", ext.isApplicable());
+        // All-or-nothing, matching the Dart parser (HdrPqPresentation.fromMap
+        // drops any structure whose two values are not both booleans): the
+        // pqPresentation key is only reported when the extension declares
+        // both channels; a legacy adapter (either accessor null) reports
+        // applicability without the key, so Dart applies its migration
+        // default.
+        final Boolean pqRgbSurface = ext.pqPresentationRgbSurface();
+        final Boolean pqYuvWindow = ext.pqPresentationYuvWindow();
+        if (pqRgbSurface != null && pqYuvWindow != null) {
+            final Map<String, Object> pqPresentation = new HashMap<>();
+            pqPresentation.put("rgbSurface", pqRgbSurface);
+            pqPresentation.put("yuvWindow", pqYuvWindow);
+            info.put("pqPresentation", pqPresentation);
+        }
         return info;
     }
 

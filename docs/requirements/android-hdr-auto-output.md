@@ -112,7 +112,8 @@ P5 的基础层是 IPT 色彩空间，忽略 RPU 会偏色，所以 P5 没有 `b
    - HEVC 解码器的 Main10/HDR 档位与 4K 尺寸帧率支持；
    - `video/dolby-vision` 解码器列表及其支持的 profile；
    - P5 管线可用性；
-   - dataspace bridge 是否加载、已注册的设备扩展是否适用于本机。
+   - dataspace bridge 是否加载、已注册的设备扩展是否适用于本机；
+   - **PQ 呈现通道** `pqPresentation{rgbSurface, yuvWindow}`（2026-10-15 起）：声明本机 RGB GPU 窗口与 YUV config49 HWC 视频层两条 PQ 呈现通道的有无。三来源解析：设备扩展自报 > 平台默认（API≥28 → rgb 可用）> 迁移默认（扩展 applicable 但未自报 → `{rgbSurface: true, yuvWindow: false}`，现网行为逐位不变）。消费规则：`metadataReshape`（RGB 构型）要求 `rgbSurface`，否则计划期不可行（`pqRgbPresentationUnavailable`）；`baseLayerConvert` 载体按通道推导（仅 yuvWindow → surfacetexture + YUV config49 HWC 窗口契约，否则平台基线）。
    查询不得调用 `eglInitialize`/`eglTerminate` 这类会干扰进程内其他 EGL 用户的接口。
 2. 库提供按源描述的预测，输出：
    - 选中的策略与路由；
@@ -155,7 +156,7 @@ P5 的基础层是 IPT 色彩空间，忽略 RPU 会偏色，所以 P5 没有 `b
    - 播放中能力丢失或 dataspace 被重置后重新应用失败。
    降级发生在开播前时，直接按下一条候选打开。发生在播放中时，在当前位置重建。
    （口径确认 2026-10-02：**"每一次降级都要发布事件"仅指开播后运行时降级**。开播前规划相的候选跳过（如能力不足、门禁跳过 experimental）不是降级事件——跳过原因经 R1.2 预测候选与 R4.2 报告候选列表完整披露，会话按选中的路由正常打开并发 `RouteApplied`。A3-2 实测：模拟无 HLG 开播 P8.4，direct 因 `displayLacksTransfer` 计划相跳过、落 convert 打开，全程无 Degraded、报告候选携带跳过原因。）
-2. 降级原因是类型化枚举，附带诊断文本。至少区分以下原因：`preferenceOff`、`displayLacksTransfer`、`noDisplayCapabilityReport`、`experimentalStrategySkipped`、`dataSpaceApplyFailed`、`dataSpaceReadbackMismatch`、`hwdecMismatch`、`outputBindTimeout`、`capabilityLost`、`unsupportedPlatform`。
+2. 降级原因是类型化枚举，附带诊断文本。至少区分以下原因：`preferenceOff`、`displayLacksTransfer`、`noDisplayCapabilityReport`、`experimentalStrategySkipped`、`dataSpaceApplyFailed`、`dataSpaceReadbackMismatch`、`hwdecMismatch`、`outputBindTimeout`、`capabilityLost`、`unsupportedPlatform`、`pqRgbPresentationUnavailable`（2026-10-15：设备仅存 YUV config49 HWC 呈现通道时，RGB 构型的 reshape 计划期不可行）、`yuvWindowArmUnavailable`（YUV 载体准入失败：无有效 owner、进程门冲突或 arm 失败——YUV arm 活体期间（admission 至 attempt terminal cleanup）并发第二输出初始化被 typed 冲突拒绝，属进程全局原子下的设备级限制）。
 3. **边界例外**：P5 的任何策略（包括 tone-map）都依赖 dovi rescale 管线才能正确着色。管线不可用时，库**不输出错误着色的画面**，改为发布 `p5PipelineUnavailable` 错误，播放不开始。PiliPlusX 应当在 R1 预测阶段就避开这种情况。
 4. 能力恢复时不自动升回 HDR，只发布 `CapabilityChanged` 事件。
 5. 事件只用于报告。换源由调用方决定，库不重试、不切换片源。
@@ -236,7 +237,7 @@ Phase 1 只做 Android。darwin（三事实交集门禁、final24 运行时禁�
 | DV P5 | metadataReshape | verified | 12703–12708，全片 EOS |
 | DV P5 | toneMapSdr | verified | P0 P5→Texture SDR 默认开启，真人确认 |
 | DV P8.4 | baseLayerDirect | verified | 12703–12708 |
-| DV P8.4 | baseLayerConvert | verified | A3-2 模拟无 HLG 落 convert（PQ、读回/SF 一致、97.9s 续播）+ 2026-10-02 人工观察确认（P8.4 RPU 重建 PQ 画面正常） |
+| DV P8.4 | baseLayerConvert | verified | A3-2 模拟无 HLG 落 convert（PQ、读回/SF 一致、97.9s 续播）+ 2026-10-02 人工观察确认（P8.4 RPU 重建 PQ 画面正常）；2026-10-15 lgh8（LG H870DS API24 实机）：HLG 基线经 C4×YUV config49 HWC 载体 verified 274s（hwdec=surfacetexture、复核样本 hwdecCurrent=surfacetexture、SF 实锤 7FA30C04 层持续驱动+hal_hdr、COLOR_METADATA(9,1,16)、SDR 复位干净）——LG 专属构型由 pqPresentation.yuvWindow=true 能力驱动（metadataReshape 同设备计划期 pqRgbPresentationUnavailable 不可行） |
 | DV P8.4 | metadataReshape | experimental | 重建管线只在 P5 验证过 |
 | DV P8.4 | toneMapSdr | verified | 12703–12708 SDR 对照 |
 | DV P8.1 | baseLayerDirect | inherited | 机制同 HDR10 直出；P8.4 直出已证明 LYA 的 HEVC 解码器能容忍 RPU NAL；缺样片确认 |

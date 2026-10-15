@@ -2,6 +2,7 @@ package com.example.media_kit_hdr_lab;
 
 import android.view.Surface;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.alexmercerind.media_kit_video.platformview.PlatformVideoView;
 
@@ -86,5 +87,21 @@ public final class LyaDiagnosticsDataSpaceExt implements PlatformVideoView.Surfa
     @Override
     public boolean isApplicable() {
         return delegate.isApplicable();
+    }
+
+    // The wrapper is not a vendor subclass; without these explicit forwards
+    // the interface defaults (null) would drop the delegate's pqPresentation
+    // report while isApplicable still delegates — so the capability query
+    // would show an applicable extension declaring nothing.
+    @Override
+    @Nullable
+    public Boolean pqPresentationRgbSurface() {
+        return delegate.pqPresentationRgbSurface();
+    }
+
+    @Override
+    @Nullable
+    public Boolean pqPresentationYuvWindow() {
+        return delegate.pqPresentationYuvWindow();
     }
 }

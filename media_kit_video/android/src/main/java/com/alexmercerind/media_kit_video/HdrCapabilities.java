@@ -39,7 +39,9 @@ import com.alexmercerind.media_kit_video.platformview.PlatformVideoView;
  * for the decoder census. It never calls eglInitialize/eglTerminate (which
  * would interfere with other EGL users in the process) and never touches any
  * private vendor ABI — a registered SurfaceDataSpaceExt is only described
- * through its read-only {@code id()}/{@code isApplicable()} accessors.
+ * through its read-only {@code id()}/{@code isApplicable()} and
+ * {@code pqPresentationRgbSurface()}/{@code pqPresentationYuvWindow()}
+ * accessors.
  */
 public final class HdrCapabilities {
     private static final String TAG = "HdrCapabilities";
@@ -84,6 +86,9 @@ public final class HdrCapabilities {
         snapshot.put("p5Pipeline", MpvPipelineProbe.probeOnce() == 1);
         snapshot.put("nativeDvBridgeApi", MpvPipelineProbe.getNativeDvBridgeApi());
         snapshot.put("dataSpaceBridgeLoaded", PlatformVideoView.isDataSpaceBridgeLoaded());
+        // Pass-through of the read-only ext report; the pqPresentation key,
+        // when present, is assembled inside
+        // PlatformVideoView.getSurfaceDataSpaceExtInfo (all-or-nothing).
         snapshot.put("dataSpaceExt", PlatformVideoView.getSurfaceDataSpaceExtInfo());
         return snapshot;
     }

@@ -169,6 +169,18 @@ enum HdrDegradeReason {
   /// needed by HDR PlatformView routes.
   gpuHdrDataSpaceUnavailable,
 
+  /// The device declares no PQ presentation through the RGB window surface
+  /// (plan W1): routes structurally hard-bound to the `rgb10_a2` RGB
+  /// surface (the C2 reshape) are infeasible at plan time; a declared YUV
+  /// window carrier may still serve the conversion candidate.
+  pqRgbPresentationUnavailable,
+
+  /// The vendor YUV window presentation arm could not be armed or cleaned up
+  /// for the route's execution attempt (plan C): missing owner authorization,
+  /// device/vendor gate refusal, or an unavailable vendor library/symbol.
+  /// Fail-closed for the YUV carrier; every other route is unaffected.
+  yuvWindowArmUnavailable,
+
   /// The platform has no HDR output pipeline (non-Android in Phase 1).
   unsupportedPlatform,
 }
@@ -424,7 +436,9 @@ class HdrCandidate {
 
   /// Stable within a planning snapshot; the snapshot identity itself is owned
   /// by the caller and must be checked again before execution.
-  String get candidateId => executionId ?? [
+  String get candidateId =>
+      executionId ??
+      [
         sourceClass?.name ?? 'unknown',
         stage?.name ?? 'sdr',
         strategy.name,
@@ -505,9 +519,8 @@ class HdrCandidate {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(strategy, maturity, feasible, isSafetyNet, skipReason, route,
-          sourceClass, stage, executionId);
+  int get hashCode => Object.hash(strategy, maturity, feasible, isSafetyNet,
+      skipReason, route, sourceClass, stage, executionId);
 
   @override
   String toString() => 'HdrCandidate(${strategy.name}, ${maturity.name}, '
