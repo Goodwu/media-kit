@@ -9,7 +9,9 @@ import 'package:flutter/services.dart'
     show MethodChannel, MissingPluginException;
 
 import 'hdr_open_plan.dart';
+import 'hdr_output_resources.dart';
 import 'hdr_route.dart';
+import 'hdr_output_failure.dart';
 import 'hdr_yuv_presentation_contract.dart';
 import 'hdr_yuv_window_arm_ffi_resolver.dart';
 
@@ -42,36 +44,10 @@ typedef HdrYuvWindowArmChannel = Future<Object?> Function(
   Map<String, Object?> arguments,
 );
 
-/// The vendor YUV window presentation arm failed to arm, or its terminal
-/// cleanup failed. Fail-closed for the YUV attempt: a silently skipped arm
-/// would open the NV12 window without the PQ/LIMITED injection (misleading
-/// playback), and a failed disarm must surface as cleanup debt rather than
-/// leak an armed flag past its attempt.
-class HdrYuvWindowArmFailure implements Exception {
-  const HdrYuvWindowArmFailure(this.reason, {this.cause});
-  final HdrDegradeReason reason;
-  final Object? cause;
-  @override
-  String toString() => 'HdrYuvWindowArmFailure(${reason.name}, $cause)';
-}
-
-/// This output initialization is rejected by the process-level admission:
-/// another session or engine currently holds the YUV window arm write
-/// admission, retains its cleanup debt, has a non-YUV initialization
-/// mid-flight, or this manager re-entered an initialization that is still
-/// in flight (B1). The rejected attempt fails outright — every route it
-/// could degrade to would still initialize an output over process-global
-/// atomics or in-flight state this attempt does not own, which is exactly
-/// the silent-poisoning regression this guard exists to prevent. Deliberately
-/// NOT an [HdrYuvWindowArmFailure], so the session's failure-driven
-/// replanning never treats a cross-session conflict as a route capability
-/// problem.
-class HdrYuvWindowLeaseConflict implements Exception {
-  const HdrYuvWindowLeaseConflict(this.description);
-  final String description;
-  @override
-  String toString() => 'HdrYuvWindowLeaseConflict($description)';
-}
+/// Compatibility names for the historical adapter and its regressions.
+/// Generic orchestration depends on hdr_output_failure.dart instead.
+typedef HdrYuvWindowArmFailure = HdrOutputPreparationFailure;
+typedef HdrYuvWindowLeaseConflict = HdrOutputLeaseConflict;
 
 /// The in-isolate record of who currently owns the YUV window presentation
 /// attempt (B1). The underlying native atomics
@@ -249,7 +225,7 @@ class HdrYuvWindowProcessLease {
 /// until it clears. Ordinary production callers without a configured owner
 /// token fail admission explicitly — automatic owner lifecycle for them is
 /// a separate, currently blocked deliverable.
-class HdrYuvWindowArm {
+class HdrYuvWindowArm implements HdrOutputResources<HdrOpenPlan> {
   HdrYuvWindowArm({
     this.ownerToken,
     required this.ownerGeneration,
@@ -718,6 +694,7 @@ class HdrYuvWindowArm {
   /// [HdrYuvWindowArmFailure] when the disarm fails (debt is retained —
   /// process-wide — and blocks the next output initialization until it
   /// clears).
+  @override
   Future<void> endAttempt(HdrOpenPlan plan) async {
     final scope = _armed;
     if (scope != null) {
@@ -752,6 +729,7 @@ class HdrYuvWindowArm {
   /// NOTE: after this, [armForAttempt]/[initializeOutput] throw — there is
   /// no "next arm recovery" for a disposed manager; recovery from retained
   /// debt is an explicit successful cleanup here or a process restart.
+  @override
   Future<void> dispose() async {
     _disposed = true;
     var clean = true;

@@ -39,7 +39,9 @@ import 'hdr_source_descriptor.dart';
 import 'hdr_source_intent.dart';
 import 'hdr_session_native_dv_policy.dart';
 import 'hdr_strategy.dart';
-import 'hdr_yuv_window_arm.dart';
+import 'hdr_output_resources.dart';
+import 'hdr_output_failure.dart';
+import 'hdr_output_request_policy.dart';
 
 typedef HdrSessionRoutePlanner = HdrRoutePrediction Function({
   required HdrSourceDescriptor source,
@@ -130,7 +132,7 @@ class HdrVideoSession {
     void Function(HdrBackendCallDiagnostic<HdrOpenPlan>)?
         onBackendCallDiagnostic,
     void Function(HdrNativeDvOptionDiagnostic)? onNativeDvOptionDiagnostic,
-    HdrYuvWindowArm? yuvWindowArm,
+    HdrOutputResources<HdrOpenPlan>? outputResources,
   }) : this._(
           player: player,
           preference: preference,
@@ -155,7 +157,7 @@ class HdrVideoSession {
           onNativeDvConsumerCaptureError: onNativeDvConsumerCaptureError,
           onBackendCallDiagnostic: onBackendCallDiagnostic,
           onNativeDvOptionDiagnostic: onNativeDvOptionDiagnostic,
-          yuvWindowArm: yuvWindowArm,
+          outputResources: outputResources,
         );
 
   HdrVideoSession._({
@@ -184,7 +186,7 @@ class HdrVideoSession {
     void Function(HdrBackendCallDiagnostic<HdrOpenPlan>)?
         onBackendCallDiagnostic,
     void Function(HdrNativeDvOptionDiagnostic)? onNativeDvOptionDiagnostic,
-    HdrYuvWindowArm? yuvWindowArm,
+    HdrOutputResources<HdrOpenPlan>? outputResources,
   }) {
     _disposeOutputForTesting = disposeOutputForTesting;
     _disposeBackendForTesting = disposeBackendForTesting;
@@ -244,33 +246,19 @@ class HdrVideoSession {
         );
       },
     );
-    // Plan C: the session owns the route-scoped YUV window presentation arm
-    // manager. The owner token comes from the experiment configuration; the
-    // owner generation is observed non-constructively from the published
-    // output only (never by creating a wrapper). Ordinary production
-    // construction has no token — its YUV routes then fail admission
-    // explicitly (automatic owner lifecycle is a separate deliverable).
-    _yuvWindowArm = yuvWindowArm ??
-        HdrYuvWindowArm(
-          ownerToken: configuration.android.lgExperimentOwnerToken,
-          ownerGeneration: () async {
-            final controller = _slot?.current;
-            if (controller == null || !controller.platform.isCompleted) {
-              return null;
-            }
-            final platform = await controller.platform.future;
-            final generation = platform.nativeSurfaceGeneration;
-            return generation > 0 ? generation : null;
-          },
-        );
     _backend = backend ??
         AndroidHdrBackend(
           player: player!,
           outputSlot: _slot!,
+          controllerConfiguration: configuration,
           surfacePixelFormatOverride: _surfaceFormatOverride,
-          yuvWindowArm: _yuvWindowArm,
           onNativeDvOptionDiagnostic: onNativeDvOptionDiagnostic,
         );
+    _outputResources = outputResources ??
+        (_backend is AndroidHdrBackend
+            ? (_backend as AndroidHdrBackend).outputResources
+            : null);
+    _outputRequestPolicy = createHdrOutputRequestPolicy(configuration);
     _coordinator = HdrOpenCoordinator<HdrOpenRequest, HdrOpenPlan>(
       HdrSessionReviewBackend(
         delegate: _backend!,
@@ -302,7 +290,9 @@ class HdrVideoSession {
       // cleanup. The manager keys on the plan instance, so retries and
       // review reopens within one generation each end their own arm, and a
       // stale attempt's late cleanup cannot clear a successor's arm.
-      attemptCleanup: (plan) => _yuvWindowArm!.endAttempt(plan),
+      attemptCleanup: (plan) async {
+        await _outputResources?.endAttempt(plan);
+      },
     );
     AndroidVideoController.registerHdrCapabilitiesChangedListener(
       _onNativeCapabilitiesChanged,
@@ -376,7 +366,8 @@ class HdrVideoSession {
   HdrOutputSlot<VideoController>? _slot;
   HdrOpenBackend<HdrOpenPlan>? _backend;
   HdrOpenCoordinator<HdrOpenRequest, HdrOpenPlan>? _coordinator;
-  HdrYuvWindowArm? _yuvWindowArm;
+  HdrOutputResources<HdrOpenPlan>? _outputResources;
+  late HdrOutputRequestPolicy _outputRequestPolicy;
 
   int _serial = 0;
   int _transactionSerial = 0;
@@ -428,7 +419,6 @@ class HdrVideoSession {
   ///
   /// Returns normally when a newer [open] superseded this one. Other
   /// failures are published as an [HdrErrorEvent] and rethrown.
-  bool _lgExperimentOpenUsed = false;
 
   Future<void> open(
     Media media, {
@@ -462,13 +452,7 @@ class HdrVideoSession {
     bool play = true,
     Duration? start,
   }) async {
-    if (_configuration.android.lgExperimentOwnerToken != null) {
-      if (_lgExperimentOpenUsed) {
-        throw StateError('LG experiment Session permits one open attempt only');
-      }
-      _lgExperimentOpenUsed =
-          true; // Atomic before the first await; failure consumes it.
-    }
+    if (_isAndroid) _outputRequestPolicy.validateOpenRequest();
     final frozenOptions = resolveHdrRouteOptions(
         options: options ?? _configuredOptions,
         preference: _configuredOptions == null ? _legacyPreference : null);
@@ -811,7 +795,7 @@ class HdrVideoSession {
     if (failed.options?.failurePolicy == VideoRouteFailurePolicy.stop) {
       return null;
     }
-    if (error is HdrYuvWindowLeaseConflict) {
+    if (error is HdrOutputLeaseConflict) {
       // B1: another session owns the process-global vendor atomics (an
       // active arm lease or retained cleanup debt). This open fails as a
       // whole — every candidate route would still initialize an output
@@ -846,7 +830,7 @@ class HdrVideoSession {
       if (!failed.route.dependencies.contains(error.dependency)) return null;
       reason = error.reason;
       excluded[error.dependency] = reason;
-    } else if (error is HdrYuvWindowArmFailure) {
+    } else if (error is HdrOutputPreparationFailure) {
       // Plan C: the YUV window arm failed this attempt (owner authorization,
       // vendor device gate or library/symbol availability). Exclude the
       // `surfacetexture` carrier so the catalog continues on the next
@@ -1425,10 +1409,7 @@ class HdrVideoSession {
 
   void _ensureConfigurationChangeAllowed() {
     if (_disposed) throw StateError('HdrVideoSession is disposed');
-    if (_configuration.android.lgExperimentOwnerToken != null) {
-      throw StateError(
-          'LG single-open experiment rejects configuration controls');
-    }
+    if (_isAndroid) _outputRequestPolicy.validateConfigurationChange();
   }
 
   Future<void> setPreference(HdrOutputPreference preference) async {
@@ -1460,11 +1441,7 @@ class HdrVideoSession {
     _emit(HdrCapabilityChangedEvent(_serial, capabilities));
     final pending = _pendingOpen;
     if (pending != null && pending.generation == _serial) {
-      if (_configuration.android.lgExperimentOwnerToken != null) {
-        throw StateError(
-          'LG single-open experiment rejects automatic replanning',
-        );
-      }
+      _outputRequestPolicy.validateConfigurationChange();
       // The latest immutable intent owns preparation and review. A previous
       // applied report may still describe another source or configuration.
       // Fresh capabilities must rebuild this intent, never that older report.
@@ -1494,11 +1471,7 @@ class HdrVideoSession {
     if (descriptor == null || actual == null || media == null) {
       return;
     }
-    if (_configuration.android.lgExperimentOwnerToken != null) {
-      throw StateError(
-        'LG single-open experiment rejects automatic replanning',
-      );
-    }
+    _outputRequestPolicy.validateConfigurationChange();
     final prediction = _plan(
       source: descriptor,
       capabilities: capabilities,
@@ -1735,7 +1708,7 @@ class HdrVideoSession {
     // Plan C terminal clear: the coordinator's dispose already re-ran the
     // last attempt's cleanup; this best-effort clear never throws (a failure
     // keeps the manager's debt flag and is logged there).
-    await _yuvWindowArm?.dispose();
+    await _outputResources?.dispose();
     _lastDisposeReport = const HdrDisposalReport(
         coordinatorError: null,
         playerError: null,
