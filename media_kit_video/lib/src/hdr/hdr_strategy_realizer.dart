@@ -357,6 +357,13 @@ class HdrStrategyRealizer {
     // mediacodec GPU import, so the convert route then decodes through
     // mediacodec-copy like the SDR routes.
     final HdrPqPresentation pqPresentation = capabilities.pqPresentation;
+    // An explicit negative declaration is not the legacy missing-field
+    // migration. Without a YUV alternative, the RGB fallback must itself
+    // be available; never manufacture a carrier for the C4 prediction.
+    if (!pqPresentation.rgbSurface && !pqPresentation.yuvWindow) {
+      return const HdrStrategyRealization.infeasible(
+          HdrDegradeReason.pqRgbPresentationUnavailable);
+    }
     final bool yuvWindowCarrier =
         pqPresentation.yuvWindow && !pqPresentation.rgbSurface;
     final String hwdec = yuvWindowCarrier
