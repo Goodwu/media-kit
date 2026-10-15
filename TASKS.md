@@ -6,6 +6,8 @@
 
 ## MK-ROUTING-20261011（CORE继任）
 
+- 2026-10-15 本地agent接续（交接锚点库 d5f30c7e / App 9b55f194b）：P0 三项 hdr_yuv_presentation_contract_test 失败已本地复现（与 CI run38731073045 一致：2×HdrOutputPreparationFailure yuvWindowArmUnavailable + 1×HdrOutputLeaseConflict 未初始化 ServicesBinding）并修复。根因=784df146 将默认 arm 管理器构造移入 AndroidHdrBackend 后，旧 `_exercise` 夹具（无注入、无声明 yuvWindow 通道、无 owner token）从"只测输出写入"越过到真实资源/平台边界。修法仅动测试夹具：经既有 `yuvWindowArm:` 构造 seam 注入同一真实 HdrYuvWindowArm + arm-integration 组既有 FakeArmAtoms 通道/原子替身，`_issuedPlan` 声明 accepted quad 蕴含的 YUV 窗口 PQ 通道（同 yuvPlan 形状）；准入/owner/lease 检查全部保持真实，生产默认资源管理器未关闭，零删用例/弱化/skip/binding 掩盖，断言零修改。本地验证：video analyze 0 + 890/890（CI 基线 884+3skip+3fail）、lab analyze 0 + 292/292、managed_output 4 OK、routing 工具 6+17+27 OK；修前/修后证据 /tmp/mk-p0-fix-evidence-20261015/。实施记录已追加 docs/plans/managed-yuv-implementation-20261015.md。仍开放：W1 通用受管 provider/Surface 协议（普通无 token YUV 冷开）、W3 App 八项 pin 更新到本提交、W4 native ELF 拒绝、W5 设备矩阵。
+
 - 用户最新优先级：DEVICE源码归并；CI跟进、新构建与其它开发暂停。本次两仓提交带`[skip ci]`；公共主PR不向正式base合并、不发布。
 - App PR3@9895e7dc的9代码/测试文件已按源字节归入，含DV003/DV005/DV006和debug applicationId变化；状态CODE_INTEGRATED_KNOWN_ISSUES_OPEN。HTTP/cache/track/localURL与亮度reset/事件/权限/lifecycle问题继续开放。
 - 库PR6@9a2c5768归入来源历史并完整归档原文；公共gather及跨轮拒绝断言保留，新增2兼容plan负例。FIRST-complete-only行为未启用，实际decoder序列和两个用户决策继续开放。

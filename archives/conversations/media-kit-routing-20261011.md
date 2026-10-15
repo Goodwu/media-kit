@@ -2,6 +2,10 @@
 
 ## Current State
 
+### 2026-10-15 本地 agent 接续：P0 修复
+
+本地（macOS arm64，Flutter 3.47.2）在 d5f30c7e 复现 CI run38731073045 的三项 hdr_yuv_presentation_contract_test 失败并完成夹具修复：`_harness` 经构造 seam 注入真实 HdrYuvWindowArm（FakeArmAtoms 替身）、`_issuedPlan` 声明 yuvWindow PQ 通道；断言与生产默认不变。修后 video 890/890、lab 292/292、managed_output 4、routing 工具全绿。详见 TASKS.md 2026-10-15 条与 docs/plans/managed-yuv-implementation-20261015.md 末节。后续：W1/W3/W4/W5 按交接顺序推进。
+
 CORE 按用户最新“先合 DEVICE、CI 等其它工作暂停”的指令完成本次源码归并。唯一公共集成分支仍为 `routing/MK-ROUTING-20261011`，公共主 PR 不向正式 base 合并、不发布。原 DEVICE 继续 native 原 PR 的配方修复与实机工作，没有新增 DEVICE 工作线。归并认领与显式处置见 [6128883314](https://github.com/Goodwu/media-kit/pull/4#issuecomment-6128883314)、[6128920010](https://github.com/Goodwu/media-kit/pull/4#issuecomment-6128920010)。
 
 ### 本次归并与来源

@@ -21,3 +21,34 @@ Keep the existing dynamic HDR10+/Vivid deferral, original branches/PRs and accep
 The first code change moves Session's direct arm construction into the Android backend. Session sees only HdrOutputResources and generic preparation/conflict failures; the existing legacy adapter implements that port. Explicit historical single-open configuration policy is isolated from ordinary orchestration. Existing arm/coordinator fake-native assertions remain; only the test injection parameter changes. Four source-boundary checks have local red/green evidence (two original boundary violations, four passing after); these are architecture checks, not ordinary YUV cold-open validation. Full Flutter suites must run on the actual published code.
 
 Still pending after this checkpoint: generic Android managed provider/Surface protocol, ordinary no-token positive initialization, rebuild/reuse/native bridge and App/native/device integration. The existing missing-owner refusal has NOT been removed. Session refactor must not be described as full L-A06/APP-L03 completion.
+
+## Implementation checkpoint: P0 contract-test fixture seams (2026-10-15, local agent)
+
+The d5f30c7e source run failed three cases in
+media_kit_video/test/hdr_yuv_presentation_contract_test.dart (reproduced
+locally and identical to CI run 38731073045: two
+HdrOutputPreparationFailure(yuvWindowArmUnavailable) and one
+HdrOutputLeaseConflict with an uninitialized ServicesBinding). Root cause:
+784df146 moved the default arm-manager construction into AndroidHdrBackend,
+so the old `_exercise` fixture (no injection, migration-default capability
+snapshot without a declared YUV-window channel, no owner token) crossed from
+"owned writes only" into the real resource/platform boundary.
+
+Fix (test-only, `test/hdr_yuv_presentation_contract_test.dart`): the
+issuance-group `_harness` now injects the SAME real `HdrYuvWindowArm`
+through the existing `yuvWindowArm:` constructor seam with the in-file
+`FakeArmAtoms` channel/FFI doubles already used by the passing
+arm-integration group, and `_exercise` uses `_issuedPlan`, which declares
+the YUV-window PQ presentation channel the accepted quad implies (the
+`yuvPlan` shape). Admission, ownership and lease checks stay live; the
+production default resource manager is untouched; no case was deleted,
+skipped or weakened; no binding initialization workaround.
+
+Local verification after the fix (Flutter 3.47.2, macOS arm64):
+media_kit_video analyze clean and `flutter test --no-pub --concurrency=1`
+890/890 passed (CI baseline 884 passed/3 skipped/3 failed; local all
+pass); media_kit_hdr_lab analyze clean and 292/292 passed;
+tool/managed_output 4 OK; routing tools 6+17+27 OK. Raw before/after
+evidence: /tmp/mk-p0-fix-evidence-20261015/. Still pending: generic
+managed provider/Surface protocol (W1), ordinary no-token YUV cold-open,
+W3 App re-pin to this commit, W4 native packaging, W5 device matrix.
