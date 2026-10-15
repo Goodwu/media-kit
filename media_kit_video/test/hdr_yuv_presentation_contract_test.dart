@@ -544,12 +544,21 @@ class _Harness {
   _Harness(this.player);
   final _FakePlayer player;
   late final AndroidHdrBackend backend;
+  late final FakeArmAtoms atoms;
   String? dataSpaceRequested;
 }
 
 _Harness _harness() {
   final player = _FakePlayer();
   final harness = _Harness(player);
+  // The backend constructor owns a real arm manager by default now. This
+  // contract pins the backend's owned writes, so the harness injects the
+  // same real manager through the constructor seam with the fake platform
+  // round trips (vendor channel + FFI atoms) the arm-integration group
+  // uses: admission, ownership and lease checks all stay live; only the
+  // platform boundary is a test double.
+  final atoms = FakeArmAtoms();
+  harness.atoms = atoms;
   harness.backend = AndroidHdrBackend(
     player: player,
     outputSlot: HdrOutputSlot<VideoController>(
@@ -559,6 +568,12 @@ _Harness _harness() {
       create: (contract) => _FakeOutput(),
       publish: (_) {},
       waitReady: (_) async {},
+    ),
+    yuvWindowArm: HdrYuvWindowArm(
+      ownerToken: 'owner-token',
+      ownerGeneration: () async => 5,
+      bindingsResolver: () => atoms.bindings(),
+      channel: atoms.channel,
     ),
     applyDataSpace: (_, transfer) async {
       harness.dataSpaceRequested = transfer;
@@ -570,10 +585,32 @@ _Harness _harness() {
   return harness;
 }
 
+/// The issuance group's plan declares the YUV-window PQ presentation
+/// channel the accepted quad implies (the arm-integration group's
+/// `yuvPlan` shape): an admissible route is the precondition for the owned
+/// writes pinned here, while the route WITHOUT the declaration still fails
+/// admission in the arm group's production-gap test.
+HdrOpenPlan _issuedPlan(HdrRoute route) => _plan(route).copyWith(
+      capabilities: HdrCapabilities(
+        sdkInt: 24,
+        displayHdrTypes: const {2, 3},
+        hevcDecoders: const [],
+        dolbyVisionDecoders: const [],
+        p5PipelineAvailable: true,
+        dataSpaceBridgeLoaded: true,
+        dataSpaceExt: const HdrDataSpaceExtInfo(
+          id: 'lg-pq',
+          applicable: true,
+          pqPresentation:
+              HdrPqPresentation(rgbSurface: false, yuvWindow: true),
+        ),
+      ),
+    );
+
 Future<_Harness> _exercise(HdrRoute route) async {
   final result = _harness();
-  await result.backend.prepareOutput(_plan(route));
-  await result.backend.configure(_plan(route));
+  await result.backend.prepareOutput(_issuedPlan(route));
+  await result.backend.configure(_issuedPlan(route));
   return result;
 }
 
