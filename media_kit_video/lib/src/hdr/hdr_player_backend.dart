@@ -18,6 +18,7 @@ import 'hdr_native_dv_review.dart';
 import 'hdr_native_dv_review_evidence.dart';
 import 'hdr_yuv_presentation_contract.dart';
 import 'hdr_yuv_window_arm.dart';
+import 'hdr_output_resources.dart';
 
 /// Android execution backend for `HdrVideoSession` (ported from hdr_lab's
 /// `AndroidHdrPlayerBackend` with the sample identity removed): writes mpv
@@ -41,7 +42,9 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
     required this.player,
     required this.outputSlot,
     this.surfacePixelFormatOverride = 'rgba1010102',
-    this.yuvWindowArm,
+    HdrYuvWindowArm? yuvWindowArm,
+    VideoControllerConfiguration controllerConfiguration =
+        const VideoControllerConfiguration(),
     void Function(HdrNativeDvOptionDiagnostic)? onNativeDvOptionDiagnostic,
     Future<Map<String, Object?>?> Function(int handle, String transfer)?
         applyDataSpace,
@@ -51,6 +54,16 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
                   handle: handle,
                   transfer: transfer,
                 )) {
+    this.yuvWindowArm = yuvWindowArm ?? HdrYuvWindowArm(
+      ownerToken: controllerConfiguration.android.lgExperimentOwnerToken,
+      ownerGeneration: () async {
+        final current = outputSlot.current;
+        if (current == null || !current.platform.isCompleted) return null;
+        final output = await current.platform.future;
+        final generation = output.nativeSurfaceGeneration;
+        return generation > 0 ? generation : null;
+      },
+    );
     _nativeDvOptions = HdrNativeDvOptionOwner(
       readProperty: player.getProperty,
       setPropertyStrict: player.setPropertyStrict,
@@ -70,7 +83,9 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
 
   /// Route-scoped YUV window presentation arms (plan C). Null keeps the
   /// backend's behavior unchanged (no arm, no admission change).
-  final HdrYuvWindowArm? yuvWindowArm;
+  late final HdrYuvWindowArm? yuvWindowArm;
+
+  HdrOutputResources<HdrOpenPlan>? get outputResources => yuvWindowArm;
 
   final Future<Map<String, Object?>?> Function(int handle, String transfer)
       _applyDataSpace;

@@ -174,7 +174,7 @@ void main() {
       positionProvider: () => position,
       isAndroid: true,
       backend: backend,
-      yuvWindowArm: yuvWindowArm,
+      outputResources: yuvWindowArm,
     );
   }
 
