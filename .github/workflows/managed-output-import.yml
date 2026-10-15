@@ -1,0 +1,58 @@
+name: Publish reviewed backend resource boundary
+on:
+  push:
+    branches: [routing/MK-ROUTING-20261011]
+    paths: [.github/workflows/managed-output-import.yml]
+permissions:
+  contents: write
+jobs:
+  import:
+    if: github.repository == 'Goodwu/media-kit'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+      - name: Apply exact source transformation and verify every reviewed blob
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = 5551da103ae565880c3d8b1fcb5b28b7f470b0fa
+          test "$(git diff --name-only HEAD^ HEAD)" = .github/workflows/managed-output-import.yml
+          test "$(git ls-remote origin "$GITHUB_REF" | awk '{print $1}')" = "$GITHUB_SHA"
+          mkdir -p "$RUNNER_TEMP/import-evidence"
+          gh api repos/Goodwu/media-kit/git/blobs/d25fd94cc6085053950bd0fe6a78c5ee2f6e190b > "$RUNNER_TEMP/import-evidence/transform-blob.json"
+          python3 - <<'PY'
+          import base64, hashlib, json, os, pathlib
+          root=pathlib.Path(os.environ['RUNNER_TEMP'])/'import-evidence'
+          obj=json.loads((root/'transform-blob.json').read_text())
+          assert obj['sha']=='d25fd94cc6085053950bd0fe6a78c5ee2f6e190b'
+          source=base64.b64decode(obj['content'])
+          assert hashlib.sha256(source).hexdigest()=='8040e6c11ce055a04f09ef68674848893a5a94ff305a64c341db814a6ba1851b'
+          (root/'transform.py').write_bytes(source)
+          PY
+          python3 "$RUNNER_TEMP/import-evidence/transform.py"
+          git add media_kit_video/lib/src/hdr media_kit_video/test/hdr_video_session_test.dart tool/managed_output docs/plans/managed-yuv-implementation-20261015.md
+          git diff --cached --check
+          python3 -m unittest discover -s tool/managed_output -v 2>&1 | tee "$RUNNER_TEMP/import-evidence/host.log"
+          git diff --cached --name-only > "$RUNNER_TEMP/import-evidence/paths.txt"
+          if grep -Ev '^(media_kit_video/|tool/managed_output/|docs/plans/managed-yuv-implementation-20261015.md$)' "$RUNNER_TEMP/import-evidence/paths.txt"; then exit 1; fi
+          test "$(wc -l < "$RUNNER_TEMP/import-evidence/paths.txt")" -eq 9
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'refactor(hdr): keep output resources behind the backend lifecycle boundary'
+          test "$(git ls-remote origin "$GITHUB_REF" | awk '{print $1}')" = "$GITHUB_SHA"
+          git push origin "HEAD:$GITHUB_REF"
+          git rev-parse HEAD 'HEAD^{tree}' > "$RUNNER_TEMP/import-evidence/source.txt"
+          git show --format=fuller --stat HEAD > "$RUNNER_TEMP/import-evidence/commit.txt"
+          printf 'scope=source-publication-and-host-boundaries\nflutterVerified=false\nnativeVerified=false\ndeviceVerified=false\n' > "$RUNNER_TEMP/import-evidence/scope.txt"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: managed-output-import-${{ github.sha }}
+          path: ${{ runner.temp }}/import-evidence
+          if-no-files-found: error
