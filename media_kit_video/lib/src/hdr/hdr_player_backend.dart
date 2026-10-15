@@ -17,6 +17,7 @@ import 'hdr_native_dv_option_owner.dart';
 import 'hdr_native_dv_review.dart';
 import 'hdr_native_dv_review_evidence.dart';
 import 'hdr_yuv_presentation_contract.dart';
+import 'hdr_yuv_window_arm.dart';
 
 /// Android execution backend for `HdrVideoSession` (ported from hdr_lab's
 /// `AndroidHdrPlayerBackend` with the sample identity removed): writes mpv
@@ -40,6 +41,7 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
     required this.player,
     required this.outputSlot,
     this.surfacePixelFormatOverride = 'rgba1010102',
+    this.yuvWindowArm,
     void Function(HdrNativeDvOptionDiagnostic)? onNativeDvOptionDiagnostic,
     Future<Map<String, Object?>?> Function(int handle, String transfer)?
         applyDataSpace,
@@ -65,6 +67,10 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
   final Player player;
   final HdrOutputSlot<VideoController> outputSlot;
   final String surfacePixelFormatOverride;
+
+  /// Route-scoped YUV window presentation arms (plan C). Null keeps the
+  /// backend's behavior unchanged (no arm, no admission change).
+  final HdrYuvWindowArm? yuvWindowArm;
 
   final Future<Map<String, Object?>?> Function(int handle, String transfer)
       _applyDataSpace;
@@ -117,6 +123,11 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
     // the whole accepted presentation quad, before any owned property write
     // or output creation runs (fail-closed).
     HdrYuvPresentationContract.validate(route);
+    // Plan C production-gap surfacing: a YUV window route the arm manager
+    // cannot admit (no valid owner, capability or vendor device gate) fails
+    // here — the earliest open phase — instead of surfacing only as a late
+    // soft-decode mismatch at the review. Non-YUV routes never fail here.
+    yuvWindowArm?.assertRouteAdmission(plan);
     final hasPair = route.strategy == HdrStrategy.nativeDolbyVision ||
         route.vdLavcOptions != null ||
         route.mediacodecEmbedRenderMode != null;
@@ -538,12 +549,40 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
     // can construct that controller, or its initialization may overwrite the
     // value that resetOwnedConfiguration is meant to restore.
     await _setOwned('hwdec', contract.requestedHwdec);
-    await outputSlot.ensure(contract);
-    if (route.topology != HdrTopology.platformView && route.vo == 'gpu-next') {
-      final prepared = await outputSlot.current!.prepareAndroidTextureOutput();
-      debugPrint(prepared
-          ? 'HDR_TEXTURE_PREPARED layoutBound=true'
-          : 'HDR_TEXTURE_PREPARED fallback=surface_or_layout_unavailable');
+    // Plan C arm point + process admission (V2 B1 round 3): the guarded
+    // initialization admits at process level BEFORE the slot's ensure —
+    // hence before the previous output's retirement, so a rejected
+    // initializer performs no teardown at all — and the arm runs as the
+    // slot's internal preparation hook after that retirement and strictly
+    // before the new output's creation triggers VO initialization. The
+    // admission's protection spans the initialization's REAL tail: read
+    // admissions to the texture layout rebuild's completion below (the
+    // platformView topology's tail is the bind completion inside ensure —
+    // output binding is what triggers its VO initialization); the YUV write
+    // admission to the attempt's terminal cleanup.
+    final arm = yuvWindowArm;
+    Future<void> initialize() async {
+      await outputSlot.ensure(
+        contract,
+        internalPrepare: arm == null ? null : (_) => arm.armForAttempt(plan),
+      );
+      if (route.topology != HdrTopology.platformView &&
+          route.vo == 'gpu-next') {
+        // The TEXTURE topology's initialization tail: the layout-bound
+        // rebuild (SetSurfaceSize + VO re-apply) runs INSIDE the admission's
+        // protection interval — after the read release it would again race a
+        // concurrent YUV arm.
+        final prepared = await outputSlot.current!.prepareAndroidTextureOutput();
+        debugPrint(prepared
+            ? 'HDR_TEXTURE_PREPARED layoutBound=true'
+            : 'HDR_TEXTURE_PREPARED fallback=surface_or_layout_unavailable');
+      }
+    }
+
+    if (arm == null) {
+      await initialize();
+    } else {
+      await arm.initializeOutput(plan, initialize);
     }
   }
 
@@ -562,10 +601,8 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
     // offscreen contract issue nothing (default routing unchanged).
     if (HdrYuvPresentationContract.isYuvWindowRoute(route)) {
       HdrYuvPresentationContract.validate(route);
-      await _setOwned(
-          'video-output-levels',
-          HdrYuvPresentationContract.mpvOutputLevels(
-              route.offscreenTransfer!));
+      await _setOwned('video-output-levels',
+          HdrYuvPresentationContract.mpvOutputLevels(route.offscreenTransfer!));
     }
     if (route.topology == HdrTopology.platformView) {
       final output = await outputSlot.current!.platform.future;

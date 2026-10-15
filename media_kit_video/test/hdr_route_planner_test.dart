@@ -1609,4 +1609,108 @@ void main() {
       });
     });
   });
+
+  group('W1 PQ presentation channels (lg-p84 yuv window reopen)', () {
+    // LG-class snapshot: API 24, DV+HDR10 panel (no HLG), applicable lg-pq
+    // extension declaring the YUV window as the only PQ presentation
+    // channel. The extension id itself is inert data; routing consumes the
+    // declared channel structure only.
+    HdrCapabilities lgYuvCaps() => caps(
+          sdkInt: 24,
+          displayHdrTypes: const <int>{1, 2},
+          ext: const HdrDataSpaceExtInfo(
+            id: 'lg-pq',
+            applicable: true,
+            pqPresentation:
+                HdrPqPresentation(rgbSurface: false, yuvWindow: true),
+          ),
+        );
+
+    test(
+        'dvP84 on the LG-class device: C2 refused on the presentation ground, '
+        'C4 feasible through the YUV carrier, playable predicted true', () {
+      final HdrRoutePrediction prediction =
+          lgYuvCaps().predict(sources[HdrSourceClass.dvP84]!);
+
+      // C1 native: the census has no video/dolby-vision decoder.
+      final HdrCandidate native = prediction.candidates.firstWhere(
+          (HdrCandidate c) => c.strategy == HdrStrategy.nativeDolbyVision);
+      expect(native.skipReason, HdrDegradeReason.nativeDvUnavailable);
+
+      // C2 reshape: structurally hard-bound to the RGB window surface this
+      // device does not declare.
+      final HdrCandidate reshape = prediction.candidates.firstWhere(
+          (HdrCandidate c) => c.strategy == HdrStrategy.metadataReshape);
+      expect(reshape.feasible, isFalse);
+      expect(reshape.skipReason, HdrDegradeReason.pqRgbPresentationUnavailable);
+
+      // C1 baseline direct: the panel declares no HLG transfer.
+      final HdrCandidate direct = prediction.candidates.firstWhere(
+          (HdrCandidate c) => c.strategy == HdrStrategy.baseLayerDirect);
+      expect(direct.skipReason, HdrDegradeReason.displayLacksTransfer);
+
+      // C4 conversion: feasible through the declared YUV carrier, carrying
+      // the fail-closed window contract.
+      final HdrCandidate convert = prediction.candidates.firstWhere(
+          (HdrCandidate c) => c.strategy == HdrStrategy.baseLayerConvert);
+      expect(convert.feasible, isTrue);
+      expect(convert.route!.hwdec, 'surfacetexture');
+      expect(convert.route!.surfaceTransfer, 'pq');
+      expect(convert.route!.offscreenTransfer, 'pq-full');
+      expect(convert.route!.dependencies,
+          contains(HdrRouteDependency.hwdecSurfaceTexture));
+
+      expect(prediction.selected.strategy, HdrStrategy.baseLayerConvert);
+      expect(prediction.selected.stage, HdrRouteStage.c4);
+      expect(prediction.playable, isTrue);
+    });
+
+    test(
+        'dvP84 on the migration-default shape plans exactly as before '
+        '(applicable extension without the structure report)', () {
+      // The legacy adapter report resolves to {rgbSurface: true,
+      // yuvWindow: false}: C2 stays feasible with the mediacodec carrier and
+      // C4 keeps the platform baseline carrier — bit-identical to the
+      // pre-W1 LYA-shaped plans.
+      final HdrRoutePrediction prediction = caps(
+        sdkInt: 29,
+        displayHdrTypes: const <int>{2, 3},
+        ext: extApplicable,
+      ).predict(sources[HdrSourceClass.dvP84]!);
+      expect(prediction.selected.strategy, HdrStrategy.metadataReshape);
+      expect(prediction.selected.stage, HdrRouteStage.c2);
+      expect(prediction.selected.route!.hwdec, 'mediacodec');
+      expect(prediction.playable, isTrue);
+      final HdrCandidate convert = prediction.candidates.firstWhere(
+          (HdrCandidate c) => c.strategy == HdrStrategy.baseLayerConvert);
+      expect(convert.feasible, isTrue);
+      expect(convert.route!.hwdec, 'mediacodec');
+      expect(convert.route!.offscreenTransfer, isNull);
+    });
+
+    test('hdr10 and P5 planning do not regress on the LG-class device', () {
+      // hdr10: the C1 mediacodec_embed direct output declares no window
+      // channel and stays the selected playable route.
+      final HdrRoutePrediction hdr10 =
+          lgYuvCaps().predict(sources[HdrSourceClass.hdr10]!);
+      expect(hdr10.selected.strategy, HdrStrategy.baseLayerDirect);
+      expect(hdr10.selected.feasible, isTrue);
+      expect(hdr10.selected.route!.hwdec, 'mediacodec');
+      expect(hdr10.playable, isTrue);
+
+      // P5: no native DV decoder, C2 needs the RGB window this device does
+      // not declare, and the tone-map row stays gated by the HDR-display
+      // rule (MK-ROUTING-20261011) — the plan records the reasons and
+      // blocks instead of a hidden SDR exit.
+      final HdrRoutePrediction p5 =
+          lgYuvCaps().predict(sources[HdrSourceClass.dvP5]!);
+      final HdrCandidate reshape = p5.candidates.firstWhere(
+          (HdrCandidate c) => c.strategy == HdrStrategy.metadataReshape);
+      expect(reshape.skipReason, HdrDegradeReason.pqRgbPresentationUnavailable);
+      final HdrCandidate toneMap = p5.candidates.firstWhere(
+          (HdrCandidate c) => c.strategy == HdrStrategy.toneMapSdr);
+      expect(toneMap.skipReason, HdrDegradeReason.displayLacksTransfer);
+      expect(p5.playable, isFalse);
+    });
+  });
 }

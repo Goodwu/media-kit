@@ -13,11 +13,52 @@ import 'hdr_source_descriptor.dart';
 /// Asynchronous libmpv property lookup, e.g. through `Player.getProperty`.
 typedef HdrPropertyReader = Future<String> Function(String property);
 
+/// Declarative PQ presentation-channel report of a vendor dataspace
+/// extension (plan W1): whether this device can present PQ through the RGB
+/// `rgb10_a2` window surface ([rgbSurface], hard-bound to the C2 reshape and
+/// the C4 baseline carrier) and/or through the vendor YUV window
+/// ([yuvWindow], the alternative C4 carrier). This is a self-report, not a
+/// probe result; a device list never lives in routing code.
+class HdrPqPresentation {
+  const HdrPqPresentation({
+    required this.rgbSurface,
+    required this.yuvWindow,
+  });
+
+  /// PQ through the RGB `rgb10_a2` window surface.
+  final bool rgbSurface;
+
+  /// PQ through the vendor YUV window carrier.
+  final bool yuvWindow;
+
+  /// Parses the extension report map. Null when the adapter did not report
+  /// the structure (legacy adapters) or reported it malformed — never a
+  /// default; resolution then falls to the migration/platform defaults.
+  static HdrPqPresentation? fromMap(Object? raw) {
+    if (raw is! Map) return null;
+    final Object? rgbSurface = raw['rgbSurface'];
+    final Object? yuvWindow = raw['yuvWindow'];
+    if (rgbSurface is! bool || yuvWindow is! bool) return null;
+    return HdrPqPresentation(
+      rgbSurface: rgbSurface,
+      yuvWindow: yuvWindow,
+    );
+  }
+
+  @override
+  String toString() =>
+      'HdrPqPresentation(rgbSurface: $rgbSurface, yuvWindow: $yuvWindow)';
+}
+
 /// Identifier and device applicability of the natively registered dataspace
 /// extension (see `PlatformVideoView.SurfaceDataSpaceExt`). Null on the
 /// capability snapshot means no extension is registered in this process.
 class HdrDataSpaceExtInfo {
-  const HdrDataSpaceExtInfo({required this.id, required this.applicable});
+  const HdrDataSpaceExtInfo({
+    required this.id,
+    required this.applicable,
+    this.pqPresentation,
+  });
 
   final String id;
 
@@ -25,16 +66,27 @@ class HdrDataSpaceExtInfo {
   /// check (never by probing a private ABI).
   final bool applicable;
 
+  /// The extension's declared PQ presentation channels, or null when a
+  /// legacy adapter reports applicability without the structure (the
+  /// snapshot resolution then applies the migration default).
+  final HdrPqPresentation? pqPresentation;
+
   static HdrDataSpaceExtInfo? fromMap(Object? raw) {
     if (raw is! Map) return null;
     final Object? id = raw['id'];
     final Object? applicable = raw['isApplicable'];
     if (id is! String || id.isEmpty) return null;
-    return HdrDataSpaceExtInfo(id: id, applicable: applicable == true);
+    return HdrDataSpaceExtInfo(
+      id: id,
+      applicable: applicable == true,
+      pqPresentation: HdrPqPresentation.fromMap(raw['pqPresentation']),
+    );
   }
 
   @override
-  String toString() => 'HdrDataSpaceExtInfo(id: $id, applicable: $applicable)';
+  String toString() =>
+      'HdrDataSpaceExtInfo(id: $id, applicable: $applicable, '
+      'pqPresentation: $pqPresentation)';
 }
 
 /// One platform decoder entry (HEVC or Dolby Vision) from `MediaCodecList`.
@@ -174,6 +226,31 @@ class HdrCapabilities {
 
   /// The registered dataspace extension, or null when none is registered.
   final HdrDataSpaceExtInfo? dataSpaceExt;
+
+  /// Resolved PQ presentation channels (plan W1), in priority order:
+  ///
+  /// 1. The extension's self-report — a vendor report wins over every
+  ///    default (an API>=28 device whose adapter reports `rgbSurface=false`
+  ///    is yuv-only all the same).
+  /// 2. Migration default: an applicable extension that did not report the
+  ///    structure resolves to `{rgbSurface: true, yuvWindow: false}` —
+  ///    bit-identical to every pre-W1 behavior.
+  /// 3. Platform default: no (or not-applicable) extension resolves by the
+  ///    public Android dataspace framework fact — `rgbSurface` from API 28,
+  ///    neither channel below it.
+  HdrPqPresentation get pqPresentation {
+    final HdrDataSpaceExtInfo? ext = dataSpaceExt;
+    if (ext != null) {
+      final HdrPqPresentation? reported = ext.pqPresentation;
+      if (reported != null) return reported;
+      if (ext.applicable) {
+        return const HdrPqPresentation(rgbSurface: true, yuvWindow: false);
+      }
+    }
+    return sdkInt >= 28
+        ? const HdrPqPresentation(rgbSurface: true, yuvWindow: false)
+        : const HdrPqPresentation(rgbSurface: false, yuvWindow: false);
+  }
 
   /// Predicts how [source] would play on this device, before any media is
   /// opened (R1.2): the selected candidate, the full candidate list with

@@ -255,19 +255,6 @@ class MainActivity : FlutterActivity() {
                             call.argument<Boolean>("acceptNonConformant") == true)
                     if (enabled) result.success(true)
                     else result.error("VISUAL278_EXPERIMENT_REFUSED", "Strict LG experiment prerequisites missing", null)
-                } else if (call.method == "EnableYuvDiag") {
-                    // Owner-bound YUV diag arm: the vendor extension checks
-                    // the owner ledger (pending + registered surface) before
-                    // the native bind; refusal is reported, never swallowed.
-                    val gen = call.argument<Number>("generation")?.toInt() ?: 0
-                    val enabled = !BuildConfig.HDR_LAB_UNREGISTER_VENDOR_EXT &&
-                        lg?.enableYuvDiag(token, gen) == true
-                    if (enabled) result.success(true)
-                    else result.error("YUV_DIAG_ARM_REFUSED",
-                        "Owner-bound YUV diag arm refused (device gate, owner ledger or library)", null)
-                } else if (call.method == "DisableYuvDiag") {
-                    lg?.disableYuvDiag()
-                    result.success(true)
                 } else result.notImplemented()
             }
         CapabilitiesChannel.register(this, flutterEngine)

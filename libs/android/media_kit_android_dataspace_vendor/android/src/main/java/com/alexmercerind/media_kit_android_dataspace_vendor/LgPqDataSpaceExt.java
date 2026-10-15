@@ -5,6 +5,7 @@ import android.util.Log;
 import android.view.Surface;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.alexmercerind.media_kit_video.platformview.MediaCodecSurfaceTextureBridge;
 import com.alexmercerind.media_kit_video.platformview.PlatformVideoView;
@@ -167,17 +168,27 @@ public final class LgPqDataSpaceExt implements PlatformVideoView.SurfaceDataSpac
                 && generation > 0;
     }
 
-    public synchronized void disableYuvDiag() {
-        // Defensive: if the native library was never loaded there is no
-        // atomic to reset; swallow the link error instead of throwing from a
-        // teardown path. Routes through the disarm entry so the owner
-        // binding is cleared together with the flag.
+    /**
+     * Disarms the YUV diag pair through the native disarm entry (flag,
+     * format record and owner binding together).
+     *
+     * <p>B5 (V2 review): returns the REAL outcome instead of a void
+     * best-effort wrapped into a success ACK by the caller — {@code false}
+     * when the library is unavailable or the native call threw. The Dart
+     * manager treats this ACK as advisory (its FFI disarm is the
+     * authoritative barrier), but an honest reply keeps every other
+     * consumer from mistaking a skipped disarm for a completed one.</p>
+     */
+    public synchronized boolean disableYuvDiag() {
         try {
-            if (ensureLibraryLoaded()) {
-                nativeDisarmYuvDiag();
+            if (!ensureLibraryLoaded()) {
+                return false;
             }
+            nativeDisarmYuvDiag();
+            return true;
         } catch (Throwable error) {
-            Log.w(TAG, "YUV diag disarm skipped (library unavailable)", error);
+            Log.w(TAG, "YUV diag disarm failed", error);
+            return false;
         }
     }
 
@@ -272,6 +283,25 @@ public final class LgPqDataSpaceExt implements PlatformVideoView.SurfaceDataSpac
     @NonNull
     public String id() {
         return EXT_ID;
+    }
+
+    /**
+     * PQ presentation self-report (plan W1): the declared form of the
+     * on-device accepted fact on the LG-H870DS — the RGB GLES chain has no
+     * HDR presentation path, so PQ presentation goes exclusively through
+     * the YUV config49 HWC window.
+     */
+    @Override
+    @Nullable
+    public Boolean pqPresentationRgbSurface() {
+        return false;
+    }
+
+    /** YUV config49 HWC window: the only PQ presentation carrier (see above). */
+    @Override
+    @Nullable
+    public Boolean pqPresentationYuvWindow() {
+        return true;
     }
 
     static final String FINGERPRINT =

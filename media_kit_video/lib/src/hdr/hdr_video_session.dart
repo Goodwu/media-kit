@@ -39,6 +39,7 @@ import 'hdr_source_descriptor.dart';
 import 'hdr_source_intent.dart';
 import 'hdr_session_native_dv_policy.dart';
 import 'hdr_strategy.dart';
+import 'hdr_yuv_window_arm.dart';
 
 typedef HdrSessionRoutePlanner = HdrRoutePrediction Function({
   required HdrSourceDescriptor source,
@@ -129,6 +130,7 @@ class HdrVideoSession {
     void Function(HdrBackendCallDiagnostic<HdrOpenPlan>)?
         onBackendCallDiagnostic,
     void Function(HdrNativeDvOptionDiagnostic)? onNativeDvOptionDiagnostic,
+    HdrYuvWindowArm? yuvWindowArm,
   }) : this._(
           player: player,
           preference: preference,
@@ -153,6 +155,7 @@ class HdrVideoSession {
           onNativeDvConsumerCaptureError: onNativeDvConsumerCaptureError,
           onBackendCallDiagnostic: onBackendCallDiagnostic,
           onNativeDvOptionDiagnostic: onNativeDvOptionDiagnostic,
+          yuvWindowArm: yuvWindowArm,
         );
 
   HdrVideoSession._({
@@ -181,6 +184,7 @@ class HdrVideoSession {
     void Function(HdrBackendCallDiagnostic<HdrOpenPlan>)?
         onBackendCallDiagnostic,
     void Function(HdrNativeDvOptionDiagnostic)? onNativeDvOptionDiagnostic,
+    HdrYuvWindowArm? yuvWindowArm,
   }) {
     _disposeOutputForTesting = disposeOutputForTesting;
     _disposeBackendForTesting = disposeBackendForTesting;
@@ -240,11 +244,31 @@ class HdrVideoSession {
         );
       },
     );
+    // Plan C: the session owns the route-scoped YUV window presentation arm
+    // manager. The owner token comes from the experiment configuration; the
+    // owner generation is observed non-constructively from the published
+    // output only (never by creating a wrapper). Ordinary production
+    // construction has no token — its YUV routes then fail admission
+    // explicitly (automatic owner lifecycle is a separate deliverable).
+    _yuvWindowArm = yuvWindowArm ??
+        HdrYuvWindowArm(
+          ownerToken: configuration.android.lgExperimentOwnerToken,
+          ownerGeneration: () async {
+            final controller = _slot?.current;
+            if (controller == null || !controller.platform.isCompleted) {
+              return null;
+            }
+            final platform = await controller.platform.future;
+            final generation = platform.nativeSurfaceGeneration;
+            return generation > 0 ? generation : null;
+          },
+        );
     _backend = backend ??
         AndroidHdrBackend(
           player: player!,
           outputSlot: _slot!,
           surfacePixelFormatOverride: _surfaceFormatOverride,
+          yuvWindowArm: _yuvWindowArm,
           onNativeDvOptionDiagnostic: onNativeDvOptionDiagnostic,
         );
     _coordinator = HdrOpenCoordinator<HdrOpenRequest, HdrOpenPlan>(
@@ -274,6 +298,11 @@ class HdrVideoSession {
       onBackendCallDiagnostic: onBackendCallDiagnostic,
       diagnosticSessionGeneration:
           onBackendCallDiagnostic == null ? null : _generationOf,
+      // Plan C disarm point: every execution attempt's awaited terminal
+      // cleanup. The manager keys on the plan instance, so retries and
+      // review reopens within one generation each end their own arm, and a
+      // stale attempt's late cleanup cannot clear a successor's arm.
+      attemptCleanup: (plan) => _yuvWindowArm!.endAttempt(plan),
     );
     AndroidVideoController.registerHdrCapabilitiesChangedListener(
       _onNativeCapabilitiesChanged,
@@ -347,6 +376,7 @@ class HdrVideoSession {
   HdrOutputSlot<VideoController>? _slot;
   HdrOpenBackend<HdrOpenPlan>? _backend;
   HdrOpenCoordinator<HdrOpenRequest, HdrOpenPlan>? _coordinator;
+  HdrYuvWindowArm? _yuvWindowArm;
 
   int _serial = 0;
   int _transactionSerial = 0;
@@ -781,6 +811,14 @@ class HdrVideoSession {
     if (failed.options?.failurePolicy == VideoRouteFailurePolicy.stop) {
       return null;
     }
+    if (error is HdrYuvWindowLeaseConflict) {
+      // B1: another session owns the process-global vendor atomics (an
+      // active arm lease or retained cleanup debt). This open fails as a
+      // whole — every candidate route would still initialize an output
+      // over atomics this session does not own, so failure-driven
+      // replanning must not degrade across the conflict.
+      return null;
+    }
     if (error is HdrPlaybackBlocked ||
         error is HdrDecoderReviewFailure ||
         nativeDvFailureMustAbort(error)) {
@@ -808,6 +846,17 @@ class HdrVideoSession {
       if (!failed.route.dependencies.contains(error.dependency)) return null;
       reason = error.reason;
       excluded[error.dependency] = reason;
+    } else if (error is HdrYuvWindowArmFailure) {
+      // Plan C: the YUV window arm failed this attempt (owner authorization,
+      // vendor device gate or library/symbol availability). Exclude the
+      // `surfacetexture` carrier so the catalog continues on the next
+      // feasible candidate with the explicit reason recorded.
+      if (!failed.route.dependencies
+          .contains(HdrRouteDependency.hwdecSurfaceTexture)) {
+        return null;
+      }
+      reason = error.reason;
+      excluded[HdrRouteDependency.hwdecSurfaceTexture] = reason;
     } else if (error is HdrDataSpaceApplyException) {
       reason = error.reason;
       excluded[failed.route.surfaceTransfer == 'hlg'
@@ -1683,6 +1732,10 @@ class HdrVideoSession {
           backendError: error);
       throw HdrSessionDisposalFailure(_lastDisposeReport!);
     }
+    // Plan C terminal clear: the coordinator's dispose already re-ran the
+    // last attempt's cleanup; this best-effort clear never throws (a failure
+    // keeps the manager's debt flag and is logged there).
+    await _yuvWindowArm?.dispose();
     _lastDisposeReport = const HdrDisposalReport(
         coordinatorError: null,
         playerError: null,

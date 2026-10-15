@@ -1,9 +1,16 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:media_kit/media_kit.dart' show Media;
+import 'package:media_kit_video/src/hdr/hdr_capabilities.dart';
+import 'package:media_kit_video/src/hdr/hdr_open_plan.dart';
 import 'package:media_kit_video/src/hdr/hdr_output_slot.dart';
 import 'package:media_kit_video/src/hdr/hdr_output_contract.dart';
 import 'package:media_kit_video/src/hdr/hdr_route.dart';
+import 'package:media_kit_video/src/hdr/hdr_source_descriptor.dart';
+import 'package:media_kit_video/src/hdr/hdr_strategy.dart';
+import 'package:media_kit_video/src/hdr/hdr_yuv_presentation_contract.dart';
+import 'package:media_kit_video/src/hdr/hdr_yuv_window_arm.dart';
 
 /// Existing lifecycle assertions plus complete request identity coverage.
 class Output {
@@ -12,6 +19,9 @@ class Output {
 }
 
 void main() {
+  // The process-level lease registry (B1) is static; isolate it per test.
+  setUp(HdrYuvWindowProcessRegistry.resetForTesting);
+
   test('first native output rebuilds even when its VO matches', () async {
     final old = Output('mediacodec_embed');
     final calls = <String>[];
@@ -387,6 +397,7 @@ void main() {
     expect(slot.current, isNot(same(failed)));
     expect(readyCalls, 2);
   });
+
   test('publication failure retires the created output and preserves its error',
       () async {
     final failure = StateError('publication failed');
@@ -459,6 +470,504 @@ void main() {
     expect(creations, 2);
     expect(readyCalls, 1);
   });
+
+  group('internal preparation hook', () {
+    test('replacement arms after the old disposal, strictly before create',
+        () async {
+      final calls = <String>[];
+      final slot = HdrOutputSlot<Output>(
+        initial: Output('mediacodec_embed'),
+        voOf: (output) async => output.vo,
+        disposeForRebuild: (_) async => calls.add('dispose'),
+        create: (contract) {
+          calls.add('create');
+          return Output(contract.vo);
+        },
+        publish: (output) => calls.add('publish:${output?.vo}'),
+        waitReady: (_) async => calls.add('ready'),
+      );
+      await slot.ensure(_contract('gpu-next', 'mediacodec'),
+          internalPrepare: (_) async => calls.add('prepare'));
+      expect(calls, [
+        'dispose',
+        'publish:null',
+        'prepare',
+        'create',
+        'publish:gpu-next',
+        'ready',
+      ]);
+    });
+
+    test('a delayed hook future blocks the new output initialization',
+        () async {
+      final gate = Completer<void>();
+      var created = false;
+      final slot = HdrOutputSlot<Output>(
+        initial: null,
+        voOf: (output) async => output.vo,
+        disposeForRebuild: (_) async {},
+        create: (contract) {
+          created = true;
+          return Output(contract.vo);
+        },
+        publish: (_) {},
+        waitReady: (_) async {},
+      );
+      final pending = slot.ensure(_contract('gpu-next', 'mediacodec'),
+          internalPrepare: (_) => gate.future);
+      for (var i = 0; i < 20; i++) {
+        await Future<void>.delayed(Duration.zero);
+      }
+      expect(created, isFalse,
+          reason: 'the arm ACK barrier must not leak through to creation');
+      gate.complete();
+      await pending;
+      expect(created, isTrue);
+    });
+
+    test('hook failure creates no new output and keeps the attempt failed',
+        () async {
+      final old = Output('mediacodec_embed');
+      var created = false;
+      final slot = HdrOutputSlot<Output>(
+        initial: old,
+        voOf: (output) async => output.vo,
+        disposeForRebuild: (_) async {},
+        create: (contract) {
+          created = true;
+          return Output(contract.vo);
+        },
+        publish: (_) {},
+        waitReady: (_) async {},
+      );
+      await expectLater(
+        slot.ensure(_contract('gpu-next', 'mediacodec'),
+            internalPrepare: (_) async => throw StateError('arm refused')),
+        throwsStateError,
+      );
+      expect(created, isFalse);
+      expect(slot.current, isNull);
+    });
+
+    test('reuse runs the hook before accepting the existing output', () async {
+      final calls = <String>[];
+      final contract = _contract('gpu-next', 'mediacodec',
+          outputFormat: 'rgb10_a2', surfaceTransfer: 'pq');
+      final slot = HdrOutputSlot<Output>(
+        initial: null,
+        initialContract: contract,
+        voOf: (output) async => output.vo,
+        disposeForRebuild: (_) async => calls.add('dispose'),
+        create: (contract) {
+          calls.add('create');
+          return Output(contract.vo);
+        },
+        publish: (output) => calls.add('publish:${output?.vo}'),
+        waitReady: (_) async => calls.add('ready'),
+      );
+      // Establish the output, then reuse it: the hook runs, then the reuse.
+      await slot.ensure(contract);
+      calls.clear();
+      await slot.ensure(contract,
+          internalPrepare: (_) async => calls.add('prepare'));
+      expect(calls, ['prepare', 'ready']);
+    });
+
+    test('reuse hook failure is not silently downgraded to a replacement',
+        () async {
+      var creations = 0;
+      final contract = _contract('gpu-next', 'mediacodec',
+          outputFormat: 'rgb10_a2', surfaceTransfer: 'pq');
+      final slot = HdrOutputSlot<Output>(
+        initial: null,
+        initialContract: contract,
+        voOf: (output) async => output.vo,
+        disposeForRebuild: (_) async {},
+        create: (contract) {
+          creations++;
+          return Output(contract.vo);
+        },
+        publish: (_) {},
+        waitReady: (_) async {},
+      );
+      await slot.ensure(contract);
+      creations = 0;
+      await expectLater(
+        slot.ensure(contract,
+            internalPrepare: (_) async => throw StateError('arm refused')),
+        throwsStateError,
+      );
+      expect(creations, 0, reason: 'a failed arm must not create a new output');
+    });
+
+    test('failed bind re-runs the hook once before the replacement create',
+        () async {
+      // The reuse segment's waitReady failure falls through to a
+      // replacement: the hook barrier runs again (same attempt contract,
+      // idempotent for its owner) before the create.
+      final calls = <String>[];
+      final contract = _contract('gpu-next', 'mediacodec',
+          outputFormat: 'rgb10_a2', surfaceTransfer: 'pq');
+      var failNextReady = false;
+      final slot = HdrOutputSlot<Output>(
+        initial: null,
+        initialContract: contract,
+        voOf: (output) async => output.vo,
+        disposeForRebuild: (_) async => calls.add('dispose'),
+        create: (contract) {
+          calls.add('create');
+          return Output(contract.vo);
+        },
+        publish: (output) => calls.add('publish:${output?.vo}'),
+        waitReady: (_) async {
+          if (failNextReady) {
+            failNextReady = false;
+            throw StateError('bind failed');
+          }
+        },
+      );
+      await slot.ensure(contract);
+      calls.clear();
+      failNextReady = true;
+      await slot.ensure(contract,
+          internalPrepare: (_) async => calls.add('prepare'));
+      expect(calls, [
+        'prepare',
+        'dispose',
+        'publish:null',
+        'prepare',
+        'create',
+        'publish:gpu-next',
+      ]);
+    });
+
+    test(
+        'a reuse failure retires the native pair and the replacement truly '
+        're-arms through the real manager (B3)', () async {
+      // Real HdrYuvWindowArm (not a hook stub): the second hook after the
+      // retirement must penetrate any arm cache and re-arm, because the
+      // retired output's owner termination already cleared the native YUV
+      // diag atom on the Java side.
+      final calls = <String>[];
+      final atoms = _SlotArmAtoms(calls);
+      final arm = HdrYuvWindowArm(
+        ownerToken: 'owner-token',
+        ownerGeneration: () async => null,
+        bindingsResolver: () => atoms.bindings(),
+        channel: atoms.channel,
+      );
+      final plan = _slotYuvPlan();
+      final contract = _contract('gpu-next', 'surfacetexture',
+          outputFormat: 'rgb10_a2', surfaceTransfer: 'pq-itu');
+      var failNextReady = false;
+      final slot = HdrOutputSlot<Output>(
+        initial: null,
+        initialContract: contract,
+        voOf: (output) async => output.vo,
+        // Simulates the Java owner-termination disarm the retirement runs.
+        disposeForRebuild: (_) async {
+          calls.add('dispose');
+          atoms.yuvDiagEnabled = 0;
+        },
+        create: (contract) {
+          calls.add('create');
+          return Output(contract.vo);
+        },
+        publish: (output) => calls.add('publish:${output?.vo}'),
+        waitReady: (_) async {
+          if (failNextReady) {
+            failNextReady = false;
+            throw StateError('bind failed');
+          }
+        },
+      );
+      // Establish the armed output.
+      await slot.ensure(contract,
+          internalPrepare: (_) => arm.armForAttempt(plan));
+      expect(atoms.yuvDiagEnabled, 1);
+      expect(atoms.diagDataSpace,
+          HdrYuvPresentationContract.windowDataSpace);
+      calls.clear();
+      // The reuse's readiness fails; the retirement clears the YUV atom
+      // (termination); the replacement's hook must re-arm it for real.
+      failNextReady = true;
+      await slot.ensure(contract,
+          internalPrepare: (_) => arm.armForAttempt(plan));
+      // Round 3: each hook first retires the previous arm's diag atom (the
+      // retire/re-arm cycle), then re-arms the pair. The retirement still
+      // happens strictly between the second hook's retire and its re-arm.
+      expect(calls, [
+        'disarm:diag',
+        'arm:diag',
+        'arm',
+        'dispose',
+        'publish:null',
+        'disarm:diag',
+        'arm:diag',
+        'arm',
+        'create',
+        'publish:gpu-next',
+      ]);
+      // The rebuilt output is authorized: the atoms describe a live arm for
+      // its attempt, not a retired one.
+      expect(atoms.yuvDiagEnabled, 1,
+          reason: 'the replacement create ran under a re-armed pair');
+      expect(atoms.diagDataSpace,
+          HdrYuvPresentationContract.windowDataSpace);
+      await arm.endAttempt(plan);
+      expect(atoms.yuvDiagEnabled, 0);
+      expect(atoms.diagDataSpace, 0);
+    });
+
+    test(
+        'a guarded replacement admits BEFORE the retirement and arms after '
+        'it (B1 round 3 ordering)', () async {
+      final calls = <String>[];
+      final atoms = _SlotArmAtoms(calls);
+      final arm = HdrYuvWindowArm(
+        ownerToken: 'owner-token',
+        ownerGeneration: () async => null,
+        bindingsResolver: () => atoms.bindings(),
+        channel: atoms.channel,
+      );
+      final plan = _slotYuvPlan();
+      final contract = _contract('gpu-next', 'surfacetexture',
+          outputFormat: 'rgb10_a2', surfaceTransfer: 'pq-itu');
+      final slot = HdrOutputSlot<Output>(
+        initial: Output('mediacodec_embed'),
+        voOf: (output) async => output.vo,
+        disposeForRebuild: (_) async => calls.add('dispose'),
+        create: (contract) {
+          calls.add('create');
+          return Output(contract.vo);
+        },
+        publish: (output) => calls.add('publish:${output?.vo}'),
+        waitReady: (_) async => calls.add('ready'),
+      );
+      await arm.initializeOutput(plan, () => slot.ensure(contract,
+              internalPrepare: (_) => arm.armForAttempt(plan)));
+      // The five time points in order: process admission, old-output
+      // retirement, the arm, the creation, the bind completion.
+      expect(calls, [
+        'admit:write',
+        'dispose',
+        'publish:null',
+        'arm:diag',
+        'arm',
+        'create',
+        'publish:gpu-next',
+        'ready',
+      ]);
+      // The write admission outlives the initialization (no EndOutputInitWrite
+      // yet) and is released by the terminal cleanup.
+      expect(calls, isNot(contains('release:write')));
+      expect(atoms.gate.writer, isTrue);
+      await arm.endAttempt(plan);
+      expect(atoms.gate.writer, isFalse);
+      expect(atoms.diagDataSpace, 0);
+    });
+
+    test(
+        'a foreign live legacy arm rejects the guarded initialization '
+        'before ANY teardown (zero side effects)', () async {
+      final calls = <String>[];
+      final holderAtoms = _SlotArmAtoms(calls);
+      final holder = HdrYuvWindowArm(
+        ownerToken: 'owner-a',
+        ownerGeneration: () async => null,
+        bindingsResolver: () => holderAtoms.bindings(),
+        channel: holderAtoms.channel,
+      );
+      final other = HdrYuvWindowArm(
+        ownerToken: 'owner-b',
+        ownerGeneration: () async => null,
+        bindingsResolver: () => holderAtoms.bindings(),
+        channel: holderAtoms.channel,
+      );
+      // The holder's live legacy arm (unbound, generation unavailable).
+      final heldPlan = _slotYuvPlan();
+      await holder.armForAttempt(heldPlan);
+      expect(holderAtoms.yuvDiagEnabled, 1);
+      final before = List.of(calls);
+      // Another session's guarded replacement: rejected at admission —
+      // BEFORE the retirement — so its old output is never disposed.
+      final contract = _contract('gpu-next', 'mediacodec',
+          outputFormat: 'rgb10_a2', surfaceTransfer: 'pq');
+      final slot = HdrOutputSlot<Output>(
+        initial: Output('mediacodec_embed'),
+        voOf: (output) async => output.vo,
+        disposeForRebuild: (_) async => calls.add('dispose'),
+        create: (contract) {
+          calls.add('create');
+          return Output(contract.vo);
+        },
+        publish: (output) => calls.add('publish:${output?.vo}'),
+        waitReady: (_) async => calls.add('ready'),
+      );
+      await expectLater(
+        other.initializeOutput(_slotYuvPlan(),
+            () => slot.ensure(contract, internalPrepare: (_) => other.armForAttempt(_slotYuvPlan()))),
+        throwsA(isA<HdrYuvWindowLeaseConflict>()),
+      );
+      expect(calls.skip(before.length), isEmpty,
+          reason: 'the rejected initializer performed no teardown at all');
+      expect(slot.current!.vo, 'mediacodec_embed',
+          reason: 'the old output is untouched');
+      expect(holderAtoms.yuvDiagEnabled, 1,
+          reason: 'the holder is unaffected');
+      expect(holderAtoms.diagDataSpace,
+          HdrYuvPresentationContract.windowDataSpace);
+      await holder.endAttempt(heldPlan);
+      expect(holderAtoms.yuvDiagEnabled, 0);
+    });
+  });
+}
+
+HdrOpenPlan _slotYuvPlan() {
+  const route = HdrRoute(
+    strategy: HdrStrategy.baseLayerConvert,
+    presentation: HdrPresentation.nativeHdr,
+    outputTransfer: HdrOutputTransfer.pq,
+    appliesDynamicMetadata: false,
+    topology: HdrTopology.platformView,
+    vo: 'gpu-next',
+    hwdec: 'surfacetexture',
+    targetPrim: 'bt.2020',
+    targetTrc: 'pq',
+    surfaceTransfer: 'pq-itu',
+    offscreenTransfer: 'pq-full',
+    stripDvRpu: false,
+  );
+  const source = HdrSourceDescriptor(
+    codec: 'hevc',
+    transfer: 'hlg',
+    primaries: 'bt.2020',
+    dynamicMetadata: HdrDynamicMetadata.dolbyVision,
+    dvProfile: 8,
+    dvCompatibilityId: 4,
+    enhancementLayer: false,
+  );
+  const candidate = HdrCandidate(
+    strategy: HdrStrategy.baseLayerConvert,
+    maturity: HdrStrategyMaturity.verified,
+    feasible: true,
+    route: route,
+  );
+  return HdrOpenPlan(
+    media: Media('test://source'),
+    source: source,
+    sourceOrigin: null,
+    capabilities: HdrCapabilities(
+      sdkInt: 24,
+      displayHdrTypes: {2},
+      hevcDecoders: [],
+      dolbyVisionDecoders: [],
+      p5PipelineAvailable: true,
+      dataSpaceBridgeLoaded: true,
+      dataSpaceExt: HdrDataSpaceExtInfo(
+        id: 'lg-pq',
+        applicable: true,
+        pqPresentation: HdrPqPresentation(rgbSurface: false, yuvWindow: true),
+      ),
+    ),
+    prediction: HdrRoutePrediction(
+      source: source,
+      selected: candidate,
+      candidates: [candidate],
+      presentation: HdrPresentation.nativeHdr,
+      confidence: HdrPredictionConfidence.verified,
+      playable: true,
+    ),
+    route: route,
+  );
+}
+
+/// Atoms fake for the real-manager slot test: records arm/disarm events into
+/// the shared timeline and simulates the native atomics plus the process
+/// admission gate (the host mirror of the Java statics).
+class _SlotArmAtoms {
+  _SlotArmAtoms(this.timeline);
+  final List<String> timeline;
+  int diagDataSpace = 0;
+  int yuvDiagEnabled = 0;
+
+  /// Host mirror of `ProcessOutputInitGate`.
+  final gate = _SlotInitGate();
+
+  HdrYuvWindowFfiBindings bindings() => HdrYuvWindowFfiBindings(
+        setDiagDataSpace: (value) {
+          diagDataSpace = value;
+          timeline.add(value == 0 ? 'disarm:diag' : 'arm:diag');
+        },
+        setYuvDiagEnabled: (value) {
+          yuvDiagEnabled = value;
+          if (value != 0) timeline.add('arm');
+        },
+        disarmYuvDiag: () => yuvDiagEnabled = 0,
+      );
+
+  Future<Object?> channel(String method, Map<String, Object?> arguments) async {
+    switch (method) {
+      case 'EnableYuvDiag':
+        yuvDiagEnabled = 1;
+        timeline.add('arm');
+        return true;
+      case 'DisableYuvDiag':
+        yuvDiagEnabled = 0;
+        return true;
+      case 'BeginOutputInitRead':
+        return gate.beginRead();
+      case 'EndOutputInitRead':
+        gate.endRead();
+        return true;
+      case 'BeginOutputInitWrite':
+        timeline.add('admit:write');
+        return gate.beginWrite(
+            arguments['ownerToken'] as Object,
+            (arguments['leaseId'] as int?) ?? 0);
+      case 'EndOutputInitWrite':
+        return gate.endWrite((arguments['leaseId'] as int?) ?? 0);
+      default:
+        return null;
+    }
+  }
+}
+
+class _SlotInitGate {
+  int readers = 0;
+  int _writerLease = 0;
+  Object? writerKey;
+  int _nextLease = 0;
+
+  bool beginRead() {
+    if (_writerLease != 0) return false;
+    readers++;
+    return true;
+  }
+
+  void endRead() {
+    if (readers > 0) readers--;
+  }
+
+  /// Lease-id identity (R3-4 mirror): a held lease rejects every other
+  /// acquire — the same token included; only the exact held lease retries.
+  int beginWrite(Object key, int retryLease) {
+    if (_writerLease != 0 || readers > 0) {
+      return retryLease != 0 && retryLease == _writerLease ? _writerLease : 0;
+    }
+    _writerLease = ++_nextLease;
+    writerKey = key;
+    return _writerLease;
+  }
+
+  bool endWrite(int lease) {
+    if (_writerLease == 0 || _writerLease != lease) return false;
+    _writerLease = 0;
+    writerKey = null;
+    return true;
+  }
+
+  bool get writer => _writerLease != 0;
 }
 
 HdrOutputContract _contract(String vo, String hwdec,
