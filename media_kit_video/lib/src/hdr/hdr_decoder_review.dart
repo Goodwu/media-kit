@@ -391,10 +391,20 @@ Future<HdrReviewFacts> gatherDecoderReviewFacts({
                   : a[key]!;
               final observed = observedDecoderEndpoints[key];
               if (observed != null && value != observed) {
-                // A supported publication SUPERSEDES the pre-attach label:
-                // the settled value becomes the registered identity. Any
-                // change that is not a supported publication still fails.
-                if (!published) {
+                // A supported publication SUPERSEDES the registered value:
+                // the settled side becomes the registered identity. Any
+                // change that is neither an in-pair publication nor the
+                // cross-round attach settlement still fails.
+                var attachSettlement = false;
+                if (key == 'current-tracks/video/decoder' &&
+                    value == '${observed}_mediacodec' &&
+                    a['android-mediacodec-info'] ==
+                        observedDecoderEndpoints['android-mediacodec-info'] &&
+                    (a['hwdec-current']!.startsWith('mediacodec') ||
+                        publishedKeys.contains('hwdec-current'))) {
+                  attachSettlement = true;
+                }
+                if (!published && !attachSettlement) {
                   throw HdrDecoderReviewFailure(
                       'Observed decoder changed: $key');
                 }

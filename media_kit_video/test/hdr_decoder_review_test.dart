@@ -340,6 +340,32 @@ void main() {
     expect(facts.decoderObservation!.decoder, 'hevc_mediacodec');
   });
 
+  test('cross-round attach settlement completes from the pre-attach label',
+      () async {
+    // Device shape (HDR review, marble 2026-10-16 second capture): early
+    // rounds register the un-suffixed label while hwdec-current is still
+    // unpublished; a later round observes the settled suffix together with
+    // the published hwdec mode and the SAME registered MediaCodec
+    // configuration — the attach publication observed across rounds.
+    final s = Sample();
+    s.props['hwdec-current'] = 'mediacodec-copy';
+    s.props['video-params/pixelformat'] = 'nv12';
+    s.props['video-params/gamma'] = 'bt.1886';
+    s.props['video-params/primaries'] = 'bt.709';
+    var decoderReads = 0;
+    s.onRead = (p) async {
+      if (p == 'current-tracks/video/decoder' && ++decoderReads <= 34) {
+        return 'hevc';
+      }
+      // No frame format is reported while the label is still pre-attach —
+      // that incompleteness is why the early rounds retry.
+      if (p == 'video-params/pixelformat' && decoderReads <= 34) return '';
+      return s.props[p] ?? '';
+    };
+    final facts = await s.gather(budget: const Duration(seconds: 3));
+    expect(facts.decoderObservation!.decoder, 'hevc_mediacodec');
+  });
+
   test('a complete snapshot that violates the plan is still rejected', () async {
     // This is complete in the first round: no decoder-publication transition
     // is claimed. The HEVC component conflicts with the AVC track.
