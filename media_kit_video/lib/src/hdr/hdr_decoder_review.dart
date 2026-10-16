@@ -322,19 +322,34 @@ Future<HdrReviewFacts> gatherDecoderReviewFacts({
     ///   configuration between the halves is not this shape and fails as a
     ///   decoder change. Component name equality is necessary, not an
     ///   instance proof — the residual same-name-instance risk is recorded
-    ///   and accepted by explicit adjudication, with any later drift of the
-    ///   registered settled identity still rejected by the guard.
-    bool supportedPublication(
+    ///   for separate adjudication, with any later drift of the registered
+    ///   settled identity still rejected by the guard.
+    String? supportedPublication(
         String key, Map<String, String> a, Map<String, String> b) {
-      if (a[key]!.isEmpty || b[key]!.isEmpty) return true;
+      final registered = observedDecoderEndpoints[key];
+      final av = a[key]!;
+      final bv = b[key]!;
+      // First publication: no registered value yet, direction empty →
+      // value. A registered value followed by an empty half is a
+      // disappearing observation (teardown/reinit) and fails closed; it
+      // can never re-authorize or swap a baseline (V2 second review R1).
+      if (registered == null && av.isEmpty && bv.isNotEmpty) {
+        return bv;
+      }
+      // In-pair hw-attach label publication: the registered label X with
+      // one half still X and the other already X_mediamediacodec… i.e. X
+      // plus the hwdec suffix — while both halves report the identical
+      // hwdec mode and the IDENTICAL MediaCodec configuration.
       if (key == 'current-tracks/video/decoder' &&
-          b[key] == '${a[key]}_mediacodec' &&
+          registered != null &&
+          ((av == registered && bv == '${registered}_mediacodec') ||
+              (bv == registered && av == '${registered}_mediacodec')) &&
           a['hwdec-current'] == b['hwdec-current'] &&
           a['hwdec-current']!.startsWith('mediacodec') &&
           a['android-mediacodec-info'] == b['android-mediacodec-info']) {
-        return true;
+        return av == registered ? bv : av;
       }
-      return false;
+      return null;
     }
 
     while (true) {
@@ -367,49 +382,61 @@ Future<HdrReviewFacts> gatherDecoderReviewFacts({
                     'Native DV requires its owned review consumer');
               }
             }
-            // Endpoint equality with the bounded publication contract
-            // (V2 R1.3): any other mismatch fails.
-            final publishedKeys = <String>{};
+            // Endpoint equality with the narrowed publication contract
+            // (V2 second review): first publication of an unregistered
+            // field, and the in-pair hw-attach relabel of the registered
+            // decoder label. Anything else fails — including a registered
+            // value whose half disappeared.
+            final publishedKeys = <String, String>{};
             for (final key in endpoints) {
               if (a[key] != b[key]) {
-                if (!supportedPublication(key, a, b)) {
+                final settled = supportedPublication(key, a, b);
+                if (settled == null) {
                   throw HdrDecoderReviewFailure(
                       'Decoder endpoint changed: $key');
                 }
-                publishedKeys.add(key);
+                publishedKeys[key] = settled;
               }
             }
             // Cross-attempt identity guard: registered from the SETTLED
             // side of a published key and from every other non-empty value,
             // on every round that reaches this point — including rounds
             // that are still incomplete (drift is never masked by
-            // readiness).
+            // readiness). A supported publication SUPERSEDES the
+            // pre-attach label (that binding is the readiness protocol's
+            // identity event); any later drift of the registered identity
+            // still fails.
             for (final key in decoderIdentityEndpoints) {
-              final published = publishedKeys.contains(key);
-              final value = published
-                  ? (b[key]!.isNotEmpty ? b[key]! : a[key]!)
+              final value = publishedKeys.containsKey(key)
+                  ? publishedKeys[key]!
                   : a[key]!;
               final observed = observedDecoderEndpoints[key];
               if (observed != null && value != observed) {
-                // A supported publication SUPERSEDES the registered value:
-                // the settled side becomes the registered identity. Any
-                // change that is neither an in-pair publication nor the
-                // cross-round attach settlement still fails.
-                var attachSettlement = false;
-                if (key == 'current-tracks/video/decoder' &&
+                // The attach settlement is its OWN bounded transition (V2
+                // second review): only the decoder label settling from the
+                // registered pre-attach value X to X + the hwdec suffix,
+                // with the registered MediaCodec configuration unchanged
+                // and a mediacodec* mode present (published this round or
+                // already baselined). Everything else still fails.
+                final attachSettlement = key ==
+                        'current-tracks/video/decoder' &&
                     value == '${observed}_mediacodec' &&
                     a['android-mediacodec-info'] ==
                         observedDecoderEndpoints['android-mediacodec-info'] &&
                     (a['hwdec-current']!.startsWith('mediacodec') ||
-                        publishedKeys.contains('hwdec-current'))) {
-                  attachSettlement = true;
-                }
-                if (!published && !attachSettlement) {
+                        publishedKeys.containsKey('hwdec-current'));
+                if (!publishedKeys.containsKey(key) && !attachSettlement) {
                   throw HdrDecoderReviewFailure(
                       'Observed decoder changed: $key');
                 }
               }
               if (value.isNotEmpty) observedDecoderEndpoints[key] = value;
+            }
+            // V2 R2: a round that observed a publication is never returned
+            // as facts — the state has advanced above; the next consistent
+            // pair completes the review.
+            if (publishedKeys.isNotEmpty) {
+              return null;
             }
             final profile =
                 int.tryParse(a['current-tracks/video/dolby-vision-profile']!);

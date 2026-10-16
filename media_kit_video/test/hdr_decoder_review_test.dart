@@ -366,6 +366,81 @@ void main() {
     expect(facts.decoderObservation!.decoder, 'hevc_mediacodec');
   });
 
+  test('registered label followed by an empty half then a different label '
+      'fails', () async {
+    // V2 second-review R1 counterexample: the first rounds register X; an
+    // empty half followed by a different settled label must not overwrite
+    // the baseline (no re-authorization through the first-publication
+    // rule, and the empty half is a disappearing observation).
+    final s = Sample();
+    var decoderReads = 0;
+    s.props['video-params/pixelformat'] = 'mediacodec';
+    s.onRead = (p) async {
+      if (p == 'current-tracks/video/decoder') {
+        final n = ++decoderReads;
+        if (n <= 6) return 'hevc_mediacodec';
+        if (n <= 8) return '';
+        return 'avc_mediacodec';
+      }
+      // No frame format while the label is unsettled: the early rounds
+      // retry, so the drift window is actually reached.
+      if (p == 'video-params/pixelformat' && decoderReads <= 8) return '';
+      return s.props[p] ?? '';
+    };
+    await expectLater(
+        s.gather(),
+        throwsA(isA<HdrDecoderReviewFailure>().having(
+            (error) => error.detail,
+            'detail',
+            contains('Observed decoder changed'))));
+  });
+
+  test('registered hwdec followed by an empty half then a different mode '
+      'fails', () async {
+    // V2 second-review R2: a registered hwdec whose half disappears is a
+    // failing disappearing observation, not a republication.
+    final s = Sample();
+    var hwdecReads = 0;
+    s.props['video-params/pixelformat'] = 'mediacodec';
+    s.onRead = (p) async {
+      if (p == 'hwdec-current') {
+        final n = ++hwdecReads;
+        if (n <= 6) return 'mediacodec';
+        if (n <= 8) return '';
+        return 'surfacetexture';
+      }
+      if (p == 'video-params/pixelformat' && hwdecReads <= 8) return '';
+      return s.props[p] ?? '';
+    };
+    await expectLater(
+        s.gather(),
+        throwsA(isA<HdrDecoderReviewFailure>().having(
+            (error) => error.detail,
+            'detail',
+            contains('Observed decoder changed'))));
+  });
+
+  test('a publication round resamples before any facts are returned',
+      () async {
+    // Green path (V2 R2): the hwdec first publication (empty A half,
+    // settled B half) advances the state and the round returns no facts;
+    // the settle delay proves the resample happened, and the facts come
+    // from the later fully-consistent round.
+    final s = Sample();
+    var hwdecReads = 0;
+    s.props['video-params/pixelformat'] = 'mediacodec';
+    s.props['current-tracks/video/decoder'] = 'hevc_mediacodec';
+    s.onRead = (p) async {
+      if (p == 'hwdec-current' && ++hwdecReads == 1) return '';
+      return s.props[p] ?? '';
+    };
+    final facts = await s.gather();
+    expect(facts.hwdecCurrent, 'mediacodec');
+    expect(facts.decoderObservation!.decoder, 'hevc_mediacodec');
+    expect(s.elapsed, greaterThanOrEqualTo(const Duration(milliseconds: 50)),
+        reason: 'the publication round must resample, not return');
+  });
+
   test('a complete snapshot that violates the plan is still rejected', () async {
     // This is complete in the first round: no decoder-publication transition
     // is claimed. The HEVC component conflicts with the AVC track.
