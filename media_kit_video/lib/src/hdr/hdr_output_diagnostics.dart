@@ -248,6 +248,67 @@ class HdrOutputDiagnostics {
   }
 
   // ---------------------------------------------------------------------------
+  // review
+  // ---------------------------------------------------------------------------
+
+  /// `HDR review:` the ordinary decoder review's observable run, emitted once
+  /// per [gatherDecoderReviewFacts] exit — success, typed failure, budget
+  /// timeout or error. The record attributes the monotonic budget across
+  /// wait phases, counts the readiness iterations and, on an endpoint A/B
+  /// mismatch, carries the full endpoint snapshots so the real transition can
+  /// be read from the log instead of being inferred.
+  ///
+  /// Privacy contract: values are mpv property strings (decoder, codec and
+  /// pixel-format names). The source path is deliberately NOT recorded —
+  /// source integrity appears only as a boolean — so no token or signed URL
+  /// can reach the log through this layer.
+  static void review({
+    required int playlistEntryId,
+    required int openedAfterEpoch,
+    required String outcome,
+    required int iterations,
+    required int elapsedMs,
+    required int loadedMs,
+    required String phase,
+    required bool identityOk,
+    String? detail,
+    String? changedKey,
+    String? changedA,
+    String? changedB,
+    Map<String, String>? aValues,
+    Map<String, String>? bValues,
+  }) {
+    if (!enabled) return;
+    final buffer = StringBuffer()
+      ..write('$tag HDR review: '
+          'entry=$playlistEntryId '
+          'openedAfterEpoch=$openedAfterEpoch '
+          'outcome=$outcome '
+          'iter=$iterations '
+          'elapsedMs=$elapsedMs '
+          'loadedMs=$loadedMs '
+          'phase=$phase '
+          'identityOk=$identityOk');
+    void field(String name, String? value) {
+      if (value != null) buffer.write(' $name=$value');
+    }
+
+    field('detail', detail);
+    field('changedKey', changedKey);
+    field('changedA', changedA);
+    field('changedB', changedB);
+    if (aValues != null) field('a', _endpointValues(aValues));
+    if (bValues != null) field('b', _endpointValues(bValues));
+    printer(buffer.toString());
+  }
+
+  /// Compact endpoint snapshot: `k=v` pairs joined by `,` in the fixed
+  /// endpoint order (the map is a linked insertion-ordered map).
+  static String _endpointValues(Map<String, String> values) {
+    return values.entries.map((e) => '${e.key}=${e.value}').join(',');
+  }
+
+  // ---------------------------------------------------------------------------
   // degrade
   // ---------------------------------------------------------------------------
 
