@@ -155,7 +155,7 @@ void main() {
     expect(lines, hasLength(1));
     final line = lines.single;
     expect(line, contains('outcome=failure'));
-    expect(line, contains('identityOk=false'));
+    expect(line, contains('identityOk=failed'));
     expect(line, contains('phase=identity'));
     expect(line.contains('drifted'), isFalse,
         reason: 'the drifted path value must not be logged');
@@ -179,7 +179,7 @@ void main() {
     final facts = await gatherDecoderReviewFacts(
       lock: Lock(),
       mediaUri: 'signed-url-that-must-not-be-logged',
-      readProperty: (name) async => stableReads[name]!,
+      readProperty: (name) async => stableReads[name] ?? '',
       waitForFileLoadedEntry: (_, __) async => const FileLoadedRecord(4, 7),
       playlistEntryId: 7,
       openedAfterEpoch: 3,
@@ -195,6 +195,172 @@ void main() {
     expect(aSection, contains('hwdec-current=mediacodec-copy'));
     expect(aSection, contains('video-params/pixelformat=yuv420p'));
     expect(line.contains('signed-url-that-must-not-be-logged'), isFalse);
+  });
+
+  test('an unknown error records only its runtime type, never its message',
+      () async {
+    enable();
+    await expectLater(
+      gatherDecoderReviewFacts(
+        lock: Lock(),
+        mediaUri: 'signed-url-that-must-not-be-logged',
+        readProperty: (_) async =>
+            throw StateError('boom at signed-url-that-must-not-be-logged'),
+        waitForFileLoadedEntry: (_, __) async => const FileLoadedRecord(4, 7),
+        playlistEntryId: 7,
+        openedAfterEpoch: 3,
+        fileLoadedEpoch: () => 4,
+        isCurrent: () => true,
+      ),
+      throwsA(isA<StateError>()),
+    );
+    expect(lines, hasLength(1));
+    final line = lines.single;
+    expect(line, contains('outcome=failure'));
+    expect(line, contains('detail=StateError'));
+    expect(line.contains('signed-url-that-must-not-be-logged'), isFalse);
+    expect(line.contains('boom'), isFalse);
+  });
+
+  test('huge multi-line values stay escaped, truncated and single-line',
+      () async {
+    enable();
+    final huge = 'x\n' * 400;
+    await expectLater(
+      gatherDecoderReviewFacts(
+        lock: Lock(),
+        mediaUri: 'signed-url-that-must-not-be-logged',
+        readProperty: (name) async =>
+            name == 'current-tracks/video/decoder-desc'
+                ? huge
+                : name == 'path' || name == 'playlist/0/filename'
+                    ? 'signed-url-that-must-not-be-logged'
+                    : name == 'playlist/0/id'
+                        ? '7'
+                        : '',
+        waitForFileLoadedEntry: (_, __) async => const FileLoadedRecord(4, 7),
+        playlistEntryId: 7,
+        openedAfterEpoch: 3,
+        fileLoadedEpoch: () => 4,
+        isCurrent: () => true,
+      ),
+      throwsA(isA<HdrDecoderReviewTimeout>()),
+    );
+    expect(lines, hasLength(1));
+    final line = lines.single;
+    expect(line.contains('\n'), isFalse, reason: 'single line required');
+    expect(line.length, lessThan(4000));
+  });
+
+  test('a throwing diagnostics sink never changes the gather outcome',
+      () async {
+    HdrOutputDiagnostics.printer = (_) => throw StateError('sink broken');
+    HdrOutputDiagnostics.enabled = true;
+    final stableReads = values({
+      'current-tracks/video/decoder': 'omx.qcom.decoder',
+      'hwdec-current': 'mediacodec-copy',
+      'video-params/pixelformat': 'yuv420p',
+      'video-params/gamma': 'bt.709',
+      'video-params/primaries': 'bt.709',
+      'current-tracks/video/codec': 'h264',
+      'video-format': 'avc',
+      'path': mediaUri,
+      'playlist/0/filename': mediaUri,
+      'playlist/0/id': '7',
+    });
+    final facts = await gatherDecoderReviewFacts(
+      lock: Lock(),
+      mediaUri: 'signed-url-that-must-not-be-logged',
+      readProperty: (name) async => stableReads[name] ?? '',
+      waitForFileLoadedEntry: (_, __) async => const FileLoadedRecord(4, 7),
+      playlistEntryId: 7,
+      openedAfterEpoch: 3,
+      fileLoadedEpoch: () => 4,
+      isCurrent: () => true,
+    );
+    expect(facts.hwdecCurrent, 'mediacodec-copy');
+  });
+
+  test('elapsed fields are relative to the gather start, not the clock',
+      () async {
+    enable();
+    var base = const Duration(seconds: 1000);
+    final stableReads = values({
+      'current-tracks/video/decoder': 'omx.qcom.decoder',
+      'hwdec-current': 'mediacodec-copy',
+      'video-params/pixelformat': 'yuv420p',
+      'video-params/gamma': 'bt.709',
+      'video-params/primaries': 'bt.709',
+      'current-tracks/video/codec': 'h264',
+      'video-format': 'avc',
+      'path': mediaUri,
+      'playlist/0/filename': mediaUri,
+      'playlist/0/id': '7',
+    });
+    await gatherDecoderReviewFacts(
+      lock: Lock(),
+      mediaUri: 'signed-url-that-must-not-be-logged',
+      readProperty: (name) async => stableReads[name] ?? '',
+      waitForFileLoadedEntry: (_, __) async => const FileLoadedRecord(4, 7),
+      playlistEntryId: 7,
+      openedAfterEpoch: 3,
+      fileLoadedEpoch: () => 4,
+      isCurrent: () => true,
+      monotonicNow: () => base,
+    );
+    final line = lines.single;
+    final elapsed = int.parse(
+        RegExp(r'elapsedMs=(\d+)').firstMatch(line)!.group(1)!);
+    final loaded = int.parse(
+        RegExp(r'loadedMs=(\d+)').firstMatch(line)!.group(1)!);
+    expect(elapsed, lessThan(1000), reason: line);
+    expect(loaded, lessThanOrEqualTo(elapsed), reason: line);
+    base = base + const Duration(hours: 1);
+  });
+
+  test('a half-read round leaves no cross-round snapshot mixture', () async {
+    enable();
+    var round = 0;
+    var decoderReads = 0;
+    await expectLater(
+      gatherDecoderReviewFacts(
+        lock: Lock(),
+        mediaUri: 'signed-url-that-must-not-be-logged',
+        readProperty: (name) async {
+          if (name == 'path' || name == 'playlist/0/filename') {
+            return 'signed-url-that-must-not-be-logged';
+          }
+          if (name == 'playlist/0/id') return '7';
+          if (name == 'current-tracks/video/decoder') {
+            decoderReads++;
+            if (decoderReads > 34) return 'drift-decoder';
+            return 'hevc_mediacodec';
+          }
+          if (name == 'video-params/pixelformat') {
+            // A late round's A half hits the budget: the timeout must not
+            // emit the previous round's snapshots as if they were current.
+            if (++round == 20) {
+              throw HdrDecoderReviewTimeout();
+            }
+            return 'mediacodec';
+          }
+          return '';
+        },
+        waitForFileLoadedEntry: (_, __) async => const FileLoadedRecord(4, 7),
+        playlistEntryId: 7,
+        openedAfterEpoch: 3,
+        fileLoadedEpoch: () => 4,
+        isCurrent: () => true,
+        budget: const Duration(seconds: 2),
+      ),
+      throwsA(isA<HdrDecoderReviewTimeout>()),
+    );
+    for (final line in lines) {
+      if (line.contains('a=')) {
+        expect(line.contains('drift-decoder'), isFalse,
+            reason: 'only fully-read rounds may appear as snapshots');
+      }
+    }
   });
 
   test('disabled diagnostics emit nothing and change no outcome', () async {
