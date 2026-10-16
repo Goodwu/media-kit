@@ -255,8 +255,11 @@ class HdrOutputDiagnostics {
   /// per [gatherDecoderReviewFacts] exit — success, typed failure, budget
   /// timeout or error. The record attributes the monotonic budget across
   /// wait phases, counts the readiness iterations and, on an endpoint A/B
-  /// mismatch, carries the full endpoint snapshots so the real transition can
-  /// be read from the log instead of being inferred.
+  /// mismatch, carries the changed key with its two values plus capped
+  /// endpoint snapshots. The snapshots are a truncating SUMMARY, not a
+  /// recoverable full transcript — complete device sequences are evidenced
+  /// by the raw logcat files of the verification runs, not by this line
+  /// (V2 third review, R3).
   ///
   /// Privacy contract: values are mpv property strings (decoder, codec and
   /// pixel-format names). The source path is deliberately NOT recorded —
