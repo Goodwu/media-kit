@@ -7,10 +7,17 @@ import 'package:media_kit_video/src/hdr/hdr_source_descriptor.dart';
 import 'package:media_kit_video/src/hdr/hdr_strategy.dart';
 import 'package:media_kit_video/src/hdr/hdr_strategy_realizer.dart';
 
-const HdrDataSpaceExtInfo extApplicable =
-    HdrDataSpaceExtInfo(id: 'lya-pq', applicable: true);
-const HdrDataSpaceExtInfo extNotApplicable =
-    HdrDataSpaceExtInfo(id: 'lya-pq', applicable: false);
+/// The LYA-shaped self-report: applicable, with the vendor's validated
+/// prediction evidence for the pq surface transfer (the confidence rule
+/// consumes the declared capability, never the extension id).
+const HdrDataSpaceExtInfo extApplicable = HdrDataSpaceExtInfo(
+    id: 'lya-pq',
+    applicable: true,
+    validatedPredictionTransfers: <String>{'pq'});
+const HdrDataSpaceExtInfo extNotApplicable = HdrDataSpaceExtInfo(
+    id: 'lya-pq',
+    applicable: false,
+    validatedPredictionTransfers: <String>{'pq'});
 
 const HdrDecoderInfo lyHevcDecoder = HdrDecoderInfo(
   name: 'OMX.hisi.video.decoder.hevc',
@@ -1446,6 +1453,44 @@ void main() {
       expect(
         caps(displayHdrTypes: const <int>{2}).predict(hdr10).confidence,
         HdrPredictionConfidence.verified,
+      );
+    });
+
+    test('confidence consumes the declared capability, never the id (R1.5)',
+        () {
+      final HdrSourceDescriptor p5 = sources[HdrSourceClass.dvP5]!;
+      // An unknown extension id with the explicit validated-prediction
+      // declaration verifies the pq dataspace route.
+      expect(
+        caps(
+          displayHdrTypes: const <int>{2},
+          ext: const HdrDataSpaceExtInfo(
+              id: 'unknown-vendor',
+              applicable: true,
+              validatedPredictionTransfers: <String>{'pq'}),
+        ).predict(p5).confidence,
+        HdrPredictionConfidence.verified,
+      );
+      // A familiar id without the declaration stays unverified: the id is
+      // inert data, only the capability counts.
+      expect(
+        caps(
+          displayHdrTypes: const <int>{2},
+          ext: const HdrDataSpaceExtInfo(id: 'lya-pq', applicable: true),
+        ).predict(p5).confidence,
+        HdrPredictionConfidence.unverified,
+      );
+      // A declared transfer that does not match the route's requested
+      // surface transfer stays unverified.
+      expect(
+        caps(
+          displayHdrTypes: const <int>{2},
+          ext: const HdrDataSpaceExtInfo(
+              id: 'lya-pq',
+              applicable: true,
+              validatedPredictionTransfers: <String>{'hlg'}),
+        ).predict(p5).confidence,
+        HdrPredictionConfidence.unverified,
       );
     });
   });

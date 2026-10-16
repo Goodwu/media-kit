@@ -53,11 +53,21 @@ class HdrPqPresentation {
 /// Identifier and device applicability of the natively registered dataspace
 /// extension (see `PlatformVideoView.SurfaceDataSpaceExt`). Null on the
 /// capability snapshot means no extension is registered in this process.
+///
+/// The transfer-conditioned fields are the extension's own per-transfer
+/// self-report; routing consumes them instead of any device-name-derived
+/// identifier. Every missing or malformed report degrades to the
+/// conservative value (empty set / 0 = not supported), never to an
+/// admission.
 class HdrDataSpaceExtInfo {
   const HdrDataSpaceExtInfo({
     required this.id,
     required this.applicable,
     this.pqPresentation,
+    this.validatedPredictionTransfers = const <String>{},
+    this.setterOnlyTransfers = const <String>{},
+    this.supportedSurfaceTransfers = const <String>{},
+    this.yuvWindowArmApi = 0,
   });
 
   final String id;
@@ -71,6 +81,25 @@ class HdrDataSpaceExtInfo {
   /// snapshot resolution then applies the migration default).
   final HdrPqPresentation? pqPresentation;
 
+  /// Transfers for which the vendor has validated evidence supporting
+  /// prediction confidence. NOT evidence that HDR is active in the current
+  /// session. Empty = nothing validated (the conservative default for a
+  /// missing or malformed report).
+  final Set<String> validatedPredictionTransfers;
+
+  /// Transfers where the setter may succeed but the readback stays missing.
+  /// Empty = no setter-only exception exists.
+  final Set<String> setterOnlyTransfers;
+
+  /// The surface transfers this extension explicitly supports. Empty =
+  /// nothing admitted.
+  final Set<String> supportedSurfaceTransfers;
+
+  /// The managed YUV window arm protocol version this extension supports
+  /// (currently 1). 0 = not supported (and the conservative default for a
+  /// missing, malformed or non-positive report).
+  final int yuvWindowArmApi;
+
   static HdrDataSpaceExtInfo? fromMap(Object? raw) {
     if (raw is! Map) return null;
     final Object? id = raw['id'];
@@ -80,13 +109,37 @@ class HdrDataSpaceExtInfo {
       id: id,
       applicable: applicable == true,
       pqPresentation: HdrPqPresentation.fromMap(raw['pqPresentation']),
+      validatedPredictionTransfers:
+          _stringSet(raw['validatedPredictionTransfers']),
+      setterOnlyTransfers: _stringSet(raw['setterOnlyTransfers']),
+      supportedSurfaceTransfers: _stringSet(raw['supportedSurfaceTransfers']),
+      yuvWindowArmApi:
+          raw['yuvWindowArmApi'] is int && (raw['yuvWindowArmApi'] as int) > 0
+              ? raw['yuvWindowArmApi'] as int
+              : 0,
     );
+  }
+
+  /// Missing, non-list or non-string-element reports degrade to the empty
+  /// set — never to an admission.
+  static Set<String> _stringSet(Object? raw) {
+    if (raw is! List) return const <String>{};
+    final Set<String> values = <String>{};
+    for (final Object? value in raw) {
+      if (value is! String) return const <String>{};
+      values.add(value);
+    }
+    return values;
   }
 
   @override
   String toString() =>
       'HdrDataSpaceExtInfo(id: $id, applicable: $applicable, '
-      'pqPresentation: $pqPresentation)';
+      'pqPresentation: $pqPresentation, '
+      'validatedPredictionTransfers: $validatedPredictionTransfers, '
+      'setterOnlyTransfers: $setterOnlyTransfers, '
+      'supportedSurfaceTransfers: $supportedSurfaceTransfers, '
+      'yuvWindowArmApi: $yuvWindowArmApi)';
 }
 
 /// One platform decoder entry (HEVC or Dolby Vision) from `MediaCodecList`.

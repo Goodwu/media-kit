@@ -96,8 +96,10 @@ void main() {
       );
 
   /// LG-class device whose extension declares the YUV window as the only PQ
-  /// presentation channel (W1): the convert route's carrier is derived from
-  /// this declaration (`surfacetexture`), replacing the removed probe seam.
+  /// presentation channel (W1) plus the managed YUV arm protocol: the
+  /// convert route's carrier is derived from the channel declaration
+  /// (`surfacetexture`) and the arm admission consumes the declared
+  /// protocol — replacing the removed probe seam and any device identity.
   HdrCapabilities lgYuvPqCaps() => HdrCapabilities(
         sdkInt: 24,
         displayHdrTypes: const {2},
@@ -112,6 +114,8 @@ void main() {
             rgbSurface: false,
             yuvWindow: true,
           ),
+          setterOnlyTransfers: <String>{'pq', 'pq-itu'},
+          yuvWindowArmApi: 1,
         ),
       );
 

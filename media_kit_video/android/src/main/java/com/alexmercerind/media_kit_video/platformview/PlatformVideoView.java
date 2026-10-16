@@ -117,6 +117,49 @@ public final class PlatformVideoView implements PlatformView {
         }
 
         /**
+         * Vendor self-report: the surface transfers for which this extension
+         * holds validated evidence supporting prediction confidence. This is
+         * NOT evidence that HDR is active in the current session. {@code
+         * null} means the extension does not declare the structure; the
+         * capability report then omits the key, and every consumer treats an
+         * undeclared transfer as unverified (never an admission).
+         */
+        @Nullable
+        default java.util.Set<String> validatedPredictionTransfers() {
+            return null;
+        }
+
+        /**
+         * Vendor self-report: the surface transfers where the dataspace
+         * setter may succeed while the readback stays missing. {@code null}
+         * means the extension does not declare the structure — no
+         * setter-only exception exists.
+         */
+        @Nullable
+        default java.util.Set<String> setterOnlyTransfers() {
+            return null;
+        }
+
+        /**
+         * Vendor self-report: the surface transfers this extension
+         * explicitly supports. {@code null} means the extension does not
+         * declare the structure — nothing is admitted.
+         */
+        @Nullable
+        default java.util.Set<String> supportedSurfaceTransfers() {
+            return null;
+        }
+
+        /**
+         * Vendor self-report: the managed YUV window arm protocol version
+         * this extension supports (currently 1). 0 = not supported (also the
+         * conservative resolution for a non-positive value).
+         */
+        default int yuvWindowArmApi() {
+            return 0;
+        }
+
+        /**
          * Vendor self-report (plan W1): whether PQ can be presented through
          * the vendor YUV window carrier on this device. Tri-state: {@code
          * null} means this extension does not declare the structure at all
@@ -195,8 +238,13 @@ public final class PlatformVideoView implements PlatformView {
      * registered. Extensions that declare their PQ presentation channels
      * additionally report {@code pqPresentation}
      * ({@code rgbSurface}/{@code yuvWindow}, both booleans or the key is
-     * omitted). Only the read-only accessors are consulted; the extension's
-     * apply path is never probed from here.
+     * omitted), and extensions that declare the per-transfer structures
+     * report {@code validatedPredictionTransfers},
+     * {@code setterOnlyTransfers} and {@code supportedSurfaceTransfers}
+     * (each key present only when the accessor is non-null) plus
+     * {@code yuvWindowArmApi} (present only when positive). Only the
+     * read-only accessors are consulted; the extension's apply path is never
+     * probed from here.
      */
     @Nullable
     public static Map<String, Object> getSurfaceDataSpaceExtInfo() {
@@ -221,7 +269,29 @@ public final class PlatformVideoView implements PlatformView {
             pqPresentation.put("yuvWindow", pqYuvWindow);
             info.put("pqPresentation", pqPresentation);
         }
+        // Per-transfer capability self-reports, each all-or-nothing: an
+        // undeclared structure is omitted, and the Dart side resolves a
+        // missing key to the conservative empty set / 0.
+        putTransferReport(info, "validatedPredictionTransfers",
+                ext.validatedPredictionTransfers());
+        putTransferReport(info, "setterOnlyTransfers",
+                ext.setterOnlyTransfers());
+        putTransferReport(info, "supportedSurfaceTransfers",
+                ext.supportedSurfaceTransfers());
+        final int yuvWindowArmApi = ext.yuvWindowArmApi();
+        if (yuvWindowArmApi > 0) {
+            info.put("yuvWindowArmApi", yuvWindowArmApi);
+        }
         return info;
+    }
+
+    /** Reports one transfer set as a string list, omitting the key when the
+     * extension does not declare the structure. */
+    private static void putTransferReport(Map<String, Object> info,
+            String key, @Nullable java.util.Set<String> transfers) {
+        if (transfers != null) {
+            info.put(key, new java.util.ArrayList<>(transfers));
+        }
     }
 
     private static final Executor transactionExecutor = Runnable::run;

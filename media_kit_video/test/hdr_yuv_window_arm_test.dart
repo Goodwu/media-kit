@@ -12,10 +12,10 @@ import 'package:media_kit_video/src/hdr/hdr_yuv_presentation_contract.dart';
 import 'package:media_kit_video/src/hdr/hdr_yuv_window_arm.dart';
 
 /// Plan C: the YUV window presentation arm manager on injectable FFI/channel
-/// seams — admission (route shape, capability channel, vendor device gate,
-/// owner), the owner-bound-first/legacy-fallback arm order, the paired
-/// disarm, cleanup debt and stale-attempt isolation. The process-level lease
-/// registry (B1) is static, so it is reset between tests.
+/// seams — admission (route shape, capability channel, vendor YUV arm
+/// capability gate, owner), the owner-bound-first/legacy-fallback arm order,
+/// the paired disarm, cleanup debt and stale-attempt isolation. The
+/// process-level lease registry (B1) is static, so it is reset between tests.
 void main() {
   setUp(HdrYuvWindowProcessRegistry.resetForTesting);
 
@@ -35,6 +35,8 @@ void main() {
             rgbSurface: false,
             yuvWindow: yuvWindow,
           ),
+          // The managed YUV arm protocol declaration the admission consumes.
+          yuvWindowArmApi: 1,
         ),
       );
 
@@ -180,7 +182,7 @@ void main() {
   });
 
   test(
-      'capability channel, vendor device gate and quad violations refuse admission',
+      'capability channel, vendor arm capability gate and quad violations refuse admission',
       () async {
     final atoms = FakeYuvAtoms();
     final arm = armManager(atoms, ownerToken: 'owner-token');
@@ -190,21 +192,26 @@ void main() {
       throwsA(isA<HdrYuvWindowArmFailure>()
           .having((error) => error.cause, 'cause', contains('no YUV window'))),
     );
-    // A non-API24 snapshot with the same self-report still refuses: the
-    // vendor exact device gate is re-checked in Dart, not only natively.
-    final wrongSdk = HdrCapabilities(
-      sdkInt: 29,
+    // A snapshot whose extension does NOT declare the managed YUV arm
+    // protocol refuses even with a familiar id: the capability gate is
+    // re-checked in Dart, not only natively.
+    final undeclaredArm = HdrCapabilities(
+      sdkInt: 24,
       displayHdrTypes: const {2},
       hevcDecoders: const [],
       dolbyVisionDecoders: const [],
       p5PipelineAvailable: true,
       dataSpaceBridgeLoaded: true,
-      dataSpaceExt: lgYuvCaps().dataSpaceExt,
+      dataSpaceExt: HdrDataSpaceExtInfo(
+        id: 'lg-pq',
+        applicable: true,
+        pqPresentation: lgYuvCaps().dataSpaceExt!.pqPresentation,
+      ),
     );
     await expectLater(
-      arm.armForAttempt(planFor(yuvRoute(), capabilities: wrongSdk)),
+      arm.armForAttempt(planFor(yuvRoute(), capabilities: undeclaredArm)),
       throwsA(isA<HdrYuvWindowArmFailure>().having((error) => error.cause,
-          'cause', contains('vendor exact device gate'))),
+          'cause', contains('vendor YUV arm capability gate'))),
     );
     await expectLater(
       arm.armForAttempt(planFor(yuvRoute().surrogate(offscreenTransfer: null))),
@@ -212,6 +219,35 @@ void main() {
           'cause', contains('presentation contract rejected'))),
     );
     expect(atoms.calls, isEmpty);
+  });
+
+  test('YUV arm admission consumes the declared capability, never the id',
+      () async {
+    final atoms = FakeYuvAtoms();
+    final arm = armManager(atoms, ownerToken: 'owner-token');
+    // An unknown extension id with the explicit arm-protocol declaration is
+    // admissible and arms the pair.
+    final unknownIdCaps = HdrCapabilities(
+      sdkInt: 29,
+      displayHdrTypes: const {2},
+      hevcDecoders: const [],
+      dolbyVisionDecoders: const [],
+      p5PipelineAvailable: true,
+      dataSpaceBridgeLoaded: true,
+      dataSpaceExt: HdrDataSpaceExtInfo(
+        id: 'unknown-vendor',
+        applicable: true,
+        pqPresentation:
+            lgYuvCaps().dataSpaceExt!.pqPresentation,
+        yuvWindowArmApi: 1,
+      ),
+    );
+    final plan = planFor(yuvRoute(), capabilities: unknownIdCaps);
+    await arm.armForAttempt(plan);
+    expect(atoms.diagDataSpace, HdrYuvPresentationContract.windowDataSpace);
+    expect(arm.isArmed, isTrue);
+    await arm.endAttempt(plan);
+    expect(atoms.diagDataSpace, 0);
   });
 
   test('failed cleanup retains debt that blocks the next arm until it clears',

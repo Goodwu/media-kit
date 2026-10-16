@@ -105,6 +105,25 @@ public class LyaPqDataSpaceExt implements PlatformVideoView.SurfaceDataSpaceExt 
         return false;
     }
 
+    /**
+     * Per-transfer capability self-report: the read-back-verified PQ apply
+     * path is the validated evidence behind prediction confidence for the
+     * {@code pq} surface transfer. No setter-only exception and no managed
+     * YUV arm protocol are declared (the defaults hold: empty sets, 0).
+     */
+    @Override
+    @NonNull
+    public java.util.Set<String> validatedPredictionTransfers() {
+        return java.util.Collections.singleton("pq");
+    }
+
+    @Override
+    @Nullable
+    public java.util.Set<String> supportedSurfaceTransfers() {
+        // The gate accepts only BT2020_PQ (see {@link #applyDataSpace}).
+        return java.util.Collections.singleton("pq");
+    }
+
     @Override
     public boolean applyDataSpace(@Nullable Surface surface, int dataSpace) {
         // Read-only gate re-checked on every call, before any native touch:
