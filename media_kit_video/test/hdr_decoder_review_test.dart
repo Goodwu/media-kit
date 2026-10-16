@@ -491,15 +491,21 @@ void main() {
   test('a complete first half whose B hwdec disappears fails in-round',
       () async {
     // V2 third review minimum test 3: A is a complete valid sample, B's
-    // hwdec-current disappears — the pair mismatches with a registered
-    // value on the empty side; the round must fail instead of returning A.
+    // hwdec-current disappears — the disappearance of a REGISTERED value
+    // is a failing disappearing observation (not a first publication —
+    // the hwdec baseline exists from the A half).
     final s = Sample();
     var hwdecReads = 0;
     s.onRead = (p) async {
       if (p == 'hwdec-current' && ++hwdecReads == 2) return '';
       return s.props[p] ?? '';
     };
-    await expectLater(s.gather(), throwsA(isA<HdrDecoderReviewFailure>()));
+    await expectLater(
+        s.gather(budget: const Duration(seconds: 1)),
+        throwsA(isA<HdrDecoderReviewFailure>().having(
+            (error) => error.detail,
+            'detail',
+            contains('value disappeared'))));
   });
 
   test('a reverse attach transition is rejected, not settled', () async {
