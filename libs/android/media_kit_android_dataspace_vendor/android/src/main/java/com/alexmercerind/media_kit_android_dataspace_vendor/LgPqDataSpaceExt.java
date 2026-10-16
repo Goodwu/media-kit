@@ -31,6 +31,14 @@ public final class LgPqDataSpaceExt implements PlatformVideoView.SurfaceDataSpac
     private Boolean loaded;
     private final LgExperimentSurfaceOwners owners = new LgExperimentSurfaceOwners();
 
+    // W1 managed output surfaces (device-neutral production path): identity
+    // is (Surface object, handle, generation, surfaceGeneration). Separate
+    // from the experiment owner ledger — no token, no retired set, per-
+    // surface records that never block a later registration.
+    private final java.util.Map<Surface, long[]> managedSurfaces =
+            new java.util.HashMap<>();
+    private final java.util.Set<Surface> managedArmed = new java.util.HashSet<>();
+
     /** Pending owner is not Surface authorization; core must register its tuple. */
     public synchronized boolean enableVisual278Experiment(long handle, String token,
             boolean routeLocked, boolean acceptNonConformant) {
@@ -326,7 +334,90 @@ public final class LgPqDataSpaceExt implements PlatformVideoView.SurfaceDataSpac
 
     @Override
     public synchronized boolean applyDataSpace(@NonNull Surface surface, int dataSpace) {
-        return applyNative(surface, dataSpace, false);
+        // A registered managed output surface is authorized for its
+        // dataspace applies (W1 managed path — the registration is the
+        // authorization; the values still pass supportsDataSpace).
+        return applyNative(surface, dataSpace,
+                managedSurfaces.containsKey(surface));
+    }
+
+    // ------------------------------------------------------------------
+    // W1 managed output surfaces (device-neutral production path)
+    // ------------------------------------------------------------------
+
+    /**
+     * Registers a live output surface into the managed ledger. The
+     * registration is the managed authorization: the dataspace apply for a
+     * registered surface is authorized, and the managed YUV-diag arm is
+     * admitted for its exact (handle, generation). Gated by the same device
+     * applicability as every other path here.
+     */
+    /** W1 owner lifetime (production): the ledger enable with this device's
+     * own YUV-carrier declaration as the non-conformant acceptance; the
+     * route lock is enforced library-side by the arm admission. */
+    @Override
+    public synchronized boolean enableOwnerLifetime(long handle, String token) {
+        return enableVisual278Experiment(handle, token, true,
+                Boolean.TRUE.equals(pqPresentationYuvWindow()));
+    }
+
+    public synchronized boolean registerManagedOutputSurface(Surface surface,
+            long handle, int generation, int surfaceGeneration) {
+        if (!isApplicable() || surface == null || handle <= 0 || generation <= 0
+                || surfaceGeneration <= 0) {
+            return false;
+        }
+        managedSurfaces.put(surface,
+                new long[] {handle, generation, surfaceGeneration});
+        return true;
+    }
+
+    /** Clears the managed record and disarms a managed arm on this surface. */
+    public synchronized void unregisterManagedOutputSurface(Surface surface) {
+        managedArmed.remove(surface);
+        managedSurfaces.remove(surface);
+    }
+
+    /**
+     * Arms the YUV diag pair for a REGISTERED managed surface: the native
+     * binding is keyed by the device-neutral managed owner key derived from
+     * (handle, generation) — the native side stores only this derived key
+     * and never validates any Java ledger, so no experiment authorization
+     * is involved. The route admission is enforced library-side before the
+     * surface event is published.
+     */
+    public synchronized boolean armManagedOutputSurface(Surface surface,
+            long handle, int generation) {
+        final long[] recorded = managedSurfaces.get(surface);
+        if (recorded == null || recorded[0] != handle || recorded[1] != generation) {
+            return false;
+        }
+        if (!isApplicable() || !ensureLibraryLoaded()) {
+            return false;
+        }
+        final long ownerKey = MediaCodecSurfaceTextureBridge.ownerKey(
+                "managed/" + handle + "/" + generation);
+        nativeArmYuvDiag(ownerKey, generation);
+        nativeSetYuvDiagEnabled(1);
+        managedArmed.add(surface);
+        return true;
+    }
+
+    /** Managed disarm for the library's end-of-attempt cleanup. */
+    public synchronized boolean disarmManagedOutputSurface(Surface surface) {
+        if (managedArmed.remove(surface)) {
+            nativeDisarmYuvDiag();
+            return true;
+        }
+        return false;
+    }
+
+    /** Whether {@code surface} is a registered managed output surface. */
+    public synchronized boolean isManagedOutputSurfaceRegistered(
+            @NonNull Surface surface, long handle, int generation) {
+        final long[] recorded = managedSurfaces.get(surface);
+        return recorded != null && recorded[0] == handle
+                && recorded[1] == generation;
     }
 
     private boolean applyNative(Surface surface, int dataSpace, boolean authorized) {
