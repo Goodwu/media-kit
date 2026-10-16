@@ -302,4 +302,90 @@ void main() {
       expect(caps.p5PipelineAvailable, isFalse);
     });
   });
+
+  group('HdrDataSpaceExtInfo per-transfer capability fields', () {
+    // The LYA vendor self-report shape (LyaPqDataSpaceExt): validated
+    // prediction for pq, no setter-only exception, no YUV arm protocol.
+    Map<Object?, Object?> lyaReport() => <Object?, Object?>{
+          'id': 'lya-pq',
+          'isApplicable': true,
+          'validatedPredictionTransfers': <Object?>['pq'],
+          'supportedSurfaceTransfers': <Object?>['pq'],
+        };
+
+    // The LG vendor self-report shape (LgPqDataSpaceExt): setter-only for
+    // pq and pq-itu, the managed YUV arm protocol 1, no validated
+    // prediction.
+    Map<Object?, Object?> lgReport() => <Object?, Object?>{
+          'id': 'lg-pq',
+          'isApplicable': true,
+          'setterOnlyTransfers': <Object?>['pq', 'pq-itu'],
+          'supportedSurfaceTransfers': <Object?>['pq', 'pq-itu'],
+          'yuvWindowArmApi': 1,
+        };
+
+    test('parses the LYA-shaped self-report', () {
+      final HdrDataSpaceExtInfo? ext = HdrDataSpaceExtInfo.fromMap(lyaReport());
+      expect(ext, isNotNull);
+      expect(ext!.validatedPredictionTransfers, <String>{'pq'});
+      expect(ext.setterOnlyTransfers, isEmpty);
+      expect(ext.supportedSurfaceTransfers, <String>{'pq'});
+      expect(ext.yuvWindowArmApi, 0);
+    });
+
+    test('parses the LG-shaped self-report', () {
+      final HdrDataSpaceExtInfo? ext = HdrDataSpaceExtInfo.fromMap(lgReport());
+      expect(ext, isNotNull);
+      expect(ext!.validatedPredictionTransfers, isEmpty);
+      expect(ext.setterOnlyTransfers, <String>{'pq', 'pq-itu'});
+      expect(ext.supportedSurfaceTransfers, <String>{'pq', 'pq-itu'});
+      expect(ext.yuvWindowArmApi, 1);
+    });
+
+    test('a legacy report without the fields resolves every field to the '
+        'conservative default', () {
+      final HdrDataSpaceExtInfo? ext = HdrDataSpaceExtInfo.fromMap(
+          <Object?, Object?>{'id': 'legacy', 'isApplicable': true});
+      expect(ext, isNotNull);
+      expect(ext!.validatedPredictionTransfers, isEmpty);
+      expect(ext.setterOnlyTransfers, isEmpty);
+      expect(ext.supportedSurfaceTransfers, isEmpty);
+      expect(ext.yuvWindowArmApi, 0);
+    });
+
+    test('malformed field types degrade to the conservative defaults, never '
+        'to an admission', () {
+      final HdrDataSpaceExtInfo? ext = HdrDataSpaceExtInfo.fromMap(
+          <Object?, Object?>{
+        'id': 'weird',
+        'isApplicable': true,
+        'validatedPredictionTransfers': 'pq',
+        'setterOnlyTransfers': <Object?>['pq', 1],
+        'supportedSurfaceTransfers': <Object?>[2],
+        'yuvWindowArmApi': '1',
+      });
+      expect(ext, isNotNull);
+      expect(ext!.validatedPredictionTransfers, isEmpty);
+      expect(ext.setterOnlyTransfers, isEmpty);
+      expect(ext.supportedSurfaceTransfers, isEmpty);
+      expect(ext.yuvWindowArmApi, 0);
+    });
+
+    test('a non-positive yuvWindowArmApi is not a protocol declaration', () {
+      final HdrDataSpaceExtInfo? ext = HdrDataSpaceExtInfo.fromMap(
+          <Object?, Object?>{'id': 'x', 'yuvWindowArmApi': 0});
+      expect(ext!.yuvWindowArmApi, 0);
+      final negative = HdrDataSpaceExtInfo.fromMap(
+          <Object?, Object?>{'id': 'x', 'yuvWindowArmApi': -1});
+      expect(negative!.yuvWindowArmApi, 0);
+    });
+
+    test('the full snapshot carries the fields through parseSnapshot', () {
+      snapshot = fullSnapshot()
+        ..['dataSpaceExt'] = lgReport();
+      final HdrCapabilities caps = HdrCapabilities.parseSnapshot(snapshot);
+      expect(caps.dataSpaceExt!.setterOnlyTransfers, <String>{'pq', 'pq-itu'});
+      expect(caps.dataSpaceExt!.yuvWindowArmApi, 1);
+    });
+  });
 }

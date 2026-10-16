@@ -97,8 +97,11 @@ void main() {
         dolbyVisionDecoders: const <HdrDecoderInfo>[],
         p5PipelineAvailable: p5Pipeline,
         dataSpaceBridgeLoaded: true,
+        // The LYA-shaped self-report: the validated prediction evidence the
+        // confidence rule consumes for pq dataspace routes.
         dataSpaceExt: ext
-            ? const HdrDataSpaceExtInfo(id: 'lya-pq', applicable: true)
+            ? const HdrDataSpaceExtInfo(id: 'lya-pq', applicable: true,
+                validatedPredictionTransfers: <String>{'pq'})
             : null,
       );
 

@@ -571,6 +571,13 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
     // can construct that controller, or its initialization may overwrite the
     // value that resetOwnedConfiguration is meant to restore.
     await _setOwned('hwdec', contract.requestedHwdec);
+    // Managed sessions keep mpv's bounded software fallback armed: after 8
+    // consecutive failed hardware frames (a successful frame resets the
+    // count) the next decoder init falls back to software.
+    // Owned like `hwdec` (same placement: before output creation and before
+    // the media open) so resetOwnedConfiguration restores the captured
+    // original; a rejected write or readback fails preparation fail-closed.
+    await _setOwned('hwdec-software-fallback', '8');
     // Plan C arm point + process admission (V2 B1 round 3): the guarded
     // initialization admits at process level BEFORE the slot's ensure —
     // hence before the previous output's retirement, so a rejected
@@ -662,10 +669,15 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
             reason: HdrDegradeReason.dataSpaceApplyFailed,
           );
         }
-        // Only the evidence-pinned API24 LG extension may accept a setter
-        // without readback. This is not verified presentation evidence.
-        final bool acceptedWithoutReadback = acceptsUnverifiedLgSetter(
-            plan.capabilities, transfer, _dataSpacePath, _dataSpaceReadback);
+        // Only an extension that self-reports the setter-only exception for
+        // this exact transfer may accept a setter without readback. This is
+        // not verified presentation evidence.
+        final bool acceptedWithoutReadback = acceptsUnverifiedExtSetter(
+            plan.capabilities,
+            transfer,
+            result?['applied'] == true,
+            _dataSpacePath,
+            _dataSpaceReadback);
         if (_dataSpacePath != 'surfaceControl' &&
             !acceptedWithoutReadback &&
             !dataSpaceReadbackMatches(transfer, _dataSpaceReadback)) {
@@ -738,14 +750,30 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
     }
   }
 
-  static bool acceptsUnverifiedLgSetter(HdrCapabilities capabilities,
-      String transfer, String? path, String? readback) {
-    return capabilities.sdkInt == 24 &&
-        capabilities.dataSpaceExt?.id == 'lg-pq' &&
-        capabilities.dataSpaceExt?.applicable == true &&
-        path == 'ext:lg-pq' &&
-        (transfer == 'pq' || transfer == 'pq-itu') &&
-        (readback == null || readback.isEmpty || readback == 'none');
+  /// The limited acceptance of a setter that succeeded without a readback:
+  /// every condition is a capability judgment, never a device-name
+  /// judgment. ALL of these must hold —
+  ///
+  /// 1. a registered extension that is applicable;
+  /// 2. the requested transfer explicitly declared in the extension's
+  ///    `setterOnlyTransfers` (an undeclared transfer never qualifies);
+  /// 3. the actual apply succeeded ([applied], already gated by the caller
+  ///    before this check);
+  /// 4. the actual apply path belongs to the currently registered extension
+  ///    (`ext:<id>` — a same-provider identity association only, never a
+  ///    device-behavior choice);
+  /// 5. the readback is genuinely missing (null/empty/`none`), not present
+  ///    with a wrong value — a present-but-wrong readback goes through the
+  ///    mismatch gate instead.
+  ///
+  /// This is not verified presentation evidence.
+  static bool acceptsUnverifiedExtSetter(HdrCapabilities capabilities,
+      String transfer, bool applied, String? path, String? readback) {
+    final HdrDataSpaceExtInfo? ext = capabilities.dataSpaceExt;
+    if (ext == null || !ext.applicable || !applied) return false;
+    if (!ext.setterOnlyTransfers.contains(transfer)) return false;
+    if (path != 'ext:${ext.id}') return false;
+    return readback == null || readback.isEmpty || readback == 'none';
   }
 
   @override

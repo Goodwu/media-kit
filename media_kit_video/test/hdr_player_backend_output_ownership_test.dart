@@ -35,11 +35,12 @@ void main() {
 
   test('same route and later route do not replace the captured baseline',
       () async {
-    final result = await _exercise(initial: 'no');
+    final result = await _exercise(initial: 'no', softwareFallback: 'no');
     await result.backend.prepareOutput(_plan('no'));
     await result.backend.prepareOutput(_plan('auto'));
     await result.backend.resetOwnedConfiguration();
     expect(result.player.properties['hwdec'], 'no');
+    expect(result.player.properties['hwdec-software-fallback'], 'no');
   });
 
   test(
@@ -66,6 +67,61 @@ void main() {
     expect(result.player.properties['hwdec'], 'no');
   });
 
+  test('first output preparation owns hwdec-software-fallback as 8', () async {
+    final result = await _exercise(initial: 'no');
+    expect(result.error, isNull);
+    expect(result.player.properties['hwdec-software-fallback'], '8');
+    // MapEntry has no structural equality; match on key/value instead.
+    expect(
+        result.player.setPropertyCalls
+            .any((call) => call.key == 'hwdec-software-fallback'),
+        isTrue);
+    expect(
+        result.player.setPropertyCalls
+            .firstWhere((call) => call.key == 'hwdec-software-fallback')
+            .value,
+        '8');
+    // Owned strictly before the controller is created, like `hwdec`.
+    expect(result.creationSawSoftwareFallback, '8');
+  });
+
+  test('resetOwnedConfiguration restores the captured hwdec-software-fallback',
+      () async {
+    final result = await _exercise(initial: 'no');
+    expect(result.player.properties['hwdec-software-fallback'], '8');
+    await result.backend.resetOwnedConfiguration();
+    expect(result.player.properties['hwdec-software-fallback'], '3');
+  });
+
+  test(
+      'resetOwnedConfiguration restores a caller-set hwdec-software-fallback',
+      () async {
+    final result = await _exercise(initial: 'no', softwareFallback: 'no');
+    expect(result.player.properties['hwdec-software-fallback'], '8');
+    await result.backend.resetOwnedConfiguration();
+    expect(result.player.properties['hwdec-software-fallback'], 'no');
+  });
+
+  test('hwdec-software-fallback rejection fails preparation before creation',
+      () async {
+    final result = await _exercise(
+        initial: 'no',
+        readbackOverrides: const {'hwdec-software-fallback': 'no'});
+    expect(result.error, isA<StateError>());
+    expect((result.error as StateError).message,
+        contains('hwdec-software-fallback rejected: requested=8 actual=no'));
+    expect(result.creationSaw, isNull);
+    expect(result.creationSawSoftwareFallback, isNull);
+  });
+
+  test('empty hwdec-software-fallback baseline refuses controller creation',
+      () async {
+    final result = await _exercise(initial: 'no', softwareFallback: '');
+    expect(result.error, isA<StateError>());
+    expect(result.creationSaw, isNull);
+    expect(result.creationSawSoftwareFallback, isNull);
+  });
+
   test('empty baseline refuses controller creation', () async {
     final result = await _exercise(initial: '');
     expect(result.error, isA<StateError>());
@@ -86,10 +142,16 @@ Future<_Exercise> _exercise({
   Object? readError,
   bool gpu = false,
   String pixelFormat = 'rgba1010102',
+  String softwareFallback = '3',
+  Map<String, String>? readbackOverrides,
 }) async {
-  final player = _FakePlayer(initial, readError: readError);
+  final player = _FakePlayer(initial,
+      readError: readError,
+      softwareFallback: softwareFallback,
+      readbackOverrides: readbackOverrides);
   String? creationSaw;
   String? creationEgl;
+  String? creationSawSoftwareFallback;
   HdrOutputContract? creationContract;
   final slot = HdrOutputSlot<VideoController>(
     initial: null,
@@ -98,6 +160,8 @@ Future<_Exercise> _exercise({
     create: (contract) {
       creationSaw = player.properties['hwdec'];
       creationEgl = player.properties['egl-output-format'];
+      creationSawSoftwareFallback =
+          player.properties['hwdec-software-fallback'];
       creationContract = contract;
       return _FakeController(contract);
     },
@@ -120,8 +184,8 @@ Future<_Exercise> _exercise({
   } catch (e) {
     error = e;
   }
-  return _Exercise(
-      player, backend, creationSaw, error, creationContract, creationEgl);
+  return _Exercise(player, backend, creationSaw, error, creationContract,
+      creationEgl, creationSawSoftwareFallback);
 }
 
 HdrOpenPlan _plan(String hwdec, {bool gpu = false}) {
@@ -172,10 +236,21 @@ HdrOpenPlan _plan(String hwdec, {bool gpu = false}) {
 }
 
 class _FakePlayer implements Player {
-  _FakePlayer(String hwdec, {this.readError})
-      : properties = {'hwdec': hwdec, 'egl-output-format': 'rgba8'};
+  _FakePlayer(String hwdec,
+      {this.readError,
+      String softwareFallback = '3',
+      Map<String, String>? readbackOverrides})
+      : properties = {
+          'hwdec': hwdec,
+          'egl-output-format': 'rgba8',
+          // mpv's actual default for --hwdec-software-fallback.
+          'hwdec-software-fallback': softwareFallback,
+        },
+        _readbackOverrides = readbackOverrides;
   final Map<String, String> properties;
   final Object? readError;
+  final Map<String, String>? _readbackOverrides;
+  final List<MapEntry<String, String>> setPropertyCalls = [];
   final Lock _lock = Lock();
   final PlayerStream _stream = PlayerStream(
       Stream.empty(),
@@ -214,12 +289,15 @@ class _FakePlayer implements Player {
   Future<String> getProperty(String name,
       {bool waitForInitialization = true}) async {
     if (readError != null) throw readError!;
+    final overridden = _readbackOverrides?[name];
+    if (overridden != null) return overridden;
     return properties[name] ?? '';
   }
 
   @override
   Future<void> setPropertyStrict(String name, String value,
       {bool waitForInitialization = true}) async {
+    setPropertyCalls.add(MapEntry(name, value));
     properties[name] = value;
   }
 
@@ -236,11 +314,12 @@ class _FakeController implements VideoController {
 
 class _Exercise {
   const _Exercise(this.player, this.backend, this.creationSaw, this.error,
-      this.creationContract, this.creationEgl);
+      this.creationContract, this.creationEgl, this.creationSawSoftwareFallback);
   final _FakePlayer player;
   final AndroidHdrBackend backend;
   final String? creationSaw;
   final Object? error;
   final HdrOutputContract? creationContract;
   final String? creationEgl;
+  final String? creationSawSoftwareFallback;
 }

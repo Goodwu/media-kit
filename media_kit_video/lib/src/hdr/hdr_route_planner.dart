@@ -241,8 +241,16 @@ class HdrRoutePlanner {
     final bool dependsOnDataSpace =
         route != null && route.surfaceTransfer != null;
     final ext = capabilities.dataSpaceExt;
+    // Confidence is a capability judgment, never a device-name judgment: a
+    // route that depends on a dataspace transfer is verified only when the
+    // registered extension is applicable AND self-reports validated
+    // evidence for exactly that surface transfer. An undeclared transfer —
+    // on any extension id — stays unverified.
     final HdrPredictionConfidence confidence = !dependsOnDataSpace ||
-            (ext != null && ext.applicable && ext.id == 'lya-pq')
+            (ext != null &&
+                ext.applicable &&
+                ext.validatedPredictionTransfers
+                    .contains(route.surfaceTransfer))
         ? HdrPredictionConfidence.verified
         : HdrPredictionConfidence.unverified;
 

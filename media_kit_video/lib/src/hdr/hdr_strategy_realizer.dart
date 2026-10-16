@@ -340,11 +340,17 @@ class HdrStrategyRealizer {
           HdrDegradeReason.displayLacksTransfer);
     }
     const HdrOutputTransfer output = HdrOutputTransfer.pq;
+    // The pq-itu experiment keeps its existing lock semantics; the
+    // admission criterion is the extension's own supported-surface-transfer
+    // self-report, never a device-name-derived identifier. An extension
+    // that does not declare the transfer — on any id — stays refused.
     if (_convertPqSurfaceTransfer != 'pq' &&
         (_convertPqSurfaceTransfer != 'pq-itu' ||
             !_convertRouteLock ||
             capabilities.sdkInt != 24 ||
-            capabilities.dataSpaceExt?.id != 'lg-pq' ||
+            !(capabilities.dataSpaceExt?.supportedSurfaceTransfers
+                    .contains(_convertPqSurfaceTransfer) ??
+                false) ||
             capabilities.dataSpaceExt?.applicable != true)) {
       return const HdrStrategyRealization.infeasible(
           HdrDegradeReason.unsupportedStrategy);

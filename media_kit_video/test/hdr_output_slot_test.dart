@@ -868,6 +868,7 @@ HdrOpenPlan _slotYuvPlan() {
         id: 'lg-pq',
         applicable: true,
         pqPresentation: HdrPqPresentation(rgbSurface: false, yuvWindow: true),
+        yuvWindowArmApi: 1,
       ),
     ),
     prediction: HdrRoutePrediction(

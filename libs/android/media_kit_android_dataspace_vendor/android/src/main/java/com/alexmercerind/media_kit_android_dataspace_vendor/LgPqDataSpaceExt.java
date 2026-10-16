@@ -312,6 +312,34 @@ public final class LgPqDataSpaceExt implements PlatformVideoView.SurfaceDataSpac
         return true;
     }
 
+    /**
+     * Per-transfer capability self-report. Android 7.0 has no
+     * GET_BUFFERS_DATASPACE message (see the class javadoc), so a successful
+     * setter cannot be read back for either supported transfer — the
+     * setter-only exception is a declared device fact here, not an identity
+     * privilege. No validated prediction transfer is declared: without
+     * read-back evidence this extension never claims prediction confidence.
+     */
+    @Override
+    @Nullable
+    public java.util.Set<String> setterOnlyTransfers() {
+        return new java.util.HashSet<>(java.util.Arrays.asList("pq", "pq-itu"));
+    }
+
+    @Override
+    @Nullable
+    public java.util.Set<String> supportedSurfaceTransfers() {
+        // Mirrors {@link #supportsDataSpace}: BT2020_PQ and the LIMITED
+        // form.
+        return new java.util.HashSet<>(java.util.Arrays.asList("pq", "pq-itu"));
+    }
+
+    /** The managed YUV window arm protocol this extension implements. */
+    @Override
+    public int yuvWindowArmApi() {
+        return 1;
+    }
+
     static final String FINGERPRINT =
             "lge/lucye_global_com/lucye:7.0/NRD90U/172921900e77a:user/release-keys";
 

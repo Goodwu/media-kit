@@ -2,6 +2,7 @@ package com.alexmercerind.media_kit_android_dataspace_vendor;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import android.view.Surface;
@@ -174,5 +175,28 @@ public class LyaPqDataSpaceExtTest {
         assertFalse(ext.applyDataSpace(NO_SURFACE, PQ));
         assertFalse(ext.applyDataSpace(NO_SURFACE, HLG));
         assertEquals(0, ext.loadCalls);
+    }
+
+    @Test
+    public void capabilitySelfReport_declaresValidatedPredictionForPqOnly() {
+        LyaPqDataSpaceExt ext =
+                new LyaPqDataSpaceExt(sdk(Q_SDK), fingerprint(LYA_FINGERPRINT));
+        // The read-back-verified PQ apply path is the validated prediction
+        // evidence for exactly the pq transfer.
+        assertEquals(java.util.Collections.singleton("pq"),
+                ext.validatedPredictionTransfers());
+        // No setter-only exception: every PQ apply here is read-back
+        // verified, so the structure stays undeclared.
+        assertNull(ext.setterOnlyTransfers());
+        // No managed YUV window arm protocol on this device.
+        assertEquals(0, ext.yuvWindowArmApi());
+    }
+
+    @Test
+    public void capabilitySelfReport_supportedTransfersMirrorTheGate() {
+        // The apply gate accepts only BT2020_PQ; the self-report must state
+        // exactly that, so routing never admits an undeclared transfer.
+        assertEquals(java.util.Collections.singleton("pq"),
+                new LyaPqDataSpaceExt().supportedSurfaceTransfers());
     }
 }

@@ -167,11 +167,16 @@ void main() {
             dolbyVisionDecoders: const [],
             p5PipelineAvailable: true,
             dataSpaceBridgeLoaded: true,
+            // The LG-shaped self-report: the YUV window channel, the
+            // setter-only exception the readback-less apply path relies on,
+            // and the managed YUV arm protocol declaration.
             dataSpaceExt: const HdrDataSpaceExtInfo(
               id: 'lg-pq',
               applicable: true,
               pqPresentation:
                   HdrPqPresentation(rgbSurface: false, yuvWindow: true),
+              setterOnlyTransfers: <String>{'pq', 'pq-itu'},
+              yuvWindowArmApi: 1,
             ),
           ),
         );
@@ -598,11 +603,16 @@ HdrOpenPlan _issuedPlan(HdrRoute route) => _plan(route).copyWith(
         dolbyVisionDecoders: const [],
         p5PipelineAvailable: true,
         dataSpaceBridgeLoaded: true,
+        // The LG-shaped self-report: the YUV window channel, the
+        // setter-only exception the harness's readback-less apply path
+        // relies on, and the managed YUV arm protocol declaration.
         dataSpaceExt: const HdrDataSpaceExtInfo(
           id: 'lg-pq',
           applicable: true,
           pqPresentation:
               HdrPqPresentation(rgbSurface: false, yuvWindow: true),
+          setterOnlyTransfers: <String>{'pq', 'pq-itu'},
+          yuvWindowArmApi: 1,
         ),
       ),
     );
@@ -644,7 +654,7 @@ class _FakePlatformOutput implements PlatformVideoController {
 }
 
 class _FakePlayer implements Player {
-  _FakePlayer() : properties = {'hwdec': 'no'};
+  _FakePlayer() : properties = {'hwdec': 'no', 'hwdec-software-fallback': '3'};
 
   final Map<String, String> properties;
   final Lock _lock = Lock();

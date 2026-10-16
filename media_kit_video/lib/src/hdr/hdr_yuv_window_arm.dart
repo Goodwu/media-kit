@@ -175,8 +175,9 @@ class HdrYuvWindowProcessLease {
 /// Arm admission is the YUV window route itself
 /// ([HdrYuvPresentationContract.isYuvWindowRoute]) plus the full fail-closed
 /// quad validation, the device's declared PQ presentation channel and the
-/// vendor exact device gate. There is no build define: any other route takes
-/// ZERO arms and is bit-identical to the pre-manager behavior.
+/// vendor YUV arm capability gate (the extension's applicable flag plus its
+/// declared arm protocol version). There is no build define: any other route
+/// takes ZERO arms and is bit-identical to the pre-manager behavior.
 ///
 /// Arm ordering (existing rule): owner-bound first through the vendor plugin
 /// channel; a refusal or an unavailable channel falls back to the legacy
@@ -316,6 +317,11 @@ class HdrYuvWindowArm implements HdrOutputResources<HdrOpenPlan> {
   /// returns the refusal reason for a YUV window route this manager cannot
   /// arm, or null when admissible. Non-YUV routes are always null — they
   /// neither arm nor fail here.
+  ///
+  /// The vendor gate is a capability judgment, never a device-name
+  /// judgment: the registered extension must be applicable AND self-report
+  /// the managed YUV arm protocol version this library speaks (currently
+  /// 1). An extension without the declaration — on any id — is refused.
   static String? routeAdmissionRefusal(HdrOpenPlan plan, String? ownerToken) {
     final route = plan.route;
     if (!HdrYuvPresentationContract.isYuvWindowRoute(route)) return null;
@@ -328,13 +334,15 @@ class HdrYuvWindowArm implements HdrOutputResources<HdrOpenPlan> {
     if (!capabilities.pqPresentation.yuvWindow) {
       return 'device declares no YUV window PQ presentation channel';
     }
+    const int yuvWindowArmProtocol = 1;
     final ext = capabilities.dataSpaceExt;
-    if (capabilities.sdkInt != 24 ||
-        ext?.id != 'lg-pq' ||
-        ext?.applicable != true) {
-      return 'vendor exact device gate refused '
-          '(sdk=${capabilities.sdkInt}, ext=${ext?.id}, '
-          'applicable=${ext?.applicable})';
+    if (ext == null ||
+        !ext.applicable ||
+        ext.yuvWindowArmApi != yuvWindowArmProtocol) {
+      return 'vendor YUV arm capability gate refused '
+          '(ext=${ext?.id}, applicable=${ext?.applicable}, '
+          'yuvWindowArmApi=${ext?.yuvWindowArmApi}, '
+          'required=$yuvWindowArmProtocol)';
     }
     if (ownerToken == null || ownerToken.isEmpty) {
       return 'no valid surface owner token: the YUV window route requires '
