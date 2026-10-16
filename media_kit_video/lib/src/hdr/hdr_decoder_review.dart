@@ -342,12 +342,16 @@ Future<HdrReviewFacts> gatherDecoderReviewFacts({
       // hwdec mode and the IDENTICAL MediaCodec configuration.
       if (key == 'current-tracks/video/decoder' &&
           registered != null &&
-          ((av == registered && bv == '${registered}_mediacodec') ||
-              (bv == registered && av == '${registered}_mediacodec')) &&
+          av == registered &&
+          bv == '${registered}_mediacodec' &&
           a['hwdec-current'] == b['hwdec-current'] &&
           a['hwdec-current']!.startsWith('mediacodec') &&
           a['android-mediacodec-info'] == b['android-mediacodec-info']) {
-        return av == registered ? bv : av;
+        // One-way only: A is the registered label, B its settled hwdec
+        // form. A suffixed A half reverting to the registered B half is an
+        // OBSERVED REVERSAL, never a publication — it fails and is not
+        // washed out by later settling (V2 third review, defect 1).
+        return bv;
       }
       return null;
     }
@@ -418,13 +422,21 @@ Future<HdrReviewFacts> gatherDecoderReviewFacts({
                 // with the registered MediaCodec configuration unchanged
                 // and a mediacodec* mode present (published this round or
                 // already baselined). Everything else still fails.
+                // The hwdec mode backing the settlement: the value this
+                // round PUBLISHED for hwdec-current, or the round's own
+                // value — a bare "hwdec-current was published" is not
+                // enough; the published mode must itself be MediaCodec
+                // (V2 third review, defect 2: an empty → surfacetexture
+                // publication must not settle an attach).
+                final settledHwdec = publishedKeys.containsKey('hwdec-current')
+                    ? publishedKeys['hwdec-current']!
+                    : a['hwdec-current']!;
                 final attachSettlement = key ==
                         'current-tracks/video/decoder' &&
                     value == '${observed}_mediacodec' &&
                     a['android-mediacodec-info'] ==
                         observedDecoderEndpoints['android-mediacodec-info'] &&
-                    (a['hwdec-current']!.startsWith('mediacodec') ||
-                        publishedKeys.containsKey('hwdec-current'));
+                    settledHwdec.startsWith('mediacodec');
                 if (!publishedKeys.containsKey(key) && !attachSettlement) {
                   throw HdrDecoderReviewFailure(
                       'Observed decoder changed: $key');
