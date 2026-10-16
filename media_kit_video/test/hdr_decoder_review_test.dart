@@ -548,13 +548,21 @@ void main() {
       }
       if (p == 'path' || p == 'playlist/0/filename') return 'test://same';
       if (p == 'playlist/0/id') return '7';
+      if (p == 'android-mediacodec-info') {
+        return '{"api":1,"mime":"video/hevc","codec":"c2.hevc","native-dv-active":false}';
+      }
       if (p == 'video-params/pixelformat' && hwdecReads <= 4) return '';
       return 'nv12';
     };
     await expectLater(
         s.gather(),
         throwsA(isA<HdrDecoderReviewFailure>().having((error) => error.detail,
-            'detail', contains('Decoder endpoint changed'))));
+            'detail',
+            // The label settles against the pre-attach baseline while the
+            // published hwdec mode is NOT MediaCodec — the observed-decoder
+            // guard rejects the settle (the old bare-publication branch
+            // would have superseded it).
+            contains('Observed decoder changed'))));
   });
 
   test('a complete snapshot that violates the plan is still rejected',
