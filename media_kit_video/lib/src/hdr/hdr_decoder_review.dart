@@ -175,12 +175,13 @@ Future<HdrReviewFacts> gatherDecoderReviewFacts({
   final now = monotonicNow ?? (() => stopwatch.elapsed);
   final started = now();
   // Bounded diagnostics state (HDR review layer): the monotonic wait-phase
-  // attribution and the last endpoint A/B snapshots. Pure observation — no
-  // read order, retry or admission semantics depend on any of it, and no
-  // source path value is ever recorded.
+  // attribution and the CURRENT round's endpoint snapshots. Pure observation
+  // — no read order, retry or admission semantics depend on any of it — and
+  // no source path value is ever recorded. Snapshots are round-scoped: a
+  // round that fails midway cannot be mixed with the next round's halves.
   var phase = 'loaded';
   var iterations = 0;
-  var identityOk = true;
+  var identityState = 'unchecked';
   var loadedMs = -1;
   Map<String, String>? aValues;
   Map<String, String>? bValues;
@@ -196,22 +197,27 @@ Future<HdrReviewFacts> gatherDecoderReviewFacts({
       changedA = aValues?[changedKey];
       changedB = bValues?[changedKey];
     }
-    HdrOutputDiagnostics.review(
-      playlistEntryId: playlistEntryId,
-      openedAfterEpoch: openedAfterEpoch,
-      outcome: outcome,
-      iterations: iterations,
-      elapsedMs: now().inMilliseconds,
-      loadedMs: loadedMs,
-      phase: phase,
-      identityOk: identityOk,
-      detail: detail,
-      changedKey: changedKey,
-      changedA: changedA,
-      changedB: changedB,
-      aValues: aValues,
-      bValues: bValues,
-    );
+    try {
+      HdrOutputDiagnostics.review(
+        playlistEntryId: playlistEntryId,
+        openedAfterEpoch: openedAfterEpoch,
+        outcome: outcome,
+        iterations: iterations,
+        elapsedMs: (now() - started).inMilliseconds,
+        loadedMs: loadedMs < 0 ? -1 : (loadedMs),
+        phase: phase,
+        identityOk: identityState,
+        detail: detail,
+        changedKey: changedKey,
+        changedA: changedA,
+        changedB: changedB,
+        aValues: aValues,
+        bValues: bValues,
+      );
+    } catch (_) {
+      // A diagnostics failure (broken sink, formatting) must never change
+      // the review's outcome or replace its original exception.
+    }
   }
 
   try {
@@ -239,7 +245,7 @@ Future<HdrReviewFacts> gatherDecoderReviewFacts({
         bounded(() => readProperty(property));
     final loaded = await bounded(
         () => waitForFileLoadedEntry(playlistEntryId, openedAfterEpoch));
-    loadedMs = now().inMilliseconds;
+    loadedMs = (now() - started).inMilliseconds;
     phase = 'loadedEpochCheck';
     if (loaded.epoch != openedAfterEpoch + 1 ||
         loaded.playlistEntryId != playlistEntryId) {
@@ -254,9 +260,10 @@ Future<HdrReviewFacts> gatherDecoderReviewFacts({
           await read('playlist/0/id') != playlistEntryId.toString() ||
           await read('playlist/0/filename') != mediaUri ||
           fileLoadedEpoch() != loaded.epoch) {
-        identityOk = false;
+        identityState = 'failed';
         throw const HdrDecoderReviewFailure('Current source identity differs');
       }
+      identityState = 'ok';
     }
 
     const endpoints = <String>[
@@ -301,53 +308,96 @@ Future<HdrReviewFacts> gatherDecoderReviewFacts({
       'android-mediacodec-info',
     ];
 
-    /// The pre-ready shape observed on device (HDR review diagnostics,
-    /// marble 2026-10-16): while mpv attaches `mediacodec-copy`, the FIRST
-    /// snapshot still carries the un-suffixed software track label with an
-    /// empty pixel format, and the immediate second snapshot already reads
-    /// `h264_mediacodec` — the SAME MediaCodec component in
-    /// `android-mediacodec-info` on both sides. That half is the before of
-    /// one settling transition, not a decoder change: retry it within the
-    /// shared budget instead of comparing it against its settled other
-    /// half. Deliberately narrow, baseline-aware: it applies only until the
-    /// decoder label is first registered, only with a frame format still
-    /// unreported, and it can never mask a contradicting registered
-    /// baseline (the observed-decoder guard below still rejects drift), a
-    /// complete-but-conflicting sample (plan validation still rejects it),
-    /// or an A/B mismatch between two settled halves.
-    bool decoderLabelPreReady(Map<String, String> a) {
-      if (observedDecoderEndpoints['current-tracks/video/decoder'] != null) {
-        return false;
+    /// The publication contract (V2 R1.3): the ONLY per-key transitions
+    /// permitted between the two halves of one sampling round, each still
+    /// bounded by the shared budget and subject to the observed-decoder
+    /// guard below.
+    ///
+    /// * First publication — one half is still empty: the property had no
+    ///   prior value that a retry could hide.
+    /// * The hw-attach label publication — `X` → `X_mediacodec` while
+    ///   both halves report the identical hwdec mode and the IDENTICAL
+    ///   MediaCodec configuration (component, MIME, native-DV flag): the
+    ///   device-evidenced relabeling of ONE decoder attachment. A swapped
+    ///   configuration between the halves is not this shape and fails as a
+    ///   decoder change. Component name equality is necessary, not an
+    ///   instance proof — the residual same-name-instance risk is recorded
+    ///   and accepted by explicit adjudication, with any later drift of the
+    ///   registered settled identity still rejected by the guard.
+    bool supportedPublication(
+        String key, Map<String, String> a, Map<String, String> b) {
+      if (a[key]!.isEmpty || b[key]!.isEmpty) return true;
+      if (key == 'current-tracks/video/decoder' &&
+          b[key] == '${a[key]}_mediacodec' &&
+          a['hwdec-current'] == b['hwdec-current'] &&
+          a['hwdec-current']!.startsWith('mediacodec') &&
+          a['android-mediacodec-info'] == b['android-mediacodec-info']) {
+        return true;
       }
-      return a['hwdec-current']!.startsWith('mediacodec') &&
-          !a['current-tracks/video/decoder']!.endsWith('_mediacodec') &&
-          a['video-params/pixelformat']!.isEmpty;
+      return false;
     }
 
     while (true) {
       iterations++;
+      aValues = null;
+      bValues = null; // Round-scoped snapshots: never mix rounds (V2 R3).
       final result = await bounded(() => lock.synchronized(() async {
             phase = 'admission';
             remaining(); // A late lock admission must perform no reads.
             await identity();
             final a = await endpoint();
             final b = await endpoint();
-            // Readiness before equality: the un-suffixed, frame-less label
-            // half of a settling hwdec attachment is not decoder evidence.
-            if (decoderLabelPreReady(a)) {
-              return null;
-            }
+            // Post-sampling source identity BEFORE any publication
+            // handling (V2 R1.1): a superseded or drifted source can never
+            // be carried into a retry.
+            phase = 'identityAfter';
             await identity();
-            for (final key in endpoints) {
-              if (a[key] != b[key]) {
-                throw HdrDecoderReviewFailure('Decoder endpoint changed: $key');
+            // Per-sample safety on BOTH halves before any publication
+            // handling (V2 R1.2): a malformed configuration or an active
+            // native-DV component can never be washed out by a retry.
+            for (final half in [a, b]) {
+              final raw = half['android-mediacodec-info']!;
+              final config = AndroidMediaCodecConfiguration.parse(raw);
+              if (raw.isNotEmpty && config == null) {
+                throw const HdrDecoderReviewFailure(
+                    'Malformed MediaCodec info');
+              }
+              if (config?.nativeDvActive == true) {
+                throw const HdrDecoderReviewFailure(
+                    'Native DV requires its owned review consumer');
               }
             }
+            // Endpoint equality with the bounded publication contract
+            // (V2 R1.3): any other mismatch fails.
+            final publishedKeys = <String>{};
+            for (final key in endpoints) {
+              if (a[key] != b[key]) {
+                if (!supportedPublication(key, a, b)) {
+                  throw HdrDecoderReviewFailure(
+                      'Decoder endpoint changed: $key');
+                }
+                publishedKeys.add(key);
+              }
+            }
+            // Cross-attempt identity guard: registered from the SETTLED
+            // side of a published key and from every other non-empty value,
+            // on every round that reaches this point — including rounds
+            // that are still incomplete (drift is never masked by
+            // readiness).
             for (final key in decoderIdentityEndpoints) {
-              final value = a[key]!;
+              final published = publishedKeys.contains(key);
+              final value = published
+                  ? (b[key]!.isNotEmpty ? b[key]! : a[key]!)
+                  : a[key]!;
               final observed = observedDecoderEndpoints[key];
               if (observed != null && value != observed) {
-                throw HdrDecoderReviewFailure('Observed decoder changed: $key');
+                // A supported publication SUPERSEDES the pre-attach label:
+                // the settled value becomes the registered identity. Any
+                // change that is not a supported publication still fails.
+                if (!published) {
+                  throw HdrDecoderReviewFailure(
+                      'Observed decoder changed: $key');
+                }
               }
               if (value.isNotEmpty) observedDecoderEndpoints[key] = value;
             }
@@ -360,13 +410,6 @@ Future<HdrReviewFacts> gatherDecoderReviewFacts({
             final hdr10Plus = a['video-params/hdr10-plus']!;
             final rawConfig = a['android-mediacodec-info']!;
             final config = AndroidMediaCodecConfiguration.parse(rawConfig);
-            if (rawConfig.isNotEmpty && config == null) {
-              throw const HdrDecoderReviewFailure('Malformed MediaCodec info');
-            }
-            if (config?.nativeDvActive == true) {
-              throw const HdrDecoderReviewFailure(
-                  'Native DV requires its owned review consumer');
-            }
             final hwdec = a['hwdec-current']!;
             final pixel = a['video-params/pixelformat']!;
             final gamma = a['video-params/gamma']!;
@@ -446,7 +489,9 @@ Future<HdrReviewFacts> gatherDecoderReviewFacts({
     emitReview('timeout', detail: error.message);
     rethrow;
   } catch (error) {
-    emitReview('failure', detail: error.toString());
+    // Privacy (V2 R3): an unknown error's message may embed the source
+    // URL — record only the runtime type, never the message.
+    emitReview('failure', detail: error.runtimeType.toString());
     rethrow;
   }
 }

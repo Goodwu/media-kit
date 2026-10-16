@@ -257,6 +257,89 @@ void main() {
             (error) => error.detail, 'detail', contains('Observed'))));
   });
 
+  test('pre-ready halves with differing components are never retried clean',
+      () async {
+    // V2 R1 counterexample: the un-suffixed first half must not launder a
+    // real component change. The attach publication requires the IDENTICAL
+    // MediaCodec configuration; a different component fails the pair.
+    final s = Sample();
+    var decoderReads = 0;
+    s.props['hwdec-current'] = 'mediacodec-copy';
+    s.props['video-params/pixelformat'] = '';
+    s.onRead = (p) async {
+      if (p == 'current-tracks/video/decoder') {
+        final n = ++decoderReads;
+        return n.isEven ? 'hevc_mediacodec' : 'hevc';
+      }
+      if (p == 'android-mediacodec-info') {
+        return decoderReads.isEven
+            ? '{"api":1,"mime":"video/hevc","codec":"c2.hevc.y","native-dv-active":false}'
+            : '{"api":1,"mime":"video/hevc","codec":"c2.hevc.x","native-dv-active":false}';
+      }
+      return s.props[p] ?? '';
+    };
+    await expectLater(s.gather(), throwsA(isA<HdrDecoderReviewFailure>()));
+  });
+
+  test('pre-ready malformed configuration is rejected before any retry',
+      () async {
+    final s = Sample();
+    s.props['hwdec-current'] = 'mediacodec-copy';
+    s.props['video-params/pixelformat'] = '';
+    s.props['current-tracks/video/decoder'] = 'hevc';
+    s.props['android-mediacodec-info'] = '{broken';
+    await expectLater(s.gather(), throwsA(isA<HdrDecoderReviewFailure>()));
+  });
+
+  test('registered hwdec baseline rejects later mode drift while pre-ready',
+      () async {
+    final s = Sample();
+    var hwdecReads = 0;
+    s.props['video-params/pixelformat'] = '';
+    s.props['current-tracks/video/decoder'] = 'hevc';
+    s.onRead = (p) async {
+      if (p == 'hwdec-current' && ++hwdecReads > 34) return 'surfacetexture';
+      return s.props[p] ?? '';
+    };
+    await expectLater(s.gather(budget: const Duration(seconds: 1)),
+        throwsA(isA<HdrDecoderReviewFailure>().having(
+            (error) => error.detail, 'detail', contains('Observed'))));
+  });
+
+  test('source drift inside the publication window is rejected immediately',
+      () async {
+    final s = Sample();
+    var hwdecReads = 0;
+    s.props['video-params/pixelformat'] = '';
+    s.props['current-tracks/video/decoder'] = 'hevc';
+    s.onRead = (p) async {
+      if (p == 'hwdec-current' && ++hwdecReads > 20) s.epoch++;
+      return s.props[p] ?? '';
+    };
+    await expectLater(s.gather(), throwsA(isA<HdrDecoderReviewFailure>()));
+    expect(s.reads.take(4).contains('path'), isTrue);
+  });
+
+  test('hwdec first publication retries and completes on the settled mode',
+      () async {
+    // Device shape (marble, second capture): hwdec-current itself is
+    // published between the two halves while the decoder label and MediaCodec
+    // component already agree.
+    final s = Sample();
+    var hwdecReads = 0;
+    s.props['video-params/pixelformat'] = 'nv12';
+    s.props['video-params/gamma'] = 'bt.1886';
+    s.props['video-params/primaries'] = 'bt.709';
+    s.props['current-tracks/video/decoder'] = 'hevc_mediacodec';
+    s.onRead = (p) async {
+      if (p == 'hwdec-current' && ++hwdecReads <= 17) return '';
+      return s.props[p] ?? '';
+    };
+    final facts = await s.gather(budget: const Duration(seconds: 3));
+    expect(facts.hwdecCurrent, 'mediacodec');
+    expect(facts.decoderObservation!.decoder, 'hevc_mediacodec');
+  });
+
   test('a complete snapshot that violates the plan is still rejected', () async {
     // This is complete in the first round: no decoder-publication transition
     // is claimed. The HEVC component conflicts with the AVC track.

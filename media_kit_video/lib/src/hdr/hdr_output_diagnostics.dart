@@ -262,6 +262,19 @@ class HdrOutputDiagnostics {
   /// pixel-format names). The source path is deliberately NOT recorded —
   /// source integrity appears only as a boolean — so no token or signed URL
   /// can reach the log through this layer.
+  /// Field and total line caps for the review layer: a record must stay a
+  /// single bounded logcat line even when a property unexpectedly carries a
+  /// huge or multi-line value (V2 R3).
+  static const int _reviewValueCap = 200;
+  static const int _reviewLineCap = 3600;
+
+  static String _sanitizeValue(String value) {
+    final flat = value.replaceAll('\n', '\\n').replaceAll('\r', '\\r');
+    return flat.length <= _reviewValueCap
+        ? flat
+        : '${flat.substring(0, _reviewValueCap)}…';
+  }
+
   static void review({
     required int playlistEntryId,
     required int openedAfterEpoch,
@@ -270,7 +283,7 @@ class HdrOutputDiagnostics {
     required int elapsedMs,
     required int loadedMs,
     required String phase,
-    required bool identityOk,
+    required String identityOk,
     String? detail,
     String? changedKey,
     String? changedA,
@@ -290,7 +303,7 @@ class HdrOutputDiagnostics {
           'phase=$phase '
           'identityOk=$identityOk');
     void field(String name, String? value) {
-      if (value != null) buffer.write(' $name=$value');
+      if (value != null) buffer.write(' $name=${_sanitizeValue(value)}');
     }
 
     field('detail', detail);
@@ -299,13 +312,20 @@ class HdrOutputDiagnostics {
     field('changedB', changedB);
     if (aValues != null) field('a', _endpointValues(aValues));
     if (bValues != null) field('b', _endpointValues(bValues));
-    printer(buffer.toString());
+    var line = buffer.toString();
+    if (line.length > _reviewLineCap) {
+      line = '${line.substring(0, _reviewLineCap)}…truncated';
+    }
+    printer(line);
   }
 
   /// Compact endpoint snapshot: `k=v` pairs joined by `,` in the fixed
-  /// endpoint order (the map is a linked insertion-ordered map).
+  /// endpoint order (the map is a linked insertion-ordered map). Values are
+  /// sanitized to keep the record single-line and bounded.
   static String _endpointValues(Map<String, String> values) {
-    return values.entries.map((e) => '${e.key}=${e.value}').join(',');
+    return values.entries
+        .map((e) => '${e.key}=${_sanitizeValue(e.value)}')
+        .join(',');
   }
 
   // ---------------------------------------------------------------------------
