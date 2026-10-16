@@ -324,38 +324,6 @@ Future<HdrReviewFacts> gatherDecoderReviewFacts({
     ///   instance proof — the residual same-name-instance risk is recorded
     ///   for separate adjudication, with any later drift of the registered
     ///   settled identity still rejected by the guard.
-    String? supportedPublication(
-        String key, Map<String, String> a, Map<String, String> b) {
-      final registered = observedDecoderEndpoints[key];
-      final av = a[key]!;
-      final bv = b[key]!;
-      // First publication: no registered value yet, direction empty →
-      // value. A registered value followed by an empty half is a
-      // disappearing observation (teardown/reinit) and fails closed; it
-      // can never re-authorize or swap a baseline (V2 second review R1).
-      if (registered == null && av.isEmpty && bv.isNotEmpty) {
-        return bv;
-      }
-      // In-pair hw-attach label publication: the registered label X with
-      // one half still X and the other already X_mediamediacodec… i.e. X
-      // plus the hwdec suffix — while both halves report the identical
-      // hwdec mode and the IDENTICAL MediaCodec configuration.
-      if (key == 'current-tracks/video/decoder' &&
-          registered != null &&
-          av == registered &&
-          bv == '${registered}_mediacodec' &&
-          a['hwdec-current'] == b['hwdec-current'] &&
-          a['hwdec-current']!.startsWith('mediacodec') &&
-          a['android-mediacodec-info'] == b['android-mediacodec-info']) {
-        // One-way only: A is the registered label, B its settled hwdec
-        // form. A suffixed A half reverting to the registered B half is an
-        // OBSERVED REVERSAL, never a publication — it fails and is not
-        // washed out by later settling (V2 third review, defect 1).
-        return bv;
-      }
-      return null;
-    }
-
     while (true) {
       iterations++;
       aValues = null;
@@ -392,15 +360,61 @@ Future<HdrReviewFacts> gatherDecoderReviewFacts({
             // decoder label. Anything else fails — including a registered
             // value whose half disappeared.
             final publishedKeys = <String, String>{};
+            // The hw-attach window publishes the decoder label suffix AND
+            // the hwdec mode in the SAME round (device evidence, LG DV
+            // attach: decoder hevc → hevc_mediacodec while hwdec-current
+            // publishes empty → surfacetexture, identical MediaCodec
+            // configuration). Evaluate the pair as a whole: every mismatch
+            // must be explained by the publication contract, otherwise the
+            // round fails.
+            var attachSettling = false;
             for (final key in endpoints) {
-              if (a[key] != b[key]) {
-                final settled = supportedPublication(key, a, b);
-                if (settled == null) {
-                  throw HdrDecoderReviewFailure(
-                      'Decoder endpoint changed: $key');
-                }
-                publishedKeys[key] = settled;
+              if (a[key] == b[key]) continue;
+              final registered = observedDecoderEndpoints[key];
+              final av = a[key]!, bv = b[key]!;
+              // Direction matters: A empty → B published is a first
+              // publication (the value appeared); A published → B empty is
+              // a DISAPPEARANCE (the value went away) — always a failure,
+              // never a publication or a retry (V2 fourth review).
+              if (av.isNotEmpty && bv.isEmpty) {
+                throw HdrDecoderReviewFailure(
+                    'Decoder endpoint changed: $key (value disappeared)');
               }
+              final firstPublication = registered == null && av.isEmpty;
+              final attachLabel = key == 'current-tracks/video/decoder' &&
+                  registered != null &&
+                  av == registered &&
+                  bv == '${registered}_mediacodec';
+              if (firstPublication) {
+                publishedKeys[key] = bv;
+                attachSettling = attachSettling ||
+                    (key == 'hwdec-current' && bv.startsWith('mediacodec')) ||
+                    (key == 'current-tracks/video/decoder' &&
+                        bv.endsWith('_mediacodec'));
+                continue;
+              }
+              if (attachLabel &&
+                  a['android-mediacodec-info'] ==
+                      b['android-mediacodec-info']) {
+                // The hwdec mode may publish in the same window: the pair
+                // is acceptable when the halves agree on a MediaCodec
+                // mode, or the hwdec-current pair is itself a first
+                // publication whose settled value is a hardware mode.
+                final aHwdec = a['hwdec-current']!;
+                final bHwdec = b['hwdec-current']!;
+                final hwdecRegistered =
+                    observedDecoderEndpoints['hwdec-current'];
+                final hwdecInFlight = hwdecRegistered == null && aHwdec.isEmpty;
+                final hwdecSettled = bHwdec.isNotEmpty ? bHwdec : aHwdec;
+                if (aHwdec == bHwdec && aHwdec.startsWith('mediacodec') ||
+                    hwdecInFlight && hwdecSettled.startsWith('mediacodec') ||
+                    hwdecSettled.startsWith('surfacetexture')) {
+                  publishedKeys[key] = bv;
+                  attachSettling = true;
+                  continue;
+                }
+              }
+              throw HdrDecoderReviewFailure('Decoder endpoint changed: $key');
             }
             // Cross-attempt identity guard: registered from the SETTLED
             // side of a published key and from every other non-empty value,
