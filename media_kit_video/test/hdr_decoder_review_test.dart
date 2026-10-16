@@ -532,11 +532,11 @@ void main() {
     await expectLater(s.gather(), throwsA(isA<HdrDecoderReviewFailure>()));
   });
 
-  test('a non-MediaCodec hwdec publication cannot settle an attach', () async {
-    // V2 third review defect 2: the label settles while hwdec-current is
-    // published empty → surfacetexture. The attach settlement requires the
-    // settled mode to be MediaCodec; the surfacetexture publication fails
-    // the pair instead of updating the label baseline.
+  test('a non-hardware hwdec publication alongside the label attach fails',
+      () async {
+    // A software decode ('no') publishing alongside the label attach is a
+    // decode failure, not an attach — the managed arm requires the settled
+    // hwdec to be a hardware mode.
     final s = Sample();
     var decoderReads = 0;
     var hwdecReads = 0;
@@ -550,7 +550,7 @@ void main() {
         final n = ++hwdecReads;
         if (n <= 2) return ''; // R1: unpublished
         if (n == 3) return ''; // R2 A: still empty
-        return 'surfacetexture'; // R2 B: non-MC publish
+        return 'no'; // R2 B: software decode
       }
       if (p == 'path' || p == 'playlist/0/filename') return 'test://same';
       if (p == 'playlist/0/id') return '7';
@@ -563,12 +563,39 @@ void main() {
     await expectLater(
         s.gather(),
         throwsA(isA<HdrDecoderReviewFailure>().having((error) => error.detail,
-            'detail',
-            // The label settles against the pre-attach baseline while the
-            // published hwdec mode is NOT MediaCodec — the observed-decoder
-            // guard rejects the settle (the old bare-publication branch
-            // would have superseded it).
-            contains('Observed decoder changed'))));
+            'detail', contains('Observed decoder changed'))));
+  });
+
+  test('surfacetexture publication settles as the YUV carrier attach',
+      () async {
+    // The YUV carrier route's own hwdec mode IS surfacetexture — the
+    // managed attach settlement accepts it and returns facts.
+    final s = Sample();
+    var decoderReads = 0;
+    var hwdecReads = 0;
+    s.onRead = (p) async {
+      if (p == 'current-tracks/video/decoder') {
+        final n = ++decoderReads;
+        if (n <= 2) return 'hevc'; // R1: baseline
+        return 'hevc_mediacodec'; // R2+: settled label
+      }
+      if (p == 'hwdec-current') {
+        final n = ++hwdecReads;
+        if (n <= 2) return ''; // R1: unpublished
+        if (n == 3) return ''; // R2 A: still empty
+        return 'surfacetexture'; // R2 B: hw mode publish
+      }
+      if (p == 'path' || p == 'playlist/0/filename') return 'test://same';
+      if (p == 'playlist/0/id') return '7';
+      if (p == 'android-mediacodec-info') {
+        return '{"api":1,"mime":"video/hevc","codec":"c2.hevc","native-dv-active":false}';
+      }
+      if (p == 'video-params/pixelformat' && hwdecReads <= 4) return '';
+      return 'nv12';
+    };
+    final facts = await s.gather();
+    expect(facts.hwdecCurrent, 'surfacetexture');
+    expect(facts.decoderObservation!.decoder, 'hevc_mediacodec');
   });
 
   test('a complete snapshot that violates the plan is still rejected',

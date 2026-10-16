@@ -436,21 +436,28 @@ Future<HdrReviewFacts> gatherDecoderReviewFacts({
                 // with the registered MediaCodec configuration unchanged
                 // and a mediacodec* mode present (published this round or
                 // already baselined). Everything else still fails.
-                // The hwdec mode backing the settlement: the value this
-                // round PUBLISHED for hwdec-current, or the round's own
-                // value — a bare "hwdec-current was published" is not
-                // enough; the published mode must itself be MediaCodec
-                // (V2 third review, defect 2: an empty → surfacetexture
-                // publication must not settle an attach).
+                // The attach settlement requires: the decoder label went
+                // from the registered bare value to its hwdec-suffixed
+                // form, the MediaCodec configuration is unchanged, and the
+                // hwdec mode (this round's or the registered baseline) is
+                // a hardware decode mode (mediacodec* or surfacetexture —
+                // the two Android hardware paths; the YUV carrier route's
+                // own mode is surfacetexture).
                 final settledHwdec = publishedKeys.containsKey('hwdec-current')
                     ? publishedKeys['hwdec-current']!
                     : a['hwdec-current']!;
+                final registeredHwdec =
+                    observedDecoderEndpoints['hwdec-current'] ?? '';
+                final hwdecIsHardware = settledHwdec.startsWith('mediacodec') ||
+                    settledHwdec.startsWith('surfacetexture') ||
+                    registeredHwdec.startsWith('mediacodec') ||
+                    registeredHwdec.startsWith('surfacetexture');
                 final attachSettlement = key ==
                         'current-tracks/video/decoder' &&
                     value == '${observed}_mediacodec' &&
                     a['android-mediacodec-info'] ==
                         observedDecoderEndpoints['android-mediacodec-info'] &&
-                    settledHwdec.startsWith('mediacodec');
+                    hwdecIsHardware;
                 if (!publishedKeys.containsKey(key) && !attachSettlement) {
                   throw HdrDecoderReviewFailure(
                       'Observed decoder changed: $key');
