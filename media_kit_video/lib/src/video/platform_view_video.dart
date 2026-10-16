@@ -34,6 +34,7 @@ class PlatformViewVideo extends StatelessWidget {
     this.androidSurfaceTransfer,
     this.androidSurfacePixelFormat,
     this.lgExperimentOwnerToken,
+    this.managedYuvCarrier = false,
   });
 
   /// The handle (player ID) of the video player.
@@ -64,6 +65,11 @@ class PlatformViewVideo extends StatelessWidget {
   final String? androidSurfacePixelFormat;
   final String? lgExperimentOwnerToken;
 
+  /// W1 managed YUV-carrier mode: the Java view registers and arms the
+  /// Surface into the vendor extension's managed ledger inside
+  /// surfaceCreated, strictly before the surface event reaches Dart.
+  final bool managedYuvCarrier;
+
   @override
   Widget build(BuildContext context) {
     final String viewType = (Platform.isIOS || Platform.isMacOS)
@@ -79,6 +85,8 @@ class PlatformViewVideo extends StatelessWidget {
       'mpvWindow': mpvWindow,
       if (Platform.isAndroid && lgExperimentOwnerToken != null)
         'lgExperimentOwnerToken': lgExperimentOwnerToken,
+      if (Platform.isAndroid && managedYuvCarrier)
+        'managedYuvCarrier': true,
       if (Platform.operatingSystem == 'ohos' &&
           (ohosSurfaceWidthPx ?? 0) > 0 &&
           (ohosSurfaceHeightPx ?? 0) > 0) ...{

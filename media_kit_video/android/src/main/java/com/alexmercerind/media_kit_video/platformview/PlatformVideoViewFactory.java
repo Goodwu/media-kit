@@ -258,6 +258,8 @@ public class PlatformVideoViewFactory extends PlatformViewFactory {
             initialPixelFormat,
             (event) -> {});
         view.setLgExperimentOwner(generation, id, (String) params.get("lgExperimentOwnerToken"));
+        view.setManagedYuvCarrier(
+                Boolean.TRUE.equals(params.get("managedYuvCarrier")));
         final SurfaceOwner owner = new SurfaceOwner(handle, generation, id);
         surfaceOwners.put(owner, view);
         view.setOnSurfaceEvent((surfaceEvent) -> {

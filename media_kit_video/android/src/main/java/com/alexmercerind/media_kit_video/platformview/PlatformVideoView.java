@@ -127,6 +127,42 @@ public final class PlatformVideoView implements PlatformView {
         default Boolean pqPresentationYuvWindow() {
             return null;
         }
+
+        /**
+         * W1 owner lifetime: enables the extension's owner-ledger entry for
+         * {@code handle} so the view's surfaces register against
+         * {@code token}. The enable authorizes nothing by itself — every
+         * arm is gated by the library's route admission, and the extension
+         * derives the non-conformant acceptance from its own device
+         * declaration. Implementations must be idempotent for the same
+         * token and must fail closed (return false) when the device is not
+         * applicable.
+         */
+        default boolean enableOwnerLifetime(long handle,
+                @Nullable String token) {
+            return false;
+        }
+
+        /** W1 managed lifecycle: registers a live output surface (see the
+         * vendor implementation for the managed ledger semantics). */
+        default boolean registerManagedOutputSurface(
+                @NonNull android.view.Surface surface, long handle,
+                int generation, int surfaceGeneration) {
+            return false;
+        }
+
+        /** W1 managed lifecycle: arms the YUV diag pair for a registered
+         * managed surface Java-side, before the surface event reaches
+         * Dart. */
+        default boolean armManagedOutputSurface(
+                @NonNull android.view.Surface surface, long handle,
+                int generation) {
+            return false;
+        }
+
+        /** W1 managed lifecycle: disarms and clears the managed record. */
+        default void unregisterManagedOutputSurface(
+                @NonNull android.view.Surface surface) {}
     }
 
     @Nullable
@@ -206,6 +242,19 @@ public final class PlatformVideoView implements PlatformView {
     @Nullable private String lgOwnerToken;
     private final Map<Integer, android.view.Surface> lgOwnerSurfaces = new HashMap<>();
 
+    private final Map<Integer, android.view.Surface> managedSurfaces = new HashMap<>();
+
+    // W1 managed YUV-carrier mode: the vendor extension registers and arms
+    // this view's surfaces Java-side inside surfaceCreated, strictly before
+    // the surface event reaches Dart. Device-neutral flag — the LG
+    // specifics live in the extension implementation behind its own device
+    // gate.
+    private volatile boolean managedYuvCarrier;
+
+    void setManagedYuvCarrier(boolean managed) {
+        managedYuvCarrier = managed;
+    }
+
     void setLgExperimentOwner(int generation, int viewId, @Nullable String token) {
         lgOwnerGeneration = generation;
         lgOwnerViewId = viewId;
@@ -226,6 +275,14 @@ public final class PlatformVideoView implements PlatformView {
             MediaCodecSurfaceTextureBridge.ensureInitialized(token, generation);
         } catch (Throwable t) {
             Log.w("MKSURF", "bridge init failed (opt-in surfacetexture hwdec will be unavailable)", t);
+        }
+    }
+
+    private void revokeManagedSurface(int generation) {
+        final android.view.Surface surface = managedSurfaces.remove(generation);
+        final SurfaceDataSpaceExt ext = surfaceDataSpaceExt;
+        if (surface != null && ext != null) {
+            ext.unregisterManagedOutputSurface(surface);
         }
     }
 
@@ -377,6 +434,22 @@ public final class PlatformVideoView implements PlatformView {
                         if (ext != null) ext.registerLgExperimentSurface(holder.getSurface(),
                                 handle, lgOwnerGeneration, lgOwnerViewId, generation, lgOwnerToken);
                     }
+                    if (managedYuvCarrier) {
+                        // W1 managed sequence: register THEN arm, strictly
+                        // before the initial dataspace apply and before the
+                        // surface event reaches Dart (the producer
+                        // activation must observe the armed carrier).
+                        final SurfaceDataSpaceExt ext = surfaceDataSpaceExt;
+                        if (ext != null) {
+                            ext.registerManagedOutputSurface(holder.getSurface(),
+                                    handle, lgOwnerGeneration, generation);
+                            final boolean armed = ext.armManagedOutputSurface(
+                                    holder.getSurface(), handle, lgOwnerGeneration);
+                            managedSurfaces.put(generation, holder.getSurface());
+                            Log.i(TAG, "managed surface: registered, armed="
+                                    + armed + ", generation=" + generation);
+                        }
+                    }
                     appliedDataSpace = null;
                     if (initialDataSpace != null) {
                         final String appliedPath =
@@ -386,6 +459,7 @@ public final class PlatformVideoView implements PlatformView {
                                 ", applied=" + (appliedPath != null));
                         if (appliedPath == null) {
                             revokeLgSurface(generation);
+                            revokeManagedSurface(generation);
                             // Do not publish a WID for a Surface generation
                             // whose HDR dataspace could not be applied.
                             onSurfaceEvent.accept(new SurfaceEvent(
@@ -468,6 +542,7 @@ public final class PlatformVideoView implements PlatformView {
             public void surfaceDestroyed(@NonNull SurfaceHolder holder) {
                 Log.i(TAG, "surfaceDestroyed: handle=" + handle + ", wid=" + wid);
                 revokeLgSurface(surfaceGeneration);
+                revokeManagedSurface(surfaceGeneration);
                 final long destroyedWid = wid;
                 if (destroyedWid != 0) {
                     onSurfaceEvent.accept(new SurfaceEvent(destroyedWid, activeSurfaceGeneration, true));
@@ -492,6 +567,7 @@ public final class PlatformVideoView implements PlatformView {
             return "deleteFailed";
         }
         revokeLgSurface(generation);
+        revokeManagedSurface(generation);
         surfaceReferences.remove(generation);
         releasedSurfaceReferences.put(generation, reference);
         if (failedSurfaceGeneration == generation) {
@@ -621,8 +697,11 @@ public final class PlatformVideoView implements PlatformView {
             logLgDataSpaceBinding("public-bridge", surface, transfer, "not-applied");
             final SurfaceDataSpaceExt ext = surfaceDataSpaceExt;
             if (ext != null) {
-                final boolean applied = ext.applyDataSpace(surface, dataSpace,
-                        handle, lgOwnerGeneration, lgOwnerViewId, surfaceGeneration, lgOwnerToken);
+                final boolean applied = managedYuvCarrier
+                        ? ext.applyDataSpace(surface, dataSpace)
+                        : ext.applyDataSpace(surface, dataSpace, handle,
+                                lgOwnerGeneration, lgOwnerViewId,
+                                surfaceGeneration, lgOwnerToken);
                 Log.i(TAG, "ext dataspace fallback: transfer=" + transfer +
                         ", applied=" + applied);
                 logLgDataSpaceBinding("output", surface, transfer,

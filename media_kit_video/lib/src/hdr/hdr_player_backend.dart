@@ -54,16 +54,18 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
                   handle: handle,
                   transfer: transfer,
                 )) {
-    this.yuvWindowArm = yuvWindowArm ?? HdrYuvWindowArm(
-      ownerToken: controllerConfiguration.android.lgExperimentOwnerToken,
-      ownerGeneration: () async {
-        final current = outputSlot.current;
-        if (current == null || !current.platform.isCompleted) return null;
-        final output = await current.platform.future;
-        final generation = output.nativeSurfaceGeneration;
-        return generation > 0 ? generation : null;
-      },
-    );
+    managedYuvCarrier = controllerConfiguration.android.managedYuvCarrier;
+    this.yuvWindowArm = yuvWindowArm ??
+        HdrYuvWindowArm(
+          ownerToken: controllerConfiguration.android.lgExperimentOwnerToken,
+          ownerGeneration: () async {
+            final current = outputSlot.current;
+            if (current == null || !current.platform.isCompleted) return null;
+            final output = await current.platform.future;
+            final generation = output.nativeSurfaceGeneration;
+            return generation > 0 ? generation : null;
+          },
+        );
     _nativeDvOptions = HdrNativeDvOptionOwner(
       readProperty: player.getProperty,
       setPropertyStrict: player.setPropertyStrict,
@@ -80,6 +82,11 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
   final Player player;
   final HdrOutputSlot<VideoController> outputSlot;
   final String surfacePixelFormatOverride;
+
+  /// W1 managed YUV-carrier mode: the platform view's Surface is registered
+  /// and armed Java-side before the surface event; the Dart arm holds only
+  /// the process write gate and the diag-dataspace atom.
+  late final bool managedYuvCarrier;
 
   /// Route-scoped YUV window presentation arms (plan C). Null keeps the
   /// backend's behavior unchanged (no arm, no admission change).
@@ -579,7 +586,11 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
     Future<void> initialize() async {
       await outputSlot.ensure(
         contract,
-        internalPrepare: arm == null ? null : (_) => arm.armForAttempt(plan),
+        internalPrepare: arm == null
+            ? null
+            : (_) => managedYuvCarrier
+                ? arm.prepareManagedAttempt(plan)
+                : arm.armForAttempt(plan),
       );
       if (route.topology != HdrTopology.platformView &&
           route.vo == 'gpu-next') {
@@ -587,7 +598,8 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
         // rebuild (SetSurfaceSize + VO re-apply) runs INSIDE the admission's
         // protection interval — after the read release it would again race a
         // concurrent YUV arm.
-        final prepared = await outputSlot.current!.prepareAndroidTextureOutput();
+        final prepared =
+            await outputSlot.current!.prepareAndroidTextureOutput();
         debugPrint(prepared
             ? 'HDR_TEXTURE_PREPARED layoutBound=true'
             : 'HDR_TEXTURE_PREPARED fallback=surface_or_layout_unavailable');

@@ -616,6 +616,10 @@ class VideoState extends State<Video> with WidgetsBindingObserver {
                                           .configuration
                                           .android
                                           .lgExperimentOwnerToken,
+                                      managedYuvCarrier: notifier
+                                          .configuration
+                                          .android
+                                          .managedYuvCarrier,
                                       androidSurfacePixelFormat: notifier
                                           .configuration
                                           .android
