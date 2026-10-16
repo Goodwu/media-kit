@@ -441,6 +441,121 @@ void main() {
         reason: 'the publication round must resample, not return');
   });
 
+  test('in-round empty then a different hwdec value after registration '
+      'fails', () async {
+    // V2 third review minimum test 2: the decoder label/hwdec baseline is
+    // registered; within ONE round the half goes empty → a different value.
+    // The first-publication rule requires NO registered value — this fails.
+    final s = Sample();
+    var hwdecReads = 0;
+    s.props['video-params/pixelformat'] = '';
+    s.onRead = (p) async {
+      if (p == 'hwdec-current') {
+        final n = ++hwdecReads;
+        if (n <= 34) return 'mediacodec';
+        return n.isEven ? '' : 'surfacetexture';
+      }
+      // Keep polling: the pixel format stays unreported until the drift
+      // window has been crossed.
+      if (p == 'video-params/pixelformat' && hwdecReads <= 36) return '';
+      return s.props[p] ?? '';
+    };
+    await expectLater(s.gather(budget: const Duration(seconds: 2)),
+        throwsA(isA<HdrDecoderReviewFailure>()));
+  });
+
+  test('registered configuration followed by an in-round empty then a '
+      'different configuration fails', () async {
+    // V2 third review minimum test 1: the component configuration is
+    // registered X; with the sampling window still open (pixel empty), one
+    // round reads A-config empty and B-config Y. Not a first publication
+    // (X is registered) and not the decoder attach shape — fails.
+    final s = Sample();
+    var infoReads = 0;
+    s.props['video-params/pixelformat'] = '';
+    s.onRead = (p) async {
+      if (p == 'android-mediacodec-info') {
+        final n = ++infoReads;
+        if (n <= 34) {
+          return '{"api":1,"mime":"video/hevc","codec":"c2.hevc.x","native-dv-active":false}';
+        }
+        return n.isEven
+            ? ''
+            : '{"api":1,"mime":"video/avc","codec":"c2.avc.y","native-dv-active":false}';
+      }
+      return s.props[p] ?? '';
+    };
+    await expectLater(s.gather(), throwsA(isA<HdrDecoderReviewFailure>()));
+  });
+
+  test('a complete first half whose B hwdec disappears fails in-round',
+      () async {
+    // V2 third review minimum test 3: A is a complete valid sample, B's
+    // hwdec-current disappears — the pair mismatches with a registered
+    // value on the empty side; the round must fail instead of returning A.
+    final s = Sample();
+    var hwdecReads = 0;
+    s.onRead = (p) async {
+      if (p == 'hwdec-current' && ++hwdecReads == 2) return '';
+      return s.props[p] ?? '';
+    };
+    await expectLater(s.gather(), throwsA(isA<HdrDecoderReviewFailure>()));
+  });
+
+  test('a reverse attach transition is rejected, not settled', () async {
+    // V2 third review defect 1: registered X; one round reads the suffixed
+    // label in A and REVERTS to X in B. The publication is one-way
+    // (registered → registered + suffix); the reversal fails and is not
+    // washed out by later settling.
+    final s = Sample();
+    var decoderReads = 0;
+    // Keep the sample incomplete before the reversal so the review is
+    // still polling when the window arrives.
+    s.props['video-params/pixelformat'] = '';
+    s.onRead = (p) async {
+      if (p == 'current-tracks/video/decoder') {
+        final n = ++decoderReads;
+        if (n == 7) return 'hevc_mediacodec';
+        if (n == 8) return 'hevc';
+        if (n <= 6 || n == 9 || n == 10) return 'hevc_mediacodec';
+        return 'hevc';
+      }
+      if (p == 'video-params/pixelformat' && decoderReads <= 10) return '';
+      return s.props[p] ?? '';
+    };
+    await expectLater(s.gather(), throwsA(isA<HdrDecoderReviewFailure>()));
+  });
+
+  test('a non-MediaCodec hwdec publication cannot settle an attach',
+      () async {
+    // V2 third review defect 2: the label settles while hwdec-current is
+    // published empty → surfacetexture. The attach settlement requires the
+    // settled mode to be MediaCodec; the surfacetexture publication fails
+    // the pair instead of updating the label baseline.
+    final s = Sample();
+    var decoderReads = 0;
+    var hwdecReads = 0;
+    s.props['video-params/pixelformat'] = 'nv12';
+    s.onRead = (p) async {
+      if (p == 'current-tracks/video/decoder' && ++decoderReads <= 34) {
+        return 'hevc';
+      }
+      if (p == 'hwdec-current') {
+        // The defective shape: hwdec-current is FIRST published as a
+        // non-MediaCodec mode in the same round the label settles, and
+        // stays there — the buggy code accepts the attach with it; the
+        // MediaCodec-only settlement contract must reject it.
+        final n = ++hwdecReads;
+        if (n <= 34) return '';
+        return 'surfacetexture';
+      }
+      if (p == 'video-params/pixelformat' && hwdecReads <= 36) return '';
+      return s.props[p] ?? '';
+    };
+    await expectLater(s.gather(budget: const Duration(seconds: 2)),
+        throwsA(isA<HdrDecoderReviewFailure>()));
+  });
+
   test('a complete snapshot that violates the plan is still rejected', () async {
     // This is complete in the first round: no decoder-publication transition
     // is claimed. The HEVC component conflicts with the AVC track.
