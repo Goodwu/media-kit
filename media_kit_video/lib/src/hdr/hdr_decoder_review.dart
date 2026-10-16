@@ -300,6 +300,30 @@ Future<HdrReviewFacts> gatherDecoderReviewFacts({
       'hwdec-current',
       'android-mediacodec-info',
     ];
+
+    /// The pre-ready shape observed on device (HDR review diagnostics,
+    /// marble 2026-10-16): while mpv attaches `mediacodec-copy`, the FIRST
+    /// snapshot still carries the un-suffixed software track label with an
+    /// empty pixel format, and the immediate second snapshot already reads
+    /// `h264_mediacodec` — the SAME MediaCodec component in
+    /// `android-mediacodec-info` on both sides. That half is the before of
+    /// one settling transition, not a decoder change: retry it within the
+    /// shared budget instead of comparing it against its settled other
+    /// half. Deliberately narrow, baseline-aware: it applies only until the
+    /// decoder label is first registered, only with a frame format still
+    /// unreported, and it can never mask a contradicting registered
+    /// baseline (the observed-decoder guard below still rejects drift), a
+    /// complete-but-conflicting sample (plan validation still rejects it),
+    /// or an A/B mismatch between two settled halves.
+    bool decoderLabelPreReady(Map<String, String> a) {
+      if (observedDecoderEndpoints['current-tracks/video/decoder'] != null) {
+        return false;
+      }
+      return a['hwdec-current']!.startsWith('mediacodec') &&
+          !a['current-tracks/video/decoder']!.endsWith('_mediacodec') &&
+          a['video-params/pixelformat']!.isEmpty;
+    }
+
     while (true) {
       iterations++;
       final result = await bounded(() => lock.synchronized(() async {
@@ -308,6 +332,11 @@ Future<HdrReviewFacts> gatherDecoderReviewFacts({
             await identity();
             final a = await endpoint();
             final b = await endpoint();
+            // Readiness before equality: the un-suffixed, frame-less label
+            // half of a settling hwdec attachment is not decoder evidence.
+            if (decoderLabelPreReady(a)) {
+              return null;
+            }
             await identity();
             for (final key in endpoints) {
               if (a[key] != b[key]) {

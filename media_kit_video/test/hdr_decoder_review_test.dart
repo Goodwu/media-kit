@@ -200,6 +200,63 @@ void main() {
 
   // DV004 final-plan negatives are compatible with the existing cross-round
   // identity guard. Its first-complete-only policy remains unapproved.
+  test('settling hwdec attachment retries within the budget and completes',
+      () async {
+    // Device-evidence shape (HDR review diagnostics, marble 2026-10-16):
+    // while mediacodec-copy attaches, the first rounds still report the
+    // un-suffixed track label with no frame format; the SAME MediaCodec
+    // component is already reported. The review must retry the pre-ready
+    // half inside the shared budget and complete on the settled sample.
+    final s = Sample();
+    var decoderReads = 0;
+    s.props['hwdec-current'] = 'mediacodec-copy';
+    s.props['video-params/pixelformat'] = 'nv12';
+    s.props['video-params/gamma'] = 'bt.1886';
+    s.props['video-params/primaries'] = 'bt.709';
+    s.onRead = (p) async {
+      if (p == 'current-tracks/video/decoder' && ++decoderReads <= 17) {
+        return 'hevc';
+      }
+      if (p == 'video-params/pixelformat' && decoderReads <= 17) return '';
+      return s.props[p] ?? '';
+    };
+    final facts = await s.gather(budget: const Duration(seconds: 3));
+    expect(facts.decoderObservation!.decoder, 'hevc_mediacodec');
+    expect(facts.decoderObservation!.pixelFormat, 'nv12');
+    expect(facts.hwdecCurrent, 'mediacodec-copy');
+  });
+
+  test('an unsettled label exhausts the shared budget', () async {
+    // The pre-ready shape held forever: hardware mode, un-suffixed label,
+    // and no frame format ever reported — the shared budget fails closed.
+    final s = Sample();
+    s.props['hwdec-current'] = 'mediacodec-copy';
+    s.props['video-params/pixelformat'] = '';
+    s.onRead = (p) async {
+      if (p == 'current-tracks/video/decoder') return 'hevc';
+      return s.props[p] ?? '';
+    };
+    await expectLater(
+        s.gather(budget: const Duration(milliseconds: 200)),
+        throwsA(isA<HdrDecoderReviewTimeout>()));
+  });
+
+  test('registered baseline rejects unsuffixed drift while frame-less',
+      () async {
+    final s = Sample();
+    s.props['video-params/pixelformat'] = '';
+    var decoderReads = 0;
+    s.onRead = (p) async {
+      if (p == 'current-tracks/video/decoder' && ++decoderReads > 34) {
+        return 'hevc';
+      }
+      return s.props[p] ?? '';
+    };
+    await expectLater(s.gather(budget: const Duration(seconds: 1)),
+        throwsA(isA<HdrDecoderReviewFailure>().having(
+            (error) => error.detail, 'detail', contains('Observed'))));
+  });
+
   test('a complete snapshot that violates the plan is still rejected', () async {
     // This is complete in the first round: no decoder-publication transition
     // is claimed. The HEVC component conflicts with the AVC track.
