@@ -431,8 +431,7 @@ class HdrYuvWindowArm implements HdrOutputResources<HdrOpenPlan> {
     } catch (error) {
       HdrYuvWindowProcessRegistry.release(this);
       _writeAdmission = null;
-      throw HdrYuvWindowArmFailure(
-          HdrDegradeReason.yuvWindowArmUnavailable,
+      throw HdrYuvWindowArmFailure(HdrDegradeReason.yuvWindowArmUnavailable,
           cause: 'process output-initialization gate unreachable: $error');
     }
     final leaseId = reply is int && reply > 0 ? reply : 0;
@@ -464,8 +463,7 @@ class HdrYuvWindowArm implements HdrOutputResources<HdrOpenPlan> {
     await _retireOwnResidue();
     final Object? reply;
     try {
-      reply =
-          await _channel('BeginOutputInitRead', const <String, Object?>{});
+      reply = await _channel('BeginOutputInitRead', const <String, Object?>{});
     } on MissingPluginException {
       debugPrint('YUV-DIAG: process init gate not registered on this '
           'engine; non-YUV initialization proceeds unguarded');
@@ -556,6 +554,41 @@ class HdrYuvWindowArm implements HdrOutputResources<HdrOpenPlan> {
   /// sequence is in flight is a typed conflict, and every continuation after
   /// an awaited step re-verifies it still owns the attempt before writing
   /// further atoms.
+  /// W1 managed YUV-carrier mode: the platform view's Surface is registered
+  /// and armed JAVA-side inside its own surfaceCreated callback (managed
+  /// ledger, no experiment token), strictly before the surface event
+  /// reaches Dart. This pre-create hook therefore only holds the process
+  /// write gate, verifies the route admission (the same fail-closed checks
+  /// as the owner-bound path) and publishes the diag-dataspace atom that
+  /// mpv consumes once at its EGL window creation. The YUV diag enable
+  /// itself is the Java arm; [endAttempt]'s disarm releases it identically.
+  Future<void> prepareManagedAttempt(HdrOpenPlan plan) async {
+    if (_disposed) throw StateError('YUV window arm manager is disposed');
+    if (_arming) {
+      throw const HdrYuvWindowLeaseConflict(
+          'this manager already has an arm sequence in flight');
+    }
+    assertRouteAdmission(plan);
+    final admission = _writeAdmission;
+    if (admission != null && !identical(admission, plan)) {
+      throw const HdrYuvWindowLeaseConflict(
+          'the armed plan does not match the admitted attempt');
+    }
+    final setDiagDataSpace = _ffi?.setDiagDataSpace;
+    if (setDiagDataSpace == null) {
+      throw const HdrYuvWindowArmFailure(
+          HdrDegradeReason.yuvWindowArmUnavailable,
+          cause: 'diag dataspace armer unavailable; the YUV route requires '
+              'the PQ/LIMITED injection to arm');
+    }
+    try {
+      setDiagDataSpace(HdrYuvPresentationContract.windowDataSpace);
+    } catch (error) {
+      throw HdrYuvWindowArmFailure(HdrDegradeReason.yuvWindowArmUnavailable,
+          cause: 'diag dataspace arm failed: $error');
+    }
+  }
+
   Future<void> armForAttempt(HdrOpenPlan plan) async {
     if (_disposed) throw StateError('YUV window arm manager is disposed');
     if (_arming) {
@@ -596,8 +629,7 @@ class HdrYuvWindowArm implements HdrOutputResources<HdrOpenPlan> {
         try {
           setDiagDataSpace(HdrYuvPresentationContract.windowDataSpace);
         } catch (error) {
-          throw HdrYuvWindowArmFailure(
-              HdrDegradeReason.yuvWindowArmUnavailable,
+          throw HdrYuvWindowArmFailure(HdrDegradeReason.yuvWindowArmUnavailable,
               cause: 'diag dataspace arm failed: $error');
         }
         // Atom 2: the YUV diag switch. Owner-bound first (vendor channel),
@@ -617,8 +649,7 @@ class HdrYuvWindowArm implements HdrOutputResources<HdrOpenPlan> {
         _assertArmOwnership(plan);
         if (generation != null && generation > 0) {
           try {
-            final enabled =
-                await _channel('EnableYuvDiag', <String, Object?>{
+            final enabled = await _channel('EnableYuvDiag', <String, Object?>{
               'ownerToken': ownerToken,
               'generation': generation,
             });
@@ -679,8 +710,7 @@ class HdrYuvWindowArm implements HdrOutputResources<HdrOpenPlan> {
     if (lease == null ||
         !identical(lease.owner, this) ||
         !identical(lease.plan, plan)) {
-      throw HdrYuvWindowArmFailure(
-          HdrDegradeReason.yuvWindowArmUnavailable,
+      throw HdrYuvWindowArmFailure(HdrDegradeReason.yuvWindowArmUnavailable,
           cause: 'the arm continuation lost its attempt ownership');
     }
   }
@@ -700,8 +730,7 @@ class HdrYuvWindowArm implements HdrOutputResources<HdrOpenPlan> {
     if (scope != null) {
       if (!identical(scope.plan, plan)) return;
       if (!await _disarmAll()) {
-        throw HdrYuvWindowArmFailure(
-            HdrDegradeReason.yuvWindowArmUnavailable,
+        throw HdrYuvWindowArmFailure(HdrDegradeReason.yuvWindowArmUnavailable,
             cause: 'attempt cleanup failed: $_lastDisarmError');
       }
       await _releaseWrite();
@@ -712,8 +741,7 @@ class HdrYuvWindowArm implements HdrOutputResources<HdrOpenPlan> {
     if (lease == null || !identical(lease.owner, this)) return;
     if (!identical(lease.plan, plan)) return;
     if (!await _disarmAll()) {
-      throw HdrYuvWindowArmFailure(
-          HdrDegradeReason.yuvWindowArmUnavailable,
+      throw HdrYuvWindowArmFailure(HdrDegradeReason.yuvWindowArmUnavailable,
           cause: 'attempt cleanup failed: $_lastDisarmError');
     }
     await _releaseWrite();
@@ -771,8 +799,7 @@ class HdrYuvWindowArm implements HdrOutputResources<HdrOpenPlan> {
         try {
           await _channel('DisableYuvDiag', const <String, Object?>{});
         } catch (channelError) {
-          debugPrint(
-              'YUV-DIAG: channel disarm unavailable ($channelError); '
+          debugPrint('YUV-DIAG: channel disarm unavailable ($channelError); '
               'FFI disarm is the authoritative barrier');
         }
       }

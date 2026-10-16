@@ -250,7 +250,7 @@ class HdrVideoSession {
         AndroidHdrBackend(
           player: player!,
           outputSlot: _slot!,
-          controllerConfiguration: configuration,
+          controllerConfiguration: _configuration,
           surfacePixelFormatOverride: _surfaceFormatOverride,
           onNativeDvOptionDiagnostic: onNativeDvOptionDiagnostic,
         );
