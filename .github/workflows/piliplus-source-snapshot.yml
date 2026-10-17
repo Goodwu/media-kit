@@ -1,0 +1,52 @@
+name: Compatibility source snapshots
+
+on:
+  push:
+    branches: ['compat/piliplus-zero-change-20261018']
+    paths: ['.github/workflows/piliplus-source-snapshot.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: sdk
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: bggRGjQaUbCoE/PiliPlus
+          ref: main
+          path: app
+          persist-credentials: false
+      - name: Archive tracked public source only and bind Git identities
+        shell: python
+        run: |
+          import json, os, pathlib, subprocess
+          out = pathlib.Path(os.environ['RUNNER_TEMP']) / 'source-snapshots'
+          out.mkdir()
+          for name in ('sdk', 'app'):
+              root = pathlib.Path(os.environ['GITHUB_WORKSPACE']) / name
+              def git(*args):
+                  return subprocess.check_output(['git', '-C', str(root), *args])
+              commit = git('rev-parse', 'HEAD').decode().strip()
+              tree = git('rev-parse', 'HEAD^{tree}').decode().strip()
+              records = {}
+              for row in git('ls-tree', '-rz', '--full-tree', 'HEAD').split(b'\0'):
+                  if row:
+                      meta, path = row.split(b'\t', 1)
+                      mode, kind, sha = meta.decode().split()
+                      records[path.decode()] = {'mode': mode, 'type': kind, 'blob': sha}
+              (out / (name + '.json')).write_text(json.dumps({'commit': commit, 'tree': tree, 'entries': records}, indent=2))
+              git('archive', '--format=tar.gz', '--output=' + str(out / (name + '.tar.gz')), 'HEAD')
+              print(name, commit, tree, len(records))
+      - uses: actions/upload-artifact@v4
+        with:
+          name: exact-public-source-snapshots
+          path: ${{ runner.temp }}/source-snapshots/*
+          retention-days: 7
+          if-no-files-found: error
