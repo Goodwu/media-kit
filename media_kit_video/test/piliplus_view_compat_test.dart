@@ -29,7 +29,7 @@ class _Player extends Fake implements Player {
   @override
   final PlayerState state;
   @override
-  final stream = _Streams();
+  final _Streams stream = _Streams();
 }
 
 class _Controller extends Fake implements VideoController {
@@ -128,7 +128,7 @@ void main() {
     )));
     final gesture = tester.widget<GestureDetector>(find.descendant(
       of: find.byType(SubtitleView), matching: find.byType(GestureDetector)));
-    gesture.onVerticalDragUpdate!(DragUpdateDetails(delta: const Offset(0, -500)));
+    gesture.onVerticalDragUpdate!(DragUpdateDetails(delta: const Offset(0, -500), globalPosition: Offset.zero));
     await tester.pump();
     gesture.onVerticalDragEnd!(DragEndDetails());
     expect(reported!.bottom, 200);

@@ -34,4 +34,17 @@ jobs:
         run: flutter pub get
       - name: Full video regression (no weakening existing tests)
         working-directory: media_kit_video
-        run: flutter test --reporter expanded
+        shell: bash
+        run: |
+          set +e
+          flutter test --reporter expanded > "$RUNNER_TEMP/video-tests.log" 2>&1
+          status=$?
+          tail -n 100 "$RUNNER_TEMP/video-tests.log"
+          exit "$status"
+      - name: Preserve full regression diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sdk-video-regression-evidence
+          path: ${{ runner.temp }}/video-tests.log
+          if-no-files-found: warn

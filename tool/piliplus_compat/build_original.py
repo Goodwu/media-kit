@@ -51,6 +51,7 @@ PLATFORM_MATERIAL = {
 # recorded separately, NOT broadly exempted by extension or directory name.
 GENERATED_TRACKED = frozenset({
     'pubspec.lock', 'pubspec_overrides.yaml',
+    'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
     'linux/flutter/generated_plugin_registrant.cc',
     'linux/flutter/generated_plugin_registrant.h',
     'linux/flutter/generated_plugins.cmake',
@@ -91,6 +92,13 @@ def tracked_manifest(root: Path) -> dict:
     return result
 
 
+def symlink_payload(target: str, *, windows: bool) -> bytes:
+    # Windows exposes path separators using its OS spelling. This is a link
+    # representation normalization, not a normalization of ordinary file data.
+    # Absolute/UNC prefixes are retained and cannot match a relative Git blob.
+    return os.fsencode(target.replace('\\', '/') if windows else target)
+
+
 def checked_payload(root: Path, relative: str, mode: str) -> bytes:
     path = root / relative
     # No parent can redirect an original file outside the staged tree.
@@ -102,7 +110,7 @@ def checked_payload(root: Path, relative: str, mode: str) -> bytes:
             raise AuditError(f'Expected source symlink: {relative}')
         if not path.resolve().is_relative_to(root.resolve()):
             raise AuditError(f'Source symlink escaped staging: {relative}')
-        return os.fsencode(os.readlink(path))
+        return symlink_payload(os.readlink(path), windows=os.name == 'nt')
     if not stat.S_ISREG(info.st_mode):
         raise AuditError(f'Expected regular source file: {relative}')
     if os.name != 'nt' and bool(info.st_mode & 0o111) != (mode == '100755'):
@@ -118,7 +126,7 @@ def verify_tracked(root: Path, manifest: dict, allowed=frozenset()) -> dict:
             actual = blob_digest(data)
             if actual != record['blob']:
                 if path not in allowed:
-                    violations.append(path)
+                    violations.append(f'{path} (expected {record["blob"]}, actual {actual})')
                 else:
                     generated[path] = {'before': record['blob'], 'after': actual}
         except (OSError, AuditError) as error:
