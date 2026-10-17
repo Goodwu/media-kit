@@ -148,6 +148,22 @@ class BuildGuardTests(unittest.TestCase):
         with self.assertRaises(build.AuditError):
             build.resolution_roots(file)
 
+    def test_windows_symlink_separator_representation(self):
+        self.assertEqual(build.symlink_payload(r'..\common\a.swift', windows=True),
+                         b'../common/a.swift')
+        self.assertEqual(build.symlink_payload(r'..\common\a.swift', windows=False),
+                         b'..\\common\\a.swift')
+        self.assertNotEqual(build.symlink_payload(r'C:\common\a.swift', windows=True),
+                            b'../common/a.swift')
+
+    def test_generated_android_registration_is_an_exact_exception(self):
+        self.write('android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
+                   '// Generated file. Do not edit.\n')
+        self.assertEqual(build.verify_added(self.root, app=True)['generatedFileCount'], 1)
+        self.write('android/app/src/main/java/io/flutter/plugins/NotGenerated.java', 'class Foreign {}')
+        with self.assertRaises(build.AuditError):
+            build.verify_added(self.root, app=True)
+
     def test_runner_persists_failure_and_actual_exit(self):
         out = self.base / 'output'
         out.mkdir()
