@@ -1,0 +1,30 @@
+{
+  "task": "PiliPlus-zero-change",
+  "planRevision": "R3",
+  "branch": "compat/piliplus-zero-change-20261018",
+  "upstream": "0a212785a87df88a0a583cd5f1f526630d5c4e81",
+  "previousBase": "866c7399bf034757b2aa54e69290533dbed6bc5c",
+  "initialPlanCommit": "5e34eb74507ed658ebc57bf96f1cf6829e012925",
+  "mergeCommit": "e51df06e0031ce5ea3afa2ee1bd295384671c025",
+  "upstreamCommitsMerged": 12,
+  "upstreamChangedFiles": 16,
+  "implementation": "P0a dependency auditor, override proposal and package_config path verification",
+  "localTests": {
+    "command": "python3 -m unittest discover -s tool/piliplus_compat -p 'test_*.py' -v",
+    "scope": "synthetic Git checkouts and pure tool tests; not the original PiliPlus",
+    "python": "3.13.5",
+    "PyYAML": "6.0.3",
+    "tests": 26,
+    "exitCode": 0,
+    "sourceSha256": {
+      "tool/piliplus_compat/dependency_plan.py": "b8e51e5094b2b2e7a059856fbface0f6dfc844f1e688a9132b69436f3e31e0eb",
+      "tool/piliplus_compat/test_dependency_plan.py": "ba1b5bf6c74c830aff8a85bd8e8e1ff2510e05358e952079c8675a2a30ab5710"
+    }
+  },
+  "ci": {"workflow": ".github/workflows/piliplus-compat-tools.yml", "scope": "T0 only", "status": "pending-remote-observation"},
+  "notRun": ["original-app-pub-resolution", "application-compile", "full-upstream-Dart-tests", "native-build", "device-playback", "hdr-verification"],
+  "environment": {"codexWorkspace": "connection-error", "localDartFlutter": "not-found", "localGitHubDNS": "resolution-failed"},
+  "next": "Read this handoff and current remote head; continue P0b isolated staging and real pub/analyzer evidence before P1 typed compatibility. Do not recreate the branch or reimplement P0a.",
+  "openItems": ["P0b complete input staging and integrity", "override-only reachability must be proven by pub, not assumed", "P1-P5 player/native compatibility and device gates", "sdrEmbed default build and screenshot compatibility remain separately unverified"],
+  "historyPolicy": "Normal merges and expected-head ref updates only; do not rewrite routing or this branch."
+}

@@ -1,0 +1,29 @@
+name: PiliPlus compatibility tools (T0 only)
+
+on:
+  push:
+    branches: ['compat/piliplus-zero-change-20261018']
+    paths:
+      - 'tool/piliplus_compat/**'
+      - '.github/workflows/piliplus-compat-tools.yml'
+  pull_request:
+    paths:
+      - 'tool/piliplus_compat/**'
+      - '.github/workflows/piliplus-compat-tools.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  dependency-tool-tests:
+    name: T0 dependency auditor unit tests (not an app build)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: python -m pip install -r tool/piliplus_compat/requirements.txt
+      - run: python -m py_compile tool/piliplus_compat/dependency_plan.py
+      - run: python -m unittest discover -s tool/piliplus_compat -p 'test_*.py' -v
