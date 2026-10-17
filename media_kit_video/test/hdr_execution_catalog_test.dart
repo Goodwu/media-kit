@@ -16,6 +16,7 @@ import 'package:media_kit_video/src/hdr/hdr_strategy.dart';
 import 'package:media_kit_video/src/hdr/hdr_strategy_realizer.dart';
 import 'package:media_kit_video/src/hdr/hdr_video_session.dart';
 import 'package:media_kit_video/src/routing/video_decoder_support.dart';
+import 'package:media_kit_video/src/routing/video_route_options.dart';
 import 'package:media_kit_video/src/routing/video_source_spec.dart';
 
 const sdr = HdrSourceDescriptor(
@@ -557,11 +558,25 @@ void main() {
     }
   });
   test(
-      'API24 catalog preserves copy first and never inserts unsupported direct import',
-      () {
+      'API24 default plans the embed execution first; explicit false keeps '
+      'copy first and never inserts unsupported direct import', () {
+    // Default-enabled sdrEmbed (2026-10-17 product decision): the plain SDR
+    // plan on the copy-fallback group leads with the embed execution; the
+    // texture route head stays copy and the explicit false opt-out restores
+    // the pre-default directory exactly.
     final prediction =
         HdrRoutePlanner.plan(source: sdr, capabilities: caps(sdk: 24));
-    expect(prediction.candidates.map((c) => c.route!.hwdec),
+    expect(prediction.candidates.map((c) => [c.route!.vo, c.route!.hwdec]), [
+      ['mediacodec_embed', 'mediacodec'],
+      ['gpu-next', 'mediacodec-copy'],
+      ['gpu-next', 'no'],
+    ]);
+    final optedOut = HdrRoutePlanner.plan(
+        source: sdr,
+        capabilities: caps(sdk: 24),
+        options: EffectiveVideoRouteOptions.resolve(
+            application: const VideoRouteOptions(sdrEmbed: false)));
+    expect(optedOut.candidates.map((c) => c.route!.hwdec),
         ['mediacodec-copy', 'no']);
   });
 }
