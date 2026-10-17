@@ -1,0 +1,147 @@
+name: Original PiliPlus builds (T1, no source patches)
+
+on:
+  push:
+    branches: ['compat/piliplus-zero-change-20261018']
+    paths:
+      - 'tool/piliplus_compat/**'
+      - 'media_kit/**'
+      - 'media_kit_video/**'
+      - 'libs/**'
+      - '.github/workflows/piliplus-original-build.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: original-piliplus-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHONDONTWRITEBYTECODE: '1'
+
+jobs:
+  source:
+    name: Resolve current original application once
+    runs-on: ubuntu-latest
+    outputs:
+      app_sha: ${{ steps.identity.outputs.app_sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: bggRGjQaUbCoE/PiliPlus
+          ref: main
+          persist-credentials: false
+      - id: identity
+        shell: bash
+        run: echo "app_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+  unit:
+    name: Build-tool tests (T0 only)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: python -m pip install -r tool/piliplus_compat/requirements.txt
+      - run: python -B -m unittest discover -s tool/piliplus_compat -p 'test_*.py' -v
+
+  build:
+    name: T1 original app / ${{ matrix.platform }}
+    needs: [source, unit]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 70
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {platform: android, os: ubuntu-latest}
+          - {platform: linux, os: ubuntu-latest}
+          - {platform: windows, os: windows-latest}
+          - {platform: macos, os: macos-latest}
+          - {platform: ios, os: macos-latest}
+    env:
+      PLATFORM: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: sources/sdk
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: bggRGjQaUbCoE/PiliPlus
+          ref: ${{ needs.source.outputs.app_sha }}
+          path: sources/app
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: actions/setup-java@v5
+        if: matrix.platform == 'android'
+        with:
+          distribution: zulu
+          java-version: '17'
+      - name: Linux build dependencies
+        if: matrix.platform == 'linux'
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev libwebkit2gtk-4.1-dev libasound2-dev libmpv-dev libayatana-appindicator3-dev
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version-file: sources/app/pubspec.yaml
+          cache: false
+      - name: Install audit dependencies
+        shell: bash
+        run: python -m pip install -r sources/sdk/tool/piliplus_compat/requirements.txt
+      - name: Build original app in isolated source and Flutter copies
+        shell: bash
+        run: |
+          python -B sources/sdk/tool/piliplus_compat/build_original.py \
+            --app-root "$GITHUB_WORKSPACE/sources/app" \
+            --sdk-root "$GITHUB_WORKSPACE/sources/sdk" \
+            --flutter-root "$FLUTTER_ROOT" \
+            --platform "$PLATFORM" \
+            --out "$RUNNER_TEMP/piliplus-$PLATFORM"
+      - name: Preserve actual stage results and full diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: original-piliplus-${{ matrix.platform }}-evidence
+          if-no-files-found: warn
+          path: |
+            ${{ runner.temp }}/piliplus-${{ matrix.platform }}/*.json
+            ${{ runner.temp }}/piliplus-${{ matrix.platform }}/*.log
+      - name: Preserve successful compilation outputs (not device certification)
+        uses: actions/upload-artifact@v4
+        with:
+          name: original-piliplus-${{ matrix.platform }}-T1-debug
+          if-no-files-found: error
+          path: |
+            ${{ runner.temp }}/piliplus-${{ matrix.platform }}/app/build/app/outputs/flutter-apk/*.apk
+            ${{ runner.temp }}/piliplus-${{ matrix.platform }}/app/build/linux/*/debug/bundle/**
+            ${{ runner.temp }}/piliplus-${{ matrix.platform }}/app/build/windows/*/runner/Debug/**
+            ${{ runner.temp }}/piliplus-${{ matrix.platform }}/app/build/macos/Build/Products/Debug/*.app/**
+            ${{ runner.temp }}/piliplus-${{ matrix.platform }}/app/build/ios/iphoneos/*.app/**
+
+  verdict:
+    name: All five original-app compilation results
+    needs: [source, unit, build]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require every platform; do not accept skipped/failed compilation
+        env:
+          SOURCE: ${{ needs.source.result }}
+          UNIT: ${{ needs.unit.result }}
+          BUILDS: ${{ needs.build.result }}
+        run: |
+          test "$SOURCE" = success
+          test "$UNIT" = success
+          test "$BUILDS" = success
+          echo 'T1 compilation passed. Native freshness, feature parity and device/HDR acceptance are separate and not certified here.'
