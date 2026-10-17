@@ -956,6 +956,18 @@ class _SinglePlayerSingleVideoScreenState
   static const _androidHdrDiagnostics = bool.fromEnvironment(
     'MEDIA_KIT_ANDROID_HDR_DIAGNOSTICS',
   );
+  // P0 baseline freeze: one-shot dump of the effective mpv decoder/output
+  // properties once an open completes and the first frame is up. Read-only.
+  static const _androidPropSnapshot = bool.fromEnvironment(
+    'MEDIA_KIT_ANDROID_PROP_SNAPSHOT',
+  );
+  // P1-A embed feasibility probe: boot the player on vo=mediacodec_embed with
+  // hwdec=mediacodec and the PlatformView output, then open through the plain
+  // non-transaction path. Implies the property snapshot above; the output-side
+  // implication (vo + usePlatformView) lives in common/globals.dart.
+  static const _androidEmbedProbe = bool.fromEnvironment(
+    'MEDIA_KIT_ANDROID_EMBED_PROBE',
+  );
 
   // The controlled /data/local/tmp fixtures opened by this page. Their
   // identity mapping below is the page's existing sample enumeration (each
@@ -3886,6 +3898,115 @@ class _SinglePlayerSingleVideoScreenState
     'MEDIA_KIT_ANDROID_VIDEO_TIMING_OFFSET',
   );
 
+  // P0 snapshot read list. The native property channel answers an
+  // unavailable property with an empty string, which the dump reports as
+  // <null>; a thrown read (e.g. a disposed player) is reported as <error>
+  // and never interrupts the remaining entries.
+  static const _propSnapshotProperties = <String>[
+    'hwdec',
+    'hwdec-current',
+    'vo',
+    'vo-configured',
+    'wid',
+    'video-format',
+    'video-params/w',
+    'video-params/h',
+    'video-params/pixelformat',
+    'video-params/primaries',
+    'video-params/gamma',
+    'video-params/sig-peak',
+    'container-fps',
+    'fps',
+    'hwdec-interop',
+    'video-sync',
+    'interpolation',
+    'target-colorspace-hint',
+    'scale',
+    'dscale',
+    'dither-depth',
+    'dither',
+    'deband',
+    'drop-frame-count',
+    'decoder-frame-drop-count',
+    'vo-drop-frame-count',
+    'frame-drop-count',
+    'estimated-vsync-fps',
+    'requested-active-window',
+    'current-vo',
+    'current-gpu-context',
+  ];
+  Timer? _embedProbeTimer;
+  int _embedProbeTick = 0;
+  bool _embedProbeScheduled = false;
+
+  /// One-shot effective-property dump for the P0 baseline freeze. Waits for
+  /// the first-frame latch (video-params) bounded by a timeout so a broken
+  /// open still produces a snapshot, then reads each property independently.
+  Future<void> _runAndroidPropSnapshot() async {
+    if (player.state.videoParams.w == null) {
+      try {
+        await player.stream.videoParams
+            .firstWhere((params) => params.w != null)
+            .timeout(const Duration(seconds: 15));
+      } catch (_) {}
+    }
+    for (final property in _propSnapshotProperties) {
+      try {
+        final value = await player.getProperty(
+          property,
+          waitForInitialization: false,
+        );
+        debugPrint(
+            'PROP_SNAPSHOT $property=${value.isEmpty ? '<null>' : value}');
+      } catch (_) {
+        debugPrint('PROP_SNAPSHOT $property=<error>');
+      }
+    }
+  }
+
+  /// Embed probe sampling beat: 1s cadence for the first 30 samples to catch
+  /// the decoder/VO attach window, then one sample every 30s until EOS.
+  void _startEmbedProbeLoop() {
+    if (_embedProbeScheduled) return;
+    _embedProbeScheduled = true;
+    _embedProbeTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      _embedProbeTick += 1;
+      if (_embedProbeTick > 30 && _embedProbeTick % 30 != 0) return;
+      if (!mounted || _autoPlayerDisposed || player.state.completed) {
+        timer.cancel();
+        return;
+      }
+      unawaited(_sampleEmbedProbe());
+    });
+  }
+
+  Future<void> _sampleEmbedProbe() async {
+    try {
+      final hwdecCurrent = await player.getProperty(
+        'hwdec-current',
+        waitForInitialization: false,
+      );
+      final width = await player.getProperty(
+        'video-params/w',
+        waitForInitialization: false,
+      );
+      final height = await player.getProperty(
+        'video-params/h',
+        waitForInitialization: false,
+      );
+      final voConfigured = await player.getProperty(
+        'vo-configured',
+        waitForInitialization: false,
+      );
+      String orUnset(String value) => value.isEmpty ? '<null>' : value;
+      debugPrint('EMBED_PROBE hwdec-current=${orUnset(hwdecCurrent)} '
+          'video-params/wxh=${orUnset(width)}x${orUnset(height)} '
+          'vo-configured=${orUnset(voConfigured)}');
+    } catch (error) {
+      debugPrint('EMBED_PROBE error=$error');
+    }
+  }
+
   Future<void> _applyAndroidVideoTimingOffset() async {
     if (!Platform.isAndroid || _androidVideoTimingOffset.isEmpty) return;
     final offset = double.tryParse(_androidVideoTimingOffset);
@@ -4042,6 +4163,10 @@ class _SinglePlayerSingleVideoScreenState
 
   late final Player player = Player(
     configuration: PlayerConfiguration(
+      // Embed probe: boot directly on the mediacodec_embed VO. The literal
+      // 'null' mirrors the PlayerConfiguration default so the define-off
+      // build is unchanged.
+      vo: _androidEmbedProbe ? 'mediacodec_embed' : 'null',
       logLevel: _androidCodecTraceLog
           ? MPVLogLevel.trace
           : (_androidVulkanProbe ||
@@ -4117,6 +4242,14 @@ class _SinglePlayerSingleVideoScreenState
     if ((_androidMpvOutputLevels.isNotEmpty || _androidVfFullRange) &&
         !_androidHdrTransaction) {
       throw StateError('Output range experiments require HDR_TRANSACTION');
+    }
+    if (_androidEmbedProbe &&
+        (!Platform.isAndroid ||
+            _androidHdrTransaction ||
+            (_androidVo.isNotEmpty && _androidVo != 'mediacodec_embed'))) {
+      throw StateError(
+          'Embed probe requires Android, no HDR transaction and no '
+          'conflicting MEDIA_KIT_ANDROID_VO');
     }
     if (_androidHdr10SessionDiagnostic) {
       _hdr10BuildError = _validateHdr10DiagnosticBuild();
@@ -4927,6 +5060,11 @@ class _SinglePlayerSingleVideoScreenState
                     (seconds * Duration.microsecondsPerSecond).round(),
               ),
       );
+      if (_androidPropSnapshot || _androidEmbedProbe) {
+        // One-shot effective-property snapshot once the session open has
+        // completed and the first frame is up (P0 baseline freeze).
+        unawaited(_runAndroidPropSnapshot());
+      }
       if (_androidAutoSdrAfterP5Seconds > 0 &&
           sources[0].contains('/media-kit-p5-')) {
         await Future<void>.delayed(
@@ -5123,6 +5261,17 @@ class _SinglePlayerSingleVideoScreenState
     if (Platform.isAndroid && _androidDirectOpenTrace) {
       debugPrint('ANDROID_DIRECT_OPEN media_command');
     }
+    if (Platform.isAndroid && _androidEmbedProbe) {
+      // Attach the embed decoder before the open so MediaCodec init sees the
+      // direct hwdec; the controller creation default ('auto') is already
+      // applied by then, this pre-open write is the last word.
+      try {
+        await player.setPropertyStrict('hwdec', 'mediacodec');
+        debugPrint('EMBED_PROBE hwdec=mediacodec applied pre-open');
+      } catch (error) {
+        debugPrint('EMBED_PROBE hwdec pre-open error=$error');
+      }
+    }
     await player.open(Media(
       sources[0],
       start: requestedStartSeconds != null && requestedStartSeconds >= 0.0
@@ -5133,6 +5282,14 @@ class _SinglePlayerSingleVideoScreenState
             )
           : null,
     ));
+    if (Platform.isAndroid && _androidEmbedProbe) {
+      _startEmbedProbeLoop();
+    }
+    if (Platform.isAndroid && (_androidPropSnapshot || _androidEmbedProbe)) {
+      // One-shot effective-property snapshot once the plain open has
+      // completed and the first frame is up (P0 baseline freeze).
+      unawaited(_runAndroidPropSnapshot());
+    }
     if (Platform.isAndroid &&
         _androidAutoSeekAtSeconds >= 0 &&
         !_autoSeekReopenScheduled) {
@@ -5455,6 +5612,7 @@ class _SinglePlayerSingleVideoScreenState
     }
     _flutterRepaintTimer?.cancel();
     _androidP5CounterTimer?.cancel();
+    _embedProbeTimer?.cancel();
     if (_diagVdLavcOOwned) {
       unawaited(_disableDiagVdLavcO(serial: null));
     }
