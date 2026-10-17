@@ -164,11 +164,11 @@ def clone_exact(source: Path, destination: Path, commit: str) -> None:
         raise AuditError('Staged checkout is not the requested commit')
 
 
-def local_uri(base_file: Path, uri: str) -> Path:
+def local_uri(base_file: Path, uri: str, *, must_exist: bool = True) -> Path:
     url = urlsplit(urljoin(base_file.resolve().as_uri(), uri))
     if url.scheme != 'file' or url.netloc not in ('', 'localhost') or url.query or url.fragment:
         raise AuditError('Expected a local file URI')
-    return Path(url2pathname(url.path)).resolve(strict=True)
+    return Path(url2pathname(url.path)).resolve(strict=must_exist)
 
 
 def resolution_roots(config_file: Path) -> dict[str, Path]:
@@ -184,7 +184,9 @@ def resolution_roots(config_file: Path) -> dict[str, Path]:
         lib_uri = row.get('packageUri', 'lib/')
         if not isinstance(lib_uri, str):
             raise AuditError('Invalid packageUri')
-        lib = local_uri(root / '.package-root', lib_uri)
+        # Native-only federated plugins can legitimately have no Dart lib/ directory.
+        # Resolve existing symlinks but do not require the leaf to exist.
+        lib = local_uri(root / '.package-root', lib_uri, must_exist=False)
         if lib != root / 'lib':
             raise AuditError(f'Package library escaped its lib/: {name}')
         roots[name] = root

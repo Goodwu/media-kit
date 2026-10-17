@@ -106,6 +106,33 @@ class BuildGuardTests(unittest.TestCase):
             with self.assertRaises(build.AuditError):
                 build.local_uri(self.root / 'file', uri)
 
+    def test_native_only_package_without_lib_is_accepted(self):
+        root = self.base / 'native_plugin'
+        root.mkdir()
+        file = self.base / 'package_config.json'
+        row = {'name': 'native_plugin', 'rootUri': root.as_uri(), 'packageUri': 'lib/'}
+        file.write_text(json.dumps({'configVersion': 2, 'packages': [row]}))
+        self.assertEqual(build.resolution_roots(file)['native_plugin'], root)
+        self.assertFalse((root / 'lib').exists())
+
+    @unittest.skipIf(os.name == 'nt', 'symlink privilege not assumed')
+    def test_existing_lib_symlink_escape_is_rejected(self):
+        root = self.base / 'native_plugin'
+        root.mkdir()
+        (root / 'lib').symlink_to(self.root / 'lib', target_is_directory=True)
+        file = self.base / 'package_config.json'
+        row = {'name': 'native_plugin', 'rootUri': root.as_uri(), 'packageUri': 'lib/'}
+        file.write_text(json.dumps({'configVersion': 2, 'packages': [row]}))
+        with self.assertRaises(build.AuditError):
+            build.resolution_roots(file)
+
+    def test_absent_package_root_still_rejected(self):
+        file = self.base / 'package_config.json'
+        row = {'name': 'missing', 'rootUri': (self.base / 'absent').as_uri(), 'packageUri': 'lib/'}
+        file.write_text(json.dumps({'configVersion': 2, 'packages': [row]}))
+        with self.assertRaises(OSError):
+            build.resolution_roots(file)
+
     def test_resolution_duplicate_rejected(self):
         (self.root / 'lib').mkdir(exist_ok=True)
         row = {'name': 'app', 'rootUri': self.root.as_uri(), 'packageUri': 'lib/'}
