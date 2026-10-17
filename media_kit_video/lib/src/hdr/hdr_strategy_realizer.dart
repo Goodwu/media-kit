@@ -136,11 +136,26 @@ class HdrStrategyRealizer {
   /// Existing SDR Texture executions, in bounded preference order. CPU
   /// candidates preserve the same tone-map/P5 pipeline/P8.4 stripping gates;
   /// they never add an HDR presenter or feed CPU frames to mediacodec_embed.
+  ///
+  /// [sdrEmbedEnabled] is the caller's functional-compatibility declaration
+  /// (`VideoRouteOptions.sdrEmbed`, default false), already arbitrated by the
+  /// caller against an explicit copy preference: the planner passes false when
+  /// the effective options declare `preferCopy` — the preserved explicit copy
+  /// intent wins over the embed declaration, so generation (not ordering) is
+  /// suppressed. When declared, and ONLY where the texture GPU import is
+  /// unavailable (`_requiresMediacodecCopy`: API 16–25, the group whose only
+  /// hardware carriers today are copy→CPU upload), the list gains an
+  /// `sdrDirect`×`mediacodec_embed` execution ordered BEFORE the copy variant
+  /// (embed → copy → software). API ≥ 26 devices keep their verified texture
+  /// direct route and gain nothing; the tone-map strategy never gains an embed
+  /// variant (tone mapping requires the GL pipeline the embed VO does not
+  /// have).
   static List<HdrStrategyRealization> realizeCandidates(
     HdrStrategy strategy, {
     required HdrSourceDescriptor source,
     required HdrSourceClass sourceClass,
     required HdrCapabilities capabilities,
+    bool sdrEmbedEnabled = false,
   }) {
     final primary = realize(strategy,
         source: source, sourceClass: sourceClass, capabilities: capabilities);
@@ -159,6 +174,13 @@ class HdrStrategyRealizer {
       'no',
     ];
     return List<HdrStrategyRealization>.unmodifiable([
+      // P2 admission is the capability rule "texture GPU import unavailable"
+      // (AImageReader import is the API 26+ GPU importer dependency), never a
+      // device-name judgment; the declaration flag alone does not admit.
+      if (sdrEmbedEnabled &&
+          strategy == HdrStrategy.sdrDirect &&
+          _requiresMediacodecCopy(capabilities))
+        HdrStrategyRealization.route(_sdrEmbedExecution(route)),
       for (final hwdec in requests)
         HdrStrategyRealization.route(
             route.withExecution(hwdec: hwdec, dependencies: {
@@ -181,6 +203,36 @@ class HdrStrategyRealizer {
         })),
     ]);
   }
+
+  /// The `sdrDirect` embed execution variant, shaped after the existing
+  /// `baseLayerDirect`/native-DV embed routes: the platform view's Surface is
+  /// the `wid` the decoder renders into (HWC-composited), so there is no
+  /// presenter/import dependency at all. Within the sdr candidate list the
+  /// only dependency it shares with the texture MediaCodec variants is the
+  /// ordinary MediaCodec decoder dependency (`decoder:mediacodec`): a decoder
+  /// failure excludes the embed and copy executions together, while the
+  /// variant's own hwdec/topology tags keep a carrier failure isolated to it.
+  /// Source processing (the P8.2 RPU strip) and the SDR metadata contract
+  /// travel with the source family, not with the carrier.
+  static HdrRoute _sdrEmbedExecution(HdrRoute textureRoute) => HdrRoute(
+        strategy: HdrStrategy.sdrDirect,
+        presentation: HdrPresentation.sdr,
+        outputTransfer: HdrOutputTransfer.sdr,
+        appliesDynamicMetadata: false,
+        topology: HdrTopology.platformView,
+        vo: 'mediacodec_embed',
+        hwdec: 'mediacodec',
+        targetPrim: null,
+        targetTrc: null,
+        surfaceTransfer: null,
+        stripDvRpu: textureRoute.stripDvRpu,
+        metadataHandling: textureRoute.metadataHandling,
+        dependencies: const <String>{
+          HdrRouteDependency.hwdecMediacodec,
+          HdrRouteDependency.topologyPlatformView,
+          HdrRouteDependency.decoderMediacodec,
+        },
+      );
 
   /// Native single-layer Dolby Vision decode through MediaCodec and the
   /// DV bridge. The RPU stays in the elementary stream for the native

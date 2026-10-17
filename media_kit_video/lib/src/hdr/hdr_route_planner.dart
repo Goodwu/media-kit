@@ -307,9 +307,22 @@ class HdrRoutePlanner {
     bool gateMaturity = true,
     required EffectiveVideoRouteOptions options,
   }) {
+    // The embed declaration is effective only without an explicit copy
+    // preference: `preferCopy` is the preserved explicit copy intent (LYA
+    // round contract — a persisted explicit mediacodec-copy preference must be
+    // respected) and it WINS over the sdrEmbed declaration, so an explicit
+    // copy preference is never silently rerouted onto the direct embed
+    // carrier. Same resolved-field access as the existing preferCopy consumer
+    // (video_route_option_review.dart); this is generation suppression, not a
+    // sort adjustment.
+    final sdrEmbedEffective = options.sdrEmbed &&
+        options.importPreference != VideoImportPreference.preferCopy;
     final candidates = [
       for (final realization in HdrStrategyRealizer.realizeCandidates(strategy,
-          source: source, sourceClass: sourceClass, capabilities: capabilities))
+          source: source,
+          sourceClass: sourceClass,
+          capabilities: capabilities,
+          sdrEmbedEnabled: sdrEmbedEffective))
         _evaluate(strategy,
             source: source,
             sourceClass: sourceClass,

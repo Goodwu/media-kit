@@ -56,6 +56,7 @@ class VideoRouteOptions {
     this.output,
     this.importPreference,
     this.failurePolicy,
+    this.sdrEmbed,
   });
 
   final VideoRouteSelection<VideoDecodeTarget>? decode;
@@ -63,11 +64,47 @@ class VideoRouteOptions {
   final VideoImportPreference? importPreference;
   final VideoRouteFailurePolicy? failurePolicy;
 
+  /// Explicit application declaration that the SDR session does not need the
+  /// mpv-side GL features the `gpu-next` texture pipeline provides. Only with
+  /// this declaration may the planner generate the `sdrDirect`×
+  /// `mediacodec_embed` execution candidate on devices where the texture GPU
+  /// import is unavailable (the `mediacodec-copy` fallback group): the embed
+  /// VO renders through the platform Surface without that GL pipeline, so a
+  /// silent carrier switch must not drop declared functionality (plan
+  /// G3/G4). Contract rules:
+  ///
+  /// 1. `true` is the caller's declaration of functional compatibility for
+  ///    THIS session. The library never auto-detects GL, subtitle, filter or
+  ///    shader usage and never infers the declaration from observed state.
+  /// 2. Do NOT declare `true` when the session needs mpv-side subtitles,
+  ///    OSD/OSC, video filters or upscaling shaders (the embed VO does not
+  ///    provide them). Flutter-layer features (danmaku, Flutter-rendered
+  ///    subtitles) composite above the platform view and are a separate
+  ///    evaluation, not covered by this declaration.
+  /// 3. Mid-playback new requirements: keep every other effective option,
+  ///    set `sdrEmbed: false`, reopen through the controlled `setOptions`
+  ///    path (HdrVideoSession.setOptions — stop, replan, rebuild the output),
+  ///    confirm the reopen succeeded, and only then enable the feature.
+  ///    Callers that cannot drive that controlled reopen flow must explicitly
+  ///    refuse the new feature request instead of declaring `true` up front.
+  /// 4. Writing filters/shaders directly to the Player is NOT an automatic
+  ///    switch-back mechanism: the embed VO does not run them, and only the
+  ///    controlled `sdrEmbed: false` reopen returns to the Texture carrier.
+  /// 5. `screenshot-raw` compatibility on the embed carrier is unmeasured and
+  ///    is not part of the verified promise.
+  ///
+  /// Default null = not declared = no embed candidate. Admission stays
+  /// capability-scoped (SDK < 26), never a device-name judgment, and an
+  /// explicit `preferCopy` import preference suppresses generation entirely
+  /// (the explicit copy intent wins over this declaration).
+  final bool? sdrEmbed;
+
   VideoRouteOptions merge(VideoRouteOptions overrides) => VideoRouteOptions(
         decode: overrides.decode ?? decode,
         output: overrides.output ?? output,
         importPreference: overrides.importPreference ?? importPreference,
         failurePolicy: overrides.failurePolicy ?? failurePolicy,
+        sdrEmbed: overrides.sdrEmbed ?? sdrEmbed,
       );
 
   /// Canonical field order and deeply immutable values, suitable for reports.
@@ -78,6 +115,7 @@ class VideoRouteOptions {
         'output': output?.toMap(),
         'importPreference': importPreference?.name,
         'failurePolicy': failurePolicy?.name,
+        'sdrEmbed': sdrEmbed,
       });
 
   String get key => jsonEncode(toMap());
@@ -90,6 +128,7 @@ class VideoRouteOptions {
       'output',
       'importPreference',
       'failurePolicy',
+      'sdrEmbed',
       'experimental'
     });
     return VideoRouteOptions(
@@ -99,6 +138,7 @@ class VideoRouteOptions {
           _enumValue(map['importPreference'], VideoImportPreference.values),
       failurePolicy:
           _enumValue(map['failurePolicy'], VideoRouteFailurePolicy.values),
+      sdrEmbed: _flag(map['sdrEmbed']),
     );
   }
 
@@ -108,11 +148,12 @@ class VideoRouteOptions {
       decode == other.decode &&
       output == other.output &&
       importPreference == other.importPreference &&
-      failurePolicy == other.failurePolicy;
+      failurePolicy == other.failurePolicy &&
+      sdrEmbed == other.sdrEmbed;
 
   @override
   int get hashCode =>
-      Object.hash(decode, output, importPreference, failurePolicy);
+      Object.hash(decode, output, importPreference, failurePolicy, sdrEmbed);
 }
 
 /// One effective configuration for selection, planning, execution and reporting.
@@ -124,6 +165,7 @@ class EffectiveVideoRouteOptions {
     required this.output,
     required this.importPreference,
     required this.failurePolicy,
+    required this.sdrEmbed,
     required this.libraryDefaults,
     required this.application,
     required this.openOverride,
@@ -157,6 +199,9 @@ class EffectiveVideoRouteOptions {
       output: result.output!,
       importPreference: result.importPreference!,
       failurePolicy: result.failurePolicy!,
+      // Undeclared (null at every layer) stays disabled: the embed candidate
+      // requires an explicit functional-compatibility declaration.
+      sdrEmbed: result.sdrEmbed ?? false,
       libraryDefaults: libraryDefaults,
       application: application,
       openOverride: openOverride,
@@ -168,6 +213,10 @@ class EffectiveVideoRouteOptions {
   final VideoRouteSelection<VideoOutputIntent> output;
   final VideoImportPreference importPreference;
   final VideoRouteFailurePolicy failurePolicy;
+
+  /// Resolved functional-compatibility declaration for the SDR embed
+  /// candidate (see [VideoRouteOptions.sdrEmbed]). Default false.
+  final bool sdrEmbed;
   final VideoRouteOptions libraryDefaults;
   final VideoRouteOptions application;
   final VideoRouteOptions openOverride;
@@ -178,6 +227,7 @@ class EffectiveVideoRouteOptions {
         'output': output.toMap(),
         'importPreference': importPreference.name,
         'failurePolicy': failurePolicy.name,
+        'sdrEmbed': sdrEmbed,
         'origins': Map<String, Object?>.unmodifiable({
           for (final entry in origins.entries) entry.key: entry.value.name,
         }),
@@ -211,6 +261,13 @@ T? _enumValue<T extends Enum>(Object? value, List<T> values) {
     if (value == candidate.name) return candidate;
   }
   throw FormatException('Unknown route option value: $value');
+}
+
+/// Absent stays undeclared (null); a stored flag must be a real boolean.
+bool? _flag(Object? value) {
+  if (value == null) return null;
+  if (value is bool) return value;
+  throw const FormatException('Route option flag must be a boolean');
 }
 
 VideoRouteSelection<T>? _selection<T extends Enum>(

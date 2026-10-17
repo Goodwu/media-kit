@@ -716,4 +716,189 @@ void main() {
     final s = Sample()..epoch = 5;
     await expectLater(s.gather(), throwsA(isA<HdrDecoderReviewFailure>()));
   });
+
+  test('embed value domain accepts the P1-A observed shape', () async {
+    // Positive contract for the mediacodec_embed observation (P1-A measured
+    // snapshot): hwdec=mediacodec AND pixelformat=mediacodec pass the plan
+    // check — the CPU-frame negative above is not the whole value domain.
+    final s = Sample();
+    s.props['current-tracks/video/decoder'] = 'h264_mediacodec';
+    s.props['current-tracks/video/codec'] = 'h264';
+    s.props['video-format'] = 'h264';
+    s.props['android-mediacodec-info'] =
+        '{"api":1,"mime":"video/avc","codec":"c2.avc","native-dv-active":false}';
+    s.props['video-params/hw-pixelformat'] = 'mediacodec';
+    s.props['video-params/gamma'] = 'bt.1886';
+    s.props['video-params/primaries'] = 'bt.709';
+    final facts = await s.gather();
+    expect(facts.hwdecCurrent, 'mediacodec');
+    expect(facts.decoderObservation!.pixelFormat, 'mediacodec');
+    expect(
+        () => validateDecoderObservation(
+            route(vo: 'mediacodec_embed', hwdec: 'mediacodec'), facts),
+        returnsNormally);
+    // The same observation still satisfies the texture mediacodec route.
+    expect(() => validateDecoderObservation(route(), facts),
+        returnsNormally);
+  });
+
+  test('embed hwdec and pixelformat first publication completes in-window',
+      () async {
+    // Embed-specific attach shape: mpv never sees an nv12 CPU frame on this
+    // VO, so the settled frame format IS 'mediacodec'. The hwdec mode and the
+    // pixel format first-publish in the SAME sampling round while the decoder
+    // label is already settled; the publication round resamples and the next
+    // consistent pair completes.
+    final s = Sample();
+    s.props['current-tracks/video/decoder'] = 'h264_mediacodec';
+    s.props['current-tracks/video/codec'] = 'h264';
+    s.props['video-format'] = 'h264';
+    s.props['android-mediacodec-info'] =
+        '{"api":1,"mime":"video/avc","codec":"c2.avc","native-dv-active":false}';
+    s.props['video-params/gamma'] = 'bt.1886';
+    s.props['video-params/primaries'] = 'bt.709';
+    var hwdecReads = 0;
+    var pixelReads = 0;
+    s.onRead = (p) async {
+      if (p == 'hwdec-current' && ++hwdecReads == 1) return '';
+      if (p == 'video-params/pixelformat' && ++pixelReads == 1) return '';
+      return s.props[p] ?? '';
+    };
+    final facts = await s.gather();
+    expect(facts.hwdecCurrent, 'mediacodec');
+    expect(facts.decoderObservation!.pixelFormat, 'mediacodec');
+    expect(facts.decoderObservation!.decoder, 'h264_mediacodec');
+    expect(s.elapsed, greaterThanOrEqualTo(const Duration(milliseconds: 50)),
+        reason: 'the publication round must resample, not return');
+    expect(
+        () => validateDecoderObservation(
+            route(vo: 'mediacodec_embed', hwdec: 'mediacodec'), facts),
+        returnsNormally);
+  });
+
+  test('first-round in-pair attach from an unregistered label is rejected',
+      () async {
+    // P0/P1-A device snapshot shape (registered == null, A=h264 /
+    // B=h264_mediacodec in ONE round): the attach publication requires a
+    // REGISTERED pre-attach label. Pin the current rejection semantics —
+    // this test does not change them.
+    final s = Sample();
+    s.props['current-tracks/video/codec'] = 'h264';
+    s.props['video-format'] = 'h264';
+    s.props['android-mediacodec-info'] =
+        '{"api":1,"mime":"video/avc","codec":"c2.avc","native-dv-active":false}';
+    s.props['video-params/gamma'] = 'bt.1886';
+    s.props['video-params/primaries'] = 'bt.709';
+    s.props['video-params/pixelformat'] = '';
+    var decoderReads = 0;
+    s.onRead = (p) async {
+      if (p == 'current-tracks/video/decoder') {
+        return ++decoderReads == 1 ? 'h264' : 'h264_mediacodec';
+      }
+      return s.props[p] ?? '';
+    };
+    await expectLater(
+        s.gather(),
+        throwsA(isA<HdrDecoderReviewFailure>().having(
+            (error) => error.detail,
+            'detail',
+            contains('Decoder endpoint changed: current-tracks/video/decoder'))));
+  });
+
+  test('cross-round attach settles with the embed hwdec publication', () async {
+    // mediacodec+mediacodec variant of the settled attach shape (the
+    // registered case is the copy+nv12 combination): early rounds register
+    // the bare h264 label while hwdec-current and the frame format are still
+    // unpublished; the settling round carries the label suffix publication
+    // AND the hwdec first publication in one window with the IDENTICAL
+    // MediaCodec configuration; the frame format settles as 'mediacodec'
+    // (mpv never sees nv12 on the embed VO). The full facts pass the embed
+    // plan check.
+    final s = Sample();
+    s.props['current-tracks/video/codec'] = 'h264';
+    s.props['video-format'] = 'h264';
+    s.props['android-mediacodec-info'] =
+        '{"api":1,"mime":"video/avc","codec":"c2.avc","native-dv-active":false}';
+    s.props['video-params/gamma'] = 'bt.1886';
+    s.props['video-params/primaries'] = 'bt.709';
+    var decoderReads = 0;
+    var hwdecReads = 0;
+    var pixelReads = 0;
+    s.onRead = (p) async {
+      if (p == 'current-tracks/video/decoder' && ++decoderReads <= 3) {
+        return 'h264';
+      }
+      if (p == 'hwdec-current' && ++hwdecReads <= 3) return '';
+      if (p == 'video-params/pixelformat' && ++pixelReads <= 4) return '';
+      if (p == 'current-tracks/video/decoder') return 'h264_mediacodec';
+      return s.props[p] ?? '';
+    };
+    final facts = await s.gather(budget: const Duration(seconds: 3));
+    expect(facts.decoderObservation!.decoder, 'h264_mediacodec');
+    expect(facts.hwdecCurrent, 'mediacodec');
+    expect(facts.decoderObservation!.pixelFormat, 'mediacodec');
+    expect(
+        () => validateDecoderObservation(
+            route(vo: 'mediacodec_embed', hwdec: 'mediacodec'), facts),
+        returnsNormally);
+  });
+
+  test('surface rebuild republishes hwdec after a dead window and completes',
+      () async {
+    // Surface loss/rebuild: during the dead window hwdec-current is reset
+    // ('', never registered) while the stale pre-teardown frame params
+    // (yuv420p) are still reported; the rebuilt output republishes
+    // '' → 'mediacodec' (first publication) and the frame format switches to
+    // 'mediacodec' across rounds. The review completes on the settled state
+    // and the embed plan check accepts it.
+    final s = Sample();
+    s.props['current-tracks/video/decoder'] = 'h264_mediacodec';
+    s.props['current-tracks/video/codec'] = 'h264';
+    s.props['video-format'] = 'h264';
+    s.props['android-mediacodec-info'] =
+        '{"api":1,"mime":"video/avc","codec":"c2.avc","native-dv-active":false}';
+    s.props['video-params/gamma'] = 'bt.1886';
+    s.props['video-params/primaries'] = 'bt.709';
+    var hwdecReads = 0;
+    var pixelReads = 0;
+    s.onRead = (p) async {
+      if (p == 'hwdec-current' && ++hwdecReads <= 3) return '';
+      if (p == 'video-params/pixelformat' && ++pixelReads <= 4) {
+        return 'yuv420p';
+      }
+      return s.props[p] ?? '';
+    };
+    final facts = await s.gather(budget: const Duration(seconds: 3));
+    expect(facts.hwdecCurrent, 'mediacodec');
+    expect(facts.decoderObservation!.pixelFormat, 'mediacodec');
+    expect(
+        () => validateDecoderObservation(
+            route(vo: 'mediacodec_embed', hwdec: 'mediacodec'), facts),
+        returnsNormally);
+  });
+
+  test('embed value domain disappearance is still a failing observation',
+      () async {
+    // Disappearance direction re-run on the embed value domain: a REGISTERED
+    // hwdec whose half goes empty fails in-round, never settles.
+    final s = Sample();
+    s.props['current-tracks/video/decoder'] = 'h264_mediacodec';
+    s.props['current-tracks/video/codec'] = 'h264';
+    s.props['video-format'] = 'h264';
+    s.props['android-mediacodec-info'] =
+        '{"api":1,"mime":"video/avc","codec":"c2.avc","native-dv-active":false}';
+    s.props['video-params/gamma'] = 'bt.1886';
+    s.props['video-params/primaries'] = 'bt.709';
+    var hwdecReads = 0;
+    s.onRead = (p) async {
+      if (p == 'hwdec-current' && ++hwdecReads == 2) return '';
+      return s.props[p] ?? '';
+    };
+    await expectLater(
+        s.gather(budget: const Duration(seconds: 1)),
+        throwsA(isA<HdrDecoderReviewFailure>().having(
+            (error) => error.detail,
+            'detail',
+            contains('value disappeared'))));
+  });
 }

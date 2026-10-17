@@ -20,20 +20,23 @@ EffectiveVideoRouteOptions options(
         {VideoRouteSelection<VideoDecodeTarget>? decode,
         VideoRouteSelection<VideoOutputIntent>? output,
         VideoImportPreference? importer,
-        VideoRouteFailurePolicy? failure}) =>
+        VideoRouteFailurePolicy? failure,
+        bool? sdrEmbed}) =>
     EffectiveVideoRouteOptions.resolve(
         application: VideoRouteOptions(
             decode: decode,
             output: output,
             importPreference: importer,
-            failurePolicy: failure));
+            failurePolicy: failure,
+            sdrEmbed: sdrEmbed));
 HdrCapabilities capabilities(
         {VideoDecoderKind kind = VideoDecoderKind.hardware,
         VideoSupport support = VideoSupport.supported,
         String name = 'c2.hevc',
-        bool hdr = true}) =>
+        bool hdr = true,
+        int sdk = 29}) =>
     HdrCapabilities(
-        sdkInt: 29,
+        sdkInt: sdk,
         displayHdrTypes: hdr ? const {1, 2, 3} : const {},
         hevcDecoders: const [],
         dolbyVisionDecoders: const [],
@@ -906,5 +909,36 @@ void main() {
         () => resolveHdrRouteOptions(
             options: o, preference: HdrOutputPreference.off),
         throwsArgumentError);
+  });
+
+  test('sdrEmbed declaration survives settings roundtrips and exits explicitly',
+      () async {
+    // Session-level contract of the controlled reopen path (setOptions and
+    // the setPreference/setPolicy settings roundtrip, hdr_video_session.dart
+    // setOptions): on the copy-fallback group (SDK 16–25) the declaration
+    // switches the selected carrier to embed, survives every settings
+    // rebuild, yields to an explicit preferCopy declaration, and an explicit
+    // sdrEmbed:false reopens back onto the copy carrier.
+    final b = Backend();
+    final s = session(b, caps: capabilities(sdk: 24));
+    await open(s, b, options());
+    expect(b.opened.single.hwdec, 'mediacodec-copy');
+    await s.setOptions(options(sdrEmbed: true));
+    expect(b.opened.last.vo, 'mediacodec_embed');
+    expect(s.report.value.verified, isTrue);
+    await s.setPolicy(HdrRoutingPolicy.defaults);
+    expect(b.opened.last.vo, 'mediacodec_embed');
+    await s.setPreference(HdrOutputPreference.auto);
+    expect(b.opened.last.vo, 'mediacodec_embed');
+    expect(s.report.value.options!.sdrEmbed, isTrue);
+    await s.setOptions(
+        options(sdrEmbed: true, importer: VideoImportPreference.preferCopy));
+    expect(b.opened.last.vo, 'gpu-next');
+    expect(b.opened.last.hwdec, 'mediacodec-copy');
+    await s.setOptions(options(sdrEmbed: false));
+    expect(b.opened.last.vo, 'gpu-next');
+    expect(b.opened.last.hwdec, 'mediacodec-copy');
+    expect(s.report.value.options!.sdrEmbed, isFalse);
+    await s.dispose();
   });
 }

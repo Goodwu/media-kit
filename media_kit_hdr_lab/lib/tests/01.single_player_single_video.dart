@@ -968,6 +968,32 @@ class _SinglePlayerSingleVideoScreenState
   static const _androidEmbedProbe = bool.fromEnvironment(
     'MEDIA_KIT_ANDROID_EMBED_PROBE',
   );
+  // P2 sdrDirect×embed candidate entry (plan android-sdr-light-presentation
+  // 2026-10-17): declares to the session's route options that the SDR session
+  // does not need mpv-side GL features, so the planner may generate the embed
+  // execution candidate on the copy-fallback device group (SDK 16–25).
+  // Effective conditions (guarded in initState):
+  // - requires MEDIA_KIT_ANDROID_HDR_TRANSACTION=true (the session transaction
+  //   path is what plans and reviews the embed candidate);
+  // - must NOT be combined with the non-transaction MEDIA_KIT_ANDROID_EMBED_PROBE
+  //   plain-player probe mode;
+  // - effectiveness is proven ONLY by the session prediction / actual route
+  //   hitting vo=mediacodec_embed — the define's existence alone is not
+  //   evidence (an SDK ≥ 26 device keeps the texture directory).
+  // Default OFF: without the define the session options are untouched and the
+  // candidate directory is identical to the default build.
+  static const _androidSdrEmbed = bool.fromEnvironment(
+    'MEDIA_KIT_ANDROID_SDR_EMBED',
+  );
+
+  /// Session route options for the P2 embed entry: null keeps the default
+  /// behavior (no options passed), declared turns the sdrDirect×embed
+  /// candidate generation on for this open.
+  static EffectiveVideoRouteOptions? get _sdrEmbedSessionOptions =>
+      _androidSdrEmbed
+          ? EffectiveVideoRouteOptions.resolve(
+              application: const VideoRouteOptions(sdrEmbed: true))
+          : null;
 
   // The controlled /data/local/tmp fixtures opened by this page. Their
   // identity mapping below is the page's existing sample enumeration (each
@@ -3223,7 +3249,8 @@ class _SinglePlayerSingleVideoScreenState
               revokeOwner: _revokeLgExperiment);
         } else {
           await prepare();
-          await session.open(Media(source), hint: hint, start: start);
+          await session.open(Media(source), hint: hint, start: start,
+              options: _sdrEmbedSessionOptions);
         }
       } catch (error, stack) {
         openFailure = error;
@@ -4238,6 +4265,15 @@ class _SinglePlayerSingleVideoScreenState
             _androidNoMediaProbe)) {
       throw StateError(
           'Convert route lock requires the Android Session open path');
+    }
+    if (_androidSdrEmbed && !_androidHdrTransaction) {
+      throw StateError(
+          'SDR embed entry requires MEDIA_KIT_ANDROID_HDR_TRANSACTION=true '
+          '(the session transaction path plans and reviews the candidate)');
+    }
+    if (_androidSdrEmbed && _androidEmbedProbe) {
+      throw StateError('SDR embed entry excludes the non-transaction '
+          'MEDIA_KIT_ANDROID_EMBED_PROBE plain-player probe mode');
     }
     if ((_androidMpvOutputLevels.isNotEmpty || _androidVfFullRange) &&
         !_androidHdrTransaction) {

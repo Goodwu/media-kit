@@ -1421,7 +1421,8 @@ class HdrVideoSession {
         decode: value.decode,
         output: value.output,
         importPreference: value.importPreference,
-        failurePolicy: value.failurePolicy);
+        failurePolicy: value.failurePolicy,
+        sdrEmbed: value.sdrEmbed ? true : null);
   }
 
   void _ensureConfigurationChangeAllowed() {
