@@ -12,6 +12,11 @@ const _androidPlatformView = bool.fromEnvironment(
   defaultValue: false,
 );
 const _androidVo = String.fromEnvironment('MEDIA_KIT_ANDROID_VO');
+// Embed feasibility probe (P1-A): the PlatformView wid-bind re-asserts `vo`
+// from this configuration, so the probe must imply the embed VO and the
+// platform view output here or the bind would silently downgrade to `gpu`.
+const _androidEmbedProbe =
+    bool.fromEnvironment('MEDIA_KIT_ANDROID_EMBED_PROBE');
 const _androidHdrTransaction = bool.fromEnvironment(
   'MEDIA_KIT_ANDROID_HDR_TRANSACTION',
 );
@@ -35,7 +40,11 @@ final configuration = ValueNotifier<VideoControllerConfiguration>(
         : 'auto',
     enableHardwareAcceleration: true,
     // W1 macOS-only experiment. Keep this enabled only in the isolated host.
-    vo: Platform.isAndroid && _androidVo.isNotEmpty ? _androidVo : null,
+    vo: Platform.isAndroid && _androidEmbedProbe
+        ? 'mediacodec_embed'
+        : Platform.isAndroid && _androidVo.isNotEmpty
+            ? _androidVo
+            : null,
     darwin: DarwinVideoOptions(
       useNativeWindow: !_autoTexture && _autoNativeWindow,
       useNativeSurface: !_autoTexture && !_autoNativeWindow,
@@ -43,7 +52,8 @@ final configuration = ValueNotifier<VideoControllerConfiguration>(
     // Explicit comparison input for Android test builds; it is not a library
     // HDR-capability declaration.
     android: AndroidVideoOptions(
-      usePlatformView: Platform.isAndroid && _androidPlatformView,
+      usePlatformView:
+          Platform.isAndroid && (_androidPlatformView || _androidEmbedProbe),
       enableSurfaceProducer: _androidSurfaceProducer,
       matchTextureOutputToLayout:
           Platform.isAndroid && _androidTextureLayoutSize,

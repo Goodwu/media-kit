@@ -6,6 +6,7 @@ import 'package:media_kit_video/src/hdr/hdr_route_planner.dart';
 import 'package:media_kit_video/src/hdr/hdr_source_descriptor.dart';
 import 'package:media_kit_video/src/hdr/hdr_strategy.dart';
 import 'package:media_kit_video/src/hdr/hdr_strategy_realizer.dart';
+import 'package:media_kit_video/src/routing/video_route_options.dart';
 
 /// The LYA-shaped self-report: applicable, with the vendor's validated
 /// prediction evidence for the pq surface transfer (the confidence rule
@@ -591,10 +592,21 @@ void main() {
         },
       );
       for (final int sdk in <int>[24, 25]) {
+        // Default-enabled sdrEmbed (2026-10-17 product decision): the plain
+        // SDR prediction selects the decoder-composited embed execution;
+        // the texture carrier head stays copy and the explicit false opt-out
+        // restores exactly the pre-default texture prediction.
         final HdrRoutePrediction sdr =
             caps(sdkInt: sdk).predict(sources[HdrSourceClass.sdr]!);
-        expect(sdr.selected.route!.hwdec, 'mediacodec-copy');
-        expect(sdr.selected.route!.dependencies, <String>{
+        expect(sdr.selected.route!.vo, 'mediacodec_embed');
+        expect(sdr.selected.route!.hwdec, 'mediacodec');
+        final HdrRoutePrediction texture = caps(sdkInt: sdk).predict(
+          sources[HdrSourceClass.sdr]!,
+          options: EffectiveVideoRouteOptions.resolve(
+              application: const VideoRouteOptions(sdrEmbed: false)),
+        );
+        expect(texture.selected.route!.hwdec, 'mediacodec-copy');
+        expect(texture.selected.route!.dependencies, <String>{
           HdrRouteDependency.hwdecMediacodecCopy,
           HdrRouteDependency.decoderMediacodec,
           HdrRouteDependency.importCpuUpload,

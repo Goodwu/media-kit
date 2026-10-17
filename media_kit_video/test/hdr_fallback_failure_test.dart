@@ -22,10 +22,15 @@ void main() {
             ? HdrRouteDependency.hwdecMediacodecCopy
             : HdrRouteDependency.hwdecMediacodec;
         final failures = {dependency: HdrDegradeReason.hwdecMismatch};
+        // The subject is the texture-carrier failure fallback: the explicit
+        // sdrEmbed opt-out keeps the directory exactly the pre-default one
+        // (the unset option now plans the embed execution first there).
         final result = HdrRoutePlanner.plan(
           source: source,
           capabilities: caps,
           excluded: failures,
+          options: EffectiveVideoRouteOptions.resolve(
+              application: const VideoRouteOptions(sdrEmbed: false)),
         );
         expect(result.playable, isTrue);
         expect(result.selected.route!.hwdec, sdk < 26 ? 'no' : 'mediacodec-copy');
@@ -36,7 +41,9 @@ void main() {
         final sharedFailures = {...failures,
           HdrRouteDependency.presenterGpuTexture: HdrDegradeReason.hwdecMismatch};
         final blocked = HdrRoutePlanner.plan(source: source, capabilities: caps,
-          excluded: sharedFailures);
+          excluded: sharedFailures,
+          options: EffectiveVideoRouteOptions.resolve(
+              application: const VideoRouteOptions(sdrEmbed: false)));
         expect(blocked.playable, isFalse);
         expect(blocked.selected.route, isNull);
         expect(blocked.selected.skipReason, HdrDegradeReason.hwdecMismatch);
