@@ -911,34 +911,61 @@ void main() {
         throwsArgumentError);
   });
 
-  test('sdrEmbed declaration survives settings roundtrips and exits explicitly',
+  test('sdrEmbed default enables embed; explicit false exits and persists',
       () async {
-    // Session-level contract of the controlled reopen path (setOptions and
-    // the setPreference/setPolicy settings roundtrip, hdr_video_session.dart
-    // setOptions): on the copy-fallback group (SDK 16–25) the declaration
-    // switches the selected carrier to embed, survives every settings
-    // rebuild, yields to an explicit preferCopy declaration, and an explicit
-    // sdrEmbed:false reopens back onto the copy carrier.
+    // Session-level contract of the default-enabled semantics (2026-10-17
+    // product decision) on the copy-fallback group (SDK 16–25): the unset
+    // option opens on the embed carrier, every settings rebuild
+    // (setPolicy/setPreference re-resolution) keeps that semantics, an
+    // explicit preferCopy still wins, and an explicit sdrEmbed:false exits
+    // through the controlled reopen and survives further settings rebuilds.
     final b = Backend();
     final s = session(b, caps: capabilities(sdk: 24));
     await open(s, b, options());
-    expect(b.opened.single.hwdec, 'mediacodec-copy');
-    await s.setOptions(options(sdrEmbed: true));
-    expect(b.opened.last.vo, 'mediacodec_embed');
+    expect(b.opened.single.vo, 'mediacodec_embed');
+    expect(b.opened.single.hwdec, 'mediacodec');
     expect(s.report.value.verified, isTrue);
     await s.setPolicy(HdrRoutingPolicy.defaults);
     expect(b.opened.last.vo, 'mediacodec_embed');
     await s.setPreference(HdrOutputPreference.auto);
     expect(b.opened.last.vo, 'mediacodec_embed');
-    expect(s.report.value.options!.sdrEmbed, isTrue);
     await s.setOptions(
-        options(sdrEmbed: true, importer: VideoImportPreference.preferCopy));
+        options(importer: VideoImportPreference.preferCopy));
     expect(b.opened.last.vo, 'gpu-next');
     expect(b.opened.last.hwdec, 'mediacodec-copy');
     await s.setOptions(options(sdrEmbed: false));
     expect(b.opened.last.vo, 'gpu-next');
     expect(b.opened.last.hwdec, 'mediacodec-copy');
     expect(s.report.value.options!.sdrEmbed, isFalse);
+    await s.setPolicy(HdrRoutingPolicy.defaults);
+    expect(b.opened.last.vo, 'gpu-next');
+    expect(b.opened.last.hwdec, 'mediacodec-copy');
+    await s.setPreference(HdrOutputPreference.auto);
+    expect(b.opened.last.vo, 'gpu-next');
+    expect(b.opened.last.hwdec, 'mediacodec-copy');
+    expect(s.report.value.options!.sdrEmbed, isFalse);
+    await s.dispose();
+  });
+
+  test('sdrEmbed explicit true survives settings rebuilds', () async {
+    // Direct coverage for the explicit `true` entry (the default-enabled
+    // test above covers the unset entry): an explicit declaration must
+    // reopen on the embed carrier, stay verified, and survive
+    // setPolicy/setPreference rebuilds with the declaration still resolved.
+    final b = Backend();
+    final s = session(b, caps: capabilities(sdk: 24));
+    await open(s, b, options(sdrEmbed: true));
+    expect(b.opened.single.vo, 'mediacodec_embed');
+    expect(b.opened.single.hwdec, 'mediacodec');
+    expect(s.report.value.verified, isTrue);
+    await s.setPolicy(HdrRoutingPolicy.defaults);
+    expect(b.opened.last.vo, 'mediacodec_embed');
+    expect(b.opened.last.hwdec, 'mediacodec');
+    expect(s.report.value.verified, isTrue);
+    await s.setPreference(HdrOutputPreference.auto);
+    expect(b.opened.last.vo, 'mediacodec_embed');
+    expect(b.opened.last.hwdec, 'mediacodec');
+    expect(s.report.value.options!.sdrEmbed, isTrue);
     await s.dispose();
   });
 }

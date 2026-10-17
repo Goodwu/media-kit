@@ -316,7 +316,12 @@ void main() {
     );
     final events = <HdrOutputEvent>[];
     session.events.listen(events.add);
-    await session.open(media);
+    // The subject is the persistent-mismatch blocking protocol: the explicit
+    // sdrEmbed opt-out keeps the unclassified source on the texture SDR head
+    // (the unset option now plans the embed execution first at SDK 24).
+    await session.open(media,
+        options: EffectiveVideoRouteOptions.resolve(
+            application: const VideoRouteOptions(sdrEmbed: false)));
     await pumpEventQueue();
     expect(backend.opened, hasLength(2));
     expect(backend.opened.first.route.strategy, HdrStrategy.sdrDirect);
@@ -936,7 +941,12 @@ void main() {
     final events = <HdrOutputEvent>[];
     session.events.listen(events.add);
 
-    await session.open(media, hint: sdr);
+    // The subject is the copy-carrier review contract: the explicit sdrEmbed
+    // opt-out keeps the directory copy → software (the unset option now
+    // plans the embed execution first on SDK 16–25).
+    await session.open(media, hint: sdr,
+        options: EffectiveVideoRouteOptions.resolve(
+            application: const VideoRouteOptions(sdrEmbed: false)));
     await pumpEventQueue();
 
     expect(backend.opened, hasLength(1));
@@ -961,7 +971,10 @@ void main() {
     );
     final events = <HdrOutputEvent>[];
     session.events.listen(events.add);
-    await session.open(media, hint: sdr);
+    // Same explicit opt-out as above: this verifies the copy review flow.
+    await session.open(media, hint: sdr,
+        options: EffectiveVideoRouteOptions.resolve(
+            application: const VideoRouteOptions(sdrEmbed: false)));
     await pumpEventQueue();
     expect(backend.opened.map((o) => o.route.hwdec), ['mediacodec-copy', 'no']);
     expect(session.report.value.verified, isTrue);
@@ -1423,7 +1436,13 @@ void main() {
         ),
         yuvWindowArm: sessionArm(atoms),
       );
-      await session.open(media, hint: hlgSource);
+      // The subject is the same-generation reopen arm protocol: the explicit
+      // sdrEmbed opt-out keeps the reclassified SDR reopen on the texture
+      // copy carrier (the unset option now plans the embed execution first
+      // at SDK 24).
+      await session.open(media, hint: hlgSource,
+          options: EffectiveVideoRouteOptions.resolve(
+              application: const VideoRouteOptions(sdrEmbed: false)));
       await pumpEventQueue();
 
       // The decoder review reclassifies the hinted HLG source as SDR and

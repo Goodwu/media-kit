@@ -137,16 +137,13 @@ class HdrStrategyRealizer {
   /// candidates preserve the same tone-map/P5 pipeline/P8.4 stripping gates;
   /// they never add an HDR presenter or feed CPU frames to mediacodec_embed.
   ///
-  /// [sdrEmbedEnabled] is the caller's functional-compatibility declaration
-  /// (`VideoRouteOptions.sdrEmbed`, default false), already arbitrated by the
-  /// caller against an explicit copy preference: the planner passes false when
-  /// the effective options declare `preferCopy` — the preserved explicit copy
-  /// intent wins over the embed declaration, so generation (not ordering) is
-  /// suppressed. When declared, and ONLY where the texture GPU import is
-  /// unavailable (`_requiresMediacodecCopy`: API 16–25, the group whose only
-  /// hardware carriers today are copy→CPU upload), the list gains an
-  /// `sdrDirect`×`mediacodec_embed` execution ordered BEFORE the copy variant
-  /// (embed → copy → software). API ≥ 26 devices keep their verified texture
+  /// [sdrEmbedEnabled] is the planner-arbitrated admission flag.
+  /// `VideoRouteOptions.sdrEmbed` resolves enabled by default; explicit
+  /// opt-out, `preferCopy`, or a source census declaring the hardware decode
+  /// `unsupported` suppresses it. This low-level parameter still defaults to
+  /// false for direct callers. When enabled, only sdrDirect on SDK 16–25
+  /// gains the embed candidate (`mediacodec_embed` → copy → software).
+  /// API ≥ 26 devices keep their verified texture
   /// direct route and gain nothing; the tone-map strategy never gains an embed
   /// variant (tone mapping requires the GL pipeline the embed VO does not
   /// have).

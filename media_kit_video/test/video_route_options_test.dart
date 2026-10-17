@@ -288,20 +288,33 @@ void main() {
         .containsKey('experimental'), isFalse);
   });
 
-  test('sdrEmbed defaults to false at every layer and origin', () {
+  test('sdrEmbed resolves default-enabled; explicit false opts out', () {
     const unset = VideoRouteOptions();
     expect(unset.sdrEmbed, isNull);
     final effective = EffectiveVideoRouteOptions.resolve();
-    expect(effective.sdrEmbed, isFalse);
+    expect(effective.sdrEmbed, isTrue);
     expect(
         effective.origins['sdrEmbed'], VideoRouteOptionOrigin.libraryDefault);
-    // A persisted configuration from before the field existed loads unchanged.
+    // A persisted configuration from before the field existed loads unchanged
+    // and null still serializes as the (now default-enabled) unset value.
     final preField = VideoRouteOptions.fromMap({
       'importPreference': 'auto',
     });
     expect(preField.sdrEmbed, isNull);
     expect(EffectiveVideoRouteOptions.resolve(application: preField).sdrEmbed,
+        isTrue);
+    // The explicit `false` escape hatch stays distinct from the default at
+    // every layer.
+    const optedOut = VideoRouteOptions(sdrEmbed: false);
+    expect(
+        EffectiveVideoRouteOptions.resolve(application: optedOut).sdrEmbed,
         isFalse);
+    expect(
+        EffectiveVideoRouteOptions.resolve(
+                application: preField, openOverride: optedOut)
+            .sdrEmbed,
+        isFalse);
+    expect(optedOut.key, isNot(preField.key));
   });
 
   test('sdrEmbed declaration roundtrips and resolves per layer', () {

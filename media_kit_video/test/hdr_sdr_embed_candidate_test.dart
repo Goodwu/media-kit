@@ -7,7 +7,9 @@ import 'package:media_kit_video/src/hdr/hdr_route_planner.dart';
 import 'package:media_kit_video/src/hdr/hdr_source_descriptor.dart';
 import 'package:media_kit_video/src/hdr/hdr_strategy.dart';
 import 'package:media_kit_video/src/hdr/hdr_strategy_realizer.dart';
+import 'package:media_kit_video/src/routing/video_decoder_support.dart';
 import 'package:media_kit_video/src/routing/video_route_options.dart';
+import 'package:media_kit_video/src/routing/video_source_spec.dart';
 
 const sdr = HdrSourceDescriptor(
     codec: 'hevc',
@@ -74,12 +76,50 @@ HdrRoute textureExecution(String hwdec, Set<String> dependencies) => HdrRoute(
     );
 
 void main() {
-  test('undeclared option keeps the candidate directory unchanged', () {
-    // Red line: with the declaration absent, every platform's directory is
-    // exactly today's — compared as complete route values (every HdrRoute
-    // field plus the dependency set). API 16–25: copy → software (the texture
-    // GPU import is unavailable). API ≥ 26: direct → copy → software.
-    expect(sdrDirectExecutions(caps(24)), [
+  test('unset option plans the embed execution first on SDK 16–25', () {
+    // Default-enabled product decision (2026-10-17): the unset (null)
+    // requested option resolves to enabled, so the copy-fallback group
+    // plans embed → copy → software and selects the embed carrier with no
+    // declaration at all.
+    for (final sdk in [16, 24, 25]) {
+      final prediction = HdrRoutePlanner.plan(
+        source: sdr,
+        capabilities: caps(sdk),
+      );
+      expect(
+          prediction.candidates.map((c) => [c.route?.vo, c.route?.hwdec]), [
+        ['mediacodec_embed', 'mediacodec'],
+        ['gpu-next', 'mediacodec-copy'],
+        ['gpu-next', 'no'],
+      ], reason: 'sdk $sdk');
+      expect(prediction.playable, isTrue, reason: 'sdk $sdk');
+      expect(prediction.selected.route!.vo, 'mediacodec_embed',
+          reason: 'sdk $sdk');
+    }
+  });
+
+  test('unset option adds nothing outside SDK 16–25', () {
+    // Zero change on the API ≥ 26 texture devices and on an unknown SDK
+    // level: the capability rule (sdkInt > 0 && sdkInt < 26) is untouched,
+    // so the default-enabled option cannot widen the directory there.
+    for (final sdk in [0, 26, 29]) {
+      final prediction = HdrRoutePlanner.plan(
+        source: sdr,
+        capabilities: caps(sdk),
+      );
+      expect(prediction.candidates.map((c) => c.route?.vo),
+          everyElement('gpu-next'),
+          reason: 'sdk $sdk');
+    }
+  });
+
+  test('explicit false opts out and keeps the pre-default directory', () {
+    // The escape hatch: with `false` requested, every platform's directory
+    // is exactly the pre-default one — compared as complete route values
+    // (every HdrRoute field plus the dependency set). API 16–25: copy →
+    // software (the texture GPU import is unavailable). API ≥ 26: direct →
+    // copy → software.
+    expect(sdrDirectExecutions(caps(24), sdrEmbed: false), [
       textureExecution('mediacodec-copy', const {
         HdrRouteDependency.presenterGpuTexture,
         HdrRouteDependency.decoderMediacodec,
@@ -92,7 +132,7 @@ void main() {
         HdrRouteDependency.importCpuUpload,
       }),
     ]);
-    expect(sdrDirectExecutions(caps(29)), [
+    expect(sdrDirectExecutions(caps(29), sdrEmbed: false), [
       textureExecution('mediacodec', const {
         HdrRouteDependency.presenterGpuTexture,
         HdrRouteDependency.decoderMediacodec,
@@ -111,9 +151,114 @@ void main() {
         HdrRouteDependency.importCpuUpload,
       }),
     ]);
-    // Explicit false behaves like absent.
-    expect(sdrDirectExecutions(caps(24), sdrEmbed: false),
-        sdrDirectExecutions(caps(24)));
+    for (final sdk in [0, 16, 24, 25, 26, 29]) {
+      final prediction = HdrRoutePlanner.plan(
+        source: sdr,
+        capabilities: caps(sdk),
+        options: optionsWith(false),
+      );
+      expect(prediction.candidates.map((c) => c.route?.vo),
+          everyElement('gpu-next'),
+          reason: 'sdk $sdk');
+    }
+  });
+
+  test('realizer generation flag defaults to off for direct callers', () {
+    // The planner-facing default comes from EffectiveVideoRouteOptions
+    // resolution (unset → enabled). The realizer's own flag keeps the
+    // conservative `false` default: a direct realizeCandidates caller that
+    // does not pass the arbitrated value gets the unchanged copy directory.
+    expect(sdrDirectExecutions(caps(24)), [
+      textureExecution('mediacodec-copy', const {
+        HdrRouteDependency.presenterGpuTexture,
+        HdrRouteDependency.decoderMediacodec,
+        HdrRouteDependency.importCpuUpload,
+        HdrRouteDependency.hwdecMediacodecCopy,
+      }),
+      textureExecution('no', const {
+        HdrRouteDependency.presenterGpuTexture,
+        HdrRouteDependency.decoderSoftware,
+        HdrRouteDependency.importCpuUpload,
+      }),
+    ]);
+  });
+
+  test('no supported hardware decoder in the census suppresses embed generation',
+      () {
+    // Edge case for the default-enabled semantics: the embed execution
+    // decodes through `hwdec=mediacodec`, so a completed census that
+    // declares no supported hardware decoder for the source (e.g. a
+    // software-only decoder row) must not produce a hardware-decode
+    // dependent candidate — with the option resolved enabled (the default)
+    // or declared explicitly. The copy texture candidate is untouched.
+    VideoSourceSupport census(VideoDecoderSupport decoder) =>
+        VideoSourceSupport(
+            source:
+                VideoSourceSpec(codec: 'hevc', width: 1920, height: 1080),
+            censusComplete: true,
+            decoders: [decoder],
+            reason: 'test');
+    final softwareOnly = caps(24).withSourceSupport(census(
+        const VideoDecoderSupport(
+            name: 'c2.android.hevc.decoder',
+            mime: 'video/hevc',
+            kind: VideoDecoderKind.software,
+            support: VideoSupport.supported,
+            reason: 'synthetic software row',
+            path: 'codec')));
+    for (final options in [null, optionsWith(true)]) {
+      final prediction = HdrRoutePlanner.plan(
+          source: sdr, capabilities: softwareOnly, options: options);
+      expect(prediction.candidates.map((c) => c.route?.vo),
+          everyElement('gpu-next'),
+          reason: 'options: $options');
+      expect(prediction.selected.route!.hwdec, 'mediacodec-copy',
+          reason: 'options: $options');
+    }
+    // A supported hardware row keeps the default embed generation.
+    final hardwareCensus = caps(24).withSourceSupport(census(
+        const VideoDecoderSupport(
+            name: 'c2.hevc.decoder',
+            mime: 'video/hevc',
+            kind: VideoDecoderKind.hardware,
+            support: VideoSupport.supported,
+            reason: 'synthetic hardware row',
+            path: 'codec')));
+    final declared = HdrRoutePlanner.plan(
+        source: sdr, capabilities: hardwareCensus);
+    expect(declared.candidates.first.route!.vo, 'mediacodec_embed');
+    // An incomplete census cannot prove absence and suppresses nothing.
+    final incomplete = caps(24).withSourceSupport(VideoSourceSupport(
+        source: VideoSourceSpec(codec: 'hevc', width: 1920, height: 1080),
+        censusComplete: false,
+        decoders: const [],
+        reason: 'test'));
+    expect(
+        HdrRoutePlanner.plan(source: sdr, capabilities: incomplete)
+            .candidates
+            .first
+            .route!
+            .vo,
+        'mediacodec_embed');
+    // Completeness alone suppresses nothing either: a completed census whose
+    // hardware row is merely `unknown` is not a definite `unsupported`
+    // declaration, so the default embed generation stays (the runtime review
+    // remains the decision point).
+    final unknownHardware = caps(24).withSourceSupport(census(
+        const VideoDecoderSupport(
+            name: 'c2.hevc.decoder',
+            mime: 'video/hevc',
+            kind: VideoDecoderKind.hardware,
+            support: VideoSupport.unknown,
+            reason: 'synthetic inconclusive row',
+            path: 'codec')));
+    expect(
+        HdrRoutePlanner.plan(source: sdr, capabilities: unknownHardware)
+            .candidates
+            .first
+            .route!
+            .vo,
+        'mediacodec_embed');
   });
 
   test('declared option adds the embed execution before copy on SDK 16–25',
@@ -211,6 +356,8 @@ void main() {
   });
 
   test('planner selects the embed execution on the copy-fallback group', () {
+    // Explicit `true` is idempotent with the default-enabled resolution; the
+    // full ordered directory is pinned here for the declared form.
     final prediction = HdrRoutePlanner.plan(
       source: sdr,
       capabilities: caps(24),
@@ -227,19 +374,6 @@ void main() {
           ['gpu-next', 'mediacodec-copy'],
           ['gpu-next', 'no'],
         ]);
-  });
-
-  test('planner directory is unchanged for undeclared option on any SDK', () {
-    for (final sdk in [0, 24, 25, 26, 29]) {
-      final prediction = HdrRoutePlanner.plan(
-        source: sdr,
-        capabilities: caps(sdk),
-        options: optionsWith(false),
-      );
-      expect(prediction.candidates.map((c) => c.route?.vo),
-          everyElement('gpu-next'),
-          reason: 'sdk $sdk');
-    }
   });
 
   test('shared decoder stage failure excludes embed and copy alike', () {
@@ -306,6 +440,24 @@ void main() {
         everyElement('gpu-next'));
     expect(prediction.candidates.length, 2);
     expect(prediction.selected.route!.vo, 'gpu-next');
+    expect(prediction.selected.route!.hwdec, 'mediacodec-copy');
+  });
+
+  test('preferCopy suppresses the default-enabled generation too', () {
+    // The explicit copy intent wins regardless of how the embed option
+    // resolves: with sdrEmbed unset (now default-enabled) and no explicit
+    // declaration, preferCopy alone still suppresses generation entirely.
+    final options = EffectiveVideoRouteOptions.resolve(
+        application: const VideoRouteOptions(
+            importPreference: VideoImportPreference.preferCopy));
+    final prediction = HdrRoutePlanner.plan(
+      source: sdr,
+      capabilities: caps(24),
+      options: options,
+    );
+    expect(prediction.candidates.map((c) => c.route?.vo),
+        everyElement('gpu-next'));
+    expect(prediction.candidates.length, 2);
     expect(prediction.selected.route!.hwdec, 'mediacodec-copy');
   });
 
