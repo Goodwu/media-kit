@@ -972,7 +972,11 @@ class _SinglePlayerSingleVideoScreenState
   // 2026-10-17): declares to the session's route options that the SDR session
   // does not need mpv-side GL features, so the planner may generate the embed
   // execution candidate on the copy-fallback device group (SDK 16–25).
-  // Effective conditions (guarded in initState):
+  // 2026-10-17 user decision: the embed candidate is DEFAULT-ENABLED within
+  // that capability scope (the unset route option resolves to enabled), so
+  // this define is retained only as an explicit override — passing it is
+  // idempotent with the default build (explicit true ≡ unset on SDK 16–25).
+  // Effective conditions (guarded in initState, unchanged):
   // - requires MEDIA_KIT_ANDROID_HDR_TRANSACTION=true (the session transaction
   //   path is what plans and reviews the embed candidate);
   // - must NOT be combined with the non-transaction MEDIA_KIT_ANDROID_EMBED_PROBE
@@ -980,15 +984,16 @@ class _SinglePlayerSingleVideoScreenState
   // - effectiveness is proven ONLY by the session prediction / actual route
   //   hitting vo=mediacodec_embed — the define's existence alone is not
   //   evidence (an SDK ≥ 26 device keeps the texture directory).
-  // Default OFF: without the define the session options are untouched and the
-  // candidate directory is identical to the default build.
   static const _androidSdrEmbed = bool.fromEnvironment(
     'MEDIA_KIT_ANDROID_SDR_EMBED',
   );
 
   /// Session route options for the P2 embed entry: null keeps the default
-  /// behavior (no options passed), declared turns the sdrDirect×embed
-  /// candidate generation on for this open.
+  /// behavior — which since the 2026-10-17 default-enablement already plans
+  /// the sdrDirect×embed candidate on the copy-fallback group — and the
+  /// define upgrades it to an explicit `sdrEmbed: true` (idempotent override,
+  /// no user-visible switch exists; `sdrEmbed: false` stays a library-level
+  /// opt-out, not exposed by this page).
   static EffectiveVideoRouteOptions? get _sdrEmbedSessionOptions =>
       _androidSdrEmbed
           ? EffectiveVideoRouteOptions.resolve(

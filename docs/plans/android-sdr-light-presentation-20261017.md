@@ -1,6 +1,7 @@
 # Android SDR 直连呈现轻量化优化方案
 
 - 版本：v2.1（2026-10-17）——v2 经 Specialist 复核 **UNBLOCK**；v2.1 仅吸收复核非阻断建议与文字勘误，机制/分期/定级零变化
+- 增补（2026-10-17，用户决策落地）：`sdrEmbed` 由显式 opt-in 改为**能力范围内默认启用**（「LG 默认就用 sdrEmbed，超分无效。不要加开关了」）——G4 与 P2 节已按默认启用语义改写，**V2 复审待办**（Lead 复审后统一提交）
 - v1 → v2 变更摘要：修正 embed/SurfaceTexture 混写；撤回按 topology 收窄 `_requiresMediacodecCopy` 的写法；撤销 C3 "压队列省 90MB" 机制改为只读归属调查；C4 移出本方案归 DV004 独立线；C1 收益降为待验证假设并改为单变量实验制；§0 证据表述降级为"观测与假设"分离；分期重排（P0 证据修正先行）
 - 状态：v2 修订后待 Specialist 复核确认解除 BLOCK；全部工作包实施前需各自审核
 - 证据基线：`/tmp/w5-verify-20261017/lg-sdravc4k/`（LG H870DS/API24 三轮实机：播放轮、系统播放器对照轮、两路径资源配对轮）
@@ -37,7 +38,7 @@ LG H870DS（API24，Adreno 530，1440p 屏）播放 `4k-sdr-avc.mp4`（4K H.264 
 - embed 路径存活且被产品消费：`vo_mediacodec_embed.c`（wid=Java Surface 直入 MediaCodec；flip 时 releaseOutputBuffer，默认 boolean render-mode，c11426b67a 增 timed 实验）；realizer 已有两条 embed 路由（native-DV、baseLayerDirect，`:235–255,289–309`）**本就不调用 copy 判断**。
 - embed VO ≠ SurfaceTexture：SurfaceTexture latch/OES→2D FBO 在 `hwdec_surfacetexture.c`（另一条路径）。embed VO 本身无 OES 绘制。SurfaceTexture importer 的 SDR 适配为**独立备选研究，未列入本方案工作包**（须另立包，不得借用 HDR YUV arm 授权；执行者不得据本行引用自行扩大范围）。
 - 复核门契约现状：`startsWith('mediacodec')` 已覆盖精确值 `mediacodec` 与 `mediacodec-copy`，另覆盖 `surfacetexture`；embed 观察契约要求实际 `hwdec=mediacodec` 且 `pixelFormat=mediacodec`；附着标签 `X→X_mediacodec` 形状已白名单化。**取值已覆盖 ≠ 任何附着时序已覆盖**——新载体的完整附着时序必须重放到现行门测试。
-- 功能限制：embed VO 缺字幕渲染、OSD/OSC、视频滤镜（`~/src/mpv/DOCS/man/vo.rst:727–733`）——消费方需要这些功能时的准入/保留 Texture 规则是 C2 的必要部分，不是可选项。
+- 功能限制：embed VO 缺字幕渲染、OSD/OSC、视频滤镜（`~/src/mpv/DOCS/man/vo.rst:727–733`）——消费方需要这些功能时的准入/保留 Texture 规则是 C2 的必要部分，不是可选项。（**2026-10-17 注**：sdk16-25 SDR 默认路径经用户决策接受超分/滤镜/OSD 不执行——本条对该人群/该路径构成显式例外，见 §4 风险 7 与 P2 默认启用改写条目；其余路径不变。）
 
 ## 1. 目标与非目标
 
@@ -46,8 +47,8 @@ LG H870DS（API24，Adreno 530，1440p 屏）播放 `4k-sdr-avc.mp4`（4K H.264 
 - G1 SDR 直连播放的资源占用向系统直出收敛——**以 P0 实测差量为准设定量化阈值，不预设**（v1 的"app CPU ≤12%/GPU ≤25%"降级为探索目标，非承诺）。
 - G2 消除 lab 路径的 VO 级偶发丢帧（161 → 收敛，验收用"统一 present 节拍指标 + VO 计数"双指标；present 节拍为主）。
 - G3 HDR 路由/会话/复核门**契约语义零变化**；`_requiresMediacodecCopy` 及既有 HDR 载体边界逐位不动；一切设备差异走能力化声明（禁设备名，2026-10-16 用户裁决）。
-- G4 画质与功能不回退：颜色/亮度按 LG 目视协议；**另含缩放清晰度、字幕、OSD/OSC、滤镜、交互功能等价性评估**（embed 限制清单的准入判定输入）。功能需求区分**会话固定需求**（选载体时判定）与**运行中需求变化**（播放中启外挂字幕/滤镜/OSD）——后者由 P2 定义受控重建或显式拒绝，不做未经审核的隐式切载体。
-- G4 运行中需求变化契约（P2 实施补充，2026-10-17 V2 审核）：`sdrEmbed` 路由选项的 `true` 是调用方对**本次会话**功能兼容性的显式声明，库不自动检测 GL/字幕/滤镜使用；需要 mpv 字幕、OSD/OSC、滤镜或超分 shader 时不得声明 true（Flutter 层叠加功能如弹幕/Flutter 字幕须单独评估，不受此声明覆盖）。播放中新增这些需求：保留其他有效选项、置 `sdrEmbed:false`，经 `setOptions` 受控重开（`hdr_video_session.dart` setOptions 的既有 stop→重规划→重建输出机制）确认成功后再启用功能；不支持该受控重开流程的调用方必须显式拒绝功能请求。禁止把直接向 Player 写滤镜/shader 当成自动切回 Texture 的机制（embed VO 不执行它们，只有受控 `sdrEmbed:false` 重开回到 Texture 载体）；screenshot-raw 兼容性未实测，不纳入已验证承诺。
+- G4 画质与功能不回退：颜色/亮度按 LG 目视协议；**另含缩放清晰度、字幕、OSD/OSC、滤镜、交互功能等价性评估**（embed 限制清单的准入判定输入）。功能需求区分**会话固定需求**（选载体时判定）与**运行中需求变化**（播放中启外挂字幕/滤镜/OSD）——后者由 P2 定义受控重建或显式拒绝，不做未经审核的隐式切载体。（**2026-10-17 注**：sdk16-25 SDR 默认路径经用户决策接受超分/滤镜/OSD 不执行——「画质与功能不回退」对该人群/该路径构成显式例外，见 §4 风险 7 与 P2 默认启用改写条目；其余路径不变。）
+- G4 运行中需求变化契约（P2 实施补充；**2026-10-17 用户决策后按默认启用语义改写，V2 复审待办**）：`sdrEmbed` 选项解析已翻转为**能力范围内默认启用**（用户决策原文「LG 默认就用 sdrEmbed，超分无效。不要加开关了」；unset(null)=默认启用、显式 `false`=退出逃生口、显式 `true`=同默认；不加用户可见开关）。默认路径=sdk16-25 设备（`_requiresMediacodecCopy`）的 SDR 会话；**mpv 侧 GL 功能（超分 shader/滤镜、字幕、OSD/OSC）在该默认路径不支持、声明与否都不执行——已接受的产品取舍，库不自动检测 GL/shader/滤镜使用**。Flutter 层叠加功能（弹幕/Flutter 字幕）合成于平台视图之上，单独评估，不受此选项覆盖。播放中新增这些需求：保留其他有效选项、置 `sdrEmbed:false`，经 `setOptions` 受控重开（`hdr_video_session.dart` setOptions 的既有 stop→重规划→重建输出机制）确认成功后再启用功能；不支持该受控重开流程的调用方必须显式拒绝功能请求。禁止把直接向 Player 写滤镜/shader 当成自动切回 Texture 的机制（embed VO 不执行它们，只有受控 `sdrEmbed:false` 重开回到 Texture 载体）；screenshot-raw 兼容性未实测，不纳入已验证承诺。准入范围不变：sdrDirect + `_requiresMediacodecCopy`==true（该 helper 与三调用方逐位不动），另增源级硬解声明抑制（完整 census 无受支持硬解行不生成 embed 候选）；显式 `preferCopy` 意图仍胜出。
 
 非目标：HDR 载体矩阵不动；marble vendor 线不动；不修改门发布契约既有语义；P8.4 tone-map 卡顿线不并入；本方案不做任何 wrapper 改动（经调查证实必要后走原生 B 线独立立项）。
 
@@ -80,7 +81,8 @@ LG H870DS（API24，Adreno 530，1440p 屏）播放 `4k-sdr-avc.mp4`（4K H.264 
 ### P2 SDR presenter 能力准入与候选接入（P1-A 成立后立项，V2）
 
 - 新增 sdrDirect×embed 执行候选：复用既有 baseLayerDirect/输出契约/SurfaceView 接线部件；偏好排序显式重审（跨 topology 加候选后 `preferCopy` 语义不保自然成立，`video_route_option_review.dart:93–129` 需逐条核对）；失败策略、功能兼容准入、双视图/重建/全屏生命周期回归、HDR 矩阵全绿。
-- 运行中需求变化契约（V2 审核补充）：同 G4 补充条目——`sdrEmbed` 声明范围与五条规则、受控重开机制位置（`hdr_video_session.dart` setOptions）、不支持重开流程的调用方显式拒绝义务、Player 直写滤镜/shader 非切换机制、screenshot-raw 未实测。另按 Lead 裁定（P2 观察 2）：显式 `preferCopy` 意图按设计保留（LYA 轮契约），在生成派生处**抑制**（非降序）embed 候选，冲突时 copy 意图胜出（实现：`hdr_route_planner.dart` `_evaluateCandidates`）。
+- 运行中需求变化契约（V2 审核补充）：同 G4 补充条目——`sdrEmbed` 选项范围与五条规则、受控重开机制位置（`hdr_video_session.dart` setOptions）、不支持重开流程的调用方显式拒绝义务、Player 直写滤镜/shader 非切换机制、screenshot-raw 未实测。另按 Lead 裁定（P2 观察 2）：显式 `preferCopy` 意图按设计保留（LYA 轮契约），在生成派生处**抑制**（非降序）embed 候选，冲突时 copy 意图胜出（实现：`hdr_route_planner.dart` `_evaluateCandidates`）。
+- 默认启用改写（**2026-10-17 用户决策落地，V2 复审 APPROVE-WITH-CHANGES 已收口**）：`VideoRouteOptions.sdrEmbed` 保持 nullable、API 面零增删，解析翻转为 unset=默认启用（能力范围内）、显式 `false`=退出、显式 `true`=同默认（实现：`EffectiveVideoRouteOptions.resolve` 的 `requested != false`；`hdr_video_session.dart` `_settingsValues` 携带显式 `false`，退出语义在 setPreference/setPolicy 往返中保持）。准入仍为 sdrDirect + `_requiresMediacodecCopy`==true（helper 与三调用方逐位不动），API≥26 与 sdkInt=0 行为零变化；源准入为**精确三态判定**——仅 census 明确声明 hardware decode `unsupported` 才抑制，`unknown` 行（含完整 census）与缺失 census 不抑制（V2 纠正：原「完整 census 无受支持硬解行就抑制」表述过强，实现与修正后注释一致），运行时复核仍是决策点。**证据边界（V2 裁定表述）**：现默认选择的同一 embed 执行路径已在 LG H870DS/API24 的受控显式 opt-in 会话中完成端到端验证；本次未重新实测默认构建，其他设备待验证。默认路径上 mpv 侧 GL 功能（超分 shader/滤镜、mpv 内字幕/OSD）不执行为已接受产品取舍（本条与 :41/:50/:51 的旧「需要功能时保留 Texture/不回退」约束相比，**对 sdk16-25 SDR 默认路径构成显式例外**，其余路径不变）。lab `MEDIA_KIT_ANDROID_SDR_EMBED` define 保留为显式覆盖（幂等），initState guard（须 HDR_TRANSACTION=true、禁混 EMBED_PROBE）不变。
 - 不改既有 HDR copy 边界/W1 授权。
 
 ### 独立线 1：copy 路径内存归属调查（只读，V1；v1-C3 降级改写）
@@ -115,6 +117,7 @@ LG H870DS（API24，Adreno 530，1440p 屏）播放 `4k-sdr-avc.mp4`（4K H.264 
 4. HWC 合成层截图不可捕获（LG DV 既有教训）：颜色对照轮必须先验证截图通路，禁以黑图判黑屏。
 5. 偏好排序交互：跨 topology 候选可能改变 `preferCopy` 语义（显式 copy 意图保留设计），P2 逐条核对。
 6. `_setOwned` 空值契约（原值非空校验）与 native-DV 配对契约的误用风险：配置注入不得复用这两条通道的当前形态。
+7. **sdrEmbed 默认启用的人群/证据/失败路径（2026-10-17 V2 复审登记）**：默认启用作用于**全 sdk16-25 人群而非单设备**；实机证据仅 LG H870DS/API24 且为受控显式 opt-in 形态（默认构建解析进同一 embed 执行路径但未作为默认构建实测），其它设备未验证；embed 观察失败由未改的复核门**终止会话**，不保证自动回退 copy（可分类依赖失败仍可重规划，门拒绝不重试）；默认路径不执行 mpv 侧 GL 功能为已接受取舍（用户决策）。V2 复审触发器延续：改 sdk 准入/unknown 策略、改门/重试/回退、改 preferCopy 优先权、引入自动 GL 检测或自动切载体、动 helper/HDR 边界、把 LG 证据扩大为全设备承诺。
 
 ## 5. Specialist 审核记录
 

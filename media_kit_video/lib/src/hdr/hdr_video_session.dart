@@ -1422,7 +1422,12 @@ class HdrVideoSession {
         output: value.output,
         importPreference: value.importPreference,
         failurePolicy: value.failurePolicy,
-        sdrEmbed: value.sdrEmbed ? true : null);
+        // The resolved flag is carried back as an explicit requested value.
+        // Under the default-enabled sdrEmbed semantics only the explicit
+        // `false` opt-out is behaviorally distinct, and it must survive the
+        // setPreference/setPolicy settings roundtrip; `true` and unset both
+        // resolve enabled again.
+        sdrEmbed: value.sdrEmbed);
   }
 
   void _ensureConfigurationChangeAllowed() {
