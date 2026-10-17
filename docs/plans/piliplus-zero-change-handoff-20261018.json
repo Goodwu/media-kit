@@ -6,8 +6,10 @@
   "previousBase": "866c7399bf034757b2aa54e69290533dbed6bc5c",
   "initialPlanCommit": "5e34eb74507ed658ebc57bf96f1cf6829e012925",
   "mergeCommit": "e51df06e0031ce5ea3afa2ee1bd295384671c025",
+  "implementationCommit": "6742133d6f2ad35226802ae9df23000505b09ba2",
   "upstreamCommitsMerged": 12,
   "upstreamChangedFiles": 16,
+  "upstreamContainment": {"behindBy": 0, "mergeBase": "0a212785a87df88a0a583cd5f1f526630d5c4e81", "extraFiles": 7},
   "implementation": "P0a dependency auditor, override proposal and package_config path verification",
   "localTests": {
     "command": "python3 -m unittest discover -s tool/piliplus_compat -p 'test_*.py' -v",
@@ -21,10 +23,30 @@
       "tool/piliplus_compat/test_dependency_plan.py": "ba1b5bf6c74c830aff8a85bd8e8e1ff2510e05358e952079c8675a2a30ab5710"
     }
   },
-  "ci": {"workflow": ".github/workflows/piliplus-compat-tools.yml", "scope": "T0 only", "status": "pending-remote-observation"},
+  "publicationVerification": {
+    "localAndRemoteGitBlobsMatch": true,
+    "toolBlob": "2ba0a9d9b25cd48171915c692fe92e13fa15f3fb",
+    "testsBlob": "7fe83bf09e7ab9670aafb68fd2b24f0c70b61b6e",
+    "planBlob": "3a9ca39b58deb5fed8a5c32f64eeefaef7ec6c76"
+  },
+  "ci": {
+    "workflow": ".github/workflows/piliplus-compat-tools.yml",
+    "scope": "T0 only; no application/native/device claims",
+    "testedCommit": "6742133d6f2ad35226802ae9df23000505b09ba2",
+    "runId": 39049427819,
+    "jobId": 117444804972,
+    "url": "https://github.com/Goodwu/media-kit/actions/runs/39049427819",
+    "status": "completed",
+    "conclusion": "success",
+    "tests": 26,
+    "python": "3.13.16",
+    "PyYAML": "6.0.3",
+    "logsRead": true,
+    "nonBlockingWarning": "Runner reports Node 20 action deprecation for checkout@v4/setup-python@v5; job ran successfully on forced Node 24. Review action upgrades separately."
+  },
   "notRun": ["original-app-pub-resolution", "application-compile", "full-upstream-Dart-tests", "native-build", "device-playback", "hdr-verification"],
   "environment": {"codexWorkspace": "connection-error", "localDartFlutter": "not-found", "localGitHubDNS": "resolution-failed"},
   "next": "Read this handoff and current remote head; continue P0b isolated staging and real pub/analyzer evidence before P1 typed compatibility. Do not recreate the branch or reimplement P0a.",
   "openItems": ["P0b complete input staging and integrity", "override-only reachability must be proven by pub, not assumed", "P1-P5 player/native compatibility and device gates", "sdrEmbed default build and screenshot compatibility remain separately unverified"],
-  "historyPolicy": "Normal merges and expected-head ref updates only; do not rewrite routing or this branch."
+  "historyPolicy": "Normal merges and expected-head ref updates only; do not rewrite routing or this branch. The commit updating this receipt is documentation-only; the tested executable code remains the implementationCommit."
 }
