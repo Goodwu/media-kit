@@ -26,6 +26,13 @@ enum HdrStrategy {
   /// it.
   nativeDolbyVision,
 
+  /// HDR10+ bitstream and dynamic metadata forwarded unchanged to a native
+  /// HDR10+ display path. Until that transport exists, return a typed error.
+  nativeHdr10Plus,
+
+  /// HDR Vivid native dynamic-metadata transport (not yet implemented).
+  nativeHdrVivid,
+
   /// Decoder direct output to the surface (`mediacodec_embed`), emitting the
   /// base-layer transfer function and ignoring dynamic metadata.
   baseLayerDirect,
@@ -63,8 +70,8 @@ enum HdrStrategyMaturity {
   /// differing parts have no effect. Selected by default like [verified].
   inherited,
 
-  /// Never verified. Only selected when the routing policy explicitly sets
-  /// `allowExperimental`.
+  /// Never verified. Diagnostic label only; it never gates admission and
+  /// the strategy is selected like any other when the pipeline realizes it.
   experimental,
 
   /// The current pipeline cannot implement the combination. Never selected
@@ -90,7 +97,11 @@ enum HdrSourceClass {
   hlg,
   hdrVivid,
   hdr10Plus,
-  sdr;
+  sdr,
+
+  /// DV is present but its profile or compatible base layer is unresolved.
+  /// Not an alias for P5/P8.2 and never made playable by the maturity gate.
+  dvUnknown;
 
   /// Derives the preference/maturity key from a source description.
   ///
@@ -99,10 +110,11 @@ enum HdrSourceClass {
   /// format; everything else follows the base-layer transfer function
   /// (`hlg`, or `pq` with BT.2020 primaries, is HDR; the rest is SDR).
   ///
-  /// DV metadata without a decodable profile is treated as profile 5: the
-  /// only family whose routes never ignore the RPU, so a malformed hint can
-  /// never select a route that mis-colors the picture (requirement R3.3).
+  /// Incomplete DV signaling remains [dvUnknown]. Applying P5 processing or
+  /// discarding RPU as though an unknown base layer were SDR is not a safe
+  /// interpretation; the planner asks for more source facts instead.
   static HdrSourceClass of(HdrSourceDescriptor source) {
+    if (source.hasUnresolvedDolbyVision) return HdrSourceClass.dvUnknown;
     if (source.dynamicMetadata == HdrDynamicMetadata.hdrVivid) {
       return HdrSourceClass.hdrVivid;
     }
@@ -118,7 +130,7 @@ enum HdrSourceClass {
         case 10:
           return HdrSourceClass.dvP10;
         case 8:
-          switch (source.dvCompatibilityId) {
+          switch (source.resolvedCompatibilityId) {
             case 1:
               return HdrSourceClass.dvP81;
             case 4:
@@ -130,9 +142,7 @@ enum HdrSourceClass {
           // rule the classifier uses to infer the id itself.
           return _dvP8FromBaseLayer(source.transfer);
       }
-      // DV metadata without a profile: profile 5, conservatively (see the
-      // doc comment above).
-      return HdrSourceClass.dvP5;
+      return HdrSourceClass.dvUnknown;
     }
     if (source.transfer == 'hlg') return HdrSourceClass.hlg;
     if (source.transfer == 'pq' && source.primaries == 'bt.2020') {
@@ -142,11 +152,18 @@ enum HdrSourceClass {
   }
 
   /// Profile 8 with an unknown compatibility id: `hlg` identifies 8.4, `pq`
-  /// maps to 8.1, an SDR (or unknown) gamma maps to 8.2.
+  /// maps to 8.1; only a recognized SDR gamma identifies 8.2.
   static HdrSourceClass _dvP8FromBaseLayer(String? transfer) {
-    if (transfer == 'hlg') return HdrSourceClass.dvP84;
-    if (transfer == 'pq') return HdrSourceClass.dvP81;
-    return HdrSourceClass.dvP82;
+    switch (HdrSourceDescriptor.compatibilityFromTransfer(transfer)) {
+      case 1:
+        return HdrSourceClass.dvP81;
+      case 2:
+        return HdrSourceClass.dvP82;
+      case 4:
+        return HdrSourceClass.dvP84;
+      default:
+        return HdrSourceClass.dvUnknown;
+    }
   }
 }
 
@@ -162,7 +179,9 @@ enum HdrSourceClass {
 /// documented exceptions: `nativeDolbyVision` stays `unsupported` for the
 /// classes R7 still reserves (every class except `dvP5`/`dvP84`), and
 /// `sdr × sdrDirect` is `verified` (the always-on SDR Texture baseline
-/// every non-HDR playback uses today).
+/// every non-HDR playback uses today). [HdrSourceClass.dvUnknown] has no
+/// implemented interpretation, so all its cells are `unsupported`. This
+/// source-fact constraint also applies to the SDR safety net.
 ///
 /// The 2026-10-10 user-adjudicated A-group promotions (`dvP5`/`dvP84` ×
 /// `nativeDolbyVision`, `hdr10` × `baseLayerConvert`/`metadataReshape`) are
@@ -184,6 +203,8 @@ class HdrStrategyMaturityTable {
       cells = <HdrSourceClass, Map<HdrStrategy, HdrStrategyMaturity>>{
     HdrSourceClass.hdr10: <HdrStrategy, HdrStrategyMaturity>{
       HdrStrategy.nativeDolbyVision: HdrStrategyMaturity.unsupported,
+      HdrStrategy.nativeHdr10Plus: HdrStrategyMaturity.experimental,
+      HdrStrategy.nativeHdrVivid: HdrStrategyMaturity.experimental,
       HdrStrategy.baseLayerDirect: HdrStrategyMaturity.verified, // 12703–12708
       // 2026-10-10 用户裁决提升（experimental → verified）：LG genbump2 轮
       // 哔哩哔哩 PQ 长片 30s，ACTUAL=baseLayerConvert 全路由
@@ -202,6 +223,8 @@ class HdrStrategyMaturityTable {
     },
     HdrSourceClass.hlg: <HdrStrategy, HdrStrategyMaturity>{
       HdrStrategy.nativeDolbyVision: HdrStrategyMaturity.unsupported,
+      HdrStrategy.nativeHdr10Plus: HdrStrategyMaturity.experimental,
+      HdrStrategy.nativeHdrVivid: HdrStrategyMaturity.experimental,
       HdrStrategy.baseLayerDirect: HdrStrategyMaturity
           .verified, // a1-hlg-gate-85 + 2026-10-02 人工观察（真实 HLG 内容直出）
       HdrStrategy.baseLayerConvert: HdrStrategyMaturity.experimental,
@@ -218,8 +241,10 @@ class HdrStrategyMaturityTable {
       // 代际 LG 原文件直通 ACTUAL=nativeDolbyVision 30s 实时（dvProfile 5
       // verified、decDrop=0、vfps=24.0 源率），用户人工观察通过；历史证据
       // r26b（2026-10-07 LG，"P5 nativeDV 画面没问题"）与 r30b（marble，
-      // "颜色正常/画面流畅"）。`allowExperimental` 门槛与其它格零改动。
+      // "颜色正常/画面流畅"）。成熟度仅为诊断标签，与其它格零改动。
       HdrStrategy.nativeDolbyVision: HdrStrategyMaturity.verified,
+      HdrStrategy.nativeHdr10Plus: HdrStrategyMaturity.experimental,
+      HdrStrategy.nativeHdrVivid: HdrStrategyMaturity.experimental,
       HdrStrategy.baseLayerDirect: HdrStrategyMaturity
           .experimental, // 忽略 RPU 会偏色；realize 直接判不可行
       HdrStrategy.baseLayerConvert: HdrStrategyMaturity
@@ -232,6 +257,8 @@ class HdrStrategyMaturityTable {
     },
     HdrSourceClass.dvP81: <HdrStrategy, HdrStrategyMaturity>{
       HdrStrategy.nativeDolbyVision: HdrStrategyMaturity.unsupported, // R7
+      HdrStrategy.nativeHdr10Plus: HdrStrategyMaturity.experimental,
+      HdrStrategy.nativeHdrVivid: HdrStrategyMaturity.experimental,
       HdrStrategy.baseLayerDirect: HdrStrategyMaturity
           .inherited, // 机制同 HDR10 直出；缺样片确认
       HdrStrategy.baseLayerConvert: HdrStrategyMaturity.experimental,
@@ -241,6 +268,8 @@ class HdrStrategyMaturityTable {
     },
     HdrSourceClass.dvP82: <HdrStrategy, HdrStrategyMaturity>{
       HdrStrategy.nativeDolbyVision: HdrStrategyMaturity.unsupported, // R7
+      HdrStrategy.nativeHdr10Plus: HdrStrategyMaturity.experimental,
+      HdrStrategy.nativeHdrVivid: HdrStrategyMaturity.experimental,
       HdrStrategy.baseLayerDirect: HdrStrategyMaturity
           .experimental, // 全部 experimental（缺样片）
       HdrStrategy.baseLayerConvert: HdrStrategyMaturity.experimental,
@@ -255,6 +284,8 @@ class HdrStrategyMaturityTable {
       // 亮度好/流畅性好"；LG 无 P8.4 DV 信令该路线不可达（N/A，非失败）
       // —— marble 单设备人工验收。
       HdrStrategy.nativeDolbyVision: HdrStrategyMaturity.verified,
+      HdrStrategy.nativeHdr10Plus: HdrStrategyMaturity.experimental,
+      HdrStrategy.nativeHdrVivid: HdrStrategyMaturity.experimental,
       HdrStrategy.baseLayerDirect: HdrStrategyMaturity.verified, // 12703–12708
       HdrStrategy.baseLayerConvert: HdrStrategyMaturity
           .verified, // A3-2 模拟无 HLG 落 convert + 2026-10-02 人工观察
@@ -266,6 +297,8 @@ class HdrStrategyMaturityTable {
     },
     HdrSourceClass.dvP7: <HdrStrategy, HdrStrategyMaturity>{
       HdrStrategy.nativeDolbyVision: HdrStrategyMaturity.unsupported, // R7
+      HdrStrategy.nativeHdr10Plus: HdrStrategyMaturity.experimental,
+      HdrStrategy.nativeHdrVivid: HdrStrategyMaturity.experimental,
       HdrStrategy.baseLayerDirect: HdrStrategyMaturity
           .experimental, // 缺样片；增强层识别方式待定
       HdrStrategy.baseLayerConvert: HdrStrategyMaturity.experimental,
@@ -278,6 +311,8 @@ class HdrStrategyMaturityTable {
       // Phase 1 不涉及 AV1：全部 unsupported（nativeDolbyVision 无 realizer
       // 分支；R7 的 dvP5 解锁不适用于本类）。
       HdrStrategy.nativeDolbyVision: HdrStrategyMaturity.unsupported,
+      HdrStrategy.nativeHdr10Plus: HdrStrategyMaturity.experimental,
+      HdrStrategy.nativeHdrVivid: HdrStrategyMaturity.experimental,
       HdrStrategy.baseLayerDirect: HdrStrategyMaturity.unsupported,
       HdrStrategy.baseLayerConvert: HdrStrategyMaturity.unsupported,
       HdrStrategy.metadataReshape: HdrStrategyMaturity.unsupported,
@@ -286,6 +321,8 @@ class HdrStrategyMaturityTable {
     },
     HdrSourceClass.hdrVivid: <HdrStrategy, HdrStrategyMaturity>{
       HdrStrategy.nativeDolbyVision: HdrStrategyMaturity.unsupported,
+      HdrStrategy.nativeHdr10Plus: HdrStrategyMaturity.experimental,
+      HdrStrategy.nativeHdrVivid: HdrStrategyMaturity.experimental,
       HdrStrategy.baseLayerDirect: HdrStrategyMaturity
           .experimental, // 本地有样片，待单列验证
       HdrStrategy.baseLayerConvert: HdrStrategyMaturity.experimental,
@@ -297,14 +334,28 @@ class HdrStrategyMaturityTable {
     HdrSourceClass.hdr10Plus: <HdrStrategy, HdrStrategyMaturity>{
       // 状态表未列出 HDR10+（mpv 尚不可识别其元数据）：全部保守 experimental。
       HdrStrategy.nativeDolbyVision: HdrStrategyMaturity.unsupported,
+      HdrStrategy.nativeHdr10Plus: HdrStrategyMaturity.experimental,
+      HdrStrategy.nativeHdrVivid: HdrStrategyMaturity.experimental,
       HdrStrategy.baseLayerDirect: HdrStrategyMaturity.experimental,
       HdrStrategy.baseLayerConvert: HdrStrategyMaturity.experimental,
       HdrStrategy.metadataReshape: HdrStrategyMaturity.experimental,
       HdrStrategy.toneMapSdr: HdrStrategyMaturity.experimental,
       HdrStrategy.sdrDirect: HdrStrategyMaturity.experimental,
     },
+    HdrSourceClass.dvUnknown: <HdrStrategy, HdrStrategyMaturity>{
+      HdrStrategy.nativeDolbyVision: HdrStrategyMaturity.unsupported,
+      HdrStrategy.nativeHdr10Plus: HdrStrategyMaturity.unsupported,
+      HdrStrategy.nativeHdrVivid: HdrStrategyMaturity.unsupported,
+      HdrStrategy.baseLayerDirect: HdrStrategyMaturity.unsupported,
+      HdrStrategy.baseLayerConvert: HdrStrategyMaturity.unsupported,
+      HdrStrategy.metadataReshape: HdrStrategyMaturity.unsupported,
+      HdrStrategy.toneMapSdr: HdrStrategyMaturity.unsupported,
+      HdrStrategy.sdrDirect: HdrStrategyMaturity.unsupported,
+    },
     HdrSourceClass.sdr: <HdrStrategy, HdrStrategyMaturity>{
       HdrStrategy.nativeDolbyVision: HdrStrategyMaturity.unsupported,
+      HdrStrategy.nativeHdr10Plus: HdrStrategyMaturity.experimental,
+      HdrStrategy.nativeHdrVivid: HdrStrategyMaturity.experimental,
       HdrStrategy.baseLayerDirect: HdrStrategyMaturity.experimental,
       HdrStrategy.baseLayerConvert: HdrStrategyMaturity.experimental,
       HdrStrategy.metadataReshape: HdrStrategyMaturity.experimental,

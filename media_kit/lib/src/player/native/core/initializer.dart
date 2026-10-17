@@ -10,7 +10,6 @@ import 'package:media_kit/generated/libmpv/bindings.dart' as generated;
 import 'package:media_kit/src/player/native/core/execmem_restriction.dart';
 import 'package:media_kit/src/player/native/core/initializer_isolate.dart';
 import 'package:media_kit/src/player/native/core/initializer_native_callable.dart';
-import 'package:media_kit/src/values.dart';
 
 /// {@template initializer}
 ///
@@ -45,8 +44,15 @@ class Initializer {
     // based implementation to avoid native -> Dart callbacks that can outlive
     // the isolate and crash with "Callback invoked after it has been deleted".
     // See: https://github.com/media-kit/media-kit/issues/1340
-    // We still use NativeCallable based implementation in release mode and unit tests for better performance.
-    if (kDebugMode && isMainIsolate()) {
+    //
+    // The root isolate also runs on the platform thread whenever the engine
+    // merges threads (platform view topologies). The NativeCallable pump
+    // drains `mpv_wait_event()` on that thread, and concurrent libmpv access
+    // from property/command helper isolates then contends with the core lock
+    // held across the pump's event handlers — deadlocking into an ANR. The
+    // isolate pump keeps `mpv_wait_event()` on its own thread, so every
+    // main-isolate player uses it regardless of build mode.
+    if (isMainIsolate()) {
       return InitializerIsolate().create(callback, options: options);
     }
     if (!isExecmemRestricted) {
@@ -65,7 +71,10 @@ class Initializer {
 
   /// Disposes [Pointer<mpv_handle>].
   Future<void> dispose(Pointer<generated.mpv_handle> ctx) async {
-    if (kDebugMode && isMainIsolate()) {
+    // Must mirror [create]: the backend that owns the handle also owns its
+    // teardown, otherwise the isolate pump keeps draining a freed handle
+    // while the NativeCallable path disposes nothing.
+    if (isMainIsolate()) {
       InitializerIsolate().dispose(mpv, ctx);
       return;
     }

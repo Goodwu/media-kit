@@ -6,9 +6,11 @@ import 'package:media_kit_video/media_kit_video.dart';
 /// (phase1-design-spec §5, plan §7: an independent experiment class; the
 /// legacy copy validator is never relaxed). Same frozen output contract and
 /// source-class whitelist as [AndroidHdrConvertExperiment], but the realized
-/// baseLayerConvert route must carry the experimental `surfacetexture`
-/// importer (the production realizer overrides the route hwdec when
-/// MEDIA_KIT_ANDROID_SURFACETEXTURE_POC is non-empty). Rejects before
+/// baseLayerConvert route must carry the `surfacetexture` importer — since W1
+/// the production realizer derives that carrier from the device-declared PQ
+/// presentation channels, and since W2 the
+/// MEDIA_KIT_ANDROID_SURFACETEXTURE_POC define is gone (feature direct-on).
+/// Rejects before
 /// Session can prepare/open any other route, including the planner's SDR
 /// safety net and dependency-failure retries: there is no fallback path.
 class AndroidSurfaceTextureExperiment {
@@ -70,14 +72,14 @@ class AndroidSurfaceTextureExperiment {
           HdrSourceClass.of(source): const [HdrStrategy.baseLayerConvert],
         },
         // This experiment class is a diagnostic tool explicitly opted in by
-        // the double define pair (MEDIA_KIT_ANDROID_SURFACETEXTURE_DIAG +
-        // _POC); hlg x baseLayerConvert is `experimental` in the production
-        // maturity table and the diagnostic round deliberately exercises that
-        // route. The production maturity table and the default (define-off)
-        // behavior are unchanged: this gate only opens inside this lab
-        // validator's own planner call, and the source-class whitelist above
-        // still bounds what can reach it.
-        allowExperimental: true,
+        // the route lock (W2: the MEDIA_KIT_ANDROID_SURFACETEXTURE_DIAG +
+        // _POC define pair is gone; only the diag define remains, and only
+        // for the readback legs); hlg x baseLayerConvert carries the
+        // `experimental` maturity
+        // label, which is diagnostic only — no gate argument exists or is
+        // needed. The production table and the default behavior
+        // are unchanged, and the source-class whitelist above still bounds
+        // what can reach this lab validator's own planner call.
       ),
       preference: preference,
       excluded: excluded,

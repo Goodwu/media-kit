@@ -1,70 +1,40 @@
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:media_kit_video/src/hdr/hdr_capabilities.dart';
 
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
-
-  const MethodChannel channel = MethodChannel(
-    'com.alexmercerind/media_kit_video',
-  );
-
-  final List<MethodCall> calls = <MethodCall>[];
-  Object? Function(MethodCall call)? handler;
-
-  setUp(() {
-    calls.clear();
-    handler = null;
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(channel, (MethodCall call) async {
-      calls.add(call);
-      return handler?.call(call);
-    });
-  });
-
-  tearDown(() {
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(channel, null);
-  });
+  Map<Object?, Object?>? snapshot;
+  setUp(() => snapshot = null);
 
   Map<Object?, Object?> fullSnapshot() => <Object?, Object?>{
-        'sdkInt': 29,
-        'displayHdrTypes': <Object?>[2, 3],
-        'hevcDecoders': <Object?>[
-          <Object?, Object?>{
-            'name': 'OMX.hisi.video.decoder.hevc',
-            'mimeType': 'video/hevc',
-            'hardwareAcceleration': true,
-            'main10': true,
-            'profiles': <Object?>[2, 65536],
-            'widthRange': <Object?>[16, 4096],
-            'heightRange': <Object?>[16, 4096],
-            'frameRateRange': <Object?>[8, 240],
-            'supports4K': true,
-            'max4KFps': 59.94,
-          },
-        ],
-        'dolbyVisionDecoders': <Object?>[],
-        'p5Pipeline': true,
-        'nativeDvBridgeApi': 1,
-        'dataSpaceBridgeLoaded': true,
-        'dataSpaceExt': <Object?, Object?>{
-          'id': 'lya-pq',
-          'isApplicable': true,
-        },
-      };
+    'sdkInt': 29,
+    'displayHdrTypes': <Object?>[2, 3],
+    'hevcDecoders': <Object?>[
+      <Object?, Object?>{
+        'name': 'OMX.hisi.video.decoder.hevc',
+        'mimeType': 'video/hevc',
+        'hardwareAcceleration': true,
+        'main10': true,
+        'profiles': <Object?>[2, 65536],
+        'widthRange': <Object?>[16, 4096],
+        'heightRange': <Object?>[16, 4096],
+        'frameRateRange': <Object?>[8, 240],
+        'supports4K': true,
+        'max4KFps': 59.94,
+      },
+    ],
+    'dolbyVisionDecoders': <Object?>[],
+    'p5Pipeline': true,
+    'nativeDvBridgeApi': 1,
+    'dataSpaceBridgeLoaded': true,
+    'dataSpaceExt': <Object?, Object?>{'id': 'lya-pq', 'isApplicable': true},
+  };
 
-  group('HdrCapabilities.query (channel parsing)', () {
-    test('parses a complete snapshot with HEVC decoder and extension',
-        () async {
-      handler = (MethodCall call) async {
-        expect(call.method, 'HdrCapabilities.Get');
-        return fullSnapshot();
-      };
-      final HdrCapabilities caps = await HdrCapabilities.queryWith();
+  group('HdrCapabilities value parsing', () {
+    test('parses a complete snapshot with HEVC decoder and extension', () {
+      snapshot = fullSnapshot();
+      final HdrCapabilities caps = HdrCapabilities.parseSnapshot(snapshot);
 
-      expect(calls.single.method, 'HdrCapabilities.Get');
       expect(caps.sdkInt, 29);
       expect(caps.displayHdrTypes, <int>{2, 3});
       expect(caps.hevcDecoders, hasLength(1));
@@ -88,25 +58,24 @@ void main() {
       expect(caps.dataSpaceExt?.applicable, isTrue);
     });
 
-    test('parses a Dolby Vision decoder with profiles, no main10 key',
-        () async {
-      handler = (MethodCall call) async => <Object?, Object?>{
-            'sdkInt': 34,
-            'displayHdrTypes': <Object?>[1, 2, 3],
-            'hevcDecoders': <Object?>[],
-            'dolbyVisionDecoders': <Object?>[
-              <Object?, Object?>{
-                'name': 'c2.dolby.decoder',
-                'mimeType': 'video/dolby-vision',
-                'hardwareAcceleration': true,
-                'profiles': <Object?>[4, 8],
-                'supports4K': true,
-                'max4KFps': 60,
-              },
-            ],
-          };
+    test('parses a Dolby Vision decoder with profiles, no main10 key', () {
+      snapshot = <Object?, Object?>{
+        'sdkInt': 34,
+        'displayHdrTypes': <Object?>[1, 2, 3],
+        'hevcDecoders': <Object?>[],
+        'dolbyVisionDecoders': <Object?>[
+          <Object?, Object?>{
+            'name': 'c2.dolby.decoder',
+            'mimeType': 'video/dolby-vision',
+            'hardwareAcceleration': true,
+            'profiles': <Object?>[4, 8],
+            'supports4K': true,
+            'max4KFps': 60,
+          },
+        ],
+      };
 
-      final HdrCapabilities caps = await HdrCapabilities.queryWith();
+      final HdrCapabilities caps = HdrCapabilities.parseSnapshot(snapshot);
 
       expect(caps.displayHdrTypes, <int>{1, 2, 3});
       expect(caps.dolbyVisionDecoders, hasLength(1));
@@ -119,10 +88,10 @@ void main() {
       expect(dv.max4KFps, 60.0);
     });
 
-    test('missing keys degrade to no-report defaults', () async {
-      handler = (MethodCall call) async => <Object?, Object?>{'sdkInt': 29};
+    test('missing keys degrade to no-report defaults', () {
+      snapshot = <Object?, Object?>{'sdkInt': 29};
 
-      final HdrCapabilities caps = await HdrCapabilities.queryWith();
+      final HdrCapabilities caps = HdrCapabilities.parseSnapshot(snapshot);
 
       expect(caps.displayHdrTypes, isNull);
       expect(caps.hevcDecoders, isEmpty);
@@ -131,57 +100,48 @@ void main() {
       expect(caps.dataSpaceExt, isNull);
     });
 
-    test('a null capability report yields displayHdrTypes == null', () async {
-      handler = (MethodCall call) async => <Object?, Object?>{
-            'sdkInt': 29,
-            'displayHdrTypes': null,
-          };
+    test('a null capability report yields displayHdrTypes == null', () {
+      snapshot = <Object?, Object?>{'sdkInt': 29, 'displayHdrTypes': null};
 
-      final HdrCapabilities caps = await HdrCapabilities.queryWith();
+      final HdrCapabilities caps = HdrCapabilities.parseSnapshot(snapshot);
 
       expect(caps.displayHdrTypes, isNull);
     });
 
-    test('malformed displayHdrTypes yields displayHdrTypes == null', () async {
+    test('malformed displayHdrTypes yields displayHdrTypes == null', () {
       // Non-int entries.
-      handler = (MethodCall call) async => <Object?, Object?>{
-            'displayHdrTypes': <Object?>[2, '3'],
-          };
-      HdrCapabilities caps = await HdrCapabilities.queryWith();
+      snapshot = <Object?, Object?>{
+        'displayHdrTypes': <Object?>[2, '3'],
+      };
+      HdrCapabilities caps = HdrCapabilities.parseSnapshot(snapshot);
       expect(caps.displayHdrTypes, isNull);
 
       // Non-list value.
-      handler = (MethodCall call) async => <Object?, Object?>{
-            'displayHdrTypes': 2,
-          };
-      caps = await HdrCapabilities.queryWith();
+      snapshot = <Object?, Object?>{'displayHdrTypes': 2};
+      caps = HdrCapabilities.parseSnapshot(snapshot);
       expect(caps.displayHdrTypes, isNull);
     });
 
-    test('an empty list is a valid "no HDR types" report, not null', () async {
-      handler = (MethodCall call) async => <Object?, Object?>{
-            'displayHdrTypes': <Object?>[],
-          };
+    test('an empty list is a valid "no HDR types" report, not null', () {
+      snapshot = <Object?, Object?>{'displayHdrTypes': <Object?>[]};
 
-      final HdrCapabilities caps = await HdrCapabilities.queryWith();
+      final HdrCapabilities caps = HdrCapabilities.parseSnapshot(snapshot);
 
       expect(caps.displayHdrTypes, <int>{});
     });
 
-    test('an unregistered extension parses to null', () async {
-      handler = (MethodCall call) async => <Object?, Object?>{
-            'dataSpaceExt': null,
-          };
+    test('an unregistered extension parses to null', () {
+      snapshot = <Object?, Object?>{'dataSpaceExt': null};
 
-      final HdrCapabilities caps = await HdrCapabilities.queryWith();
+      final HdrCapabilities caps = HdrCapabilities.parseSnapshot(snapshot);
 
       expect(caps.dataSpaceExt, isNull);
     });
 
-    test('a missing channel reply is tolerated (null snapshot)', () async {
-      handler = (MethodCall call) async => null;
+    test('a missing channel reply is tolerated (null snapshot)', () {
+      snapshot = null;
 
-      final HdrCapabilities caps = await HdrCapabilities.queryWith();
+      final HdrCapabilities caps = HdrCapabilities.parseSnapshot(snapshot);
 
       expect(caps.displayHdrTypes, isNull);
       expect(caps.dataSpaceBridgeLoaded, isFalse);
@@ -189,24 +149,18 @@ void main() {
   });
 
   group('HdrCapabilities.parseSnapshot P5 pipeline field', () {
-    test('snapshot p5Pipeline true means available', () async {
-      handler = (MethodCall call) async => <Object?, Object?>{
-            'sdkInt': 29,
-            'p5Pipeline': true,
-          };
+    test('snapshot p5Pipeline true means available', () {
+      snapshot = <Object?, Object?>{'sdkInt': 29, 'p5Pipeline': true};
 
-      final HdrCapabilities caps = await HdrCapabilities.queryWith();
+      final HdrCapabilities caps = HdrCapabilities.parseSnapshot(snapshot);
 
       expect(caps.p5PipelineAvailable, isTrue);
     });
 
-    test('snapshot p5Pipeline false means unavailable', () async {
-      handler = (MethodCall call) async => <Object?, Object?>{
-            'sdkInt': 29,
-            'p5Pipeline': false,
-          };
+    test('snapshot p5Pipeline false means unavailable', () {
+      snapshot = <Object?, Object?>{'sdkInt': 29, 'p5Pipeline': false};
 
-      final HdrCapabilities caps = await HdrCapabilities.queryWith();
+      final HdrCapabilities caps = HdrCapabilities.parseSnapshot(snapshot);
 
       expect(caps.p5PipelineAvailable, isFalse);
     });
@@ -226,8 +180,9 @@ void main() {
     });
 
     test('a missing p5Pipeline key and no argument degrade to false', () {
-      final HdrCapabilities caps =
-          HdrCapabilities.parseSnapshot(<Object?, Object?>{'sdkInt': 29});
+      final HdrCapabilities caps = HdrCapabilities.parseSnapshot(
+        <Object?, Object?>{'sdkInt': 29},
+      );
       expect(caps.p5PipelineAvailable, isFalse);
     });
 
@@ -293,8 +248,9 @@ void main() {
       }
       expect(HdrCapabilities.parseSnapshot(null).nativeDvBridgeApi, 0);
       expect(
-          HdrCapabilities.parseSnapshot(<Object?, Object?>{}).nativeDvBridgeApi,
-          0);
+        HdrCapabilities.parseSnapshot(<Object?, Object?>{}).nativeDvBridgeApi,
+        0,
+      );
     });
 
     for (final bool p5 in <bool>[false, true]) {
@@ -311,43 +267,125 @@ void main() {
     }
   });
 
-  group('HdrCapabilities.query without a player', () {
+  group('HdrCapabilities runtime probe value', () {
     test(
-        'query(player: null) is authoritative: the native probe verdict in '
-        'the snapshot is used', () async {
-      handler = (MethodCall call) async {
-        expect(call.method, 'HdrCapabilities.Get');
-        return fullSnapshot();
+      'parsing without a Player is authoritative: the native probe verdict in '
+      'the snapshot is used',
+      () {
+        snapshot = fullSnapshot();
+
+        final HdrCapabilities caps = HdrCapabilities.parseSnapshot(snapshot);
+
+        expect(caps.sdkInt, 29);
+        expect(caps.displayHdrTypes, <int>{2, 3});
+        // Core new capability of plan B: no Player is required — the P5
+        // verdict comes from the disposable mpv instance probe cached at
+        // engine attach, so query() is authoritative without a player.
+        expect(caps.p5PipelineAvailable, isTrue);
+        expect(caps.dataSpaceBridgeLoaded, isTrue);
+        expect(caps.dataSpaceExt?.id, 'lya-pq');
+      },
+    );
+
+    test('parsing without a Player reports p5PipelineAvailable false for a '
+        'non-fork libmpv', () {
+      snapshot = <Object?, Object?>{
+        'sdkInt': 29,
+        'displayHdrTypes': <Object?>[2, 3],
+        // Upstream (non-fork) libmpv has no such property: the native
+        // probe answers 0 (unavailable, a verdict — not an error).
+        'p5Pipeline': false,
       };
 
-      final HdrCapabilities caps = await HdrCapabilities.query(player: null);
-
-      // The Android snapshot is still fetched through the plugin channel.
-      expect(calls.single.method, 'HdrCapabilities.Get');
-      expect(caps.sdkInt, 29);
-      expect(caps.displayHdrTypes, <int>{2, 3});
-      // Core new capability of plan B: no Player is required — the P5
-      // verdict comes from the disposable mpv instance probe cached at
-      // engine attach, so query() is authoritative without a player.
-      expect(caps.p5PipelineAvailable, isTrue);
-      expect(caps.dataSpaceBridgeLoaded, isTrue);
-      expect(caps.dataSpaceExt?.id, 'lya-pq');
-    });
-
-    test(
-        'query(player: null) reports p5PipelineAvailable false for a '
-        'non-fork libmpv', () async {
-      handler = (MethodCall call) async => <Object?, Object?>{
-            'sdkInt': 29,
-            'displayHdrTypes': <Object?>[2, 3],
-            // Upstream (non-fork) libmpv has no such property: the native
-            // probe answers 0 (unavailable, a verdict — not an error).
-            'p5Pipeline': false,
-          };
-
-      final HdrCapabilities caps = await HdrCapabilities.query(player: null);
+      final HdrCapabilities caps = HdrCapabilities.parseSnapshot(snapshot);
 
       expect(caps.p5PipelineAvailable, isFalse);
+    });
+  });
+
+  group('HdrDataSpaceExtInfo per-transfer capability fields', () {
+    // The LYA vendor self-report shape (LyaPqDataSpaceExt): validated
+    // prediction for pq, no setter-only exception, no YUV arm protocol.
+    Map<Object?, Object?> lyaReport() => <Object?, Object?>{
+          'id': 'lya-pq',
+          'isApplicable': true,
+          'validatedPredictionTransfers': <Object?>['pq'],
+          'supportedSurfaceTransfers': <Object?>['pq'],
+        };
+
+    // The LG vendor self-report shape (LgPqDataSpaceExt): setter-only for
+    // pq and pq-itu, the managed YUV arm protocol 1, no validated
+    // prediction.
+    Map<Object?, Object?> lgReport() => <Object?, Object?>{
+          'id': 'lg-pq',
+          'isApplicable': true,
+          'setterOnlyTransfers': <Object?>['pq', 'pq-itu'],
+          'supportedSurfaceTransfers': <Object?>['pq', 'pq-itu'],
+          'yuvWindowArmApi': 1,
+        };
+
+    test('parses the LYA-shaped self-report', () {
+      final HdrDataSpaceExtInfo? ext = HdrDataSpaceExtInfo.fromMap(lyaReport());
+      expect(ext, isNotNull);
+      expect(ext!.validatedPredictionTransfers, <String>{'pq'});
+      expect(ext.setterOnlyTransfers, isEmpty);
+      expect(ext.supportedSurfaceTransfers, <String>{'pq'});
+      expect(ext.yuvWindowArmApi, 0);
+    });
+
+    test('parses the LG-shaped self-report', () {
+      final HdrDataSpaceExtInfo? ext = HdrDataSpaceExtInfo.fromMap(lgReport());
+      expect(ext, isNotNull);
+      expect(ext!.validatedPredictionTransfers, isEmpty);
+      expect(ext.setterOnlyTransfers, <String>{'pq', 'pq-itu'});
+      expect(ext.supportedSurfaceTransfers, <String>{'pq', 'pq-itu'});
+      expect(ext.yuvWindowArmApi, 1);
+    });
+
+    test('a legacy report without the fields resolves every field to the '
+        'conservative default', () {
+      final HdrDataSpaceExtInfo? ext = HdrDataSpaceExtInfo.fromMap(
+          <Object?, Object?>{'id': 'legacy', 'isApplicable': true});
+      expect(ext, isNotNull);
+      expect(ext!.validatedPredictionTransfers, isEmpty);
+      expect(ext.setterOnlyTransfers, isEmpty);
+      expect(ext.supportedSurfaceTransfers, isEmpty);
+      expect(ext.yuvWindowArmApi, 0);
+    });
+
+    test('malformed field types degrade to the conservative defaults, never '
+        'to an admission', () {
+      final HdrDataSpaceExtInfo? ext = HdrDataSpaceExtInfo.fromMap(
+          <Object?, Object?>{
+        'id': 'weird',
+        'isApplicable': true,
+        'validatedPredictionTransfers': 'pq',
+        'setterOnlyTransfers': <Object?>['pq', 1],
+        'supportedSurfaceTransfers': <Object?>[2],
+        'yuvWindowArmApi': '1',
+      });
+      expect(ext, isNotNull);
+      expect(ext!.validatedPredictionTransfers, isEmpty);
+      expect(ext.setterOnlyTransfers, isEmpty);
+      expect(ext.supportedSurfaceTransfers, isEmpty);
+      expect(ext.yuvWindowArmApi, 0);
+    });
+
+    test('a non-positive yuvWindowArmApi is not a protocol declaration', () {
+      final HdrDataSpaceExtInfo? ext = HdrDataSpaceExtInfo.fromMap(
+          <Object?, Object?>{'id': 'x', 'yuvWindowArmApi': 0});
+      expect(ext!.yuvWindowArmApi, 0);
+      final negative = HdrDataSpaceExtInfo.fromMap(
+          <Object?, Object?>{'id': 'x', 'yuvWindowArmApi': -1});
+      expect(negative!.yuvWindowArmApi, 0);
+    });
+
+    test('the full snapshot carries the fields through parseSnapshot', () {
+      snapshot = fullSnapshot()
+        ..['dataSpaceExt'] = lgReport();
+      final HdrCapabilities caps = HdrCapabilities.parseSnapshot(snapshot);
+      expect(caps.dataSpaceExt!.setterOnlyTransfers, <String>{'pq', 'pq-itu'});
+      expect(caps.dataSpaceExt!.yuvWindowArmApi, 1);
     });
   });
 }

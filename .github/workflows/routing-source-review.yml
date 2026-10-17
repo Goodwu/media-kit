@@ -1,0 +1,67 @@
+name: Routing tracked source snapshot (not functional validation)
+
+on:
+  pull_request:
+  push:
+    branches: [routing/MK-ROUTING-20261011]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: routing-source-review-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  snapshot:
+    name: Capture tracked sources for isolated review
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+          path: media-kit
+      - name: Capture current App branch once
+        id: app
+        shell: bash
+        run: |
+          set -euo pipefail
+          ref=refs/heads/routing/MK-ROUTING-20261011
+          sha=$(git ls-remote https://github.com/Goodwu/PiliPlusX.git "$ref" | awk '{print $1}')
+          [[ "$sha" =~ ^[0-9a-f]{40}$ ]]
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v4
+        with:
+          repository: Goodwu/PiliPlusX
+          ref: ${{ steps.app.outputs.sha }}
+          persist-credentials: false
+          path: PiliPlusX
+      - name: Archive only tracked Git trees and provenance
+        shell: bash
+        env:
+          LIBRARY_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          APP_SHA: ${{ steps.app.outputs.sha }}
+        run: |
+          set -euo pipefail
+          mkdir evidence
+          test "$(git -C media-kit rev-parse HEAD)" = "$LIBRARY_SHA"
+          test "$(git -C PiliPlusX rev-parse HEAD)" = "$APP_SHA"
+          for repo in media-kit PiliPlusX; do
+            git -C "$repo" diff --exit-code
+            git -C "$repo" diff --cached --exit-code
+            git -C "$repo" rev-parse HEAD 'HEAD^{tree}' > "evidence/$repo-identity.txt"
+            git -C "$repo" ls-tree -r --full-tree HEAD > "evidence/$repo-tree.txt"
+            git -C "$repo" archive --format=tar HEAD | gzip -n > "evidence/$repo-source.tar.gz"
+          done
+          printf 'scope=tracked-source-review-only\nfunctionalVerified=false\nnativeVerified=false\ndeviceVerified=false\nrun=%s\nattempt=%s\n' "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" > evidence/scope.txt
+          sha256sum evidence/* > evidence.sha256
+          mv evidence.sha256 evidence/SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: routing-tracked-sources-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence
+          if-no-files-found: error
+          retention-days: 14

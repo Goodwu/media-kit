@@ -1,0 +1,2211 @@
+{
+  "schema": "core-successor-source-ci-audit-v1",
+  "collected_utc": "2026-10-12T14:35:47.883852+00:00",
+  "repository": "Goodwu/PiliPlusX",
+  "verdict": "STANDALONE_SOURCE_RUN_SUCCESS_FOR_EXACT_13b139b7_5834ce5b_VECTOR_ONLY",
+  "run": {
+    "id": 38258403604,
+    "name": "Routing App source integration",
+    "run_number": 102,
+    "run_attempt": 1,
+    "event": "pull_request",
+    "head_branch": "routing/MK-ROUTING-20261011",
+    "head_sha": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+    "path": ".github/workflows/routing-source-integration.yml",
+    "status": "completed",
+    "conclusion": "success",
+    "created_at": "2026-10-12T13:49:25Z",
+    "run_started_at": "2026-10-12T13:49:25Z",
+    "updated_at": "2026-10-12T13:58:09Z",
+    "html_url": "https://github.com/Goodwu/PiliPlusX/actions/runs/38258403604"
+  },
+  "pagination": {
+    "jobs_latest_page_1_count": 6,
+    "jobs_total_count": 6,
+    "attempt_1_page_1_identical_to_latest": true,
+    "attempt_1_page_2_count": 0,
+    "per_page": 100,
+    "artifacts_page_1_count": 5,
+    "artifacts_total_count": 5
+  },
+  "source_vector": {
+    "app": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+    "appTree": "464e4ed20cd327dd31644d40f75e01f7e1267fd5",
+    "media-kit": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+    "media-kitTree": "6736c16afed90cc9e55b4694d0cdcf7f7876379f"
+  },
+  "source_git_and_hash_verification": {
+    "clones": {
+      "app": {
+        "path": "/workspace/scratch/bb7931e64549/checkouts/PiliPlusX",
+        "head": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+        "tree": "464e4ed20cd327dd31644d40f75e01f7e1267fd5",
+        "status": "",
+        "origin": "https://github.com/Goodwu/PiliPlusX.git"
+      },
+      "media-kit": {
+        "path": "/workspace/scratch/bb7931e64549/checkouts/media-kit",
+        "head": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+        "tree": "6736c16afed90cc9e55b4694d0cdcf7f7876379f",
+        "status": "",
+        "origin": "https://github.com/Goodwu/media-kit.git"
+      }
+    },
+    "hash_count": 2705,
+    "hashes_matched": 2705,
+    "repository_counts": {
+      "app": 1442,
+      "media-kit": 1263
+    },
+    "all_five_workers_same_source_hashes": true,
+    "independent_tracked_scope_projection_exact_match": true,
+    "source_hashes_canonical_sha256": "7d650affab1214376bebbddd6504be059145b6facaeb8808f691c7b3acecd8fd",
+    "full_source_rehash_evidence_sha256": "f6c3347ad20088d5892ee61d9f45d03eafcb86125d94bc864f1137289e0bcdc2",
+    "scope": "App tracked lib/ and test/; all tracked media-kit files; all hashes re-read from the exact clean Goodwu checkouts."
+  },
+  "jobs": [
+    {
+      "id": 114842356524,
+      "name": "Capture one current routing source vector",
+      "head_sha": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+      "run_attempt": 1,
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Goodwu/PiliPlusX/actions/runs/38258403604/job/114842356524",
+      "created_at": "2026-10-12T13:49:28Z",
+      "started_at": "2026-10-12T13:49:30Z",
+      "completed_at": "2026-10-12T13:49:33Z",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-12T13:49:31Z",
+          "completed_at": "2026-10-12T13:49:31Z"
+        },
+        {
+          "name": "Capture exact media-kit HEAD once for all source jobs",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-12T13:49:31Z",
+          "completed_at": "2026-10-12T13:49:32Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-12T13:49:32Z",
+          "completed_at": "2026-10-12T13:49:32Z"
+        }
+      ],
+      "decoded_log_lf_sha256": "fb8567357972eba688f98390040adabcc88aa97ebc227d2784f8c46b3cabda25"
+    },
+    {
+      "id": 114842394912,
+      "name": "App Python regression tests (macOS)",
+      "head_sha": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+      "run_attempt": 1,
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Goodwu/PiliPlusX/actions/runs/38258403604/job/114842394912",
+      "created_at": "2026-10-12T13:49:34Z",
+      "started_at": "2026-10-12T13:49:42Z",
+      "completed_at": "2026-10-12T13:56:08Z",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-12T13:49:42Z",
+          "completed_at": "2026-10-12T13:49:43Z"
+        },
+        {
+          "name": "Keep App checkout inputs in LF form",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-12T13:49:43Z",
+          "completed_at": "2026-10-12T13:49:43Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-12T13:49:43Z",
+          "completed_at": "2026-10-12T13:49:50Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-12T13:49:50Z",
+          "completed_at": "2026-10-12T13:49:54Z"
+        },
+        {
+          "name": "Verify exact Python test source vector and App base",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-12T13:49:54Z",
+          "completed_at": "2026-10-12T13:49:54Z"
+        },
+        {
+          "name": "Bootstrap private parser SDK and current sources",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-12T13:49:54Z",
+          "completed_at": "2026-10-12T13:52:39Z"
+        },
+        {
+          "name": "Run all App Python test modules",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-12T13:52:39Z",
+          "completed_at": "2026-10-12T13:55:50Z"
+        },
+        {
+          "name": "Finalize Python test source freshness and package roots",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-12T13:55:50Z",
+          "completed_at": "2026-10-12T13:55:53Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-12T13:55:53Z",
+          "completed_at": "2026-10-12T13:55:54Z"
+        },
+        {
+          "name": "Post Bootstrap private parser SDK and current sources",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16,
+          "started_at": "2026-10-12T13:55:54Z",
+          "completed_at": "2026-10-12T13:55:54Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-10-12T13:55:54Z",
+          "completed_at": "2026-10-12T13:55:55Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18,
+          "started_at": "2026-10-12T13:55:55Z",
+          "completed_at": "2026-10-12T13:55:55Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19,
+          "started_at": "2026-10-12T13:55:55Z",
+          "completed_at": "2026-10-12T13:55:59Z"
+        }
+      ],
+      "decoded_log_lf_sha256": "ff330f56b242edc0a58a81cec5a4dc7b8ff26c405a032ae4db52f1ae6caf1a8f"
+    },
+    {
+      "id": 114842394977,
+      "name": "Source bootstrap and validation (linux)",
+      "head_sha": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+      "run_attempt": 1,
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Goodwu/PiliPlusX/actions/runs/38258403604/job/114842394977",
+      "created_at": "2026-10-12T13:49:34Z",
+      "started_at": "2026-10-12T13:49:36Z",
+      "completed_at": "2026-10-12T13:54:25Z",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-12T13:49:36Z",
+          "completed_at": "2026-10-12T13:49:37Z"
+        },
+        {
+          "name": "Keep App checkout inputs in LF form",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-12T13:49:37Z",
+          "completed_at": "2026-10-12T13:49:44Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-12T13:49:44Z",
+          "completed_at": "2026-10-12T13:49:49Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-12T13:49:49Z",
+          "completed_at": "2026-10-12T13:49:51Z"
+        },
+        {
+          "name": "Verify App base and record source scope",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-12T13:49:51Z",
+          "completed_at": "2026-10-12T13:49:52Z"
+        },
+        {
+          "name": "Bootstrap actual platform SDK and package patches",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-12T13:49:52Z",
+          "completed_at": "2026-10-12T13:51:39Z"
+        },
+        {
+          "name": "Analyze and run all Flutter App tests against prepared sources",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-12T13:51:39Z",
+          "completed_at": "2026-10-12T13:53:40Z"
+        },
+        {
+          "name": "Compile the App Dart and assets bundle without historical native binaries",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-12T13:53:40Z",
+          "completed_at": "2026-10-12T13:54:17Z"
+        },
+        {
+          "name": "Finalize source freshness and all package roots after testing",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-12T13:54:17Z",
+          "completed_at": "2026-10-12T13:54:18Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-12T13:54:18Z",
+          "completed_at": "2026-10-12T13:54:19Z"
+        },
+        {
+          "name": "Post Bootstrap actual platform SDK and package patches",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18,
+          "started_at": "2026-10-12T13:54:19Z",
+          "completed_at": "2026-10-12T13:54:19Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19,
+          "started_at": "2026-10-12T13:54:19Z",
+          "completed_at": "2026-10-12T13:54:20Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 20,
+          "started_at": "2026-10-12T13:54:20Z",
+          "completed_at": "2026-10-12T13:54:20Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 21,
+          "started_at": "2026-10-12T13:54:20Z",
+          "completed_at": "2026-10-12T13:54:20Z"
+        }
+      ],
+      "decoded_log_lf_sha256": "4b906219a1298cc2c4a4e6b56ddf908e602792c86fa1ece659cb3dc82e19af11"
+    },
+    {
+      "id": 114842395076,
+      "name": "App analyze, tests and Dart bundle (latest media-kit source)",
+      "head_sha": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+      "run_attempt": 1,
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Goodwu/PiliPlusX/actions/runs/38258403604/job/114842395076",
+      "created_at": "2026-10-12T13:49:34Z",
+      "started_at": "2026-10-12T13:49:36Z",
+      "completed_at": "2026-10-12T13:55:48Z",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-12T13:49:37Z",
+          "completed_at": "2026-10-12T13:49:37Z"
+        },
+        {
+          "name": "Keep App checkout inputs in LF form",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-12T13:49:37Z",
+          "completed_at": "2026-10-12T13:49:37Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-12T13:49:37Z",
+          "completed_at": "2026-10-12T13:49:43Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-12T13:49:43Z",
+          "completed_at": "2026-10-12T13:49:44Z"
+        },
+        {
+          "name": "Verify App base and record source scope",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-12T13:49:44Z",
+          "completed_at": "2026-10-12T13:49:44Z"
+        },
+        {
+          "name": "Bootstrap real Android patches against current sources",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-12T13:49:44Z",
+          "completed_at": "2026-10-12T13:51:37Z"
+        },
+        {
+          "name": "Record prepared toolchain",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-12T13:51:37Z",
+          "completed_at": "2026-10-12T13:51:38Z"
+        },
+        {
+          "name": "Analyze the App",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-12T13:51:38Z",
+          "completed_at": "2026-10-12T13:52:26Z"
+        },
+        {
+          "name": "Run all Flutter App tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-12T13:52:26Z",
+          "completed_at": "2026-10-12T13:53:49Z"
+        },
+        {
+          "name": "Run Web player DOM tests in Chrome",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-12T13:53:49Z",
+          "completed_at": "2026-10-12T13:54:20Z"
+        },
+        {
+          "name": "Compile the Web player entry point",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-10-12T13:54:20Z",
+          "completed_at": "2026-10-12T13:55:02Z"
+        },
+        {
+          "name": "Compile the App Dart and assets bundle without historical native binaries",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-10-12T13:55:02Z",
+          "completed_at": "2026-10-12T13:55:40Z"
+        },
+        {
+          "name": "Finalize source freshness and all package roots after testing",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-10-12T13:55:40Z",
+          "completed_at": "2026-10-12T13:55:41Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14,
+          "started_at": "2026-10-12T13:55:41Z",
+          "completed_at": "2026-10-12T13:55:42Z"
+        },
+        {
+          "name": "Post Bootstrap real Android patches against current sources",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 26,
+          "started_at": "2026-10-12T13:55:42Z",
+          "completed_at": "2026-10-12T13:55:42Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 27,
+          "started_at": "2026-10-12T13:55:42Z",
+          "completed_at": "2026-10-12T13:55:43Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 28,
+          "started_at": "2026-10-12T13:55:43Z",
+          "completed_at": "2026-10-12T13:55:43Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 29,
+          "started_at": "2026-10-12T13:55:43Z",
+          "completed_at": "2026-10-12T13:55:43Z"
+        }
+      ],
+      "decoded_log_lf_sha256": "97c816198ed5853a2d2bb6d72f43defde2e9d1b2491adadd1bd0754ce3ef8717"
+    },
+    {
+      "id": 114842395097,
+      "name": "Source bootstrap and validation (windows)",
+      "head_sha": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+      "run_attempt": 1,
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Goodwu/PiliPlusX/actions/runs/38258403604/job/114842395097",
+      "created_at": "2026-10-12T13:49:34Z",
+      "started_at": "2026-10-12T13:49:36Z",
+      "completed_at": "2026-10-12T13:56:48Z",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-12T13:49:37Z",
+          "completed_at": "2026-10-12T13:49:37Z"
+        },
+        {
+          "name": "Keep App checkout inputs in LF form",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-12T13:49:37Z",
+          "completed_at": "2026-10-12T13:49:38Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-12T13:49:38Z",
+          "completed_at": "2026-10-12T13:49:49Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-12T13:49:49Z",
+          "completed_at": "2026-10-12T13:49:55Z"
+        },
+        {
+          "name": "Verify App base and record source scope",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-12T13:49:55Z",
+          "completed_at": "2026-10-12T13:49:56Z"
+        },
+        {
+          "name": "Bootstrap actual platform SDK and package patches",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-12T13:49:56Z",
+          "completed_at": "2026-10-12T13:53:09Z"
+        },
+        {
+          "name": "Analyze and run all Flutter App tests against prepared sources",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-12T13:53:09Z",
+          "completed_at": "2026-10-12T13:55:48Z"
+        },
+        {
+          "name": "Compile the App Dart and assets bundle without historical native binaries",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-12T13:55:48Z",
+          "completed_at": "2026-10-12T13:56:29Z"
+        },
+        {
+          "name": "Finalize source freshness and all package roots after testing",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-12T13:56:29Z",
+          "completed_at": "2026-10-12T13:56:33Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-12T13:56:33Z",
+          "completed_at": "2026-10-12T13:56:34Z"
+        },
+        {
+          "name": "Post Bootstrap actual platform SDK and package patches",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18,
+          "started_at": "2026-10-12T13:56:34Z",
+          "completed_at": "2026-10-12T13:56:35Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19,
+          "started_at": "2026-10-12T13:56:35Z",
+          "completed_at": "2026-10-12T13:56:37Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 20,
+          "started_at": "2026-10-12T13:56:37Z",
+          "completed_at": "2026-10-12T13:56:39Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 21,
+          "started_at": "2026-10-12T13:56:39Z",
+          "completed_at": "2026-10-12T13:56:39Z"
+        }
+      ],
+      "decoded_log_lf_sha256": "cab8b7c81e2cb618ee77cd269c7d12d8e6d69726e166eec35e54035774154ba2"
+    },
+    {
+      "id": 114842395101,
+      "name": "Source bootstrap and validation (macos)",
+      "head_sha": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+      "run_attempt": 1,
+      "status": "completed",
+      "conclusion": "success",
+      "html_url": "https://github.com/Goodwu/PiliPlusX/actions/runs/38258403604/job/114842395101",
+      "created_at": "2026-10-12T13:49:34Z",
+      "started_at": "2026-10-12T13:51:29Z",
+      "completed_at": "2026-10-12T13:58:08Z",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-12T13:51:30Z",
+          "completed_at": "2026-10-12T13:51:31Z"
+        },
+        {
+          "name": "Keep App checkout inputs in LF form",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-12T13:51:31Z",
+          "completed_at": "2026-10-12T13:51:32Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-12T13:51:32Z",
+          "completed_at": "2026-10-12T13:51:39Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-12T13:51:39Z",
+          "completed_at": "2026-10-12T13:51:42Z"
+        },
+        {
+          "name": "Verify App base and record source scope",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-12T13:51:42Z",
+          "completed_at": "2026-10-12T13:51:44Z"
+        },
+        {
+          "name": "Bootstrap actual platform SDK and package patches",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-12T13:51:44Z",
+          "completed_at": "2026-10-12T13:54:13Z"
+        },
+        {
+          "name": "Analyze and run all Flutter App tests against prepared sources",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-12T13:54:13Z",
+          "completed_at": "2026-10-12T13:57:08Z"
+        },
+        {
+          "name": "Compile the App Dart and assets bundle without historical native binaries",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-12T13:57:08Z",
+          "completed_at": "2026-10-12T13:57:47Z"
+        },
+        {
+          "name": "Finalize source freshness and all package roots after testing",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-12T13:57:47Z",
+          "completed_at": "2026-10-12T13:57:51Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-12T13:57:51Z",
+          "completed_at": "2026-10-12T13:57:52Z"
+        },
+        {
+          "name": "Post Bootstrap actual platform SDK and package patches",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18,
+          "started_at": "2026-10-12T13:57:52Z",
+          "completed_at": "2026-10-12T13:57:53Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19,
+          "started_at": "2026-10-12T13:57:53Z",
+          "completed_at": "2026-10-12T13:57:54Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 20,
+          "started_at": "2026-10-12T13:57:54Z",
+          "completed_at": "2026-10-12T13:57:54Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 21,
+          "started_at": "2026-10-12T13:57:54Z",
+          "completed_at": "2026-10-12T13:57:58Z"
+        }
+      ],
+      "decoded_log_lf_sha256": "d63149f4ef1bb187b8a92a61532662f1061d331857c7dc9c2641b7411837670c"
+    }
+  ],
+  "source_artifacts": [
+    {
+      "artifact": {
+        "id": 11752106377,
+        "name": "routing-app-source-macos-13b139b797aa65d853cafb5cb207d17a6e7aceac",
+        "size_in_bytes": 206153,
+        "digest": "sha256:503aaf5fb17d4ed585c901200e5e3ef33a0b5c4653dd8e76091d5bccbb5dace3",
+        "url": "https://api.github.com/repos/Goodwu/PiliPlusX/actions/artifacts/11752106377",
+        "archive_download_url": "https://api.github.com/repos/Goodwu/PiliPlusX/actions/artifacts/11752106377/zip",
+        "created_at": "2026-10-12T13:57:53Z",
+        "updated_at": "2026-10-12T13:57:53Z",
+        "expired": false,
+        "workflow_run": {
+          "id": 38258403604,
+          "repository_id": 1354565031,
+          "head_repository_id": 1354565031,
+          "head_branch": "routing/MK-ROUTING-20261011",
+          "head_sha": "13b139b797aa65d853cafb5cb207d17a6e7aceac"
+        }
+      },
+      "job_id": 114842395101,
+      "job_url": "https://github.com/Goodwu/PiliPlusX/actions/runs/38258403604/job/114842395101",
+      "run_attempt": 1,
+      "zip_sha256": "503aaf5fb17d4ed585c901200e5e3ef33a0b5c4653dd8e76091d5bccbb5dace3",
+      "api_digest_matches_actual_zip": true,
+      "api_size_matches_actual_zip": true,
+      "job_upload_id_digest_size_match": true,
+      "zip_crc_ok": true,
+      "member_count": 52,
+      "member_sha256": {
+        "after-app-head.log": "da44731d38a76c5b06098b87402d490b23de5e654b4b64d4b9c9c8307f336413",
+        "after-app-remote.log": "253443b3d23cf12130cd4d7eaaebf09344855b8c57289617997883f27ce247ea",
+        "after-app-tree.log": "6e9eb9a26d93ce4d38d3f778d3209b339a1c4e666ba4170aef90d192c023087e",
+        "after-media-kit-head.log": "7d145fcbd298f11e7cccde0a76dfebbac8513cc112ed7ed6fc5da7f8a144f097",
+        "after-media-kit-tree.log": "6fc7409ca670ae2add8d48ad4571a81cc7ce2c4852fc2bf777f594adb3cb4b4a",
+        "analyze.log": "8a99df3c07482fd6c0e52c8c94ea23dd64e5158b31dee5c97969c5663ee214c1",
+        "app-clean-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "after-media-kit-remote.log": "3017433a6d2675a18301bd0d090ee12e3ceff6744c4d1330831550a2164dffba",
+        "app-ignored-source-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "app-tracked-files.log": "f4703241c5e1c65149e9e485342526a31ce4e63bfcb011644e121cb2f8ffc30b",
+        "app-untracked-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "before-app-head.log": "da44731d38a76c5b06098b87402d490b23de5e654b4b64d4b9c9c8307f336413",
+        "before-app-remote.log": "253443b3d23cf12130cd4d7eaaebf09344855b8c57289617997883f27ce247ea",
+        "before-app-tree.log": "6e9eb9a26d93ce4d38d3f778d3209b339a1c4e666ba4170aef90d192c023087e",
+        "before-media-kit-head.log": "7d145fcbd298f11e7cccde0a76dfebbac8513cc112ed7ed6fc5da7f8a144f097",
+        "before-media-kit-remote.log": "3017433a6d2675a18301bd0d090ee12e3ceff6744c4d1330831550a2164dffba",
+        "before-media-kit-tree.log": "6fc7409ca670ae2add8d48ad4571a81cc7ce2c4852fc2bf777f594adb3cb4b4a",
+        "bootstrap.json": "0b50f0052fa4c67a1c4e5a77426f4a668c3a0d77d17fd531b484ba3e73df07cf",
+        "final-app-head.log": "da44731d38a76c5b06098b87402d490b23de5e654b4b64d4b9c9c8307f336413",
+        "final-app-remote.log": "253443b3d23cf12130cd4d7eaaebf09344855b8c57289617997883f27ce247ea",
+        "final-app-tree.log": "6e9eb9a26d93ce4d38d3f778d3209b339a1c4e666ba4170aef90d192c023087e",
+        "final-media-kit-head.log": "7d145fcbd298f11e7cccde0a76dfebbac8513cc112ed7ed6fc5da7f8a144f097",
+        "final-media-kit-remote.log": "3017433a6d2675a18301bd0d090ee12e3ceff6744c4d1330831550a2164dffba",
+        "final-media-kit-tree.log": "6fc7409ca670ae2add8d48ad4571a81cc7ce2c4852fc2bf777f594adb3cb4b4a",
+        "flutter-tests.log": "fcc56684417c33d0bb89f6a1882d1d1bc4507d81ecf880be731448fd020e5855",
+        "flutter-tools-resolve.log": "8126378699c07787a2df1ea4215eb651a9e66c9f5fcffc579a94532d76dd8b55",
+        "kernel-sha256.txt": "2e576e9160479c55717e7e6110f79d65d151ec79e20487b2e2bde291c1a08fdf",
+        "media-kit-clean-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "media-kit-ignored-source-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "media-kit-tracked-files.log": "a3a37885d033d22e508b293286d33d4620d9acdf7c375bc57821962bb3d0fdd4",
+        "media-kit-untracked-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "original-sdk-head.log": "1fbcf8e1ce7135edd57542ccd6a9e4a6bc902b102c5d46b9685bc43e09cf61de",
+        "original-sdk-index-diff.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "original-sdk-root.log": "a5614dd00c6bbbd28efd634fd5f8aea8462dd6b5504df75a5b8577360a4bdfee",
+        "original-sdk-state.json": "43e4abd54202f0d7eab5d60074aa3a657b596257e00819155b8b967184e837ba",
+        "original-sdk-status.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "original-sdk-tree.log": "c3cc99cbaf402860ea7ba408c41f11e71a04ea1454c5b3c160263e8e673a1e0e",
+        "original-sdk-working-diff.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "patch-PackagesOnly.log": "56510591b354de8dda373bbef6098eb9d9323d2ddd767fc722da5dd33b59c327",
+        "patch-SdkOnly.log": "16af120da4690ad39d575e4a78efe4daa64fa1392b190a2728ebd376cb16e24b",
+        "patched-sdk-diff.log": "0ab0120a6ef6950c0865743ed37d555f4f5a25ec3a0044528f8ca51f15babf1d",
+        "patched-sdk-status.log": "b2d837bef4ebc47ef32f7c7fbf954f429e4bcf5d6663c1b9c797a9dc9a9864df",
+        "private-sdk-root.log": "a5614dd00c6bbbd28efd634fd5f8aea8462dd6b5504df75a5b8577360a4bdfee",
+        "resolve.log": "b040791b06faf40cd017ef22807cf394f48d81f93c3801353a46a228ed83bb76",
+        "scope.txt": "59f4f2ee6638db996af8ce499d7a93f26c214bf28e4caed1fd8d6ce631e786bc",
+        "source-resolution-after.json": "12101fb21b6a8a6c8eb2c855b2c6adda1fcc1f999605f5d316bd0f45ba799d7b",
+        "source-resolution-before.json": "12101fb21b6a8a6c8eb2c855b2c6adda1fcc1f999605f5d316bd0f45ba799d7b",
+        "source-resolution-patched.json": "12101fb21b6a8a6c8eb2c855b2c6adda1fcc1f999605f5d316bd0f45ba799d7b",
+        "toolchain-machine.log": "dab16f37c420f4961df63e4bdc6bfa6a26c74740b4e4ab5637959b6c19f45607",
+        "toolchain.log": "ef444c1d10d6d2384cc29c2853f18819fcf18661403902d7cc3dd89f85bafde2",
+        "toolchain.txt": "ef444c1d10d6d2384cc29c2853f18819fcf18661403902d7cc3dd89f85bafde2",
+        "source.txt": "8148e081ca6b968fa497ec69e3bf04eeb2c3f9a76f63b691e19c99763a96337b"
+      },
+      "source_txt_actual": "app=13b139b797aa65d853cafb5cb207d17a6e7aceac\nmedia-kit=5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f\n",
+      "scope": "routing-source-bootstrap",
+      "platform": "macos",
+      "status": "fresh-source-only",
+      "vector": {
+        "app": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+        "appTree": "464e4ed20cd327dd31644d40f75e01f7e1267fd5",
+        "media-kit": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+        "media-kitTree": "6736c16afed90cc9e55b4694d0cdcf7f7876379f"
+      },
+      "afterVector": {
+        "app": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+        "appTree": "464e4ed20cd327dd31644d40f75e01f7e1267fd5",
+        "media-kit": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+        "media-kitTree": "6736c16afed90cc9e55b4694d0cdcf7f7876379f"
+      },
+      "finalVector": {
+        "app": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+        "appTree": "464e4ed20cd327dd31644d40f75e01f7e1267fd5",
+        "media-kit": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+        "media-kitTree": "6736c16afed90cc9e55b4694d0cdcf7f7876379f"
+      },
+      "raw_heads_trees_remote_facts": {
+        "before": {
+          "app": {
+            "head": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+            "tree": "464e4ed20cd327dd31644d40f75e01f7e1267fd5",
+            "remote": "13b139b797aa65d853cafb5cb207d17a6e7aceac\trefs/heads/routing/MK-ROUTING-20261011"
+          },
+          "media-kit": {
+            "head": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+            "tree": "6736c16afed90cc9e55b4694d0cdcf7f7876379f",
+            "remote": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f\trefs/heads/routing/MK-ROUTING-20261011"
+          }
+        },
+        "after": {
+          "app": {
+            "head": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+            "tree": "464e4ed20cd327dd31644d40f75e01f7e1267fd5",
+            "remote": "13b139b797aa65d853cafb5cb207d17a6e7aceac\trefs/heads/routing/MK-ROUTING-20261011"
+          },
+          "media-kit": {
+            "head": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+            "tree": "6736c16afed90cc9e55b4694d0cdcf7f7876379f",
+            "remote": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f\trefs/heads/routing/MK-ROUTING-20261011"
+          }
+        },
+        "final": {
+          "app": {
+            "head": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+            "tree": "464e4ed20cd327dd31644d40f75e01f7e1267fd5",
+            "remote": "13b139b797aa65d853cafb5cb207d17a6e7aceac\trefs/heads/routing/MK-ROUTING-20261011"
+          },
+          "media-kit": {
+            "head": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+            "tree": "6736c16afed90cc9e55b4694d0cdcf7f7876379f",
+            "remote": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f\trefs/heads/routing/MK-ROUTING-20261011"
+          }
+        }
+      },
+      "nativeBinaryProvenanceVerified": false,
+      "deviceTest": false,
+      "steps_count": 57,
+      "steps_all_exit_zero": true,
+      "source_hashes_count": 2705,
+      "all_source_hashes_independently_rehashed": true,
+      "source_resolution_before_patched_after_equal": true,
+      "package_root_count": 261,
+      "ten_packages": {
+        "media_kit": "media_kit",
+        "media_kit_android_dataspace_vendor": "libs/android/media_kit_android_dataspace_vendor",
+        "media_kit_libs_android_video": "libs/android/media_kit_libs_android_video",
+        "media_kit_libs_ios_video": "libs/ios/media_kit_libs_ios_video",
+        "media_kit_libs_linux": "libs/linux/media_kit_libs_linux",
+        "media_kit_libs_macos_video": "libs/macos/media_kit_libs_macos_video",
+        "media_kit_libs_ohos": "libs/ohos/media_kit_libs_ohos",
+        "media_kit_libs_video": "libs/universal/media_kit_libs_video",
+        "media_kit_libs_windows_video": "libs/windows/media_kit_libs_windows_video",
+        "media_kit_video": "media_kit_video"
+      },
+      "ten_roots": {
+        "media_kit": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/media_kit",
+        "media_kit_android_dataspace_vendor": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/android/media_kit_android_dataspace_vendor",
+        "media_kit_libs_android_video": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/android/media_kit_libs_android_video",
+        "media_kit_libs_ios_video": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/ios/media_kit_libs_ios_video",
+        "media_kit_libs_linux": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/linux/media_kit_libs_linux",
+        "media_kit_libs_macos_video": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/macos/media_kit_libs_macos_video",
+        "media_kit_libs_ohos": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/ohos/media_kit_libs_ohos",
+        "media_kit_libs_video": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/universal/media_kit_libs_video",
+        "media_kit_libs_windows_video": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/windows/media_kit_libs_windows_video",
+        "media_kit_video": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/media_kit_video"
+      },
+      "all_package_roots_in_allowed_app_media_sdk_private_cache": true,
+      "sdkCommit": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+      "sdkTree": "4373f258a6af48e0fa44b0e39370094cb22f7634",
+      "sdk_patch_execution": {
+        "platform": "macos",
+        "sourceVector": {
+          "app": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+          "appTree": "464e4ed20cd327dd31644d40f75e01f7e1267fd5",
+          "media-kit": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+          "media-kitTree": "6736c16afed90cc9e55b4694d0cdcf7f7876379f"
+        },
+        "sdkCommit": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+        "sdkRoot": "/Users/runner/work/_temp/rb/s/flutter",
+        "pubCache": "/Users/runner/work/_temp/rb/p",
+        "scriptPath": "lib/scripts/patch.ps1",
+        "scriptSha256": "14cd003d6be569773de15931d4297b82df5bf6901468d4a55adc1fd0b5c65089",
+        "scriptGitBlobSha1": "cfe2639dc1d832354a2d9baf37fe1d66fbeb70c0",
+        "phases": [
+          {
+            "name": "patch-SdkOnly",
+            "command": [
+              "pwsh",
+              "-NoLogo",
+              "-NoProfile",
+              "-File",
+              "/Users/runner/work/PiliPlusX/PiliPlusX/app/lib/scripts/patch.ps1",
+              "macos",
+              "-SdkOnly"
+            ],
+            "cwd": "/Users/runner/work/PiliPlusX/PiliPlusX/app",
+            "exitCode": 0
+          },
+          {
+            "name": "patch-PackagesOnly",
+            "command": [
+              "pwsh",
+              "-NoLogo",
+              "-NoProfile",
+              "-File",
+              "/Users/runner/work/PiliPlusX/PiliPlusX/app/lib/scripts/patch.ps1",
+              "macos",
+              "-PackagesOnly"
+            ],
+            "cwd": "/Users/runner/work/PiliPlusX/PiliPlusX/app",
+            "exitCode": 0
+          }
+        ]
+      },
+      "sdk_patch_identity": {
+        "schema": "routing-sdk-patch-identity-v1",
+        "platform": "macos",
+        "sdkRoot": "/Users/runner/work/_temp/rb/s/flutter",
+        "pubCache": "/Users/runner/work/_temp/rb/p",
+        "sdkCommit": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+        "sdkTree": "4373f258a6af48e0fa44b0e39370094cb22f7634",
+        "trackedDiffSha256": "0ab0120a6ef6950c0865743ed37d555f4f5a25ec3a0044528f8ca51f15babf1d",
+        "trackedStatusSha256": "dc1563c168ddad1baf5c80bbd3de57f119f8126a65369076eee6aef40cf4b706",
+        "toolsConfigSha256": "2edf0f4bf241f37fb8cf9ecb162cd4ebbdfad9d5fe98e1e6d61d36cb215a5c05",
+        "toolsLockSha256": "bc2ca8669c0c8503cb7b88ecb3ece08f3083e0fb67c206e981764735610bea2d",
+        "toolchain": {
+          "frameworkVersion": "3.47.2",
+          "channel": "stable",
+          "repositoryUrl": "https://github.com/flutter/flutter.git",
+          "frameworkRevision": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+          "frameworkCommitDate": "2026-08-26 16:07:51 -0700",
+          "engineRevision": "a804b261645ef8c13eb3d5c44a5c2fb0340c5539",
+          "engineCommitDate": "2026-08-26 18:46:13.000Z",
+          "engineContentHash": "1cf1c4773fb941c4c74a7f8bb144a8837596c0f4",
+          "engineBuildDate": "2026-08-26 12:23:07.677",
+          "dartSdkVersion": "3.13.2",
+          "devToolsVersion": "2.60.0",
+          "flutterVersion": "3.47.2",
+          "flutterRoot": "/Users/runner/work/_temp/rb/s/flutter"
+        }
+      },
+      "sdk_diff_log_reconstructed_digest_matches": true,
+      "sdk_status_log_nul_reconstructed_digest_matches": true,
+      "sdk_log_reconstruction": "CRLF text-log newlines restored to LF; exact leading Git stderr warnings recorded separately; porcelain status LF separators restored to -z NUL for simple recorded paths.",
+      "sdk_diff_stderr_warning_prefix": "",
+      "tests": {
+        "flutter_passed": 268,
+        "flutter_summary": "01:26 +268: All tests passed!",
+        "analyze_actual": "Analyzing app...                                                \nNo issues found! (ran in 54.5s)",
+        "dart_bundle_step": {
+          "name": "Compile the App Dart and assets bundle without historical native binaries",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-12T13:57:08Z",
+          "completed_at": "2026-10-12T13:57:47Z"
+        },
+        "kernel_record": "Algorithm : SHA256\nHash      : 6ADCDB267367B6047A46C836B357C106A4C1C049383556900AFF33C38FEA7108\nPath      : /Users/runner/work/PiliPlusX/PiliPlusX/app/build/flutter_assets/kernel_blob.bin",
+        "kernel_bytes_rehashed": false
+      }
+    },
+    {
+      "artifact": {
+        "id": 11752046180,
+        "name": "routing-app-source-windows-13b139b797aa65d853cafb5cb207d17a6e7aceac",
+        "size_in_bytes": 206225,
+        "digest": "sha256:90a4c9a4b01d51af3feec4edd44f01b8d2109dcecf65bfcf97a35380d5b5e51e",
+        "url": "https://api.github.com/repos/Goodwu/PiliPlusX/actions/artifacts/11752046180",
+        "archive_download_url": "https://api.github.com/repos/Goodwu/PiliPlusX/actions/artifacts/11752046180/zip",
+        "created_at": "2026-10-12T13:56:34Z",
+        "updated_at": "2026-10-12T13:56:34Z",
+        "expired": false,
+        "workflow_run": {
+          "id": 38258403604,
+          "repository_id": 1354565031,
+          "head_repository_id": 1354565031,
+          "head_branch": "routing/MK-ROUTING-20261011",
+          "head_sha": "13b139b797aa65d853cafb5cb207d17a6e7aceac"
+        }
+      },
+      "job_id": 114842395097,
+      "job_url": "https://github.com/Goodwu/PiliPlusX/actions/runs/38258403604/job/114842395097",
+      "run_attempt": 1,
+      "zip_sha256": "90a4c9a4b01d51af3feec4edd44f01b8d2109dcecf65bfcf97a35380d5b5e51e",
+      "api_digest_matches_actual_zip": true,
+      "api_size_matches_actual_zip": true,
+      "job_upload_id_digest_size_match": true,
+      "zip_crc_ok": true,
+      "member_count": 52,
+      "member_sha256": {
+        "after-app-head.log": "510a30f081fb6107c88bc70287d875c5f5edaf0d1c159961b6917fd2947edf73",
+        "after-app-remote.log": "01e99b2566e4833c3a48a9e65114143b8b19a5244dc152c16deeaad88ba5a35f",
+        "after-app-tree.log": "c0f271bf6b7e1b58ac4c76c669b4e9343d2b19c7c7969f001c2d5e3f65c58d8f",
+        "after-media-kit-head.log": "217d6e4fbf783a99216dec903531d198447a6c5f6a70dbebe5bfabf28b321fc4",
+        "after-media-kit-remote.log": "cc37c794173da0b2d7a8a5abd5229800881a39273fb0185b01d9044816baab58",
+        "after-media-kit-tree.log": "14c67acea9ca871095541d7a34c1367e8846bcb705be12a19315479f8f59402c",
+        "analyze.log": "79ee918f621d33f50841778fa1ba0fa815bec6ac758003b6e4ce8bde733daa81",
+        "app-clean-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "app-ignored-source-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "app-tracked-files.log": "f4703241c5e1c65149e9e485342526a31ce4e63bfcb011644e121cb2f8ffc30b",
+        "app-untracked-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "before-app-head.log": "510a30f081fb6107c88bc70287d875c5f5edaf0d1c159961b6917fd2947edf73",
+        "before-app-remote.log": "01e99b2566e4833c3a48a9e65114143b8b19a5244dc152c16deeaad88ba5a35f",
+        "before-app-tree.log": "c0f271bf6b7e1b58ac4c76c669b4e9343d2b19c7c7969f001c2d5e3f65c58d8f",
+        "before-media-kit-head.log": "217d6e4fbf783a99216dec903531d198447a6c5f6a70dbebe5bfabf28b321fc4",
+        "before-media-kit-remote.log": "cc37c794173da0b2d7a8a5abd5229800881a39273fb0185b01d9044816baab58",
+        "before-media-kit-tree.log": "14c67acea9ca871095541d7a34c1367e8846bcb705be12a19315479f8f59402c",
+        "bootstrap.json": "aeab9a475aa4f38d96a7d1ec5650f414594589d44625a309b289f3ad7bf03485",
+        "final-app-head.log": "510a30f081fb6107c88bc70287d875c5f5edaf0d1c159961b6917fd2947edf73",
+        "final-app-remote.log": "01e99b2566e4833c3a48a9e65114143b8b19a5244dc152c16deeaad88ba5a35f",
+        "final-app-tree.log": "c0f271bf6b7e1b58ac4c76c669b4e9343d2b19c7c7969f001c2d5e3f65c58d8f",
+        "final-media-kit-head.log": "217d6e4fbf783a99216dec903531d198447a6c5f6a70dbebe5bfabf28b321fc4",
+        "final-media-kit-remote.log": "cc37c794173da0b2d7a8a5abd5229800881a39273fb0185b01d9044816baab58",
+        "final-media-kit-tree.log": "14c67acea9ca871095541d7a34c1367e8846bcb705be12a19315479f8f59402c",
+        "flutter-tests.log": "18466dce94fc91b8a060afdb8317350a1dbfb662c7cc2d7986b9776f85cd3cfb",
+        "flutter-tools-resolve.log": "1869a172c793bc119e02cffe731a9e14c50cf6026d28d5f5a66c2ce7d5e64ea2",
+        "kernel-sha256.txt": "c145b1c6497978be4b29080ecdea13ba818c9cfe16be7f0430203c4b3a3676db",
+        "media-kit-clean-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "media-kit-ignored-source-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "media-kit-tracked-files.log": "a3a37885d033d22e508b293286d33d4620d9acdf7c375bc57821962bb3d0fdd4",
+        "media-kit-untracked-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "original-sdk-head.log": "37f988a523eda44168d93b83124fa56d124d8c143831502e1b87a8203d607730",
+        "original-sdk-index-diff.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "original-sdk-root.log": "7e53d89612c98edb27a5852e1aa9dc257618b0d8884c9067142850755e435111",
+        "original-sdk-state.json": "b83c301f867db52bfa6dd736697ce7e1d5ab24deab89a561f588f974b4551c05",
+        "original-sdk-status.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "original-sdk-tree.log": "319acd314b58c46baf59bc027aba50565f1723e5413d27d1ccef07865373298a",
+        "original-sdk-working-diff.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "patch-PackagesOnly.log": "21642db090f02678fd881348da115fbe620990ca14761c34525bece3d255cf8c",
+        "patch-SdkOnly.log": "9e4f4386b072ab1bf7347123b2ab66638ee3eb71d08e07b0be1c75e5bc967535",
+        "patched-sdk-diff.log": "c1287a940f66d5fdba35cea0d95f5a663ba4273de522e8b9666a1f5edd7ae3b5",
+        "patched-sdk-status.log": "802d2335610edffeabb60ef2b798dbcda4d209055d5941ff6aacec887612b43e",
+        "private-sdk-root.log": "7e53d89612c98edb27a5852e1aa9dc257618b0d8884c9067142850755e435111",
+        "resolve.log": "29ee26e086f862ee3d167b83850e1288b1eadfd494c8164c0d6c05da04f7fba3",
+        "scope.txt": "a45e49e5f9aed1c4ab530420ecafea94a72059abc99dcca3e7f8180e796b3172",
+        "source-resolution-after.json": "52decae9281212dfc4e9d6c5f64ceb93212e65f6e15a86886427b78daa80c9e9",
+        "source-resolution-before.json": "52decae9281212dfc4e9d6c5f64ceb93212e65f6e15a86886427b78daa80c9e9",
+        "source-resolution-patched.json": "52decae9281212dfc4e9d6c5f64ceb93212e65f6e15a86886427b78daa80c9e9",
+        "source.txt": "61ea2af363806f6b75f6b81d3e5b6232ceefd827df5b7a28f10bd4a63b41300c",
+        "toolchain-machine.log": "275a91512da53a33dc2652453deb256aecc23a61e36bacee6aafed6ab9f0f879",
+        "toolchain.log": "a9d1161572c7eb746ea58792da8ddcc707dc910d7b4bd58add60d354b6053c3f",
+        "toolchain.txt": "6695424bcb76b101e88042d7ff9cc94cdda54d1b80305048a456ad7ecc805abe"
+      },
+      "source_txt_actual": "app=13b139b797aa65d853cafb5cb207d17a6e7aceac\nmedia-kit=5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f\r\n",
+      "scope": "routing-source-bootstrap",
+      "platform": "windows",
+      "status": "fresh-source-only",
+      "vector": {
+        "app": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+        "appTree": "464e4ed20cd327dd31644d40f75e01f7e1267fd5",
+        "media-kit": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+        "media-kitTree": "6736c16afed90cc9e55b4694d0cdcf7f7876379f"
+      },
+      "afterVector": {
+        "app": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+        "appTree": "464e4ed20cd327dd31644d40f75e01f7e1267fd5",
+        "media-kit": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+        "media-kitTree": "6736c16afed90cc9e55b4694d0cdcf7f7876379f"
+      },
+      "finalVector": {
+        "app": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+        "appTree": "464e4ed20cd327dd31644d40f75e01f7e1267fd5",
+        "media-kit": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+        "media-kitTree": "6736c16afed90cc9e55b4694d0cdcf7f7876379f"
+      },
+      "raw_heads_trees_remote_facts": {
+        "before": {
+          "app": {
+            "head": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+            "tree": "464e4ed20cd327dd31644d40f75e01f7e1267fd5",
+            "remote": "13b139b797aa65d853cafb5cb207d17a6e7aceac\trefs/heads/routing/MK-ROUTING-20261011"
+          },
+          "media-kit": {
+            "head": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+            "tree": "6736c16afed90cc9e55b4694d0cdcf7f7876379f",
+            "remote": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f\trefs/heads/routing/MK-ROUTING-20261011"
+          }
+        },
+        "after": {
+          "app": {
+            "head": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+            "tree": "464e4ed20cd327dd31644d40f75e01f7e1267fd5",
+            "remote": "13b139b797aa65d853cafb5cb207d17a6e7aceac\trefs/heads/routing/MK-ROUTING-20261011"
+          },
+          "media-kit": {
+            "head": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+            "tree": "6736c16afed90cc9e55b4694d0cdcf7f7876379f",
+            "remote": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f\trefs/heads/routing/MK-ROUTING-20261011"
+          }
+        },
+        "final": {
+          "app": {
+            "head": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+            "tree": "464e4ed20cd327dd31644d40f75e01f7e1267fd5",
+            "remote": "13b139b797aa65d853cafb5cb207d17a6e7aceac\trefs/heads/routing/MK-ROUTING-20261011"
+          },
+          "media-kit": {
+            "head": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+            "tree": "6736c16afed90cc9e55b4694d0cdcf7f7876379f",
+            "remote": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f\trefs/heads/routing/MK-ROUTING-20261011"
+          }
+        }
+      },
+      "nativeBinaryProvenanceVerified": false,
+      "deviceTest": false,
+      "steps_count": 57,
+      "steps_all_exit_zero": true,
+      "source_hashes_count": 2705,
+      "all_source_hashes_independently_rehashed": true,
+      "source_resolution_before_patched_after_equal": true,
+      "package_root_count": 261,
+      "ten_packages": {
+        "media_kit": "media_kit",
+        "media_kit_android_dataspace_vendor": "libs/android/media_kit_android_dataspace_vendor",
+        "media_kit_libs_android_video": "libs/android/media_kit_libs_android_video",
+        "media_kit_libs_ios_video": "libs/ios/media_kit_libs_ios_video",
+        "media_kit_libs_linux": "libs/linux/media_kit_libs_linux",
+        "media_kit_libs_macos_video": "libs/macos/media_kit_libs_macos_video",
+        "media_kit_libs_ohos": "libs/ohos/media_kit_libs_ohos",
+        "media_kit_libs_video": "libs/universal/media_kit_libs_video",
+        "media_kit_libs_windows_video": "libs/windows/media_kit_libs_windows_video",
+        "media_kit_video": "media_kit_video"
+      },
+      "ten_roots": {
+        "media_kit": "D:\\a\\PiliPlusX\\PiliPlusX\\media-kit\\media_kit",
+        "media_kit_android_dataspace_vendor": "D:\\a\\PiliPlusX\\PiliPlusX\\media-kit\\libs\\android\\media_kit_android_dataspace_vendor",
+        "media_kit_libs_android_video": "D:\\a\\PiliPlusX\\PiliPlusX\\media-kit\\libs\\android\\media_kit_libs_android_video",
+        "media_kit_libs_ios_video": "D:\\a\\PiliPlusX\\PiliPlusX\\media-kit\\libs\\ios\\media_kit_libs_ios_video",
+        "media_kit_libs_linux": "D:\\a\\PiliPlusX\\PiliPlusX\\media-kit\\libs\\linux\\media_kit_libs_linux",
+        "media_kit_libs_macos_video": "D:\\a\\PiliPlusX\\PiliPlusX\\media-kit\\libs\\macos\\media_kit_libs_macos_video",
+        "media_kit_libs_ohos": "D:\\a\\PiliPlusX\\PiliPlusX\\media-kit\\libs\\ohos\\media_kit_libs_ohos",
+        "media_kit_libs_video": "D:\\a\\PiliPlusX\\PiliPlusX\\media-kit\\libs\\universal\\media_kit_libs_video",
+        "media_kit_libs_windows_video": "D:\\a\\PiliPlusX\\PiliPlusX\\media-kit\\libs\\windows\\media_kit_libs_windows_video",
+        "media_kit_video": "D:\\a\\PiliPlusX\\PiliPlusX\\media-kit\\media_kit_video"
+      },
+      "all_package_roots_in_allowed_app_media_sdk_private_cache": true,
+      "sdkCommit": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+      "sdkTree": "4373f258a6af48e0fa44b0e39370094cb22f7634",
+      "sdk_patch_execution": {
+        "platform": "windows",
+        "sourceVector": {
+          "app": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+          "appTree": "464e4ed20cd327dd31644d40f75e01f7e1267fd5",
+          "media-kit": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+          "media-kitTree": "6736c16afed90cc9e55b4694d0cdcf7f7876379f"
+        },
+        "sdkCommit": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+        "sdkRoot": "D:\\a\\_temp\\rb\\s\\flutter",
+        "pubCache": "D:\\a\\_temp\\rb\\p",
+        "scriptPath": "lib/scripts/patch.ps1",
+        "scriptSha256": "14cd003d6be569773de15931d4297b82df5bf6901468d4a55adc1fd0b5c65089",
+        "scriptGitBlobSha1": "cfe2639dc1d832354a2d9baf37fe1d66fbeb70c0",
+        "phases": [
+          {
+            "name": "patch-SdkOnly",
+            "command": [
+              "pwsh",
+              "-NoLogo",
+              "-NoProfile",
+              "-File",
+              "D:\\a\\PiliPlusX\\PiliPlusX\\app\\lib\\scripts\\patch.ps1",
+              "windows",
+              "-SdkOnly"
+            ],
+            "cwd": "D:\\a\\PiliPlusX\\PiliPlusX\\app",
+            "exitCode": 0
+          },
+          {
+            "name": "patch-PackagesOnly",
+            "command": [
+              "pwsh",
+              "-NoLogo",
+              "-NoProfile",
+              "-File",
+              "D:\\a\\PiliPlusX\\PiliPlusX\\app\\lib\\scripts\\patch.ps1",
+              "windows",
+              "-PackagesOnly"
+            ],
+            "cwd": "D:\\a\\PiliPlusX\\PiliPlusX\\app",
+            "exitCode": 0
+          }
+        ]
+      },
+      "sdk_patch_identity": {
+        "schema": "routing-sdk-patch-identity-v1",
+        "platform": "windows",
+        "sdkRoot": "D:\\a\\_temp\\rb\\s\\flutter",
+        "pubCache": "D:\\a\\_temp\\rb\\p",
+        "sdkCommit": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+        "sdkTree": "4373f258a6af48e0fa44b0e39370094cb22f7634",
+        "trackedDiffSha256": "0ab0120a6ef6950c0865743ed37d555f4f5a25ec3a0044528f8ca51f15babf1d",
+        "trackedStatusSha256": "dc1563c168ddad1baf5c80bbd3de57f119f8126a65369076eee6aef40cf4b706",
+        "toolsConfigSha256": "7f90e769d253aedf6c4cfd7c219b571344ee21bc03b55c608e8cd2a24fab0c0f",
+        "toolsLockSha256": "bc2ca8669c0c8503cb7b88ecb3ece08f3083e0fb67c206e981764735610bea2d",
+        "toolchain": {
+          "frameworkVersion": "3.47.2",
+          "channel": "stable",
+          "repositoryUrl": "https://github.com/flutter/flutter.git",
+          "frameworkRevision": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+          "frameworkCommitDate": "2026-08-26 16:07:51 -0700",
+          "engineRevision": "a804b261645ef8c13eb3d5c44a5c2fb0340c5539",
+          "engineCommitDate": "2026-08-26 18:46:13.000Z",
+          "engineContentHash": "1cf1c4773fb941c4c74a7f8bb144a8837596c0f4",
+          "engineBuildDate": "2026-08-26 19:23:07.677",
+          "dartSdkVersion": "3.13.2",
+          "devToolsVersion": "2.60.0",
+          "flutterVersion": "3.47.2",
+          "flutterRoot": "D:\\a\\_temp\\rb\\s\\flutter"
+        }
+      },
+      "sdk_diff_log_reconstructed_digest_matches": true,
+      "sdk_status_log_nul_reconstructed_digest_matches": true,
+      "sdk_log_reconstruction": "CRLF text-log newlines restored to LF; exact leading Git stderr warnings recorded separately; porcelain status LF separators restored to -z NUL for simple recorded paths.",
+      "sdk_diff_stderr_warning_prefix": "warning: in the working copy of 'packages/flutter/lib/src/widgets/scroll_view.dart', CRLF will be replaced by LF the next time Git touches it\nwarning: in the working copy of 'packages/flutter/lib/src/widgets/scrollable.dart', CRLF will be replaced by LF the next time Git touches it\n",
+      "tests": {
+        "flutter_passed": 268,
+        "flutter_summary": "01:25 +268: All tests passed!",
+        "analyze_actual": "Analyzing app...                                                \r\nNo issues found! (ran in 52.9s)",
+        "dart_bundle_step": {
+          "name": "Compile the App Dart and assets bundle without historical native binaries",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-12T13:55:48Z",
+          "completed_at": "2026-10-12T13:56:29Z"
+        },
+        "kernel_record": "Algorithm : SHA256\r\nHash      : 09799B8722A904C9B8D39892D9AA6D772F68FB6637777898712DDBDA9C17F6AE\r\nPath      : D:\\a\\PiliPlusX\\PiliPlusX\\app\\build\\flutter_assets\\kernel_blob.bin",
+        "kernel_bytes_rehashed": false
+      }
+    },
+    {
+      "artifact": {
+        "id": 11752011077,
+        "name": "routing-app-source-13b139b797aa65d853cafb5cb207d17a6e7aceac",
+        "size_in_bytes": 212051,
+        "digest": "sha256:0245f410990addec5cf1f4ffa74ec26a614008c0aaeaddebcf37ef961dbacb3f",
+        "url": "https://api.github.com/repos/Goodwu/PiliPlusX/actions/artifacts/11752011077",
+        "archive_download_url": "https://api.github.com/repos/Goodwu/PiliPlusX/actions/artifacts/11752011077/zip",
+        "created_at": "2026-10-12T13:55:42Z",
+        "updated_at": "2026-10-12T13:55:42Z",
+        "expired": false,
+        "workflow_run": {
+          "id": 38258403604,
+          "repository_id": 1354565031,
+          "head_repository_id": 1354565031,
+          "head_branch": "routing/MK-ROUTING-20261011",
+          "head_sha": "13b139b797aa65d853cafb5cb207d17a6e7aceac"
+        }
+      },
+      "job_id": 114842395076,
+      "job_url": "https://github.com/Goodwu/PiliPlusX/actions/runs/38258403604/job/114842395076",
+      "run_attempt": 1,
+      "zip_sha256": "0245f410990addec5cf1f4ffa74ec26a614008c0aaeaddebcf37ef961dbacb3f",
+      "api_digest_matches_actual_zip": true,
+      "api_size_matches_actual_zip": true,
+      "job_upload_id_digest_size_match": true,
+      "zip_crc_ok": true,
+      "member_count": 56,
+      "member_sha256": {
+        "after-app-head.log": "da44731d38a76c5b06098b87402d490b23de5e654b4b64d4b9c9c8307f336413",
+        "after-app-tree.log": "6e9eb9a26d93ce4d38d3f778d3209b339a1c4e666ba4170aef90d192c023087e",
+        "after-app-remote.log": "253443b3d23cf12130cd4d7eaaebf09344855b8c57289617997883f27ce247ea",
+        "after-media-kit-head.log": "7d145fcbd298f11e7cccde0a76dfebbac8513cc112ed7ed6fc5da7f8a144f097",
+        "after-media-kit-remote.log": "3017433a6d2675a18301bd0d090ee12e3ceff6744c4d1330831550a2164dffba",
+        "after-media-kit-tree.log": "6fc7409ca670ae2add8d48ad4571a81cc7ce2c4852fc2bf777f594adb3cb4b4a",
+        "analyze.log": "5044429904b9dbb685030286f17442dc088e241152cf7ccd2b0db1b3450899f3",
+        "app-clean-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "app-ignored-source-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "app-tracked-files.log": "f4703241c5e1c65149e9e485342526a31ce4e63bfcb011644e121cb2f8ffc30b",
+        "app-untracked-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "before-app-head.log": "da44731d38a76c5b06098b87402d490b23de5e654b4b64d4b9c9c8307f336413",
+        "before-app-remote.log": "253443b3d23cf12130cd4d7eaaebf09344855b8c57289617997883f27ce247ea",
+        "before-app-tree.log": "6e9eb9a26d93ce4d38d3f778d3209b339a1c4e666ba4170aef90d192c023087e",
+        "before-media-kit-head.log": "7d145fcbd298f11e7cccde0a76dfebbac8513cc112ed7ed6fc5da7f8a144f097",
+        "before-media-kit-remote.log": "3017433a6d2675a18301bd0d090ee12e3ceff6744c4d1330831550a2164dffba",
+        "before-media-kit-tree.log": "6fc7409ca670ae2add8d48ad4571a81cc7ce2c4852fc2bf777f594adb3cb4b4a",
+        "bootstrap.json": "7ec66a72077433050f61d250fc1a271111fb622770829e4b927c09f584a699c5",
+        "bundle-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "final-app-head.log": "da44731d38a76c5b06098b87402d490b23de5e654b4b64d4b9c9c8307f336413",
+        "final-app-remote.log": "253443b3d23cf12130cd4d7eaaebf09344855b8c57289617997883f27ce247ea",
+        "final-app-tree.log": "6e9eb9a26d93ce4d38d3f778d3209b339a1c4e666ba4170aef90d192c023087e",
+        "final-media-kit-head.log": "7d145fcbd298f11e7cccde0a76dfebbac8513cc112ed7ed6fc5da7f8a144f097",
+        "final-media-kit-remote.log": "3017433a6d2675a18301bd0d090ee12e3ceff6744c4d1330831550a2164dffba",
+        "final-media-kit-tree.log": "6fc7409ca670ae2add8d48ad4571a81cc7ce2c4852fc2bf777f594adb3cb4b4a",
+        "flutter-tests.log": "60adae3e33927cd6c2b73a62b717c0e60a349e9c3203eb8ca8ca0b5f78b954b8",
+        "flutter-tools-resolve.log": "8126378699c07787a2df1ea4215eb651a9e66c9f5fcffc579a94532d76dd8b55",
+        "kernel-sha256.txt": "dcf25ecf35a12ceb6afa91297dfc42a6127930e9c1f52a15425f40280801f99c",
+        "media-kit-clean-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "media-kit-ignored-source-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "media-kit-tracked-files.log": "a3a37885d033d22e508b293286d33d4620d9acdf7c375bc57821962bb3d0fdd4",
+        "media-kit-untracked-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "original-sdk-head.log": "1fbcf8e1ce7135edd57542ccd6a9e4a6bc902b102c5d46b9685bc43e09cf61de",
+        "original-sdk-index-diff.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "original-sdk-root.log": "16ae44ba340dbdf3b074a6e2017e5de187f1e5ac7ee140b2c847b8335ee35e80",
+        "original-sdk-state.json": "59a4f6c0e37df9b5b8803742e0c34eadaf91b27a89e09736e381de106178109d",
+        "original-sdk-status.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "original-sdk-tree.log": "c3cc99cbaf402860ea7ba408c41f11e71a04ea1454c5b3c160263e8e673a1e0e",
+        "original-sdk-working-diff.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "patch-PackagesOnly.log": "372c93cd4f18e9d68e35e5ab32395b5bdb94c805ac2c5c0e9efdeb30d75ba318",
+        "patch-SdkOnly.log": "2bfb75dd6343e8ced4097e425c72eb5a1a0467a0016b25d30f987b582ff4a1dc",
+        "patched-sdk-diff.log": "41691eafb63b76d662fcb86f39ef06ec2e99cbaacb43ea8632701d8fd458bc76",
+        "patched-sdk-status.log": "1a6f634ff50324712c333c8672387ccc37fdb10bb7e4683e802b0d074c3cbbd7",
+        "private-sdk-root.log": "16ae44ba340dbdf3b074a6e2017e5de187f1e5ac7ee140b2c847b8335ee35e80",
+        "resolve.log": "b040791b06faf40cd017ef22807cf394f48d81f93c3801353a46a228ed83bb76",
+        "scope.txt": "9443c89f6944e02b86cf4ee87ef7cd1cbef6e21745377c2acadad5f0817e7208",
+        "source-resolution-after.json": "a54722d4e95abb3dd030ac001958a35b384d7b0e4d5c41c5b8a9ed6d64924cc1",
+        "source-resolution-before.json": "a54722d4e95abb3dd030ac001958a35b384d7b0e4d5c41c5b8a9ed6d64924cc1",
+        "source-resolution-patched.json": "a54722d4e95abb3dd030ac001958a35b384d7b0e4d5c41c5b8a9ed6d64924cc1",
+        "source.txt": "8148e081ca6b968fa497ec69e3bf04eeb2c3f9a76f63b691e19c99763a96337b",
+        "toolchain-machine.log": "9b38656cdbfb2963be165a4463ac30fab8846f72e5ac94fa9c81e01dfd00583c",
+        "toolchain.log": "ef444c1d10d6d2384cc29c2853f18819fcf18661403902d7cc3dd89f85bafde2",
+        "toolchain.txt": "ef444c1d10d6d2384cc29c2853f18819fcf18661403902d7cc3dd89f85bafde2",
+        "web-build.log": "1ddff1aabbcea12297603d88105278e770ccbddac471d800fd2bbcdd9eec7ee4",
+        "web-dom-tests.log": "ed2bf7db098c77bb853dda8033e841ec108d48435cc94e928eed177c9a102abb",
+        "web-sha256.txt": "08a59420e2d1986d768cca3be2ceaa18b06d2300b890839879d3c7d70c82a7d0"
+      },
+      "source_txt_actual": "app=13b139b797aa65d853cafb5cb207d17a6e7aceac\nmedia-kit=5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f\n",
+      "scope": "routing-source-bootstrap",
+      "platform": "android",
+      "status": "fresh-source-only",
+      "vector": {
+        "app": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+        "appTree": "464e4ed20cd327dd31644d40f75e01f7e1267fd5",
+        "media-kit": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+        "media-kitTree": "6736c16afed90cc9e55b4694d0cdcf7f7876379f"
+      },
+      "afterVector": {
+        "app": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+        "appTree": "464e4ed20cd327dd31644d40f75e01f7e1267fd5",
+        "media-kit": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+        "media-kitTree": "6736c16afed90cc9e55b4694d0cdcf7f7876379f"
+      },
+      "finalVector": {
+        "app": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+        "appTree": "464e4ed20cd327dd31644d40f75e01f7e1267fd5",
+        "media-kit": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+        "media-kitTree": "6736c16afed90cc9e55b4694d0cdcf7f7876379f"
+      },
+      "raw_heads_trees_remote_facts": {
+        "before": {
+          "app": {
+            "head": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+            "tree": "464e4ed20cd327dd31644d40f75e01f7e1267fd5",
+            "remote": "13b139b797aa65d853cafb5cb207d17a6e7aceac\trefs/heads/routing/MK-ROUTING-20261011"
+          },
+          "media-kit": {
+            "head": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+            "tree": "6736c16afed90cc9e55b4694d0cdcf7f7876379f",
+            "remote": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f\trefs/heads/routing/MK-ROUTING-20261011"
+          }
+        },
+        "after": {
+          "app": {
+            "head": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+            "tree": "464e4ed20cd327dd31644d40f75e01f7e1267fd5",
+            "remote": "13b139b797aa65d853cafb5cb207d17a6e7aceac\trefs/heads/routing/MK-ROUTING-20261011"
+          },
+          "media-kit": {
+            "head": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+            "tree": "6736c16afed90cc9e55b4694d0cdcf7f7876379f",
+            "remote": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f\trefs/heads/routing/MK-ROUTING-20261011"
+          }
+        },
+        "final": {
+          "app": {
+            "head": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+            "tree": "464e4ed20cd327dd31644d40f75e01f7e1267fd5",
+            "remote": "13b139b797aa65d853cafb5cb207d17a6e7aceac\trefs/heads/routing/MK-ROUTING-20261011"
+          },
+          "media-kit": {
+            "head": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+            "tree": "6736c16afed90cc9e55b4694d0cdcf7f7876379f",
+            "remote": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f\trefs/heads/routing/MK-ROUTING-20261011"
+          }
+        }
+      },
+      "nativeBinaryProvenanceVerified": false,
+      "deviceTest": false,
+      "steps_count": 57,
+      "steps_all_exit_zero": true,
+      "source_hashes_count": 2705,
+      "all_source_hashes_independently_rehashed": true,
+      "source_resolution_before_patched_after_equal": true,
+      "package_root_count": 261,
+      "ten_packages": {
+        "media_kit": "media_kit",
+        "media_kit_android_dataspace_vendor": "libs/android/media_kit_android_dataspace_vendor",
+        "media_kit_libs_android_video": "libs/android/media_kit_libs_android_video",
+        "media_kit_libs_ios_video": "libs/ios/media_kit_libs_ios_video",
+        "media_kit_libs_linux": "libs/linux/media_kit_libs_linux",
+        "media_kit_libs_macos_video": "libs/macos/media_kit_libs_macos_video",
+        "media_kit_libs_ohos": "libs/ohos/media_kit_libs_ohos",
+        "media_kit_libs_video": "libs/universal/media_kit_libs_video",
+        "media_kit_libs_windows_video": "libs/windows/media_kit_libs_windows_video",
+        "media_kit_video": "media_kit_video"
+      },
+      "ten_roots": {
+        "media_kit": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/media_kit",
+        "media_kit_android_dataspace_vendor": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/android/media_kit_android_dataspace_vendor",
+        "media_kit_libs_android_video": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/android/media_kit_libs_android_video",
+        "media_kit_libs_ios_video": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/ios/media_kit_libs_ios_video",
+        "media_kit_libs_linux": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/linux/media_kit_libs_linux",
+        "media_kit_libs_macos_video": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/macos/media_kit_libs_macos_video",
+        "media_kit_libs_ohos": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/ohos/media_kit_libs_ohos",
+        "media_kit_libs_video": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/universal/media_kit_libs_video",
+        "media_kit_libs_windows_video": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/windows/media_kit_libs_windows_video",
+        "media_kit_video": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/media_kit_video"
+      },
+      "all_package_roots_in_allowed_app_media_sdk_private_cache": true,
+      "sdkCommit": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+      "sdkTree": "4373f258a6af48e0fa44b0e39370094cb22f7634",
+      "sdk_patch_execution": {
+        "platform": "android",
+        "sourceVector": {
+          "app": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+          "appTree": "464e4ed20cd327dd31644d40f75e01f7e1267fd5",
+          "media-kit": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+          "media-kitTree": "6736c16afed90cc9e55b4694d0cdcf7f7876379f"
+        },
+        "sdkCommit": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+        "sdkRoot": "/home/runner/work/_temp/rb/s/flutter",
+        "pubCache": "/home/runner/work/_temp/rb/p",
+        "scriptPath": "lib/scripts/patch.ps1",
+        "scriptSha256": "14cd003d6be569773de15931d4297b82df5bf6901468d4a55adc1fd0b5c65089",
+        "scriptGitBlobSha1": "cfe2639dc1d832354a2d9baf37fe1d66fbeb70c0",
+        "phases": [
+          {
+            "name": "patch-SdkOnly",
+            "command": [
+              "pwsh",
+              "-NoLogo",
+              "-NoProfile",
+              "-File",
+              "/home/runner/work/PiliPlusX/PiliPlusX/app/lib/scripts/patch.ps1",
+              "android",
+              "-SdkOnly"
+            ],
+            "cwd": "/home/runner/work/PiliPlusX/PiliPlusX/app",
+            "exitCode": 0
+          },
+          {
+            "name": "patch-PackagesOnly",
+            "command": [
+              "pwsh",
+              "-NoLogo",
+              "-NoProfile",
+              "-File",
+              "/home/runner/work/PiliPlusX/PiliPlusX/app/lib/scripts/patch.ps1",
+              "android",
+              "-PackagesOnly"
+            ],
+            "cwd": "/home/runner/work/PiliPlusX/PiliPlusX/app",
+            "exitCode": 0
+          }
+        ]
+      },
+      "sdk_patch_identity": {
+        "schema": "routing-sdk-patch-identity-v1",
+        "platform": "android",
+        "sdkRoot": "/home/runner/work/_temp/rb/s/flutter",
+        "pubCache": "/home/runner/work/_temp/rb/p",
+        "sdkCommit": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+        "sdkTree": "4373f258a6af48e0fa44b0e39370094cb22f7634",
+        "trackedDiffSha256": "41691eafb63b76d662fcb86f39ef06ec2e99cbaacb43ea8632701d8fd458bc76",
+        "trackedStatusSha256": "f78d323e893aff0194fbdc6652a8e93d7be9e3a463ad1eb1dcafb4baef8afe3d",
+        "toolsConfigSha256": "3988ac15445f5885f5974e36a82d4a714f4cebf25c2c279ae1fd3c6944f27852",
+        "toolsLockSha256": "bc2ca8669c0c8503cb7b88ecb3ece08f3083e0fb67c206e981764735610bea2d",
+        "toolchain": {
+          "frameworkVersion": "3.47.2",
+          "channel": "stable",
+          "repositoryUrl": "https://github.com/flutter/flutter.git",
+          "frameworkRevision": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+          "frameworkCommitDate": "2026-08-26 16:07:51 -0700",
+          "engineRevision": "a804b261645ef8c13eb3d5c44a5c2fb0340c5539",
+          "engineCommitDate": "2026-08-26 18:46:13.000Z",
+          "engineContentHash": "1cf1c4773fb941c4c74a7f8bb144a8837596c0f4",
+          "engineBuildDate": "2026-08-26 12:23:07.677",
+          "dartSdkVersion": "3.13.2",
+          "devToolsVersion": "2.60.0",
+          "flutterVersion": "3.47.2",
+          "flutterRoot": "/home/runner/work/_temp/rb/s/flutter"
+        }
+      },
+      "sdk_diff_log_reconstructed_digest_matches": true,
+      "sdk_status_log_nul_reconstructed_digest_matches": true,
+      "sdk_log_reconstruction": "CRLF text-log newlines restored to LF; exact leading Git stderr warnings recorded separately; porcelain status LF separators restored to -z NUL for simple recorded paths.",
+      "sdk_diff_stderr_warning_prefix": "",
+      "tests": {
+        "flutter_passed": 268,
+        "flutter_summary": "01:06 +268: All tests passed!",
+        "analyze_actual": "Analyzing app...                                                \nNo issues found! (ran in 47.4s)",
+        "dart_bundle_step": {
+          "name": "Compile the App Dart and assets bundle without historical native binaries",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-10-12T13:55:02Z",
+          "completed_at": "2026-10-12T13:55:40Z"
+        },
+        "kernel_record": "370b03e498f9a6fe2cba2332751eaea49381c8f05a3db4b1e11280cd2f8affe3  build/flutter_assets/kernel_blob.bin",
+        "kernel_bytes_rehashed": false,
+        "web_dom_passed": 1,
+        "web_build_log": "Compiling lib/main_web.dart for the Web...                      \nWasm dry run succeeded. Consider building and testing your application with the `--wasm` flag. See docs for more info: https://docs.flutter.dev/platform-integration/web/wasm\nUse --no-wasm-dry-run to disable these warnings.\nExpected to find fonts for (MaterialIcons, packages/cupertino_icons/CupertinoIcons), but found (MaterialIcons). This usually means you are referring to font families in an IconData class but not including them in the assets section of your pubspec.yaml, are missing the package that would include them, or are missing \"uses-material-design: true\".\nFont asset \"MaterialIcons-Regular.otf\" was tree-shaken, reducing it from 1645184 to 8100 bytes (99.5% reduction). Tree-shaking can be disabled by providing the --no-tree-shake-icons flag when building your app.\nCompiling lib/main_web.dart for the Web...                         41.7s\n✓ Built build/web\n",
+        "web_hash_records": "e837ee45180338b7464d299f427ac1fe9efb1c2ae31be87fe25b09e2e2cc3f79  build/web/.last_build_id\ne81c4e7d1af9d05b897eaea855a1f890ebf401811910a5b6c77fc5d22fa07239  build/web/assets/AssetManifest.bin\ne5066b5d28cdae1245791740972396a2c2a599f2c63dd0170601b3b44f6babc4  build/web/assets/AssetManifest.bin.json\n8a0029502974464126a1c622bb7a317900d7241da4fcd2ea5d2ecbdf6caa0170  build/web/assets/FontManifest.json\nd0e9890670b92f97a9b5895c4bdc7ca1a31b4f0702b360fb5bd6b507e6ef8078  build/web/assets/NOTICES\nff50160d69715640ef326a78f7d5e0fd7333873eb176af31a9f42dc7dca3efd1  build/web/assets/assets/fonts/custom_icon.ttf\n5b0634c68191d8c31aa084d8c1ea50fbdb61adc24723a263b82842ba10e9044f  build/web/assets/assets/fonts/digital_id_num.ttf\n1898676d1369f7e6a0dd694bb30a88aff3a881045a58ba404a54d9c0a1a305a2  build/web/assets/assets/images/ai.png\ne402d58067d3bb0fe64037c5212c6b2485c2275bbd35829768c2fa736ac02255  build/web/assets/assets/images/big-vip.svg\n276d43445d688f3697e0d4f581e0ef790d118f1373d8ba86245a86cdef29a754  build/web/assets/assets/images/error.svg\n5a82bfedc4de5199b51730d21eed0a5f43f4f536beca29defe76ad1247423e06  build/web/assets/assets/images/live.gif\na29f35708400adc0f55f5b86de26fd34ccc42e9f19bb2380bbea6734f8209125  build/web/assets/assets/images/live.png\n1543fc13d2e8a58ad4b4eb526e6e888b32656bbabd073f7d646a301d5aaebe23  build/web/assets/assets/images/live/default_bg.webp\ncfbb11a8e83e0077ba34347b7d38b5de7eace157a24378b47cd5255eba9bdffe  build/web/assets/assets/images/live/live.gif\n38907a7e7c5ca4e9411c2a6c62447dd215fd131e093839625fb8386c90de2934  build/web/assets/assets/images/loading.png\n97ad82c000752ee5ddcfdd4778e9ea043f4587d1c1788f01409e60a312f15f85  build/web/assets/assets/images/loading.webp\n9a58961a43c4473680f0bca16f1f2583ed361df6606d1c837a6a4124480af100  build/web/assets/assets/images/logo/logo.png\nfc50a1c7c18f70a578116a05923916d5e9fec7189ee71d46d199ebe3f2c5c85d  build/web/assets/assets/images/logo/logo_2.png\n824be2d5b27ae6c2b8c2b4b63545a187e38ce6cab33bdb56d65b2d04485c03bb  build/web/assets/assets/images/noface.jpeg\n225bb4addbb4bd8e0619abe56d0d5195ed5ae1843416a309509a70ca48add547  build/web/assets/assets/images/paycoins/ic_22_gun_sister.png\n49778fb348af498d474b4c8a39fd9abb74bf762ed04374f6371f0ee6c6633c49  build/web/assets/assets/images/paycoins/ic_22_mario.png\n9c268a1d1e40ea0c3246b942fe404ecd2ad95f40ca18d648ff2cea6dc9405137  build/web/assets/assets/images/paycoins/ic_22_not_enough_pay.png\nb69f7af4cea1c8c962182ee827f0ba8a94c83e808ea03a96e156cc1ac2359297  build/web/assets/assets/images/paycoins/ic_coins_one.png\n6901bd6f91bbcb46d73d7e214ddbb1373d9105ebf684818241b9af4929d27680  build/web/assets/assets/images/paycoins/ic_coins_two.png\n070b35287f0a6fad68f11531292c2b57da69f5acf4b43d96197617f34f82396f  build/web/assets/assets/images/paycoins/ic_left.png\n252f49c3f0744447f323f1f764a91eae8053945e3a66d6feaef631f7785a3b49  build/web/assets/assets/images/paycoins/ic_left_disable.png\nc1e54deeaa780feef671f9d97050b3bc321f04df2f5b19afc0968b2dfc15615a  build/web/assets/assets/images/paycoins/ic_panel_close.png\neb0eba9872ce7ce07bcac569644c1477142183f5d971d9b8487eb04d924840ca  build/web/assets/assets/images/paycoins/ic_pay_coins_box.png\n6ea65bc199f00bbbe1fb4ce8a8c39069496f2d843e18b829f281f68c0973a96e  build/web/assets/assets/images/paycoins/ic_pay_coins_close.png\nc7c85f3470a1e6347a85586cd6c2128e7c9a3ffc683fbaee55afbc6af0e54a14  build/web/assets/assets/images/paycoins/ic_right.png\n29f6c56de53d0cae4f474853bb949bce9888220d4bd1c9938a42b99da7d38583  build/web/assets/assets/images/paycoins/ic_right_disable.png\n55f2acbd11caa77f7804acaadac549655c7d49ba226e448d639fd573a6730a93  build/web/assets/assets/images/paycoins/ic_thunder_1.png\n53bb11861e77326d18529f9a7853e19d97d8805b3eb3b72af9fa457ce4a169ae  build/web/assets/assets/images/paycoins/ic_thunder_2.png\n9fcbb67e9949225f9e5c2a097bbc7dd26b72a2cb91b7d7b7ff3468ce598dce64  build/web/assets/assets/images/paycoins/ic_thunder_3.png\nba3ec83016e007912d3b6491b23dcf3765d1f8fc2cc3933ae306faa0148c8d25  build/web/assets/assets/images/topic-header-bg.png\n188da22f3975618da15c90c28f4d450abd3392cbdbcedfe36728c7f2fd27cef1  build/web/assets/assets/images/trending_banner.png\n8c58291740146bd766a4d73f132775a797fe80f7d07919b5d767e27a5dc85656  build/web/assets/assets/shaders/Anime4K_AutoDownscalePre_x2.glsl\n5af62d8cd844916dc1126613e13bad3beab195787f93a71200b47c6ec78f2e41  build/web/assets/assets/shaders/Anime4K_AutoDownscalePre_x4.glsl\na2a9bf7fbc1d75d09660ca2e701e4d7fb0cf5457b94da47e1825032fa2b3671a  build/web/assets/assets/shaders/Anime4K_Clamp_Highlights.glsl\n67ea3ed26539e8de3b7d307688535d2ff17e8d147e11dda0247da7770dbecf41  build/web/assets/assets/shaders/Anime4K_Restore_CNN_M.glsl\n97c24dc370ab300c108bfaa09db7f175aeff343674842c299cf3940a3d330427  build/web/assets/assets/shaders/Anime4K_Restore_CNN_S.glsl\n35036722733305cd4d4e57660b883bbe2569ba2914033c254327107d7b77e35e  build/web/assets/assets/shaders/Anime4K_Restore_CNN_VL.glsl\n716e02098a68f0d648761f2b96b4dd139e1cb09b174bb369fca3aa34328fff7e  build/web/assets/assets/shaders/Anime4K_Upscale_CNN_x2_M.glsl\n4c53ec2e287908f7ee7bcb266b0170421626d663576468b7d7dafc62962649a4  build/web/assets/assets/shaders/Anime4K_Upscale_CNN_x2_S.glsl\n5638fe31c37c151a3443fea3451a3ef91af073f4dbb9615f6c0d1e29db11493d  build/web/assets/assets/shaders/Anime4K_Upscale_CNN_x2_VL.glsl\nedc7f247e1189b61c2d5970d162a14f6affbf03d8f5eb65930d5389c69372867  build/web/assets/assets/shaders/LICENSE\n17a039c14b2f09cde0d9a5b942086dbfaab94d1bfb312ed236aeed7a4ecd0706  build/web/assets/fonts/MaterialIcons-Regular.otf\n2e563220bd855e11f230dc27a0d6f2fd5b839a2996f86edc8025aab45e6fa5c3  build/web/assets/packages/flutter_inappwebview/assets/t_rex_runner/t-rex.css\ndc72cfc1f1d2a5013bb9de34f8cacf5e26e542d7d713fcbe09b865b4aaca6ddf  build/web/assets/packages/flutter_inappwebview/assets/t_rex_runner/t-rex.html\n2f9ccef9db4da6b73d3c678ffe570aad402791b00dfa520730fdb66d0dc209fc  build/web/assets/packages/flutter_inappwebview_web/assets/web/web_support.js\n808443ae6c8204395add8543da8a90a60b9376fb0f87ed8e8ea37d109596d805  build/web/assets/packages/font_awesome_flutter/lib/fonts/fa-brands-400.ttf\n54cf6086f7bb21f9d072ad494a19b4681fa516dd0a14cee52da01d3651a913a3  build/web/assets/packages/font_awesome_flutter/lib/fonts/fa-regular-400.ttf\nd2f0593540b0e33ba6de255a54f272d466e31144806956bea8cfdbf7edffc9bd  build/web/assets/packages/font_awesome_flutter/lib/fonts/fa-solid-900.ttf\n61e8aba5a4e981fe22cf7c8e8bcdbea00476e75c62c37f01bf7ee33361d68428  build/web/assets/packages/material_design_icons_flutter/lib/fonts/materialdesignicons-webfont.ttf\n2dca5ab93d4ec29e963f996f3916320ba60825e9537dfb149a68008c7a16b026  build/web/assets/packages/material_ui/shaders/ink_sparkle.frag\n30b278794fd3f269a47e6dc7b76ae9a04f08acffdd72f9b8cc26d49d3ba09c38  build/web/assets/packages/media_kit/assets/web/hls1.4.10.js\n726c644cda17bf271d996fb629806a59409607e9b00e0dfbf75adfd3986bbb7e  build/web/assets/packages/wakelock_plus/assets/no_sleep.js\n2dca5ab93d4ec29e963f996f3916320ba60825e9537dfb149a68008c7a16b026  build/web/assets/shaders/ink_sparkle.frag\nab412f07a5b9b50b67a885b24dbe16929738ae28630407d6490c924caf0a3220  build/web/assets/shaders/stretch_effect.frag\nbb559f6080c7d312ac2a912b4abec9f68ff3d3022d4a603c7796b9b31460642b  build/web/canvaskit/canvaskit.js\n384f80b392972c83fd4f262527e3d06215a297d33ed59732c726721e9d9311bd  build/web/canvaskit/canvaskit.js.symbols\nfbed517a43e82452404446683f00f2e876d835aed84410695759e67b6bb01cd3  build/web/canvaskit/canvaskit.wasm\n6018b12bd8ed37e6952eee72d59c1cf7ad707ccdb74a0a45190010f77edd9068  build/web/canvaskit/chromium/canvaskit.js\n31c86fac6042dd8b756150832c1d15495d0d07742e2718f75dbdde5a5a91455e  build/web/canvaskit/chromium/canvaskit.js.symbols\nae8ff1d858140f7b1300ced3fa89fb8c9dce0a400a0f4f1e11f6dcfb3315fdcf  build/web/canvaskit/chromium/canvaskit.wasm\n71d7d3e34bf71b52bdba3b588b103bba8148ba28de5754083e01b3398e7a6e1c  build/web/canvaskit/skwasm.js\n9137f1a3ae744dea575043abfc6e063a047e910e6dab1ee53e496c975d1c033e  build/web/canvaskit/skwasm.js.symbols\ne540fd5e8303b7b68ec2718cb49e9c421f8ade3075b15e02a7059a62654df9a1  build/web/canvaskit/skwasm.wasm\ncec554b46ddcf4c0e63d799e0556d546f42d2c3f69316fb4f67ed776f6104558  build/web/canvaskit/skwasm_heavy.js\nb6b79ed497e11d4cd13cc46724f9e289eacc744d2d185e31c72d595cdf62772b  build/web/canvaskit/skwasm_heavy.js.symbols\n565f5cc1cca6ab120f11934b105f01fec4b58b480c82e0889dca93af8e6f8635  build/web/canvaskit/skwasm_heavy.wasm\n3110e3e4d9b7b5657d336f253aaca8acca5777cde9319fb69ac302d6ff5a8b23  build/web/canvaskit/webparagraph/canvaskit.js\n44d6c47919106235cf32252252490cdf798d907ee874ba343ab53dc94bc2a9dc  build/web/canvaskit/webparagraph/canvaskit.js.symbols\n0ce1b05082efdc8529550e8a01f6ff0593972d55525035010e26f5600aa9f254  build/web/canvaskit/webparagraph/canvaskit.wasm\n8fd8a47480c6eb0a374d159912d0b3fb15661b41f5c113ecdd39c2f01f2bee46  build/web/canvaskit/wimp.js\nb4907ebd33131302a8cd99f7c55f52357bdfde04f421b605a616ba8764ae1de4  build/web/canvaskit/wimp.js.symbols\ne924eaafd801d41e017d178f3fd5cf8a417f641fe35c9ed34a4e1d7582283e0c  build/web/canvaskit/wimp.wasm\n7ab2525f4b86b65d3e4c70358a17e5a1aaf6f437f99cbcc046dad73d59bb9015  build/web/favicon.png\n2beb1ce6b159c71540aa66030af1d7964b6a92377cc78473745e02f97b74effe  build/web/flutter.js\n1731f75b47336c763f6896ab2bb427404ecfb79a0b8a516bb9d62d1c3ee8e372  build/web/flutter_bootstrap.js\na131df5ca46154cc4eb79044f7f5a14029c2f8bfccf8cef34e3ec3b5a9f5a88c  build/web/flutter_service_worker.js\n3dce99077602f70421c1c6b2a240bc9b83d64d86681d45f2154143310c980be3  build/web/icons/Icon-192.png\nbaccb205ae45f0b421be1657259b4943ac40c95094ab877f3bcbe12cd544dcbe  build/web/icons/Icon-512.png\nd2c842e22a9f4ec9d996b23373a905c88d9a203b220c5c151885ad621f974b5c  build/web/icons/Icon-maskable-192.png\n6aee06cdcab6b2aef74b1734c4778f4421d2da100b0ff9e52b21b55240202929  build/web/icons/Icon-maskable-512.png\na52ff4a200f207a61aac54e2c261018069b786ef6f736269e5fff93e0e3f6c2b  build/web/index.html\nf44110f2b6f54a6b74abb77b5bcc993d4906d2556852a590fc8943430a3c7d80  build/web/main.dart.js\n8f39a3c5d8bc19c57ae238e781709e02aca54090cc71d3e1b9b96e5942bc931e  build/web/manifest.json\na26931ef78c7155cf1e147a9c3013e2d9f6c2cf818805fc04da4136c3bc42bd6  build/web/version.json\n",
+        "web_bytes_rehashed": false
+      }
+    },
+    {
+      "artifact": {
+        "id": 11751931210,
+        "name": "routing-app-python-13b139b797aa65d853cafb5cb207d17a6e7aceac",
+        "size_in_bytes": 207978,
+        "digest": "sha256:01e82edae7ea98d4033a1d8ffef66bdd7b3927fa8950c7e85540e326b1f680ea",
+        "url": "https://api.github.com/repos/Goodwu/PiliPlusX/actions/artifacts/11751931210",
+        "archive_download_url": "https://api.github.com/repos/Goodwu/PiliPlusX/actions/artifacts/11751931210/zip",
+        "created_at": "2026-10-12T13:55:54Z",
+        "updated_at": "2026-10-12T13:55:54Z",
+        "expired": false,
+        "workflow_run": {
+          "id": 38258403604,
+          "repository_id": 1354565031,
+          "head_repository_id": 1354565031,
+          "head_branch": "routing/MK-ROUTING-20261011",
+          "head_sha": "13b139b797aa65d853cafb5cb207d17a6e7aceac"
+        }
+      },
+      "job_id": 114842394912,
+      "job_url": "https://github.com/Goodwu/PiliPlusX/actions/runs/38258403604/job/114842394912",
+      "run_attempt": 1,
+      "zip_sha256": "01e82edae7ea98d4033a1d8ffef66bdd7b3927fa8950c7e85540e326b1f680ea",
+      "api_digest_matches_actual_zip": true,
+      "api_size_matches_actual_zip": true,
+      "job_upload_id_digest_size_match": true,
+      "zip_crc_ok": true,
+      "member_count": 49,
+      "member_sha256": {
+        "after-app-head.log": "da44731d38a76c5b06098b87402d490b23de5e654b4b64d4b9c9c8307f336413",
+        "after-app-remote.log": "253443b3d23cf12130cd4d7eaaebf09344855b8c57289617997883f27ce247ea",
+        "after-app-tree.log": "6e9eb9a26d93ce4d38d3f778d3209b339a1c4e666ba4170aef90d192c023087e",
+        "after-media-kit-head.log": "7d145fcbd298f11e7cccde0a76dfebbac8513cc112ed7ed6fc5da7f8a144f097",
+        "after-media-kit-remote.log": "3017433a6d2675a18301bd0d090ee12e3ceff6744c4d1330831550a2164dffba",
+        "app-clean-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "app-ignored-source-input.log": "663a42f94a71e78365fb977e086e81197e55b815755007b7d1e9681b913e9629",
+        "after-media-kit-tree.log": "6fc7409ca670ae2add8d48ad4571a81cc7ce2c4852fc2bf777f594adb3cb4b4a",
+        "app-tracked-files.log": "f4703241c5e1c65149e9e485342526a31ce4e63bfcb011644e121cb2f8ffc30b",
+        "app-untracked-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "before-app-head.log": "da44731d38a76c5b06098b87402d490b23de5e654b4b64d4b9c9c8307f336413",
+        "before-app-remote.log": "253443b3d23cf12130cd4d7eaaebf09344855b8c57289617997883f27ce247ea",
+        "before-app-tree.log": "6e9eb9a26d93ce4d38d3f778d3209b339a1c4e666ba4170aef90d192c023087e",
+        "before-media-kit-head.log": "7d145fcbd298f11e7cccde0a76dfebbac8513cc112ed7ed6fc5da7f8a144f097",
+        "before-media-kit-remote.log": "3017433a6d2675a18301bd0d090ee12e3ceff6744c4d1330831550a2164dffba",
+        "before-media-kit-tree.log": "6fc7409ca670ae2add8d48ad4571a81cc7ce2c4852fc2bf777f594adb3cb4b4a",
+        "bootstrap.json": "95ed382d0a58403a45210d65736ffb482fab04371f5a43a1603cefbfb0ef0a36",
+        "final-app-head.log": "da44731d38a76c5b06098b87402d490b23de5e654b4b64d4b9c9c8307f336413",
+        "final-app-remote.log": "253443b3d23cf12130cd4d7eaaebf09344855b8c57289617997883f27ce247ea",
+        "final-app-tree.log": "6e9eb9a26d93ce4d38d3f778d3209b339a1c4e666ba4170aef90d192c023087e",
+        "final-media-kit-head.log": "7d145fcbd298f11e7cccde0a76dfebbac8513cc112ed7ed6fc5da7f8a144f097",
+        "final-media-kit-remote.log": "3017433a6d2675a18301bd0d090ee12e3ceff6744c4d1330831550a2164dffba",
+        "final-media-kit-tree.log": "6fc7409ca670ae2add8d48ad4571a81cc7ce2c4852fc2bf777f594adb3cb4b4a",
+        "flutter-tools-resolve.log": "8126378699c07787a2df1ea4215eb651a9e66c9f5fcffc579a94532d76dd8b55",
+        "media-kit-clean-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "media-kit-ignored-source-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "media-kit-tracked-files.log": "a3a37885d033d22e508b293286d33d4620d9acdf7c375bc57821962bb3d0fdd4",
+        "manifest-parser-tests.json": "ef01c596fa4f267ce7248402c78dfaae24b89e1e6dffdb7ff09c9af368b61761",
+        "media-kit-untracked-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "original-sdk-head.log": "1fbcf8e1ce7135edd57542ccd6a9e4a6bc902b102c5d46b9685bc43e09cf61de",
+        "original-sdk-index-diff.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "original-sdk-root.log": "a5614dd00c6bbbd28efd634fd5f8aea8462dd6b5504df75a5b8577360a4bdfee",
+        "original-sdk-state.json": "43e4abd54202f0d7eab5d60074aa3a657b596257e00819155b8b967184e837ba",
+        "original-sdk-status.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "original-sdk-tree.log": "c3cc99cbaf402860ea7ba408c41f11e71a04ea1454c5b3c160263e8e673a1e0e",
+        "original-sdk-working-diff.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "patch-PackagesOnly.log": "0f15b72d0912dec746d5f0edecf4c635786b914c29dc771574a9a0e3fa52153b",
+        "patch-SdkOnly.log": "81dd53e6923e9acc79c9970455a13879f93cb51b7d81e677f8c2ae2312e47757",
+        "patched-sdk-diff.log": "41691eafb63b76d662fcb86f39ef06ec2e99cbaacb43ea8632701d8fd458bc76",
+        "patched-sdk-status.log": "1a6f634ff50324712c333c8672387ccc37fdb10bb7e4683e802b0d074c3cbbd7",
+        "private-sdk-root.log": "a5614dd00c6bbbd28efd634fd5f8aea8462dd6b5504df75a5b8577360a4bdfee",
+        "resolve.log": "b040791b06faf40cd017ef22807cf394f48d81f93c3801353a46a228ed83bb76",
+        "source-resolution-after.json": "12101fb21b6a8a6c8eb2c855b2c6adda1fcc1f999605f5d316bd0f45ba799d7b",
+        "source-resolution-before.json": "12101fb21b6a8a6c8eb2c855b2c6adda1fcc1f999605f5d316bd0f45ba799d7b",
+        "source-resolution-patched.json": "12101fb21b6a8a6c8eb2c855b2c6adda1fcc1f999605f5d316bd0f45ba799d7b",
+        "source.txt": "8148e081ca6b968fa497ec69e3bf04eeb2c3f9a76f63b691e19c99763a96337b",
+        "tests.log": "6b47e59630daae42fb280e29550a72e90e1b24b12e9da1d7d44a0167c72dd878",
+        "toolchain-machine.log": "dab16f37c420f4961df63e4bdc6bfa6a26c74740b4e4ab5637959b6c19f45607",
+        "toolchain.log": "ef444c1d10d6d2384cc29c2853f18819fcf18661403902d7cc3dd89f85bafde2"
+      },
+      "source_txt_actual": "app=13b139b797aa65d853cafb5cb207d17a6e7aceac\nmedia-kit=5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f\n",
+      "scope": "routing-source-bootstrap",
+      "platform": "android",
+      "status": "fresh-source-only",
+      "vector": {
+        "app": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+        "appTree": "464e4ed20cd327dd31644d40f75e01f7e1267fd5",
+        "media-kit": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+        "media-kitTree": "6736c16afed90cc9e55b4694d0cdcf7f7876379f"
+      },
+      "afterVector": {
+        "app": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+        "appTree": "464e4ed20cd327dd31644d40f75e01f7e1267fd5",
+        "media-kit": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+        "media-kitTree": "6736c16afed90cc9e55b4694d0cdcf7f7876379f"
+      },
+      "finalVector": {
+        "app": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+        "appTree": "464e4ed20cd327dd31644d40f75e01f7e1267fd5",
+        "media-kit": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+        "media-kitTree": "6736c16afed90cc9e55b4694d0cdcf7f7876379f"
+      },
+      "raw_heads_trees_remote_facts": {
+        "before": {
+          "app": {
+            "head": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+            "tree": "464e4ed20cd327dd31644d40f75e01f7e1267fd5",
+            "remote": "13b139b797aa65d853cafb5cb207d17a6e7aceac\trefs/heads/routing/MK-ROUTING-20261011"
+          },
+          "media-kit": {
+            "head": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+            "tree": "6736c16afed90cc9e55b4694d0cdcf7f7876379f",
+            "remote": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f\trefs/heads/routing/MK-ROUTING-20261011"
+          }
+        },
+        "after": {
+          "app": {
+            "head": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+            "tree": "464e4ed20cd327dd31644d40f75e01f7e1267fd5",
+            "remote": "13b139b797aa65d853cafb5cb207d17a6e7aceac\trefs/heads/routing/MK-ROUTING-20261011"
+          },
+          "media-kit": {
+            "head": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+            "tree": "6736c16afed90cc9e55b4694d0cdcf7f7876379f",
+            "remote": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f\trefs/heads/routing/MK-ROUTING-20261011"
+          }
+        },
+        "final": {
+          "app": {
+            "head": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+            "tree": "464e4ed20cd327dd31644d40f75e01f7e1267fd5",
+            "remote": "13b139b797aa65d853cafb5cb207d17a6e7aceac\trefs/heads/routing/MK-ROUTING-20261011"
+          },
+          "media-kit": {
+            "head": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+            "tree": "6736c16afed90cc9e55b4694d0cdcf7f7876379f",
+            "remote": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f\trefs/heads/routing/MK-ROUTING-20261011"
+          }
+        }
+      },
+      "nativeBinaryProvenanceVerified": false,
+      "deviceTest": false,
+      "steps_count": 57,
+      "steps_all_exit_zero": true,
+      "source_hashes_count": 2705,
+      "all_source_hashes_independently_rehashed": true,
+      "source_resolution_before_patched_after_equal": true,
+      "package_root_count": 261,
+      "ten_packages": {
+        "media_kit": "media_kit",
+        "media_kit_android_dataspace_vendor": "libs/android/media_kit_android_dataspace_vendor",
+        "media_kit_libs_android_video": "libs/android/media_kit_libs_android_video",
+        "media_kit_libs_ios_video": "libs/ios/media_kit_libs_ios_video",
+        "media_kit_libs_linux": "libs/linux/media_kit_libs_linux",
+        "media_kit_libs_macos_video": "libs/macos/media_kit_libs_macos_video",
+        "media_kit_libs_ohos": "libs/ohos/media_kit_libs_ohos",
+        "media_kit_libs_video": "libs/universal/media_kit_libs_video",
+        "media_kit_libs_windows_video": "libs/windows/media_kit_libs_windows_video",
+        "media_kit_video": "media_kit_video"
+      },
+      "ten_roots": {
+        "media_kit": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/media_kit",
+        "media_kit_android_dataspace_vendor": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/android/media_kit_android_dataspace_vendor",
+        "media_kit_libs_android_video": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/android/media_kit_libs_android_video",
+        "media_kit_libs_ios_video": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/ios/media_kit_libs_ios_video",
+        "media_kit_libs_linux": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/linux/media_kit_libs_linux",
+        "media_kit_libs_macos_video": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/macos/media_kit_libs_macos_video",
+        "media_kit_libs_ohos": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/ohos/media_kit_libs_ohos",
+        "media_kit_libs_video": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/universal/media_kit_libs_video",
+        "media_kit_libs_windows_video": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/windows/media_kit_libs_windows_video",
+        "media_kit_video": "/Users/runner/work/PiliPlusX/PiliPlusX/media-kit/media_kit_video"
+      },
+      "all_package_roots_in_allowed_app_media_sdk_private_cache": true,
+      "sdkCommit": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+      "sdkTree": "4373f258a6af48e0fa44b0e39370094cb22f7634",
+      "sdk_patch_execution": {
+        "platform": "android",
+        "sourceVector": {
+          "app": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+          "appTree": "464e4ed20cd327dd31644d40f75e01f7e1267fd5",
+          "media-kit": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+          "media-kitTree": "6736c16afed90cc9e55b4694d0cdcf7f7876379f"
+        },
+        "sdkCommit": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+        "sdkRoot": "/Users/runner/work/_temp/rb/s/flutter",
+        "pubCache": "/Users/runner/work/_temp/rb/p",
+        "scriptPath": "lib/scripts/patch.ps1",
+        "scriptSha256": "14cd003d6be569773de15931d4297b82df5bf6901468d4a55adc1fd0b5c65089",
+        "scriptGitBlobSha1": "cfe2639dc1d832354a2d9baf37fe1d66fbeb70c0",
+        "phases": [
+          {
+            "name": "patch-SdkOnly",
+            "command": [
+              "pwsh",
+              "-NoLogo",
+              "-NoProfile",
+              "-File",
+              "/Users/runner/work/PiliPlusX/PiliPlusX/app/lib/scripts/patch.ps1",
+              "android",
+              "-SdkOnly"
+            ],
+            "cwd": "/Users/runner/work/PiliPlusX/PiliPlusX/app",
+            "exitCode": 0
+          },
+          {
+            "name": "patch-PackagesOnly",
+            "command": [
+              "pwsh",
+              "-NoLogo",
+              "-NoProfile",
+              "-File",
+              "/Users/runner/work/PiliPlusX/PiliPlusX/app/lib/scripts/patch.ps1",
+              "android",
+              "-PackagesOnly"
+            ],
+            "cwd": "/Users/runner/work/PiliPlusX/PiliPlusX/app",
+            "exitCode": 0
+          }
+        ]
+      },
+      "sdk_patch_identity": {
+        "schema": "routing-sdk-patch-identity-v1",
+        "platform": "android",
+        "sdkRoot": "/Users/runner/work/_temp/rb/s/flutter",
+        "pubCache": "/Users/runner/work/_temp/rb/p",
+        "sdkCommit": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+        "sdkTree": "4373f258a6af48e0fa44b0e39370094cb22f7634",
+        "trackedDiffSha256": "41691eafb63b76d662fcb86f39ef06ec2e99cbaacb43ea8632701d8fd458bc76",
+        "trackedStatusSha256": "f78d323e893aff0194fbdc6652a8e93d7be9e3a463ad1eb1dcafb4baef8afe3d",
+        "toolsConfigSha256": "2edf0f4bf241f37fb8cf9ecb162cd4ebbdfad9d5fe98e1e6d61d36cb215a5c05",
+        "toolsLockSha256": "bc2ca8669c0c8503cb7b88ecb3ece08f3083e0fb67c206e981764735610bea2d",
+        "toolchain": {
+          "frameworkVersion": "3.47.2",
+          "channel": "stable",
+          "repositoryUrl": "https://github.com/flutter/flutter.git",
+          "frameworkRevision": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+          "frameworkCommitDate": "2026-08-26 16:07:51 -0700",
+          "engineRevision": "a804b261645ef8c13eb3d5c44a5c2fb0340c5539",
+          "engineCommitDate": "2026-08-26 18:46:13.000Z",
+          "engineContentHash": "1cf1c4773fb941c4c74a7f8bb144a8837596c0f4",
+          "engineBuildDate": "2026-08-26 12:23:07.677",
+          "dartSdkVersion": "3.13.2",
+          "devToolsVersion": "2.60.0",
+          "flutterVersion": "3.47.2",
+          "flutterRoot": "/Users/runner/work/_temp/rb/s/flutter"
+        }
+      },
+      "sdk_diff_log_reconstructed_digest_matches": true,
+      "sdk_status_log_nul_reconstructed_digest_matches": true,
+      "sdk_log_reconstruction": "CRLF text-log newlines restored to LF; exact leading Git stderr warnings recorded separately; porcelain status LF separators restored to -z NUL for simple recorded paths.",
+      "sdk_diff_stderr_warning_prefix": "",
+      "tests": {
+        "python_total": 506,
+        "python_passed": 504,
+        "python_skipped": 2,
+        "skip_details": [
+          "test_real_three_file_ios_chain_passes_and_android_only_chain_fails (prepare_ios_variant_test.IOSPatchSemanticsTests.test_real_three_file_ios_chain_passes_and_android_only_chain_fails) ... skipped 'shared Flutter Git source is not present'",
+          "test_semantic_gate_rejects_source_patch_mutation_and_reverse_tool_failure (prepare_ios_variant_test.IOSPatchSemanticsTests.test_semantic_gate_rejects_source_patch_mutation_and_reverse_tool_failure) ... skipped 'shared Flutter Git source is not present'"
+        ],
+        "parser_identity_checks": 7,
+        "parser_checks": [
+          {
+            "test": "parse_routing_manifest_test.ManifestTests.test_absolute_uri_encoded_absolute_query_fragment_rejected",
+            "identityUnchanged": true
+          },
+          {
+            "test": "parse_routing_manifest_test.ManifestTests.test_decoded_escaped_generated_paths_rejected_by_prebuild_contract",
+            "identityUnchanged": true
+          },
+          {
+            "test": "parse_routing_manifest_test.ManifestTests.test_invalid_yaml_documents_tags_types_keys_duplicates_aliases_rejected",
+            "identityUnchanged": true
+          },
+          {
+            "test": "parse_routing_manifest_test.ManifestTests.test_normal_assets_maps_anchors_fonts_shaders_deferred_decode",
+            "identityUnchanged": true
+          },
+          {
+            "test": "parse_routing_manifest_test.ManifestTests.test_real_current_app_resource_declarations_are_tracked",
+            "identityUnchanged": true
+          },
+          {
+            "test": "parse_routing_manifest_test.ManifestTests.test_shared_darwin_uses_parsed_boolean_and_lock_yaml_version",
+            "identityUnchanged": true
+          },
+          {
+            "test": "parse_routing_manifest_test.ManifestTests.test_tool_compiles_against_real_tools_graph",
+            "identityUnchanged": true
+          }
+        ],
+        "parser_prepared_bootstrap_sha256": "daf7821cf481b5e11449c758735ef18f48942515807dda9619dd082ba0e68a92",
+        "parser_prepared_receipt_reconstructed_and_verified": true
+      }
+    },
+    {
+      "artifact": {
+        "id": 11751726564,
+        "name": "routing-app-source-linux-13b139b797aa65d853cafb5cb207d17a6e7aceac",
+        "size_in_bytes": 206081,
+        "digest": "sha256:19e07369395aeb654a2c82ab7bf0330141e62279b42fbfd7f84af0905790d044",
+        "url": "https://api.github.com/repos/Goodwu/PiliPlusX/actions/artifacts/11751726564",
+        "archive_download_url": "https://api.github.com/repos/Goodwu/PiliPlusX/actions/artifacts/11751726564/zip",
+        "created_at": "2026-10-12T13:54:19Z",
+        "updated_at": "2026-10-12T13:54:19Z",
+        "expired": false,
+        "workflow_run": {
+          "id": 38258403604,
+          "repository_id": 1354565031,
+          "head_repository_id": 1354565031,
+          "head_branch": "routing/MK-ROUTING-20261011",
+          "head_sha": "13b139b797aa65d853cafb5cb207d17a6e7aceac"
+        }
+      },
+      "job_id": 114842394977,
+      "job_url": "https://github.com/Goodwu/PiliPlusX/actions/runs/38258403604/job/114842394977",
+      "run_attempt": 1,
+      "zip_sha256": "19e07369395aeb654a2c82ab7bf0330141e62279b42fbfd7f84af0905790d044",
+      "api_digest_matches_actual_zip": true,
+      "api_size_matches_actual_zip": true,
+      "job_upload_id_digest_size_match": true,
+      "zip_crc_ok": true,
+      "member_count": 52,
+      "member_sha256": {
+        "after-app-head.log": "da44731d38a76c5b06098b87402d490b23de5e654b4b64d4b9c9c8307f336413",
+        "after-app-remote.log": "253443b3d23cf12130cd4d7eaaebf09344855b8c57289617997883f27ce247ea",
+        "after-app-tree.log": "6e9eb9a26d93ce4d38d3f778d3209b339a1c4e666ba4170aef90d192c023087e",
+        "after-media-kit-head.log": "7d145fcbd298f11e7cccde0a76dfebbac8513cc112ed7ed6fc5da7f8a144f097",
+        "after-media-kit-remote.log": "3017433a6d2675a18301bd0d090ee12e3ceff6744c4d1330831550a2164dffba",
+        "after-media-kit-tree.log": "6fc7409ca670ae2add8d48ad4571a81cc7ce2c4852fc2bf777f594adb3cb4b4a",
+        "analyze.log": "73ba049d923af80f1b48b523bb1db58ebd218eb8b7a35fd930d8ca5306dcc6f1",
+        "app-clean-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "app-ignored-source-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "app-tracked-files.log": "f4703241c5e1c65149e9e485342526a31ce4e63bfcb011644e121cb2f8ffc30b",
+        "app-untracked-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "before-app-head.log": "da44731d38a76c5b06098b87402d490b23de5e654b4b64d4b9c9c8307f336413",
+        "before-app-remote.log": "253443b3d23cf12130cd4d7eaaebf09344855b8c57289617997883f27ce247ea",
+        "before-app-tree.log": "6e9eb9a26d93ce4d38d3f778d3209b339a1c4e666ba4170aef90d192c023087e",
+        "before-media-kit-head.log": "7d145fcbd298f11e7cccde0a76dfebbac8513cc112ed7ed6fc5da7f8a144f097",
+        "before-media-kit-remote.log": "3017433a6d2675a18301bd0d090ee12e3ceff6744c4d1330831550a2164dffba",
+        "before-media-kit-tree.log": "6fc7409ca670ae2add8d48ad4571a81cc7ce2c4852fc2bf777f594adb3cb4b4a",
+        "bootstrap.json": "2c9c9029ab14392c923917e7f8159eed11b2e9834d678e8afea6229a19aa1469",
+        "final-app-head.log": "da44731d38a76c5b06098b87402d490b23de5e654b4b64d4b9c9c8307f336413",
+        "final-app-remote.log": "253443b3d23cf12130cd4d7eaaebf09344855b8c57289617997883f27ce247ea",
+        "final-app-tree.log": "6e9eb9a26d93ce4d38d3f778d3209b339a1c4e666ba4170aef90d192c023087e",
+        "final-media-kit-remote.log": "3017433a6d2675a18301bd0d090ee12e3ceff6744c4d1330831550a2164dffba",
+        "final-media-kit-head.log": "7d145fcbd298f11e7cccde0a76dfebbac8513cc112ed7ed6fc5da7f8a144f097",
+        "final-media-kit-tree.log": "6fc7409ca670ae2add8d48ad4571a81cc7ce2c4852fc2bf777f594adb3cb4b4a",
+        "flutter-tests.log": "b25206754f9b27bc3fc71a8cfe5f6dfa1280b137cff84567d0e111de8a4fc08a",
+        "flutter-tools-resolve.log": "8126378699c07787a2df1ea4215eb651a9e66c9f5fcffc579a94532d76dd8b55",
+        "kernel-sha256.txt": "5161cda252d3a75d9d69fec6bf4dbb76f9454fe1b887dc93f904f6cd05addc96",
+        "media-kit-clean-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "media-kit-ignored-source-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "media-kit-tracked-files.log": "a3a37885d033d22e508b293286d33d4620d9acdf7c375bc57821962bb3d0fdd4",
+        "media-kit-untracked-input.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "original-sdk-head.log": "1fbcf8e1ce7135edd57542ccd6a9e4a6bc902b102c5d46b9685bc43e09cf61de",
+        "original-sdk-index-diff.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "original-sdk-root.log": "16ae44ba340dbdf3b074a6e2017e5de187f1e5ac7ee140b2c847b8335ee35e80",
+        "original-sdk-state.json": "59a4f6c0e37df9b5b8803742e0c34eadaf91b27a89e09736e381de106178109d",
+        "original-sdk-status.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "original-sdk-tree.log": "c3cc99cbaf402860ea7ba408c41f11e71a04ea1454c5b3c160263e8e673a1e0e",
+        "original-sdk-working-diff.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "patch-PackagesOnly.log": "2d5833ab1cd705fd09241852f92df69dd2cd0e6baaaa6ccb8a6e680086f59c99",
+        "patch-SdkOnly.log": "88f2cead9f2f43b9b28b2e96249598667f3b2876dbf618d1009f95afd37be9ee",
+        "patched-sdk-diff.log": "0ab0120a6ef6950c0865743ed37d555f4f5a25ec3a0044528f8ca51f15babf1d",
+        "patched-sdk-status.log": "b2d837bef4ebc47ef32f7c7fbf954f429e4bcf5d6663c1b9c797a9dc9a9864df",
+        "private-sdk-root.log": "16ae44ba340dbdf3b074a6e2017e5de187f1e5ac7ee140b2c847b8335ee35e80",
+        "resolve.log": "b040791b06faf40cd017ef22807cf394f48d81f93c3801353a46a228ed83bb76",
+        "scope.txt": "59f4f2ee6638db996af8ce499d7a93f26c214bf28e4caed1fd8d6ce631e786bc",
+        "source-resolution-after.json": "a54722d4e95abb3dd030ac001958a35b384d7b0e4d5c41c5b8a9ed6d64924cc1",
+        "source-resolution-before.json": "a54722d4e95abb3dd030ac001958a35b384d7b0e4d5c41c5b8a9ed6d64924cc1",
+        "source-resolution-patched.json": "a54722d4e95abb3dd030ac001958a35b384d7b0e4d5c41c5b8a9ed6d64924cc1",
+        "source.txt": "8148e081ca6b968fa497ec69e3bf04eeb2c3f9a76f63b691e19c99763a96337b",
+        "toolchain-machine.log": "9b38656cdbfb2963be165a4463ac30fab8846f72e5ac94fa9c81e01dfd00583c",
+        "toolchain.txt": "ef444c1d10d6d2384cc29c2853f18819fcf18661403902d7cc3dd89f85bafde2",
+        "toolchain.log": "ef444c1d10d6d2384cc29c2853f18819fcf18661403902d7cc3dd89f85bafde2"
+      },
+      "source_txt_actual": "app=13b139b797aa65d853cafb5cb207d17a6e7aceac\nmedia-kit=5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f\n",
+      "scope": "routing-source-bootstrap",
+      "platform": "linux",
+      "status": "fresh-source-only",
+      "vector": {
+        "app": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+        "appTree": "464e4ed20cd327dd31644d40f75e01f7e1267fd5",
+        "media-kit": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+        "media-kitTree": "6736c16afed90cc9e55b4694d0cdcf7f7876379f"
+      },
+      "afterVector": {
+        "app": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+        "appTree": "464e4ed20cd327dd31644d40f75e01f7e1267fd5",
+        "media-kit": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+        "media-kitTree": "6736c16afed90cc9e55b4694d0cdcf7f7876379f"
+      },
+      "finalVector": {
+        "app": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+        "appTree": "464e4ed20cd327dd31644d40f75e01f7e1267fd5",
+        "media-kit": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+        "media-kitTree": "6736c16afed90cc9e55b4694d0cdcf7f7876379f"
+      },
+      "raw_heads_trees_remote_facts": {
+        "before": {
+          "app": {
+            "head": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+            "tree": "464e4ed20cd327dd31644d40f75e01f7e1267fd5",
+            "remote": "13b139b797aa65d853cafb5cb207d17a6e7aceac\trefs/heads/routing/MK-ROUTING-20261011"
+          },
+          "media-kit": {
+            "head": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+            "tree": "6736c16afed90cc9e55b4694d0cdcf7f7876379f",
+            "remote": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f\trefs/heads/routing/MK-ROUTING-20261011"
+          }
+        },
+        "after": {
+          "app": {
+            "head": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+            "tree": "464e4ed20cd327dd31644d40f75e01f7e1267fd5",
+            "remote": "13b139b797aa65d853cafb5cb207d17a6e7aceac\trefs/heads/routing/MK-ROUTING-20261011"
+          },
+          "media-kit": {
+            "head": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+            "tree": "6736c16afed90cc9e55b4694d0cdcf7f7876379f",
+            "remote": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f\trefs/heads/routing/MK-ROUTING-20261011"
+          }
+        },
+        "final": {
+          "app": {
+            "head": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+            "tree": "464e4ed20cd327dd31644d40f75e01f7e1267fd5",
+            "remote": "13b139b797aa65d853cafb5cb207d17a6e7aceac\trefs/heads/routing/MK-ROUTING-20261011"
+          },
+          "media-kit": {
+            "head": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+            "tree": "6736c16afed90cc9e55b4694d0cdcf7f7876379f",
+            "remote": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f\trefs/heads/routing/MK-ROUTING-20261011"
+          }
+        }
+      },
+      "nativeBinaryProvenanceVerified": false,
+      "deviceTest": false,
+      "steps_count": 57,
+      "steps_all_exit_zero": true,
+      "source_hashes_count": 2705,
+      "all_source_hashes_independently_rehashed": true,
+      "source_resolution_before_patched_after_equal": true,
+      "package_root_count": 261,
+      "ten_packages": {
+        "media_kit": "media_kit",
+        "media_kit_android_dataspace_vendor": "libs/android/media_kit_android_dataspace_vendor",
+        "media_kit_libs_android_video": "libs/android/media_kit_libs_android_video",
+        "media_kit_libs_ios_video": "libs/ios/media_kit_libs_ios_video",
+        "media_kit_libs_linux": "libs/linux/media_kit_libs_linux",
+        "media_kit_libs_macos_video": "libs/macos/media_kit_libs_macos_video",
+        "media_kit_libs_ohos": "libs/ohos/media_kit_libs_ohos",
+        "media_kit_libs_video": "libs/universal/media_kit_libs_video",
+        "media_kit_libs_windows_video": "libs/windows/media_kit_libs_windows_video",
+        "media_kit_video": "media_kit_video"
+      },
+      "ten_roots": {
+        "media_kit": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/media_kit",
+        "media_kit_android_dataspace_vendor": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/android/media_kit_android_dataspace_vendor",
+        "media_kit_libs_android_video": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/android/media_kit_libs_android_video",
+        "media_kit_libs_ios_video": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/ios/media_kit_libs_ios_video",
+        "media_kit_libs_linux": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/linux/media_kit_libs_linux",
+        "media_kit_libs_macos_video": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/macos/media_kit_libs_macos_video",
+        "media_kit_libs_ohos": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/ohos/media_kit_libs_ohos",
+        "media_kit_libs_video": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/universal/media_kit_libs_video",
+        "media_kit_libs_windows_video": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/libs/windows/media_kit_libs_windows_video",
+        "media_kit_video": "/home/runner/work/PiliPlusX/PiliPlusX/media-kit/media_kit_video"
+      },
+      "all_package_roots_in_allowed_app_media_sdk_private_cache": true,
+      "sdkCommit": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+      "sdkTree": "4373f258a6af48e0fa44b0e39370094cb22f7634",
+      "sdk_patch_execution": {
+        "platform": "linux",
+        "sourceVector": {
+          "app": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+          "appTree": "464e4ed20cd327dd31644d40f75e01f7e1267fd5",
+          "media-kit": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+          "media-kitTree": "6736c16afed90cc9e55b4694d0cdcf7f7876379f"
+        },
+        "sdkCommit": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+        "sdkRoot": "/home/runner/work/_temp/rb/s/flutter",
+        "pubCache": "/home/runner/work/_temp/rb/p",
+        "scriptPath": "lib/scripts/patch.ps1",
+        "scriptSha256": "14cd003d6be569773de15931d4297b82df5bf6901468d4a55adc1fd0b5c65089",
+        "scriptGitBlobSha1": "cfe2639dc1d832354a2d9baf37fe1d66fbeb70c0",
+        "phases": [
+          {
+            "name": "patch-SdkOnly",
+            "command": [
+              "pwsh",
+              "-NoLogo",
+              "-NoProfile",
+              "-File",
+              "/home/runner/work/PiliPlusX/PiliPlusX/app/lib/scripts/patch.ps1",
+              "linux",
+              "-SdkOnly"
+            ],
+            "cwd": "/home/runner/work/PiliPlusX/PiliPlusX/app",
+            "exitCode": 0
+          },
+          {
+            "name": "patch-PackagesOnly",
+            "command": [
+              "pwsh",
+              "-NoLogo",
+              "-NoProfile",
+              "-File",
+              "/home/runner/work/PiliPlusX/PiliPlusX/app/lib/scripts/patch.ps1",
+              "linux",
+              "-PackagesOnly"
+            ],
+            "cwd": "/home/runner/work/PiliPlusX/PiliPlusX/app",
+            "exitCode": 0
+          }
+        ]
+      },
+      "sdk_patch_identity": {
+        "schema": "routing-sdk-patch-identity-v1",
+        "platform": "linux",
+        "sdkRoot": "/home/runner/work/_temp/rb/s/flutter",
+        "pubCache": "/home/runner/work/_temp/rb/p",
+        "sdkCommit": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+        "sdkTree": "4373f258a6af48e0fa44b0e39370094cb22f7634",
+        "trackedDiffSha256": "0ab0120a6ef6950c0865743ed37d555f4f5a25ec3a0044528f8ca51f15babf1d",
+        "trackedStatusSha256": "dc1563c168ddad1baf5c80bbd3de57f119f8126a65369076eee6aef40cf4b706",
+        "toolsConfigSha256": "3988ac15445f5885f5974e36a82d4a714f4cebf25c2c279ae1fd3c6944f27852",
+        "toolsLockSha256": "bc2ca8669c0c8503cb7b88ecb3ece08f3083e0fb67c206e981764735610bea2d",
+        "toolchain": {
+          "frameworkVersion": "3.47.2",
+          "channel": "stable",
+          "repositoryUrl": "https://github.com/flutter/flutter.git",
+          "frameworkRevision": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+          "frameworkCommitDate": "2026-08-26 16:07:51 -0700",
+          "engineRevision": "a804b261645ef8c13eb3d5c44a5c2fb0340c5539",
+          "engineCommitDate": "2026-08-26 18:46:13.000Z",
+          "engineContentHash": "1cf1c4773fb941c4c74a7f8bb144a8837596c0f4",
+          "engineBuildDate": "2026-08-26 12:23:07.677",
+          "dartSdkVersion": "3.13.2",
+          "devToolsVersion": "2.60.0",
+          "flutterVersion": "3.47.2",
+          "flutterRoot": "/home/runner/work/_temp/rb/s/flutter"
+        }
+      },
+      "sdk_diff_log_reconstructed_digest_matches": true,
+      "sdk_status_log_nul_reconstructed_digest_matches": true,
+      "sdk_log_reconstruction": "CRLF text-log newlines restored to LF; exact leading Git stderr warnings recorded separately; porcelain status LF separators restored to -z NUL for simple recorded paths.",
+      "sdk_diff_stderr_warning_prefix": "",
+      "tests": {
+        "flutter_passed": 268,
+        "flutter_summary": "01:03 +268: All tests passed!",
+        "analyze_actual": "Analyzing app...                                                \nNo issues found! (ran in 40.7s)",
+        "dart_bundle_step": {
+          "name": "Compile the App Dart and assets bundle without historical native binaries",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-12T13:53:40Z",
+          "completed_at": "2026-10-12T13:54:17Z"
+        },
+        "kernel_record": "Algorithm : SHA256\nHash      : EC7BB619B1C7EA2DD1FA6653033AEFCBF808ED542C6E073F483F341FC4A9CBE7\nPath      : /home/runner/work/PiliPlusX/PiliPlusX/app/build/flutter_assets/kernel_blob.bin",
+        "kernel_bytes_rehashed": false
+      }
+    }
+  ],
+  "test_summary": {
+    "flutter_platforms": [
+      "android-source-on-ubuntu",
+      "linux",
+      "macos",
+      "windows"
+    ],
+    "flutter_each_passed": 268,
+    "analyze_each": "No issues found",
+    "dart_bundle_each_success": true,
+    "python_passed": 504,
+    "python_skipped": 2,
+    "python_total": 506,
+    "chrome_dom_passed": 1,
+    "web_build_success": true
+  },
+  "excluded_cancelled_run": {
+    "id": 38258394875,
+    "head_sha": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+    "run_attempt": 1,
+    "status": "completed",
+    "conclusion": "cancelled",
+    "html_url": "https://github.com/Goodwu/PiliPlusX/actions/runs/38258394875"
+  },
+  "historical_evidence_preserved": {
+    "run_id": 38255581451,
+    "source_vector": {
+      "app": "a3b577f3794634b497c6f82369bcc98d39d91fa2",
+      "appTree": "cf07f3782cb7ec56ef2cf14617732b3ada3efe4a",
+      "media-kit": "e269d9669becb5812663200e7521901e8254c8bd",
+      "media-kitTree": "b8040c8c682e11bb92658a5605dffd4ef75d9896"
+    },
+    "report_repository_path": "docs/plans/core-source-ci-a3b577-e269d-checkpoint-20261012.json",
+    "report_sha256": "156cd314f670a3d958cea70beb3818a4ea3b6dba0d3e9d944e20b8d1858705da",
+    "not_relabelled_as_current_vector": true
+  },
+  "limitations": [
+    "Source tests, analyze, Dart/assets bundle and Web compilation do not establish native binary provenance, APK/JAR acceptance, device HDR, ordinary Session behavior or sustained performance.",
+    "Artifact archives contain kernel/web hash records and build logs but do not contain the kernel or complete compiled Web output bytes; those output hashes were not independently rehashed.",
+    "SDK tools package-config and lock hashes are recorded source-bound receipts; those live SDK/config/lock bytes are not archived here for independent rehash. The archived SDK diff and status are independently reconstructed and matched to receipt hashes.",
+    "Python explicitly skips two iOS real-source semantic tests because shared Flutter Git source is not present; this is 504 passed plus 2 skipped, not 506 passed.",
+    "This audit executes no workflow rerun, production build, native recipe edit, device action, PR mutation or publication."
+  ],
+  "raw_evidence_hashes": {
+    "artifacts-page1.json": "0f6b4c91b06afd046210f949a035a7d2a56c4fa17d2420df225dd38039dc4275",
+    "cancelled-run-excluded.json": "b89b0846f5f3a42d851712b560c62d55ddddab460172c06c0799594bbe4c73d1",
+    "full-source-rehash.json": "f6c3347ad20088d5892ee61d9f45d03eafcb86125d94bc864f1137289e0bcdc2",
+    "jobs-attempt1-page1.json": "501b75680673982622da75c744c6553aaa8df9e1df0f757386271211b06878fc",
+    "jobs-page1.json": "f46e11943dfc05e7e57af09dd10d3063af56102a11e851f8357285587253e62f",
+    "jobs-page2.json": "b3a888b07d505c54139bdcabb415f2d210ed2440124b42a590e1766b13787591",
+    "media-kit-commit.json": "5e60e6cec2df29e5a5448e625ca8d2ab266666920d29999f588980e7bddbe860",
+    "remote-heads.json": "193252a82b3a80f370fa387a2eaf11e7e4f253593574801bce960fbbe59973cf",
+    "run.json": "b3709e29f6bb0668d86e6faa00ebc26a14f7077da41df021928e253b7b8307de",
+    "zip-download-verification.json": "f4b683e28cb7150a9acf5514691657c3afda5c05e9eb59534ae2697ce0afdf71",
+    "run-terminal-recheck.json": "0e94a090e3edf7064b2bed9e5c7a5d1cff073b7fb37961a510da88237272da08"
+  },
+  "terminal_recheck": {
+    "observed_at": "2026-10-12T14:36:10.695Z",
+    "id": 38258403604,
+    "head_sha": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+    "run_attempt": 1,
+    "status": "completed",
+    "conclusion": "success",
+    "updated_at": "2026-10-12T13:58:09Z",
+    "html_url": "https://github.com/Goodwu/PiliPlusX/actions/runs/38258403604"
+  }
+}

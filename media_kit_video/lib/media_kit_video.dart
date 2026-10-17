@@ -19,10 +19,12 @@ export 'package:media_kit_video/src/hdr/hdr_output_diagnostics.dart';
 export 'package:media_kit_video/src/hdr/hdr_output_event.dart';
 export 'package:media_kit_video/src/hdr/hdr_output_report.dart';
 export 'package:media_kit_video/src/hdr/hdr_output_slot.dart';
+export 'package:media_kit_video/src/hdr/hdr_output_contract.dart';
 export 'package:media_kit_video/src/hdr/hdr_route.dart';
 export 'package:media_kit_video/src/hdr/hdr_route_planner.dart';
 export 'package:media_kit_video/src/hdr/hdr_source_classifier.dart';
 export 'package:media_kit_video/src/hdr/hdr_source_descriptor.dart';
+export 'package:media_kit_video/src/hdr/hdr_source_facts.dart';
 export 'package:media_kit_video/src/hdr/hdr_strategy.dart';
 export 'package:media_kit_video/src/hdr/hdr_strategy_realizer.dart';
 export 'package:media_kit_video/src/hdr/hdr_video_session.dart';
@@ -33,3 +35,11 @@ export 'package:media_kit_video/src/subtitle/subtitle_view.dart';
 export 'package:media_kit_video/media_kit_video_controls/media_kit_video_controls.dart';
 
 export 'package:media_kit_video/src/utils/darwin_wakeup_callback_owner.dart';
+
+// Player-independent target and encoded-source capability discovery.
+export 'src/routing/video_source_spec.dart';
+export 'src/routing/video_output_target.dart';
+export 'src/routing/video_route_capabilities.dart';
+export 'src/routing/video_route_options.dart';
+
+export 'src/routing/video_route_option_review.dart';

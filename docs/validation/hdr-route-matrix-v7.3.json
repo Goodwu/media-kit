@@ -1,0 +1,665 @@
+{
+  "schema": 1,
+  "taskId": "MK-ROUTING-20261011",
+  "specification": "HDR v7.3 fixed first-feasible C1-C4",
+  "releasePolicy": "All applicable paths require actual path-specific evidence; fallback success cannot accept an earlier candidate; no feature-enable switches.",
+  "releaseReady": false,
+  "sourceNotes": {
+    "dvP5": "Native DV or RPU-based PQ reshape; IPT has no safe C3",
+    "dvP81": "Profile 8.1, compatible PQ base; do not conflate profile support with native decoder admission",
+    "dvP82": "C3 is an SDR base allowed only for an explicitly SDR display; C2 can generate PQ on an HDR panel",
+    "dvP84": "HLG compatibility base, optionally converted HLG-to-PQ",
+    "dvP7": "C2 only when EL residual reconstruction is provably unnecessary; native P7 requires actual dual-layer implementation",
+    "hdr10": "Static PQ direct; C2/C3/C4 must not duplicate or fabricate conversions",
+    "hlg": "HLG direct when declared, otherwise HLG-to-PQ",
+    "hdr10Plus": "C1 native and C2 local ST2094-40 mapping are separate required functions; C3 is static PQ",
+    "hdrVividPq": "Vivid dynamic mapping with PQ base distinct from Vivid-HLG",
+    "hdrVividHlg": "Vivid dynamic mapping with HLG base; baseline HLG-to-PQ is not dynamic mapping",
+    "sdr": "Ordinary SDR direct irrespective of HDR display",
+    "dvP10": "Unsupported DV over AV1 requires explicit typed precheck block; no SDR disguise",
+    "dvUnknown": "Unresolved Dolby Vision signaling must block"
+  },
+  "requiredAdditionalCases": [
+    {
+      "id": "sdrDirect",
+      "acceptance": "pending",
+      "evidence": []
+    },
+    {
+      "id": "hdrDisplayMissingMustBlock",
+      "acceptance": "pending",
+      "evidence": []
+    },
+    {
+      "id": "hdrNoSdrFallback",
+      "acceptance": "pending",
+      "evidence": []
+    },
+    {
+      "id": "sdrOnlyToneMap",
+      "acceptance": "pending",
+      "evidence": []
+    },
+    {
+      "id": "dvUnknownBlock",
+      "acceptance": "pending",
+      "evidence": []
+    },
+    {
+      "id": "requireOutputConflict",
+      "acceptance": "pending",
+      "evidence": []
+    },
+    {
+      "id": "metadataNotImplementedReturnsError",
+      "acceptance": "pending",
+      "evidence": []
+    },
+    {
+      "id": "metadataErrorPreservedAfterBaseline",
+      "acceptance": "pending",
+      "evidence": []
+    },
+    {
+      "id": "p82HdrNoSdrBaseExit",
+      "acceptance": "pending",
+      "evidence": []
+    },
+    {
+      "id": "p82SdrDisplayDirect",
+      "acceptance": "pending",
+      "evidence": []
+    },
+    {
+      "id": "c2FailureThenC3",
+      "acceptance": "pending",
+      "evidence": []
+    },
+    {
+      "id": "c2FailureThenC4",
+      "acceptance": "pending",
+      "evidence": []
+    },
+    {
+      "id": "staleGenerationRejected",
+      "acceptance": "pending",
+      "evidence": []
+    },
+    {
+      "id": "ownerDebtBlocksRetry",
+      "acceptance": "pending",
+      "evidence": []
+    },
+    {
+      "id": "presentationObservedNotImplied",
+      "acceptance": "pending",
+      "evidence": []
+    }
+  ],
+  "cases": [
+    {
+      "id": "dvP5/c1",
+      "source": "dvP5",
+      "stage": "c1",
+      "route": "nativeDolbyVision",
+      "applicable": true,
+      "implementation": "requiresValidation",
+      "acceptance": "pending",
+      "evidence": []
+    },
+    {
+      "id": "dvP5/c2",
+      "source": "dvP5",
+      "stage": "c2",
+      "route": "metadataReshape",
+      "applicable": true,
+      "implementation": "requiresValidation",
+      "acceptance": "pending",
+      "evidence": []
+    },
+    {
+      "id": "dvP5/c3",
+      "source": "dvP5",
+      "stage": "c3",
+      "route": null,
+      "applicable": false,
+      "implementation": "notApplicable",
+      "acceptance": "notApplicable",
+      "evidence": []
+    },
+    {
+      "id": "dvP5/c4",
+      "source": "dvP5",
+      "stage": "c4",
+      "route": null,
+      "applicable": false,
+      "implementation": "notApplicable",
+      "acceptance": "notApplicable",
+      "evidence": []
+    },
+    {
+      "id": "dvP81/c1",
+      "source": "dvP81",
+      "stage": "c1",
+      "route": "nativeDolbyVision",
+      "applicable": true,
+      "implementation": "pendingImplementation",
+      "acceptance": "pending",
+      "evidence": []
+    },
+    {
+      "id": "dvP81/c2",
+      "source": "dvP81",
+      "stage": "c2",
+      "route": "metadataReshape",
+      "applicable": true,
+      "implementation": "requiresValidation",
+      "acceptance": "pending",
+      "evidence": []
+    },
+    {
+      "id": "dvP81/c3",
+      "source": "dvP81",
+      "stage": "c3",
+      "route": "baseLayerDirect",
+      "applicable": true,
+      "implementation": "requiresValidation",
+      "acceptance": "pending",
+      "evidence": []
+    },
+    {
+      "id": "dvP81/c4",
+      "source": "dvP81",
+      "stage": "c4",
+      "route": null,
+      "applicable": false,
+      "implementation": "notApplicable",
+      "acceptance": "notApplicable",
+      "evidence": []
+    },
+    {
+      "id": "dvP82/c1",
+      "source": "dvP82",
+      "stage": "c1",
+      "route": "nativeDolbyVision",
+      "applicable": true,
+      "implementation": "pendingImplementation",
+      "acceptance": "pending",
+      "evidence": []
+    },
+    {
+      "id": "dvP82/c2",
+      "source": "dvP82",
+      "stage": "c2",
+      "route": "metadataReshape",
+      "applicable": true,
+      "implementation": "requiresValidation",
+      "acceptance": "pending",
+      "evidence": []
+    },
+    {
+      "id": "dvP82/c3",
+      "source": "dvP82",
+      "stage": "c3",
+      "route": "sdrDirect",
+      "applicable": true,
+      "implementation": "requiresValidation",
+      "acceptance": "pending",
+      "evidence": [],
+      "condition": "explicitSdrOnly"
+    },
+    {
+      "id": "dvP82/c4",
+      "source": "dvP82",
+      "stage": "c4",
+      "route": null,
+      "applicable": false,
+      "implementation": "notApplicable",
+      "acceptance": "notApplicable",
+      "evidence": []
+    },
+    {
+      "id": "dvP84/c1",
+      "source": "dvP84",
+      "stage": "c1",
+      "route": "nativeDolbyVision",
+      "applicable": true,
+      "implementation": "requiresValidation",
+      "acceptance": "pending",
+      "evidence": []
+    },
+    {
+      "id": "dvP84/c2",
+      "source": "dvP84",
+      "stage": "c2",
+      "route": "metadataReshape",
+      "applicable": true,
+      "implementation": "requiresValidation",
+      "acceptance": "pending",
+      "evidence": []
+    },
+    {
+      "id": "dvP84/c3",
+      "source": "dvP84",
+      "stage": "c3",
+      "route": "baseLayerDirect",
+      "applicable": true,
+      "implementation": "requiresValidation",
+      "acceptance": "pending",
+      "evidence": []
+    },
+    {
+      "id": "dvP84/c4",
+      "source": "dvP84",
+      "stage": "c4",
+      "route": "baseLayerConvert",
+      "applicable": true,
+      "implementation": "requiresValidation",
+      "acceptance": "pending",
+      "evidence": [],
+      "condition": "HLGBaseAndPqOutput"
+    },
+    {
+      "id": "dvP7/c1",
+      "source": "dvP7",
+      "stage": "c1",
+      "route": "nativeDolbyVision",
+      "applicable": true,
+      "implementation": "pendingImplementation",
+      "acceptance": "pending",
+      "evidence": []
+    },
+    {
+      "id": "dvP7/c2",
+      "source": "dvP7",
+      "stage": "c2",
+      "route": "metadataReshape",
+      "applicable": true,
+      "implementation": "requiresValidation",
+      "acceptance": "pending",
+      "evidence": [],
+      "condition": "noEnhancementResidualNeeded"
+    },
+    {
+      "id": "dvP7/c3",
+      "source": "dvP7",
+      "stage": "c3",
+      "route": "baseLayerDirect",
+      "applicable": true,
+      "implementation": "requiresValidation",
+      "acceptance": "pending",
+      "evidence": []
+    },
+    {
+      "id": "dvP7/c4",
+      "source": "dvP7",
+      "stage": "c4",
+      "route": null,
+      "applicable": false,
+      "implementation": "notApplicable",
+      "acceptance": "notApplicable",
+      "evidence": []
+    },
+    {
+      "id": "hdr10/c1",
+      "source": "hdr10",
+      "stage": "c1",
+      "route": "baseLayerDirect",
+      "applicable": true,
+      "implementation": "requiresValidation",
+      "acceptance": "pending",
+      "evidence": []
+    },
+    {
+      "id": "hdr10/c2",
+      "source": "hdr10",
+      "stage": "c2",
+      "route": null,
+      "applicable": false,
+      "implementation": "notApplicable",
+      "acceptance": "notApplicable",
+      "evidence": []
+    },
+    {
+      "id": "hdr10/c3",
+      "source": "hdr10",
+      "stage": "c3",
+      "route": null,
+      "applicable": false,
+      "implementation": "notApplicable",
+      "acceptance": "notApplicable",
+      "evidence": []
+    },
+    {
+      "id": "hdr10/c4",
+      "source": "hdr10",
+      "stage": "c4",
+      "route": null,
+      "applicable": false,
+      "implementation": "notApplicable",
+      "acceptance": "notApplicable",
+      "evidence": []
+    },
+    {
+      "id": "hlg/c1",
+      "source": "hlg",
+      "stage": "c1",
+      "route": "baseLayerDirect",
+      "applicable": true,
+      "implementation": "requiresValidation",
+      "acceptance": "pending",
+      "evidence": []
+    },
+    {
+      "id": "hlg/c2",
+      "source": "hlg",
+      "stage": "c2",
+      "route": null,
+      "applicable": false,
+      "implementation": "notApplicable",
+      "acceptance": "notApplicable",
+      "evidence": []
+    },
+    {
+      "id": "hlg/c3",
+      "source": "hlg",
+      "stage": "c3",
+      "route": null,
+      "applicable": false,
+      "implementation": "notApplicable",
+      "acceptance": "notApplicable",
+      "evidence": []
+    },
+    {
+      "id": "hlg/c4",
+      "source": "hlg",
+      "stage": "c4",
+      "route": "baseLayerConvert",
+      "applicable": true,
+      "implementation": "requiresValidation",
+      "acceptance": "pending",
+      "evidence": [],
+      "condition": "HLGBaseAndPqOutput"
+    },
+    {
+      "id": "hdr10Plus/c1",
+      "source": "hdr10Plus",
+      "stage": "c1",
+      "route": "nativeHdr10Plus",
+      "applicable": true,
+      "implementation": "pendingImplementation",
+      "acceptance": "pending",
+      "evidence": [],
+      "scheduling": "deferredByUser"
+    },
+    {
+      "id": "hdr10Plus/c2",
+      "source": "hdr10Plus",
+      "stage": "c2",
+      "route": "metadataReshape",
+      "applicable": true,
+      "implementation": "pendingImplementation",
+      "acceptance": "pending",
+      "evidence": [],
+      "scheduling": "deferredByUser"
+    },
+    {
+      "id": "hdr10Plus/c3",
+      "source": "hdr10Plus",
+      "stage": "c3",
+      "route": "baseLayerDirect",
+      "applicable": true,
+      "implementation": "requiresValidation",
+      "acceptance": "pending",
+      "evidence": [],
+      "scheduling": "currentStaticCompatibility"
+    },
+    {
+      "id": "hdr10Plus/c4",
+      "source": "hdr10Plus",
+      "stage": "c4",
+      "route": null,
+      "applicable": false,
+      "implementation": "notApplicable",
+      "acceptance": "notApplicable",
+      "evidence": []
+    },
+    {
+      "id": "hdrVividPq/c1",
+      "source": "hdrVividPq",
+      "stage": "c1",
+      "route": "nativeHdrVivid",
+      "applicable": true,
+      "implementation": "pendingImplementation",
+      "acceptance": "pending",
+      "evidence": [],
+      "scheduling": "deferredByUser"
+    },
+    {
+      "id": "hdrVividPq/c2",
+      "source": "hdrVividPq",
+      "stage": "c2",
+      "route": "metadataReshape",
+      "applicable": true,
+      "implementation": "pendingImplementation",
+      "acceptance": "pending",
+      "evidence": [],
+      "scheduling": "deferredByUser"
+    },
+    {
+      "id": "hdrVividPq/c3",
+      "source": "hdrVividPq",
+      "stage": "c3",
+      "route": "baseLayerDirect",
+      "applicable": true,
+      "implementation": "requiresValidation",
+      "acceptance": "pending",
+      "evidence": [],
+      "scheduling": "currentStaticCompatibility"
+    },
+    {
+      "id": "hdrVividPq/c4",
+      "source": "hdrVividPq",
+      "stage": "c4",
+      "route": null,
+      "applicable": false,
+      "implementation": "notApplicable",
+      "acceptance": "notApplicable",
+      "evidence": []
+    },
+    {
+      "id": "hdrVividHlg/c1",
+      "source": "hdrVividHlg",
+      "stage": "c1",
+      "route": "nativeHdrVivid",
+      "applicable": true,
+      "implementation": "pendingImplementation",
+      "acceptance": "pending",
+      "evidence": [],
+      "scheduling": "deferredByUser"
+    },
+    {
+      "id": "hdrVividHlg/c2",
+      "source": "hdrVividHlg",
+      "stage": "c2",
+      "route": "metadataReshape",
+      "applicable": true,
+      "implementation": "pendingImplementation",
+      "acceptance": "pending",
+      "evidence": [],
+      "scheduling": "deferredByUser"
+    },
+    {
+      "id": "hdrVividHlg/c3",
+      "source": "hdrVividHlg",
+      "stage": "c3",
+      "route": "baseLayerDirect",
+      "applicable": true,
+      "implementation": "requiresValidation",
+      "acceptance": "pending",
+      "evidence": [],
+      "scheduling": "currentStaticCompatibility"
+    },
+    {
+      "id": "hdrVividHlg/c4",
+      "source": "hdrVividHlg",
+      "stage": "c4",
+      "route": "baseLayerConvert",
+      "applicable": true,
+      "implementation": "requiresValidation",
+      "acceptance": "pending",
+      "evidence": [],
+      "condition": "HLGBaseAndPqOutput",
+      "scheduling": "currentStaticCompatibility"
+    },
+    {
+      "id": "sdr/c1",
+      "source": "sdr",
+      "stage": "c1",
+      "route": null,
+      "applicable": false,
+      "implementation": "notApplicable",
+      "acceptance": "notApplicable",
+      "evidence": []
+    },
+    {
+      "id": "sdr/c2",
+      "source": "sdr",
+      "stage": "c2",
+      "route": null,
+      "applicable": false,
+      "implementation": "notApplicable",
+      "acceptance": "notApplicable",
+      "evidence": []
+    },
+    {
+      "id": "sdr/c3",
+      "source": "sdr",
+      "stage": "c3",
+      "route": null,
+      "applicable": false,
+      "implementation": "notApplicable",
+      "acceptance": "notApplicable",
+      "evidence": []
+    },
+    {
+      "id": "sdr/c4",
+      "source": "sdr",
+      "stage": "c4",
+      "route": null,
+      "applicable": false,
+      "implementation": "notApplicable",
+      "acceptance": "notApplicable",
+      "evidence": []
+    },
+    {
+      "id": "dvP10/c1",
+      "source": "dvP10",
+      "stage": "c1",
+      "route": null,
+      "applicable": false,
+      "implementation": "notApplicable",
+      "acceptance": "notApplicable",
+      "evidence": []
+    },
+    {
+      "id": "dvP10/c2",
+      "source": "dvP10",
+      "stage": "c2",
+      "route": null,
+      "applicable": false,
+      "implementation": "notApplicable",
+      "acceptance": "notApplicable",
+      "evidence": []
+    },
+    {
+      "id": "dvP10/c3",
+      "source": "dvP10",
+      "stage": "c3",
+      "route": null,
+      "applicable": false,
+      "implementation": "notApplicable",
+      "acceptance": "notApplicable",
+      "evidence": []
+    },
+    {
+      "id": "dvP10/c4",
+      "source": "dvP10",
+      "stage": "c4",
+      "route": null,
+      "applicable": false,
+      "implementation": "notApplicable",
+      "acceptance": "notApplicable",
+      "evidence": []
+    },
+    {
+      "id": "dvUnknown/c1",
+      "source": "dvUnknown",
+      "stage": "c1",
+      "route": null,
+      "applicable": false,
+      "implementation": "notApplicable",
+      "acceptance": "notApplicable",
+      "evidence": []
+    },
+    {
+      "id": "dvUnknown/c2",
+      "source": "dvUnknown",
+      "stage": "c2",
+      "route": null,
+      "applicable": false,
+      "implementation": "notApplicable",
+      "acceptance": "notApplicable",
+      "evidence": []
+    },
+    {
+      "id": "dvUnknown/c3",
+      "source": "dvUnknown",
+      "stage": "c3",
+      "route": null,
+      "applicable": false,
+      "implementation": "notApplicable",
+      "acceptance": "notApplicable",
+      "evidence": []
+    },
+    {
+      "id": "dvUnknown/c4",
+      "source": "dvUnknown",
+      "stage": "c4",
+      "route": null,
+      "applicable": false,
+      "implementation": "notApplicable",
+      "acceptance": "notApplicable",
+      "evidence": []
+    }
+  ],
+  "currentPhase": {
+    "decisionDate": "2026-10-14",
+    "decision": "HDR10+ and HDR Vivid static PQ/HLG compatibility output only; no native dynamic passthrough, dynamic mapping, or B1-B4 implementation in this phase.",
+    "mode": "staticCompatibilityOnly",
+    "deferredPackages": [
+      "B1",
+      "B2",
+      "B3",
+      "B4"
+    ],
+    "deferredCandidateIds": [
+      "hdr10Plus/c1",
+      "hdr10Plus/c2",
+      "hdrVividPq/c1",
+      "hdrVividPq/c2",
+      "hdrVividHlg/c1",
+      "hdrVividHlg/c2"
+    ],
+    "baselineCandidateIds": [
+      "hdr10Plus/c3",
+      "hdrVividPq/c3",
+      "hdrVividHlg/c3",
+      "hdrVividHlg/c4"
+    ],
+    "hlgToPqRule": "Existing C4 HLG-to-PQ static compatibility conversion only when HLG display support is unavailable and real PQ output is available; never count as Vivid C2",
+    "requiresDeferredDynamicFeaturesForStaticAcceptance": false,
+    "originalFullMatrixReleaseReadyField": "releaseReady continues to represent future full v7.3 acceptance; keep deferred applicable paths pending, not notApplicable or accepted",
+    "resumption": "Only after a new explicit user decision; do not auto-implement or auto-enable native HDR10+/Vivid dynamic C1/C2"
+  }
+}

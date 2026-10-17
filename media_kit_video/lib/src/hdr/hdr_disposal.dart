@@ -11,15 +11,21 @@ class HdrDisposalReport {
     required this.playerError,
     required this.directoryError,
     required this.retainedDirectory,
+    this.slotError,
+    this.backendError,
   });
 
   final Object? coordinatorError;
+  final Object? slotError;
+  final Object? backendError;
   final Object? playerError;
   final Object? directoryError;
   final String? retainedDirectory;
 
   bool get clean =>
       coordinatorError == null &&
+      slotError == null &&
+      backendError == null &&
       playerError == null &&
       directoryError == null &&
       retainedDirectory == null;

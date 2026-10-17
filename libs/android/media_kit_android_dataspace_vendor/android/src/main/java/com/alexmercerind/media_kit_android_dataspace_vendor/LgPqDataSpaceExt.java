@@ -5,6 +5,7 @@ import android.util.Log;
 import android.view.Surface;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.alexmercerind.media_kit_video.platformview.MediaCodecSurfaceTextureBridge;
 import com.alexmercerind.media_kit_video.platformview.PlatformVideoView;
@@ -29,6 +30,14 @@ public final class LgPqDataSpaceExt implements PlatformVideoView.SurfaceDataSpac
 
     private Boolean loaded;
     private final LgExperimentSurfaceOwners owners = new LgExperimentSurfaceOwners();
+
+    // W1 managed output surfaces (device-neutral production path): identity
+    // is (Surface object, handle, generation, surfaceGeneration). Separate
+    // from the experiment owner ledger — no token, no retired set, per-
+    // surface records that never block a later registration.
+    private final java.util.Map<Surface, long[]> managedSurfaces =
+            new java.util.HashMap<>();
+    private final java.util.Set<Surface> managedArmed = new java.util.HashSet<>();
 
     /** Pending owner is not Surface authorization; core must register its tuple. */
     public synchronized boolean enableVisual278Experiment(long handle, String token,
@@ -167,17 +176,27 @@ public final class LgPqDataSpaceExt implements PlatformVideoView.SurfaceDataSpac
                 && generation > 0;
     }
 
-    public synchronized void disableYuvDiag() {
-        // Defensive: if the native library was never loaded there is no
-        // atomic to reset; swallow the link error instead of throwing from a
-        // teardown path. Routes through the disarm entry so the owner
-        // binding is cleared together with the flag.
+    /**
+     * Disarms the YUV diag pair through the native disarm entry (flag,
+     * format record and owner binding together).
+     *
+     * <p>B5 (V2 review): returns the REAL outcome instead of a void
+     * best-effort wrapped into a success ACK by the caller — {@code false}
+     * when the library is unavailable or the native call threw. The Dart
+     * manager treats this ACK as advisory (its FFI disarm is the
+     * authoritative barrier), but an honest reply keeps every other
+     * consumer from mistaking a skipped disarm for a completed one.</p>
+     */
+    public synchronized boolean disableYuvDiag() {
         try {
-            if (ensureLibraryLoaded()) {
-                nativeDisarmYuvDiag();
+            if (!ensureLibraryLoaded()) {
+                return false;
             }
+            nativeDisarmYuvDiag();
+            return true;
         } catch (Throwable error) {
-            Log.w(TAG, "YUV diag disarm skipped (library unavailable)", error);
+            Log.w(TAG, "YUV diag disarm failed", error);
+            return false;
         }
     }
 
@@ -274,6 +293,53 @@ public final class LgPqDataSpaceExt implements PlatformVideoView.SurfaceDataSpac
         return EXT_ID;
     }
 
+    /**
+     * PQ presentation self-report (plan W1): the declared form of the
+     * on-device accepted fact on the LG-H870DS — the RGB GLES chain has no
+     * HDR presentation path, so PQ presentation goes exclusively through
+     * the YUV config49 HWC window.
+     */
+    @Override
+    @Nullable
+    public Boolean pqPresentationRgbSurface() {
+        return false;
+    }
+
+    /** YUV config49 HWC window: the only PQ presentation carrier (see above). */
+    @Override
+    @Nullable
+    public Boolean pqPresentationYuvWindow() {
+        return true;
+    }
+
+    /**
+     * Per-transfer capability self-report. Android 7.0 has no
+     * GET_BUFFERS_DATASPACE message (see the class javadoc), so a successful
+     * setter cannot be read back for either supported transfer — the
+     * setter-only exception is a declared device fact here, not an identity
+     * privilege. No validated prediction transfer is declared: without
+     * read-back evidence this extension never claims prediction confidence.
+     */
+    @Override
+    @Nullable
+    public java.util.Set<String> setterOnlyTransfers() {
+        return new java.util.HashSet<>(java.util.Arrays.asList("pq", "pq-itu"));
+    }
+
+    @Override
+    @Nullable
+    public java.util.Set<String> supportedSurfaceTransfers() {
+        // Mirrors {@link #supportsDataSpace}: BT2020_PQ and the LIMITED
+        // form.
+        return new java.util.HashSet<>(java.util.Arrays.asList("pq", "pq-itu"));
+    }
+
+    /** The managed YUV window arm protocol this extension implements. */
+    @Override
+    public int yuvWindowArmApi() {
+        return 1;
+    }
+
     static final String FINGERPRINT =
             "lge/lucye_global_com/lucye:7.0/NRD90U/172921900e77a:user/release-keys";
 
@@ -296,7 +362,90 @@ public final class LgPqDataSpaceExt implements PlatformVideoView.SurfaceDataSpac
 
     @Override
     public synchronized boolean applyDataSpace(@NonNull Surface surface, int dataSpace) {
-        return applyNative(surface, dataSpace, false);
+        // A registered managed output surface is authorized for its
+        // dataspace applies (W1 managed path — the registration is the
+        // authorization; the values still pass supportsDataSpace).
+        return applyNative(surface, dataSpace,
+                managedSurfaces.containsKey(surface));
+    }
+
+    // ------------------------------------------------------------------
+    // W1 managed output surfaces (device-neutral production path)
+    // ------------------------------------------------------------------
+
+    /**
+     * Registers a live output surface into the managed ledger. The
+     * registration is the managed authorization: the dataspace apply for a
+     * registered surface is authorized, and the managed YUV-diag arm is
+     * admitted for its exact (handle, generation). Gated by the same device
+     * applicability as every other path here.
+     */
+    /** W1 owner lifetime (production): the ledger enable with this device's
+     * own YUV-carrier declaration as the non-conformant acceptance; the
+     * route lock is enforced library-side by the arm admission. */
+    @Override
+    public synchronized boolean enableOwnerLifetime(long handle, String token) {
+        return enableVisual278Experiment(handle, token, true,
+                Boolean.TRUE.equals(pqPresentationYuvWindow()));
+    }
+
+    public synchronized boolean registerManagedOutputSurface(Surface surface,
+            long handle, int generation, int surfaceGeneration) {
+        if (!isApplicable() || surface == null || handle <= 0 || generation <= 0
+                || surfaceGeneration <= 0) {
+            return false;
+        }
+        managedSurfaces.put(surface,
+                new long[] {handle, generation, surfaceGeneration});
+        return true;
+    }
+
+    /** Clears the managed record and disarms a managed arm on this surface. */
+    public synchronized void unregisterManagedOutputSurface(Surface surface) {
+        managedArmed.remove(surface);
+        managedSurfaces.remove(surface);
+    }
+
+    /**
+     * Arms the YUV diag pair for a REGISTERED managed surface: the native
+     * binding is keyed by the device-neutral managed owner key derived from
+     * (handle, generation) — the native side stores only this derived key
+     * and never validates any Java ledger, so no experiment authorization
+     * is involved. The route admission is enforced library-side before the
+     * surface event is published.
+     */
+    public synchronized boolean armManagedOutputSurface(Surface surface,
+            long handle, int generation) {
+        final long[] recorded = managedSurfaces.get(surface);
+        if (recorded == null || recorded[0] != handle || recorded[1] != generation) {
+            return false;
+        }
+        if (!isApplicable() || !ensureLibraryLoaded()) {
+            return false;
+        }
+        final long ownerKey = MediaCodecSurfaceTextureBridge.ownerKey(
+                "managed/" + handle + "/" + generation);
+        nativeArmYuvDiag(ownerKey, generation);
+        nativeSetYuvDiagEnabled(1);
+        managedArmed.add(surface);
+        return true;
+    }
+
+    /** Managed disarm for the library's end-of-attempt cleanup. */
+    public synchronized boolean disarmManagedOutputSurface(Surface surface) {
+        if (managedArmed.remove(surface)) {
+            nativeDisarmYuvDiag();
+            return true;
+        }
+        return false;
+    }
+
+    /** Whether {@code surface} is a registered managed output surface. */
+    public synchronized boolean isManagedOutputSurfaceRegistered(
+            @NonNull Surface surface, long handle, int generation) {
+        final long[] recorded = managedSurfaces.get(surface);
+        return recorded != null && recorded[0] == handle
+                && recorded[1] == generation;
     }
 
     private boolean applyNative(Surface surface, int dataSpace, boolean authorized) {

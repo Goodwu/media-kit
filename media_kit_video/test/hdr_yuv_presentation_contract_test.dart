@@ -10,6 +10,7 @@ import 'package:media_kit_video/src/hdr/hdr_route.dart';
 import 'package:media_kit_video/src/hdr/hdr_source_descriptor.dart';
 import 'package:media_kit_video/src/hdr/hdr_strategy.dart';
 import 'package:media_kit_video/src/hdr/hdr_yuv_presentation_contract.dart';
+import 'package:media_kit_video/src/hdr/hdr_yuv_window_arm.dart';
 import 'package:media_kit_video/src/video_controller/platform_video_controller.dart';
 import 'package:media_kit_video/src/video_controller/video_controller.dart';
 import 'package:synchronized/synchronized.dart';
@@ -24,6 +25,9 @@ import 'package:synchronized/synchronized.dart';
 /// output-levels write, and routes off the carrier keep their default
 /// routing.
 void main() {
+  // The process-level lease registry (B1) is static; isolate it per test.
+  setUp(HdrYuvWindowProcessRegistry.resetForTesting);
+
   group('contract validation', () {
     test('accepted quad passes validation', () {
       // Must not throw.
@@ -41,11 +45,11 @@ void main() {
       HdrYuvPresentationContract.validate(
           _yuvRoute().surrogate(hwdec: 'mediacodec-copy'));
       // Texture routes never carry the YUV shape.
-      HdrYuvPresentationContract.validate(_yuvRoute()
-          .surrogate(hwdec: 'mediacodec', vo: 'gpu-next', surfaceTransfer: 'x'));
+      HdrYuvPresentationContract.validate(_yuvRoute().surrogate(
+          hwdec: 'mediacodec', vo: 'gpu-next', surfaceTransfer: 'x'));
       // Non-PQ window request on the carrier is not the YUV pairing.
-      HdrYuvPresentationContract.validate(
-          _yuvRoute().surrogate(surfaceTransfer: 'hlg', offscreenTransfer: null));
+      HdrYuvPresentationContract.validate(_yuvRoute()
+          .surrogate(surfaceTransfer: 'hlg', offscreenTransfer: null));
     });
 
     test('every quad member is fail-closed', () {
@@ -61,9 +65,7 @@ void main() {
       mutations.forEach((member, build) {
         expect(
           () => HdrYuvPresentationContract.validate(build()),
-          throwsA(isA<StateError>().having(
-              (error) => error.message,
-              'message',
+          throwsA(isA<StateError>().having((error) => error.message, 'message',
               contains('YUV presentation contract rejected'))),
           reason: 'quad member "$member" must be fail-closed',
         );
@@ -77,7 +79,8 @@ void main() {
       // request-keyed gate used to let through without the quad.
       final counterexample =
           _yuvRoute().surrogate(surfaceTransfer: 'pq', offscreenTransfer: null);
-      expect(HdrYuvPresentationContract.isYuvWindowRoute(counterexample), isTrue,
+      expect(
+          HdrYuvPresentationContract.isYuvWindowRoute(counterexample), isTrue,
           reason: 'the carrier, not the requested label, decides the shape');
       expect(
         () => HdrYuvPresentationContract.validate(counterexample),
@@ -121,8 +124,8 @@ void main() {
       // contract for this shape, validate passes and the owned
       // video-output-levels=full write is issued (it was skipped before the
       // fix).
-      final result = await _exercise(
-          _yuvRoute().surrogate(surfaceTransfer: 'pq'));
+      final result =
+          await _exercise(_yuvRoute().surrogate(surfaceTransfer: 'pq'));
       expect(result.player.properties['video-output-levels'], 'full');
       expect(result.dataSpaceRequested, 'pq');
       await result.backend.resetOwnedConfiguration();
@@ -133,25 +136,335 @@ void main() {
         () async {
       final result = _harness();
       await expectLater(
-        result.backend
-            .prepareOutput(_plan(_yuvRoute().surrogate(offscreenTransfer: null))),
+        result.backend.prepareOutput(
+            _plan(_yuvRoute().surrogate(offscreenTransfer: null))),
         throwsA(isA<StateError>()),
       );
       // Fail-closed happened before any owned write or controller creation.
       expect(result.player.properties['hwdec'], 'no');
-      expect(result.player.properties.containsKey('video-output-levels'),
-          isFalse);
+      expect(
+          result.player.properties.containsKey('video-output-levels'), isFalse);
     });
 
-    test('routes off the YUV carrier issue no output levels',
-        () async {
-      final result = await _exercise(
-          _yuvRoute().surrogate(hwdec: 'mediacodec-copy', surfaceTransfer: 'pq'));
-      expect(result.player.properties.containsKey('video-output-levels'),
-          isFalse);
+    test('routes off the YUV carrier issue no output levels', () async {
+      final result = await _exercise(_yuvRoute()
+          .surrogate(hwdec: 'mediacodec-copy', surfaceTransfer: 'pq'));
+      expect(
+          result.player.properties.containsKey('video-output-levels'), isFalse);
       expect(result.dataSpaceRequested, 'pq');
     });
   });
+
+  group('backend arm integration (plan C)', () {
+    // The shared [_plan] carries the migration-default capability snapshot
+    // (no yuvWindow declaration); the arm admission tests need the declared
+    // YUV-window channel the realizer's route implies.
+    HdrOpenPlan yuvPlan(HdrRoute route) => _plan(route).copyWith(
+          capabilities: HdrCapabilities(
+            sdkInt: 24,
+            displayHdrTypes: const {2, 3},
+            hevcDecoders: const [],
+            dolbyVisionDecoders: const [],
+            p5PipelineAvailable: true,
+            dataSpaceBridgeLoaded: true,
+            // The LG-shaped self-report: the YUV window channel, the
+            // setter-only exception the readback-less apply path relies on,
+            // and the managed YUV arm protocol declaration.
+            dataSpaceExt: const HdrDataSpaceExtInfo(
+              id: 'lg-pq',
+              applicable: true,
+              pqPresentation:
+                  HdrPqPresentation(rgbSurface: false, yuvWindow: true),
+              setterOnlyTransfers: <String>{'pq', 'pq-itu'},
+              yuvWindowArmApi: 1,
+            ),
+          ),
+        );
+
+    _ArmHarness armHarness({String? ownerToken = 'owner-token'}) {
+      final calls = <String>[];
+      final atoms = FakeArmAtoms(calls);
+      final player = _FakePlayer();
+      final arm = HdrYuvWindowArm(
+        ownerToken: ownerToken,
+        ownerGeneration: () async => 5,
+        bindingsResolver: () => atoms.bindings(),
+        channel: atoms.channel,
+      );
+      final backend = AndroidHdrBackend(
+        player: player,
+        outputSlot: HdrOutputSlot<VideoController>(
+          initial: null,
+          voOf: (_) async => 'gpu-next',
+          disposeForRebuild: (_) async => calls.add('dispose'),
+          create: (contract) {
+            calls.add('create');
+            return _FakeOutput();
+          },
+          publish: (output) =>
+              calls.add('publish:${output == null ? 'null' : 'out'}'),
+          waitReady: (_) async => calls.add('ready'),
+        ),
+        yuvWindowArm: arm,
+        applyDataSpace: (_, transfer) async =>
+            {'applied': true, 'path': 'ext:lg-pq', 'readback': null},
+      );
+      return _ArmHarness(backend, atoms, calls, player);
+    }
+
+    test('YUV route arms inside the slot barrier, before the create', () async {
+      final harness = armHarness();
+      await harness.backend.prepareOutput(yuvPlan(_yuvRoute()));
+      expect(harness.atoms.diagDataSpace,
+          HdrYuvPresentationContract.windowDataSpace);
+      // The unified event timeline proves the process admission precedes
+      // everything and the arm ACK strictly precedes the output creation
+      // (and publication): moving the arm after the create flips this red
+      // instead of silently keeping a final-value check. The write
+      // admission intentionally OUTLIVES prepareOutput (it is held to the
+      // attempt's terminal cleanup), so no release appears here.
+      expect(harness.calls, [
+        'admit:write',
+        'arm:diag:${HdrYuvPresentationContract.windowDataSpace}',
+        'arm:bound',
+        'create',
+        'publish:out',
+        'ready',
+      ]);
+      expect(harness.atoms.gate.writer, isTrue,
+          reason: 'the write admission is still held after prepareOutput');
+    });
+
+    test('routes off the YUV carrier arm nothing through the backend',
+        () async {
+      final harness = armHarness();
+      await harness.backend.prepareOutput(
+          yuvPlan(_yuvRoute().surrogate(hwdec: 'mediacodec-copy')));
+      expect(harness.atoms.calls, isEmpty);
+      // Round 3: the non-YUV route takes a READ admission (Begin/End) but
+      // performs no arm/disarm channel call and touches no atom.
+      expect(
+          harness.atoms.channelCalls
+              .where((method) => method.contains('YuvDiag')),
+          isEmpty);
+      expect(harness.atoms.gate.writer, isFalse);
+      expect(harness.atoms.gate.readers, 0,
+          reason: 'the read admission was released when ensure settled');
+    });
+
+    test(
+        'the read admission covers the texture topology\'s real '
+        'initialization tail (R3-3)', () async {
+      // Real backend fixture: a texture-topology route whose ACTUAL VO
+      // rebuild (prepareAndroidTextureOutput: SetSurfaceSize + the locked
+      // wid/vo re-apply in real.dart) suspends mid-call — the read
+      // admission must still be held there, so a concurrent YUV write is
+      // rejected until the real tail completes.
+      final calls = <String>[];
+      final atoms = FakeArmAtoms(calls);
+      final player = _FakePlayer();
+      final textureGate = Completer<void>();
+      final arm = HdrYuvWindowArm(
+        ownerToken: 'owner-a',
+        ownerGeneration: () async => 5,
+        bindingsResolver: () => atoms.bindings(),
+        channel: atoms.channel,
+      );
+      final backend = AndroidHdrBackend(
+        player: player,
+        outputSlot: HdrOutputSlot<VideoController>(
+          initial: null,
+          voOf: (_) async => 'gpu-next',
+          disposeForRebuild: (_) async => calls.add('dispose'),
+          create: (contract) {
+            calls.add('create');
+            return _TextureGateOutput(textureGate);
+          },
+          publish: (output) =>
+              calls.add('publish:${output == null ? 'null' : 'out'}'),
+          waitReady: (_) async => calls.add('ready'),
+        ),
+        yuvWindowArm: arm,
+        applyDataSpace: (_, transfer) async =>
+            {'applied': true, 'path': 'ext:lg-pq', 'readback': null},
+      );
+      final other = HdrYuvWindowArm(
+        ownerToken: 'owner-b',
+        ownerGeneration: () async => 5,
+        bindingsResolver: () => atoms.bindings(),
+        channel: atoms.channel,
+      );
+      final texturePlan = yuvPlan(_yuvRoute().surrogate(
+          hwdec: 'mediacodec-copy', topology: HdrTopology.texture));
+      final preparing = backend.prepareOutput(texturePlan);
+      for (var i = 0;
+          !calls.contains('create') || !calls.contains('ready');
+          i++) {
+        if (i > 5000) fail('texture preparation did not reach its tail');
+        await Future<void>.delayed(Duration.zero);
+      }
+      // Suspended INSIDE prepareAndroidTextureOutput — past ensure, at the
+      // real initialization tail.
+      expect(atoms.gate.readers, 1,
+          reason: 'the read admission still covers the texture tail');
+      await expectLater(
+        other.initializeOutput(yuvPlan(_yuvRoute()), () async {
+          await other.armForAttempt(yuvPlan(_yuvRoute()));
+        }),
+        throwsA(isA<HdrYuvWindowLeaseConflict>()),
+      );
+      expect(atoms.calls.where((c) => c.startsWith('diag:')), isEmpty,
+          reason: 'the rejected YUV attempt armed nothing');
+      textureGate.complete();
+      await preparing;
+      expect(atoms.gate.readers, 0,
+          reason: 'the read released only after the real tail completed');
+      // With the process quiescent, the same YUV attempt proceeds.
+      final plan = yuvPlan(_yuvRoute());
+      await other.initializeOutput(plan, () => other.armForAttempt(plan));
+      await other.endAttempt(plan);
+      expect(atoms.diagDataSpace, 0);
+      expect(atoms.yuvDiagEnabled, 0);
+    });
+
+    test('production gap: no owner token fails validation before any write',
+        () async {
+      final harness = armHarness(ownerToken: null);
+      await expectLater(
+        harness.backend.validate(yuvPlan(_yuvRoute())),
+        throwsA(isA<HdrYuvWindowArmFailure>().having((error) => error.cause,
+            'cause', contains('no valid surface owner token'))),
+      );
+      expect(harness.atoms.calls, isEmpty);
+      expect(harness.properties['hwdec'], 'no',
+          reason: 'fail-closed before any owned write');
+    });
+
+    test('arm failure inside the barrier creates no output', () async {
+      final harness = armHarness();
+      harness.atoms.omitYuvDiagSetter = true;
+      harness.atoms.channelError = StateError('no plugin');
+      await expectLater(
+        harness.backend.prepareOutput(yuvPlan(_yuvRoute())),
+        throwsA(isA<HdrYuvWindowArmFailure>()),
+      );
+      expect(harness.calls, isNot(contains('create')));
+      expect(harness.atoms.diagDataSpace, 0,
+          reason: 'the partial arm was rolled back');
+    });
+  });
+}
+
+class _ArmHarness {
+  _ArmHarness(this.backend, this.atoms, this.calls, this._player);
+  final AndroidHdrBackend backend;
+  final FakeArmAtoms atoms;
+  final List<String> calls;
+  final _FakePlayer _player;
+
+  /// Owned mpv property state of the fake player.
+  Map<String, String> get properties => _player.properties;
+}
+
+class FakeArmAtoms {
+  FakeArmAtoms([this.timeline]);
+  final List<String>? timeline;
+  int diagDataSpace = 0;
+  int yuvDiagEnabled = 0;
+  final calls = <String>[];
+  final channelCalls = <String>[];
+  Object? channelError;
+  bool omitYuvDiagSetter = false;
+
+  /// Host mirror of the vendor plugin's process-static admission gate.
+  final gate = _ArmInitGate();
+
+  HdrYuvWindowFfiBindings bindings() => HdrYuvWindowFfiBindings(
+        setDiagDataSpace: (value) {
+          calls.add('diag:$value');
+          timeline?.add(value == 0 ? 'disarm:diag' : 'arm:diag:$value');
+          diagDataSpace = value;
+        },
+        setYuvDiagEnabled: omitYuvDiagSetter
+            ? null
+            : (value) {
+                calls.add('yuvDiag:$value');
+                timeline?.add('legacy:$value');
+                yuvDiagEnabled = value;
+              },
+        disarmYuvDiag: () {
+          calls.add('disarm');
+          timeline?.add('disarm:yuv');
+          yuvDiagEnabled = 0;
+        },
+      );
+
+  Future<Object?> channel(String method, Map<String, Object?> arguments) async {
+    if (channelError != null) throw channelError!;
+    channelCalls.add(method);
+    switch (method) {
+      case 'EnableYuvDiag':
+        yuvDiagEnabled = 1;
+        timeline?.add('arm:bound');
+        return true;
+      case 'DisableYuvDiag':
+        yuvDiagEnabled = 0;
+        timeline?.add('disarm:bound');
+        return true;
+      case 'BeginOutputInitRead':
+        return gate.beginRead();
+      case 'EndOutputInitRead':
+        gate.endRead();
+        return true;
+      case 'BeginOutputInitWrite':
+        timeline?.add('admit:write');
+        return gate.beginWrite(
+            arguments['ownerToken'] as Object,
+            (arguments['leaseId'] as int?) ?? 0);
+      case 'EndOutputInitWrite':
+        timeline?.add('release:write');
+        return gate.endWrite((arguments['leaseId'] as int?) ?? 0);
+      default:
+        return null;
+    }
+  }
+}
+
+class _ArmInitGate {
+  int readers = 0;
+  int _writerLease = 0;
+  Object? writerKey;
+  int _nextLease = 0;
+
+  bool beginRead() {
+    if (_writerLease != 0) return false;
+    readers++;
+    return true;
+  }
+
+  void endRead() {
+    if (readers > 0) readers--;
+  }
+
+  /// Lease-id identity (R3-4 mirror): a held lease rejects every other
+  /// acquire — the same token included; only the exact held lease retries.
+  int beginWrite(Object key, int retryLease) {
+    if (_writerLease != 0 || readers > 0) {
+      return retryLease != 0 && retryLease == _writerLease ? _writerLease : 0;
+    }
+    _writerLease = ++_nextLease;
+    writerKey = key;
+    return _writerLease;
+  }
+
+  bool endWrite(int lease) {
+    if (_writerLease == 0 || _writerLease != lease) return false;
+    _writerLease = 0;
+    writerKey = null;
+    return true;
+  }
+
+  bool get writer => _writerLease != 0;
 }
 
 HdrRoute _yuvRoute() => const HdrRoute(
@@ -236,21 +549,36 @@ class _Harness {
   _Harness(this.player);
   final _FakePlayer player;
   late final AndroidHdrBackend backend;
+  late final FakeArmAtoms atoms;
   String? dataSpaceRequested;
 }
 
 _Harness _harness() {
   final player = _FakePlayer();
   final harness = _Harness(player);
+  // The backend constructor owns a real arm manager by default now. This
+  // contract pins the backend's owned writes, so the harness injects the
+  // same real manager through the constructor seam with the fake platform
+  // round trips (vendor channel + FFI atoms) the arm-integration group
+  // uses: admission, ownership and lease checks all stay live; only the
+  // platform boundary is a test double.
+  final atoms = FakeArmAtoms();
+  harness.atoms = atoms;
   harness.backend = AndroidHdrBackend(
     player: player,
     outputSlot: HdrOutputSlot<VideoController>(
       initial: null,
       voOf: (_) async => 'gpu-next',
       disposeForRebuild: (_) async {},
-      create: (vo, hwdec, transfer) => _FakeOutput(),
+      create: (contract) => _FakeOutput(),
       publish: (_) {},
       waitReady: (_) async {},
+    ),
+    yuvWindowArm: HdrYuvWindowArm(
+      ownerToken: 'owner-token',
+      ownerGeneration: () async => 5,
+      bindingsResolver: () => atoms.bindings(),
+      channel: atoms.channel,
     ),
     applyDataSpace: (_, transfer) async {
       harness.dataSpaceRequested = transfer;
@@ -262,10 +590,37 @@ _Harness _harness() {
   return harness;
 }
 
+/// The issuance group's plan declares the YUV-window PQ presentation
+/// channel the accepted quad implies (the arm-integration group's
+/// `yuvPlan` shape): an admissible route is the precondition for the owned
+/// writes pinned here, while the route WITHOUT the declaration still fails
+/// admission in the arm group's production-gap test.
+HdrOpenPlan _issuedPlan(HdrRoute route) => _plan(route).copyWith(
+      capabilities: HdrCapabilities(
+        sdkInt: 24,
+        displayHdrTypes: const {2, 3},
+        hevcDecoders: const [],
+        dolbyVisionDecoders: const [],
+        p5PipelineAvailable: true,
+        dataSpaceBridgeLoaded: true,
+        // The LG-shaped self-report: the YUV window channel, the
+        // setter-only exception the harness's readback-less apply path
+        // relies on, and the managed YUV arm protocol declaration.
+        dataSpaceExt: const HdrDataSpaceExtInfo(
+          id: 'lg-pq',
+          applicable: true,
+          pqPresentation:
+              HdrPqPresentation(rgbSurface: false, yuvWindow: true),
+          setterOnlyTransfers: <String>{'pq', 'pq-itu'},
+          yuvWindowArmApi: 1,
+        ),
+      ),
+    );
+
 Future<_Harness> _exercise(HdrRoute route) async {
   final result = _harness();
-  await result.backend.prepareOutput(_plan(route));
-  await result.backend.configure(_plan(route));
+  await result.backend.prepareOutput(_issuedPlan(route));
+  await result.backend.configure(_issuedPlan(route));
   return result;
 }
 
@@ -277,6 +632,20 @@ class _FakeOutput implements VideoController {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
+/// A fake output whose REAL initialization tail
+/// ([VideoController.prepareAndroidTextureOutput]) suspends until a test
+/// gate completes — the R3-3 fixture.
+class _TextureGateOutput extends _FakeOutput {
+  _TextureGateOutput(this.gate);
+  final Completer<void> gate;
+
+  @override
+  Future<bool> prepareAndroidTextureOutput() async {
+    await gate.future;
+    return true;
+  }
+}
+
 class _FakePlatformOutput implements PlatformVideoController {
   @override
   Future<void> get waitUntilCurrentOutputBound async {}
@@ -285,7 +654,7 @@ class _FakePlatformOutput implements PlatformVideoController {
 }
 
 class _FakePlayer implements Player {
-  _FakePlayer() : properties = {'hwdec': 'no'};
+  _FakePlayer() : properties = {'hwdec': 'no', 'hwdec-software-fallback': '3'};
 
   final Map<String, String> properties;
   final Lock _lock = Lock();
@@ -339,7 +708,9 @@ class _FakePlayer implements Player {
                         ? 'bt.709'
                         : name == 'target-trc'
                             ? 'sdr'
-                            : name == 'target-colorspace-hint' ? 'no' : '');
+                            : name == 'target-colorspace-hint'
+                                ? 'no'
+                                : '');
   }
 
   @override

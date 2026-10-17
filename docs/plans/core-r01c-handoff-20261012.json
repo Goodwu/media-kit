@@ -1,0 +1,33 @@
+{
+  "stage": "CORE-R01c",
+  "baseline": "12966e7ac78983807199e0a179e84ad763a547a7",
+  "parentDocumentationCheckpoint": "e162cb3c7575219e09cb007398e62be9ac7fbf1a",
+  "scope": "bounded review acceptance and precise output timeout attribution",
+  "files": {
+    "media_kit_video/lib/src/hdr/hdr_open_coordinator.dart": "f653f8650376bf5f25d28b8dd9e73d772a997389f4e32502dcf1ff11b0d3c40e",
+    "media_kit_video/lib/src/hdr/hdr_player_backend.dart": "949de3478bf4aa01126cd5c4a43c7ae9942500aeb07cdd7c12f517678c1eab07",
+    "media_kit_video/lib/src/hdr/hdr_route.dart": "6a1436209a03cfdcb38ab80c9b95efc4a48b8f29d92e97241ec26bacb5e8962f",
+    "media_kit_video/lib/src/hdr/hdr_video_session.dart": "c920703f4c08e8dab17291fdb9b86db7939db8ad624b6409037814db25e4f6df",
+    "media_kit_video/test/hdr_open_coordinator_test.dart": "405276474cc1b9b227332f4ade678fbf77c283124bc2a607768e8d54958968d8",
+    "media_kit_video/test/hdr_video_session_test.dart": "71af527af96a7cb7183c66747d85c54f7b45142a17f589a7a32334860a655521"
+  },
+  "verification": {
+    "baselineBehaviorFailures": 4,
+    "baselineLog": "/tmp/r01c-red.log",
+    "workerTargetTests": 228,
+    "workerAdditionalSecondHdrTest": 1,
+    "criticalTargetTests": 231,
+    "criticalLog": "/tmp/r01c-critical-target.log",
+    "strictAnalysis": "No issues found",
+    "privateSdk": true
+  },
+  "limitations": [
+    "SDK24 true failed first on baseline; false final exercised but not claimed baseline red",
+    "route-only mismatch final coverage only",
+    "no complete actual decoder/frame identity validation",
+    "no new copy/software catalog",
+    "no effective auto/prefer/require closed loop",
+    "no native or device acceptance",
+    "budget effective constraint needs explicit reporting before require configuration"
+  ]
+}

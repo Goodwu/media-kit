@@ -24,7 +24,7 @@ import '../common/android_service_probe.dart';
 import '../common/android_hdr_convert_experiment.dart';
 import '../common/android_surface_texture_experiment.dart';
 import '../common/sources/android_hdr_player_backend.dart'
-    show AndroidSurfaceTextureDiag, AndroidSurfaceTexturePoc;
+    show AndroidSurfaceTextureDiag;
 import '../common/android_native_dv_release_diagnostic.dart';
 import '../common/android_native_dv_session_diagnostic.dart';
 import '../common/android_native_dv_session_lifecycle.dart';
@@ -46,33 +46,23 @@ class AndroidLgSingleOwnerVideo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentSession = session;
-    // POC define on only: mount the output at the frozen contract's 2:1
+    // W2 (feature direct-on): mount the output at the frozen contract's 2:1
     // geometry from the first frame, so the platform view surface is created
     // directly at its final 1440x720 size and the mid-open resize (video
-    // params resetting the decoder) never happens. Define off keeps the
-    // existing adaptive placeholder/session layout untouched.
-    if (AndroidSurfaceTexturePoc.enabled) {
-      debugPrint('MKSURF-POC: fixed 2:1 single-owner output layout');
-      return Center(
-        child: AspectRatio(
-          aspectRatio: 2.0,
-          child: currentSession == null
-              ? const HdrVideoPlaceholder()
-              : HdrVideo(
-                  key: const ValueKey('lg-single-owner-video'),
-                  session: currentSession,
-                  controls: null,
-                ),
-        ),
-      );
-    }
-    return currentSession == null
-        ? const HdrVideoPlaceholder()
-        : HdrVideo(
-            key: const ValueKey('lg-single-owner-video'),
-            session: currentSession,
-            controls: null,
-          );
+    // params resetting the decoder) never happens.
+    debugPrint('MKSURF-POC: fixed 2:1 single-owner output layout');
+    return Center(
+      child: AspectRatio(
+        aspectRatio: 2.0,
+        child: currentSession == null
+            ? const HdrVideoPlaceholder()
+            : HdrVideo(
+                key: const ValueKey('lg-single-owner-video'),
+                session: currentSession,
+                controls: null,
+              ),
+      ),
+    );
   }
 }
 
@@ -681,28 +671,6 @@ class AndroidNativeDvSessionPageExitController {
   }
 }
 
-/// P8.4 C2: non-constructive owner-generation observation for the YUV diag
-/// bound arm. Reads only [session]'s published controller — a null session or
-/// a session that has not published an output yet yields null (the arm then
-/// keeps its legacy-global-arm fallback) and no default Texture wrapper is
-/// ever created as a side effect. Observing through the
-/// `_hdrTransactionController` fallback getter here would eagerly construct
-/// `_initialController` before the session's platform-view request, letting
-/// the Android controller reuse a Texture-configured handle and hard-fail the
-/// first open with HdrDataSpaceApplyException.
-@visibleForTesting
-Future<int?> resolveYuvDiagOwnerGeneration(HdrVideoSession? session) async {
-  int? ownerGeneration;
-  final VideoController? controller = session?.controller.value;
-  if (controller != null && controller.platform.isCompleted) {
-    final platform = await controller.platform.future;
-    if (platform.nativeSurfaceGeneration > 0) {
-      ownerGeneration = platform.nativeSurfaceGeneration;
-    }
-  }
-  return ownerGeneration;
-}
-
 class SinglePlayerSingleVideoScreen extends StatefulWidget {
   const SinglePlayerSingleVideoScreen({super.key});
 
@@ -761,28 +729,19 @@ class _SinglePlayerSingleVideoScreenState
   static const _androidHdrConvertRouteLock = bool.fromEnvironment(
     'MEDIA_KIT_ANDROID_HDR_CONVERT_ROUTE_LOCK',
   );
-  // WP-C SurfaceTexture PoC (phase1-design-spec §5): the production realizer
-  // overrides the locked convert route hwdec when the define is non-empty;
-  // this page only captures MKSURF log evidence and hard-fails the open
-  // without it. The hwdec-current verdict itself stays in the production
-  // backend (verified against the overridden route.hwdec).
+  // W2 (plan lg-p84-yuv-window-reopen-20261014): the
+  // MEDIA_KIT_ANDROID_SURFACETEXTURE_POC define was removed with the feature
+  // direct-on. The `surfacetexture` importer is the derived YUV-window
+  // carrier (W1 channel derivation); this page still captures MKSURF log
+  // evidence and hard-fails the open without it.
+  static const String _surfaceTextureHwdec = 'surfacetexture';
+  static const String _mkSurfaceVersionMarker = 'MKSURF: version';
+  static const String _mkSurfacePocTag = 'MKSURF-POC:';
   StreamSubscription<PlayerLog>? _surfaceTexturePocLogSubscription;
   // Sticky: set on the first matching entry so a later bounded-buffer
   // eviction can never lose the verdict.
   bool _surfaceTexturePocVersionObserved = false;
-  // WP-C SurfaceTexture diagnostics copy leg (diag on, PoC off): the locked
-  // convert route stays the baseline mediacodec-copy path; the page owns an
-  // unlabeled `lavfi=[signalstats]` append to the vf chain for one open
-  // transaction and polls its metadata every 500 ms while playback runs.
-  // Backend `_setOwned` convention: capture the original value, write strict,
-  // read back to verify, restore on the failure/transaction-end path.
-  static const String _copyDiagVfFilter =
-      'format=yuv420p,@mksdiag:lavfi=[signalstats]';
-  Timer? _copyDiagTimer;
-  int? _copyDiagSerial;
-  String? _copyDiagOriginalVf;
-  bool _copyDiagVfOwned = false;
-  // Diagnostics vd-lavc-o ownership (both legs): the diag session declares
+  // Diagnostics vd-lavc-o ownership (OES leg): the diag session declares
   // the patch material's source color to the MediaCodec decoder through
   // avctx options (color_trc=16 SMPTE2084, color_primaries=9 BT2020,
   // colorspace=9 BT2020nc); MediaCodec does not parse VUI and the FFmpeg
@@ -792,8 +751,7 @@ class _SinglePlayerSingleVideoScreenState
   bool _diagVdLavcOOwned = false;
   String? _diagOriginalVdLavcO;
   int? _diagVdLavcOSerial;
-  bool _copyDiagSampleInFlight = false;
-  // WP-C SurfaceTexture diagnostics OES leg (diag on, PoC on): the
+  // WP-C SurfaceTexture diagnostics OES leg (diag define on): the
   // small-area readback switch is the pure-C `mkst_set_diag_enabled` export
   // of the already-loaded media_kit_video_hdr_bridge.so, called directly via
   // dart:ffi (no Java bridge call, no platform channel). Resolved once and
@@ -803,32 +761,6 @@ class _SinglePlayerSingleVideoScreenState
   static void Function(int)? _surfaceTextureDiagSwitch;
   Timer? _surfaceTextureDiagTimer;
   int? _surfaceTextureDiagSerial;
-  // E1 (MKSURF-E1, diag on + PoC on only): producer-commit-boundary
-  // dataspace injection arm. The page arms the vendor's diag atomic with the
-  // unchanged PQ/LIMITED value before the open (same point as
-  // `_enableDiagVdLavcO`) and resets it to 0 on the open end/failure paths;
-  // mpv consumes it once at its EGL window surface creation. FFI mirrors the
-  // `mkst_set_diag_enabled` pattern: the vendor plugin .so is already loaded
-  // in-process by its own Java side, resolution is latched, and any failure
-  // keeps the switch a silent no-op. Off state (either define off) never
-  // touches the atomic.
-  static const int _diagDataspacePqLimited =
-      0x11C60000; // 300000256 = BT2020 PQ / LIMITED (unchanged value).
-  static bool _diagDataspaceArmerProbed = false;
-  static void Function(int)? _diagDataspaceArmer;
-  int? _diagDataspaceSerial;
-  // YUV diag (define on + PoC on only): arms the vendor's independent YUV
-  // diag atomic before the open, exactly like the E1 dataspace arm. mpv
-  // reads it once via dlsym at its EGL context/surface creation; the native
-  // gate re-verifies the config49 EGL capability before any perform.
-  static bool _yuvDiagSwitchProbed = false;
-  static void Function(int)? _yuvDiagSwitch;
-  int? _yuvDiagSerial;
-  // Disarm export of the same vendor library (clears the owner binding
-  // together with the flag). Best-effort: resolution failure falls back to
-  // the legacy enabled-setter and is logged.
-  static bool _yuvDiagDisarmProbed = false;
-  static void Function()? _yuvDiagDisarm;
   AndroidLgSingleOpenOwner? _lgExperimentOwner;
   String? get _lgExperimentToken => _lgExperimentOwner?.token;
 
@@ -840,15 +772,11 @@ class _SinglePlayerSingleVideoScreenState
   static const _androidLgVisual278Experiment = bool.fromEnvironment(
     'MEDIA_KIT_ANDROID_LG_VISUAL278_EXPERIMENT',
   );
-  static const _convertExperiment = AndroidHdrConvertExperiment(
-    String.fromEnvironment('MEDIA_KIT_ANDROID_CONVERT_SURFACE_TRANSFER',
-        defaultValue: 'pq'),
-    _androidMpvOutputLevels,
-  );
-  // WP-C SurfaceTexture PoC (plan §7): independent experiment class with the
-  // same frozen output contract; the realized route must carry the
-  // experimental surfacetexture importer. Define off keeps every call site
-  // on the legacy convert experiment unchanged.
+  // W2: the SURFACETEXTURE_POC define was removed with the feature direct-on.
+  // The only lab route-lock planner is the independent SurfaceTexture
+  // experiment class (same frozen output contract); the realized route must
+  // carry the `surfacetexture` carrier, which the production realizer derives
+  // from the device-declared PQ presentation channels since W1.
   static const _surfaceTextureExperiment = AndroidSurfaceTextureExperiment(
     String.fromEnvironment('MEDIA_KIT_ANDROID_CONVERT_SURFACE_TRANSFER',
         defaultValue: 'pq'),
@@ -856,27 +784,6 @@ class _SinglePlayerSingleVideoScreenState
   );
   static const _androidMpvVoDebug = bool.fromEnvironment(
     'MEDIA_KIT_ANDROID_MPV_VO_DEBUG',
-  );
-  // YUV diag (phase3-decision, lab-gated, default off): the config49 8-bit
-  // NV12 output diagnostic branch. Define on requires PoC on (the diag arm
-  // follows the same E1 producer-commit-boundary pattern); with the define
-  // off nothing is armed and mpv stays on the existing RGB path.
-  static const _androidMksYuvDiag = bool.fromEnvironment(
-    'MEDIA_KIT_ANDROID_MKS_YUV_DIAG',
-  );
-  // YUV diag offscreen/window range contract (V2 P1-1): the diag define MUST
-  // be built with CONVERT_SURFACE_TRANSFER=pq + MPV_OUTPUT_LEVELS=full. That
-  // pairing makes gpu-next write FULL-range normalized PQ into the RGBA16F
-  // offscreen RGB FBO, while the config49 NV12 window surface is LIMITED
-  // (probed), and the mpv-side final pass performs the single 16+219p limited
-  // packing. Any other pairing double-compresses: offscreen limited x shader
-  // limited would put the black/white ends at 30/217 instead of 16/235. The
-  // experiment classes' validate() accepts the pq/full combination; this page
-  // additionally hard-verifies the pairing at arm time and fails the
-  // diagnostic transaction otherwise (YUV-DIAG: pairing rejected).
-  static const _yuvDiagConvertTransfer = String.fromEnvironment(
-    'MEDIA_KIT_ANDROID_CONVERT_SURFACE_TRANSFER',
-    defaultValue: 'pq',
   );
   // HLG OOTF experiment: libplacebo derives the HLG scene-to-display
   // transform from the target peak (nit). Empty keeps mpv's auto.
@@ -1016,8 +923,8 @@ class _SinglePlayerSingleVideoScreenState
   //   (`sdr`, `hdr10` or `p84`) to trigger the single review rebuild.
   // - no-hint: opens without any hint; the session classifies from decoder
   //   facts and rebuilds if needed.
-  // - policy-experimental: allowExperimental + metadataReshape first for the
-  //   P8.4 source class (A6 RPU-reshape PQ route).
+  // - policy-experimental: metadataReshape first for the P8.4 source class
+  //   (A6 RPU-reshape PQ route).
   // - preference/policy swap timers: mid-playback setPreference/setPolicy
   //   probes (A5).
   static const _androidHdrSimulateNoHlg = bool.fromEnvironment(
@@ -1049,6 +956,49 @@ class _SinglePlayerSingleVideoScreenState
   static const _androidHdrDiagnostics = bool.fromEnvironment(
     'MEDIA_KIT_ANDROID_HDR_DIAGNOSTICS',
   );
+  // P0 baseline freeze: one-shot dump of the effective mpv decoder/output
+  // properties once an open completes and the first frame is up. Read-only.
+  static const _androidPropSnapshot = bool.fromEnvironment(
+    'MEDIA_KIT_ANDROID_PROP_SNAPSHOT',
+  );
+  // P1-A embed feasibility probe: boot the player on vo=mediacodec_embed with
+  // hwdec=mediacodec and the PlatformView output, then open through the plain
+  // non-transaction path. Implies the property snapshot above; the output-side
+  // implication (vo + usePlatformView) lives in common/globals.dart.
+  static const _androidEmbedProbe = bool.fromEnvironment(
+    'MEDIA_KIT_ANDROID_EMBED_PROBE',
+  );
+  // P2 sdrDirect×embed candidate entry (plan android-sdr-light-presentation
+  // 2026-10-17): declares to the session's route options that the SDR session
+  // does not need mpv-side GL features, so the planner may generate the embed
+  // execution candidate on the copy-fallback device group (SDK 16–25).
+  // 2026-10-17 user decision: the embed candidate is DEFAULT-ENABLED within
+  // that capability scope (the unset route option resolves to enabled), so
+  // this define is retained only as an explicit override — passing it is
+  // idempotent with the default build (explicit true ≡ unset on SDK 16–25).
+  // Effective conditions (guarded in initState, unchanged):
+  // - requires MEDIA_KIT_ANDROID_HDR_TRANSACTION=true (the session transaction
+  //   path is what plans and reviews the embed candidate);
+  // - must NOT be combined with the non-transaction MEDIA_KIT_ANDROID_EMBED_PROBE
+  //   plain-player probe mode;
+  // - effectiveness is proven ONLY by the session prediction / actual route
+  //   hitting vo=mediacodec_embed — the define's existence alone is not
+  //   evidence (an SDK ≥ 26 device keeps the texture directory).
+  static const _androidSdrEmbed = bool.fromEnvironment(
+    'MEDIA_KIT_ANDROID_SDR_EMBED',
+  );
+
+  /// Session route options for the P2 embed entry: null keeps the default
+  /// behavior — which since the 2026-10-17 default-enablement already plans
+  /// the sdrDirect×embed candidate on the copy-fallback group — and the
+  /// define upgrades it to an explicit `sdrEmbed: true` (idempotent override,
+  /// no user-visible switch exists; `sdrEmbed: false` stays a library-level
+  /// opt-out, not exposed by this page).
+  static EffectiveVideoRouteOptions? get _sdrEmbedSessionOptions =>
+      _androidSdrEmbed
+          ? EffectiveVideoRouteOptions.resolve(
+              application: const VideoRouteOptions(sdrEmbed: true))
+          : null;
 
   // The controlled /data/local/tmp fixtures opened by this page. Their
   // identity mapping below is the page's existing sample enumeration (each
@@ -1269,9 +1219,10 @@ class _SinglePlayerSingleVideoScreenState
     // Wait for native initialization before using waitForInitialization:false
     // under the existing Player lock. This is an idle readiness read only.
     await player.getProperty('path');
-    journal.recordCapabilities(await HdrCapabilities.query());
+    journal.recordCapabilities((await VideoRouteCapabilities.query(
+        target: const VideoOutputTarget.applicationView())).hdr);
     await journal.captureBaseline();
-    _createHdrSession();
+    await _createHdrSession();
     journal.recordReport(_requireHdrSession().report.value);
     // The ordinary entry keeps the true hint/classification/review semantics.
     await _openInitialSource();
@@ -1492,7 +1443,7 @@ class _SinglePlayerSingleVideoScreenState
     if (negative != null) {
       await negative.prepare(player);
       if (!mounted || _autoPlayerDisposed) return;
-      _createHdrSession();
+      await _createHdrSession();
       final session = _requireHdrSession();
       _nativeDvN1Events = session.events.listen(negative.onEvent);
       negative.admitOpen();
@@ -1538,7 +1489,7 @@ class _SinglePlayerSingleVideoScreenState
     }
     await diagnostic.prepare();
     if (!mounted || _autoPlayerDisposed) return;
-    _createHdrSession();
+    await _createHdrSession();
     final session = _requireHdrSession();
     await diagnostic.attach(
       session,
@@ -2090,7 +2041,8 @@ class _SinglePlayerSingleVideoScreenState
     _hdrDisposeFuture = null;
     _nativeDvSessionInstanceId =
         'session-${++_nativeDvSessionInstanceSequence}';
-    _createHdrSession(lifecycleSessionInstanceId: _nativeDvSessionInstanceId);
+    await _createHdrSession(
+        lifecycleSessionInstanceId: _nativeDvSessionInstanceId);
     final newSession = _requireHdrSession();
     await diagnostic.attach(newSession,
         sessionInstanceId: _nativeDvSessionInstanceId);
@@ -2894,16 +2846,27 @@ class _SinglePlayerSingleVideoScreenState
   /// Creates the session that owns the transaction path. Phase 1 constraint:
   /// one session per process (the HdrCapabilities.Changed enable is a shared
   /// switch), which the single-player page satisfies.
-  void _createHdrSession({String? lifecycleSessionInstanceId}) {
+  Future<void> _createHdrSession({String? lifecycleSessionInstanceId}) async {
     if (_hdrSession != null) return;
     final policy = _hdrRoutingPolicy();
-    if (_androidLgVisual278Experiment) {
+    // W2 device-round fix: the mkst bridge initializes only through the
+    // platform view creationParams' `lgExperimentOwnerToken`
+    // (`MKSURF: bridge not initialized` otherwise; the surfacetexture hwdec
+    // cannot register and the decode falls back to software). The owner
+    // token is therefore part of the YUV recipe: it is generated when the
+    // device declares the YUV window PQ channel — the same capability latch
+    // the pre-open arm uses, resolved once ahead of the platform view
+    // creation — and the token is wired into every session branch's
+    // configuration. Token/generation semantics and the A2 binding model are
+    // unchanged; the one-shot open wrapper stays an exclusive
+    // VISUAL278-experiment behavior.
+    if (await _yuvWindowChannelDeclared()) {
       final random = Random.secure();
       _lgExperimentOwner = AndroidLgSingleOpenOwner(List.generate(
               24, (_) => random.nextInt(256).toRadixString(16).padLeft(2, '0'))
           .join());
     }
-    final experimentConfiguration = configuration.value.copyWith(
+    final sessionConfiguration = configuration.value.copyWith(
         android: configuration.value.android
             .copyWith(lgExperimentOwnerToken: _lgExperimentToken));
     // migrated to HdrVideoSession (S10): the lab coordinator/slot/backend are
@@ -2945,13 +2908,8 @@ class _SinglePlayerSingleVideoScreenState
     }
 
     if (_androidHdrConvertRouteLock) {
-      if (AndroidSurfaceTexturePoc.enabled) {
-        _surfaceTextureExperiment.validateAdmission(
-            dataSpacePerformProbe: _androidDataSpacePerformProbe);
-      } else {
-        _convertExperiment.validateAdmission(
-            dataSpacePerformProbe: _androidDataSpacePerformProbe);
-      }
+      _surfaceTextureExperiment.validateAdmission(
+          dataSpacePerformProbe: _androidDataSpacePerformProbe);
       if (!_androidHdrTransaction ||
           _androidNativeDvSessionDiagnostic ||
           _androidHdrSimulateNoHlg ||
@@ -2968,12 +2926,11 @@ class _SinglePlayerSingleVideoScreenState
         HdrVideoSession.forTesting(
             player: player,
             policy: policy,
-            configuration: experimentConfiguration,
-            // SurfaceTexture PoC: the planner must realize the overridden
-            // route; the legacy copy validator would block it.
-            routePlanner: AndroidSurfaceTexturePoc.enabled
-                ? _surfaceTextureExperiment.plan
-                : _convertExperiment.plan,
+            configuration: sessionConfiguration,
+            // SurfaceTexture carrier (W1 channel derivation, W2 direct-on):
+            // the planner must realize the carrier route; the legacy copy
+            // validator would block it.
+            routePlanner: _surfaceTextureExperiment.plan,
           )
         : _androidNativeDvSessionDiagnostic
             ? // The only diagnostic seam is a realizer-backed fixed-P5 planner
@@ -2982,7 +2939,7 @@ class _SinglePlayerSingleVideoScreenState
             HdrVideoSession.forTesting(
                 player: player,
                 policy: policy,
-                configuration: configuration.value,
+                configuration: sessionConfiguration,
                 routePlanner: diagnostic!.routePlanner,
                 onBackendCallDiagnostic: onBackendCall,
                 onNativeDvOptionDiagnostic: onNativeOption,
@@ -3016,13 +2973,13 @@ class _SinglePlayerSingleVideoScreenState
                 HdrVideoSession.forTesting(
                     player: player,
                     policy: policy,
-                    configuration: configuration.value,
+                    configuration: sessionConfiguration,
                     capabilitiesProvider: _capabilitiesWithoutHlg,
                   )
                 : HdrVideoSession(
                     player,
                     policy: policy,
-                    configuration: configuration.value,
+                    configuration: sessionConfiguration,
                   );
     _hdrSession = session;
     if (n4 != null) {
@@ -3069,11 +3026,12 @@ class _SinglePlayerSingleVideoScreenState
   }
 
   /// The routing policy from the A6 experiment switch: defaults, or
-  /// allowExperimental with `metadataReshape` first for the P8.4 class.
+  /// `metadataReshape` first for the P8.4 class. There is no enable switch
+  /// field anymore; the gates only select preference orders.
   HdrRoutingPolicy _hdrRoutingPolicy() {
     if (_androidHdrGateOpen) {
-      debugPrint('HDR_GATE_OPEN default order, allowExperimental=true');
-      return const HdrRoutingPolicy(allowExperimental: true);
+      debugPrint('HDR_GATE_OPEN default order');
+      return HdrRoutingPolicy.defaults;
     }
     if (_androidHdrPreferConvert) {
       // HLG→PQ color-accuracy experiment: prefer the GPU convert route over
@@ -3104,7 +3062,6 @@ class _SinglePlayerSingleVideoScreenState
       preferences: <HdrSourceClass, List<HdrStrategy>>{
         HdrSourceClass.dvP84: reordered,
       },
-      allowExperimental: true,
     );
   }
 
@@ -3112,7 +3069,8 @@ class _SinglePlayerSingleVideoScreenState
   /// real query with display type 3 (HLG) removed, so P8.4 cannot select an
   /// HLG-output route and must degrade along the candidate list.
   Future<HdrCapabilities> _capabilitiesWithoutHlg() async {
-    final capabilities = await HdrCapabilities.query(player: player);
+    final capabilities = (await VideoRouteCapabilities.query(
+        target: const VideoOutputTarget.applicationView())).hdr;
     final types = capabilities.displayHdrTypes;
     final Set<int>? filtered = types == null ? null : <int>{...types};
     if (filtered != null) {
@@ -3206,19 +3164,11 @@ class _SinglePlayerSingleVideoScreenState
         }
         if (_androidMpvOutputLevels.isNotEmpty) {
           if (_androidHdrConvertRouteLock) {
-            if (AndroidSurfaceTexturePoc.enabled) {
-              await _surfaceTextureExperiment.prepareOutputLevels(
-                set: (value) =>
-                    player.setPropertyStrict('video-output-levels', value),
-                read: () => player.getProperty('video-output-levels'),
-              );
-            } else {
-              await _convertExperiment.prepareOutputLevels(
-                set: (value) =>
-                    player.setPropertyStrict('video-output-levels', value),
-                read: () => player.getProperty('video-output-levels'),
-              );
-            }
+            await _surfaceTextureExperiment.prepareOutputLevels(
+              set: (value) =>
+                  player.setPropertyStrict('video-output-levels', value),
+              read: () => player.getProperty('video-output-levels'),
+            );
           } else {
             await player.setPropertyStrict(
                 'video-output-levels', _androidMpvOutputLevels);
@@ -3231,13 +3181,8 @@ class _SinglePlayerSingleVideoScreenState
               'MPV_OUTPUT_LEVELS=$_androidMpvOutputLevels accepted=true beforeOpen=true');
         }
         if (_androidLgVisual278Experiment) {
-          if (AndroidSurfaceTexturePoc.enabled) {
-            _surfaceTextureExperiment.validateAdmission(
-                dataSpacePerformProbe: _androidDataSpacePerformProbe);
-          } else {
-            _convertExperiment.validateAdmission(
-                dataSpacePerformProbe: _androidDataSpacePerformProbe);
-          }
+          _surfaceTextureExperiment.validateAdmission(
+              dataSpacePerformProbe: _androidDataSpacePerformProbe);
           if (experimentOwner == null) {
             throw StateError('Missing experiment owner');
           }
@@ -3256,76 +3201,26 @@ class _SinglePlayerSingleVideoScreenState
             throw StateError('Visual278 experiment enable refused');
           }
         }
-        if (AndroidSurfaceTextureDiag.enabled &&
-            !AndroidSurfaceTexturePoc.enabled) {
-          // Copy leg (对照): before the open, after the route decision for
-          // this locked transaction is in place, append the signalstats probe
-          // to the end of the current vf chain through the backend `_setOwned`
-          // convention (owned restore on the open end). PoC on never reaches
-          // this leg: the two legs are mutually exclusive.
-          await _enableDiagVdLavcO(serial);
-          await _enableCopyDiagVf(serial);
-        }
       }
 
       final hint = _hintFor(source);
-      if (AndroidSurfaceTexturePoc.enabled) {
-        if (AndroidSurfaceTextureDiag.enabled) {
-          // OES leg: enable the importer-side small-area readback for this
-          // open transaction before the decoder init can emit its per-frame
-          // `MKSURF: diag` entries.
-          await _enableDiagVdLavcO(serial);
-          _enableSurfaceTextureDiagSwitch(serial);
-          // E1: arm the producer-commit-boundary dataspace before the open
-          // so mpv's one-shot EGL-window injection reads the armed value.
-          // YUV mode (define on) arms it fail-closed inside the pre-open
-          // sequence below — an unresolvable armer or a failed arm throws
-          // (a silently skipped arm would open the NV12 window without the
-          // PQ/LIMITED injection = misleading playback); non-YUV mode keeps
-          // the original non-blocking arm.
-          // YUV diag (define on required): arm the independent config49
-          // branch switch before the open so mpv's EGL context/surface
-          // creation takes the NV12 path. Fail-closed: a pairing mismatch, a
-          // dataspace arm failure or a YUV switch arm failure throws
-          // (diagnostic transaction fails) after rolling back every arm
-          // taken in this pre-open sequence.
-          if (_androidMksYuvDiag) {
-            try {
-              _armDiagDataspace(serial);
-              await _armYuvDiagSwitch(serial);
-            } catch (_) {
-              _disarmDiagDataspace(serial: null);
-              _disarmYuvDiagSwitch(serial: null);
-              _disableSurfaceTextureDiagSwitch(serial: null);
-              await _disableDiagVdLavcO(serial: null);
-              rethrow;
-            }
-          } else {
-            // Diag on + PoC on, but the YUV define is off: only the
-            // non-blocking E1 dataspace arm applies.
-            _armDiagDataspace(serial);
-            debugPrint('YUV-DIAG: define off; branch inert');
-          }
-        } else if (_androidMksYuvDiag) {
-          // PoC on but the SurfaceTexture diag leg is off: the YUV diag arm
-          // requires the diag+PoC combination, so the branch stays inert.
-          debugPrint('YUV-DIAG: define on but diag leg off; branch inert');
-        }
-        // Capture the whole open window: the importer emits `MKSURF: version`
-        // during decoder init, before the production backend's hwdec-current
-        // verification completes inside session.open.
-        unawaited(_surfaceTexturePocLogSubscription?.cancel());
-        _surfaceTexturePocVersionObserved = false;
-        _surfaceTexturePocLogSubscription = player.stream.log.listen((log) {
-          if (AndroidSurfaceTexturePoc.isVersionEntry(log.text)) {
-            _surfaceTexturePocVersionObserved = true;
-          }
-        });
-      } else if (_androidMksYuvDiag) {
-        // PoC off: the YUV diag arm requires the diag+PoC combination, so
-        // the branch stays inert.
-        debugPrint('YUV-DIAG: define on but PoC off; branch inert');
+      if (AndroidSurfaceTextureDiag.enabled) {
+        // OES leg: enable the importer-side small-area readback for this
+        // open transaction before the decoder init can emit its per-frame
+        // `MKSURF: diag` entries.
+        await _enableDiagVdLavcO(serial);
+        _enableSurfaceTextureDiagSwitch(serial);
       }
+      // Capture the whole open window: the importer emits `MKSURF: version`
+      // during decoder init, before the production backend's hwdec-current
+      // verification completes inside session.open.
+      unawaited(_surfaceTexturePocLogSubscription?.cancel());
+      _surfaceTexturePocVersionObserved = false;
+      _surfaceTexturePocLogSubscription = player.stream.log.listen((log) {
+        if (log.text.contains(_mkSurfaceVersionMarker)) {
+          _surfaceTexturePocVersionObserved = true;
+        }
+      });
       debugPrint(
           'ANDROID_HDR_OPEN_BEGIN path=$source hint=$hint serial=$serial '
           'simulateNoHlg=$_androidHdrSimulateNoHlg '
@@ -3342,7 +3237,14 @@ class _SinglePlayerSingleVideoScreenState
       Object? openFailure;
       StackTrace? openFailureStack;
       try {
-        if (experimentOwner != null) {
+        // W2 device-round fix: the one-shot owner wrapper (claim consumed on
+        // the first attempt, failures included) stays an exclusive
+        // VISUAL278-experiment behavior. The capability-gated standard build
+        // holds an owner token for the bridge initialization but opens
+        // through the plain session path so repeated opens keep working;
+        // the token's remaining roles (owner-bound arm, error/disposal
+        // revoke) are null-safe and unaffected.
+        if (_androidLgVisual278Experiment && experimentOwner != null) {
           await experimentOwner.open(
               session: session,
               media: Media(source),
@@ -3352,30 +3254,35 @@ class _SinglePlayerSingleVideoScreenState
               revokeOwner: _revokeLgExperiment);
         } else {
           await prepare();
-          await session.open(Media(source), hint: hint, start: start);
+          await session.open(Media(source), hint: hint, start: start,
+              options: _sdrEmbedSessionOptions);
         }
       } catch (error, stack) {
         openFailure = error;
         openFailureStack = stack;
       }
-      if (AndroidSurfaceTexturePoc.enabled &&
-          _requireHdrSession().report.value.actual?.strategy ==
-              HdrStrategy.baseLayerConvert) {
-        // V2 review fix: the override was applied to this open's route, so
-        // the verdict applies regardless of the open outcome. The session
+      // W2 (V1 review): the importer verdict applies only to opens actually
+      // realized on the `surfacetexture` carrier (only the YUV-window C4
+      // convert route carries that hwdec). An RGB-baseline C4 open on a
+      // migration-default device plays the copy carrier and has no importer
+      // verdict — its decoder identity is already covered by the
+      // hwdec-current check inside session.open.
+      if (_requireHdrSession().report.value.actual?.hwdec ==
+          _surfaceTextureHwdec) {
+        // V2 review fix: the carrier is part of this open's realized route
+        // (W1 channel derivation, W2 direct-on), so the verdict applies
+        // regardless of the open outcome. The session
         // only DEGRADES on a decoder mismatch (e.g. bridge init failure
         // makes vd_lavc fall back to software decoding with
         // hwdec-current=no and keeps playing); this verdict must hard-fail
-        // such opens instead of letting the fallback play. Both evidence
-        // requirements are strict: hwdec-current must equal the overridden
-        // importer AND `MKSURF: version` must have been observed.
+        // such opens instead of letting the fallback play.
         // V3 review fix: tracks whether the verdict block below completes
         // normally. The verdict-failure StateError (or any other exception
         // out of this block, e.g. the hwdec-current poll) throws past the
-        // OES open-end block below, which is the only place the dataspace
-        // arm, the readback switch and the vd-lavc-o owned write are reset
-        // on the failure path — so every abnormal exit must reset all of
-        // them here. The normal pass path deliberately does not: the open
+        // OES open-end block below, which is the only place the readback
+        // switch and the vd-lavc-o owned write are reset on the failure
+        // path — so every abnormal exit must reset all of them here. The
+        // normal pass path deliberately does not: the open
         // keeps the readback switch and the owned vd-lavc-o live for the
         // bounded playback window (open-end block + teardown watch).
         var verdictBlockAborted = true;
@@ -3393,82 +3300,62 @@ class _SinglePlayerSingleVideoScreenState
             // one read only, the original error stays the primary failure.
             hwdecCurrent = await player.getProperty('hwdec-current');
           }
-          final failure = AndroidSurfaceTexturePoc.verdictFailure(
-            hwdecCurrent: hwdecCurrent,
-            versionObserved: _surfaceTexturePocVersionObserved,
-          );
+          // W2: the verdict helper of the deleted AndroidSurfaceTexturePoc
+          // class, inlined with unchanged semantics. Both evidence
+          // requirements are strict: hwdec-current must equal the
+          // `surfacetexture` carrier AND `MKSURF: version` must have been
+          // observed.
+          final verdictReasons = <String>[
+            if (hwdecCurrent != _surfaceTextureHwdec)
+              'hwdec-current=$hwdecCurrent expected=$_surfaceTextureHwdec',
+            if (!_surfaceTexturePocVersionObserved)
+              'no "$_mkSurfaceVersionMarker" entry in the captured mpv log '
+                  'stream',
+          ];
+          final failure =
+              verdictReasons.isEmpty ? null : verdictReasons.join('; ');
           if (failure != null) {
-            debugPrint('${AndroidSurfaceTexturePoc.tag} '
-                'active-importer-verify-fail $failure');
+            debugPrint('$_mkSurfacePocTag active-importer-verify-fail $failure');
             if (openFailure == null) {
               // Hard stop: a degraded open keeps playing software-decoded
               // frames otherwise.
               try {
                 await player.stop();
               } catch (stopError) {
-                debugPrint('${AndroidSurfaceTexturePoc.tag} '
+                debugPrint('$_mkSurfacePocTag '
                     'player stop after verify-fail failed: $stopError');
               }
               throw StateError(
                   'SurfaceTexture PoC verification failed: $failure');
             }
           } else if (openFailure == null) {
-            debugPrint('${AndroidSurfaceTexturePoc.tag} '
+            debugPrint('$_mkSurfacePocTag '
                 'active-importer=surfacetexture verified');
           }
           verdictBlockAborted = false;
         } finally {
           unawaited(_surfaceTexturePocLogSubscription?.cancel());
           _surfaceTexturePocLogSubscription = null;
-          // V2 P1-3: the verdict-failure StateError below throws past the
-          // open-end block, so the YUV arm must be reset here too
-          // (idempotent on the success path; the open-end disarm no-ops
-          // after this).
-          _disarmYuvDiagSwitch(serial: serial);
           if (verdictBlockAborted) {
             // V3 review fix: the remaining pre-open authorizations are
             // released here too (all idempotent, serial: null) so the
-            // throw path resets the whole diagnostic arm set instead of
-            // leaking the dataspace arm, the readback switch and the
-            // vd-lavc-o owned write past the aborted transaction.
-            _disarmDiagDataspace(serial: null);
+            // throw path resets the whole diagnostic set instead of
+            // leaking the readback switch and the vd-lavc-o owned write
+            // past the aborted transaction.
             _disableSurfaceTextureDiagSwitch(serial: null);
             await _disableDiagVdLavcO(serial: null);
           }
         }
       }
-      if (AndroidSurfaceTextureDiag.enabled &&
-          !AndroidSurfaceTexturePoc.enabled) {
-        // Copy leg open end: a failed open releases the owned vf probe before
-        // the original error propagates; a successful open starts the bounded
-        // 500 ms metadata poll for the transaction's playback window.
-        if (openFailure != null) {
-          await _disableDiagVdLavcO(serial: serial);
-          await _disableCopyDiagVf(serial: serial);
-        } else {
-          _startCopyDiagPoll(serial);
-        }
-      }
-      if (AndroidSurfaceTextureDiag.enabled &&
-          AndroidSurfaceTexturePoc.enabled) {
+      if (AndroidSurfaceTextureDiag.enabled) {
         // OES leg open end: a failed open turns the readback switch back off
         // before the original error propagates; a successful open starts the
         // bounded teardown watch for the transaction's playback window.
-        // E1: the dataspace arm is transaction-scoped — reset to 0 on both
-        // the open end and the failure path, mirroring the disable mode; the
-        // mpv injection has already consumed the armed value at its EGL
-        // window surface creation during this open. YUV diag: same
-        // transaction scope — mpv consumed the switch at its EGL context
-        // creation during this open.
         if (openFailure != null) {
           unawaited(_disableDiagVdLavcO(serial: serial));
           _disableSurfaceTextureDiagSwitch(serial: serial);
-          _disarmDiagDataspace(serial: serial);
-          _disarmYuvDiagSwitch(serial: serial);
         } else {
           _startSurfaceTextureDiagWatch(serial);
-          _disarmDiagDataspace(serial: serial);
-          _disarmYuvDiagSwitch(serial: serial);
         }
       }
       if (openFailure != null) {
@@ -3606,243 +3493,32 @@ class _SinglePlayerSingleVideoScreenState
     }
   }
 
-  /// E1: resolves the vendor plugin .so exports once. `DynamicLibrary.open`
-  /// returns the same handle for a library the process already loaded (the
-  /// vendor plugin's Java side loaded it); open or symbol-lookup failure
-  /// latches the unavailable state and never throws. The plugin's CMake
-  /// target actually produces `libmedia_kit_dataspace_vendor.so`
-  /// (`System.loadLibrary("media_kit_dataspace_vendor")`), so the spec'd
-  /// `libmedia_kit_android_dataspace_vendor.so` name is tried first and the
-  /// real soname second before giving up.
-  static void Function(int)? _resolveDiagDataspaceArmer() {
-    if (_diagDataspaceArmerProbed) return _diagDataspaceArmer;
-    _diagDataspaceArmerProbed = true;
-    void lookup(ffi.DynamicLibrary library) =>
-        _diagDataspaceArmer = library
-            .lookupFunction<ffi.Void Function(ffi.Int32), void Function(int)>(
-                'mkvendor_set_diag_dataspace');
-    try {
-      lookup(ffi.DynamicLibrary.open(
-          'libmedia_kit_android_dataspace_vendor.so'));
-    } catch (_) {
-      try {
-        lookup(ffi.DynamicLibrary.open('libmedia_kit_dataspace_vendor.so'));
-      } catch (error) {
-        _diagDataspaceArmer = null;
-        debugPrint('MKSURF-E1: diag dataspace armer unavailable ($error)');
-      }
-    }
-    return _diagDataspaceArmer;
-  }
-
-  /// E1, diag on + PoC on only: arms the vendor diag atomic with the
-  /// unchanged PQ/LIMITED value before the open. The setter is a pure
-  /// atomic store and safe from any thread; mpv consumes it once at its EGL
-  /// window surface creation, before the first swap.
-  ///
-  /// Fail-closed in YUV mode (V3 review fix): the config49 NV12 branch
-  /// REQUIRES the PQ/LIMITED dataspace injection, so an unresolvable armer
-  /// or a failed arm throws a StateError — a silently skipped arm would
-  /// open the YUV window without the armed dataspace (misleading playback),
-  /// and the pre-open rollback in the caller releases the arms already
-  /// taken. Non-YUV mode keeps the original non-blocking behavior.
-  void _armDiagDataspace(int serial) {
-    if (_diagDataspaceSerial != null) {
-      if (_diagDataspaceSerial == serial) return;
-      // A previous transaction still owns the arm; reset it first so
-      // ownership never doubles.
-      _disarmDiagDataspace(serial: null);
-    }
-    final armer = _resolveDiagDataspaceArmer();
-    if (armer == null) {
-      if (_androidMksYuvDiag) {
-        throw StateError('MKSURF-E1: diag dataspace armer unavailable; '
-            'YUV mode requires the PQ/LIMITED injection to arm');
-      }
-      return;
-    }
-    try {
-      armer(_diagDataspacePqLimited);
-      _diagDataspaceSerial = serial;
-      debugPrint('MKSURF-E1: diag dataspace armed 0x11C60000');
-    } catch (error) {
-      if (_androidMksYuvDiag) {
-        throw StateError('MKSURF-E1: diag dataspace arm failed ($error)');
-      }
-      debugPrint('MKSURF-E1: diag dataspace arm failed ($error)');
-    }
-  }
-
-  /// E1: resets the vendor diag atomic to 0 (off). Idempotent; with a
-  /// non-null [serial] it only acts while that open still owns the arm.
-  void _disarmDiagDataspace({required int? serial}) {
-    if (serial != null && serial != _diagDataspaceSerial) return;
-    _diagDataspaceSerial = null;
-    final armer = _diagDataspaceArmer;
-    if (armer == null) return;
-    try {
-      armer(0);
-    } catch (error) {
-      debugPrint('MKSURF-E1: diag dataspace disarm failed: $error');
-    }
-  }
-
-  /// YUV diag: resolves the vendor switch export once (same pattern as the
-  /// E1 armer above). Fail-closed (V2 P1-3): a missing .so or symbol throws
-  /// a StateError so the diagnostic transaction fails instead of silently
-  /// playing with the branch inactive.
-  static void Function(int)? _resolveYuvDiagSwitch() {
-    if (_yuvDiagSwitchProbed) {
-      if (_yuvDiagSwitch == null) {
-        throw StateError('YUV-DIAG: switch unavailable (probe failed)');
-      }
-      return _yuvDiagSwitch;
-    }
-    _yuvDiagSwitchProbed = true;
-    void lookup(ffi.DynamicLibrary library) =>
-        _yuvDiagSwitch = library
-            .lookupFunction<ffi.Void Function(ffi.Int32), void Function(int)>(
-                'mkvendor_set_yuv_diag_enabled');
-    try {
-      lookup(ffi.DynamicLibrary.open(
-          'libmedia_kit_android_dataspace_vendor.so'));
-    } catch (_) {
-      try {
-        lookup(ffi.DynamicLibrary.open('libmedia_kit_dataspace_vendor.so'));
-      } catch (error) {
-        _yuvDiagSwitch = null;
-        throw StateError('YUV-DIAG: switch unavailable ($error)');
-      }
-    }
-    return _yuvDiagSwitch;
-  }
-
-  /// Resolves the vendor disarm export once (same dual-name lookup as the
-  /// switch resolver). Best-effort: any failure latches null and never
-  /// throws — the disarm path then falls back to the legacy setter.
-  static void Function()? _resolveYuvDiagDisarm() {
-    if (_yuvDiagDisarmProbed) return _yuvDiagDisarm;
-    _yuvDiagDisarmProbed = true;
-    void lookup(ffi.DynamicLibrary library) => _yuvDiagDisarm = library
-        .lookupFunction<ffi.Void Function(), void Function()>(
-            'mkvendor_disarm_yuv_diag');
-    try {
-      lookup(ffi.DynamicLibrary.open(
-          'libmedia_kit_android_dataspace_vendor.so'));
-    } catch (_) {
-      try {
-        lookup(ffi.DynamicLibrary.open('libmedia_kit_dataspace_vendor.so'));
-      } catch (error) {
-        _yuvDiagDisarm = null;
-        debugPrint('YUV-DIAG: disarm export unavailable ($error)');
-      }
-    }
-    return _yuvDiagDisarm;
-  }
-
-  /// YUV diag, define on + PoC on only: arms the independent YUV diag atomic
-  /// before the open so mpv's EGL context/surface creation takes the NV12
-  /// branch. Pure atomic store, safe from any thread; transaction-scoped.
-  /// Fail-closed: a pairing mismatch (P1-1 contract) or an arm failure throws
-  /// a StateError — a YUV-diag define that ends in a non-NV12 open is
-  /// misleading and must hard-fail the diagnostic transaction.
-  ///
-  /// Owner-bound arm first (A2 authorization model): when the owner token
-  /// and the platform-view generation are available, the arm routes through
-  /// the vendor extension's bound overload so it consumes the owner ledger
-  /// (pending + registered surface) and records the binding natively. When
-  /// either input is unavailable — or the ledger refuses, which is the case
-  /// before this owner's first platform-view mount — the legacy unbound
-  /// global arm applies and the fallback is logged, never silent. The
-  /// generation is observed non-constructively from the session's published
-  /// output only; the fallback controller getter is never touched (P8.4 C2).
-  Future<void> _armYuvDiagSwitch(int serial) async {
-    if (_yuvDiagConvertTransfer != 'pq' || _androidMpvOutputLevels != 'full') {
-      throw StateError('YUV-DIAG: pairing rejected '
-          '(need CONVERT_SURFACE_TRANSFER=pq + MPV_OUTPUT_LEVELS=full; '
-          'got transfer=$_yuvDiagConvertTransfer '
-          'levels=$_androidMpvOutputLevels; offscreen full, window limited, '
-          'single final-pass packing)');
-    }
-    if (_yuvDiagSerial != null) {
-      if (_yuvDiagSerial == serial) return;
-      _disarmYuvDiagSwitch(serial: null);
-    }
-    final String? ownerToken = _lgExperimentToken;
-    final int? ownerGeneration =
-        await resolveYuvDiagOwnerGeneration(_hdrSession);
-    if (ownerToken != null && ownerGeneration != null) {
-      try {
-        final bound = await const MethodChannel(
-                'media_kit_hdr_lab/lg_visual278_experiment')
-            .invokeMethod<bool>('EnableYuvDiag', {
-          'ownerToken': ownerToken,
-          'generation': ownerGeneration,
-        });
-        if (bound == true) {
-          _yuvDiagSerial = serial;
-          debugPrint('YUV-DIAG: switch armed (owner-bound, '
-              'generation=$ownerGeneration, config49 NV12 branch, pq/full)');
-          return;
+  /// W1 (V1 review): whether the device's PQ presentation capability report
+  /// declares the YUV window channel — the single activation gate shared by
+  /// the session owner token and the pre-open arm sequence (W2 removed the
+  /// build defines; the carrier is a declared capability). Resolved once per
+  /// page and reused everywhere (read-only device query: no display target,
+  /// no media — the same snapshot source the session plans against), so the
+  /// token is ready ahead of the platform view creation and no second
+  /// semantic source can diverge. Only a positive declaration activates: an
+  /// unavailable adapter or a failed query latches false (logged, never
+  /// throws) so unknown devices stay bit-identical to the define-off
+  /// behavior; a yuvWindow device whose query fails fails visibly at the
+  /// open through the vendor window gate.
+  Future<bool>? _yuvWindowChannelFuture;
+  Future<bool> _yuvWindowChannelDeclared() =>
+      _yuvWindowChannelFuture ??= () async {
+        try {
+          return (await VideoRouteCapabilities.query())
+              .hdr
+              .pqPresentation
+              .yuvWindow;
+        } catch (error) {
+          debugPrint(
+              'YUV-DIAG: capability query failed ($error); gate latched off');
+          return false;
         }
-        debugPrint('YUV-DIAG: owner-bound arm refused; legacy global arm');
-      } catch (error) {
-        debugPrint('YUV-DIAG: owner-bound arm unavailable ($error); '
-            'legacy global arm');
-      }
-    } else {
-      debugPrint('YUV-DIAG: owner token/generation unavailable; '
-          'legacy global arm');
-    }
-    final arm = _resolveYuvDiagSwitch();
-    // Unreachable: the resolver throws instead of returning null, but the
-    // explicit check gives flow analysis the non-null promotion.
-    if (arm == null) {
-      throw StateError('YUV-DIAG: switch unavailable');
-    }
-    try {
-      arm(1);
-    } catch (error) {
-      throw StateError('YUV-DIAG: arm failed ($error)');
-    }
-    _yuvDiagSerial = serial;
-    debugPrint('YUV-DIAG: switch armed (config49 NV12 branch, pq/full)');
-  }
-
-  /// YUV diag: resets the YUV diag atomic to 0 (off). Idempotent; with a
-  /// non-null [serial] it only acts while that open still owns the arm.
-  void _disarmYuvDiagSwitch({required int? serial}) {
-    if (serial != null && serial != _yuvDiagSerial) return;
-    _yuvDiagSerial = null;
-    // Prefer the disarm export: same flag + binding + format-record reset in
-    // one call, with the bound-disarm log line.
-    final disarm = _resolveYuvDiagDisarm();
-    if (disarm != null) {
-      try {
-        disarm();
-        debugPrint('YUV-DIAG: switch disarmed');
-      } catch (error) {
-        debugPrint('YUV-DIAG: disarm failed: $error');
-      }
-      return;
-    }
-    // Legacy fallback: the setter ALSO clears the owner binding (and the
-    // format record) on the current vendor library — comment drift fixed
-    // (A5 V2): the earlier note claiming the binding persists was written
-    // before the legacy entry started resetting the tuple, and the binding
-    // is 0/0 after this fallback too. Logged so the fallback path is
-    // explicit.
-    final legacy = _yuvDiagSwitch ?? _resolveYuvDiagSwitch();
-    // Unreachable: the resolver throws instead of returning null.
-    if (legacy == null) return;
-    try {
-      legacy(0);
-      debugPrint('YUV-DIAG: switch disarmed (legacy setter; '
-          'binding tuple reset to 0/0)');
-    } catch (error) {
-      debugPrint('YUV-DIAG: disarm failed: $error');
-    }
-  }
+      }();
 
   /// OES-leg teardown watch: 500 ms cadence, no per-tick work beyond the
   /// transaction re-check; turns the readback switch off (bounded to one
@@ -3864,66 +3540,8 @@ class _SinglePlayerSingleVideoScreenState
     });
   }
 
-  /// Copy leg only (diag on, PoC off): appends the unlabeled signalstats
-  /// filter to the end of the current vf chain through an owned write
-  /// following the backend `_setOwned` convention (capture, write strict,
-  /// read back to verify). Unlike `_setOwned`, an empty captured `vf` is a
-  /// valid original (a chain without filters) and is restored as an empty
-  /// chain; a chain that already carries signalstats is left untouched so the
-  /// probe is never duplicated.
-  Future<void> _enableCopyDiagVf(int serial) async {
-    if (_copyDiagVfOwned) {
-      if (serial == _copyDiagSerial) return;
-      // A previous transaction still owns the chain; release it before this
-      // open appends its own probe so ownership never doubles.
-      await _disableCopyDiagVf(serial: null);
-    }
-    final original = await player.getProperty('vf');
-    if (original.contains('signalstats')) {
-      debugPrint('MKSURF-COPY-DIAG: vf already carries signalstats; '
-          'append skipped');
-      return;
-    }
-    final updated =
-        original.isEmpty ? _copyDiagVfFilter : '$original,$_copyDiagVfFilter';
-    await player.setPropertyStrict('vf', updated);
-    final actual = await player.getProperty('vf');
-    // mpv normalizes the graph syntax (e.g. lavfi=[signalstats] becomes
-    // lavfi=graph=signalstats); verify semantically, not by string equality.
-    if (!actual.contains('signalstats')) {
-      throw StateError('vf rejected: requested=$updated actual=$actual');
-    }
-    _copyDiagOriginalVf = original;
-    _copyDiagSerial = serial;
-    _copyDiagVfOwned = true;
-  }
-
-  /// Releases the copy-leg owned vf write and stops the metadata poll.
-  /// Idempotent; with a non-null [serial] it only acts while that open still
-  /// owns the write, so a superseding transaction's own probe stays intact.
-  Future<void> _disableCopyDiagVf({required int? serial}) async {
-    _copyDiagTimer?.cancel();
-    _copyDiagTimer = null;
-    if (!_copyDiagVfOwned) return;
-    if (serial != null && serial != _copyDiagSerial) return;
-    final original = _copyDiagOriginalVf ?? '';
-    _copyDiagVfOwned = false;
-    _copyDiagOriginalVf = null;
-    _copyDiagSerial = null;
-    try {
-      await player.setPropertyStrict('vf', original);
-      final actual = await player.getProperty('vf');
-      if (actual != original) {
-        debugPrint('MKSURF-COPY-DIAG: vf restore mismatch '
-            'requested=$original actual=$actual');
-      }
-    } catch (error) {
-      debugPrint('MKSURF-COPY-DIAG: vf restore failed: $error');
-    }
-  }
-
-  /// Diagnostics vd-lavc-o ownership (both legs). Mirror of the copy-leg
-  /// owned write: capture (empty is the valid original), strict write,
+  /// Diagnostics vd-lavc-o ownership (OES leg). Owned write: capture (empty
+  /// is the valid original), strict write,
   /// read-back verify; an already-set original is never overridden (logged,
   /// skipped, non-blocking).
   Future<void> _enableDiagVdLavcO(int serial) async {
@@ -3968,52 +3586,6 @@ class _SinglePlayerSingleVideoScreenState
       debugPrint('MKSURF-DIAG: vd-lavc-o restore failed: $error');
     }
   }
-
-  /// Copy-leg metadata poll: 500 ms cadence while this transaction plays.
-  /// Every tick re-checks ownership and stops (restoring the owned vf chain)
-  /// on page disposal, a superseding open or end of playback, so the poll is
-  /// always bounded to one open transaction.
-  void _startCopyDiagPoll(int serial) {
-    _copyDiagTimer?.cancel();
-    _copyDiagTimer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
-      final superseded = serial != _hdrOpenSerial;
-      if (!mounted ||
-          _autoPlayerDisposed ||
-          superseded ||
-          player.state.completed ||
-          !_copyDiagVfOwned) {
-        timer.cancel();
-        unawaited(_disableCopyDiagVf(serial: superseded ? null : serial));
-        return;
-      }
-      unawaited(_sampleCopyDiag(serial));
-    });
-  }
-
-  /// One `MKSURF-COPY-DIAG:` sample. Every property is read through the
-  /// string path; an unreadable property is logged as null.
-  Future<void> _sampleCopyDiag(int serial) async {
-    if (serial != _hdrOpenSerial || _copyDiagSampleInFlight) return;
-    _copyDiagSampleInFlight = true;
-    try {
-      final pos = await player.getProperty('time-pos');
-      final yavg =
-          await player.getProperty('vf-metadata/mksdiag/lavfi.signalstats.YAVG');
-      final ymin =
-          await player.getProperty('vf-metadata/mksdiag/lavfi.signalstats.YMIN');
-      final ymax =
-          await player.getProperty('vf-metadata/mksdiag/lavfi.signalstats.YMAX');
-      debugPrint('MKSURF-COPY-DIAG: t=${_copyDiagValue(pos)} '
-          'yavg=${_copyDiagValue(yavg)} ymin=${_copyDiagValue(ymin)} '
-          'ymax=${_copyDiagValue(ymax)}');
-    } catch (error) {
-      debugPrint('MKSURF-COPY-DIAG: sample failed: $error');
-    } finally {
-      _copyDiagSampleInFlight = false;
-    }
-  }
-
-  static String _copyDiagValue(String value) => value.isEmpty ? 'null' : value;
 
   /// Prints the session report of the current generation with the full
   /// prediction (selected + every candidate) and the actual route — the A2
@@ -4358,6 +3930,115 @@ class _SinglePlayerSingleVideoScreenState
     'MEDIA_KIT_ANDROID_VIDEO_TIMING_OFFSET',
   );
 
+  // P0 snapshot read list. The native property channel answers an
+  // unavailable property with an empty string, which the dump reports as
+  // <null>; a thrown read (e.g. a disposed player) is reported as <error>
+  // and never interrupts the remaining entries.
+  static const _propSnapshotProperties = <String>[
+    'hwdec',
+    'hwdec-current',
+    'vo',
+    'vo-configured',
+    'wid',
+    'video-format',
+    'video-params/w',
+    'video-params/h',
+    'video-params/pixelformat',
+    'video-params/primaries',
+    'video-params/gamma',
+    'video-params/sig-peak',
+    'container-fps',
+    'fps',
+    'hwdec-interop',
+    'video-sync',
+    'interpolation',
+    'target-colorspace-hint',
+    'scale',
+    'dscale',
+    'dither-depth',
+    'dither',
+    'deband',
+    'drop-frame-count',
+    'decoder-frame-drop-count',
+    'vo-drop-frame-count',
+    'frame-drop-count',
+    'estimated-vsync-fps',
+    'requested-active-window',
+    'current-vo',
+    'current-gpu-context',
+  ];
+  Timer? _embedProbeTimer;
+  int _embedProbeTick = 0;
+  bool _embedProbeScheduled = false;
+
+  /// One-shot effective-property dump for the P0 baseline freeze. Waits for
+  /// the first-frame latch (video-params) bounded by a timeout so a broken
+  /// open still produces a snapshot, then reads each property independently.
+  Future<void> _runAndroidPropSnapshot() async {
+    if (player.state.videoParams.w == null) {
+      try {
+        await player.stream.videoParams
+            .firstWhere((params) => params.w != null)
+            .timeout(const Duration(seconds: 15));
+      } catch (_) {}
+    }
+    for (final property in _propSnapshotProperties) {
+      try {
+        final value = await player.getProperty(
+          property,
+          waitForInitialization: false,
+        );
+        debugPrint(
+            'PROP_SNAPSHOT $property=${value.isEmpty ? '<null>' : value}');
+      } catch (_) {
+        debugPrint('PROP_SNAPSHOT $property=<error>');
+      }
+    }
+  }
+
+  /// Embed probe sampling beat: 1s cadence for the first 30 samples to catch
+  /// the decoder/VO attach window, then one sample every 30s until EOS.
+  void _startEmbedProbeLoop() {
+    if (_embedProbeScheduled) return;
+    _embedProbeScheduled = true;
+    _embedProbeTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      _embedProbeTick += 1;
+      if (_embedProbeTick > 30 && _embedProbeTick % 30 != 0) return;
+      if (!mounted || _autoPlayerDisposed || player.state.completed) {
+        timer.cancel();
+        return;
+      }
+      unawaited(_sampleEmbedProbe());
+    });
+  }
+
+  Future<void> _sampleEmbedProbe() async {
+    try {
+      final hwdecCurrent = await player.getProperty(
+        'hwdec-current',
+        waitForInitialization: false,
+      );
+      final width = await player.getProperty(
+        'video-params/w',
+        waitForInitialization: false,
+      );
+      final height = await player.getProperty(
+        'video-params/h',
+        waitForInitialization: false,
+      );
+      final voConfigured = await player.getProperty(
+        'vo-configured',
+        waitForInitialization: false,
+      );
+      String orUnset(String value) => value.isEmpty ? '<null>' : value;
+      debugPrint('EMBED_PROBE hwdec-current=${orUnset(hwdecCurrent)} '
+          'video-params/wxh=${orUnset(width)}x${orUnset(height)} '
+          'vo-configured=${orUnset(voConfigured)}');
+    } catch (error) {
+      debugPrint('EMBED_PROBE error=$error');
+    }
+  }
+
   Future<void> _applyAndroidVideoTimingOffset() async {
     if (!Platform.isAndroid || _androidVideoTimingOffset.isEmpty) return;
     final offset = double.tryParse(_androidVideoTimingOffset);
@@ -4514,6 +4195,10 @@ class _SinglePlayerSingleVideoScreenState
 
   late final Player player = Player(
     configuration: PlayerConfiguration(
+      // Embed probe: boot directly on the mediacodec_embed VO. The literal
+      // 'null' mirrors the PlayerConfiguration default so the define-off
+      // build is unchanged.
+      vo: _androidEmbedProbe ? 'mediacodec_embed' : 'null',
       logLevel: _androidCodecTraceLog
           ? MPVLogLevel.trace
           : (_androidVulkanProbe ||
@@ -4586,9 +4271,26 @@ class _SinglePlayerSingleVideoScreenState
       throw StateError(
           'Convert route lock requires the Android Session open path');
     }
+    if (_androidSdrEmbed && !_androidHdrTransaction) {
+      throw StateError(
+          'SDR embed entry requires MEDIA_KIT_ANDROID_HDR_TRANSACTION=true '
+          '(the session transaction path plans and reviews the candidate)');
+    }
+    if (_androidSdrEmbed && _androidEmbedProbe) {
+      throw StateError('SDR embed entry excludes the non-transaction '
+          'MEDIA_KIT_ANDROID_EMBED_PROBE plain-player probe mode');
+    }
     if ((_androidMpvOutputLevels.isNotEmpty || _androidVfFullRange) &&
         !_androidHdrTransaction) {
       throw StateError('Output range experiments require HDR_TRANSACTION');
+    }
+    if (_androidEmbedProbe &&
+        (!Platform.isAndroid ||
+            _androidHdrTransaction ||
+            (_androidVo.isNotEmpty && _androidVo != 'mediacodec_embed'))) {
+      throw StateError(
+          'Embed probe requires Android, no HDR transaction and no '
+          'conflicting MEDIA_KIT_ANDROID_VO');
     }
     if (_androidHdr10SessionDiagnostic) {
       _hdr10BuildError = _validateHdr10DiagnosticBuild();
@@ -4713,8 +4415,11 @@ class _SinglePlayerSingleVideoScreenState
         surfaceSnapshot: _androidServiceProbeSurfaceSnapshot);
     if (Platform.isAndroid && _androidHdrTransaction) {
       // migrated to HdrVideoSession (S10): the session owns the HDR open
-      // orchestration for the page's lifetime.
-      _createHdrSession();
+      // orchestration for the page's lifetime. W2: the creation awaits the
+      // YUV-window capability latch (owner token must precede the platform
+      // view creation); nothing after this point in initState reads the
+      // session synchronously.
+      unawaited(_createHdrSession());
       if (_androidHdrDiagnostics) {
         // R4.3 seven-layer key=value logs (HDR capability/predict/classify/
         // decision/readback/degrade/recover) on top of the page's own
@@ -5114,7 +4819,8 @@ class _SinglePlayerSingleVideoScreenState
           debugPrint('HDR_CAP_LIB_CHANNEL ERROR=$error');
         }
         try {
-          final caps = await HdrCapabilities.query(player: player);
+          final caps = (await VideoRouteCapabilities.query(
+        target: const VideoOutputTarget.applicationView())).hdr;
           debugPrint('HDR_CAP_QUERY $caps');
         } catch (error) {
           debugPrint('HDR_CAP_QUERY ERROR=$error');
@@ -5395,6 +5101,11 @@ class _SinglePlayerSingleVideoScreenState
                     (seconds * Duration.microsecondsPerSecond).round(),
               ),
       );
+      if (_androidPropSnapshot || _androidEmbedProbe) {
+        // One-shot effective-property snapshot once the session open has
+        // completed and the first frame is up (P0 baseline freeze).
+        unawaited(_runAndroidPropSnapshot());
+      }
       if (_androidAutoSdrAfterP5Seconds > 0 &&
           sources[0].contains('/media-kit-p5-')) {
         await Future<void>.delayed(
@@ -5591,6 +5302,17 @@ class _SinglePlayerSingleVideoScreenState
     if (Platform.isAndroid && _androidDirectOpenTrace) {
       debugPrint('ANDROID_DIRECT_OPEN media_command');
     }
+    if (Platform.isAndroid && _androidEmbedProbe) {
+      // Attach the embed decoder before the open so MediaCodec init sees the
+      // direct hwdec; the controller creation default ('auto') is already
+      // applied by then, this pre-open write is the last word.
+      try {
+        await player.setPropertyStrict('hwdec', 'mediacodec');
+        debugPrint('EMBED_PROBE hwdec=mediacodec applied pre-open');
+      } catch (error) {
+        debugPrint('EMBED_PROBE hwdec pre-open error=$error');
+      }
+    }
     await player.open(Media(
       sources[0],
       start: requestedStartSeconds != null && requestedStartSeconds >= 0.0
@@ -5601,6 +5323,14 @@ class _SinglePlayerSingleVideoScreenState
             )
           : null,
     ));
+    if (Platform.isAndroid && _androidEmbedProbe) {
+      _startEmbedProbeLoop();
+    }
+    if (Platform.isAndroid && (_androidPropSnapshot || _androidEmbedProbe)) {
+      // One-shot effective-property snapshot once the plain open has
+      // completed and the first frame is up (P0 baseline freeze).
+      unawaited(_runAndroidPropSnapshot());
+    }
     if (Platform.isAndroid &&
         _androidAutoSeekAtSeconds >= 0 &&
         !_autoSeekReopenScheduled) {
@@ -5923,21 +5653,14 @@ class _SinglePlayerSingleVideoScreenState
     }
     _flutterRepaintTimer?.cancel();
     _androidP5CounterTimer?.cancel();
-    _copyDiagTimer?.cancel();
-    if (_copyDiagVfOwned) {
-      unawaited(_disableCopyDiagVf(serial: null));
+    _embedProbeTimer?.cancel();
+    if (_diagVdLavcOOwned) {
       unawaited(_disableDiagVdLavcO(serial: null));
     }
     _surfaceTextureDiagTimer?.cancel();
     if (_surfaceTextureDiagSerial != null) {
       _disableSurfaceTextureDiagSwitch(serial: null);
     }
-    // E1: drop a lingering dataspace arm (defensive; the arm is normally
-    // reset at each open's end).
-    _disarmDiagDataspace(serial: null);
-    // YUV diag: drop a lingering branch switch (defensive; normally reset at
-    // each open's end).
-    _disarmYuvDiagSwitch(serial: null);
     if (Platform.isAndroid && _androidFrameSchedulerProbe) {
       SchedulerBinding.instance.removeTimingsCallback(_frameTimingsCallback);
     }
@@ -6139,11 +5862,11 @@ class _SinglePlayerSingleVideoScreenState
     debugPrint('DIAG_SCOPE_PAGE_EXIT stop complete');
   }
 
-  /// POC define on only: the video output container is fixed at the frozen
-  /// output contract's 2:1 geometry from the first build, so the platform
-  /// view is created directly at its final 1440x720 surface size and the
-  /// mid-open resize (video-params arrival resetting the decoder) never
-  /// happens. Define off keeps the existing adaptive layout untouched.
+  /// W2 (feature direct-on): the video output container is fixed at the
+  /// frozen output contract's 2:1 geometry from the first build, so the
+  /// platform view is created directly at its final 1440x720 surface size and
+  /// the mid-open resize (video-params arrival resetting the decoder) never
+  /// happens.
   Widget _pocFixedOutputLayout(Widget child) {
     debugPrint('MKSURF-POC: fixed 2:1 output layout');
     return Center(
@@ -6892,10 +6615,8 @@ class _SinglePlayerSingleVideoScreenState
                               clipBehavior: Clip.antiAlias,
                               margin: const EdgeInsets.all(32.0),
                               child: useHdrVideo
-                                  ? (AndroidSurfaceTexturePoc.enabled
-                                      ? _pocFixedOutputLayout(
-                                          HdrVideo(session: _hdrSession!))
-                                      : HdrVideo(session: _hdrSession!))
+                                  ? _pocFixedOutputLayout(
+                                      HdrVideo(session: _hdrSession!))
                                   : displayController == null
                                       ? const ColoredBox(color: Colors.black)
                                       : Video(
@@ -6921,17 +6642,10 @@ class _SinglePlayerSingleVideoScreenState
             : ListView(
                 children: [
                   useHdrVideo
-                      ? (AndroidSurfaceTexturePoc.enabled
-                          ? _pocFixedOutputLayout(HdrVideo(
-                              session: _hdrSession!,
-                              controls: (_) => const SizedBox.shrink(),
-                            ))
-                          : HdrVideo(
-                              session: _hdrSession!,
-                              width: MediaQuery.of(context).size.width,
-                              height:
-                                  MediaQuery.of(context).size.width * 9.0 / 16.0,
-                            ))
+                      ? _pocFixedOutputLayout(HdrVideo(
+                          session: _hdrSession!,
+                          controls: (_) => const SizedBox.shrink(),
+                        ))
                       : displayController == null
                           ? AspectRatio(
                               aspectRatio: 16 / 9,

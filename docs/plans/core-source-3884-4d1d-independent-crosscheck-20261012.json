@@ -1,0 +1,236 @@
+{
+  "schema": "core-independent-app-source-crosscheck-v1",
+  "task": "MK-ROUTING-20261011",
+  "checked_at_utc": "2026-10-12T16:28:20.189554+00:00",
+  "verdict": "PASS",
+  "scope": "Independent read-only cross-check of the frozen report against its five actual local ZIPs and recorded job metadata/log files; no production writes or hosted/device test reruns.",
+  "input_report": {
+    "path": "/workspace/scratch/bb7931e64549/audit-ci-web-cow/slice2/core-source-ci-3884d3e-4d1d4b7-checkpoint-20261012.json",
+    "bytes": 148018,
+    "sha256": "1f48f122a109ee4c920165998c285cbf81bc0786af55f1c77cb34f9f03ac0dc1"
+  },
+  "run": {
+    "id": 38275714484,
+    "html_url": "https://github.com/Goodwu/PiliPlusX/actions/runs/38275714484",
+    "head_sha": "3884d3e8f4f38ebd6043c9be5c8dc6cef46e4377",
+    "run_attempt": 1,
+    "status": "completed",
+    "conclusion": "success",
+    "updated_at": "2026-10-12T16:21:08Z"
+  },
+  "source_vector": {
+    "app": "3884d3e8f4f38ebd6043c9be5c8dc6cef46e4377",
+    "appTree": "babf93595feed078058608d6aada5c4dd014ddd5",
+    "media-kit": "4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2",
+    "media-kitTree": "34dfc9a45c039e2f1da327f057dc8807f1cf3df3"
+  },
+  "artifacts": [
+    {
+      "artifact_id": 11759950362,
+      "artifact_name": "routing-app-python-3884d3e8f4f38ebd6043c9be5c8dc6cef46e4377",
+      "path": "/workspace/scratch/bb7931e64549/audit-ci-web-cow/slice2/11759950362.zip",
+      "bytes": 209912,
+      "sha256": "ba4b7e1e0c7e1f544018125bb668ccd24896558d7d6fcb259eae817296f7c8dd",
+      "member_count": 49,
+      "all_member_names_sizes_sha256_match": true,
+      "source_txt_raw": "app=3884d3e8f4f38ebd6043c9be5c8dc6cef46e4377\nmedia-kit=4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2\n",
+      "source_txt_sha256": "47ea5f6f2d84f1663945322889d0b7aa3581cea283d4e28317d921db354d0f9f",
+      "source_vector_all_three_phases_match": true,
+      "fresh_receipt_steps": 57,
+      "all_step_exit_codes_zero": true,
+      "job_id": 114900636697,
+      "job_log_sha256": "4b7e34df132022b95a6de3b7144764e29359cf74aee517cb7c250da3ed7d4abc",
+      "sdk_root": "/Users/runner/work/_temp/rb/s/flutter",
+      "native_acceptance": false,
+      "device_acceptance": false
+    },
+    {
+      "artifact_id": 11759575257,
+      "artifact_name": "routing-app-source-linux-3884d3e8f4f38ebd6043c9be5c8dc6cef46e4377",
+      "path": "/workspace/scratch/bb7931e64549/audit-ci-web-cow/slice2/11759575257.zip",
+      "bytes": 207682,
+      "sha256": "39e3c806ec9e7e97cc4ee94eb4af75489535341a7890902079713ea998c92a68",
+      "member_count": 52,
+      "all_member_names_sizes_sha256_match": true,
+      "source_txt_raw": "app=3884d3e8f4f38ebd6043c9be5c8dc6cef46e4377\nmedia-kit=4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2\n",
+      "source_txt_sha256": "47ea5f6f2d84f1663945322889d0b7aa3581cea283d4e28317d921db354d0f9f",
+      "source_vector_all_three_phases_match": true,
+      "fresh_receipt_steps": 57,
+      "all_step_exit_codes_zero": true,
+      "job_id": 114900636617,
+      "job_log_sha256": "1133cfa4644c28bb2fe267e2064dd78fd62bb141daaf827739aa709c4dce2ea1",
+      "sdk_root": "/home/runner/work/_temp/rb/s/flutter",
+      "native_acceptance": false,
+      "device_acceptance": false
+    },
+    {
+      "artifact_id": 11759371632,
+      "artifact_name": "routing-app-source-macos-3884d3e8f4f38ebd6043c9be5c8dc6cef46e4377",
+      "path": "/workspace/scratch/bb7931e64549/audit-ci-web-cow/slice2/11759371632.zip",
+      "bytes": 207856,
+      "sha256": "52f053f929040aa0fb055b989c95ee6f8e786a2ac77565375fad96038b3e33a8",
+      "member_count": 52,
+      "all_member_names_sizes_sha256_match": true,
+      "source_txt_raw": "app=3884d3e8f4f38ebd6043c9be5c8dc6cef46e4377\nmedia-kit=4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2\n",
+      "source_txt_sha256": "47ea5f6f2d84f1663945322889d0b7aa3581cea283d4e28317d921db354d0f9f",
+      "source_vector_all_three_phases_match": true,
+      "fresh_receipt_steps": 57,
+      "all_step_exit_codes_zero": true,
+      "job_id": 114900636619,
+      "job_log_sha256": "a7592264b7ae2f1f0c073700b0140e37641bf218f36a82ef4766900507bbee2e",
+      "sdk_root": "/Users/runner/work/_temp/rb/s/flutter",
+      "native_acceptance": false,
+      "device_acceptance": false
+    },
+    {
+      "artifact_id": 11759216852,
+      "artifact_name": "routing-app-source-3884d3e8f4f38ebd6043c9be5c8dc6cef46e4377",
+      "path": "/workspace/scratch/bb7931e64549/audit-ci-web-cow/slice2/11759216852.zip",
+      "bytes": 213498,
+      "sha256": "6888ede8eed304fd29b164aaa1dbe2bafa3e78bb6bba9758f6100956aeb6902d",
+      "member_count": 56,
+      "all_member_names_sizes_sha256_match": true,
+      "source_txt_raw": "app=3884d3e8f4f38ebd6043c9be5c8dc6cef46e4377\nmedia-kit=4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2\n",
+      "source_txt_sha256": "47ea5f6f2d84f1663945322889d0b7aa3581cea283d4e28317d921db354d0f9f",
+      "source_vector_all_three_phases_match": true,
+      "fresh_receipt_steps": 57,
+      "all_step_exit_codes_zero": true,
+      "job_id": 114900636611,
+      "job_log_sha256": "1d9fd98aed1e112150dff442300f5168abfb36b7396e8fdd1ff370673decb6df",
+      "sdk_root": "/home/runner/work/_temp/rb/s/flutter",
+      "native_acceptance": false,
+      "device_acceptance": false
+    },
+    {
+      "artifact_id": 11758049975,
+      "artifact_name": "routing-app-source-windows-3884d3e8f4f38ebd6043c9be5c8dc6cef46e4377",
+      "path": "/workspace/scratch/bb7931e64549/audit-ci-web-cow/slice2/11758049975.zip",
+      "bytes": 207879,
+      "sha256": "8e88bc2c53aac9fcb2f08d602d5c4002b6b0326547e203ebf9233f37a60402af",
+      "member_count": 52,
+      "all_member_names_sizes_sha256_match": true,
+      "source_txt_raw": "app=3884d3e8f4f38ebd6043c9be5c8dc6cef46e4377\nmedia-kit=4d1d4b7d23d66e8c7de82c3955238c4a0dd159c2\r\n",
+      "source_txt_sha256": "c05d812660ec6af615f4638959f49c46afc4847a47146289884451a89e1ede8d",
+      "source_vector_all_three_phases_match": true,
+      "fresh_receipt_steps": 57,
+      "all_step_exit_codes_zero": true,
+      "job_id": 114900636678,
+      "job_log_sha256": "70f7c9ea14affea12bcf56c55c291b1c7d0d05b3fc1ec33384958cbe3c6721df",
+      "sdk_root": "D:\\a\\_temp\\rb\\s\\flutter",
+      "native_acceptance": false,
+      "device_acceptance": false
+    }
+  ],
+  "statistics": {
+    "flutter": [
+      {
+        "artifact_id": 11759575257,
+        "source_platform": "linux",
+        "passed": 268,
+        "terminal_line": "01:04 +268: All tests passed!",
+        "analyze_terminal_line": "No issues found! (ran in 42.4s)",
+        "bundle_step": {
+          "number": 8,
+          "conclusion": "success"
+        },
+        "kernel_hash_receipt_matches": true,
+        "actual_kernel_binary_in_zip": false
+      },
+      {
+        "artifact_id": 11759371632,
+        "source_platform": "macos",
+        "passed": 268,
+        "terminal_line": "01:34 +268: All tests passed!",
+        "analyze_terminal_line": "No issues found! (ran in 59.1s)",
+        "bundle_step": {
+          "number": 8,
+          "conclusion": "success"
+        },
+        "kernel_hash_receipt_matches": true,
+        "actual_kernel_binary_in_zip": false
+      },
+      {
+        "artifact_id": 11759216852,
+        "source_platform": "android",
+        "passed": 268,
+        "terminal_line": "01:17 +268: All tests passed!",
+        "analyze_terminal_line": "No issues found! (ran in 34.5s)",
+        "bundle_step": {
+          "number": 12,
+          "conclusion": "success"
+        },
+        "kernel_hash_receipt_matches": true,
+        "actual_kernel_binary_in_zip": false
+      },
+      {
+        "artifact_id": 11758049975,
+        "source_platform": "windows",
+        "passed": 268,
+        "terminal_line": "01:22 +268: All tests passed!",
+        "analyze_terminal_line": "No issues found! (ran in 42.6s)",
+        "bundle_step": {
+          "number": 8,
+          "conclusion": "success"
+        },
+        "kernel_hash_receipt_matches": true,
+        "actual_kernel_binary_in_zip": false
+      }
+    ],
+    "python": {
+      "artifact_id": 11759950362,
+      "member": "tests.log",
+      "passed": 515,
+      "skipped": 2,
+      "total": 517,
+      "actual_terminal_lines": [
+        "----------------------------------------------------------------------",
+        "Ran 517 tests in 212.075s",
+        "",
+        "OK (skipped=2)"
+      ],
+      "skip_details": [
+        "test_real_three_file_ios_chain_passes_and_android_only_chain_fails (prepare_ios_variant_test.IOSPatchSemanticsTests.test_real_three_file_ios_chain_passes_and_android_only_chain_fails) ... skipped 'shared Flutter Git source is not present'",
+        "test_semantic_gate_rejects_source_patch_mutation_and_reverse_tool_failure (prepare_ios_variant_test.IOSPatchSemanticsTests.test_semantic_gate_rejects_source_patch_mutation_and_reverse_tool_failure) ... skipped 'shared Flutter Git source is not present'"
+      ],
+      "test_log_sha256": "6a3c2c365014e961fb78af625f7ea73ebe32e00ad84585034e1af9933254e46b"
+    },
+    "web": {
+      "artifact_id": 11759216852,
+      "dom_passed": 1,
+      "dom_terminal_line": "00:00 +1: All tests passed!",
+      "compile_terminal_line": "✓ Built build/web",
+      "hash_receipt_matches": true,
+      "actual_web_output_archived": false
+    }
+  },
+  "sdk": {
+    "flutter": "3.47.2",
+    "dart": "3.13.2",
+    "commit": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+    "all_five_actual_toolchain_machine_logs_match_report_and_bootstrap": true
+  },
+  "boundary_spotcheck_windows": {
+    "artifact_id": 11758049975,
+    "source_txt_CRLF_handled_without_changing_raw_hash": true,
+    "sdk_root_raw": "D:\\a\\_temp\\rb\\s\\flutter",
+    "private_sdk_root_log": "D:/a/_temp/rb/s/flutter\r\n",
+    "sdk_patch_execution_exact_vector_and_sdk_match": true,
+    "package_root_samples": {
+      "media_kit": "D:\\a\\PiliPlusX\\PiliPlusX\\media-kit\\media_kit",
+      "media_kit_video": "D:\\a\\PiliPlusX\\PiliPlusX\\media-kit\\media_kit_video"
+    }
+  },
+  "acceptance_boundaries": [
+    "Every bootstrap records nativeBinaryProvenanceVerified=false and deviceTest=false; every report artifact keeps native_acceptance=false and device_acceptance=false.",
+    "All five ZIPs contain source/host-test/provenance receipts; no native binary member was found.",
+    "Dart kernel and complete Web output bytes are absent; their hash receipts and successful recorded build steps do not become independent binary rehash or native acceptance.",
+    "The Python skip count is preserved; the two iOS source-patch semantic cases are not counted as passed.",
+    "App Chrome DOM 1 and four App Flutter 268 suites do not substitute for separate library Web targeted/full-suite statistics."
+  ],
+  "not_repeated": [
+    "The original audit of 2733 pinned Git source-content hashes.",
+    "All package roots or complete SDK patch reconstruction; this cross-check sampled Windows roots and SDK identity.",
+    "GitHub metadata fetch, artifact redownload, native builds, device HDR, sustained performance."
+  ],
+  "contradictions": []
+}

@@ -488,7 +488,9 @@ class AndroidVideoController extends PlatformVideoController {
     if (_disposed ||
         _fullyDisposed ||
         _playerTerminated ||
-        _detachRetryTimers.containsKey(owner)) return;
+        _detachRetryTimers.containsKey(owner)) {
+      return;
+    }
     final attempts = _detachRetryAttempts[owner] ?? 0;
     if (attempts >= _maxPlatformSurfaceRetries) {
       debugPrint('PlatformVideoView detach retry exhausted: '
@@ -522,7 +524,9 @@ class AndroidVideoController extends PlatformVideoController {
         _playerTerminated ||
         !_ledger.isLive(owner) ||
         !_outputIntent.isCurrent(owner, outputIntentSerial) ||
-        _bindRetryTimers.containsKey(owner)) return;
+        _bindRetryTimers.containsKey(owner)) {
+      return;
+    }
     final attempts = _bindRetryAttempts[owner] ?? 0;
     if (attempts >= _maxPlatformSurfaceRetries) {
       debugPrint('PlatformVideoView bind retry exhausted: '
@@ -1096,14 +1100,15 @@ class AndroidVideoController extends PlatformVideoController {
   /// Every matching change re-sends the full `HdrCapabilities.Get` snapshot
   /// as a `HdrCapabilities.Changed` method call on the shared channel.
   ///
-  /// The enable is a shared channel switch, not per-subscriber: with several
-  /// [HdrVideoSession]s alive, one disposing closes the subscription for the
-  /// survivors. Phase 1 assumes a single session per process; revisit with a
-  /// reference count if that ever changes.
+  /// Sessions register before enabling and unregister before disabling.
+  /// Keep the shared native subscription enabled while any registered
+  /// listener remains, including when a previous owner sends a late disable.
+  /// The idempotent listener collection owns this lifetime; repeated calls
+  /// do not acquire or release additional ownership.
   static Future<void> setHdrCapabilitiesChangedEnabled(bool enabled) {
-    return _channel.invokeMethod<Object?>(
+    return _channel.invokeMethod<void>(
       'HdrCapabilities.Changed',
-      {'enable': enabled},
+      {'enable': enabled || _hdrCapabilitiesChangedListeners.isNotEmpty},
     );
   }
 

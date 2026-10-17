@@ -1,0 +1,693 @@
+{
+  "schema": "core-app-pr3-user-ordered-code-merge-review-v1",
+  "task": "MK-ROUTING-20261011",
+  "frozen_at_utc": "2026-10-12T17:05:56.605786+00:00",
+  "observed_remote_at_utc": "2026-10-12 17:00:46 UTC",
+  "reviewer_role": "Read-only CORE integration review assistant; root remains sole public integrator",
+  "recommendation": "PROCEED_WITH_USER_AUTHORIZED_CODE_INTEGRATION_AND_EXPLICIT_OPEN_ISSUES",
+  "authorization_context": "Root relayed the latest user instruction: integrate DEVICE changes first; pause CI and other work. This supersedes older no-integration scheduling statements without marking unresolved defects or device/native acceptance complete.",
+  "heads": {
+    "public": "ed0dc2bfc7f51ac3dc14a7f676451db27ecea6a7",
+    "device": "9895e7dc040cdc06a33cceba4d4379eba3f596b5",
+    "actual_merge_base": "1970d440b5b9d9ffc001866064581e4005b26b30",
+    "remote_public_ref_matched_requested_head": true
+  },
+  "actual_compare": {
+    "status": "diverged",
+    "device_ahead_commits": 9,
+    "public_ahead_commits": 11,
+    "device_changed_paths": 11,
+    "public_changed_paths": 34,
+    "overlap_paths": [
+      "TASKS.md"
+    ],
+    "additions": 1047,
+    "deletions": 3
+  },
+  "mechanical_result": {
+    "text_conflicts": [],
+    "non_tasks_patch_check_exit": 0,
+    "non_tasks_apply_exit": 0,
+    "non_tasks_files_after_apply_match_exact_device_git_blobs": 10,
+    "tasks_three_way_merge_exit": 0,
+    "scope": "Only independent scratch copies were written. No repository checkout/index/ref was modified. This is exact GitHub merge-base plus per-file patch and TASKS three-way replay, not a whole-repository git merge or build."
+  },
+  "paths": [
+    {
+      "path": "TASKS.md",
+      "status": "modified",
+      "additions": 2,
+      "deletions": 0,
+      "device_git_blob": "7e775eab5d91195212a2417e2233e2ec13d6def0",
+      "public_also_changed_since_merge_base": true,
+      "recommendation": "manual_current_state_reconciliation",
+      "reason_and_preservation": "唯一双方改动路径，三方文本合并成功，但 DEVICE 旧增量仍声称已修复/真机验收及仅待 LG。以 ed0 公共当前状态为准，登记用户授权代码归并的精确 parents/来源与仍开放问题，保留既有历史证据；不能整份取 DEVICE 版。",
+      "mechanical_replay": {
+        "git_merge_file_exit": 0,
+        "conflict_markers": [],
+        "public_head_git_blob": "554b253f82441abc5d8aeea12db98471c2412466",
+        "base_git_blob": "5233c8d254e9cda3fafe1a1a958e21d945092fa5"
+      }
+    },
+    {
+      "path": "android/app/build.gradle.kts",
+      "status": "modified",
+      "additions": 2,
+      "deletions": 1,
+      "device_git_blob": "64aa199df9e5fb24fc37a540ca67fb7c6258597e",
+      "public_also_changed_since_merge_base": false,
+      "recommendation": "direct_code_delta_with_explicit_diagnostic_config_note",
+      "reason_and_preservation": "直接保留 debug 删除 .debug suffix 的 DEVICE 增量；这是包名/安装行为变化，debug 与 release 同 applicationId，不是运行时路由修复。fdbb3a8 commit 称用户要求的诊断配置，本次用户明确要求先并 DEVICE 代码；登记来源和行为，不声称批准生产发布。",
+      "mechanical_replay": {
+        "path": "android/app/build.gradle.kts",
+        "bytes": 3057,
+        "git_blob": "64aa199df9e5fb24fc37a540ca67fb7c6258597e",
+        "sha256": "e7ca1476c52ac272a305644f19150a42a8fcf6f8232efb54c0a96c9947811eef",
+        "exact_device_blob_after_apply": true
+      }
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/example/piliplusx/MainActivity.kt",
+      "status": "modified",
+      "additions": 9,
+      "deletions": 0,
+      "device_git_blob": "d967a664d2690ce0bc313569ea60755fcdc3845d",
+      "public_also_changed_since_merge_base": false,
+      "recommendation": "direct_code_delta_known_issues_open",
+      "reason_and_preservation": "保留原公共 HDR MethodChannel/setWindowHdrMode 逻辑，仅接入 brightness handler/start/stop；不回退已有窗口 HDR 处理。DV006 运行时问题单独保持开放。",
+      "mechanical_replay": {
+        "path": "android/app/src/main/kotlin/com/example/piliplusx/MainActivity.kt",
+        "bytes": 4915,
+        "git_blob": "d967a664d2690ce0bc313569ea60755fcdc3845d",
+        "sha256": "1257fcad2d392112ad8ab12bbbc1391cfc9b063869caa6f656095870363c2179",
+        "exact_device_blob_after_apply": true
+      }
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/example/piliplusx/ScreenBrightnessHandler.kt",
+      "status": "added",
+      "additions": 210,
+      "deletions": 0,
+      "device_git_blob": "e1be883ee1a0fa55826415cdb25e82beac2eac74",
+      "public_also_changed_since_merge_base": false,
+      "recommendation": "direct_new_code_known_issues_open",
+      "reason_and_preservation": "可按用户代码先归并要求加入。已知 NaN reset、线程、application events、系统授权/失败和 Activity detach 问题未随本次归并解决。",
+      "mechanical_replay": {
+        "path": "android/app/src/main/kotlin/com/example/piliplusx/ScreenBrightnessHandler.kt",
+        "bytes": 8294,
+        "git_blob": "e1be883ee1a0fa55826415cdb25e82beac2eac74",
+        "sha256": "ac1ffcc4e451fe71cfa12ba25ff1a311dcc06fe3f8effaac79fda389722a75bd",
+        "exact_device_blob_after_apply": true
+      }
+    },
+    {
+      "path": "archives/conversations/dv003-dolby-tier-gray-20261012.md",
+      "status": "added",
+      "additions": 37,
+      "deletions": 0,
+      "device_git_blob": "0dc67f9399e09d396b9a7501030e7260ad0722ff",
+      "public_also_changed_since_merge_base": false,
+      "recommendation": "import_as_provenanced_historical_record",
+      "reason_and_preservation": "文件原始 9895 Git blob 0dc67f9399e09d396b9a7501030e7260ad0722ff，5450 bytes，SHA256 c6eb58a4f19bcb300802dd267208de59e4a54b66735a272acb6b70ad2b27772d。保留内容作为 DEVICE 历史记录并明确来源/日期/当时向量；前置状态说明其旧已闭环/仅剩 LG/旧测试日志不代表当前验收，以公共唯一 conversation 和公开 reviews 为当前事实。",
+      "mechanical_replay": {
+        "path": "archives/conversations/dv003-dolby-tier-gray-20261012.md",
+        "bytes": 5450,
+        "git_blob": "0dc67f9399e09d396b9a7501030e7260ad0722ff",
+        "sha256": "c6eb58a4f19bcb300802dd267208de59e4a54b66735a272acb6b70ad2b27772d",
+        "exact_device_blob_after_apply": true
+      }
+    },
+    {
+      "path": "lib/pages/video/controller.dart",
+      "status": "modified",
+      "additions": 83,
+      "deletions": 0,
+      "device_git_blob": "baf63f24eae937c263f782bd1a6b90f6ca881868",
+      "public_also_changed_since_merge_base": false,
+      "recommendation": "direct_code_delta_known_issues_open",
+      "reason_and_preservation": "仅并入 facts cache/probe/open 增量，保留公共既有 options/revision/serial/target/query/source-generation 门。生产/消费键合同、in-flight、HTTP 等旧缺陷继续登记；不能把机械无冲突写成选源功能验收。",
+      "mechanical_replay": {
+        "path": "lib/pages/video/controller.dart",
+        "bytes": 74764,
+        "git_blob": "baf63f24eae937c263f782bd1a6b90f6ca881868",
+        "sha256": "9978268db891b601dd05a147506e6542bd2c4dd4a9d3adb7fdf79c069e13c142",
+        "exact_device_blob_after_apply": true
+      }
+    },
+    {
+      "path": "lib/plugin/pl_player/controller.dart",
+      "status": "modified",
+      "additions": 7,
+      "deletions": 0,
+      "device_git_blob": "4fb76fec28957af8a2e623e0c9d2e800f70d4285",
+      "public_also_changed_since_merge_base": false,
+      "recommendation": "direct_code_delta_preserve_public_ownership",
+      "reason_and_preservation": "七行事实透传增量与公共源码无双改：保留现有 Session owner/lease/teardown/route-options 逻辑，新增 hint 字段、setDataSource/reopen/首次和 refresh open facts 通道。reopen 具体遗漏已修，不能重新标未接线。",
+      "mechanical_replay": {
+        "path": "lib/plugin/pl_player/controller.dart",
+        "bytes": 143250,
+        "git_blob": "4fb76fec28957af8a2e623e0c9d2e800f70d4285",
+        "sha256": "84b1005646bf9954120fdc24e1f986f917ce388da8b923ec30e47d40f3e30e0f",
+        "exact_device_blob_after_apply": true
+      }
+    },
+    {
+      "path": "lib/plugin/pl_player/dovi_sniff.dart",
+      "status": "added",
+      "additions": 211,
+      "deletions": 0,
+      "device_git_blob": "1e14cfab7a73ed5d8ce170befc3b3b96bf2abb66",
+      "public_also_changed_since_merge_base": false,
+      "recommendation": "direct_new_code_known_issues_open",
+      "reason_and_preservation": "加入 DEVICE 嗅探器，不重写同一工作线。成功 body 停顿未限时、错误 take 按 chunk 计数、Range 与畸形 URI、轨道绑定/层颜色问题继续开放。",
+      "mechanical_replay": {
+        "path": "lib/plugin/pl_player/dovi_sniff.dart",
+        "bytes": 7760,
+        "git_blob": "1e14cfab7a73ed5d8ce170befc3b3b96bf2abb66",
+        "sha256": "aba14c40e645f486f55f41b5cf91db9a745ef6f3e32adc7f833d2f01d7637879",
+        "exact_device_blob_after_apply": true
+      }
+    },
+    {
+      "path": "lib/plugin/pl_player/hdr_output.dart",
+      "status": "modified",
+      "additions": 44,
+      "deletions": 0,
+      "device_git_blob": "e308350cb007fa1cf592dfbfea7fc9659a67bebb",
+      "public_also_changed_since_merge_base": false,
+      "recommendation": "direct_code_delta_known_issues_open",
+      "reason_and_preservation": "保留公共默认 unknown-DV、原 codec/quality 映射与 HDR 门，加入 DoviFacts 入参和分支；P5 compatibility 重写及 P10 强制 HEVC 是已知语义缺口，不能改成已验收原始事实。",
+      "mechanical_replay": {
+        "path": "lib/plugin/pl_player/hdr_output.dart",
+        "bytes": 9591,
+        "git_blob": "e308350cb007fa1cf592dfbfea7fc9659a67bebb",
+        "sha256": "b71488e3fa7f43707354edf4430bd2a88fe9fd2c8a762d992a93e130f40e21ef",
+        "exact_device_blob_after_apply": true
+      }
+    },
+    {
+      "path": "lib/plugin/pl_player/source_selection.dart",
+      "status": "modified",
+      "additions": 20,
+      "deletions": 2,
+      "device_git_blob": "9106a9b2c9ca54093f5e875285bd32b28a19398f",
+      "public_also_changed_since_merge_base": false,
+      "recommendation": "direct_code_delta_known_issues_open",
+      "reason_and_preservation": "保留公共 capability query/options/unknown-DV gate；加入 facts 参数传递。消费者仍按 spec.key 读，与页面 producer 的 revision/cid/baseUrl 不匹配，继续记 P1。",
+      "mechanical_replay": {
+        "path": "lib/plugin/pl_player/source_selection.dart",
+        "bytes": 5973,
+        "git_blob": "9106a9b2c9ca54093f5e875285bd32b28a19398f",
+        "sha256": "a41788bce176730566b381f57280cb1eca1824daf8b5f3129ca7e82900c1a517",
+        "exact_device_blob_after_apply": true
+      }
+    },
+    {
+      "path": "test/plugin/pl_player/dovi_sniff_test.dart",
+      "status": "added",
+      "additions": 422,
+      "deletions": 0,
+      "device_git_blob": "8a65ab400693bdd72feb391fab0d37277ee0d852",
+      "public_also_changed_since_merge_base": false,
+      "recommendation": "direct_new_tests_without_new_execution_claim",
+      "reason_and_preservation": "可归入原测试代码。部分 HTTP 测试绕过真实 HttpClient，菜单测试手工注入 spec.key，不能覆盖已知真实入口缺陷。本轮按用户要求暂停 CI/测试，不将历史自报数字记作新合并向量通过。",
+      "mechanical_replay": {
+        "path": "test/plugin/pl_player/dovi_sniff_test.dart",
+        "bytes": 14618,
+        "git_blob": "8a65ab400693bdd72feb391fab0d37277ee0d852",
+        "sha256": "f20a9e6470401bff614333a8f6ccb826f8414d45a33617d36ec9306d635ccb31",
+        "exact_device_blob_after_apply": true
+      }
+    }
+  ],
+  "public_only_paths_to_preserve": [
+    {
+      "filename": ".github/actions/routing-bootstrap/action.yml",
+      "status": "modified",
+      "additions": 12,
+      "deletions": 1,
+      "changes": 13,
+      "previous_filename": null
+    },
+    {
+      "filename": ".github/workflows/build.yml",
+      "status": "modified",
+      "additions": 10,
+      "deletions": 2,
+      "changes": 12,
+      "previous_filename": null
+    },
+    {
+      "filename": ".github/workflows/ios.yml",
+      "status": "modified",
+      "additions": 233,
+      "deletions": 5,
+      "changes": 238,
+      "previous_filename": null
+    },
+    {
+      "filename": ".github/workflows/mac.yml",
+      "status": "modified",
+      "additions": 196,
+      "deletions": 7,
+      "changes": 203,
+      "previous_filename": null
+    },
+    {
+      "filename": "archives/conversations/media-kit-routing-20261011.md",
+      "status": "modified",
+      "additions": 259,
+      "deletions": 14,
+      "changes": 273,
+      "previous_filename": null
+    },
+    {
+      "filename": "docs/plans/core-cache-cleanup-partial-20261012.json",
+      "status": "added",
+      "additions": 25,
+      "deletions": 0,
+      "changes": 25,
+      "previous_filename": null
+    },
+    {
+      "filename": "docs/plans/core-dv003-critical-review-20261012.json",
+      "status": "added",
+      "additions": 110,
+      "deletions": 0,
+      "changes": 110,
+      "previous_filename": null
+    },
+    {
+      "filename": "docs/plans/core-ios-routing-workflow-review-20261012.json",
+      "status": "added",
+      "additions": 45,
+      "deletions": 0,
+      "changes": 45,
+      "previous_filename": null
+    },
+    {
+      "filename": "docs/plans/core-ios-source-prepare-checkpoint-20261012.json",
+      "status": "added",
+      "additions": 757,
+      "deletions": 0,
+      "changes": 757,
+      "previous_filename": null
+    },
+    {
+      "filename": "docs/plans/core-ios-source-r2-evidence-review-20261012.json",
+      "status": "added",
+      "additions": 127,
+      "deletions": 0,
+      "changes": 127,
+      "previous_filename": null
+    },
+    {
+      "filename": "docs/plans/core-linux-native-consumer-final-review-20261012.json",
+      "status": "added",
+      "additions": 36,
+      "deletions": 0,
+      "changes": 36,
+      "previous_filename": null
+    },
+    {
+      "filename": "docs/plans/core-linux-native-consumer-review-20261012.json",
+      "status": "added",
+      "additions": 99,
+      "deletions": 0,
+      "changes": 99,
+      "previous_filename": null
+    },
+    {
+      "filename": "docs/plans/core-macos-routing-workflow-review-20261012.json",
+      "status": "added",
+      "additions": 192,
+      "deletions": 0,
+      "changes": 192,
+      "previous_filename": null
+    },
+    {
+      "filename": "docs/plans/core-pr5-matrix-final-review-20261012.json",
+      "status": "added",
+      "additions": 158,
+      "deletions": 0,
+      "changes": 158,
+      "previous_filename": null
+    },
+    {
+      "filename": "docs/plans/core-release-prelude-6d349-checkpoint-20261012.json",
+      "status": "added",
+      "additions": 6924,
+      "deletions": 0,
+      "changes": 6924,
+      "previous_filename": null
+    },
+    {
+      "filename": "docs/plans/core-source-ci-1970-checkpoint-20261012.json",
+      "status": "added",
+      "additions": 92,
+      "deletions": 0,
+      "changes": 92,
+      "previous_filename": null
+    },
+    {
+      "filename": "docs/plans/core-source-ci-36053-4824-checkpoint-20261012.json",
+      "status": "added",
+      "additions": 1457,
+      "deletions": 0,
+      "changes": 1457,
+      "previous_filename": null
+    },
+    {
+      "filename": "docs/plans/core-source-ci-6d349-checkpoint-20261012.json",
+      "status": "added",
+      "additions": 2165,
+      "deletions": 0,
+      "changes": 2165,
+      "previous_filename": null
+    },
+    {
+      "filename": "docs/plans/core-source-ci-a05dfe-38ff-checkpoint-20261012.json",
+      "status": "added",
+      "additions": 7821,
+      "deletions": 0,
+      "changes": 7821,
+      "previous_filename": null
+    },
+    {
+      "filename": "docs/plans/core-source-ci-a3b577-e269d-checkpoint-20261012.json",
+      "status": "added",
+      "additions": 8732,
+      "deletions": 0,
+      "changes": 8732,
+      "previous_filename": null
+    },
+    {
+      "filename": "docs/plans/core-source-prelude-ci-checkpoint-20261012.json",
+      "status": "modified",
+      "additions": 32,
+      "deletions": 3,
+      "changes": 35,
+      "previous_filename": null
+    },
+    {
+      "filename": "docs/plans/media-kit-routing-app-handoff-20261011.json",
+      "status": "modified",
+      "additions": 2114,
+      "deletions": 81,
+      "changes": 2195,
+      "previous_filename": null
+    },
+    {
+      "filename": "docs/plans/routing-linux-native-accepted-inputs.json",
+      "status": "added",
+      "additions": 6,
+      "deletions": 0,
+      "changes": 6,
+      "previous_filename": null
+    },
+    {
+      "filename": "docs/plans/routing-linux-native-contract-20261011.md",
+      "status": "added",
+      "additions": 116,
+      "deletions": 0,
+      "changes": 116,
+      "previous_filename": null
+    },
+    {
+      "filename": "scripts/acquire_routing_linux_native.py",
+      "status": "added",
+      "additions": 316,
+      "deletions": 0,
+      "changes": 316,
+      "previous_filename": null
+    },
+    {
+      "filename": "scripts/prepare_routing_ci.py",
+      "status": "modified",
+      "additions": 2,
+      "deletions": 3,
+      "changes": 5,
+      "previous_filename": null
+    },
+    {
+      "filename": "scripts/routing_flutter_version.py",
+      "status": "added",
+      "additions": 83,
+      "deletions": 0,
+      "changes": 83,
+      "previous_filename": null
+    },
+    {
+      "filename": "scripts/verify_routing_linux_native.py",
+      "status": "added",
+      "additions": 1184,
+      "deletions": 0,
+      "changes": 1184,
+      "previous_filename": null
+    },
+    {
+      "filename": "test/acquire_routing_linux_native_test.py",
+      "status": "added",
+      "additions": 47,
+      "deletions": 0,
+      "changes": 47,
+      "previous_filename": null
+    },
+    {
+      "filename": "test/macos_shared_release_test.py",
+      "status": "modified",
+      "additions": 18,
+      "deletions": 2,
+      "changes": 20,
+      "previous_filename": null
+    },
+    {
+      "filename": "test/reusable_workflow_contract_test.py",
+      "status": "modified",
+      "additions": 444,
+      "deletions": 3,
+      "changes": 447,
+      "previous_filename": null
+    },
+    {
+      "filename": "test/routing_flutter_version_test.py",
+      "status": "added",
+      "additions": 103,
+      "deletions": 0,
+      "changes": 103,
+      "previous_filename": null
+    },
+    {
+      "filename": "test/verify_routing_linux_native_test.py",
+      "status": "added",
+      "additions": 461,
+      "deletions": 0,
+      "changes": 461,
+      "previous_filename": null
+    }
+  ],
+  "required_semantic_reconciliation": [
+    {
+      "path": "TASKS.md",
+      "requirement": "Keep ed0 public current state and history; replace the old DEVICE added claim with code-integration status/commit provenance and explicit open defects. Do not adopt DEVICE TASKS.md wholesale."
+    },
+    {
+      "path": "archives/conversations/dv003-dolby-tier-gray-20261012.md",
+      "requirement": "Keep as provenance-labelled historical DEVICE record. Its Current State, closed-loop/only-LG wording, and early failed-log references cannot become current acceptance."
+    },
+    {
+      "path": "archives/conversations/media-kit-routing-20261011.md",
+      "requirement": "Preserve the public unique authoritative conversation and append the actual integration source heads, resulting head when committed, known issues, new brightness gesture self-report, and paused validation status."
+    }
+  ],
+  "latest_relevant_comments": {
+    "pr_review_state": "COMMENTED with REQUEST_CHANGES body; original review findings remain open, old do-not-integrate scheduling superseded by user request",
+    "pr3_latest_review_url": "https://github.com/Goodwu/PiliPlusX/pull/3#pullrequestreview-5493423824",
+    "newly_read_dv006_user_gesture_claim": {
+      "id": 6128050177,
+      "url": "https://github.com/Goodwu/PiliPlusX/pull/3#issuecomment-6128050177",
+      "created_at": "2026-10-12T16:10:39Z",
+      "body": "**DV006 用户验收通过（2026-10-13）**：亮度手势修复后 LYA 实机手动滑动确认生效（数字与实际亮度联动，自动亮度自动切手动）。补充提交 9895e7dc0（ScreenBrightnessHandler.kt 原生通道实现 + MainActivity 接线）已包含在本 PR。",
+      "assessment": "DEVICE reports the user accepted LYA gesture percentage/visible brightness and auto-to-manual behavior. Record as reported user observation, replacing earlier pending-manual-gesture wording. No raw reset/events/permission/lifecycle evidence was supplied by this comment."
+    },
+    "central_comments_read": [
+      {
+        "id": 6128220148,
+        "url": "https://github.com/Goodwu/media-kit/pull/4#issuecomment-6128220148",
+        "created_at": "2026-10-12T16:20:32Z",
+        "updated_at": "2026-10-12T16:20:32Z"
+      },
+      {
+        "id": 6128436938,
+        "url": "https://github.com/Goodwu/media-kit/pull/4#issuecomment-6128436938",
+        "created_at": "2026-10-12T16:34:28Z",
+        "updated_at": "2026-10-12T16:37:27Z"
+      }
+    ],
+    "new_code_since_last_9895_review": false
+  },
+  "known_issues_after_code_merge": [
+    {
+      "id": "DV003-FACTS-KEY",
+      "severity": "P1",
+      "paths": [
+        "lib/pages/video/controller.dart:327-367",
+        "lib/plugin/pl_player/source_selection.dart:118,144"
+      ],
+      "status": "OPEN_AFTER_CODE_INTEGRATION",
+      "finding": "producer 键 revision/cid/baseUrl 与 consumer spec.key 不同；真实页面获得 facts 后仍不进入 selection。"
+    },
+    {
+      "id": "DV003-HTTP",
+      "severity": "P1",
+      "paths": [
+        "lib/plugin/pl_player/dovi_sniff.dart:72-75,125-145"
+      ],
+      "status": "OPEN_AFTER_CODE_INTEGRATION",
+      "finding": "成功响应 await-for 等下一 chunk 无 deadline；错误流 take(byteCount) 数 chunks；Content-Range 未验，URI.parse 在 try 外；不能称单一总 4 秒硬预算已闭合。"
+    },
+    {
+      "id": "DV003-INFLIGHT",
+      "severity": "P1",
+      "paths": [
+        "lib/pages/video/controller.dart:338-365"
+      ],
+      "status": "OPEN_AFTER_CODE_INTEGRATION",
+      "finding": "in-flight Set 跳过而不共享 Future，后发 probe 可发布空 map 并使前发完成因 serial 过期被丢；异常清理无 finally。"
+    },
+    {
+      "id": "DV005-LOCAL-FILE",
+      "severity": "P1",
+      "paths": [
+        "lib/pages/video/controller.dart:1158-1162"
+      ],
+      "status": "OPEN_AFTER_CODE_INTEGRATION",
+      "finding": "FileSource/DirectFileSource 分流前 Uri.parse(videoUrl!)，本地源未设网络 URL 时仍抛空值异常。"
+    },
+    {
+      "id": "DV003-TRACK-COLOR",
+      "severity": "P1",
+      "paths": [
+        "lib/plugin/pl_player/dovi_sniff.dart:164-210",
+        "lib/plugin/pl_player/hdr_output.dart:93-122"
+      ],
+      "status": "OPEN_AFTER_CODE_INTEGRATION",
+      "finding": "任意首个 DOVI box 缺所选 video track/sample-entry 绑定及多记录冲突判断；BL/RPU 未用于准入，P5 compatibility 被重写、P10 被强制 HEVC。"
+    },
+    {
+      "id": "DV003-SOURCE-LOG",
+      "severity": "P2",
+      "paths": [
+        "lib/pages/video/controller.dart:1158-1162"
+      ],
+      "status": "OPEN_AFTER_CODE_INTEGRATION",
+      "finding": "日志包含完整 videoUrl/query；sniffer runtimeType 脱敏改善不等于页面日志已脱敏。"
+    },
+    {
+      "id": "DV006-RESET",
+      "severity": "P1",
+      "paths": [
+        "android/app/src/main/kotlin/com/example/piliplusx/ScreenBrightnessHandler.kt:92-94,191-200"
+      ],
+      "status": "OPEN_AFTER_CODE_INTEGRATION",
+      "finding": "reset 写 NaN，coerceIn 不转为清除覆盖值，getter 可返回 NaN 并触发接口范围错误；滑动成功自报不覆盖 reset。"
+    },
+    {
+      "id": "DV006-THREAD",
+      "severity": "P2",
+      "paths": [
+        "android/app/src/main/kotlin/com/example/piliplusx/ScreenBrightnessHandler.kt:56-61"
+      ],
+      "status": "OPEN_AFTER_CODE_INTEGRATION",
+      "finding": "ContentObserver(null) 通知线程直接调用 Flutter event sink，未保证平台/UI 线程。"
+    },
+    {
+      "id": "DV006-APPLICATION-EVENTS",
+      "severity": "P2",
+      "paths": [
+        "android/app/src/main/kotlin/com/example/piliplusx/ScreenBrightnessHandler.kt:112-120,197-201"
+      ],
+      "status": "OPEN_AFTER_CODE_INTEGRATION",
+      "finding": "applicationSink 无 success 发送，默认 App application stream 的 set/reset/system-follow 事件缺失。"
+    },
+    {
+      "id": "DV006-SYSTEM-WRITES",
+      "severity": "P2",
+      "paths": [
+        "android/app/src/main/kotlin/com/example/piliplusx/ScreenBrightnessHandler.kt:104,168-188"
+      ],
+      "status": "OPEN_AFTER_CODE_INTEGRATION",
+      "finding": "canChange 恒 true、忽略 Settings.System.putInt false、无可靠用户授权与失败传播。"
+    },
+    {
+      "id": "DV006-ACTIVITY-LIFETIME",
+      "severity": "P2",
+      "paths": [
+        "android/app/src/main/kotlin/com/example/piliplusx/ScreenBrightnessHandler.kt:33-39,66-67,112-137,204-208"
+      ],
+      "status": "OPEN_AFTER_CODE_INTEGRATION",
+      "finding": "stop 未移除 method/event handlers；AudioService 缓存 engine 保留时旧 handler 仍可能引用销毁 Activity。"
+    }
+  ],
+  "already_fixed_not_to_reopen": [
+    "initialDoviFacts is forwarded through _RouteSourceIntent.reopen, initial and refresh Session hint paths.",
+    "The accidental current gradle.properties local JAR path was reverted before 9895; it is absent from the net diff.",
+    "Connect/header share a deadline, candidates are capped to primary plus two backups, success accumulation is bounded, stale revision cache writes are rejected, and sniffer errors use runtimeType; these are partial improvements, not closure of the remaining HTTP/cache findings."
+  ],
+  "suggested_current_status": "CODE_INTEGRATED_KNOWN_ISSUES_OPEN; integration commit/vector pending root. CI and other acceptance work paused per user. Native approved-input ledger, device HDR/sustained performance, PR6/DV004 acceptance and both unresolved user decision points remain separate.",
+  "preserved_contracts": [
+    "experimental default false and primary true/false verification policy",
+    "public effective options/revision/serial/source-generation gates",
+    "existing Session/owner/ACK/lease contracts and LG exact-device YUV8/FULL/range1 policy",
+    "public SDK/CI/native-input fail-closed contracts and provenance histories",
+    "two excluded native recipes remain outside this App PR3 review"
+  ],
+  "validation_performed": [
+    "Refreshed exact PR3 HEAD/metadata and all returned issue/review comments; read central comments since the last review.",
+    "Queried exact public routing ref and both GitHub compare directions for actual merge-base and path lists.",
+    "Read ed0 exact file blobs without lazy fetch; isolated patch replay and exact 10 resulting Git blob checks.",
+    "Read exact base and DEVICE TASKS and performed independent git merge-file diff3 preview, exit 0."
+  ],
+  "not_performed": [
+    "No CI queries, runs, artifact downloads or test execution in this task.",
+    "No shared repository edits, git fetch/pull/merge/cherry-pick/commit/push or public comments.",
+    "No native recipe change, no new DEVICE workline, no PR merge/close/release action."
+  ],
+  "evidence_manifest": [
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/app-pr3-merge-review/remote-snapshot.json",
+      "bytes": 155103,
+      "sha256": "91c9479d7322a14e7529633e0b3a38179c90b8be86c48de40b953f1143756ab9"
+    },
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/app-pr3-merge-review/mechanical-replay.json",
+      "bytes": 3299,
+      "sha256": "11bcf87f54589166cdb5e31772c10ba645543deb2b7235dc6fff54adf0dd0e83"
+    },
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/app-pr3-merge-review/device-non-task-changes.patch",
+      "bytes": 55152,
+      "sha256": "3ed8e0702f206aa83b7dd60661dde23b5cb9a1998e649b9de367e12bfb28119b"
+    },
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/app-pr3-merge-review/TASKS-three-way-preview.md",
+      "bytes": 76379,
+      "sha256": "ad6adbd3840b6854b21ecc3a2a611a4874c16edfb78d321e46d163a39e3500d6"
+    },
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/app-pr3-merge-review/base/TASKS.md",
+      "bytes": 77113,
+      "sha256": "47e62fd4d3348d5bf939626203ae545101acc611b9ce23b59e573748b7d4fe9d"
+    },
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/app-pr3-merge-review/device/TASKS.md",
+      "bytes": 77636,
+      "sha256": "7f3ca6ce2f70548eade3bdb27d923bf66ae364ba3f4a37df5f2bd520a4b75cf9"
+    },
+    {
+      "path": "/workspace/scratch/bb7931e64549/audit-device-followthrough/app-pr3-merge-review/public/TASKS.md",
+      "bytes": 75856,
+      "sha256": "1933321ec8ee0eab3f1c68206f93e3c97aa6726c19b9083de60b483a9172f76b"
+    }
+  ]
+}

@@ -3,10 +3,7 @@
 /// Copyright © 2021 & onwards, Hitesh Kumar Saini <saini123hitesh@gmail.com>.
 /// All rights reserved.
 /// Use of this source code is governed by MIT license that can be found in the LICENSE file.
-import 'package:flutter/foundation.dart'
-    show debugPrint, visibleForTesting;
 import 'hdr_capabilities.dart';
-import 'hdr_mkst_bridge_probe.dart';
 import 'hdr_output_policy.dart' show HdrOutputPolicy;
 import 'hdr_route.dart';
 import 'hdr_source_descriptor.dart';
@@ -51,42 +48,207 @@ class HdrStrategyRealizer {
     required HdrSourceClass sourceClass,
     required HdrCapabilities capabilities,
   }) {
+    // Guard the direct realizer API too: a caller-supplied coarse class must
+    // not override the descriptor's unresolved DV semantics.
+    if (source.hasUnresolvedDolbyVision ||
+        sourceClass == HdrSourceClass.dvUnknown) {
+      return const HdrStrategyRealization.infeasible(
+        HdrDegradeReason.sourceMetadataUnknown,
+      );
+    }
     switch (strategy) {
       case HdrStrategy.nativeDolbyVision:
         return _nativeDolbyVision(source, sourceClass, capabilities);
+      case HdrStrategy.nativeHdr10Plus:
+        return HdrStrategyRealization.infeasible(
+            sourceClass == HdrSourceClass.hdr10Plus &&
+                    source.dynamicMetadata == HdrDynamicMetadata.hdr10Plus
+                ? HdrDegradeReason.routeNotImplemented
+                : HdrDegradeReason.unsupportedStrategy);
+      case HdrStrategy.nativeHdrVivid:
+        return HdrStrategyRealization.infeasible(
+            sourceClass == HdrSourceClass.hdrVivid &&
+                    source.dynamicMetadata == HdrDynamicMetadata.hdrVivid
+                ? HdrDegradeReason.routeNotImplemented
+                : HdrDegradeReason.unsupportedStrategy);
       case HdrStrategy.baseLayerDirect:
-        return _baseLayerDirect(source, sourceClass, capabilities);
+        return _withOrdinaryDecoderDependency(
+            _baseLayerDirect(source, sourceClass, capabilities));
       case HdrStrategy.baseLayerConvert:
-        return _baseLayerConvert(source, sourceClass, capabilities);
+        return _withOrdinaryDecoderDependency(
+            _baseLayerConvert(source, sourceClass, capabilities));
       case HdrStrategy.metadataReshape:
-        return _metadataReshape(source, sourceClass, capabilities);
+        return _withOrdinaryDecoderDependency(
+            _metadataReshape(source, sourceClass, capabilities));
       case HdrStrategy.toneMapSdr:
-        return _toneMapSdr(source, sourceClass, capabilities);
+        return _withOrdinaryDecoderDependency(
+            _toneMapSdr(source, sourceClass, capabilities));
       case HdrStrategy.sdrDirect:
-        return _sdrDirect(source, sourceClass, capabilities);
+        return _withOrdinaryDecoderDependency(
+            _sdrDirect(source, sourceClass, capabilities));
     }
   }
 
-  /// Native Dolby Vision P5 decode through MediaCodec and the DV bridge.
-  /// This bypasses libplacebo's P5 rescale pipeline while keeping the RPU in
-  /// the elementary stream for the native Dolby Vision decoder.
+  /// Compute the immutable *request* before realizing the route. Neither this
+  /// value nor appliesDynamicMetadata is a runtime observation.
+  static HdrMetadataHandling metadataHandlingFor(
+      HdrSourceDescriptor source, HdrStrategy strategy) {
+    if (source.dynamicMetadata == HdrDynamicMetadata.none) {
+      return HdrMetadataHandling.none;
+    }
+    switch (strategy) {
+      case HdrStrategy.nativeDolbyVision:
+      case HdrStrategy.nativeHdr10Plus:
+      case HdrStrategy.nativeHdrVivid:
+        return HdrMetadataHandling.preserveForNative;
+      case HdrStrategy.metadataReshape:
+        return HdrMetadataHandling.consumeForMapping;
+      case HdrStrategy.toneMapSdr:
+        return source.dvProfile == 5 &&
+                source.dynamicMetadata == HdrDynamicMetadata.dolbyVision
+            ? HdrMetadataHandling.consumeForMapping
+            : HdrMetadataHandling.baselineOnly;
+      case HdrStrategy.baseLayerDirect:
+      case HdrStrategy.baseLayerConvert:
+      case HdrStrategy.sdrDirect:
+        return HdrMetadataHandling.baselineOnly;
+    }
+  }
+
+  // These mpv requests all use the ordinary MediaCodec decode implementation.
+  // Native DV owns a different configured decoder contract; hwdec=no is FFmpeg.
+  static HdrStrategyRealization _withOrdinaryDecoderDependency(
+      HdrStrategyRealization realization) {
+    final route = realization.route;
+    if (route == null ||
+        !const {'mediacodec', 'mediacodec-copy', 'surfacetexture'}
+            .contains(route.hwdec)) {
+      return realization;
+    }
+    return HdrStrategyRealization.route(route.withExecution(
+        hwdec: route.hwdec,
+        dependencies: {
+          ...route.dependencies,
+          HdrRouteDependency.decoderMediacodec
+        }));
+  }
+
+  /// Existing SDR Texture executions, in bounded preference order. CPU
+  /// candidates preserve the same tone-map/P5 pipeline/P8.4 stripping gates;
+  /// they never add an HDR presenter or feed CPU frames to mediacodec_embed.
+  ///
+  /// [sdrEmbedEnabled] is the planner-arbitrated admission flag.
+  /// `VideoRouteOptions.sdrEmbed` resolves enabled by default; explicit
+  /// opt-out, `preferCopy`, or a source census declaring the hardware decode
+  /// `unsupported` suppresses it. This low-level parameter still defaults to
+  /// false for direct callers. When enabled, only sdrDirect on SDK 16–25
+  /// gains the embed candidate (`mediacodec_embed` → copy → software).
+  /// API ≥ 26 devices keep their verified texture
+  /// direct route and gain nothing; the tone-map strategy never gains an embed
+  /// variant (tone mapping requires the GL pipeline the embed VO does not
+  /// have).
+  static List<HdrStrategyRealization> realizeCandidates(
+    HdrStrategy strategy, {
+    required HdrSourceDescriptor source,
+    required HdrSourceClass sourceClass,
+    required HdrCapabilities capabilities,
+    bool sdrEmbedEnabled = false,
+  }) {
+    final primary = realize(strategy,
+        source: source, sourceClass: sourceClass, capabilities: capabilities);
+    final route = primary.route;
+    if (route == null ||
+        route.vo != 'gpu-next' ||
+        route.topology != HdrTopology.texture ||
+        route.outputTransfer != HdrOutputTransfer.sdr ||
+        (strategy != HdrStrategy.sdrDirect &&
+            strategy != HdrStrategy.toneMapSdr)) {
+      return [primary];
+    }
+    final requests = <String>[
+      route.hwdec,
+      if (route.hwdec != 'mediacodec-copy') 'mediacodec-copy',
+      'no',
+    ];
+    return List<HdrStrategyRealization>.unmodifiable([
+      // P2 admission is the capability rule "texture GPU import unavailable"
+      // (AImageReader import is the API 26+ GPU importer dependency), never a
+      // device-name judgment; the declaration flag alone does not admit.
+      if (sdrEmbedEnabled &&
+          strategy == HdrStrategy.sdrDirect &&
+          _requiresMediacodecCopy(capabilities))
+        HdrStrategyRealization.route(_sdrEmbedExecution(route)),
+      for (final hwdec in requests)
+        HdrStrategyRealization.route(
+            route.withExecution(hwdec: hwdec, dependencies: {
+          ...route.dependencies.where((dependency) =>
+              dependency != HdrRouteDependency.hwdecMediacodec &&
+              dependency != HdrRouteDependency.hwdecMediacodecCopy &&
+              dependency != HdrRouteDependency.decoderMediacodec),
+          HdrRouteDependency.presenterGpuTexture,
+          if (hwdec == 'no')
+            HdrRouteDependency.decoderSoftware
+          else
+            HdrRouteDependency.decoderMediacodec,
+          if (hwdec == 'mediacodec') ...{
+            HdrRouteDependency.hwdecMediacodec,
+            HdrRouteDependency.importMediacodec,
+          } else
+            HdrRouteDependency.importCpuUpload,
+          if (hwdec == 'mediacodec-copy')
+            HdrRouteDependency.hwdecMediacodecCopy,
+        })),
+    ]);
+  }
+
+  /// The `sdrDirect` embed execution variant, shaped after the existing
+  /// `baseLayerDirect`/native-DV embed routes: the platform view's Surface is
+  /// the `wid` the decoder renders into (HWC-composited), so there is no
+  /// presenter/import dependency at all. Within the sdr candidate list the
+  /// only dependency it shares with the texture MediaCodec variants is the
+  /// ordinary MediaCodec decoder dependency (`decoder:mediacodec`): a decoder
+  /// failure excludes the embed and copy executions together, while the
+  /// variant's own hwdec/topology tags keep a carrier failure isolated to it.
+  /// Source processing (the P8.2 RPU strip) and the SDR metadata contract
+  /// travel with the source family, not with the carrier.
+  static HdrRoute _sdrEmbedExecution(HdrRoute textureRoute) => HdrRoute(
+        strategy: HdrStrategy.sdrDirect,
+        presentation: HdrPresentation.sdr,
+        outputTransfer: HdrOutputTransfer.sdr,
+        appliesDynamicMetadata: false,
+        topology: HdrTopology.platformView,
+        vo: 'mediacodec_embed',
+        hwdec: 'mediacodec',
+        targetPrim: null,
+        targetTrc: null,
+        surfaceTransfer: null,
+        stripDvRpu: textureRoute.stripDvRpu,
+        metadataHandling: textureRoute.metadataHandling,
+        dependencies: const <String>{
+          HdrRouteDependency.hwdecMediacodec,
+          HdrRouteDependency.topologyPlatformView,
+          HdrRouteDependency.decoderMediacodec,
+        },
+      );
+
+  /// Native single-layer Dolby Vision decode through MediaCodec and the
+  /// DV bridge. The RPU stays in the elementary stream for the native
+  /// decoder; the GPU P5 rescale pipeline is not used by this route.
   static HdrStrategyRealization _nativeDolbyVision(
     HdrSourceDescriptor source,
     HdrSourceClass cls,
     HdrCapabilities capabilities,
   ) {
-    // 2026-10-06: dvP84 unlocked alongside dvP5 (user-directed direct-path
-    // verification on the LG DV device). P8.4 = profile 8, compatibility id 4
-    // (HLG base layer + enhancement/RPU); the Dolby engine handles the
-    // enhancement the same way the P5.0 single-layer case hands everything to
-    // it. Other classes/profiles remain unsupported.
-    final bool eligibleSource = (cls == HdrSourceClass.dvP5 &&
-            source.dvProfile == 5 &&
-            source.dvCompatibilityId == 0 &&
-            source.enhancementLayer == false) ||
-        (cls == HdrSourceClass.dvP84 &&
-            source.dvProfile == 8 &&
-            source.dvCompatibilityId == 4);
+    // Match the fork's single-layer native_dv contract for both supported
+    // source classes. Unknown EL presence is not proof of a single layer.
+    // FFmpeg separately validates the BL/RPU flags and initialization data.
+    final bool eligibleSource = source.enhancementLayer == false &&
+        ((cls == HdrSourceClass.dvP5 &&
+                source.dvProfile == 5 &&
+                source.dvCompatibilityId == 0) ||
+            (cls == HdrSourceClass.dvP84 &&
+                source.dvProfile == 8 &&
+                source.dvCompatibilityId == 4));
     if (!eligibleSource ||
         source.codec != 'hevc' ||
         source.dynamicMetadata != HdrDynamicMetadata.dolbyVision) {
@@ -102,20 +264,23 @@ class HdrStrategyRealizer {
       return const HdrStrategyRealization.infeasible(
           HdrDegradeReason.displayLacksTransfer);
     }
-    const int dolbyVisionProfile32 = 32;
+    // These are Android CodecProfileLevel keys, not DV profile numbers:
+    // P5 uses DvheStn (0x20); P8 uses DvheSt (0x100). Keep admission aligned
+    // with FFmpeg's native_dv_android_profile_key(). A P5-only decoder is
+    // not a P8 candidate, and a P8 decoder need not also advertise P5.
+    final int requiredAndroidProfile = cls == HdrSourceClass.dvP5 ? 32 : 256;
     final hasDolbyVisionDecoder = capabilities.dolbyVisionDecoders.any(
       (decoder) =>
           decoder.mimeType == 'video/dolby-vision' &&
           decoder.hardwareAcceleration &&
-          decoder.profiles.contains(dolbyVisionProfile32),
+          decoder.profiles.contains(requiredAndroidProfile),
     );
     if (!hasDolbyVisionDecoder || capabilities.nativeDvBridgeApi != 1) {
       return const HdrStrategyRealization.infeasible(
           HdrDegradeReason.nativeDvUnavailable);
     }
-    // P5 keeps the verified timed release. The API 24 vendor DV decoder
-    // holds at-time released buffers (on-device r28 chain: frames decoded,
-    // playback advancing, screen frozen 48s), so P8.4 releases immediately.
+    // Preserve the accepted release-mode behavior. Decoder-specific mode
+    // policy is independent of this source/profile admission correction.
     final renderMode = cls == HdrSourceClass.dvP84 ? 'boolean' : 'timed';
     return HdrStrategyRealization.route(
       HdrRoute(
@@ -132,6 +297,7 @@ class HdrStrategyRealizer {
         targetTrc: null,
         surfaceTransfer: null,
         stripDvRpu: false,
+        metadataHandling: metadataHandlingFor(source, HdrStrategy.nativeDolbyVision),
         dependencies: const <String>{
           HdrRouteDependency.nativeDolbyVision,
           HdrRouteDependency.hwdecMediacodec,
@@ -162,18 +328,12 @@ class HdrStrategyRealizer {
       final HdrDegradeReason? reason =
           _displayTransferCheck(transfer, capabilities);
       if (reason != null) {
-        // An HLG base layer stays presentable on a panel that declares
-        // Dolby Vision without HLG: the system composer interprets the HLG
-        // buffer itself (the platform player plays P8.4 this way on the
-        // API 24 LG device — smooth, desaturated, no dynamic metadata).
-        // Every other missing transfer stays infeasible.
-        final bool hlgOverDvPanel =
-            reason == HdrDegradeReason.displayLacksTransfer &&
-                transfer == HdrOutputTransfer.hlg &&
-                capabilities.displayHdrTypes?.contains(1) == true;
-        if (!hlgOverDvPanel) {
-          return HdrStrategyRealization.infeasible(reason);
-        }
+        // Dolby Vision display support does not imply support for a bare
+        // HLG base layer. In particular, the LG HLG-over-DV-panel experiment
+        // did not establish correct HLG HDR presentation. Conversion and
+        // SDR candidates must pass their own gates instead of bypassing
+        // this display-transfer requirement.
+        return HdrStrategyRealization.infeasible(reason);
       }
     }
     return HdrStrategyRealization.route(
@@ -192,6 +352,7 @@ class HdrStrategyRealizer {
         surfaceTransfer: null,
         // The decoder ignores the RPU on the compat path; nothing to strip.
         stripDvRpu: false,
+        metadataHandling: metadataHandlingFor(source, HdrStrategy.baseLayerDirect),
         dependencies: const <String>{
           HdrRouteDependency.hwdecMediacodec,
           HdrRouteDependency.topologyPlatformView,
@@ -200,15 +361,17 @@ class HdrStrategyRealizer {
     );
   }
 
-  /// `gpu-next` conversion of the base layer to a display-supported HDR
-  /// transfer function on a `rgb10_a2` PlatformView surface, PQ preferred.
-  /// DV sources strip the RPU on this route; profile 5 never applies.
+  /// C4: `gpu-next` conversion of an HLG compatibility base layer to PQ on
+  /// a `rgb10_a2` PlatformView. An existing PQ or SDR base layer is never
+  /// transformed here. DV sources strip their RPU; profile 5 is excluded.
   static HdrStrategyRealization _baseLayerConvert(
     HdrSourceDescriptor source,
     HdrSourceClass cls,
     HdrCapabilities capabilities,
   ) {
-    if (cls == HdrSourceClass.dvP5 || cls == HdrSourceClass.dvP10) {
+    if (cls == HdrSourceClass.dvP5 ||
+        cls == HdrSourceClass.dvP10 ||
+        _baseLayerTransfer(source, cls) != HdrOutputTransfer.hlg) {
       return const HdrStrategyRealization.infeasible(
           HdrDegradeReason.unsupportedStrategy);
     }
@@ -221,44 +384,48 @@ class HdrStrategyRealizer {
       return const HdrStrategyRealization.infeasible(
           HdrDegradeReason.noDisplayCapabilityReport);
     }
-    final HdrOutputTransfer output;
-    if (types.contains(HdrOutputPolicy.displayHdrTypeHdr10)) {
-      output = HdrOutputTransfer.pq;
-    } else if (types.contains(HdrOutputPolicy.displayHdrTypeHlg)) {
-      output = HdrOutputTransfer.hlg;
-    } else {
+    if (!types.contains(HdrOutputPolicy.displayHdrTypeHdr10)) {
       return const HdrStrategyRealization.infeasible(
           HdrDegradeReason.displayLacksTransfer);
     }
-    if (output == HdrOutputTransfer.pq &&
-        (_convertPqSurfaceTransfer != 'pq' &&
-            (_convertPqSurfaceTransfer != 'pq-itu' ||
-                !_convertRouteLock ||
-                capabilities.sdkInt != 24 ||
-                capabilities.dataSpaceExt?.id != 'lg-pq' ||
-                capabilities.dataSpaceExt?.applicable != true))) {
+    const HdrOutputTransfer output = HdrOutputTransfer.pq;
+    // The pq-itu experiment keeps its existing lock semantics; the
+    // admission criterion is the extension's own supported-surface-transfer
+    // self-report, never a device-name-derived identifier. An extension
+    // that does not declare the transfer — on any id — stays refused.
+    if (_convertPqSurfaceTransfer != 'pq' &&
+        (_convertPqSurfaceTransfer != 'pq-itu' ||
+            !_convertRouteLock ||
+            capabilities.sdkInt != 24 ||
+            !(capabilities.dataSpaceExt?.supportedSurfaceTransfers
+                    .contains(_convertPqSurfaceTransfer) ??
+                false) ||
+            capabilities.dataSpaceExt?.applicable != true)) {
       return const HdrStrategyRealization.infeasible(
           HdrDegradeReason.unsupportedStrategy);
     }
     final String trc = output == HdrOutputTransfer.pq ? 'pq' : 'hlg';
-    // API < 26 has no non-copy mediacodec GPU import; the convert route
-    // then decodes through mediacodec-copy like the SDR routes.
-    final bool useMediacodecCopy = _requiresMediacodecCopy(capabilities);
-    final String routedHwdec =
-        useMediacodecCopy ? 'mediacodec-copy' : 'mediacodec';
-    // The official backend applies at this decision point only when the
-    // bridge reports an owner-bound explicit init; every gate above
-    // (applicability, display capability, transfer whitelist) has already
-    // passed, so the override rides the same admission as the routed value.
-    // Other strategies never consult the bridge.
-    final String hwdec = surfaceTexturePocHwdec(
-      routedHwdec,
-      officialBackendReady:
-          mkstBridgeProbeOverride?.call() ?? mkstBridgeInitialized(),
-    );
-    if (hwdec != routedHwdec) {
-      debugPrint('MKSURF-POC: route hwdec override $routedHwdec -> $hwdec');
+    // W1 carrier derivation: the vendor-declared YUV window is the only
+    // alternative carrier, and only when the RGB window channel is absent
+    // (a device declaring both channels keeps the RGB baseline). A YUV-less
+    // device keeps the platform baseline: API < 26 has no non-copy
+    // mediacodec GPU import, so the convert route then decodes through
+    // mediacodec-copy like the SDR routes.
+    final HdrPqPresentation pqPresentation = capabilities.pqPresentation;
+    // An explicit negative declaration is not the legacy missing-field
+    // migration. Without a YUV alternative, the RGB fallback must itself
+    // be available; never manufacture a carrier for the C4 prediction.
+    if (!pqPresentation.rgbSurface && !pqPresentation.yuvWindow) {
+      return const HdrStrategyRealization.infeasible(
+          HdrDegradeReason.pqRgbPresentationUnavailable);
     }
+    final bool yuvWindowCarrier =
+        pqPresentation.yuvWindow && !pqPresentation.rgbSurface;
+    final String hwdec = yuvWindowCarrier
+        ? 'surfacetexture'
+        : _requiresMediacodecCopy(capabilities)
+            ? 'mediacodec-copy'
+            : 'mediacodec';
     // A4 contract split, P8.4 A5 V2 review fix: the separate offscreen
     // contract is keyed on the CARRIER, not on the requested window label.
     // The `surfacetexture` hwdec is the LG yuv-diag path's only carrier and
@@ -275,6 +442,14 @@ class HdrStrategyRealizer {
         (_convertPqSurfaceTransfer == 'pq' ||
             _convertPqSurfaceTransfer ==
                 HdrYuvPresentationContract.windowTransfer);
+    final String hwdecDependency;
+    if (hwdec == 'surfacetexture') {
+      hwdecDependency = HdrRouteDependency.hwdecSurfaceTexture;
+    } else if (hwdec == 'mediacodec-copy') {
+      hwdecDependency = HdrRouteDependency.hwdecMediacodecCopy;
+    } else {
+      hwdecDependency = HdrRouteDependency.hwdecMediacodec;
+    }
     return HdrStrategyRealization.route(
       HdrRoute(
         strategy: HdrStrategy.baseLayerConvert,
@@ -294,10 +469,9 @@ class HdrStrategyRealizer {
             ? HdrYuvPresentationContract.offscreenTransfer
             : null,
         stripDvRpu: source.dynamicMetadata == HdrDynamicMetadata.dolbyVision,
+        metadataHandling: metadataHandlingFor(source, HdrStrategy.baseLayerConvert),
         dependencies: <String>{
-          useMediacodecCopy
-              ? HdrRouteDependency.hwdecMediacodecCopy
-              : HdrRouteDependency.hwdecMediacodec,
+          hwdecDependency,
           HdrRouteDependency.topologyPlatformView,
           output == HdrOutputTransfer.pq
               ? HdrRouteDependency.dataspacePq
@@ -317,11 +491,29 @@ class HdrStrategyRealizer {
     HdrSourceClass cls,
     HdrCapabilities capabilities,
   ) {
-    if (cls == HdrSourceClass.hdrVivid || cls == HdrSourceClass.dvP10) {
+    if (cls == HdrSourceClass.hdrVivid ||
+        cls == HdrSourceClass.hdr10Plus) {
+      // The format is a valid C2 target, but full metadata mapping is not
+      // implemented. Do not silently emit PQ while ignoring the metadata.
+      final reason = _displayTransferCheck(HdrOutputTransfer.pq, capabilities);
+      if (reason != null) return HdrStrategyRealization.infeasible(reason);
+      if (_gpuHdrDataSpaceUnavailable(capabilities)) {
+        return const HdrStrategyRealization.infeasible(
+            HdrDegradeReason.gpuHdrDataSpaceUnavailable);
+      }
+      return const HdrStrategyRealization.infeasible(
+          HdrDegradeReason.routeNotImplemented);
+    }
+    if (cls == HdrSourceClass.dvP10) {
       return const HdrStrategyRealization.infeasible(
           HdrDegradeReason.unsupportedStrategy);
     }
     final bool isDv = source.dynamicMetadata == HdrDynamicMetadata.dolbyVision;
+    if (!isDv) {
+      // Ordinary PQ/HLG contains no dynamic metadata to rebuild.
+      return const HdrStrategyRealization.infeasible(
+          HdrDegradeReason.unsupportedStrategy);
+    }
     if (isDv) {
       if (!capabilities.p5PipelineAvailable) {
         return const HdrStrategyRealization.infeasible(
@@ -341,6 +533,14 @@ class HdrStrategyRealizer {
     if (reason != null) {
       return HdrStrategyRealization.infeasible(reason);
     }
+    // W1: the reshape is structurally hard-bound to the RGB `rgb10_a2`
+    // window surface. A device whose declared PQ presentation channels
+    // exclude the RGB surface cannot realize it at all — a declared YUV
+    // window may still carry the conversion candidate instead.
+    if (!capabilities.pqPresentation.rgbSurface) {
+      return const HdrStrategyRealization.infeasible(
+          HdrDegradeReason.pqRgbPresentationUnavailable);
+    }
     return HdrStrategyRealization.route(
       HdrRoute(
         strategy: HdrStrategy.metadataReshape,
@@ -355,10 +555,12 @@ class HdrStrategyRealizer {
         surfaceTransfer: 'pq',
         // The RPU is the input of the rebuild; it must survive.
         stripDvRpu: false,
+        metadataHandling: metadataHandlingFor(source, HdrStrategy.metadataReshape),
         dependencies: const <String>{
           HdrRouteDependency.hwdecMediacodec,
           HdrRouteDependency.topologyPlatformView,
           HdrRouteDependency.dataspacePq,
+          HdrRouteDependency.mapperDolbyVision,
         },
       ),
     );
@@ -391,6 +593,7 @@ class HdrStrategyRealizer {
         targetTrc: 'bt.1886',
         surfaceTransfer: null,
         stripDvRpu: cls == HdrSourceClass.dvP84,
+        metadataHandling: metadataHandlingFor(source, HdrStrategy.toneMapSdr),
         dependencies: <String>{
           useMediacodecCopy
               ? HdrRouteDependency.hwdecMediacodecCopy
@@ -428,6 +631,7 @@ class HdrStrategyRealizer {
         surfaceTransfer: null,
         // P8.2 strips its RPU; plain SDR carries none.
         stripDvRpu: source.dynamicMetadata == HdrDynamicMetadata.dolbyVision,
+        metadataHandling: metadataHandlingFor(source, HdrStrategy.sdrDirect),
         dependencies: <String>{
           useMediacodecCopy
               ? HdrRouteDependency.hwdecMediacodecCopy
@@ -458,6 +662,7 @@ class HdrStrategyRealizer {
       case HdrSourceClass.sdr:
       case HdrSourceClass.dvP5: // Unreachable: refused above.
       case HdrSourceClass.dvP10:
+      case HdrSourceClass.dvUnknown: // unreachable after the source-fact guard
         if (source.transfer == 'hlg') return HdrOutputTransfer.hlg;
         if (source.transfer == 'pq') return HdrOutputTransfer.pq;
         return HdrOutputTransfer.sdr;
@@ -508,36 +713,6 @@ class HdrStrategyRealizer {
       defaultValue: 'pq');
   static const bool _convertRouteLock =
       bool.fromEnvironment('MEDIA_KIT_ANDROID_HDR_CONVERT_ROUTE_LOCK');
-
-  /// WP-C SurfaceTexture PoC (phase1-design-spec §5): a non-empty
-  /// MEDIA_KIT_ANDROID_SURFACETEXTURE_POC define overrides only the
-  /// baseLayerConvert route hwdec with the experimental `surfacetexture`
-  /// importer. Empty (default) keeps every routed value unchanged.
-  static const String _surfaceTexturePoc =
-      String.fromEnvironment('MEDIA_KIT_ANDROID_SURFACETEXTURE_POC');
-
-  /// Test seam for the official backend probe: null (default) runs the real
-  /// FFI probe. Only the baseLayerConvert decision point consumes it.
-  ///
-  /// Visibility constraint (frozen): this seam exists for host tests only —
-  /// it stays `@visibleForTesting` (compile-time enforced, no runtime gate,
-  /// no build flag around it) and must never grow a production caller or a
-  /// runtime toggle that could silently re-route the admission decision.
-  @visibleForTesting
-  static bool Function()? mkstBridgeProbeOverride;
-
-  /// hwdec written at the baseLayerConvert decision point. Pure helper with
-  /// injectable inputs for tests; production passes the official backend
-  /// probe ([mkstBridgeInitialized]) and uses [_surfaceTexturePoc].
-  /// All other realizer decision points never call this. The define stays
-  /// authoritative: a non-empty define forces the override even when the
-  /// probe is absent; the official path applies only while the bridge
-  /// reports an owner-bound explicit init.
-  static String surfaceTexturePocHwdec(String routedHwdec,
-          {String? define, bool officialBackendReady = false}) =>
-      (define ?? _surfaceTexturePoc).isNotEmpty || officialBackendReady
-          ? 'surfacetexture'
-          : routedHwdec;
 
   static bool _requiresMediacodecCopy(HdrCapabilities capabilities) =>
       capabilities.sdkInt > 0 && capabilities.sdkInt < 26;

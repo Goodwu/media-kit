@@ -25,6 +25,9 @@ enum HdrPresentation {
     switch (strategy) {
       case HdrStrategy.nativeDolbyVision:
         return HdrPresentation.nativeDolbyVision;
+      case HdrStrategy.nativeHdr10Plus:
+      case HdrStrategy.nativeHdrVivid:
+        return HdrPresentation.nativeHdr;
       case HdrStrategy.baseLayerDirect:
       case HdrStrategy.baseLayerConvert:
       case HdrStrategy.metadataReshape:
@@ -53,9 +56,24 @@ enum HdrOutputTransfer {
 /// The output topology of a realized route: a `gpu-next` GL texture
 /// (Texture widget) or a native surface hosted by the platform view
 /// (decoder-composited `mediacodec_embed` or the GPU HDR dataspace surface).
-enum HdrTopology {
-  texture,
-  platformView,
+enum HdrTopology { texture, platformView }
+
+/// Intended ownership of *source* dynamic metadata. This is a requested
+/// route contract, never proof that a decoder/renderer consumed or forwarded
+/// a frame's metadata. Actual delivery/consumption needs runtime evidence.
+enum HdrMetadataHandling {
+  /// Ordinary SDR/HDR without an applicable dynamic payload.
+  none,
+
+  /// Keep original dynamic signaling for an actual native HDR decoder.
+  preserveForNative,
+
+  /// Consume per-frame metadata in the local GPU mapping/tone-map pipeline.
+  consumeForMapping,
+
+  /// Use only the independently decodable compatible base layer.
+  /// The execution adapter must not claim dynamic HDR was rendered.
+  baselineOnly,
 }
 
 /// Confidence that the predicted route will actually come up on this device
@@ -76,6 +94,20 @@ enum HdrPredictionConfidence {
 /// Typed reasons for a skipped candidate or a runtime degradation
 /// (requirement R3.2, which sets the floor "至少区分以下原因").
 enum HdrDegradeReason {
+  /// No available system decoder for this exact source and route consumer.
+  /// Does not prove that an unenumerated FFmpeg software path is impossible.
+  sourceDecodeUnsupported,
+
+  /// Every execution of this complete request was already admitted once.
+  candidateExhausted,
+
+  /// The requested configuration cannot be met by an eligible/current route.
+  routeOptionsUnsatisfied,
+
+  /// DV is present but its profile/base-layer interpretation is not known.
+  /// More source facts are required; requesting SDR cannot remove this need.
+  sourceMetadataUnknown,
+
   /// Output forced to SDR because the caller set `HdrOutputPreference.off`.
   preferenceOff,
 
@@ -86,8 +118,9 @@ enum HdrDegradeReason {
   /// routes are never selected on a guess.
   noDisplayCapabilityReport,
 
-  /// The strategy is `experimental` and the routing policy did not set
-  /// `allowExperimental` (requirement 3.5).
+  /// Legacy reason of the removed maturity admission gate. The planner no
+  /// longer produces it — maturity never gates admission — and it is kept
+  /// only as part of the typed reason vocabulary.
   experimentalStrategySkipped,
 
   /// The strategy cannot be realized on the current pipeline at all: a
@@ -96,6 +129,15 @@ enum HdrDegradeReason {
   /// rebuild (not implemented), or reshape on a P7 stream whose
   /// enhancement layer may be FEL.
   unsupportedStrategy,
+
+  /// The selected, structurally applicable route has no implementation in
+  /// this build. This is not display/decoder unavailability and is reported
+  /// even if a later baseline HDR candidate plays successfully.
+  routeNotImplemented,
+
+  /// The dynamic metadata mapper failed on a route that actually depends on
+  /// it. A compatible static HDR baseline may still be separately usable.
+  metadataMappingFailed,
 
   /// A Dolby Vision source needs the fork's P5 dovi rescale pipeline and it
   /// is not available; the library refuses to output a wrongly colored
@@ -111,6 +153,9 @@ enum HdrDegradeReason {
   /// `hwdec-current` did not match the route's expectation.
   hwdecMismatch,
 
+  /// The reviewed source requires a different route after the single rebuild.
+  routeReviewMismatch,
+
   /// The GPU output surface did not bind within the budget.
   outputBindTimeout,
 
@@ -123,6 +168,18 @@ enum HdrDegradeReason {
   /// Android versions before API 28 cannot apply the public GPU HDR dataspace
   /// needed by HDR PlatformView routes.
   gpuHdrDataSpaceUnavailable,
+
+  /// The device declares no PQ presentation through the RGB window surface
+  /// (plan W1): routes structurally hard-bound to the `rgb10_a2` RGB
+  /// surface (the C2 reshape) are infeasible at plan time; a declared YUV
+  /// window carrier may still serve the conversion candidate.
+  pqRgbPresentationUnavailable,
+
+  /// The vendor YUV window presentation arm could not be armed or cleaned up
+  /// for the route's execution attempt (plan C): missing owner authorization,
+  /// device/vendor gate refusal, or an unavailable vendor library/symbol.
+  /// Fail-closed for the YUV carrier; every other route is unaffected.
+  yuvWindowArmUnavailable,
 
   /// The platform has no HDR output pipeline (non-Android in Phase 1).
   unsupportedPlatform,
@@ -145,11 +202,29 @@ abstract class HdrRouteDependency {
   /// The route decodes through MediaCodec and copies frames to the GPU.
   static const String hwdecMediacodecCopy = 'hwdec:mediacodec-copy';
 
+  /// The route imports SurfaceTexture decoder frames. This records the
+  /// execution dependency only; it does not imply a YUV presenter or identify
+  /// a decoder failure cause.
+  static const String hwdecSurfaceTexture = 'hwdec:surfacetexture';
+
   /// The native Dolby Vision decoder/bridge pipeline.
   static const String nativeDolbyVision = 'native:dolbyVision';
 
   /// The route renders through the platform view topology.
   static const String topologyPlatformView = 'topology:platformView';
+
+  /// The DV RPU-to-PQ mapping stage, independent of the shared PQ presenter.
+  /// A verified mapper failure must not exclude C4 HLG-base-to-PQ conversion
+  /// or C3 compatibility decoding. Do not use this tag for dataspace/owner
+  /// failures, which have their own exact dependencies.
+  static const String mapperDolbyVision = 'mapper:dolbyVision';
+
+  /// Shared ordinary MediaCodec decode, independent of frame import mode.
+  static const String decoderMediacodec = 'decoder:mediacodec';
+  static const String decoderSoftware = 'decoder:ffmpeg-software';
+  static const String importMediacodec = 'import:mediacodec-hardware';
+  static const String importCpuUpload = 'import:cpu-upload';
+  static const String presenterGpuTexture = 'presenter:gpu-next-opengl-texture';
 }
 
 /// {@template hdr_route}
@@ -183,6 +258,7 @@ class HdrRoute {
     required this.targetTrc,
     required this.surfaceTransfer,
     required this.stripDvRpu,
+    this.metadataHandling = HdrMetadataHandling.none,
     this.offscreenTransfer,
     this.dependencies = const <String>{},
   });
@@ -240,8 +316,35 @@ class HdrRoute {
   /// Whether the Dolby Vision RPU must be stripped from the bitstream.
   final bool stripDvRpu;
 
+  /// Intent only. For C3/C4 the output must be reported as a static
+  /// compatibility baseline, not as native or mapped dynamic HDR.
+  final HdrMetadataHandling metadataHandling;
+
   /// The pipeline stages this route depends on (see [HdrRouteDependency]).
   final Set<String> dependencies;
+
+  /// Preserves source processing and all output/color requests while changing
+  /// the decode/import execution path. OutputContract derives from this value.
+  HdrRoute withExecution(
+          {required String hwdec, required Set<String> dependencies}) =>
+      HdrRoute(
+        strategy: strategy,
+        presentation: presentation,
+        outputTransfer: outputTransfer,
+        appliesDynamicMetadata: appliesDynamicMetadata,
+        topology: topology,
+        vo: vo,
+        hwdec: hwdec,
+        vdLavcOptions: vdLavcOptions,
+        mediacodecEmbedRenderMode: mediacodecEmbedRenderMode,
+        targetPrim: targetPrim,
+        targetTrc: targetTrc,
+        surfaceTransfer: surfaceTransfer,
+        offscreenTransfer: offscreenTransfer,
+        stripDvRpu: stripDvRpu,
+        metadataHandling: metadataHandling,
+        dependencies: Set<String>.unmodifiable(dependencies),
+      );
 
   @override
   bool operator ==(Object other) {
@@ -261,6 +364,7 @@ class HdrRoute {
         other.surfaceTransfer == surfaceTransfer &&
         other.offscreenTransfer == offscreenTransfer &&
         other.stripDvRpu == stripDvRpu &&
+        other.metadataHandling == metadataHandling &&
         setEquals(other.dependencies, dependencies);
   }
 
@@ -280,6 +384,7 @@ class HdrRoute {
         surfaceTransfer,
         offscreenTransfer,
         stripDvRpu,
+        metadataHandling,
         Object.hashAllUnordered(dependencies),
       );
 
@@ -290,8 +395,13 @@ class HdrRoute {
       'vd-lavc-o: $vdLavcOptions, render-mode: $mediacodecEmbedRenderMode, '
       'prim: $targetPrim, trc: $targetTrc, surface: $surfaceTransfer, '
       'offscreen: ${offscreenTransfer ?? 'none'}, '
-      'stripRpu: $stripDvRpu, deps: $dependencies)';
+      'stripRpu: $stripDvRpu, metadata: ${metadataHandling.name}, '
+      'deps: $dependencies)';
 }
+
+enum HdrRouteStage { c1, c2, c3, c4 }
+
+enum HdrCandidateStatus { ready, skipped, unavailable, error }
 
 /// {@template hdr_candidate}
 ///
@@ -306,21 +416,89 @@ class HdrCandidate {
     required this.strategy,
     required this.maturity,
     this.feasible = false,
+    this.isSafetyNet = false,
     this.skipReason,
     this.route,
+    this.sourceClass,
+    this.stage,
+    this.executionId,
   });
 
   final HdrStrategy strategy;
+
+  /// The source classification and immutable C1–C4 order of this candidate.
+  final HdrSourceClass? sourceClass;
+  final HdrRouteStage? stage;
+
+  /// Preserved across later rejection/wrapping when a realizable execution
+  /// is converted to an infeasible candidate (e.g. HDR cannot fall to SDR).
+  final String? executionId;
+
+  /// Stable within a planning snapshot; the snapshot identity itself is owned
+  /// by the caller and must be checked again before execution.
+  String get candidateId =>
+      executionId ??
+      [
+        sourceClass?.name ?? 'unknown',
+        stage?.name ?? 'sdr',
+        strategy.name,
+        route?.vo ?? 'none',
+        route?.hwdec ?? 'none',
+        route?.outputTransfer.name ?? 'none',
+        route?.surfaceTransfer ?? 'none',
+        route?.offscreenTransfer ?? 'none',
+        route?.vdLavcOptions ?? 'none',
+      ].join('/');
+
+  HdrCandidate withRoutingIdentity(HdrSourceClass cls, HdrRouteStage? phase) =>
+      HdrCandidate(
+        strategy: strategy,
+        maturity: maturity,
+        feasible: feasible,
+        isSafetyNet: isSafetyNet,
+        skipReason: skipReason,
+        route: route,
+        sourceClass: cls,
+        stage: phase,
+        executionId: [
+          cls.name,
+          phase?.name ?? 'sdr',
+          strategy.name,
+          route?.vo ?? 'none',
+          route?.hwdec ?? 'none',
+          route?.outputTransfer.name ?? 'none',
+          route?.surfaceTransfer ?? 'none',
+          route?.offscreenTransfer ?? 'none',
+          route?.vdLavcOptions ?? 'none',
+        ].join('/'),
+      );
 
   final HdrStrategyMaturity maturity;
 
   /// Whether the strategy can be realized on this device right now.
   final bool feasible;
 
+  /// Explicit source-safe SDR fallback, whose maturity gate was relaxed.
+  final bool isSafetyNet;
+
   /// Why the strategy was not (or cannot be) selected. Null when the
   /// candidate is feasible — including a feasible non-selected candidate
   /// kept for display, and the final safety-net candidate.
   final HdrDegradeReason? skipReason;
+
+  /// An explicit planning state. Runtime playback success is a separate
+  /// observation; a later fallback must not erase this candidate's error.
+  HdrCandidateStatus get status {
+    if (feasible) return HdrCandidateStatus.ready;
+    if (skipReason == HdrDegradeReason.routeNotImplemented) {
+      return HdrCandidateStatus.error;
+    }
+    if (skipReason == HdrDegradeReason.unsupportedStrategy ||
+        skipReason == HdrDegradeReason.experimentalStrategySkipped) {
+      return HdrCandidateStatus.skipped;
+    }
+    return HdrCandidateStatus.unavailable;
+  }
 
   /// The realized route when [feasible] is true.
   final HdrRoute? route;
@@ -332,13 +510,17 @@ class HdrCandidate {
         other.strategy == strategy &&
         other.maturity == maturity &&
         other.feasible == feasible &&
+        other.isSafetyNet == isSafetyNet &&
+        other.sourceClass == sourceClass &&
+        other.stage == stage &&
+        other.executionId == executionId &&
         other.skipReason == skipReason &&
         other.route == route;
   }
 
   @override
-  int get hashCode =>
-      Object.hash(strategy, maturity, feasible, skipReason, route);
+  int get hashCode => Object.hash(strategy, maturity, feasible, isSafetyNet,
+      skipReason, route, sourceClass, stage, executionId);
 
   @override
   String toString() => 'HdrCandidate(${strategy.name}, ${maturity.name}, '
@@ -384,8 +566,8 @@ class HdrRoutePrediction {
 
   final HdrPredictionConfidence confidence;
 
-  /// False only when playback must not start: a P5 source whose dovi
-  /// rescale pipeline is missing (R3.3).
+  /// False when no candidate satisfies source and execution constraints.
+  /// Includes missing P5 processing, unresolved DV and failed dependencies.
   final bool playable;
 
   @override
@@ -404,11 +586,31 @@ class HdrRoutePrediction {
   }
 
   @override
-  int get hashCode => Object.hash(source, selected, presentation, confidence,
-      playable, Object.hashAll(candidates));
+  int get hashCode => Object.hash(
+        source,
+        selected,
+        presentation,
+        confidence,
+        playable,
+        Object.hashAll(candidates),
+      );
 
   @override
   String toString() => 'HdrRoutePrediction(selected: $selected, '
       'presentation: ${presentation.name}, confidence: ${confidence.name}, '
       'playable: $playable, candidates: $candidates)';
+}
+
+/// A caller/native adapter has identified the failing execution component.
+/// Generic errors do not establish this cause. Session verifies the dependency
+/// belongs to the failed route before excluding other candidates that share it.
+class HdrExecutionDependencyFailure implements Exception {
+  const HdrExecutionDependencyFailure(this.dependency, this.reason,
+      {this.cause});
+  final String dependency;
+  final HdrDegradeReason reason;
+  final Object? cause;
+  @override
+  String toString() =>
+      'HdrExecutionDependencyFailure($dependency, ${reason.name}, $cause)';
 }

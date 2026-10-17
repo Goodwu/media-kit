@@ -25,13 +25,36 @@ tool/build-android-test.sh --tag mytest-pv --platform-view --local-source /data/
 
 产物：`media_kit_hdr_lab/build/app/outputs/flutter-apk/<tag>-release.apk` + 同名构建日志；JAR/溯源在 `~/src/media-kit-build/lg-api24/lg-api24-realtime-gpu-mks-<tag>-build/`。发布构建不走此脚本（gradle 钉定下载链保持默认）。
 
-### `matrix-build.sh` — 播放矩阵六包构建
+### `matrix-build.sh` — 受审 native 输入的八行路由矩阵
 
-P5/HDR10/P8.4 × SDR/HDR 六个 arm64 APK 批量构建（基础 define 集 = 12632 去起播偏移；HDR 轮加 `PLATFORM_VIEW`，P5 PQ 另加 `GPU_PLATFORM_HDR`）。产物 `/tmp/matrix-<tag>.apk` + 构建日志 `/tmp/matrix-build-<tag>.log`，末尾打印各包 SHA-256。
+沿用 PR #5 的矩阵运行职责，改为 P5/P8.4/HDR10/HLG × `MEDIA_KIT_ANDROID_HDR_GATE_OPEN=true/false` 八个 serial `media_kit_hdr_lab` APK。gate=false 行对应 Lab `allowExperimental=false`；gate=true 行对应 Lab `allowExperimental=true`。八行均将独立的 `MEDIA_KIT_ANDROID_HDR_POLICY_EXPERIMENTAL=false` 固定，避免 P8.4 元数据路线重排；这不覆盖 gate=true 的准入语义。receipt 分别记录 `allowExperimental` 和 `hdrPolicyExperimental`。以 `--target-platform android-arm64` 和 `mediaKitArm64Only=true` 构建。实验 SurfaceTexture define 不传；矩阵不强制 decoder、VO、颜色 hint 或 LG YUV 路线。App 产品默认仍 false，矩阵不改变产品默认值。
 
-- 前置：JDK17（脚本内已 export `/opt/homebrew/opt/openjdk@17`）；默认源为钉定发布 JAR（gradle 下载 + SHA 核验，v2026.012）；需要验证重建 JAR 时用 `ORG_GRADLE_PROJECT_mediaKitLocalArm64Jar` 覆盖，日常测试构建直接走 `build-android-test.sh`（教训：误链旧世代 libavcodec 会复演 `direct=0`）。
-- `MEDIA_KIT_ANDROID_LOCAL_SOURCE` 指向设备侧素材路径（`/data/local/tmp/...`），换素材需改 `build` 调用参数。
-- define 集与六轮验收依据：`archives/experiments/android-playback-matrix-12703-12708-20260930.md`。
+入口要求 App 精确 checkout、空输出目录、Flutter、JDK、Android SDK、`llvm-readelf`、`llvm-nm`、`apksigner`、`ffprobe` 和四种真实 fixture 的证据文件：
+
+```sh
+tool/matrix-build.sh \
+  --app-root /path/to/PiliPlusX \
+  --output /absolute/path/to/new-empty-matrix-dir \
+  --flutter /path/to/flutter/bin/flutter \
+  --java-home /path/to/jdk \
+  --android-sdk /path/to/android-sdk \
+  --bootstrap-dir /path/to/current/private-bootstrap-receipts \
+  --readelf /path/to/ndk/llvm-readelf \
+  --nm /path/to/ndk/llvm-nm \
+  --apksigner /path/to/android-sdk/build-tools/VERSION/apksigner \
+  --ffprobe /path/to/ffprobe \
+  --fixtures /path/to/verified-fixtures.json
+```
+
+`--fixtures` 是 JSON 对象：`schemaVersion: 1`，`fixtures` 恰含 `p5`、`p84`、`hdr10`、`hlg` 四项。每项字段为 `path`（本机真实媒体文件）、`sha256`（当前 lab 字节身份表中的摘要）、`devicePath`（`/data/local/tmp/media-kit-<kind>-<suffix>.mp4`）、`probeEvidence`（先前探测 JSON）。sidecar 形如 `{"schemaVersion":1,"fixtureSha256":"...","probe":{...}}`。工具会用指定 `ffprobe` 对本机文件实际运行 `-show_streams -show_format`，记录命令、输出摘要，并要求其 stream 语义投影与 SHA 绑定 sidecar 一致；sidecar 不能替代实际探测。P5 以实际 DOVI profile 5/compatibility 0/EL=false/RPU与BL存在分类；颜色 VUI 可以缺失，但存在时不能矛盾。P8.4 要求 profile 8/compatibility 4/EL=false/RPU与BL存在、HLG兼容 transfer 及 BT.2020 primaries/matrix；HDR10/HLG分别要求无DOVI、PQ/HLG transfer和BT.2020。未知或冲突均在 prebuild 拒绝。字节身份表仍是独立准入门；未收录的实测文件（包括 review 中报告的未知 P5 SHA）不会因 ffprobe 分类正确而自动进入表。
+
+`--bootstrap-dir` 必须是同一 runner 产生的受审 bootstrap 输出目录，含 `bootstrap.json`、`source-resolution-before.json` 和 `patched-sdk-diff.log`。脚本检查 bootstrap 的 App/media-kit HEAD/tree 与当前 tracking remote，调用现有 `prepare_routing_ci.py --finalize` 再核 package/source freshness，要求当前 `--flutter` 正是 receipt 中打过 SDK/package 补丁的私有 SDK，并记录 patch 输入、SDK commit/tree/diff。`verify_routing_sources.py` 也会在真实 App checkout 上核对 App package_config。
+
+在该前置通过后，脚本把精确 media-kit Git tree archive 到输出副本；每行从这个 archive 复制独立完整源码副本，在副本内执行自己的 `flutter pub get`，并将 `PUB_CACHE` 指向该行新建的专属缓存，避免前一行插件 `.cxx` 输出成为下一行输入。package_config 必须逐包绑定十个 media-kit library 与它自己的 `media_kit_hdr_lab` pubspec/source；其他 package 只能来自该行副本、专属 pub cache 或私有 Flutter SDK。构建调用使用 Flutter 支持的正常 lab 输出目录和 `--no-pub`，每行只从新副本的 `build/app/outputs/flutter-apk/app-release.apk` 取 APK，不传无效 `--build-dir`，也不从旧行或源 checkout 回退。Git archive 的逐路径 blob、普通文件/链接类型及执行模式在 pub get 前后和构建后复核；pub get 修改原 tracked 文件、删除文件或新增未认可源码均拒绝，不能重抓变化后的基线。所有已解析依赖包的 asset/font/shader 另行按实际声明冻结内容，优先于普通输出目录排除（例如依赖的合法 `build/review.bin`），资源 URI 与 `packages/<name>/...` 按实际 Flutter 的 packageUriRoot 解析并绑定精确包内目标；沿当前 SDK `asset.dart` 的一层 resolution variant 规则同时冻结隐式成员及集合变化；目录 asset 只读取直接文件及其真实 variants，不把整个依赖 `build/` 的 Gradle 子树视为资源。fonts 保持实际文件语义。遗漏、跨包逃逸、循环链接或读取错误均失败。资源声明通过 App 原有 `prepare_android_variant.py` 和锁定 yaml 3.1.3 的实际 Dart parser 解析；生成文件、根输出目录及按包绑定的 plugin symlink 使用精确路径契约，`assets/build/` 仍作为资源输入。构建前后冻结比较该行 package_config、pubspec/lock、resolved package roots及全部源码/resource/generator文件树。
+
+脚本通过 App 精确 checkout 的原有 `acquire_routing_native_inputs.py` 读取固定 CORE accepted ledger，并调用原 `verify_routing_native_inputs.py` 验证选中 artifact；空 selector 在 Flutter APK build 前拒绝。App verifier 保持对 APK 中受审 JAR 三成员的原始哈希/ELF门。矩阵再从接受的 JAR manifest、Flutter engine/AOT 契约、当前 lab/依赖 Android Gradle 实际配置引用的 CMake shared targets 与 arm64 `jniLibs` 源输入推导 APK native closure（当前七成员，包括 `libmedia_kit_dataspace_vendor.so`）；按 Lab 的真实 `build/<project name>` 重定向及各精确模块 `.cxx` 查找当前输出；未知 native member、foreign ABI、非 ELF64/AArch64/DYN、缺少当前 SDK engine/本行 AOT/CMake 输出逐项拒绝。接受 native 输入后实际执行 Android precache，再冻结 engine cache、Dart/compiler/tool snapshot、engine.version/stamp 和 SDK tools config/lock；SDK Git patch 与被忽略的 engine 字节在每行构建前后重新核对；合法 SDK 内部目录/父路径链接同时绑定 link、canonical target 及递归实际内容，拒绝逃逸、循环和读取失败。YAML parser/锁及实现哈希同时复核。每行 AOT 绑定该行精确 archive、defines、构建命令及冻结输入；不同 defines 的 AOT 不要求相同字节，JAR 三成员仍严格相同。receipt 分别记录 JAR、SDK engine、Flutter AOT 和每个 lab/vendor native member 的真实来源和 SHA，并记录 apksigner证书；八行证书必须一致。APK、日志和最终/失败 `matrix-receipt.json` 写入各行隔离目录，最终全绿状态也会持久写回磁盘。命令失败保留部分 receipt 并立即以失败码退出。可用空间低于 512 MiB 时拒绝启动下一条命令；工具不删除任何缓存。
+
+receipt 将 `localContentVerified=true` 与 `deviceFixtureVerified=false` 分开记录；脚本不运行 adb、不安装、不播放，也不宣称画面/HDR/性能验收。DEVICE 后续须在实机核对文件映射，再单独完成真实 Session、可见输出和持续播放验收。PR #5 原脚本来源/哈希见 `docs/plans/core-pr5-script-inventory-20261012.json`；其中 `assemble-jar-arm64.sh` 是 native bundler 的重复配方，不在此导入，由 DV001 原配方唯一维护。
 
 ### `mk-pack-jar.sh <src.jar> <new_libmpv.so> <out.jar>` — JAR 重打包
 

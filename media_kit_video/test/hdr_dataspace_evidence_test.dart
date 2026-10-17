@@ -3,7 +3,10 @@ import 'package:media_kit_video/media_kit_video.dart';
 import 'package:media_kit_video/src/hdr/hdr_player_backend.dart';
 
 HdrCapabilities caps(
-        {int sdk = 24, String id = 'lg-pq', bool applicable = true}) =>
+        {int sdk = 24,
+        String id = 'lg-pq',
+        bool applicable = true,
+        Set<String> setterOnly = const <String>{}}) =>
     HdrCapabilities(
         sdkInt: sdk,
         displayHdrTypes: const {2},
@@ -11,7 +14,16 @@ HdrCapabilities caps(
         dolbyVisionDecoders: const [],
         p5PipelineAvailable: false,
         dataSpaceBridgeLoaded: false,
-        dataSpaceExt: HdrDataSpaceExtInfo(id: id, applicable: applicable));
+        dataSpaceExt: HdrDataSpaceExtInfo(
+            id: id,
+            applicable: applicable,
+            setterOnlyTransfers: setterOnly));
+
+/// The LG-shaped self-report: the extension declares the setter-only
+/// exception for both PQ transfers (the readback is impossible on that
+/// platform) — the capability the acceptance consumes instead of any
+/// device-name-derived identifier.
+const lgSetterOnly = <String>{'pq', 'pq-itu'};
 
 void main() {
   test('LYA default convert route keeps production PQ request', () {
@@ -42,33 +54,62 @@ void main() {
     expect(
         AndroidHdrBackend.dataSpaceReadbackMatches('unknown', 'PQ'), isFalse);
   });
-  test('missing readback exception is confined to applicable LG API24 PQ', () {
+  test('setter-without-readback acceptance follows the declared capability',
+      () {
+    // The declared capability accepts both PQ transfers (applied must hold).
     expect(
-        AndroidHdrBackend.acceptsUnverifiedLgSetter(
-            caps(), 'pq-itu', 'ext:lg-pq', 'none'),
+        AndroidHdrBackend.acceptsUnverifiedExtSetter(
+            caps(setterOnly: lgSetterOnly), 'pq-itu', true, 'ext:lg-pq',
+            'none'),
         isTrue);
-    for (final c in [
-      caps(sdk: 25),
-      caps(id: 'lya-pq'),
-      caps(applicable: false)
-    ]) {
-      expect(
-          AndroidHdrBackend.acceptsUnverifiedLgSetter(
-              c, 'pq', 'ext:lg-pq', null),
-          isFalse);
-    }
-    for (final path in [null, 'ext:any', 'ext:lya-pq', 'none']) {
-      expect(
-          AndroidHdrBackend.acceptsUnverifiedLgSetter(caps(), 'pq', path, null),
-          isFalse);
-    }
     expect(
-        AndroidHdrBackend.acceptsUnverifiedLgSetter(
-            caps(), 'hlg', 'ext:lg-pq', null),
+        AndroidHdrBackend.acceptsUnverifiedExtSetter(
+            caps(setterOnly: lgSetterOnly), 'pq', true, 'ext:lg-pq', null),
+        isTrue);
+    // A familiar id WITHOUT the declaration gets no exception: the id is
+    // inert data, only the capability counts.
+    expect(
+        AndroidHdrBackend.acceptsUnverifiedExtSetter(
+            caps(), 'pq', true, 'ext:lg-pq', null),
+        isFalse);
+    // An unknown id WITH the explicit declaration works (the path identity
+    // follows the registered extension).
+    expect(
+        AndroidHdrBackend.acceptsUnverifiedExtSetter(
+            caps(id: 'unknown-vendor', setterOnly: lgSetterOnly),
+            'pq',
+            true,
+            'ext:unknown-vendor',
+            null),
+        isTrue);
+    // The five rejections: not applicable, not applied, undeclared
+    // transfer, foreign path, present-but-wrong readback.
+    expect(
+        AndroidHdrBackend.acceptsUnverifiedExtSetter(
+            caps(setterOnly: lgSetterOnly, applicable: false),
+            'pq',
+            true,
+            'ext:lg-pq',
+            null),
         isFalse);
     expect(
-        AndroidHdrBackend.acceptsUnverifiedLgSetter(
-            caps(), 'pq', 'ext:lg-pq', 'DATASPACE_SRGB'),
+        AndroidHdrBackend.acceptsUnverifiedExtSetter(
+            caps(setterOnly: lgSetterOnly), 'pq', false, 'ext:lg-pq', null),
+        isFalse);
+    expect(
+        AndroidHdrBackend.acceptsUnverifiedExtSetter(
+            caps(setterOnly: lgSetterOnly), 'hlg', true, 'ext:lg-pq', null),
+        isFalse);
+    for (final path in [null, 'ext:any', 'ext:lya-pq', 'none']) {
+      expect(
+          AndroidHdrBackend.acceptsUnverifiedExtSetter(
+              caps(setterOnly: lgSetterOnly), 'pq', true, path, null),
+          isFalse);
+    }
+    expect(
+        AndroidHdrBackend.acceptsUnverifiedExtSetter(
+            caps(setterOnly: lgSetterOnly), 'pq', true, 'ext:lg-pq',
+            'DATASPACE_SRGB'),
         isFalse);
   });
   test('LG setter evidence is not surface readback verification', () {

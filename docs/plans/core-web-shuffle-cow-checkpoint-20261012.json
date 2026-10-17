@@ -1,0 +1,235 @@
+{
+  "schema": 1,
+  "taskId": "MK-ROUTING-20261011",
+  "checkpoint": "CORE-WEB-SHUFFLE-01",
+  "capturedAtUtc": "2026-10-12T15:36:00Z",
+  "inputHeads": {
+    "phase": "observed inputs before this Web implementation checkpoint; containing commits must be read back separately and are not covered by preceding CI",
+    "app": "a98a57f2892592d5b8a25d6533ede4580d412ae5",
+    "mediaKit": "0c6ffeaf2f509c38f8c76eca42ee255bd69b8cd2",
+    "ffmpeg": "9aba43cfbee182ade060cdccbe15340a0fbe3e83",
+    "deviceDV001": "1095a43acb4d0973b8bca59c5da4e300657bdb29",
+    "pr5": "dc41787082752f234fed85db7fb7be3bd855cc45",
+    "deviceDV004PR6": "9a2c5768dd10e71975b7c3e76bb7125460a43e5b",
+    "appDV003DV005PR3": "b18086d0d654a5f523296b41bdfb869c588cd3f0"
+  },
+  "implementation": {
+    "id": "CORE-WEB-SHUFFLE-01",
+    "status": "implemented_and_independently_source_reviewed_hosted_execution_pending",
+    "claim": 6126963656,
+    "ciScopeSupplement": 6127346332,
+    "owner": "CORE sole public integrator",
+    "files": [
+      "media_kit/lib/src/player/web/player/real.dart",
+      "media_kit/test/src/player/player_test.dart",
+      ".github/workflows/ci.yml"
+    ],
+    "functions": [
+      "WebPlayer.setShuffle enable and restore",
+      "two original shuffle cases and two new Web-only snapshot regressions",
+      "ci.yml media_kit-tests-web targeted step before full Chrome suite"
+    ],
+    "sourceIdentity": [
+      {
+        "path": "media_kit/lib/src/player/web/player/real.dart",
+        "parentBlob": "c6feb91a11698ff89dd09448a091bd13f5f4670e",
+        "candidateBlob": "1864968fd3128586c30b70e1fc6ff8833390565e",
+        "sha256": "7bdd28f5606da42f4931e13ec0fe274a866f9e75b2bed294c60e43b53374462d",
+        "bytes": 49622
+      },
+      {
+        "path": "media_kit/test/src/player/player_test.dart",
+        "parentBlob": "50f4a893f252cf3e9ba7ff33edb043363233a666",
+        "candidateBlob": "cd8a27fe29f1bc558f6594d589515794aa71d010",
+        "sha256": "b1e20203b0bd5d0f1698b650db24201c0e06d344461a6dc6235178effd3f5c59",
+        "bytes": 105962
+      },
+      {
+        "path": ".github/workflows/ci.yml",
+        "parentBlob": "4d6e7676e471317bd34dc89fb7e235136790d5f8",
+        "candidateBlob": "38ae4d0aa0bd044e1e1312846d91a5b79fbdf04e",
+        "sha256": "02da549c4b38e3c27c3e219fbfd165dae755c742a17fe7eee1d927c5f932b6bb",
+        "bytes": 26060
+      }
+    ],
+    "method": "copy internal queue before shuffle; restore from a new copy; preserve previously exposed state and stream Playlist snapshots",
+    "targetedTestCount": 4,
+    "newTestCount": 2,
+    "runtimeVerification": "pending actual hosted target and full Chrome suite; no local Dart/Flutter/Chrome available",
+    "staticReview": {
+      "verdict": "READY_FOR_HOSTED_VALIDATION",
+      "report": "docs/plans/core-web-shuffle-independent-source-review-20261012.json",
+      "sha256": "47c46cbd9acc886b8967bc028f61284d7cdff57b19e7dfa6c55f318addc9bffe",
+      "priorFailingRun": 38255531407,
+      "baselineRuntimeRedNewTestsExecuted": false
+    },
+    "outOfScopeObservedIssues": [
+      "all URI-equal entries make the existing rejection-sampling while loop non-terminating; independently scoped repair still needed",
+      "indexOf(current) uses URI equality and does not retain exact duplicate occurrence identity; no claim of complete queue-edit/shuffle semantics"
+    ],
+    "preserved": [
+      "global Playlist/Media equality and stream distinct",
+      "native player and public Session/planner/backend/realizer/output slot",
+      "existing test timings and routing CI concurrency policy",
+      "DEVICE App/sniffer/gather/native recipe ownership"
+    ]
+  },
+  "priorVectorValidation": {
+    "scope": "exact prior source vector only; Web production changes in this checkpoint await their own hosted execution",
+    "vector": {
+      "app": "a98a57f2892592d5b8a25d6533ede4580d412ae5",
+      "appTree": "74c2aeaabde1ee80df812b5a505f16223bbdbb81",
+      "mediaKit": "0c6ffeaf2f509c38f8c76eca42ee255bd69b8cd2",
+      "mediaKitTree": "b72b6dc2a47282bc3992ddc64c298f8e83baf182"
+    },
+    "app": {
+      "run": 38266831541,
+      "attempt": 1,
+      "conclusion": "success",
+      "actualArtifactZIPs": 5,
+      "flutterPassedEachPlatform": 268,
+      "analyzeIssuesEachPlatform": 0,
+      "pythonPassed": 504,
+      "pythonSkipped": 2,
+      "pythonTotal": 506,
+      "webDOMPassed": 1,
+      "webBuild": "success",
+      "dartAssetsBundleEach": "success",
+      "bootstrapStepsEach": 57,
+      "bootstrapStatus": "fresh-source-only",
+      "sourceHashesIndependentlyRecomputed": 2714,
+      "appLibTestHashes": 1442,
+      "mediaKitAllTrackedHashes": 1272,
+      "totalPackageRootsEach": 261,
+      "mediaKitPackageRootsEach": 10,
+      "sdkFlutter": "3.47.2",
+      "sdkDart": "3.13.2",
+      "evidence": "docs/plans/core-source-ci-a98a57-0c6ffe-checkpoint-20261012.json"
+    },
+    "appBuild": {
+      "run": 38266831911,
+      "attempt": 1,
+      "conclusion": "failure",
+      "actualArtifactZIPs": 11,
+      "jobTotals": {
+        "success": 7,
+        "failure": 6,
+        "skipped": 2
+      },
+      "embeddedSourceValidation": "independent artifacts and jobs; four Flutter groups268/analyze0, Python504+2; same exact a98a57f/0c6ffe vector",
+      "androidAndPink": "selection failed: explicit selected native manifest empty; commands=[]",
+      "otherFourNativePlatforms": "SOURCE_PREPARED_NATIVE_BLOCKED; native root/producer receipt unavailable",
+      "iosVariant": "1918 base tracked hashes and exactly two approved transformations independently replayed and matched; bundle success; Xcode build not started",
+      "acceptedNativeCandidates": 0,
+      "evidence": "docs/plans/core-build-ci-a98a57-0c6ffe-checkpoint-20261012.json"
+    },
+    "librarySource": {
+      "run": 38266780378,
+      "attempt": 1,
+      "conclusion": "success",
+      "head": "0c6ffeaf2f509c38f8c76eca42ee255bd69b8cd2",
+      "actualArtifactZIPs": 3,
+      "mediaKitVideoPassed": 772,
+      "mediaKitVideoSkipped": 3,
+      "hdrLabPassed": 298,
+      "analyzeIssuesEach": 0,
+      "pythonToolGroupsPassed": [
+        6,
+        12,
+        27
+      ],
+      "sdkFlutter": "3.47.7",
+      "sdkDart": "3.13.5",
+      "sdkNote": "independent workflow used a different SDK from App source; do not combine their toolchain labels",
+      "evidence": "docs/plans/core-library-source-ci-0c6ffe-checkpoint-20261012.json"
+    },
+    "libraryGeneral": {
+      "run": 38266780432,
+      "attempt": 1,
+      "statusAtAudit": "in_progress",
+      "runHead": "0c6ffeaf2f509c38f8c76eca42ee255bd69b8cd2",
+      "actualTestCheckout": "65531539dd2f53b9dbc8d8b3be93c25e534b7c19",
+      "mergeParents": [
+        "d761922721ad8da6bb186abd270bb096100944ea",
+        "0c6ffeaf2f509c38f8c76eca42ee255bd69b8cd2"
+      ],
+      "mergeTree": "b72b6dc2a47282bc3992ddc64c298f8e83baf182",
+      "terminalAndFullArtifactAudit": "pending; interim progression belongs in PR4 without rewriting this frozen checkpoint"
+    },
+    "historicalExactPairs": [
+      {
+        "app": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+        "mediaKit": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+        "sourceRun": 38258403604,
+        "buildRun": 38258404288,
+        "evidence": "docs/plans/core-successor-checkpoint-20261012.json"
+      },
+      {
+        "app": "a3b577f3794634b497c6f82369bcc98d39d91fa2",
+        "mediaKit": "e269d9669becb5812663200e7521901e8254c8bd",
+        "sourceRun": 38255581451,
+        "evidence": "docs/plans/core-source-ci-a3b577-e269d-checkpoint-20261012.json",
+        "sha256": "156cd314f670a3d958cea70beb3818a4ea3b6dba0d3e9d944e20b8d1858705da"
+      }
+    ],
+    "excludedCancelledRuns": [
+      38266821993,
+      38258394875
+    ],
+    "acceptedNativeInputs": 0,
+    "deviceAcceptance": false,
+    "sustainedPerformanceAcceptance": false,
+    "limits": [
+      "kernel/full Web output bytes are not in these artifacts; digest receipts do not mean independent binary rehash",
+      "source/host/bundle, native build, device HDR and sustained performance remain separate gates"
+    ]
+  },
+  "reports": [
+    {
+      "path": "docs/plans/core-source-ci-a98a57-0c6ffe-checkpoint-20261012.json",
+      "sha256": "a7dd45cc38fca65034c9dadf88c5a1913b39cd8e1b9177d5b82e7421b0393f62",
+      "bytes": 153192,
+      "copyPolicy": "exact frozen report bytes"
+    },
+    {
+      "path": "docs/plans/core-build-ci-a98a57-0c6ffe-checkpoint-20261012.json",
+      "sha256": "fac67d7dff2cd362a99c6d81ba4b398c6978f395e44d28ad60929bc180b513b1",
+      "bytes": 309890,
+      "copyPolicy": "exact frozen report bytes"
+    },
+    {
+      "path": "docs/plans/core-library-source-ci-0c6ffe-checkpoint-20261012.json",
+      "sha256": "12939d895c11862b0eaf4268cdabcf22af813ddd83f7e6732eae6e7f301cf158",
+      "bytes": 27658,
+      "copyPolicy": "exact frozen report bytes"
+    },
+    {
+      "path": "docs/plans/core-web-shuffle-independent-source-review-20261012.json",
+      "sha256": "47c46cbd9acc886b8967bc028f61284d7cdff57b19e7dfa6c55f318addc9bffe",
+      "bytes": 12914,
+      "copyPolicy": "exact frozen report bytes"
+    },
+    {
+      "path": "docs/plans/core-device-return-b180-review-20261012.json",
+      "sha256": "82c4f7658a51b91d95c7dd1e83e1c5708a08ed73de51d5b47ad31f68a30d859a",
+      "bytes": 38082,
+      "copyPolicy": "exact frozen report bytes"
+    }
+  ],
+  "nativeDeviceIntegration": {
+    "DV001AndPR5": "required_and_unfinished",
+    "acceptedNativeInputs": 0,
+    "owner": "existing DEVICE; original PR fixes and actual artifact/device return required",
+    "excludedScripts": [
+      "assemble-jar-arm64.sh",
+      "matrix-device-build.sh"
+    ]
+  },
+  "userDecisionsStillOpen": [
+    "temporary DV004 diagnostic scope",
+    "final plan fulfillment versus observed/any actual decoder switch acceptance"
+  ],
+  "publicationPolicy": "all primary PRs remain open/draft/unmerged/unclosed/unreleased",
+  "readbackPolicy": "containing commit and tree must be read back after non-force expected-SHA update; later workflow results keep their exact vector",
+  "runtimeEnvironment": "Linux Git/Python/Node; no local Dart/Flutter/Chrome/ADB/native SDK; static review is not execution"
+}

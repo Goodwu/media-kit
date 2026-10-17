@@ -3,6 +3,9 @@
 /// Copyright © 2021 & onwards, Hitesh Kumar Saini <saini123hitesh@gmail.com>.
 /// All rights reserved.
 /// Use of this source code is governed by MIT license that can be found in the LICENSE file.
+import '../routing/video_decoder_support.dart';
+import '../routing/video_route_options.dart';
+import '../routing/video_route_option_review.dart';
 import 'hdr_capabilities.dart';
 import 'hdr_output_diagnostics.dart';
 import 'hdr_route.dart';
@@ -13,45 +16,40 @@ import 'hdr_strategy_realizer.dart';
 /// The playback-level output preference (requirement 3.3). `off` is the
 /// caller asking for tone-mapped SDR regardless of capability (SDR sources
 /// stay SDR); it does not stop playback.
-enum HdrOutputPreference {
-  auto,
-
-  off,
-}
+enum HdrOutputPreference { auto, off }
 
 /// {@template hdr_routing_policy}
 ///
 /// HdrRoutingPolicy
 /// ----------------
-/// The caller-tunable part of routing: an ordered strategy list per source
-/// class and the `allowExperimental` gate (requirement 3.3/3.5).
+/// Legacy source-specific lists are retained while applications migrate to
+/// the fixed C1–C4 catalog. Maturity labels are diagnostic facts only;
+/// they never authorize or suppress execution.
 ///
 /// Preferences only contain cross-platform strategy names — no vo, hwdec,
 /// SDK or device knowledge — so an application may ship them as plain
 /// configuration. A class missing from a custom map falls back to
-/// [defaultPreferences]; a class missing from both (profile 10 and HDR10+
-/// have no default row in requirement 3.4) yields an empty list and the
-/// planner's safety net picks the route.
+/// [defaultPreferences]; a class missing from both (profile 10 has no
+/// default row) yields an empty list and the planner blocks with the
+/// placeholder candidate.
 ///
 /// {@endtemplate}
 class HdrRoutingPolicy {
   /// {@macro hdr_routing_policy}
-  const HdrRoutingPolicy({this.preferences, this.allowExperimental = false});
+  const HdrRoutingPolicy({this.preferences});
 
   /// Caller overrides keyed by source class. Treated as immutable; callers
   /// must not mutate a map after handing it to a policy.
   final Map<HdrSourceClass, List<HdrStrategy>>? preferences;
 
-  /// Whether `experimental` strategies may be selected (requirement 3.5).
-  /// `verified` and `inherited` are always allowed.
-  final bool allowExperimental;
-
   /// The default preference order per source class: HDR output first with
   /// direct routes preferred, tone-map last (requirement 3.4).
   ///
-  /// `dvP10` and `hdr10Plus` intentionally have no row (requirement 3.4
-  /// does not list them; Phase 1 does not cover AV1 and mpv cannot read
-  /// HDR10+ metadata yet) — those classes fall through to the safety net.
+  /// `dvP10` intentionally has no row (requirement 3.4 does not list it;
+  /// Phase 1 does not cover AV1) — that class plans to the blocking
+  /// placeholder candidate instead of any SDR fallback. `hdr10Plus` plans
+  /// through the fixed C1–C3 catalog with explicit not-implemented errors
+  /// on its dynamic candidates.
   static const Map<HdrSourceClass, List<HdrStrategy>> defaultPreferences =
       <HdrSourceClass, List<HdrStrategy>>{
     HdrSourceClass.dvP5: <HdrStrategy>[
@@ -61,15 +59,15 @@ class HdrRoutingPolicy {
     ],
     HdrSourceClass.dvP81: <HdrStrategy>[
       HdrStrategy.nativeDolbyVision,
-      HdrStrategy.baseLayerDirect,
       HdrStrategy.metadataReshape,
+      HdrStrategy.baseLayerDirect,
       HdrStrategy.toneMapSdr,
     ],
     HdrSourceClass.dvP84: <HdrStrategy>[
       HdrStrategy.nativeDolbyVision,
+      HdrStrategy.metadataReshape,
       HdrStrategy.baseLayerDirect,
       HdrStrategy.baseLayerConvert,
-      HdrStrategy.metadataReshape,
       HdrStrategy.toneMapSdr,
     ],
     HdrSourceClass.dvP82: <HdrStrategy>[
@@ -78,8 +76,9 @@ class HdrRoutingPolicy {
       HdrStrategy.sdrDirect,
     ],
     HdrSourceClass.dvP7: <HdrStrategy>[
-      HdrStrategy.baseLayerDirect,
+      HdrStrategy.nativeDolbyVision,
       HdrStrategy.metadataReshape,
+      HdrStrategy.baseLayerDirect,
       HdrStrategy.toneMapSdr,
     ],
     HdrSourceClass.hdr10: <HdrStrategy>[
@@ -93,21 +92,29 @@ class HdrRoutingPolicy {
       HdrStrategy.toneMapSdr,
     ],
     HdrSourceClass.hdrVivid: <HdrStrategy>[
-      HdrStrategy.baseLayerDirect,
+      HdrStrategy.nativeHdrVivid,
       HdrStrategy.metadataReshape,
+      HdrStrategy.baseLayerDirect,
+      HdrStrategy.baseLayerConvert,
       HdrStrategy.toneMapSdr,
     ],
-    HdrSourceClass.sdr: <HdrStrategy>[
-      HdrStrategy.sdrDirect,
+    HdrSourceClass.hdr10Plus: <HdrStrategy>[
+      HdrStrategy.nativeHdr10Plus,
+      HdrStrategy.metadataReshape,
+      HdrStrategy.baseLayerDirect,
+      HdrStrategy.baseLayerConvert,
+      HdrStrategy.toneMapSdr,
     ],
+    HdrSourceClass.sdr: <HdrStrategy>[HdrStrategy.sdrDirect],
   };
 
-  /// The library default policy: requirement 3.4 preferences, experimental
-  /// strategies gated off.
+  /// The library default policy: requirement 3.4 preferences only. There is
+  /// no enable switch; maturity never gates admission.
   static const HdrRoutingPolicy defaults = HdrRoutingPolicy();
 
   /// The preference list for [cls]: the caller's row when present, otherwise
-  /// the default row, otherwise an empty list (safety net only).
+  /// the default row, otherwise an empty list (planning then blocks with the
+  /// placeholder candidate).
   List<HdrStrategy> preferencesFor(HdrSourceClass cls) {
     return preferences?[cls] ??
         defaultPreferences[cls] ??
@@ -124,15 +131,18 @@ class HdrRoutingPolicy {
 /// route that actually gets applied cannot drift apart (R1.3).
 ///
 /// Algorithm (plan 1.3): classify the source, take the preference list for
-/// the class (`off` short-circuits to the safety-net strategy), and pick
-/// the first entry that passes the maturity gate, realizes feasibly, and
+/// the class (`off` short-circuits to the explicit SDR strategy), and pick
+/// the first entry that realizes feasibly, and
 /// does not depend on an excluded pipeline stage. Skipped entries stay in
-/// the candidate list with their typed reason. When nothing survives, the
-/// safety net (tone-mapped SDR, SDR direct for SDR sources) keeps playback
-/// going — requirement section 2 forbids stopping playback — except a P5
-/// source without the dovi rescale pipeline, which reports
-/// [HdrDegradeReason.p5PipelineUnavailable] and `playable == false`
-/// (R3.3: never output a wrongly colored picture).
+/// the candidate list with their typed reason. The SDR safety net (tone-map
+/// for HDR sources, SDR direct for SDR sources) exists only when an SDR
+/// output is allowed: a plain SDR source, an explicit off/require-SDR
+/// request, or a display whose report is present and empty. On an
+/// HDR-capable or unknown display (any non-empty report, or no report at
+/// all), an exhausted HDR candidate list blocks playback instead of
+/// synthesizing an implicit tone-map fallback; the first rejected
+/// candidate's reason is preserved. A P5 source without the rescale
+/// pipeline remains blocked (never output a wrongly colored picture).
 ///
 /// {@endtemplate}
 class HdrRoutePlanner {
@@ -146,11 +156,24 @@ class HdrRoutePlanner {
   static HdrRoutePrediction plan({
     required HdrSourceDescriptor source,
     required HdrCapabilities capabilities,
-    HdrRoutingPolicy policy = HdrRoutingPolicy.defaults,
-    HdrOutputPreference preference = HdrOutputPreference.auto,
+    HdrRoutingPolicy? policy,
+    HdrOutputPreference? preference,
+    EffectiveVideoRouteOptions? options,
     Map<String, HdrDegradeReason> excluded = const <String, HdrDegradeReason>{},
   }) {
+    options = resolveHdrRouteOptions(options: options, preference: preference);
+    policy = HdrRoutingPolicy(preferences: policy?.preferences);
+    preference = options.output.isRequired &&
+            options.output.target == VideoOutputIntent.sdr
+        ? HdrOutputPreference.off
+        : preference ?? HdrOutputPreference.auto;
     final HdrSourceClass cls = HdrSourceClass.of(source);
+    // In automatic mode an HDR source may use SDR only when the display
+    // explicitly reports SDR-only capabilities. A missing report is unknown,
+    // not an SDR panel. The explicit off/require-SDR request is separate.
+    final bool allowSdrOutput = cls == HdrSourceClass.sdr ||
+        preference == HdrOutputPreference.off ||
+        capabilities.displayHdrTypes?.isEmpty == true;
     final HdrStrategy fallback = cls == HdrSourceClass.sdr
         ? HdrStrategy.sdrDirect
         : HdrStrategy.toneMapSdr;
@@ -160,69 +183,89 @@ class HdrRoutePlanner {
 
     final List<HdrCandidate> candidates = <HdrCandidate>[];
     HdrCandidate? selected;
-    for (int i = 0; i < list.length; i++) {
-      final HdrCandidate candidate = _evaluate(
-        list[i],
-        source: source,
-        sourceClass: cls,
-        capabilities: capabilities,
-        policy: policy,
-        excluded: excluded,
-      );
-      candidates.add(candidate);
-      if (candidate.feasible) {
-        selected = candidate;
-        // Evaluate the remaining entries for display (feasibility and skip
-        // reasons), without changing the selection.
-        for (int j = i + 1; j < list.length; j++) {
-          candidates.add(_evaluate(
-            list[j],
-            source: source,
-            sourceClass: cls,
-            capabilities: capabilities,
-            policy: policy,
-            excluded: excluded,
-          ));
-        }
-        break;
+    for (final strategy in list) {
+      for (final candidate in _evaluateCandidates(strategy,
+          source: source,
+          sourceClass: cls,
+          capabilities: capabilities,
+          policy: policy,
+          excluded: excluded,
+          options: options)) {
+        final effective = !allowSdrOutput &&
+                candidate.feasible &&
+                candidate.route?.outputTransfer == HdrOutputTransfer.sdr
+            ? HdrCandidate(
+                strategy: candidate.strategy,
+                maturity: candidate.maturity,
+                skipReason: HdrDegradeReason.displayLacksTransfer,
+            sourceClass: candidate.sourceClass,
+            stage: candidate.stage,
+            executionId: candidate.executionId)
+            : candidate;
+        candidates.add(effective);
+        if (effective.feasible) selected ??= effective;
       }
     }
-    if (selected == null) {
-      // Safety net: playback continues tone-mapped (SDR direct for SDR
-      // sources). It bypasses the maturity gate and the excluded stages on
-      // purpose — the requirement mandates continuing playback — so its
-      // only possible failure is why playback will not start at all (a P5
-      // source without the rescale pipeline, R3.3).
-      final HdrCandidate candidate = _evaluate(
-        fallback,
-        source: source,
-        sourceClass: cls,
-        capabilities: capabilities,
-        policy: policy,
-        excluded: excluded,
-        gateMaturity: false,
-        honorExcluded: false,
-      );
-      selected = candidate;
-      candidates.add(candidate);
+    if (selected == null && allowSdrOutput) {
+      // SDR fallback is limited to an explicit SDR request or a confirmed
+      // SDR-only display. It must not become a hidden HDR failure exit.
+      final fallbackCandidates = _evaluateCandidates(fallback,
+          source: source,
+          sourceClass: cls,
+          capabilities: capabilities,
+          policy: policy,
+          excluded: excluded,
+          gateMaturity: false,
+          options: options);
+      candidates.addAll(fallbackCandidates);
+      selected = fallbackCandidates.firstWhere(
+          (candidate) => candidate.feasible,
+          orElse: () => fallbackCandidates.first);
     }
 
+    // No fallback candidate is synthesized for HDR-capable or unknown
+    // displays. Preserve the first rejected candidate as the blocking reason.
+    selected ??= candidates.isNotEmpty
+        ? candidates.first
+        : HdrCandidate(
+            strategy: HdrStrategy.metadataReshape,
+            maturity: HdrStrategyMaturity.unsupported,
+            skipReason: cls == HdrSourceClass.dvUnknown
+                ? HdrDegradeReason.sourceMetadataUnknown
+                : HdrDegradeReason.unsupportedStrategy);
+    if (candidates.isEmpty) candidates.add(selected);
+    final ordered = applyVideoRouteOptions(candidates, capabilities, options);
+    selected = ordered.firstWhere((candidate) => candidate.feasible,
+        orElse: () => selected!);
     final HdrRoute? route = selected.route;
     final bool dependsOnDataSpace =
         route != null && route.surfaceTransfer != null;
     final ext = capabilities.dataSpaceExt;
+    // Confidence is a capability judgment, never a device-name judgment: a
+    // route that depends on a dataspace transfer is verified only when the
+    // registered extension is applicable AND self-reports validated
+    // evidence for exactly that surface transfer. An undeclared transfer —
+    // on any extension id — stays unverified.
     final HdrPredictionConfidence confidence = !dependsOnDataSpace ||
-            (ext != null && ext.applicable && ext.id == 'lya-pq')
+            (ext != null &&
+                ext.applicable &&
+                ext.validatedPredictionTransfers
+                    .contains(route.surfaceTransfer))
         ? HdrPredictionConfidence.verified
         : HdrPredictionConfidence.unverified;
 
     final HdrRoutePrediction prediction = HdrRoutePrediction(
       source: source,
       selected: selected,
-      candidates: List<HdrCandidate>.unmodifiable(candidates),
+      candidates: List<HdrCandidate>.unmodifiable(ordered),
       presentation:
           route?.presentation ?? HdrPresentation.ofStrategy(selected.strategy),
-      confidence: confidence,
+      confidence: cls == HdrSourceClass.dvUnknown ||
+              route != null &&
+                  (route.hwdec == 'no' || capabilities.sourceSupport != null) &&
+                  capabilities.decoderSupportFor(route) == VideoSupport.unknown
+          ? HdrPredictionConfidence.unverified
+          : confidence,
       playable: selected.feasible,
     );
     // `HDR predict:` layer (R4.3), emitted at the single planning function
@@ -231,6 +274,80 @@ class HdrRoutePlanner {
     // function stays I/O-free and the disabled cost is one boolean check.
     HdrOutputDiagnostics.predict(prediction);
     return prediction;
+  }
+
+  static HdrRouteStage? _stageFor(
+      HdrStrategy strategy, HdrSourceClass cls) {
+    switch (strategy) {
+      case HdrStrategy.nativeDolbyVision:
+      case HdrStrategy.nativeHdr10Plus:
+      case HdrStrategy.nativeHdrVivid:
+        return HdrRouteStage.c1;
+      case HdrStrategy.metadataReshape:
+        return HdrRouteStage.c2;
+      case HdrStrategy.baseLayerDirect:
+        return cls == HdrSourceClass.hdr10 || cls == HdrSourceClass.hlg
+            ? HdrRouteStage.c1
+            : HdrRouteStage.c3;
+      case HdrStrategy.baseLayerConvert:
+        return HdrRouteStage.c4;
+      case HdrStrategy.toneMapSdr:
+      case HdrStrategy.sdrDirect:
+        return null;
+    }
+  }
+
+  static List<HdrCandidate> _evaluateCandidates(
+    HdrStrategy strategy, {
+    required HdrSourceDescriptor source,
+    required HdrSourceClass sourceClass,
+    required HdrCapabilities capabilities,
+    required HdrRoutingPolicy policy,
+    required Map<String, HdrDegradeReason> excluded,
+    bool gateMaturity = true,
+    required EffectiveVideoRouteOptions options,
+  }) {
+    // The embed option is effective only without an explicit copy
+    // preference: `preferCopy` is the preserved explicit copy intent (LYA
+    // round contract — a persisted explicit mediacodec-copy preference must be
+    // respected) and it WINS over the sdrEmbed option, so an explicit
+    // copy preference is never silently rerouted onto the direct embed
+    // carrier. Same resolved-field access as the existing preferCopy consumer
+    // (video_route_option_review.dart); this is generation suppression, not a
+    // sort adjustment. The option resolves default-enabled (2026-10-17
+    // product decision); an explicit `false` opt-out lands here as false.
+    // The embed execution decodes through `hwdec=mediacodec`, so generation
+    // is suppressed only when the census DEFINITIVELY declares the source's
+    // hardware decode `unsupported` — a software-decode declaration must not
+    // hang a hardware-decode dependent candidate. `unknown` rows (even in a
+    // completed census) and an absent census suppress nothing; the runtime
+    // review stays the decision point.
+    final VideoSourceSupport? sourceSupport = capabilities.sourceSupport;
+    final sdrEmbedEffective = options.sdrEmbed &&
+        options.importPreference != VideoImportPreference.preferCopy &&
+        sourceSupport?.support(
+              path: 'codec',
+              kind: VideoDecoderKind.hardware,
+            ) !=
+            VideoSupport.unsupported;
+    final candidates = [
+      for (final realization in HdrStrategyRealizer.realizeCandidates(strategy,
+          source: source,
+          sourceClass: sourceClass,
+          capabilities: capabilities,
+          sdrEmbedEnabled: sdrEmbedEffective))
+        _evaluate(strategy,
+            source: source,
+            sourceClass: sourceClass,
+            capabilities: capabilities,
+            policy: policy,
+            excluded: excluded,
+            gateMaturity: gateMaturity,
+            realization: realization)
+          .withRoutingIdentity(sourceClass, _stageFor(strategy, sourceClass)),
+    ];
+    // Maturity is recorded but never used as a routing admission check.
+    return applyVideoRouteOptions(candidates, capabilities, options);
   }
 
   /// Evaluates one strategy against the gates and this device.
@@ -245,38 +362,38 @@ class HdrRoutePlanner {
     required HdrRoutingPolicy policy,
     required Map<String, HdrDegradeReason> excluded,
     bool gateMaturity = true,
-    bool honorExcluded = true,
+    required HdrStrategyRealization realization,
   }) {
-    final HdrStrategyMaturity maturity =
-        HdrStrategyMaturityTable.of(sourceClass, strategy);
-    if (gateMaturity) {
-      if (maturity == HdrStrategyMaturity.unsupported) {
-        return HdrCandidate(
-          strategy: strategy,
-          maturity: maturity,
-          skipReason: HdrDegradeReason.unsupportedStrategy,
-        );
-      }
-      if (maturity == HdrStrategyMaturity.experimental &&
-          !policy.allowExperimental) {
-        return HdrCandidate(
-          strategy: strategy,
-          maturity: maturity,
-          skipReason: HdrDegradeReason.experimentalStrategySkipped,
-        );
-      }
-    }
-    final HdrStrategyRealization realization = HdrStrategyRealizer.realize(
+    final HdrStrategyMaturity maturity = HdrStrategyMaturityTable.of(
+      sourceClass,
       strategy,
-      source: source,
-      sourceClass: sourceClass,
-      capabilities: capabilities,
     );
+    if (source.hasUnresolvedDolbyVision) {
+      return HdrCandidate(
+        strategy: strategy,
+        maturity: maturity,
+        isSafetyNet: !gateMaturity,
+        skipReason: HdrDegradeReason.sourceMetadataUnknown,
+      );
+    }
+    // Missing code is a genuine path error, not an experimental switch
+    // rejection. The route stays visible even when a baseline can follow.
+    if (realization.infeasibleReason == HdrDegradeReason.routeNotImplemented) {
+      return HdrCandidate(
+        strategy: strategy,
+        maturity: maturity,
+        skipReason: HdrDegradeReason.routeNotImplemented,
+      );
+    }
+    // A route with experimental or unsupported *historical evidence* is
+    // evaluated like every other route. Structural eligibility and the
+    // actual implementation, not maturity, decide its outcome.
     final HdrRoute? route = realization.route;
     if (route == null) {
       return HdrCandidate(
         strategy: strategy,
         maturity: maturity,
+        isSafetyNet: !gateMaturity,
         skipReason: realization.infeasibleReason ??
             HdrDegradeReason.unsupportedStrategy,
       );
@@ -287,19 +404,52 @@ class HdrRoutePlanner {
     // not the carried failure reason — the deeper cause. The selected
     // strategy is unaffected either way.
     for (final MapEntry<String, HdrDegradeReason> entry in excluded.entries) {
-      if (honorExcluded && route.dependencies.contains(entry.key)) {
+      if (route.dependencies.contains(entry.key)) {
         return HdrCandidate(
           strategy: strategy,
           maturity: maturity,
+          isSafetyNet: !gateMaturity,
           skipReason: entry.value,
         );
       }
     }
+    if (capabilities.sourceSupport != null &&
+        capabilities.decoderSupportFor(route) == VideoSupport.unsupported) {
+      return HdrCandidate(
+        strategy: strategy,
+        maturity: maturity,
+        isSafetyNet: !gateMaturity,
+        skipReason: HdrDegradeReason.sourceDecodeUnsupported,
+      );
+    }
     return HdrCandidate(
       strategy: strategy,
       maturity: maturity,
+      isSafetyNet: !gateMaturity,
       feasible: true,
       route: route,
     );
   }
+}
+
+/// Convert legacy callers once; explicit contradictory inputs cannot be ignored.
+EffectiveVideoRouteOptions resolveHdrRouteOptions(
+    {EffectiveVideoRouteOptions? options,
+    HdrOutputPreference? preference}) {
+  if (options != null) {
+    if (preference == HdrOutputPreference.off &&
+        !(options.output.isRequired &&
+            options.output.target == VideoOutputIntent.sdr)) {
+      throw ArgumentError(
+          'Legacy HDR off conflicts with effective output options');
+    }
+    return options;
+  }
+  return EffectiveVideoRouteOptions.resolve(
+      application: VideoRouteOptions(
+          output: preference == null
+              ? null
+              : preference == HdrOutputPreference.off
+                  ? const VideoRouteSelection.require(VideoOutputIntent.sdr)
+                  : const VideoRouteSelection<VideoOutputIntent>.auto()));
 }
