@@ -287,4 +287,60 @@ void main() {
     expect(EffectiveVideoRouteOptions.resolve(application: legacy).toMap()
         .containsKey('experimental'), isFalse);
   });
+
+  test('sdrEmbed defaults to false at every layer and origin', () {
+    const unset = VideoRouteOptions();
+    expect(unset.sdrEmbed, isNull);
+    final effective = EffectiveVideoRouteOptions.resolve();
+    expect(effective.sdrEmbed, isFalse);
+    expect(
+        effective.origins['sdrEmbed'], VideoRouteOptionOrigin.libraryDefault);
+    // A persisted configuration from before the field existed loads unchanged.
+    final preField = VideoRouteOptions.fromMap({
+      'importPreference': 'auto',
+    });
+    expect(preField.sdrEmbed, isNull);
+    expect(EffectiveVideoRouteOptions.resolve(application: preField).sdrEmbed,
+        isFalse);
+  });
+
+  test('sdrEmbed declaration roundtrips and resolves per layer', () {
+    final requested = const VideoRouteOptions(sdrEmbed: true);
+    expect(VideoRouteOptions.fromMap(requested.toMap()), requested);
+    expect(
+        VideoRouteOptions.fromMap(jsonDecode(requested.key)
+                as Map<String, Object?>)
+            .sdrEmbed,
+        isTrue);
+    final effective = EffectiveVideoRouteOptions.resolve(application: requested);
+    expect(effective.sdrEmbed, isTrue);
+    expect(
+        effective.origins['sdrEmbed'], VideoRouteOptionOrigin.application);
+    // An explicit open-level false overrides the application declaration;
+    // an unset open layer inherits it.
+    final overridden = EffectiveVideoRouteOptions.resolve(
+        application: requested,
+        openOverride: const VideoRouteOptions(sdrEmbed: false));
+    expect(overridden.sdrEmbed, isFalse);
+    expect(
+        overridden.origins['sdrEmbed'], VideoRouteOptionOrigin.openOverride);
+    final inherited = EffectiveVideoRouteOptions.resolve(
+        application: requested, openOverride: const VideoRouteOptions());
+    expect(inherited.sdrEmbed, isTrue);
+    // The declaration participates in requested equality and the key.
+    expect(requested, isNot(const VideoRouteOptions()));
+    expect(const VideoRouteOptions(sdrEmbed: false).key,
+        isNot(const VideoRouteOptions().key));
+  });
+
+  test('sdrEmbed fromMap accepts absent and boolean spellings only', () {
+    expect(VideoRouteOptions.fromMap(const {}).sdrEmbed, isNull);
+    expect(VideoRouteOptions.fromMap({'sdrEmbed': null}).sdrEmbed, isNull);
+    expect(VideoRouteOptions.fromMap({'sdrEmbed': true}).sdrEmbed, isTrue);
+    expect(VideoRouteOptions.fromMap({'sdrEmbed': false}).sdrEmbed, isFalse);
+    expect(() => VideoRouteOptions.fromMap({'sdrEmbed': 'true'}),
+        throwsFormatException);
+    expect(() => VideoRouteOptions.fromMap({'sdrEmbed': 1}),
+        throwsFormatException);
+  });
 }

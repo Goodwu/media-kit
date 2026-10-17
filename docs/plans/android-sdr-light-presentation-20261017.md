@@ -47,6 +47,7 @@ LG H870DS（API24，Adreno 530，1440p 屏）播放 `4k-sdr-avc.mp4`（4K H.264 
 - G2 消除 lab 路径的 VO 级偶发丢帧（161 → 收敛，验收用"统一 present 节拍指标 + VO 计数"双指标；present 节拍为主）。
 - G3 HDR 路由/会话/复核门**契约语义零变化**；`_requiresMediacodecCopy` 及既有 HDR 载体边界逐位不动；一切设备差异走能力化声明（禁设备名，2026-10-16 用户裁决）。
 - G4 画质与功能不回退：颜色/亮度按 LG 目视协议；**另含缩放清晰度、字幕、OSD/OSC、滤镜、交互功能等价性评估**（embed 限制清单的准入判定输入）。功能需求区分**会话固定需求**（选载体时判定）与**运行中需求变化**（播放中启外挂字幕/滤镜/OSD）——后者由 P2 定义受控重建或显式拒绝，不做未经审核的隐式切载体。
+- G4 运行中需求变化契约（P2 实施补充，2026-10-17 V2 审核）：`sdrEmbed` 路由选项的 `true` 是调用方对**本次会话**功能兼容性的显式声明，库不自动检测 GL/字幕/滤镜使用；需要 mpv 字幕、OSD/OSC、滤镜或超分 shader 时不得声明 true（Flutter 层叠加功能如弹幕/Flutter 字幕须单独评估，不受此声明覆盖）。播放中新增这些需求：保留其他有效选项、置 `sdrEmbed:false`，经 `setOptions` 受控重开（`hdr_video_session.dart` setOptions 的既有 stop→重规划→重建输出机制）确认成功后再启用功能；不支持该受控重开流程的调用方必须显式拒绝功能请求。禁止把直接向 Player 写滤镜/shader 当成自动切回 Texture 的机制（embed VO 不执行它们，只有受控 `sdrEmbed:false` 重开回到 Texture 载体）；screenshot-raw 兼容性未实测，不纳入已验证承诺。
 
 非目标：HDR 载体矩阵不动；marble vendor 线不动；不修改门发布契约既有语义；P8.4 tone-map 卡顿线不并入；本方案不做任何 wrapper 改动（经调查证实必要后走原生 B 线独立立项）。
 
@@ -79,6 +80,7 @@ LG H870DS（API24，Adreno 530，1440p 屏）播放 `4k-sdr-avc.mp4`（4K H.264 
 ### P2 SDR presenter 能力准入与候选接入（P1-A 成立后立项，V2）
 
 - 新增 sdrDirect×embed 执行候选：复用既有 baseLayerDirect/输出契约/SurfaceView 接线部件；偏好排序显式重审（跨 topology 加候选后 `preferCopy` 语义不保自然成立，`video_route_option_review.dart:93–129` 需逐条核对）；失败策略、功能兼容准入、双视图/重建/全屏生命周期回归、HDR 矩阵全绿。
+- 运行中需求变化契约（V2 审核补充）：同 G4 补充条目——`sdrEmbed` 声明范围与五条规则、受控重开机制位置（`hdr_video_session.dart` setOptions）、不支持重开流程的调用方显式拒绝义务、Player 直写滤镜/shader 非切换机制、screenshot-raw 未实测。另按 Lead 裁定（P2 观察 2）：显式 `preferCopy` 意图按设计保留（LYA 轮契约），在生成派生处**抑制**（非降序）embed 候选，冲突时 copy 意图胜出（实现：`hdr_route_planner.dart` `_evaluateCandidates`）。
 - 不改既有 HDR copy 边界/W1 授权。
 
 ### 独立线 1：copy 路径内存归属调查（只读，V1；v1-C3 降级改写）
