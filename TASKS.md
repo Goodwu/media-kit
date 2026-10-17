@@ -129,6 +129,7 @@
 
 - [ ] PiliPlusX 性能优先/画质优先开关（HDR 路由策略预设）
   - status: planned（2026-10-02 用户登记，暂不实施）
+  - latest+ (2026-10-17)：Specialist 评估「sdrEmbed 内部化由 vendor 决定开启」→ **否定该形式**（信息所有权：会话功能需求属 app 非 vendor；SDR 载体开关塞入 dataspace vendor 域=分层违规；库 shader 自检存在源码可构造的静默失效路径——PiliPlusX 播放中 UI 直接 `setShader()`，header_control.dart:465-482）；**推荐路线 C=sdrEmbed 折入本预设**（性能预设语义=「在所需功能可满足的候选中优先低开销」而非无条件置 sdrEmbed，需 shader 会话保留 Texture，运行中开超分先 setOptions 受控重开）；实现前提=旧映射引用的 allowExperimental 已随成熟度门删除须重设计；vendor 通道仅可承载设备事实补充（当前 embed 用标准 Surface 路径，vendor 布尔无证明增量）；任何「预设设为默认」另行 V2 复审。
   - context: archives/conversations/android-hdr-auto-output-20261002.md（设计评估记录节）
   - acceptance: 库侧两个命名预设映射现有 HdrRoutingPolicy（性能优先=默认偏好序直出优先+不放宽 experimental 门禁；画质优先=dvP84 reshape 置顶+allowExperimental）；PiliPlusX 只选预设不写平台/设备决策（A8 红线）；运行中可切换（会话原位重建，A5 已验证）；文档显式声明 P5 豁免（必须 reshape）与 HDR10+/HDR Vivid 暂为空操作；不做固定抽帧（自适应 framedrop 已覆盖）。
   - next: 用户排期后立项：库侧两预设+需求文档/dartdoc 补记+PiliPlusX 设置项与会话接线。
