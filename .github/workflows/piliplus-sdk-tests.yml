@@ -33,7 +33,7 @@ jobs:
           channel: stable
           flutter-version-file: original-app/pubspec.yaml
           cache: false
-      - name: Pure Dart screenshot member contract
+      - name: Pure Dart screenshot byte contract
         working-directory: media_kit
         run: |
           dart pub get
@@ -41,6 +41,9 @@ jobs:
       - name: Resolve SDK packages
         working-directory: media_kit_video
         run: flutter pub get
+      - name: Analyze the restricted-import screenshot and header contract
+        working-directory: media_kit_video
+        run: flutter analyze --no-pub test/piliplus_restricted_import_contract_test.dart
       - name: Full video regression (no weakening existing tests)
         working-directory: media_kit_video
         shell: bash
