@@ -8,6 +8,7 @@ import 'dart:io';
 import 'dart:ffi';
 import 'dart:async';
 import 'dart:collection';
+import '../../../compat/legacy_media_headers.dart';
 import 'dart:typed_data';
 import 'package:path/path.dart';
 import 'package:meta/meta.dart';
@@ -84,19 +85,16 @@ class NativePlayer extends PlatformPlayer {
       {String? userAgent, String? referer}) =>
       api.setHeader(handle, userAgent: userAgent, referer: referer);
 
-  final Map<String, String> _legacyHttpHeaders = {};
+  final LegacyMediaHeaders _legacyHttpHeaders = LegacyMediaHeaders();
   String _legacyHwdecCurrent = '';
 
   /// Synchronous application-level defaults: the next on_load observes these
   /// even when the caller does not await a property write. Per-media headers win.
-  void setMediaHeader({String? userAgent, String? referer}) {
+  void setMediaHeader({String? userAgent, String? referer,
+      Map<String, String>? headers}) {
     if (disposed || isDisposing) throw StateError('Player is disposed');
-    for (final entry in {'user-agent': userAgent, 'referer': referer}.entries) {
-      final value = entry.value;
-      if (value == null) continue;
-      if (value.contains(RegExp(r'[\r\n\x00]'))) throw ArgumentError('Invalid HTTP header');
-      _legacyHttpHeaders[entry.key] = value;
-    }
+    _legacyHttpHeaders.update(
+        userAgent: userAgent, referer: referer, headers: headers);
   }
 
   /// UI-only observed snapshots. Routing/lifetime decisions MUST use
@@ -2538,11 +2536,7 @@ class NativePlayer extends PlatformPlayer {
               await MpvApiIsolate.getPropertyString(ctx.address, 'path') ??
               '';
           // Get the headers for current [Media] by looking up [uri] in the [HashMap].
-          final headers = <String, String>{
-            ..._legacyHttpHeaders,
-            for (final entry in (Media(uri).httpHeaders ?? <String, String>{}).entries)
-              entry.key.toLowerCase(): entry.value,
-          };
+          final headers = _legacyHttpHeaders.resolve(Media(uri).httpHeaders);
           if (headers.isNotEmpty) {
             final entries = <String>[
               for (final entry in headers.entries) '${entry.key}: ${entry.value}',

@@ -28,7 +28,8 @@ void oldApplicationTypes(NativePlayer player, Pointer<g.mpv_handle> encodingHand
   expect([width, height, volume, screenshot, size, apiVersion, raw], isNotEmpty);
 }
 
-class ImagePlayer extends Fake implements PlatformPlayer {
+class ImagePlayer extends PlatformPlayer {
+  ImagePlayer() : super(configuration: const PlayerConfiguration());
   @override
   Future<Uint8List?> safeScreenshot({String? format = 'image/jpeg',
       bool synchronized = true, bool includeLibassSubtitles = false}) async {

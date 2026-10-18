@@ -32,6 +32,3 @@ export 'package:media_kit/src/player/native/player/player.dart';
 export 'package:media_kit/src/player/web/player/player.dart';
 
 export 'package:media_kit/src/native_wakeup_callback.dart';
-
-export 'src/compat/screenshot_bytes.dart'
-    if (dart.library.ui) 'src/compat/screenshot_flutter.dart';
