@@ -3,7 +3,7 @@ name: PiliPlus SDK compatibility regression
 on:
   push:
     branches: ['compat/piliplus-zero-change-20261018']
-    paths: ['media_kit/**', 'media_kit_video/**', '.github/workflows/piliplus-sdk-tests.yml']
+    paths: ['media_kit/**', 'media_kit_video/**', 'tool/piliplus_compat/P1_SOURCE_STATUS.md', '.github/workflows/piliplus-sdk-tests.yml']
   workflow_dispatch:
 
 permissions:
@@ -33,6 +33,11 @@ jobs:
           channel: stable
           flutter-version-file: original-app/pubspec.yaml
           cache: false
+      - name: Pure Dart screenshot member contract
+        working-directory: media_kit
+        run: |
+          dart pub get
+          dart test test/src/compat/legacy_screenshot_test.dart
       - name: Resolve SDK packages
         working-directory: media_kit_video
         run: flutter pub get
