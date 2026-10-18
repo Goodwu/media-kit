@@ -1,0 +1,46 @@
+name: Materialize reviewed P1 SDK sources
+on:
+  push:
+    branches: ['compat/piliplus-zero-change-20261018']
+    paths: ['tool/piliplus_compat/materialize_p1.py', '.github/workflows/piliplus-p1-materialize.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  materialize:
+    if: github.repository == 'Goodwu/media-kit' && github.ref == 'refs/heads/compat/piliplus-zero-change-20261018'
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Materialize guarded library edits, never app edits
+        shell: bash
+        run: |
+          set -euo pipefail
+          current=$(git ls-remote origin "$GITHUB_REF" | cut -f1)
+          test "$current" = "$GITHUB_SHA"
+          python -B tool/piliplus_compat/materialize_p1.py
+          git diff --check
+          git diff --stat
+          git diff --binary > "$RUNNER_TEMP/p1-materialized.patch"
+          git add -- media_kit media_kit_video media_kit_test media_kit_hdr_lab video_player_media_kit docs/plans/piliplus-p1-materialized.json
+          if ! git diff --cached --quiet; then
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git commit -m 'feat(compat): materialize typed player API while preserving strict native core'
+            current=$(git ls-remote origin "$GITHUB_REF" | cut -f1)
+            test "$current" = "$GITHUB_SHA"
+            git push origin "HEAD:$GITHUB_REF"
+          fi
+          echo "SDK_SOURCE_COMMIT=$(git rev-parse HEAD)"
+          echo 'Source publication only; compilation and runtime checks are not asserted.'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p1-source-materialization-evidence
+          path: ${{ runner.temp }}/p1-materialized.patch
+          if-no-files-found: warn
