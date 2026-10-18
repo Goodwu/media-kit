@@ -1,0 +1,60 @@
+name: Darwin SDK input integrity (not native freshness)
+on:
+  push:
+    branches: ['compat/piliplus-zero-change-20261018']
+    paths: ['tool/piliplus_compat/darwin_bundle_inputs.py', '.github/workflows/piliplus-darwin-input-tests.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  bundles:
+    runs-on: macos-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [ios, macos]
+    env:
+      PLATFORM: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Acquire SDK-declared bundle through its existing recipe
+        shell: bash
+        run: make -C "libs/$PLATFORM/media_kit_libs_${PLATFORM}_video/$PLATFORM"
+      - name: Verify every actual input against the declared archive
+        shell: python
+        run: |
+          import json, os, pathlib, sys, tarfile
+          sys.path.insert(0, 'tool/piliplus_compat')
+          from darwin_bundle_inputs import verify_sdk_bundles
+          root = pathlib.Path.cwd()
+          platform = os.environ['PLATFORM']
+          out = pathlib.Path(os.environ['RUNNER_TEMP']) / 'native-input-receipt.json'
+          try:
+              result = verify_sdk_bundles(root, platform)
+              result['status'] = 'passed-input-integrity-only'
+          except Exception as error:
+              result = {'status': 'failed', 'error': str(error), 'archiveEntries': []}
+              for path in (root / f'libs/{platform}/media_kit_libs_{platform}_video/{platform}/.cache/xcframeworks').glob('*.tar.gz'):
+                  if path.is_symlink():
+                      continue
+                  with tarfile.open(path) as archive:
+                      for member in archive:
+                          result['archiveEntries'].append({'name': member.name, 'type': repr(member.type), 'link': member.linkname})
+                          if len(result['archiveEntries']) >= 300:
+                              break
+              out.write_text(json.dumps(result, indent=2))
+              raise
+          out.write_text(json.dumps(result, indent=2))
+          print(result['status'], len(result['records']), result['archiveSha256'])
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: darwin-${{ matrix.platform }}-input-integrity
+          path: ${{ runner.temp }}/native-input-receipt.json
+          if-no-files-found: warn
