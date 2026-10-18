@@ -26,7 +26,7 @@ jobs:
       - name: Archive tracked public source only and bind Git identities
         shell: python
         run: |
-          import json, os, pathlib, subprocess
+          import hashlib, json, os, pathlib, subprocess
           out = pathlib.Path(os.environ['RUNNER_TEMP']) / 'source-snapshots'
           out.mkdir()
           for name in ('sdk', 'app'):
@@ -41,9 +41,11 @@ jobs:
                       meta, path = row.split(b'\t', 1)
                       mode, kind, sha = meta.decode().split()
                       records[path.decode()] = {'mode': mode, 'type': kind, 'blob': sha}
-              (out / (name + '.json')).write_text(json.dumps({'commit': commit, 'tree': tree, 'entries': records}, indent=2))
-              git('archive', '--format=tar.gz', '--output=' + str(out / (name + '.tar.gz')), 'HEAD')
-              print(name, commit, tree, len(records))
+              archive = out / (name + '.tar.gz')
+              git('archive', '--format=tar.gz', '--output=' + str(archive), 'HEAD')
+              digest = hashlib.sha256(archive.read_bytes()).hexdigest()
+              (out / (name + '.json')).write_text(json.dumps({'commit': commit, 'tree': tree, 'archiveSha256': digest, 'entries': records}, indent=2))
+              print(name, commit, tree, len(records), digest)
       - uses: actions/upload-artifact@v4
         with:
           name: exact-public-source-snapshots
