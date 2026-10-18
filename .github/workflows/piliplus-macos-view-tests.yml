@@ -1,0 +1,55 @@
+name: PiliPlus macOS view contracts
+
+on:
+  push:
+    branches: ['compat/piliplus-zero-change-20261018']
+    paths: ['media_kit/**', 'media_kit_video/**', '.github/workflows/piliplus-macos-view-tests.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  views:
+    name: macOS viewport and legacy Flutter contracts (not device playback)
+    runs-on: macos-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: bggRGjQaUbCoE/PiliPlus
+          ref: main
+          path: original-app
+          persist-credentials: false
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version-file: original-app/pubspec.yaml
+          cache: false
+      - name: Resolve packages
+        working-directory: media_kit_video
+        run: flutter pub get
+      - name: Run actual macOS-specific production-view tests
+        working-directory: media_kit_video
+        shell: bash
+        run: |
+          set +e
+          flutter test --reporter expanded \
+            test/native_surface_viewport_test.dart \
+            test/piliplus_view_compat_test.dart \
+            test/piliplus_player_contract_test.dart \
+            test/piliplus_restricted_import_contract_test.dart \
+            > "$RUNNER_TEMP/macos-view-tests.log" 2>&1
+          status=$?
+          cat "$RUNNER_TEMP/macos-view-tests.log"
+          exit "$status"
+      - name: Preserve actual results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-view-contract-evidence
+          path: ${{ runner.temp }}/macos-view-tests.log
+          if-no-files-found: warn
