@@ -444,6 +444,7 @@ abstract class PlatformPlayer {
 
   Future<Uint8List?> screenshotBytes(
       {String? format = 'image/jpeg',
+      bool synchronized = true,
       bool includeLibassSubtitles = false}) async {
     throw UnimplementedError(
       '[PlatformPlayer.screenshot] is not implemented',
@@ -452,6 +453,7 @@ abstract class PlatformPlayer {
 
   Future<Uint8List?> safeScreenshot(
       {String? format = 'image/jpeg',
+      bool synchronized = true,
       bool includeLibassSubtitles = false}) async {
     throw UnimplementedError(
       '[PlatformPlayer.safeScreenshot] is not implemented',
