@@ -6,8 +6,8 @@ import 'package:media_kit/src/player/native/core/initializer_native_callable.dar
 import 'package:test/test.dart';
 
 class _Owner implements NativeWakeupCallbackOwner {
-  _Owner(this.mpv);
-  final generated.MPV mpv;
+  _Owner(this.mpvBindings);
+  final generated.MPV mpvBindings;
   bool reject = false, throwInstall = false, failRemove = false;
   final Set<int> live = {};
   final List<String> calls = [];
@@ -16,7 +16,7 @@ class _Owner implements NativeWakeupCallbackOwner {
     calls.add('install');
     if (reject) return false;
     live.add(handle);
-    mpv.mpv_set_wakeup_callback(Pointer.fromAddress(handle),
+    mpvBindings.mpv_set_wakeup_callback(Pointer.fromAddress(handle),
         Pointer.fromAddress(callback), Pointer.fromAddress(userdata));
     if (throwInstall) throw StateError('failure after native publication');
     return true;
@@ -27,7 +27,7 @@ class _Owner implements NativeWakeupCallbackOwner {
     calls.add('remove');
     if (failRemove) throw StateError('removal failure');
     if (live.remove(handle)) {
-      mpv.mpv_set_wakeup_callback(
+      mpvBindings.mpv_set_wakeup_callback(
           Pointer.fromAddress(handle), nullptr, nullptr);
       calls.add('cleared');
     }
@@ -70,16 +70,16 @@ void main() {
     return;
   }
   _preloadFrameworkDependencies();
-  final mpv = generated.MPV(DynamicLibrary.open(path));
-  final initializer = InitializerNativeCallable(mpv);
-  final owner = _Owner(mpv);
+  final mpvBindings = generated.MPV(DynamicLibrary.open(path));
+  final initializer = InitializerNativeCallable(mpvBindings);
+  final owner = _Owner(mpvBindings);
   NativeWakeupCallbackOwnership.initialize(owner);
   tearDown(() async {
     owner.reject = owner.throwInstall = owner.failRemove = false;
     for (final address in owner.live.toList()) {
       final handle = Pointer<generated.mpv_handle>.fromAddress(address);
       await initializer.dispose(handle);
-      mpv.mpv_terminate_destroy(handle);
+      mpvBindings.mpv_terminate_destroy(handle);
     }
     owner.calls.clear();
   });
@@ -100,7 +100,7 @@ void main() {
     expect(player.isDisposing, isFalse);
     // No terminal destruction occurred despite the caller having attempted
     // dispose. The still-mapped callable safely receives a real mpv wakeup.
-    mpv.mpv_wakeup(Pointer.fromAddress(address));
+    mpvBindings.mpv_wakeup(Pointer.fromAddress(address));
     await Future<void>.delayed(Duration.zero);
     owner.failRemove = false;
     await player.dispose();
@@ -109,7 +109,7 @@ void main() {
     expect(owner.calls.last, 'cleared');
   });
   test('owner cannot be replaced', () {
-    expect(() => NativeWakeupCallbackOwnership.initialize(_Owner(mpv)),
+    expect(() => NativeWakeupCallbackOwnership.initialize(_Owner(mpvBindings)),
         throwsStateError);
   });
   test(
@@ -120,10 +120,10 @@ void main() {
     expect(owner.live, contains(handle.address));
     await initializer.dispose(handle);
     expect(owner.calls, ['install', 'remove', 'cleared']);
-    mpv.mpv_wakeup(handle);
+    mpvBindings.mpv_wakeup(handle);
     await initializer.dispose(handle);
     expect(owner.calls, ['install', 'remove', 'cleared']);
-    mpv.mpv_terminate_destroy(handle);
+    mpvBindings.mpv_terminate_destroy(handle);
   });
   test('closed owner rejects without publishing native handle', () async {
     owner.reject = true;
@@ -143,12 +143,12 @@ void main() {
     owner.failRemove = true;
     await expectLater(initializer.dispose(handle), throwsStateError);
     expect(owner.live, contains(handle.address));
-    mpv.mpv_wakeup(handle);
+    mpvBindings.mpv_wakeup(handle);
     await Future<void>.delayed(Duration.zero);
     owner.failRemove = false;
     await initializer.dispose(handle);
     expect(owner.live, isEmpty);
-    mpv.mpv_terminate_destroy(handle);
+    mpvBindings.mpv_terminate_destroy(handle);
   });
   test('failed exceptional-install rollback retains native resources for retry',
       () async {
@@ -156,11 +156,11 @@ void main() {
     await expectLater(initializer.create((_) async {}), throwsStateError);
     expect(owner.live, hasLength(1));
     final handle = Pointer<generated.mpv_handle>.fromAddress(owner.live.single);
-    mpv.mpv_wakeup(handle);
+    mpvBindings.mpv_wakeup(handle);
     await Future<void>.delayed(Duration.zero);
     owner.failRemove = false;
     await initializer.dispose(handle);
     expect(owner.live, isEmpty);
-    mpv.mpv_terminate_destroy(handle);
+    mpvBindings.mpv_terminate_destroy(handle);
   });
 }

@@ -140,21 +140,21 @@ class AndroidServiceProbe {
                 requestedRenderMode != 'timed') {
               throw ArgumentError('renderMode must be boolean or timed');
             }
-            final vo = await current.getProperty('vo');
+            final vo = await current.getPropertyAsync('vo');
             _ensureProbeCurrent(current, generation);
             if (vo != 'mediacodec_embed') {
               throw StateError(
                 'native-dv-open requires vo=mediacodec_embed (got $vo)',
               );
             }
-            final hwdecOption = await current.getProperty('hwdec');
+            final hwdecOption = await current.getPropertyAsync('hwdec');
             _ensureProbeCurrent(current, generation);
             if (hwdecOption != 'mediacodec') {
               throw StateError(
                 'native-dv-open requires hwdec=mediacodec (got $hwdecOption)',
               );
             }
-            final durationProperty = await current.getProperty('duration');
+            final durationProperty = await current.getPropertyAsync('duration');
             _ensureProbeCurrent(current, generation);
             final parsedDuration = double.tryParse(durationProperty);
             final hasStableDuration =
@@ -177,9 +177,9 @@ class AndroidServiceProbe {
               );
             }
             final alreadyEnabled = transaction != null;
-            final currentOption = await current.getProperty('vd-lavc-o');
+            final currentOption = await current.getPropertyAsync('vd-lavc-o');
             _ensureProbeCurrent(current, generation);
-            final currentRenderMode = await current.getProperty(
+            final currentRenderMode = await current.getPropertyAsync(
               'mediacodec-embed-render-mode',
             );
             _ensureProbeCurrent(current, generation);
@@ -246,7 +246,7 @@ class AndroidServiceProbe {
                   waitForInitialization: false,
                 );
                 _ensureProbeCurrent(current, generation);
-                final appliedOption = await current.getProperty('vd-lavc-o');
+                final appliedOption = await current.getPropertyAsync('vd-lavc-o');
                 _ensureProbeCurrent(current, generation);
                 if (appliedOption != activeTransaction.nativeOption) {
                   throw StateError(
@@ -262,7 +262,7 @@ class AndroidServiceProbe {
                   waitForInitialization: false,
                 );
                 _ensureProbeCurrent(current, generation);
-                final appliedRenderMode = await current.getProperty(
+                final appliedRenderMode = await current.getPropertyAsync(
                   'mediacodec-embed-render-mode',
                 );
                 _ensureProbeCurrent(current, generation);
@@ -377,7 +377,7 @@ class AndroidServiceProbe {
           'vo-delayed-frame-count',
         ]) {
           try {
-            properties[name] = await current.getProperty(name);
+            properties[name] = await current.getPropertyAsync(name);
             _ensureProbeCurrent(current, generation);
           } catch (error) {
             _ensureProbeCurrent(current, generation);
@@ -450,22 +450,22 @@ class AndroidServiceProbe {
         'video-reinit requires an owned native-DV transaction for this player',
       );
     }
-    final vo = await player.getProperty('vo');
+    final vo = await player.getPropertyAsync('vo');
     _ensureProbeCurrent(player, generation);
     if (vo != 'mediacodec_embed') {
       throw StateError('video-reinit requires vo=mediacodec_embed (got $vo)');
     }
-    final hwdec = await player.getProperty('hwdec');
+    final hwdec = await player.getPropertyAsync('hwdec');
     _ensureProbeCurrent(player, generation);
     if (hwdec != 'mediacodec') {
       throw StateError('video-reinit requires hwdec=mediacodec (got $hwdec)');
     }
-    final option = await player.getProperty('vd-lavc-o');
+    final option = await player.getPropertyAsync('vd-lavc-o');
     _ensureProbeCurrent(player, generation);
     if (option != transaction.nativeOption) {
       throw StateError('video-reinit requires owned vd-lavc-o=native_dv=1');
     }
-    final renderMode = await player.getProperty('mediacodec-embed-render-mode');
+    final renderMode = await player.getPropertyAsync('mediacodec-embed-render-mode');
     _ensureProbeCurrent(player, generation);
     if (renderMode != transaction.renderMode) {
       throw StateError(
@@ -474,7 +474,7 @@ class AndroidServiceProbe {
       );
     }
 
-    final savedVid = await player.getProperty('vid');
+    final savedVid = await player.getPropertyAsync('vid');
     _ensureProbeCurrent(player, generation);
     final savedVideoTrack = int.tryParse(savedVid);
     if (savedVideoTrack == null || savedVideoTrack <= 0) {
@@ -483,7 +483,7 @@ class AndroidServiceProbe {
         '(got $savedVid)',
       );
     }
-    final savedPause = await player.getProperty('pause');
+    final savedPause = await player.getPropertyAsync('pause');
     _ensureProbeCurrent(player, generation);
     if (savedPause != 'yes' && savedPause != 'no') {
       throw StateError(
@@ -567,7 +567,7 @@ class AndroidServiceProbe {
       waitForInitialization: false,
     );
     _ensureProbeCurrent(player, generation);
-    final actual = await player.getProperty(property);
+    final actual = await player.getPropertyAsync(property);
     _ensureProbeCurrent(player, generation);
     if (actual != value) {
       throw StateError('$property did not acknowledge $value (got $actual)');
@@ -578,7 +578,7 @@ class AndroidServiceProbe {
     Player player,
     int generation,
   ) async {
-    final pathBefore = await player.getProperty('path');
+    final pathBefore = await player.getPropertyAsync('path');
     _ensureProbeCurrent(player, generation);
     final bridgeApiRaw = await _readProbeProperty(
       player,
@@ -590,7 +590,7 @@ class AndroidServiceProbe {
       'android-mediacodec-info',
       generation,
     );
-    final pathAfter = await player.getProperty('path');
+    final pathAfter = await player.getPropertyAsync('path');
     _ensureProbeCurrent(player, generation);
     if (pathBefore != pathAfter) {
       throw StateError(
@@ -647,7 +647,7 @@ class AndroidServiceProbe {
     int generation,
   ) async {
     try {
-      final value = await player.getProperty(property);
+      final value = await player.getPropertyAsync(property);
       _ensureProbeCurrent(player, generation);
       return value;
     } catch (error) {
@@ -788,7 +788,7 @@ class AndroidServiceProbe {
     if (!transaction.pending(property)) return;
     final player = transaction.player;
     try {
-      final currentValue = await player.getProperty(property);
+      final currentValue = await player.getPropertyAsync(property);
       if (!identical(_nativeDvTransaction, transaction)) return;
       if (currentValue == originalValue) {
         clearPending();
@@ -808,7 +808,7 @@ class AndroidServiceProbe {
         waitForInitialization: false,
       );
       if (!identical(_nativeDvTransaction, transaction)) return;
-      final restoredValue = await player.getProperty(property);
+      final restoredValue = await player.getPropertyAsync(property);
       if (!identical(_nativeDvTransaction, transaction)) return;
       if (restoredValue != originalValue) {
         failures.add(

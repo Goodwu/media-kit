@@ -2974,8 +2974,8 @@ void main() {
       expect(player.state.videoBitrate, equals(null));
       expect(player.state.track, equals(const Track()));
       expect(player.state.tracks, equals(const Tracks()));
-      expect(player.state.width, equals(null));
-      expect(player.state.height, equals(null));
+      expect(player.state.videoWidth, equals(null));
+      expect(player.state.videoHeight, equals(null));
       expect(
         ListEquality().equals(
           player.state.subtitle,
@@ -3045,11 +3045,11 @@ void main() {
       // VOLUNTARY DELAY.
       await Future.delayed(const Duration(seconds: 5));
 
-      final screenshot = await player.screenshot();
+      final screenshotBytes = await player.screenshotBytes();
 
-      expect(screenshot, isNotNull);
-      expect(screenshot, isA<Uint8List>());
-      expect(screenshot?.length ?? 0, greaterThan(0));
+      expect(screenshotBytes, isNotNull);
+      expect(screenshotBytes, isA<Uint8List>());
+      expect(screenshotBytes?.length ?? 0, greaterThan(0));
 
       // VOLUNTARY DELAY.
       await Future.delayed(const Duration(seconds: 5));
@@ -3069,15 +3069,15 @@ void main() {
       // VOLUNTARY DELAY.
       await Future.delayed(const Duration(seconds: 5));
 
-      final jpeg = await player.screenshot(format: 'image/jpeg');
+      final jpeg = await player.screenshotBytes(format: 'image/jpeg');
       expect(jpeg, isNotNull);
       expect(jpeg, isA<Uint8List>());
       expect(jpeg?.length ?? 0, greaterThan(0));
-      final png = await player.screenshot(format: 'image/png');
+      final png = await player.screenshotBytes(format: 'image/png');
       expect(png, isNotNull);
       expect(png, isA<Uint8List>());
       expect(png?.length ?? 0, greaterThan(0));
-      final pixels = await player.screenshot(format: null);
+      final pixels = await player.screenshotBytes(format: null);
       expect(pixels, isNotNull);
       expect(pixels, isA<Uint8List>());
       expect(pixels?.length ?? 0, greaterThan(0));
@@ -3101,9 +3101,9 @@ void main() {
       await Future.delayed(const Duration(seconds: 5));
 
       // CORS
-      final screenshot = await player.screenshot();
+      final screenshotBytes = await player.screenshotBytes();
 
-      expect(screenshot, isNull);
+      expect(screenshotBytes, isNull);
 
       // VOLUNTARY DELAY.
       await Future.delayed(const Duration(seconds: 5));
@@ -3124,9 +3124,9 @@ void main() {
       await Future.delayed(const Duration(seconds: 5));
 
       // CORS
-      final screenshot = await player.screenshot(format: 'image/png');
+      final screenshotBytes = await player.screenshotBytes(format: 'image/png');
 
-      expect(screenshot, isNull);
+      expect(screenshotBytes, isNull);
 
       // VOLUNTARY DELAY.
       await Future.delayed(const Duration(seconds: 5));
@@ -3147,11 +3147,11 @@ void main() {
       await Future.delayed(const Duration(seconds: 5));
 
       expect(
-        () async => await player.screenshot(format: 'abc'),
+        () async => await player.screenshotBytes(format: 'abc'),
         throwsArgumentError,
       );
       expect(
-        () async => await player.screenshot(format: 'xyz'),
+        () async => await player.screenshotBytes(format: 'xyz'),
         throwsArgumentError,
       );
 

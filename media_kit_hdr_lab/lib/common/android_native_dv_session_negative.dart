@@ -681,7 +681,7 @@ class AndroidNativeDvN1Run {
           'vo'
         ]) {
           result[name] =
-              await player.getProperty(name, waitForInitialization: false);
+              await player.getPropertyAsync(name, waitForInitialization: false);
         }
         result['fileLoadedEpoch'] = before.toString();
         if (before != player.fileLoadedEpoch) {

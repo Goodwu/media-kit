@@ -905,7 +905,7 @@ class AndroidNativeDvSessionForeignOwnershipRun {
           'time-pos',
         ]) {
           try {
-            properties[name] = await player.getProperty(
+            properties[name] = await player.getPropertyAsync(
               name,
               waitForInitialization: false,
             );

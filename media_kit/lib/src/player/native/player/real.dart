@@ -1,3 +1,4 @@
+import '../core/legacy_mpv.dart' show LegacyMpv;
 /// This file is a part of media_kit (https://github.com/media-kit/media-kit).
 ///
 /// Copyright © 2021 & onwards, Hitesh Kumar Saini <saini123hitesh@gmail.com>.
@@ -55,11 +56,11 @@ void nativeEnsureInitialized({String? libmpv}) {
     print('$tag Disposing:\n${references.map((e) => e.address).join('\n')}');
 
     // I can only get quit to work; [mpv_terminate_destroy] causes direct crash.
-    final mpv = generated.MPV(DynamicLibrary.open(NativeLibrary.path));
+    final mpvBindings = generated.MPV(DynamicLibrary.open(NativeLibrary.path));
     final cmd = 'quit'.toNativeUtf8();
     try {
       for (final reference in references) {
-        mpv.mpv_command_string(reference.cast(), cmd.cast());
+        mpvBindings.mpv_command_string(reference.cast(), cmd.cast());
       }
     } finally {
       calloc.free(cmd);
@@ -76,6 +77,41 @@ void nativeEnsureInitialized({String? libmpv}) {
 ///
 /// {@endtemplate}
 class NativePlayer extends PlatformPlayer {
+  /// Static legacy encoding ABI. Playback continues to use mpvBindings.
+  static LegacyMpv get mpv => LegacyMpv.instance;
+  static int get apiVersion => mpv.apiVersion;
+  static void setHeader(LegacyMpv api, Pointer<generated.mpv_handle> handle,
+      {String? userAgent, String? referer}) =>
+      api.setHeader(handle, userAgent: userAgent, referer: referer);
+
+  final Map<String, String> _legacyHttpHeaders = {};
+  String _legacyHwdecCurrent = '';
+
+  /// Synchronous application-level defaults: the next on_load observes these
+  /// even when the caller does not await a property write. Per-media headers win.
+  void setMediaHeader({String? userAgent, String? referer}) {
+    if (disposed || isDisposing) throw StateError('Player is disposed');
+    for (final entry in {'user-agent': userAgent, 'referer': referer}.entries) {
+      final value = entry.value;
+      if (value == null) continue;
+      if (value.contains(RegExp(r'[\r\n\x00]'))) throw ArgumentError('Invalid HTTP header');
+      _legacyHttpHeaders[entry.key] = value;
+    }
+  }
+
+  /// UI-only observed snapshots. Routing/lifetime decisions MUST use
+  /// getPropertyAsync, never these synchronous compatibility values.
+  String getProperty(String property) {
+    if (disposed || isDisposing) throw StateError('Player is disposed');
+    switch (property) {
+      case 'volume': return state.volume.toString();
+      case 'speed': return state.rate.toString();
+      case 'pause': return state.playing ? 'no' : 'yes';
+      case 'hwdec-current': return _legacyHwdecCurrent;
+      default: throw UnsupportedError('Use getPropertyAsync for $property');
+    }
+  }
+
   static const bool _bufferingTraceEnabled =
       bool.fromEnvironment('MEDIA_KIT_BUFFER_TRACE');
   final Stopwatch _bufferingTraceClock = Stopwatch()..start();
@@ -169,7 +205,7 @@ class NativePlayer extends PlatformPlayer {
   /// {@macro native_player}
   NativePlayer(
       {PlayerConfiguration configuration = const PlayerConfiguration()})
-      : mpv = generated.MPV(DynamicLibrary.open(NativeLibrary.path)),
+      : mpvBindings = generated.MPV(DynamicLibrary.open(NativeLibrary.path)),
         super(configuration: configuration) {
     future = _create()
       ..then((_) {
@@ -236,11 +272,11 @@ class NativePlayer extends PlatformPlayer {
         // the handle, streams and event pump are still alive. Never destroy a
         // handle still retained by an engine's wakeup owner registry.
         final ownedWakeupDisposed =
-            await Initializer(mpv).disposeOwnedWakeupCallback(ctx);
+            await PlayerInitializer(mpvBindings).disposeOwnedWakeupCallback(ctx);
         if (!ownedWakeupDisposed) {
           // The isolate backend retains its historical request protocol; the
           // NativeCallable backend is already closed and drained here.
-          await Initializer(mpv).dispose(ctx);
+          await PlayerInitializer(mpvBindings).dispose(ctx);
         }
         reachedTerminalPhase = true;
 
@@ -256,7 +292,7 @@ class NativePlayer extends PlatformPlayer {
         // for the owned event-pump drain above.
         await Future.delayed(const Duration(seconds: 5));
         try {
-          withWindowsMta(() => mpv.mpv_terminate_destroy(ctx));
+          withWindowsMta(() => mpvBindings.mpv_terminate_destroy(ctx));
           _mpvTerminated = true;
         } catch (error, stack) {
           cleanupError ??= error;
@@ -1338,7 +1374,7 @@ class NativePlayer extends PlatformPlayer {
   /// If [includeLibassSubtitles] is `true` *and* [PlayerConfiguration.libass] is `true`, then the
   /// screenshot will include the on-screen subtitles.
   @override
-  Future<Uint8List?> screenshot(
+  Future<Uint8List?> screenshotBytes(
       {String? format = 'image/jpeg',
       bool synchronized = true,
       bool includeLibassSubtitles = false}) async {
@@ -1548,7 +1584,7 @@ class NativePlayer extends PlatformPlayer {
   /// * https://mpv.io/manual/master/#options
   /// * https://mpv.io/manual/master/#properties
   ///
-  Future<String> getProperty(
+  Future<String> getPropertyAsync(
     String property, {
     bool waitForInitialization = true,
   }) async {
@@ -1571,11 +1607,11 @@ class NativePlayer extends PlatformPlayer {
       return value ?? '';
     }
     final name = property.toNativeUtf8();
-    final value = mpv.mpv_get_property_string(ctx, name.cast());
+    final value = mpvBindings.mpv_get_property_string(ctx, name.cast());
     if (value != nullptr) {
       final result = value.cast<Utf8>().toDartString();
       calloc.free(name);
-      mpv.mpv_free(value.cast());
+      mpvBindings.mpv_free(value.cast());
 
       return result;
     }
@@ -1614,7 +1650,7 @@ class NativePlayer extends PlatformPlayer {
     final reply = property.hashCode;
     observed[property] = listener;
     final name = property.toNativeUtf8();
-    mpv.mpv_observe_property(
+    mpvBindings.mpv_observe_property(
       ctx,
       reply,
       name.cast(),
@@ -1652,7 +1688,7 @@ class NativePlayer extends PlatformPlayer {
     }
     final reply = property.hashCode;
     observed.remove(property);
-    mpv.mpv_unobserve_property(ctx, reply);
+    mpvBindings.mpv_unobserve_property(ctx, reply);
   }
 
   /// Invokes command for the internal libmpv instance of this [Player].
@@ -1678,6 +1714,20 @@ class NativePlayer extends PlatformPlayer {
   }
 
   Future<void> _handler(Pointer<generated.mpv_event> event) async {
+    if (event.ref.event_id == generated.mpv_event_id.MPV_EVENT_START_FILE ||
+        event.ref.event_id == generated.mpv_event_id.MPV_EVENT_END_FILE) {
+      _legacyHwdecCurrent = '';
+    }
+    if (event.ref.event_id == generated.mpv_event_id.MPV_EVENT_PROPERTY_CHANGE) {
+      final observation = event.ref.data.cast<generated.mpv_event_property>().ref;
+      if (observation.name.cast<Utf8>().toDartString() == 'hwdec-current') {
+        final value = observation.format == generated.mpv_format.MPV_FORMAT_STRING &&
+            observation.data != nullptr
+            ? observation.data.cast<Pointer<Int8>>().value : nullptr.cast<Int8>();
+        _legacyHwdecCurrent = value == nullptr ? '' : value.cast<Utf8>().toDartString();
+      }
+    }
+
     if (event.ref.event_id ==
         generated.mpv_event_id.MPV_EVENT_PROPERTY_CHANGE) {
       final prop = event.ref.data.cast<generated.mpv_event_property>();
@@ -2391,14 +2441,14 @@ class NativePlayer extends PlatformPlayer {
               // Route through the API isolate (see [getProperty]).
               value = await MpvApiIsolate.getPropertyString(ctx.address, name);
             } else {
-              final data = mpv.mpv_get_property_string(ctx, prop.ref.name);
+              final data = mpvBindings.mpv_get_property_string(ctx, prop.ref.name);
               if (data == nullptr) {
                 value = null;
               } else {
                 try {
                   value = data.cast<Utf8>().toDartString();
                 } finally {
-                  mpv.mpv_free(data.cast());
+                  mpvBindings.mpv_free(data.cast());
                 }
               }
             }
@@ -2488,8 +2538,12 @@ class NativePlayer extends PlatformPlayer {
               await MpvApiIsolate.getPropertyString(ctx.address, 'path') ??
               '';
           // Get the headers for current [Media] by looking up [uri] in the [HashMap].
-          final headers = Media(uri).httpHeaders;
-          if (headers != null) {
+          final headers = <String, String>{
+            ..._legacyHttpHeaders,
+            for (final entry in (Media(uri).httpHeaders ?? <String, String>{}).entries)
+              entry.key.toLowerCase(): entry.value,
+          };
+          if (headers.isNotEmpty) {
             final entries = <String>[
               for (final entry in headers.entries) '${entry.key}: ${entry.value}',
             ];
@@ -2642,7 +2696,7 @@ class NativePlayer extends PlatformPlayer {
         }
       }
 
-      ctx = await Initializer(mpv).create(
+      ctx = await PlayerInitializer(mpvBindings).create(
         _handler,
         options: options,
       );
@@ -2740,6 +2794,7 @@ class NativePlayer extends PlatformPlayer {
 
       // Observe the properties to update the state & feed event stream.
       <String, int>{
+        'hwdec-current': generated.mpv_format.MPV_FORMAT_STRING,
         'pause': generated.mpv_format.MPV_FORMAT_FLAG,
         'time-pos': generated.mpv_format.MPV_FORMAT_DOUBLE,
         'duration': generated.mpv_format.MPV_FORMAT_DOUBLE,
@@ -2765,7 +2820,7 @@ class NativePlayer extends PlatformPlayer {
         (property, format) {
           final reply = property.hashCode;
           final name = property.toNativeUtf8();
-          mpv.mpv_observe_property(
+          mpvBindings.mpv_observe_property(
             ctx,
             reply,
             name.cast(),
@@ -2787,15 +2842,15 @@ class NativePlayer extends PlatformPlayer {
       final level = levels[configuration.logLevel];
       if (level != null) {
         final min = level.toNativeUtf8();
-        mpv.mpv_request_log_messages(ctx, min.cast());
+        mpvBindings.mpv_request_log_messages(ctx, min.cast());
         calloc.free(min);
       }
 
       // Add libmpv hooks for supporting custom HTTP headers in [Media].
       final load = 'on_load'.toNativeUtf8();
       final unload = 'on_unload'.toNativeUtf8();
-      mpv.mpv_hook_add(ctx, 0, load.cast(), 0);
-      mpv.mpv_hook_add(ctx, 0, unload.cast(), 0);
+      mpvBindings.mpv_hook_add(ctx, 0, load.cast(), 0);
+      mpvBindings.mpv_hook_add(ctx, 0, unload.cast(), 0);
       calloc.free(load);
       calloc.free(unload);
 
@@ -2806,7 +2861,7 @@ class NativePlayer extends PlatformPlayer {
   /// Adds an error to the [Player.stream.error].
   void _logError(int code, String? text) {
     if (code < 0 && !logController.isClosed) {
-      final message = mpv.mpv_error_string(code).cast<Utf8>().toDartString();
+      final message = mpvBindings.mpv_error_string(code).cast<Utf8>().toDartString();
       logController.add(
         PlayerLog(
           prefix: 'media_kit',
@@ -2826,7 +2881,7 @@ class NativePlayer extends PlatformPlayer {
     final completer = _setPropertyRequests[requestNumber] = Completer<int>();
     final namePtr = name.toNativeUtf8();
     if (configuration.async) {
-      final immediate = mpv.mpv_set_property_async(
+      final immediate = mpvBindings.mpv_set_property_async(
         ctx,
         requestNumber,
         namePtr.cast(),
@@ -2841,7 +2896,7 @@ class NativePlayer extends PlatformPlayer {
       }
       _logError(await completer.future, text);
     } else {
-      mpv.mpv_set_property(
+      mpvBindings.mpv_set_property(
         ctx,
         namePtr.cast(),
         format,
@@ -2928,7 +2983,7 @@ class NativePlayer extends PlatformPlayer {
         final requestNumber = _asyncRequestNumber++;
         final completer =
             _setPropertyRequests[requestNumber] = Completer<int>();
-        final immediate = mpv.mpv_set_property_async(
+        final immediate = mpvBindings.mpv_set_property_async(
           ctx,
           requestNumber,
           namePtr.cast(),
@@ -2955,7 +3010,7 @@ class NativePlayer extends PlatformPlayer {
           _setPropertyRequests.remove(requestNumber);
         }
       } else {
-        final result = mpv.mpv_set_property(
+        final result = mpvBindings.mpv_set_property(
           ctx,
           namePtr.cast(),
           format,
@@ -2997,7 +3052,7 @@ class NativePlayer extends PlatformPlayer {
     final name = property.toNativeUtf8();
     final data = value.toNativeUtf8();
     try {
-      final result = mpv.mpv_set_property_string(
+      final result = mpvBindings.mpv_set_property_string(
         ctx,
         name.cast(),
         data.cast(),
@@ -3011,7 +3066,7 @@ class NativePlayer extends PlatformPlayer {
 
   void _throwIfMpvError(int result, String operation) {
     if (result >= 0) return;
-    final message = mpv.mpv_error_string(result).cast<Utf8>().toDartString();
+    final message = mpvBindings.mpv_error_string(result).cast<Utf8>().toDartString();
     throw StateError('$operation failed ($result): $message');
   }
 
@@ -3025,7 +3080,7 @@ class NativePlayer extends PlatformPlayer {
     if (configuration.async) {
       final requestNumber = _asyncRequestNumber++;
       final completer = _commandRequests[requestNumber] = Completer<int>();
-      final immediate = mpv.mpv_command_async(ctx, requestNumber, arr.cast());
+      final immediate = mpvBindings.mpv_command_async(ctx, requestNumber, arr.cast());
       final text = '_command(${args.join(', ')})';
       if (immediate < 0) {
         // Sending failed.
@@ -3034,7 +3089,7 @@ class NativePlayer extends PlatformPlayer {
       }
       _logError(await completer.future, text);
     } else {
-      mpv.mpv_command(ctx, arr.cast());
+      mpvBindings.mpv_command(ctx, arr.cast());
     }
 
     calloc.free(arr);
@@ -3042,7 +3097,7 @@ class NativePlayer extends PlatformPlayer {
   }
 
   /// Generated libmpv C API bindings.
-  final generated.MPV mpv;
+  final generated.MPV mpvBindings;
 
   /// [Pointer] to [generated.mpv_handle] of this instance.
   Pointer<generated.mpv_handle> ctx = nullptr;
@@ -3133,7 +3188,7 @@ class _ScreenshotData {
 
 Uint8List? _screenshot(_ScreenshotData data) {
   // ---------
-  final mpv = generated.MPV(DynamicLibrary.open(data.lib));
+  final mpvBindings = generated.MPV(DynamicLibrary.open(data.lib));
   final ctx = Pointer<generated.mpv_handle>.fromAddress(data.ctx);
   // ---------
   final format = data.format;
@@ -3158,7 +3213,7 @@ Uint8List? _screenshot(_ScreenshotData data) {
       (arr + i).value = pointers[i];
     }
 
-    mpv.mpv_command_ret(
+    mpvBindings.mpv_command_ret(
       ctx,
       arr.cast(),
       result.cast(),
@@ -3249,7 +3304,7 @@ Uint8List? _screenshot(_ScreenshotData data) {
     return image;
   } finally {
     pointers.forEach(calloc.free);
-    mpv.mpv_free_node_contents(result.cast());
+    mpvBindings.mpv_free_node_contents(result.cast());
     if (arr != nullptr) {
       calloc.free(arr);
     }
@@ -3279,14 +3334,14 @@ class _GetPlaylistResult {
 
 _GetPlaylistResult _getPlaylist(_GetPlaylistData data) {
   // ---------
-  final mpv = generated.MPV(DynamicLibrary.open(data.lib));
+  final mpvBindings = generated.MPV(DynamicLibrary.open(data.lib));
   final ctx = Pointer<generated.mpv_handle>.fromAddress(data.ctx);
   // ---------
 
   final name = 'playlist'.toNativeUtf8();
   final value = calloc<generated.mpv_node>();
 
-  mpv.mpv_get_property(
+  mpvBindings.mpv_get_property(
     ctx,
     name.cast(),
     generated.mpv_format.MPV_FORMAT_NODE,
@@ -3321,7 +3376,7 @@ _GetPlaylistResult _getPlaylist(_GetPlaylistData data) {
     }
   }
 
-  mpv.mpv_free_node_contents(value.cast());
+  mpvBindings.mpv_free_node_contents(value.cast());
 
   calloc.free(name.cast());
   calloc.free(value.cast());

@@ -1053,12 +1053,12 @@ class HdrVideoSession {
         );
       }
       final epoch = native.fileLoadedEpoch;
-      final path = await window.bounded(() => native.getProperty('path'));
+      final path = await window.bounded(() => native.getPropertyAsync('path'));
       final entry = await window.bounded(
-        () => native.getProperty('playlist/0/id'),
+        () => native.getPropertyAsync('playlist/0/id'),
       );
-      if (await window.bounded(() => native.getProperty('path')) != path ||
-          await window.bounded(() => native.getProperty('playlist/0/id')) !=
+      if (await window.bounded(() => native.getPropertyAsync('path')) != path ||
+          await window.bounded(() => native.getPropertyAsync('playlist/0/id')) !=
               entry ||
           native.fileLoadedEpoch != epoch) {
         throw const HdrNativeDvReviewFailure(
@@ -1095,7 +1095,7 @@ class HdrVideoSession {
       lock: lock,
       readIdentity: readIdentity,
       readProperty: _testReadNativeProperty ??
-          ((name) => (native as NativePlayer).getProperty(name)),
+          ((name) => (native as NativePlayer).getPropertyAsync(name)),
       readOutput: readOutput,
       isCurrent: () => generation == _serial && !_disposed,
     );

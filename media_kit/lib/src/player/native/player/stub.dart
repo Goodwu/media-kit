@@ -60,7 +60,7 @@ class NativePlayer extends PlatformPlayer {
   }
 
   /// Raw mpv property access parity with the io [NativePlayer].
-  Future<String> getProperty(
+  Future<String> getPropertyAsync(
     String property, {
     bool waitForInitialization = true,
   }) async {

@@ -18,7 +18,7 @@ import 'package:media_kit/src/player/native/core/native_library.dart';
 import 'package:media_kit/generated/libmpv/bindings.dart';
 
 MPV? _mpv;
-MPV get mpv => _mpv!;
+MPV get mpvBindings => _mpv!;
 
 void _preloadFrameworkDependencies() {
   final bundlePath = Platform.environment['MEDIA_KIT_TEST_FRAMEWORKS'];
@@ -57,22 +57,22 @@ void main() {
   test(
     'initializer-init',
     () async {
-      final handle = await Initializer(mpv).create((_) async {});
-      await Initializer(mpv).dispose(handle);
+      final handle = await PlayerInitializer(mpvBindings).create((_) async {});
+      await PlayerInitializer(mpvBindings).dispose(handle);
     },
   );
   test(
     'initializer-create',
     () async {
-      final handle = await Initializer(mpv).create((_) async {});
-      await Initializer(mpv).dispose(handle);
+      final handle = await PlayerInitializer(mpvBindings).create((_) async {});
+      await PlayerInitializer(mpvBindings).dispose(handle);
     },
   );
   test(
     'initializer-dispose',
     () async {
-      final handle = await Initializer(mpv).create((_) async {});
-      await expectLater(Initializer(mpv).dispose(handle), completes);
+      final handle = await PlayerInitializer(mpvBindings).create((_) async {});
+      await expectLater(PlayerInitializer(mpvBindings).dispose(handle), completes);
     },
   );
   test(
@@ -90,7 +90,7 @@ void main() {
         expect(true, isTrue);
       });
 
-      final handle = await Initializer(mpv).create(
+      final handle = await PlayerInitializer(mpvBindings).create(
         (event) async {
           if (event.ref.event_id == mpv_event_id.MPV_EVENT_PROPERTY_CHANGE) {
             final prop = event.ref.data.cast<mpv_event_property>();
@@ -108,7 +108,7 @@ void main() {
       await Future.delayed(Duration(seconds: 5));
       {
         final name = 'pause'.toNativeUtf8();
-        mpv.mpv_observe_property(
+        mpvBindings.mpv_observe_property(
           handle,
           0,
           name.cast(),
@@ -118,7 +118,7 @@ void main() {
       }
       {
         final command = 'cycle pause'.toNativeUtf8();
-        mpv.mpv_command_string(
+        mpvBindings.mpv_command_string(
           handle,
           command.cast(),
         );
@@ -127,7 +127,7 @@ void main() {
       await shutdown.future;
       {
         final command = 'quit 0'.toNativeUtf8();
-        mpv.mpv_command_string(
+        mpvBindings.mpv_command_string(
           handle,
           command.cast(),
         );
@@ -136,13 +136,13 @@ void main() {
 
       await Future.delayed(const Duration(seconds: 5));
 
-      await Initializer(mpv).dispose(handle);
+      await PlayerInitializer(mpvBindings).dispose(handle);
     },
   );
   test(
     'initializer-options-with-callback',
     () async {
-      final handle = await Initializer(mpv).create(
+      final handle = await PlayerInitializer(mpvBindings).create(
         (_) async {},
         options: {
           'config': 'yes',
@@ -151,7 +151,7 @@ void main() {
       );
       {
         final name = 'config'.toNativeUtf8();
-        final value = mpv.mpv_get_property_string(
+        final value = mpvBindings.mpv_get_property_string(
           handle,
           name.cast(),
         );
@@ -163,7 +163,7 @@ void main() {
       }
       {
         final name = 'config-dir'.toNativeUtf8();
-        final value = mpv.mpv_get_property_string(
+        final value = mpvBindings.mpv_get_property_string(
           handle,
           name.cast(),
         );
@@ -176,7 +176,7 @@ void main() {
 
       await Future.delayed(const Duration(seconds: 5));
 
-      await Initializer(mpv).dispose(handle);
+      await PlayerInitializer(mpvBindings).dispose(handle);
     },
   );
 }

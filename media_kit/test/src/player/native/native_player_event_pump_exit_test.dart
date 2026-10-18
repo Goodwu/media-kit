@@ -13,14 +13,14 @@ import 'package:test/test.dart';
 /// CPU-only bridge fixture. It installs the exact NativeCallable address into
 /// mpv, while retaining a controllable removal failure for retry coverage.
 class _MpvOwner implements NativeWakeupCallbackOwner {
-  _MpvOwner(this.mpv);
+  _MpvOwner(this.mpvBindings);
 
-  final generated.MPV mpv;
+  final generated.MPV mpvBindings;
   int failedRemovals = 0;
 
   @override
   bool install(int handle, int callback, int userdata) {
-    mpv.mpv_set_wakeup_callback(
+    mpvBindings.mpv_set_wakeup_callback(
       Pointer<generated.mpv_handle>.fromAddress(handle),
       Pointer<NativeFunction<Void Function(Pointer<Void>)>>.fromAddress(
         callback,
@@ -36,7 +36,7 @@ class _MpvOwner implements NativeWakeupCallbackOwner {
       failedRemovals--;
       throw StateError('controlled callback owner removal failure');
     }
-    mpv.mpv_set_wakeup_callback(
+    mpvBindings.mpv_set_wakeup_callback(
       Pointer<generated.mpv_handle>.fromAddress(handle),
       nullptr,
       nullptr,
@@ -52,7 +52,7 @@ void main() {
     return;
   }
 
-  late generated.MPV mpv;
+  late generated.MPV mpvBindings;
   late _MpvOwner owner;
 
   setUpAll(() {
@@ -84,8 +84,8 @@ void main() {
       }
     }
     nativeEnsureInitialized(libmpv: libraryPath);
-    mpv = generated.MPV(DynamicLibrary.open(NativeLibrary.path));
-    owner = _MpvOwner(mpv);
+    mpvBindings = generated.MPV(DynamicLibrary.open(NativeLibrary.path));
+    owner = _MpvOwner(mpvBindings);
     NativeWakeupCallbackOwnership.initialize(owner);
   });
 

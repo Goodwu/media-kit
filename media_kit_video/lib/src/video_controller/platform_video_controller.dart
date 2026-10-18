@@ -383,7 +383,17 @@ class VideoControllerConfiguration {
   final bool enableHardwareAcceleration;
 
   /// Android-specific output options.
-  final AndroidVideoOptions android;
+  final AndroidVideoOptions _android;
+  final bool? androidAttachSurfaceAfterVideoParameters;
+  AndroidVideoOptions get android {
+    final legacy = androidAttachSurfaceAfterVideoParameters;
+    if (legacy == null) return _android;
+    final current = _android.attachSurfaceAfterVideoParameters;
+    if (current != null && current != legacy) {
+      throw ArgumentError('Conflicting Android surface attachment options');
+    }
+    return _android.copyWith(attachSurfaceAfterVideoParameters: legacy);
+  }
 
   /// Darwin-specific output options.
   final DarwinVideoOptions darwin;
@@ -396,9 +406,10 @@ class VideoControllerConfiguration {
     this.height,
     this.scale = 1.0,
     this.enableHardwareAcceleration = true,
-    this.android = const AndroidVideoOptions(),
+    AndroidVideoOptions android = const AndroidVideoOptions(),
+    this.androidAttachSurfaceAfterVideoParameters,
     this.darwin = const DarwinVideoOptions(),
-  });
+  }) : _android = android;
 
   /// Returns a copy of this class with the given fields replaced by the new values.
   VideoControllerConfiguration copyWith({

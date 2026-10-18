@@ -100,12 +100,12 @@ class LocalPlaybackObserver {
       'buffering': state.buffering,
       'positionMs': state.position.inMilliseconds,
       'durationMs': state.duration.inMilliseconds,
-      'width': state.width,
-      'height': state.height,
+      'width': state.videoWidth,
+      'height': state.videoHeight,
     });
     if (!_propertiesRequested &&
         !_stopped &&
-        (state.width ?? 0) > 0 &&
+        (state.videoWidth ?? 0) > 0 &&
         state.position > Duration.zero &&
         !state.buffering &&
         controller?.platform.isCompleted == true) {
@@ -133,7 +133,7 @@ class LocalPlaybackObserver {
       if (_stopped || generation != _request) return;
       final began = _clock.elapsedMicroseconds;
       try {
-        final value = await player.getProperty(
+        final value = await player.getPropertyAsync(
           name, waitForInitialization: false,
         );
         if (_stopped || generation != _request) return;

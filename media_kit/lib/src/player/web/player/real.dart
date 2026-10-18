@@ -47,7 +47,7 @@ class WebPlayer extends PlatformPlayer {
   /// {@macro web_player}
   WebPlayer({PlayerConfiguration configuration = const PlayerConfiguration()})
       : super(configuration: configuration) {
-    var idProperty = globalContext.getProperty(kInstanceCount.toJS);
+    var idProperty = globalContext.getPropertyAsync(kInstanceCount.toJS);
     if (idProperty.isUndefinedOrNull) {
       id = 0;
     } else {
@@ -1437,7 +1437,7 @@ class WebPlayer extends PlatformPlayer {
   ///
   /// [includeLibassSubtitles] is ignored.
   @override
-  Future<Uint8List?> screenshot({
+  Future<Uint8List?> screenshotBytes({
     String? format = 'image/jpeg',
     bool synchronized = true,
     bool includeLibassSubtitles = false,
@@ -1494,7 +1494,7 @@ class WebPlayer extends PlatformPlayer {
       {String? format = 'image/jpeg',
       bool synchronized = true,
       bool includeLibassSubtitles = false}) {
-    return screenshot(
+    return screenshotBytes(
       format: format,
       synchronized: synchronized,
       includeLibassSubtitles: includeLibassSubtitles,
@@ -1517,7 +1517,7 @@ class WebPlayer extends PlatformPlayer {
   /// Raw mpv property access parity with [NativePlayer].
   /// The web `<video>` player has no internal libmpv instance, so the mpv
   /// property surface is not exposed.
-  Future<String> getProperty(
+  Future<String> getPropertyAsync(
     String property, {
     bool waitForInitialization = true,
   }) async {

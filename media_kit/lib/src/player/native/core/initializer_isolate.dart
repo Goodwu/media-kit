@@ -87,7 +87,7 @@ class InitializerIsolate {
   }
 
   /// Disposes [Pointer<mpv_handle>].
-  void dispose(generated.MPV mpv, Pointer<generated.mpv_handle> handle) {
+  void dispose(generated.MPV mpvBindings, Pointer<generated.mpv_handle> handle) {
     final port = _ports[handle.address];
     final isolate = _isolates[handle.address];
     if (port != null && isolate != null) {
@@ -96,7 +96,7 @@ class InitializerIsolate {
       _ports.remove(handle.address);
       _isolates.remove(handle.address);
 
-      mpv.mpv_wakeup(handle);
+      mpvBindings.mpv_wakeup(handle);
 
       Future.delayed(const Duration(seconds: 2), () {
         isolate.kill(priority: Isolate.immediate);
@@ -118,7 +118,7 @@ class InitializerIsolate {
     port.send(receiver.sendPort);
 
     late Map<String, String> options;
-    late generated.MPV mpv;
+    late generated.MPV mpvBindings;
 
     bool disposed = false;
 
@@ -129,7 +129,7 @@ class InitializerIsolate {
         if (message is Map<String, String>) {
           options = message;
         } else if (message is String) {
-          mpv = generated.MPV(DynamicLibrary.open(message));
+          mpvBindings = generated.MPV(DynamicLibrary.open(message));
           completer.complete();
         } else if (message is bool) {
           completer.complete();
@@ -144,22 +144,22 @@ class InitializerIsolate {
 
     await completer.future;
 
-    handle ??= mpv.mpv_create();
+    handle ??= mpvBindings.mpv_create();
 
     for (final entry in options.entries) {
       final name = entry.key.toNativeUtf8();
       final value = entry.value.toNativeUtf8();
-      mpv.mpv_set_option_string(handle, name.cast(), value.cast());
+      mpvBindings.mpv_set_option_string(handle, name.cast(), value.cast());
       calloc.free(name);
       calloc.free(value);
     }
 
-    mpv.mpv_initialize(handle);
+    mpvBindings.mpv_initialize(handle);
     port.send(handle.address);
 
     while (!disposed) {
       completer = Completer();
-      final event = mpv.mpv_wait_event(handle, kReleaseMode ? -1 : 0.1);
+      final event = mpvBindings.mpv_wait_event(handle, kReleaseMode ? -1 : 0.1);
       if (disposed) {
         break;
       }

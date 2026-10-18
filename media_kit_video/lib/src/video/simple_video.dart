@@ -45,8 +45,8 @@ class SimpleVideoState extends State<SimpleVideo> {
     }
     _subscriptions.clear();
     final player = widget.controller.player;
-    _width = player.state.width;
-    _height = player.state.height;
+    _width = player.state.videoWidth;
+    _height = player.state.videoHeight;
     _subscriptions.add(player.stream.width.listen((value) {
       if (!mounted || generation != _generation || value == _width) return;
       setState(() => _width = value);

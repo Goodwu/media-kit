@@ -725,7 +725,7 @@ class AndroidNativeDvReleaseDiagnostic {
     }
     final read = admitAndroidNativeDvDiagnosticRead<String>(
       remainingBudget: _samplingRemainingBudget(),
-      startNativeRead: () => player.getProperty(name),
+      startNativeRead: () => player.getPropertyAsync(name),
     );
     final operation = read.operation;
     _unsettledPropertyRead = operation;

@@ -48,20 +48,20 @@ class SwRender {
   /// the bridge's own dlopen resolving a possibly different copy.
   static _MpvSymbols _resolveMpvSymbols() {
     for (final name in ['libmpv.so', 'libmpv.so.2']) {
-      DynamicLibrary mpv;
+      DynamicLibrary mpvBindings;
       try {
-        mpv = DynamicLibrary.open(name);
+        mpvBindings = DynamicLibrary.open(name);
       } catch (_) {
         continue;
       }
       try {
-        final create = mpv
+        final create = mpvBindings
             .lookup<NativeFunction<_MpvCreateC>>('mpv_render_context_create')
             .cast<Void>();
-        final freeFn = mpv
+        final freeFn = mpvBindings
             .lookup<NativeFunction<_MpvFreeC>>('mpv_render_context_free')
             .cast<Void>();
-        final render = mpv
+        final render = mpvBindings
             .lookup<NativeFunction<_MpvRenderC>>('mpv_render_context_render')
             .cast<Void>();
         return _MpvSymbols(create, freeFn, render);

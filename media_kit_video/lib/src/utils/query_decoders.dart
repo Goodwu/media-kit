@@ -23,12 +23,12 @@ Future<HashSet<String>> queryDecoders(int handle) {
     }
 
     NativeLibrary.ensureInitialized();
-    final mpv = MPV(DynamicLibrary.open(NativeLibrary.path));
+    final mpvBindings = MPV(DynamicLibrary.open(NativeLibrary.path));
 
     if (_decoders.isEmpty) {
       final name = 'decoder-list'.toNativeUtf8();
       final data = calloc<mpv_node>();
-      mpv.mpv_get_property(
+      mpvBindings.mpv_get_property(
         Pointer.fromAddress(handle),
         name.cast(),
         mpv_format.MPV_FORMAT_NODE,
@@ -55,7 +55,7 @@ Future<HashSet<String>> queryDecoders(int handle) {
           }
         }
       }
-      mpv.mpv_free_node_contents(data);
+      mpvBindings.mpv_free_node_contents(data);
       calloc.free(name);
       calloc.free(data);
     }

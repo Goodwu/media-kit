@@ -1,3 +1,4 @@
+import '../compat/legacy_dimensions.dart';
 /// This file is a part of media_kit (https://github.com/media-kit/media-kit).
 ///
 /// Copyright © 2021 & onwards, Hitesh Kumar Saini <saini123hitesh@gmail.com>.
@@ -21,6 +22,9 @@ import 'package:media_kit/src/models/video_params.dart';
 ///
 /// {@endtemplate}
 class PlayerStream {
+  /// Paired legacy size stream, with zero for unknown dimensions.
+  Stream<(int, int)> get size => legacyDimensions(width, height);
+
   /// Currently opened [Media]s.
   final Stream<Playlist> playlist;
 

@@ -154,8 +154,8 @@ class VideoState extends State<Video> with WidgetsBindingObserver {
   final _subtitleViewKey = GlobalKey<SubtitleViewState>();
   final _wakelock = Wakelock();
   final _subscriptions = <StreamSubscription>[];
-  late int? _width = widget.controller.player.state.width;
-  late int? _height = widget.controller.player.state.height;
+  late int? _width = widget.controller.player.state.videoWidth;
+  late int? _height = widget.controller.player.state.videoHeight;
   late bool _visible = (_width ?? 0) > 0 && (_height ?? 0) > 0;
   Size? _lastNativeSurfaceViewport;
   String? _lastOhosCompositionTrace;

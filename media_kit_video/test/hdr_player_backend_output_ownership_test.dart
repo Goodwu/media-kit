@@ -286,7 +286,7 @@ class _FakePlayer implements Player {
   @override
   int get fileLoadedEpoch => 0;
   @override
-  Future<String> getProperty(String name,
+  Future<String> getPropertyAsync(String name,
       {bool waitForInitialization = true}) async {
     if (readError != null) throw readError!;
     final overridden = _readbackOverrides?[name];

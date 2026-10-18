@@ -442,7 +442,7 @@ abstract class PlatformPlayer {
     );
   }
 
-  Future<Uint8List?> screenshot(
+  Future<Uint8List?> screenshotBytes(
       {String? format = 'image/jpeg',
       bool includeLibassSubtitles = false}) async {
     throw UnimplementedError(

@@ -19,31 +19,31 @@ import 'package:synchronized/synchronized.dart';
 class InitializerNativeCallable {
   static InitializerNativeCallable? _instance;
 
-  InitializerNativeCallable._(this.mpv);
+  InitializerNativeCallable._(this.mpvBindings);
 
-  factory InitializerNativeCallable(generated.MPV mpv) {
-    _instance ??= InitializerNativeCallable._(mpv);
+  factory InitializerNativeCallable(generated.MPV mpvBindings) {
+    _instance ??= InitializerNativeCallable._(mpvBindings);
     return _instance!;
   }
 
-  final generated.MPV mpv;
+  final generated.MPV mpvBindings;
 
   Future<Pointer<generated.mpv_handle>> create(
     Future<void> Function(Pointer<generated.mpv_event>) callback, {
     Map<String, String> options = const {},
   }) async {
-    final ctx = mpv.mpv_create();
+    final ctx = mpvBindings.mpv_create();
     for (final entry in options.entries) {
       final name = entry.key.toNativeUtf8();
       final value = entry.value.toNativeUtf8();
       try {
-        mpv.mpv_set_option_string(ctx, name.cast(), value.cast());
+        mpvBindings.mpv_set_option_string(ctx, name.cast(), value.cast());
       } finally {
         calloc.free(name);
         calloc.free(value);
       }
     }
-    mpv.mpv_initialize(ctx);
+    mpvBindings.mpv_initialize(ctx);
 
     final owner = NativeWakeupCallbackOwnership.owner;
     final session = _EventPumpSession(ctx, callback, owner);
@@ -72,17 +72,17 @@ class InitializerNativeCallable {
         }
         session.phase = _EventPumpPhase.closing;
         await _drainAndClose(session);
-        mpv.mpv_terminate_destroy(ctx);
+        mpvBindings.mpv_terminate_destroy(ctx);
         Error.throwWithStackTrace(error, stack);
       }
       if (!installed) {
         session.phase = _EventPumpPhase.closing;
         await _drainAndClose(session);
-        mpv.mpv_terminate_destroy(ctx);
+        mpvBindings.mpv_terminate_destroy(ctx);
         throw StateError('Native wakeup callback owner is shutting down');
       }
     } else {
-      mpv.mpv_set_wakeup_callback(ctx, nativeFunction.cast(), ctx.cast());
+      mpvBindings.mpv_set_wakeup_callback(ctx, nativeFunction.cast(), ctx.cast());
     }
     return ctx;
   }
@@ -109,7 +109,7 @@ class InitializerNativeCallable {
       await _closeSession(session);
       return;
     }
-    mpv.mpv_set_wakeup_callback(ctx, nullptr, nullptr);
+    mpvBindings.mpv_set_wakeup_callback(ctx, nullptr, nullptr);
     session.phase = _EventPumpPhase.closing;
     await _drainAndClose(session);
   }
@@ -165,7 +165,7 @@ class InitializerNativeCallable {
     unawaited(session.serial.synchronized(() async {
       if (!_isOpen(session, ctx)) return;
       while (_isOpen(session, ctx)) {
-        final event = mpv.mpv_wait_event(ctx, 0);
+        final event = mpvBindings.mpv_wait_event(ctx, 0);
         if (!_isOpen(session, ctx)) return;
         if (event == nullptr ||
             event.ref.event_id == generated.mpv_event_id.MPV_EVENT_NONE) {

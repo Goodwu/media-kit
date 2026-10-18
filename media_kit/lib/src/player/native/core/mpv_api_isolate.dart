@@ -35,7 +35,7 @@ abstract final class MpvApiReply {
 /// contended across threads while `mpv_wait_event()` is parked (see the
 /// note in [InitializerIsolate]).
 (int, Object?) performMpvApiOp(
-  generated.MPV mpv,
+  generated.MPV mpvBindings,
   int op,
   Pointer<generated.mpv_handle> ctx,
   List<Object?> args,
@@ -45,17 +45,17 @@ abstract final class MpvApiReply {
   switch (op) {
     case MpvApiOp.getPropertyString:
       final name = (args[0]! as String).toNativeUtf8();
-      final result = mpv.mpv_get_property_string(ctx, name.cast());
+      final result = mpvBindings.mpv_get_property_string(ctx, name.cast());
       if (result != nullptr) {
         value = result.cast<Utf8>().toDartString();
-        mpv.mpv_free(result.cast());
+        mpvBindings.mpv_free(result.cast());
       }
       calloc.free(name);
       break;
     case MpvApiOp.getPropertyInt64:
       final name = (args[0]! as String).toNativeUtf8();
       final pointer = calloc<Int64>(1);
-      error = mpv.mpv_get_property(
+      error = mpvBindings.mpv_get_property(
         ctx,
         name.cast(),
         generated.mpv_format.MPV_FORMAT_INT64,
@@ -72,7 +72,7 @@ abstract final class MpvApiReply {
       final data = (args[1]! as String).toNativeUtf8();
       final pointer = calloc<Pointer<Void>>(1);
       pointer.value = Pointer.fromAddress(data.address);
-      error = mpv.mpv_set_property(
+      error = mpvBindings.mpv_set_property(
         ctx,
         name.cast(),
         generated.mpv_format.MPV_FORMAT_STRING,
@@ -86,7 +86,7 @@ abstract final class MpvApiReply {
       final name = (args[0]! as String).toNativeUtf8();
       final pointer = calloc<generated.mpv_node>();
       pointer.ref.format = generated.mpv_format.MPV_FORMAT_NONE;
-      error = mpv.mpv_set_property(
+      error = mpvBindings.mpv_set_property(
         ctx,
         name.cast(),
         generated.mpv_format.MPV_FORMAT_NODE,
@@ -96,7 +96,7 @@ abstract final class MpvApiReply {
       calloc.free(name);
       break;
     case MpvApiOp.hookContinue:
-      error = mpv.mpv_hook_continue(ctx, args[0]! as int);
+      error = mpvBindings.mpv_hook_continue(ctx, args[0]! as int);
       break;
     case MpvApiOp.setPropertyStringListNode:
       final name = (args[0]! as String).toNativeUtf8();
@@ -114,7 +114,7 @@ abstract final class MpvApiReply {
             generated.mpv_format.MPV_FORMAT_STRING;
         value_.ref.u.list.ref.values[i].u.string = entry.cast();
       }
-      error = mpv.mpv_set_property(
+      error = mpvBindings.mpv_set_property(
         ctx,
         name.cast(),
         generated.mpv_format.MPV_FORMAT_NODE,
@@ -282,7 +282,7 @@ class _MpvApiInit {
 }
 
 void _mpvApiIsolateEntry(_MpvApiInit init) {
-  final mpv = generated.MPV(DynamicLibrary.open(init.libraryPath));
+  final mpvBindings = generated.MPV(DynamicLibrary.open(init.libraryPath));
   final requests = ReceivePort();
   init.reply.send(requests.sendPort);
   final reply = init.response;
@@ -296,7 +296,7 @@ void _mpvApiIsolateEntry(_MpvApiInit init) {
     int error = -1;
     Object? value;
     try {
-      (error, value) = performMpvApiOp(mpv, op, ctx, args);
+      (error, value) = performMpvApiOp(mpvBindings, op, ctx, args);
     } catch (exception, stacktrace) {
       // A failed operation must still terminate its caller's await.
       print(exception);

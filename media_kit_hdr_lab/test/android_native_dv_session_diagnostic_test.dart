@@ -1208,7 +1208,7 @@ void main() {
 
 class _SlowPropertyPlayer implements Player {
   @override
-  Future<String> getProperty(String name,
+  Future<String> getPropertyAsync(String name,
       {bool waitForInitialization = true}) async {
     final delay = Stopwatch()..start();
     while (delay.elapsed < const Duration(milliseconds: 1100)) {}
@@ -1224,7 +1224,7 @@ class _ControlledPropertyPlayer implements Player {
   final names = <String>[];
 
   @override
-  Future<String> getProperty(String name, {bool waitForInitialization = true}) {
+  Future<String> getPropertyAsync(String name, {bool waitForInitialization = true}) {
     names.add(name);
     return name == 'first' ? first.future : Future<String>.value('next');
   }
@@ -1463,7 +1463,7 @@ class _PropertyDiagnosticPlayer implements Player {
   PlayerState get state => const PlayerState();
 
   @override
-  Future<String> getProperty(String name,
+  Future<String> getPropertyAsync(String name,
       {bool waitForInitialization = true}) async {
     if (name == failProperty) throw StateError('read failed: $name');
     final value = properties[name] ?? '';
