@@ -23,6 +23,7 @@ from urllib.request import url2pathname
 import yaml
 
 from private_flutter_cache import copy_flutter_cache
+from generated_macos import capture_macos_inputs, verify_macos_generators, MACOS_CONFIG
 from generated_xcconfig import is_generated_cocoapods_include
 from generated_gradle import capture_gradle_wrappers, verify_generated_wrapper
 from generated_apple import (capture_apple_inputs, is_generated_configuration,
@@ -140,7 +141,7 @@ def verify_tracked(root: Path, manifest: dict, allowed=frozenset(), generated_co
                 else:
                     generated[path] = {'before': record['blob'], 'after': actual}
                     if apple_generated:
-                        generated[path]['generator'] = 'Flutter IOSDeploymentTargetMigration'
+                        generated[path]['generator'] = (generated_configs or {})[path]['generator']
                     if pods_generated:
                         generated[path]['generator'] = 'Flutter CocoaPods exact include prefix'
         except (OSError, AuditError) as error:
@@ -386,6 +387,12 @@ def execute(args, runner: Runner) -> None:
         apple = capture_apple_inputs(flutter, originals)
         runner.receipt['appleGeneratedInputs'] = apple
         runner.save()
+    if args.platform == 'macos':
+        originals = {p: git(app, 'show', 'HEAD:' + p) for p in MACOS_CONFIG
+                     if p in app_manifest}
+        apple = capture_macos_inputs(flutter, originals)
+        runner.receipt['appleGeneratedInputs'] = apple
+        runner.save()
     runner.run('flutter-version', [executable, '--version', '--machine'], app)
     wrappers = {}
     if args.platform == 'android':
@@ -419,8 +426,11 @@ def execute(args, runner: Runner) -> None:
     runner.receipt['applicationCompile'] = 'passed' if build == 0 else 'failed'
     runner.receipt['analysis'] = 'passed' if analyze == 0 else 'failed'
     runner.save()
+    (out / 'app-generated-diff.log').write_bytes(git(app, 'diff', '--binary', 'HEAD'))
     if args.platform == 'ios':
         verify_generators(flutter)
+    elif args.platform == 'macos':
+        verify_macos_generators(flutter)
     runner.receipt['addedInputsAfterBuild'] = {
         'app': verify_added(app, app=True, generated_wrappers=wrappers, generated_apple=apple['newFiles']),
         'sdk': verify_added(sdk, package_paths=[p['path'] for p in plan['packages'].values()]),
