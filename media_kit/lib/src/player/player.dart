@@ -4,4 +4,4 @@
 /// player implementation. Keep this alias while the fork carries newer
 /// platform backends internally.
 export 'player_native.dart'
-    if (dart.library.html) 'player_web.dart';
+    if (dart.library.js_interop) 'player_web.dart';

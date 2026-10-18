@@ -6,8 +6,6 @@
 
 import 'dart:async';
 import 'dart:typed_data';
-import '../compat/screenshot_bytes.dart'
-    if (dart.library.ui) '../compat/screenshot_flutter.dart' as screenshot;
 import 'package:meta/meta.dart';
 import 'package:collection/collection.dart';
 
@@ -66,7 +64,7 @@ class PreTerminationOwnerReservation {
   }
 }
 
-abstract class PlatformPlayer with screenshot.PlayerScreenshot {
+abstract class PlatformPlayer {
   /// {@macro platform_player}
   PlatformPlayer({required this.configuration});
 

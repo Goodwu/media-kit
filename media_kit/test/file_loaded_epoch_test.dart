@@ -1,4 +1,4 @@
-import 'package:media_kit/media_kit.dart';
+import 'package:media_kit/media_kit_dart.dart';
 import 'package:test/test.dart';
 
 class RecordingPlayer extends PlatformPlayer {

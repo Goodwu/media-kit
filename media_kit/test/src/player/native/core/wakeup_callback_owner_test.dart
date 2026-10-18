@@ -1,7 +1,7 @@
 import 'dart:ffi';
 import 'dart:io';
 import 'package:media_kit/generated/libmpv/bindings.dart' as generated;
-import 'package:media_kit/media_kit.dart';
+import 'package:media_kit/media_kit_dart.dart';
 import 'package:media_kit/src/player/native/core/initializer_native_callable.dart';
 import 'package:test/test.dart';
 
