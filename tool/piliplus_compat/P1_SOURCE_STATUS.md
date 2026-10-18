@@ -1,12 +1,12 @@
-# P1 source integration — current checkpoint
+# P1 source integration — static API/build correction checkpoint
 
-Continue ONLY `compat/piliplus-zero-change-20261018`. Do not replay the P1 materializer.
+Continue ONLY compat/piliplus-zero-change-20261018; never replay materializers.
+Initial P1: f2495b983d48fb3ac8cf5a00040d4967c16625ff.
+Compile-r2: a165f55c81cd5f9ef6c6d5297c2803bb8fd6663b.
+Static Flutter/pure-Dart entry integration: 288b9f24803025c462f081a5be4c3c0cb9065ea4.
+Exact macOS generator integration: b5e7602da9b9c87be7496c8d2ec96de5f62b4711.
+The 11 existing locally available static-facade source files matched the published blobs. No application sources were patched. Local final tool suite: 77 passed.
 
-Initial P1 sources: f2495b983d48fb3ac8cf5a00040d4967c16625ff.
-First correction: 66df199c1165abc872af2161dadbd99f166b21d7.
-Compile-r2 source integration: a165f55c81cd5f9ef6c6d5297c2803bb8fd6663b.
-All seven changed existing source files in compile-r2 have locally verified matching remote Git blob hashes (see docs/plans/piliplus-p1-compile-r2.json).
+Prior T1 run39126075750 at f0de192 compiled Android/iOS/Linux; Windows compiler also exited 0 but the console printer failed, and macOS failed due to flattened framework links. Analysis failed on the conditional screenshot type on every platform. iOS/macOS automatic project migrations were rejected, not silently admitted. These are historical intermediate results, NOT acceptance of current code.
 
-Compile-r2 replaces the screenshot extension with a true inherited member selected for Flutter/pure Dart; adds the audio headers replacement contract and exact generated Gradle wrapper provenance. Local tool tests: 60 passed. The current commit starts T1 and the full video regression on the already integrated SDK code, not on the pre-publication request commit. A separate pure Dart test checks that no Flutter import is required.
-
-The previous T1 run 39096187146 failed at ac964799; it is not evidence for compile-r2. No application/native/device success is claimed before the new runs complete. The Linux system-libmpv test is only an ABI/lifetime test, not fork-native freshness. Application source remains untouched. Ordinary-open routing, stable output ownership, full native closure, feature and HDR acceptance remain open.
+This commit starts all five original-app builds on the published fixes and adds analyzer verification for restricted-import screenshot/header APIs before the complete video test suite. Non-Flutter callers explicitly use media_kit_dart.dart; the Flutter entry remains unchanged for original PiliPlus. The SDK system-libmpv lifetime test does not certify source-fresh fork binaries. Native closure, runtime/feature/automatic routing and HDR remain separate open gates.
