@@ -9,6 +9,7 @@ import 'dart:ffi';
 import 'dart:async';
 import 'dart:collection';
 import '../../../compat/legacy_media_headers.dart';
+import '../../../compat/legacy_media_options.dart';
 import 'dart:typed_data';
 import 'package:path/path.dart';
 import 'package:meta/meta.dart';
@@ -345,6 +346,14 @@ class NativePlayer extends PlatformPlayer {
     bool play = true,
     bool synchronized = true,
   }) {
+    // Snapshot legacy per-entry options before yielding or taking the lock.
+    final playlist = playable is Media
+        ? <Media>[playable]
+        : playable is Playlist ? List<Media>.of(playable.medias) : <Media>[];
+    final index = playable is Media ? 0 : playable is Playlist ? playable.index : -1;
+    final mediaOptions = [
+      for (final media in playlist) LegacyMediaOptions.fromExtras(media.extras),
+    ];
     Future<void> function() async {
       if (disposed) {
         throw AssertionError('[Player] has been disposed');
@@ -352,17 +361,11 @@ class NativePlayer extends PlatformPlayer {
       await waitForPlayerInitialization;
       await waitForVideoControllerInitializationIfAttached;
 
-      final int index;
-      final List<Media> playlist = <Media>[];
-      if (playable is Media) {
-        index = 0;
-        playlist.add(playable);
-      } else if (playable is Playlist) {
-        index = playable.index;
-        playlist.addAll(playable.medias);
-      } else {
-        index = -1;
-      }
+      final entryCommands = [
+        for (var i = 0; i < playlist.length; i++)
+          mediaOptions[i].appendArguments(playlist[i].uri,
+              apiVersion: mpvBindings.mpv_client_api_version()),
+      ];
 
       // Keep these [Media] objects in memory.
       current = playlist;
@@ -384,18 +387,14 @@ class NativePlayer extends PlatformPlayer {
       // Enter paused state.
       await _setPropertyFlag('pause', true);
 
-      if (playlist.any((media) => media.uri.startsWith('fd://'))) {
-        // The fd:// scheme is used to reference content:// URIs on Android.
-        // The loadlist command does not support this by default, yielding "Refusing to load potentially unsafe URL from a playlist."
-        // So, we fallback to loading each file individually.
-        for (int i = 0; i < playlist.length; i++) {
-          await _command(
-            [
-              'loadfile',
-              playlist[i].uri,
-              'append',
-            ],
-          );
+      if (mediaOptions.any((options) => !options.isEmpty) ||
+          playlist.any((media) => media.uri.startsWith('fd://') ||
+              media.uri.startsWith('edl://'))) {
+        // Native playlist entries own the option scope. EDL is an opaque URI:
+        // do not parse/rebuild it or lose the application's secondary stream.
+        // fd:// also needs loadfile rather than an external playlist.
+        for (final command in entryCommands) {
+          await _command(command, strict: true);
         }
       } else {
         final file = await TempFile.create();
@@ -668,6 +667,7 @@ class NativePlayer extends PlatformPlayer {
   /// Appends a [Media] to the [Player]'s playlist.
   @override
   Future<void> add(Media media, {bool synchronized = true}) {
+    final options = LegacyMediaOptions.fromExtras(media.extras);
     Future<void> function() async {
       if (disposed) {
         throw AssertionError('[Player] has been disposed');
@@ -686,7 +686,8 @@ class NativePlayer extends PlatformPlayer {
       }
       // ---------------------------------------------
 
-      await _command(['loadfile', media.uri, 'append']);
+      await _command(options.appendArguments(media.uri,
+          apiVersion: mpvBindings.mpv_client_api_version()), strict: true);
     }
 
     if (synchronized) {
@@ -3064,30 +3065,39 @@ class NativePlayer extends PlatformPlayer {
     throw StateError('$operation failed ($result): $message');
   }
 
-  Future<void> _command(List<String> args) async {
+  Future<void> _command(List<String> args, {bool strict = false}) async {
     final pointers = args.map<Pointer<Utf8>>((e) => e.toNativeUtf8()).toList();
-    final arr = calloc<Pointer<Utf8>>(128);
-    for (int i = 0; i < args.length; i++) {
-      (arr + i).value = pointers[i];
-    }
-
-    if (configuration.async) {
-      final requestNumber = _asyncRequestNumber++;
-      final completer = _commandRequests[requestNumber] = Completer<int>();
-      final immediate = mpvBindings.mpv_command_async(ctx, requestNumber, arr.cast());
-      final text = '_command(${args.join(', ')})';
-      if (immediate < 0) {
-        // Sending failed.
-        _logError(immediate, text);
-        return;
+    final arr = calloc<Pointer<Utf8>>(args.length + 1);
+    try {
+      for (int i = 0; i < args.length; i++) {
+        (arr + i).value = pointers[i];
       }
-      _logError(await completer.future, text);
-    } else {
-      mpvBindings.mpv_command(ctx, arr.cast());
+      if (configuration.async) {
+        final requestNumber = _asyncRequestNumber++;
+        final completer = _commandRequests[requestNumber] = Completer<int>();
+        // Do not copy a signed URL or filter payload into a strict failure.
+        final text = strict ? 'mpv ${args.first}' : '_command(${args.join(', ')})';
+        try {
+          final immediate = mpvBindings.mpv_command_async(ctx, requestNumber, arr.cast());
+          if (immediate < 0) {
+            if (strict) _throwIfMpvError(immediate, text);
+            _logError(immediate, text);
+            return;
+          }
+          final reply = await completer.future;
+          if (strict) _throwIfMpvError(reply, text);
+          _logError(reply, text);
+        } finally {
+          _commandRequests.remove(requestNumber);
+        }
+      } else {
+        final result = mpvBindings.mpv_command(ctx, arr.cast());
+        if (strict) _throwIfMpvError(result, 'mpv ${args.first}');
+      }
+    } finally {
+      calloc.free(arr);
+      pointers.forEach(calloc.free);
     }
-
-    calloc.free(arr);
-    pointers.forEach(calloc.free);
   }
 
   /// Generated libmpv C API bindings.
