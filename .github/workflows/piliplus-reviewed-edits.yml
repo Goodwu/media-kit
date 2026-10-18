@@ -30,7 +30,7 @@ jobs:
           if ! git diff --cached --quiet; then
             git config user.name 'github-actions[bot]'
             git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-            git commit -m 'fix(compat): align screenshot contract and verify generated macOS includes'
+            git commit -m 'fix(compat): publish reviewed screenshot, header and build-guard corrections'
             test "$(git ls-remote origin "$GITHUB_REF" | cut -f1)" = "$GITHUB_SHA"
             git push origin "HEAD:$GITHUB_REF"
           fi

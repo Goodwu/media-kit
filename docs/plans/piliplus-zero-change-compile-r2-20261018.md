@@ -1,0 +1,11 @@
+# R3 continuation: compile blockers R2
+
+Continue only `compat/piliplus-zero-change-20261018`. Refreshed source snapshot: SDK `622b51b16ddb232a05dab8209720597c13ebd3ca` (parent implementation `66df199c`), application `6a5171f98f6d493f3c07bc7fc5f0952d4bc5a5b4`. The two archive SHA-256 values and every Git blob were checked locally. No application sources are modified.
+
+The last T1 run 39096187146 tested ac964799, before the 66df199c corrections. All five jobs failed; the latest corrected source had no new run. This continuation fixes remaining known compiler blockers instead of repeating P0a/P0b or claiming that old tool successes certify the application.
+
+Changes: make screenshot a platform-selected member (not an import-scoped extension), retaining real Flutter ui.Image ownership and a separate pure-Dart byte implementation; accept headers in setMediaHeader, including replacement by an empty custom map to clear audio Referer; validate names/values atomically and preserve per-media precedence. Add restricted-import compilation and header regression tests. Recognize only three Android Gradle wrapper files whose bytes match the private Flutter cache frozen before building; a filename alone cannot authorize new input. Preserve analyzer/build statuses even if a later integrity guard fails.
+
+The exact-blob edit request is `tool/piliplus_compat/reviewed_edits.json`, id `piliplus-p1-compile-r2`. Its publisher must commit the actual SDK modifications before the next accepted test run. No build-time patch to PiliPlus is allowed. Verify the resulting source blobs; then trigger T1 and the SDK suite against the published source, not against this request-only commit. Local post-edit Python tests: 60 passed, exit 0; this is not Flutter compilation. Dart/Flutter is unavailable locally and the Codex workspace connection still fails.
+
+Remaining: finish five-platform compilation and SDK tests, then ordinary open automatic routing, stable output ownership, media-option/EDL parity, source-fresh native closure, feature/device/HDR acceptance. Preserve upstream sdrEmbed, explicit copy preference and capability tri-state semantics. Do not replay P1 materialization; do not create another branch.
