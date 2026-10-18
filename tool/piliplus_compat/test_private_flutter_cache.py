@@ -66,7 +66,7 @@ class BuildCorrectionsTests(unittest.TestCase):
             root = Path(d); p = root / 'ios/Podfile'; p.parent.mkdir()
             before = b"platform :ios, '14.0'\n# keep\n"; after = migrate_ios_config(before)
             manifest = {'ios/Podfile': {'mode': '100644', 'blob': blob(before)}}
-            configs = {'ios/Podfile': {'before': blob(before), 'after': blob(after)}}
+            configs = {'ios/Podfile': {'before': blob(before), 'after': blob(after), 'generator': 'test'}}
             p.write_bytes(after)
             record = build.verify_tracked(root, manifest, build.GENERATED_TRACKED, configs)
             self.assertFalse(record['allTrackedBytesUnchanged'])

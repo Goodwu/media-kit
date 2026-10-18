@@ -1,0 +1,44 @@
+{
+  "request": {
+    "id": "piliplus-p1-apple-r3b",
+    "files": [
+      {
+        "path": "tool/piliplus_compat/build_original.py",
+        "blob": "57f45f85e62fcc4d2a46417bed34284bbc2cec1c",
+        "edits": [
+          {
+            "old": "from generated_xcconfig import",
+            "new": "from generated_macos import capture_macos_inputs, verify_macos_generators, MACOS_CONFIG\nfrom generated_xcconfig import"
+          },
+          {
+            "old": "generated[path]['generator'] = 'Flutter IOSDeploymentTargetMigration'",
+            "new": "generated[path]['generator'] = (generated_configs or {})[path]['generator']"
+          },
+          {
+            "old": "    runner.run('flutter-version', [executable, '--version', '--machine'], app)",
+            "new": "    if args.platform == 'macos':\n        originals = {p: git(app, 'show', 'HEAD:' + p) for p in MACOS_CONFIG\n                     if p in app_manifest}\n        apple = capture_macos_inputs(flutter, originals)\n        runner.receipt['appleGeneratedInputs'] = apple\n        runner.save()\n    runner.run('flutter-version', [executable, '--version', '--machine'], app)"
+          },
+          {
+            "old": "    if args.platform == 'ios':\n        verify_generators(flutter)\n",
+            "new": "    (out / 'app-generated-diff.log').write_bytes(git(app, 'diff', '--binary', 'HEAD'))\n    if args.platform == 'ios':\n        verify_generators(flutter)\n    elif args.platform == 'macos':\n        verify_macos_generators(flutter)\n"
+          }
+        ]
+      },
+      {
+        "path": "tool/piliplus_compat/test_private_flutter_cache.py",
+        "blob": "14ad07a6d3f115a68600c72667e412e3267fde04",
+        "edits": [
+          {
+            "old": "configs = {'ios/Podfile': {'before': blob(before), 'after': blob(after)}}",
+            "new": "configs = {'ios/Podfile': {'before': blob(before), 'after': blob(after), 'generator': 'test'}}"
+          }
+        ]
+      }
+    ]
+  },
+  "result": {
+    "tool/piliplus_compat/build_original.py": "e79063a133390cfd106d5e4fbe7373603e679441",
+    "tool/piliplus_compat/test_private_flutter_cache.py": "d15f7e8eff746fc6c90d558264cab64cdfe733c5"
+  },
+  "status": "source-published-not-build-certified"
+}
