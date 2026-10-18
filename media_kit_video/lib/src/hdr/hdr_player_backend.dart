@@ -67,7 +67,7 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
           },
         );
     _nativeDvOptions = HdrNativeDvOptionOwner(
-      readProperty: player.getProperty,
+      readProperty: player.getPropertyAsync,
       setPropertyStrict: player.setPropertyStrict,
       readIdentity: _readOptionIdentity,
       onDiagnostic: onNativeDvOptionDiagnostic,
@@ -121,7 +121,7 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
 
   Future<void> _setOwned(String name, String value) async {
     if (!_originalProperties.containsKey(name)) {
-      final original = await player.getProperty(name);
+      final original = await player.getPropertyAsync(name);
       if (original.isEmpty) {
         throw StateError('Cannot capture original value of $name');
       }
@@ -129,7 +129,7 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
     }
     _ownedProperties.add(name);
     await player.setPropertyStrict(name, value);
-    final actual = await player.getProperty(name);
+    final actual = await player.getPropertyAsync(name);
     if (actual != value) {
       throw StateError('$name rejected: requested=$value actual=$actual');
     }
@@ -334,10 +334,10 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
 
   Future<HdrOptionSourceIdentity> _readOptionIdentity() async {
     final epoch = player.fileLoadedEpoch;
-    final path = await player.getProperty('path');
-    final entry = await player.getProperty('playlist/0/id');
-    if (await player.getProperty('path') != path ||
-        await player.getProperty('playlist/0/id') != entry ||
+    final path = await player.getPropertyAsync('path');
+    final entry = await player.getPropertyAsync('playlist/0/id');
+    if (await player.getPropertyAsync('path') != path ||
+        await player.getPropertyAsync('playlist/0/id') != entry ||
         player.fileLoadedEpoch != epoch) {
       throw StateError('Media changed while reading native DV option identity');
     }
@@ -389,7 +389,7 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
     }
     final current = await pending.confirmForCleanup(
       readIdentity: _readOptionIdentity,
-      readPlaylistFilename: () => player.getProperty('playlist/0/filename'),
+      readPlaylistFilename: () => player.getPropertyAsync('playlist/0/filename'),
       waitForFileLoadedEntry: player.waitForFileLoadedEntryAfter,
       afterOwnStop: _nativeDvPendingOwnStopIssued,
     );
@@ -441,7 +441,7 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
     }
     final stopped = await pending.confirmForCleanup(
       readIdentity: _readOptionIdentity,
-      readPlaylistFilename: () => player.getProperty('playlist/0/filename'),
+      readPlaylistFilename: () => player.getPropertyAsync('playlist/0/filename'),
       waitForFileLoadedEntry: player.waitForFileLoadedEntryAfter,
       afterOwnStop: true,
     );
@@ -704,7 +704,7 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
       await player
           .command(['vf', 'add', '$_dvRpuFilter:format=dolbyvision=no']);
       _rpuFilterApplied = true;
-      final actual = await player.getProperty('vf');
+      final actual = await player.getPropertyAsync('vf');
       if (!actual.contains('$_dvRpuFilter:format=dolbyvision=no')) {
         throw StateError('DV base-layer filter was not accepted');
       }
@@ -818,7 +818,7 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
           mediaUri: media.uri,
           openWithoutLock: () =>
               player.open(playable, play: play, synchronized: false),
-          readProperty: player.getProperty,
+          readProperty: player.getPropertyAsync,
           onCaptured: (entry) {
             _openFileLoadedEpoch = entry.before.fileLoadedEpoch;
             _openPlaylistEntryId = entry.playlistEntryId;
@@ -834,7 +834,7 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
           mediaUri: captured.mediaUri,
           expectedPlaylistEntryId: captured.playlistEntryId,
           readIdentity: _readOptionIdentity,
-          readPlaylistFilename: () => player.getProperty('playlist/0/filename'),
+          readPlaylistFilename: () => player.getPropertyAsync('playlist/0/filename'),
           waitForFileLoadedEntry: player.waitForFileLoadedEntryAfter,
         );
         await rebindNativeDvUnderLock(
@@ -851,7 +851,7 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
           fileLoadedEpoch: () => player.fileLoadedEpoch,
           openWithoutLock: () =>
               player.open(playable, play: play, synchronized: false),
-          readProperty: player.getProperty,
+          readProperty: player.getPropertyAsync,
           isCurrent: () => _ordinaryReviewSerial == reviewSerial,
         );
         if (_ordinaryReviewSerial != reviewSerial) {
@@ -923,7 +923,7 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
               ? null
               : HdrNativeDvOutputSnapshot(controller, identity);
         },
-        readProperty: player.getProperty,
+        readProperty: player.getPropertyAsync,
         latestVideoParams: () => _latestVideoParams,
       );
       _lastHwdecCurrent = facts.hwdecCurrent;
@@ -933,7 +933,7 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
     final facts = await gatherDecoderReviewFacts(
       lock: player.lock,
       mediaUri: plan.media.uri,
-      readProperty: player.getProperty,
+      readProperty: player.getPropertyAsync,
       waitForFileLoadedEntry: player.waitForFileLoadedEntryAfter,
       playlistEntryId: entryId,
       openedAfterEpoch: before,

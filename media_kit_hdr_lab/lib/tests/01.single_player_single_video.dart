@@ -1218,7 +1218,7 @@ class _SinglePlayerSingleVideoScreenState
     final journal = _hdr10Journal!;
     // Wait for native initialization before using waitForInitialization:false
     // under the existing Player lock. This is an idle readiness read only.
-    await player.getProperty('path');
+    await player.getPropertyAsync('path');
     journal.recordCapabilities((await VideoRouteCapabilities.query(
         target: const VideoOutputTarget.applicationView())).hdr);
     await journal.captureBaseline();
@@ -3167,12 +3167,12 @@ class _SinglePlayerSingleVideoScreenState
             await _surfaceTextureExperiment.prepareOutputLevels(
               set: (value) =>
                   player.setPropertyStrict('video-output-levels', value),
-              read: () => player.getProperty('video-output-levels'),
+              read: () => player.getPropertyAsync('video-output-levels'),
             );
           } else {
             await player.setPropertyStrict(
                 'video-output-levels', _androidMpvOutputLevels);
-            final levels = await player.getProperty('video-output-levels');
+            final levels = await player.getPropertyAsync('video-output-levels');
             if (levels != _androidMpvOutputLevels) {
               throw StateError('Output levels not accepted: $levels');
             }
@@ -3291,14 +3291,14 @@ class _SinglePlayerSingleVideoScreenState
           if (openFailure == null) {
             final deadline = DateTime.now().add(const Duration(seconds: 8));
             while (DateTime.now().isBefore(deadline)) {
-              hwdecCurrent = await player.getProperty('hwdec-current');
+              hwdecCurrent = await player.getPropertyAsync('hwdec-current');
               if (hwdecCurrent.isNotEmpty) break;
               await Future<void>.delayed(const Duration(milliseconds: 50));
             }
           } else {
             // The open failed and the coordinator rolled the backend back;
             // one read only, the original error stays the primary failure.
-            hwdecCurrent = await player.getProperty('hwdec-current');
+            hwdecCurrent = await player.getPropertyAsync('hwdec-current');
           }
           // W2: the verdict helper of the deleted AndroidSurfaceTexturePoc
           // class, inlined with unchanged semantics. Both evidence
@@ -3374,9 +3374,9 @@ class _SinglePlayerSingleVideoScreenState
       }
       if (_androidOpenPhaseTrace) {
         unawaited(() async {
-          final vo = await player.getProperty('vo');
-          final hwdec = await player.getProperty('hwdec-current');
-          final path = await player.getProperty('path');
+          final vo = await player.getPropertyAsync('vo');
+          final hwdec = await player.getPropertyAsync('hwdec-current');
+          final path = await player.getPropertyAsync('path');
           debugPrint(
               'ANDROID_HDR_OUTPUT vo=$vo hwdecCurrent=$hwdec path=$path');
         }()
@@ -3408,8 +3408,8 @@ class _SinglePlayerSingleVideoScreenState
             await Future<void>.delayed(const Duration(seconds: 1));
             debugPrint(
                 'ANDROID_HDR_MEDIA_PAUSE target=${target.inMilliseconds} '
-                'timePos=${await player.getProperty('time-pos')} '
-                'pause=${await player.getProperty('pause')}');
+                'timePos=${await player.getPropertyAsync('time-pos')} '
+                'pause=${await player.getPropertyAsync('pause')}');
           } catch (error) {
             debugPrint('ANDROID_HDR_MEDIA_PAUSE error=$error');
           }
@@ -3422,7 +3422,7 @@ class _SinglePlayerSingleVideoScreenState
           await player.pause();
           debugPrint('ANDROID_HDR_AUTO_PAUSE '
               'position=${player.state.position.inMilliseconds} '
-              'pause=${await player.getProperty('pause')}');
+              'pause=${await player.getPropertyAsync('pause')}');
         }));
       }
     } catch (_) {
@@ -3549,14 +3549,14 @@ class _SinglePlayerSingleVideoScreenState
       if (serial == _diagVdLavcOSerial) return;
       await _disableDiagVdLavcO(serial: null);
     }
-    final original = await player.getProperty('vd-lavc-o');
+    final original = await player.getPropertyAsync('vd-lavc-o');
     if (original.isNotEmpty) {
       debugPrint('MKSURF-DIAG: vd-lavc-o already set ($original); '
           'write skipped');
       return;
     }
     await player.setPropertyStrict('vd-lavc-o', _diagVdLavcOValue);
-    final actual = await player.getProperty('vd-lavc-o');
+    final actual = await player.getPropertyAsync('vd-lavc-o');
     if (actual != _diagVdLavcOValue) {
       throw StateError('vd-lavc-o rejected: requested=$_diagVdLavcOValue '
           'actual=$actual');
@@ -3577,7 +3577,7 @@ class _SinglePlayerSingleVideoScreenState
     _diagVdLavcOSerial = null;
     try {
       await player.setPropertyStrict('vd-lavc-o', original);
-      final actual = await player.getProperty('vd-lavc-o');
+      final actual = await player.getPropertyAsync('vd-lavc-o');
       if (actual != original) {
         debugPrint('MKSURF-DIAG: vd-lavc-o restore mismatch '
             'requested=$original actual=$actual');
@@ -3630,8 +3630,8 @@ class _SinglePlayerSingleVideoScreenState
     _hdrCurrentSource = source;
     await _requireHdrSession().open(Media(source), hint: _hintFor(source));
     debugPrint('ANDROID_HDR_SDR_RECOVERY_OPEN path=$source '
-        'vo=${await player.getProperty('vo')} '
-        'hwdec=${await player.getProperty('hwdec-current')}');
+        'vo=${await player.getPropertyAsync('vo')} '
+        'hwdec=${await player.getPropertyAsync('hwdec-current')}');
     if (mounted) _logHdrSessionReport();
   }
 
@@ -3984,7 +3984,7 @@ class _SinglePlayerSingleVideoScreenState
     }
     for (final property in _propSnapshotProperties) {
       try {
-        final value = await player.getProperty(
+        final value = await player.getPropertyAsync(
           property,
           waitForInitialization: false,
         );
@@ -4014,19 +4014,19 @@ class _SinglePlayerSingleVideoScreenState
 
   Future<void> _sampleEmbedProbe() async {
     try {
-      final hwdecCurrent = await player.getProperty(
+      final hwdecCurrent = await player.getPropertyAsync(
         'hwdec-current',
         waitForInitialization: false,
       );
-      final width = await player.getProperty(
+      final width = await player.getPropertyAsync(
         'video-params/w',
         waitForInitialization: false,
       );
-      final height = await player.getProperty(
+      final height = await player.getPropertyAsync(
         'video-params/h',
         waitForInitialization: false,
       );
-      final voConfigured = await player.getProperty(
+      final voConfigured = await player.getPropertyAsync(
         'vo-configured',
         waitForInitialization: false,
       );
@@ -4046,7 +4046,7 @@ class _SinglePlayerSingleVideoScreenState
       throw StateError('Video timing offset must be 0..1 seconds');
     }
     await player.setProperty('video-timing-offset', _androidVideoTimingOffset);
-    final actual = await player.getProperty('video-timing-offset');
+    final actual = await player.getPropertyAsync('video-timing-offset');
     if ((double.tryParse(actual.toString()) ?? double.nan) != offset) {
       throw StateError('Video timing offset rejected: $actual');
     }
@@ -4063,7 +4063,7 @@ class _SinglePlayerSingleVideoScreenState
         'vd-lavc-threads': _androidLavcThreads,
     }.entries) {
       await player.setProperty(entry.key, entry.value);
-      final actual = await player.getProperty(entry.key);
+      final actual = await player.getPropertyAsync(entry.key);
       if (actual.toString() != entry.value) {
         throw StateError(
             'Android scaler property ${entry.key} rejected: $actual');
@@ -4147,7 +4147,7 @@ class _SinglePlayerSingleVideoScreenState
         'avsync',
       ]) {
         try {
-          values[name] = await player.getProperty(name);
+          values[name] = await player.getPropertyAsync(name);
         } catch (error) {
           values[name] = 'ERROR:$error';
         }
@@ -4298,7 +4298,7 @@ class _SinglePlayerSingleVideoScreenState
       final journal = AndroidHdrSessionDiagnostic(
         label: _androidHdr10DiagnosticIdentity,
         readProperty: (name) =>
-            player.getProperty(name, waitForInitialization: false),
+            player.getPropertyAsync(name, waitForInitialization: false),
         readEpoch: () => player.fileLoadedEpoch,
         readIdentity: _hdr10ReadIdentity,
         withPlayerLock: (work) => player.lock.synchronized(work),
@@ -4647,14 +4647,14 @@ class _SinglePlayerSingleVideoScreenState
             try {
               final tracePlayer = player;
               debugPrint(
-                  'AVTRACE pos=${await tracePlayer.getProperty('time-pos', waitForInitialization: false)} '
-                  'pause=${await tracePlayer.getProperty('pause', waitForInitialization: false)} '
-                  'decDrop=${await tracePlayer.getProperty('decoder-frame-drop-count', waitForInitialization: false)} '
-                  'voDelayed=${await tracePlayer.getProperty('vo-delayed-frame-count', waitForInitialization: false)} '
-                  'frames=${await tracePlayer.getProperty('frame-count', waitForInitialization: false)} '
-                  'vbitrate=${await tracePlayer.getProperty('video-bitrate', waitForInitialization: false)} '
-                  'cacheDur=${await tracePlayer.getProperty('demuxer-cache-duration', waitForInitialization: false)} '
-                  'vfps=${await tracePlayer.getProperty('estimated-vf-fps', waitForInitialization: false)} '
+                  'AVTRACE pos=${await tracePlayer.getPropertyAsync('time-pos', waitForInitialization: false)} '
+                  'pause=${await tracePlayer.getPropertyAsync('pause', waitForInitialization: false)} '
+                  'decDrop=${await tracePlayer.getPropertyAsync('decoder-frame-drop-count', waitForInitialization: false)} '
+                  'voDelayed=${await tracePlayer.getPropertyAsync('vo-delayed-frame-count', waitForInitialization: false)} '
+                  'frames=${await tracePlayer.getPropertyAsync('frame-count', waitForInitialization: false)} '
+                  'vbitrate=${await tracePlayer.getPropertyAsync('video-bitrate', waitForInitialization: false)} '
+                  'cacheDur=${await tracePlayer.getPropertyAsync('demuxer-cache-duration', waitForInitialization: false)} '
+                  'vfps=${await tracePlayer.getPropertyAsync('estimated-vf-fps', waitForInitialization: false)} '
                   'completed=${tracePlayer.state.completed} '
                   'buffering=${tracePlayer.state.buffering}');
             } catch (error) {
@@ -4673,7 +4673,7 @@ class _SinglePlayerSingleVideoScreenState
           unawaited(() async {
             try {
               final passesPlayer = player;
-              final passes = await passesPlayer.getProperty('vo-passes',
+              final passes = await passesPlayer.getPropertyAsync('vo-passes',
                   waitForInitialization: false);
               debugPrint('VOPASSES len=${passes.length} $passes');
             } catch (error) {
@@ -4789,7 +4789,7 @@ class _SinglePlayerSingleVideoScreenState
         'tone-mapping',
       ]) {
         try {
-          final value = await player.getProperty(
+          final value = await player.getPropertyAsync(
             property,
             waitForInitialization: false,
           );
@@ -4868,7 +4868,7 @@ class _SinglePlayerSingleVideoScreenState
           ]) {
             try {
               final value = await player
-                  .getProperty(
+                  .getPropertyAsync(
                     property,
                     waitForInitialization: false,
                   )
@@ -4961,7 +4961,7 @@ class _SinglePlayerSingleVideoScreenState
           'playing=${player.state.playing} '
           'time=${DateTime.now().toIso8601String()}');
       unawaited(player
-          .getProperty('time-pos', waitForInitialization: false)
+          .getPropertyAsync('time-pos', waitForInitialization: false)
           .timeout(const Duration(seconds: 2))
           .then(
               (value) => debugPrint(
@@ -5079,7 +5079,7 @@ class _SinglePlayerSingleVideoScreenState
       if (_androidLoopSource) {
         await player.setPlaylistMode(PlaylistMode.single);
         debugPrint('ANDROID_LOOP_SOURCE mode=single '
-            'loop-file=${await player.getProperty('loop-file')}');
+            'loop-file=${await player.getPropertyAsync('loop-file')}');
       }
       final seconds = _androidPlayingStartSeconds.isEmpty
           ? null
@@ -5160,7 +5160,7 @@ class _SinglePlayerSingleVideoScreenState
         'add',
         '@media-kit-p84-base:format=dolbyvision=$_androidP84DoviFilter',
       ]);
-      debugPrint('P84_BASE_FILTER vf=${await player.getProperty('vf')}');
+      debugPrint('P84_BASE_FILTER vf=${await player.getPropertyAsync('vf')}');
     }
     if (Platform.isAndroid &&
         (_androidTargetPrim.isNotEmpty ||
@@ -5199,7 +5199,7 @@ class _SinglePlayerSingleVideoScreenState
           'opengl-swapinterval',
           '$_androidOpenGlSwapInterval',
         );
-        final actual = await player.getProperty('opengl-swapinterval');
+        final actual = await player.getPropertyAsync('opengl-swapinterval');
         if (actual.toString() != _androidOpenGlSwapInterval.toString()) {
           throw StateError('OpenGL swap interval rejected: $actual');
         }
@@ -5208,7 +5208,7 @@ class _SinglePlayerSingleVideoScreenState
       if (_androidVideoLatencyHacks) {
         await player.setProperty('video-latency-hacks', 'yes');
         debugPrint(
-            'ANDROID_VIDEO_LATENCY_HACKS=${await player.getProperty('video-latency-hacks')}');
+            'ANDROID_VIDEO_LATENCY_HACKS=${await player.getPropertyAsync('video-latency-hacks')}');
       }
       await _applyAndroidScalers();
     }
@@ -5359,12 +5359,12 @@ class _SinglePlayerSingleVideoScreenState
     if (Platform.isAndroid && _androidSameSurfaceRebindProbe) {
       Future<void>.delayed(const Duration(seconds: 6), () async {
         try {
-          final before = await player.getProperty('wid');
+          final before = await player.getPropertyAsync('wid');
           debugPrint('ANDROID_SAME_SURFACE_REBIND begin wid=$before');
           await player.setProperty('vo', 'null');
           await player.setProperty('wid', before);
           await player.setProperty('vo', _androidVo);
-          final after = await player.getProperty('wid');
+          final after = await player.getPropertyAsync('wid');
           debugPrint('ANDROID_SAME_SURFACE_REBIND end wid=$after');
         } catch (error) {
           debugPrint('ANDROID_SAME_SURFACE_REBIND error=$error');

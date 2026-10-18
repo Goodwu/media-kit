@@ -149,11 +149,11 @@ void main() {
         isTrue,
       );
       expect(
-        state.width,
+        state.videoWidth,
         isNull,
       );
       expect(
-        state.height,
+        state.videoHeight,
         isNull,
       );
       expect(

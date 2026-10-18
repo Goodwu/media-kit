@@ -65,12 +65,12 @@ class _SinglePlayerSingleVideoScreenState
       final platform = player.platform;
       if (platform != null) {
         try {
-          final vo = await (platform as dynamic).getProperty('vo');
+          final vo = await (platform as dynamic).getPropertyAsync('vo');
           final vf = await (platform as dynamic)
-              .getProperty('video-format');
+              .getPropertyAsync('video-format');
           final idle = await (platform as dynamic)
-              .getProperty('idle-active');
-          final w = player.state.width;
+              .getPropertyAsync('idle-active');
+          final w = player.state.videoWidth;
           debugPrint('SwRender mpv vo=$vo video-format=$vf '
               'idle=$idle width=$w');
         } catch (_) {}

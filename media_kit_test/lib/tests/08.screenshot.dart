@@ -37,15 +37,15 @@ class _ScreenshotState extends State<Screenshot> {
   }
 
   Future<void> takeScreenshot() async {
-    final screenshot = await (threadSafe
+    final screenshotBytes = await (threadSafe
         ? player.safeScreenshot(format: 'image/png')
-        : player.screenshot(format: 'image/png'));
+        : player.screenshotBytes(format: 'image/png'));
     if (!mounted) {
       return;
     }
     setState(() {
-      if (screenshot != null) {
-        image = Image.memory(screenshot);
+      if (screenshotBytes != null) {
+        image = Image.memory(screenshotBytes);
       }
     });
   }

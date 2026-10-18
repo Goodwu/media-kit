@@ -890,7 +890,7 @@ class DiagnosticPlayer implements Player {
       bool synchronized = true,
       bool waitForVideoControllerInitialization = true}) async {}
   @override
-  Future<String> getProperty(String name,
+  Future<String> getPropertyAsync(String name,
       {bool waitForInitialization = true}) async {
     if (name == 'hwdec') throw hwdecError;
     return properties[name] ?? '';

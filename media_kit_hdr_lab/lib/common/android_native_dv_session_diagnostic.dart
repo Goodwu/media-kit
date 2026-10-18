@@ -627,7 +627,7 @@ class AndroidNativeDvSessionDiagnostic {
       'android-native-dv-bridge-api',
     ]) {
       values[name] =
-          await player.getProperty(name, waitForInitialization: false);
+          await player.getPropertyAsync(name, waitForInitialization: false);
     }
     return Map<String, String>.unmodifiable(values);
   }
@@ -2098,7 +2098,7 @@ class AndroidNativeDvSessionDiagnostic {
     if (remaining <= Duration.zero) {
       throw TimeoutException('Sampling deadline reached');
     }
-    final operation = player.getProperty(name, waitForInitialization: false);
+    final operation = player.getPropertyAsync(name, waitForInitialization: false);
     _pendingPropertyRead = operation;
     unawaited(operation.then<void>((_) {
       if (identical(_pendingPropertyRead, operation)) {

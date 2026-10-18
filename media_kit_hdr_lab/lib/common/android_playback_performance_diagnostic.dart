@@ -136,7 +136,7 @@ class AndroidPlaybackPerformanceDiagnostic {
         final callErrors = <AndroidPlaybackPerformanceRawError>[];
         for (final name in androidPlaybackPerformanceDiagnosticProperties) {
           try {
-            final value = await _player.getProperty(
+            final value = await _player.getPropertyAsync(
               name,
               waitForInitialization: false,
             );
@@ -248,7 +248,7 @@ class AndroidPlaybackPerformanceDiagnostic {
     String? oversizedProperty;
     for (final name in const ['path', 'vo', 'hwdec-current']) {
       try {
-        final value = await _player.getProperty(
+        final value = await _player.getPropertyAsync(
           name,
           waitForInitialization: false,
         );

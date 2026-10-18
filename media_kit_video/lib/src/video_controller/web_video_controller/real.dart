@@ -50,8 +50,8 @@ class WebVideoController extends PlatformVideoController {
     player.platform?.release.add(controller._dispose);
 
     // Retrieve the [html.VideoElement] instance from [js.context].
-    final instances = globalContext.getProperty(_kInstances.toJS) as JSObject;
-    final element = instances.getProperty(handle.toJS) as web.HTMLVideoElement;
+    final instances = globalContext.getPropertyAsync(_kInstances.toJS) as JSObject;
+    final element = instances.getPropertyAsync(handle.toJS) as web.HTMLVideoElement;
     controller._element = element;
     // Register the [html.VideoElement] as platform view.
     platformViewRegistry.registerViewFactory(
@@ -81,7 +81,7 @@ class WebVideoController extends PlatformVideoController {
 
     // Notify about the first frame being rendered.
     // Case: If some [Media] is already playing when [VideoController] is created.
-    if (player.state.width != null && player.state.height != null) {
+    if (player.state.videoWidth != null && player.state.videoHeight != null) {
       if (!controller.waitUntilFirstFrameRenderedCompleter.isCompleted) {
         controller.waitUntilFirstFrameRenderedCompleter.complete();
       }

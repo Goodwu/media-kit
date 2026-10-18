@@ -89,10 +89,14 @@ class PlayerState {
   final Tracks tracks;
 
   /// Currently playing video's width.
-  final int? width;
+  final int? videoWidth;
+
+  /// Legacy display size; unknown is zero, not evidence of a decoded frame.
+  int get width => videoWidth ?? 0;
 
   /// Currently playing video's height.
-  final int? height;
+  final int? videoHeight;
+  int get height => videoHeight ?? 0;
 
   /// Currently displayed subtitle.
   final List<String> subtitle;
@@ -120,10 +124,10 @@ class PlayerState {
     this.audioDevices = const [AudioDevice('auto', '')],
     this.track = const Track(),
     this.tracks = const Tracks(),
-    this.width,
-    this.height,
+    int? width,
+    int? height,
     this.subtitle = const ['', ''],
-  });
+  }) : videoWidth = width, videoHeight = height;
 
   PlayerState copyWith({
     Playlist? playlist,
@@ -177,8 +181,8 @@ class PlayerState {
       audioDevices: audioDevices ?? this.audioDevices,
       track: track ?? this.track,
       tracks: tracks ?? this.tracks,
-      width: identical(width, _undefined) ? this.width : width as int?,
-      height: identical(height, _undefined) ? this.height : height as int?,
+      width: identical(width, _undefined) ? videoWidth : width as int?,
+      height: identical(height, _undefined) ? videoHeight : height as int?,
       subtitle: subtitle ?? this.subtitle,
     );
   }

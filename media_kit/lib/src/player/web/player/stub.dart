@@ -34,7 +34,7 @@ class WebPlayer extends PlatformPlayer {
 
   /// Raw mpv property access parity with [NativePlayer]. The web player does
   /// not expose the mpv property surface.
-  Future<String> getProperty(
+  Future<String> getPropertyAsync(
     String property, {
     bool waitForInitialization = true,
   }) async {

@@ -694,7 +694,7 @@ class _FakePlayer implements Player {
   @override
   Future<int> get handle async => 1;
   @override
-  Future<String> getProperty(String name,
+  Future<String> getPropertyAsync(String name,
       {bool waitForInitialization = true}) async {
     // Non-empty baselines so the owned writes can capture and restore.
     return properties[name] ??

@@ -1,3 +1,4 @@
+export 'legacy_mpv.dart' show Initializer;
 /// This file is a part of media_kit (https://github.com/media-kit/media-kit).
 ///
 /// Copyright © 2021 & onwards, Hitesh Kumar Saini <saini123hitesh@gmail.com>.
@@ -18,21 +19,21 @@ import 'package:media_kit/src/player/native/core/initializer_native_callable.dar
 /// Initializes [Pointer<mpv_handle>] & notifies about events through the supplied callback.
 ///
 /// {@endtemplate}
-class Initializer {
+class PlayerInitializer {
   /// Singleton instance.
-  static Initializer? _instance;
+  static PlayerInitializer? _instance;
 
   /// {@macro initializer}
-  Initializer._(this.mpv);
+  PlayerInitializer._(this.mpvBindings);
 
   /// {@macro initializer}
-  factory Initializer(generated.MPV mpv) {
-    _instance ??= Initializer._(mpv);
+  factory PlayerInitializer(generated.MPV mpvBindings) {
+    _instance ??= PlayerInitializer._(mpvBindings);
     return _instance!;
   }
 
   /// Generated libmpv C API bindings.
-  final generated.MPV mpv;
+  final generated.MPV mpvBindings;
 
   /// Creates [Pointer<mpv_handle>].
   Future<Pointer<generated.mpv_handle>> create(
@@ -56,7 +57,7 @@ class Initializer {
       return InitializerIsolate().create(callback, options: options);
     }
     if (!isExecmemRestricted) {
-      return InitializerNativeCallable(mpv).create(callback, options: options);
+      return InitializerNativeCallable(mpvBindings).create(callback, options: options);
     } else {
       return InitializerIsolate().create(callback, options: options);
     }
@@ -67,7 +68,7 @@ class Initializer {
   Future<bool> disposeOwnedWakeupCallback(
     Pointer<generated.mpv_handle> ctx,
   ) =>
-      InitializerNativeCallable(mpv).disposeOwned(ctx);
+      InitializerNativeCallable(mpvBindings).disposeOwned(ctx);
 
   /// Disposes [Pointer<mpv_handle>].
   Future<void> dispose(Pointer<generated.mpv_handle> ctx) async {
@@ -75,15 +76,15 @@ class Initializer {
     // teardown, otherwise the isolate pump keeps draining a freed handle
     // while the NativeCallable path disposes nothing.
     if (isMainIsolate()) {
-      InitializerIsolate().dispose(mpv, ctx);
+      InitializerIsolate().dispose(mpvBindings, ctx);
       return;
     }
     if (!isExecmemRestricted) {
-      await InitializerNativeCallable(mpv).dispose(ctx);
+      await InitializerNativeCallable(mpvBindings).dispose(ctx);
     } else {
       // Isolate shutdown remains its existing asynchronous request protocol;
       // this path is not a close-and-drain completion barrier.
-      InitializerIsolate().dispose(mpv, ctx);
+      InitializerIsolate().dispose(mpvBindings, ctx);
     }
   }
 

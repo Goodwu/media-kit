@@ -253,7 +253,7 @@ class _FakePlayer implements Player {
   void bumpEpoch() => _epoch++;
 
   @override
-  Future<String> getProperty(
+  Future<String> getPropertyAsync(
     String name, {
     bool waitForInitialization = true,
   }) async {

@@ -72,7 +72,7 @@ class AndroidHdrPlayerBackend implements AndroidHdrOpenBackend {
 
   Future<void> _setOwned(String name, String value) async {
     if (!_originalProperties.containsKey(name)) {
-      final original = await player.getProperty(name);
+      final original = await player.getPropertyAsync(name);
       if (original.isEmpty) {
         throw StateError('Cannot capture original value of $name');
       }
@@ -80,7 +80,7 @@ class AndroidHdrPlayerBackend implements AndroidHdrOpenBackend {
     }
     _ownedProperties.add(name);
     await player.setPropertyStrict(name, value);
-    final actual = await player.getProperty(name);
+    final actual = await player.getPropertyAsync(name);
     if (actual != value) {
       throw StateError('$name rejected: requested=$value actual=$actual');
     }
@@ -89,7 +89,7 @@ class AndroidHdrPlayerBackend implements AndroidHdrOpenBackend {
   @override
   Future<void> stop() async {
     await player.stop();
-    final path = await player.getProperty('path');
+    final path = await player.getPropertyAsync('path');
     if (path.isNotEmpty) {
       throw StateError('Stop did not clear old media path: $path');
     }
@@ -182,7 +182,7 @@ class AndroidHdrPlayerBackend implements AndroidHdrOpenBackend {
       await player
           .command(['vf', 'add', '@media-kit-p84-base:format=dolbyvision=no']);
       _p84FilterApplied = true;
-      final actual = await player.getProperty('vf');
+      final actual = await player.getPropertyAsync('vf');
       if (!actual.contains('@media-kit-p84-base:format=dolbyvision=no')) {
         throw StateError('P8.4 base-layer filter was not accepted');
       }
@@ -223,8 +223,8 @@ class AndroidHdrPlayerBackend implements AndroidHdrOpenBackend {
     _openFileLoadedEpoch = player.fileLoadedEpoch;
     _openPlaylistEntryId = null;
     await player.open(Media(identity.path, start: start), play: play);
-    final playlistPath = await player.getProperty('playlist/0/filename');
-    final entryId = int.tryParse(await player.getProperty('playlist/0/id'));
+    final playlistPath = await player.getPropertyAsync('playlist/0/filename');
+    final entryId = int.tryParse(await player.getPropertyAsync('playlist/0/id'));
     if (playlistPath != identity.path || entryId == null) {
       throw StateError('Opened playlist entry differs from staged source: '
           'path=$playlistPath id=$entryId');
@@ -249,8 +249,8 @@ class AndroidHdrPlayerBackend implements AndroidHdrOpenBackend {
     var currentPath = '';
     var videoFormat = '';
     while (DateTime.now().isBefore(deadline)) {
-      currentPath = await player.getProperty('path');
-      videoFormat = await player.getProperty('video-format');
+      currentPath = await player.getPropertyAsync('path');
+      videoFormat = await player.getPropertyAsync('video-format');
       if (currentPath == identity.path && videoFormat.isNotEmpty) break;
       await Future<void>.delayed(const Duration(milliseconds: 50));
     }
@@ -259,7 +259,7 @@ class AndroidHdrPlayerBackend implements AndroidHdrOpenBackend {
           'New media track not observed: path=$currentPath format=$videoFormat');
     }
     final profile =
-        await player.getProperty('current-tracks/video/dolby-vision-profile');
+        await player.getPropertyAsync('current-tracks/video/dolby-vision-profile');
     final expectedProfile = switch (identity.sample) {
       AndroidHdrSample.hdr10 => '',
       AndroidHdrSample.hlgBaseControl => '',
@@ -283,10 +283,10 @@ class AndroidHdrPlayerBackend implements AndroidHdrOpenBackend {
       throw StateError('No validated decoder policy for track verification');
     }
     while (DateTime.now().isBefore(deadline)) {
-      if (await player.getProperty('path') != identity.path) {
+      if (await player.getPropertyAsync('path') != identity.path) {
         throw StateError('Media changed before decoder verification');
       }
-      hwdec = await player.getProperty('hwdec-current');
+      hwdec = await player.getPropertyAsync('hwdec-current');
       if (hwdec == expectedHwdec) {
         return;
       }

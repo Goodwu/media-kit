@@ -407,11 +407,11 @@ class NativeVideoController extends PlatformVideoController {
           'target-prim': payload['target-prim'] as String,
           'target-trc': payload['target-trc'] as String,
         });
-        final colorspace = await player.getProperty(
+        final colorspace = await player.getPropertyAsync(
           'target-prim',
           waitForInitialization: false,
         );
-        final transfer = await player.getProperty(
+        final transfer = await player.getPropertyAsync(
           'target-trc',
           waitForInitialization: false,
         );

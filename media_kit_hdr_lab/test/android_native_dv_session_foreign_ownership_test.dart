@@ -1262,7 +1262,7 @@ class _FakePlayer implements Player {
   bool? lastOpenSynchronized;
 
   @override
-  Future<String> getProperty(String property,
+  Future<String> getPropertyAsync(String property,
       {bool waitForInitialization = true}) async {
     if (disposed) throw StateError('Player is disposed');
     onGetProperty?.call(property);

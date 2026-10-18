@@ -450,7 +450,7 @@ class _Player implements Player {
   @override
   PlayerState get state => const PlayerState();
   @override
-  Future<String> getProperty(String name,
+  Future<String> getPropertyAsync(String name,
           {bool waitForInitialization = true}) async =>
       properties[name]!;
   @override

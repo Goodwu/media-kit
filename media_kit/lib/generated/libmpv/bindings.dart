@@ -1127,13 +1127,13 @@ class MPV {
   /// from the change events.
   /// @return error code (usually fails only on OOM or unsupported format)
   int mpv_observe_property(
-    ffi.Pointer<mpv_handle> mpv,
+    ffi.Pointer<mpv_handle> mpvBindings,
     int reply_userdata,
     ffi.Pointer<ffi.Int8> name,
     int format,
   ) {
     return _mpv_observe_property(
-      mpv,
+      mpvBindings,
       reply_userdata,
       name,
       format,
@@ -1156,11 +1156,11 @@ class MPV {
   /// @return negative value is an error code, >=0 is number of removed properties
   /// on success (includes the case when 0 were removed)
   int mpv_unobserve_property(
-    ffi.Pointer<mpv_handle> mpv,
+    ffi.Pointer<mpv_handle> mpvBindings,
     int registered_reply_userdata,
   ) {
     return _mpv_unobserve_property(
-      mpv,
+      mpvBindings,
       registered_reply_userdata,
     );
   }
