@@ -1,0 +1,32 @@
+{
+  "id": "piliplus-p1-compile-r1",
+  "files": [
+    {
+      "path": "media_kit/lib/src/player/platform_player.dart",
+      "blob": "e63cf9c80cb3e64463fe09693547a868fafb9bc9",
+      "edits": [
+        {"old": "  Future<Uint8List?> screenshotBytes(\n      {String? format = 'image/jpeg',\n      bool includeLibassSubtitles = false}) async {", "new": "  Future<Uint8List?> screenshotBytes(\n      {String? format = 'image/jpeg',\n      bool synchronized = true,\n      bool includeLibassSubtitles = false}) async {"},
+        {"old": "  Future<Uint8List?> safeScreenshot(\n      {String? format = 'image/jpeg',\n      bool includeLibassSubtitles = false}) async {", "new": "  Future<Uint8List?> safeScreenshot(\n      {String? format = 'image/jpeg',\n      bool synchronized = true,\n      bool includeLibassSubtitles = false}) async {"}
+      ]
+    },
+    {
+      "path": "media_kit/lib/src/player/native/core/legacy_mpv.dart",
+      "blob": "b9e110a1ee2af69402c41f6ba08afb92312d9950",
+      "edits": [{"old": "mpv._owners.containsKey(ctx.address)", "new": "identical(mpv._owners[ctx.address], this)", "count": 2}]
+    },
+    {
+      "path": "media_kit_video/test/piliplus_player_contract_test.dart",
+      "blob": "ff8f6f8acb5460fd546804b5b0df434c5c190ace",
+      "edits": [{"old": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aD1sAAAAASUVORK5CYII=", "new": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII="}]
+    },
+    {
+      "path": "tool/piliplus_compat/build_original.py",
+      "blob": "f5cbc7ee2189185e7ef098069c88fa1d405c1713",
+      "edits": [
+        {"old": "import yaml\n", "new": "import yaml\n\nfrom generated_xcconfig import is_generated_cocoapods_include\n"},
+        {"old": "                if path not in allowed:\n                    violations.append(f'{path} (expected {record[\"blob\"]}, actual {actual})')\n                else:\n                    generated[path] = {'before': record['blob'], 'after': actual}", "new": "                pods_generated = (allowed == GENERATED_TRACKED and\n                    is_generated_cocoapods_include(path, record['blob'], data))\n                if path not in allowed and not pods_generated:\n                    violations.append(f'{path} (expected {record[\"blob\"]}, actual {actual})')\n                else:\n                    generated[path] = {'before': record['blob'], 'after': actual}\n                    if pods_generated:\n                        generated[path]['generator'] = 'Flutter CocoaPods exact include prefix'"},
+        {"old": "            'originalSourceUnchanged': True}", "new": "            'originalSourceUnchanged': True,\n            'allTrackedBytesUnchanged': not bool(generated)}"}
+      ]
+    }
+  ]
+}
