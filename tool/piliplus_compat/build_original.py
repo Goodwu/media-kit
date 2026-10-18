@@ -23,6 +23,7 @@ from urllib.request import url2pathname
 import yaml
 
 from generated_xcconfig import is_generated_cocoapods_include
+from generated_gradle import capture_gradle_wrappers, verify_generated_wrapper
 
 from dependency_plan import (AuditError, build_plan, git, identity,
                              managed, manifests_at_head, package_catalog,
@@ -145,7 +146,7 @@ def verify_tracked(root: Path, manifest: dict, allowed=frozenset()) -> dict:
 
 
 
-def verify_added(root: Path, *, app=False, package_paths=()) -> dict:
+def verify_added(root: Path, *, app=False, package_paths=(), generated_wrappers=None) -> dict:
     prefixes = ['.dart_tool/', 'build/'] if app else []
     files = set(GENERATED_TRACKED) | {
         '.flutter-plugins', '.flutter-plugins-dependencies',
@@ -163,10 +164,21 @@ def verify_added(root: Path, *, app=False, package_paths=()) -> dict:
                 '.dart_tool/', 'build/', 'android/.cxx/', 'android/.gradle/',
                 'android/build/', 'linux/ephemeral/', 'windows/ephemeral/')]
     added = [p for p in git(root, 'ls-files', '--others', '-z').decode().split('\0') if p]
-    rejected = [p for p in added if p not in files and not any(p.startswith(prefix) for prefix in prefixes)]
+    wrappers = generated_wrappers or {}
+    verified_wrappers = {}
+    for path in added:
+        if app and path in wrappers:
+            try:
+                verify_generated_wrapper(root, path, wrappers[path])
+            except (OSError, ValueError) as error:
+                raise AuditError(str(error)) from error
+            verified_wrappers[path] = wrappers[path]
+    rejected = [p for p in added if p not in files and p not in verified_wrappers
+                and not any(p.startswith(prefix) for prefix in prefixes)]
     if rejected:
         raise AuditError('Unexpected new source/input: ' + ', '.join(rejected[:20]))
-    return {'generatedFileCount': len(added), 'unexpectedNewInputs': []}
+    return {'generatedFileCount': len(added), 'unexpectedNewInputs': [],
+            'verifiedGradleWrappers': verified_wrappers}
 
 def clone_exact(source: Path, destination: Path, commit: str) -> None:
     subprocess.run(['git', 'clone', '--no-hardlinks', '--no-checkout', '--',
@@ -333,6 +345,12 @@ def execute(args, runner: Runner) -> None:
     for name in FRAMEWORK_PATCHES + PLATFORM_FRAMEWORK.get(args.platform, ()):
         runner.apply(flutter, app / 'lib/scripts' / (name + '.patch'), 'flutter-' + name)
     runner.run('flutter-version', [executable, '--version', '--machine'], app)
+    wrappers = {}
+    if args.platform == 'android':
+        runner.run('precache-android', [executable, 'precache', '--android'], app)
+        wrappers = capture_gradle_wrappers(flutter)
+        runner.receipt['gradleWrapperInputs'] = wrappers
+        runner.save()
     runner.run('pub-get', [executable, 'pub', 'get'], app)
     runner.receipt['resolution'] = verify_managed(plan, app / '.dart_tool/package_config.json', app, sdk)
     roots = resolution_roots(app / '.dart_tool/package_config.json')
@@ -340,7 +358,7 @@ def execute(args, runner: Runner) -> None:
         runner.apply(roots['material_ui'], app / 'lib/scripts/material' / (name + '.patch'), 'material-' + name)
     if args.platform == 'ios':
         runner.apply(roots['cupertino_ui'], app / 'lib/scripts/cupertino/bottom_sheet_ios_flutter.patch', 'cupertino-ios')
-    verify_added(app, app=True)
+    verify_added(app, app=True, generated_wrappers=wrappers)
     verify_added(sdk, package_paths=[p['path'] for p in plan['packages'].values()])
     runner.receipt['sourceGuardBeforeBuild'] = {
         'app': verify_tracked(app, app_manifest, GENERATED_TRACKED),
@@ -356,8 +374,11 @@ def execute(args, runner: Runner) -> None:
         'linux': ['linux', '--debug'],
     }
     build = runner.run('build-' + args.platform, [executable, 'build', *commands[args.platform], '--no-pub'], app, required=False)
+    runner.receipt['applicationCompile'] = 'passed' if build == 0 else 'failed'
+    runner.receipt['analysis'] = 'passed' if analyze == 0 else 'failed'
+    runner.save()
     runner.receipt['addedInputsAfterBuild'] = {
-        'app': verify_added(app, app=True),
+        'app': verify_added(app, app=True, generated_wrappers=wrappers),
         'sdk': verify_added(sdk, package_paths=[p['path'] for p in plan['packages'].values()]),
     }
     runner.receipt['sourceGuardAfterBuild'] = {
