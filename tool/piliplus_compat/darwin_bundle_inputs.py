@@ -138,4 +138,9 @@ def verify_sdk_bundles(sdk: Path, platform: str) -> dict:
     relative = f'libs/{platform}/media_kit_libs_{platform}_video/{platform}'
     result = verify_bundle(sdk / relative, platform)
     result['records'] = {relative + '/' + key: value for key, value in result['records'].items()}
+    # Headers are downloaded by media_kit_video's separate common Makefile.
+    from darwin_header_inputs import verify_sdk_headers
+    headers = verify_sdk_headers(sdk, platform)
+    result['records'].update(headers.pop('records'))
+    result['headers'] = headers
     return result

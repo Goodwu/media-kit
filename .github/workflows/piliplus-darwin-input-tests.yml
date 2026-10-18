@@ -2,7 +2,7 @@ name: Darwin SDK input integrity (not native freshness)
 on:
   push:
     branches: ['compat/piliplus-zero-change-20261018']
-    paths: ['tool/piliplus_compat/darwin_bundle_inputs.py', '.github/workflows/piliplus-darwin-input-tests.yml']
+    paths: ['tool/piliplus_compat/darwin_bundle_inputs.py', 'tool/piliplus_compat/darwin_header_inputs.py', '.github/workflows/piliplus-darwin-input-tests.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -25,7 +25,9 @@ jobs:
           python-version: '3.13'
       - name: Acquire SDK-declared bundle through its existing recipe
         shell: bash
-        run: make -C "libs/$PLATFORM/media_kit_libs_${PLATFORM}_video/$PLATFORM"
+        run: |
+          make -C "libs/$PLATFORM/media_kit_libs_${PLATFORM}_video/$PLATFORM"
+          make -C media_kit_video/common/darwin HEADERS_DESTDIR="$PWD/media_kit_video/$PLATFORM/Headers"
       - name: Verify every actual input against the declared archive
         shell: python
         run: |
