@@ -22,6 +22,8 @@ from urllib.request import url2pathname
 
 import yaml
 
+from darwin_bundle_inputs import verify_sdk_bundles
+from apple_scheme_inputs import capture_scheme_inputs, verify_scheme_generators
 from private_flutter_cache import copy_flutter_cache
 from generated_macos import capture_macos_inputs, verify_macos_generators, MACOS_CONFIG
 from generated_xcconfig import is_generated_cocoapods_include
@@ -156,7 +158,7 @@ def verify_tracked(root: Path, manifest: dict, allowed=frozenset(), generated_co
 
 
 
-def verify_added(root: Path, *, app=False, package_paths=(), generated_wrappers=None, generated_apple=None) -> dict:
+def verify_added(root: Path, *, app=False, package_paths=(), generated_wrappers=None, generated_apple=None, verified_native_inputs=None) -> dict:
     prefixes = ['.dart_tool/', 'build/'] if app else []
     files = set(GENERATED_TRACKED) | {
         '.flutter-plugins', '.flutter-plugins-dependencies',
@@ -193,11 +195,13 @@ def verify_added(root: Path, *, app=False, package_paths=(), generated_wrappers=
                 raise AuditError(str(error)) from error
             verified_apple[path] = apple[path]
     rejected = [p for p in added if p not in files and p not in verified_wrappers and p not in verified_apple
+                and p not in (verified_native_inputs or {})
                 and not any(p.startswith(prefix) for prefix in prefixes)]
     if rejected:
         raise AuditError('Unexpected new source/input: ' + ', '.join(rejected[:20]))
     return {'generatedFileCount': len(added), 'unexpectedNewInputs': [],
-            'verifiedGradleWrappers': verified_wrappers, 'verifiedAppleFiles': verified_apple}
+            'verifiedGradleWrappers': verified_wrappers, 'verifiedAppleFiles': verified_apple,
+            'verifiedNativeInputCount': len(verified_native_inputs or {})}
 
 def clone_exact(source: Path, destination: Path, commit: str) -> None:
     subprocess.run(['git', 'clone', '--no-hardlinks', '--no-checkout', '--',
@@ -393,6 +397,13 @@ def execute(args, runner: Runner) -> None:
         apple = capture_macos_inputs(flutter, originals)
         runner.receipt['appleGeneratedInputs'] = apple
         runner.save()
+    if args.platform in ('ios', 'macos'):
+        scheme_paths = (f'{args.platform}/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme',
+                        f'{args.platform}/Runner.xcworkspace/contents.xcworkspacedata')
+        originals = {p: git(app, 'show', 'HEAD:' + p) for p in scheme_paths if p in app_manifest}
+        apple['configurations'].update(capture_scheme_inputs(flutter, originals, args.platform))
+        runner.receipt['appleGeneratedInputs'] = apple
+        runner.save()
     runner.run('flutter-version', [executable, '--version', '--machine'], app)
     wrappers = {}
     if args.platform == 'android':
@@ -431,9 +442,15 @@ def execute(args, runner: Runner) -> None:
         verify_generators(flutter)
     elif args.platform == 'macos':
         verify_macos_generators(flutter)
+    native_inputs = verify_sdk_bundles(sdk, args.platform) if build == 0 else {'records': {}}
+    runner.receipt['downloadedDarwinInputs'] = native_inputs
+    runner.save()
+    if args.platform in ('ios', 'macos'):
+        verify_scheme_generators(flutter)
     runner.receipt['addedInputsAfterBuild'] = {
         'app': verify_added(app, app=True, generated_wrappers=wrappers, generated_apple=apple['newFiles']),
-        'sdk': verify_added(sdk, package_paths=[p['path'] for p in plan['packages'].values()]),
+        'sdk': verify_added(sdk, package_paths=[p['path'] for p in plan['packages'].values()],
+                            verified_native_inputs=native_inputs['records']),
     }
     runner.receipt['sourceGuardAfterBuild'] = {
         'app': verify_tracked(app, app_manifest, GENERATED_TRACKED, generated_configs=apple['configurations']),

@@ -1,0 +1,45 @@
+{
+  "request": {
+    "id": "piliplus-p1-darwin-input-r4",
+    "files": [
+      {
+        "path": "tool/piliplus_compat/build_original.py",
+        "blob": "e79063a133390cfd106d5e4fbe7373603e679441",
+        "edits": [
+          {
+            "old": "from private_flutter_cache import",
+            "new": "from darwin_bundle_inputs import verify_sdk_bundles\nfrom apple_scheme_inputs import capture_scheme_inputs, verify_scheme_generators\nfrom private_flutter_cache import"
+          },
+          {
+            "old": "generated_apple=None) -> dict:",
+            "new": "generated_apple=None, verified_native_inputs=None) -> dict:"
+          },
+          {
+            "old": "                and not any(p.startswith(prefix) for prefix in prefixes)]",
+            "new": "                and p not in (verified_native_inputs or {})\n                and not any(p.startswith(prefix) for prefix in prefixes)]"
+          },
+          {
+            "old": "'verifiedAppleFiles': verified_apple}",
+            "new": "'verifiedAppleFiles': verified_apple,\n            'verifiedNativeInputCount': len(verified_native_inputs or {})}"
+          },
+          {
+            "old": "    runner.run('flutter-version', [executable, '--version', '--machine'], app)",
+            "new": "    if args.platform in ('ios', 'macos'):\n        scheme_paths = (f'{args.platform}/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme',\n                        f'{args.platform}/Runner.xcworkspace/contents.xcworkspacedata')\n        originals = {p: git(app, 'show', 'HEAD:' + p) for p in scheme_paths if p in app_manifest}\n        apple['configurations'].update(capture_scheme_inputs(flutter, originals, args.platform))\n        runner.receipt['appleGeneratedInputs'] = apple\n        runner.save()\n    runner.run('flutter-version', [executable, '--version', '--machine'], app)"
+          },
+          {
+            "old": "    runner.receipt['addedInputsAfterBuild'] = {",
+            "new": "    native_inputs = verify_sdk_bundles(sdk, args.platform) if build == 0 else {'records': {}}\n    runner.receipt['downloadedDarwinInputs'] = native_inputs\n    runner.save()\n    if args.platform in ('ios', 'macos'):\n        verify_scheme_generators(flutter)\n    runner.receipt['addedInputsAfterBuild'] = {"
+          },
+          {
+            "old": "'sdk': verify_added(sdk, package_paths=[p['path'] for p in plan['packages'].values()]),",
+            "new": "'sdk': verify_added(sdk, package_paths=[p['path'] for p in plan['packages'].values()],\n                            verified_native_inputs=native_inputs['records']),"
+          }
+        ]
+      }
+    ]
+  },
+  "result": {
+    "tool/piliplus_compat/build_original.py": "80d251ad91319056c091bd4630e3f82c5a67ddcb"
+  },
+  "status": "source-published-not-build-certified"
+}
