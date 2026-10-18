@@ -3,9 +3,13 @@
 /// Copyright © 2021 & onwards, Hitesh Kumar Saini <saini123hitesh@gmail.com>.
 /// All rights reserved.
 /// Use of this source code is governed by MIT license that can be found in the LICENSE file.
+import '../routing/video_route_options.dart';
+import '../routing/video_route_option_review.dart';
 import 'hdr_open_plan.dart';
+import 'hdr_decoder_review.dart';
 import 'hdr_route.dart';
 import 'hdr_source_descriptor.dart';
+import 'hdr_source_facts.dart';
 
 /// {@template hdr_output_report}
 ///
@@ -26,12 +30,18 @@ class HdrOutputReport {
     this.generation = 0,
     this.source,
     this.sourceOrigin,
+    this.sourceFacts,
     this.prediction,
     this.actual,
+    this.requested,
+    this.options,
+    this.optionFulfillment,
+    this.attemptedRoutes = const [],
     this.dataSpaceRequested,
     this.dataSpacePath,
     this.dataSpaceReadback,
     this.hwdecCurrent,
+    this.decoderObservation,
     this.verified = false,
     this.degradeReason,
     this.diagnostic,
@@ -48,12 +58,34 @@ class HdrOutputReport {
   /// null when neither has happened yet.
   final HdrReportSource? sourceOrigin;
 
+  /// Per-field original-source evidence and the separate latest decoded-frame
+  /// sample. The presence of this snapshot or [verified] does not certify the
+  /// initial hint, source bitstream, metadata delivery or panel presentation.
+  final HdrSourceFacts? sourceFacts;
+
   /// The prediction the route was selected from, including the full
   /// candidate list with skip reasons.
   final HdrRoutePrediction? prediction;
 
   /// The route actually being executed, when playback opened.
   final HdrRoute? actual;
+
+  /// Initial requested execution, before bounded independent alternatives.
+  /// [actual] is the effective applied request; decoderObservation is observed.
+  final HdrRoute? requested;
+  final EffectiveVideoRouteOptions? options;
+  final VideoRouteOptionFulfillment? optionFulfillment;
+  final List<HdrRoute> attemptedRoutes;
+
+  /// Metadata treatment requested by the effective route. This is not
+  /// evidence of frame-side metadata delivery/consumption or panel output.
+  HdrMetadataHandling? get requestedMetadataHandling =>
+      actual?.metadataHandling ?? requested?.metadataHandling;
+
+  /// Frame-side metadata proof is not yet provided by the native backend.
+  /// Keeping this null prevents plan success from masquerading as C1/C2
+  /// metadata handling success.
+  bool? get metadataHandlingObserved => null;
 
   /// Dataspace requested for the GPU surface (`pq`/`hlg`), when the route
   /// needs one.
@@ -68,6 +100,13 @@ class HdrOutputReport {
 
   /// The observed `hwdec-current`, when read.
   final String? hwdecCurrent;
+
+  /// Ordinary current-source decoder/frame sample. Missing names remain
+  /// unknown; route verification does not certify decoder identity or pixels.
+  final HdrDecoderObservation? decoderObservation;
+
+  bool get decoderIdentityKnown =>
+      decoderObservation?.decoderIdentityKnown ?? false;
 
   /// Whether the decoder review completed for this generation. This does
   /// not certify the surface dataspace or panel presentation.
@@ -111,12 +150,18 @@ class HdrOutputReport {
     int? generation,
     HdrSourceDescriptor? source,
     HdrReportSource? sourceOrigin,
+    HdrSourceFacts? sourceFacts,
     HdrRoutePrediction? prediction,
     HdrRoute? actual,
+    HdrRoute? requested,
+    EffectiveVideoRouteOptions? options,
+    VideoRouteOptionFulfillment? optionFulfillment,
+    List<HdrRoute>? attemptedRoutes,
     String? dataSpaceRequested,
     String? dataSpacePath,
     String? dataSpaceReadback,
     String? hwdecCurrent,
+    HdrDecoderObservation? decoderObservation,
     bool? verified,
     HdrDegradeReason? degradeReason,
     String? diagnostic,
@@ -126,12 +171,18 @@ class HdrOutputReport {
       generation: generation ?? this.generation,
       source: source ?? this.source,
       sourceOrigin: sourceOrigin ?? this.sourceOrigin,
+      sourceFacts: sourceFacts ?? this.sourceFacts,
       prediction: prediction ?? this.prediction,
       actual: actual ?? this.actual,
+      requested: requested ?? this.requested,
+      options: options ?? this.options,
+      optionFulfillment: optionFulfillment ?? this.optionFulfillment,
+      attemptedRoutes: attemptedRoutes ?? this.attemptedRoutes,
       dataSpaceRequested: dataSpaceRequested ?? this.dataSpaceRequested,
       dataSpacePath: dataSpacePath ?? this.dataSpacePath,
       dataSpaceReadback: dataSpaceReadback ?? this.dataSpaceReadback,
       hwdecCurrent: hwdecCurrent ?? this.hwdecCurrent,
+      decoderObservation: decoderObservation ?? this.decoderObservation,
       verified: verified ?? this.verified,
       degradeReason: degradeReason ?? this.degradeReason,
       diagnostic: diagnostic ?? this.diagnostic,

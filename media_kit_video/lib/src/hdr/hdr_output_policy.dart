@@ -28,6 +28,9 @@ enum HdrMediaKind {
 
   /// Dolby Vision profile 8.4 (HLG-compatible cross-compatibility profile).
   dolbyVisionP84,
+
+  /// DV signaling exists but its correct interpretation still needs facts.
+  dolbyVisionUnknown,
 }
 
 /// {@template hdr_output_policy}
@@ -117,7 +120,7 @@ class HdrOutputPolicy {
   ///
   /// [displayHdrTypes] carries the Android `Display.HdrCapabilities` set.
   /// It must be provided for PlatformView HDR routes; an absent capability
-  /// report must not silently select an HDR route.
+  /// report must not silently select an HDR output route.
   ///
   /// [p5DoviRescaleAvailable] reports whether the libmpv build carries the
   /// P5 dovi metadata rescale pipeline; profile 5 must not be opened without
@@ -130,6 +133,9 @@ class HdrOutputPolicy {
     Set<int>? displayHdrTypes,
     bool preferGpuOutput = false,
   }) {
+    if (kind == HdrMediaKind.dolbyVisionUnknown) {
+      throw StateError('Dolby Vision profile/base-layer facts are unresolved');
+    }
     if (kind == HdrMediaKind.dolbyVisionP5 && !p5DoviRescaleAvailable) {
       throw StateError('P5 RPU-preserving native pipeline is not built');
     }
@@ -232,6 +238,7 @@ class HdrOutputPolicy {
           stripDvRpu: false,
         );
       case HdrMediaKind.sdr:
+      case HdrMediaKind.dolbyVisionUnknown:
         break; // handled above; unreachable for HDR-flagged input.
     }
     throw StateError('unreachable');

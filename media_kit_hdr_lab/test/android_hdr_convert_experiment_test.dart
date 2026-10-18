@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:media_kit_video/src/video/platform_view_video.dart';
 import 'package:media_kit_hdr_lab/tests/01.single_player_single_video.dart'
-    show AndroidLgSingleOwnerVideo, resolveYuvDiagOwnerGeneration;
+    show AndroidLgSingleOwnerVideo;
 import '../../media_kit_video/test/android_output_presentation_test.dart'
     show FakeController, FakeSession, FakePlayer, FakeStreams;
 import 'package:flutter_test/flutter_test.dart';
@@ -73,74 +73,41 @@ void main() {
     expect(branch, isNot(contains('_initialController')));
     expect(branch, isNot(contains('body: Video(')));
   });
-  test('YUV diag arm observes the session output non-constructively', () {
+  test('plan C retirement: the page owns no YUV arm path; token, verdict and '
+      'diagnostics remain', () {
     final page = File('lib/tests/01.single_player_single_video.dart')
         .readAsStringSync();
-    final arm =
-        page.indexOf('Future<void> _armYuvDiagSwitch(int serial) async {');
-    final end = page.indexOf('void _disarmYuvDiagSwitch(', arm);
-    expect(arm, greaterThanOrEqualTo(0));
-    expect(end, greaterThan(arm));
-    final body = page.substring(arm, end);
-    // P8.4 C2: the arm must route the owner-generation observation through
-    // the non-constructive session-only seam; the fallback getter constructs
-    // the default Texture wrapper and poisons the first platform-view open.
-    expect(body, contains('resolveYuvDiagOwnerGeneration(_hdrSession)'));
-    expect(body, isNot(contains('_hdrTransactionController')));
-    expect(body, isNot(contains('_initialController')));
-    final seam = page.indexOf('Future<int?> resolveYuvDiagOwnerGeneration(');
-    final seamEnd = page.indexOf('class SinglePlayerSingleVideoScreen', seam);
-    expect(seam, greaterThanOrEqualTo(0));
-    expect(seamEnd, greaterThan(seam));
-    final seamBody = page.substring(seam, seamEnd);
-    expect(seamBody, contains('session?.controller.value'));
-    expect(seamBody, isNot(contains('_hdrTransactionController')));
-    expect(seamBody, isNot(contains('_initialController')));
-  });
-  testWidgets('YUV diag owner observation never constructs a default wrapper',
-      (tester) async {
-    final calls = <MethodCall>[];
-    const channel = MethodChannel('com.alexmercerind/media_kit_video');
-    tester.binding.defaultBinaryMessenger
-        .setMockMethodCallHandler(channel, (call) async {
-      calls.add(call);
-      return null;
-    });
-    addTearDown(() => tester.binding.defaultBinaryMessenger
-        .setMockMethodCallHandler(channel, null));
-
-    // First open (session null): no default wrapper creation, no
-    // VideoOutputManager.Create, no session output published; the null
-    // generation keeps the arm's legacy global arm fallback.
-    expect(await resolveYuvDiagOwnerGeneration(null), isNull);
-    final session = FakeSession();
-    expect(await resolveYuvDiagOwnerGeneration(session), isNull);
-    expect(session.published.value, isNull);
-    await tester.pump();
-    expect(calls.where((call) => call.method == 'VideoOutputManager.Create'),
-        isEmpty);
-    expect(calls, isEmpty);
-
-    // Existing session output: the generation is read from the published
-    // platform-view object; nothing is published, recreated or created.
-    final controller = _WidgetController();
-    final platform = _PublishedPlatformOutput(
-        controller.player,
-        const VideoControllerConfiguration(
-            vo: 'gpu-next',
-            hwdec: 'mediacodec-copy',
-            android: AndroidVideoOptions(
-                usePlatformView: true,
-                surfaceTransfer: 'pq-itu',
-                lgExperimentOwnerToken: 'owner278-yuv-arm')));
-    controller.notifier.value = platform;
-    controller.platform.complete(platform);
-    session.published.value = controller;
-    expect(await resolveYuvDiagOwnerGeneration(session),
-        platform.nativeSurfaceGeneration);
-    expect(session.published.value, same(controller));
-    expect(calls, isEmpty);
-    session.published.dispose();
+    // Plan C: the YUV window arm lifecycle is the library's
+    // (HdrYuvWindowArm, routed by execution attempt). The page must not read
+    // or write the vendor YUV atoms through any path — a pre-open arm here
+    // would pollute the process-global atomics before a non-YUV routed open
+    // (observed as a dead VO on lgh7-sdr).
+    for (final retired in [
+      '_armYuvDiagSwitch',
+      '_disarmYuvDiagSwitch',
+      '_armDiagDataspace',
+      '_disarmDiagDataspace',
+      '_resolveYuvDiagSwitch',
+      '_resolveDiagDataspaceArmer',
+      'resolveYuvDiagOwnerGeneration',
+      'mkvendor_',
+      'EnableYuvDiag',
+      'DisableYuvDiag',
+    ]) {
+      expect(page.contains(retired), isFalse,
+          reason: 'retired page-side YUV arm symbol still present: $retired');
+    }
+    // The owner token capability gate stays: the bridge initializes only
+    // through the creationParams' lgExperimentOwnerToken, so the token is a
+    // platform-view-owner duty, not an arm duty.
+    expect(
+        page.contains('if (await _yuvWindowChannelDeclared()) {'), isTrue);
+    expect(page, contains('Future<bool> _yuvWindowChannelDeclared()'));
+    // The importer verdict and the version-marker capture stay (diagnostics,
+    // not production preconditions).
+    expect(page, contains("_mkSurfaceVersionMarker = 'MKSURF: version'"));
+    expect(page, contains('SurfaceTexture PoC verification failed'));
+    expect(page, contains('.report.value.actual?.hwdec =='));
   });
   testWidgets('experiment waits for Session output without default Texture',
       (tester) async {
@@ -254,10 +221,22 @@ void main() {
     expect(prepared, 1);
     await expectLater(
         session.open(Media('test://retry'), hint: source), throwsStateError);
+    final backendCalls = List<String>.of(backend.calls);
+    final failedReport = session.report.value;
+    await expectLater(
+        session.setOptions(EffectiveVideoRouteOptions.resolve(
+            application: const VideoRouteOptions(
+                decode: VideoRouteSelection.require(VideoDecodeTarget.software),
+                output: VideoRouteSelection.require(VideoOutputIntent.sdr)))),
+        throwsStateError);
     await expectLater(
         session.setPreference(HdrOutputPreference.off), throwsStateError);
     await expectLater(
         session.setPolicy(HdrRoutingPolicy.defaults), throwsStateError);
+    expect(backend.calls, backendCalls);
+    expect(session.report.value, same(failedReport));
+    expect(revoked, ['owner-a/7']);
+    expect(prepared, 1);
     await session.dispose();
   });
   test(

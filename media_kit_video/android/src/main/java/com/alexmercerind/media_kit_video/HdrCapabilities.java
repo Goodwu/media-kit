@@ -39,7 +39,9 @@ import com.alexmercerind.media_kit_video.platformview.PlatformVideoView;
  * for the decoder census. It never calls eglInitialize/eglTerminate (which
  * would interfere with other EGL users in the process) and never touches any
  * private vendor ABI — a registered SurfaceDataSpaceExt is only described
- * through its read-only {@code id()}/{@code isApplicable()} accessors.
+ * through its read-only {@code id()}/{@code isApplicable()} and
+ * {@code pqPresentationRgbSurface()}/{@code pqPresentationYuvWindow()}
+ * accessors.
  */
 public final class HdrCapabilities {
     private static final String TAG = "HdrCapabilities";
@@ -70,32 +72,37 @@ public final class HdrCapabilities {
      */
     @NonNull
     public static Map<String, Object> get(@NonNull Context context) {
+        return get(context, defaultDisplay(context));
+    }
+
+    /** Explicit null means device-only; never substitute the default display. */
+    @NonNull
+    public static Map<String, Object> get(@NonNull Context context, @Nullable Display display) {
         final Map<String, Object> snapshot = new HashMap<>();
         snapshot.put("sdkInt", Build.VERSION.SDK_INT);
-        snapshot.put("displayHdrTypes", displayHdrTypes(context));
+        snapshot.put("displayHdrTypes", displayHdrTypes(display));
         snapshot.put("hevcDecoders", decoders(MediaFormat.MIMETYPE_VIDEO_HEVC));
         snapshot.put("dolbyVisionDecoders", decoders(MIMETYPE_DOLBY_VISION));
         snapshot.put("p5Pipeline", MpvPipelineProbe.probeOnce() == 1);
         snapshot.put("nativeDvBridgeApi", MpvPipelineProbe.getNativeDvBridgeApi());
         snapshot.put("dataSpaceBridgeLoaded", PlatformVideoView.isDataSpaceBridgeLoaded());
+        // Pass-through of the read-only ext report; the pqPresentation key,
+        // when present, is assembled inside
+        // PlatformVideoView.getSurfaceDataSpaceExtInfo (all-or-nothing).
         snapshot.put("dataSpaceExt", PlatformVideoView.getSurfaceDataSpaceExtInfo());
         return snapshot;
     }
 
     @Nullable
-    private static List<Integer> displayHdrTypes(@Nullable Context context) {
-        if (context == null) {
-            return null;
-        }
-        final DisplayManager displayManager = (DisplayManager)
-                context.getSystemService(Context.DISPLAY_SERVICE);
-        if (displayManager == null) {
-            return null;
-        }
-        final Display display = displayManager.getDisplay(Display.DEFAULT_DISPLAY);
-        if (display == null) {
-            return null;
-        }
+    private static Display defaultDisplay(@Nullable Context context) {
+        if (context == null) return null;
+        final DisplayManager manager = (DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE);
+        return manager == null ? null : manager.getDisplay(Display.DEFAULT_DISPLAY);
+    }
+
+    @Nullable
+    private static List<Integer> displayHdrTypes(@Nullable Display display) {
+        if (display == null || !display.isValid() || Build.VERSION.SDK_INT < 24) return null;
         final Display.HdrCapabilities hdrCapabilities = display.getHdrCapabilities();
         if (hdrCapabilities == null) {
             return null;

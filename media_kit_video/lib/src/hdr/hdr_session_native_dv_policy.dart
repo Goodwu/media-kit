@@ -7,15 +7,19 @@ import 'hdr_native_dv_option_owner.dart';
 import 'hdr_native_dv_review_evidence.dart';
 import 'hdr_open_coordinator.dart';
 import 'hdr_open_plan.dart';
+import 'hdr_decoder_review.dart';
 import 'hdr_route.dart';
 import 'hdr_strategy.dart';
 
 /// State of actual candidate admissions in one Session open generation.
-/// Display-only planning never spends a slot. Native DV may run only once;
-/// the two HDR slots include both native HDR and native Dolby Vision.
+/// Display-only planning never spends a slot. Each concrete route is admitted
+/// at most once per session generation; native DV may run only once.
+/// HDR attempt count is telemetry, never a budget or an SDR fallback trigger.
 class HdrSessionAttemptPolicy {
   int hdrAttempts = 0;
   bool nativeDvAttempted = false;
+  final Set<HdrRoute> _attempted = {};
+  Set<HdrRoute> get attempted => Set<HdrRoute>.unmodifiable(_attempted);
   final Map<String, HdrDegradeReason> _excluded = {};
 
   static bool isHdr(HdrRoute route) =>
@@ -23,11 +27,12 @@ class HdrSessionAttemptPolicy {
       route.presentation == HdrPresentation.nativeDolbyVision;
 
   void admit(HdrRoute route) {
-    if ((route.strategy == HdrStrategy.nativeDolbyVision &&
-            nativeDvAttempted) ||
-        (isHdr(route) && hdrAttempts >= 2)) {
+    if (_attempted.contains(route) ||
+        (route.strategy == HdrStrategy.nativeDolbyVision &&
+            nativeDvAttempted)) {
       throw const HdrSessionRouteBudgetFailure();
     }
+    _attempted.add(route);
     if (isHdr(route)) hdrAttempts++;
     if (route.strategy == HdrStrategy.nativeDolbyVision) {
       nativeDvAttempted = true;
@@ -61,8 +66,21 @@ class HdrSessionRouteBudgetFailure implements Exception {
 bool nativeDvFailureMustAbort(Object error) {
   final seen = <Object>{};
   Object? current = error;
+  var dependencyWrapper = false;
   while (current != null && seen.add(current)) {
-    if (current is HdrNativeDvOptionFailure) return true;
+    if (current is HdrNativeDvOptionFailure ||
+        (dependencyWrapper &&
+            (current is HdrPlaybackBlocked ||
+                current is HdrDecoderReviewFailure ||
+                (current is TimeoutException &&
+                    current is! HdrOutputBindTimeout)))) {
+      return true;
+    }
+    if (current is HdrExecutionDependencyFailure) {
+      dependencyWrapper = true;
+      current = current.cause;
+      continue;
+    }
     if (current is! HdrNativeDvReviewFailure) return false;
     if (current.kind == HdrNativeDvReviewFailureKind.ownership ||
         current.kind == HdrNativeDvReviewFailureKind.sourceIdentity ||

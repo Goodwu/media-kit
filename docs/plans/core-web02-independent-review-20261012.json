@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "task": "MK-ROUTING-20261011",
+  "slice": "CORE-WEB-SHUFFLE-DEGENERATE-01",
+  "reviewer": "CORE independent reviewer (formerly device_return_review; no production writes)",
+  "reviewedAtUtc": "2026-10-12T15:50:53.197174+00:00",
+  "baseHead": "a73d570b633a949aab6a31e8f68ec03a13643c31",
+  "files": [
+    {
+      "path": "media_kit/lib/src/player/web/player/real.dart",
+      "baseGitBlob": "1864968fd3128586c30b70e1fc6ff8833390565e",
+      "newGitBlob": "c5ad7ca432b1cb62b37f0f4a120b44501ea1ddda",
+      "newSha256": "928e1ab8a91812e80230c1a65fd74c5941d45d5be47678f573c2efff4f9a9b42",
+      "bytes": 50029
+    },
+    {
+      "path": "media_kit/test/src/player/player_test.dart",
+      "baseGitBlob": "cd8a27fe29f1bc558f6594d589515794aa71d010",
+      "newGitBlob": "0495efa2fcb9f50684a18d182986b15d34f0761e",
+      "newSha256": "3f0d13d76f5f2e78e6524710244de604d9cf1d38730c9f5b869e830afadee3c2",
+      "bytes": 107691
+    }
+  ],
+  "diffSha256": "bca2f22b7716debf5366bf1a73c30d21bde4e3de21fdc25acc8532f26f457a95",
+  "verdict": "PASS_WITH_PENDING_HOSTED",
+  "blockingFindings": [],
+  "findingBasis": [
+    "Web Media operator== compares URI; any(media != current) is false exactly for the all-equal URI case with a valid current element. No rejection-sampling loop is entered for that case or a singleton.",
+    "Current index and exact Media object order remain unchanged on all-equal enable and restore. IdentityEquality checks order/occurrence identity, while published playlist equality remains its existing URI/index semantics.",
+    "Ordinary queues with more than one equality class retain the existing rejection sampling and indexOf(current) path. No claim fixes mixed duplicate occurrence tracking or queue edits during shuffle.",
+    "Copy-on-write previous snapshot protection remains unchanged.",
+    "Two new Web-only tests construct distinct Media objects sharing URI or repeat one Media object, start at index2, run true,true,false,false twice, inspect exact per-position identity/current index/retained snapshot and collect playlist/mode events.",
+    "Each toList listener is attached before open and awaited after the finally dispose closes the streams; no unawaited expectation is introduced by the delta.",
+    "collection import already exists; typed const ListEquality<Media>(IdentityEquality<Media>()) matches the official constructor contracts. No dependency or global equality change."
+  ],
+  "validation": {
+    "localDartFlutterChromeRun": false,
+    "staticSourceReview": true,
+    "actualDiffFrozen": true,
+    "apiCompatibilityReviewed": true,
+    "notRunOnOldCode": "The old all-equal while loop is synchronous; running the regression against it would block the JS event loop and defeat a timer-based test timeout. No executed red-test claim.",
+    "requiredHosted": [
+      "six targeted shuffle cases on actual reviewed/new source combination",
+      "full Web package suite on same source/merge vector"
+    ]
+  },
+  "primaryApiSources": [
+    {
+      "url": "https://api.flutter.dev/flutter/package-collection_collection/IdentityEquality-class.html",
+      "supports": "IdentityEquality<E> implements Equality<E>, identity comparison, const constructor; read directly via web open"
+    },
+    {
+      "url": "https://api.flutter.dev/flutter/package-collection_collection/ListEquality/ListEquality.html",
+      "supports": "const ListEquality<E>([Equality<E> elementEquality]); read directly via web open"
+    }
+  ],
+  "limits": [
+    "Empty playlist behavior unchanged and outside this slice",
+    "Mixed-URI duplicate occurrence identity and shuffle-time queue edits not claimed solved",
+    "Ordinary random rejection sampling retains probabilistic behavior; bounded termination claim is only for the formerly impossible all-equal permutation case",
+    "Host/build/native/device/HDR/performance acceptance unaffected"
+  ]
+}

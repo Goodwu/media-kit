@@ -105,7 +105,7 @@ Map<String, Object?> androidHdr10ReportJson(HdrOutputReport report) {
               'maturity': prediction.selected.maturity.name,
               'feasible': prediction.selected.feasible,
               'skipReason': prediction.selected.skipReason?.name,
-              'route': androidHdr10RouteJson(prediction.selected.route)
+              'route': androidHdr10RouteJson(prediction.selected.route),
             },
             'candidates': [
               for (final candidate in prediction.candidates)
@@ -115,7 +115,7 @@ Map<String, Object?> androidHdr10ReportJson(HdrOutputReport report) {
                   'feasible': candidate.feasible,
                   'skipReason': candidate.skipReason?.name,
                   'route': androidHdr10RouteJson(candidate.route),
-                }
+                },
             ],
           },
     'actual': androidHdr10RouteJson(report.actual),
@@ -208,15 +208,18 @@ class AndroidHdrSessionDiagnostic {
       if (value.length > 64) _gap('map-truncated:$field');
       return {
         for (final entry in value.entries.take(64))
-          entry.key.toString():
-              _bounded(entry.value, '$field.${entry.key}', depth + 1)
+          entry.key.toString(): _bounded(
+            entry.value,
+            '$field.${entry.key}',
+            depth + 1,
+          ),
       };
     }
     if (value is List) {
       if (value.length > 64) _gap('list-truncated:$field');
       return [
         for (var i = 0; i < value.length && i < 64; i++)
-          _bounded(value[i], '$field.$i', depth + 1)
+          _bounded(value[i], '$field.$i', depth + 1),
       ];
     }
     return _bounded(value.toString(), field, depth);
@@ -251,7 +254,7 @@ class AndroidHdrSessionDiagnostic {
       'index': _rows.length,
       'elapsedMs': _clock.elapsedMilliseconds,
       'kind': kind,
-      ...fields
+      ...fields,
     }, 'row') as Map;
     if (kind == 'sample' && (_gaps.isNotEmpty || _gapsOverflow)) {
       row['accepted'] = false;
@@ -309,13 +312,14 @@ class AndroidHdrSessionDiagnostic {
     _capabilities = {
       'sdkInt': capabilities.sdkInt,
       'displayHdrTypes': capabilities.displayHdrTypes?.toList(),
-      'snapshotScope':
-          'separate real HdrCapabilities.query; not Session private snapshot'
+      'snapshotScope': 'separate real VideoRouteCapabilities.query; not Session private snapshot',
     };
   }
 
   Future<Map<String, String>> _readProperties(
-      List<String> names, Map<String, Object?> errors) async {
+    List<String> names,
+    Map<String, Object?> errors,
+  ) async {
     final values = <String, String>{};
     for (final name in names) {
       try {
@@ -327,7 +331,7 @@ class AndroidHdrSessionDiagnostic {
       } catch (error, stack) {
         errors[name] = {
           'error': _bounded(_errorText(error), name),
-          'stack': _bounded(stack.toString(), '$name.stack')
+          'stack': _bounded(stack.toString(), '$name.stack'),
         };
         // Missing optional decoder properties stay explicit, not a fatal open error.
         if (errors.length > 64) {
@@ -345,21 +349,30 @@ class AndroidHdrSessionDiagnostic {
       final errors = <String, Object?>{};
       final before = readEpoch();
       final path = await readProperty('path');
-      final values =
-          await _readProperties(androidHdr10RestoredProperties, errors);
+      final values = await _readProperties(
+        androidHdr10RestoredProperties,
+        errors,
+      );
       if (path.isNotEmpty ||
           before != readEpoch() ||
           errors.isNotEmpty ||
           values.values.any((v) => v.isEmpty) ||
           _gaps.isNotEmpty) {
-        _record('baseline-rejected',
-            {'path': path, 'errors': errors, 'values': values});
+        _record('baseline-rejected', {
+          'path': path,
+          'errors': errors,
+          'values': values,
+        });
         throw StateError(
-            'HDR10 requires a complete stable idle option baseline');
+          'HDR10 requires a complete stable idle option baseline',
+        );
       }
       _baseline = Map<String, String>.unmodifiable(values);
-      _record(
-          'baseline', {'epoch': before, 'path': path, 'properties': values});
+      _record('baseline', {
+        'epoch': before,
+        'path': path,
+        'properties': values,
+      });
     });
     await writeNow();
   }
@@ -389,9 +402,9 @@ class AndroidHdrSessionDiagnostic {
             'handle',
             'generation',
             'surfaceGeneration',
-            'wid'
+            'wid',
           ])
-            output[key] is int && (output[key] as int) > 0
+            output[key] is int && (output[key] as int) > 0,
         ].every((v) => v) &&
         output['viewId'] is int &&
         (output['viewId'] as int) >= 0;
@@ -402,15 +415,19 @@ class AndroidHdrSessionDiagnostic {
       final errors = <String, Object?>{};
       final epochBefore = readEpoch();
       final identityBefore = Map<String, Object?>.from(
-          jsonDecode(jsonEncode(await readIdentity())) as Map);
+        jsonDecode(jsonEncode(await readIdentity())) as Map,
+      );
       final before = await _readProperties(['path', 'playlist/0/id'], errors);
-      final properties =
-          await _readProperties(androidHdr10DecoderProperties, errors);
+      final properties = await _readProperties(
+        androidHdr10DecoderProperties,
+        errors,
+      );
       final after = await _readProperties(['path', 'playlist/0/id'], errors);
       final identityAfter = await readIdentity();
       final epochAfter = readEpoch();
       final generation = identityBefore['sessionGeneration'];
-      final stable = before['path'] == androidHdr10DiagnosticSource &&
+      final stable =
+          before['path'] == androidHdr10DiagnosticSource &&
           before['path'] == after['path'] &&
           before['playlist/0/id'] != null &&
           before['playlist/0/id']!.isNotEmpty &&
@@ -428,7 +445,8 @@ class AndroidHdrSessionDiagnostic {
         'sessionInstanceId': identityBefore['sessionInstanceId'],
         'boundOutput': identityBefore['boundOutput'],
       });
-      final segmentMatches = _boundEpoch == null ||
+      final segmentMatches =
+          _boundEpoch == null ||
           (_boundEpoch == epochBefore &&
               _boundGeneration == generation &&
               _boundEntry == before['playlist/0/id'] &&
@@ -443,7 +461,8 @@ class AndroidHdrSessionDiagnostic {
       }
       final actual = identityBefore['actual'];
       final source = identityBefore['source'];
-      final nativeConfiguration = accepted &&
+      final nativeConfiguration =
+          accepted &&
           identityBefore['verified'] == true &&
           identityBefore['sourceOrigin'] == 'decoder' &&
           actual is Map &&
@@ -463,8 +482,9 @@ class AndroidHdrSessionDiagnostic {
       _record('sample', {
         'accepted': accepted,
         'nativeHdr10Configuration': nativeConfiguration,
-        'rejection':
-            accepted ? null : 'source-session-output-identity-drift-or-gap',
+        'rejection': accepted
+            ? null
+            : 'source-session-output-identity-drift-or-gap',
         'epochBefore': epochBefore,
         'epochAfter': epochAfter,
         'sourceBefore': before,
@@ -474,7 +494,7 @@ class AndroidHdrSessionDiagnostic {
         'properties': properties,
         'propertyErrors': errors,
         'scope':
-            'matching endpoints; continuous output and panel HDR unverified'
+            'matching endpoints; continuous output and panel HDR unverified',
       });
     });
     await writeNow();
@@ -489,18 +509,21 @@ class AndroidHdrSessionDiagnostic {
         return;
       }
       final directory = Directory(
-          '/storage/emulated/0/Android/data/com.example.media_kit_hdr_lab/files/media-kit-hdr-diagnostic');
+        '/storage/emulated/0/Android/data/com.example.media_kit_hdr_lab/files/media-kit-hdr-diagnostic',
+      );
       await directory.create(recursive: true);
       final text = jsonEncode(payload);
       final temporary = File('${directory.path}/hdr10-session-$runId.tmp');
       await temporary.writeAsString(text, flush: true);
       await temporary.rename('${directory.path}/hdr10-session.json');
     });
-    _writes =
-        attempt.then<void>((_) {}, onError: (Object error, StackTrace stack) {
-      recordError(error, stack);
-      _debt = true;
-    });
+    _writes = attempt.then<void>(
+      (_) {},
+      onError: (Object error, StackTrace stack) {
+        recordError(error, stack);
+        _debt = true;
+      },
+    );
     return attempt;
   }
 
@@ -508,11 +531,11 @@ class AndroidHdrSessionDiagnostic {
     required Future<void> Function() disposeSession,
     required Map<String, Object?> Function() sessionCleanupFacts,
     required Future<void> Function() terminatePlayer,
-  }) =>
-      _finish ??= _finishOnce(
-          disposeSession: disposeSession,
-          sessionCleanupFacts: sessionCleanupFacts,
-          terminatePlayer: terminatePlayer);
+  }) => _finish ??= _finishOnce(
+    disposeSession: disposeSession,
+    sessionCleanupFacts: sessionCleanupFacts,
+    terminatePlayer: terminatePlayer,
+  );
 
   Future<void> _finishOnce({
     required Future<void> Function() disposeSession,
@@ -540,17 +563,21 @@ class AndroidHdrSessionDiagnostic {
       await withPlayerLock(() async {
         final errors = <String, Object?>{};
         final before = readEpoch();
-        final values =
-            await _readProperties(androidHdr10RestoredProperties, errors);
+        final values = await _readProperties(
+          androidHdr10RestoredProperties,
+          errors,
+        );
         final facts = sessionCleanupFacts();
         final baseline = _baseline;
         final checks = {
           for (final name in androidHdr10RestoredProperties)
-            name: baseline != null &&
+            name:
+                baseline != null &&
                 values[name] == baseline[name] &&
-                !errors.containsKey(name)
+                !errors.containsKey(name),
         };
-        _restored = errors.isEmpty &&
+        _restored =
+            errors.isEmpty &&
             before == readEpoch() &&
             checks.values.every((v) => v) &&
             facts['sessionReportClean'] == true &&
@@ -562,7 +589,7 @@ class AndroidHdrSessionDiagnostic {
           'baseline': baseline,
           'checks': checks,
           'verified': _restored,
-          'surfaceReleaseAcknowledgement': 'unverified'
+          'surfaceReleaseAcknowledgement': 'unverified',
         };
         if (!_restored) {
           _debt = true;
@@ -604,48 +631,49 @@ class AndroidHdrSessionDiagnostic {
     }).toList();
     double? position(Map<String, Object?> row) {
       final p = row['properties'];
-      final value =
-          p is Map ? double.tryParse(p['time-pos']?.toString() ?? '') : null;
+      final value = p is Map
+          ? double.tryParse(p['time-pos']?.toString() ?? '')
+          : null;
       return value != null && value.isFinite && value >= 0 ? value : null;
     }
 
     final first = samples.isEmpty ? null : position(samples.first);
     final last = samples.isEmpty ? null : position(samples.last);
     final progress = first != null && last != null && last - first >= 10;
-    return jsonDecode(jsonEncode({
-      'schema': 1,
-      'diagnosticMode': 'hdr10-session',
-      'runId': runId,
-      'startUtc': startUtc,
-      'externalIdentityLabel': label,
-      'durationLimitSeconds': androidHdr10DiagnosticSeconds,
-      'elapsedMs': _clock.elapsedMilliseconds,
-      'sourcePath': androidHdr10DiagnosticSource,
-      'sourceExpectedSha256': androidHdr10DiagnosticSourceSha256,
-      'sourceIdentityScope':
-          'external byte-verified asset required; not hashed by journal',
-      'capabilities': _capabilities,
-      'closed': _closed,
-      'debt': _debt,
-      'error': _firstError,
-      'errors': _errors,
-      'evidenceGaps': _gaps,
-      'evidenceGapsOverflow': _gapsOverflow,
-      'finalWriteSucceededInProcess': _finalWriteSucceeded,
-      'finalPersistenceScope':
-          'closed journal requires external byte readback; not self-acknowledged',
-      'sessionRestorationVerified': _restored,
-      'playerTerminated': _terminated,
-      'cleanup': _cleanup,
-      'progressSupport': {
-        'tenSecondsPositionAdvance': progress,
-        'firstTimePos': first,
-        'lastTimePos': last,
-        'acceptedSampleCount': samples.length,
-        'scope':
-            'matching source/generation endpoints; visible output and smoothness unverified'
-      },
-      'rows': _rows,
-    })) as Map<String, Object?>;
+    return jsonDecode(
+      jsonEncode({
+        'schema': 1,
+        'diagnosticMode': 'hdr10-session',
+        'runId': runId,
+        'startUtc': startUtc,
+        'externalIdentityLabel': label,
+        'durationLimitSeconds': androidHdr10DiagnosticSeconds,
+        'elapsedMs': _clock.elapsedMilliseconds,
+        'sourcePath': androidHdr10DiagnosticSource,
+        'sourceExpectedSha256': androidHdr10DiagnosticSourceSha256,
+        'sourceIdentityScope':
+            'external byte-verified asset required; not hashed by journal',
+        'capabilities': _capabilities,
+        'closed': _closed,
+        'debt': _debt,
+        'error': _firstError,
+        'errors': _errors,
+        'evidenceGaps': _gaps,
+        'evidenceGapsOverflow': _gapsOverflow,
+        'finalWriteSucceededInProcess': _finalWriteSucceeded,
+        'finalPersistenceScope': 'closed journal requires external byte readback; not self-acknowledged',
+        'sessionRestorationVerified': _restored,
+        'playerTerminated': _terminated,
+        'cleanup': _cleanup,
+        'progressSupport': {
+          'tenSecondsPositionAdvance': progress,
+          'firstTimePos': first,
+          'lastTimePos': last,
+          'acceptedSampleCount': samples.length,
+          'scope': 'matching source/generation endpoints; visible output and smoothness unverified',
+        },
+        'rows': _rows,
+      }),
+    ) as Map<String, Object?>;
   }
 }

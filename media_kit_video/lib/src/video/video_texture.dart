@@ -123,7 +123,7 @@ class Video extends StatefulWidget {
 
   /// {@macro video}
   const Video({
-    Key? key,
+    super.key,
     required this.controller,
     this.width,
     this.height,
@@ -140,7 +140,7 @@ class Video extends StatefulWidget {
     this.onEnterFullscreen = defaultEnterNativeFullscreen,
     this.onExitFullscreen = defaultExitNativeFullscreen,
     this.focusNode,
-  }) : super(key: key);
+  });
 
   @override
   State<Video> createState() => VideoState();
@@ -616,6 +616,10 @@ class VideoState extends State<Video> with WidgetsBindingObserver {
                                           .configuration
                                           .android
                                           .lgExperimentOwnerToken,
+                                      managedYuvCarrier: notifier
+                                          .configuration
+                                          .android
+                                          .managedYuvCarrier,
                                       androidSurfacePixelFormat: notifier
                                           .configuration
                                           .android

@@ -260,6 +260,13 @@ class AndroidVideoOptions {
   /// Null outside the explicitly owner-bound LG lab experiment.
   final String? lgExperimentOwnerToken;
 
+  /// W1 managed YUV-carrier mode: the platform view's Surface registers
+  /// into the vendor extension's managed ledger and is armed Java-side
+  /// before the surface event reaches Dart (the arm precedes the producer
+  /// activation). Set by the HDR session for YUV-carrier topology only —
+  /// never by applications.
+  final bool managedYuvCarrier;
+
   const AndroidVideoOptions({
     this.usePlatformView = false,
     this.useHCPP = false,
@@ -270,6 +277,7 @@ class AndroidVideoOptions {
     this.surfaceTransfer,
     this.surfacePixelFormat,
     this.lgExperimentOwnerToken,
+    this.managedYuvCarrier = false,
   });
 
   AndroidVideoOptions copyWith({
@@ -283,6 +291,7 @@ class AndroidVideoOptions {
     String? surfaceTransfer,
     String? surfacePixelFormat,
     String? lgExperimentOwnerToken,
+    bool? managedYuvCarrier,
   }) =>
       AndroidVideoOptions(
         usePlatformView: usePlatformView ?? this.usePlatformView,
@@ -298,6 +307,7 @@ class AndroidVideoOptions {
         surfacePixelFormat: surfacePixelFormat ?? this.surfacePixelFormat,
         lgExperimentOwnerToken:
             lgExperimentOwnerToken ?? this.lgExperimentOwnerToken,
+        managedYuvCarrier: managedYuvCarrier ?? this.managedYuvCarrier,
       );
 }
 

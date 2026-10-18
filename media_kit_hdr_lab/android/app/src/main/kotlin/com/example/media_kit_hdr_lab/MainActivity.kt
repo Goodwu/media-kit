@@ -27,6 +27,20 @@ class MainActivity : FlutterActivity() {
     private var lastTouchDownNs = 0L
     private var lastTouchUpNs = 0L
 
+    override fun onCreate(savedInstanceState: android.os.Bundle?) {
+        super.onCreate(savedInstanceState)
+        // App-uid MediaCodec probe (marble 4K AVC adjudication). Trigger only
+        // via an explicit intent extra; the ordinary lab flow is untouched.
+        val mode = intent?.getStringExtra("mcprobe") ?: return
+        val stream = intent?.getStringExtra("mcstream") ?: "stream4k.h264"
+        val codec = intent?.getStringExtra("mccodec") ?: "c2.qti.avc.decoder"
+        val width = intent?.getIntExtra("mcwidth", 3840) ?: 3840
+        val height = intent?.getIntExtra("mcheight", 2160) ?: 2160
+        val instances = intent?.getIntExtra("mcinstances", 6) ?: 6
+        McProbeRunner.run(
+            assets, mode, stream, codec, width, height, instances)
+    }
+
     companion object {
         init {
             // SurfaceTexture diagnostics (OES leg): load the bridge .so at app
@@ -255,19 +269,6 @@ class MainActivity : FlutterActivity() {
                             call.argument<Boolean>("acceptNonConformant") == true)
                     if (enabled) result.success(true)
                     else result.error("VISUAL278_EXPERIMENT_REFUSED", "Strict LG experiment prerequisites missing", null)
-                } else if (call.method == "EnableYuvDiag") {
-                    // Owner-bound YUV diag arm: the vendor extension checks
-                    // the owner ledger (pending + registered surface) before
-                    // the native bind; refusal is reported, never swallowed.
-                    val gen = call.argument<Number>("generation")?.toInt() ?: 0
-                    val enabled = !BuildConfig.HDR_LAB_UNREGISTER_VENDOR_EXT &&
-                        lg?.enableYuvDiag(token, gen) == true
-                    if (enabled) result.success(true)
-                    else result.error("YUV_DIAG_ARM_REFUSED",
-                        "Owner-bound YUV diag arm refused (device gate, owner ledger or library)", null)
-                } else if (call.method == "DisableYuvDiag") {
-                    lg?.disableYuvDiag()
-                    result.success(true)
                 } else result.notImplemented()
             }
         CapabilitiesChannel.register(this, flutterEngine)

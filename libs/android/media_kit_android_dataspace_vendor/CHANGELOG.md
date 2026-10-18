@@ -1,3 +1,13 @@
+## Unreleased (W1 managed output lifecycle)
+
+- `LgPqDataSpaceExt`: managed output surface ledger for the production
+  library path — per-surface records (no experiment token, no retired
+  set), managed YUV-diag arming keyed by the device-neutral owner key
+  derived from (handle, generation), managed dataspace authorization for
+  registered surfaces, and the `enableOwnerLifetime` entry whose
+  non-conformant acceptance comes from this device's own
+  `pqPresentationYuvWindow` declaration. The experiment owner ledger and
+  the visual278 consent remain untouched for the lab entry.
 # Changelog
 
 ## 1.0.0+1 (2026-10-02)

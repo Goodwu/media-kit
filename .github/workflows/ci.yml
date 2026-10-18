@@ -17,7 +17,7 @@ on:
 
 concurrency:
   group: media-kit-ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.head_ref != 'routing/MK-ROUTING-20261011' && github.ref_name != 'routing/MK-ROUTING-20261011' }}
 
 jobs:
   media_kit-tests-windows:
@@ -107,6 +107,8 @@ jobs:
       # Delete tests which import native code & depend upon dart:ffi
       - run: rm -r test/src/player/native
       - run: dart pub get
+      - name: Verify Web shuffle playlist snapshots
+        run: dart test --platform chrome test/src/player/player_test.dart --name '^player-set-shuffle' --reporter expanded
       - run: dart test --platform chrome
       
 
@@ -149,7 +151,7 @@ jobs:
       run:
         working-directory: media_kit_test
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: "true"
       - name: Set up Flutter for ARM64
@@ -171,7 +173,7 @@ jobs:
         with:
           name: media_kit_test_win32_arm64
           path: media_kit_test/media_kit_test_win32_arm64.7z
-      - uses: softprops/action-gh-release@v1
+      - uses: softprops/action-gh-release@v2
         if: github.repository == 'media-kit/media-kit' && github.ref == 'refs/heads/main'
         with:
           draft: true
@@ -702,7 +704,7 @@ jobs:
           path: |
             manifest.json
             SHA256SUMS
-      - uses: softprops/action-gh-release@v1
+      - uses: softprops/action-gh-release@v2
         with:
           draft: true
           prerelease: false
@@ -722,58 +724,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Download pinned arm64 jar and verify identity
-        run: |
-          set -euo pipefail
-          python3 - <<'PY'
-          import hashlib
-          import re
-          import subprocess
-          import zipfile
-          from pathlib import Path
-
-          gradle = Path(
-              'libs/android/media_kit_libs_android_video/android/build.gradle'
-          ).read_text()
-          match = re.search(
-              r'"url":\s*"([^"]*arm64-v8a\.jar)",\s*'
-              r'"sha256":\s*"([0-9a-f]{64})"',
-              gradle,
-          )
-          if match is None:
-              raise SystemExit('no pinned arm64-v8a jar found in build.gradle')
-          url, expected = match.groups()
-          print(f'pinned url: {url}')
-          print(f'pinned sha256: {expected}')
-
-          jar = Path('arm64-v8a.jar')
-          subprocess.run(['curl', '-fsSL', url, '-o', str(jar)], check=True)
-          actual = hashlib.sha256(jar.read_bytes()).hexdigest()
-          if actual != expected:
-              raise SystemExit(f'sha256 mismatch: {actual} != {expected}')
-
-          with zipfile.ZipFile(jar) as archive:
-              so = archive.read('lib/arm64-v8a/libmpv.so')
-          # Version markers compiled into the fork's libmpv. Since the
-          # architecture-review remediation (5f9ddf1777): the mapper's
-          # per-mapper init/fallback log, the dovi rescale factor log and
-          # the --dovi-p5-fast-path option name. Since the HDR-routing
-          # property generation (d24c59905b, release v2026.011): the
-          # dovi-p5-pipeline read-only build-capability property, probed
-          # through the media_kit_video_hdr_bridge disposable-instance
-          # probe (the option-info proxy is retired).
-          # (The old P5_DOVI_RESCALE / P5_BUFFER_RETIRE probe tags were
-          # removed together with the experiment probes.)
-          # Since the FFmpeg P5 RPU remediation (b4d2ea4ffb, release
-          # v2026.012): the mediacodec dovi RPU tracking log line — this
-          # marker pins the libavcodec generation, not just the mpv fork.
-          markers = [b'P5 direct external YUV sampler enabled', b'dovi rescale k=%.6f', b'dovi-p5-fast-path', b'dovi-p5-pipeline', b'Dolby Vision RPU export enabled']
-          missing = [m.decode() for m in markers if m not in so]
-          if missing:
-              raise SystemExit(f'libmpv.so missing version markers: {missing}')
-          print('libmpv.so version markers verified: ' + ', '.join(
-              m.decode() for m in markers))
-          PY
+      - name: Test release identity parser and negative cases
+        run: python3 -m unittest tool.routing_ci.test_android_jar_identity -v
+      - name: Verify configured release JAR (not a native source build)
+        run: python3 tool/routing_ci/android_jar_identity.py
 
   hdr-lab-analyze:
     # The HDR diagnostics app (media_kit_hdr_lab) owns the AUTO/HDR define

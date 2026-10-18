@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:media_kit/media_kit.dart' show Media, VideoParams;
 import 'package:media_kit_video/src/hdr/hdr_capabilities.dart';
+import 'package:media_kit_video/src/hdr/hdr_open_coordinator.dart'
+    show HdrOutputBindTimeout;
 import 'package:media_kit_video/src/hdr/hdr_open_plan.dart';
 import 'package:media_kit_video/src/hdr/hdr_output_diagnostics.dart';
 import 'package:media_kit_video/src/hdr/hdr_route.dart';
@@ -68,6 +70,10 @@ void main() {
     dvCompatibilityId: 4,
     enhancementLayer: false,
   );
+  const hlg = HdrSourceDescriptor(
+    codec: 'hevc', transfer: 'hlg', primaries: 'bt.2020',
+    enhancementLayer: false,
+  );
   const p5 = HdrSourceDescriptor(
     codec: 'hevc',
     dynamicMetadata: HdrDynamicMetadata.dolbyVision,
@@ -91,8 +97,11 @@ void main() {
         dolbyVisionDecoders: const <HdrDecoderInfo>[],
         p5PipelineAvailable: p5Pipeline,
         dataSpaceBridgeLoaded: true,
+        // The LYA-shaped self-report: the validated prediction evidence the
+        // confidence rule consumes for pq dataspace routes.
         dataSpaceExt: ext
-            ? const HdrDataSpaceExtInfo(id: 'lya-pq', applicable: true)
+            ? const HdrDataSpaceExtInfo(id: 'lya-pq', applicable: true,
+                validatedPredictionTransfers: <String>{'pq'})
             : null,
       );
 
@@ -248,8 +257,19 @@ void main() {
       expect(
         lines.single,
         'HdrDiag HDR classify: origin=facts codec=hevc transfer=hlg '
-        'primaries=bt.2020 meta=dolbyVision dv=8 compat=4 el=false',
+        'primaries=bt.2020 meta=dolbyVision dv=8 compat=4 el=unknown',
       );
+    });
+
+    test('explicit single-layer fact remains false in the diagnostic', () {
+      enable();
+      const HdrSourceClassifier().classify(
+        videoParams: const VideoParams(gamma: 'hlg', primaries: 'bt.2020'),
+        dolbyVisionProfile: 8,
+        dvElPresent: false,
+        hint: p84,
+      );
+      expect(lines.single, endsWith('dv=8 compat=4 el=false'));
     });
 
     test('hint without facts keeps the hint origin', () {
@@ -274,24 +294,32 @@ void main() {
   });
 
   group('predict layer', () {
-    test('full candidate list with unsupported and gate skips (golden)', () {
+    test('full candidate list with unavailable and display-gated entries '
+        '(golden)', () {
       enable();
       // P8.4 on the LYA-like snapshot with the default policy: the native DV
       // strategy is verified since 2026-10-10 but this snapshot has no DV
-      // decoder, so the realizer refuses it (nativeDvUnavailable); the RPU
-      // reshape is behind the experimental gate, direct, the PQ conversion
-      // (verified since 2026-10-10) and tone-map are feasible.
+      // decoder, so the realizer refuses it (nativeDvUnavailable). There is
+      // no maturity admission gate: the C2 RPU reshape is evaluated like
+      // every route and, with the P5 pipeline available and a PQ-capable
+      // display, realizes feasibly — the canonical stage order (C2 before
+      // C3/C4) makes it the selected route. The C3 direct and the C4
+      // HLG-to-PQ conversion stay feasible behind it; tone-map executions
+      // are blocked because the HDR10/HLG display does not authorize SDR
+      // output (display transfer gate, not a maturity gate).
       HdrRoutePlanner.plan(source: p84, capabilities: caps());
       expect(
         lines.single,
         'HdrDiag HDR predict: source=hevc,hlg,bt.2020,dolbyVision,8,4,false '
-        'class=dvP84 selected=baseLayerDirect maturity=verified '
+        'class=dvP84 selected=metadataReshape maturity=experimental '
         'presentation=nativeHdr confidence=verified playable=true '
         'candidates=nativeDolbyVision:nativeDvUnavailable,'
+        'metadataReshape:ok,'
         'baseLayerDirect:ok,'
         'baseLayerConvert:ok,'
-        'metadataReshape:experimentalStrategySkipped,'
-        'toneMapSdr:ok',
+        'toneMapSdr:displayLacksTransfer,'
+        'toneMapSdr:displayLacksTransfer,'
+        'toneMapSdr:displayLacksTransfer',
       );
       expect(
         keysOf(lines.single),
@@ -308,17 +336,19 @@ void main() {
       );
     });
 
-    test('every candidate and skip reason appears for the gated P8.4', () {
+    test('every candidate and skip reason appears for the P8.4 catalog', () {
       enable();
       HdrRoutePlanner.plan(source: p84, capabilities: caps());
       final candidates =
           lines.single.split('candidates=')[1].split(',');
       expect(candidates, <String>[
         'nativeDolbyVision:nativeDvUnavailable',
+        'metadataReshape:ok',
         'baseLayerDirect:ok',
         'baseLayerConvert:ok',
-        'metadataReshape:experimentalStrategySkipped',
-        'toneMapSdr:ok',
+        'toneMapSdr:displayLacksTransfer',
+        'toneMapSdr:displayLacksTransfer',
+        'toneMapSdr:displayLacksTransfer',
       ]);
     });
 
@@ -376,8 +406,8 @@ void main() {
       expect(
         decisions[0],
         contains('candidates=baseLayerDirect:ok,'
-            'baseLayerConvert:ok,'
-            'toneMapSdr:ok'),
+            'baseLayerConvert:unsupportedStrategy,'
+            'toneMapSdr:displayLacksTransfer'),
       );
 
       // Applied phase: same generation, verified, with the observation.
@@ -391,25 +421,23 @@ void main() {
     test('a dataspace route logs requested/path/readback in the applied '
         'decision', () async {
       enable();
-      // Force a dataspace route: an HLG-only display has no PQ support, so
-      // the conversion targets HLG (dataspace hlg) with the gate open.
+      // C4 requires an HLG input and a PQ-capable display.
       final backend = FakeBackend()
-        ..factsForOpen.add(facts(gamma: 'pq'))
-        ..factsForOpen.add(facts(gamma: 'pq'));
+        ..factsForOpen.add(facts(gamma: 'hlg'))
+        ..factsForOpen.add(facts(gamma: 'hlg'));
       final session = makeSession(
         backend: backend,
-        capabilities: caps(types: const {3}),
-        policy: const HdrRoutingPolicy(allowExperimental: true),
+        capabilities: caps(types: const {2}),
       );
-      await session.open(media, hint: hdr10);
+      await session.open(media, hint: hlg);
       await pumpEventQueueTimes(3);
 
       final applied = lines
           .where((l) => l.startsWith('HdrDiag HDR decision:'))
           .where((l) => l.contains('phase=applied'))
           .single;
-      expect(applied, contains('surface=hlg'));
-      expect(applied, contains('requested=hlg path=ext:lya-pq'));
+      expect(applied, contains('surface=pq'));
+      expect(applied, contains('requested=pq path=ext:lya-pq'));
       expect(applied, contains('readback=DATASPACE_BT2020_PQ'));
       await session.dispose();
     });
@@ -463,48 +491,42 @@ void main() {
         ..factsForOpen.add(facts(gamma: 'hlg', profile: 8))
         ..factsForOpen.add(facts(gamma: 'hlg', profile: 8))
         ..factsForOpen.add(facts(gamma: 'hlg', profile: 8));
-      final policy = const HdrRoutingPolicy(
-        preferences: {
-          HdrSourceClass.dvP84: [
-            HdrStrategy.baseLayerConvert,
-            HdrStrategy.baseLayerDirect,
-            HdrStrategy.toneMapSdr,
-          ],
-        },
-        allowExperimental: true,
-      );
       final session = makeSession(
-          backend: backend, capabilities: caps(), policy: policy);
-      await session.open(media, hint: p84);
+          backend: backend, capabilities: caps());
+      // Canonical stage order plans C2 (metadataReshape) first; its dataspace
+      // step fails and degrades to the next stage's candidate (C3 direct).
+      // The following bind timeout excludes the platform-view topology, which
+      // also blocks the C4 conversion on this HDR-capable display, so the
+      // open blocks instead of degrading to tone-map. Cross-stage preference
+      // reordering no longer exists, so the default catalog is used.
+      await expectLater(
+          session.open(media, hint: p84), throwsA(isA<HdrOutputBindTimeout>()));
       await pumpEventQueueTimes(3);
 
       final degrades =
           lines.where((l) => l.startsWith('HdrDiag HDR degrade:')).toList();
-      expect(degrades, hasLength(2));
+      expect(degrades, hasLength(1));
       expect(degrades[0],
           startsWith('HdrDiag HDR degrade: gen=1 '
-              'reason=dataSpaceApplyFailed from=baseLayerConvert '
+              'reason=dataSpaceApplyFailed from=metadataReshape '
               'to=baseLayerDirect diagnostic=HdrDataSpaceApplyException'));
-      expect(degrades[1],
-          startsWith('HdrDiag HDR degrade: gen=1 '
-              'reason=outputBindTimeout from=baseLayerDirect '
-              'to=toneMapSdr diagnostic=TimeoutException'));
-      // The applied decision reports why the final route degraded.
-      final applied = lines
-          .where((l) => l.startsWith('HdrDiag HDR decision:'))
-          .where((l) => l.contains('phase=applied'))
-          .single;
-      expect(applied, contains('degrade=outputBindTimeout'));
-      expect(applied, contains('selected=toneMapSdr'));
+      // No applied decision: the generation never reached a verified route.
+      expect(
+        lines
+            .where((l) => l.startsWith('HdrDiag HDR decision:'))
+            .where((l) => l.contains('phase=applied')),
+        isEmpty,
+      );
       await session.dispose();
     });
   });
 
   group('recover layer (session hook)', () {
-    test('capability changes log the snapshot summary; recovery never '
-        'upgrades', () async {
+    test('capability changes log the snapshot summary; recovery rebuilds '
+        'onto the HDR route', () async {
       enable();
       final backend = FakeBackend()
+        ..factsForOpen.add(facts(gamma: 'pq'))
         ..factsForOpen.add(facts(gamma: 'pq'))
         ..factsForOpen.add(facts(gamma: 'pq'))
         ..factsForOpen.add(facts(gamma: 'pq'));
@@ -523,7 +545,8 @@ void main() {
             'reason=capabilityLost from=baseLayerDirect to=toneMapSdr'),
       );
 
-      // Recovery: only the event (and its log line), no route upgrade.
+      // Recovery: the restored HDR display invalidates the resting SDR-output
+      // route, so the same capabilityLost path rebuilds the HDR route.
       await session.handleCapabilitiesChanged(caps());
       await pumpEventQueueTimes(3);
       final recovers =
@@ -534,7 +557,12 @@ void main() {
       expect(recovers[0], contains('displayHdrTypes=none'));
       expect(recovers[1], contains('gen=2'));
       expect(recovers[1], contains('displayHdrTypes=1,2,3'));
-      expect(session.report.value.actual!.strategy, HdrStrategy.toneMapSdr);
+      expect(
+        lines.where((l) => l.startsWith('HdrDiag HDR degrade:')).last,
+        startsWith('HdrDiag HDR degrade: gen=2 '
+            'reason=capabilityLost from=toneMapSdr to=baseLayerDirect'),
+      );
+      expect(session.report.value.actual!.strategy, HdrStrategy.baseLayerDirect);
       await session.dispose();
     });
   });

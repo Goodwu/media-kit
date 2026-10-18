@@ -12,10 +12,13 @@ import 'package:media_kit_video/media_kit_video.dart';
 import 'package:media_kit_video/src/video_controller/android_video_controller/android_video_controller.dart';
 
 import 'hdr_open_coordinator.dart';
+import 'hdr_decoder_review.dart';
 import 'hdr_native_dv_option_owner.dart';
 import 'hdr_native_dv_review.dart';
 import 'hdr_native_dv_review_evidence.dart';
 import 'hdr_yuv_presentation_contract.dart';
+import 'hdr_yuv_window_arm.dart';
+import 'hdr_output_resources.dart';
 
 /// Android execution backend for `HdrVideoSession` (ported from hdr_lab's
 /// `AndroidHdrPlayerBackend` with the sample identity removed): writes mpv
@@ -38,6 +41,10 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
   AndroidHdrBackend({
     required this.player,
     required this.outputSlot,
+    this.surfacePixelFormatOverride = 'rgba1010102',
+    HdrYuvWindowArm? yuvWindowArm,
+    VideoControllerConfiguration controllerConfiguration =
+        const VideoControllerConfiguration(),
     void Function(HdrNativeDvOptionDiagnostic)? onNativeDvOptionDiagnostic,
     Future<Map<String, Object?>?> Function(int handle, String transfer)?
         applyDataSpace,
@@ -47,6 +54,18 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
                   handle: handle,
                   transfer: transfer,
                 )) {
+    managedYuvCarrier = controllerConfiguration.android.managedYuvCarrier;
+    this.yuvWindowArm = yuvWindowArm ??
+        HdrYuvWindowArm(
+          ownerToken: controllerConfiguration.android.lgExperimentOwnerToken,
+          ownerGeneration: () async {
+            final current = outputSlot.current;
+            if (current == null || !current.platform.isCompleted) return null;
+            final output = await current.platform.future;
+            final generation = output.nativeSurfaceGeneration;
+            return generation > 0 ? generation : null;
+          },
+        );
     _nativeDvOptions = HdrNativeDvOptionOwner(
       readProperty: player.getProperty,
       setPropertyStrict: player.setPropertyStrict,
@@ -62,6 +81,18 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
 
   final Player player;
   final HdrOutputSlot<VideoController> outputSlot;
+  final String surfacePixelFormatOverride;
+
+  /// W1 managed YUV-carrier mode: the platform view's Surface is registered
+  /// and armed Java-side before the surface event; the Dart arm holds only
+  /// the process write gate and the diag-dataspace atom.
+  late final bool managedYuvCarrier;
+
+  /// Route-scoped YUV window presentation arms (plan C). Null keeps the
+  /// backend's behavior unchanged (no arm, no admission change).
+  late final HdrYuvWindowArm? yuvWindowArm;
+
+  HdrOutputResources<HdrOpenPlan>? get outputResources => yuvWindowArm;
 
   final Future<Map<String, Object?>?> Function(int handle, String transfer)
       _applyDataSpace;
@@ -78,6 +109,7 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
   HdrOptionSourceIdentity? _stoppedBoundary;
   int? _openFileLoadedEpoch;
   int? _openPlaylistEntryId;
+  int _ordinaryReviewSerial = 0;
   String? _dataSpaceRequested;
   String? _dataSpacePath;
   String? _dataSpaceReadback;
@@ -113,6 +145,11 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
     // the whole accepted presentation quad, before any owned property write
     // or output creation runs (fail-closed).
     HdrYuvPresentationContract.validate(route);
+    // Plan C production-gap surfacing: a YUV window route the arm manager
+    // cannot admit (no valid owner, capability or vendor device gate) fails
+    // here — the earliest open phase — instead of surfacing only as a late
+    // soft-decode mismatch at the review. Non-YUV routes never fail here.
+    yuvWindowArm?.assertRouteAdmission(plan);
     final hasPair = route.strategy == HdrStrategy.nativeDolbyVision ||
         route.vdLavcOptions != null ||
         route.mediacodecEmbedRenderMode != null;
@@ -432,6 +469,7 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
 
   @override
   Future<void> stop() async {
+    ++_ordinaryReviewSerial;
     _observedStoppedPath = false;
     _stoppedBoundary = null;
     // All possible FILE_LOADED waits happen before/after the critical section.
@@ -520,27 +558,65 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
           vd: route.vdLavcOptions!,
           renderMode: route.mediacodecEmbedRenderMode!);
     }
-    final gpuPlatform =
-        route.topology == HdrTopology.platformView && route.vo == 'gpu-next';
-    if (gpuPlatform) {
-      await _setOwned('egl-output-format', 'rgb10_a2');
+    final contract = HdrOutputContract.fromRoute(
+      route,
+      surfacePixelFormatOverride: surfacePixelFormatOverride,
+    );
+    final eglOutputFormat = contract.eglOutputFormat;
+    if (eglOutputFormat != null) {
+      await _setOwned('egl-output-format', eglOutputFormat);
     }
     // The Android video controller applies its creation-time hwdec setting
     // while it initializes. Capture and register ownership before ensure()
     // can construct that controller, or its initialization may overwrite the
     // value that resetOwnedConfiguration is meant to restore.
-    await _setOwned('hwdec', route.hwdec);
-    await outputSlot.ensure(
-      route.vo,
-      route.hwdec,
-      outputFormat: gpuPlatform ? 'rgb10_a2' : null,
-      surfaceTransfer: route.surfaceTransfer,
-    );
-    if (route.topology != HdrTopology.platformView && route.vo == 'gpu-next') {
-      final prepared = await outputSlot.current!.prepareAndroidTextureOutput();
-      debugPrint(prepared
-          ? 'HDR_TEXTURE_PREPARED layoutBound=true'
-          : 'HDR_TEXTURE_PREPARED fallback=surface_or_layout_unavailable');
+    await _setOwned('hwdec', contract.requestedHwdec);
+    // Managed sessions keep mpv's bounded software fallback armed: after 8
+    // consecutive failed hardware frames (a successful frame resets the
+    // count) the next decoder init falls back to software.
+    // Owned like `hwdec` (same placement: before output creation and before
+    // the media open) so resetOwnedConfiguration restores the captured
+    // original; a rejected write or readback fails preparation fail-closed.
+    await _setOwned('hwdec-software-fallback', '8');
+    // Plan C arm point + process admission (V2 B1 round 3): the guarded
+    // initialization admits at process level BEFORE the slot's ensure —
+    // hence before the previous output's retirement, so a rejected
+    // initializer performs no teardown at all — and the arm runs as the
+    // slot's internal preparation hook after that retirement and strictly
+    // before the new output's creation triggers VO initialization. The
+    // admission's protection spans the initialization's REAL tail: read
+    // admissions to the texture layout rebuild's completion below (the
+    // platformView topology's tail is the bind completion inside ensure —
+    // output binding is what triggers its VO initialization); the YUV write
+    // admission to the attempt's terminal cleanup.
+    final arm = yuvWindowArm;
+    Future<void> initialize() async {
+      await outputSlot.ensure(
+        contract,
+        internalPrepare: arm == null
+            ? null
+            : (_) => managedYuvCarrier
+                ? arm.prepareManagedAttempt(plan)
+                : arm.armForAttempt(plan),
+      );
+      if (route.topology != HdrTopology.platformView &&
+          route.vo == 'gpu-next') {
+        // The TEXTURE topology's initialization tail: the layout-bound
+        // rebuild (SetSurfaceSize + VO re-apply) runs INSIDE the admission's
+        // protection interval — after the read release it would again race a
+        // concurrent YUV arm.
+        final prepared =
+            await outputSlot.current!.prepareAndroidTextureOutput();
+        debugPrint(prepared
+            ? 'HDR_TEXTURE_PREPARED layoutBound=true'
+            : 'HDR_TEXTURE_PREPARED fallback=surface_or_layout_unavailable');
+      }
+    }
+
+    if (arm == null) {
+      await initialize();
+    } else {
+      await arm.initializeOutput(plan, initialize);
     }
   }
 
@@ -559,15 +635,14 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
     // offscreen contract issue nothing (default routing unchanged).
     if (HdrYuvPresentationContract.isYuvWindowRoute(route)) {
       HdrYuvPresentationContract.validate(route);
-      await _setOwned(
-          'video-output-levels',
-          HdrYuvPresentationContract.mpvOutputLevels(
-              route.offscreenTransfer!));
+      await _setOwned('video-output-levels',
+          HdrYuvPresentationContract.mpvOutputLevels(route.offscreenTransfer!));
     }
     if (route.topology == HdrTopology.platformView) {
       final output = await outputSlot.current!.platform.future;
-      await output.waitUntilCurrentOutputBound
-          .timeout(const Duration(seconds: 10));
+      await HdrOutputBindTimeout.waitFor(
+        output.waitUntilCurrentOutputBound.timeout(const Duration(seconds: 10)),
+      );
       final transfer = route.surfaceTransfer;
       if (transfer != null) {
         final handle = await player.handle;
@@ -594,10 +669,15 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
             reason: HdrDegradeReason.dataSpaceApplyFailed,
           );
         }
-        // Only the evidence-pinned API24 LG extension may accept a setter
-        // without readback. This is not verified presentation evidence.
-        final bool acceptedWithoutReadback = acceptsUnverifiedLgSetter(
-            plan.capabilities, transfer, _dataSpacePath, _dataSpaceReadback);
+        // Only an extension that self-reports the setter-only exception for
+        // this exact transfer may accept a setter without readback. This is
+        // not verified presentation evidence.
+        final bool acceptedWithoutReadback = acceptsUnverifiedExtSetter(
+            plan.capabilities,
+            transfer,
+            result?['applied'] == true,
+            _dataSpacePath,
+            _dataSpaceReadback);
         if (_dataSpacePath != 'surfaceControl' &&
             !acceptedWithoutReadback &&
             !dataSpaceReadbackMatches(transfer, _dataSpaceReadback)) {
@@ -670,14 +750,30 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
     }
   }
 
-  static bool acceptsUnverifiedLgSetter(HdrCapabilities capabilities,
-      String transfer, String? path, String? readback) {
-    return capabilities.sdkInt == 24 &&
-        capabilities.dataSpaceExt?.id == 'lg-pq' &&
-        capabilities.dataSpaceExt?.applicable == true &&
-        path == 'ext:lg-pq' &&
-        (transfer == 'pq' || transfer == 'pq-itu') &&
-        (readback == null || readback.isEmpty || readback == 'none');
+  /// The limited acceptance of a setter that succeeded without a readback:
+  /// every condition is a capability judgment, never a device-name
+  /// judgment. ALL of these must hold —
+  ///
+  /// 1. a registered extension that is applicable;
+  /// 2. the requested transfer explicitly declared in the extension's
+  ///    `setterOnlyTransfers` (an undeclared transfer never qualifies);
+  /// 3. the actual apply succeeded ([applied], already gated by the caller
+  ///    before this check);
+  /// 4. the actual apply path belongs to the currently registered extension
+  ///    (`ext:<id>` — a same-provider identity association only, never a
+  ///    device-behavior choice);
+  /// 5. the readback is genuinely missing (null/empty/`none`), not present
+  ///    with a wrong value — a present-but-wrong readback goes through the
+  ///    mismatch gate instead.
+  ///
+  /// This is not verified presentation evidence.
+  static bool acceptsUnverifiedExtSetter(HdrCapabilities capabilities,
+      String transfer, bool applied, String? path, String? readback) {
+    final HdrDataSpaceExtInfo? ext = capabilities.dataSpaceExt;
+    if (ext == null || !ext.applicable || !applied) return false;
+    if (!ext.setterOnlyTransfers.contains(transfer)) return false;
+    if (path != 'ext:${ext.id}') return false;
+    return readback == null || readback.isEmpty || readback == 'none';
   }
 
   @override
@@ -697,6 +793,7 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
     }
     _observedStoppedPath = false;
     _stoppedBoundary = null;
+    final reviewSerial = ++_ordinaryReviewSerial;
     final media = plan.media;
     // Drop the previous media's cached video-params so the review waits for
     // this open's report instead of classifying from a stale source.
@@ -748,15 +845,20 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
         _nativeDvPendingOpen = null;
         _nativeDvPendingOwnStopIssued = false;
       } else {
-        await player.open(playable, play: play);
-        final playlistPath = await player.getProperty('playlist/0/filename');
-        final entryId = int.tryParse(await player.getProperty('playlist/0/id'));
-        if (playlistPath != media.uri || entryId == null) {
-          throw StateError(
-              'Opened playlist entry differs from requested source: '
-              'path=$playlistPath id=$entryId');
+        final entry = await captureDecoderOpenUnderLock(
+          lock: player.lock,
+          mediaUri: media.uri,
+          fileLoadedEpoch: () => player.fileLoadedEpoch,
+          openWithoutLock: () =>
+              player.open(playable, play: play, synchronized: false),
+          readProperty: player.getProperty,
+          isCurrent: () => _ordinaryReviewSerial == reviewSerial,
+        );
+        if (_ordinaryReviewSerial != reviewSerial) {
+          throw const HdrDecoderReviewFailure('Superseded ordinary open');
         }
-        _openPlaylistEntryId = entryId;
+        _openFileLoadedEpoch = entry.openedAfterEpoch;
+        _openPlaylistEntryId = entry.playlistEntryId;
       }
     } catch (error, stack) {
       if (!identityConfirmationAttempted &&
@@ -827,23 +929,29 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
       _lastHwdecCurrent = facts.hwdecCurrent;
       return facts;
     }
-    return gatherReviewFacts(
+    final reviewSerial = _ordinaryReviewSerial;
+    final facts = await gatherDecoderReviewFacts(
+      lock: player.lock,
       mediaUri: plan.media.uri,
-      expectedHwdec: plan.route.hwdec,
       readProperty: player.getProperty,
-      latestVideoParams: () => _latestVideoParams,
       waitForFileLoadedEntry: player.waitForFileLoadedEntryAfter,
       playlistEntryId: entryId,
-      fileLoadedEpoch: before,
-    ).then((facts) {
-      _lastHwdecCurrent = facts.hwdecCurrent;
-      return facts;
-    });
+      openedAfterEpoch: before,
+      fileLoadedEpoch: () => player.fileLoadedEpoch,
+      isCurrent: () => _ordinaryReviewSerial == reviewSerial,
+    );
+    if (_ordinaryReviewSerial != reviewSerial) {
+      throw const HdrDecoderReviewFailure('Superseded decoder result');
+    }
+    _lastHwdecCurrent = facts.hwdecCurrent;
+    return facts;
   }
 
   /// Gathers the decoder facts after the open's file-loaded boundary (plan
   /// 1.4 step 8). Static with injected readers so VM tests can drive the
-  /// polling without a native Player; [reviewFacts] delegates to it.
+  /// polling without a native Player. This legacy test seam is not the
+  /// production [reviewFacts] path; ordinary production review uses
+  /// [gatherDecoderReviewFacts] and current scalar source/frame evidence.
   ///
   /// Both review inputs are awaited: `dolby-vision-profile` is read after
   /// the decoder reports, and video-params are polled until they carry the
@@ -956,6 +1064,12 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
         : hdrVividRaw == 'no'
             ? false
             : null;
+    final hdr10PlusRaw = await readProperty('video-params/hdr10-plus');
+    final hdr10Plus = hdr10PlusRaw == 'yes'
+        ? true
+        : hdr10PlusRaw == 'no'
+            ? false
+            : null;
     return HdrReviewFacts(
       videoParams: latestVideoParams(),
       dolbyVisionProfile: profile,
@@ -965,6 +1079,7 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
       dvCompatibilityId: dvCompatibilityId,
       dvElPresent: dvElPresent,
       hdrVivid: hdrVivid,
+      hdr10Plus: hdr10Plus,
     );
   }
 
@@ -979,6 +1094,7 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
   }
 
   Future<void> dispose() async {
+    ++_ordinaryReviewSerial;
     await _videoParamsSubscription?.cancel();
     _videoParamsSubscription = null;
   }

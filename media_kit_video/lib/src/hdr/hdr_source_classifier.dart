@@ -34,10 +34,13 @@ import 'hdr_source_descriptor.dart';
 /// (`current-tracks/video/dolby-vision-el-present`); when the review
 /// reports them, they are authoritative — the container record is the DV
 /// signaling itself — and the base-layer transfer inference is only the
-/// fallback for a `null` fact. HDR Vivid is observable as a per-frame
-/// side-data fact (`video-params/hdr-vivid`): a reported `true` classifies
-/// a profile-less source as [HdrDynamicMetadata.hdrVivid]. HDR10+ remains
-/// not observable through mpv and stays [HdrDynamicMetadata.none].
+/// fallback for a `null` compatibility fact. A missing enhancement-layer
+/// fact stays unknown for every supported DV profile. HDR Vivid is
+/// observable as a per-frame side-data fact (`video-params/hdr-vivid`): a
+/// reported `true` classifies a profile-less source as
+/// [HdrDynamicMetadata.hdrVivid]. The fork also exposes per-frame HDR10+
+/// side-data presence as `video-params/hdr10-plus`. Neither positive fact
+/// certifies that the metadata was actually mapped or forwarded.
 ///
 /// When no decoder facts are available at all ([VideoParams] and the profile
 /// both absent), the optional [hint] descriptor is returned as-is so a hint
@@ -55,14 +58,14 @@ class HdrSourceClassifier {
   /// [dolbyVisionProfile] is the raw integer `dolby-vision-profile` mpv
   /// property (`5`, `8`, `10`, ...). [dvCompatibilityId] and [dvElPresent]
   /// are the container facts from the fork's compatibility-id/el-present
-  /// properties; when reported they take priority over the base-layer
-  /// inference (the container record is the DV signaling itself) and a
-  /// `null` fact falls back to the profile/gamma defaults. [hdrVivid] is
-  /// the per-frame side-data fact from `video-params/hdr-vivid`; it applies
-  /// only to profile-less sources (a DV profile and HDR Vivid side data
-  /// never co-occur — when both appear, the DV branch wins). Passing
-  /// hint-less facts produces a description with an empty codec; pass the
-  /// track codec through a hint to keep it populated.
+  /// properties; when reported they take priority over inference. A missing
+  /// compatibility id may use the profile/gamma defaults; a missing EL
+  /// fact remains unknown and must not authorize native single-layer DV.
+  /// [hdrVivid] is the per-frame side-data fact from `video-params/hdr-vivid`;
+  /// it applies only to profile-less sources (a DV profile and HDR Vivid
+  /// side data never co-occur — when both appear, the DV branch wins).
+  /// Passing hint-less facts produces a description with an empty codec;
+  /// pass the track codec through a hint to keep it populated.
   HdrSourceDescriptor classify({
     VideoParams? videoParams,
     int? dolbyVisionProfile,
@@ -70,8 +73,10 @@ class HdrSourceClassifier {
     int? dvCompatibilityId,
     bool? dvElPresent,
     bool? hdrVivid,
+    bool? hdr10Plus,
   }) {
-    final bool hasFacts = videoParams != null || dolbyVisionProfile != null;
+    final bool hasFacts = videoParams != null || dolbyVisionProfile != null ||
+        hdrVivid == true || hdr10Plus == true;
     final HdrSourceDescriptor descriptor = _classify(
       videoParams: videoParams,
       dolbyVisionProfile: dolbyVisionProfile,
@@ -79,6 +84,7 @@ class HdrSourceClassifier {
       dvCompatibilityId: dvCompatibilityId,
       dvElPresent: dvElPresent,
       hdrVivid: hdrVivid,
+      hdr10Plus: hdr10Plus,
     );
     // `HDR classify:` layer (R4.3): the description plus where it came from.
     // Short-circuits inside while disabled; no strings are built here.
@@ -96,11 +102,13 @@ class HdrSourceClassifier {
     int? dvCompatibilityId,
     bool? dvElPresent,
     bool? hdrVivid,
+    bool? hdr10Plus,
   }) {
     // No decoder facts yet: the hint (if any) is the only description
     // available. Without a hint the source stays undescribed/SDR until the
     // decoder reports.
-    if (videoParams == null && dolbyVisionProfile == null) {
+    if (videoParams == null && dolbyVisionProfile == null &&
+        hdrVivid != true && hdr10Plus != true) {
       return hint ?? const HdrSourceDescriptor();
     }
     final gamma = videoParams?.gamma;
@@ -118,19 +126,13 @@ class HdrSourceClassifier {
       final bool? enhancementLayer;
       switch (profile) {
         case 5:
-          // Native-DV eligibility must not infer single-layer structure from
-          // a missing container fact.
-          enhancementLayer = dvElPresent;
-          break;
         case 7:
-          // The profile-7 enhancement-layer presence is observable now
-          // (`el-present`); the record does not distinguish FEL/MEL, and a
-          // null fact stays unknown.
-          enhancementLayer = dvElPresent;
-          break;
         case 8:
         case 10:
-          enhancementLayer = dvElPresent ?? false; // Single layer default.
+          // Preserve the actual container fact. In particular, P8's missing
+          // EL field cannot become false before native-DV admission checks
+          // it. Presence alone also does not distinguish P7 MEL from FEL.
+          enhancementLayer = dvElPresent;
           break;
         default:
           enhancementLayer = null;
@@ -146,15 +148,18 @@ class HdrSourceClassifier {
         enhancementLayer: enhancementLayer,
       );
     }
-    // Profile-less sources: HDR Vivid side data observed on a frame is the
-    // only detectable dynamic metadata; false/unknown stays none.
+    // DV wins over frame metadata; for profile-less streams Vivid takes
+    // precedence over HDR10+ in a conflicting observation. Persistent
+    // affirmative format conflicts are rejected by HdrSourceFacts.
     return HdrSourceDescriptor(
       codec: hint?.codec ?? '',
       transfer: gamma,
       primaries: primaries,
       dynamicMetadata: hdrVivid == true
           ? HdrDynamicMetadata.hdrVivid
-          : HdrDynamicMetadata.none,
+          : hdr10Plus == true
+              ? HdrDynamicMetadata.hdr10Plus
+              : HdrDynamicMetadata.none,
       // Base-layer-only sources never carry an enhancement layer.
       enhancementLayer: false,
     );
@@ -187,11 +192,7 @@ class HdrSourceClassifier {
   /// Base-layer compatibility-id inference for profiles 8 and 10, where the
   /// profile alone does not identify the cross-compatibility family:
   /// `pq` → 1 (8.1), `hlg` → 4 (8.4), SDR gammas (`bt.1886`/`srgb`/...) →
-  /// 2 (8.2). `null` gamma stays unknown.
-  int? _compatibilityIdFromBaseLayer(String? gamma) {
-    if (gamma == null) return null;
-    if (gamma == 'pq') return 1; // 8.1
-    if (gamma == 'hlg') return 4; // 8.4
-    return 2; // 8.2 (SDR base layer)
-  }
+  /// 2 (8.2). Missing and unrecognized gamma values stay unknown.
+  int? _compatibilityIdFromBaseLayer(String? gamma) =>
+      HdrSourceDescriptor.compatibilityFromTransfer(gamma);
 }

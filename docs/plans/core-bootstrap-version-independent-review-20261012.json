@@ -1,0 +1,220 @@
+{
+  "schema": 1,
+  "task": "MK-ROUTING-20261011",
+  "slice": "CORE-BOOTSTRAP-VERSION-01",
+  "reviewer": "/root/web_shuffle_review",
+  "verdict": "PASS_WITH_PENDING_HOSTED",
+  "unresolved_p1_p2": [],
+  "review_scope": "Independent read-only review of the six final App files. The reviewer changed no repository files and made no repository commits, pushes or public comments. Tests used temporary fixtures.",
+  "baseline": {
+    "repository": "https://github.com/Goodwu/PiliPlusX",
+    "branch": "routing/MK-ROUTING-20261011",
+    "commit": "1fcc367cd98e77a217f8a70a388fcfcdaf92aad4",
+    "media_kit_context_commit_not_exercised": "a73d570b633a949aab6a31e8f68ec03a13643c31",
+    "vector_scope": "This report identifies the reviewed worktree file bytes. It does not attest a future integration commit or a hosted source/native build vector."
+  },
+  "public_claims_read_back": [
+    {
+      "id": 6127809360,
+      "url": "https://github.com/Goodwu/media-kit/pull/4#issuecomment-6127809360",
+      "created_at": "2026-10-12T15:55:44Z",
+      "scope": "Pre-install exact Flutter version reader, composite action wiring, post-install exact version recheck, tests."
+    },
+    {
+      "id": 6127846798,
+      "url": "https://github.com/Goodwu/media-kit/pull/4#issuecomment-6127846798",
+      "created_at": "2026-10-12T15:58:02Z",
+      "scope": "Add the new helper to the Linux fixed consumer source sets and corresponding completeness fixtures without changing native acceptance."
+    }
+  ],
+  "frozen_files": [
+    {
+      "path": ".github/actions/routing-bootstrap/action.yml",
+      "bytes": 3934,
+      "lines": 86,
+      "sha256": "218606a4744edada180389019ed0441a2f164c4f37e694f79ae92b24eb687d0a",
+      "blob": "6f22053c3a6d6356b9f967625271997075a204eb"
+    },
+    {
+      "path": "scripts/prepare_routing_ci.py",
+      "bytes": 30209,
+      "lines": 510,
+      "sha256": "460d94b21d6798a4efa0dede74b796bf9c47259dfa9dd9869878a35c58e50340",
+      "blob": "94684e1b03435f3e43c2c64fa87104a325a8534c"
+    },
+    {
+      "path": "scripts/routing_flutter_version.py",
+      "bytes": 3644,
+      "lines": 83,
+      "sha256": "6077ff2fd6afd37ebec54708bbfacf3c7189bdfa8758eaf5a32d5a85989d4f9e",
+      "blob": "b79e05e27a1371c4568eb1d4bd5823c99d19f7dd"
+    },
+    {
+      "path": "test/routing_flutter_version_test.py",
+      "bytes": 5327,
+      "lines": 103,
+      "sha256": "8beaaeb4cf92e21d267ee7696491b9e92e2466d9fe2893b9437d8fd0990d48af",
+      "blob": "1484105106b1df29a6f032a625c7d767f70d9a28"
+    },
+    {
+      "path": "scripts/verify_routing_linux_native.py",
+      "bytes": 67002,
+      "lines": 1184,
+      "sha256": "66d1d3487396e4d7ee1f19dc210891ec94ef8b58d3d74ee23724869a073d00c1",
+      "blob": "18e3428ba2f8c43e6f05c1d1f87c37ea28219590"
+    },
+    {
+      "path": "test/verify_routing_linux_native_test.py",
+      "bytes": 29316,
+      "lines": 461,
+      "sha256": "f4c57e56fd7187ec21524e8e21417471cd9caa3a4b8c98d57d80245c813fa9d3",
+      "blob": "c27a664f0c46f9c8e549daba34f4b00352eb324c"
+    }
+  ],
+  "file_hashes_rechecked_after_tests": true,
+  "final_source_review": [
+    {
+      "area": "Version reader",
+      "file": "scripts/routing_flutter_version.py",
+      "anchors": "flutter_version, lines 10-65",
+      "result": "PASS",
+      "reasoning": "Uses only Python's standard library. Requires exactly one bare, block-style top-level environment and unique two-space, single-line sdk/flutter entries inside it. The selected flutter value is an unquoted ASCII X.Y.Z with optional trailing horizontal whitespace. Missing, duplicate, range, channel, nested, quoted and ambiguous pins fail.",
+      "restricted_syntax": "Every non-comment line is checked for the repository's bounded block form. Quoted values must close on the same line; inline arrays are limited to a closed bare-word list to preserve the current platforms syntax. Multi-line quote/flow, anchors/tags, directives and non-bare keys are refused. This deliberately does not implement general YAML or validate all pubspec semantics.",
+      "current_source_acceptance": "The real checked-out App pubspec is accepted and returns 3.47.2. The value is read from the file, not hardcoded.",
+      "limitation": "Future pubspec syntax outside this explicit subset must update the contract and tests together. The helper does not claim to be a general YAML parser."
+    },
+    {
+      "area": "PowerShell composite action",
+      "file": ".github/actions/routing-bootstrap/action.yml",
+      "anchors": "flutter-pin step, lines 37-47; Flutter action input, lines 60-66",
+      "result": "PASS_STATIC_PENDING_HOSTED",
+      "reasoning": "actions/setup-python remains before the pin reader. PowerShell obtains both paths with Join-Path and passes them as separate native-command arguments. The helper emits one ASCII version line; LASTEXITCODE is checked immediately before any GITHUB_OUTPUT write. An unavailable command is stopped by ErrorActionPreference, and helper errors exit nonzero rather than exporting an empty or fallback version.",
+      "unchanged": "Private SDK/cache paths, cache=false, pub-cache=false, line-ending setup, exact source arguments and later prepare step remain in place.",
+      "not_executed": "No pwsh executable exists on this host. Actual PowerShell execution and Windows action output propagation require the new hosted run."
+    },
+    {
+      "area": "Upstream explicit-version path",
+      "result": "PASS_FOR_EXACT_REVIEWED_UPSTREAM_COMMIT",
+      "upstream_commit": "1a449444c387b1966244ae4d4f8c696479add0b2",
+      "sources": [
+        "https://github.com/subosito/flutter-action/blob/1a449444c387b1966244ae4d4f8c696479add0b2/action.yaml",
+        "https://github.com/subosito/flutter-action/blob/1a449444c387b1966244ae4d4f8c696479add0b2/setup.sh"
+      ],
+      "reasoning": "Read the actual upstream files, not only the action README. action.yaml installs yq on Windows only when flutter-version-file is nonempty and not an FVM JSON file. setup.sh checks for and calls yq only on the nonempty version-file path. Passing flutter-version with an empty default version-file avoids that dependency; it still selects and installs an SDK normally.",
+      "source_retrieval": "The upstream manifest is action.yaml; action.yml returned 404. Both final canonical action.yaml and setup.sh were successfully fetched at the exact SHA.",
+      "future_run_limit": "The project still refers to upstream @v2 as before. New hosted receipts must record its actually resolved commit; this report's upstream source audit applies to the explicit SHA above."
+    },
+    {
+      "area": "Post-install SDK/source verification",
+      "file": "scripts/prepare_routing_ci.py",
+      "anchors": "import at line 18; Bootstrap.prepare_sdk frameworkVersion comparison around 394-398; prepare around 408-448",
+      "result": "PASS",
+      "reasoning": "The existing frameworkVersion equality gate now calls the same flutter_version reader as the pre-install step. Unknown SDK modifications, independent private .git ownership, source HEAD/tree and clean checks, package roots, both SdkOnly/PackagesOnly invocations, SDK patch identity and final source freshness verification remain in place. No patch bytes, expected SDK patch hash, platform gate, receipt status or native assertion is weakened.",
+      "import_contract": "The helper imports only standard-library modules and has no reverse dependency on prepare_routing_ci. Existing CLI execution from scripts and test module path setup resolve it without a new package dependency.",
+      "related_existing_test": "test/prepare_routing_ci_test.py::BootstrapTest.test_wrong_toolchain_rejected_before_app_resolution remains present; the broader bootstrap suite is root's separate verification scope."
+    },
+    {
+      "area": "Linux consumer provenance",
+      "file": "scripts/verify_routing_linux_native.py",
+      "anchors": "CONSUMER_SOURCE_FILES and REQUIRED_CONSUMER_PATHS; compute_consumer_source_closure and require_consumer_source_closure",
+      "result": "PASS",
+      "reasoning": "The helper is included in both the fixed allowed-input set and the fixed required-input set. The existing canonical per-file hash and exact closure comparison detect a changed helper; the required set detects its deletion from the Git input inventory. Only two constant-set entries changed in production. No accepted ledger, member list, ELF inspection, source approval or native decision was changed.",
+      "fixture_review": "Both existing real-Git source fixtures include the new member. The production-source mutation test now first changes the helper, expects the approved-closure mismatch, restores it, removes it from Git, expects the missing-fixed-input error, then restores it before the preexisting production-source mutations. The ledger-only-commit test still proves that an unchanged source closure survives a documentation/ledger head change.",
+      "other_platform_boundary": "The macOS fixed seven-gate identity set describes native gate executables and does not include the source bootstrap driver; the new pin reader is not one of those native gates. No equivalent Windows fixed bootstrap-consumer set was found in current scripts. The App's existing clean HEAD/tree checks bind tracked scripts for all platforms, while sourceHashes itself only enumerates App lib/test files. Do not claim the new helper is individually listed in sourceHashes."
+    }
+  ],
+  "findings_resolved_before_freeze": [
+    {
+      "id": "B01",
+      "severity": "P2",
+      "finding": "Initial uncommitted reader ignored quoted duplicate environment/flutter keys and accepted a conflicting pin.",
+      "observed_inputs": [
+        "environment:\n  flutter: 3.47.2\n\"environment\":\n  flutter: 9.9.9\n",
+        "environment:\n  flutter: 3.47.2\n  \"flutter\": 9.9.9\n"
+      ],
+      "observed_initial_reader_output": "3.47.2",
+      "resolution": "Reject non-bare keys throughout the restricted input and require unique environment entries.",
+      "final_verified": true
+    },
+    {
+      "id": "B02",
+      "severity": "P2",
+      "finding": "Initial uncommitted reader accepted an exact first line followed by a multi-line Flutter scalar continuation.",
+      "observed_input": "environment:\n  sdk: any\n  flutter: 3.47.2\n    >=9.9.9\n",
+      "observed_initial_reader_output": "3.47.2",
+      "resolution": "Require each environment entry to be a two-space single-line sdk/flutter field and reject continuation forms.",
+      "final_verified": true
+    },
+    {
+      "id": "B03",
+      "severity": "P2",
+      "finding": "Intermediate reader accepted a fake environment embedded inside another multi-line quoted scalar; that YAML had no actual environment mapping.",
+      "observed_input": "description: \"hello\nenvironment:\n  flutter: 3.47.2\nend: world\"\n",
+      "observed_intermediate_reader_output": "3.47.2",
+      "resolution": "Validate single-line scalar closure on every line, including nested entries and list mappings; reject complex or multiline flow.",
+      "final_verified": true
+    }
+  ],
+  "direct_local_verification": {
+    "python_version_tests": {
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B -m unittest test.routing_flutter_version_test -v",
+      "working_directory": "/workspace/scratch/bb7931e64549/checkouts/PiliPlusX",
+      "exit_code": 0,
+      "result": "11 tests passed",
+      "output": "test_cli_emits_only_the_version_and_accepts_paths_with_spaces (test.routing_flutter_version_test.FlutterVersionTest.test_cli_emits_only_the_version_and_accepts_paths_with_spaces) ... ok\ntest_cli_refuses_bad_or_missing_inputs_without_version_output (test.routing_flutter_version_test.FlutterVersionTest.test_cli_refuses_bad_or_missing_inputs_without_version_output) ... ok\ntest_comments_blank_lines_and_crlf_do_not_change_pin (test.routing_flutter_version_test.FlutterVersionTest.test_comments_blank_lines_and_crlf_do_not_change_pin) ... ok\ntest_duplicate_or_inline_environment_is_rejected (test.routing_flutter_version_test.FlutterVersionTest.test_duplicate_or_inline_environment_is_rejected) ... ok\ntest_duplicate_pin_is_rejected_even_if_one_value_is_invalid (test.routing_flutter_version_test.FlutterVersionTest.test_duplicate_pin_is_rejected_even_if_one_value_is_invalid) ... ok\ntest_exact_pin_belongs_to_environment_not_dependencies (test.routing_flutter_version_test.FlutterVersionTest.test_exact_pin_belongs_to_environment_not_dependencies) ... ok\ntest_missing_environment_cannot_borrow_a_dependency_version (test.routing_flutter_version_test.FlutterVersionTest.test_missing_environment_cannot_borrow_a_dependency_version) ... ok\ntest_missing_or_nested_flutter_is_rejected (test.routing_flutter_version_test.FlutterVersionTest.test_missing_or_nested_flutter_is_rejected) ... ok\ntest_quoted_keys_and_scalar_continuations_cannot_hide_another_pin (test.routing_flutter_version_test.FlutterVersionTest.test_quoted_keys_and_scalar_continuations_cannot_hide_another_pin) ... ok\ntest_repository_contract_and_inline_platform_lists_are_supported (test.routing_flutter_version_test.FlutterVersionTest.test_repository_contract_and_inline_platform_lists_are_supported) ... ok\ntest_unpinned_or_unsupported_syntax_is_rejected (test.routing_flutter_version_test.FlutterVersionTest.test_unpinned_or_unsupported_syntax_is_rejected) ... ok\n\n----------------------------------------------------------------------\nRan 11 tests in 0.101s\n\nOK\n"
+    },
+    "native_source_closure_tests": {
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B -m unittest test.verify_routing_linux_native_test.LinuxNativeGateTest.test_nonempty_approved_closure_survives_ledger_only_commit_head_change test.verify_routing_linux_native_test.LinuxNativeGateTest.test_consumer_closure_rejects_modified_added_or_deleted_production_source -v",
+      "working_directory": "/workspace/scratch/bb7931e64549/checkouts/PiliPlusX",
+      "exit_code": 0,
+      "result": "2 targeted real-Git fixture tests passed; this is not native compilation or approval",
+      "output": "test_nonempty_approved_closure_survives_ledger_only_commit_head_change (test.verify_routing_linux_native_test.LinuxNativeGateTest.test_nonempty_approved_closure_survives_ledger_only_commit_head_change) ... ok\ntest_consumer_closure_rejects_modified_added_or_deleted_production_source (test.verify_routing_linux_native_test.LinuxNativeGateTest.test_consumer_closure_rejects_modified_added_or_deleted_production_source) ... ok\n\n----------------------------------------------------------------------\nRan 2 tests in 0.175s\n\nOK\n"
+    },
+    "negative_probes": {
+      "quoted_duplicate_environment": {
+        "rejected": true,
+        "error": "App pubspec requires bare block mapping keys"
+      },
+      "quoted_duplicate_flutter": {
+        "rejected": true,
+        "error": "App pubspec requires bare block mapping keys"
+      },
+      "multiline_flutter_value": {
+        "rejected": true,
+        "error": "App pubspec requires bare block mapping keys"
+      },
+      "fake_environment_in_top_level_quoted_scalar": {
+        "rejected": true,
+        "error": "App pubspec requires single-line scalar values"
+      },
+      "fake_environment_in_nested_quoted_scalar": {
+        "rejected": true,
+        "error": "App pubspec requires single-line scalar values"
+      },
+      "explicit_yaml_environment_key": {
+        "rejected": true,
+        "error": "App pubspec requires bare block mapping keys"
+      }
+    },
+    "current_real_pubspec_pin": "3.47.2",
+    "tracked_diff_check": "git diff --check passed for the four tracked changed files; two newly added file hashes are separately frozen above.",
+    "pwsh_available": null,
+    "no_repository_source_or_git_mutation_by_reviewer": true,
+    "new_file_whitespace_scan": "Both new files have a final newline and no trailing whitespace."
+  },
+  "not_attested": [
+    "The full App Python suite is not attested by this reviewer. The root's broader runs and their environmental failures are separate evidence; the 13 direct passing tests here must not be labeled as a complete suite.",
+    "No hosted SDK installation or PowerShell execution was performed by this reviewer.",
+    "No Dart/Flutter test, bundle, native build, device HDR, owner/carrier or sustained-performance acceptance is claimed.",
+    "Earlier App/media-kit CI vectors do not validate these worktree changes.",
+    "Removing the version-file yq dependency does not authorize an unapproved native candidate or change SOURCE_PREPARED_NATIVE_BLOCKED semantics."
+  ],
+  "next_acceptance": {
+    "stable_commit_owner": "/root",
+    "required_hosted_evidence": "Record the exact new App/media-kit input commits and trees before each run, resolved upstream action SHA, run attempt/job/artifact identity, source.txt and fresh bootstrap receipts. Confirm that the Windows pin step and actual SDK installation succeed, then retain the unchanged post-install exact-version/source/SDK patch checks.",
+    "permission_or_native_handoff_needed_for_this_code_review": false,
+    "primary_prs_remain_open_unmerged_unreleased": true
+  },
+  "recorded_at_utc": "2026-10-12T16:07:15.943891+00:00",
+  "frozen_files_rechecked_at_report_write": true
+}

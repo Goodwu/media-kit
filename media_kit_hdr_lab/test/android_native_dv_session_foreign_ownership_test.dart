@@ -1173,7 +1173,12 @@ class _FakeSession implements HdrVideoSession {
 
   @override
   Future<void> open(Media media,
-      {HdrSourceDescriptor? hint, bool play = true, Duration? start}) async {
+      {HdrSourceDescriptor? hint,
+      VideoSourceSpec? sourceSpec,
+      VideoOutputTarget? target,
+      EffectiveVideoRouteOptions? options,
+      bool play = true,
+      Duration? start}) async {
     sessionOpenCalls++;
     _report.value = _report.value.copyWith(generation: generation + 1);
   }

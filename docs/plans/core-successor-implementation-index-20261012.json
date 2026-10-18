@@ -1,0 +1,519 @@
+{
+  "checkedAt": "2026-10-12T14:35:45.005152+00:00",
+  "scope": "Read-only implementation-presence index; not full semantic review and no test/native build executed",
+  "repositories": {
+    "PiliPlusX": {
+      "localHead": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+      "branch": "routing/MK-ROUTING-20261011"
+    },
+    "media-kit": {
+      "localHead": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+      "branch": "routing/MK-ROUTING-20261011"
+    }
+  },
+  "files": [
+    {
+      "repository": "Goodwu/media-kit",
+      "head": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+      "path": "media_kit_video/lib/src/routing/video_route_capabilities.dart",
+      "meaning": "Independent target/source query",
+      "gitBlob": "879ab101778a636ad32594038f818dd4d7c8672c",
+      "workingFileGitBlob": "879ab101778a636ad32594038f818dd4d7c8672c",
+      "matchesHeadBlob": true,
+      "sha256": "8ac2358d923e288dcc41c5347a59545115f1a8162839062d58b1a86f115dec6d",
+      "lineRanges": [
+        {
+          "start": 86,
+          "end": 109,
+          "text": "  static Future<VideoRouteCapabilities> query({\n    VideoOutputTarget? target,\n    Iterable<VideoSourceSpec> sources = const [],\n  }) async {\n    // Bound before deduplicating: callers cannot pass an unbounded iterable.\n    final unique = <String, VideoSourceSpec>{};\n    var count = 0;\n    for (final source in sources) {\n      if (++count > 128) {\n        throw ArgumentError('At most 128 source specifications per query');\n      }\n      unique[source.key] = source;\n    }\n    Map<Object?, Object?>? raw;\n    try {\n      raw = await _channel.invokeMapMethod<Object?, Object?>(\n        'VideoRouteCapabilities.Get',\n        <String, Object?>{\n          'schema': 1,\n          'target': target?.toMap(),\n          'sources': unique.values\n              .map((s) => s.toMap())\n              .toList(growable: false),\n        },"
+        }
+      ]
+    },
+    {
+      "repository": "Goodwu/media-kit",
+      "head": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+      "path": "media_kit_video/android/src/main/java/com/alexmercerind/media_kit_video/MediaKitVideoPlugin.java",
+      "meaning": "Android platform channel dispatch",
+      "gitBlob": "45437af035c790f0a1f63480e83bcc540228f6a8",
+      "workingFileGitBlob": "45437af035c790f0a1f63480e83bcc540228f6a8",
+      "matchesHeadBlob": true,
+      "sha256": "2f0f3b784048419f03c31cdc94d90e5f1e985945486c9182ae3a2c25dfcd3205",
+      "lineRanges": [
+        {
+          "start": 200,
+          "end": 212,
+          "text": "            case \"VideoRouteCapabilities.Get\": {\n                try {\n                    if (!(call.arguments instanceof java.util.Map)) {\n                        throw new IllegalArgumentException(\"Expected capability query map\");\n                    }\n                    result.success(VideoRouteCapabilities.get(applicationContext,\n                            applicationDisplay(), (java.util.Map<?, ?>) call.arguments));\n                } catch (IllegalArgumentException e) {\n                    result.error(\"invalid_source_query\", e.getMessage(), null);\n                } catch (RuntimeException | LinkageError e) {\n                    result.error(\"capability_query_failed\", e.getClass().getSimpleName(), null);\n                }\n                break;"
+        }
+      ]
+    },
+    {
+      "repository": "Goodwu/media-kit",
+      "head": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+      "path": "media_kit_video/lib/src/hdr/hdr_source_facts.dart",
+      "meaning": "F01 immutable source plus independent decoded-frame observations",
+      "gitBlob": "37162cab20774352baf3e5f0aa96067a3d7782c6",
+      "workingFileGitBlob": "37162cab20774352baf3e5f0aa96067a3d7782c6",
+      "matchesHeadBlob": true,
+      "sha256": "3cdde07a61e53566a43506eb29ba2cb822b179865d88615d17d3b6d10f719fe5",
+      "lineRanges": [
+        {
+          "start": 47,
+          "end": 60,
+          "text": "class HdrSourceFacts {\n  HdrSourceFacts._({\n    required this.initialHint,\n    required this.source,\n    required Map<HdrSourceField, HdrSourceFactOrigin> origins,\n    required List<HdrSourceFactConflict> conflicts,\n    this.videoParams,\n    this.hdrVividOnFrame,\n    this.reviewCount = 0,\n  }) : origins = Map.unmodifiable(origins),\n       conflicts = List.unmodifiable(conflicts);\n\n  factory HdrSourceFacts.fromHint(HdrSourceDescriptor? hint) {\n    final source = hint ?? const HdrSourceDescriptor();"
+        },
+        {
+          "start": 84,
+          "end": 103,
+          "text": "  final HdrSourceDescriptor? initialHint;\n  final HdrSourceDescriptor source;\n  final Map<HdrSourceField, HdrSourceFactOrigin> origins;\n  final List<HdrSourceFactConflict> conflicts;\n  final VideoParams? videoParams;\n  final bool? hdrVividOnFrame;\n  final int reviewCount;\n\n  bool get hasConflict => conflicts.isNotEmpty;\n  bool get retainsHint => origins.containsValue(HdrSourceFactOrigin.hint);\n\n  HdrSourceFacts observe({\n    VideoParams? videoParams,\n    int? dolbyVisionProfile,\n    String codec = '',\n    int? dvCompatibilityId,\n    bool? dvElPresent,\n    bool? hdrVivid,\n    required bool inferSourceColorFromDecoder,\n  }) {"
+        }
+      ]
+    },
+    {
+      "repository": "Goodwu/media-kit",
+      "head": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+      "path": "media_kit_video/lib/src/hdr/hdr_video_session.dart",
+      "meaning": "F01 retained per logical open; ordinary observation validation; actual option fulfillment",
+      "gitBlob": "b7afbf0f28f5a782c61071f36e8ebe1dd57fe63d",
+      "workingFileGitBlob": "b7afbf0f28f5a782c61071f36e8ebe1dd57fe63d",
+      "matchesHeadBlob": true,
+      "sha256": "38006cbb22c0808776efc97faa6b3a583f584e632e43a00d27d1443b7d80710e",
+      "lineRanges": [
+        {
+          "start": 718,
+          "end": 725,
+          "text": "    final sourceFacts = request.sourceFacts ?? HdrSourceFacts.fromHint(hint);\n    final source = sourceFacts.source;\n    final prediction = _plan(\n      options: request.options!,\n      source: source,\n      capabilities: capabilities,\n      policy: _policy,\n      preference: HdrOutputPreference.auto,"
+        },
+        {
+          "start": 1128,
+          "end": 1150,
+          "text": "    if (plan.route.strategy != HdrStrategy.nativeDolbyVision) {\n      validateDecoderObservation(plan.route, facts);\n      _decoderObservation = facts.decoderObservation;\n    } else {\n      // A native review describes another accepted attempt. Do not attach an\n      // ordinary predecessor's entry/decoder/frame sample to this report.\n      _decoderObservation = null;\n    }\n    // Source evidence survives this logical open's retries. Decoder output\n    // is stored separately and cannot erase original DV/HDR metadata merely\n    // because the new decoder omitted it. Native DV may transform frame colors;\n    // its output tags are never used to infer the source compatibility family.\n    final sourceFacts =\n        (plan.sourceFacts ?? HdrSourceFacts.fromHint(plan.source)).observe(\n      videoParams: facts.videoParams,\n      dolbyVisionProfile: facts.dolbyVisionProfile,\n      codec: facts.codec,\n      dvCompatibilityId: facts.dvCompatibilityId,\n      dvElPresent: facts.dvElPresent,\n      hdrVivid: facts.hdrVivid,\n      inferSourceColorFromDecoder:\n          plan.route.strategy != HdrStrategy.nativeDolbyVision,\n    );"
+        },
+        {
+          "start": 1162,
+          "end": 1165,
+          "text": "    _optionFulfillment = reviewVideoRouteOptions(plan, facts, plan.options!);\n    try {\n      validateVideoRouteOptionFulfillment(plan.options!, _optionFulfillment!);\n    } on HdrPlaybackBlocked catch (error) {"
+        }
+      ]
+    },
+    {
+      "repository": "Goodwu/media-kit",
+      "head": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+      "path": "media_kit_video/lib/src/hdr/hdr_open_plan.dart",
+      "meaning": "Source facts carried by requests and immutable plans",
+      "gitBlob": "c305b7f73f4fed39b1cf559fe9a8fa1041395bc5",
+      "workingFileGitBlob": "c305b7f73f4fed39b1cf559fe9a8fa1041395bc5",
+      "matchesHeadBlob": true,
+      "sha256": "b19471d1090f973eff955d6d380033846c513f4d126ba00dd94377ba5b138bf2",
+      "lineRanges": [
+        {
+          "start": 35,
+          "end": 47,
+          "text": "    this.sourceFacts,\n  });\n\n  final VideoOutputTarget target;\n  final VideoSourceSpec? sourceSpec;\n  final EffectiveVideoRouteOptions? options;\n  final HdrCapabilities? capabilitiesOverride;\n\n  /// Internal same-source configuration rebuild seed. A public Session.open\n  /// never supplies it; per-open failure/review retries carry their plan.\n  final HdrSourceFacts? sourceFacts;\n\n  final Media media;"
+        },
+        {
+          "start": 109,
+          "end": 123,
+          "text": "    HdrSourceFacts? sourceFacts,\n  }) {\n    return HdrOpenPlan(\n      media: media,\n      source: source ?? this.source,\n      sourceOrigin: sourceOrigin ?? this.sourceOrigin,\n      capabilities: capabilities ?? this.capabilities,\n      prediction: prediction ?? this.prediction,\n      route: route ?? this.route,\n      excluded: excluded ?? this.excluded,\n      sourceFacts: sourceFacts ?? this.sourceFacts,\n      options: options,\n      sourceSpec: sourceSpec,\n    );\n  }"
+        }
+      ]
+    },
+    {
+      "repository": "Goodwu/media-kit",
+      "head": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+      "path": "media_kit_video/lib/src/hdr/hdr_output_report.dart",
+      "meaning": "Source facts and attempted executions reported",
+      "gitBlob": "f4d165c16e53951a7cf3c56cf46b2d825fd53ce0",
+      "workingFileGitBlob": "f4d165c16e53951a7cf3c56cf46b2d825fd53ce0",
+      "matchesHeadBlob": true,
+      "sha256": "df8fd7806150df8bfd940e17c4ca81fec233ae884b2767cf4dfb7d3df0bbee0e",
+      "lineRanges": [
+        {
+          "start": 60,
+          "end": 82,
+          "text": "\n  /// Per-field original-source evidence and the separate latest decoded-frame\n  /// sample. The presence of this snapshot or [verified] does not certify the\n  /// initial hint, source bitstream, metadata delivery or panel presentation.\n  final HdrSourceFacts? sourceFacts;\n\n  /// The prediction the route was selected from, including the full\n  /// candidate list with skip reasons.\n  final HdrRoutePrediction? prediction;\n\n  /// The route actually being executed, when playback opened.\n  final HdrRoute? actual;\n\n  /// Initial requested execution, before bounded independent alternatives.\n  /// [actual] is the effective applied request; decoderObservation is observed.\n  final HdrRoute? requested;\n  final EffectiveVideoRouteOptions? options;\n  final VideoRouteOptionFulfillment? optionFulfillment;\n  final List<HdrRoute> attemptedRoutes;\n\n  /// Dataspace requested for the GPU surface (`pq`/`hlg`), when the route\n  /// needs one.\n  final String? dataSpaceRequested;"
+        }
+      ]
+    },
+    {
+      "repository": "Goodwu/media-kit",
+      "head": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+      "path": "media_kit_video/lib/src/hdr/hdr_route.dart",
+      "meaning": "R01 distinct decoder/importer/presenter dependencies",
+      "gitBlob": "7780f254727131cc4f84f91dde06d1fc968de0ba",
+      "workingFileGitBlob": "7780f254727131cc4f84f91dde06d1fc968de0ba",
+      "matchesHeadBlob": true,
+      "sha256": "742173a63659029efa8de3c140e092a608f07b7a108d263f06dffffcce5425b6",
+      "lineRanges": [
+        {
+          "start": 155,
+          "end": 180,
+          "text": "\n  /// The route plays through the MediaCodec hardware decoder.\n  static const String hwdecMediacodec = 'hwdec:mediacodec';\n\n  /// The route decodes through MediaCodec and copies frames to the GPU.\n  static const String hwdecMediacodecCopy = 'hwdec:mediacodec-copy';\n\n  /// The route imports SurfaceTexture decoder frames. This records the\n  /// execution dependency only; it does not imply a YUV presenter or identify\n  /// a decoder failure cause.\n  static const String hwdecSurfaceTexture = 'hwdec:surfacetexture';\n\n  /// The native Dolby Vision decoder/bridge pipeline.\n  static const String nativeDolbyVision = 'native:dolbyVision';\n\n  /// The route renders through the platform view topology.\n  static const String topologyPlatformView = 'topology:platformView';\n\n  /// Shared ordinary MediaCodec decode, independent of frame import mode.\n  static const String decoderMediacodec = 'decoder:mediacodec';\n  static const String decoderSoftware = 'decoder:ffmpeg-software';\n  static const String importMediacodec = 'import:mediacodec-hardware';\n  static const String importCpuUpload = 'import:cpu-upload';\n  static const String presenterGpuTexture = 'presenter:gpu-next-opengl-texture';\n}\n"
+        }
+      ]
+    },
+    {
+      "repository": "Goodwu/media-kit",
+      "head": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+      "path": "media_kit_video/lib/src/hdr/hdr_strategy_realizer.dart",
+      "meaning": "R01 bounded existing SDR Texture direct/copy/software candidates",
+      "gitBlob": "98c6c0c02879799ee56ba93b9be8e406d6aa35e8",
+      "workingFileGitBlob": "98c6c0c02879799ee56ba93b9be8e406d6aa35e8",
+      "matchesHeadBlob": true,
+      "sha256": "7e3de29421b9c23e4aa058722d52fe59abf06ca03c8e709f7719d98ea7b5823b",
+      "lineRanges": [
+        {
+          "start": 100,
+          "end": 147,
+          "text": "  /// Existing SDR Texture executions, in bounded preference order. CPU\n  /// candidates preserve the same tone-map/P5 pipeline/P8.4 stripping gates;\n  /// they never add an HDR presenter or feed CPU frames to mediacodec_embed.\n  static List<HdrStrategyRealization> realizeCandidates(\n    HdrStrategy strategy, {\n    required HdrSourceDescriptor source,\n    required HdrSourceClass sourceClass,\n    required HdrCapabilities capabilities,\n  }) {\n    final primary = realize(strategy,\n        source: source, sourceClass: sourceClass, capabilities: capabilities);\n    final route = primary.route;\n    if (route == null ||\n        route.vo != 'gpu-next' ||\n        route.topology != HdrTopology.texture ||\n        route.outputTransfer != HdrOutputTransfer.sdr ||\n        (strategy != HdrStrategy.sdrDirect &&\n            strategy != HdrStrategy.toneMapSdr)) {\n      return [primary];\n    }\n    final requests = <String>[\n      route.hwdec,\n      if (route.hwdec != 'mediacodec-copy') 'mediacodec-copy',\n      'no',\n    ];\n    return List<HdrStrategyRealization>.unmodifiable([\n      for (final hwdec in requests)\n        HdrStrategyRealization.route(\n            route.withExecution(hwdec: hwdec, dependencies: {\n          ...route.dependencies.where((dependency) =>\n              dependency != HdrRouteDependency.hwdecMediacodec &&\n              dependency != HdrRouteDependency.hwdecMediacodecCopy &&\n              dependency != HdrRouteDependency.decoderMediacodec),\n          HdrRouteDependency.presenterGpuTexture,\n          if (hwdec == 'no')\n            HdrRouteDependency.decoderSoftware\n          else\n            HdrRouteDependency.decoderMediacodec,\n          if (hwdec == 'mediacodec') ...{\n            HdrRouteDependency.hwdecMediacodec,\n            HdrRouteDependency.importMediacodec,\n          } else\n            HdrRouteDependency.importCpuUpload,\n          if (hwdec == 'mediacodec-copy')\n            HdrRouteDependency.hwdecMediacodecCopy,\n        })),\n    ]);\n  }"
+        }
+      ]
+    },
+    {
+      "repository": "Goodwu/media-kit",
+      "head": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+      "path": "media_kit_video/lib/src/hdr/hdr_output_contract.dart",
+      "meaning": "R01 complete output request equality",
+      "gitBlob": "ee92072cce8c5e6ebaa3a1118579a988016e5b9d",
+      "workingFileGitBlob": "ee92072cce8c5e6ebaa3a1118579a988016e5b9d",
+      "matchesHeadBlob": true,
+      "sha256": "9a41e89f20f3b1c3f5450f5709a7b7f246634c9a52a2bbf11795fe52771e442d",
+      "lineRanges": [
+        {
+          "start": 13,
+          "end": 25,
+          "text": "class HdrOutputContract {\n  const HdrOutputContract({\n    required this.vo,\n    required this.topology,\n    required this.requestedHwdec,\n    this.gpuApi,\n    this.eglOutputFormat,\n    this.surfacePixelFormat,\n    this.surfaceTransfer,\n    this.offscreenTransfer,\n  });\n\n  factory HdrOutputContract.fromRoute("
+        },
+        {
+          "start": 80,
+          "end": 95,
+          "text": "  @override\n  bool operator ==(Object other) =>\n      identical(this, other) ||\n      other is HdrOutputContract &&\n          vo == other.vo &&\n          topology == other.topology &&\n          requestedHwdec == other.requestedHwdec &&\n          gpuApi == other.gpuApi &&\n          eglOutputFormat == other.eglOutputFormat &&\n          surfacePixelFormat == other.surfacePixelFormat &&\n          surfaceTransfer == other.surfaceTransfer &&\n          offscreenTransfer == other.offscreenTransfer;\n\n  @override\n  int get hashCode => Object.hash(vo, topology, requestedHwdec, gpuApi,\n      eglOutputFormat, surfacePixelFormat, surfaceTransfer, offscreenTransfer);"
+        }
+      ]
+    },
+    {
+      "repository": "Goodwu/media-kit",
+      "head": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+      "path": "media_kit_video/lib/src/hdr/hdr_output_slot.dart",
+      "meaning": "R01 resource contract governs output reuse",
+      "gitBlob": "e32be26eede98adbbcd61cb91403e4960861c4bc",
+      "workingFileGitBlob": "e32be26eede98adbbcd61cb91403e4960861c4bc",
+      "matchesHeadBlob": true,
+      "sha256": "128a683e338d5304e1f332463ece2d00c388f99ab94256c901e80411b6f38c54",
+      "lineRanges": [
+        {
+          "start": 40,
+          "end": 62,
+          "text": "  Future<void> ensure(HdrOutputContract contract) async {\n    final old = _current;\n    if (old != null) {\n      String? oldVo;\n      try {\n        oldVo = await voOf(old);\n      } catch (_) {\n        // A failed controller initialization has no usable VO. The wrapper\n        // still needs to be retired before another one is created.\n      }\n      if ((!_initialPending || !rebuildInitial) &&\n          !_failed &&\n          oldVo == contract.vo &&\n          _currentContract == contract) {\n        try {\n          await waitReady(old);\n          return;\n        } catch (_) {\n          // An explicit retry of the same route must replace a failed output.\n          // Retire it through the normal producer stop and Surface ACK barrier\n          // before publishing a new controller below.\n        }\n      }"
+        }
+      ]
+    },
+    {
+      "repository": "Goodwu/media-kit",
+      "head": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+      "path": "media_kit_video/lib/src/hdr/hdr_decoder_review.dart",
+      "meaning": "R01 ordinary decoder/frame sampling and identity review; DV004 reviewed separately",
+      "gitBlob": "80979951400981a5be20d5f56e04031088cb4908",
+      "workingFileGitBlob": "80979951400981a5be20d5f56e04031088cb4908",
+      "matchesHeadBlob": true,
+      "sha256": "495b5bd10572c127948686b6c54ab874667f46e0df2cbb1978215fc7ab8de01b",
+      "lineRanges": [
+        {
+          "start": 55,
+          "end": 74,
+          "text": "/// Checks the actual resource accepted by the existing presenter. It does not\n/// select a codec by name or grant new software/HDR paths.\nvoid validateDecoderObservation(HdrRoute route, HdrReviewFacts facts) {\n  final observation = facts.decoderObservation;\n  if (observation == null) return; // Legacy injected backends, not production.\n  if (facts.codec.isEmpty) {\n    throw const HdrPlaybackBlocked(HdrDegradeReason.sourceMetadataUnknown);\n  }\n  final config = observation.mediaCodecConfiguration;\n  if (observation.hwdec.isEmpty ||\n      observation.pixelFormat.isEmpty ||\n      observation.hwdec != facts.hwdecCurrent ||\n      config?.nativeDvActive == true ||\n      (route.vo == 'mediacodec_embed' &&\n          (observation.hwdec != 'mediacodec' ||\n              observation.pixelFormat != 'mediacodec'))) {\n    throw const HdrPlaybackBlocked(HdrDegradeReason.routeReviewMismatch);\n  }\n  // Source codec describes the track, not the selected decoder identity.\n  const mimeByCodec = <String, String>{"
+        },
+        {
+          "start": 242,
+          "end": 267,
+          "text": "  const decoderIdentityEndpoints = <String>[\n    'current-tracks/video/decoder',\n    'current-tracks/video/decoder-desc',\n    'hwdec-current',\n    'android-mediacodec-info',\n  ];\n  while (true) {\n    final result = await bounded(() => lock.synchronized(() async {\n          remaining(); // A late lock admission must perform no reads.\n          await identity();\n          final a = await endpoint();\n          final b = await endpoint();\n          await identity();\n          for (final key in endpoints) {\n            if (a[key] != b[key]) {\n              throw HdrDecoderReviewFailure('Decoder endpoint changed: $key');\n            }\n          }\n          for (final key in decoderIdentityEndpoints) {\n            final value = a[key]!;\n            final observed = observedDecoderEndpoints[key];\n            if (observed != null && value != observed) {\n              throw HdrDecoderReviewFailure('Observed decoder changed: $key');\n            }\n            if (value.isNotEmpty) observedDecoderEndpoints[key] = value;\n          }"
+        }
+      ]
+    },
+    {
+      "repository": "Goodwu/media-kit",
+      "head": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+      "path": "media_kit_video/lib/src/routing/video_route_options.dart",
+      "meaning": "Effective immutable configuration and resolution",
+      "gitBlob": "c4b42f56ee47c5b5fc68f1a900a56a4d2c204649",
+      "workingFileGitBlob": "c4b42f56ee47c5b5fc68f1a900a56a4d2c204649",
+      "matchesHeadBlob": true,
+      "sha256": "31af8d350e3b88485c7c479a8683648f0a1ae90d71e27becb90c720f40b435ae",
+      "lineRanges": [
+        {
+          "start": 127,
+          "end": 174,
+          "text": "class EffectiveVideoRouteOptions {\n  EffectiveVideoRouteOptions._({\n    required this.decode,\n    required this.output,\n    required this.importPreference,\n    required this.failurePolicy,\n    required this.experimental,\n    required this.libraryDefaults,\n    required this.application,\n    required this.openOverride,\n    required Map<String, VideoRouteOptionOrigin> origins,\n  }) : origins = Map<String, VideoRouteOptionOrigin>.unmodifiable(origins);\n\n  static const defaults = VideoRouteOptions(\n    decode: VideoRouteSelection<VideoDecodeTarget>.auto(),\n    output: VideoRouteSelection<VideoOutputIntent>.auto(),\n    importPreference: VideoImportPreference.auto,\n    failurePolicy: VideoRouteFailurePolicy.allowAlternatives,\n    experimental: false,\n  );\n\n  factory EffectiveVideoRouteOptions.resolve({\n    VideoRouteOptions libraryDefaults = defaults,\n    VideoRouteOptions application = const VideoRouteOptions(),\n    VideoRouteOptions openOverride = const VideoRouteOptions(),\n  }) {\n    final base = defaults.merge(libraryDefaults);\n    final result = base.merge(application).merge(openOverride);\n    final origins = <String, VideoRouteOptionOrigin>{};\n    for (final field in defaults.toMap().keys) {\n      origins[field] = openOverride.toMap()[field] != null\n          ? VideoRouteOptionOrigin.openOverride\n          : application.toMap()[field] != null\n              ? VideoRouteOptionOrigin.application\n              : VideoRouteOptionOrigin.libraryDefault;\n    }\n    return EffectiveVideoRouteOptions._(\n      decode: result.decode!,\n      output: result.output!,\n      importPreference: result.importPreference!,\n      failurePolicy: result.failurePolicy!,\n      experimental: result.experimental!,\n      libraryDefaults: libraryDefaults,\n      application: application,\n      openOverride: openOverride,\n      origins: origins,\n    );\n  }"
+        }
+      ]
+    },
+    {
+      "repository": "Goodwu/media-kit",
+      "head": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+      "path": "media_kit_video/lib/src/hdr/hdr_route_planner.dart",
+      "meaning": "Planner consumes effective options and applies candidates",
+      "gitBlob": "e1970e450d6315f3c0bf167e98914f210c89fa5a",
+      "workingFileGitBlob": "e1970e450d6315f3c0bf167e98914f210c89fa5a",
+      "matchesHeadBlob": true,
+      "sha256": "ad874f56a744bf5ed069a28b48af50fab4fee8fb4dbbf513dc23fdab43222804",
+      "lineRanges": [
+        {
+          "start": 150,
+          "end": 159,
+          "text": "    EffectiveVideoRouteOptions? options,\n    Map<String, HdrDegradeReason> excluded = const <String, HdrDegradeReason>{},\n  }) {\n    options = resolveHdrRouteOptions(\n        options: options, policy: policy, preference: preference);\n    policy = HdrRoutingPolicy(\n        preferences: policy?.preferences,\n        allowExperimental: options.experimental);\n    preference = options.output.isRequired &&\n            options.output.target == VideoOutputIntent.sdr"
+        },
+        {
+          "start": 193,
+          "end": 204,
+          "text": "          options: options);\n      candidates.addAll(fallbackCandidates);\n      selected = fallbackCandidates.firstWhere(\n          (candidate) => candidate.feasible,\n          orElse: () => fallbackCandidates.first);\n    }\n\n    final ordered = applyVideoRouteOptions(candidates, capabilities, options);\n    selected = ordered.firstWhere((candidate) => candidate.feasible,\n        orElse: () => selected!);\n    final HdrRoute? route = selected.route;\n    final bool dependsOnDataSpace ="
+        }
+      ]
+    },
+    {
+      "repository": "Goodwu/PiliPlusX",
+      "head": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+      "path": "lib/plugin/pl_player/hdr_output.dart",
+      "meaning": "App query wrapper passes target and source candidates",
+      "gitBlob": "e18b41933acd491803076df22e7c240f7447f7df",
+      "workingFileGitBlob": "e18b41933acd491803076df22e7c240f7447f7df",
+      "matchesHeadBlob": true,
+      "sha256": "2d97cf8043a5bb5908cb3c53e805a8e2ccc8a5f51186069022423b1aeffd4228",
+      "lineRanges": [
+        {
+          "start": 18,
+          "end": 33,
+          "text": "  /// Query one explicit output target before creating a Player. A failure is\n  /// unknown for THIS request; never reuse a previous display/source snapshot.\n  static Future<VideoRouteCapabilities?> queryCapabilities({\n    required VideoOutputTarget target,\n    Iterable<VideoSourceSpec> sources = const [],\n  }) async {\n    try {\n      return await VideoRouteCapabilities.query(\n        target: target,\n        sources: sources,\n      );\n    } on Object catch (error) {\n      debugPrint('Video route capability query failed: ${error.runtimeType}');\n      return null;\n    }\n  }"
+        },
+        {
+          "start": 104,
+          "end": 114,
+          "text": "  static HdrRoutePrediction? predict({\n    required HdrSourceDescriptor descriptor,\n    required VideoSourceSpec specification,\n    required VideoRouteCapabilities? capabilities,\n    EffectiveVideoRouteOptions? options,\n  }) => capabilities?.predict(\n    descriptor,\n    specification: specification,\n    policy: policy,\n    options: options,\n  );"
+        }
+      ]
+    },
+    {
+      "repository": "Goodwu/PiliPlusX",
+      "head": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+      "path": "lib/plugin/pl_player/source_selection.dart",
+      "meaning": "DASH per-candidate specification/query/prediction/filter",
+      "gitBlob": "aaadc80dbe7800e5959dac9bebffffda1a5fffe8",
+      "workingFileGitBlob": "aaadc80dbe7800e5959dac9bebffffda1a5fffe8",
+      "matchesHeadBlob": true,
+      "sha256": "3162fd478858497aa6b593986d2bb291e01c59acee17a3a3da741ec64afdbeea",
+      "lineRanges": [
+        {
+          "start": 29,
+          "end": 49,
+          "text": "  static VideoSourceSpec? specification(VideoItem item) {\n    final codec = item.codecs;\n    if (codec == null || codec.trim().isEmpty) return null;\n    try {\n      return VideoSourceSpec(\n        codec: codec,\n        width: item.width,\n        height: item.height,\n        frameRate: VideoSourceSpec.parseFrameRate(item.frameRate),\n        bitrate: item.bandWidth,\n      );\n    } on ArgumentError {\n      return null; // Missing/malformed server fields are not support evidence.\n    }\n  }\n\n  static Future<DashRouteSelection> query({\n    required Iterable<VideoItem> tracks,\n    required VideoOutputTarget target,\n    bool allowUnknown = true,\n    EffectiveVideoRouteOptions? options,"
+        },
+        {
+          "start": 95,
+          "end": 117,
+          "text": "  HdrRoutePrediction? prediction(VideoItem item) {\n    final spec = specification(item);\n    if (spec == null) return null;\n    return HdrOutputSelector.predict(\n      descriptor:\n          HdrOutputSelector.descriptorFromDash(\n            quality: item.id,\n            codec: item.codecs,\n          ) ??\n          const HdrSourceDescriptor(),\n      specification: spec,\n      capabilities: _sources[spec.key],\n      options: options,\n    );\n  }\n\n  VideoSupport decodeSupport(VideoItem item) {\n    final spec = specification(item);\n    if (spec == null) return VideoSupport.unknown;\n    final caps = _sources[spec.key];\n    final route = prediction(item)?.selected.route;\n    if (caps == null || route == null) return VideoSupport.unknown;\n    return caps.forHdrSource(spec).decoderSupportFor(route);"
+        },
+        {
+          "start": 120,
+          "end": 150,
+          "text": "  bool allows(VideoItem item) {\n    // Unknown decoder support may permit a controlled SDR attempt. It cannot\n    // authorize an unknown DV color interpretation, even without a snapshot\n    // or when the server puts that codec in an ordinary quality tier.\n    final descriptor = HdrOutputSelector.descriptorFromDash(\n      quality: item.id,\n      codec: item.codecs,\n    );\n    if (descriptor?.hasUnresolvedDolbyVision == true) return false;\n    final hdrTier = item.id == 125 || item.id == 126 || item.id == 129;\n    final planned = prediction(item);\n    if (planned == null) {\n      // Missing evidence cannot satisfy an explicit output/decode requirement.\n      final requiresEvidence =\n          options?.output.preference == VideoRoutePreference.require ||\n          options?.decode.preference == VideoRoutePreference.require;\n      return allowUnknown && !hdrTier && !requiresEvidence;\n    }\n    if (!planned.playable) return false;\n    if (hdrTier &&\n        options?.output !=\n            const VideoRouteSelection.require(VideoOutputIntent.sdr) &&\n        !HdrOutputSelector.isHdrPresentable(planned)) {\n      return false;\n    }\n    return allowUnknown || decodeSupport(item) == VideoSupport.supported;\n  }\n\n  List<VideoItem> filter(Iterable<VideoItem> tracks) =>\n      tracks.where(allows).toList();\n}"
+        }
+      ]
+    },
+    {
+      "repository": "Goodwu/PiliPlusX",
+      "head": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+      "path": "lib/pages/video/controller.dart",
+      "meaning": "Actual playback controller queries and filters DASH, carries immutable network source",
+      "gitBlob": "7aecfc6b3fa9177b44ea2b7f513655a29a179aa2",
+      "workingFileGitBlob": "7aecfc6b3fa9177b44ea2b7f513655a29a179aa2",
+      "matchesHeadBlob": true,
+      "sha256": "8d3bec24d48e9cb92df74cc767af2324a643612415a4f738630e343450acf2cd",
+      "lineRanges": [
+        {
+          "start": 275,
+          "end": 290,
+          "text": "    _routeSelection = null;\n    // A first FlutterView can attach while the initial query is outstanding.\n    // Re-read that target once; do not publish a result for the previous one.\n    for (var attempt = 0; attempt < 2; attempt++) {\n      final target = _videoOutputTarget;\n      final selection = await DashRouteSelection.query(\n        tracks: data.dash?.video ?? const [],\n        target: target,\n        options: options,\n      );\n      if (isClosed ||\n          revision != _playbackDataRevision ||\n          serial != _routingQuerySerial ||\n          configRevision != _routeOptionsRevision ||\n          !identical(options, _routeOptions)) {\n        return false;"
+        },
+        {
+          "start": 976,
+          "end": 984,
+          "text": "    bool requireConfirmedEightKHardware = false,\n  }) {\n    /// 根据currentVideoQa和currentDecodeFormats 重新设置videoUrl\n    var videoList = data.dash!.video!\n        .where((i) => i.id == qa)\n        .where(_routeAllows)\n        .toList();\n    if (requireConfirmedEightKHardware) {\n      videoList = tracksEligibleForPlayback("
+        },
+        {
+          "start": 1095,
+          "end": 1118,
+          "text": "              typeTag: entry.typeTag!,\n              isMp4: entry.mediaType == 1,\n              hasDashAudio: entry.hasDashAudio,\n              routeOptions: options,\n            )\n          : NetworkSource(\n              videoSource: videoUrl!,\n              audioSource: audioUrl,\n              videoSpec: DashRouteSelection.specification(firstVideo),\n              outputTarget: _videoOutputTarget,\n              routeOptions: options,\n            ),\n      seekTo: seek,\n      duration: data.timeLength == null\n          ? null\n          : Duration(milliseconds: data.timeLength!),\n      isVertical: isVertical.value,\n      aid: isLocalVideoDiagnostic ? null : aid,\n      bvid: isLocalVideoDiagnostic ? null : bvid,\n      cid: isLocalVideoDiagnostic ? null : cid.value,\n      autoplay: autoplay ?? _autoPlay.value,\n      epid: isUgc ? null : epId,\n      seasonId: isUgc ? null : seasonId,\n      pgcType: isUgc ? null : pgcType,"
+        }
+      ]
+    },
+    {
+      "repository": "Goodwu/PiliPlusX",
+      "head": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+      "path": "lib/plugin/pl_player/controller.dart",
+      "meaning": "Actual Session open receives source spec, options and target",
+      "gitBlob": "7ba0b8d5dc1785cb0dfc3f762b02c06a522953b1",
+      "workingFileGitBlob": "7ba0b8d5dc1785cb0dfc3f762b02c06a522953b1",
+      "matchesHeadBlob": true,
+      "sha256": "f7a8b2be9697f3e9e8f720d23f6670f6040d4074b9d906d82cbc2305a5091d3e",
+      "lineRanges": [
+        {
+          "start": 2391,
+          "end": 2406,
+          "text": "      open: (player) {\n        if (hdrVideoSession.value != null) {\n          // Android：开播走会话 open 并传 hint（DASH codec/清晰度档 →\n          // HdrSourceDescriptor，R2.3）；选档换清晰度/换源同样到达这里。\n          // 会话内部完成复核重建与沿候选列表降级。\n          return hdrVideoSession.value!.open(\n            media,\n            hint: HdrOutputSelector.descriptorFromDash(\n              quality: _hdrQualityHint,\n              codec: _hdrCodecHint,\n            ),\n            sourceSpec: dataSource.videoSpec,\n            options: dataSource.routeOptions ?? _sourceRouteOptions,\n            target: dataSource.outputTarget ?? videoOutputTarget,\n            play: false,\n          );"
+        },
+        {
+          "start": 2436,
+          "end": 2447,
+          "text": "      if (hdrVideoSession.value != null) {\n        // Android：换源/重开走会话 open（会话内部处理复核重建，R2.3）。\n        return hdrVideoSession.value!.open(\n          media,\n          hint: HdrOutputSelector.descriptorFromDash(\n            quality: _hdrQualityHint,\n            codec: _hdrCodecHint,\n          ),\n          sourceSpec: dataSource.videoSpec,\n          options: dataSource.routeOptions ?? _sourceRouteOptions,\n          target: dataSource.outputTarget ?? videoOutputTarget,\n          play: true,"
+        }
+      ]
+    },
+    {
+      "repository": "Goodwu/PiliPlusX",
+      "head": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+      "path": "scripts/prepare_routing_ci.py",
+      "meaning": "Source-bound SDK patch execution and pre/post resolution provenance",
+      "gitBlob": "f4ba6019f4818efcadee50e8929f81315ded46f0",
+      "workingFileGitBlob": "f4ba6019f4818efcadee50e8929f81315ded46f0",
+      "matchesHeadBlob": true,
+      "sha256": "67ea73a78b4071a28846f1c0f9b29501ab5d3ccc77f72440afea7c9449f73152",
+      "lineRanges": [
+        {
+          "start": 151,
+          "end": 165,
+          "text": "def sdk_patch_execution_identity(app: Path, platform: str, vector: dict,\n                                 sdk_identity: dict, steps: list[dict]) -> dict:\n    app = app.resolve(strict=True)\n    script_relative = 'lib/scripts/patch.ps1'\n    script = app / script_relative\n    if not script.is_file() or script.is_symlink():\n        raise ValueError('Source-bound patch.ps1 must be a tracked regular file')\n    script_bytes = script.read_bytes()\n    source_blob = subprocess.run(['git', 'cat-file', 'blob', f'HEAD:{script_relative}'], cwd=app,\n                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE)\n    if source_blob.returncode or source_blob.stdout != script_bytes:\n        raise ValueError('patch.ps1 differs from its exact source Git blob')\n    phases = []\n    for mode in ('SdkOnly', 'PackagesOnly'):\n        name = f'patch-{mode}'"
+        },
+        {
+          "start": 409,
+          "end": 445,
+          "text": "    def prepare(self) -> None:\n        self.receipt['vector'] = self.vector('before')\n        self.check_sources()\n        self.check_patch_inputs()\n        before_hashes = self.source_hashes()\n        flutter, cache = self.prepare_sdk()\n        sdk = Path(self.env['FLUTTER_ROOT'])\n        self.run('resolve', [str(flutter), 'pub', 'get'], self.app)\n        before = self.resolution('source-resolution-before', sdk, cache)\n        patch = str(self.app / 'lib/scripts/patch.ps1')\n        for mode in ('SdkOnly', 'PackagesOnly'):\n            self.run(f'patch-{mode}', ['pwsh', '-NoLogo', '-NoProfile', '-File', patch,\n                                      self.args.platform, f'-{mode}'], self.app)\n            if mode == 'SdkOnly':\n                self.receipt['sdkPatchIdentity'] = sdk_patch_identity(\n                    sdk, cache, self.args.platform, self.receipt['toolchain'])\n                self.save()\n        if sdk_patch_identity(sdk, cache, self.args.platform, self.receipt['toolchain']) != self.receipt['sdkPatchIdentity']:\n            raise ValueError('PackagesOnly changed the private SDK identity')\n        self.receipt['sdkPatchExecution'] = sdk_patch_execution_identity(\n            self.app, self.args.platform, self.receipt['vector'], self.receipt['sdkPatchIdentity'],\n            self.receipt['steps'])\n        if self.args.platform == 'ios':\n            self.receipt['iosSdkSemanticWitness'] = ios_sdk_semantic_witness(\n                self.app, sdk, self.receipt['sdkPatchIdentity']['sdkCommit'])\n        self.run('patched-sdk-status', ['git', 'status', '--porcelain', '--untracked-files=no'], sdk)\n        self.run('patched-sdk-diff', ['git', 'diff', '--binary'], sdk)\n        patched = self.resolution('source-resolution-patched', sdk, cache)\n        if before != patched:\n            raise ValueError('Package resolution changed during patches')\n        package_roots(sdk / 'packages/flutter_tools/.dart_tool/package_config.json', [sdk, cache])\n        self.check_sources()\n        if before_hashes != self.source_hashes():\n            raise ValueError('Bootstrap modified application/library source files')\n        self.receipt['afterVector'] = self.vector('after')\n        if self.receipt['afterVector'] != self.receipt['vector']:\n            raise ValueError('Source vector changed during bootstrap')"
+        },
+        {
+          "start": 460,
+          "end": 486,
+          "text": "    def finalize(self) -> None:\n        previous = json.loads((self.output / 'bootstrap.json').read_text(encoding='utf-8'))\n        if previous['status'] != 'prepared-source-only':\n            raise ValueError('Bootstrap is not prepared')\n        self.receipt = previous\n        self.receipt['finalVector'] = self.vector('final')\n        if self.receipt['finalVector'] != previous['vector']:\n            raise ValueError('Final source vector differs from prepared vector')\n        sdk, cache = Path(previous['flutterRoot']), Path(previous['pubCache'])\n        current_sdk_identity = sdk_patch_identity(sdk, cache, previous['platform'], previous['toolchain'])\n        if current_sdk_identity != previous.get('sdkPatchIdentity'):\n            raise ValueError('Private SDK/cache identity changed after bootstrap preparation')\n        current_patch_execution = sdk_patch_execution_identity(\n            self.app, previous['platform'], previous['vector'], current_sdk_identity, previous['steps'])\n        if current_patch_execution != previous.get('sdkPatchExecution'):\n            raise ValueError('Source-bound SDK/Packages patch execution identity changed')\n        if previous['platform'] == 'ios':\n            current_witness = ios_sdk_semantic_witness(self.app, sdk, current_sdk_identity['sdkCommit'])\n            if current_witness != previous.get('iosSdkSemanticWitness'):\n                raise ValueError('Source-bound iOS SDK patch application changed after bootstrap')\n        self.check_sources()\n        after = self.resolution('source-resolution-after', sdk, cache)\n        before = json.loads((self.output / 'source-resolution-before.json').read_text(encoding='utf-8'))\n        if after != before or previous['sourceHashes'] != self.source_hashes():\n            raise ValueError('Sources or package resolution changed after bootstrap')\n        self.receipt['status'] = 'fresh-source-only'\n        self.save()"
+        }
+      ]
+    },
+    {
+      "repository": "Goodwu/PiliPlusX",
+      "head": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+      "path": "scripts/verify_routing_sources.py",
+      "meaning": "Runtime package roots tied to checkout sources",
+      "gitBlob": "63d8048ec40b797dd6baf8172100f1f944f9962e",
+      "workingFileGitBlob": "63d8048ec40b797dd6baf8172100f1f944f9962e",
+      "matchesHeadBlob": true,
+      "sha256": "1cb6ee4643c393deec1921f4b5c020996ac1800dbbdc24c8a1e83600fcaa7719",
+      "lineRanges": [
+        {
+          "start": 16,
+          "end": 36,
+          "text": "    'media_kit_libs_android_video': 'libs/android/media_kit_libs_android_video',\n    'media_kit_libs_ios_video': 'libs/ios/media_kit_libs_ios_video',\n    'media_kit_libs_macos_video': 'libs/macos/media_kit_libs_macos_video',\n    'media_kit_libs_linux': 'libs/linux/media_kit_libs_linux',\n    'media_kit_libs_ohos': 'libs/ohos/media_kit_libs_ohos',\n    'media_kit_libs_video': 'libs/universal/media_kit_libs_video',\n    'media_kit_libs_windows_video': 'libs/windows/media_kit_libs_windows_video',\n}\n\n\ndef verify(config: Path, media_root: Path) -> dict[str, str]:\n    config, media_root = config.resolve(strict=True), media_root.resolve(strict=True)\n    entries = json.loads(config.read_text(encoding='utf-8'))['packages']\n    found: dict[str, str] = {}\n    for entry in entries:\n        name = entry['name']\n        if not name.startswith('media_kit'):\n            continue\n        if name not in PACKAGES:\n            raise ValueError(f'Unaccounted media-kit package: {name}')\n        if name in found:"
+        },
+        {
+          "start": 42,
+          "end": 94,
+          "text": "        if uri.scheme != 'file' or uri.netloc not in ('', 'localhost'):\n            raise ValueError(f'Non-local package root: {name}')\n        if not uri.path.startswith('/'):\n            raise ValueError(f'Invalid local package root: {name}')\n        # url2pathname performs the single URL decode and applies native path\n        # rules (including /C:/... handling on Windows).\n        actual = Path(url2pathname(uri.path)).resolve(strict=True)\n        expected = (media_root / PACKAGES[name]).resolve(strict=True)\n        expected.relative_to(media_root)  # Reject an escaped checkout symlink.\n        if actual != expected or not actual.is_dir():\n            raise ValueError(f'{name} does not use the supplied media-kit checkout')\n        found[name] = PACKAGES[name]\n    missing = set(PACKAGES) - set(found)\n    if missing:\n        raise ValueError('Missing media-kit packages: ' + ', '.join(sorted(missing)))\n    return found\n\n\ndef git(root: Path, *args: str) -> str:\n    return subprocess.check_output(['git', '-C', str(root), *args], text=True).strip()\n\n\ndef main() -> None:\n    parser = argparse.ArgumentParser(description=__doc__)\n    parser.add_argument('--app-root', type=Path, required=True)\n    parser.add_argument('--media-kit-root', type=Path, required=True)\n    parser.add_argument('--output', type=Path, required=True)\n    args = parser.parse_args()\n    app, media = args.app_root.resolve(), args.media_kit_root.resolve()\n    packages = verify(app / '.dart_tool/package_config.json', media)\n    receipt = {\n        'taskId': 'MK-ROUTING-20261011',\n        'scope': 'app-source-package-resolution',\n        'appCommit': git(app, 'rev-parse', 'HEAD'),\n        'mediaKitCommit': git(media, 'rev-parse', 'HEAD'),\n        'appSourceTree': git(app, 'rev-parse', 'HEAD^{tree}'),\n        'mediaKitSourceTree': git(media, 'rev-parse', 'HEAD^{tree}'),\n        'packages': packages,\n        'nativeBinaryProvenanceVerified': False,\n        'deviceTest': False,\n    }\n    args.output.parent.mkdir(parents=True, exist_ok=True)\n    args.output.write_text(json.dumps(receipt, indent=2) + '\\n', encoding='utf-8')\n    print(json.dumps(receipt, indent=2))\n\n\nif __name__ == '__main__':\n    main()"
+        }
+      ]
+    },
+    {
+      "repository": "Goodwu/PiliPlusX",
+      "head": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+      "path": ".github/workflows/routing-source-integration.yml",
+      "meaning": "One captured library HEAD passed through real source jobs",
+      "gitBlob": "e349ebbd8de950a3177b48689affe714327196cf",
+      "workingFileGitBlob": "e349ebbd8de950a3177b48689affe714327196cf",
+      "matchesHeadBlob": true,
+      "sha256": "bb52e20bb03b068ca095c57ced7fdbbcfdcec9e59aff5c6346767ea6270aeb4c",
+      "lineRanges": [
+        {
+          "start": 28,
+          "end": 50,
+          "text": "    runs-on: ubuntu-latest\n    timeout-minutes: 5\n    outputs:\n      media-kit-sha: ${{ steps.vector.outputs.media-kit-sha }}\n    steps:\n      - name: Capture exact media-kit HEAD once for all source jobs\n        id: vector\n        shell: bash\n        env:\n          SUPPLIED_MEDIA_SHA: ${{ inputs.media-kit-sha }}\n          EXPECTED_APP_SHA: ${{ inputs.app-sha || github.event.pull_request.head.sha || github.sha }}\n        run: |\n          set -euo pipefail\n          app_head=$(git ls-remote --exit-code https://github.com/Goodwu/PiliPlusX.git refs/heads/routing/MK-ROUTING-20261011 | cut -f1)\n          test \"$app_head\" = \"$EXPECTED_APP_SHA\"\n          if [ -n \"$SUPPLIED_MEDIA_SHA\" ]; then\n            library_head=\"$SUPPLIED_MEDIA_SHA\"\n          else\n            library_head=$(git ls-remote --exit-code https://github.com/Goodwu/media-kit.git refs/heads/routing/MK-ROUTING-20261011 | cut -f1)\n          fi\n          [[ \"$library_head\" =~ ^[0-9a-f]{40}$ ]]\n          printf 'media-kit-sha=%s\\n' \"$library_head\" >> \"$GITHUB_OUTPUT\"\n          printf 'app=%s\\nmedia-kit=%s\\n' \"$EXPECTED_APP_SHA\" \"$library_head\""
+        },
+        {
+          "start": 91,
+          "end": 107,
+          "text": "          test \"$(git rev-parse HEAD)\" = \"$EXPECTED_APP_SHA\"\n          git fetch --no-tags origin fix/darwin-video-output-rebuild-barrier\n          git merge-base --is-ancestor FETCH_HEAD HEAD\n          test \"$(git -C ../media-kit rev-parse HEAD)\" = \"$EXPECTED_MEDIA_KIT_SHA\"\n          printf 'app=%s\\nmedia-kit=%s\\n' \"$EXPECTED_APP_SHA\" \"$EXPECTED_MEDIA_KIT_SHA\" | tee \"$ROUTING_RESULTS/source.txt\"\n      - name: Bootstrap private parser SDK and current sources\n        id: prepare\n        uses: ./app/.github/actions/routing-bootstrap\n        with:\n          app-root: app\n          media-kit-root: media-kit\n          app-sha: ${{ env.EXPECTED_APP_SHA }}\n          media-kit-sha: ${{ env.EXPECTED_MEDIA_KIT_SHA }}\n          platform: android\n      - name: Run all App Python test modules\n        if: ${{ !cancelled() && steps.prepare.outcome == 'success' }}\n        run: |"
+        },
+        {
+          "start": 172,
+          "end": 189,
+          "text": "      - name: Bootstrap real Android patches against current sources\n        id: prepare\n        uses: ./app/.github/actions/routing-bootstrap\n        with:\n          app-root: app\n          media-kit-root: media-kit\n          app-sha: ${{ env.EXPECTED_APP_SHA }}\n          media-kit-sha: ${{ env.EXPECTED_MEDIA_KIT_SHA }}\n          platform: android\n      - name: Record prepared toolchain\n        if: ${{ !cancelled() && steps.prepare.outcome == 'success' }}\n        run: |\n          set -euo pipefail\n          flutter --version | tee \"$ROUTING_RESULTS/toolchain.txt\"\n      - name: Analyze the App\n        if: ${{ !cancelled() && steps.prepare.outcome == 'success' }}\n        run: |\n          set -euo pipefail"
+        }
+      ]
+    },
+    {
+      "repository": "Goodwu/PiliPlusX",
+      "head": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+      "path": "docs/plans/routing-native-accepted-inputs.json",
+      "meaning": "Unapproved native input remains fail closed",
+      "gitBlob": "82f81a26d91ce0d40ef2b8ad154fac2b06e418ca",
+      "workingFileGitBlob": "82f81a26d91ce0d40ef2b8ad154fac2b06e418ca",
+      "matchesHeadBlob": true,
+      "sha256": "d0731f943df85a52ff3e53385bcb805a046b7b64bd9f8627439d753397ad28b8",
+      "lineRanges": [
+        {
+          "start": 1,
+          "end": 6,
+          "text": "{\n  \"schemaVersion\": 1,\n  \"task\": \"MK-ROUTING-20261011\",\n  \"selectedManifestSha256\": null,\n  \"entries\": []\n}"
+        }
+      ]
+    },
+    {
+      "repository": "Goodwu/PiliPlusX",
+      "head": "13b139b797aa65d853cafb5cb207d17a6e7aceac",
+      "path": "scripts/acquire_routing_native_inputs.py",
+      "meaning": "Empty selector rejects before API/download/staging",
+      "gitBlob": "478747a3c6c83f1793202de8c2541665e7ebc476",
+      "workingFileGitBlob": "478747a3c6c83f1793202de8c2541665e7ebc476",
+      "matchesHeadBlob": true,
+      "sha256": "f23fd6c0287b2dc46322d2b909bb92d25bd6ab15a8f666b4b27f0a89843e80d2",
+      "lineRanges": [
+        {
+          "start": 157,
+          "end": 182,
+          "text": "    return root/f'PiliPlusX_routing_{flavor}_arm64-v8a.apk'\n\n\ndef acquire(output, accepted, consumer, receipt, *, github=None, readelf='readelf', nm='nm', staging=None, flavor=None):\n    receipt.update(task=TASK, scope='routing-native-acquisition', stage='selection',\n                   status='failed', nativeVerified=False, deviceVerified=False,\n                   consumer=consumer, commands=[])\n    entry = selected_entry(accepted)  # Empty selection fails before any API/download.\n    receipt['selectedManifestSha256'] = entry['manifestSha256']\n    apk = None\n    if staging is not None:\n        if flavor not in ('android','pink'):\n            raise GateError('staging requires explicit Android/Pink flavor')\n        apk = staging_apk(staging, flavor, consumer, entry['manifestSha256'])\n    temporary = Path(os.environ['RUNNER_TEMP']).resolve(strict=True)\n    output = output.absolute()\n    if output.exists() or not output.resolve().is_relative_to(temporary) or output.resolve() == temporary:\n        raise GateError('acquisition output must be a fresh child of RUNNER_TEMP')\n    # Never traverse a pre-existing symlink while creating the private stage.\n    for parent in output.parents:\n        if parent.resolve() == temporary:\n            break\n        if parent.is_symlink():\n            raise GateError('acquisition staging path contains symbolic link')\n    output.mkdir(parents=True, mode=0o700)\n    github = github or GitHub(receipt)"
+        }
+      ]
+    },
+    {
+      "repository": "Goodwu/media-kit",
+      "head": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+      "path": "tool/matrix-build.sh",
+      "meaning": "Single public matrix entrypoint, no second bundler",
+      "gitBlob": "568b7c43d4e71cbb9eb2ff0e914b8c0e5fb5cbd0",
+      "workingFileGitBlob": "568b7c43d4e71cbb9eb2ff0e914b8c0e5fb5cbd0",
+      "matchesHeadBlob": true,
+      "sha256": "55c54040a13b65af30d4b5e2379d7670622909c6757560278b47c6f9474bf00b",
+      "lineRanges": [
+        {
+          "start": 1,
+          "end": 4,
+          "text": "#!/usr/bin/env bash\n# CORE-reviewed eight-row P5/P8.4/HDR10/HLG × HDR gate matrix.\nset -Eeuo pipefail\nexec python3 \"$(cd \"$(dirname \"$0\")\" && pwd)/routing_matrix.py\" \"$@\""
+        }
+      ]
+    },
+    {
+      "repository": "Goodwu/media-kit",
+      "head": "5834ce5bdbd0bee3c2f7c130db0c05ed5f01f45f",
+      "path": "tool/routing_matrix.py",
+      "meaning": "Current matrix consumes existing accepted native ledger",
+      "gitBlob": "7299fe535fef6da3317de6f13569d8a93c509a15",
+      "workingFileGitBlob": "7299fe535fef6da3317de6f13569d8a93c509a15",
+      "matchesHeadBlob": true,
+      "sha256": "62ca4703be69a69f7addd8b347f9fe43a582c5ed12459a5a0b9237f4d6f6894e",
+      "lineRanges": [
+        {
+          "start": 1,
+          "end": 7,
+          "text": "#!/usr/bin/env python3\n\"\"\"Build the eight accepted-input Android HDR lab matrix rows serially.\n\nThis is a consumer/evidence runner. It never produces or weakens libmpv and it\nnever attests that the declared fixture has been copied to, or played on, a\ndevice. Native authorization comes only from the fixed App acceptance ledger.\n\"\"\""
+        },
+        {
+          "start": 26,
+          "end": 43,
+          "text": "ROOT = Path(__file__).resolve().parents[1]\nLAB = ROOT / \"media_kit_hdr_lab\"\nAPP_GATE = \"scripts/verify_routing_native_inputs.py\"\nAPP_ACQUIRE = \"scripts/acquire_routing_native_inputs.py\"\nAPP_LEDGER = \"docs/plans/routing-native-accepted-inputs.json\"\nIDENTITY_SOURCE = \"media_kit_hdr_lab/lib/common/sources/android_hdr_sample_identity.dart\"\nHEX40 = re.compile(r\"[0-9a-f]{40}\\Z\")\nHEX64 = re.compile(r\"[0-9a-f]{64}\\Z\")\nKINDS = (\"p5\", \"p84\", \"hdr10\", \"hlg\")\nAPPROVED_JAR_MEMBERS = {\n    \"lib/arm64-v8a/libmpv.so\", \"lib/arm64-v8a/libmediakitandroidhelper.so\",\n    \"lib/arm64-v8a/libc++_shared.so\",\n}\nFLUTTER_APK_MEMBERS = {\n    \"lib/arm64-v8a/libflutter.so\", \"lib/arm64-v8a/libapp.so\",\n}\nSAMPLES = {\"p5\": \"dolbyVisionP5\", \"p84\": \"dolbyVisionP84\",\n           \"hdr10\": \"hdr10\", \"hlg\": \"hlgBaseControl\"}"
+        }
+      ]
+    }
+  ]
+}

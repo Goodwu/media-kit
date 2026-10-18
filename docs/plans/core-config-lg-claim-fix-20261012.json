@@ -1,0 +1,494 @@
+{
+  "task": "MK-ROUTING-20261011",
+  "stage": "CONFIG LG dedicated single-open safety followup",
+  "status": "V2 PASS host scope; preparing exact reviewed integration",
+  "authorFreeze": {
+    "schemaVersion": 1,
+    "status": "author-tests-passed-awaiting-independent-critical-review",
+    "baseCommit": "b5c5067089dd19a3271feff3e38aefc43b9f075f",
+    "files": [
+      {
+        "path": "media_kit_hdr_lab/test/android_native_dv_session_foreign_ownership_test.dart",
+        "sha256": "4bcfade85a507e44755db869f86bbb38d6109c9d2032cfe3f33b2a56d86cb784",
+        "isolatedSha256": "4bcfade85a507e44755db869f86bbb38d6109c9d2032cfe3f33b2a56d86cb784",
+        "afterSha256": "4bcfade85a507e44755db869f86bbb38d6109c9d2032cfe3f33b2a56d86cb784",
+        "isolatedAfterSha256": "4bcfade85a507e44755db869f86bbb38d6109c9d2032cfe3f33b2a56d86cb784"
+      },
+      {
+        "path": "media_kit_hdr_lab/test/android_hdr_convert_experiment_test.dart",
+        "sha256": "cf6ef09d36e865848b4b9bca40abd752966fb8612496cdb59a880b966aea85f4",
+        "isolatedSha256": "cf6ef09d36e865848b4b9bca40abd752966fb8612496cdb59a880b966aea85f4",
+        "afterSha256": "cf6ef09d36e865848b4b9bca40abd752966fb8612496cdb59a880b966aea85f4",
+        "isolatedAfterSha256": "cf6ef09d36e865848b4b9bca40abd752966fb8612496cdb59a880b966aea85f4"
+      },
+      {
+        "path": "media_kit_video/lib/src/hdr/hdr_video_session.dart",
+        "sha256": "38006cbb22c0808776efc97faa6b3a583f584e632e43a00d27d1443b7d80710e",
+        "isolatedSha256": "38006cbb22c0808776efc97faa6b3a583f584e632e43a00d27d1443b7d80710e",
+        "afterSha256": "38006cbb22c0808776efc97faa6b3a583f584e632e43a00d27d1443b7d80710e",
+        "isolatedAfterSha256": "38006cbb22c0808776efc97faa6b3a583f584e632e43a00d27d1443b7d80710e"
+      },
+      {
+        "path": "media_kit_video/test/hdr_session_route_options_test.dart",
+        "sha256": "dbe76c4e39621501433457d1a8f21681d488703e0994586969833c4baa92f02f",
+        "isolatedSha256": "dbe76c4e39621501433457d1a8f21681d488703e0994586969833c4baa92f02f",
+        "afterSha256": "dbe76c4e39621501433457d1a8f21681d488703e0994586969833c4baa92f02f",
+        "isolatedAfterSha256": "dbe76c4e39621501433457d1a8f21681d488703e0994586969833c4baa92f02f"
+      }
+    ],
+    "testCopy": "/tmp/mk-lab-config-regression-20261012",
+    "flutterHead": "d3b14c876900e553bc736ca19295fc09e3853e8e",
+    "isolatedPubGet": {
+      "lab": "/tmp/mk-lab-config-baseline-pubget.log",
+      "video": "/tmp/mk-lab-config-video-pubget.log",
+      "offline": true,
+      "sharedMetadataChanged": false
+    },
+    "rootCauses": [
+      "Lab _FakeSession.open override lacked new EffectiveVideoRouteOptions parameter, causing compile failure.",
+      "CONFIG setters lost the existing LG token control guard; failed/fresh sessions could silently accept changes, and pending setPolicy mutated policy before reopen was refused.",
+      "Resolving contradictory effective options before consuming LG attempt let a later valid open bypass failure-consumes-claim."
+    ],
+    "changes": [
+      "Synchronize lab fake open signature without changing foreign-ownership semantics.",
+      "Preserve original lab failed-claim assertions and add setOptions/refused-operation side-effect checks.",
+      "Read-only disposed/LG guard before each setter reads or mutates configuration.",
+      "Consume LG attempt before options resolution, retaining original claim-before-disposed ordering.",
+      "Add 12 state/setter cases and one conflicting-first-open claim case; retain existing ordinary CONFIG tests."
+    ],
+    "validation": {
+      "baseline": {
+        "log": "/tmp/mk-lab-config-baseline-tests.log",
+        "sha256": "9280a87aeda022fb7bd2a1a1694c7672e89303e7d69607e420aa359427b56496",
+        "exitCode": 1,
+        "passed": 17,
+        "failed": 2
+      },
+      "extendedRed": {
+        "log": "/tmp/mk-lab-config-extended-red-final.log",
+        "sha256": "982afb6aebc327e9dc8f94d419ba4e81ae5f7023ee06f8605da58d9f7c9a3fff",
+        "exitCode": 1,
+        "passed": 98,
+        "failed": 9
+      },
+      "fixedTargets": {
+        "log": "/tmp/mk-lab-config-fixed-target.log",
+        "sha256": "1f0a0d8f5c8d66c5610654091d70dc31ef3deefd8883561835fc6d0da11d3fd5",
+        "exitCode": 0,
+        "passed": 107,
+        "failed": 0
+      },
+      "fullLab": {
+        "log": "/tmp/mk-lab-config-full-lab.log",
+        "sha256": "08497db388d9ae998aed6a65ac74b7b3a4cdb749db4479225355e079b3e9769e",
+        "exitCode": 0,
+        "passed": 298,
+        "failed": 0
+      },
+      "fullVideo": {
+        "log": "/tmp/mk-lab-config-full-video.log",
+        "sha256": "8e5f40c5dd9ac219b9505698b9b0a715219e7225844e24d9cbf988fe3ba1eaf7",
+        "exitCode": 0,
+        "passed": 775,
+        "failed": 0
+      },
+      "strictLab": {
+        "log": "/tmp/mk-lab-config-lab-analyze.log",
+        "sha256": "bd68702447c63b194418c7ef78e80b3817f08144436e9541229c86d70105bbc6",
+        "exitCode": 0,
+        "passed": null,
+        "failed": 0
+      },
+      "strictVideo": {
+        "log": "/tmp/mk-lab-config-video-analyze.log",
+        "sha256": "3cac83b4a3e6e6cb9002b30c3ae751ede42ed2effd2f9cf3a3202dfe88c6cd4d",
+        "exitCode": 0,
+        "passed": null,
+        "failed": 0
+      },
+      "restoredLG": {
+        "log": "/tmp/mk-lab-config-restored-lg-tests.log",
+        "sha256": "206f20c4fd809f86be15d327f7307cf4a8f5f41149dea8401461ebf0bb66e87a",
+        "exitCode": 0,
+        "passed": 13,
+        "failed": 0
+      }
+    },
+    "negativeMutations": {
+      "sourceRestoredSha256": "38006cbb22c0808776efc97faa6b3a583f584e632e43a00d27d1443b7d80710e",
+      "mutations": [
+        {
+          "mutation": "lg-guard-removed",
+          "exitCode": 1,
+          "log": "/tmp/mk-lab-config-mutation-lg-guard-removed.log",
+          "logSha256": "ddb330a83176c4dc25b75f35cb00f77e9394ed5ea5694c9faede1f9f0a8e233f"
+        },
+        {
+          "mutation": "policy-pre-mutation-guard-removed",
+          "exitCode": 1,
+          "log": "/tmp/mk-lab-config-mutation-policy-pre-mutation-guard-removed.log",
+          "logSha256": "5527d185220a0516cb7bf4b05f5e560ee919a3caf8f54fa911c859d2b862a62d"
+        },
+        {
+          "mutation": "claim-after-options-resolution",
+          "exitCode": 1,
+          "log": "/tmp/mk-lab-config-mutation-claim-after-options-resolution.log",
+          "logSha256": "e4d0db9d626ea0bcc87434bf99d8fa8c3658af30b9a761e752f80135d14d4c84"
+        }
+      ]
+    },
+    "limitations": [
+      "Host tests use synthetic backend observations; no native build, physical LG pixel, HDR presentation or sustained device performance acceptance.",
+      "Repository HEAD plus four dirty files candidate only; not a committed or pushed revision.",
+      "Some initial new test authoring attempts had compile errors and a failed-phase fixture mismatch; those logs are retained and are not causal gate evidence.",
+      "Final full tests use an isolated git archive plus exact four candidate files, with private SDK/cache and isolated package configurations."
+    ],
+    "writesExcluded": [
+      "TASKS.md",
+      "archives/conversations/media-kit-routing-20261011.md",
+      "shared SDK/package metadata",
+      "native/backend/source facts/owner code"
+    ]
+  },
+  "priorCommittedCI": {
+    "observedAt": "2026-10-11T19:21:20.223861+00:00",
+    "scope": "read-only committed CONFIG CI; no dirty native helper/scripts used; no project/Git/pubget/rerun/cancel/dispatch",
+    "verifiedCounts": {
+      "libraryVideo": {
+        "passed": 759,
+        "skipped": 3,
+        "strict": "No issues found"
+      },
+      "libraryLab": {
+        "passed": 267,
+        "failed": 2,
+        "strict": "1 error invalid_override"
+      },
+      "AppEachPlatformFlutter": 268,
+      "AppPythonSource": {
+        "passed": 362,
+        "seconds": 31.293
+      },
+      "AppPythonBuild": {
+        "passed": 362,
+        "seconds": 34.451
+      },
+      "AndroidChrome": 1,
+      "DarwinWidgets": 9,
+      "queryAssertions": 34
+    },
+    "knownFailures": [
+      {
+        "path": "media_kit_hdr_lab/test/android_native_dv_session_foreign_ownership_test.dart:1175",
+        "failure": "FakeSession.open missing EffectiveVideoRouteOptions? options, invalid_override and compilation failure"
+      },
+      {
+        "path": "media_kit_hdr_lab/test/android_hdr_convert_experiment_test.dart",
+        "test": "real lab single-open wrapper failure permanently consumes claim",
+        "failure": "expected throws StateError, actual Future completes null"
+      }
+    ],
+    "limits": [
+      "general initialpending snapshot only; no hang claim",
+      "source does not prove native/device",
+      "results only exact captured vector; future remoteadvance does not relabel them"
+    ],
+    "OHOSActualInputs": {
+      "lines": [
+        "2026-10-11T19:11:02.8659464Z HEAD is now at 9e5577d5 Merge b5c5067089dd19a3271feff3e38aefc43b9f075f into d761922721ad8da6bb186abd270bb096100944ea",
+        "2026-10-11T19:12:21.9326121Z HEAD is now at 2ece1aae docs+test: HCPP input block 设计契约文档与静态契约测试脚本",
+        "2026-10-11T19:13:36.0850802Z Artifact ohos-pubspec-lock has been successfully uploaded! Final size is 4896 bytes. Artifact ID is 11712019766",
+        "2026-10-11T19:14:47.1940512Z ✓ Built build/ohos/hap/entry-default-unsigned.hap (61.1MB).",
+        "2026-10-11T19:14:47.5179124Z       \"sha256\": \"7f321d22b16d48876b5bddc8490d15586221d77e94dfc1fd55b405f83631e44f\"",
+        "2026-10-11T19:14:47.5183382Z   \"source_commit\": \"9e5577d51a90fad935c946984d6994d951cef9f5\",",
+        "2026-10-11T19:14:50.9870122Z Artifact media-kit-ohos-arm64-unsigned has been successfully uploaded! Final size is 27336135 bytes. Artifact ID is 11712373158"
+      ],
+      "checkout": "9e5577d51a90fad935c946984d6994d951cef9f5",
+      "kind": "PR merge b5c506 into d7619227",
+      "HAPDownloaded": false,
+      "scope": "unsigned HAP build only, no native/device acceptance"
+    },
+    "verdict": "App source38166934942 success and Build38166935298 source matrix success at b7d3+b5c. Library source38166919509 failure due two lab failures; video clean. Build overall fails six Release jobs; no joint all-green claim.",
+    "rawLogSHA256": {
+      "38166919509/114551295241-raw.log": "799d28c12346b6f34f597342f7dc4d23bb802c5423cb6c9c6b1a914314fb75f2",
+      "38166919509/114551295429-raw.log": "69a2258518fcbd40c7bc161397b7141516940735fcda34cc1387ca4d5a1e5af7",
+      "38166919509/114551295488-raw.log": "325efc3e41c5be182f2ef1c3535c0a758e3cd63aac4d3e1b7fc9e667b7cd1fe8",
+      "38166919514/114551285460-raw.log": "b8c5c3b057a60a07d9722cc6d37e822cfd78daadfa0ff6da6019f3706d350d88",
+      "38166919512/114551292490-raw.log": "895455e316d9da8b6d9710681e62754ffede69af00eba7817182bddcb8b9423b",
+      "38166934942/114551358563-raw.log": "d1e6e12c43f1eed548e656640ac58601cd988fe2e24c109a15612fa4c3fcd45e",
+      "38166934942/114551358543-raw.log": "cbcd6914865d32c46dee06c95ec7346496d297ed41b8980cbd7b787f6b421fd2",
+      "38166934942/114551358558-raw.log": "06cc1df612eba8c754eadab738a7f770933e191c336a721e1689cc4d14356c3f",
+      "38166934942/114551358514-raw.log": "2afb6b484f05c37134c3d7126dcfe41b4297209f67b84ac5355299e56618e394",
+      "38166934942/114551339424-raw.log": "818319b608391fe10b730750ec41e04df12da165cf39012c2e9119d3ed36d27f",
+      "38166935298/114551330120-raw.log": "617f496d18789664fda35f6e6f239995652620e7c62eea2c1a353d74f830497b",
+      "38166935298/114551350401-raw.log": "87bf322cc0314ca731b1e3439af6f1cf1be4d56d497050c6aca00c1d38bdc4f7",
+      "38166935298/114551330037-raw.log": "414cb4c09aed3d421ac961c914722ef1ba1e3e349b90d739c9590be5c9979d26",
+      "38166935298/114551330170-raw.log": "871330939ba31a55478773784f5a949a7305ff47cea645112b38ca04cbd6a0ac",
+      "38166935298/114551350389-raw.log": "dcc0069b50cbdba6f43e866b432a413faa1cc1fa7e2b85fd2952d013bc271ae1",
+      "38166935298/114551350477-raw.log": "6f2e536db765f1b59eb2501a889eab2c73603e68ea408aa590938c1419772e42",
+      "38166935298/114551350453-raw.log": "e5e841b4c58056a70663950a91d946e3fdcf13c624b2e0ea29ff4d44d501c619",
+      "38166935298/114551329948-raw.log": "b6fcc31a15d1d513017aaa50ef82b2274bbcbc42dbec2bb35cb422f5c5f3bcf7",
+      "38166935298/114551329904-raw.log": "0fecaf4435daed9d75ddc771a71ddec48ade3896086f8f4dd1b381196f917483",
+      "38166935298/114551330110-raw.log": "6e2a0b2c48555cfa647ec8922157ccd896e292afc0157286033bfe95350dabd9",
+      "38166935298/114551330109-raw.log": "1c3a096ff5b80ea26a6fbdbe88068c1e564257b81fe46163960cfa0eafb483c4",
+      "38166919543/114551284199-raw.log": "49dc156e144fdc4bf27e0d26c2e433897d4c1990dc9b527e3eab0cd395643d2a"
+    },
+    "summarySHA256": "874a15e2609c38d80cd9e415a78a826790f17c451a99afa8fe99de515d5915ad",
+    "summaryPath": "/tmp/mk-routing-config-ci-20261012/summary.json",
+    "runs": {
+      "38166919509": {
+        "head_sha": "b5c5067089dd19a3271feff3e38aefc43b9f075f",
+        "run_attempt": 1,
+        "status": "completed",
+        "conclusion": "failure",
+        "html_url": "https://github.com/Goodwu/media-kit/actions/runs/38166919509"
+      },
+      "38166919514": {
+        "head_sha": "b5c5067089dd19a3271feff3e38aefc43b9f075f",
+        "run_attempt": 1,
+        "status": "completed",
+        "conclusion": "success",
+        "html_url": "https://github.com/Goodwu/media-kit/actions/runs/38166919514"
+      },
+      "38166919512": {
+        "head_sha": "b5c5067089dd19a3271feff3e38aefc43b9f075f",
+        "run_attempt": 1,
+        "status": "completed",
+        "conclusion": "success",
+        "html_url": "https://github.com/Goodwu/media-kit/actions/runs/38166919512"
+      },
+      "38166934942": {
+        "head_sha": "b7d3a8efa313c670ed0d41dc86e85646d3531585",
+        "run_attempt": 1,
+        "status": "completed",
+        "conclusion": "success",
+        "html_url": "https://github.com/Goodwu/PiliPlusX/actions/runs/38166934942"
+      },
+      "38166935298": {
+        "head_sha": "b7d3a8efa313c670ed0d41dc86e85646d3531585",
+        "run_attempt": 1,
+        "status": "completed",
+        "conclusion": "failure",
+        "html_url": "https://github.com/Goodwu/PiliPlusX/actions/runs/38166935298"
+      },
+      "38166919543": {
+        "head_sha": "b5c5067089dd19a3271feff3e38aefc43b9f075f",
+        "run_attempt": 1,
+        "status": "completed",
+        "conclusion": "success",
+        "html_url": "https://github.com/Goodwu/media-kit/actions/runs/38166919543"
+      },
+      "38166919527": {
+        "head_sha": "b5c5067089dd19a3271feff3e38aefc43b9f075f",
+        "run_attempt": 1,
+        "status": "pending",
+        "conclusion": null,
+        "html_url": "https://github.com/Goodwu/media-kit/actions/runs/38166919527"
+      }
+    },
+    "artifacts": [
+      {
+        "id": 11712058090,
+        "zipSHA256": "265482439b2b6cb090cf62534973d52f3eaae0da63a818f4a7b6e400e791743c",
+        "path": "/tmp/mk-routing-config-ci-20261012/38166919509/11712058090"
+      },
+      {
+        "id": 11712227650,
+        "zipSHA256": "44e9f81f5f4e1a86a3eb1ac9dae623f00bf0f4cce435e6cf80784237279fdbe8",
+        "path": "/tmp/mk-routing-config-ci-20261012/38166919509/11712227650"
+      },
+      {
+        "id": 11712422854,
+        "zipSHA256": "eac1067b4af6c79e18703ffad1c507f9b70cda41280982522892e8536d6ceb61",
+        "path": "/tmp/mk-routing-config-ci-20261012/38166919509/11712422854"
+      },
+      {
+        "id": 11712038071,
+        "zipSHA256": "6bbca99ff6924190c191bbb4ea6f2165048d7b5d72a2a1fd43ca5dde53fd3472",
+        "path": "/tmp/mk-routing-config-ci-20261012/38166919514/11712038071"
+      },
+      {
+        "id": 11712123201,
+        "zipSHA256": "f6e973646a1d3d6309ebaa220400d7d6b26dfcbc308ca7bce9c1e2e00a32d462",
+        "path": "/tmp/mk-routing-config-ci-20261012/38166919512/11712123201"
+      },
+      {
+        "id": 11712687722,
+        "zipSHA256": "0339aff8664178007e229a7a46232b815674198d313207d0616fd5c10a10d920",
+        "path": "/tmp/mk-routing-config-ci-20261012/38166934942/11712687722"
+      },
+      {
+        "id": 11712318453,
+        "zipSHA256": "b25b0df4e8ce40950c5b2f99107be4ad3b58f5ea983fd84832aeac549c7b5a44",
+        "path": "/tmp/mk-routing-config-ci-20261012/38166934942/11712318453"
+      },
+      {
+        "id": 11712827095,
+        "zipSHA256": "b7f06a4ce0f84f60cdec8610b4090a2da16f315561565f4426063513247e9cfa",
+        "path": "/tmp/mk-routing-config-ci-20261012/38166934942/11712827095"
+      },
+      {
+        "id": 11711968673,
+        "zipSHA256": "be31f8858439b5c590ba2a2fe7c19d0d529db9a2e4b6fabde744ed3de9735268",
+        "path": "/tmp/mk-routing-config-ci-20261012/38166934942/11711968673"
+      },
+      {
+        "id": 11712453477,
+        "zipSHA256": "68c50d58dc9f456175ce9cd61c98e7edebd7e4801f8d412e983e36ed84adaa8e",
+        "path": "/tmp/mk-routing-config-ci-20261012/38166934942/11712453477"
+      },
+      {
+        "id": 11712781379,
+        "zipSHA256": "f8b1a838db9e97445bfea7f859ce456ab68f8f2be23cdafe12633b7199791779",
+        "path": "/tmp/mk-routing-config-ci-20261012/38166935298/11712781379"
+      },
+      {
+        "id": 11712252712,
+        "zipSHA256": "0c96b6e6a1d18997f32fbbc55259a76bfd0300dad6e43cda3310556c80659e63",
+        "path": "/tmp/mk-routing-config-ci-20261012/38166935298/11712252712"
+      },
+      {
+        "id": 11712706822,
+        "zipSHA256": "eb4a26aecb57244a79c32c2d636d1f8677308c668091565fd49749bbf1fac125",
+        "path": "/tmp/mk-routing-config-ci-20261012/38166935298/11712706822"
+      },
+      {
+        "id": 11712912216,
+        "zipSHA256": "4a5322562e873d2538384cca32839422b9fd75ea641712776111a706b127d53f",
+        "path": "/tmp/mk-routing-config-ci-20261012/38166935298/11712912216"
+      },
+      {
+        "id": 11712981155,
+        "zipSHA256": "420a14c0c0b2bc30f60625e5e695d0d54cd0d23c030a02d179b62206484fd487",
+        "path": "/tmp/mk-routing-config-ci-20261012/38166935298/11712981155"
+      },
+      {
+        "id": 11711978316,
+        "zipSHA256": "3d1b2876bb678dd9e253fdeccde473c54e509c44be2269decbc99f5858dce126",
+        "path": "/tmp/mk-routing-config-ci-20261012/38166935298/11711978316"
+      }
+    ]
+  },
+  "limits": [
+    "App source CI success does not clear library lab failure",
+    "LG guard applies to dedicated token sessions; ordinary mutable CONFIG remains supported",
+    "Fresh commit CI/native/device/final DV001 and PR5 integration still required"
+  ],
+  "independentCriticalReview": {
+    "result": "PASS_FOR_FROZEN_LG_SINGLE_OPEN_HOST_SCOPE",
+    "baseCommit": "b5c5067089dd19a3271feff3e38aefc43b9f075f",
+    "currentHead": "b5c5067089dd19a3271feff3e38aefc43b9f075f",
+    "manifest": "/tmp/mk-lab-config-author-freeze.json",
+    "manifestSha256": "1ed335505dff848a053f53589e5942cd90e49f281bab27f116cb1509c597c6d9",
+    "snapshotRoot": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-lg-claim-v2-6km78g0d",
+    "scopeFiles": [
+      {
+        "path": "media_kit_hdr_lab/test/android_native_dv_session_foreign_ownership_test.dart",
+        "expected": "4bcfade85a507e44755db869f86bbb38d6109c9d2032cfe3f33b2a56d86cb784",
+        "sourceAfter": "4bcfade85a507e44755db869f86bbb38d6109c9d2032cfe3f33b2a56d86cb784",
+        "snapshotAfter": "4bcfade85a507e44755db869f86bbb38d6109c9d2032cfe3f33b2a56d86cb784",
+        "match": true
+      },
+      {
+        "path": "media_kit_hdr_lab/test/android_hdr_convert_experiment_test.dart",
+        "expected": "cf6ef09d36e865848b4b9bca40abd752966fb8612496cdb59a880b966aea85f4",
+        "sourceAfter": "cf6ef09d36e865848b4b9bca40abd752966fb8612496cdb59a880b966aea85f4",
+        "snapshotAfter": "cf6ef09d36e865848b4b9bca40abd752966fb8612496cdb59a880b966aea85f4",
+        "match": true
+      },
+      {
+        "path": "media_kit_video/lib/src/hdr/hdr_video_session.dart",
+        "expected": "38006cbb22c0808776efc97faa6b3a583f584e632e43a00d27d1443b7d80710e",
+        "sourceAfter": "38006cbb22c0808776efc97faa6b3a583f584e632e43a00d27d1443b7d80710e",
+        "snapshotAfter": "38006cbb22c0808776efc97faa6b3a583f584e632e43a00d27d1443b7d80710e",
+        "match": true
+      },
+      {
+        "path": "media_kit_video/test/hdr_session_route_options_test.dart",
+        "expected": "dbe76c4e39621501433457d1a8f21681d488703e0994586969833c4baa92f02f",
+        "sourceAfter": "dbe76c4e39621501433457d1a8f21681d488703e0994586969833c4baa92f02f",
+        "snapshotAfter": "dbe76c4e39621501433457d1a8f21681d488703e0994586969833c4baa92f02f",
+        "match": true
+      }
+    ],
+    "allFourFilesMatchBeforeAndAfter": true,
+    "sharedPackageConfigUnchanged": true,
+    "blockingFindings": [],
+    "nonBlockingFindings": [],
+    "independentTests": [
+      {
+        "name": "baseline b5c two original CI root causes",
+        "exitCode": 1,
+        "passed": 17,
+        "reportedFailures": 3,
+        "note": "Missing options override causes primary compile failure and collateral compiler-exit load failure; separate failed-claim setter assertion also fails. Two root causes, three runner failures.",
+        "log": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-lg-claim-v2-6km78g0d/baseline-independent.log"
+      },
+      {
+        "name": "full lab with test assets",
+        "exitCode": 0,
+        "passed": 298,
+        "log": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-lg-claim-v2-6km78g0d/lab-independent-final.log"
+      },
+      {
+        "name": "full video",
+        "exitCode": 0,
+        "passed": 775,
+        "log": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-lg-claim-v2-6km78g0d/video-independent.log"
+      },
+      {
+        "name": "external LG control boundary",
+        "exitCode": 0,
+        "passed": 4,
+        "log": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-lg-claim-v2-6km78g0d/lg-independent-boundary.log"
+      },
+      {
+        "name": "lab strict all lib/test --fatal-infos",
+        "exitCode": 0,
+        "log": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-lg-claim-v2-6km78g0d/lab-strict-independent.log"
+      },
+      {
+        "name": "video strict all lib/test --fatal-infos",
+        "exitCode": 0,
+        "log": "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-lg-claim-v2-6km78g0d/video-strict-independent.log"
+      }
+    ],
+    "verifiedFacts": [
+      "All three setters reject LG owner-token sessions before assigning configured options or policy or resolving/merging preferences",
+      "Fresh rejected setters do not consume first-open claim, query capabilities, stop/reset backend, alter report or modify initial defaults",
+      "Pending rejected setters preserve pending transaction, query count, immutable report, start=61 and play=false",
+      "First contradictory LG open consumes single-open claim synchronously before resolver throws; immediately adjacent valid open is refused without capability query or backend calls",
+      "No-token contradictory options failure permits later valid open; normal setOptions/setPolicy/setPreference remain functional",
+      "Lab failed-open wrapper keeps revoke/prepare counts and side-effect assertions; fake open override now includes options without changing ownership behavior",
+      "Full owner/ACK/source identity, disposal debt, F01 unknown DV and request-budget suites remain passing"
+    ],
+    "notVerified": [
+      "Native or physical LG output, HDR colors and sustained performance",
+      "DEVICE native owner/arm fixes or full DV001 and PR5 final integration",
+      "Hosted CI for the future committed source vector",
+      "New App native SDK workflow execution"
+    ],
+    "reviewTriggers": [
+      "Change to frozen four files or LG claim/control order",
+      "Changes to native ownership, precise-handle gates, output configuration or guarded execution lifecycle",
+      "Future CI or native/device evidence contradicting host assumptions"
+    ],
+    "environmentFailures": [
+      "Independent setup initially found no shared lab package_config.json; this absence was recorded and preserved, and package metadata was confined to temp snapshot.",
+      "First full lab run used --no-test-assets: 297 passed, one N4 layout test failed because shaders/ink_sparkle.frag was absent. Reran complete same-source suite with normal test asset compilation: 298 passed. Initial log retained lab-independent.log."
+    ],
+    "sourceOrGitModifiedByReviewer": false,
+    "sharedSdkOrMetadataModifiedByReviewer": false,
+    "nativeVerified": false,
+    "deviceVerified": false,
+    "evidenceSha256": {
+      "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-lg-claim-v2-6km78g0d/baseline-independent.log": "e043a5b61c6b4c7cf00de7eba7713645f0100987baebb950f5d0efb5dbb7f4f3",
+      "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-lg-claim-v2-6km78g0d/lab-independent-final.log": "ec8a7caf478ba8dccad8bac43802a2af575721efc996f852f26c8afb4a91d8b8",
+      "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-lg-claim-v2-6km78g0d/video-independent.log": "d2d6348860c93a9b821b498ffe0af82287408ff08da34eaa3f2fe15dda905f7f",
+      "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-lg-claim-v2-6km78g0d/lg-independent-boundary.log": "8bf6454d9f9b545782e59d0e7cc2d133ec359047ce7d5c537a2f2edcd09faf04",
+      "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-lg-claim-v2-6km78g0d/lab-strict-independent.log": "95a28819c918db92d8f3f7dfadfc18f1248f79ab8313759391ad318fe94cf093",
+      "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-lg-claim-v2-6km78g0d/video-strict-independent.log": "95a28819c918db92d8f3f7dfadfc18f1248f79ab8313759391ad318fe94cf093",
+      "/private/var/folders/96/wxgz1n_d70g8rfl09q80jych0000gp/T/mk-lg-claim-v2-6km78g0d/lg_boundary_test.dart": "4a29a532dcedb693d53abd1b464e3581641e309a26b80994dc94529fcd5d6e8d"
+    }
+  }
+}

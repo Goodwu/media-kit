@@ -92,7 +92,7 @@ void main() {
       FileLoadedRecord(epoch + 1, entryId);
 
   test('review waits for late video-params: first review yields 8.4, '
-      'no rebuild, baseLayerDirect stays applied', () async {
+      'no rebuild, the C2 reshape route stays applied', () async {
     final backend = _GatheringBackend(
       readProperty: reader(),
       latestVideoParams: paramsAfterFirstQuery(),
@@ -111,16 +111,18 @@ void main() {
     await session.open(Media('test://media'), hint: p84);
     await pumpEventQueue();
 
-    // The one and only open ran on the HLG direct route; the review agreed
-    // with the hint on its first execution.
+    // The one and only open ran on the C2 reshape route (the canonical DV
+    // order evaluates the reshape before the C3 baseline on this PQ-capable
+    // DV-declaring panel); the review agreed with the hint on its first
+    // execution, so no rebuild was spent.
     expect(backend.opened, hasLength(1));
-    expect(backend.opened.single.route.strategy, HdrStrategy.baseLayerDirect);
-    expect(backend.opened.single.route.outputTransfer, HdrOutputTransfer.hlg);
+    expect(backend.opened.single.route.strategy, HdrStrategy.metadataReshape);
+    expect(backend.opened.single.route.outputTransfer, HdrOutputTransfer.pq);
     expect(backend.reviewFactsCalls, 1);
     final report = session.report.value;
     expect(report.verified, isTrue);
     expect(report.source, p84);
-    expect(report.actual!.strategy, HdrStrategy.baseLayerDirect);
+    expect(report.actual!.strategy, HdrStrategy.metadataReshape);
     expect(report.diagnostic, isNull);
     expect(events.whereType<HdrDegradedEvent>(), isEmpty);
     expect(events.whereType<HdrReclassifiedEvent>(), isEmpty);

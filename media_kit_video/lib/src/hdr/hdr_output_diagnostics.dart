@@ -19,7 +19,7 @@ import 'hdr_strategy.dart';
 /// pipeline (requirement R4.3). Seven layers, one fixed line format each:
 ///
 /// * `HDR capability:` — capability snapshot summary
-///   (`HdrCapabilities.queryWith`).
+///   (`VideoRouteCapabilities.query`).
 /// * `HDR predict:` — planner output: selected strategy plus every candidate
 ///   and its skip reason (`HdrRoutePlanner.plan`).
 /// * `HDR classify:` — decoder-fact classification result and its origin
@@ -67,7 +67,7 @@ class HdrOutputDiagnostics {
   // ---------------------------------------------------------------------------
 
   /// `HDR capability:` snapshot summary, emitted by
-  /// `HdrCapabilities.queryWith` after a completed query.
+  /// `VideoRouteCapabilities.query` after a completed query.
   static void capability(HdrCapabilities capabilities) {
     if (!enabled) return;
     printer('$tag HDR capability: ${_capabilityFields(capabilities)}');
@@ -81,7 +81,8 @@ class HdrOutputDiagnostics {
   }) {
     if (!enabled) return;
     printer(
-        '$tag HDR recover: gen=$generation ${_capabilityFields(capabilities)}');
+      '$tag HDR recover: gen=$generation ${_capabilityFields(capabilities)}',
+    );
   }
 
   /// The shared capability snapshot fields of the `capability` and `recover`
@@ -89,7 +90,8 @@ class HdrOutputDiagnostics {
   static String _capabilityFields(HdrCapabilities c) {
     final String types;
     if (c.displayHdrTypes == null) {
-      types = 'unreported'; // No capability report at all (distinct from empty).
+      types =
+          'unreported'; // No capability report at all (distinct from empty).
     } else if (c.displayHdrTypes!.isEmpty) {
       types = 'none';
     } else {
@@ -146,29 +148,31 @@ class HdrOutputDiagnostics {
   }) {
     if (!enabled) return;
     final HdrRoute? route = actual ?? prediction.selected.route;
-    printer('$tag HDR decision: '
-        'phase=$phase '
-        'gen=$generation '
-        'origin=${origin?.name ?? 'none'} '
-        'source=${_sourceValue(source)} '
-        'class=${HdrSourceClass.of(source).name} '
-        'selected=${prediction.selected.strategy.name} '
-        'maturity=${prediction.selected.maturity.name} '
-        'presentation=${prediction.presentation.name} '
-        'confidence=${prediction.confidence.name} '
-        'vo=${route?.vo ?? 'none'} '
-        'hwdec=${route?.hwdec ?? 'none'} '
-        'output=${route?.outputTransfer.name ?? 'none'} '
-        'topology=${route?.topology.name ?? 'none'} '
-        'surface=${route?.surfaceTransfer ?? 'none'} '
-        'stripRpu=${route?.stripDvRpu ?? 'none'} '
-        'hwdecCurrent=${_orNone(hwdecCurrent)} '
-        'requested=${_orNone(dataSpaceRequested)} '
-        'path=${_orNone(dataSpacePath)} '
-        'readback=${_orNone(dataSpaceReadback)} '
-        'verified=${verified ?? false} '
-        'degrade=${degradeReason?.name ?? 'none'} '
-        'candidates=${_candidatesValue(prediction)}');
+    printer(
+      '$tag HDR decision: '
+      'phase=$phase '
+      'gen=$generation '
+      'origin=${origin?.name ?? 'none'} '
+      'source=${_sourceValue(source)} '
+      'class=${HdrSourceClass.of(source).name} '
+      'selected=${prediction.selected.strategy.name} '
+      'maturity=${prediction.selected.maturity.name} '
+      'presentation=${prediction.presentation.name} '
+      'confidence=${prediction.confidence.name} '
+      'vo=${route?.vo ?? 'none'} '
+      'hwdec=${route?.hwdec ?? 'none'} '
+      'output=${route?.outputTransfer.name ?? 'none'} '
+      'topology=${route?.topology.name ?? 'none'} '
+      'surface=${route?.surfaceTransfer ?? 'none'} '
+      'stripRpu=${route?.stripDvRpu ?? 'none'} '
+      'hwdecCurrent=${_orNone(hwdecCurrent)} '
+      'requested=${_orNone(dataSpaceRequested)} '
+      'path=${_orNone(dataSpacePath)} '
+      'readback=${_orNone(dataSpaceReadback)} '
+      'verified=${verified ?? false} '
+      'degrade=${degradeReason?.name ?? 'none'} '
+      'candidates=${_candidatesValue(prediction)}',
+    );
   }
 
   static String _predictionFields(HdrRoutePrediction prediction) {
@@ -186,9 +190,11 @@ class HdrOutputDiagnostics {
   /// `strategy:<skipReason.name>`.
   static String _candidatesValue(HdrRoutePrediction prediction) {
     return prediction.candidates
-        .map((HdrCandidate c) => c.feasible
-            ? '${c.strategy.name}:ok'
-            : '${c.strategy.name}:${c.skipReason?.name ?? 'infeasible'}')
+        .map(
+          (HdrCandidate c) => c.feasible
+              ? '${c.strategy.name}:ok'
+              : '${c.strategy.name}:${c.skipReason?.name ?? 'infeasible'}',
+        )
         .join(',');
   }
 
@@ -204,15 +210,17 @@ class HdrOutputDiagnostics {
     required String origin,
   }) {
     if (!enabled) return;
-    printer('$tag HDR classify: '
-        'origin=$origin '
-        'codec=${_orNone(descriptor.codec)} '
-        'transfer=${_orNone(descriptor.transfer)} '
-        'primaries=${_orNone(descriptor.primaries)} '
-        'meta=${descriptor.dynamicMetadata.name} '
-        'dv=${descriptor.dvProfile?.toString() ?? 'none'} '
-        'compat=${descriptor.dvCompatibilityId?.toString() ?? 'none'} '
-        'el=${descriptor.enhancementLayer?.toString() ?? 'unknown'}');
+    printer(
+      '$tag HDR classify: '
+      'origin=$origin '
+      'codec=${_orNone(descriptor.codec)} '
+      'transfer=${_orNone(descriptor.transfer)} '
+      'primaries=${_orNone(descriptor.primaries)} '
+      'meta=${descriptor.dynamicMetadata.name} '
+      'dv=${descriptor.dvProfile?.toString() ?? 'none'} '
+      'compat=${descriptor.dvCompatibilityId?.toString() ?? 'none'} '
+      'el=${descriptor.enhancementLayer?.toString() ?? 'unknown'}',
+    );
   }
 
   // ---------------------------------------------------------------------------
@@ -230,11 +238,97 @@ class HdrOutputDiagnostics {
     String? readback,
   }) {
     if (!enabled) return;
-    printer('$tag HDR readback: '
-        'requested=$requested '
-        'path=${_orNone(path)} '
-        'applied=$applied '
-        'readback=${_orNone(readback)}');
+    printer(
+      '$tag HDR readback: '
+      'requested=$requested '
+      'path=${_orNone(path)} '
+      'applied=$applied '
+      'readback=${_orNone(readback)}',
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // review
+  // ---------------------------------------------------------------------------
+
+  /// `HDR review:` the ordinary decoder review's observable run, emitted once
+  /// per [gatherDecoderReviewFacts] exit — success, typed failure, budget
+  /// timeout or error. The record attributes the monotonic budget across
+  /// wait phases, counts the readiness iterations and, on an endpoint A/B
+  /// mismatch, carries the changed key with its two values plus capped
+  /// endpoint snapshots. The snapshots are a truncating SUMMARY, not a
+  /// recoverable full transcript — complete device sequences are evidenced
+  /// by the raw logcat files of the verification runs, not by this line
+  /// (V2 third review, R3).
+  ///
+  /// Privacy contract: values are mpv property strings (decoder, codec and
+  /// pixel-format names). The source path is deliberately NOT recorded —
+  /// source integrity appears only as a boolean — so no token or signed URL
+  /// can reach the log through this layer.
+  /// Field and total line caps for the review layer: a record must stay a
+  /// single bounded logcat line even when a property unexpectedly carries a
+  /// huge or multi-line value (V2 R3).
+  static const int _reviewValueCap = 200;
+  static const int _reviewLineCap = 3600;
+
+  static String _sanitizeValue(String value) {
+    final flat = value.replaceAll('\n', '\\n').replaceAll('\r', '\\r');
+    return flat.length <= _reviewValueCap
+        ? flat
+        : '${flat.substring(0, _reviewValueCap)}…';
+  }
+
+  static void review({
+    required int playlistEntryId,
+    required int openedAfterEpoch,
+    required String outcome,
+    required int iterations,
+    required int elapsedMs,
+    required int loadedMs,
+    required String phase,
+    required String identityOk,
+    String? detail,
+    String? changedKey,
+    String? changedA,
+    String? changedB,
+    Map<String, String>? aValues,
+    Map<String, String>? bValues,
+  }) {
+    if (!enabled) return;
+    final buffer = StringBuffer()
+      ..write('$tag HDR review: '
+          'entry=$playlistEntryId '
+          'openedAfterEpoch=$openedAfterEpoch '
+          'outcome=$outcome '
+          'iter=$iterations '
+          'elapsedMs=$elapsedMs '
+          'loadedMs=$loadedMs '
+          'phase=$phase '
+          'identityOk=$identityOk');
+    void field(String name, String? value) {
+      if (value != null) buffer.write(' $name=${_sanitizeValue(value)}');
+    }
+
+    field('detail', detail);
+    field('changedKey', changedKey);
+    field('changedA', changedA);
+    field('changedB', changedB);
+    if (aValues != null) field('a', _endpointValues(aValues));
+    if (bValues != null) field('b', _endpointValues(bValues));
+    var line = buffer.toString();
+    if (line.length > _reviewLineCap) {
+      line = '${line.substring(0, _reviewLineCap)}…truncated';
+    }
+    printer(line);
+  }
+
+  /// Compact endpoint snapshot: `k=v` pairs joined by `,` in the fixed
+  /// endpoint order (the map is a linked insertion-ordered map). Values are
+  /// sanitized to keep the record single-line and bounded.
+  static String _endpointValues(Map<String, String> values) {
+    return values.entries
+        .map((e) => '${e.key}=${_sanitizeValue(e.value)}')
+        .join(',');
   }
 
   // ---------------------------------------------------------------------------
@@ -252,12 +346,14 @@ class HdrOutputDiagnostics {
     String diagnostic = '',
   }) {
     if (!enabled) return;
-    printer('$tag HDR degrade: '
-        'gen=$generation '
-        'reason=${reason.name} '
-        'from=${from?.strategy.name ?? 'none'} '
-        'to=${to?.strategy.name ?? 'none'} '
-        'diagnostic=$diagnostic');
+    printer(
+      '$tag HDR degrade: '
+      'gen=$generation '
+      'reason=${reason.name} '
+      'from=${from?.strategy.name ?? 'none'} '
+      'to=${to?.strategy.name ?? 'none'} '
+      'diagnostic=$diagnostic',
+    );
   }
 
   // ---------------------------------------------------------------------------

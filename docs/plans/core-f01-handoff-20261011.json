@@ -1,0 +1,59 @@
+{
+  "taskId": "MK-ROUTING-20261011",
+  "workItem": "CORE-F01",
+  "role": "CORE",
+  "centralClaim": 6109670062,
+  "integrationScopeClaim": 6109798715,
+  "branch": "routing/MK-ROUTING-20261011",
+  "primaryPR": 4,
+  "status": "implemented_host_and_App_bundle_validated",
+  "baseline": {
+    "mediaKit": "d68871f7bad52264955500ad8dde8adb34f0a100",
+    "app": "8bed4a4f60bc7c7b3aaf9aa52fcda04e83648e03",
+    "ffmpeg": "9aba43cfbee182ade060cdccbe15340a0fbe3e83"
+  },
+  "modelCheckpoint": "a3cdbda2ab1e872e9f3b0d381fc5737e9c819d88",
+  "modelValidation": {
+    "run": 38145332412,
+    "videoAnalyzeAndTests": "success",
+    "labAnalyzeAndTests": "success",
+    "scope": "Model/pure tests only; not Session integration acceptance"
+  },
+  "implemented": [
+    "Immutable per-logical-open source evidence with per-field origins and original hint",
+    "Separate latest decoder videoParams and per-frame Vivid sample including absent values",
+    "Session prepare/review/report carry evidence; missing metadata does not erase known original semantics",
+    "Track contradiction is blocked before replan, with evidence retained in failed report",
+    "Native DV evidence consumer still runs first and its output gamma never infers original source compatibility",
+    "Internal review/failure and configuration/capability reopens preserve evidence",
+    "Explicit public open resets source evidence even for the same URI",
+    "Plan/report copies retain immutable snapshots; public snapshot export added"
+  ],
+  "testAdditions": {
+    "modelCases": 21,
+    "sessionCases": 9,
+    "status": "All21 model+9Session cases executed in source run38149366499"
+  },
+  "limits": [
+    "video-params includes decoder output/overrides; no claim of raw bitstream or final display observation",
+    "Hint retention is not hint verification; report exposes each field's origin",
+    "No new native protocol, raw source property, pre-open probe, HDR10+ delivery or live track-change implementation",
+    "Existing classifier standalone API remains stateless; Session uses the per-open evidence resolver",
+    "No native/Surface/owner/ACK/LG recipe/build modifications; DEVICE owns those areas",
+    "App34 infos and remaining Release CI stay open; previous CI02 results are in6109490925 and6109486294"
+  ],
+  "parallel": {
+    "deviceUpdate": 6109723491,
+    "coreReply": 6109798715,
+    "deviceBuildPR": "Goodwu/libmpv-android-video-build-dv-experiment#1",
+    "note": "DEVICE is solidifying latest mpv/libplacebo/helper/native JAR recipe; CORE has not merged or certified it. Avoid duplicate recipe development. Shared source/review/configuration-reopen functions only were touched in CORE-F01."
+  },
+  "next": "CORE-R01 execution path/output/decoder review; raw source and live track observations remain outside F01.",
+  "handoff": "Model and Session source evidence are already implemented on the one canonical branch, not a request to redevelop. Preserve failed intermediate CI as history. Update canonical summary on the next source checkpoint; terminal comment may complete validation without another docs-only cancellation.",
+  "terminalValidation": {
+    "comment": 6110447335,
+    "librarySha": "6e7570fcdaadeb66223a7327860000bb945daeb4",
+    "appSha": "569138fa8d55eb2686578fc834c19aba8093c411",
+    "appComment": 6110417510
+  }
+}
