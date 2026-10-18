@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:media_kit/media_kit.dart';
+import 'package:media_kit/src/compat/screenshot_flutter.dart';
 import 'package:media_kit/ffi/src/allocation.dart';
 import 'package:media_kit/ffi/src/utf8.dart';
 import 'package:media_kit/generated/libmpv/bindings.dart' as g;
@@ -28,7 +29,7 @@ void oldApplicationTypes(NativePlayer player, Pointer<g.mpv_handle> encodingHand
   expect([width, height, volume, screenshot, size, apiVersion, raw], isNotEmpty);
 }
 
-class ImagePlayer extends PlatformPlayer {
+class ImagePlayer extends PlatformPlayer with PlayerScreenshot {
   ImagePlayer() : super(configuration: const PlayerConfiguration());
   @override
   Future<Uint8List?> safeScreenshot({String? format = 'image/jpeg',

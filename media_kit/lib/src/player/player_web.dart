@@ -1,5 +1,3 @@
-import 'web/player/player.dart';
-
-export 'web/player/player.dart';
-
+import '../compat/flutter_web_player.dart';
+export '../compat/flutter_web_player.dart';
 typedef Player = WebPlayer;

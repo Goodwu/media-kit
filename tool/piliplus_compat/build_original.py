@@ -22,8 +22,11 @@ from urllib.request import url2pathname
 
 import yaml
 
+from private_flutter_cache import copy_flutter_cache
 from generated_xcconfig import is_generated_cocoapods_include
 from generated_gradle import capture_gradle_wrappers, verify_generated_wrapper
+from generated_apple import (capture_apple_inputs, is_generated_configuration,
+                             verify_generated_apple, verify_generators, IOS_CONFIG)
 
 from dependency_plan import (AuditError, build_plan, git, identity,
                              managed, manifests_at_head, package_catalog,
@@ -121,7 +124,7 @@ def checked_payload(root: Path, relative: str, mode: str) -> bytes:
     return path.read_bytes()
 
 
-def verify_tracked(root: Path, manifest: dict, allowed=frozenset()) -> dict:
+def verify_tracked(root: Path, manifest: dict, allowed=frozenset(), generated_configs=None) -> dict:
     generated, violations = {}, []
     for path, record in manifest.items():
         try:
@@ -130,10 +133,14 @@ def verify_tracked(root: Path, manifest: dict, allowed=frozenset()) -> dict:
             if actual != record['blob']:
                 pods_generated = (allowed == GENERATED_TRACKED and
                     is_generated_cocoapods_include(path, record['blob'], data))
-                if path not in allowed and not pods_generated:
+                apple_generated = (allowed == GENERATED_TRACKED and
+                    is_generated_configuration(path, record['blob'], data, generated_configs or {}))
+                if path not in allowed and not pods_generated and not apple_generated:
                     violations.append(f'{path} (expected {record["blob"]}, actual {actual})')
                 else:
                     generated[path] = {'before': record['blob'], 'after': actual}
+                    if apple_generated:
+                        generated[path]['generator'] = 'Flutter IOSDeploymentTargetMigration'
                     if pods_generated:
                         generated[path]['generator'] = 'Flutter CocoaPods exact include prefix'
         except (OSError, AuditError) as error:
@@ -142,11 +149,13 @@ def verify_tracked(root: Path, manifest: dict, allowed=frozenset()) -> dict:
         raise AuditError('Original source/type/mode changed: ' + ', '.join(violations[:20]))
     return {'trackedFiles': len(manifest), 'generatedChanges': generated,
             'originalSourceUnchanged': True,
-            'allTrackedBytesUnchanged': not bool(generated)}
+            'allTrackedBytesUnchanged': not bool(generated),
+            'generatedPlatformConfigurationChanges': {p: v for p, v in generated.items()
+                if 'generator' in v}}
 
 
 
-def verify_added(root: Path, *, app=False, package_paths=(), generated_wrappers=None) -> dict:
+def verify_added(root: Path, *, app=False, package_paths=(), generated_wrappers=None, generated_apple=None) -> dict:
     prefixes = ['.dart_tool/', 'build/'] if app else []
     files = set(GENERATED_TRACKED) | {
         '.flutter-plugins', '.flutter-plugins-dependencies',
@@ -173,12 +182,21 @@ def verify_added(root: Path, *, app=False, package_paths=(), generated_wrappers=
             except (OSError, ValueError) as error:
                 raise AuditError(str(error)) from error
             verified_wrappers[path] = wrappers[path]
-    rejected = [p for p in added if p not in files and p not in verified_wrappers
+    apple = generated_apple or {}
+    verified_apple = {}
+    for path in added:
+        if app and path in apple:
+            try:
+                verify_generated_apple(root, path, apple[path])
+            except (OSError, ValueError) as error:
+                raise AuditError(str(error)) from error
+            verified_apple[path] = apple[path]
+    rejected = [p for p in added if p not in files and p not in verified_wrappers and p not in verified_apple
                 and not any(p.startswith(prefix) for prefix in prefixes)]
     if rejected:
         raise AuditError('Unexpected new source/input: ' + ', '.join(rejected[:20]))
     return {'generatedFileCount': len(added), 'unexpectedNewInputs': [],
-            'verifiedGradleWrappers': verified_wrappers}
+            'verifiedGradleWrappers': verified_wrappers, 'verifiedAppleFiles': verified_apple}
 
 def clone_exact(source: Path, destination: Path, commit: str) -> None:
     subprocess.run(['git', 'clone', '--no-hardlinks', '--no-checkout', '--',
@@ -247,6 +265,13 @@ def verify_managed(plan: dict, config_file: Path, app_root: Path, sdk_root: Path
             'packageConfigSha256': hashlib.sha256(config_file.read_bytes()).hexdigest()}
 
 
+def console_text(text: str) -> None:
+    # Full UTF-8 logs retain all bytes; a legacy Windows console must not turn
+    # a successful compiler exit into a failed build just by printing a tick.
+    encoding = getattr(sys.stdout, 'encoding', None) or 'utf-8'
+    print(text.encode(encoding, errors='backslashreplace').decode(encoding), flush=True)
+
+
 class Runner:
     def __init__(self, output: Path):
         self.output = output
@@ -269,7 +294,7 @@ class Runner:
                'log': log.name, 'status': 'running'}
         self.receipt['steps'].append(row)
         self.save()
-        print(f'=== {name}: {argv} ===', flush=True)
+        console_text(f'=== {name}: {argv} ===')
         start = time.monotonic()
         with log.open('w', encoding='utf-8') as stream:
             try:
@@ -287,7 +312,7 @@ class Runner:
         self.save()
         text = log.read_text(encoding='utf-8', errors='replace')
         # Full logs are artifacts; bounded tail keeps Actions API reads useful.
-        print(text[-24000:], flush=True)
+        console_text(text[-24000:])
         if required and code:
             raise AuditError(f'{name} failed with exit {code}; see {log.name}')
         return code
@@ -334,9 +359,12 @@ def execute(args, runner: Runner) -> None:
     flutter_id = git(original_flutter, 'rev-parse', 'HEAD').decode().strip()
     flutter = out / 'flutter'
     clone_exact(original_flutter, flutter, flutter_id)
-    # Copy, never link, mutable cache state into this per-run SDK.
+    # Copy mutable bytes independently, preserving only private internal links.
+    # Flattening Versions/Current makes macOS frameworks ambiguous to codesign.
     if (original_flutter / 'bin/cache').exists():
-        shutil.copytree(original_flutter / 'bin/cache', flutter / 'bin/cache', symlinks=False)
+        runner.receipt['flutterCacheCopy'] = copy_flutter_cache(
+            original_flutter / 'bin/cache', flutter / 'bin/cache')
+        runner.save()
     executable = str(flutter / 'bin' / ('flutter.bat' if os.name == 'nt' else 'flutter'))
     runner.env['FLUTTER_ROOT'] = str(flutter)
     runner.env['PATH'] = str(flutter / 'bin') + os.pathsep + runner.env.get('PATH', '')
@@ -344,6 +372,20 @@ def execute(args, runner: Runner) -> None:
                                  'requested': app_spec.get('environment', {}).get('flutter')}
     for name in FRAMEWORK_PATCHES + PLATFORM_FRAMEWORK.get(args.platform, ()):
         runner.apply(flutter, app / 'lib/scripts' / (name + '.patch'), 'flutter-' + name)
+    apple = {'configurations': {}, 'newFiles': {}}
+    if args.platform in ('ios', 'macos'):
+        home = out / 'home'
+        home.mkdir()
+        runner.env['HOME'] = str(home)
+        runner.env['XDG_CONFIG_HOME'] = str(home / '.config')
+        runner.run('retain-cocoapods-integration',
+                   [executable, 'config', '--no-enable-swift-package-manager'], app)
+    if args.platform == 'ios':
+        originals = {p: git(app, 'show', 'HEAD:' + p) for p in IOS_CONFIG
+                     if p in app_manifest}
+        apple = capture_apple_inputs(flutter, originals)
+        runner.receipt['appleGeneratedInputs'] = apple
+        runner.save()
     runner.run('flutter-version', [executable, '--version', '--machine'], app)
     wrappers = {}
     if args.platform == 'android':
@@ -358,10 +400,10 @@ def execute(args, runner: Runner) -> None:
         runner.apply(roots['material_ui'], app / 'lib/scripts/material' / (name + '.patch'), 'material-' + name)
     if args.platform == 'ios':
         runner.apply(roots['cupertino_ui'], app / 'lib/scripts/cupertino/bottom_sheet_ios_flutter.patch', 'cupertino-ios')
-    verify_added(app, app=True, generated_wrappers=wrappers)
+    verify_added(app, app=True, generated_wrappers=wrappers, generated_apple=apple['newFiles'])
     verify_added(sdk, package_paths=[p['path'] for p in plan['packages'].values()])
     runner.receipt['sourceGuardBeforeBuild'] = {
-        'app': verify_tracked(app, app_manifest, GENERATED_TRACKED),
+        'app': verify_tracked(app, app_manifest, GENERATED_TRACKED, generated_configs=apple['configurations']),
         'sdk': verify_tracked(sdk, sdk_manifest),
     }
     runner.save()
@@ -377,12 +419,14 @@ def execute(args, runner: Runner) -> None:
     runner.receipt['applicationCompile'] = 'passed' if build == 0 else 'failed'
     runner.receipt['analysis'] = 'passed' if analyze == 0 else 'failed'
     runner.save()
+    if args.platform == 'ios':
+        verify_generators(flutter)
     runner.receipt['addedInputsAfterBuild'] = {
-        'app': verify_added(app, app=True, generated_wrappers=wrappers),
+        'app': verify_added(app, app=True, generated_wrappers=wrappers, generated_apple=apple['newFiles']),
         'sdk': verify_added(sdk, package_paths=[p['path'] for p in plan['packages'].values()]),
     }
     runner.receipt['sourceGuardAfterBuild'] = {
-        'app': verify_tracked(app, app_manifest, GENERATED_TRACKED),
+        'app': verify_tracked(app, app_manifest, GENERATED_TRACKED, generated_configs=apple['configurations']),
         'sdk': verify_tracked(sdk, sdk_manifest),
     }
     runner.receipt['resolutionAfterBuild'] = verify_managed(plan, app / '.dart_tool/package_config.json', app, sdk)

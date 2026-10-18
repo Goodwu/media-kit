@@ -47,7 +47,7 @@ class WebPlayer extends PlatformPlayer {
   /// {@macro web_player}
   WebPlayer({PlayerConfiguration configuration = const PlayerConfiguration()})
       : super(configuration: configuration) {
-    var idProperty = globalContext.getPropertyAsync(kInstanceCount.toJS);
+    var idProperty = globalContext.getProperty(kInstanceCount.toJS);
     if (idProperty.isUndefinedOrNull) {
       id = 0;
     } else {
