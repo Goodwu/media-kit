@@ -33,7 +33,7 @@ class ImagePlayer extends Fake implements PlatformPlayer {
   Future<Uint8List?> safeScreenshot({String? format = 'image/jpeg',
       bool synchronized = true, bool includeLibassSubtitles = false}) async {
     expect(format, 'image/png');
-    return base64Decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aD1sAAAAASUVORK5CYII=');
+    return base64Decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=');
   }
 }
 

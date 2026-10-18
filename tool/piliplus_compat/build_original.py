@@ -22,6 +22,8 @@ from urllib.request import url2pathname
 
 import yaml
 
+from generated_xcconfig import is_generated_cocoapods_include
+
 from dependency_plan import (AuditError, build_plan, git, identity,
                              managed, manifests_at_head, package_catalog,
                              parse_manifest)
@@ -125,16 +127,21 @@ def verify_tracked(root: Path, manifest: dict, allowed=frozenset()) -> dict:
             data = checked_payload(root, path, record['mode'])
             actual = blob_digest(data)
             if actual != record['blob']:
-                if path not in allowed:
+                pods_generated = (allowed == GENERATED_TRACKED and
+                    is_generated_cocoapods_include(path, record['blob'], data))
+                if path not in allowed and not pods_generated:
                     violations.append(f'{path} (expected {record["blob"]}, actual {actual})')
                 else:
                     generated[path] = {'before': record['blob'], 'after': actual}
+                    if pods_generated:
+                        generated[path]['generator'] = 'Flutter CocoaPods exact include prefix'
         except (OSError, AuditError) as error:
             violations.append(f'{path}: {error}')
     if violations:
         raise AuditError('Original source/type/mode changed: ' + ', '.join(violations[:20]))
     return {'trackedFiles': len(manifest), 'generatedChanges': generated,
-            'originalSourceUnchanged': True}
+            'originalSourceUnchanged': True,
+            'allTrackedBytesUnchanged': not bool(generated)}
 
 
 

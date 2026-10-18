@@ -347,7 +347,7 @@ class _LegacyPump {
       event.ref.error = -1;
       event.ref.data = log.cast();
       await callback(event);
-      if (mpv._owners.containsKey(ctx.address)) {
+      if (identical(mpv._owners[ctx.address], this)) {
         event.ref.event_id = g.mpv_event_id.MPV_EVENT_SHUTDOWN;
         event.ref.data = nullptr;
         await callback(event);
@@ -360,7 +360,7 @@ class _LegacyPump {
       calloc.free(message);
       calloc.free(log);
       calloc.free(event);
-      if (mpv._owners.containsKey(ctx.address)) mpv.mpv_terminate_destroy(ctx);
+      if (identical(mpv._owners[ctx.address], this)) mpv.mpv_terminate_destroy(ctx);
     }
   }
 }
