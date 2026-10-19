@@ -20,11 +20,11 @@ jobs:
           persist-credentials: false
       - uses: actions/checkout@v4
         with:
-          repository: bggRGjQaUbCoE/PiliPlus
-          ref: main
+          repository: Goodwu/PiliPlus
+          ref: feature/ohos
           path: app
           persist-credentials: false
-      - name: Archive tracked public source for direction B and bind Git identities
+      - name: Archive confirmed OHOS target and current SDK with Git identities
         shell: python
         run: |
           import hashlib, json, os, pathlib, subprocess
