@@ -69,6 +69,13 @@ class LocalMediaServer {
               '${jsonEncode(requests.map((r) => {"path": r.path, "headers": r.headers}).toList())}');
         });
   }
+  Future<RequestCapture> waitForPath(String path, {int after = 0}) {
+    for (final entry in requests.skip(after)) {
+      if (entry.path == path) return Future.value(entry);
+    }
+    return events.stream.firstWhere((entry) => entry.path == path)
+        .timeout(const Duration(seconds: 10));
+  }
   Future<void> close() async {
     await server.close(force: true);
     await subscription.cancel();
@@ -82,6 +89,24 @@ Future<void> waitLoaded(Player player) async {
       .timeout(const Duration(seconds: 10), onTimeout: () {
         throw StateError('No nonzero duration; state: ${player.state}');
       });
+}
+
+/// stop() acknowledges commands; it does not await native file teardown.
+/// mpv restores per-file option backups before returning to idle. Observe that
+/// independent boundary, then assert the values ONCE; never poll the expected
+/// header value, write a reset, or treat pause/core-idle as an unloaded file.
+/// This is test synchronization, not a new public stop/lifetime guarantee.
+Future<void> waitNativeIdle(Player player) async {
+  const timeout = Duration(seconds: 10);
+  final clock = Stopwatch()..start();
+  while (clock.elapsed < timeout) {
+    final remaining = timeout - clock.elapsed;
+    if (remaining <= Duration.zero) break;
+    final idle = await player.getPropertyAsync('idle-active').timeout(remaining);
+    if (idle == 'yes') return;
+    await Future<void>.delayed(const Duration(milliseconds: 10));
+  }
+  throw TimeoutException('Native file teardown did not reach idle-active', timeout);
 }
 
 void main() {
@@ -125,6 +150,7 @@ void main() {
       await player.jump(0);
       expect((await server.waitFor('A', after: beforeA)).headers['x-default'], 'before');
       await player.stop();
+      await waitNativeIdle(player);
       expect(await player.getPropertyAsync('http-header-fields'), 'x-baseline: keep');
     } finally {
       await player.dispose();
@@ -133,6 +159,53 @@ void main() {
       await directory.delete(recursive: true);
     }
   }, skip: !Platform.isLinux, timeout: const Timeout(Duration(seconds: 50)));
+
+  test('immediate stop/open does not leak scoped headers into a baseline request', () async {
+    MediaKit.ensureInitialized(libmpv: 'libmpv.so.2');
+    NativePlayer.test = true;
+    final directory = await Directory.systemTemp.createTemp('mk-header-reopen-');
+    final file = await pcmFixture(directory, 'sample.wav');
+    final server = await LocalMediaServer.start(await file.readAsBytes());
+    final player = await Player.create(configuration: const PlayerConfiguration(
+        options: {'ao': 'null', 'vo': 'null'}));
+    try {
+      for (var cycle = 0; cycle < 3; cycle++) {
+        final baseline = 'x-baseline: keep-$cycle';
+        await player.setPropertyStrict('http-header-fields', baseline);
+        await player.open(Media(server.uri('scoped-$cycle.wav'),
+            httpHeaders: {'X-Entry': 'scoped-$cycle', 'X-Private': 'fixture-only'},
+            extras: const {'cache': 'no'}), play: false);
+        final scoped = await server.waitFor('scoped-$cycle');
+        await waitLoaded(player);
+        expect(scoped.headers.containsKey('x-baseline'), isFalse);
+        final after = server.requests.length;
+        await player.stop();
+        // Deliberately NO idle wait between stop and the successor open.
+        // A test-only teardown wait must not conceal next-source leakage.
+        final path = '/baseline-$cycle.wav';
+        await player.open(Media(server.uri(path.substring(1)),
+            httpHeaders: const {}, extras: const {'cache': 'no'}), play: false);
+        final next = await server.waitForPath(path, after: after);
+        await waitLoaded(player);
+        expect(next.headers['x-baseline'], 'keep-$cycle');
+        expect(next.headers.containsKey('x-entry'), isFalse);
+        expect(next.headers.containsKey('x-private'), isFalse);
+        for (final request in server.requests.skip(after).where((r) => r.path == path)) {
+          expect(request.headers['x-baseline'], 'keep-$cycle');
+          expect(request.headers.containsKey('x-entry'), isFalse);
+          expect(request.headers.containsKey('x-private'), isFalse);
+        }
+        await player.stop();
+        await waitNativeIdle(player);
+        expect(await player.getPropertyAsync('http-header-fields'), baseline);
+      }
+    } finally {
+      await player.dispose();
+      NativePlayer.test = false;
+      await server.close();
+      await directory.delete(recursive: true);
+    }
+  }, skip: !Platform.isLinux, timeout: const Timeout(Duration(seconds: 60)));
 
   test('add captures headers independently and invalid headers preserve playback', () async {
     MediaKit.ensureInitialized(libmpv: 'libmpv.so.2');
@@ -198,6 +271,7 @@ void main() {
       expect(double.parse(observation.$1), closeTo(0.75, 0.001));
       expect(double.parse(observation.$2), closeTo(1.75, 0.001));
       await player.stop();
+      await waitNativeIdle(player);
       expect((await player.getPropertyAsync('start'),
           await player.getPropertyAsync('end')), baseline);
     } finally {
