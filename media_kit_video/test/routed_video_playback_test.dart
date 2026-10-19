@@ -30,9 +30,9 @@ class TestPlayer extends Fake implements Player {
 
 class TestSession extends Fake implements HdrVideoSession {
   @override
-  final controller = ValueNotifier<VideoController?>(null);
+  final ValueNotifier<VideoController?> controller = ValueNotifier(null);
   @override
-  final report = ValueNotifier(const HdrOutputReport());
+  final ValueNotifier<HdrOutputReport> report = ValueNotifier(const HdrOutputReport());
   final requests = <Completer<void>>[];
   final calls = <String>[];
   bool failDispose = false;
@@ -75,7 +75,7 @@ void main() {
       final options = routeOptionsForLegacyConfiguration(
           VideoControllerConfiguration(hwdec: hwdec));
       expect(options.importPreference, VideoImportPreference.preferCopy);
-      expect(options.sdrEmbed, isTrue); // planner, not this adapter, suppresses embed
+      expect(options.sdrEmbed, isTrue);
     }
     final options = routeOptionsForLegacyConfiguration(
         const VideoControllerConfiguration(enableHardwareAcceleration: false));
