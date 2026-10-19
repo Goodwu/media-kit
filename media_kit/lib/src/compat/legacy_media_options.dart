@@ -57,17 +57,19 @@ class LegacyMediaOptions {
   final Map<String, String> httpHeaders;
   bool get isEmpty => values.isEmpty && httpHeaders.isEmpty;
 
-  /// The key/value parser consumes UTF-8 byte lengths. Header list operations
-  /// deliberately use clr + repeated append, NOT a comma-joined string list:
-  /// append keeps commas and trailing backslashes literally inside ONE field.
-  /// The native per-file backup belongs to http-header-fields for every action.
+  /// loadfile's key/value parser de-duplicates repeated keys: multiple
+  /// http-header-fields-append entries would keep only the last field. Use one
+  /// internally assembled CRLF block as ONE string-list member instead. Input
+  /// names/values were validated before assembly and cannot supply CR/LF/NUL.
+  /// Escaping commas protects the inner string-list parser; the outer UTF-8
+  /// length quoting protects key/value syntax. Backslashes at field ends are
+  /// followed by CRLF (or EOF), never a list separator, so they stay literal.
   String get encoded => <String>[
     for (final entry in values.entries) _pair(entry.key, entry.value),
-    if (httpHeaders.isNotEmpty) ...[
-      _pair('http-header-fields-clr', ''),
-      for (final entry in httpHeaders.entries)
-        _pair('http-header-fields-append', '${entry.key}: ${entry.value}'),
-    ],
+    if (httpHeaders.isNotEmpty)
+      _pair('http-header-fields', httpHeaders.entries
+          .map((entry) => '${entry.key}: ${entry.value}')
+          .join('\r\n').replaceAll(',', r'\,')),
   ].join(',');
 
   static String _pair(String name, String value) =>

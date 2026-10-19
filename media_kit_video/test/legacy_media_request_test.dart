@@ -4,7 +4,7 @@ import 'package:media_kit/src/compat/legacy_media_headers.dart';
 import 'package:media_kit/src/compat/legacy_media_options.dart';
 
 // Independent reader for the generated key/value byte-length syntax. Returning
-// pairs rather than a map deliberately preserves repeated header append keys.
+// pairs rather than a map lets the tests reject duplicate native option keys.
 List<(String, String)> pairs(String text) {
   final bytes = utf8.encode(text);
   var offset = 0;
@@ -47,22 +47,30 @@ void main() {
     expect(captured.httpHeaders, {'user-agent': 'media', 'x-default': 'first'});
   });
 
-  test('append actions preserve comma, percent, UTF-8 and trailing slash', () {
+  test('one header block preserves comma, percent, UTF-8 and trailing slash', () {
     final headers = {'X-Test': 'one,two=3%[四]', 'X-Tail': 'ends\\'};
     final options = LegacyMediaOptions.fromExtras(null, httpHeaders: headers);
     expect(pairs(options.encoded), [
-      ('http-header-fields-clr', ''),
-      ('http-header-fields-append', 'x-test: one,two=3%[四]'),
-      ('http-header-fields-append', 'x-tail: ends\\'),
+      ('http-header-fields', 'x-test: one\\,two=3%[四]\r\nx-tail: ends\\'),
     ]);
+  });
+
+  test('multiple trailing backslashes never escape a field separator', () {
+    final options = LegacyMediaOptions.fromExtras(null, httpHeaders: {
+      'X-First': 'first\\', 'X-Middle': r'part\,tail', 'X-Last': 'last\\',
+    });
+    final nativePairs = pairs(options.encoded);
+    expect(nativePairs.map((entry) => entry.$1).toSet().length,
+        nativePairs.length);
+    expect(nativePairs.single.$2.replaceAll(r'\,', ','),
+        'x-first: first\\\r\nx-middle: part\\,tail\r\nx-last: last\\');
   });
 
   test('header-looking delimiters cannot acquire VO or decoder options', () {
     final options = LegacyMediaOptions.fromExtras({'vo': 'null'},
         httpHeaders: {'X-Test': 'a,vo=null,hwdec=no'});
     expect(pairs(options.encoded), [
-      ('http-header-fields-clr', ''),
-      ('http-header-fields-append', 'x-test: a,vo=null,hwdec=no'),
+      ('http-header-fields', r'x-test: a\,vo=null\,hwdec=no'),
     ]);
   });
 
