@@ -1,0 +1,43 @@
+{
+  "task": "PiliPlus compatibility — approved direction B / OHOS continuation",
+  "updated": "2026-10-19 Asia/Singapore",
+  "branch": "compat/piliplus-zero-change-20261018",
+  "status": "OHOS_NATIVE_SOURCE_AND_SDK_RELEASE_HAP_PASSED_CURRENT_PILIPLUS_OHOS_BLOCKED",
+  "userDecision": {"direction": "B", "status": "approved", "transparentPlayerInterception": "not-required", "scopeExpansion": "Discuss costly full-application OHOS portability before implementation; no alternative application baseline approved."},
+  "priorDirectionB": {"completeUnmodifiedHandoff": "docs/plans/piliplus-direction-b-handoff-before-ohos-20261019.json", "blob": "d6db6262ae35c957102d0f08f24b46acc0f13d99", "lastHandoffCommit": "9e351bed8b39ae728d6949036bf4895f7123f879", "note": "All original P0/P1/P2b/B commits, five-platform results, full artifact hashes, remaining gates and history are preserved in that exact archived blob. Do not redo them."},
+  "plan": "docs/plans/piliplus-ohos-adaptation-20261019.md",
+  "execution": "docs/plans/piliplus-ohos-execution-20261019.md",
+  "source": {
+    "sdkHap": "978c7f6888c1ca7cd7a94bee4f78ccfad92aa469",
+    "sdkContracts": "7c9ff573f6a2b7693dba6ebd969d112fa211a790",
+    "routing": "0597c8318ccf50f0824249ceeab310632efb84ab",
+    "nativeBuilder": "102510e8f6a3aa21d9df19fdbc3bc7c7f9de0d41",
+    "mpv": "6edeee00a07b9b76f197aa71eee3d029fb090de4",
+    "ffmpeg": "7dddf74de0346fee1f17bd49563efc5ab9deaf98",
+    "libplacebo": "cee9b076f2c63104ccfd497fa79c39a867293ec4",
+    "flutterFramework": "2ece1aaeb4bb386c66708e9992e03aafb8dc73da",
+    "flutterEngine": "5a2a6a42cce67f965cf540fcecf616faca624aa1",
+    "refRecheck": "Maintained OHOS native branches, builder main, Flutter patch branch and routing re-read and matched. OHOS-specific recipe, not all-platform branch equivalence."
+  },
+  "ohos": {
+    "workflowRun": 39221456265,
+    "workflowConclusion": "failure",
+    "nativeAndSdkHap": {"job": 117957472301, "conclusion": "success", "target": "media_kit_test/lib/ohos_routed_playback.dart", "build": "ARM64 Release unsigned HAP", "piliPlusApplication": false, "artifact": 12172483324, "artifactZipSha256": "e0842a3253f981623c663aaf5650632ccc688d69583aae0f60119b6e3c9dbcc0", "hapSha256": "040dd2b7315932945906839b964d888983bf2db75d11697198b2807b1221f11c", "libmpvSha256": "f3967033ee2f703e37496665a1ba30a5f9ba606f3c51a6ecbab4c69afaa5be9c", "payloadMatchesCurrentBuild": true, "recipePatchDigestChecks": 10},
+    "frameworkContracts": {"run": 39222397643, "job": 117960541514, "conclusion": "success", "passed": 11, "skipped": 0, "failed": 0, "scope": "host tests using actual OHOS Flutter, not device execution", "artifact": 12172222360, "artifactZipSha256": "423f90a4169490b522aa70001ee9f67e87fad70698a2215fff440326fd583e65"},
+    "localToolRetest": {"passed": 14, "failed": 0, "exitCode": 0},
+    "staticExports": {"referencedMpv": 26, "hdrBridge": 3, "swBridge": 10, "missingReferenced": 0, "generatedUnusedMissing": ["mpv_detach_destroy", "mpv_get_sub_api", "mpv_resume", "mpv_suspend"], "scope": "static names/ELF only; not full ABI, device loading or arbitrary consumer FFI certification"},
+    "allThreeArtifactsDownloadedAndRead": true,
+    "toolchain": {"flutter": "3.44.9+ohos", "dart": "3.12.2", "sdkCli": "26.0.0.621", "sdkApi": "6.0-Release", "bootstrapEvidenceNote": "Raw flutter-version.json contains bootstrap logging; dart-version.txt empty. Preserved raw files; extracted unique real version JSON for delivery, corroborated by independent application preflight. No compiler relabelling."},
+    "applicationPreflight": {"job": 117957473483, "conclusion": "failure", "testedApp": "9b172128beb034e6ba4f9d545c43e3147c0a61ca", "pubGetExitCode": 1, "requiredDart": ">=3.13.0", "requiredFlutter": "3.47.7", "ohosHostPresent": false, "applicationCompile": "not-run", "requirementsRelaxed": false, "artifact": 12172111467, "artifactZipSha256": "46ff80e17a7938a50c453049909ceb3fc93a7883346f974e21e7505533491d86"},
+    "latestAppReadOnly": {"commit": "7312ca186e79c3898d35fbc33b1b8e90856a3cb2", "appVersion": "2.1.6+1", "sameSdkConstraints": true, "commitsAfterTestedApp": 2, "changedFiles": ["lib/pages/live_room/view.dart", "lib/plugin/pl_player/controller.dart", "lib/utils/video_utils.dart"], "newOhosHost": false, "newBuild": "not-run", "bPatchRefreshRequired": true},
+    "deviceInstall": "not-run",
+    "devicePlayback": "not-run",
+    "PiPAndScreenshot": "not-run",
+    "hdrDisplay": "not-run"
+  },
+  "discussion": {"status": "pending-specific-OHOS-application-baseline", "originalDirectionBReapprovalRequired": false, "options": ["Keep current upstream PiliPlus and scope a matching OHOS framework/engine, host/plugin port, and latest B patch refresh.", "Approve existing Goodwu/PiliPlusX ohos application baseline and port current SDK integration there; this is the older 1.1.5 application, not current upstream 2.1.6."], "alternativeAppChanged": false, "currentAppRequirementsLowered": false, "reason": "Full current application rejected by actual Dart version and lacks OHOS host; broader than seven player integration files."},
+  "remaining": ["OHOS application baseline/scope decision, then actual application adaptation and HAP build", "Latest original app B patch review before any current-app T1/T1B/preflight run", "OHOS signing, install, playback, PiP, screenshot and HDR device gates", "Other-platform native/artifact and functional acceptance from archived direction B handoff"],
+  "next": "Read this master, the OHOS execution note and archived B handoff. Preserve existing branch and completed changes. SDK/native OHOS compile is passed, whole application workflow is still failed. Discuss the specific application baseline before framework/engine or non-player port expansion; never lower SDK constraints or silently replace current PiliPlus with PiliPlusX. Do not certify latest app from earlier green results.",
+  "receiptScope": "This receipt-only continuation changes documentation only; no new runtime changes or new HEAD build claim.",
+  "environment": {"workspace": "Codex media-kit connection attempted and failed", "localFlutterDart": "not-present", "localNetwork": "DNS failed", "execution": "Actual GitHub Actions plus downloaded artifacts inspected and tool/ELF checks rerun locally"}
+}
