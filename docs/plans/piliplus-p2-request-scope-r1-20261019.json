@@ -1,0 +1,37 @@
+{
+  "request": {
+    "id": "piliplus-p2-request-scope-r1-20261019",
+    "files": [
+      {
+        "path": "media_kit/lib/src/player/native/player/real.dart",
+        "blob": "0fe15c816436f9c8462751434c223ef26272cc0b",
+        "edits": [
+          {
+            "old": "  /// Synchronous application-level defaults: the next on_load observes these\n  /// even when the caller does not await a property write. Per-media headers win.",
+            "new": "  /// Synchronous defaults captured by subsequent open/add calls, before they\n  /// wait for a lock. Already queued entries are immutable. Per-media fields win."
+          },
+          {
+            "old": "      for (final media in playlist) LegacyMediaOptions.fromExtras(media.extras),",
+            "new": "      for (final media in playlist) LegacyMediaOptions.fromExtras(media.extras,\n          httpHeaders: _legacyHttpHeaders.resolve(media.httpHeaders),\n          start: media.start, end: media.end),"
+          },
+          {
+            "old": "    final options = LegacyMediaOptions.fromExtras(media.extras);",
+            "new": "    final options = LegacyMediaOptions.fromExtras(media.extras,\n        httpHeaders: _legacyHttpHeaders.resolve(media.httpHeaders),\n        start: media.start, end: media.end);"
+          },
+          {
+            "old": "        // Handle HTTP headers specified in the [Media].\n        try {\n          final uri =\n              await MpvApiIsolate.getPropertyString(ctx.address, 'path') ??\n              '';\n          // Get the headers for current [Media] by looking up [uri] in the [HashMap].\n          final headers = _legacyHttpHeaders.resolve(Media(uri).httpHeaders);\n          if (headers.isNotEmpty) {\n            final entries = <String>[\n              for (final entry in headers.entries) '${entry.key}: ${entry.value}',\n            ];\n            await MpvApiIsolate.setPropertyStringListNode(\n              ctx.address,\n              'http-header-fields',\n              entries,\n            );\n          }\n        } catch (exception, stacktrace) {\n          print(exception);\n          print(stacktrace);\n        }\n        // Handle start & end position specified in the [Media].\n        try {\n          final index =\n              await MpvApiIsolate.getPropertyInt64(\n                ctx.address,\n                'playlist-pos',\n              ) ??\n              -1;\n\n          if (index >= 0) {\n            final start = current[index].start;\n            final end = current[index].end;\n\n            if (start != null) {\n              try {\n                await _setPropertyStringDirect(\n                  'start',\n                  (start.inMilliseconds / 1000).toStringAsFixed(3),\n                  waitForInitialization: false,\n                );\n              } catch (exception, stacktrace) {\n                print(exception);\n                print(stacktrace);\n              }\n            }\n\n            if (end != null) {\n              try {\n                await _setPropertyStringDirect(\n                  'end',\n                  (end.inMilliseconds / 1000).toStringAsFixed(3),\n                  waitForInitialization: false,\n                );\n              } catch (exception, stacktrace) {\n                print(exception);\n                print(stacktrace);\n              }\n            }\n          }\n        } catch (_) {}\n",
+            "new": "        // Headers and playback intervals are frozen on native playlist entries.\n        // Never recover them from Media(uri) or a mutable current[index] here.\n"
+          },
+          {
+            "old": "        // Set http-header-fields as [generated.mpv_format.MPV_FORMAT_NONE] [generated.mpv_node].\n        try {\n          await MpvApiIsolate.setPropertyNodeNone(\n            ctx.address,\n            'http-header-fields',\n          );\n        } catch (exception, stacktrace) {\n          print(exception);\n          print(stacktrace);\n        }\n        // Set start & end position as [generated.mpv_format.MPV_FORMAT_NONE] [generated.mpv_node].\n        try {\n          await _setPropertyStringDirect(\n            'start',\n            'none',\n            waitForInitialization: false,\n          );\n        } catch (exception, stacktrace) {\n          print(exception);\n          print(stacktrace);\n        }\n        try {\n          await _setPropertyStringDirect(\n            'end',\n            'none',\n            waitForInitialization: false,\n          );\n        } catch (exception, stacktrace) {\n          print(exception);\n          print(stacktrace);\n        }\n",
+            "new": "        // Native per-file options restore their own baseline. An old unload\n        // must not clear another entry's request headers or playback interval.\n"
+          }
+        ]
+      }
+    ]
+  },
+  "result": {
+    "media_kit/lib/src/player/native/player/real.dart": "4f4348f40df74a8fc5622783ce6993974998b4b9"
+  },
+  "status": "source-published-not-build-certified"
+}
