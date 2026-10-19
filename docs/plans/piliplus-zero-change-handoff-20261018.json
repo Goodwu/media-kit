@@ -1,22 +1,90 @@
 {
-  "task": "PiliPlus compatibility — direction B approved",
+  "task": "PiliPlus compatibility — direction B",
   "updated": "2026-10-19 Asia/Singapore",
   "branch": "compat/piliplus-zero-change-20261018",
   "planRevision": "R3 with approved direction B explicit player integration",
+  "status": "DIRECTION_B_FIRST_INTEGRATION_BATCH_AND_DEBUG_BUILDS_PASSED_NATIVE_DEVICE_GATES_OPEN",
+  "userDecision": {"status": "approved", "direction": "B", "request": "按方向B实施", "scope": "seven reviewed Dart player binding files only; no network/account/business-rule/native-host changes", "universalTransparentAdapter": "not required", "upstreamApplicationRepositoryWritten": false},
   "upstream": "0597c8318ccf50f0824249ceeab310632efb84ab",
-  "userDecision": {"status": "approved", "direction": "B", "request": "按方向B实施", "scope": "seven reviewed Dart player binding files only; no network/account/business-rule/native-host changes", "universalTransparentAdapter": "not required", "applicationRepositoryWritten": false},
+  "upstreamRecheckedAtEnd": true,
+  "applicationCommit": "2eaeeb731462dad92246809d5b5ac716c671736b",
+  "applicationMainRecheckedAtEnd": true,
   "plan": "docs/plans/piliplus-direction-b-20261019.md",
   "execution": "docs/plans/piliplus-direction-b-execution-20261019.md",
-  "completedHistory": {"p0a": "6742133d6f2ad35226802ae9df23000505b09ba2", "p1": "f2495b983d48fb3ac8cf5a00040d4967c16625ff", "p2bCore": "486d1080f18abb54629da197f09c374b115a16c7", "p2bEncoding": "e540c22fa106cc2ece54a1a665862422523c1f6c", "p2bAcceptance": "b6f19b0ad078a97e04c558e3ecb5f44d3f6491a6"},
-  "historicalGreen": {"testedCommit": "b6f19b0ad078a97e04c558e3ecb5f44d3f6491a6", "applicationCommit": "6a5171f98f6d493f3c07bc7fc5f0952d4bc5a5b4", "sdkRun": 39192616258, "videoSuite": {"passed": 1014, "skipped": 3, "failed": 0}, "sdkArtifact": 12160224957, "sdkZipSha256": "bff7e52f9df345c041fd49697d04f143883a9aa0eef974dfb41e4c9363539250", "t1Run": 39192616309, "allFiveDebugPlatforms": "success", "macosViewsRun": 39192616235, "macosViews": "success", "scope": "historical P2b API and zero-patch compilation only, not current direction B acceptance"},
-  "currentApplicationCommit": "2eaeeb731462dad92246809d5b5ac716c671736b",
-  "sourceSnapshot": {"sdk": "5a025cdfdfa8793d26ebf023e534975e912f131a", "run": 39198005234, "artifact": 12161749495, "zipSha256": "d4a9607ae4a2c1d6468288112135c13f68d9a97e550bc12814d11b321a792c97", "archivesAndRegularBlobsChecked": true},
-  "currentWork": {"sdkIntegrationCommit": "6025d405939743eb40718fe4663cec5b2cb4fe27", "appPatchAndT1BCommit": "d2a40e0619a97f896188ce54e7a1a2dddd1ee137", "patch": "tool/piliplus_compat/direction_b/player-integration.patch", "patchSha256": "8be7561cc7f0f79a7470efb56b8f8801fb99dcb624b7716a8149da9bfe098028", "delivery": "maintained SDK patch applied to isolated latest original app, with pre/postimage guards and a distinct derivative receipt", "status": "implemented first batch; fixing test-double static types and observing CI"},
-  "localToolTests": {"passed": 121, "failed": 0, "scope": "Python build tools only, not Dart/Flutter"},
-  "latestSdkFailure": {"runId": 39199934684, "testedCommit": "6025d405939743eb40718fe4663cec5b2cb4fe27", "artifact": 12163785787, "zipSha256": "4d2e9e2ed1172e1e3a87a54600fa57f11a73e5086dc8d61310c32afb85822304", "fullLogRead": true, "oldTestsPassed": 1014, "skipped": 3, "newTestFilesFailedToLoad": 2, "cause": "fake overridden fields inferred as read-only interface types; explicit ValueNotifier/stream/player types required", "fix": "this batch retains all assertions and changes only test fixture static types"},
-  "currentT1B": {"status": "new workflow submitted; actual outcome pending", "workflow": ".github/workflows/piliplus-direction-b-build.yml", "zeroPatch": false},
-  "remaining": ["new SDK and T1/T1B actual-code acceptance", "remaining cancellation and source-fact admission cases", "latest-source native artifact and ABI closure", "Release/signing, feature/PiP/screenshot and device/HDR acceptance"],
-  "next": "Read current ref and actual CI. Do not ask again about A/B or redo P0/P1/P2b. Observe SDK test fix and separate T1B builds, correct real failures, record exact tested source. Keep original zero-patch T1 distinct.",
-  "environment": {"codexWorkspace": "connection-error rechecked", "localFlutterDart": "not-found", "localGitHubDNS": "resolution-failed", "execution": "GitHub connector and actual Actions; downloaded source/evidence inspected locally"},
-  "historyPolicy": "Normal commits and expected-head updates, no branch recreation. Capture latest app once per matrix; SHAs are receipts, not permanent old-source pins. No current pass inferred from old green runs. See previous handoff commit 43f698958b7acdb4d0c1012d5afa17b8d829dc34 for historical full jobs/receipts."
+  "buildGuide": "docs/plans/piliplus-direction-b-build-guide-20261019.md",
+  "lastAppBuildCommit": "ab2e54022c53f0aff5c3932c56ef5c72d8f163f8",
+  "lastSdkRegressionCommit": "d42f9ed5cd82380e24c88be8141c1a6510fd1d34",
+  "runtimeCodeIdentity": "compare d42f9ed5 to a2a81360: no media_kit or media_kit_video runtime/test changes; only integration recipe/tools, macOS workflow and documentation changed. App builds used the final recipe at ab2e5402. Later receipt-only commits do not retest or change code.",
+  "implementation": {
+    "sdkIntegrationCommit": "6025d405939743eb40718fe4663cec5b2cb4fe27",
+    "testTypeFixCommit": "57a5e991f87c73162f12fd5ceeacc6ec92ae60cb",
+    "generationFixCommit": "d42f9ed5cd82380e24c88be8141c1a6510fd1d34",
+    "finalAppPatchCommit": "40b026dd5619e56adc6f25adc2076d81efc7fc23",
+    "windowsRecipeFixCommit": "ab2e54022c53f0aff5c3932c56ef5c72d8f163f8",
+    "patch": "tool/piliplus_compat/direction_b/player-integration.patch",
+    "manifest": "tool/piliplus_compat/direction_b/manifest.json",
+    "patchSha256": "2109c3c44c8f93febf04636d557f863d6c05b15fa5a1287ed3f86f2a8474443b",
+    "delivery": "SDK-maintained patch applied only to isolated latest original app; exact before/after blobs, seven-file scope, derivative commit and actual diff retained",
+    "changedOriginalFiles": 7,
+    "unchangedOriginalFiles": 1633,
+    "features": ["explicit Android HDR session and controller listenable binding", "mount-before-review without enabling autoplay or removing original cover", "latest play/pause/seek intent after review", "late preceding report rejected while successor waits", "video/audio owner transitions", "owner-first retryable disposal and failed initialization cleanup", "subtitle/view replacement and gallery integration", "non-Android ordinary output preserved; no Android-equivalent HDR claim"]
+  },
+  "lastT1B": {
+    "runId": 39202905110,
+    "testedCommit": "ab2e54022c53f0aff5c3932c56ef5c72d8f163f8",
+    "status": "completed", "conclusion": "success", "zeroPatch": false,
+    "platformJobs": {"android": 117899670228, "ios": 117899670224, "macos": 117899670261, "windows": 117899670281, "linux": 117899670250},
+    "allBuildStepsSuccess": true, "allOutputUploadStepsSuccess": true,
+    "aggregateJob": 117902869948, "aggregate": "success", "jobsRead": true,
+    "buildScope": {"android": "arm64 Debug APK", "ios": "Debug --no-codesign", "macos": "Debug", "windows": "x64 Debug", "linux": "x64 Debug"},
+    "allFiveEvidenceArtifactsDownloadedAndRead": true,
+    "allFiveReceiptChecks": ["same original application and SDK commit", "same final patch digest and exact applied diff", "exactly seven changed source files and 1633 unchanged", "analysis and applicationCompile passed", "before/after source and resolved-package guards passed", "original input checkouts unchanged"],
+    "evidence": {
+      "android": {"artifactId": 12164982260, "zipSha256": "5d6f6262e6958b202dc62232e923b834b65a52704a95f29b0dc314144979e397"},
+      "ios": {"artifactId": 12164672089, "zipSha256": "8a539e4a67323e18b1a3af803f6c2de0e4f85e148ac6cb06a61f1bc0e7de0e0a"},
+      "macos": {"artifactId": 12164897257, "zipSha256": "0ec9d2437db364fdb1511dfcc87344395cc4b53213a936d55d34434709dfbb40"},
+      "windows": {"artifactId": 12164124065, "zipSha256": "194c6e9aca7c123b1a293872bd5dc8e26b12fb4460b6c833f1058b8741b545d1"},
+      "linux": {"artifactId": 12164762209, "zipSha256": "e1a372c367657fea4489b920e296b0565c28c1aecce85acf26ac48f6963a3ebb"}
+    },
+    "nativeSourceFreshness": "not-verified", "devicePlayback": "not-run", "hdrVerification": "not-run"
+  },
+  "lastT1": {
+    "runId": 39202905113, "testedCommit": "ab2e54022c53f0aff5c3932c56ef5c72d8f163f8",
+    "status": "completed", "conclusion": "success", "zeroPatch": true,
+    "platformJobs": {"android": 117899770600, "ios": 117899770637, "macos": 117899770601, "windows": 117899770607, "linux": 117899770578},
+    "allBuildStepsSuccess": true, "allOutputUploadStepsSuccess": true,
+    "aggregateJob": 117903104482, "aggregate": "success", "jobsRead": true,
+    "scope": "retained original-app Debug compile compatibility; distinct from T1B"
+  },
+  "lastSdk": {
+    "runId": 39201319384, "jobId": 117894695683,
+    "testedCommit": "d42f9ed5cd82380e24c88be8141c1a6510fd1d34",
+    "status": "completed", "conclusion": "success",
+    "videoSuite": {"passed": 1025, "skipped": 3, "failed": 0},
+    "pureDartScreenshot": "success", "restrictedImportAnalysis": "success",
+    "artifactId": 12164166739, "artifactZipSha256": "8c3f1de106309051f241f463a62b4c54075fc8f7a7c91fc043de529306b15b4a",
+    "fullArtifactRead": true,
+    "nativeScope": "Linux system libmpv API semantics only; not latest fork-native provenance"
+  },
+  "lastMacosViews": {
+    "runId": 39203008059, "testedCommit": "fee433f1321afe1ced5c8d524bb941cf17d736df",
+    "status": "completed", "conclusion": "success", "passed": 36, "failed": 0,
+    "includesDirectionBTests": true, "artifactId": 12164911181,
+    "artifactZipSha256": "02be1ee477956cafc11c220455fb4cc4c3f3d18f31cecdb09c3262078ea80756", "fullArtifactRead": true
+  },
+  "toolTests": {"localPassed": 123, "failed": 0, "ciRunId": 39202905090, "ciConclusion": "success"},
+  "resolvedFailuresThisBatch": [
+    {"run": 39199934684, "source": "6025d405", "cause": "two new test files failed to load because overridden fake fields inferred read-only interface types", "fix": "57a5e991 explicitly types test fields; no assertion weakening"},
+    {"run": 39201319273, "platform": "windows", "source": "d42f9ed5", "cause": "checkout CRLF changed patch container digest before compilation", "fix": "ab2e5402 reads exact committed Git objects; digest/preimage/postimage guards retained"}
+  ],
+  "completedHistory": {"p0a": "6742133d6f2ad35226802ae9df23000505b09ba2", "p1": "f2495b983d48fb3ac8cf5a00040d4967c16625ff", "p2bCore": "486d1080f18abb54629da197f09c374b115a16c7", "p2bEncoding": "e540c22fa106cc2ece54a1a665862422523c1f6c", "p2bAcceptance": "b6f19b0ad078a97e04c558e3ecb5f44d3f6491a6", "fullPreBHistoryAt": "43f698958b7acdb4d0c1012d5afa17b8d829dc34", "firstBReceiptAt": "57a5e991f87c73162f12fd5ceeacc6ec92ae60cb"},
+  "remaining": [
+    "Full real no-hint source admission and identified missing facts/paths; existing backend already reads selected track codec/DV/profile/EL, so inspect before changing or duplicating classifiers",
+    "Additional actual application cancellation/rebuild/initialization failure and feature/PiP/screenshot regression",
+    "P4 latest mpv/FFmpeg and other native source builds on each platform and final packaged artifact/ABI identity; current compilation still uses existing native dependency inputs",
+    "Release/signing and P5 real device/HDR continuous-output acceptance"
+  ],
+  "next": "Read latest refs and this handoff. Keep approved B and the existing branch; do not redo P0/P1/P2b or first B integration, and do not diagnose superseded fixed failures again. Preserve separate T1/T1B gates. Prioritize real source-fact/native-artifact closure and application runtime evidence; discuss any new disproportionately costly scope before expanding it.",
+  "environment": {"codexWorkspace": "connection-error rechecked this turn", "localFlutterDart": "not-found", "localGitHubDNS": "resolution-failed", "execution": "working GitHub connector and actual Actions; source/evidence artifacts inspected locally"},
+  "historyPolicy": "Normal commits and expected-head/blob-guarded updates; no force push or branch recreation. Latest app resolved once per matrix. Recorded SHAs identify actual tests, not permanent source pins. Do not certify new code with old green results; document exact unchanged runtime/test identity for tool/document-only successors."
 }
