@@ -62,11 +62,15 @@ set(LIBMPV_SHA "29b8bd4de54bb61c6fbb549022af5d9082d7b057a5901a1d388597ff15114191
 set(LIBMPV_ARCHIVE "${CMAKE_CURRENT_SOURCE_DIR}/${LIBMPV}")
 set(LIBMPV_SRC "${CMAKE_CURRENT_SOURCE_DIR}/../../../libs/arm64-v8a/")
 
-download_and_verify(
-  ${LIBMPV_URL}
-  ${LIBMPV_SHA}
-  ${LIBMPV_ARCHIVE}
-)
+include("${CMAKE_CURRENT_SOURCE_DIR}/external_libmpv.cmake")
+media_kit_ohos_external_libmpv(LIBMPV_ARCHIVE LIBMPV_SHA LIBMPV_EXTERNAL)
+if(NOT LIBMPV_EXTERNAL)
+  download_and_verify(
+    "${LIBMPV_URL}"
+    "${LIBMPV_SHA}"
+    "${LIBMPV_ARCHIVE}"
+  )
+endif()
 
 # The native archive is consumed through the shared libs/arm64-v8a directory.
 # Do not remove that directory during configure: another CMake/HAP invocation
