@@ -61,20 +61,30 @@ void main() {
     return base..addAll(overrides);
   }
 
-  /// The 17 endpoints of the A snapshot (reads 0–16) see [aHwdec] for
-  /// `hwdec-current`, the B snapshot (reads 17–33) sees [bHwdec].
-  Future<HdrReviewFacts> gatherWithFlippedHwdec(String aHwdec, String bHwdec) {
-    var read = 0;
+  /// Round 1 reports [firstHwdec] for `hwdec-current`, every later round
+  /// reports [settledHwdec]; all other endpoints are complete and stable.
+  /// Under the single-sample contract (2026-10-20) this settles on the
+  /// later value and records only the success exit.
+  Future<HdrReviewFacts> gatherWithFlippedHwdec(
+      String firstHwdec, String settledHwdec) {
+    var round = 0;
     return gatherDecoderReviewFacts(
       lock: Lock(),
       mediaUri: 'signed-url-that-must-not-be-logged',
       readProperty: (name) async {
-        // The identity endpoints first (no counter effect on the A/B split).
         if (name == 'path' || name == 'playlist/0/filename') return mediaUri;
         if (name == 'playlist/0/id') return '7';
-        final snapshot = read++ < 17 ? aHwdec : bHwdec;
+        if (name == 'hwdec-current') {
+          return round++ == 0 ? firstHwdec : settledHwdec;
+        }
         return values({
-          'hwdec-current': snapshot,
+          'current-tracks/video/decoder': 'omx.qcom.decoder',
+          'hwdec-current': settledHwdec,
+          'video-params/pixelformat': 'yuv420p',
+          'current-tracks/video/codec': 'h264',
+          'video-format': 'avc',
+          'video-params/gamma': 'bt.709',
+          'video-params/primaries': 'bt.709',
         })[name] ?? '';
       },
       waitForFileLoadedEntry: (_, __) async => const FileLoadedRecord(4, 7),
@@ -85,25 +95,20 @@ void main() {
     );
   }
 
-  test('endpoint mismatch records the changed key with both snapshots',
+  test('endpoint churn records only the settled success snapshot',
       () async {
     enable();
-    await expectLater(
-      gatherWithFlippedHwdec('no', 'mediacodec-copy'),
-      throwsA(isA<HdrDecoderReviewFailure>()),
-    );
+    final facts = await gatherWithFlippedHwdec('no', 'mediacodec-copy');
+    expect(facts.hwdecCurrent, 'mediacodec-copy');
     expect(lines, hasLength(1));
     final line = lines.single;
     expect(line, contains('HDR review: '));
-    expect(line, contains('outcome=endpoint-changed'));
-    expect(line, contains('changedKey=hwdec-current'));
-    expect(line, contains('changedA=no'));
-    expect(line, contains('changedB=mediacodec-copy'));
-    final aSection =
-        line.substring(line.indexOf(' a=') + 3, line.indexOf(' b='));
-    final bSection = line.substring(line.indexOf(' b=') + 3);
-    expect(aSection, contains('hwdec-current=no'));
-    expect(bSection, contains('hwdec-current=mediacodec-copy'));
+    expect(line, contains('outcome=success'));
+    expect(line, contains('phase=complete'));
+    // Single-sample contract: no A/B pair and no changed key exist.
+    expect(line.contains('changedKey='), isFalse);
+    final aSection = line.substring(line.indexOf(' a=') + 3);
+    expect(aSection, contains('hwdec-current=mediacodec-copy'));
     expect(line, contains('entry=7 openedAfterEpoch=3'));
     // The privacy contract: the source path value never reaches the record.
     expect(line.contains('signed-url-that-must-not-be-logged'), isFalse);
@@ -364,10 +369,8 @@ void main() {
   });
 
   test('disabled diagnostics emit nothing and change no outcome', () async {
-    await expectLater(
-      gatherWithFlippedHwdec('no', 'surfacetexture'),
-      throwsA(isA<HdrDecoderReviewFailure>()),
-    );
+    final facts = await gatherWithFlippedHwdec('no', 'surfacetexture');
+    expect(facts.hwdecCurrent, 'surfacetexture');
     expect(lines, isEmpty);
   });
 }

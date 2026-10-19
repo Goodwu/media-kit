@@ -824,12 +824,19 @@ class HdrVideoSession {
         error is HdrDecoderReviewFailure ||
         nativeDvFailureMustAbort(error)) {
       // Ownership/source/debt failures retain their original typed cause.
+      // HdrDecoderReviewFailure is source-level under the single-sample
+      // contract (identity drift, epoch mismatch, malformed configuration,
+      // native-DV safety) — a different candidate cannot fix the source.
       // Coordinator cleanup is still protected by the backend's owner gates.
       return null;
     }
-    // A timeout in open/review/configuration does not identify a failed
-    // decoder or presenter. Stop and clean up rather than guessing a route.
-    if (error is TimeoutException && error is! HdrOutputBindTimeout) {
+    // A plain timeout (unknown stage) does not identify a failed decoder or
+    // presenter — stop and clean up rather than guessing a route. The
+    // bounded decoder review timeout is exempted: it is a candidate
+    // rejection (see the reason chain below).
+    if (error is TimeoutException &&
+        error is! HdrOutputBindTimeout &&
+        error is! HdrDecoderReviewTimeout) {
       return null;
     }
     final nativeFailure =
@@ -868,6 +875,15 @@ class HdrVideoSession {
       if (failed.route.topology == HdrTopology.platformView) {
         excluded[HdrRouteDependency.topologyPlatformView] = reason;
       }
+    } else if (error is HdrDecoderReviewTimeout) {
+      // Review-gate invariants (2026-10-20): the settle budget exhausting
+      // means this candidate's promised decode never stabilized. Exclude
+      // that exact hwdec dependency so the planner takes the next candidate
+      // (e.g. mediacodec → mediacodec-copy) instead of aborting the open.
+      final dependency = _hwdecDependency(failed.route.hwdec);
+      if (dependency == null) return null;
+      reason = HdrDegradeReason.hwdecMismatch;
+      excluded[dependency] = reason;
     } else {
       reason = HdrDegradeReason.unsupportedStrategy;
     }

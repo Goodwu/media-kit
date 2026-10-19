@@ -20,6 +20,7 @@
 ## Session Log
 - S1: 2026-10-20 晚 PiliPlus 三机验收与根因定位（HdrDiag 通道经 App 临时开关取得；SF --latency 用 EMUI 层名 "SurfaceView - pkg/act#0" 才有数据）。
 - S2: 2026-10-20 深夜 App 侧接线试验（RoutedVideoPlayback/RoutedSimpleVideo + 挂载门 + auto-copy + legacy 回退）完整复现门失败后，按用户裁决回退 App 零改动，修复方案收敛 SDK 侧并落设计稿。
+- S3: 2026-10-20（二）凌晨实施不变量 1/2（静止后单采样+复核超时候选回退）+legacy 桥 sdr/sdrEmbed 选项，三机（LYA/LG/marble）深链自动播放全绿：review×2 success→dvP84→toneMapSdr→applied，LYA 30.6fps、LG 30.4fps、零 ANR/FATAL；19 项旧契约测试迁移，media_kit_video 1020+hdr_lab 292 全绿。
 
 ## Findings
 - F1: `routeOptionsForLegacyConfiguration` 对 PiliPlus 安卓 release 默认 hwdec=`mediacodec,auto-safe`（混合 direct+auto）判为非 copy 意图 → 规划钉 direct；显式传 auto-copy 可得 copy 规划（实测 decision 行 hwdec=mediacodec-copy topology=texture），但 copy 候选同样过不了现有门（E2）。
@@ -35,7 +36,8 @@
   - 影响：DV004 不变量与 hdr_lab 契约重写，P1/P2 设计降级为对照方案；丢帧最终解除依赖本设计落地。
 
 ## Action Items
-- [ ] A1: 设计稿 specialist review（含"同配置重建容忍"单规则与静止判定参数定稿）。
+- [x] A1a(部分): 不变量 1/2 已实施并三机验收（2026-10-20 二）；设计稿整体 review 与不变量 3（唯一重开权威）仍待。
+- [ ] A1: 设计稿 specialist review（含"同配置重建容忍"单规则与不变量 3）。
 - [ ] A2: 分批实施 ①门+候选回退 ②自动路由 ③EDL 事实；每批过全量契约测试与三机设备验收。
 - [ ] A3: 自动路由落地后删除 App 侧接线存档的依赖（届时 App 仅需 pubspec_overrides）。
 

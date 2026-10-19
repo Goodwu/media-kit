@@ -298,6 +298,16 @@ EffectiveVideoRouteOptions routeOptionsForLegacyConfiguration(
   return EffectiveVideoRouteOptions.resolve(application: VideoRouteOptions(
     decode: software
         ? const VideoRouteSelection.require(VideoDecodeTarget.software) : null,
+    // The legacy application contract is SDR presentation: its UI, tone
+    // expectations and screenshot paths all assume SDR output. Native HDR
+    // (DV reshape / PQ surface) stays available to explicit HdrVideoSession
+    // integrations that opt in.
+    output: const VideoRouteSelection.require(VideoOutputIntent.sdr),
     importPreference: !software && copyOnly ? VideoImportPreference.preferCopy : null,
+    // The default SDK 16-25 embed carrier is not device-verified in the
+    // default form (documented 2026-10-17); the legacy contract keeps the
+    // Texture carrier — the lab-verified LG-class configuration
+    // (sdrDirect / gpu-next / mediacodec-copy).
+    sdrEmbed: false,
   ));
 }
