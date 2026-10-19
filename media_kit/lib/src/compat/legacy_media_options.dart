@@ -1,13 +1,13 @@
 import 'dart:convert';
 
-/// The finite set of legacy per-media options consumed by original PiliPlus.
-/// Other extras stay application data. In particular decoder, output, hooks and
-/// scripts cannot acquire routing ownership through an extras map.
-///
-/// Values are frozen before an open/add is queued. mpv owns their per-file
-/// lifetime through loadfile's options argument, not a Dart rollback cache.
+import 'legacy_media_headers.dart';
+
+/// Frozen per-entry input for ordinary open/add. Unknown extras stay data;
+/// decoder/output/script ownership cannot be acquired through an extras map.
+/// mpv applies/restores these values with the native playlist entry, not by URI
+/// lookup or by a Dart on_unload callback which may belong to an older source.
 class LegacyMediaOptions {
-  LegacyMediaOptions._(Map<String, String> values)
+  LegacyMediaOptions._(Map<String, String> values, this.httpHeaders)
       : values = Map<String, String>.unmodifiable(values);
 
   static const _names = <String>{
@@ -19,7 +19,11 @@ class LegacyMediaOptions {
     'lavfi-complex',
   };
 
-  factory LegacyMediaOptions.fromExtras(Map<String, dynamic>? extras) {
+  factory LegacyMediaOptions.fromExtras(Map<String, dynamic>? extras, {
+    Map<String, String>? httpHeaders,
+    Duration? start,
+    Duration? end,
+  }) {
     final values = <String, String>{};
     for (final name in _names) {
       if (extras == null || !extras.containsKey(name)) continue;
@@ -30,7 +34,6 @@ class LegacyMediaOptions {
       var decoded = value;
       // The old loadfile key/value parser removed this quoting layer. The
       // application wraps its entire lavfi-complex graph in double quotes.
-      // Do not treat embedded quotes or comma-separated text as new options.
       if (decoded.startsWith('"')) {
         if (decoded.length < 2 || !decoded.endsWith('"') ||
             decoded.substring(1, decoded.length - 1).contains('"')) {
@@ -40,16 +43,35 @@ class LegacyMediaOptions {
       }
       values[name] = decoded;
     }
-    return LegacyMediaOptions._(values);
+    // Preserve the existing millisecond precision and negative-time semantics.
+    // These named fields are trusted API input, not an expanded extras allowlist.
+    if (start != null) values['start'] =
+        (start.inMilliseconds / 1000).toStringAsFixed(3);
+    if (end != null) values['end'] =
+        (end.inMilliseconds / 1000).toStringAsFixed(3);
+    final headers = LegacyMediaHeaders().resolve(httpHeaders);
+    return LegacyMediaOptions._(values, headers);
   }
 
   final Map<String, String> values;
-  bool get isEmpty => values.isEmpty;
+  final Map<String, String> httpHeaders;
+  bool get isEmpty => values.isEmpty && httpHeaders.isEmpty;
 
-  /// mpv's fixed-length suboption escaping uses UTF-8 bytes, not Dart length.
-  /// This keeps commas, equals, brackets and percent signs inside one value.
-  String get encoded => values.entries.map((entry) =>
-      '${entry.key}=%${utf8.encode(entry.value).length}%${entry.value}').join(',');
+  /// The key/value parser consumes UTF-8 byte lengths. Header list operations
+  /// deliberately use clr + repeated append, NOT a comma-joined string list:
+  /// append keeps commas and trailing backslashes literally inside ONE field.
+  /// The native per-file backup belongs to http-header-fields for every action.
+  String get encoded => <String>[
+    for (final entry in values.entries) _pair(entry.key, entry.value),
+    if (httpHeaders.isNotEmpty) ...[
+      _pair('http-header-fields-clr', ''),
+      for (final entry in httpHeaders.entries)
+        _pair('http-header-fields-append', '${entry.key}: ${entry.value}'),
+    ],
+  ].join(',');
+
+  static String _pair(String name, String value) =>
+      '$name=%${utf8.encode(value).length}%$value';
 
   List<String> appendArguments(String uri, {required int apiVersion}) {
     if (uri.contains('\u0000')) throw ArgumentError('Media URI contains NUL');
