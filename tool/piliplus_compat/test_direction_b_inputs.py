@@ -33,13 +33,22 @@ class DirectionBInputsTest(unittest.TestCase):
             'patchSha256': hashlib.sha256(patch).hexdigest(),
             'files': {self.name: {'before': blob(b'old player\n'),
                                   'after': blob(b'explicit session\n')}}}
+        self.sdk_git('init', '-q')
+        self.sdk_git('config', 'user.name', 'Test')
+        self.sdk_git('config', 'user.email', 'test@example.invalid')
+        self.sdk_git('config', 'core.autocrlf', 'false')
         self.save()
+
+    def sdk_git(self, *args):
+        return subprocess.check_output(['git', '-C', str(self.sdk), *args], stderr=subprocess.STDOUT)
 
     def git(self, *args):
         return subprocess.check_output(['git', '-C', str(self.app), *args], stderr=subprocess.STDOUT)
 
     def save(self):
         (self.recipe / 'manifest.json').write_text(json.dumps(self.manifest))
+        self.sdk_git('add', '.')
+        self.sdk_git('commit', '--allow-empty', '-qm', 'reviewed recipe')
 
     def test_applies_only_reviewed_diff_and_retains_original_identity(self):
         before = self.git('rev-parse', 'HEAD').decode().strip()
@@ -72,6 +81,22 @@ class DirectionBInputsTest(unittest.TestCase):
         self.manifest['files'][self.name]['after'] = '0' * 40; self.save()
         with self.assertRaises(AuditError): apply_direction_b(self.app, self.sdk, self.out)
         self.assertFalse((self.out / 'direction-b-applied.patch').exists())
+
+    def test_windows_checkout_line_endings_do_not_change_reviewed_patch(self):
+        self.sdk_git('config', 'core.autocrlf', 'true')
+        patch = self.recipe / 'player-integration.patch'
+        patch.write_bytes(patch.read_bytes().replace(b'\n', b'\r\n'))
+        result = apply_direction_b(self.app, self.sdk, self.out)
+        self.assertEqual(result['patchSha256'], self.manifest['patchSha256'])
+        self.assertNotIn(b'\r\n', (self.out / 'direction-b-input.patch').read_bytes())
+        self.assertEqual((self.app / self.name).read_text(), 'explicit session\n')
+
+    def test_committed_patch_tamper_is_not_line_ending_normalized(self):
+        patch = self.recipe / 'player-integration.patch'
+        patch.write_bytes(patch.read_bytes().replace(b'explicit session', b'unreviewed code'))
+        self.sdk_git('add', '.'); self.sdk_git('commit', '-qm', 'tampered recipe')
+        with self.assertRaises(AuditError): apply_direction_b(self.app, self.sdk, self.out)
+        self.assertEqual((self.app / self.name).read_text(), 'old player\n')
 
     def test_allowlist_contains_only_reviewed_dart_player_binding_paths(self):
         self.assertEqual(len(ALLOWED), 7)

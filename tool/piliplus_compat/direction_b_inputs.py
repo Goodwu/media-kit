@@ -8,7 +8,6 @@ from __future__ import annotations
 import hashlib
 import json
 from pathlib import Path
-import subprocess
 
 from dependency_plan import AuditError, git
 
@@ -28,13 +27,17 @@ def blob(data: bytes) -> str:
 
 
 def apply_direction_b(app: Path, sdk: Path, evidence: Path) -> dict:
-    recipe = sdk / 'tool/piliplus_compat/direction_b'
-    manifest = json.loads((recipe / 'manifest.json').read_text(encoding='utf-8'))
-    patch = recipe / 'player-integration.patch'
+    recipe = 'tool/piliplus_compat/direction_b'
+    # Windows checkout autocrlf may transform patch text. Consume the reviewed
+    # Git objects, not transformed worktree bytes; keep all digest and source
+    # checks exact. The SDK input identity is separately guarded by the builder.
+    manifest = json.loads(git(sdk, 'show', 'HEAD:' + recipe + '/manifest.json'))
+    patch_data = git(sdk, 'show', 'HEAD:' + recipe + '/player-integration.patch')
+    patch = evidence / 'direction-b-input.patch'
     if (manifest.get('version') != 1 or manifest.get('decision') != 'B-approved-20261019'
             or not manifest.get('files') or not set(manifest['files']).issubset(ALLOWED)):
         raise AuditError('Unapproved direction B file scope')
-    if hashlib.sha256(patch.read_bytes()).hexdigest() != manifest['patchSha256']:
+    if hashlib.sha256(patch_data).hexdigest() != manifest['patchSha256']:
         raise AuditError('Direction B patch digest changed')
     if git(app, 'status', '--porcelain').strip():
         raise AuditError('Direction B input clone is dirty')
@@ -47,6 +50,7 @@ def apply_direction_b(app: Path, sdk: Path, evidence: Path) -> dict:
             raise AuditError('Upstream player integration changed; review required: ' + name)
     # All preimages are checked before applying any edits. Never use --reject,
     # fuzzy textual substitutions, or accept a partial application.
+    patch.write_bytes(patch_data)
     git(app, 'apply', '--check', str(patch.resolve()))
     git(app, 'apply', str(patch.resolve()))
     changed = set(git(app, 'diff', '--name-only').decode().splitlines())

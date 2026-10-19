@@ -1,0 +1,7 @@
+# Direction B Windows recipe input correction
+
+The full Windows evidence of T1B run 39201319273 at d42f9ed5 was downloaded and read: artifact 12163912804, ZIP SHA256 1765e302985f68d57da3e040e379ebe4bf1729d39bd7716979c4ac3940635069. Failure was 'Direction B patch digest changed' before compilation. Windows checkout autocrlf changed the patch container's bytes, not the committed recipe. Other platforms reached successful builds on the earlier patch, but the later pre-initialization patch still requires its own five-platform result.
+
+Read the committed manifest and patch with git show HEAD:path, write the exact patch bytes into the evidence directory, then apply with the same exact digest, seven-path scope, preimage/postimage and diff guards. No hash relaxation, line-normalization of application code, or weakening of source checks. The builder already checks input checkout identity and clones application sources with core.autocrlf=false. Add a CRLF-checkout test and a committed-tamper rejection test. Local complete Python tool suite: 123 passed, 0 failures.
+
+The newest SDK runtime code is still d42f9ed5. SDK workflow 39201319384/job117894695683 completed successfully. Full artifact12164166739 was downloaded and read; ZIP SHA2568c3f1de106309051f241f463a62b4c54075fc8f7a7c91fc043de529306b15b4a. Complete media_kit_video suite:1025 pass,3 skip,0fail. Pure Dart screenshot test and restricted-import analysis also succeeded. This tool-only change does not change the tested SDK runtime/test code. New T1B and original T1 must run on the new full commit.
