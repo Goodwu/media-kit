@@ -1,14 +1,7 @@
-# P1 source integration — R4 acceptance run
+# Integrated compatibility source status (2026-10-19)
 
-Continue ONLY compat/piliplus-zero-change-20261018; never replay materializers.
-Initial P1: f2495b983d48fb3ac8cf5a00040d4967c16625ff.
-Compile-r2: a165f55c81cd5f9ef6c6d5297c2803bb8fd6663b.
-Static Flutter/pure-Dart entry: 288b9f24803025c462f081a5be4c3c0cb9065ea4.
-Exact macOS generator: b5e7602da9b9c87be7496c8d2ec96de5f62b4711.
-Darwin input/scheme verifier integrated: 6c55323d8b7a6bca31c1f4547d533ad6176051bc; builder blob 80d251ad91319056c091bd4630e3f82c5a67ddcb matches the locally tested code. Local tool suite: 93 passed.
+Continue only `compat/piliplus-zero-change-20261018`. P0/P1/P2a are already integrated; do not replay their migrations. `81b6d940` passed all five original-app build and output steps plus the aggregate in run 39145299165, SDK regression 39145299152 and macOS view contracts 39145299187. Those passes identify exactly that earlier source.
 
-At f7dceaa93edfa8d5a4e5cf2fde1661cbecf6c795, T1 run39128691646 had all five analyzers and compilers exit0. Android/Linux/Windows passed full guards and uploaded debug outputs. iOS/macOS failed the new-input guard on downloaded Frameworks; exact original/generated scheme/workspace changes were also reviewed before admitting them. This commit runs the complete five-platform workflow on the integrated R4 verifier, not on an unmaterialized request.
+P2b core edits are now committed at `486d1080f18abb54629da197f09c374b115a16c7`. The actual `native/player/real.dart` blob is `4f4348f40df74a8fc5622783ce6993974998b4b9`, verified against the guarded receipt. open/add now freeze request headers and intervals before locking, and native entries own application/restoration. Original PiliPlus is unchanged. This commit adds nine pure contracts and four real native tests and triggers SDK and five-platform builds on the integrated code. A source publication is not a test pass.
 
-SDK run39128691721: pure Dart byte contract and restricted-import Flutter analyzer passed; complete video suite 979passed,3macOS-onlyskips. Separate actual macOS run39129486851 executed all25 viewport/legacy-view/player/restricted-import cases successfully, including those three previously skipped tests. Runtime/library sources are unchanged by R4; no native freshness or device playback is inferred.
-
-Original PiliPlus Dart/native logic and source pubspec remain untouched. Generated lockfiles and precisely reviewed platform build configurations are separately recorded, never called byte-identical. Non-Flutter clients use media_kit_dart.dart; original PiliPlus keeps its Flutter import. P2-P5 media sequencing, automatic routing, stable output lifecycle, latest-source native closure and feature/PiP/HDR acceptance remain open.
+Native tests use Linux system libmpv plus a loopback HTTP server to check equal-URI request isolation, literal headers, queued add, invalid-input preservation, interval restoration and video+audio EDL. No external credentials or services are involved. System libmpv success is API behavior evidence, not current fork-native artifact provenance or HDR/device validation. P2 complete operation sequencing, P3 automatic routing/stable outputs and P4/P5 native/device gates remain open. See the main handoff and `docs/plans/piliplus-p2-request-scope-20261019.md`.
