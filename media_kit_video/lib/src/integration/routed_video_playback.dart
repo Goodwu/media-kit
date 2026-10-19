@@ -71,6 +71,7 @@ class RoutedVideoPlayback {
   bool _closed = false;
   bool _desiredPlaying = false;
   int _generation = 0;
+  int _submittedGeneration = -1;
   int _intent = 0;
   int _readinessEpoch = 0;
   (int, int, int)? _applied;
@@ -88,7 +89,10 @@ class RoutedVideoPlayback {
   }
 
   void _reportChanged() {
-    if (_closed) return;
+    // A successor may still be waiting for an already admitted transport call
+    // or for audio/video owner retirement. Reports from the preceding request
+    // cannot authorize this newer intent before it enters the session.
+    if (_closed || _submittedGeneration != _generation) return;
     final report = _session!.report.value;
     _ready.value = report.verified && report.error == null;
     if (!_ready.value) _readinessEpoch++;
@@ -110,6 +114,7 @@ class RoutedVideoPlayback {
   Future<void> open(Media media, {bool play = true, bool video = true}) {
     _ensureOpen();
     final generation = ++_generation;
+    _submittedGeneration = -1;
     _intent++;
     _desiredPlaying = play;
     _pendingSeek = null;
@@ -129,6 +134,7 @@ class RoutedVideoPlayback {
           // Always false: an internal rebuild must never restore a stale play
           // flag captured by an earlier open. Report notification reapplies the
           // latest intent only after verification. Preserve Media.start.
+          _submittedGeneration = generation;
           await session.open(media, options: options,
               start: media.start, play: false);
         }
