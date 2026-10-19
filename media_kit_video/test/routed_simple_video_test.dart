@@ -17,13 +17,13 @@ class _Player extends Fake implements Player {
   @override
   final state = PlayerState(width: 640, height: 360);
   @override
-  final stream = _Streams();
+  final _Streams stream = _Streams();
   @override
   Future<void> dispose({bool synchronized = true}) async {}
 }
 class _Controller extends Fake implements VideoController {
   @override
-  final player = _Player();
+  final _Player player = _Player();
   @override
   final id = ValueNotifier<int?>(null);
   @override
