@@ -2,11 +2,11 @@
   "version": 1,
   "decision": "B-approved-20261019",
   "reviewedAppCommit": "2eaeeb731462dad92246809d5b5ac716c671736b",
-  "patchSha256": "8be7561cc7f0f79a7470efb56b8f8801fb99dcb624b7716a8149da9bfe098028",
+  "patchSha256": "2109c3c44c8f93febf04636d557f863d6c05b15fa5a1287ed3f86f2a8474443b",
   "files": {
     "lib/common/widgets/image_viewer/gallery_viewer.dart": {
       "before": "d1ce243d84fcd0069ea5e22a20ff81ea6b4c4c37",
-      "after": "1cb4da78d032622860ee1a50308f323e34d2bcd8"
+      "after": "b978f68a1918465db8eeff3e93556522149da1e3"
     },
     "lib/pages/live_room/view.dart": {
       "before": "161158cd75a55bc709c8fa1c526beb10ba1058e8",
@@ -22,15 +22,15 @@
     },
     "lib/pages/video/view.dart": {
       "before": "f0680dce1d05a0fa0d6bb39979a4ac9f1ee47a98",
-      "after": "084aec9d0e289ae4854308c86ad912be18ea7451"
+      "after": "28c4e70d8c52050a60045b8c7547d7ecc67aa1f3"
     },
     "lib/plugin/pl_player/controller.dart": {
       "before": "f4f3d86a49e93e21a0f3545a524769a8df2cdf1d",
-      "after": "b0dea36cc509b8a05d011b1e7d0e0d1922ba5356"
+      "after": "7b6e827993f34a0b9ef2b0dcfc38790ebdc99c30"
     },
     "lib/plugin/pl_player/view/view.dart": {
       "before": "c7a2f92d52dde4b250072e1ef5cda0622f5ce15f",
-      "after": "be1a261130d035dbd0e8354af0801dda12ec3258"
+      "after": "ac3629867f4fdebe0ccb2c84475bfdf27bdadf67"
     }
   }
 }
