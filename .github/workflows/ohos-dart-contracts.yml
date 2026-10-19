@@ -1,0 +1,59 @@
+name: OHOS Flutter direction B Dart contracts
+
+on:
+  push:
+    branches: ['compat/piliplus-zero-change-20261018']
+    paths:
+      - '.github/workflows/ohos-dart-contracts.yml'
+      - 'media_kit_video/lib/**'
+      - 'media_kit_video/test/routed_*'
+      - 'tool/ohos/bootstrap_current_flutter.sh'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contracts:
+    name: Real OHOS Flutter framework / host-side B contracts
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install native API test dependency
+        run: sudo apt-get update && sudo apt-get install -y libmpv-dev libglu1-mesa
+      - name: Resolve current maintained OHOS Flutter
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash tool/ohos/bootstrap_current_flutter.sh "$RUNNER_TEMP/flutter-ohos" "$RUNNER_TEMP/contracts-evidence"
+          echo "$RUNNER_TEMP/flutter-ohos/bin" >> "$GITHUB_PATH"
+      - name: Resolve real SDK package graph
+        working-directory: media_kit_video
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter pub get 2>&1 | tee "$RUNNER_TEMP/contracts-evidence/pub-get.log"
+      - name: Execute unchanged direction B transport and view assertions
+        working-directory: media_kit_video
+        shell: bash
+        run: |
+          set +e
+          flutter test --reporter expanded \
+            test/routed_video_playback_test.dart \
+            test/routed_video_generation_test.dart \
+            test/routed_simple_video_test.dart \
+            > "$RUNNER_TEMP/contracts-evidence/contracts.log" 2>&1
+          result=$?
+          cat "$RUNNER_TEMP/contracts-evidence/contracts.log"
+          echo "$result" > "$RUNNER_TEMP/contracts-evidence/exit-code.txt"
+          exit "$result"
+      - name: Preserve real framework and diagnostics (not device/HAP evidence)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ohos-flutter-b-contract-evidence
+          path: ${{ runner.temp }}/contracts-evidence/
+          if-no-files-found: error
