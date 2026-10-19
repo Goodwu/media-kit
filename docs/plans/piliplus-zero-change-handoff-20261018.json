@@ -1,86 +1,51 @@
 {
-  "task": "PiliPlus compatibility — approved B / confirmed final OHOS application",
-  "updated": "2026-10-19 Asia/Singapore",
-  "branch": "compat/piliplus-zero-change-20261018",
-  "status": "OHOS_TARGET_CONFIRMED_EXISTING_APP_PORT_REUSE_MEDIA_INTEGRATION_PENDING",
+  "task": "Confirmed Goodwu/PiliPlus feature/ohos — current media-kit direction B integration",
+  "updated": "2026-10-19 Asia/Seoul",
+  "sdkBranch": "compat/piliplus-zero-change-20261018",
+  "status": "TARGET_MEDIA_CODE_COMMITTED_FULL_APPLICATION_BUILD_IN_PROGRESS",
   "userDecision": {
     "direction": "B",
-    "status": "approved",
+    "approved": true,
     "applicationRepository": "Goodwu/PiliPlus",
     "applicationBranch": "feature/ohos",
-    "piliPlusX": "reference-only; never a build, delivery or fallback application",
-    "baselineDiscussion": "resolved by user; do not ask again",
-    "transparentPlayerInterception": "not-required",
-    "newCostlyScope": "Discuss concrete new tradeoffs, without reopening the rejected application choice."
+    "PiliPlusX": "reference only; never target or fallback",
+    "request": "按计划完成适配",
+    "costPolicy": "Discuss a concrete unusually costly new requirement, not the already resolved target."
+  },
+  "history": {
+    "previousMaster": "docs/plans/piliplus-ohos-handoff-before-media-activation-20261019.json",
+    "previousMasterBlob": "1620f59a4f2f7eef67850a56fcd59d0524b065f5",
+    "policy": "Previous master is archived byte-for-byte and links every earlier B/OHOS receipt. Do not redo P0/P1/P2b/B or SDK/native OHOS basics."
   },
   "plan": "docs/plans/piliplus-ohos-target-goodwu-20261019.md",
-  "history": {
-    "previousOhosHandoff": {
-      "path": "docs/plans/piliplus-ohos-handoff-before-target-correction-20261019.json",
-      "blob": "5ee4eaf529bdf19045ea05ce4aef3724607fe45e",
-      "atCommit": "d76ecc202e8ac10508a931bfec1248cecb85d0bb",
-      "scope": "Exact SDK/native evidence and failed preflight of the different upstream main application; previous baseline choice is superseded."
-    },
-    "directionBHandoff": {
-      "path": "docs/plans/piliplus-direction-b-handoff-before-ohos-20261019.json",
-      "blob": "d6db6262ae35c957102d0f08f24b46acc0f13d99"
-    },
-    "doNotRedo": "Retain existing P0/P1/P2b, explicit B integration, native archive/payload checks and historical test receipts."
+  "applicationImplementation": {
+    "initialHead": "dad64686e82bba879ccd40b60d6bb43a37422e11",
+    "codeCommit": "a289c0ad77623bd640f846a47639aacc09e803a7",
+    "codeTree": "f92e55df12848090f515db1ac86ef9bb38e4fee8",
+    "independentFrameworkTestCommit": "7a50470bcf169f40bf76a26ca2bc000330895c44",
+    "files": ["tool/ohos/media_backend.py", "tool/ohos/media_backend.json", "tool/ohos/test_media_backend.py", "tool/ohos/build_profile.py", "tool/ohos/build.py", ".github/workflows/ohos-build.yml", ".github/workflows/ohos-media-contracts.yml", "docs/ohos/media-integration.md"],
+    "scope": "Committed target build-adaptation layer only; original upstream Dart/pubspec/native host paths remain unchanged in Git. Export receives real media B modifications followed by existing OHOS platform/language adaptations.",
+    "mediaDeferred": "Removed defer_media from configure; initialization/API version, audio, Live Photo, video/live and WebP real entrypoints restored. Original playback-driven chat lifecycle retained, not duplicated with deferred-only listeners.",
+    "sdkInput": "Current clean Goodwu/media-kit checkout exported with per-file Git blobs, exact B patch pre/post-images, actual package roots and prepared app Dart identity checks.",
+    "nativeInput": "Current Goodwu/libmpv-ohos-build main rebuilt each HAP run; retain source-lock/manifest/SBOM and compare final app HAP bytes against this run's libmpv and required bridges.",
+    "newRuntimeSwitches": false,
+    "localTests": {"passed": 45, "failed": 0, "originalTestsRetained": 31, "newMediaTests": 14},
+    "localTreeMatchesPublishedTree": true,
+    "exactLayerComposition": "All seven B preimages match target; B patch then all existing OHOS app patches and platform replacements pass without fuzzy matching."
   },
-  "targetRead": {
-    "repository": "Goodwu/PiliPlus",
-    "branch": "feature/ohos",
-    "commit": "dad64686e82bba879ccd40b60d6bb43a37422e11",
-    "appVersion": "2.1.6+1",
-    "ohosHostPresent": true,
-    "upstreamBaselineRecordedByTarget": "849c56b035ac8acf1b4fd677c2c94debe161da8e",
-    "rootEnvironment": {"dart": ">=3.13.0", "flutter": "3.47.7"},
-    "preparedEnvironment": {"dart": ">=3.12.0 <4.0.0", "flutter": ">=3.44.0 <3.45.0"},
-    "preparation": "Reviewed generated-copy source backports, SDK and dependency adaptations; do not run the old raw-root pub preflight as this target's gate.",
-    "flutterRecipe": {
-      "repository": "CPF-Flutter/flutter_flutter",
-      "branch": "oh-3.44.9-dev",
-      "recordedCommit": "3ffe70c6280cc6ddf613bffa59dd70611f238f7e",
-      "hostEngine": "5a2a6a42cce67f965cf540fcecf616faca624aa1",
-      "ohosEngine": "24497d6833225b0445953e1dd05dc6538c16a8dd",
-      "policy": "Reuse and verify target recipe, not an automatic substitution of the SDK-exercise Flutter fork."
-    },
-    "mediaState": "deferred-by-request; explicit blocks in tool/ohos/build_profile.py::defer_media",
-    "targetRecordedValidation": {
-      "path": "docs/ohos/validation.json",
-      "status": "built-unsigned-media-deferred",
-      "entrypoint": "lib/main.dart",
-      "recordedSourceCommit": "fc0ed189d1194974898b33e1d54cef6f8231feef",
-      "evidenceLevel": "Target repository record read only, not a new execution or current SDK playback acceptance."
-    }
+  "execution": {
+    "hapRun": 39251488304,
+    "hapJob": 118056100184,
+    "hapTestedApplicationCommit": "a289c0ad77623bd640f846a47639aacc09e803a7",
+    "hapStatus": "in_progress",
+    "lastObservedStage": "source preservation/45 tests/tool setup passed; current native source compilation running",
+    "sourceCheckRun": 39251488321,
+    "sourceCheckConclusion": "success",
+    "frameworkContracts": "Independent complete SDK suite on the target's reviewed official CPF Flutter recipe submitted; read its actual run/log before claiming success.",
+    "hapSuccessClaim": false,
+    "deviceExecution": "not available; not run"
   },
-  "corrections": [
-    "The old missing-OHOS-host claim applies to bggRGjQaUbCoE/PiliPlus main, not this target.",
-    "The target already has real Dart 3.12 backports and OHOS dependency preparation; its root SDK declaration alone is not the build decision.",
-    "Old failed preflight remains historical; target media-deferred HAP and SDK exercise HAP do not prove the final integrated target."
-  ],
-  "nextImplementation": [
-    "Re-read both specified branch heads and protect concurrent work. Reuse target prepare_sdk.py, ohos.py prepare-build and build.py.",
-    "Replace media-deferred restrictions with explicit B integration; retain non-media portability and live-chat/route lifecycle behavior.",
-    "Review overlapping player/view/gallery patches against this target's generated source; do not blindly apply old seven-file preimages.",
-    "Resolve media-kit package closure to current SDK and fresh OHOS native artifacts while preserving unrelated plugin overrides.",
-    "Retarget application CI to the confirmed branch and actual target preparation/build pipeline, with a non-deferred media acceptance gate.",
-    "Build target lib/main.dart HAP; verify native payloads and separately record device install/playback/lifecycle/PiP/screenshots."
-  ],
-  "executionThisTurn": {
-    "repositoryReads": true,
-    "planAndHandoffUpdated": true,
-    "runtimeOrApplicationCodeChanged": false,
-    "workflowsChanged": false,
-    "buildOrTestRun": "not-run",
-    "integratedTargetAcceptance": "pending"
-  },
-  "remaining": [
-    "Target-specific media integration and CI retargeting",
-    "Fresh target application HAP and native payload verification",
-    "Signing/install/playback/lifecycle/PiP/screenshot and HDR device gates",
-    "Other-platform remaining acceptance preserved in archived B handoff"
-  ],
-  "next": "Proceed with the user-confirmed target and its existing port. No baseline reapproval or PiliPlusX fallback. Read the new plan and actual current source before implementing; do not claim current target acceptance using old artifacts.",
-  "receiptScope": "Documentation-only target correction; old complete handoff archived as identical Git blob."
+  "next": "Read current target and SDK refs. Observe HAP run 39251488304 and framework contracts at application 7a50470b; fix actual diagnostics, do not bypass any source/identity/app build gate or substitute an SDK exercise. Update both target docs and this master with exact final receipts. Keep source stages distinct from physical device acceptance.",
+  "remaining": ["Complete full target application HAP and inspect native payload", "Full target-framework media regression result", "OHOS signing/installation and real playback/lifecycle/PiP/screenshot/WebP/HDR device validation", "Other-platform acceptance still recorded in archived B handoff"],
+  "environment": {"CodexWorkspace": "attempted connection failed", "container": "no Flutter/Dart/OHOS SDK, GitHub DNS fails", "execution": "GitHub connector with actual Actions; exact source/evidence artifacts inspected and source tests executed in container"}
 }
