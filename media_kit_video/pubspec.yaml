@@ -29,6 +29,11 @@ dependencies:
   universal_platform: ^1.0.0+1
   plugin_platform_interface: ^2.0.2
   web: ^1.1.0
+  # Legacy fork dependency contract (bggRGjQaUbCoE/media-kit native):
+  # applications call screen_brightness_platform_interface directly and rely on
+  # this package to bring the native Android/iOS implementations into the build.
+  screen_brightness_android: ^2.1.3
+  screen_brightness_ios: ^2.1.2
 
 dev_dependencies:
   flutter_test:
