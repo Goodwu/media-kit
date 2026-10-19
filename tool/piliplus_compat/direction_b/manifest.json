@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "decision": "B-approved-20261019",
+  "reviewedAppCommit": "2eaeeb731462dad92246809d5b5ac716c671736b",
+  "patchSha256": "8be7561cc7f0f79a7470efb56b8f8801fb99dcb624b7716a8149da9bfe098028",
+  "files": {
+    "lib/common/widgets/image_viewer/gallery_viewer.dart": {
+      "before": "d1ce243d84fcd0069ea5e22a20ff81ea6b4c4c37",
+      "after": "1cb4da78d032622860ee1a50308f323e34d2bcd8"
+    },
+    "lib/pages/live_room/view.dart": {
+      "before": "161158cd75a55bc709c8fa1c526beb10ba1058e8",
+      "after": "d61be1966b7ea83ebccbcd17cd299f9281b8348b"
+    },
+    "lib/pages/video/introduction/local/controller.dart": {
+      "before": "6133fa1a963624900e7ffa213a2a0e7eeeca47b4",
+      "after": "5ba8ce3d8bb68075761674000d763de921a34e55"
+    },
+    "lib/pages/video/post_panel/view.dart": {
+      "before": "a3809e88afa12a24895d15d046372f9918494745",
+      "after": "0c739edd53e7517bbfc484ae17713552ab4d41bd"
+    },
+    "lib/pages/video/view.dart": {
+      "before": "f0680dce1d05a0fa0d6bb39979a4ac9f1ee47a98",
+      "after": "084aec9d0e289ae4854308c86ad912be18ea7451"
+    },
+    "lib/plugin/pl_player/controller.dart": {
+      "before": "f4f3d86a49e93e21a0f3545a524769a8df2cdf1d",
+      "after": "b0dea36cc509b8a05d011b1e7d0e0d1922ba5356"
+    },
+    "lib/plugin/pl_player/view/view.dart": {
+      "before": "c7a2f92d52dde4b250072e1ef5cda0622f5ce15f",
+      "after": "be1a261130d035dbd0e8354af0801dda12ec3258"
+    }
+  }
+}
