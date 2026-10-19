@@ -89,8 +89,8 @@ class NativePlayer extends PlatformPlayer {
   final LegacyMediaHeaders _legacyHttpHeaders = LegacyMediaHeaders();
   String _legacyHwdecCurrent = '';
 
-  /// Synchronous application-level defaults: the next on_load observes these
-  /// even when the caller does not await a property write. Per-media headers win.
+  /// Synchronous defaults captured by subsequent open/add calls, before they
+  /// wait for a lock. Already queued entries are immutable. Per-media fields win.
   void setMediaHeader({String? userAgent, String? referer,
       Map<String, String>? headers}) {
     if (disposed || isDisposing) throw StateError('Player is disposed');
@@ -352,7 +352,9 @@ class NativePlayer extends PlatformPlayer {
         : playable is Playlist ? List<Media>.of(playable.medias) : <Media>[];
     final index = playable is Media ? 0 : playable is Playlist ? playable.index : -1;
     final mediaOptions = [
-      for (final media in playlist) LegacyMediaOptions.fromExtras(media.extras),
+      for (final media in playlist) LegacyMediaOptions.fromExtras(media.extras,
+          httpHeaders: _legacyHttpHeaders.resolve(media.httpHeaders),
+          start: media.start, end: media.end),
     ];
     Future<void> function() async {
       if (disposed) {
@@ -667,7 +669,9 @@ class NativePlayer extends PlatformPlayer {
   /// Appends a [Media] to the [Player]'s playlist.
   @override
   Future<void> add(Media media, {bool synchronized = true}) {
-    final options = LegacyMediaOptions.fromExtras(media.extras);
+    final options = LegacyMediaOptions.fromExtras(media.extras,
+        httpHeaders: _legacyHttpHeaders.resolve(media.httpHeaders),
+        start: media.start, end: media.end);
     Future<void> function() async {
       if (disposed) {
         throw AssertionError('[Player] has been disposed');
@@ -2531,67 +2535,8 @@ class NativePlayer extends PlatformPlayer {
           }
         }
         // --------------------------------------------------
-        // Handle HTTP headers specified in the [Media].
-        try {
-          final uri =
-              await MpvApiIsolate.getPropertyString(ctx.address, 'path') ??
-              '';
-          // Get the headers for current [Media] by looking up [uri] in the [HashMap].
-          final headers = _legacyHttpHeaders.resolve(Media(uri).httpHeaders);
-          if (headers.isNotEmpty) {
-            final entries = <String>[
-              for (final entry in headers.entries) '${entry.key}: ${entry.value}',
-            ];
-            await MpvApiIsolate.setPropertyStringListNode(
-              ctx.address,
-              'http-header-fields',
-              entries,
-            );
-          }
-        } catch (exception, stacktrace) {
-          print(exception);
-          print(stacktrace);
-        }
-        // Handle start & end position specified in the [Media].
-        try {
-          final index =
-              await MpvApiIsolate.getPropertyInt64(
-                ctx.address,
-                'playlist-pos',
-              ) ??
-              -1;
-
-          if (index >= 0) {
-            final start = current[index].start;
-            final end = current[index].end;
-
-            if (start != null) {
-              try {
-                await _setPropertyStringDirect(
-                  'start',
-                  (start.inMilliseconds / 1000).toStringAsFixed(3),
-                  waitForInitialization: false,
-                );
-              } catch (exception, stacktrace) {
-                print(exception);
-                print(stacktrace);
-              }
-            }
-
-            if (end != null) {
-              try {
-                await _setPropertyStringDirect(
-                  'end',
-                  (end.inMilliseconds / 1000).toStringAsFixed(3),
-                  waitForInitialization: false,
-                );
-              } catch (exception, stacktrace) {
-                print(exception);
-                print(stacktrace);
-              }
-            }
-          }
-        } catch (_) {}
+        // Headers and playback intervals are frozen on native playlist entries.
+        // Never recover them from Media(uri) or a mutable current[index] here.
         // --------------------------------------------------
         await MpvApiIsolate.hookContinue(ctx.address, prop.ref.id);
       }
@@ -2606,37 +2551,8 @@ class NativePlayer extends PlatformPlayer {
           }
         }
         // --------------------------------------------------
-        // Set http-header-fields as [generated.mpv_format.MPV_FORMAT_NONE] [generated.mpv_node].
-        try {
-          await MpvApiIsolate.setPropertyNodeNone(
-            ctx.address,
-            'http-header-fields',
-          );
-        } catch (exception, stacktrace) {
-          print(exception);
-          print(stacktrace);
-        }
-        // Set start & end position as [generated.mpv_format.MPV_FORMAT_NONE] [generated.mpv_node].
-        try {
-          await _setPropertyStringDirect(
-            'start',
-            'none',
-            waitForInitialization: false,
-          );
-        } catch (exception, stacktrace) {
-          print(exception);
-          print(stacktrace);
-        }
-        try {
-          await _setPropertyStringDirect(
-            'end',
-            'none',
-            waitForInitialization: false,
-          );
-        } catch (exception, stacktrace) {
-          print(exception);
-          print(stacktrace);
-        }
+        // Native per-file options restore their own baseline. An old unload
+        // must not clear another entry's request headers or playback interval.
         // --------------------------------------------------
         await MpvApiIsolate.hookContinue(ctx.address, prop.ref.id);
       }
