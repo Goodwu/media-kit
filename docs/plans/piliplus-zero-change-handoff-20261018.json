@@ -15,11 +15,16 @@
   "lastT1": {
     "runId": 39192616309,
     "testedCommit": "b6f19b0ad078a97e04c558e3ecb5f44d3f6491a6",
-    "status": "in_progress",
-    "conclusion": null,
+    "status": "completed",
+    "conclusion": "success",
     "platformJobs": {"android": 117868561478, "ios": 117868561540, "macos": 117868561539, "windows": 117868561501, "linux": 117868561506},
-    "observedResults": {"linux": "success", "android": "in_progress", "ios": "in_progress", "macos": "in_progress", "windows": "in_progress"},
+    "observedResults": {"linux": "success", "android": "success", "ios": "success", "macos": "success", "windows": "success"},
+    "allBuildStepsSuccess": true,
+    "allOutputUploadStepsSuccess": true,
+    "aggregateJob": 117871493016,
+    "aggregate": "success",
     "jobsRead": true,
+    "buildScope": {"android": "arm64 Debug APK", "ios": "Debug --no-codesign", "macos": "Debug", "windows": "Debug", "linux": "Debug"},
     "linuxReceiptRead": {"artifactId": 12161220529, "zipSha256": "d5ecb90c8a1517e930866668af28da1fe3fd6415593430ab3bbb6207ec8cfd47", "analysis": "passed", "applicationCompile": "passed", "originalSourceUnchanged": true, "appTrackedFiles": 1640, "sdkTrackedFiles": 1434, "nativeSourceFreshness": "not-verified"}
   },
   "previousSuccessfulT1": {"runId": 39187039605, "testedCommit": "e540c22fa106cc2ece54a1a665862422523c1f6c", "allFivePlatforms": "success", "scope": "Debug compilation; not native-source or device acceptance"},
@@ -49,9 +54,9 @@
     "resolution": "Observe independent idle-active before exact restoration assertions; retain all wire assertions and add three immediate stop/open cycles with changing baselines. No production reset, assertion removal or new skip."
   },
   "currentWork": {
-    "scope": "P2b API-scope acceptance passed; P3 complexity discussion",
+    "scope": "P2b API-scope acceptance and five-platform T1 passed; P3 complexity discussion",
     "plan": "docs/plans/piliplus-p2-native-unload-and-p3-decision-20261019.md",
-    "status": "P3 production interception/output-proxy work paused pending user scope choice; collect current T1 results",
+    "status": "P3 production interception/output-proxy work paused pending user scope choice",
     "p2b": "10 pure input contracts and 5 native request tests included in successful full video suite"
   },
   "userDecision": {
@@ -63,8 +68,8 @@
     "p3ProductionEditsMadeThisTurn": false,
     "nonNegotiatedGates": ["HDR factual verification", "native source/artifact identity", "real feature and device tests", "explicit errors for unimplemented paths"]
   },
-  "remaining": ["current T1 aggregate observation", "P2 operation cancellation/rebuild sequencing", "P3 scope decision then routing/no-hint facts/stable output implementation", "P4 latest-source native artifacts and ABI closure", "P5 feature, PiP, screenshot, device/HDR acceptance"],
-  "next": "Read current ref and this handoff. Do not redo P0/P1/P2a/P2b or re-diagnose the old wire timeout. Complete observation of T1 run 39192616309. Await user discussion before P3 architectural changes or any original-app edits.",
+  "remaining": ["P2 operation cancellation/rebuild sequencing", "P3 scope decision then routing/no-hint facts/stable output implementation", "P4 latest-source native artifacts and ABI closure", "P5 feature, PiP, screenshot, device/HDR acceptance"],
+  "next": "Read current ref and this handoff. Do not redo P0/P1/P2a/P2b or re-diagnose the old wire timeout. Both SDK and five-platform T1 succeeded on b6f19b0a. Await user discussion before P3 architectural changes or any original-app edits.",
   "environment": {"codexWorkspace": "connection-error rechecked this turn", "localFlutterDart": "not-found", "localGitHubDNS": "resolution-failed", "sourceAndExecution": "GitHub connector plus Actions; downloaded artifacts inspected in container"},
   "historyPolicy": "Normal commits and blob-guarded updates only. Test SHAs identify actual runs, not permanent old-source pins. Documentation-only receipt commits do not change the tested runtime/test code. Never certify new code from an older green run."
 }
