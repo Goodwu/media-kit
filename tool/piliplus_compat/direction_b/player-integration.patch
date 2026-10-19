@@ -1,0 +1,514 @@
+diff --git a/lib/common/widgets/image_viewer/gallery_viewer.dart b/lib/common/widgets/image_viewer/gallery_viewer.dart
+index d1ce243..1cb4da7 100644
+--- a/lib/common/widgets/image_viewer/gallery_viewer.dart
++++ b/lib/common/widgets/image_viewer/gallery_viewer.dart
+@@ -86,7 +86,26 @@ class _GalleryViewerState extends State<GalleryViewer>
+ 
+   late bool _hasInit = false;
+   Player? _player;
+-  VideoController? _videoController;
++  RoutedVideoPlayback? _playback;
++  final _retiredPlaybacks = <RoutedVideoPlayback>{};
++
++  void _playMedia(Media media) {
++    _playback?.open(media).catchError((Object error) {
++      if (error is! RoutedOpenSuperseded) {
++        debugPrint('Gallery routed playback failed: ${error.runtimeType}');
++      }
++    });
++  }
++
++  Future<void> _releasePlayback() async {
++    final binding = _playback;
++    _playback = null;
++    if (binding != null) _retiredPlaybacks.add(binding);
++    for (final old in _retiredPlaybacks.toList()) {
++      await old.dispose();
++      _retiredPlaybacks.remove(old);
++    }
++  }
+ 
+   late final PageController _pageController;
+ 
+@@ -116,16 +135,16 @@ class _GalleryViewerState extends State<GalleryViewer>
+   Future<void> _initPlayer() async {
+     assert(_player == null);
+     final player = await Player.create();
+-    _videoController = await VideoController.create(player);
++    final playback = await RoutedVideoPlayback.create(player);
++    _playback = playback;
+     if (!mounted) {
+-      player.dispose();
+-      _videoController = null;
++      await _releasePlayback();
+       return;
+     }
+     _player = player;
+     final currItem = widget.sources[_currIndex.value];
+     if (currItem.sourceType == .livePhoto) {
+-      player.open(Media(currItem.liveUrl!));
++      _playMedia(Media(currItem.liveUrl!));
+       _currIndex.refresh();
+     }
+   }
+@@ -288,9 +307,10 @@ class _GalleryViewerState extends State<GalleryViewer>
+ 
+   @override
+   void dispose() {
+-    _player?.dispose();
++    unawaited(_releasePlayback().catchError((Object error) {
++      debugPrint('Gallery output cleanup failed: ${error.runtimeType}');
++    }));
+     _player = null;
+-    _videoController = null;
+     _pageController.dispose();
+     _animateController.dispose();
+     _tapGestureRecognizer.dispose();
+@@ -388,7 +408,7 @@ class _GalleryViewerState extends State<GalleryViewer>
+   void _playIfNeeded(SourceModel item) {
+     if (item.sourceType == .livePhoto) {
+       if (_player != null) {
+-        _player!.open(Media(item.liveUrl!));
++        _playMedia(Media(item.liveUrl!));
+       } else if (!_hasInit) {
+         _hasInit = true;
+         _initPlayer();
+@@ -397,7 +417,7 @@ class _GalleryViewerState extends State<GalleryViewer>
+   }
+ 
+   void _onPageChanged(int index) {
+-    _player?.pause();
++    _playback?.pause();
+     _playIfNeeded(widget.sources[index]);
+     _currIndex.value = index;
+     widget.onPageChanged?.call(index);
+@@ -501,7 +521,7 @@ class _GalleryViewerState extends State<GalleryViewer>
+       case SourceType.livePhoto:
+         child = Obx(
+           key: _key,
+-          () => _currIndex.value == index && _videoController != null
++          () => _currIndex.value == index && _playback != null
+               ? Viewer(
+                   minScale: widget.minScale,
+                   maxScale: widget.maxScale,
+@@ -515,8 +535,8 @@ class _GalleryViewerState extends State<GalleryViewer>
+                       _horizontalDragGestureRecognizer,
+                   onChangePage: _onChangePage,
+                   child: FittedBox(
+-                    child: SimpleVideo(
+-                      controller: _videoController!,
++                    child: RoutedSimpleVideo(
++                      playback: _playback!,
+                       fill: Colors.transparent,
+                     ),
+                   ),
+diff --git a/lib/pages/live_room/view.dart b/lib/pages/live_room/view.dart
+index 161158c..d61be19 100644
+--- a/lib/pages/live_room/view.dart
++++ b/lib/pages/live_room/view.dart
+@@ -256,7 +256,9 @@ class _LiveRoomPageState extends State<LiveRoomPage>
+     Widget player = Obx(
+       key: playerKey,
+       () {
+-        if (_liveRoomController.isLoaded.value && plPlayerController.isLive) {
++        if ((_liveRoomController.isLoaded.value ||
++                plPlayerController.routedPlayback != null) &&
++            plPlayerController.isLive && plPlayerController.routedPlayback != null) {
+           final roomInfoH5 = _liveRoomController.roomInfoH5.value;
+           return PLVideoPlayer(
+             maxWidth: width,
+diff --git a/lib/pages/video/introduction/local/controller.dart b/lib/pages/video/introduction/local/controller.dart
+index 6133fa1..5ba8ce3 100644
+--- a/lib/pages/video/introduction/local/controller.dart
++++ b/lib/pages/video/introduction/local/controller.dart
+@@ -102,8 +102,8 @@ class LocalIntroController extends CommonIntroController {
+       final playCtr = videoDetailCtr.plPlayerController;
+       if (playCtr.playRepeat == PlayRepeat.listCycle) {
+         if (list.length == 1) {
+-          if (playCtr.videoPlayerController case final ctr?) {
+-            ctr.seek(Duration.zero).whenComplete(ctr.play);
++          if (playCtr.routedPlayback case final binding?) {
++            binding.seek(Duration.zero).then((_) => binding.play());
+           }
+         } else {
+           playIndex(0);
+diff --git a/lib/pages/video/post_panel/view.dart b/lib/pages/video/post_panel/view.dart
+index a3809e8..0c739ed 100644
+--- a/lib/pages/video/post_panel/view.dart
++++ b/lib/pages/video/post_panel/view.dart
+@@ -525,14 +525,14 @@ class _PostPanelState extends State<PostPanel>
+                 if (start <= 0) {
+                   seekTo();
+                   if (!player.state.playing) {
+-                    await player.play();
++                    await plPlayerController.play();
+                   }
+                   return;
+                 }
+                 final seek = max(0, start - 2000);
+                 await plPlayerController.seek(Duration(milliseconds: seek));
+                 if (!player.state.playing) {
+-                  await player.play();
++                  await plPlayerController.play();
+                 }
+                 if (start > seek) {
+                   final posSub = player.stream.position.listen(
+diff --git a/lib/pages/video/view.dart b/lib/pages/video/view.dart
+index f0680dc..084aec9 100644
+--- a/lib/pages/video/view.dart
++++ b/lib/pages/video/view.dart
+@@ -1220,9 +1220,8 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
+         videoDetailController.plPlayerController.onPopInvokedWithResult,
+     child: Obx(
+       () =>
+-          !videoDetailController.videoState.value ||
+-              !videoDetailController.autoPlay ||
+-              plPlayerController?.videoController == null
++          !videoDetailController.autoPlay ||
++              plPlayerController?.routedPlayback == null
+           ? const SizedBox.shrink()
+           : PLVideoPlayer(
+               maxWidth: width,
+diff --git a/lib/plugin/pl_player/controller.dart b/lib/plugin/pl_player/controller.dart
+index f4f3d86..b0dea36 100644
+--- a/lib/plugin/pl_player/controller.dart
++++ b/lib/plugin/pl_player/controller.dart
+@@ -1,4 +1,4 @@
+-import 'dart:async' show StreamSubscription, Timer;
++import 'dart:async' show StreamSubscription, Timer, unawaited;
+ import 'dart:convert' show ascii, utf8;
+ import 'dart:io' show Platform;
+ import 'dart:math' show max, min;
+@@ -75,7 +75,12 @@ typedef PlayOwner = ({String tag, Type type});
+ 
+ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
+   Player? _videoPlayerController;
+-  VideoController? _videoController;
++  final _routedPlayback = Rxn<RoutedVideoPlayback>();
++  Future<Player>? _initializingPlayer;
++  StreamSubscription<Object>? _routeErrors;
++  int _sourceEpoch = 0;
++  // Failed owner cleanup remains reachable and must finish before a new owner.
++  static final _retiredBindings = <RoutedVideoPlayback>{};
+ 
+   static PlPlayerController? _instance;
+ 
+@@ -173,7 +178,26 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
+   Player? get videoPlayerController => _videoPlayerController;
+ 
+   /// [videoController] instance of Player
+-  VideoController? get videoController => _videoController;
++  VideoController? get videoController => routedPlayback?.controller.value;
++  RoutedVideoPlayback? get routedPlayback => _routedPlayback.value;
++
++  Future<void> _releasePlayback() async {
++    final binding = _routedPlayback.value;
++    _routedPlayback.value = null;
++    _initializingPlayer = null;
++    if (binding != null) {
++      _retiredBindings.add(binding);
++      await binding.dispose();
++      _retiredBindings.remove(binding);
++    }
++  }
++
++  void _reportRouteError(Object error) {
++    if (error is RoutedOpenSuperseded) return;
++    dataStatus.value = DataStatus.error;
++    // Do not emit source URLs or request headers from integration diagnostics.
++    Utils.reportError('media-kit routed playback failed: ${error.runtimeType}');
++  }
+ 
+   bool isMuted = false;
+ 
+@@ -720,6 +744,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
+     Volume? volume,
+     bool autoFullScreenFlag = false,
+   }) async {
++    final request = ++_sourceEpoch;
+     try {
+       _processing = true;
+       this.isLive = isLive;
+@@ -752,13 +777,13 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
+         return;
+       }
+       // 配置Player 音轨、字幕等等
+-      await _createVideoController(dataSource, seekTo, volume);
++      await _createVideoController(dataSource, seekTo, volume, request);
++      if (request != _sourceEpoch) return;
+ 
+       if (_playerCount == 0) {
+         _removeListeners();
+-        _videoPlayerController?.dispose();
++        await _releasePlayback();
+         _videoPlayerController = null;
+-        _videoController = null;
+         return;
+       }
+ 
+@@ -773,14 +798,17 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
+ 
+       await _initializePlayer();
+       onInit?.call();
++    } on RoutedOpenSuperseded {
++      return;
+     } catch (err, stackTrace) {
++      if (request != _sourceEpoch) return;
+       dataStatus.value = DataStatus.error;
+       if (kDebugMode) {
+         debugPrint(stackTrace.toString());
+         debugPrint('plPlayer err:  $err');
+       }
+     } finally {
+-      _processing = false;
++      if (request == _sourceEpoch) _processing = false;
+     }
+   }
+ 
+@@ -836,7 +864,13 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
+     }
+   }
+ 
+-  Future<Player> _initPlayer() async {
++  Future<Player> _initPlayer() => _initializingPlayer ??= _initPlayerOnce();
++
++  Future<Player> _initPlayerOnce() async {
++    for (final old in _retiredBindings.toList()) {
++      await old.dispose();
++      _retiredBindings.remove(old);
++    }
+     assert(_videoPlayerController == null);
+     final opt = {
+       'video-sync': Pref.videoSync,
+@@ -857,9 +891,9 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
+       ),
+     );
+ 
+-    assert(_videoController == null);
++    assert(_routedPlayback.value == null);
+ 
+-    _videoController = await VideoController.create(
++    final binding = await RoutedVideoPlayback.create(
+       player,
+       configuration: VideoControllerConfiguration(
+         enableHardwareAcceleration: hwdec != null,
+@@ -869,13 +903,21 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
+     );
+ 
+     if (Platform.isAndroid) {
+-      // Avoid sizing the surface using mpv's idle window between media loads.
+-      player.setProperty('force-window', 'no');
++      await player.setPropertyStrict('force-window', 'no');
++    }
++    if (_playerCount == 0) {
++      _retiredBindings.add(binding);
++      await binding.dispose();
++      _retiredBindings.remove(binding);
++      throw const RoutedOpenSuperseded();
+     }
+-
+     player.setMediaHeader(userAgent: BrowserUa.pc, referer: HttpString.baseUrl);
+-
+     _startListeners(player);
++    // Publish a complete integration before open, not a loaded-media flag.
++    // The raw player is present before controls can mount and subscribe.
++    _videoPlayerController = player;
++    _routedPlayback.value = binding;
++    _routeErrors = binding.errors.listen(_reportRouteError);
+ 
+     return player;
+   }
+@@ -888,6 +930,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
+     DataSource dataSource,
+     Duration? seekTo,
+     Volume? volume,
++    int request,
+   ) async {
+     isBuffering.value = false;
+     _heartDuration = 0;
+@@ -897,11 +940,11 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
+ 
+     if (player == null) {
+       player = await _initPlayer();
++      if (request != _sourceEpoch) return;
+       if (_playerCount == 0) {
+         _removeListeners();
+-        player.dispose();
++        await _releasePlayback();
+         player = null;
+-        _videoController = null;
+         return;
+       }
+       _videoPlayerController = player;
+@@ -937,14 +980,16 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
+       audioFilterExtras(volume, map: extras);
+     }
+ 
++    if (request != _sourceEpoch) return;
+     assert(!isLive || seekTo == null);
+-    await player.open(
++    await routedPlayback!.open(
+       Media(
+         video,
+         start: seekTo,
+         extras: extras.isEmpty ? null : extras,
+       ),
+       play: false,
++      video: !onlyPlayAudio.value,
+     );
+   }
+ 
+@@ -955,7 +1000,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
+     if (_videoPlayerController case final ctr? when (ctr.current.isNotEmpty)) {
+       var media = ctr.current.last;
+       if (!isLive) media = media.copyWith(start: ctr.state.position);
+-      return ctr.open(media, play: true);
++      return routedPlayback?.open(media, play: true, video: !onlyPlayAudio.value);
+     }
+     return null;
+   }
+@@ -1165,6 +1210,8 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
+ 
+   /// 移除事件监听
+   void _removeListeners() {
++    _routeErrors?.cancel();
++    _routeErrors = null;
+     _subscriptions?.forEach((e) => e.cancel());
+     _subscriptions?.clear();
+     _subscriptions = null;
+@@ -1184,7 +1231,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
+     }
+     danmakuController?.clear();
+     try {
+-      await _videoPlayerController?.seek(position);
++      await routedPlayback?.seek(position);
+       _updateIOSPip(position);
+     } catch (e) {
+       if (kDebugMode) debugPrint('seek failed: $e');
+@@ -1244,7 +1291,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
+       await seekTo(Duration.zero, isSeek: false);
+     }
+ 
+-    await _videoPlayerController?.play();
++    await routedPlayback?.play();
+ 
+     audioSessionHandler?.setActive(true);
+ 
+@@ -1253,7 +1300,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
+ 
+   /// 暂停播放
+   Future<void> pause({bool notify = true, bool isInterrupt = false}) async {
+-    await _videoPlayerController?.pause();
++    await routedPlayback?.pause();
+     playerStatus = .paused;
+ 
+     // 主动暂停时让出音频焦点
+@@ -1393,10 +1440,10 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
+   // 双击播放、暂停
+   Future<void> onDoubleTapCenter() async {
+     if (!isLive && isCompleted) {
+-      await videoPlayerController!.seek(Duration.zero);
+-      videoPlayerController!.play();
++      await routedPlayback?.seek(Duration.zero);
++      await routedPlayback?.play();
+     } else {
+-      videoPlayerController!.playOrPause();
++      await routedPlayback?.playOrPause();
+     }
+   }
+ 
+@@ -1659,6 +1706,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
+     }
+ 
+     _playerCount = 0;
++    ++_sourceEpoch;
+     if (removeSafeArea) {
+       showSystemBar();
+     }
+@@ -1701,9 +1749,8 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
+     if (kDebugMode) {
+       debugPrint('dispose player');
+     }
+-    _videoPlayerController?.dispose();
++    unawaited(_releasePlayback().catchError(_reportRouteError));
+     _videoPlayerController = null;
+-    _videoController = null;
+     _instance = null;
+     videoPlayerServiceHandler?.clear();
+   }
+diff --git a/lib/plugin/pl_player/view/view.dart b/lib/plugin/pl_player/view/view.dart
+index c7a2f92..be1a261 100644
+--- a/lib/plugin/pl_player/view/view.dart
++++ b/lib/plugin/pl_player/view/view.dart
+@@ -131,7 +131,6 @@ class PLVideoPlayer extends StatefulWidget {
+ class _PLVideoPlayerState extends State<PLVideoPlayer>
+     with WidgetsBindingObserver, TickerProviderStateMixin {
+   late AnimationController _animationController;
+-  late VideoController videoController;
+   late final CommonIntroController introController = widget.introController!;
+   late final VideoDetailController videoDetailController =
+       widget.videoDetailController!;
+@@ -265,7 +264,6 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
+       vsync: this,
+       duration: const Duration(milliseconds: 100),
+     );
+-    videoController = plPlayerController.videoController!;
+ 
+     if (PlatformUtils.isMobile) {
+       Future.microtask(() {
+@@ -340,12 +338,12 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
+       if (const <AppLifecycleState>[.paused, .detached].contains(state)) {
+         if (player != null && player.state.playing) {
+           _pauseDueToPauseUponEnteringBackgroundMode = true;
+-          player.pause();
++          plPlayerController.routedPlayback?.pause();
+         }
+       } else {
+         if (_pauseDueToPauseUponEnteringBackgroundMode) {
+           _pauseDueToPauseUponEnteringBackgroundMode = false;
+-          player?.play();
++          plPlayerController.routedPlayback?.play();
+         }
+       }
+     }
+@@ -1371,12 +1369,23 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
+             child: IgnorePointer(
+               ignoring: !plPlayerController.enableDragSubtitle,
+               child: Obx(
+-                () => SubtitleView(
+-                  controller: videoController,
+-                  configuration: plPlayerController.subtitleConfig.value,
+-                  enableDragSubtitle: plPlayerController.enableDragSubtitle,
+-                  onUpdatePadding: plPlayerController.onUpdatePadding,
+-                ),
++                () {
++                  final binding = plPlayerController.routedPlayback;
++                  final config = plPlayerController.subtitleConfig.value;
++                  if (binding == null) return const SizedBox.shrink();
++                  return ValueListenableBuilder<VideoController?>(
++                    valueListenable: binding.controller,
++                    builder: (context, controller, _) => controller == null
++                        ? const SizedBox.shrink()
++                        : SubtitleView(
++                            key: ValueKey(controller),
++                            controller: controller,
++                            configuration: config,
++                            enableDragSubtitle: plPlayerController.enableDragSubtitle,
++                            onUpdatePadding: plPlayerController.onUpdatePadding,
++                          ),
++                  );
++                },
+               ),
+             ),
+           ),
+@@ -2051,8 +2060,8 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
+                   child: FittedBox(
+                     fit: videoFit.boxFit,
+                     alignment: widget.alignment,
+-                    child: SimpleVideo(
+-                      controller: plPlayerController.videoController!,
++                    child: RoutedSimpleVideo(
++                      playback: plPlayerController.routedPlayback!,
+                       fill: widget.fill,
+                       aspectRatio: videoFit.aspectRatio,
+                     ),
