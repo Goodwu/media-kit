@@ -24,7 +24,7 @@ jobs:
           ref: main
           path: app
           persist-credentials: false
-      - name: Archive tracked public source only and bind Git identities
+      - name: Archive tracked public source for direction B and bind Git identities
         shell: python
         run: |
           import hashlib, json, os, pathlib, subprocess
