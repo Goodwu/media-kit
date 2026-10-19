@@ -1,51 +1,57 @@
 {
-  "task": "Confirmed Goodwu/PiliPlus feature/ohos — current media-kit direction B integration",
+  "task": "Goodwu/PiliPlus feature/ohos actual media integration",
   "updated": "2026-10-19 Asia/Seoul",
   "sdkBranch": "compat/piliplus-zero-change-20261018",
-  "status": "TARGET_MEDIA_CODE_COMMITTED_FULL_APPLICATION_BUILD_IN_PROGRESS",
-  "userDecision": {
-    "direction": "B",
-    "approved": true,
-    "applicationRepository": "Goodwu/PiliPlus",
-    "applicationBranch": "feature/ohos",
-    "PiliPlusX": "reference only; never target or fallback",
-    "request": "按计划完成适配",
-    "costPolicy": "Discuss a concrete unusually costly new requirement, not the already resolved target."
-  },
-  "history": {
-    "previousMaster": "docs/plans/piliplus-ohos-handoff-before-media-activation-20261019.json",
-    "previousMasterBlob": "1620f59a4f2f7eef67850a56fcd59d0524b065f5",
-    "policy": "Previous master is archived byte-for-byte and links every earlier B/OHOS receipt. Do not redo P0/P1/P2b/B or SDK/native OHOS basics."
-  },
+  "status": "APPLICATION_SOURCE_LINK_FIX_COMMITTED_NEW_WEBP_NATIVE_AND_HAP_BUILD_IN_PROGRESS",
+  "userDecision": {"direction": "B", "approved": true, "applicationRepository": "Goodwu/PiliPlus", "applicationBranch": "feature/ohos", "PiliPlusX": "reference-only; no target or fallback", "request": "按计划完成适配", "costPolicy": "Discuss only a concrete new costly requirement, not the resolved target or direction."},
+  "history": {"previousMaster": "docs/plans/piliplus-ohos-handoff-before-media-activation-20261019.json", "previousMasterBlob": "1620f59a4f2f7eef67850a56fcd59d0524b065f5", "firstActivationHandoffAt": "9bc6952eed76f440eaa25b5753ba464192ef81dd", "policy": "Archives preserve every earlier B/OHOS receipt. Do not recreate branches or redo P0/P1/P2b/B and SDK/native basics."},
   "plan": "docs/plans/piliplus-ohos-target-goodwu-20261019.md",
-  "applicationImplementation": {
+  "application": {
     "initialHead": "dad64686e82bba879ccd40b60d6bb43a37422e11",
-    "codeCommit": "a289c0ad77623bd640f846a47639aacc09e803a7",
-    "codeTree": "f92e55df12848090f515db1ac86ef9bb38e4fee8",
-    "independentFrameworkTestCommit": "7a50470bcf169f40bf76a26ca2bc000330895c44",
-    "files": ["tool/ohos/media_backend.py", "tool/ohos/media_backend.json", "tool/ohos/test_media_backend.py", "tool/ohos/build_profile.py", "tool/ohos/build.py", ".github/workflows/ohos-build.yml", ".github/workflows/ohos-media-contracts.yml", "docs/ohos/media-integration.md"],
-    "scope": "Committed target build-adaptation layer only; original upstream Dart/pubspec/native host paths remain unchanged in Git. Export receives real media B modifications followed by existing OHOS platform/language adaptations.",
-    "mediaDeferred": "Removed defer_media from configure; initialization/API version, audio, Live Photo, video/live and WebP real entrypoints restored. Original playback-driven chat lifecycle retained, not duplicated with deferred-only listeners.",
-    "sdkInput": "Current clean Goodwu/media-kit checkout exported with per-file Git blobs, exact B patch pre/post-images, actual package roots and prepared app Dart identity checks.",
-    "nativeInput": "Current Goodwu/libmpv-ohos-build main rebuilt each HAP run; retain source-lock/manifest/SBOM and compare final app HAP bytes against this run's libmpv and required bridges.",
-    "newRuntimeSwitches": false,
-    "localTests": {"passed": 45, "failed": 0, "originalTestsRetained": 31, "newMediaTests": 14},
-    "localTreeMatchesPublishedTree": true,
-    "exactLayerComposition": "All seven B preimages match target; B patch then all existing OHOS app patches and platform replacements pass without fuzzy matching."
+    "integrationCommit": "a289c0ad77623bd640f846a47639aacc09e803a7",
+    "frameworkTestCommit": "7a50470bcf169f40bf76a26ca2bc000330895c44",
+    "reusableWorkflowCommit": "12df1fe944014a76c90fb9ee42696c9484ed953e",
+    "currentFixCommit": "6cf36e3591db01826c15abe5fd95fde91f2a3a0f",
+    "scope": "Existing OHOS build-copy adaptation only; original Git main Dart/pubspec/platform files retained. Real B patch is applied before existing OHOS platform/language patches.",
+    "media": "defer_media removed; actual init/API version, video/live, audio, Live Photo and WebP entrypoints restored; original playback-driven chat lifecycle retained",
+    "gates": "clean SDK export with exact Git blobs/modes, seven-file B pre/post-images, actual package roots and immutable prepared app Dart. Track relative in-tree source links by their literal target blobs, rejecting escapes/absolute/dangling/replaced links.",
+    "nativeManifest": "Requires current archive/SO and adjacent manifest with exact hashes and compiled libwebp/libwebp_anim/WebP muxer features. No old binary fallback.",
+    "localTests": {"passed": 54, "failed": 0, "originalRetained": 31},
+    "sourceLinkInspection": {"entries": 1465, "relativeLinks": 39, "errors": 0, "scope": "downloaded SDK snapshot; actual export/B preparation also exercised with mocked native inputs, not a HAP build"},
+    "notes": ["docs/ohos/media-integration.md", "docs/ohos/media-build-input-fixes.md"]
   },
-  "execution": {
-    "hapRun": 39251488304,
-    "hapJob": 118056100184,
-    "hapTestedApplicationCommit": "a289c0ad77623bd640f846a47639aacc09e803a7",
-    "hapStatus": "in_progress",
-    "lastObservedStage": "source preservation/45 tests/tool setup passed; current native source compilation running",
-    "sourceCheckRun": 39251488321,
-    "sourceCheckConclusion": "success",
-    "frameworkContracts": "Independent complete SDK suite on the target's reviewed official CPF Flutter recipe submitted; read its actual run/log before claiming success.",
-    "hapSuccessClaim": false,
-    "deviceExecution": "not available; not run"
+  "native": {
+    "repository": "Goodwu/libmpv-ohos-build",
+    "branch": "main",
+    "previous": "102510e8f6a3aa21d9df19fdbc3bc7c7f9de0d41",
+    "current": "8bc1bd5840b626bebde2d9f37adcbe96dc15235b",
+    "reason": "Actual application WebP conversion uses libwebp_anim and WebP muxer; the old recipe disabled all muxers and only enabled PNG/MJPEG encoders.",
+    "implementation": "Source-locked libwebp v1.6.0 PIC static build with libwebpmux; FFmpeg encoders/muxer enabled. Config/registry/final-library identity gate embedded in SHA-covered manifest.",
+    "libwebp": "4fa21912338357f89e4fd51cf2368325b59e9bd9",
+    "guardTests": {"localPassed": 6, "ciRun": 39256184859, "ciConclusion": "success"},
+    "newCrossBuild": "pending current application job; earlier native success used old recipe",
+    "deviceEncoding": "not-run"
   },
-  "next": "Read current target and SDK refs. Observe HAP run 39251488304 and framework contracts at application 7a50470b; fix actual diagnostics, do not bypass any source/identity/app build gate or substitute an SDK exercise. Update both target docs and this master with exact final receipts. Keep source stages distinct from physical device acceptance.",
-  "remaining": ["Complete full target application HAP and inspect native payload", "Full target-framework media regression result", "OHOS signing/installation and real playback/lifecycle/PiP/screenshot/WebP/HDR device validation", "Other-platform acceptance still recorded in archived B handoff"],
-  "environment": {"CodexWorkspace": "attempted connection failed", "container": "no Flutter/Dart/OHOS SDK, GitHub DNS fails", "execution": "GitHub connector with actual Actions; exact source/evidence artifacts inspected and source tests executed in container"}
+  "frameworkRegression": {
+    "run": 39251894291,
+    "application": "7a50470bcf169f40bf76a26ca2bc000330895c44",
+    "sdk": "4e86d26eac211c124798c48e7bd955371f4ba6c0",
+    "passed": 1025, "skipped": 3, "failed": 0, "conclusion": "success",
+    "artifact": 12186087635,
+    "zipSha256": "eb8d3d8286d197b15aa3c7bb57cd6c41bcb9d438bd8dbe5c09e895e1258ac68",
+    "fullArtifactRead": true,
+    "scope": "Full SDK suite on the target's official CPF OHOS framework plus reviewed target SDK patches, Linux host/system libmpv; not device playback",
+    "newRunAt6cf": {"run": 39257755478, "job": 118077226963, "conclusion": "success", "artifactNotYetRead": true}
+  },
+  "actualFailures": [
+    {"repository": "Goodwu/PiliPlus", "run": 39251488304, "job": 118056100184, "app": "a289c0ad77623bd640f846a47639aacc09e803a7", "nativeCompile": "success", "applicationCompile": "not-run", "failureStage": "source preparation", "error": "Unsupported SDK source entry: Darwin shared Swift source symlink", "artifact": 12187896058, "zipSha256": "dae399c311706195333b7d1843436b75a14f2def662a86a203aea927d7563200", "fullArtifactRead": true},
+    {"repository": "Goodwu/media-kit", "run": 39254578899, "attempt": 1, "app": "12df1fe944014a76c90fb9ee42696c9484ed953e", "error": "same source symlink rejection", "artifact": 12188541632, "zipSha256": "b8c91f6fec8ca0ca513b0821525bb4923194a1880cff664cdaed27848b4a28d3", "fullArtifactRead": true}
+  ],
+  "currentBuilds": {
+    "application": {"run": 39257755406, "job": 118077226999, "app": "6cf36e3591db01826c15abe5fd95fde91f2a3a0f", "status": "in_progress", "lastStage": "fresh native compile", "sourceAnd54Tests": "success", "sdk14NativeInputTests": "success"},
+    "sdk": {"sdkCommit": "b4cd48cdd900ece7e2628bd3dcc2b40f6dda3c02", "run": 39254578899, "failedJobsRerunAccepted": true, "note": "Reusable complete application workflow; record actual new app/native checkout identities from retry evidence. Do not overwrite attempt-1 failure history."}
+  },
+  "remaining": ["Actual complete target HAP, dependency/analysis and fresh WebP-capable native checks", "Read new framework regression artifact", "Update target documentation and final exact source/artifact receipts", "Physical OHOS signing/install/playback/lifecycle/PiP/screenshot/WebP/HDR gates", "Other-platform acceptance in archived B handoffs"],
+  "next": "Keep current branches. Read current builds' actual artifacts, fix concrete failures without relaxing gates. SDK/example HAP is not the target application. Full target media source is committed, not yet HAP-certified. Preserve original-source and native identity checks and historical receipts.",
+  "environment": {"CodexWorkspace": "connection failed when attempted", "container": "no Flutter/Dart/OHOS SDK; GitHub DNS fails", "execution": "GitHub connector/Actions, downloaded exact source and evidence inspected, Python tests executed locally", "device": "not connected"}
 }
