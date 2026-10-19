@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   views:
-    name: macOS viewport and legacy Flutter contracts (not device playback)
+    name: macOS viewport and explicit integration contracts (not device playback)
     runs-on: macos-latest
     timeout-minutes: 20
     steps:
@@ -32,7 +32,7 @@ jobs:
       - name: Resolve packages
         working-directory: media_kit_video
         run: flutter pub get
-      - name: Run actual macOS-specific production-view tests
+      - name: Run actual macOS-specific production-view and direction B tests
         working-directory: media_kit_video
         shell: bash
         run: |
@@ -42,6 +42,9 @@ jobs:
             test/piliplus_view_compat_test.dart \
             test/piliplus_player_contract_test.dart \
             test/piliplus_restricted_import_contract_test.dart \
+            test/routed_video_playback_test.dart \
+            test/routed_video_generation_test.dart \
+            test/routed_simple_video_test.dart \
             > "$RUNNER_TEMP/macos-view-tests.log" 2>&1
           status=$?
           cat "$RUNNER_TEMP/macos-view-tests.log"
