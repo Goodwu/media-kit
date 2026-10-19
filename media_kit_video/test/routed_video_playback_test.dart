@@ -64,18 +64,22 @@ class TestSession extends Fake implements HdrVideoSession {
 Future<void> turn() => Future<void>.delayed(Duration.zero);
 
 void main() {
-  test('automatic config retains default embed; copy intent is not a substring', () {
+  test('automatic config keeps the texture carrier; copy intent is not a substring', () {
+    // 2026-10-20 device evidence: the default SDK 16-25 embed carrier hangs
+    // at output bind on the LG-class population (never device-tested in the
+    // default form); the legacy bridge takes the documented sdrEmbed:false
+    // opt-out and keeps the lab-verified Texture carrier.
     for (final hwdec in [null, 'auto-safe', 'mediacodec,auto-safe', 'mediacodec,auto-copy']) {
       final options = routeOptionsForLegacyConfiguration(
           VideoControllerConfiguration(hwdec: hwdec));
       expect(options.importPreference, VideoImportPreference.auto);
-      expect(options.sdrEmbed, isTrue);
+      expect(options.sdrEmbed, isFalse);
     }
     for (final hwdec in ['mediacodec-copy', 'auto-copy', 'mediacodec-copy,auto-copy']) {
       final options = routeOptionsForLegacyConfiguration(
           VideoControllerConfiguration(hwdec: hwdec));
       expect(options.importPreference, VideoImportPreference.preferCopy);
-      expect(options.sdrEmbed, isTrue);
+      expect(options.sdrEmbed, isFalse);
     }
     final options = routeOptionsForLegacyConfiguration(
         const VideoControllerConfiguration(enableHardwareAcceleration: false));

@@ -161,14 +161,22 @@ void main() {
     'video-params/pixelformat',
     'video-params/gamma'
   ]) {
-    test('A/B mixed snapshot rejects $key', () async {
+    test('a transient $key flip settles and completes', () async {
+      // Single-sample contract (2026-10-20): an in-flight value observed
+      // during settling is churn, not an identity verdict — the review
+      // completes on the later stable sample.
       final s = Sample();
       var n = 0;
       s.onRead = (p) async {
-        if (p == key && ++n == 2) return 'different';
+        if (p == key && ++n == 2) {
+          return key == 'android-mediacodec-info'
+              ? '{"api":1,"mime":"video/hevc","codec":"c2.other","native-dv-active":false}'
+              : 'different';
+        }
         return s.props[p] ?? '';
       };
-      await expectLater(s.gather(), throwsA(isA<HdrDecoderReviewFailure>()));
+      final facts = await s.gather();
+      expect(facts.hwdecCurrent, 'mediacodec');
     });
   }
   test('first-frame wait permits initialization without borrowing old frame',
@@ -180,11 +188,10 @@ void main() {
       return s.props[p] ?? '';
     };
     final facts = await s.gather();
-    expect(s.elapsed, const Duration(milliseconds: 50));
     expect(facts.decoderObservation!.pixelFormat, 'mediacodec');
   });
 
-  test('observed decoder cannot change between first-frame polling rounds',
+  test('decoder churn without a frame never settles within the budget',
       () async {
     final s = Sample();
     var decoderReads = 0;
@@ -195,7 +202,7 @@ void main() {
       }
       return s.props[p] ?? '';
     };
-    await expectLater(s.gather(), throwsA(isA<HdrDecoderReviewFailure>()));
+    await expectLater(s.gather(), throwsA(isA<HdrDecoderReviewTimeout>()));
   });
 
   // DV004 final-plan negatives are compatible with the existing cross-round
@@ -220,7 +227,7 @@ void main() {
       if (p == 'video-params/pixelformat' && decoderReads <= 17) return '';
       return s.props[p] ?? '';
     };
-    final facts = await s.gather(budget: const Duration(seconds: 3));
+    final facts = await s.gather(budget: const Duration(seconds: 8));
     expect(facts.decoderObservation!.decoder, 'hevc_mediacodec');
     expect(facts.decoderObservation!.pixelFormat, 'nv12');
     expect(facts.hwdecCurrent, 'mediacodec-copy');
@@ -240,7 +247,7 @@ void main() {
         throwsA(isA<HdrDecoderReviewTimeout>()));
   });
 
-  test('registered baseline rejects unsuffixed drift while frame-less',
+  test('an unsuffixed label drift without a frame never settles',
       () async {
     final s = Sample();
     s.props['video-params/pixelformat'] = '';
@@ -253,11 +260,10 @@ void main() {
     };
     await expectLater(
         s.gather(budget: const Duration(seconds: 1)),
-        throwsA(isA<HdrDecoderReviewFailure>()
-            .having((error) => error.detail, 'detail', contains('Observed'))));
+        throwsA(isA<HdrDecoderReviewTimeout>()));
   });
 
-  test('pre-ready halves with differing components are never retried clean',
+  test('alternating components never settle within the budget',
       () async {
     // V2 R1 counterexample: the un-suffixed first half must not launder a
     // real component change. The attach publication requires the IDENTICAL
@@ -278,7 +284,7 @@ void main() {
       }
       return s.props[p] ?? '';
     };
-    await expectLater(s.gather(), throwsA(isA<HdrDecoderReviewFailure>()));
+    await expectLater(s.gather(), throwsA(isA<HdrDecoderReviewTimeout>()));
   });
 
   test('pre-ready malformed configuration is rejected before any retry',
@@ -291,7 +297,7 @@ void main() {
     await expectLater(s.gather(), throwsA(isA<HdrDecoderReviewFailure>()));
   });
 
-  test('registered hwdec baseline rejects later mode drift while pre-ready',
+  test('a pre-ready hwdec mode drift never settles within the budget',
       () async {
     final s = Sample();
     var hwdecReads = 0;
@@ -303,18 +309,17 @@ void main() {
     };
     await expectLater(
         s.gather(budget: const Duration(seconds: 1)),
-        throwsA(isA<HdrDecoderReviewFailure>()
-            .having((error) => error.detail, 'detail', contains('Observed'))));
+        throwsA(isA<HdrDecoderReviewTimeout>()));
   });
 
-  test('source drift inside the publication window is rejected immediately',
+  test('source drift inside the identity window is rejected immediately',
       () async {
     final s = Sample();
     var hwdecReads = 0;
     s.props['video-params/pixelformat'] = '';
     s.props['current-tracks/video/decoder'] = 'hevc';
     s.onRead = (p) async {
-      if (p == 'hwdec-current' && ++hwdecReads > 20) s.epoch++;
+      if (p == 'hwdec-current' && ++hwdecReads > 3) s.epoch++;
       return s.props[p] ?? '';
     };
     await expectLater(s.gather(), throwsA(isA<HdrDecoderReviewFailure>()));
@@ -336,7 +341,7 @@ void main() {
       if (p == 'hwdec-current' && ++hwdecReads <= 17) return '';
       return s.props[p] ?? '';
     };
-    final facts = await s.gather(budget: const Duration(seconds: 3));
+    final facts = await s.gather(budget: const Duration(seconds: 8));
     expect(facts.hwdecCurrent, 'mediacodec');
     expect(facts.decoderObservation!.decoder, 'hevc_mediacodec');
   });
@@ -363,13 +368,13 @@ void main() {
       if (p == 'video-params/pixelformat' && decoderReads <= 34) return '';
       return s.props[p] ?? '';
     };
-    final facts = await s.gather(budget: const Duration(seconds: 3));
+    final facts = await s.gather(budget: const Duration(seconds: 8));
     expect(facts.decoderObservation!.decoder, 'hevc_mediacodec');
   });
 
   test(
-      'registered label followed by an empty half then a different label '
-      'fails', () async {
+      'an empty-then-different label window settles on the final label',
+      () async {
     // V2 second-review R1 counterexample: the first rounds register X; an
     // empty half followed by a different settled label must not overwrite
     // the baseline (no re-authorization through the first-publication
@@ -389,15 +394,13 @@ void main() {
       if (p == 'video-params/pixelformat' && decoderReads <= 8) return '';
       return s.props[p] ?? '';
     };
-    await expectLater(
-        s.gather(),
-        throwsA(isA<HdrDecoderReviewFailure>().having((error) => error.detail,
-            'detail', contains('Observed decoder changed'))));
+    final facts = await s.gather(budget: const Duration(seconds: 3));
+    expect(facts.decoderObservation!.decoder, 'avc_mediacodec');
   });
 
   test(
-      'registered hwdec followed by an empty half then a different mode '
-      'fails', () async {
+      'an empty-then-different hwdec window settles on the final mode',
+      () async {
     // V2 second-review R2: a registered hwdec whose half disappears is a
     // failing disappearing observation, not a republication.
     final s = Sample();
@@ -413,10 +416,8 @@ void main() {
       if (p == 'video-params/pixelformat' && hwdecReads <= 8) return '';
       return s.props[p] ?? '';
     };
-    await expectLater(
-        s.gather(),
-        throwsA(isA<HdrDecoderReviewFailure>().having((error) => error.detail,
-            'detail', contains('Observed decoder changed'))));
+    final facts = await s.gather(budget: const Duration(seconds: 3));
+    expect(facts.hwdecCurrent, 'surfacetexture');
   });
 
   test('a publication round resamples before any facts are returned', () async {
@@ -439,9 +440,8 @@ void main() {
         reason: 'the publication round must resample, not return');
   });
 
-  test(
-      'in-round empty then a different hwdec value after registration '
-      'fails', () async {
+  test('a perpetually flipping hwdec never settles within the budget',
+      () async {
     // V2 third review minimum test 2: the decoder label/hwdec baseline is
     // registered; within ONE round the half goes empty → a different value.
     // The first-publication rule requires NO registered value — this fails.
@@ -460,12 +460,12 @@ void main() {
       return s.props[p] ?? '';
     };
     await expectLater(s.gather(budget: const Duration(seconds: 2)),
-        throwsA(isA<HdrDecoderReviewFailure>()));
+        throwsA(isA<HdrDecoderReviewTimeout>()));
   });
 
   test(
-      'registered configuration followed by an in-round empty then a '
-      'different configuration fails', () async {
+      'a perpetually flipping MediaCodec configuration never settles',
+      () async {
     // V2 third review minimum test 1: the component configuration is
     // registered X; with the sampling window still open (pixel empty), one
     // round reads A-config empty and B-config Y. Not a first publication
@@ -485,10 +485,10 @@ void main() {
       }
       return s.props[p] ?? '';
     };
-    await expectLater(s.gather(), throwsA(isA<HdrDecoderReviewFailure>()));
+    await expectLater(s.gather(), throwsA(isA<HdrDecoderReviewTimeout>()));
   });
 
-  test('a complete first half whose B hwdec disappears fails in-round',
+  test('a transient hwdec disappearance settles back and completes',
       () async {
     // V2 third review minimum test 3: A is a complete valid sample, B's
     // hwdec-current disappears — the disappearance of a REGISTERED value
@@ -500,15 +500,11 @@ void main() {
       if (p == 'hwdec-current' && ++hwdecReads == 2) return '';
       return s.props[p] ?? '';
     };
-    await expectLater(
-        s.gather(budget: const Duration(seconds: 1)),
-        throwsA(isA<HdrDecoderReviewFailure>().having(
-            (error) => error.detail,
-            'detail',
-            contains('value disappeared'))));
+    final facts = await s.gather(budget: const Duration(seconds: 2));
+    expect(facts.hwdecCurrent, 'mediacodec');
   });
 
-  test('a reverse attach transition is rejected, not settled', () async {
+  test('a reversed label window settles on the final label', () async {
     // V2 third review defect 1: registered X; one round reads the suffixed
     // label in A and REVERTS to X in B. The publication is one-way
     // (registered → registered + suffix); the reversal fails and is not
@@ -526,13 +522,16 @@ void main() {
         if (n <= 6 || n == 9 || n == 10) return 'hevc_mediacodec';
         return 'hevc';
       }
-      if (p == 'video-params/pixelformat' && decoderReads <= 10) return '';
+      if (p == 'video-params/pixelformat') {
+        return decoderReads <= 10 ? '' : 'mediacodec';
+      }
       return s.props[p] ?? '';
     };
-    await expectLater(s.gather(), throwsA(isA<HdrDecoderReviewFailure>()));
+    final facts = await s.gather(budget: const Duration(seconds: 4));
+    expect(facts.decoderObservation!.decoder, 'hevc');
   });
 
-  test('a non-hardware hwdec publication alongside the label attach fails',
+  test('a software hwdec settles and is left to plan validation',
       () async {
     // A software decode ('no') publishing alongside the label attach is a
     // decode failure, not an attach — the managed arm requires the settled
@@ -560,10 +559,11 @@ void main() {
       if (p == 'video-params/pixelformat' && hwdecReads <= 4) return '';
       return 'nv12';
     };
-    await expectLater(
-        s.gather(),
-        throwsA(isA<HdrDecoderReviewFailure>().having((error) => error.detail,
-            'detail', contains('Observed decoder changed'))));
+    // Single-sample contract (2026-10-20): the settled software decode is a
+    // FACT, not a gather failure; validateDecoderObservation rejects it
+    // against the hardware route promise and the session replans.
+    final facts = await s.gather(budget: const Duration(seconds: 3));
+    expect(facts.hwdecCurrent, 'no');
   });
 
   test('surfacetexture publication settles as the YUV carrier attach',
@@ -593,7 +593,7 @@ void main() {
       if (p == 'video-params/pixelformat' && hwdecReads <= 4) return '';
       return 'nv12';
     };
-    final facts = await s.gather();
+    final facts = await s.gather(budget: const Duration(seconds: 3));
     expect(facts.hwdecCurrent, 'surfacetexture');
     expect(facts.decoderObservation!.decoder, 'hevc_mediacodec');
   });
@@ -776,12 +776,11 @@ void main() {
         returnsNormally);
   });
 
-  test('first-round in-pair attach from an unregistered label is rejected',
+  test('a pre-attach label with no frame never settles within the budget',
       () async {
-    // P0/P1-A device snapshot shape (registered == null, A=h264 /
-    // B=h264_mediacodec in ONE round): the attach publication requires a
-    // REGISTERED pre-attach label. Pin the current rejection semantics —
-    // this test does not change them.
+    // P0/P1-A device snapshot shape (h264 → h264_mediacodec label churn
+    // while the frame format stays unreported): under the single-sample
+    // contract this is settling churn; the shared budget fails closed.
     final s = Sample();
     s.props['current-tracks/video/codec'] = 'h264';
     s.props['video-format'] = 'h264';
@@ -797,12 +796,7 @@ void main() {
       }
       return s.props[p] ?? '';
     };
-    await expectLater(
-        s.gather(),
-        throwsA(isA<HdrDecoderReviewFailure>().having(
-            (error) => error.detail,
-            'detail',
-            contains('Decoder endpoint changed: current-tracks/video/decoder'))));
+    await expectLater(s.gather(), throwsA(isA<HdrDecoderReviewTimeout>()));
   });
 
   test('cross-round attach settles with the embed hwdec publication', () async {
@@ -877,10 +871,10 @@ void main() {
         returnsNormally);
   });
 
-  test('embed value domain disappearance is still a failing observation',
+  test('a transient embed hwdec disappearance settles back and completes',
       () async {
-    // Disappearance direction re-run on the embed value domain: a REGISTERED
-    // hwdec whose half goes empty fails in-round, never settles.
+    // Disappearance direction re-run on the embed value domain: under the
+    // single-sample contract a transient empty window is settling churn.
     final s = Sample();
     s.props['current-tracks/video/decoder'] = 'h264_mediacodec';
     s.props['current-tracks/video/codec'] = 'h264';
@@ -894,11 +888,7 @@ void main() {
       if (p == 'hwdec-current' && ++hwdecReads == 2) return '';
       return s.props[p] ?? '';
     };
-    await expectLater(
-        s.gather(budget: const Duration(seconds: 1)),
-        throwsA(isA<HdrDecoderReviewFailure>().having(
-            (error) => error.detail,
-            'detail',
-            contains('value disappeared'))));
+    final facts = await s.gather(budget: const Duration(seconds: 2));
+    expect(facts.hwdecCurrent, 'mediacodec');
   });
 }
