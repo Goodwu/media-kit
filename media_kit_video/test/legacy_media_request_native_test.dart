@@ -63,7 +63,11 @@ class LocalMediaServer {
       if (entry.headers['x-entry'] == value) return Future.value(entry);
     }
     return events.stream.firstWhere((entry) => entry.headers['x-entry'] == value)
-        .timeout(const Duration(seconds: 10));
+        .timeout(const Duration(seconds: 10), onTimeout: () {
+          // Only locally generated fixture headers are present in this test.
+          throw StateError('No X-Entry=$value after request $after; received: '
+              '${jsonEncode(requests.map((r) => {"path": r.path, "headers": r.headers}).toList())}');
+        });
   }
   Future<void> close() async {
     await server.close(force: true);
@@ -75,7 +79,9 @@ class LocalMediaServer {
 Future<void> waitLoaded(Player player) async {
   if (player.state.duration > Duration.zero) return;
   await player.stream.duration.firstWhere((value) => value > Duration.zero)
-      .timeout(const Duration(seconds: 10));
+      .timeout(const Duration(seconds: 10), onTimeout: () {
+        throw StateError('No nonzero duration; state: ${player.state}');
+      });
 }
 
 void main() {

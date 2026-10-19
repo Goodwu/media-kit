@@ -1,0 +1,25 @@
+{
+  "request": {
+    "id": "piliplus-p2-request-diagnostics-r2-20261019",
+    "files": [
+      {
+        "path": "media_kit_video/test/legacy_media_request_native_test.dart",
+        "blob": "59c6bd5acb9c1717ee7f0b0835f164e97572e4b5",
+        "edits": [
+          {
+            "old": "return events.stream.firstWhere((entry) => entry.headers['x-entry'] == value)\n        .timeout(const Duration(seconds: 10));",
+            "new": "return events.stream.firstWhere((entry) => entry.headers['x-entry'] == value)\n        .timeout(const Duration(seconds: 10), onTimeout: () {\n          // Only locally generated fixture headers are present in this test.\n          throw StateError('No X-Entry=$value after request $after; received: '\n              '${jsonEncode(requests.map((r) => {\"path\": r.path, \"headers\": r.headers}).toList())}');\n        });"
+          },
+          {
+            "old": "await player.stream.duration.firstWhere((value) => value > Duration.zero)\n      .timeout(const Duration(seconds: 10));",
+            "new": "await player.stream.duration.firstWhere((value) => value > Duration.zero)\n      .timeout(const Duration(seconds: 10), onTimeout: () {\n        throw StateError('No nonzero duration; state: ${player.state}');\n      });"
+          }
+        ]
+      }
+    ]
+  },
+  "result": {
+    "media_kit_video/test/legacy_media_request_native_test.dart": "3dc3e48cb3ff01267bd4a8e334a7df7bcb7faf2d"
+  },
+  "status": "source-published-not-build-certified"
+}
