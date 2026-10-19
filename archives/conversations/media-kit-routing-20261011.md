@@ -2,6 +2,10 @@
 
 ## Current State
 
+### 2026-10-19 compat 分支 pull 9c772a41 后重建重验（第二轮；首轮本地结论按用户指令废弃）
+
+用户指令「pull 并重新验证」+「本地测试结论没有用了，废弃掉吧」：首轮（基线 5e34eb74，提交 1cca105c）已从分支丢弃（reflog 可达，交接副本存 `~/src/media-kit-build/evidence/compat-marble-20261019/superseded-local-handoff-20261019.md`），分支 `reset --hard` 对齐 origin@**9c772a41**（80 提交：direction B SDK 集成/应用补丁配方/P0 工具/OHOS 线）。重建三包（p5 d1acc62d/p84 eaa74b12/hdr10 53403181，exit 0；前置修复=lab package_config 残留 languageVersion 2.17→`flutter pub get` 重解析 3.1，树零变化）。marble 三轮**全部首会话 PASS**：p5 EOS 98.9s、p84 267.9s 零丢帧、hdr10 268.0s+BT2020_ITU_PQ 层（前轮首开 flake 未复现，不作已修复断言）；三轮 `manual [ hdr ]` 链、零 render failure/FATAL/ANR、dispose 干净；版本身份=装机 sha256 回读逐字节一致；设备还原核验。边界：lab 样片场景验收，非 T1/非 direction B 应用侧设备验收。详见 `docs/plans/piliplus-zero-change-handoff-20261019-v2.md` 与 `~/src/media-kit-build/evidence/compat-marble-20261019/{apks-v2,rounds-v2}/`。
+
 ### 2026-10-15 本地 agent 接续：P0 修复
 
 本地（macOS arm64，Flutter 3.47.2）在 d5f30c7e 复现 CI run38731073045 的三项 hdr_yuv_presentation_contract_test 失败并完成夹具修复：`_harness` 经构造 seam 注入真实 HdrYuvWindowArm（FakeArmAtoms 替身）、`_issuedPlan` 声明 yuvWindow PQ 通道；断言与生产默认不变。修后 video 890/890、lab 292/292、managed_output 4、routing 工具全绿。详见 TASKS.md 2026-10-15 条与 docs/plans/managed-yuv-implementation-20261015.md 末节。后续：W1/W3/W4/W5 按交接顺序推进。
