@@ -1,146 +1,32 @@
-name: OHOS current-source SDK HAP and PiliPlus prerequisites
+name: OHOS complete PiliPlus media integration
 
 on:
   push:
     branches: ['compat/piliplus-zero-change-20261018']
     paths:
       - '.github/workflows/piliplus-ohos-adaptation.yml'
+      - 'media_kit/**'
+      - 'media_kit_video/**'
       - 'tool/ohos/**'
       - 'libs/ohos/**'
-      - 'media_kit_test/lib/ohos_routed_playback.dart'
-      - 'media_kit_video/lib/src/integration/**'
+      - 'libs/universal/**'
+      - 'tool/piliplus_compat/direction_b/**'
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  sdk-hap:
-    name: Current native sources and direction B SDK HAP (not PiliPlus)
-    runs-on: ubuntu-latest
-    timeout-minutes: 75
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          path: sdk
-          persist-credentials: false
-      - uses: actions/checkout@v4
-        with:
-          repository: Goodwu/libmpv-ohos-build
-          ref: main
-          path: native-build
-          persist-credentials: false
-      - name: Record exact current source inputs
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/ohos-evidence"
-          for source in sdk native-build; do
-            git -C "$source" rev-parse HEAD > "$RUNNER_TEMP/ohos-evidence/$source-commit.txt"
-            git -C "$source" archive --format=tar.gz -o "$RUNNER_TEMP/ohos-evidence/$source.tar.gz" HEAD
-          done
-      - name: Install build dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y gperf git jq ninja-build pkg-config python3-venv ripgrep unzip zip curl wget xz-utils libglu1-mesa cmake libmpv-dev
-          python3 -m venv "$RUNNER_TEMP/build-tools"
-          "$RUNNER_TEMP/build-tools/bin/python" -m pip install meson==1.6.1 PyYAML
-          echo "$RUNNER_TEMP/build-tools/bin" >> "$GITHUB_PATH"
-      - name: Strict native-input and HAP identity tests
-        run: python3 -B -m unittest discover -s sdk/tool/ohos -p 'test_*.py' -v
-      - uses: ErBWs/setup-ohos@5c8e74d05fc9888a387b6154ba06d0cd9ede3da1
-        with:
-          version: 26.0.0.621
-          cache: true
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
-      - name: Resolve current maintained Flutter OHOS branch
-        shell: bash
-        run: |
-          set -euo pipefail
-          bash sdk/tool/ohos/bootstrap_current_flutter.sh "$RUNNER_TEMP/flutter-ohos" "$RUNNER_TEMP/ohos-evidence"
-          echo "$RUNNER_TEMP/flutter-ohos/bin" >> "$GITHUB_PATH"
-      - name: Compile current OHOS native branches using the checked recipe
-        working-directory: native-build
-        shell: bash
-        run: |
-          set -euo pipefail
-          chmod +x *.sh download/*.sh scripts/*.sh
-          set +e
-          ./bundle.sh > "$RUNNER_TEMP/ohos-evidence/native-build.log" 2>&1
-          status=$?
-          set -e
-          tail -n 100 "$RUNNER_TEMP/ohos-evidence/native-build.log"
-          echo "$status" > "$RUNNER_TEMP/ohos-evidence/native-build-exit.txt"
-          test "$status" = 0
-          (cd libmpv/arm64-build && sha256sum -c SHA256SUMS)
-          cp reproducibility/source-lock.json "$RUNNER_TEMP/ohos-evidence/"
-          cp libmpv/arm64-build/{manifest.json,sbom.cdx.json,SHA256SUMS,libmpv_aarch64.zip,libmpv.so} "$RUNNER_TEMP/ohos-evidence/"
-          archive="$GITHUB_WORKSPACE/native-build/libmpv/arm64-build/libmpv_aarch64.zip"
-          echo "MEDIA_KIT_OHOS_LIBMPV_ARCHIVE=$archive" >> "$GITHUB_ENV"
-          echo "MEDIA_KIT_OHOS_LIBMPV_SHA256=$(sha256sum "$archive" | cut -d' ' -f1)" >> "$GITHUB_ENV"
-      - name: Resolve and analyze the actual direction B SDK exercise
-        working-directory: sdk/media_kit_test
-        shell: bash
-        run: |
-          set -euo pipefail
-          flutter pub get 2>&1 | tee "$RUNNER_TEMP/ohos-evidence/sdk-pub-get.log"
-          flutter analyze --no-pub lib/ohos_routed_playback.dart 2>&1 | tee "$RUNNER_TEMP/ohos-evidence/sdk-analyze.log"
-          cp pubspec.lock "$RUNNER_TEMP/ohos-evidence/sdk-pubspec.lock"
-      - name: Compile unsigned ARM64 HAP with the newly built native library
-        working-directory: sdk/media_kit_test
-        shell: bash
-        run: |
-          set -euo pipefail
-          flutter build hap --release --no-codesign --target lib/ohos_routed_playback.dart > "$RUNNER_TEMP/ohos-evidence/hap-build.log" 2>&1 || { tail -n 100 "$RUNNER_TEMP/ohos-evidence/hap-build.log"; exit 1; }
-          tail -n 100 "$RUNNER_TEMP/ohos-evidence/hap-build.log"
-          mapfile -t haps < <(find build/ohos/hap -type f -name '*unsigned.hap')
-          test "${#haps[@]}" = 1
-          python3 ../tool/ohos/verify_hap_native.py "${haps[0]}" "$GITHUB_WORKSPACE/native-build/libmpv/arm64-build/libmpv.so" --output "$RUNNER_TEMP/ohos-evidence/hap-identity.json"
-          cp "${haps[0]}" "$RUNNER_TEMP/ohos-evidence/"
-      - name: Preserve source, failure logs and actual SDK-only artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: ohos-current-sdk-evidence
-          path: ${{ runner.temp }}/ohos-evidence/
-          if-no-files-found: error
+  complete-application:
+    name: Confirmed Goodwu/PiliPlus feature/ohos with this SDK commit
+    uses: Goodwu/PiliPlus/.github/workflows/ohos-build.yml@feature/ohos
+    with:
+      application_ref: feature/ohos
+      media_kit_ref: ${{ github.sha }}
 
-  application-prerequisites:
-    name: Current PiliPlus direction B OHOS prerequisites (not HAP certification)
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          path: sdk
-          persist-credentials: false
-      - uses: actions/checkout@v4
-        with:
-          repository: bggRGjQaUbCoE/PiliPlus
-          ref: main
-          path: original-app
-          persist-credentials: false
-      - run: python3 -m pip install -r sdk/tool/piliplus_compat/requirements.txt
-      - name: Resolve actual Flutter OHOS version
-        shell: bash
-        run: |
-          set -euo pipefail
-          bash sdk/tool/ohos/bootstrap_current_flutter.sh "$RUNNER_TEMP/flutter-ohos" "$RUNNER_TEMP/app-ohos-toolchain"
-      - name: Apply only reviewed B integration and run actual dependency resolution
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 sdk/tool/ohos/application_preflight.py --sdk-root "$GITHUB_WORKSPACE/sdk" --app-root "$GITHUB_WORKSPACE/original-app" --flutter "$RUNNER_TEMP/flutter-ohos/bin/flutter" --output "$RUNNER_TEMP/app-ohos-preflight"
-      - name: Preserve actual app blockers independently of the SDK HAP
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: piliplus-ohos-prerequisite-evidence
-          path: |
-            ${{ runner.temp }}/app-ohos-toolchain/
-            ${{ runner.temp }}/app-ohos-preflight/*.json
-            ${{ runner.temp }}/app-ohos-preflight/*.log
-          if-no-files-found: error
+# This supersedes the preflight of bggRGjQaUbCoE/PiliPlus main, which was the
+# wrong application for the user's confirmed target. The called workflow
+# retains source/patch/dependency/parser/UI/analysis/HAP/native-identity gates,
+# compiles fresh OHOS native sources and builds actual lib/main.dart. It is
+# stronger than the earlier SDK exercise and is never device/HDR certification.
+# Historical failed preflight and successful SDK-only evidence remain in docs.
