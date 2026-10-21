@@ -303,9 +303,6 @@ EffectiveVideoRouteOptions routeOptionsForLegacyConfiguration(
     // the source transfer or the caller explicitly requires SDR.
     output: null,
     importPreference: !software && copyOnly ? VideoImportPreference.preferCopy : null,
-    // Keep the legacy integration on its established texture carrier for
-    // SDR. Callers that have validated the SDK 16-25 embed path may opt in
-    // through the route options API.
-    sdrEmbed: false,
+    // Leave SDR embed unpinned so the SDK's default route policy applies.
   ));
 }
