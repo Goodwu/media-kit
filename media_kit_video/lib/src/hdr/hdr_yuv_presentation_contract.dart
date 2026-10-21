@@ -69,6 +69,9 @@ class HdrYuvPresentationContract {
   /// contract does not depend on a vendor header.
   static const int windowDataSpace = 0x11C60000;
 
+  /// Target peak in nits for the device-accepted HLG-to-PQ conversion.
+  static const String targetPeak = '1000';
+
   /// Metadata identity triplet (mks_p1, verbatim): primaries 9 (BT.2020),
   /// range 1, transfer 16 (PQ). HONESTY BOUNDARY: this is a
   /// documentation-level consistency declaration between the route fields

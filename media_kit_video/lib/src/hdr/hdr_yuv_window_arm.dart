@@ -207,15 +207,11 @@ class HdrYuvWindowProcessLease {
 /// settles — the platformView topology's bind completion, or the texture
 /// topology's layout rebuild (`prepareAndroidTextureOutput`), whichever
 /// this route's real Surface/VO initialization ends with — and a WRITE
-/// admission is held to the owning attempt's terminal cleanup
-/// ([endAttempt]). Device limitation, precisely scoped: a concurrent
-/// second output initialization is REJECTED while a P8.4 YUV OPEN
-/// TRANSACTION is between its admission and its terminal cleanup — NOT
-/// during the whole playback period (the attempt-scoped arm and this
-/// admission end together before the open result completes, so steady
-/// playback accepts new initializations). Under process-global atomics a
-/// concurrent initializer inside that interval would be poisoned, and
-/// rejection is the honest semantics.
+/// admission is held through the attempt. An accepted YUV output retains
+/// that admission until its owner replaces or disposes the live window.
+/// While it is retained, other output initializations are rejected rather
+/// than allowed to change process-global presentation state. A failed or
+/// superseded attempt disarms and releases through [endAttempt].
 ///
 /// Every hook invocation performs a real arm: the reuse-failure path runs
 /// the hook a second time after the retired output's owner termination
@@ -287,6 +283,7 @@ class HdrYuvWindowArm implements HdrOutputResources<HdrOpenPlan> {
   /// [armForAttempt] calls, which register their pending ownership at arm
   /// time instead.
   HdrOpenPlan? _writeAdmission;
+  HdrOpenPlan? _managedPlan;
 
   /// The process gate's LEASE id for the current write admission (R3-4:
   /// the only release handle; a configured token is never shared into a
@@ -393,7 +390,7 @@ class HdrYuvWindowArm implements HdrOutputResources<HdrOpenPlan> {
         try {
           return await initialize();
         } catch (error, stack) {
-          if (_armed == null && !_cleanupDebt) {
+          if (_armed == null && _managedPlan == null && !_cleanupDebt) {
             // The attempt died before arming and left no debt: the dead
             // attempt must not hold the process write (the coordinator's
             // terminal cleanup still runs and releases idempotently).
@@ -502,6 +499,7 @@ class HdrYuvWindowArm implements HdrOutputResources<HdrOpenPlan> {
 
   Future<void> _releaseWrite() async {
     _writeAdmission = null;
+    _managedPlan = null;
     HdrYuvWindowProcessRegistry.release(this);
     final leaseId = _gateLeaseId;
     _gateLeaseId = 0;
@@ -582,6 +580,14 @@ class HdrYuvWindowArm implements HdrOutputResources<HdrOpenPlan> {
       throw const HdrYuvWindowLeaseConflict(
           'the armed plan does not match the admitted attempt');
     }
+    final lease = HdrYuvWindowProcessRegistry.activeLease;
+    if (!identical(admission, plan) ||
+        !identical(lease?.owner, this) ||
+        !identical(lease?.plan, plan) ||
+        _gateLeaseId == 0) {
+      throw const HdrYuvWindowLeaseConflict(
+          'managed YUV preparation requires this attempt\'s active write admission');
+    }
     final setDiagDataSpace = _ffi?.setDiagDataSpace;
     if (setDiagDataSpace == null) {
       throw const HdrYuvWindowArmFailure(
@@ -591,6 +597,7 @@ class HdrYuvWindowArm implements HdrOutputResources<HdrOpenPlan> {
     }
     try {
       setDiagDataSpace(HdrYuvPresentationContract.windowDataSpace);
+      _managedPlan = plan;
     } catch (error) {
       throw HdrYuvWindowArmFailure(HdrDegradeReason.yuvWindowArmUnavailable,
           cause: 'diag dataspace arm failed: $error');
@@ -732,6 +739,29 @@ class HdrYuvWindowArm implements HdrOutputResources<HdrOpenPlan> {
   /// [HdrYuvWindowArmFailure] when the disarm fails (debt is retained —
   /// process-wide — and blocks the next output initialization until it
   /// clears).
+  /// Accepted-attempt terminal cleanup leaves the armed window and its
+  /// ownership intact while the route's output is live. The same manager's
+  /// next open or disposal retires it.
+  @override
+  Future<void> endAttemptRetainingWindow(HdrOpenPlan plan) async {
+    final scope = _armed;
+    if (scope != null && identical(scope.plan, plan)) {
+      // Keep all ownership until this same manager opens again or disposes.
+      return;
+    }
+    final lease = HdrYuvWindowProcessRegistry.activeLease;
+    if (identical(_managedPlan, plan) &&
+        identical(_writeAdmission, plan) &&
+        identical(lease?.owner, this) &&
+        identical(lease?.plan, plan)) {
+      // Managed YUV preparation arms dataspace while Java owns the window
+      // ledger; it has no Dart _armed scope, so retain only this exact live
+      // managed attempt's verified admission.
+      return;
+    }
+    await endAttempt(plan);
+  }
+
   @override
   Future<void> endAttempt(HdrOpenPlan plan) async {
     final scope = _armed;

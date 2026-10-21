@@ -184,6 +184,8 @@ class _Environment {
               name == 'android-mediacodec-info' ? _dvRaw : 'mediacodec',
           readNativeOutput: output,
           reviewMonotonicNow: () => now,
+          // This fixture exercises the observer against an explicit deadline.
+          reviewBudget: const Duration(seconds: 8),
           onNativeDvConsumerValidated: observer,
           onNativeDvConsumerCaptureError: captureError);
 }

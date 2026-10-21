@@ -21,12 +21,15 @@ class SimpleVideo extends StatefulWidget {
     required this.controller,
     this.aspectRatio,
     this.filterQuality = FilterQuality.low,
+    this.viewport,
   }) : assert(aspectRatio == null || aspectRatio > 0);
 
   final Color fill;
   final VideoController controller;
   final double? aspectRatio;
   final FilterQuality filterQuality;
+  /// On-screen slot for native 1:1 layout; the renderer fits within this slot.
+  final Size? viewport;
 
   @override
   State<SimpleVideo> createState() => SimpleVideoState();
@@ -82,15 +85,31 @@ class SimpleVideoState extends State<SimpleVideo> {
   Widget build(BuildContext context) {
     final controller = widget.controller;
     return ListenableBuilder(
-      listenable: Listenable.merge([controller.id, controller.rect]),
+      listenable: Listenable.merge([
+        controller.id,
+        controller.rect,
+        controller.notifier,
+      ]),
       builder: (context, _) {
-        final size = simpleVideoLogicalSize(
-          rect: controller.rect.value,
-          width: _width,
-          height: _height,
-          devicePixelRatio: MediaQuery.devicePixelRatioOf(context),
-          aspectRatio: widget.aspectRatio,
-        );
+        final viewport = widget.viewport;
+        final useViewport =
+            controller.notifier.value?.configuration.android.usePlatformView ==
+                true &&
+            viewport != null &&
+            viewport.width.isFinite &&
+            viewport.height.isFinite &&
+            viewport.width > 0 &&
+            viewport.height > 0;
+        final size = useViewport
+            ? viewport!
+            : simpleVideoLogicalSize(
+                rect: controller.rect.value,
+                width: _width,
+                height: _height,
+                devicePixelRatio: MediaQuery.devicePixelRatioOf(context),
+                aspectRatio: widget.aspectRatio,
+              );
+        final fit = useViewport ? BoxFit.contain : BoxFit.fill;
         final visible = (_width ?? 0) > 0 && (_height ?? 0) > 0;
         return SizedBox(
           width: size.width,
@@ -105,7 +124,7 @@ class SimpleVideoState extends State<SimpleVideo> {
                 controller: controller,
                 width: size.width,
                 height: size.height,
-                fit: BoxFit.fill,
+                fit: fit,
                 fill: widget.fill,
                 aspectRatio: widget.aspectRatio,
                 filterQuality: widget.filterQuality,

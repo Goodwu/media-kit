@@ -33,6 +33,7 @@ import 'hdr_output_slot.dart';
 import 'hdr_output_contract.dart';
 import 'hdr_player_backend.dart';
 import 'hdr_route.dart';
+import 'hdr_yuv_presentation_contract.dart';
 import 'hdr_route_planner.dart';
 import 'hdr_source_facts.dart';
 import 'hdr_source_descriptor.dart';
@@ -125,7 +126,7 @@ class HdrVideoSession {
     Future<String> Function(String)? readNativeProperty,
     HdrNativeDvOutputSnapshot? Function()? readNativeOutput,
     Duration Function()? reviewMonotonicNow,
-    Duration reviewBudget = const Duration(seconds: 8),
+    Duration reviewBudget = const Duration(seconds: 20),
     void Function(int generation, HdrOpenPlan plan, HdrReviewFacts facts)?
         onNativeDvConsumerValidated,
     void Function(Object, StackTrace)? onNativeDvConsumerCaptureError,
@@ -179,7 +180,7 @@ class HdrVideoSession {
     Future<String> Function(String)? readNativeProperty,
     HdrNativeDvOutputSnapshot? Function()? readNativeOutput,
     Duration Function()? reviewMonotonicNow,
-    Duration reviewBudget = const Duration(seconds: 8),
+    Duration reviewBudget = const Duration(seconds: 20),
     void Function(int generation, HdrOpenPlan plan, HdrReviewFacts facts)?
         onNativeDvConsumerValidated,
     void Function(Object, StackTrace)? onNativeDvConsumerCaptureError,
@@ -308,6 +309,16 @@ class HdrVideoSession {
       // review reopens within one generation each end their own arm, and a
       // stale attempt's late cleanup cannot clear a successor's arm.
       attemptCleanup: (plan) async {
+        final live = _liveAcceptedYuvPlan;
+        if (live != null && identical(live, plan)) {
+          _liveAcceptedYuvPlan = null;
+          // Review may be superseded before terminal cleanup runs. Only
+          // the current accepted output may retain its live ownership.
+          if (!_disposed && _generationOf(plan) == _serial) {
+            await _outputResources?.endAttemptRetainingWindow(plan);
+            return;
+          }
+        }
         await _outputResources?.endAttempt(plan);
       },
     );
@@ -384,6 +395,11 @@ class HdrVideoSession {
   HdrOpenBackend<HdrOpenPlan>? _backend;
   HdrOpenCoordinator<HdrOpenRequest, HdrOpenPlan>? _coordinator;
   HdrOutputResources<HdrOpenPlan>? _outputResources;
+
+  /// The plan of the accepted attempt whose YUV window stays live past the
+  /// open (set by [_review], consumed once by the coordinator's terminal
+  /// cleanup, cleared on dispose).
+  HdrOpenPlan? _liveAcceptedYuvPlan;
   late HdrOutputRequestPolicy _outputRequestPolicy;
 
   int _serial = 0;
@@ -1269,6 +1285,9 @@ class HdrVideoSession {
           ),
         );
       }
+      if (HdrYuvPresentationContract.isYuvWindowRoute(plan.route)) {
+        _liveAcceptedYuvPlan = plan;
+      }
       return HdrReviewDecision<HdrOpenPlan>.accept(
         nextPlan: plan.copyWith(
           source: descriptor,
@@ -1678,6 +1697,9 @@ class HdrVideoSession {
   /// restores owned mpv properties, disposes controllers and closes the
   /// event stream. The caller's [Player] is not disposed.
   Future<void> dispose() {
+    // The live accepted YUV window must take the full teardown from here:
+    // the coordinator's dispose-path cleanup must not retain it.
+    _liveAcceptedYuvPlan = null;
     final existing = _disposeFuture;
     if (existing != null) return existing;
     final attempt = _disposeOnce();
