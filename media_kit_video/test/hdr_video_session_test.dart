@@ -162,6 +162,9 @@ void main() {
   HdrVideoSession makeSession({
     required FakeBackend backend,
     required HdrCapabilities capabilities,
+    Future<HdrCapabilities> Function()? capabilitiesProvider,
+    void Function(HdrBackendCallDiagnostic<HdrOpenPlan>)?
+        onBackendCallDiagnostic,
     Duration position = Duration.zero,
     HdrOutputPreference preference = HdrOutputPreference.auto,
     HdrRoutingPolicy policy = HdrRoutingPolicy.defaults,
@@ -174,11 +177,12 @@ void main() {
       player: null,
       preference: preference,
       policy: policy,
-      capabilitiesProvider: () async => capabilities,
+      capabilitiesProvider: capabilitiesProvider ?? (() async => capabilities),
       positionProvider: () => position,
       isAndroid: true,
       backend: backend,
       outputResources: yuvWindowArm,
+      onBackendCallDiagnostic: onBackendCallDiagnostic,
     );
   }
 
@@ -1337,7 +1341,7 @@ void main() {
       await session.dispose();
     });
 
-    test('a YUV route arms per attempt and disarms at each attempt end',
+    test('a YUV review reopen retires its replaced attempt and retains live',
         () async {
       final atoms = _SessionArmAtoms();
       final backend = FakeBackend()
@@ -1360,8 +1364,8 @@ void main() {
       // The HLG hint plans C4 on the surfacetexture carrier; the decoder
       // review reclassifies the source to dvP84 (RPU stripping changes the
       // route) and reopens in place — still on the YUV-carrier convert
-      // route: two execution attempts, each with its own arm and terminal
-      // disarm.
+      // route: two execution attempts. The replaced attempt is disarmed;
+      // the accepted live attempt retains its ownership until disposal.
       await session.open(media, hint: hlgSource);
       await pumpEventQueue();
 
@@ -1373,14 +1377,16 @@ void main() {
       expect(session.report.value.verified, isTrue);
       expect(atoms.armCount, 2,
           reason: 'each execution attempt arms exactly once');
-      expect(atoms.disarmCount, 2,
-          reason: 'the reopen and the success each end their attempt');
+      expect(atoms.disarmCount, 1,
+          reason: 'only the replaced attempt is disarmed immediately');
+      expect(atoms.diagDataSpace, 0x11C60000);
+      expect(atoms.yuvDiagEnabled, 1);
+      await session.dispose();
       expect(atoms.diagDataSpace, 0);
       expect(atoms.yuvDiagEnabled, 0);
-      await session.dispose();
     });
 
-    test('a YUV attempt followed by a non-YUV attempt keeps both atoms zero',
+    test('a YUV attempt stays armed until the same session reopens or disposes',
         () async {
       final atoms = _SessionArmAtoms();
       final backend = FakeBackend()
@@ -1399,12 +1405,14 @@ void main() {
       await pumpEventQueue();
       expect(session.report.value.verified, isTrue);
       expect(atoms.armCount, 1);
-      expect(atoms.disarmCount, 1);
-      expect(atoms.diagDataSpace, 0);
-      expect(atoms.yuvDiagEnabled, 0);
+      // The ACCEPTED YUV window and its process ownership stay live past the
+      // open; the disarm belongs to same-owner replacement and disposal.
+      expect(atoms.disarmCount, 0);
+      expect(atoms.diagDataSpace, 0x11C60000);
+      expect(atoms.yuvDiagEnabled, 1);
 
-      // A following SDR open (non-YUV carrier) neither arms nor disturbs
-      // the zeroed atoms: its own review facts agree with the SDR route.
+      // A same-owner SDR open retires the retained YUV window before reading
+      // the successor output's facts.
       backend.factsForOpen
           .add(gammaFacts(gamma: 'bt.1886', hwdec: 'mediacodec-copy'));
       await session.open(media, hint: sdr);
@@ -1413,6 +1421,68 @@ void main() {
       expect(atoms.armCount, 1);
       expect(atoms.diagDataSpace, 0);
       expect(atoms.yuvDiagEnabled, 0);
+      await session.dispose();
+    });
+
+    test('a superseded accepted review disarms instead of retaining its lease',
+        () async {
+      final atoms = _SessionArmAtoms();
+      final backend = FakeBackend()..factsForOpen.add(yuvFacts());
+      final successorCapabilities = Completer<HdrCapabilities>();
+      var capabilityCalls = 0;
+      var successorStarted = false;
+      late Future<void> successorOpen;
+      late HdrVideoSession session;
+      session = makeSession(
+        backend: backend,
+        capabilities: lgYuvPqCaps(),
+        capabilitiesProvider: () {
+          capabilityCalls++;
+          return capabilityCalls == 1
+              ? Future<HdrCapabilities>.value(lgYuvPqCaps())
+              : successorCapabilities.future;
+        },
+        policy: HdrRoutingPolicy(
+          preferences: const {
+            HdrSourceClass.hlg: [HdrStrategy.baseLayerConvert],
+          },
+        ),
+        yuvWindowArm: sessionArm(atoms),
+        onBackendCallDiagnostic: (diagnostic) {
+          if (diagnostic.method != HdrBackendDiagnosticMethod.reviewFacts ||
+              diagnostic.boundary != HdrBackendDiagnosticBoundary.returned ||
+              successorStarted) {
+            return;
+          }
+          successorStarted = true;
+          scheduleMicrotask(() {
+            // The successor is held before preparation so the old attempt's
+            // terminal cleanup is the only operation that can release A.
+            backend.prepareErrorOnce = StateError('successor prepare failed');
+            successorOpen = session.open(
+                Media('test://superseding-request'),
+                hint: hlgSource);
+          });
+        },
+      );
+
+      try {
+        await session.open(media, hint: hlgSource);
+      } catch (_) {
+        // The diagnostic-triggered request supersedes the old generation.
+      }
+      await pumpUntil(() => successorStarted && capabilityCalls >= 2);
+      expect(atoms.diagDataSpace, 0,
+          reason: 'stale accepted review cleanup must disarm its atoms');
+      expect(atoms.yuvDiagEnabled, 0);
+      expect(atoms.gate.writer, isFalse,
+          reason: 'stale accepted review cleanup must release its writer');
+
+      successorCapabilities.complete(lgYuvPqCaps());
+      await expectLater(successorOpen, throwsStateError);
+      expect(atoms.diagDataSpace, 0);
+      expect(atoms.yuvDiagEnabled, 0);
+      expect(atoms.gate.writer, isFalse);
       await session.dispose();
     });
 
@@ -1585,11 +1655,16 @@ void main() {
       await pumpEventQueue();
       expect(yuvSession.report.value.verified, isTrue);
       expect(atoms.armCount, 2);
-      expect(atoms.disarmCount, 2);
-      expect(atoms.diagDataSpace, 0);
-      expect(atoms.yuvDiagEnabled, 0);
+      // Only the replaced reopen attempt disarmed; the ACCEPTED attempt's
+      // window stays armed while live, retiring at the session dispose.
+      expect(atoms.disarmCount, 1);
+      expect(atoms.diagDataSpace, 0x11C60000);
+      expect(atoms.yuvDiagEnabled, 1);
       await sdrSession.dispose();
       await yuvSession.dispose();
+      await pumpEventQueue();
+      expect(atoms.diagDataSpace, 0);
+      expect(atoms.yuvDiagEnabled, 0);
     });
 
     test(
@@ -1598,7 +1673,7 @@ void main() {
       final atoms = _SessionArmAtoms();
       final firstBackend = FakeBackend()..factsForOpen.add(yuvFacts());
       final secondBackend = FakeBackend()
-        ..factsForOpen.add(gammaFacts(gamma: 'bt.1886', hwdec: 'mediacodec-copy'));
+        ..factsForOpen.add(yuvFacts());
       atoms.sink = firstBackend.calls;
       final first = makeSession(
         backend: firstBackend,
@@ -1613,6 +1688,11 @@ void main() {
       final second = makeSession(
         backend: secondBackend,
         capabilities: lgYuvPqCaps(),
+        policy: HdrRoutingPolicy(
+          preferences: const {
+            HdrSourceClass.hlg: [HdrStrategy.baseLayerConvert],
+          },
+        ),
         yuvWindowArm: sessionArm(atoms),
       );
       // Hold the first session's YUV attempt between the arm and the open.
@@ -1641,19 +1721,36 @@ void main() {
       expect(events.whereType<HdrErrorEvent>().single.error,
           isA<HdrYuvWindowLeaseConflict>());
 
-      // After the first attempt ends (disarm + lease release), the same
-      // open proceeds on a clean process state.
+      // The accepted window remains owned after open completion. Other
+      // sessions cannot initialize either SDR or YUV output while it lives.
       firstBackend.holdConfigure!.complete();
       await firstOpen;
       await pumpEventQueue();
       expect(first.report.value.verified, isTrue);
-      await second.open(media, hint: sdr);
+      await expectLater(second.open(media, hint: sdr),
+          throwsA(isA<HdrYuvWindowLeaseConflict>()));
+      await expectLater(second.open(media, hint: hlgSource),
+          throwsA(isA<HdrYuvWindowLeaseConflict>()));
+      expect(secondBackend.opened, isEmpty,
+          reason: 'neither conflicting route initialized output');
+
+      // A's dispose releases its retained ownership; B can then initialize
+      // YUV. A repeated stale dispose must not clear B's new live window.
+      await first.dispose();
+      await second.open(media, hint: hlgSource);
       await pumpEventQueue();
       expect(second.report.value.verified, isTrue);
+      expect(atoms.diagDataSpace, 0x11C60000);
+      expect(atoms.yuvDiagEnabled, 1);
+      await first.dispose();
+      await pumpEventQueue();
+      expect(atoms.diagDataSpace, 0x11C60000);
+      expect(atoms.yuvDiagEnabled, 1,
+          reason: 'stale A disposal must not clear B ownership');
+      await second.dispose();
+      await pumpEventQueue();
       expect(atoms.diagDataSpace, 0);
       expect(atoms.yuvDiagEnabled, 0);
-      await first.dispose();
-      await second.dispose();
     });
 
     test('a failed YUV attempt disarms before the error surfaces', () async {

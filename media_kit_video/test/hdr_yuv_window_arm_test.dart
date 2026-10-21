@@ -584,6 +584,99 @@ void main() {
       expect(atoms.yuvDiagEnabled, 0);
     });
 
+    test('managed accepted attempt retains only its admitted write owner',
+        () async {
+      final atoms = FakeYuvAtoms();
+      final owner = armManager(atoms, ownerToken: 'owner-a');
+      final successor = armManager(atoms, ownerToken: 'owner-b');
+      final managedPlan = planFor(yuvRoute());
+      final sdrPlan =
+          planFor(yuvRoute().surrogate(hwdec: 'mediacodec-copy'));
+
+      await owner.initializeOutput(
+          managedPlan, () => owner.prepareManagedAttempt(managedPlan));
+      await owner.endAttemptRetainingWindow(managedPlan);
+      expect(atoms.gate.writer, isTrue,
+          reason: 'managed accepted output retains its write gate lease');
+      expect(atoms.diagDataSpace,
+          HdrYuvPresentationContract.windowDataSpace);
+
+      await expectLater(
+          successor.initializeOutput(sdrPlan, () async {}),
+          throwsA(isA<HdrYuvWindowLeaseConflict>()));
+      final successorPlan = planFor(yuvRoute());
+      await expectLater(
+          successor.initializeOutput(successorPlan,
+              () => successor.prepareManagedAttempt(successorPlan)),
+          throwsA(isA<HdrYuvWindowLeaseConflict>()));
+      expect(atoms.gate.writer, isTrue,
+          reason: 'both successor routes leave the accepted owner intact');
+
+      // A same-manager non-YUV open retires the previous managed window.
+      await owner.initializeOutput(sdrPlan, () async {});
+      expect(atoms.gate.writer, isFalse);
+      expect(atoms.diagDataSpace, 0);
+
+      // Re-establish accepted managed ownership, then dispose the owner.
+      await owner.initializeOutput(
+          managedPlan, () => owner.prepareManagedAttempt(managedPlan));
+      await owner.endAttemptRetainingWindow(managedPlan);
+      await owner.dispose();
+      expect(atoms.gate.writer, isFalse);
+      expect(atoms.diagDataSpace, 0);
+
+      // The successor can now own a new managed output. A stale cleanup and
+      // repeated disposal by the old manager cannot clear that ownership.
+      await successor.initializeOutput(
+          successorPlan, () => successor.prepareManagedAttempt(successorPlan));
+      await successor.endAttemptRetainingWindow(successorPlan);
+      await owner.endAttempt(managedPlan);
+      await owner.dispose();
+      expect(atoms.gate.writer, isTrue);
+      expect(atoms.diagDataSpace,
+          HdrYuvPresentationContract.windowDataSpace);
+      await successor.dispose();
+      expect(atoms.gate.writer, isFalse);
+      expect(atoms.diagDataSpace, 0);
+    });
+
+    test('managed prepare failure keeps admission until terminal cleanup',
+        () async {
+      final atoms = FakeYuvAtoms();
+      final owner = armManager(atoms, ownerToken: 'owner-a');
+      final successor = armManager(atoms, ownerToken: 'owner-b');
+      final failedPlan = planFor(yuvRoute());
+      final sdrPlan =
+          planFor(yuvRoute().surrogate(hwdec: 'mediacodec-copy'));
+
+      await expectLater(
+          owner.initializeOutput(failedPlan, () async {
+            await owner.prepareManagedAttempt(failedPlan);
+            throw StateError('output initialization failed');
+          }),
+          throwsStateError);
+      expect(atoms.gate.writer, isTrue,
+          reason: 'managed preparation established cleanup ownership');
+      expect(atoms.diagDataSpace,
+          HdrYuvPresentationContract.windowDataSpace);
+      await expectLater(successor.initializeOutput(sdrPlan, () async {}),
+          throwsA(isA<HdrYuvWindowLeaseConflict>()));
+
+      await owner.endAttempt(failedPlan);
+      expect(atoms.gate.writer, isFalse);
+      expect(atoms.diagDataSpace, 0);
+      expect(atoms.yuvDiagEnabled, 0);
+
+      final successorPlan = planFor(yuvRoute());
+      await successor.initializeOutput(successorPlan,
+          () => successor.prepareManagedAttempt(successorPlan));
+      expect(atoms.gate.writer, isTrue,
+          reason: 'the successor initializes after terminal cleanup');
+      await successor.endAttempt(successorPlan);
+      expect(atoms.gate.writer, isFalse);
+      expect(atoms.diagDataSpace, 0);
+    });
+
     test(
         'same-manager re-entry while an unguarded arm is suspended at the '
         'generation read is a typed conflict; the pending arm completes',

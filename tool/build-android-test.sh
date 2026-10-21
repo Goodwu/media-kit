@@ -12,7 +12,8 @@
 # 发布构建不走本脚本：gradle 默认下载钉定发布 JAR + SHA-256 核验（发布链）。
 #
 # usage: build-android-test.sh [--debug] [--tag <name>] [--platform-view]
-#                              --local-source <device-path> [-- 额外 --dart-define ...]
+#                              --local-source <device-path> [--app-dir <flutter-project>]
+#                              [-- 额外 flutter build 参数 ...]
 set -Eeuo pipefail
 cd "$(dirname "$0")/.."
 
@@ -20,6 +21,7 @@ variant=release
 tag=test-latest
 platform_view=false
 local_source=
+app_dir=
 extra=()
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -27,11 +29,20 @@ while [[ $# -gt 0 ]]; do
     --tag) tag=$2; shift 2;;
     --platform-view) platform_view=true; shift;;
     --local-source) local_source=$2; shift 2;;
+    --app-dir) app_dir=$2; shift 2;;
     --) shift; extra+=("$@"); break;;
     *) extra+=("$1"); shift;;
   esac
 done
-[[ -n "$local_source" ]] || { echo "need --local-source <device-path>" >&2; exit 2; }
+lab_dir="$PWD/media_kit_hdr_lab"
+if [[ -z "$app_dir" ]]; then
+  app_dir="$lab_dir"
+  [[ -n "$local_source" ]] || { echo "need --local-source <device-path> for the default hdr_lab build" >&2; exit 2; }
+fi
+[[ -f "$app_dir/pubspec.yaml" ]] || { echo "Flutter project not found: $app_dir" >&2; exit 2; }
+app_dir="$(cd "$app_dir" && pwd)"
+is_lab=false
+[[ "$app_dir" == "$(cd "$lab_dir" && pwd)" ]] && is_lab=true
 
 export PATH="/Users/wuweiwei1/Library/Android/sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/darwin-x86_64/bin:$PATH"
 export JAVA_HOME=/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home
@@ -47,29 +58,44 @@ jar="$HOME/src/media-kit-build/lg-api24/lg-api24-realtime-gpu-mks-$tag-build/med
 shasum -a 256 "$jar"
 
 echo "=== [3/3] flutter build apk ($variant, local JAR) ==="
-base_defines=(
-  --dart-define=MEDIA_KIT_AUTO_SINGLE_PLAYER=true
-  --dart-define=MEDIA_KIT_ANDROID_OPEN_ON_TAP=true
-  --dart-define=MEDIA_KIT_ANDROID_PREOPEN_FULLSCREEN=true
-  --dart-define=MEDIA_KIT_ANDROID_NAMED_LOCAL_SOURCE=true
-  --dart-define=MEDIA_KIT_ANDROID_P5_RPU_PIPELINE_BUILT=true
-  --dart-define=MEDIA_KIT_ANDROID_HDR_TRANSACTION=true
-  --dart-define=MEDIA_KIT_ANDROID_SURFACE_PRODUCER=false
-  --dart-define=MEDIA_KIT_ANDROID_TEXTURE_LAYOUT_SIZE=true
-  --dart-define=MEDIA_KIT_ANDROID_PERF_PROBE=true
-  --dart-define=MEDIA_KIT_ANDROID_P5_COUNTER_PROBE=true
-  --dart-define=MEDIA_KIT_ANDROID_DIRECT_OPEN_TRACE=true
-)
-[[ -n "$local_source" ]] && base_defines+=("--dart-define=MEDIA_KIT_ANDROID_LOCAL_SOURCE=$local_source")
-$platform_view && base_defines+=("--dart-define=MEDIA_KIT_ANDROID_PLATFORM_VIEW=true")
+base_defines=()
+if $is_lab; then
+  base_defines+=(
+    --dart-define=MEDIA_KIT_AUTO_SINGLE_PLAYER=true
+    --dart-define=MEDIA_KIT_ANDROID_OPEN_ON_TAP=true
+    --dart-define=MEDIA_KIT_ANDROID_PREOPEN_FULLSCREEN=true
+    --dart-define=MEDIA_KIT_ANDROID_NAMED_LOCAL_SOURCE=true
+    --dart-define=MEDIA_KIT_ANDROID_P5_RPU_PIPELINE_BUILT=true
+    --dart-define=MEDIA_KIT_ANDROID_HDR_TRANSACTION=true
+    --dart-define=MEDIA_KIT_ANDROID_SURFACE_PRODUCER=false
+    --dart-define=MEDIA_KIT_ANDROID_TEXTURE_LAYOUT_SIZE=true
+    --dart-define=MEDIA_KIT_ANDROID_PERF_PROBE=true
+    --dart-define=MEDIA_KIT_ANDROID_P5_COUNTER_PROBE=true
+    --dart-define=MEDIA_KIT_ANDROID_DIRECT_OPEN_TRACE=true
+  )
+  [[ -n "$local_source" ]] && base_defines+=("--dart-define=MEDIA_KIT_ANDROID_LOCAL_SOURCE=$local_source")
+  $platform_view && base_defines+=("--dart-define=MEDIA_KIT_ANDROID_PLATFORM_VIEW=true")
+fi
 
 export ORG_GRADLE_PROJECT_mediaKitLocalArm64Jar="$jar"
 export ORG_GRADLE_PROJECT_mediaKitArm64Only=true
-mode=(); [[ "$variant" == debug ]] && mode=(--debug)
-# flutter 工程在 media_kit_hdr_lab/（仓库根是 melos workspace，无 lib/main.dart）
-(cd media_kit_hdr_lab && flutter build apk "${mode[@]}" --target-platform android-arm64 \
+mode=(--release); [[ "$variant" == debug ]] && mode=(--debug)
+output_dir="$app_dir/build/app/outputs/flutter-apk"
+mkdir -p "$output_dir"
+build_marker="$(mktemp "$output_dir/.android-test-build.XXXXXX")"
+trap 'rm -f "$build_marker"' EXIT
+split_per_abi=false
+for arg in "${extra[@]}"; do
+  [[ "$arg" == --split-per-abi ]] && split_per_abi=true
+done
+(cd "$app_dir" && flutter build apk "${mode[@]}" --target-platform android-arm64 \
   "${base_defines[@]}" "${extra[@]}")
-apk="media_kit_hdr_lab/build/app/outputs/flutter-apk/app-${variant}.apk"
-cp "$apk" "media_kit_hdr_lab/build/app/outputs/flutter-apk/$tag-$variant.apk"
-echo "=== DONE: $tag-$variant.apk ==="
-shasum -a 256 "media_kit_hdr_lab/build/app/outputs/flutter-apk/$tag-$variant.apk"
+apk="$output_dir/app-${variant}.apk"
+if $split_per_abi; then
+  apk="$app_dir/build/app/outputs/flutter-apk/app-arm64-v8a-${variant}.apk"
+fi
+[[ -f "$apk" ]] || { echo "APK missing for $variant under $app_dir/build/app/outputs/flutter-apk" >&2; exit 1; }
+[[ "$apk" -nt "$build_marker" ]] || { echo "APK was not rebuilt in this invocation: $apk" >&2; exit 1; }
+cp "$apk" "$output_dir/$tag-$variant.apk"
+echo "=== DONE: $tag-$variant.apk ($app_dir) ==="
+shasum -a 256 "$output_dir/$tag-$variant.apk"

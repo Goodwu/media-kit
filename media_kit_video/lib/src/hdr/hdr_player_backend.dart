@@ -637,6 +637,15 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
       HdrYuvPresentationContract.validate(route);
       await _setOwned('video-output-levels',
           HdrYuvPresentationContract.mpvOutputLevels(route.offscreenTransfer!));
+      // The offscreen contract is PQ: without target-trc mpv renders the
+      // source HLG values unconverted, which the PQ-tagged window (and the
+      // panel) then interpret as absolute PQ luminance — bright areas
+      // roughly double overexposed. Applying the HLG->PQ conversion here.
+      await _setOwned('target-trc', 'pq');
+      // The HLG source is mastered against a 1000-nit reference: pin the
+      // inverse-OOTF peak so the conversion stays colorimetric instead of
+      // resolving the target peak from the PQ container's nominal peak.
+      await _setOwned('target-peak', HdrYuvPresentationContract.targetPeak);
     }
     if (route.topology == HdrTopology.platformView) {
       final output = await outputSlot.current!.platform.future;

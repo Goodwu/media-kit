@@ -97,6 +97,7 @@ void main() {
       expect(HdrYuvPresentationContract.offscreenTransfer, 'pq-full');
       expect(HdrYuvPresentationContract.windowTransfer, 'pq-itu');
       expect(HdrYuvPresentationContract.windowRequests, ['pq', 'pq-itu']);
+      expect(HdrYuvPresentationContract.targetPeak, '1000');
     });
 
     test('offscreen contract maps to the mpv output-levels value', () {
@@ -113,9 +114,13 @@ void main() {
         () async {
       final result = await _exercise(_yuvRoute());
       expect(result.player.properties['video-output-levels'], 'full');
+      expect(result.player.properties['target-trc'], 'pq');
+      expect(result.player.properties['target-peak'], '1000');
       expect(result.dataSpaceRequested, 'pq-itu');
       await result.backend.resetOwnedConfiguration();
       expect(result.player.properties['video-output-levels'], 'auto');
+      expect(result.player.properties['target-trc'], 'sdr');
+      expect(result.player.properties['target-peak'], 'auto');
     });
 
     test('euv17 pq-request route issues the owned quad write', () async {
@@ -127,9 +132,13 @@ void main() {
       final result =
           await _exercise(_yuvRoute().surrogate(surfaceTransfer: 'pq'));
       expect(result.player.properties['video-output-levels'], 'full');
+      expect(result.player.properties['target-trc'], 'pq');
+      expect(result.player.properties['target-peak'], '1000');
       expect(result.dataSpaceRequested, 'pq');
       await result.backend.resetOwnedConfiguration();
       expect(result.player.properties['video-output-levels'], 'auto');
+      expect(result.player.properties['target-trc'], 'sdr');
+      expect(result.player.properties['target-peak'], 'auto');
     });
 
     test('YUV route without the offscreen contract is refused before writes',
@@ -708,9 +717,11 @@ class _FakePlayer implements Player {
                         ? 'bt.709'
                         : name == 'target-trc'
                             ? 'sdr'
-                            : name == 'target-colorspace-hint'
-                                ? 'no'
-                                : '');
+                            : name == 'target-peak'
+                                ? 'auto'
+                                : name == 'target-colorspace-hint'
+                                    ? 'no'
+                                    : '');
   }
 
   @override

@@ -167,7 +167,13 @@ Future<HdrReviewFacts> gatherDecoderReviewFacts({
   required int openedAfterEpoch,
   required int Function() fileLoadedEpoch,
   required bool Function() isCurrent,
-  Duration budget = const Duration(seconds: 8),
+  // The budget spans the file-loaded wait AND the post-loaded settle. 4K
+  // network streams on slow radios routinely need 5–10 s of loaded→first-
+  // frame settle (measured LG H870DS: loaded 1.4–4.6 s + settle 5–8 s);
+  // an 8 s total turned marginal networks into a hardware-decode exclusion
+  // with a software-decode retry — effectively a black screen. 20 s keeps
+  // the settle bounded while covering the slow tail.
+  Duration budget = const Duration(seconds: 20),
   Duration Function()? monotonicNow,
   Future<void> Function(Duration) delay = Future<void>.delayed,
 }) async {

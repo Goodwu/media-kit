@@ -334,6 +334,20 @@ public final class LgPqDataSpaceExt implements PlatformVideoView.SurfaceDataSpac
         return new java.util.HashSet<>(java.util.Arrays.asList("pq", "pq-itu"));
     }
 
+    /**
+     * Validated prediction evidence for the {@code pq} surface transfer:
+     * the full baseLayerConvert pipeline ran end-to-end on this exact
+     * firmware (2026-10-20 on-device validation: hardware HEVC decode via
+     * the surfacetexture importer, the config49 YUV window with the
+     * vendor-forced BT2020_PQ dataspace applied through this extension, and
+     * continuous frame presentation at source rate through the mks
+     * latch/retire/reap path).
+     */
+    @Override
+    public java.util.Set<String> validatedPredictionTransfers() {
+        return java.util.Collections.singleton("pq");
+    }
+
     /** The managed YUV window arm protocol this extension implements. */
     @Override
     public int yuvWindowArmApi() {

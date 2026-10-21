@@ -10,24 +10,28 @@ import 'routed_video_playback.dart';
 class RoutedSimpleVideo extends StatelessWidget {
   const RoutedSimpleVideo({super.key, required this.playback,
     this.fill = const Color(0xFF000000), this.aspectRatio,
-    this.filterQuality = FilterQuality.low});
+    this.filterQuality = FilterQuality.low, this.viewport});
 
   final RoutedVideoPlayback playback;
   final Color fill;
   final double? aspectRatio;
   final FilterQuality filterQuality;
+  /// On-screen slot used to align native output geometry.
+  final Size? viewport;
 
   @override
   Widget build(BuildContext context) => ValueListenableBuilder<VideoController?>(
     valueListenable: playback.controller,
     builder: (context, controller, _) {
       if (controller == null) {
-        return SizedBox(width: aspectRatio ?? 1, height: 1,
+        return SizedBox(width: viewport?.width ?? aspectRatio ?? 1,
+            height: viewport?.height ?? 1,
             child: ColoredBox(color: fill));
       }
       return Stack(fit: StackFit.passthrough, children: [
         SimpleVideo(key: ValueKey(controller), controller: controller,
-            fill: fill, aspectRatio: aspectRatio, filterQuality: filterQuality),
+            fill: fill, aspectRatio: aspectRatio, filterQuality: filterQuality,
+            viewport: viewport),
         // Mounting is independent of readiness; pre-review pixels are covered.
         Positioned.fill(child: ValueListenableBuilder<bool>(
           valueListenable: playback.ready,

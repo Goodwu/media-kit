@@ -10,6 +10,9 @@ environment:
   flutter: ">=3.7.0"
 
 dependencies:
+  # This fork's video bundle includes the device-gated Android HDR extension.
+  media_kit_android_dataspace_vendor:
+    path: ../../android/media_kit_android_dataspace_vendor
   media_kit_libs_android_video:
     path: ../../android/media_kit_libs_android_video
   media_kit_libs_ios_video:

@@ -164,6 +164,12 @@ class VideoController {
     () async {
       final completer = Completer();
       WidgetsBinding.instance.addPostFrameCallback((_) => completer.complete());
+      // A session may create this controller mid-open, while the widget
+      // tree is idle and nothing else schedules a frame; the post-frame
+      // callback would then never run and the open stalls forever
+      // (measured on LG H870DS, 2026-10-20: the platform-view output
+      // replacement hung until any frame was forced). Ensure one frame.
+      WidgetsBinding.instance.ensureVisualUpdate();
       await completer.future;
 
       try {
