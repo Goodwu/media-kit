@@ -631,6 +631,9 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
 
   @override
   Future<void> configure(HdrOpenPlan plan) async {
+    _dataSpaceRequested = null;
+    _dataSpacePath = null;
+    _dataSpaceReadback = null;
     final route = plan.route;
     if (route.vdLavcOptions != null) {
       await player.lock.synchronized(_nativeDvOptions.verify);

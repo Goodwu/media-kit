@@ -127,6 +127,47 @@ void main() {
       expect(result.player.properties['gamma'], '0.000000');
     });
 
+    test('dataspace observation resets across PQ to SDR and a later PQ',
+        () async {
+      final result = _harness();
+      final pq = _issuedPlan(_yuvRoute());
+      await result.backend.prepareOutput(pq);
+      await result.backend.configure(pq);
+      expect(result.backend.observe().dataSpaceRequested, 'pq-itu');
+      expect(result.backend.observe().dataSpacePath, 'ext:lg-pq');
+      expect(result.backend.observe().dataSpaceReadback, isNull);
+      expect(result.dataSpaceApplyCount, 1);
+
+      final sdrRoute = HdrRoute(
+        strategy: HdrStrategy.sdrDirect,
+        presentation: HdrPresentation.sdr,
+        outputTransfer: HdrOutputTransfer.sdr,
+        appliesDynamicMetadata: false,
+        topology: HdrTopology.platformView,
+        vo: 'mediacodec_embed',
+        hwdec: 'mediacodec',
+        targetPrim: null,
+        targetTrc: 'sdr',
+        surfaceTransfer: null,
+        stripDvRpu: false,
+      );
+      await result.backend.configure(pq.copyWith(route: sdrRoute));
+      expect(result.backend.observe().dataSpaceRequested, isNull);
+      expect(result.backend.observe().dataSpacePath, isNull);
+      expect(result.backend.observe().dataSpaceReadback, isNull);
+      expect(result.dataSpaceApplyCount, 1,
+          reason: 'SDR with no dataspace must not call the injected setter');
+
+      result.dataSpacePath = 'new-pq-path';
+      result.dataSpaceReadback = 'DATASPACE_BT2020_PQ_LIMITED';
+      await result.backend.configure(pq);
+      expect(result.backend.observe().dataSpaceRequested, 'pq-itu');
+      expect(result.backend.observe().dataSpacePath, 'new-pq-path');
+      expect(result.backend.observe().dataSpaceReadback,
+          'DATASPACE_BT2020_PQ_LIMITED');
+      expect(result.dataSpaceApplyCount, 2);
+    });
+
     test('non-neutral user gamma is preserved', () async {
       final result = _harness();
       result.player.properties['gamma'] = '1.25';
@@ -672,6 +713,9 @@ class _Harness {
   late final AndroidHdrBackend backend;
   late final FakeArmAtoms atoms;
   String? dataSpaceRequested;
+  String? dataSpacePath;
+  String? dataSpaceReadback;
+  int dataSpaceApplyCount = 0;
 }
 
 Future<void> _expectNoGamma(HdrOpenPlan plan) async {
@@ -714,12 +758,13 @@ _Harness _harness({
     ),
     applyDataSpace: (_, transfer) async {
       harness.dataSpaceRequested = transfer;
+      harness.dataSpaceApplyCount++;
       // LG setter path: accepted without readback (the evidence-pinned
       // API24 extension), matching the device behavior this contract pins.
       return {
         'applied': dataSpaceSucceeds,
-        'path': 'ext:$dataSpaceExtId',
-        'readback': null,
+        'path': harness.dataSpacePath ?? 'ext:$dataSpaceExtId',
+        'readback': harness.dataSpaceReadback,
       };
     },
   );
