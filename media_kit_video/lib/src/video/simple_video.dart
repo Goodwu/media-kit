@@ -20,6 +20,7 @@ class SimpleVideo extends StatefulWidget {
     this.fill = const Color(0xFF000000),
     required this.controller,
     this.aspectRatio,
+    this.fit,
     this.filterQuality = FilterQuality.low,
     this.viewport,
   }) : assert(aspectRatio == null || aspectRatio > 0);
@@ -27,6 +28,9 @@ class SimpleVideo extends StatefulWidget {
   final Color fill;
   final VideoController controller;
   final double? aspectRatio;
+  /// Optional fit override for callers that manage a separate viewport.
+  /// When omitted, preserve the legacy viewport/non-viewport defaults.
+  final BoxFit? fit;
   final FilterQuality filterQuality;
   /// On-screen slot for native 1:1 layout; the renderer fits within this slot.
   final Size? viewport;
@@ -109,7 +113,7 @@ class SimpleVideoState extends State<SimpleVideo> {
                 devicePixelRatio: MediaQuery.devicePixelRatioOf(context),
                 aspectRatio: widget.aspectRatio,
               );
-        final fit = useViewport ? BoxFit.contain : BoxFit.fill;
+        final fit = widget.fit ?? (useViewport ? BoxFit.contain : BoxFit.fill);
         final visible = (_width ?? 0) > 0 && (_height ?? 0) > 0;
         return SizedBox(
           width: size.width,

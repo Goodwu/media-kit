@@ -9,6 +9,8 @@ import 'package:flutter/widgets.dart';
 import 'package:media_kit_video/src/video/video.dart';
 import 'package:media_kit_video/src/subtitle/subtitle_view.dart';
 
+const _aspectRatioNotSet = Object();
+
 /// {@template video_view_parameters}
 ///
 /// VideoViewParameters
@@ -49,7 +51,7 @@ class VideoViewParameters {
     BoxFit? fit,
     Color? fill,
     Alignment? alignment,
-    double? aspectRatio,
+    Object? aspectRatio = _aspectRatioNotSet,
     FilterQuality? filterQuality,
     /* VideoControlsBuilder? */ dynamic controls,
     bool? pauseUponEnteringBackgroundMode,
@@ -65,7 +67,11 @@ class VideoViewParameters {
       fit: fit ?? this.fit,
       fill: fill ?? this.fill,
       alignment: alignment ?? this.alignment,
-      aspectRatio: aspectRatio ?? this.aspectRatio,
+      aspectRatio: identical(aspectRatio, _aspectRatioNotSet)
+          ? this.aspectRatio
+          : aspectRatio == null
+              ? null
+              : (aspectRatio as num).toDouble(),
       filterQuality: filterQuality ?? this.filterQuality,
       controls: controls ?? this.controls,
       subtitleViewConfiguration:

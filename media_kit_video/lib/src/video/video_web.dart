@@ -10,12 +10,13 @@ import 'package:web/web.dart';
 import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:media_kit_video/media_kit_video.dart';
-
 import 'package:media_kit_video/media_kit_video_controls/media_kit_video_controls.dart'
     as media_kit_video_controls;
 import 'package:media_kit_video/src/utils/dispose_safe_notifer.dart';
 
 import 'package:media_kit_video/src/utils/wakelock.dart';
+
+const _aspectRatioNotSet = Object();
 
 /// {@template video}
 ///
@@ -187,7 +188,7 @@ class VideoState extends State<Video> with WidgetsBindingObserver {
     BoxFit? fit,
     Color? fill,
     Alignment? alignment,
-    double? aspectRatio,
+    Object? aspectRatio = _aspectRatioNotSet,
     FilterQuality? filterQuality,
     /* VideoControlsBuilder? */ dynamic controls,
     SubtitleViewConfiguration? subtitleViewConfiguration,
@@ -200,7 +201,11 @@ class VideoState extends State<Video> with WidgetsBindingObserver {
       fit: fit,
       fill: fill,
       alignment: alignment,
-      aspectRatio: aspectRatio,
+      aspectRatio: identical(aspectRatio, _aspectRatioNotSet)
+          ? videoViewParametersNotifier.value.aspectRatio
+          : aspectRatio == null
+              ? null
+              : (aspectRatio as num).toDouble(),
       filterQuality: filterQuality,
       controls: controls,
       subtitleViewConfiguration: subtitleViewConfiguration,
