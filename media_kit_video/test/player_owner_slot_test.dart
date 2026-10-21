@@ -190,24 +190,38 @@ void main() {
     expect(attempts, 2);
   });
 
-  test('a conflicting retirement cannot replace outstanding cleanup debt',
+  test('distinct retirements preserve FIFO debts and original disposers',
       () async {
     final slot = PlayerOwnerSlot();
-    final owner = Object();
-    var attempts = 0;
-    var wrongOwnerDisposed = false;
+    final a = Object(), b = Object();
+    final order = <String>[];
+    var releaseA = false, releaseB = false;
+    var wrongDisposerCalls = 0;
     await expectLater(slot.transition((tx) async {
       try {
-        await tx.retire(owner, () async {
-          attempts++;
-          if (attempts == 1) throw StateError('retry');
+        await tx.retire(a, () async {
+          order.add('a');
+          if (!releaseA) throw StateError('a blocked');
         });
       } catch (_) {}
-      await tx.retire(Object(), () async => wrongOwnerDisposed = true);
+      await tx.retire(b, () async {
+        order.add('b');
+        if (!releaseB) throw StateError('b blocked');
+      });
     }), throwsStateError);
-    expect(wrongOwnerDisposed, isFalse);
-    await slot.transition((tx) async {});
-    expect(attempts, 2);
-    expect(wrongOwnerDisposed, isFalse);
+    expect(order, ['a', 'a']);
+    releaseA = true;
+    await expectLater(
+        slot.retire(b, () async => wrongDisposerCalls++), throwsStateError);
+    expect(order, ['a', 'a', 'a', 'b']);
+    var successorRan = false;
+    await expectLater(
+        slot.transition((_) async => successorRan = true), throwsStateError);
+    expect(successorRan, isFalse);
+    releaseB = true;
+    await slot.transition((_) async => successorRan = true);
+    expect(successorRan, isTrue);
+    expect(order, ['a', 'a', 'a', 'b', 'b', 'b']);
+    expect(wrongDisposerCalls, 0);
   });
 }
