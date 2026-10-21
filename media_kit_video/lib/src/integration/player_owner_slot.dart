@@ -8,8 +8,7 @@
 class PlayerOwnerSlot {
   Future<void> _tail = Future<void>.value();
   final _released = Expando<bool>();
-  Object? _retiredOwner;
-  Future<void> Function()? _disposeRetiredOwner;
+  final _retirements = <({Object owner, Future<void> Function() dispose})>[];
 
   /// Retries outstanding cleanup before admitting a new owner transition.
   /// A failed release keeps its owner and blocks the callback until a later
@@ -17,7 +16,7 @@ class PlayerOwnerSlot {
   Future<T> transition<T>(
       Future<T> Function(PlayerOwnerTransition transition) operation) {
     return _enqueue(() async {
-      await _drainRetiredOwner();
+      await _drainRetiredOwners();
       final transition = PlayerOwnerTransition._(this);
       try {
         final result = await operation(transition);
@@ -35,13 +34,11 @@ class PlayerOwnerSlot {
   }
 
   /// Queues retirement from outside a transition (for example on view close).
-  /// Repeating a failed retirement retries that same pending owner once, rather
-  /// than first draining it and then disposing it a second time.
+  /// Its queued job registers the owner before retrying earlier cleanup, so a
+  /// failed earlier release cannot discard this debt. Distinct owners retain
+  /// FIFO order; duplicates retain the first disposer and are released once.
   Future<void> retire(Object owner, Future<void> Function() dispose) {
-    return _enqueue(() async {
-      await _drainRetiredOwner();
-      await _retire(owner, dispose);
-    });
+    return _enqueue(() => _retire(owner, dispose));
   }
 
   Future<T> _enqueue<T>(Future<T> Function() operation) {
@@ -51,25 +48,20 @@ class PlayerOwnerSlot {
   }
 
   Future<void> _retire(Object owner, Future<void> Function() dispose) async {
-    if (_released[owner] == true) return;
-    if (_retiredOwner != null && !identical(_retiredOwner, owner)) {
-      throw StateError('A previous player owner is still awaiting disposal');
+    if (_released[owner] != true &&
+        !_retirements.any((entry) => identical(entry.owner, owner))) {
+      _retirements.add((owner: owner, dispose: dispose));
     }
-    if (_retiredOwner == null) {
-      _retiredOwner = owner;
-      _disposeRetiredOwner = dispose;
-    }
-    await _drainRetiredOwner();
+    await _drainRetiredOwners();
   }
 
-  Future<void> _drainRetiredOwner() async {
-    final owner = _retiredOwner;
-    final dispose = _disposeRetiredOwner;
-    if (owner == null || dispose == null) return;
-    await dispose();
-    _released[owner] = true;
-    _retiredOwner = null;
-    _disposeRetiredOwner = null;
+  Future<void> _drainRetiredOwners() async {
+    while (_retirements.isNotEmpty) {
+      final entry = _retirements.first;
+      await entry.dispose();
+      _released[entry.owner] = true;
+      _retirements.removeAt(0);
+    }
   }
 }
 
