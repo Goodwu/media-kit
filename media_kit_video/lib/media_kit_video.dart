@@ -47,3 +47,4 @@ export 'src/routing/video_route_option_review.dart';
 // Explicit application integration; ordinary Player calls are not intercepted.
 export 'src/integration/routed_video_playback.dart';
 export 'src/integration/routed_simple_video.dart';
+export 'src/integration/player_owner_slot.dart';
