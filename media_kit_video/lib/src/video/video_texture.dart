@@ -24,6 +24,8 @@ import 'package:media_kit_video/src/video/platform_view_video.dart';
 import 'package:media_kit_video/src/video/native_surface_viewport.dart';
 import 'android_output_presentation.dart';
 
+const _aspectRatioNotSet = Object();
+
 /// {@template video}
 ///
 /// Video
@@ -215,7 +217,7 @@ class VideoState extends State<Video> with WidgetsBindingObserver {
     BoxFit? fit,
     Color? fill,
     Alignment? alignment,
-    double? aspectRatio,
+    Object? aspectRatio = _aspectRatioNotSet,
     FilterQuality? filterQuality,
     VideoControlsBuilder? controls,
     SubtitleViewConfiguration? subtitleViewConfiguration,
@@ -228,7 +230,11 @@ class VideoState extends State<Video> with WidgetsBindingObserver {
       fit: fit,
       fill: fill,
       alignment: alignment,
-      aspectRatio: aspectRatio,
+      aspectRatio: identical(aspectRatio, _aspectRatioNotSet)
+          ? videoViewParametersNotifier.value.aspectRatio
+          : aspectRatio == null
+              ? null
+              : (aspectRatio as num).toDouble(),
       filterQuality: filterQuality,
       controls: controls,
       subtitleViewConfiguration: subtitleViewConfiguration,
@@ -552,8 +558,19 @@ class VideoState extends State<Video> with WidgetsBindingObserver {
                                 return const SizedBox.shrink();
                               })();
                             }
+                            final hdrGpuPlatformView = Platform.isAndroid &&
+                                notifier
+                                    .configuration.android.usePlatformView &&
+                                notifier.configuration.vo == 'gpu-next' &&
+                                (notifier.configuration.android.surfaceTransfer
+                                        ?.isNotEmpty ??
+                                    false);
+                            final layoutFit = hdrGpuPlatformView &&
+                                    videoViewParameters.fit == BoxFit.fill
+                                ? BoxFit.cover
+                                : videoViewParameters.fit;
                             _reportTextureLayout(context, viewportConstraints,
-                                videoViewParameters.fit, notifier);
+                                layoutFit, notifier);
                             Widget fitLegacyOutput(Widget child) => FittedBox(
                                   fit: videoViewParameters.fit,
                                   alignment: videoViewParameters.alignment,
@@ -574,60 +591,103 @@ class VideoState extends State<Video> with WidgetsBindingObserver {
                                   viewportConstraints.hasBoundedHeight
                                       ? viewportConstraints.maxHeight
                                       : videoViewParameters.height ?? 1.0;
-                              final hdrPlatformView =
-                                  notifier.configuration.vo == 'gpu-next' &&
-                                      (notifier.configuration.android
-                                              .surfaceTransfer?.isNotEmpty ??
-                                          false);
-                              return fitLegacyOutput(StreamBuilder<VideoParams>(
-                                stream: hdrPlatformView
-                                    ? widget
-                                        .controller.player.stream.videoParams
-                                    : null,
+                              return StreamBuilder<VideoParams>(
+                                stream:
+                                    widget.controller.player.stream.videoParams,
                                 builder: (context, snapshot) {
-                                  final aspect = snapshot.data?.aspect ??
-                                      widget.controller.player.state.videoParams
-                                          .aspect;
-                                  final fittedHeight = hdrPlatformView &&
-                                          aspect != null &&
+                                  final params = snapshot.data ??
+                                      widget
+                                          .controller.player.state.videoParams;
+                                  final aspect = params.aspect;
+                                  final dpr =
+                                      MediaQuery.devicePixelRatioOf(context);
+                                  final rawWidth = params.dw;
+                                  final rawHeight = params.dh;
+                                  final rotate = params.rotate ?? 0;
+                                  final hasDisplaySize = rawWidth != null &&
+                                      rawHeight != null &&
+                                      rawWidth > 0 &&
+                                      rawHeight > 0;
+                                  final sourceWidth = hasDisplaySize
+                                      ? ((rotate == 90 || rotate == 270)
+                                          ? rawHeight
+                                          : rawWidth)
+                                      : null;
+                                  final sourceHeight = hasDisplaySize
+                                      ? ((rotate == 90 || rotate == 270)
+                                          ? rawWidth
+                                          : rawHeight)
+                                      : null;
+                                  final validAspect = aspect != null &&
                                           aspect.isFinite &&
                                           aspect > 0
-                                      ? width / aspect
-                                      : height;
+                                      ? aspect
+                                      : width / height;
+                                  final sourceSize = sourceWidth != null &&
+                                          sourceHeight != null
+                                      ? Size(
+                                          sourceWidth / dpr, sourceHeight / dpr)
+                                      : Size(width, width / validAspect);
+                                  final surfaceRect = fittedNativeSurfaceRect(
+                                    sourceSize: sourceSize,
+                                    viewportSize: Size(width, height),
+                                    fit: videoViewParameters.fit,
+                                    alignment: videoViewParameters.alignment,
+                                    aspectRatio:
+                                        videoViewParameters.aspectRatio,
+                                  );
+                                  if (surfaceRect == null) {
+                                    return const SizedBox.shrink();
+                                  }
+                                  // mediacodec_embed is also a native PlatformView
+                                  // (including Dolby Vision / HDR10 direct output).
+                                  // Its bounds must follow fit just like gpu-next.
+                                  // Platform views do not inherit Flutter
+                                  // transforms, so lay out the fitted bounds
+                                  // directly and clip cover-mode overflow.
                                   return SizedBox(
                                     width: width,
-                                    height: fittedHeight,
-                                    child: PlatformViewVideo(
-                                      key: ValueKey(
-                                        'android-platform-view-${notifier.nativeHandle}-${notifier.nativeSurfaceGeneration}',
+                                    height: height,
+                                    child: ClipRect(
+                                      child: Stack(
+                                        fit: StackFit.expand,
+                                        children: [
+                                          Positioned.fromRect(
+                                            rect: surfaceRect,
+                                            child: PlatformViewVideo(
+                                              key: ValueKey(
+                                                'android-platform-view-${notifier.nativeHandle}-${notifier.nativeSurfaceGeneration}',
+                                              ),
+                                              handle: notifier.nativeHandle!,
+                                              width: surfaceRect.width.ceil(),
+                                              height: surfaceRect.height.ceil(),
+                                              useHCPP: notifier.configuration
+                                                  .android.useHCPP,
+                                              generation: notifier
+                                                  .nativeSurfaceGeneration,
+                                              androidSurfaceTransfer: notifier
+                                                  .configuration
+                                                  .android
+                                                  .surfaceTransfer,
+                                              lgExperimentOwnerToken: notifier
+                                                  .configuration
+                                                  .android
+                                                  .lgExperimentOwnerToken,
+                                              managedYuvCarrier: notifier
+                                                  .configuration
+                                                  .android
+                                                  .managedYuvCarrier,
+                                              androidSurfacePixelFormat:
+                                                  notifier.configuration.android
+                                                      .surfacePixelFormat,
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                      handle: notifier.nativeHandle!,
-                                      width: width.ceil(),
-                                      height: fittedHeight.ceil(),
-                                      useHCPP: notifier
-                                          .configuration.android.useHCPP,
-                                      generation:
-                                          notifier.nativeSurfaceGeneration,
-                                      androidSurfaceTransfer: notifier
-                                          .configuration
-                                          .android
-                                          .surfaceTransfer,
-                                      lgExperimentOwnerToken: notifier
-                                          .configuration
-                                          .android
-                                          .lgExperimentOwnerToken,
-                                      managedYuvCarrier: notifier
-                                          .configuration
-                                          .android
-                                          .managedYuvCarrier,
-                                      androidSurfacePixelFormat: notifier
-                                          .configuration
-                                          .android
-                                          .surfacePixelFormat,
                                     ),
                                   );
                                 },
-                              ));
+                              );
                             }
                             return ValueListenableBuilder<bool>(
                               valueListenable:
