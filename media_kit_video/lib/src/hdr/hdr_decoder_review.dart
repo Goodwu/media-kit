@@ -154,6 +154,18 @@ Future<HdrDecoderOpenedEntry> captureDecoderOpenUnderLock({
       return HdrDecoderOpenedEntry(before, entry);
     });
 
+class _ReviewWorkResult<T> {
+  const _ReviewWorkResult.value(this.value)
+      : error = null,
+        stackTrace = null;
+  const _ReviewWorkResult.error(this.error, this.stackTrace) : value = null;
+  final T? value;
+  final Object? error;
+  final StackTrace? stackTrace;
+}
+
+const _reviewPollTick = Object();
+
 /// All asynchronous waits use one monotonic budget. Endpoint equality detects
 /// observable changes; it cannot prove the absence of ABA between native reads.
 /// The scalar frame properties are sampled directly, rather than promoting a
@@ -176,8 +188,10 @@ Future<HdrReviewFacts> gatherDecoderReviewFacts({
   Duration budget = const Duration(seconds: 20),
   Duration Function()? monotonicNow,
   Future<void> Function(Duration) delay = Future<void>.delayed,
+  Duration cancellationPollInterval = const Duration(milliseconds: 20),
 }) async {
   final stopwatch = Stopwatch()..start();
+  final wallClock = Stopwatch()..start();
   final now = monotonicNow ?? (() => stopwatch.elapsed);
   final started = now();
   // Bounded diagnostics state (HDR review layer): the monotonic wait-phase
@@ -223,26 +237,66 @@ Future<HdrReviewFacts> gatherDecoderReviewFacts({
       if (!isCurrent()) {
         throw const HdrDecoderReviewFailure('Superseded decoder sample');
       }
-      final result = budget - (now() - started);
+      final elapsed = now() - started;
+      final wallElapsed = wallClock.elapsed;
+      final result = budget - (elapsed > wallElapsed ? elapsed : wallElapsed);
       if (result <= Duration.zero) throw HdrDecoderReviewTimeout();
       return result;
     }
 
     Future<T> bounded<T>(Future<T> Function() operation) async {
       final left = remaining();
+      final pending = operation();
       try {
-        final result = await operation().timeout(left);
+        final result = await pending.timeout(left);
         remaining();
         return result;
       } on TimeoutException {
+        // Future.timeout stops waiting; it cannot stop a native property read.
+        // Keep the Player lock until that exact read has actually settled.
+        try {
+          await pending;
+        } catch (_) {
+          // Preserve cancellation/timeout as the review result.
+        }
+        if (!isCurrent()) {
+          throw const HdrDecoderReviewFailure('Superseded decoder sample');
+        }
         throw HdrDecoderReviewTimeout();
+      }
+    }
+
+    Future<T> passiveWait<T>(Future<T> future) async {
+      final result = Completer<_ReviewWorkResult<T>>();
+      future.then<void>(
+        (value) => result.complete(_ReviewWorkResult<T>.value(value)),
+        onError: (Object error, StackTrace stack) =>
+            result.complete(_ReviewWorkResult<T>.error(error, stack)),
+      );
+      while (true) {
+        remaining();
+        final tick = Completer<void>();
+        final timer = Timer(cancellationPollInterval, tick.complete);
+        await Future.any<Object>([
+          result.future,
+          tick.future.then<Object>((_) => _reviewPollTick),
+        ]);
+        timer.cancel();
+        if (result.isCompleted) {
+          final completed = await result.future;
+          if (completed.error != null) {
+            Error.throwWithStackTrace(completed.error!, completed.stackTrace!);
+          }
+          remaining();
+          return completed.value as T;
+        }
       }
     }
 
     Future<String> read(String property) =>
         bounded(() => readProperty(property));
-    final loaded = await bounded(
-        () => waitForFileLoadedEntry(playlistEntryId, openedAfterEpoch));
+    final loaded = await passiveWait(
+        waitForFileLoadedEntry(playlistEntryId, openedAfterEpoch));
     loadedMs = (now() - started).inMilliseconds;
     phase = 'loadedEpochCheck';
     if (loaded.epoch != openedAfterEpoch + 1 ||
@@ -253,8 +307,11 @@ Future<HdrReviewFacts> gatherDecoderReviewFacts({
     Future<void> identity() async {
       phase = 'identity';
       remaining();
-      if (fileLoadedEpoch() != loaded.epoch ||
-          await read('path') != mediaUri ||
+      if (fileLoadedEpoch() != loaded.epoch) {
+        identityState = 'failed';
+        throw const HdrDecoderReviewFailure('Current source identity differs');
+      }
+      if (await read('path') != mediaUri ||
           await read('playlist/0/id') != playlistEntryId.toString() ||
           await read('playlist/0/filename') != mediaUri ||
           fileLoadedEpoch() != loaded.epoch) {
@@ -320,30 +377,61 @@ Future<HdrReviewFacts> gatherDecoderReviewFacts({
     while (true) {
       iterations++;
       bValues = null; // single-sample contract: no B half is ever taken.
-      final values = await bounded(() => lock.synchronized(() async {
-            phase = 'admission';
-            remaining(); // A late lock admission must perform no reads.
-            await identity();
-            final sample = await endpoint();
-            // Post-sampling source identity (kept): a superseded or drifted
-            // source can never be carried into facts.
-            phase = 'identityAfter';
-            await identity();
-            // Per-sample safety on the settled sample before it can become
-            // facts: a malformed configuration or an active native-DV
-            // component must fail the review regardless of settling.
-            final raw = sample['android-mediacodec-info']!;
-            final config = AndroidMediaCodecConfiguration.parse(raw);
-            if (raw.isNotEmpty && config == null) {
-              throw const HdrDecoderReviewFailure(
-                  'Malformed MediaCodec info');
-            }
-            if (config?.nativeDvActive == true) {
-              throw const HdrDecoderReviewFailure(
-                  'Native DV requires its owned review consumer');
-            }
-            return sample;
-          }));
+      var admitted = false;
+      final lockWork = lock.synchronized(() async {
+        admitted = true;
+        phase = 'admission';
+        remaining(); // A late lock admission must perform no reads.
+        await identity();
+        final sample = await endpoint();
+        // Post-sampling source identity (kept): a superseded or drifted
+        // source can never be carried into facts.
+        phase = 'identityAfter';
+        await identity();
+        // Per-sample safety on the settled sample before it can become
+        // facts: a malformed configuration or an active native-DV
+        // component must fail the review regardless of settling.
+        final raw = sample['android-mediacodec-info']!;
+        final config = AndroidMediaCodecConfiguration.parse(raw);
+        if (raw.isNotEmpty && config == null) {
+          throw const HdrDecoderReviewFailure('Malformed MediaCodec info');
+        }
+        if (config?.nativeDvActive == true) {
+          throw const HdrDecoderReviewFailure(
+              'Native DV requires its owned review consumer');
+        }
+        return sample;
+      });
+      final observedLockWork =
+          lockWork.then<_ReviewWorkResult<Map<String, String>>>(
+        _ReviewWorkResult<Map<String, String>>.value,
+        onError: (Object error, StackTrace stack) =>
+            _ReviewWorkResult<Map<String, String>>.error(error, stack),
+      );
+      _ReviewWorkResult<Map<String, String>>? lockResult;
+      while (lockResult == null) {
+        try {
+          remaining();
+        } on Object {
+          if (admitted) await observedLockWork;
+          rethrow;
+        }
+        final tick = Completer<void>();
+        final timer = Timer(cancellationPollInterval, tick.complete);
+        final outcome = await Future.any<Object>([
+          observedLockWork,
+          tick.future.then<Object>((_) => _reviewPollTick),
+        ]);
+        timer.cancel();
+        if (outcome is _ReviewWorkResult<Map<String, String>>) {
+          lockResult = outcome;
+        }
+      }
+      if (lockResult.error != null) {
+        Error.throwWithStackTrace(lockResult.error!, lockResult.stackTrace!);
+      }
+      remaining();
+      final values = lockResult.value!;
       final complete = values['hwdec-current']!.isNotEmpty &&
           values['video-params/pixelformat']!.isNotEmpty &&
           values['video-params/gamma']!.isNotEmpty &&
@@ -416,7 +504,7 @@ Future<HdrReviewFacts> gatherDecoderReviewFacts({
       }
       previousSample = values;
       phase = 'settleDelay';
-      await bounded(() => delay(settleInterval));
+      await passiveWait(delay(settleInterval));
     }
   } on HdrDecoderReviewFailure catch (error) {
     emitReview(

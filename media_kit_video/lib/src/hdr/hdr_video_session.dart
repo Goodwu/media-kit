@@ -271,6 +271,7 @@ class HdrVideoSession {
           controllerConfiguration: _configuration,
           surfacePixelFormatOverride: _surfaceFormatOverride,
           onNativeDvOptionDiagnostic: onNativeDvOptionDiagnostic,
+          reviewIsCurrent: _reviewIsCurrent,
         );
     _outputResources = outputResources ??
         (_backend is AndroidHdrBackend
@@ -938,6 +939,9 @@ class HdrVideoSession {
 
   int _generationOf(HdrOpenPlan plan) =>
       _planGenerations[plan] ?? (throw const OpenSuperseded());
+
+  bool _reviewIsCurrent(HdrOpenPlan plan) =>
+      _generationOf(plan) == _serial && !_disposed;
 
   HdrRoutePrediction _planNextAttempt({
     required EffectiveVideoRouteOptions options,
@@ -1779,6 +1783,12 @@ class HdrVideoSession {
     _controller.dispose();
     _report.dispose();
   }
+}
+
+/// Test access without adding a member to the session's instance interface.
+extension HdrVideoSessionReviewTesting on HdrVideoSession {
+  @visibleForTesting
+  bool reviewIsCurrentForTesting(HdrOpenPlan plan) => _reviewIsCurrent(plan);
 }
 
 class HdrSessionDisposalFailure implements Exception {

@@ -84,6 +84,118 @@ void main() {
         () => validateDecoderObservation(route(vo: 'mediacodec_embed'), facts),
         returnsNormally);
   });
+  test('pending file-loaded wait cancels cooperatively', () async {
+    final s = Sample();
+    final entered = Completer<void>();
+    final release = Completer<FileLoadedRecord>();
+    s.onLoaded = (id, epoch) {
+      entered.complete();
+      return release.future;
+    };
+    final review = s.gather();
+    await entered.future;
+    s.current = false;
+    await expectLater(review, throwsA(isA<HdrDecoderReviewFailure>()));
+    release.complete(FileLoadedRecord(4, 7));
+  });
+
+  test('cancelled lock admission does not read when lock later opens',
+      () async {
+    final s = Sample();
+    final entered = Completer<void>();
+    final release = Completer<void>();
+    final holder = s.lock.synchronized(() async {
+      entered.complete();
+      await release.future;
+    });
+    await entered.future;
+    final review = s.gather();
+    await Future<void>.delayed(const Duration(milliseconds: 25));
+    s.current = false;
+    await expectLater(review, throwsA(isA<HdrDecoderReviewFailure>()));
+    release.complete();
+    await holder;
+    await Future<void>.delayed(const Duration(milliseconds: 25));
+    expect(s.reads, isEmpty);
+  });
+
+  test('cancellation drains active native read before returning', () async {
+    final s = Sample();
+    final entered = Completer<void>();
+    final release = Completer<String>();
+    s.onRead = (property) {
+      if (property == 'path') {
+        entered.complete();
+        return release.future;
+      }
+      return Future.value(s.props[property] ?? '');
+    };
+    final review = s.gather();
+    await entered.future;
+    s.current = false;
+    var finished = false;
+    unawaited(review.then<void>((_) => finished = true,
+        onError: (Object _, StackTrace __) => finished = true));
+    await Future<void>.delayed(const Duration(milliseconds: 40));
+    expect(finished, isFalse);
+    release.complete('test://same');
+    await expectLater(review, throwsA(isA<HdrDecoderReviewFailure>()));
+    expect(s.reads, ['path']);
+  });
+
+  test('ordinary review budget still times out while file-loaded is pending',
+      () async {
+    final s = Sample();
+    final never = Completer<FileLoadedRecord>();
+    await expectLater(
+      gatherDecoderReviewFacts(
+        lock: s.lock,
+        mediaUri: 'test://same',
+        readProperty: s.read,
+        waitForFileLoadedEntry: (_, __) => never.future,
+        playlistEntryId: 7,
+        openedAfterEpoch: 3,
+        fileLoadedEpoch: () => s.epoch,
+        isCurrent: () => true,
+        budget: const Duration(milliseconds: 60),
+      ),
+      throwsA(isA<HdrDecoderReviewTimeout>()),
+    );
+    never.complete(FileLoadedRecord(4, 7));
+  });
+  test('active native read drains past budget after cancellation', () async {
+    final s = Sample();
+    final entered = Completer<void>();
+    final release = Completer<String>();
+    s.onRead = (property) {
+      if (property == 'path') {
+        entered.complete();
+        return release.future;
+      }
+      return Future.value(s.props[property] ?? '');
+    };
+    final review = gatherDecoderReviewFacts(
+      lock: s.lock,
+      mediaUri: 'test://same',
+      readProperty: s.read,
+      waitForFileLoadedEntry: (_, epoch) async => FileLoadedRecord(epoch + 1, 7),
+      playlistEntryId: 7,
+      openedAfterEpoch: 3,
+      fileLoadedEpoch: () => s.epoch,
+      isCurrent: () => s.current,
+      budget: const Duration(milliseconds: 60),
+    );
+    await entered.future;
+    s.current = false;
+    var finished = false;
+    unawaited(review.then<void>((_) => finished = true,
+        onError: (Object _, StackTrace __) => finished = true));
+    await Future<void>.delayed(const Duration(milliseconds: 100));
+    expect(finished, isFalse);
+    release.complete('test://same');
+    await expectLater(review, throwsA(isA<HdrDecoderReviewFailure>()));
+    expect(s.reads, ['path']);
+  });
   test('unknown name does not reject an unnamed default decoder', () async {
     final s = Sample();
     s.props['current-tracks/video/decoder'] = '';
@@ -657,11 +769,41 @@ void main() {
   });
   test('late property completion performs no more reads', () async {
     final s = Sample();
+    final entered = Completer<void>();
     final pending = Completer<String>();
-    s.onRead = (_) => pending.future;
-    await expectLater(s.gather(budget: const Duration(milliseconds: 20)),
-        throwsA(isA<HdrDecoderReviewTimeout>()));
-    pending.complete('test://same');
+    s.onRead = (_) {
+      if (!entered.isCompleted) entered.complete();
+      return pending.future;
+    };
+    final review = s.gather(budget: const Duration(milliseconds: 20));
+    var reviewFinished = false;
+    Object? reviewError;
+    final observedReview = review.then<void>(
+      (_) => reviewFinished = true,
+      onError: (Object error, StackTrace _) {
+        reviewFinished = true;
+        reviewError = error;
+      },
+    );
+    await entered.future;
+    var followingTaskEntered = false;
+    final followingTask = s.lock.synchronized(() async {
+      followingTaskEntered = true;
+    });
+    try {
+      await Future<void>.delayed(const Duration(milliseconds: 40));
+      expect(reviewFinished, isFalse);
+      expect(followingTaskEntered, isFalse);
+      expect(s.reads, ['path']);
+    } finally {
+      // A logical timeout cannot release the lock ahead of this native read.
+      pending.complete('test://same');
+    }
+    await expectLater(review, throwsA(isA<HdrDecoderReviewTimeout>()));
+    await observedReview;
+    await followingTask;
+    expect(reviewError, isA<HdrDecoderReviewTimeout>());
+    expect(followingTaskEntered, isTrue);
     await pumpEventQueue();
     expect(s.reads, ['path']);
   });
@@ -715,6 +857,32 @@ void main() {
     expect(own.playlistEntryId, 12);
     final s = Sample()..epoch = 5;
     await expectLater(s.gather(), throwsA(isA<HdrDecoderReviewFailure>()));
+  });
+  test('superseded open capture reads no identity after open', () async {
+    final lock = Lock();
+    var current = true;
+    final entered = Completer<void>();
+    final release = Completer<void>();
+    final reads = <String>[];
+    final opened = captureDecoderOpenUnderLock(
+      lock: lock,
+      mediaUri: 'test://same',
+      fileLoadedEpoch: () => 1,
+      openWithoutLock: () async {
+        entered.complete();
+        await release.future;
+      },
+      readProperty: (property) async {
+        reads.add(property);
+        return '';
+      },
+      isCurrent: () => current,
+    );
+    await entered.future;
+    current = false;
+    release.complete();
+    await expectLater(opened, throwsA(isA<HdrDecoderReviewFailure>()));
+    expect(reads, isEmpty);
   });
 
   test('embed value domain accepts the P1-A observed shape', () async {

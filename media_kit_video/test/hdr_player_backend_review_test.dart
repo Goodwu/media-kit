@@ -130,6 +130,30 @@ void main() {
     await session.dispose();
   });
 
+  test('session review generation invalidates a prior open', () async {
+    final backend = _GatheringBackend(
+      readProperty: reader(),
+      latestVideoParams: paramsAfterFirstQuery(),
+      waitForFileLoadedEntry: fileLoadedNext,
+    );
+    final session = HdrVideoSession.forTesting(
+      player: null,
+      capabilitiesProvider: () async => caps(),
+      positionProvider: () => Duration.zero,
+      isAndroid: true,
+      backend: backend,
+    );
+
+    await session.open(Media('test://media'), hint: p84);
+    final priorPlan = backend.plans.single;
+    expect(session.reviewIsCurrentForTesting(priorPlan), isTrue);
+
+    await session.open(Media('test://media'), hint: p84);
+    expect(session.reviewIsCurrentForTesting(priorPlan), isFalse);
+    expect(session.reviewIsCurrentForTesting(backend.plans.last), isTrue);
+    await session.dispose();
+  });
+
   test('params poll timeout returns the facts as observed (videoParams null)',
       () async {
     final facts = await AndroidHdrBackend.gatherReviewFacts(
@@ -236,6 +260,7 @@ class _GatheringBackend implements HdrOpenBackend<HdrOpenPlan> {
       waitForFileLoadedEntry;
 
   final opened = <_Opened>[];
+  final plans = <HdrOpenPlan>[];
   int reviewFactsCalls = 0;
   int _openSerial = 0;
 
@@ -264,6 +289,7 @@ class _GatheringBackend implements HdrOpenBackend<HdrOpenPlan> {
     required bool play,
   }) async {
     _openSerial++;
+    plans.add(plan);
     opened.add(_Opened(plan.route, _openSerial));
   }
 

@@ -46,6 +46,7 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
     VideoControllerConfiguration controllerConfiguration =
         const VideoControllerConfiguration(),
     void Function(HdrNativeDvOptionDiagnostic)? onNativeDvOptionDiagnostic,
+    bool Function(HdrOpenPlan)? reviewIsCurrent,
     Future<Map<String, Object?>?> Function(int handle, String transfer)?
         applyDataSpace,
   }) : _applyDataSpace = applyDataSpace ??
@@ -54,6 +55,7 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
                   handle: handle,
                   transfer: transfer,
                 )) {
+    this.reviewIsCurrent = reviewIsCurrent ?? ((_) => true);
     managedYuvCarrier = controllerConfiguration.android.managedYuvCarrier;
     this.yuvWindowArm = yuvWindowArm ??
         HdrYuvWindowArm(
@@ -82,6 +84,7 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
   final Player player;
   final HdrOutputSlot<VideoController> outputSlot;
   final String surfacePixelFormatOverride;
+  late final bool Function(HdrOpenPlan) reviewIsCurrent;
 
   /// W1 managed YUV-carrier mode: the platform view's Surface is registered
   /// and armed Java-side before the surface event; the Dart arm holds only
@@ -894,9 +897,10 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
           openWithoutLock: () =>
               player.open(playable, play: play, synchronized: false),
           readProperty: player.getPropertyAsync,
-          isCurrent: () => _ordinaryReviewSerial == reviewSerial,
+          isCurrent: () =>
+              _ordinaryReviewSerial == reviewSerial && reviewIsCurrent(plan),
         );
-        if (_ordinaryReviewSerial != reviewSerial) {
+        if (_ordinaryReviewSerial != reviewSerial || !reviewIsCurrent(plan)) {
           throw const HdrDecoderReviewFailure('Superseded ordinary open');
         }
         _openFileLoadedEpoch = entry.openedAfterEpoch;
@@ -980,9 +984,10 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
       playlistEntryId: entryId,
       openedAfterEpoch: before,
       fileLoadedEpoch: () => player.fileLoadedEpoch,
-      isCurrent: () => _ordinaryReviewSerial == reviewSerial,
+      isCurrent: () =>
+          _ordinaryReviewSerial == reviewSerial && reviewIsCurrent(plan),
     );
-    if (_ordinaryReviewSerial != reviewSerial) {
+    if (_ordinaryReviewSerial != reviewSerial || !reviewIsCurrent(plan)) {
       throw const HdrDecoderReviewFailure('Superseded decoder result');
     }
     _lastHwdecCurrent = facts.hwdecCurrent;
