@@ -119,7 +119,8 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
   /// `@media-kit-p84-base`.
   static const String _dvRpuFilter = '@media-kit-dv-base';
 
-  Future<void> _setOwned(String name, String value) async {
+  Future<void> _setOwned(String name, String value,
+      {bool numericReadback = false}) async {
     if (!_originalProperties.containsKey(name)) {
       final original = await player.getPropertyAsync(name);
       if (original.isEmpty) {
@@ -130,7 +131,12 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
     _ownedProperties.add(name);
     await player.setPropertyStrict(name, value);
     final actual = await player.getPropertyAsync(name);
-    if (actual != value) {
+    final bool matches = actual == value ||
+        (numericReadback &&
+            double.tryParse(actual) != null &&
+            double.tryParse(value) != null &&
+            double.parse(actual) == double.parse(value));
+    if (!matches) {
       throw StateError('$name rejected: requested=$value actual=$actual');
     }
   }
@@ -642,10 +648,37 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
       // panel) then interpret as absolute PQ luminance — bright areas
       // roughly double overexposed. Applying the HLG->PQ conversion here.
       await _setOwned('target-trc', 'pq');
-      // The HLG source is mastered against a 1000-nit reference: pin the
-      // inverse-OOTF peak so the conversion stays colorimetric instead of
-      // resolving the target peak from the PQ container's nominal peak.
+      // Pin the destination peak used by HLG conversion instead of resolving
+      // it from the PQ container's nominal peak. This is a rendering target;
+      // it does not assert the source mastering peak or measured panel nits.
       await _setOwned('target-peak', HdrYuvPresentationContract.targetPeak);
+      final ext = plan.capabilities.dataSpaceExt;
+      final bool supportsLgYuvPq = ext != null &&
+          ext.id == 'lg-pq' &&
+          ext.applicable &&
+          ext.pqPresentation?.yuvWindow == true &&
+          ext.setterOnlyTransfers.contains(route.surfaceTransfer);
+      if (plan.source.transfer == 'hlg' &&
+          route.strategy == HdrStrategy.baseLayerConvert &&
+          supportsLgYuvPq) {
+        // A small midtone lift for the validated LG HLG-to-PQ route. The
+        // neutral gamma is the only value this presentation adjustment owns;
+        // a caller's non-neutral gamma remains intact.
+        if (!_ownedProperties.contains('gamma')) {
+          final String originalGamma = await player.getPropertyAsync('gamma');
+          if (originalGamma.isEmpty) {
+            throw StateError('Cannot capture original value of gamma');
+          }
+          // Gamma can be user-adjusted between HDR sessions. Unlike the
+          // generic cache retained for other route properties, recapture it
+          // whenever this presentation does not currently own the value.
+          _originalProperties['gamma'] = originalGamma;
+        }
+        final String originalGamma = _originalProperties['gamma']!;
+        if (double.tryParse(originalGamma) == 0) {
+          await _setOwned('gamma', '3', numericReadback: true);
+        }
+      }
     }
     if (route.topology == HdrTopology.platformView) {
       final output = await outputSlot.current!.platform.future;

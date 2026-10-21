@@ -116,11 +116,121 @@ void main() {
       expect(result.player.properties['video-output-levels'], 'full');
       expect(result.player.properties['target-trc'], 'pq');
       expect(result.player.properties['target-peak'], '1000');
+      expect(result.player.properties['gamma'], '3.000000');
       expect(result.dataSpaceRequested, 'pq-itu');
+      await result.backend.configure(_issuedPlan(_yuvRoute()));
+      expect(result.player.properties['gamma'], '3.000000');
       await result.backend.resetOwnedConfiguration();
       expect(result.player.properties['video-output-levels'], 'auto');
       expect(result.player.properties['target-trc'], 'sdr');
       expect(result.player.properties['target-peak'], 'auto');
+      expect(result.player.properties['gamma'], '0.000000');
+    });
+
+    test('non-neutral user gamma is preserved', () async {
+      final result = _harness();
+      result.player.properties['gamma'] = '1.25';
+      final plan = _issuedPlan(_yuvRoute());
+      await result.backend.prepareOutput(plan);
+      await result.backend.configure(plan);
+      expect(result.player.properties['gamma'], '1.25');
+      await result.backend.resetOwnedConfiguration();
+      expect(result.player.properties['gamma'], '1.25');
+    });
+
+    test('gamma lift is limited to HLG base-layer conversion on LG YUV PQ',
+        () async {
+      final nonHlg = _issuedPlan(_yuvRoute()).copyWith(
+        source: const HdrSourceDescriptor(codec: 'hevc', transfer: 'pq'),
+      );
+      await _expectNoGamma(nonHlg);
+    });
+
+    test('gamma lift requires the applicable LG YUV PQ extension', () async {
+      final plan = _issuedPlan(_yuvRoute()).copyWith(
+        capabilities: HdrCapabilities(
+          sdkInt: 24,
+          displayHdrTypes: const {2, 3},
+          hevcDecoders: const [],
+          dolbyVisionDecoders: const [],
+          p5PipelineAvailable: true,
+          dataSpaceBridgeLoaded: true,
+          dataSpaceExt: const HdrDataSpaceExtInfo(
+            id: 'other-pq',
+            applicable: true,
+            pqPresentation:
+                HdrPqPresentation(rgbSurface: false, yuvWindow: true),
+            setterOnlyTransfers: <String>{'pq-itu'},
+            yuvWindowArmApi: 1,
+          ),
+        ),
+      );
+      await _expectNoGamma(plan);
+    });
+
+    test('gamma lift is limited to base-layer conversion', () async {
+      final plan = _issuedPlan(
+        _yuvRoute().surrogate(strategy: HdrStrategy.toneMapSdr),
+      );
+      await _expectNoGamma(plan);
+    });
+
+    test('gamma readback rejection fails configuration', () async {
+      final result = _harness();
+      result.player.rejectedProperties.add('gamma');
+      final plan = _issuedPlan(_yuvRoute());
+      await result.backend.prepareOutput(plan);
+      await expectLater(
+        result.backend.configure(plan),
+        throwsA(isA<StateError>().having(
+          (error) => error.message,
+          'message',
+          contains('gamma rejected'),
+        )),
+      );
+      result.player.rejectedProperties.remove('gamma');
+      await result.backend.resetOwnedConfiguration();
+      expect(result.player.properties['gamma'], '0.000000');
+    });
+
+    test('later configuration failure restores the applied gamma', () async {
+      final result = _harness(dataSpaceSucceeds: false);
+      final plan = _issuedPlan(_yuvRoute());
+      await result.backend.prepareOutput(plan);
+      await expectLater(
+        result.backend.configure(plan),
+        throwsA(isA<HdrDataSpaceApplyException>()),
+      );
+      expect(result.player.properties['gamma'], '3.000000');
+      await result.backend.resetOwnedConfiguration();
+      expect(result.player.properties['gamma'], '0.000000');
+    });
+
+    test('gamma is recaptured after reset when a new session is neutral',
+        () async {
+      final result = _harness();
+      final plan = _issuedPlan(_yuvRoute());
+      await result.backend.prepareOutput(plan);
+      await result.backend.configure(plan);
+      await result.backend.resetOwnedConfiguration();
+      expect(result.player.properties['gamma'], '0.000000');
+      await result.backend.configure(plan);
+      expect(result.player.properties['gamma'], '3.000000');
+      await result.backend.resetOwnedConfiguration();
+      expect(result.player.properties['gamma'], '0.000000');
+    });
+
+    test('gamma is recaptured after reset when the user changed it', () async {
+      final result = _harness();
+      final plan = _issuedPlan(_yuvRoute());
+      await result.backend.prepareOutput(plan);
+      await result.backend.configure(plan);
+      await result.backend.resetOwnedConfiguration();
+      result.player.properties['gamma'] = '1.25';
+      await result.backend.configure(plan);
+      expect(result.player.properties['gamma'], '1.25');
+      await result.backend.resetOwnedConfiguration();
+      expect(result.player.properties['gamma'], '1.25');
     });
 
     test('euv17 pq-request route issues the owned quad write', () async {
@@ -160,6 +270,7 @@ void main() {
           .surrogate(hwdec: 'mediacodec-copy', surfaceTransfer: 'pq'));
       expect(
           result.player.properties.containsKey('video-output-levels'), isFalse);
+      expect(result.player.properties.containsKey('gamma'), isFalse);
       expect(result.dataSpaceRequested, 'pq');
     });
   });
@@ -496,6 +607,7 @@ extension _RouteSurrogate on HdrRoute {
   /// full copyWith on the immutable route value. [offscreenTransfer] has no
   /// fallback so a null argument explicitly resets the field.
   HdrRoute surrogate({
+    HdrStrategy? strategy,
     String? hwdec,
     String? vo,
     HdrTopology? topology,
@@ -505,7 +617,7 @@ extension _RouteSurrogate on HdrRoute {
     String? targetTrc,
   }) =>
       HdrRoute(
-        strategy: strategy,
+        strategy: strategy ?? this.strategy,
         presentation: presentation,
         outputTransfer: outputTransfer,
         appliesDynamicMetadata: appliesDynamicMetadata,
@@ -562,7 +674,18 @@ class _Harness {
   String? dataSpaceRequested;
 }
 
-_Harness _harness() {
+Future<void> _expectNoGamma(HdrOpenPlan plan) async {
+  final result =
+      _harness(dataSpaceExtId: plan.capabilities.dataSpaceExt?.id ?? 'lg-pq');
+  await result.backend.prepareOutput(plan);
+  await result.backend.configure(plan);
+  expect(result.player.properties.containsKey('gamma'), isFalse);
+}
+
+_Harness _harness({
+  String dataSpaceExtId = 'lg-pq',
+  bool dataSpaceSucceeds = true,
+}) {
   final player = _FakePlayer();
   final harness = _Harness(player);
   // The backend constructor owns a real arm manager by default now. This
@@ -593,7 +716,11 @@ _Harness _harness() {
       harness.dataSpaceRequested = transfer;
       // LG setter path: accepted without readback (the evidence-pinned
       // API24 extension), matching the device behavior this contract pins.
-      return {'applied': true, 'path': 'ext:lg-pq', 'readback': null};
+      return {
+        'applied': dataSpaceSucceeds,
+        'path': 'ext:$dataSpaceExtId',
+        'readback': null,
+      };
     },
   );
   return harness;
@@ -666,6 +793,7 @@ class _FakePlayer implements Player {
   _FakePlayer() : properties = {'hwdec': 'no', 'hwdec-software-fallback': '3'};
 
   final Map<String, String> properties;
+  final Set<String> rejectedProperties = <String>{};
   final Lock _lock = Lock();
   final PlayerStream _stream = PlayerStream(
       Stream.empty(),
@@ -721,13 +849,18 @@ class _FakePlayer implements Player {
                                 ? 'auto'
                                 : name == 'target-colorspace-hint'
                                     ? 'no'
-                                    : '');
+                                    : name == 'gamma'
+                                        ? '0.000000'
+                                        : '');
   }
 
   @override
   Future<void> setPropertyStrict(String name, String value,
       {bool waitForInitialization = true}) async {
-    properties[name] = value;
+    if (rejectedProperties.contains(name)) return;
+    properties[name] = name == 'gamma' && double.tryParse(value) != null
+        ? double.parse(value).toStringAsFixed(6)
+        : value;
   }
 
   @override
