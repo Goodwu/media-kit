@@ -4,6 +4,10 @@
 
 **路径映射（2026-10-05 起）**：`archives/experiments/` 已整体迁移至独立仓库 **`~/src/media-kit-experiments`**（实验记录/证据/交接/索引全量归档）。本文件及 conversations 中所有 `archives/experiments/` 前缀路径均映射到该库根目录。**主库历史已剥离该路径（2026-10-06，main 51ef66cc→ee28accd，树零变化）**：剥离前提交历史不再在主库，查备份仓 `Goodwu/media-kit-history-archive`（分支 `pre-strip-20261006`）；旧哈希换算用 `~/src/media-kit-build/history-strip-20261006/commit-map.json`。
 
+## ROUTED-REPORT-EXPOSURE-20261023
+
+- **implemented / 工作区未提交**：`RoutedVideoPlayback` 新增只读 `report`（`ValueListenable<HdrOutputReport>` 转发视图：跨 session 生命周期连续，session 退役/dispose 重置为 const 默认，`_reportView` 永不 dispose，闭包捕获局部 session 不读已 dispose notifier），服务 PiliPlus 播放诊断条（PiliPlus 仓 PLAYBACK-DIAG-BAR-20261022）；`media_kit_video.dart` 补 export `hdr_decoder_review.dart`（HdrDecoderObservation）。纯加法，`_reportChanged`/`ready`/`errors`/`verifiedSourceHint` 零改动。测试：routed_video_playback_test 14/14（+3 转发/重置/替换用例）、piliplus 两契约 9/9；全量 1231 过/9 skip/1 既有失败（hdr_operation_diagnostics default backend，stash 干净树复现与本改动无关）。V1 review 可交付。已知边界：非 Android `RoutedVideoPlayback.create` 也建无 session binding → report 恒默认值（App 侧诊断条显示 route:pending，纯诊断可接受）。
+
 ## VIDEO-ROUTE-CAPABILITIES-DARWIN-WINDOWS-20261022
 
 - **implemented / 已本地提交（未推送）；Windows/darwin 实机构建待验**：为 `VideoRouteCapabilities.Get` 补 darwin 与 Windows 显示适配器（此前仅 Android 有）。macOS：NSScreen EDR 余量 >1.0 → display resolved + hdrTypes `[2,3]`（10.15+，macOS 不做 DV 直通；低版本 queryUnavailable）；iOS：无公开显示 HDR 查询 → queryUnavailable（Dart 按未知、不置灰）；Windows：DISPLAYCONFIG Advanced Color enabled → resolved + `[2,3]`，查询失败 → queryUnavailable。三端 sources 均回显 `censusComplete=false`（显式 unknown，不模拟支持）。no-libs stub 变体不加通道（MissingPlugin → unavailable → 不置灰，维持兜底语义）。

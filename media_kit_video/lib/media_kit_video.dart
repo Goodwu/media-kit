@@ -14,6 +14,7 @@ export 'package:media_kit_video/src/hdr/hdr_output_policy.dart';
 // HDR output session (Android HDR auto-output, Phase 1): session
 // orchestration, planning types, capability query, reports and events.
 export 'package:media_kit_video/src/hdr/hdr_capabilities.dart';
+export 'package:media_kit_video/src/hdr/hdr_decoder_review.dart';
 export 'package:media_kit_video/src/hdr/hdr_open_plan.dart';
 export 'package:media_kit_video/src/hdr/hdr_output_diagnostics.dart';
 export 'package:media_kit_video/src/hdr/hdr_output_event.dart';
