@@ -194,9 +194,58 @@ public class MediaKitVideoPlugin: NSObject, FlutterPlugin {
       handleEnterNativeFullscreenMethodCall(call.arguments, result)
     case "Utils.ExitNativeFullscreen":
       handleExitNativeFullscreenMethodCall(call.arguments, result)
+    case "VideoRouteCapabilities.Get":
+      handleRouteCapabilitiesMethodCall(call.arguments, result)
     default:
       result(FlutterMethodNotImplemented)
     }
+  }
+
+  /// Read-only device capability query (schema 1), the darwin display
+  /// adapter: macOS reports panel HDR facts (EDR headroom > 1.0 ⇒ HDR panel,
+  /// reported as HDR10(PQ)=2 + HLG=3; no DV passthrough on macOS); iOS has
+  /// no public display HDR query, so the display stays unresolved and the
+  /// Dart side treats it as unknown (never "no HDR"). Source specs echo
+  /// back censusComplete=false — explicit unknown, never simulated support.
+  private func handleRouteCapabilitiesMethodCall(
+    _ arguments: Any?,
+    result: @escaping FlutterResult
+  ) {
+    var display: [String: Any] = ["status": "queryUnavailable"]
+    #if os(macOS)
+      if #available(macOS 10.15, *) {
+        let hdr = NSScreen.screens.contains {
+          $0.maximumExtendedDynamicRangeColorComponentValue > 1.0
+        }
+        display = [
+          "status": "resolved",
+          "hdrTypes": hdr ? [2, 3] : [Int](),
+        ]
+      }
+    #endif
+
+    var sources: [[String: Any]] = []
+    if let args = arguments as? [String: Any],
+      let requested = args["sources"] as? [[String: Any]]
+    {
+      for spec in requested {
+        guard let key = spec["key"] as? String else { continue }
+        sources.append([
+          "key": key,
+          "censusComplete": false,
+          "reason": "notSupportedOnDarwinAdapter",
+          "decoders": [[String: Any]](),
+        ])
+      }
+    }
+
+    result([
+      "schema": 1,
+      "platform": "darwin",
+      "display": display,
+      "sources": sources,
+      "hdr": [String: Any](),
+    ])
   }
 
   private func handleNativeOutput(

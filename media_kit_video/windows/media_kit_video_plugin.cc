@@ -13,6 +13,110 @@
 
 namespace media_kit_video {
 
+namespace {
+
+// Windows display HDR (Advanced Color) state across active outputs.
+// Returns 1 = HDR active (HDR10(PQ)=2 + HLG=3; no DV passthrough),
+// 0 = no HDR on any active output, -1 = query unavailable.
+int QueryAdvancedColorHdrState() {
+  UINT32 path_count = 0;
+  UINT32 mode_count = 0;
+  if (GetDisplayConfigBufferSizes(QDC_ONLY_ACTIVE_PATHS, &path_count,
+                                  &mode_count) != ERROR_SUCCESS ||
+      path_count == 0) {
+    return -1;
+  }
+  std::vector<DISPLAYCONFIG_PATH_INFO> paths(path_count);
+  std::vector<DISPLAYCONFIG_MODE_INFO> modes(mode_count);
+  if (QueryDisplayConfig(QDC_ONLY_ACTIVE_PATHS, &path_count, paths.data(),
+                         &mode_count, modes.data(), nullptr) != ERROR_SUCCESS) {
+    return -1;
+  }
+  for (const auto& path : paths) {
+    DISPLAYCONFIG_DEVICE_INFO_GET_ADVANCED_COLOR_INFO info = {};
+    info.header.type = DISPLAYCONFIG_DEVICE_INFO_GET_ADVANCED_COLOR_INFO;
+    info.header.size = sizeof(info);
+    info.header.adapterId = path.sourceInfo.adapterId;
+    info.header.id = path.sourceInfo.id;
+    if (DisplayConfigGetDeviceInfo(&info.header) == ERROR_SUCCESS &&
+        info.advancedColorEnabled) {
+      return 1;
+    }
+  }
+  return 0;
+}
+
+// Read-only device capability query result (schema 1), the Windows display
+// adapter: display HDR facts from Advanced Color; source specs echo back
+// censusComplete=false — explicit unknown, never simulated support.
+flutter::EncodableMap BuildRouteCapabilitiesResult(
+    const flutter::MethodCall<flutter::EncodableValue>& method_call) {
+  flutter::EncodableMap display;
+  const int hdr_state = QueryAdvancedColorHdrState();
+  if (hdr_state < 0) {
+    display[flutter::EncodableValue("status")] =
+        flutter::EncodableValue("queryUnavailable");
+  } else {
+    display[flutter::EncodableValue("status")] =
+        flutter::EncodableValue("resolved");
+    display[flutter::EncodableValue("hdrTypes")] =
+        hdr_state == 1
+            ? flutter::EncodableValue(std::vector<flutter::EncodableValue>{
+                  flutter::EncodableValue(2), flutter::EncodableValue(3)})
+            : flutter::EncodableValue(flutter::EncodableList{});
+  }
+
+  std::vector<flutter::EncodableValue> sources;
+  if (const auto* arguments = method_call.arguments()) {
+    if (const auto* args = std::get_if<flutter::EncodableMap>(arguments)) {
+      if (const auto it = args->find(flutter::EncodableValue("sources"));
+          it != args->end()) {
+        if (const auto* requested = std::get_if<flutter::EncodableList>(
+                &it->second)) {
+          for (const auto& spec : *requested) {
+            const auto* spec_map = std::get_if<flutter::EncodableMap>(&spec);
+            if (spec_map == nullptr) {
+              continue;
+            }
+            const auto key_it = spec_map->find(flutter::EncodableValue("key"));
+            if (key_it == spec_map->end()) {
+              continue;
+            }
+            const auto* key = std::get_if<std::string>(&key_it->second);
+            if (key == nullptr) {
+              continue;
+            }
+            flutter::EncodableMap entry;
+            entry[flutter::EncodableValue("key")] =
+                flutter::EncodableValue(*key);
+            entry[flutter::EncodableValue("censusComplete")] =
+                flutter::EncodableValue(false);
+            entry[flutter::EncodableValue("reason")] =
+                flutter::EncodableValue("notSupportedOnWindowsAdapter");
+            entry[flutter::EncodableValue("decoders")] =
+                flutter::EncodableValue(flutter::EncodableList{});
+            sources.emplace_back(flutter::EncodableValue(entry));
+          }
+        }
+      }
+    }
+  }
+
+  flutter::EncodableMap result;
+  result[flutter::EncodableValue("schema")] = flutter::EncodableValue(1);
+  result[flutter::EncodableValue("platform")] =
+      flutter::EncodableValue("windows");
+  result[flutter::EncodableValue("display")] =
+      flutter::EncodableValue(display);
+  result[flutter::EncodableValue("sources")] =
+      flutter::EncodableValue(flutter::EncodableList(std::move(sources)));
+  result[flutter::EncodableValue("hdr")] = flutter::EncodableValue(
+      flutter::EncodableMap{});
+  return result;
+}
+
+}  // namespace
+
 MediaKitVideoPlugin* MediaKitVideoPlugin::instance_ = nullptr;
 
 void MediaKitVideoPlugin::RegisterWithRegistrar(
@@ -232,6 +336,10 @@ void MediaKitVideoPlugin::HandleMethodCall(
         ::GetAncestor(registrar_->GetView()->GetNativeWindow(), GA_ROOT);
     Utils::ExitNativeFullscreen(window);
     result->Success(flutter::EncodableValue(std::monostate{}));
+  } else if (method_call.method_name().compare("VideoRouteCapabilities.Get") ==
+             0) {
+    result->Success(flutter::EncodableValue(
+        BuildRouteCapabilitiesResult(method_call)));
   } else {
     result->NotImplemented();
   }
