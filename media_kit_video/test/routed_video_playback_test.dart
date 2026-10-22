@@ -256,4 +256,71 @@ void main() {
     for (final session in sessions) { session.closeNotifiers(); }
   });
 
+  test('report view starts at the initial report and survives dispose', () async {
+    final player = TestPlayer();
+    final binding = RoutedVideoPlayback.forTesting(player);
+    expect(binding.report.value, const HdrOutputReport());
+    await binding.open(Media('test://legacy'), play: false);
+    // No HDR session on this path: the view keeps the initial report.
+    expect(binding.report.value, const HdrOutputReport());
+    await binding.play(); await binding.dispose();
+    // The view is never disposed itself and stays reset after closing.
+    expect(binding.report.value, const HdrOutputReport());
+    expect(player.calls.last, 'dispose');
+  });
+
+  test('report view forwards the mounted session report', () async {
+    final player = TestPlayer(), session = TestSession();
+    final binding = RoutedVideoPlayback.forTesting(player, session: session);
+    final seen = <HdrOutputReport>[];
+    void record() => seen.add(binding.report.value);
+    binding.report.addListener(record);
+    expect(binding.report.value.generation, 0);
+    final opening = binding.open(Media('test://a'));
+    await turn();
+    // The session published an unverified report for the new generation.
+    expect(binding.report.value.generation, 1);
+    expect(binding.report.value.verified, isFalse);
+    session.accept(0); await opening;
+    expect(binding.report.value.generation, 1);
+    expect(binding.report.value.verified, isTrue);
+    expect(seen.last.generation, 1);
+    expect(seen.last.verified, isTrue);
+    await binding.dispose();
+    expect(binding.report.value, const HdrOutputReport());
+    expect(seen.last, const HdrOutputReport());
+    binding.report.removeListener(record);
+    session.closeNotifiers();
+  });
+
+  test('report view resets on session retirement and follows the successor', () async {
+    final player = TestPlayer();
+    final sessions = <TestSession>[];
+    final binding = RoutedVideoPlayback.forTesting(player, sessionFactory: () {
+      final session = TestSession(); sessions.add(session); return session;
+    });
+    expect(binding.report.value, const HdrOutputReport());
+    final first = binding.open(Media('test://video'), play: false);
+    await turn();
+    expect(sessions.length, 1);
+    expect(binding.report.value.generation, 1);
+    expect(binding.report.value.verified, isFalse);
+    sessions.single.accept(0); await first;
+    expect(binding.report.value.verified, isTrue);
+    await binding.open(Media('test://audio'), video: false);
+    // Retirement resets the view: the old session's last report must not leak.
+    expect(binding.report.value, const HdrOutputReport());
+    final next = binding.open(Media('test://video2'), play: false);
+    await turn();
+    expect(sessions.length, 2);
+    // The successor's own fresh report is forwarded after the remount.
+    expect(binding.report.value.generation, 1);
+    expect(binding.report.value.verified, isFalse);
+    sessions.last.accept(0); await next;
+    expect(binding.report.value.verified, isTrue);
+    await binding.dispose();
+    expect(binding.report.value, const HdrOutputReport());
+    for (final session in sessions) { session.closeNotifiers(); }
+  });
+
 }

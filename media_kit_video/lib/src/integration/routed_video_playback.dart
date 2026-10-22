@@ -4,6 +4,7 @@ import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
 import 'package:media_kit/media_kit.dart';
 
+import '../hdr/hdr_output_report.dart';
 import '../hdr/hdr_source_descriptor.dart';
 import '../hdr/hdr_video_session.dart';
 import '../routing/video_route_options.dart';
@@ -25,6 +26,7 @@ class RoutedVideoPlayback {
       session.controller.addListener(_outputChanged);
       session.report.addListener(_reportChanged);
       _outputChanged();
+      _listenSessionReport(session);
     }
   }
 
@@ -65,9 +67,20 @@ class RoutedVideoPlayback {
   final _controller = ValueNotifier<VideoController?>(null);
   final _ready = ValueNotifier<bool>(false);
   final _errors = StreamController<Object>.broadcast();
+  // Long-lived forwarding view of the mounted session's report. Deliberately
+  // never disposed: application listeners may outlive this binding.
+  final _reportView = ValueNotifier<HdrOutputReport>(const HdrOutputReport());
+  void Function()? _reportForwarder;
   ValueListenable<VideoController?> get controller => _controller;
   ValueListenable<bool> get ready => _ready;
   Stream<Object> get errors => _errors.stream;
+
+  /// Read-only view of the mounted session's [HdrOutputReport], continuous
+  /// across session replacement: it resets to `const HdrOutputReport()` when
+  /// a session retires or this object is disposed, and immediately reflects
+  /// the successor's current report after a remount. The underlying notifier
+  /// is never disposed, so listeners may safely outlive [dispose].
+  ValueListenable<HdrOutputReport> get report => _reportView;
 
   /// The reviewed source description of the current generation's verified
   /// open, suitable as the caller-held [RoutedVideoPlayback.open] hint for a
@@ -105,6 +118,28 @@ class RoutedVideoPlayback {
 
   void _outputChanged() {
     if (!_closed) _controller.value = _session!.controller.value;
+  }
+
+  /// Forwards the mounted session's report into the long-lived [_reportView].
+  /// The forwarding closure captures its own session reference so it can
+  /// never read the report of a session that is no longer mounted (its
+  /// notifier is disposed once retirement completes).
+  void _listenSessionReport(HdrVideoSession session) {
+    void forward() => _reportView.value = session.report.value;
+    _reportForwarder = forward;
+    session.report.addListener(forward);
+    forward();
+  }
+
+  /// Detaches the forwarding listener and resets the view to the initial
+  /// report: a retired session's last value must not leak across the session
+  /// boundary. [_reportView] itself is never disposed.
+  void _unlistenSessionReport(HdrVideoSession session) {
+    final forward = _reportForwarder;
+    if (forward == null) return;
+    _reportForwarder = null;
+    session.report.removeListener(forward);
+    _reportView.value = const HdrOutputReport();
   }
 
   void _reportChanged() {
@@ -192,6 +227,7 @@ class RoutedVideoPlayback {
         if (!_retiringSession) {
           old.controller.removeListener(_outputChanged);
           old.report.removeListener(_reportChanged);
+          _unlistenSessionReport(old);
           _controller.value = null;
           _retiringSession = true;
         }
@@ -207,6 +243,7 @@ class RoutedVideoPlayback {
         _session = next;
         next.controller.addListener(_outputChanged);
         next.report.addListener(_reportChanged);
+        _listenSessionReport(next);
         _outputChanged();
       }
     });
@@ -276,6 +313,7 @@ class RoutedVideoPlayback {
       _controller.value = null;
       _session?.controller.removeListener(_outputChanged);
       _session?.report.removeListener(_reportChanged);
+      if (_session case final session?) _unlistenSessionReport(session);
     }
     final task = () async {
       // Invalidate a pending session open immediately; do not await its open
