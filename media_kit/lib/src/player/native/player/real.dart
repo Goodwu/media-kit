@@ -1,4 +1,5 @@
 import '../core/legacy_mpv.dart' show LegacyMpv;
+
 /// This file is a part of media_kit (https://github.com/media-kit/media-kit).
 ///
 /// Copyright © 2021 & onwards, Hitesh Kumar Saini <saini123hitesh@gmail.com>.
@@ -39,6 +40,7 @@ import 'package:media_kit/src/player/native/utils/android_asset_loader.dart';
 import 'package:media_kit/src/player/native/utils/android_helper.dart';
 import 'package:media_kit/src/player/native/utils/isolates.dart';
 import 'package:media_kit/src/player/native/utils/native_reference_holder.dart';
+import 'package:media_kit/src/player/native/utils/source_transition_gate.dart';
 import 'package:media_kit/src/player/native/utils/temp_file.dart';
 import 'package:media_kit/src/player/native/utils/windows_mta.dart';
 import 'package:media_kit/src/player/platform_player.dart';
@@ -83,7 +85,7 @@ class NativePlayer extends PlatformPlayer {
   static LegacyMpv get mpv => LegacyMpv.instance;
   static int get apiVersion => mpv.apiVersion;
   static void setHeader(LegacyMpv api, Pointer<generated.mpv_handle> handle,
-      {String? userAgent, String? referer}) =>
+          {String? userAgent, String? referer}) =>
       api.setHeader(handle, userAgent: userAgent, referer: referer);
 
   final LegacyMediaHeaders _legacyHttpHeaders = LegacyMediaHeaders();
@@ -91,8 +93,8 @@ class NativePlayer extends PlatformPlayer {
 
   /// Synchronous defaults captured by subsequent open/add calls, before they
   /// wait for a lock. Already queued entries are immutable. Per-media fields win.
-  void setMediaHeader({String? userAgent, String? referer,
-      Map<String, String>? headers}) {
+  void setMediaHeader(
+      {String? userAgent, String? referer, Map<String, String>? headers}) {
     if (disposed || isDisposing) throw StateError('Player is disposed');
     _legacyHttpHeaders.update(
         userAgent: userAgent, referer: referer, headers: headers);
@@ -103,17 +105,109 @@ class NativePlayer extends PlatformPlayer {
   String getProperty(String property) {
     if (disposed || isDisposing) throw StateError('Player is disposed');
     switch (property) {
-      case 'volume': return state.volume.toString();
-      case 'speed': return state.rate.toString();
-      case 'pause': return state.playing ? 'no' : 'yes';
-      case 'hwdec-current': return _legacyHwdecCurrent;
-      default: throw UnsupportedError('Use getPropertyAsync for $property');
+      case 'volume':
+        return state.volume.toString();
+      case 'speed':
+        return state.rate.toString();
+      case 'pause':
+        return state.playing ? 'no' : 'yes';
+      case 'hwdec-current':
+        return _legacyHwdecCurrent;
+      default:
+        throw UnsupportedError('Use getPropertyAsync for $property');
     }
   }
 
   static const bool _bufferingTraceEnabled =
       bool.fromEnvironment('MEDIA_KIT_BUFFER_TRACE');
+  static const bool _transportTraceEnabled =
+      bool.fromEnvironment('MEDIA_KIT_TRANSPORT_TRACE');
+  static const bool _startupTraceEnabled =
+      bool.fromEnvironment('MEDIA_KIT_STARTUP_TRACE');
+  static final RegExp _httpErrorStatusPattern =
+      RegExp(r'HTTP error ([45]\d\d)', caseSensitive: false);
+  static final RegExp _deadlineQueryPattern = RegExp(
+    r'(?:^|[?&;]|%3f|%26)deadline(?:=|%3d)(\d{10})(?=$|[&#;]|%26)',
+    caseSensitive: false,
+  );
   final Stopwatch _bufferingTraceClock = Stopwatch()..start();
+  int _transportTraceSequence = 0;
+  int _transportTraceClassifiedLogCount = 0;
+  final Map<int, String> _transportTraceCommands = <int, String>{};
+  final Map<int, String> _transportTraceProperties = <int, String>{};
+
+  int _beginTransportTrace(String operation, String detail) {
+    if (!_transportTraceEnabled) return 0;
+    final id = ++_transportTraceSequence;
+    _traceTransport(
+        operation, id, 'api-enter', '$detail ${_currentDeadlineSummary()}');
+    return id;
+  }
+
+  String _currentDeadlineSummary() {
+    try {
+      var count = 0;
+      int? minimumExpiresInSeconds;
+      final nowSeconds = DateTime.now().toUtc().millisecondsSinceEpoch ~/ 1000;
+      for (final media in current) {
+        for (final match in _deadlineQueryPattern.allMatches(media.uri)) {
+          final deadline = int.tryParse(match.group(1)!);
+          if (deadline == null) continue;
+          count++;
+          final remaining = deadline - nowSeconds;
+          if (minimumExpiresInSeconds == null ||
+              remaining < minimumExpiresInSeconds) {
+            minimumExpiresInSeconds = remaining;
+          }
+        }
+      }
+      return 'deadlineMatches=$count minimumExpiresInSeconds='
+          '${minimumExpiresInSeconds?.toString() ?? 'unknown'}';
+    } catch (_) {
+      // Keep optional diagnostics safe for malformed or changing playlists.
+      return 'deadlineMatches=unknown minimumExpiresInSeconds=unknown';
+    }
+  }
+
+  void _traceClassifiedMpvLog(String text) {
+    if (!_transportTraceEnabled || _transportTraceClassifiedLogCount >= 16) {
+      return;
+    }
+    String? kind;
+    String? status;
+    final httpError = _httpErrorStatusPattern.firstMatch(text);
+    if (httpError != null) {
+      kind = 'http-error';
+      status = httpError.group(1);
+    } else if (text.contains('Failed to flush codec')) {
+      kind = 'codec-flush';
+    } else if (text.contains('Error while decoding frame')) {
+      kind = 'decode';
+    }
+    if (kind == null) return;
+    _transportTraceClassifiedLogCount++;
+    _traceTransport('mpv-log', _transportTraceClassifiedLogCount, 'classified',
+        'kind=$kind${status == null ? '' : ' status=$status'}');
+  }
+
+  void _traceTransport(String operation, int id, String phase,
+      [String detail = '']) {
+    if (!_transportTraceEnabled) return;
+    print(
+      '[MediaKitTransportTrace] t=${_bufferingTraceClock.elapsedMicroseconds} '
+      'player=${identityHashCode(this)} op=$operation id=$id phase=$phase playing=${state.playing} '
+      'completed=${state.completed} positionMs=${state.position.inMilliseconds}'
+      ' bufferMs=${state.buffer.inMilliseconds}'
+      '${detail.isEmpty ? '' : ' $detail'}',
+    );
+  }
+
+  Future<void> _traceTransportCompletion(
+      String operation, int id, Future<void> result) {
+    if (!_transportTraceEnabled) return result;
+    return result
+        .whenComplete(() => _traceTransport(operation, id, 'api-exit'));
+  }
 
   void _traceBufferingProperty(String source, bool value) {
     if (!_bufferingTraceEnabled) return;
@@ -150,6 +244,25 @@ class NativePlayer extends PlatformPlayer {
   bool _mpvTerminated = false;
   bool _disposeInProgress = false;
   Future<void>? _disposeFuture;
+
+  /// Detached grace period + native handle destruction scheduled by
+  /// [dispose]. Awaits the historical 5s grace, mpv_terminate_destroy and
+  /// the post-termination callbacks.
+  Future<void>? _nativeDestruction;
+  (Object, StackTrace)? _nativeDestructionError;
+
+  /// Completes after the detached native destruction scheduled by a
+  /// completed [dispose]. Calling this before dispose reached its terminal
+  /// phase completes immediately (nothing is scheduled yet).
+  /// Rethrows the first native-destruction error, if any.
+  Future<void> get nativeDestructionComplete async {
+    final destruction = _nativeDestruction;
+    if (destruction != null) await destruction;
+    final failure = _nativeDestructionError;
+    if (failure != null) {
+      Error.throwWithStackTrace(failure.$1, failure.$2);
+    }
+  }
   bool _nativeReferenceRemovedForDispose = false;
   bool _playerStoppedForDispose = false;
 
@@ -222,7 +335,7 @@ class NativePlayer extends PlatformPlayer {
     }
     final outputLifecycle = this.outputLifecycle;
     // Close admission synchronously, before the first await or lock wait.
-    outputLifecycle?.onCloseOwnerAdmission?.call();
+    _sourceTransitions.closeAdmission(outputLifecycle?.onCloseOwnerAdmission);
     final existing = _disposeFuture;
     if (existing != null) return existing;
 
@@ -270,8 +383,8 @@ class NativePlayer extends PlatformPlayer {
         // Native ownership removal can fail; it must remain retryable while
         // the handle, streams and event pump are still alive. Never destroy a
         // handle still retained by an engine's wakeup owner registry.
-        final ownedWakeupDisposed =
-            await PlayerInitializer(mpvBindings).disposeOwnedWakeupCallback(ctx);
+        final ownedWakeupDisposed = await PlayerInitializer(mpvBindings)
+            .disposeOwnedWakeupCallback(ctx);
         if (!ownedWakeupDisposed) {
           // The isolate backend retains its historical request protocol; the
           // NativeCallable backend is already closed and drained here.
@@ -287,24 +400,37 @@ class NativePlayer extends PlatformPlayer {
           cleanupError = error;
           cleanupStack = stack;
         }
-        // Preserve the existing grace period. It is not used as a substitute
-        // for the owned event-pump drain above.
-        await Future.delayed(const Duration(seconds: 5));
-        try {
-          withWindowsMta(() => mpvBindings.mpv_terminate_destroy(ctx));
-          _mpvTerminated = true;
-        } catch (error, stack) {
-          cleanupError ??= error;
-          cleanupStack ??= stack;
-        }
-        if (_mpvTerminated) {
+        // The historical grace period before the native handle destruction
+        // ran on this future and added its full duration (5s) to every
+        // owner retirement — most visibly to each video switch. The
+        // owned event-pump drain above is the real barrier, so the grace
+        // sleep and the destruction now run detached from the caller's
+        // future. Await [nativeDestructionComplete] when the destroyed
+        // native context must be observed.
+        final nativeFuture = () async {
+          await Future.delayed(const Duration(seconds: 5));
+          // The detached destruction has no awaiting caller by design; keep
+          // its failures observable instead of silently swallowed (V2 P2).
           try {
-            await retryPostTerminationCallbacks();
+            withWindowsMta(() => mpvBindings.mpv_terminate_destroy(ctx));
+            _mpvTerminated = true;
           } catch (error, stack) {
-            cleanupError ??= error;
-            cleanupStack ??= stack;
+            _nativeDestructionError ??= (error, stack);
           }
-        }
+          if (_mpvTerminated) {
+            try {
+              await retryPostTerminationCallbacks();
+            } catch (error, stack) {
+              _nativeDestructionError ??= (error, stack);
+            }
+          }
+        }();
+        _nativeDestruction = nativeFuture;
+        unawaited(nativeFuture.then<void>((_) {}, onError: (Object e, StackTrace st) {
+          // Surface through the platform log; retry stays possible via the
+          // registered post-termination callbacks on the next dispose path.
+          print('[media_kit]: native destruction failure: $e\n$st');
+        }));
         if (cleanupError != null) {
           Error.throwWithStackTrace(cleanupError, cleanupStack!);
         }
@@ -317,7 +443,8 @@ class NativePlayer extends PlatformPlayer {
     }
 
     _disposeInProgress = true;
-    final future = synchronized ? lock.synchronized(function) : function();
+    final future = _sourceTransitions.schedule(
+        NativeSourceOperation.dispose, function, synchronized: synchronized);
     _disposeFuture = future;
     return future;
   }
@@ -345,16 +472,54 @@ class NativePlayer extends PlatformPlayer {
     Playable playable, {
     bool play = true,
     bool synchronized = true,
+  }) =>
+      _open(playable, play: play, synchronized: synchronized);
+
+  /// Opens one media entry without selecting any tracks, for container-only
+  /// source discovery. Per-file mpv backups restore the ordinary options when
+  /// this entry is replaced or stopped.
+  Future<void> openContainerProbe(
+    Playable playable, {
+    bool synchronized = true,
+    bool automaticSubtitles = true,
+  }) {
+    if (playable is! Media) {
+      throw ArgumentError.value(playable, 'playable',
+          'Container source discovery accepts exactly one Media entry');
+    }
+    return _open(playable,
+        play: false,
+        synchronized: synchronized,
+        containerProbe: true,
+        probeAutomaticSubtitles: automaticSubtitles);
+  }
+
+  Future<void> _open(
+    Playable playable, {
+    required bool play,
+    required bool synchronized,
+    bool containerProbe = false,
+    bool probeAutomaticSubtitles = true,
   }) {
     // Snapshot legacy per-entry options before yielding or taking the lock.
     final playlist = playable is Media
         ? <Media>[playable]
-        : playable is Playlist ? List<Media>.of(playable.medias) : <Media>[];
-    final index = playable is Media ? 0 : playable is Playlist ? playable.index : -1;
+        : playable is Playlist
+            ? List<Media>.of(playable.medias)
+            : <Media>[];
+    final index = playable is Media
+        ? 0
+        : playable is Playlist
+            ? playable.index
+            : -1;
     final mediaOptions = [
-      for (final media in playlist) LegacyMediaOptions.fromExtras(media.extras,
-          httpHeaders: _legacyHttpHeaders.resolve(media.httpHeaders),
-          start: media.start, end: media.end),
+      for (final media in playlist)
+        LegacyMediaOptions.fromExtras(media.extras,
+            httpHeaders: _legacyHttpHeaders.resolve(media.httpHeaders),
+            start: media.start,
+            end: media.end,
+            containerProbe: containerProbe,
+            probeAutomaticSubtitles: probeAutomaticSubtitles),
     ];
     Future<void> function() async {
       if (disposed) {
@@ -390,7 +555,8 @@ class NativePlayer extends PlatformPlayer {
       await _setPropertyFlag('pause', true);
 
       if (mediaOptions.any((options) => !options.isEmpty) ||
-          playlist.any((media) => media.uri.startsWith('fd://') ||
+          playlist.any((media) =>
+              media.uri.startsWith('fd://') ||
               media.uri.startsWith('edl://'))) {
         // Native playlist entries own the option scope. EDL is an opaque URI:
         // do not parse/rebuild it or lose the application's secondary stream.
@@ -435,11 +601,8 @@ class NativePlayer extends PlatformPlayer {
       await _setPropertyInt64('playlist-pos', index);
     }
 
-    if (synchronized) {
-      return lock.synchronized(function);
-    } else {
-      return function();
-    }
+    return _sourceTransitions.schedule(
+        NativeSourceOperation.open, function, synchronized: synchronized);
   }
 
   /// Stops the [Player].
@@ -559,17 +722,16 @@ class NativePlayer extends PlatformPlayer {
       }
     }
 
-    if (synchronized) {
-      return lock.synchronized(function);
-    } else {
-      return function();
-    }
+    return _sourceTransitions.schedule(
+        NativeSourceOperation.stop, function, synchronized: synchronized);
   }
 
   /// Starts playing the [Player].
   @override
   Future<void> play({bool synchronized = true}) {
+    final traceId = _beginTransportTrace('play', 'synchronized=$synchronized');
     Future<void> function() async {
+      _traceTransport('play', traceId, 'lock-acquired');
       if (disposed) {
         throw AssertionError('[Player] has been disposed');
       }
@@ -591,11 +753,9 @@ class NativePlayer extends PlatformPlayer {
       await _setPropertyFlag('pause', false);
     }
 
-    if (synchronized) {
-      return lock.synchronized(function);
-    } else {
-      return function();
-    }
+    final operation = _sourceTransitions.schedule(
+        NativeSourceOperation.play, function, synchronized: synchronized);
+    return _traceTransportCompletion('play', traceId, operation);
   }
 
   /// Pauses the [Player].
@@ -631,7 +791,10 @@ class NativePlayer extends PlatformPlayer {
     bool notify = true,
     bool synchronized = true,
   }) {
+    final traceId = _beginTransportTrace(
+        'playOrPause', 'synchronized=$synchronized notify=$notify');
     Future<void> function() async {
+      _traceTransport('playOrPause', traceId, 'lock-acquired');
       if (disposed) {
         throw AssertionError('[Player] has been disposed');
       }
@@ -659,11 +822,9 @@ class NativePlayer extends PlatformPlayer {
       await _command(['cycle', 'pause']);
     }
 
-    if (synchronized) {
-      return lock.synchronized(function);
-    } else {
-      return function();
-    }
+    final operation = _sourceTransitions.schedule(
+        NativeSourceOperation.playOrPause, function, synchronized: synchronized);
+    return _traceTransportCompletion('playOrPause', traceId, operation);
   }
 
   /// Appends a [Media] to the [Player]'s playlist.
@@ -671,7 +832,8 @@ class NativePlayer extends PlatformPlayer {
   Future<void> add(Media media, {bool synchronized = true}) {
     final options = LegacyMediaOptions.fromExtras(media.extras,
         httpHeaders: _legacyHttpHeaders.resolve(media.httpHeaders),
-        start: media.start, end: media.end);
+        start: media.start,
+        end: media.end);
     Future<void> function() async {
       if (disposed) {
         throw AssertionError('[Player] has been disposed');
@@ -690,15 +852,14 @@ class NativePlayer extends PlatformPlayer {
       }
       // ---------------------------------------------
 
-      await _command(options.appendArguments(media.uri,
-          apiVersion: mpvBindings.mpv_client_api_version()), strict: true);
+      await _command(
+          options.appendArguments(media.uri,
+              apiVersion: mpvBindings.mpv_client_api_version()),
+          strict: true);
     }
 
-    if (synchronized) {
-      return lock.synchronized(function);
-    } else {
-      return function();
-    }
+    return _sourceTransitions.schedule(
+        NativeSourceOperation.add, function, synchronized: synchronized);
   }
 
   /// Removes the [Media] at specified index from the [Player]'s playlist.
@@ -789,11 +950,8 @@ class NativePlayer extends PlatformPlayer {
       await _command(['playlist-remove', index.toString()]);
     }
 
-    if (synchronized) {
-      return lock.synchronized(function);
-    } else {
-      return function();
-    }
+    return _sourceTransitions.schedule(
+        NativeSourceOperation.remove, function, synchronized: synchronized);
   }
 
   /// Jumps to next [Media] in the [Player]'s playlist.
@@ -819,11 +977,8 @@ class NativePlayer extends PlatformPlayer {
       await _command(['playlist-next']);
     }
 
-    if (synchronized) {
-      return lock.synchronized(function);
-    } else {
-      return function();
-    }
+    return _sourceTransitions.schedule(
+        NativeSourceOperation.next, function, synchronized: synchronized);
   }
 
   /// Jumps to previous [Media] in the [Player]'s playlist.
@@ -849,11 +1004,8 @@ class NativePlayer extends PlatformPlayer {
       await _command(['playlist-prev']);
     }
 
-    if (synchronized) {
-      return lock.synchronized(function);
-    } else {
-      return function();
-    }
+    return _sourceTransitions.schedule(
+        NativeSourceOperation.previous, function, synchronized: synchronized);
   }
 
   /// Jumps to specified [Media]'s index in the [Player]'s playlist.
@@ -870,11 +1022,8 @@ class NativePlayer extends PlatformPlayer {
       await _setPropertyInt64('playlist-pos', index);
     }
 
-    if (synchronized) {
-      return lock.synchronized(function);
-    } else {
-      return function();
-    }
+    return _sourceTransitions.schedule(
+        NativeSourceOperation.jump, function, synchronized: synchronized);
   }
 
   /// Moves the playlist [Media] at [from], so that it takes the place of the [Media] [to].
@@ -909,17 +1058,17 @@ class NativePlayer extends PlatformPlayer {
       await _command(['playlist-move', from.toString(), to.toString()]);
     }
 
-    if (synchronized) {
-      return lock.synchronized(function);
-    } else {
-      return function();
-    }
+    return _sourceTransitions.schedule(
+        NativeSourceOperation.move, function, synchronized: synchronized);
   }
 
   /// Seeks the currently playing [Media] in the [Player] by specified [Duration].
   @override
   Future<void> seek(Duration duration, {bool synchronized = true}) {
+    final traceId = _beginTransportTrace('seek',
+        'targetMs=${duration.inMilliseconds} synchronized=$synchronized');
     Future<void> function() async {
+      _traceTransport('seek', traceId, 'lock-acquired');
       if (disposed) {
         throw AssertionError('[Player] has been disposed');
       }
@@ -941,11 +1090,9 @@ class NativePlayer extends PlatformPlayer {
       }
     }
 
-    if (synchronized) {
-      return lock.synchronized(function);
-    } else {
-      return function();
-    }
+    final operation = _sourceTransitions.schedule(
+        NativeSourceOperation.seek, function, synchronized: synchronized);
+    return _traceTransportCompletion('seek', traceId, operation);
   }
 
   /// Sets playlist mode.
@@ -986,11 +1133,8 @@ class NativePlayer extends PlatformPlayer {
       }
     }
 
-    if (synchronized) {
-      return lock.synchronized(function);
-    } else {
-      return function();
-    }
+    return _sourceTransitions.schedule(
+        NativeSourceOperation.setPlaylistMode, function, synchronized: synchronized);
   }
 
   /// Sets the playback volume of the [Player]. Defaults to `100.0`.
@@ -1156,11 +1300,8 @@ class NativePlayer extends PlatformPlayer {
       });
     }
 
-    if (synchronized) {
-      return lock.synchronized(function);
-    } else {
-      return function();
-    }
+    return _sourceTransitions.schedule(
+        NativeSourceOperation.setShuffle, function, synchronized: synchronized);
   }
 
   /// Sets the current [AudioDevice] for audio output.
@@ -1606,7 +1747,8 @@ class NativePlayer extends PlatformPlayer {
       // platform-thread surface work. On engines that run Dart on the
       // platform thread that deadlocks into an ANR, so serve the read from
       // the API isolate instead.
-      final value = await MpvApiIsolate.getPropertyString(ctx.address, property);
+      final value =
+          await MpvApiIsolate.getPropertyString(ctx.address, property);
       return value ?? '';
     }
     final name = property.toNativeUtf8();
@@ -1620,6 +1762,49 @@ class NativePlayer extends PlatformPlayer {
     }
 
     return "";
+  }
+
+  /// Reads several string properties from libmpv with one API-isolate
+  /// request. Source-consistent callers must still bracket the batch with
+  /// identity checks because mpv properties are sampled in sequence.
+  @override
+  Future<List<String>> getPropertiesAsync(
+    List<String> properties, {
+    bool waitForInitialization = true,
+  }) async {
+    if (disposed) {
+      throw AssertionError('[Player] has been disposed');
+    }
+    if (waitForInitialization) {
+      await waitForPlayerInitialization;
+      await waitForVideoControllerInitializationIfAttached;
+    }
+    if (configuration.async) {
+      final values = await MpvApiIsolate.getPropertyStrings(
+        ctx.address,
+        properties,
+      );
+      return [for (final value in values) value ?? ''];
+    }
+    final values = <String>[];
+    for (final property in properties) {
+      final name = property.toNativeUtf8();
+      try {
+        final value = mpvBindings.mpv_get_property_string(ctx, name.cast());
+        if (value == nullptr) {
+          values.add('');
+        } else {
+          try {
+            values.add(value.cast<Utf8>().toDartString());
+          } finally {
+            mpvBindings.mpv_free(value.cast());
+          }
+        }
+      } finally {
+        calloc.free(name);
+      }
+    }
+    return values;
   }
 
   /// Observes property for the internal libmpv instance of this [Player].
@@ -1717,17 +1902,28 @@ class NativePlayer extends PlatformPlayer {
   }
 
   Future<void> _handler(Pointer<generated.mpv_event> event) async {
+    if (_transportTraceEnabled &&
+        event.ref.event_id == generated.mpv_event_id.MPV_EVENT_END_FILE) {
+      final endFile = event.ref.data.cast<generated.mpv_event_end_file>().ref;
+      _traceTransport('end-file', 0, 'event',
+          'reason=${endFile.reason} error=${endFile.error}');
+    }
     if (event.ref.event_id == generated.mpv_event_id.MPV_EVENT_START_FILE ||
         event.ref.event_id == generated.mpv_event_id.MPV_EVENT_END_FILE) {
       _legacyHwdecCurrent = '';
     }
-    if (event.ref.event_id == generated.mpv_event_id.MPV_EVENT_PROPERTY_CHANGE) {
-      final observation = event.ref.data.cast<generated.mpv_event_property>().ref;
+    if (event.ref.event_id ==
+        generated.mpv_event_id.MPV_EVENT_PROPERTY_CHANGE) {
+      final observation =
+          event.ref.data.cast<generated.mpv_event_property>().ref;
       if (observation.name.cast<Utf8>().toDartString() == 'hwdec-current') {
-        final value = observation.format == generated.mpv_format.MPV_FORMAT_STRING &&
-            observation.data != nullptr
-            ? observation.data.cast<Pointer<Int8>>().value : nullptr.cast<Int8>();
-        _legacyHwdecCurrent = value == nullptr ? '' : value.cast<Utf8>().toDartString();
+        final value =
+            observation.format == generated.mpv_format.MPV_FORMAT_STRING &&
+                    observation.data != nullptr
+                ? observation.data.cast<Pointer<Int8>>().value
+                : nullptr.cast<Int8>();
+        _legacyHwdecCurrent =
+            value == nullptr ? '' : value.cast<Utf8>().toDartString();
       }
     }
 
@@ -1736,6 +1932,10 @@ class NativePlayer extends PlatformPlayer {
       final prop = event.ref.data.cast<generated.mpv_event_property>();
       if (prop.ref.name.cast<Utf8>().toDartString() == 'idle-active' &&
           prop.ref.format == generated.mpv_format.MPV_FORMAT_FLAG) {
+        if (_transportTraceEnabled) {
+          _traceTransport('property', 0, 'event',
+              'name=idle-active value=${prop.ref.data.cast<Int8>().value == 1}');
+        }
         await future;
         // The [Player] has entered the idle state; initialization is complete.
         if (!completer.isCompleted) {
@@ -1800,6 +2000,12 @@ class NativePlayer extends PlatformPlayer {
         print(
             'Warning: Received MPV_EVENT_SET_PROPERTY_REPLY with unregistered ID ${event.ref.reply_userdata}');
       } else {
+        final traceProperty =
+            _transportTraceProperties.remove(event.ref.reply_userdata);
+        if (traceProperty != null) {
+          _traceTransport('property', event.ref.reply_userdata, 'reply',
+              'name=$traceProperty code=${event.ref.error}');
+        }
         completer.complete(event.ref.error);
       }
     }
@@ -1809,6 +2015,12 @@ class NativePlayer extends PlatformPlayer {
         print(
             'Warning: Received MPV_EVENT_COMMAND_REPLY with unregistered ID ${event.ref.reply_userdata}');
       } else {
+        final traceCommand =
+            _transportTraceCommands.remove(event.ref.reply_userdata);
+        if (traceCommand != null) {
+          _traceTransport('command', event.ref.reply_userdata, 'reply',
+              'name=$traceCommand code=${event.ref.error}');
+        }
         completer.complete(event.ref.error);
       }
     }
@@ -2329,6 +2541,7 @@ class NativePlayer extends PlatformPlayer {
       if (prop.ref.name.cast<Utf8>().toDartString() == 'eof-reached' &&
           prop.ref.format == generated.mpv_format.MPV_FORMAT_FLAG) {
         final value = prop.ref.data.cast<Bool>().value;
+        _traceTransport('eof', 0, 'event', 'value=$value');
         if (value) {
           if (isPlayingStateChangeAllowed) {
             state = state.copyWith(
@@ -2444,7 +2657,8 @@ class NativePlayer extends PlatformPlayer {
               // Route through the API isolate (see [getProperty]).
               value = await MpvApiIsolate.getPropertyString(ctx.address, name);
             } else {
-              final data = mpvBindings.mpv_get_property_string(ctx, prop.ref.name);
+              final data =
+                  mpvBindings.mpv_get_property_string(ctx, prop.ref.name);
               if (data == nullptr) {
                 value = null;
               } else {
@@ -2473,6 +2687,12 @@ class NativePlayer extends PlatformPlayer {
       final prefix = eventLogMessage.prefix.cast<Utf8>().toDartString().trim();
       final level = eventLogMessage.level.cast<Utf8>().toDartString().trim();
       final text = eventLogMessage.text.cast<Utf8>().toDartString().trim();
+      final startupTiming =
+          _startupTraceEnabled && text.startsWith('MK_STARTUP_NATIVE ');
+      if (startupTiming) {
+        print(text);
+      }
+      _traceClassifiedMpvLog(text);
       if (!logController.isClosed) {
         logController.add(
           PlayerLog(
@@ -2483,7 +2703,7 @@ class NativePlayer extends PlatformPlayer {
         );
         // --------------------------------------------------
         // Emit error(s) based on the log messages.
-        if (level == 'error') {
+        if (level == 'error' && !startupTiming) {
           if (prefix == 'file') {
             // file:// not found.
             if (!errorController.isClosed) {
@@ -2525,6 +2745,7 @@ class NativePlayer extends PlatformPlayer {
     if (event.ref.event_id == generated.mpv_event_id.MPV_EVENT_HOOK) {
       final prop = event.ref.data.cast<generated.mpv_event_hook>();
       if (prop.ref.name.cast<Utf8>().toDartString() == 'on_load') {
+        _traceTransport('hook', 0, 'enter', 'name=on_load');
         // --------------------------------------------------
         for (final hook in onLoadHooks) {
           try {
@@ -2539,8 +2760,10 @@ class NativePlayer extends PlatformPlayer {
         // Never recover them from Media(uri) or a mutable current[index] here.
         // --------------------------------------------------
         await MpvApiIsolate.hookContinue(ctx.address, prop.ref.id);
+        _traceTransport('hook', 0, 'continue', 'name=on_load');
       }
       if (prop.ref.name.cast<Utf8>().toDartString() == 'on_unload') {
+        _traceTransport('hook', 0, 'enter', 'name=on_unload');
         // --------------------------------------------------
         for (final hook in onUnloadHooks) {
           try {
@@ -2555,6 +2778,7 @@ class NativePlayer extends PlatformPlayer {
         // must not clear another entry's request headers or playback interval.
         // --------------------------------------------------
         await MpvApiIsolate.hookContinue(ctx.address, prop.ref.id);
+        _traceTransport('hook', 0, 'continue', 'name=on_unload');
       }
     }
   }
@@ -2750,7 +2974,12 @@ class NativePlayer extends PlatformPlayer {
         MPVLogLevel.debug: 'debug',
         MPVLogLevel.trace: 'trace',
       };
-      final level = levels[configuration.logLevel];
+      final requestedLogLevel = _startupTraceEnabled
+          ? MPVLogLevel.v
+          : _transportTraceEnabled
+              ? MPVLogLevel.warn
+              : configuration.logLevel;
+      final level = levels[requestedLogLevel];
       if (level != null) {
         final min = level.toNativeUtf8();
         mpvBindings.mpv_request_log_messages(ctx, min.cast());
@@ -2772,7 +3001,8 @@ class NativePlayer extends PlatformPlayer {
   /// Adds an error to the [Player.stream.error].
   void _logError(int code, String? text) {
     if (code < 0 && !logController.isClosed) {
-      final message = mpvBindings.mpv_error_string(code).cast<Utf8>().toDartString();
+      final message =
+          mpvBindings.mpv_error_string(code).cast<Utf8>().toDartString();
       logController.add(
         PlayerLog(
           prefix: 'media_kit',
@@ -2789,6 +3019,12 @@ class NativePlayer extends PlatformPlayer {
 
   Future<void> _setProperty(String name, int format, Pointer<Void> data) async {
     final requestNumber = _asyncRequestNumber++;
+    final traceProperty =
+        _transportTraceEnabled && (name == 'pause' || name == 'playlist-pos');
+    if (traceProperty) {
+      _transportTraceProperties[requestNumber] = name;
+      _traceTransport('property', requestNumber, 'submit', 'name=$name');
+    }
     final completer = _setPropertyRequests[requestNumber] = Completer<int>();
     final namePtr = name.toNativeUtf8();
     if (configuration.async) {
@@ -2801,6 +3037,11 @@ class NativePlayer extends PlatformPlayer {
       );
       final text = '_setProperty($name, $format)';
       if (immediate < 0) {
+        if (traceProperty) {
+          _transportTraceProperties.remove(requestNumber);
+          _traceTransport('property', requestNumber, 'immediate-error',
+              'name=$name code=$immediate');
+        }
         // Sending failed.
         _logError(immediate, text);
         return;
@@ -2977,7 +3218,8 @@ class NativePlayer extends PlatformPlayer {
 
   void _throwIfMpvError(int result, String operation) {
     if (result >= 0) return;
-    final message = mpvBindings.mpv_error_string(result).cast<Utf8>().toDartString();
+    final message =
+        mpvBindings.mpv_error_string(result).cast<Utf8>().toDartString();
     throw StateError('$operation failed ($result): $message');
   }
 
@@ -2988,14 +3230,28 @@ class NativePlayer extends PlatformPlayer {
       for (int i = 0; i < args.length; i++) {
         (arr + i).value = pointers[i];
       }
+      final traceCommand = _transportTraceEnabled &&
+          (args.first == 'seek' || args.first == 'cycle');
       if (configuration.async) {
         final requestNumber = _asyncRequestNumber++;
+        if (traceCommand) {
+          _transportTraceCommands[requestNumber] = args.first;
+          _traceTransport(
+              'command', requestNumber, 'submit', 'name=${args.first}');
+        }
         final completer = _commandRequests[requestNumber] = Completer<int>();
         // Do not copy a signed URL or filter payload into a strict failure.
-        final text = strict ? 'mpv ${args.first}' : '_command(${args.join(', ')})';
+        final text =
+            strict ? 'mpv ${args.first}' : '_command(${args.join(', ')})';
         try {
-          final immediate = mpvBindings.mpv_command_async(ctx, requestNumber, arr.cast());
+          final immediate =
+              mpvBindings.mpv_command_async(ctx, requestNumber, arr.cast());
           if (immediate < 0) {
+            if (traceCommand) {
+              _transportTraceCommands.remove(requestNumber);
+              _traceTransport('command', requestNumber, 'immediate-error',
+                  'name=${args.first} code=$immediate');
+            }
             if (strict) _throwIfMpvError(immediate, text);
             _logError(immediate, text);
             return;
@@ -3008,6 +3264,10 @@ class NativePlayer extends PlatformPlayer {
         }
       } else {
         final result = mpvBindings.mpv_command(ctx, arr.cast());
+        if (traceCommand) {
+          _traceTransport(
+              'command', 0, 'sync-result', 'name=${args.first} code=$result');
+        }
         if (strict) _throwIfMpvError(result, 'mpv ${args.first}');
       }
     } finally {
@@ -3073,6 +3333,15 @@ class NativePlayer extends PlatformPlayer {
   /// previous page's asynchronous teardown block the next page from creating
   /// its own player, which leaves Android re-entry without a video output.
   final Lock lock = Lock();
+
+  late final NativeSourceTransitionGate _sourceTransitions =
+      NativeSourceTransitionGate(lock);
+
+  /// Holds source admission across output work that must release Player.lock.
+  /// Callers must acquire this gate before Player.lock, and use explicit
+  /// synchronized:false for nested source operations while holding that lock.
+  Future<T> runSourceTransition<T>(Future<T> Function() body) =>
+      _sourceTransitions.run(body);
 
   /// [HashMap] for retrieving previously fetched audio-bitrate(s).
   static final HashMap<String, double> audioBitrateCache =

@@ -299,9 +299,22 @@ class HdrVideoSession {
       ),
       preparer: _prepare,
       review: _review,
+      prepareDiscover: _prepareContainerDiscovery,
+      discoverReplan: _discoverReplan,
+      canPromoteDiscovered: _backend is HdrContainerSourcePromotionBackend
+          ? _canPromoteDiscovered
+          : null,
+      promoteDiscovered: _backend is HdrContainerSourcePromotionBackend
+          ? _promoteDiscovered
+          : null,
       retry: _retry,
       maxRetries: 4, // At most two HDR executions plus three SDR executions.
       maxReviewReopens: 3, // One source rebuild, then distinct SDR requests.
+      onPhase: const bool.fromEnvironment('MEDIA_KIT_STARTUP_TRACE')
+          ? (generation, phase, elapsedMicros) =>
+              debugPrint('MK_STARTUP session=${identityHashCode(this)} '
+                  'gen=$generation phase=$phase elapsedUs=$elapsedMicros')
+          : null,
       onBackendCallDiagnostic: onBackendCallDiagnostic,
       diagnosticSessionGeneration:
           onBackendCallDiagnostic == null ? null : _generationOf,
@@ -820,9 +833,155 @@ class HdrVideoSession {
     return plan;
   }
 
-  /// Failure-driven plan replacement inside the open generation (plan 1.4
-  /// step 5): map the failure to a dependency stage, re-plan past the failed
-  /// candidate. HDR failures never authorize a silent SDR fallback.
+  /// Keep the prepare and discovery gates identical so a later attempt cannot
+  /// suspend decoder work after the source has already been classified.
+  bool _isContainerDiscoveryEligible(HdrOpenPlan plan) {
+    final backend = _backend;
+    return backend is HdrContainerSourceBackend &&
+        !_rebuildUsed &&
+        plan.sourceOrigin == null &&
+        plan.source == const HdrSourceDescriptor() &&
+        plan.route.strategy == HdrStrategy.sdrDirect &&
+        plan.options?.failurePolicy != VideoRouteFailurePolicy.stop;
+  }
+
+  Future<void> _prepareContainerDiscovery(HdrOpenPlan plan) async {
+    if (!_isContainerDiscoveryEligible(plan)) return;
+    final generation = _generationOf(plan);
+    if (generation != _serial || _disposed) throw const OpenSuperseded();
+    await (_backend as HdrContainerSourceBackend).prepareSourceDiscovery(plan);
+    if (generation != _serial || _disposed) throw const OpenSuperseded();
+  }
+
+  Future<void> _resumeContainerDiscovery(
+    HdrOpenPlan plan,
+    HdrContainerSourceBackend backend,
+    int generation,
+  ) async {
+    if (generation != _serial || _disposed) throw const OpenSuperseded();
+    await backend.resumeSourceDiscovery(plan);
+    if (generation != _serial || _disposed) throw const OpenSuperseded();
+  }
+
+  Future<bool> _canPromoteDiscovered(
+    HdrOpenPlan previous,
+    HdrOpenPlan next,
+  ) async {
+    final backend = _backend as HdrContainerSourcePromotionBackend?;
+    if (backend == null ||
+        next.route.strategy != HdrStrategy.nativeDolbyVision) {
+      return false;
+    }
+    final generation = _generationOf(previous);
+    if (generation != _serial ||
+        generation != _generationOf(next) ||
+        _disposed) {
+      throw const OpenSuperseded();
+    }
+    final canPromote = await backend.canPromoteDiscoveredSource(previous, next);
+    if (generation != _serial ||
+        generation != _generationOf(previous) ||
+        generation != _generationOf(next) ||
+        _disposed) {
+      throw const OpenSuperseded();
+    }
+    return canPromote;
+  }
+
+  Future<void> _promoteDiscovered(
+    HdrOpenPlan previous,
+    HdrOpenPlan next,
+    Duration? start,
+  ) async {
+    final backend = _backend as HdrContainerSourcePromotionBackend?;
+    if (backend == null ||
+        next.route.strategy != HdrStrategy.nativeDolbyVision) {
+      throw StateError('Discovered source promotion is no longer eligible');
+    }
+    final generation = _generationOf(previous);
+    if (generation != _serial ||
+        generation != _generationOf(next) ||
+        _disposed) {
+      throw const OpenSuperseded();
+    }
+    await backend.promoteDiscoveredSource(previous, next, start: start);
+    if (generation != _serial ||
+        generation != _generationOf(previous) ||
+        generation != _generationOf(next) ||
+        _disposed) {
+      throw const OpenSuperseded();
+    }
+  }
+
+  Future<HdrOpenPlan?> _discoverReplan(HdrOpenPlan plan) async {
+    final backend = _backend;
+    if (!_isContainerDiscoveryEligible(plan)) return null;
+    final discoveryBackend = backend as HdrContainerSourceBackend;
+    final generation = _generationOf(plan);
+    if (generation != _serial || _disposed) throw const OpenSuperseded();
+    final snapshot = await discoveryBackend.discoverSource(plan);
+    if (generation != _serial || _disposed) throw const OpenSuperseded();
+    if (snapshot == null) {
+      await _resumeContainerDiscovery(plan, discoveryBackend, generation);
+      return null;
+    }
+    final sourceFacts =
+        (plan.sourceFacts ?? HdrSourceFacts.fromHint(null)).observe(
+      codec: snapshot.codec,
+      dolbyVisionProfile: snapshot.dvProfile,
+      dvCompatibilityId: snapshot.dvCompatibilityId,
+      dvElPresent: snapshot.elPresent,
+      inferSourceColorFromDecoder: false,
+    );
+    if (sourceFacts.hasConflict) {
+      throw HdrPlaybackBlocked(HdrDegradeReason.sourceMetadataUnknown,
+          sourceFacts: sourceFacts);
+    }
+    final excluded =
+        _attemptPolicy.exclusions(plan.excluded, nextAttempt: true);
+    final preferred = _preferCurrent(
+      _plan(
+        options: plan.options!,
+        source: sourceFacts.source,
+        capabilities: plan.capabilities,
+        policy: _policy,
+        preference: HdrOutputPreference.auto,
+        excluded: _attemptPolicy.exclusions(plan.excluded),
+      ),
+      plan.route,
+    );
+    if (!preferred.playable || preferred.selected.route == plan.route) {
+      await _resumeContainerDiscovery(plan, discoveryBackend, generation);
+      return null;
+    }
+    final prediction = _planNextAttempt(
+      options: plan.options!,
+      source: sourceFacts.source,
+      capabilities: plan.capabilities,
+      policy: _policy,
+      excluded: excluded,
+    );
+    // This fast path only discards the unverified discovery output. The
+    // replacement must still pass its ordinary/native decoder review.
+    if (!prediction.playable || prediction.selected.route == plan.route) {
+      await _resumeContainerDiscovery(plan, discoveryBackend, generation);
+      return null;
+    }
+    _rebuildUsed = true;
+    final next = plan.copyWith(
+      source: sourceFacts.source,
+      sourceFacts: sourceFacts,
+      sourceOrigin: HdrReportSource.decoder,
+      prediction: prediction,
+      route: prediction.selected.route!,
+      excluded: excluded,
+    );
+    _planGenerations[next] = generation;
+    _emit(HdrReclassifiedEvent(_transactionSerial,
+        previous: plan.source, current: sourceFacts.source, rebuilt: true));
+    return next;
+  }
+
   Future<HdrOpenPlan?> _retry(HdrOpenPlan failed, Object error) async {
     final generation = _generationOf(failed);
     if (generation != _serial || _disposed) return null;
@@ -1088,24 +1247,10 @@ class HdrVideoSession {
           HdrNativeDvReviewFailureKind.sourceIdentity,
         );
       }
-      final epoch = native.fileLoadedEpoch;
-      final path = await window.bounded(() => native.getPropertyAsync('path'));
-      final entry = await window.bounded(
-        () => native.getPropertyAsync('playlist/0/id'),
-      );
-      if (await window.bounded(() => native.getPropertyAsync('path')) != path ||
-          await window.bounded(() => native.getPropertyAsync('playlist/0/id')) !=
-              entry ||
-          native.fileLoadedEpoch != epoch) {
-        throw const HdrNativeDvReviewFailure(
-          HdrNativeDvReviewFailureKind.sourceIdentity,
-        );
-      }
-      return HdrOptionSourceIdentity(
+      return readHdrOptionSourceIdentity(
         player: native,
-        path: path,
-        playlistEntryId: entry,
-        fileLoadedEpoch: epoch,
+        fileLoadedEpoch: () => native.fileLoadedEpoch,
+        readProperties: native.getPropertiesAsync,
       );
     }
 
@@ -1132,6 +1277,9 @@ class HdrVideoSession {
       readIdentity: readIdentity,
       readProperty: _testReadNativeProperty ??
           ((name) => (native as NativePlayer).getPropertyAsync(name)),
+      readProperties: _testReadNativeProperty == null && native is NativePlayer
+          ? native.getPropertiesAsync
+          : null,
       readOutput: readOutput,
       isCurrent: () => generation == _serial && !_disposed,
     );

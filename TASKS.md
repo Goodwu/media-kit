@@ -276,3 +276,4 @@ P5 主线（详细流水见 `archives/conversations/android-hdr-dv-display-plan-
 
 
 - [x] 加入 Debug 编译源码约束（2026-10-12）；仅文档核验，未构建、未提交；Lead V0 核验通过，git diff --check 通过。context: archives/conversations/debug-build-source-policy-20261012.md
+- 2026-10-22 晚第二批本地提交:dispose 宽限期剥离(切换 4.3s→0.2s 实测)+首开 sourceHint 直开通道(44/44 测试,V2 PASS);变更明细见本文件上一条与 PiliPlus 侧 VIDEO-STARTUP-LATENCY-20261022。

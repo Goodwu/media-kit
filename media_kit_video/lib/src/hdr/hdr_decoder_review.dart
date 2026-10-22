@@ -174,6 +174,7 @@ Future<HdrReviewFacts> gatherDecoderReviewFacts({
   required Lock lock,
   required String mediaUri,
   required Future<String> Function(String) readProperty,
+  Future<List<String>> Function(List<String>)? readProperties,
   required Future<FileLoadedRecord> Function(int, int) waitForFileLoadedEntry,
   required int playlistEntryId,
   required int openedAfterEpoch,
@@ -293,8 +294,22 @@ Future<HdrReviewFacts> gatherDecoderReviewFacts({
       }
     }
 
-    Future<String> read(String property) =>
-        bounded(() => readProperty(property));
+    Future<Map<String, String>> readMany(List<String> properties) async {
+      final batchReader = readProperties;
+      if (batchReader != null) {
+        final values = await bounded(() => batchReader(properties));
+        if (values.length != properties.length) {
+          throw const HdrDecoderReviewFailure(
+              'Incomplete decoder property batch');
+        }
+        return Map<String, String>.fromIterables(properties, values);
+      }
+      final values = <String, String>{};
+      for (final property in properties) {
+        values[property] = await bounded(() => readProperty(property));
+      }
+      return values;
+    }
     final loaded = await passiveWait(
         waitForFileLoadedEntry(playlistEntryId, openedAfterEpoch));
     loadedMs = (now() - started).inMilliseconds;
@@ -311,9 +326,14 @@ Future<HdrReviewFacts> gatherDecoderReviewFacts({
         identityState = 'failed';
         throw const HdrDecoderReviewFailure('Current source identity differs');
       }
-      if (await read('path') != mediaUri ||
-          await read('playlist/0/id') != playlistEntryId.toString() ||
-          await read('playlist/0/filename') != mediaUri ||
+      final values = await readMany(const [
+        'path',
+        'playlist/0/id',
+        'playlist/0/filename',
+      ]);
+      if (values['path'] != mediaUri ||
+          values['playlist/0/id'] != playlistEntryId.toString() ||
+          values['playlist/0/filename'] != mediaUri ||
           fileLoadedEpoch() != loaded.epoch) {
         identityState = 'failed';
         throw const HdrDecoderReviewFailure('Current source identity differs');
@@ -342,10 +362,7 @@ Future<HdrReviewFacts> gatherDecoderReviewFacts({
     ];
     Future<Map<String, String>> endpoint() async {
       phase = 'endpoint';
-      final values = <String, String>{};
-      for (final property in endpoints) {
-        values[property] = await read(property);
-      }
+      final values = await readMany(endpoints);
       aValues = values;
       return values;
     }

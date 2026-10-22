@@ -71,8 +71,9 @@ class _Routed extends Fake implements RoutedVideoPlayback {
   @override
   Stream<Object> get errors => errorsController.stream;
   @override
-  Future<void> open(Media media, {bool play = true, bool video = true}) async {
-    calls.add('open:$play:$video');
+  Future<void> open(Media media,
+      {bool play = true, bool video = true, HdrSourceDescriptor? sourceHint}) async {
+    calls.add('open:$play:$video:$sourceHint');
     await openAction?.call(media, play: play, video: video);
   }
 

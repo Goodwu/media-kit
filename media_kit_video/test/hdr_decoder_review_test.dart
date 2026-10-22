@@ -13,6 +13,7 @@ class Sample {
   int epoch = 4;
   bool current = true;
   final reads = <String>[];
+  final batches = <List<String>>[];
   final props = <String, String>{
     'path': 'test://same',
     'playlist/0/filename': 'test://same',
@@ -36,12 +37,20 @@ class Sample {
     return onRead == null ? props[p] ?? '' : await onRead!(p);
   }
 
+  Future<List<String>> readMany(List<String> properties) async {
+    batches.add(List<String>.of(properties));
+    return [for (final property in properties) await read(property)];
+  }
+
   Future<HdrReviewFacts> gather(
-          {Duration budget = const Duration(seconds: 1)}) =>
+          {Duration budget = const Duration(seconds: 1),
+          bool batched = false,
+          Future<List<String>> Function(List<String>)? batchReader}) =>
       gatherDecoderReviewFacts(
         lock: lock,
         mediaUri: 'test://same',
         readProperty: read,
+        readProperties: batchReader ?? (batched ? readMany : null),
         waitForFileLoadedEntry:
             onLoaded ?? ((id, epoch) async => FileLoadedRecord(epoch + 1, id)),
         playlistEntryId: 7,
@@ -83,6 +92,63 @@ void main() {
     expect(
         () => validateDecoderObservation(route(vo: 'mediacodec_embed'), facts),
         returnsNormally);
+  });
+  test('batched sampling keeps both source identity brackets', () async {
+    final sample = Sample();
+    final facts = await sample.gather(batched: true);
+    expect(facts.codec, 'hevc');
+    expect(sample.batches, hasLength(6));
+    expect(
+        sample.batches[0],
+        equals([
+          'path',
+          'playlist/0/id',
+          'playlist/0/filename',
+        ]));
+    expect(sample.batches[1].length, 17);
+    expect(sample.batches[2], equals(sample.batches[0]));
+  });
+  test('batched source identity drift is rejected after sampling', () async {
+    final sample = Sample();
+    var identitySamples = 0;
+    Future<List<String>> readBatch(List<String> properties) async {
+      final values = await sample.readMany(properties);
+      if (properties.first == 'path' && ++identitySamples == 2) {
+        values[0] = 'test://other';
+      }
+      return values;
+    }
+
+    await expectLater(
+      sample.gather(batchReader: readBatch),
+      throwsA(isA<HdrDecoderReviewFailure>()),
+    );
+    expect(identitySamples, 2);
+  });
+  test('cancellation drains an active property batch before returning',
+      () async {
+    final sample = Sample();
+    final entered = Completer<void>();
+    final release = Completer<String>();
+    sample.onRead = (property) {
+      if (property == 'path') {
+        entered.complete();
+        return release.future;
+      }
+      return Future.value(sample.props[property] ?? '');
+    };
+
+    final review = sample.gather(batched: true);
+    await entered.future;
+    sample.current = false;
+    var finished = false;
+    unawaited(review.then<void>((_) => finished = true,
+        onError: (Object _, StackTrace __) => finished = true));
+    await Future<void>.delayed(const Duration(milliseconds: 40));
+    expect(finished, isFalse);
+    release.complete('test://same');
+    await expectLater(review, throwsA(isA<HdrDecoderReviewFailure>()));
+    expect(sample.reads, ['path', 'playlist/0/id', 'playlist/0/filename']);
   });
   test('pending file-loaded wait cancels cooperatively', () async {
     final s = Sample();
@@ -178,7 +244,8 @@ void main() {
       lock: s.lock,
       mediaUri: 'test://same',
       readProperty: s.read,
-      waitForFileLoadedEntry: (_, epoch) async => FileLoadedRecord(epoch + 1, 7),
+      waitForFileLoadedEntry: (_, epoch) async =>
+          FileLoadedRecord(epoch + 1, 7),
       playlistEntryId: 7,
       openedAfterEpoch: 3,
       fileLoadedEpoch: () => s.epoch,
@@ -359,8 +426,7 @@ void main() {
         throwsA(isA<HdrDecoderReviewTimeout>()));
   });
 
-  test('an unsuffixed label drift without a frame never settles',
-      () async {
+  test('an unsuffixed label drift without a frame never settles', () async {
     final s = Sample();
     s.props['video-params/pixelformat'] = '';
     var decoderReads = 0;
@@ -370,13 +436,11 @@ void main() {
       }
       return s.props[p] ?? '';
     };
-    await expectLater(
-        s.gather(budget: const Duration(seconds: 1)),
+    await expectLater(s.gather(budget: const Duration(seconds: 1)),
         throwsA(isA<HdrDecoderReviewTimeout>()));
   });
 
-  test('alternating components never settle within the budget',
-      () async {
+  test('alternating components never settle within the budget', () async {
     // V2 R1 counterexample: the un-suffixed first half must not launder a
     // real component change. The attach publication requires the IDENTICAL
     // MediaCodec configuration; a different component fails the pair.
@@ -419,8 +483,7 @@ void main() {
       if (p == 'hwdec-current' && ++hwdecReads > 34) return 'surfacetexture';
       return s.props[p] ?? '';
     };
-    await expectLater(
-        s.gather(budget: const Duration(seconds: 1)),
+    await expectLater(s.gather(budget: const Duration(seconds: 1)),
         throwsA(isA<HdrDecoderReviewTimeout>()));
   });
 
@@ -484,8 +547,7 @@ void main() {
     expect(facts.decoderObservation!.decoder, 'hevc_mediacodec');
   });
 
-  test(
-      'an empty-then-different label window settles on the final label',
+  test('an empty-then-different label window settles on the final label',
       () async {
     // V2 second-review R1 counterexample: the first rounds register X; an
     // empty half followed by a different settled label must not overwrite
@@ -510,8 +572,7 @@ void main() {
     expect(facts.decoderObservation!.decoder, 'avc_mediacodec');
   });
 
-  test(
-      'an empty-then-different hwdec window settles on the final mode',
+  test('an empty-then-different hwdec window settles on the final mode',
       () async {
     // V2 second-review R2: a registered hwdec whose half disappears is a
     // failing disappearing observation, not a republication.
@@ -575,8 +636,7 @@ void main() {
         throwsA(isA<HdrDecoderReviewTimeout>()));
   });
 
-  test(
-      'a perpetually flipping MediaCodec configuration never settles',
+  test('a perpetually flipping MediaCodec configuration never settles',
       () async {
     // V2 third review minimum test 1: the component configuration is
     // registered X; with the sampling window still open (pixel empty), one
@@ -600,8 +660,7 @@ void main() {
     await expectLater(s.gather(), throwsA(isA<HdrDecoderReviewTimeout>()));
   });
 
-  test('a transient hwdec disappearance settles back and completes',
-      () async {
+  test('a transient hwdec disappearance settles back and completes', () async {
     // V2 third review minimum test 3: A is a complete valid sample, B's
     // hwdec-current disappears — the disappearance of a REGISTERED value
     // is a failing disappearing observation (not a first publication —
@@ -643,8 +702,7 @@ void main() {
     expect(facts.decoderObservation!.decoder, 'hevc');
   });
 
-  test('a software hwdec settles and is left to plan validation',
-      () async {
+  test('a software hwdec settles and is left to plan validation', () async {
     // A software decode ('no') publishing alongside the label attach is a
     // decode failure, not an attach — the managed arm requires the settled
     // hwdec to be a hardware mode.
@@ -906,8 +964,7 @@ void main() {
             route(vo: 'mediacodec_embed', hwdec: 'mediacodec'), facts),
         returnsNormally);
     // The same observation still satisfies the texture mediacodec route.
-    expect(() => validateDecoderObservation(route(), facts),
-        returnsNormally);
+    expect(() => validateDecoderObservation(route(), facts), returnsNormally);
   });
 
   test('embed hwdec and pixelformat first publication completes in-window',

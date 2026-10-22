@@ -4,6 +4,7 @@ import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
 import 'package:media_kit/media_kit.dart';
 
+import '../hdr/hdr_source_descriptor.dart';
 import '../hdr/hdr_video_session.dart';
 import '../routing/video_route_options.dart';
 import '../video_controller/platform_video_controller.dart';
@@ -68,6 +69,24 @@ class RoutedVideoPlayback {
   ValueListenable<bool> get ready => _ready;
   Stream<Object> get errors => _errors.stream;
 
+  /// The reviewed source description of the current generation's verified
+  /// open, suitable as the caller-held [RoutedVideoPlayback.open] hint for a
+  /// following open of the same URLs. Null while unverified or when this
+  /// binding has no HDR session. The caller owns when reusing it: passing a
+  /// descriptor from different URLs mislabels the new source and costs one
+  /// review correction rebuild.
+  HdrSourceDescriptor? get verifiedSourceHint {
+    final report = _session?.report.value;
+    if (report == null || !report.verified) return null;
+    final descriptor = report.sourceFacts?.source ?? report.source;
+    // An all-unknown description carries no routing information; treat it
+    // like no hint so the ordinary probe path stays eligible.
+    if (descriptor == null || descriptor == const HdrSourceDescriptor()) {
+      return null;
+    }
+    return descriptor;
+  }
+
   bool _closed = false;
   bool _desiredPlaying = false;
   int _generation = 0;
@@ -111,7 +130,8 @@ class RoutedVideoPlayback {
 
   /// Completes after the explicit session's open/review and transport intent.
   /// The view must already follow [controller]; readiness is NOT a mount gate.
-  Future<void> open(Media media, {bool play = true, bool video = true}) {
+  Future<void> open(Media media,
+      {bool play = true, bool video = true, HdrSourceDescriptor? sourceHint}) {
     _ensureOpen();
     final generation = ++_generation;
     _submittedGeneration = -1;
@@ -135,7 +155,7 @@ class RoutedVideoPlayback {
           // flag captured by an earlier open. Report notification reapplies the
           // latest intent only after verification. Preserve Media.start.
           _submittedGeneration = generation;
-          await session.open(media, options: options,
+          await session.open(media, options: options, hint: sourceHint,
               start: media.start, play: false);
         }
         if (_closed || generation != _generation) throw const RoutedOpenSuperseded();
