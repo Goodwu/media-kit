@@ -13,6 +13,8 @@ import 'package:media_kit_video/src/video_controller/android_video_controller/an
 
 import 'hdr_open_coordinator.dart';
 import 'hdr_decoder_review.dart';
+import 'hdr_container_source_discovery.dart';
+import 'hdr_container_probe_owner.dart';
 import 'hdr_native_dv_option_owner.dart';
 import 'hdr_native_dv_review.dart';
 import 'hdr_native_dv_review_evidence.dart';
@@ -37,7 +39,37 @@ import 'hdr_output_resources.dart';
 ///
 /// Output capability and actual presentation must still be checked
 /// separately on the device.
-class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
+abstract interface class HdrContainerSourceBackend {
+  Future<void> prepareSourceDiscovery(HdrOpenPlan plan);
+
+  Future<void> resumeSourceDiscovery(HdrOpenPlan plan);
+
+  Future<HdrContainerSourceSnapshot?> discoverSource(HdrOpenPlan plan);
+}
+
+/// Optional same-entry transition from a paused decoderless source probe to
+/// an owned native Dolby Vision route. A positive capability check is pure;
+/// once promotion starts, failures must be surfaced for owned cleanup rather
+/// than reopening or treating the entry as an ordinary retry.
+abstract interface class HdrContainerSourcePromotionBackend {
+  Future<bool> canPromoteDiscoveredSource(
+      HdrOpenPlan previous, HdrOpenPlan next);
+
+  Future<void> promoteDiscoveredSource(
+    HdrOpenPlan previous,
+    HdrOpenPlan next, {
+    Duration? start,
+  });
+}
+
+class AndroidHdrBackend
+    implements
+        HdrOpenBackend<HdrOpenPlan>,
+        HdrContainerSourceBackend,
+        HdrContainerSourcePromotionBackend {
+  static const bool _startupTrace =
+      bool.fromEnvironment('MEDIA_KIT_STARTUP_TRACE');
+
   AndroidHdrBackend({
     required this.player,
     required this.outputSlot,
@@ -70,6 +102,8 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
         );
     _nativeDvOptions = HdrNativeDvOptionOwner(
       readProperty: player.getPropertyAsync,
+      readProperties: player.getPropertiesAsync,
+      currentFileLoadedEpoch: () => player.fileLoadedEpoch,
       setPropertyStrict: player.setPropertyStrict,
       readIdentity: _readOptionIdentity,
       onDiagnostic: onNativeDvOptionDiagnostic,
@@ -103,6 +137,15 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
   VideoParams? _latestVideoParams;
 
   late final HdrNativeDvOptionOwner _nativeDvOptions;
+  final HdrContainerProbeOwner _containerProbeOwner = HdrContainerProbeOwner();
+  HdrOpenPlan? _promotedProbePlan;
+  HdrOptionSourceIdentity? _promotedProbeIdentity;
+  HdrNativeDvStoppedCapture? _promotionStoppedCapture;
+  // Restoring the native pair and retiring the probe do not acknowledge a
+  // failed stop call to the coordinator. Keep its completed boundary until a
+  // later managed open is admitted under Player.lock. Cleanup retries must
+  // never fall through to an unowned stop after the owners have retired.
+  HdrOptionSourceIdentity? _completedPromotionStop;
   HdrNativeDvPendingOpen? _nativeDvPendingOpen;
   bool _nativeDvPendingOwnStopIssued = false;
   HdrOptionSourceIdentity? _nativeDvStopAttemptBefore;
@@ -113,6 +156,7 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
   int? _openFileLoadedEpoch;
   int? _openPlaylistEntryId;
   int _ordinaryReviewSerial = 0;
+  Stopwatch? _ordinaryReviewClock;
   String? _dataSpaceRequested;
   String? _dataSpacePath;
   String? _dataSpaceReadback;
@@ -121,6 +165,74 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
   /// The RPU-stripping filter label; hdr_lab used the sample-specific name
   /// `@media-kit-p84-base`.
   static const String _dvRpuFilter = '@media-kit-dv-base';
+
+  bool get _hasTransferredProbeDebt {
+    final plan = _promotedProbePlan;
+    return plan != null && _containerProbeOwner.promotionTransferred(plan);
+  }
+
+  static bool _promotionPlanPairIsEligible(
+      HdrOpenPlan previous, HdrOpenPlan next) {
+    final from = previous.route;
+    final to = next.route;
+    final facts = next.sourceFacts;
+    final source = next.source;
+    final sourceFactsMatch = facts != null &&
+        !facts.hasConflict &&
+        facts.source == source &&
+        facts.origins[HdrSourceField.codec] == HdrSourceFactOrigin.track &&
+        facts.origins[HdrSourceField.dvProfile] == HdrSourceFactOrigin.track &&
+        facts.origins[HdrSourceField.dvCompatibilityId] ==
+            HdrSourceFactOrigin.track &&
+        facts.origins[HdrSourceField.enhancementLayer] ==
+            HdrSourceFactOrigin.track;
+    final sourceIsSupported = source.codec == 'hevc' &&
+        source.dynamicMetadata == HdrDynamicMetadata.dolbyVision &&
+        source.enhancementLayer == false &&
+        ((source.dvProfile == 5 && source.dvCompatibilityId == 0) ||
+            (source.dvProfile == 8 && source.dvCompatibilityId == 4));
+    return identical(previous.media, next.media) &&
+        previous.media.uri == next.media.uri &&
+        previous.sourceOrigin == null &&
+        previous.source == const HdrSourceDescriptor() &&
+        from.strategy == HdrStrategy.sdrDirect &&
+        from.presentation == HdrPresentation.sdr &&
+        from.outputTransfer == HdrOutputTransfer.sdr &&
+        !from.appliesDynamicMetadata &&
+        from.topology == HdrTopology.texture &&
+        from.vo == 'gpu-next' &&
+        from.vdLavcOptions == null &&
+        from.mediacodecEmbedRenderMode == null &&
+        !from.stripDvRpu &&
+        from.targetPrim == null &&
+        from.targetTrc == null &&
+        from.surfaceTransfer == null &&
+        to.strategy == HdrStrategy.nativeDolbyVision &&
+        to.presentation == HdrPresentation.nativeDolbyVision &&
+        to.outputTransfer == HdrOutputTransfer.dolbyVision &&
+        to.appliesDynamicMetadata &&
+        to.topology == HdrTopology.platformView &&
+        to.vo == 'mediacodec_embed' &&
+        to.hwdec == 'mediacodec' &&
+        to.vdLavcOptions == 'native_dv=1' &&
+        (to.mediacodecEmbedRenderMode == 'timed' ||
+            to.mediacodecEmbedRenderMode == 'boolean') &&
+        to.surfaceTransfer == null &&
+        !to.stripDvRpu &&
+        to.targetPrim == null &&
+        to.targetTrc == null &&
+        sourceFactsMatch &&
+        sourceIsSupported;
+  }
+
+  @override
+  Future<bool> canPromoteDiscoveredSource(
+          HdrOpenPlan previous, HdrOpenPlan next) async =>
+      !_nativeDvOptions.active &&
+      _promotedProbePlan == null &&
+      _promotionStoppedCapture == null &&
+      _containerProbeOwner.canPromote(previous) &&
+      _promotionPlanPairIsEligible(previous, next);
 
   Future<void> _setOwned(String name, String value,
       {bool numericReadback = false}) async {
@@ -341,22 +453,12 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
       lock.synchronized(() => options.begin(
           stoppedIdentity: stoppedIdentity, vd: vd, renderMode: renderMode));
 
-  Future<HdrOptionSourceIdentity> _readOptionIdentity() async {
-    final epoch = player.fileLoadedEpoch;
-    final path = await player.getPropertyAsync('path');
-    final entry = await player.getPropertyAsync('playlist/0/id');
-    if (await player.getPropertyAsync('path') != path ||
-        await player.getPropertyAsync('playlist/0/id') != entry ||
-        player.fileLoadedEpoch != epoch) {
-      throw StateError('Media changed while reading native DV option identity');
-    }
-    return HdrOptionSourceIdentity(
-      player: player,
-      path: path,
-      playlistEntryId: entry,
-      fileLoadedEpoch: epoch,
-    );
-  }
+  Future<HdrOptionSourceIdentity> _readOptionIdentity() =>
+      readHdrOptionSourceIdentity(
+        player: player,
+        fileLoadedEpoch: () => player.fileLoadedEpoch,
+        readProperties: player.getPropertiesAsync,
+      );
 
   /// Only a matching native FILE_LOADED record permits the backend to move
   /// option ownership from its stopped boundary onto the entry it opened.
@@ -398,7 +500,8 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
     }
     final current = await pending.confirmForCleanup(
       readIdentity: _readOptionIdentity,
-      readPlaylistFilename: () => player.getPropertyAsync('playlist/0/filename'),
+      readPlaylistFilename: () =>
+          player.getPropertyAsync('playlist/0/filename'),
       waitForFileLoadedEntry: player.waitForFileLoadedEntryAfter,
       afterOwnStop: _nativeDvPendingOwnStopIssued,
     );
@@ -438,7 +541,68 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
         options: _nativeDvOptions,
         before: before,
         confirmed: stopped);
+    if (_hasTransferredProbeDebt) {
+      _nativeDvStopAttemptBefore = null;
+      _promotionStoppedCapture =
+          HdrNativeDvStoppedCapture(before: before, stopped: stopped);
+      return;
+    }
     _nativeDvStopAttemptBefore = null;
+  }
+
+  Future<void> _completeTransferredProbeStop() async {
+    final capture = _promotionStoppedCapture;
+    final plan = _promotedProbePlan;
+    if (capture == null || plan == null || !_hasTransferredProbeDebt) return;
+    // The native owner has already re-bound this exact stop to its empty
+    // boundary. Restore its per-player pair before retiring the probe's
+    // entry-local backup debt; either failure leaves the debt retryable.
+    await player.lock.synchronized(_nativeDvOptions.restore);
+    await _containerProbeOwner.retireAfterTransferredStop(
+      lock: player.lock,
+      capture: capture,
+      readIdentity: _readOptionIdentity,
+    );
+    _completedPromotionStop = capture.stopped;
+    _promotionStoppedCapture = null;
+    _promotedProbeIdentity = null;
+    _promotedProbePlan = null;
+    _nativeDvStopAttemptBefore = null;
+    _nativeDvPendingOpen = null;
+    _nativeDvPendingOwnStopIssued = false;
+  }
+
+  Future<bool> _finishCapturedPromotionStop() async {
+    final capture = _promotionStoppedCapture;
+    if (capture != null) await _completeTransferredProbeStop();
+    final stopped = _completedPromotionStop;
+    if (stopped == null) return false;
+    await player.lock.synchronized(() async {
+      await _assertCompletedPromotionStopped();
+      _stoppedBoundary = stopped;
+      _observedStoppedPath = true;
+    });
+    return true;
+  }
+
+  /// The caller holds Player.lock, including when consuming the proof for a
+  /// new managed open. Same-URI replacements are different entries/epochs.
+  Future<void> _assertCompletedPromotionStopped() async {
+    final stopped = _completedPromotionStop;
+    if (stopped == null) return;
+    if (await _readOptionIdentity() != stopped ||
+        await _readOptionIdentity() != stopped) {
+      throw StateError('Completed promotion stop lost its stopped boundary');
+    }
+  }
+
+  Future<void> _admitOpenAfterCompletedPromotionStop(
+      Future<void> Function() openWithoutLock) async {
+    await _assertCompletedPromotionStopped();
+    // The source ownership capture enclosing this callback now owns any
+    // partially accepted loadfile, including an acknowledgement failure.
+    _completedPromotionStop = null;
+    await openWithoutLock();
   }
 
   Future<HdrOptionSourceIdentity> _confirmNativeDvOwnStop(
@@ -450,7 +614,8 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
     }
     final stopped = await pending.confirmForCleanup(
       readIdentity: _readOptionIdentity,
-      readPlaylistFilename: () => player.getPropertyAsync('playlist/0/filename'),
+      readPlaylistFilename: () =>
+          player.getPropertyAsync('playlist/0/filename'),
       waitForFileLoadedEntry: player.waitForFileLoadedEntryAfter,
       afterOwnStop: true,
     );
@@ -482,9 +647,25 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
     _observedStoppedPath = false;
     _stoppedBoundary = null;
     // All possible FILE_LOADED waits happen before/after the critical section.
+    if (await _finishCapturedPromotionStop()) return;
     await _recoverNativeDvPendingOpen();
     await _recoverNativeDvStopAttempt();
-    if (!_nativeDvOptions.active) {
+    if (await _finishCapturedPromotionStop()) return;
+    if (_containerProbeOwner.active && !_hasTransferredProbeDebt) {
+      _stoppedBoundary = await _containerProbeOwner.stopOwnedUnderLock(
+        lock: player.lock,
+        stopWithoutLock: () => player.stop(synchronized: false),
+        readIdentity: _readOptionIdentity,
+        readPlaylistFilename: () =>
+            player.getPropertyAsync('playlist/0/filename'),
+        waitForFileLoadedEntry: player.waitForFileLoadedEntryAfter,
+      );
+      // A promotion can fail before native ownership is acquired. Its first
+      // probe stop may unload successfully but lose the acknowledgement; on
+      // this confirmed retry retain the boundary before reset retires the
+      // probe and attempts any remaining configuration restores.
+      _completedPromotionStop = _stoppedBoundary;
+    } else if (!_nativeDvOptions.active) {
       _stoppedBoundary = await captureStoppedBoundaryUnderLock(
           lock: player.lock,
           stopWithoutLock: () => player.stop(synchronized: false),
@@ -502,8 +683,9 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
         stopWithoutLock: () => player.stop(synchronized: false),
         readIdentity: _readOptionIdentity,
       );
+      HdrOptionSourceIdentity confirmed;
       try {
-        final confirmed = await _confirmNativeDvOwnStop(captured.before);
+        confirmed = await _confirmNativeDvOwnStop(captured.before);
         if (confirmed != captured.stopped) {
           throw StateError(
               'Native DV stopped proof changed before acknowledgement');
@@ -513,13 +695,24 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
             options: _nativeDvOptions,
             before: captured.before,
             confirmed: confirmed);
-        _stoppedBoundary = confirmed;
-        _nativeDvPendingOpen = null;
-        _nativeDvPendingOwnStopIssued = false;
-        _nativeDvStopAttemptBefore = null;
       } catch (identityError) {
         throw HdrNativeDvOptionFailure(
             captured.operationError, {'sourceIdentity': identityError});
+      }
+      _stoppedBoundary = confirmed;
+      if (_hasTransferredProbeDebt) {
+        _nativeDvStopAttemptBefore = null;
+        _promotionStoppedCapture = HdrNativeDvStoppedCapture(
+          before: captured.before,
+          stopped: confirmed,
+          operationError: captured.operationError,
+          operationStack: captured.operationStack,
+        );
+        await _completeTransferredProbeStop();
+      } else {
+        _nativeDvPendingOpen = null;
+        _nativeDvPendingOwnStopIssued = false;
+        _nativeDvStopAttemptBefore = null;
       }
       if (captured.operationError != null) {
         Error.throwWithStackTrace(
@@ -533,21 +726,55 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
   Future<void> resetOwnedConfiguration() async {
     await _recoverNativeDvPendingOpen();
     await _recoverNativeDvStopAttempt();
-    await player.lock.synchronized(_nativeDvOptions.restore);
+    if (_promotionStoppedCapture != null) {
+      await _completeTransferredProbeStop();
+    }
+    if (_hasTransferredProbeDebt) {
+      throw StateError(
+          'Promoted container probe requires its owned stop before reset');
+    }
+    await player.lock.synchronized(() async {
+      await _assertCompletedPromotionStopped();
+      await _nativeDvOptions.restore();
+    });
     _nativeDvPendingOpen = null;
     _nativeDvPendingOwnStopIssued = false;
     _nativeDvStopAttemptBefore = null;
-    if (_rpuFilterApplied) {
-      await player.command(['vf', 'remove', _dvRpuFilter]);
-      _rpuFilterApplied = false;
-    }
-    for (final name in _ownedProperties.toList().reversed) {
-      final original = _originalProperties[name];
-      if (original == null || original.isEmpty) {
-        throw StateError('No original value for $name');
+    if (_containerProbeOwner.active && !_hasTransferredProbeDebt) {
+      final stopped = _stoppedBoundary;
+      if (!_observedStoppedPath || stopped == null) {
+        throw StateError(
+            'Container probe cleanup has no verified stopped boundary');
       }
-      await player.setPropertyStrict(name, original);
-      _ownedProperties.remove(name);
+      await _containerProbeOwner.retireAtStoppedBoundary(
+        lock: player.lock,
+        stoppedIdentity: stopped,
+        readIdentity: _readOptionIdentity,
+      );
+    }
+    Future<void> restoreRemaining() async {
+      if (_rpuFilterApplied) {
+        await player.command(['vf', 'remove', _dvRpuFilter]);
+        _rpuFilterApplied = false;
+      }
+      for (final name in _ownedProperties.toList().reversed) {
+        final original = _originalProperties[name];
+        if (original == null || original.isEmpty) {
+          throw StateError('No original value for $name');
+        }
+        await player.setPropertyStrict(name, original);
+        _ownedProperties.remove(name);
+      }
+    }
+
+    if (_completedPromotionStop != null) {
+      await player.lock.synchronized(() async {
+        await _assertCompletedPromotionStopped();
+        await restoreRemaining();
+        await _assertCompletedPromotionStopped();
+      });
+    } else {
+      await restoreRemaining();
     }
   }
 
@@ -556,16 +783,35 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
     final route = plan.route;
     await validate(plan);
     if (route.vdLavcOptions != null) {
-      final stopped = _stoppedBoundary;
-      if (!_observedStoppedPath || stopped == null) {
-        throw StateError('No stopped-media boundary before native DV options');
+      if (_containerProbeOwner.promotionTransferred(plan)) {
+        final expected = _promotedProbeIdentity;
+        if (!_nativeDvOptions.active ||
+            expected == null ||
+            _nativeDvOptions.identity != expected) {
+          throw const HdrDecoderReviewFailure(
+              'Container promotion lost native DV option ownership');
+        }
+        await player.lock.synchronized(() async {
+          await _nativeDvOptions.assertCurrent();
+          await _nativeDvOptions.verify();
+          if (_nativeDvOptions.identity != expected) {
+            throw const HdrDecoderReviewFailure(
+                'Container promotion source changed before output setup');
+          }
+        });
+      } else {
+        final stopped = _stoppedBoundary;
+        if (!_observedStoppedPath || stopped == null) {
+          throw StateError(
+              'No stopped-media boundary before native DV options');
+        }
+        await beginNativeDvUnderLock(
+            lock: player.lock,
+            options: _nativeDvOptions,
+            stoppedIdentity: stopped,
+            vd: route.vdLavcOptions!,
+            renderMode: route.mediacodecEmbedRenderMode!);
       }
-      await beginNativeDvUnderLock(
-          lock: player.lock,
-          options: _nativeDvOptions,
-          stoppedIdentity: stopped,
-          vd: route.vdLavcOptions!,
-          renderMode: route.mediacodecEmbedRenderMode!);
     }
     final contract = HdrOutputContract.fromRoute(
       route,
@@ -839,10 +1085,18 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
     if (!_observedStoppedPath) {
       throw StateError('No stopped-media path boundary before open');
     }
+    final media = plan.media;
+    final playable = start == null && media.start == null
+        ? media
+        : Media(media.uri,
+            start: start ?? media.start,
+            end: media.end,
+            extras: media.extras,
+            httpHeaders: media.httpHeaders);
     _observedStoppedPath = false;
     _stoppedBoundary = null;
     final reviewSerial = ++_ordinaryReviewSerial;
-    final media = plan.media;
+    _ordinaryReviewClock = null;
     // Drop the previous media's cached video-params so the review waits for
     // this open's report instead of classifying from a stale source.
     _latestVideoParams = null;
@@ -852,20 +1106,13 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
     final optionIdentity = _nativeDvOptions.identity;
     var identityConfirmationAttempted = false;
     try {
-      final playable = start == null && media.start == null
-          ? media
-          : Media(media.uri,
-              start: start ?? media.start,
-              end: media.end,
-              extras: media.extras,
-              httpHeaders: media.httpHeaders);
       if (optionIdentity != null) {
         final captured = await captureNativeDvOpenUnderLock(
           lock: player.lock,
           options: _nativeDvOptions,
           mediaUri: media.uri,
-          openWithoutLock: () =>
-              player.open(playable, play: play, synchronized: false),
+          openWithoutLock: () => _admitOpenAfterCompletedPromotionStop(
+              () => player.open(playable, play: play, synchronized: false)),
           readProperty: player.getPropertyAsync,
           onCaptured: (entry) {
             _openFileLoadedEpoch = entry.before.fileLoadedEpoch;
@@ -882,7 +1129,8 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
           mediaUri: captured.mediaUri,
           expectedPlaylistEntryId: captured.playlistEntryId,
           readIdentity: _readOptionIdentity,
-          readPlaylistFilename: () => player.getPropertyAsync('playlist/0/filename'),
+          readPlaylistFilename: () =>
+              player.getPropertyAsync('playlist/0/filename'),
           waitForFileLoadedEntry: player.waitForFileLoadedEntryAfter,
         );
         await rebindNativeDvUnderLock(
@@ -893,16 +1141,42 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
         _nativeDvPendingOpen = null;
         _nativeDvPendingOwnStopIssued = false;
       } else {
-        final entry = await captureDecoderOpenUnderLock(
-          lock: player.lock,
-          mediaUri: media.uri,
-          fileLoadedEpoch: () => player.fileLoadedEpoch,
-          openWithoutLock: () =>
-              player.open(playable, play: play, synchronized: false),
-          readProperty: player.getPropertyAsync,
-          isCurrent: () =>
-              _ordinaryReviewSerial == reviewSerial && reviewIsCurrent(plan),
-        );
+        bool current() =>
+            _ordinaryReviewSerial == reviewSerial && reviewIsCurrent(plan);
+        final entry = _containerProbeOwner.owns(plan)
+            ? await _containerProbeOwner.captureOpenUnderLock(
+                lock: player.lock,
+                plan: plan,
+                start: playable.start,
+                isCurrent: current,
+                openWithoutLock: (probe) =>
+                    _admitOpenAfterCompletedPromotionStop(() async {
+                  if (_startupTrace) {
+                    debugPrint('MK_STARTUP containerProbe=$probe');
+                  }
+                  if (probe) {
+                    await player.openContainerProbe(playable,
+                        automaticSubtitles:
+                            _containerProbeOwner.automaticSubtitlesFor(plan),
+                        synchronized: false);
+                  } else {
+                    await player.open(playable,
+                        play: play, synchronized: false);
+                  }
+                }),
+                readIdentity: _readOptionIdentity,
+                readProperties: player.getPropertiesAsync,
+              )
+            : await captureDecoderOpenUnderLock(
+                lock: player.lock,
+                mediaUri: media.uri,
+                fileLoadedEpoch: () => player.fileLoadedEpoch,
+                openWithoutLock: () => _admitOpenAfterCompletedPromotionStop(
+                    () =>
+                        player.open(playable, play: play, synchronized: false)),
+                readProperty: player.getPropertyAsync,
+                isCurrent: current,
+              );
         if (_ordinaryReviewSerial != reviewSerial || !reviewIsCurrent(plan)) {
           throw const HdrDecoderReviewFailure('Superseded ordinary open');
         }
@@ -929,6 +1203,278 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
       }
       Error.throwWithStackTrace(error, stack);
     }
+  }
+
+  @override
+  Future<void> prepareSourceDiscovery(HdrOpenPlan plan) async {
+    void trace(bool prepared) {
+      if (_startupTrace) {
+        debugPrint('MK_STARTUP containerProbeIntent=$prepared');
+      }
+    }
+
+    final currentOutput = outputSlot.current;
+    if (currentOutput == null) {
+      trace(false);
+      return;
+    }
+    final route = plan.route;
+    final eligiblePlan = plan.sourceOrigin == null &&
+        plan.source == const HdrSourceDescriptor() &&
+        plan.route.strategy == HdrStrategy.sdrDirect &&
+        route.topology == HdrTopology.texture &&
+        route.vo == 'gpu-next' &&
+        plan.options?.failurePolicy != VideoRouteFailurePolicy.stop;
+    if (!eligiblePlan || !reviewIsCurrent(plan)) {
+      trace(false);
+      return;
+    }
+    // LegacyMediaOptions permits lavfi-complex as a per-entry loadfile
+    // override. A global-property check below cannot prove that such a
+    // custom graph is absent, so keep the ordinary open path for it.
+    if (plan.media.extras?.containsKey('lavfi-complex') ?? false) {
+      trace(false);
+      return;
+    }
+    final output = await currentOutput.platform.future;
+    final configuration = output.configuration;
+    final eligibleOutput = configuration.vo == 'gpu-next' &&
+        !configuration.android.usePlatformView;
+    if (!eligibleOutput || !reviewIsCurrent(plan)) {
+      trace(false);
+      return;
+    }
+    final stopped = _stoppedBoundary;
+    if (!_observedStoppedPath || stopped == null) {
+      trace(false);
+      return;
+    }
+    final prepared = await _containerProbeOwner.prepare(
+      lock: player.lock,
+      plan: plan,
+      uri: plan.media.uri,
+      eligibleRoute: true,
+      isCurrent: () => reviewIsCurrent(plan),
+      stoppedIdentity: stopped,
+      readIdentity: _readOptionIdentity,
+      readProperties: player.getPropertiesAsync,
+    );
+    trace(prepared);
+  }
+
+  @override
+  Future<void> resumeSourceDiscovery(HdrOpenPlan plan) async {
+    if (!_containerProbeOwner.owns(plan)) return;
+    final openedAfterEpoch = _openFileLoadedEpoch;
+    final entryId = _openPlaylistEntryId;
+    if (openedAfterEpoch == null || entryId == null) {
+      throw const HdrDecoderReviewFailure(
+          'Container probe has no opened playlist identity');
+    }
+    final serial = _ordinaryReviewSerial;
+    await _containerProbeOwner.resume(
+      lock: player.lock,
+      plan: plan,
+      isCurrent: () => _ordinaryReviewSerial == serial && reviewIsCurrent(plan),
+      fileLoadedEpoch: () => player.fileLoadedEpoch,
+      readProperties: player.getPropertiesAsync,
+      writeProperty: player.setPropertyStrict,
+      expectedEntryId: entryId,
+      openedAfterEpoch: openedAfterEpoch,
+      mediaUri: plan.media.uri,
+    );
+    if (_startupTrace) debugPrint('MK_STARTUP containerProbeResumed=true');
+  }
+
+  @override
+  Future<void> promoteDiscoveredSource(
+    HdrOpenPlan previous,
+    HdrOpenPlan next, {
+    Duration? start,
+  }) =>
+      player.runSourceTransition(() async {
+        try {
+          await _promoteDiscoveredSource(previous, next, start: start);
+        } catch (error, stack) {
+          // Source admission stays closed through every fallible output
+          // operation and its owned cleanup. Surface callbacks can still use
+          // Player.lock (not this gate), so binding does not deadlock.
+          try {
+            await stop();
+            final stopped = _stoppedBoundary;
+            if (stopped != null &&
+                stopped.path.isEmpty &&
+                stopped.playlistEntryId.isEmpty) {
+              // This also covers rejection before the native owner acquired
+              // the entry: the original probe's stop proof must survive its
+              // retirement and the coordinator's later rollback retry.
+              _completedPromotionStop ??= stopped;
+            }
+            await resetOwnedConfiguration();
+          } catch (cleanupError) {
+            throw HdrNativeDvOptionFailure(
+                error, {'promotionCleanup': cleanupError});
+          }
+          Error.throwWithStackTrace(error, stack);
+        }
+      });
+
+  Future<void> _promoteDiscoveredSource(
+    HdrOpenPlan previous,
+    HdrOpenPlan next, {
+    Duration? start,
+  }) async {
+    if (!await canPromoteDiscoveredSource(previous, next)) {
+      throw const HdrDecoderReviewFailure(
+          'Container source is not eligible for same-entry promotion');
+    }
+    final serial = _ordinaryReviewSerial;
+    bool isCurrent() =>
+        _ordinaryReviewSerial == serial && reviewIsCurrent(next);
+
+    final promoted = await _containerProbeOwner.beginPromotionUnderLock(
+      lock: player.lock,
+      oldPlan: previous,
+      newPlan: next,
+      expectedStart: start ?? previous.media.start,
+      isCurrent: isCurrent,
+      fileLoadedEpoch: () => player.fileLoadedEpoch,
+      readProperties: player.getPropertiesAsync,
+      writeProperty: player.setPropertyStrict,
+      readIdentity: _readOptionIdentity,
+      nativeOwnershipAcquired: (identity) =>
+          _nativeDvOptions.identity == identity,
+      takeNativeOwnership: (identity, originalVd, originalRenderMode,
+          verifyDecoderlessProbe) async {
+        // The probe owner records the transfer only after it observes that
+        // the native option owner has acquired this exact source. If native
+        // begin rejects before taking identity, the probe remains the sole
+        // source-stop owner.
+        _promotedProbePlan = next;
+        _promotedProbeIdentity = identity;
+        try {
+          await _nativeDvOptions.beginFromDecoderlessProbe(
+            entryIdentity: identity,
+            originalVd: originalVd,
+            originalRenderMode: originalRenderMode,
+            verifyDecoderlessProbe: verifyDecoderlessProbe,
+            vd: next.route.vdLavcOptions!,
+            renderMode: next.route.mediacodecEmbedRenderMode!,
+          );
+        } catch (_) {
+          if (_nativeDvOptions.identity != identity) {
+            _promotedProbePlan = null;
+            _promotedProbeIdentity = null;
+          }
+          rethrow;
+        }
+      },
+    );
+    if (promoted != _promotedProbeIdentity || !isCurrent()) {
+      throw const HdrDecoderReviewFailure(
+          'Promoted source ownership changed before output setup');
+    }
+
+    // No loadfile and no new epoch: the exact paused demuxer survives while
+    // this route replaces the texture output with its native DV PlatformView.
+    await prepareOutput(next);
+    await configure(next);
+    await waitForOutput(next);
+
+    final output = outputSlot.current;
+    final controller = output?.notifier.value;
+    if (controller is! AndroidVideoController ||
+        !identical(controller.player, player) ||
+        controller.configuration.vo != next.route.vo ||
+        !controller.configuration.android.usePlatformView) {
+      throw const HdrDecoderReviewFailure(
+          'Promoted native DV PlatformView is not owned and ready');
+    }
+    final boundIdentity = controller.currentBoundOutputIdentity;
+    if (boundIdentity == null) {
+      throw const HdrDecoderReviewFailure(
+          'Promoted native DV PlatformView has no bound output');
+    }
+
+    Future<void> verifyBoundVideo() async {
+      if (!isCurrent() ||
+          !_containerProbeOwner.promotionTransferred(next) ||
+          !identical(outputSlot.current, output) ||
+          !identical(output?.notifier.value, controller) ||
+          !identical(controller.player, player) ||
+          controller.configuration.vo != next.route.vo ||
+          !controller.configuration.android.usePlatformView ||
+          controller.currentBoundOutputIdentity != boundIdentity ||
+          _nativeDvOptions.identity != promoted) {
+        throw const HdrDecoderReviewFailure(
+            'Promoted native DV output or source ownership changed');
+      }
+      await _nativeDvOptions.assertCurrent();
+      await _nativeDvOptions.verify();
+      if (!isCurrent() ||
+          !identical(outputSlot.current, output) ||
+          !identical(output?.notifier.value, controller) ||
+          controller.currentBoundOutputIdentity != boundIdentity ||
+          _nativeDvOptions.identity != promoted) {
+        throw const HdrDecoderReviewFailure(
+            'Promoted native DV output changed during selector restore');
+      }
+    }
+
+    final openedAfterEpoch = _openFileLoadedEpoch;
+    final entryId = _openPlaylistEntryId;
+    if (openedAfterEpoch == null || entryId == null) {
+      throw const HdrDecoderReviewFailure(
+          'Promoted probe lost its original file-loaded identity');
+    }
+    await _containerProbeOwner.resumePromotion(
+      lock: player.lock,
+      plan: next,
+      isCurrent: isCurrent,
+      fileLoadedEpoch: () => player.fileLoadedEpoch,
+      readProperties: player.getPropertiesAsync,
+      writeProperty: player.setPropertyStrict,
+      expectedEntryId: entryId,
+      openedAfterEpoch: openedAfterEpoch,
+      mediaUri: next.media.uri,
+      verifyBoundVideo: verifyBoundVideo,
+    );
+  }
+
+  @override
+  Future<HdrContainerSourceSnapshot?> discoverSource(HdrOpenPlan plan) async {
+    final before = _openFileLoadedEpoch;
+    final entry = _openPlaylistEntryId;
+    if (before == null || entry == null) {
+      throw StateError('No playlist-entry identity before discovery');
+    }
+    _ordinaryReviewClock ??= Stopwatch()..start();
+    final probe = _containerProbeOwner.probing(plan);
+    final serial = _ordinaryReviewSerial;
+    return gatherContainerSourceSnapshot(
+      lock: player.lock,
+      mediaUri: plan.media.uri,
+      playlistEntryId: entry,
+      openedAfterEpoch: before,
+      fileLoadedEpoch: () => player.fileLoadedEpoch,
+      isCurrent: () => _ordinaryReviewSerial == serial && reviewIsCurrent(plan),
+      readProperties: player.getPropertiesAsync,
+      waitForFileLoadedEntry: player.waitForFileLoadedEntryAfter,
+      budget: const Duration(seconds: 20) - _ordinaryReviewClock!.elapsed,
+      unselectedProbe: probe,
+      verifyUnselectedProbe: probe
+          ? () => _containerProbeOwner.verifyInLock(
+                plan: plan,
+                isCurrent: () =>
+                    _ordinaryReviewSerial == serial && reviewIsCurrent(plan),
+                fileLoadedEpoch: () => player.fileLoadedEpoch,
+                readProperties: player.getPropertiesAsync,
+                mediaUri: plan.media.uri,
+                playlistEntryId: entry,
+                openedAfterEpoch: before,
+              )
+          : null,
+    );
   }
 
   @override
@@ -973,6 +1519,7 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
               : HdrNativeDvOutputSnapshot(controller, identity);
         },
         readProperty: player.getPropertyAsync,
+        readProperties: player.getPropertiesAsync,
         latestVideoParams: () => _latestVideoParams,
       );
       _lastHwdecCurrent = facts.hwdecCurrent;
@@ -983,12 +1530,15 @@ class AndroidHdrBackend implements HdrOpenBackend<HdrOpenPlan> {
       lock: player.lock,
       mediaUri: plan.media.uri,
       readProperty: player.getPropertyAsync,
+      readProperties: player.getPropertiesAsync,
       waitForFileLoadedEntry: player.waitForFileLoadedEntryAfter,
       playlistEntryId: entryId,
       openedAfterEpoch: before,
       fileLoadedEpoch: () => player.fileLoadedEpoch,
       isCurrent: () =>
           _ordinaryReviewSerial == reviewSerial && reviewIsCurrent(plan),
+      budget: const Duration(seconds: 20) -
+          (_ordinaryReviewClock?.elapsed ?? Duration.zero),
     );
     if (_ordinaryReviewSerial != reviewSerial || !reviewIsCurrent(plan)) {
       throw const HdrDecoderReviewFailure('Superseded decoder result');

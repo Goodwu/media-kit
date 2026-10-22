@@ -5,7 +5,10 @@ import 'package:media_kit_video/src/routing/video_route_options.dart';
 import 'package:media_kit/media_kit.dart'
     show FileLoadedRecord, Media, VideoParams;
 import 'package:media_kit_video/src/hdr/hdr_capabilities.dart';
+import 'package:media_kit_video/src/hdr/hdr_container_source_discovery.dart';
 import 'package:media_kit_video/src/hdr/hdr_decoder_review.dart';
+import 'package:media_kit_video/src/hdr/hdr_player_backend.dart'
+    show HdrContainerSourceBackend, HdrContainerSourcePromotionBackend;
 import 'package:media_kit_video/src/hdr/android_mediacodec_configuration.dart';
 import 'package:media_kit_video/src/hdr/hdr_native_dv_option_owner.dart';
 import 'package:media_kit_video/src/hdr/hdr_native_dv_review_evidence.dart';
@@ -17,6 +20,7 @@ import 'package:media_kit_video/src/hdr/hdr_output_event.dart';
 import 'package:media_kit_video/src/hdr/hdr_route.dart';
 import 'package:media_kit_video/src/hdr/hdr_route_planner.dart';
 import 'package:media_kit_video/src/hdr/hdr_source_descriptor.dart';
+import 'package:media_kit_video/src/hdr/hdr_source_facts.dart';
 import 'package:media_kit_video/src/hdr/hdr_strategy.dart';
 import 'package:media_kit_video/src/hdr/hdr_video_session.dart';
 import 'package:media_kit_video/src/hdr/hdr_yuv_window_arm.dart';
@@ -81,6 +85,50 @@ void main() {
             ? const HdrDataSpaceExtInfo(id: 'lya-pq', applicable: true)
             : null,
       );
+
+  HdrRoutePrediction nativeP5RoutePlanner({
+    required HdrSourceDescriptor source,
+    required HdrCapabilities capabilities,
+    required HdrRoutingPolicy policy,
+    required HdrOutputPreference preference,
+    required Map<String, HdrDegradeReason> excluded,
+  }) {
+    final ordinary = HdrRoutePlanner.plan(
+      source: source,
+      capabilities: capabilities,
+      policy: policy,
+      preference: preference,
+      excluded: excluded,
+    );
+    if (HdrSourceClass.of(source) != HdrSourceClass.dvP5) return ordinary;
+    const nativeRoute = HdrRoute(
+      strategy: HdrStrategy.nativeDolbyVision,
+      presentation: HdrPresentation.nativeDolbyVision,
+      outputTransfer: HdrOutputTransfer.dolbyVision,
+      appliesDynamicMetadata: true,
+      topology: HdrTopology.platformView,
+      vo: 'mediacodec_embed',
+      hwdec: 'mediacodec',
+      targetPrim: null,
+      targetTrc: null,
+      surfaceTransfer: null,
+      stripDvRpu: false,
+    );
+    final candidate = const HdrCandidate(
+      strategy: HdrStrategy.nativeDolbyVision,
+      maturity: HdrStrategyMaturity.unsupported,
+      route: nativeRoute,
+      feasible: true,
+    ).withRoutingIdentity(HdrSourceClass.dvP5, HdrRouteStage.c1);
+    return HdrRoutePrediction(
+      source: source,
+      selected: candidate,
+      candidates: [candidate, ...ordinary.candidates],
+      presentation: nativeRoute.presentation,
+      confidence: HdrPredictionConfidence.unverified,
+      playable: true,
+    );
+  }
 
   HdrCapabilities lgPqCaps() => HdrCapabilities(
         sdkInt: 24,
@@ -272,6 +320,472 @@ void main() {
       events.whereType<HdrReclassifiedEvent>().single.rebuilt,
       isTrue,
     );
+    await session.dispose();
+  });
+
+  test(
+      'paused container discovery replaces unverified SDR and reviews replacement',
+      () async {
+    final backend = FakeBackend()
+      ..containerSnapshot = const HdrContainerSourceSnapshot(
+        mediaUri: 'test://media',
+        playlistEntryId: 1,
+        fileLoadedEpoch: 1,
+        videoTrackId: '0',
+        codec: 'hevc',
+        dvProfile: 8,
+        dvCompatibilityId: 4,
+        elPresent: false,
+      )
+      ..factsForOpen.add(gammaFacts(gamma: 'pq'));
+    final session = makeSession(backend: backend, capabilities: caps());
+
+    await session.open(media, play: false);
+    await pumpEventQueue();
+
+    expect(backend.discoveryCalls, 1);
+    expect(backend.calls.where((call) => call.startsWith('prepare-discovery:')),
+        hasLength(1));
+    expect(backend.calls.where((call) => call.startsWith('resume-discovery:')),
+        isEmpty);
+    expect(
+      backend.calls.indexWhere((call) => call.startsWith('prepare-discovery:')),
+      lessThan(backend.calls.indexWhere((call) => call.startsWith('open:'))),
+    );
+    expect(backend.opened.map((open) => open.route.strategy),
+        [HdrStrategy.sdrDirect, HdrStrategy.metadataReshape]);
+    expect(backend.calls.where((call) => call.startsWith('review:')),
+        hasLength(1));
+    expect(session.report.value.verified, isTrue);
+    expect(session.report.value.source?.dvProfile, 8);
+    expect(session.report.value.sourceFacts!.origins[HdrSourceField.dvProfile],
+        HdrSourceFactOrigin.track);
+    expect(
+        session.report.value.sourceFacts!
+            .origins[HdrSourceField.dvCompatibilityId],
+        HdrSourceFactOrigin.track);
+    await session.dispose();
+  });
+
+  test(
+      'container facts conflicting with replacement decoder review are blocked',
+      () async {
+    final backend = FakeBackend()
+      ..containerSnapshot = const HdrContainerSourceSnapshot(
+        mediaUri: 'test://media',
+        playlistEntryId: 1,
+        fileLoadedEpoch: 1,
+        videoTrackId: '0',
+        codec: 'hevc',
+        dvProfile: 8,
+        dvCompatibilityId: 4,
+        elPresent: false,
+      )
+      ..factsForOpen.add(gammaFacts(gamma: 'pq', profile: 5));
+    final session = makeSession(backend: backend, capabilities: caps());
+
+    await session.open(media, play: false);
+    await pumpEventQueue();
+
+    expect(backend.opened, hasLength(2));
+    expect(backend.calls.where((call) => call.startsWith('review:')),
+        hasLength(1));
+    expect(session.report.value.verified, isFalse);
+    expect(session.report.value.degradeReason,
+        HdrDegradeReason.sourceMetadataUnknown);
+    expect(session.report.value.sourceFacts!.hasConflict, isTrue);
+    await session.dispose();
+  });
+
+  test('native DV container discovery promotes once and still runs full review',
+      () async {
+    const nativeRaw = '{"api":1,"mime":"video/dolby-vision",'
+        '"codec":"c2.native.dv","native-dv-active":true}';
+    final playerIdentity = Object();
+    final controllerIdentity = Object();
+    final sourceIdentity = HdrOptionSourceIdentity(
+      player: playerIdentity,
+      path: media.uri,
+      playlistEntryId: '7',
+      fileLoadedEpoch: 4,
+    );
+    final output = HdrNativeDvOutputSnapshot(
+      controllerIdentity,
+      const AndroidSurfaceAccountId(
+        handle: 11,
+        generation: 2,
+        viewId: 3,
+        surfaceGeneration: 4,
+        wid: 5,
+      ),
+    );
+    final backend = PromotionFakeBackend()
+      ..allowPromotion = true
+      ..containerSnapshot = HdrContainerSourceSnapshot(
+        mediaUri: media.uri,
+        playlistEntryId: 7,
+        fileLoadedEpoch: 4,
+        videoTrackId: '0',
+        codec: 'hevc',
+        dvProfile: 5,
+        dvCompatibilityId: 0,
+        elPresent: false,
+      )
+      ..factsForOpen.add(
+        HdrReviewFacts(
+          codec: 'hevc',
+          hwdecCurrent: 'mediacodec',
+          path: media.uri,
+          dolbyVisionProfile: 5,
+          dvCompatibilityId: 0,
+          dvElPresent: false,
+          nativeDvEvidence: HdrNativeDvReviewEvidence(
+            source: sourceIdentity,
+            loaded: const FileLoadedRecord(4, 7),
+            controller: output.controller,
+            output: output.identity,
+            configuration: AndroidMediaCodecConfiguration.parse(nativeRaw)!,
+            hwdecCurrent: 'mediacodec',
+          ),
+        ),
+      );
+    final session = HdrVideoSession.forTesting(
+      backend: backend,
+      isAndroid: true,
+      capabilitiesProvider: () async => caps(),
+      nativePlayerIdentity: playerIdentity,
+      nativePlayerLock: Lock(),
+      readNativeIdentity: () async => sourceIdentity,
+      readNativeProperty: (name) async =>
+          name == 'android-mediacodec-info' ? nativeRaw : 'mediacodec',
+      readNativeOutput: () => output,
+      reviewMonotonicNow: () => Duration.zero,
+      routePlanner: nativeP5RoutePlanner,
+    );
+    const start = Duration(seconds: 5);
+
+    await session.open(media, play: false, start: start);
+
+    expect(backend.opened.map((attempt) => attempt.route.strategy),
+        [HdrStrategy.sdrDirect]);
+    expect(backend.promotedFrom?.route.strategy, HdrStrategy.sdrDirect);
+    expect(backend.promotedTo?.route.strategy, HdrStrategy.nativeDolbyVision);
+    expect(backend.promotedStart, start);
+    expect(
+      backend.calls.indexWhere((call) => call.startsWith('promote:')),
+      lessThan(backend.calls.indexWhere((call) => call.startsWith('review:'))),
+    );
+    expect(backend.calls.where((call) => call.startsWith('review:')),
+        hasLength(1));
+    expect(session.report.value.verified, isTrue);
+    expect(
+        session.report.value.actual!.strategy, HdrStrategy.nativeDolbyVision);
+    await session.dispose();
+  });
+
+  test('missing container snapshot falls back to ordinary decoder review',
+      () async {
+    final backend = FakeBackend()
+      ..factsForOpen.addAll([gammaFacts(gamma: 'pq'), gammaFacts(gamma: 'pq')]);
+    final session = makeSession(backend: backend, capabilities: caps());
+
+    await session.open(media, play: false);
+    await pumpEventQueue();
+
+    expect(backend.discoveryCalls, 1);
+    expect(backend.calls.where((call) => call.startsWith('prepare-discovery:')),
+        hasLength(1));
+    expect(backend.calls.where((call) => call.startsWith('resume-discovery:')),
+        hasLength(1));
+    expect(
+      backend.calls.indexWhere((call) => call.startsWith('resume-discovery:')),
+      lessThan(backend.calls.indexWhere((call) => call.startsWith('review:'))),
+    );
+    expect(backend.opened, hasLength(2));
+    expect(backend.calls.where((call) => call.startsWith('review:')),
+        hasLength(2));
+    expect(session.report.value.verified, isTrue);
+    expect(session.report.value.sourceOrigin, HdrReportSource.decoder);
+    await session.dispose();
+  });
+
+  test('superseded native promotion admission cannot promote the stale plan',
+      () async {
+    final admission = Completer<void>();
+    final backend = PromotionFakeBackend()
+      ..allowPromotion = true
+      ..holdPromotionAdmission = admission
+      ..containerSnapshot = HdrContainerSourceSnapshot(
+        mediaUri: media.uri,
+        playlistEntryId: 7,
+        fileLoadedEpoch: 4,
+        videoTrackId: '0',
+        codec: 'hevc',
+        dvProfile: 5,
+        dvCompatibilityId: 0,
+        elPresent: false,
+      );
+    final session = HdrVideoSession.forTesting(
+      backend: backend,
+      isAndroid: true,
+      capabilitiesProvider: () async => caps(),
+      routePlanner: nativeP5RoutePlanner,
+    );
+
+    final stale = session.open(media, play: false);
+    await pumpUntil(
+      () => backend.calls.any((call) => call.startsWith('can-promote:')),
+    );
+    final current = session.open(Media('test://newer'), play: true);
+    admission.complete();
+    await Future.wait([stale, current]);
+
+    expect(backend.promotedTo, isNull);
+    expect(
+      backend.opened.every(
+          (attempt) => attempt.route.strategy != HdrStrategy.nativeDolbyVision),
+      isTrue,
+    );
+    expect(
+      backend.calls.where((call) => call.startsWith('review:')).length,
+      1,
+    );
+    await session.dispose();
+  });
+
+  test('container discovery is skipped for hints and playing opens', () async {
+    final hinted = FakeBackend()
+      ..containerSnapshot = const HdrContainerSourceSnapshot(
+        mediaUri: 'test://media',
+        playlistEntryId: 1,
+        fileLoadedEpoch: 1,
+        videoTrackId: '0',
+        codec: 'hevc',
+        dvProfile: 8,
+        dvCompatibilityId: 4,
+        elPresent: false,
+      );
+    final hintedSession = makeSession(backend: hinted, capabilities: caps());
+    await hintedSession.open(media, hint: p84, play: false);
+    await pumpEventQueue();
+    expect(hinted.discoveryCalls, 0);
+    expect(hinted.calls.where((call) => call.startsWith('prepare-discovery:')),
+        isEmpty);
+    await hintedSession.dispose();
+
+    final playing = FakeBackend()..containerSnapshot = hinted.containerSnapshot;
+    final playingSession = makeSession(backend: playing, capabilities: caps());
+    await playingSession.open(media, play: true);
+    await pumpEventQueue();
+    expect(playing.discoveryCalls, 0);
+    expect(playing.calls.where((call) => call.startsWith('prepare-discovery:')),
+        isEmpty);
+    await playingSession.dispose();
+  });
+
+  test(
+    'container discovery preparation failure cleans up before open',
+    () async {
+      final failure = StateError('prepare discovery failed');
+      final backend = FakeBackend()..prepareDiscoveryError = failure;
+      final session = makeSession(backend: backend, capabilities: caps());
+      final events = <HdrOutputEvent>[];
+      session.events.listen(events.add);
+      final verifiedReviewCounts = <int>[];
+      session.report.addListener(() {
+        if (session.report.value.verified) {
+          verifiedReviewCounts.add(
+            backend.calls.where((call) => call.startsWith('review:')).length,
+          );
+        }
+      });
+
+      await session.open(media, play: false);
+      await pumpEventQueue();
+
+      final prepareAt = backend.calls.indexWhere(
+        (call) => call.startsWith('prepare-discovery:'),
+      );
+      final retryStopAt = backend.calls.indexWhere(
+        (call) => call == 'stop',
+        prepareAt + 1,
+      );
+      final retryResetAt = backend.calls.indexWhere(
+        (call) => call == 'reset',
+        retryStopAt + 1,
+      );
+      final retryOpenAt = backend.calls.indexWhere(
+        (call) => call.startsWith('open:'),
+      );
+      expect(prepareAt, greaterThanOrEqualTo(0));
+      expect(retryStopAt, greaterThan(prepareAt));
+      expect(retryResetAt, greaterThan(retryStopAt));
+      expect(
+        retryOpenAt,
+        greaterThan(retryResetAt),
+        reason: 'the failed prepare attempt is cleaned before retry open',
+      );
+      expect(
+        backend.calls.sublist(prepareAt, retryStopAt).where(
+              (call) => call.startsWith('open:') || call.startsWith('review:'),
+            ),
+        isEmpty,
+        reason: 'the failed preparation itself neither opens nor reviews',
+      );
+      expect(
+        backend.calls.where((call) => call.startsWith('open:')),
+        hasLength(1),
+      );
+      expect(
+        backend.calls.where((call) => call.startsWith('review:')),
+        hasLength(1),
+      );
+      expect(
+        backend.calls.indexWhere((call) => call.startsWith('review:')),
+        greaterThan(retryOpenAt),
+        reason: 'only the successor attempt reaches decoder review',
+      );
+      expect(backend.preparedPlans, hasLength(2));
+      expect(session.report.value.actual, backend.preparedPlans.last.route);
+      expect(
+        events.whereType<HdrRouteAppliedEvent>().single.route,
+        backend.preparedPlans.last.route,
+      );
+      expect(
+        events.whereType<HdrDegradedEvent>().single.diagnostic,
+        failure.toString(),
+      );
+      expect(
+          verifiedReviewCounts,
+          [
+            1,
+          ],
+          reason: 'verification is published only after the retry review');
+      expect(session.report.value.error, isNull);
+      expect(session.report.value.verified, isTrue);
+      expect(backend.openedPlayModes, [false]);
+      expect(backend.calls, contains('stop'));
+      expect(backend.calls, contains('reset'));
+      await session.dispose();
+    },
+  );
+
+  test('resume failure rolls back before ordinary review', () async {
+    final failure = StateError('resume discovery failed');
+    final backend = FakeBackend()..resumeDiscoveryError = failure;
+    final session = makeSession(backend: backend, capabilities: caps());
+    final events = <HdrOutputEvent>[];
+    session.events.listen(events.add);
+    final verifiedReviewCounts = <int>[];
+    session.report.addListener(() {
+      if (session.report.value.verified) {
+        verifiedReviewCounts.add(
+          backend.calls.where((call) => call.startsWith('review:')).length,
+        );
+      }
+    });
+
+    await session.open(media, play: false);
+    await pumpEventQueue();
+
+    final openCalls =
+        backend.calls.where((call) => call.startsWith('open:')).toList();
+    final firstOpenAt = backend.calls.indexOf(openCalls.first);
+    final discoveryAt = backend.calls.indexWhere(
+      (call) => call.startsWith('discover:'),
+    );
+    final resumeAt = backend.calls.indexWhere(
+      (call) => call.startsWith('resume-discovery:'),
+    );
+    final retryStopAt = backend.calls.indexWhere(
+      (call) => call == 'stop',
+      resumeAt + 1,
+    );
+    final retryResetAt = backend.calls.indexWhere(
+      (call) => call == 'reset',
+      retryStopAt + 1,
+    );
+    final retryOpenAt = backend.calls.indexWhere(
+      (call) => call.startsWith('open:'),
+      firstOpenAt + 1,
+    );
+    expect(openCalls, hasLength(2));
+    expect(firstOpenAt, lessThan(discoveryAt));
+    expect(discoveryAt, lessThan(resumeAt));
+    expect(resumeAt, lessThan(retryStopAt));
+    expect(retryStopAt, lessThan(retryResetAt));
+    expect(
+      retryResetAt,
+      lessThan(retryOpenAt),
+      reason: 'the failed resume attempt is cleaned before retry open',
+    );
+    expect(
+      backend.calls
+          .sublist(firstOpenAt, retryStopAt)
+          .where((call) => call.startsWith('review:')),
+      isEmpty,
+      reason: 'the failed resume never enters ordinary decoder review',
+    );
+    expect(
+      backend.calls.where((call) => call.startsWith('review:')),
+      hasLength(1),
+    );
+    expect(
+      backend.calls.indexWhere((call) => call.startsWith('review:')),
+      greaterThan(retryOpenAt),
+      reason: 'only the successor attempt reaches decoder review',
+    );
+    expect(backend.preparedPlans, hasLength(2));
+    expect(session.report.value.actual, backend.preparedPlans.last.route);
+    expect(
+      events.whereType<HdrRouteAppliedEvent>().single.route,
+      backend.preparedPlans.last.route,
+    );
+    expect(
+      events.whereType<HdrDegradedEvent>().single.diagnostic,
+      failure.toString(),
+    );
+    expect(
+        verifiedReviewCounts,
+        [
+          1,
+        ],
+        reason: 'verification is published only after the retry review');
+    expect(session.report.value.error, isNull);
+    expect(session.report.value.verified, isTrue);
+    expect(backend.openedPlayModes, [false, false]);
+    expect(backend.calls, contains('stop'));
+    expect(backend.calls, contains('reset'));
+    await session.dispose();
+  });
+
+  test('superseded container discovery cannot reopen a stale source', () async {
+    final pending = Completer<HdrContainerSourceSnapshot?>();
+    final backend = FakeBackend()..holdContainerDiscovery = pending;
+    final session = makeSession(backend: backend, capabilities: caps());
+    final stale = session.open(media, play: false);
+    await pumpUntil(() => backend.discoveryCalls == 1);
+    final newer = session.open(Media('test://newer'), play: true);
+    pending.complete(const HdrContainerSourceSnapshot(
+      mediaUri: 'test://media',
+      playlistEntryId: 1,
+      fileLoadedEpoch: 1,
+      videoTrackId: '0',
+      codec: 'hevc',
+      dvProfile: 8,
+      dvCompatibilityId: 4,
+      elPresent: false,
+    ));
+    await Future.wait([stale, newer]);
+    await pumpEventQueue();
+    expect(backend.opened, hasLength(2));
+    expect(backend.calls.where((call) => call.startsWith('resume-discovery:')),
+        isEmpty);
+    expect(
+        backend.opened
+            .every((open) => open.route.strategy == HdrStrategy.sdrDirect),
+        isTrue);
+    expect(backend.opened.where((open) => open.start == null), isNotEmpty);
     await session.dispose();
   });
 
@@ -948,7 +1462,8 @@ void main() {
     // The subject is the copy-carrier review contract: the explicit sdrEmbed
     // opt-out keeps the directory copy → software (the unset option now
     // plans the embed execution first on SDK 16–25).
-    await session.open(media, hint: sdr,
+    await session.open(media,
+        hint: sdr,
         options: EffectiveVideoRouteOptions.resolve(
             application: const VideoRouteOptions(sdrEmbed: false)));
     await pumpEventQueue();
@@ -976,7 +1491,8 @@ void main() {
     final events = <HdrOutputEvent>[];
     session.events.listen(events.add);
     // Same explicit opt-out as above: this verifies the copy review flow.
-    await session.open(media, hint: sdr,
+    await session.open(media,
+        hint: sdr,
         options: EffectiveVideoRouteOptions.resolve(
             application: const VideoRouteOptions(sdrEmbed: false)));
     await pumpEventQueue();
@@ -1313,8 +1829,7 @@ void main() {
       expect(atoms.calls, isEmpty);
       // Round 3: the non-YUV route takes a READ admission (Begin/End), but
       // performs no arm channel call and touches no atom.
-      expect(
-          atoms.channelCalls.where((m) => m.contains('YuvDiag')), isEmpty);
+      expect(atoms.channelCalls.where((m) => m.contains('YuvDiag')), isEmpty);
       expect(events.whereType<HdrErrorEvent>(), isEmpty);
       await session.dispose();
       expect(atoms.diagDataSpace, 0);
@@ -1336,8 +1851,7 @@ void main() {
       expect(atoms.calls, isEmpty);
       // Round 3: the non-YUV route takes a READ admission (Begin/End), but
       // performs no arm channel call and touches no atom.
-      expect(
-          atoms.channelCalls.where((m) => m.contains('YuvDiag')), isEmpty);
+      expect(atoms.channelCalls.where((m) => m.contains('YuvDiag')), isEmpty);
       await session.dispose();
     });
 
@@ -1459,8 +1973,7 @@ void main() {
             // The successor is held before preparation so the old attempt's
             // terminal cleanup is the only operation that can release A.
             backend.prepareErrorOnce = StateError('successor prepare failed');
-            successorOpen = session.open(
-                Media('test://superseding-request'),
+            successorOpen = session.open(Media('test://superseding-request'),
                 hint: hlgSource);
           });
         },
@@ -1510,7 +2023,8 @@ void main() {
       // sdrEmbed opt-out keeps the reclassified SDR reopen on the texture
       // copy carrier (the unset option now plans the embed execution first
       // at SDK 24).
-      await session.open(media, hint: hlgSource,
+      await session.open(media,
+          hint: hlgSource,
           options: EffectiveVideoRouteOptions.resolve(
               application: const VideoRouteOptions(sdrEmbed: false)));
       await pumpEventQueue();
@@ -1526,10 +2040,13 @@ void main() {
       expect(atoms.armCount, 1);
       expect(atoms.disarmCount, 1);
       final disarmAt = backend.calls.indexWhere((c) => c.startsWith('disarm:'));
-      final secondPrepareAt = backend.calls
-          .indexWhere((c) => c.startsWith('prepare:'), backend.calls.indexWhere((c) => c.startsWith('prepare:')) + 1);
-      expect(disarmAt, greaterThan(backend.calls.indexWhere((c) => c.startsWith('review:'))),
-          reason: 'the terminal disarm follows the review that ended the attempt');
+      final secondPrepareAt = backend.calls.indexWhere(
+          (c) => c.startsWith('prepare:'),
+          backend.calls.indexWhere((c) => c.startsWith('prepare:')) + 1);
+      expect(disarmAt,
+          greaterThan(backend.calls.indexWhere((c) => c.startsWith('review:'))),
+          reason:
+              'the terminal disarm follows the review that ended the attempt');
       expect(disarmAt, lessThan(secondPrepareAt),
           reason: 'the successor attempt prepares only over cleared atoms');
       expect(atoms.diagDataSpace, 0);
@@ -1570,7 +2087,8 @@ void main() {
       // an output over uncleared arms is exactly the poisoned-atoms path.
       backend.factsForOpen
           .add(gammaFacts(gamma: 'bt.1886', hwdec: 'mediacodec-copy'));
-      await expectLater(session.open(media, hint: sdr),
+      await expectLater(
+          session.open(media, hint: sdr),
           throwsA(isA<HdrYuvWindowArmFailure>().having(
               (error) => error.cause.toString(),
               'cause',
@@ -1627,9 +2145,10 @@ void main() {
       // SDR initialization is not queued-behind-but-poisoned.
       await expectLater(
           yuvSession.open(media, hint: hlgSource),
-          throwsA(isA<HdrYuvWindowLeaseConflict>()
-              .having((error) => error.description, 'description',
-                  contains('concurrent output initialization'))));
+          throwsA(isA<HdrYuvWindowLeaseConflict>().having(
+              (error) => error.description,
+              'description',
+              contains('concurrent output initialization'))));
       await pumpEventQueue();
       expect(yuvBackend.opened, isEmpty,
           reason: 'the rejected YUV attempt initialized no output');
@@ -1672,8 +2191,7 @@ void main() {
         'flight (B1), and proceeds after the hand-off', () async {
       final atoms = _SessionArmAtoms();
       final firstBackend = FakeBackend()..factsForOpen.add(yuvFacts());
-      final secondBackend = FakeBackend()
-        ..factsForOpen.add(yuvFacts());
+      final secondBackend = FakeBackend()..factsForOpen.add(yuvFacts());
       atoms.sink = firstBackend.calls;
       final first = makeSession(
         backend: firstBackend,
@@ -1698,13 +2216,14 @@ void main() {
       // Hold the first session's YUV attempt between the arm and the open.
       firstBackend.holdConfigure = Completer<void>();
       final firstOpen = first.open(media, hint: hlgSource);
-      await pumpUntil(() => firstBackend.calls.any((c) => c.startsWith('configure:')));
+      await pumpUntil(
+          () => firstBackend.calls.any((c) => c.startsWith('configure:')));
       expect(atoms.yuvDiagEnabled, 1,
           reason: 'the in-flight attempt holds the process atoms armed');
       expect(
           firstBackend.calls.indexWhere((c) => c.startsWith('arm:')),
-          lessThan(firstBackend.calls
-              .indexWhere((c) => c.startsWith('configure:'))),
+          lessThan(
+              firstBackend.calls.indexWhere((c) => c.startsWith('configure:'))),
           reason: 'the arm ACK precedes the configuration phase');
 
       // The second session's SDR (non-YUV) initialization is rejected with
@@ -1831,8 +2350,7 @@ void main() {
       expect(atoms.calls, isEmpty);
       // Round 3: the non-YUV route takes a READ admission (Begin/End), but
       // performs no arm channel call and touches no atom.
-      expect(
-          atoms.channelCalls.where((m) => m.contains('YuvDiag')), isEmpty);
+      expect(atoms.channelCalls.where((m) => m.contains('YuvDiag')), isEmpty);
       await session.dispose();
     });
   });
@@ -1900,8 +2418,7 @@ class _SessionArmAtoms {
         return true;
       case 'BeginOutputInitWrite':
         sink?.add('admit:write');
-        return gate.beginWrite(
-            arguments['ownerToken'] as Object,
+        return gate.beginWrite(arguments['ownerToken'] as Object,
             (arguments['leaseId'] as int?) ?? 0);
       case 'EndOutputInitWrite':
         sink?.add('release:write');
@@ -1983,10 +2500,17 @@ class FakeOpened {
 
 /// Fake [HdrOpenBackend] over plans: records phase calls, applies scripted
 /// per-attempt failures, and hands out decoder facts per open attempt.
-class FakeBackend implements HdrOpenBackend<HdrOpenPlan> {
+class FakeBackend
+    implements HdrOpenBackend<HdrOpenPlan>, HdrContainerSourceBackend {
   final calls = <String>[];
   final opened = <FakeOpened>[];
+  final openedPlayModes = <bool>[];
   final preparedPlans = <HdrOpenPlan>[];
+  HdrContainerSourceSnapshot? containerSnapshot;
+  Completer<HdrContainerSourceSnapshot?>? holdContainerDiscovery;
+  int discoveryCalls = 0;
+  Object? prepareDiscoveryError;
+  Object? resumeDiscoveryError;
 
   /// Facts returned by [reviewFacts], one entry per attempt (last repeats).
   final factsForOpen = <HdrReviewFacts>[];
@@ -2021,6 +2545,29 @@ class FakeBackend implements HdrOpenBackend<HdrOpenPlan> {
 
   @override
   Future<void> validate(HdrOpenPlan plan) async {}
+
+  @override
+  Future<HdrContainerSourceSnapshot?> discoverSource(HdrOpenPlan plan) {
+    discoveryCalls++;
+    calls.add('discover:${_tag(plan)}');
+    return holdContainerDiscovery?.future ?? Future.value(containerSnapshot);
+  }
+
+  @override
+  Future<void> prepareSourceDiscovery(HdrOpenPlan plan) async {
+    calls.add('prepare-discovery:${_tag(plan)}');
+    final error = prepareDiscoveryError;
+    prepareDiscoveryError = null;
+    if (error != null) throw error;
+  }
+
+  @override
+  Future<void> resumeSourceDiscovery(HdrOpenPlan plan) async {
+    calls.add('resume-discovery:${_tag(plan)}');
+    final error = resumeDiscoveryError;
+    resumeDiscoveryError = null;
+    if (error != null) throw error;
+  }
 
   @override
   Future<void> stop() async {
@@ -2099,6 +2646,7 @@ class FakeBackend implements HdrOpenBackend<HdrOpenPlan> {
     required bool play,
   }) async {
     calls.add('open:${_tag(plan)}:$start');
+    openedPlayModes.add(play);
     if (_script.openError != null) throw _script.openError!;
     opened.add(FakeOpened(plan.route, start, plan.options));
   }
@@ -2129,4 +2677,40 @@ class FakeBackend implements HdrOpenBackend<HdrOpenPlan> {
         dataSpaceReadback: _dataSpaceReadback,
         hwdecCurrent: _lastHwdec,
       );
+}
+
+class PromotionFakeBackend extends FakeBackend
+    implements HdrContainerSourcePromotionBackend {
+  bool allowPromotion = false;
+  Object? promotionError;
+  Completer<void>? holdPromotionAdmission;
+  HdrOpenPlan? promotedFrom;
+  HdrOpenPlan? promotedTo;
+  Duration? promotedStart;
+
+  @override
+  Future<bool> canPromoteDiscoveredSource(
+    HdrOpenPlan previous,
+    HdrOpenPlan next,
+  ) async {
+    calls.add('can-promote:${previous.route.strategy.name}:'
+        '${next.route.strategy.name}');
+    await holdPromotionAdmission?.future;
+    return allowPromotion;
+  }
+
+  @override
+  Future<void> promoteDiscoveredSource(
+    HdrOpenPlan previous,
+    HdrOpenPlan next, {
+    Duration? start,
+  }) async {
+    calls.add('promote:${previous.route.strategy.name}:'
+        '${next.route.strategy.name}');
+    promotedFrom = previous;
+    promotedTo = next;
+    promotedStart = start;
+    final error = promotionError;
+    if (error != null) throw error;
+  }
 }

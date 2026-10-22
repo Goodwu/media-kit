@@ -35,12 +35,14 @@ class TestSession extends Fake implements HdrVideoSession {
   final ValueNotifier<HdrOutputReport> report = ValueNotifier(const HdrOutputReport());
   final requests = <Completer<void>>[];
   final calls = <String>[];
+  final hints = <HdrSourceDescriptor?>[];
   bool failDispose = false;
   @override
   Future<void> open(Media media, {HdrSourceDescriptor? hint,
     VideoSourceSpec? sourceSpec, VideoOutputTarget? target,
     EffectiveVideoRouteOptions? options, bool play = true, Duration? start}) {
     calls.add('open:$play:${start?.inSeconds}');
+    hints.add(hint);
     final pending = Completer<void>();
     requests.add(pending);
     report.value = HdrOutputReport(generation: requests.length);
@@ -103,6 +105,51 @@ void main() {
     await binding.dispose();
     expect(session.calls.last, 'dispose');
     expect(player.calls.last, 'dispose');
+    session.closeNotifiers();
+  });
+
+  test('sourceHint reaches the session open unmodified', () async {
+    final player = TestPlayer(), session = TestSession();
+    final binding = RoutedVideoPlayback.forTesting(player, session: session);
+    const hint = HdrSourceDescriptor(
+        codec: 'hevc', transfer: 'hlg',
+        dynamicMetadata: HdrDynamicMetadata.dolbyVision,
+        dvProfile: 8, dvCompatibilityId: 4);
+    final opening = binding.open(Media('test://a'), sourceHint: hint);
+    await turn();
+    expect(session.hints, const [hint]);
+    session.accept(0);
+    await opening;
+    await binding.dispose();
+    session.closeNotifiers();
+  });
+
+  test('verifiedSourceHint stays null until verified, then exposes facts', () async {
+    final player = TestPlayer(), session = TestSession();
+    final binding = RoutedVideoPlayback.forTesting(player, session: session);
+    expect(binding.verifiedSourceHint, isNull);
+    const hint = HdrSourceDescriptor(
+        codec: 'hevc', transfer: 'hlg',
+        dynamicMetadata: HdrDynamicMetadata.dolbyVision,
+        dvProfile: 8, dvCompatibilityId: 4);
+    final opening = binding.open(Media('test://a'), sourceHint: hint);
+    await turn();
+    // The session published a fresh unverified report for the new generation.
+    expect(binding.verifiedSourceHint, isNull);
+    session.accept(0);
+    await opening;
+    expect(binding.verifiedSourceHint, isNull); // no source in the report
+    session.report.value = const HdrOutputReport(
+        generation: 1, verified: true, source: hint);
+    expect(binding.verifiedSourceHint, const HdrSourceDescriptor(
+        codec: 'hevc', transfer: 'hlg',
+        dynamicMetadata: HdrDynamicMetadata.dolbyVision,
+        dvProfile: 8, dvCompatibilityId: 4));
+    session.report.value = HdrOutputReport(
+        generation: 1, verified: true, sourceFacts: HdrSourceFacts.fromHint(null));
+    // An all-unknown description is no hint: the probe path stays eligible.
+    expect(binding.verifiedSourceHint, isNull);
+    await binding.dispose();
     session.closeNotifiers();
   });
 

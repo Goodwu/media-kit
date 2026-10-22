@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:media_kit/media_kit.dart';
 
+import '../hdr/hdr_source_descriptor.dart';
 import '../video_controller/video_controller.dart';
 import '../video_controller/platform_video_controller.dart';
 import 'player_owner_slot.dart';
@@ -68,6 +69,12 @@ class ManagedVideoPlayback {
 
   Player? get player => _owner?.player;
   RoutedVideoPlayback? get routed => _owner?.routed;
+
+  /// Pass-through of the current verified source description for callers
+  /// holding this managed wrapper; see
+  /// [RoutedVideoPlayback.verifiedSourceHint].
+  HdrSourceDescriptor? get verifiedSourceHint =>
+      _owner?.routed?.verifiedSourceHint;
   VideoController? get controller =>
       _owner?.routed?.controller.value ?? _owner?.legacyController;
   bool get hasOutput => _owner != null;
@@ -135,6 +142,7 @@ class ManagedVideoPlayback {
     bool video = true,
     bool allowLegacyFallback = false,
     bool preservePlaybackSettings = false,
+    HdrSourceDescriptor? sourceHint,
   }) async {
     final previous = _owner;
     final snapshot = previous == null
@@ -170,7 +178,8 @@ class ManagedVideoPlayback {
     final route = captured.routed;
     if (route == null) return;
     try {
-      await route.open(media, play: play, video: video);
+      await route.open(media, play: play, video: video,
+          sourceHint: sourceHint);
       if (!isCurrent() || !identical(_owner, captured)) return;
       _notifyChanged();
     } catch (error) {
