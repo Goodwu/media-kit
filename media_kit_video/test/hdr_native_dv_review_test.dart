@@ -33,9 +33,11 @@ class Fixture {
   };
   int writes = 0;
   int propertyReads = 0;
+  final batchReads = <List<String>>[];
   Duration clock = Duration.zero;
   Duration budget = const Duration(seconds: 1);
   void Function(String)? onRead;
+  Future<List<String>> Function(List<String>)? onReadBatch;
   void Function()? onDelay;
   Future<FileLoadedRecord> Function()? loaded;
   Object? verificationError;
@@ -110,6 +112,12 @@ class Fixture {
           onRead?.call(name);
           return result;
         },
+        readProperties: onReadBatch == null
+            ? null
+            : (names) async {
+                batchReads.add(List<String>.of(names));
+                return onReadBatch!(names);
+              },
         latestVideoParams: () => null,
         budget: budget,
         monotonicNow: () => clock,
@@ -146,6 +154,127 @@ void main() {
     expect(facts.dvCompatibilityId, 0);
     expect(facts.dvElPresent, isFalse);
     expect(f.writes, 0);
+  });
+
+  test('batch review keeps ordered head and independent tail samples',
+      () async {
+    final f = Fixture();
+    await f.initialize();
+    f.onReadBatch =
+        (names) async => names.map((name) => f.values[name] ?? '').toList();
+    final facts = await f.review();
+
+    expect(f.batchReads, [
+      [
+        'android-mediacodec-info',
+        'hwdec-current',
+        'video-format',
+        'current-tracks/video/dolby-vision-profile',
+        'current-tracks/video/codec',
+        'current-tracks/video/dolby-vision-compatibility-id',
+        'current-tracks/video/dolby-vision-el-present',
+        'video-params/hdr-vivid',
+      ],
+      ['android-mediacodec-info', 'hwdec-current'],
+    ]);
+    expect(f.propertyReads, 0);
+    expect(facts.dolbyVisionProfile, 5);
+    expect(facts.codec, 'hevc');
+    expect(facts.hwdecCurrent, 'mediacodec');
+  });
+
+  test('batch head and tail decoder drift remains rejected', () async {
+    final f = Fixture();
+    await f.initialize();
+    f.onReadBatch = (names) async {
+      final result = names.map((name) => f.values[name] ?? '').toList();
+      if (names.first == 'android-mediacodec-info') {
+        f.values['android-mediacodec-info'] =
+            dvConfiguration.replaceFirst('OMX.qcom', 'other');
+      }
+      return result;
+    };
+
+    await expectLater(
+      f.review(),
+      throwsA(failure(HdrNativeDvReviewFailureKind.configuration)),
+    );
+    expect(f.batchReads, [
+      [
+        'android-mediacodec-info',
+        'hwdec-current',
+        'video-format',
+        'current-tracks/video/dolby-vision-profile',
+        'current-tracks/video/codec',
+        'current-tracks/video/dolby-vision-compatibility-id',
+        'current-tracks/video/dolby-vision-el-present',
+        'video-params/hdr-vivid',
+      ],
+      ['android-mediacodec-info', 'hwdec-current'],
+    ]);
+    expect(f.writes, 0);
+  });
+
+  test('batch result length mismatch is rejected', () async {
+    final f = Fixture();
+    await f.initialize();
+    f.onReadBatch = (_) async => <String>[];
+
+    await expectLater(
+      f.review(),
+      throwsA(failure(HdrNativeDvReviewFailureKind.configuration)),
+    );
+    expect(f.batchReads, hasLength(1));
+  });
+
+  test('batch read remains bounded by the shared review deadline', () async {
+    final f = Fixture();
+    await f.initialize();
+    f.budget = const Duration(milliseconds: 100);
+    f.onReadBatch = (names) async {
+      f.clock += f.budget;
+      return names.map((name) => f.values[name] ?? '').toList();
+    };
+
+    await expectLater(
+      f.review(),
+      throwsA(failure(HdrNativeDvReviewFailureKind.timeout)),
+    );
+    expect(f.batchReads, hasLength(1));
+    expect(f.clock, f.budget);
+  });
+
+  test('timed out native batch drains before releasing the Player lock',
+      () async {
+    final f = Fixture();
+    await f.initialize();
+    f.budget = const Duration(milliseconds: 40);
+    final entered = Completer<void>();
+    final release = Completer<List<String>>();
+    f.onReadBatch = (names) {
+      entered.complete();
+      return release.future;
+    };
+    var reviewFinished = false;
+    final reviewing = f.review();
+    reviewing.then<void>((_) => reviewFinished = true,
+        onError: (Object _, StackTrace __) => reviewFinished = true);
+    await entered.future;
+    await Future<void>.delayed(const Duration(milliseconds: 60));
+    expect(reviewFinished, isFalse);
+
+    var secondLockEntered = false;
+    final secondLock = f.lock.synchronized(() => secondLockEntered = true);
+    await Future<void>.delayed(const Duration(milliseconds: 10));
+    expect(secondLockEntered, isFalse);
+
+    release.complete(<String>[]);
+    await expectLater(
+      reviewing,
+      throwsA(failure(HdrNativeDvReviewFailureKind.timeout)),
+    );
+    await secondLock;
+    expect(secondLockEntered, isTrue);
   });
 
   for (final change in ['entry', 'epoch', 'player', 'path']) {
@@ -467,6 +596,30 @@ void main() {
     release.complete();
     await holding;
     await assertion;
+    expect(f.propertyReads, 0);
+  });
+
+  test('late lock admission returns without waiting for or issuing reads',
+      () async {
+    final f = Fixture();
+    await f.initialize();
+    f.budget = const Duration(milliseconds: 30);
+    final release = Completer<void>();
+    final entered = Completer<void>();
+    final holding = f.lock.synchronized(() {
+      entered.complete();
+      return release.future;
+    });
+    await entered.future;
+    final reviewing = f.review();
+    await expectLater(
+      reviewing,
+      throwsA(failure(HdrNativeDvReviewFailureKind.timeout)),
+    );
+    expect(f.propertyReads, 0);
+    f.clock = f.budget;
+    release.complete();
+    await holding;
     expect(f.propertyReads, 0);
   });
 

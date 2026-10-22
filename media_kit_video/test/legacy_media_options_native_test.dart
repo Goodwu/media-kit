@@ -91,4 +91,24 @@ void main() {
       await directory.delete(recursive: true);
     }
   }, skip: !Platform.isLinux, timeout: const Timeout(Duration(seconds: 40)));
+
+  test('container probe accepts one media and always opens paused', () async {
+    MediaKit.ensureInitialized(libmpv: 'libmpv.so.2');
+    NativePlayer.test = true;
+    final directory = await Directory.systemTemp.createTemp('mk-probe-');
+    final file = await pcmFixture(directory, 'probe.wav');
+    final player = await Player.create();
+    try {
+      expect(
+        () => player.openContainerProbe(Playlist([Media(file.path)])),
+        throwsArgumentError,
+      );
+      await player.openContainerProbe(Media(file.path));
+      expect(player.state.playing, isFalse);
+    } finally {
+      await player.dispose();
+      NativePlayer.test = false;
+      await directory.delete(recursive: true);
+    }
+  }, skip: !Platform.isLinux, timeout: const Timeout(Duration(seconds: 40)));
 }

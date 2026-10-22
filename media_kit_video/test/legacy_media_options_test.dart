@@ -14,8 +14,50 @@ void main() {
     final options = LegacyMediaOptions.fromExtras({
       'hwdec': 'no', 'vo': 'null', 'scripts': 'foreign.lua',
       'http-header-fields': 'Cookie: private', 'record': Object(),
+      'track-auto-selection': 'no', 'vid': 'auto', 'aid': 'auto',
+      'sid': 'auto', 'secondary-sid': 'no',
     });
     expect(options.isEmpty, isTrue);
+  });
+  test('typed container probe options preserve request fields and headers', () {
+    final options = LegacyMediaOptions.fromExtras({
+      // These untrusted extras must not replace the trusted probe policy.
+      'track-auto-selection': 'yes', 'vid': '2', 'aid': '3', 'sid': '4',
+      'secondary-sid': 'yes',
+    },
+      containerProbe: true,
+      start: const Duration(milliseconds: 1234),
+      end: const Duration(seconds: 9),
+      httpHeaders: const {'X-Probe': 'preserved'},
+    );
+    expect(options.values, {
+      'start': '1.234',
+      'end': '9.000',
+      'track-auto-selection': 'no',
+      'vid': 'auto',
+      'aid': 'auto',
+      'sid': 'auto',
+      'secondary-sid': 'no',
+    });
+    expect(options.encoded, contains('http-header-fields=%18%x-probe: preserved'));
+    expect(options.appendArguments('probe.mp4', apiVersion: 0x20003), [
+      'loadfile', 'probe.mp4', 'append', '-1', options.encoded,
+    ]);
+  });
+  test('container probe can preserve an explicitly disabled subtitle selector', () {
+    final disabled = LegacyMediaOptions.fromExtras(null,
+        containerProbe: true, probeAutomaticSubtitles: false);
+    expect(disabled.values['sid'], 'no');
+    expect(disabled.values['track-auto-selection'], 'no');
+    expect(disabled.values['vid'], 'auto');
+    expect(disabled.values['aid'], 'auto');
+    expect(disabled.values['secondary-sid'], 'no');
+
+    final defaultProbe = LegacyMediaOptions.fromExtras(null, containerProbe: true);
+    expect(defaultProbe.values['sid'], 'auto');
+    final ordinary = LegacyMediaOptions.fromExtras(null,
+        probeAutomaticSubtitles: false);
+    expect(ordinary.isEmpty, isTrue);
   });
   test('original buffering option set survives', () {
     final options = LegacyMediaOptions.fromExtras({

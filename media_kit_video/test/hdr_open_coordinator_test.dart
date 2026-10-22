@@ -19,6 +19,9 @@ class FakeBackend implements HdrOpenBackend<FakePlan> {
   Completer<void>? heldOutput;
   Completer<void>? heldConfigure;
   Completer<void>? heldPrepareOutput;
+  Completer<void>? heldReview;
+  final openedStarts = <Duration?>[];
+  final openedPlays = <bool>[];
   TimeoutException? outputError;
   bool failConfigure = false;
   bool failStopOnce = false;
@@ -93,6 +96,8 @@ class FakeBackend implements HdrOpenBackend<FakePlan> {
     required bool play,
   }) async {
     calls.add('open:${plan.path}');
+    openedStarts.add(start);
+    openedPlays.add(play);
     await heldOpen?.future;
     final error = openErrorOnce;
     if (error != null) {
@@ -104,6 +109,7 @@ class FakeBackend implements HdrOpenBackend<FakePlan> {
   @override
   Future<HdrReviewFacts> reviewFacts(FakePlan plan) async {
     calls.add('review:${plan.path}');
+    await heldReview?.future;
     final error = reviewErrorOnce;
     if (error != null) {
       reviewErrorOnce = null;
@@ -586,6 +592,467 @@ void main() {
     await coordinator.dispose();
   });
 
+  group('source discovery replan', () {
+    test('promotes in place, then still performs replacement review', () async {
+      final backend = FakeBackend();
+      final order = <String>[];
+      final cleaned = <String>[];
+      final diagnostics = <HdrBackendCallDiagnostic<FakePlan>>[];
+      final coordinator = HdrOpenCoordinator<String, FakePlan>(
+        backend,
+        preparer: (source, _) async => plan(source),
+        discoverReplan: (current) async =>
+            current.path == 'A' ? plan('B') : null,
+        canPromoteDiscovered: (previous, next) async {
+          order.add('can:${previous.path}:${next.path}');
+          return true;
+        },
+        promoteDiscovered: (previous, next, start) async {
+          order.add('promote:${previous.path}:${next.path}:$start');
+        },
+        review: (current, _) async {
+          order.add('review:${current.path}');
+          return const HdrReviewDecision<FakePlan>.accept();
+        },
+        attemptCleanup: (current) async {
+          cleaned.add(current.path);
+          order.add('cleanup:${current.path}');
+        },
+        onBackendCallDiagnostic: (event) {
+          diagnostics.add(event);
+          if (event.method == HdrBackendDiagnosticMethod.validate &&
+              event.boundary == HdrBackendDiagnosticBoundary.entered &&
+              event.invocation?.plan.path == 'B') {
+            order.add('validate:B');
+          }
+        },
+      );
+      const start = Duration(seconds: 9);
+
+      final result =
+          await coordinator.openSource('A', start: start, play: false);
+
+      expect(result.plan.path, 'B');
+      expect(result.presentationVerified, isFalse);
+      expect(
+          backend.calls.where((call) => call.startsWith('open:')), ['open:A']);
+      expect(backend.calls, contains('review:B'));
+      expect(cleaned, ['A', 'B']);
+      final promotionAt =
+          order.indexWhere((event) => event.startsWith('promote:A:B:'));
+      expect(order.indexOf('cleanup:A'), lessThan(order.indexOf('validate:B')));
+      expect(order.indexOf('validate:B'), lessThan(promotionAt));
+      expect(promotionAt, lessThan(order.indexOf('review:B')));
+      final promotedValidation = diagnostics.singleWhere((event) =>
+          event.method == HdrBackendDiagnosticMethod.validate &&
+          event.boundary == HdrBackendDiagnosticBoundary.entered &&
+          event.invocation?.plan.path == 'B');
+      expect(promotedValidation.owningAttempt?.plan.path, 'B');
+      await coordinator.dispose();
+    });
+
+    test('a declined promotion keeps the normal reopen path', () async {
+      final backend = FakeBackend();
+      final cleaned = <String>[];
+      var promotions = 0;
+      final coordinator = HdrOpenCoordinator<String, FakePlan>(
+        backend,
+        preparer: (source, _) async => plan(source),
+        discoverReplan: (current) async =>
+            current.path == 'A' ? plan('B') : null,
+        canPromoteDiscovered: (_, __) async => false,
+        promoteDiscovered: (_, __, ___) async => promotions++,
+        review: (_, __) async => const HdrReviewDecision<FakePlan>.accept(),
+        attemptCleanup: (current) async => cleaned.add(current.path),
+      );
+
+      await coordinator.openSource('A', play: false);
+
+      expect(backend.calls.where((call) => call.startsWith('open:')),
+          ['open:A', 'open:B']);
+      expect(backend.calls, contains('review:B'));
+      expect(cleaned, ['A', 'B']);
+      expect(promotions, 0);
+      await coordinator.dispose();
+    });
+
+    test('old cleanup failure keeps old owner and prevents promotion',
+        () async {
+      final backend = FakeBackend();
+      final diagnostics = <HdrBackendCallDiagnostic<FakePlan>>[];
+      var promotions = 0;
+      final coordinator = HdrOpenCoordinator<String, FakePlan>(
+        backend,
+        preparer: (source, _) async => plan(source),
+        discoverReplan: (_) async => plan('B'),
+        canPromoteDiscovered: (_, __) async => true,
+        promoteDiscovered: (_, __, ___) async => promotions++,
+        attemptCleanup: (current) async {
+          if (current.path == 'A') throw StateError('old cleanup failed');
+        },
+        onBackendCallDiagnostic: diagnostics.add,
+      );
+
+      await expectLater(coordinator.openSource('A', play: false),
+          throwsA(isA<HdrAttemptCleanupFailure>()));
+
+      expect(promotions, 0);
+      expect(
+          backend.calls.where((call) => call.startsWith('open:')), ['open:A']);
+      expect(
+          backend.calls.where((call) => call.startsWith('review:')), isEmpty);
+      final rollbackStop = diagnostics.lastWhere((event) =>
+          event.method == HdrBackendDiagnosticMethod.stop &&
+          event.purpose == HdrBackendDiagnosticPurpose.rollback &&
+          event.boundary == HdrBackendDiagnosticBoundary.entered);
+      expect(rollbackStop.owningAttempt?.plan.path, 'A');
+      await coordinator.dispose();
+    });
+
+    test('promotion failure rolls back and cleans the replacement owner',
+        () async {
+      final backend = FakeBackend();
+      final cleaned = <String>[];
+      final diagnostics = <HdrBackendCallDiagnostic<FakePlan>>[];
+      var retries = 0;
+      final coordinator = HdrOpenCoordinator<String, FakePlan>(
+        backend,
+        preparer: (source, _) async => plan(source),
+        retry: (_, __) async {
+          retries++;
+          return plan('retry');
+        },
+        maxRetries: 1,
+        discoverReplan: (_) async => plan('B'),
+        canPromoteDiscovered: (_, __) async => true,
+        promoteDiscovered: (_, __, ___) async =>
+            throw StateError('promotion failed'),
+        attemptCleanup: (current) async => cleaned.add(current.path),
+        onBackendCallDiagnostic: diagnostics.add,
+      );
+
+      await expectLater(
+          coordinator.openSource('A', play: false), throwsA(isA<StateError>()));
+
+      expect(cleaned, ['A', 'B']);
+      expect(retries, 0);
+      expect(
+          backend.calls.where((call) => call.startsWith('open:')), ['open:A']);
+      expect(
+          backend.calls.where((call) => call.startsWith('review:')), isEmpty);
+      final rollbackStop = diagnostics.lastWhere((event) =>
+          event.method == HdrBackendDiagnosticMethod.stop &&
+          event.purpose == HdrBackendDiagnosticPurpose.rollback &&
+          event.boundary == HdrBackendDiagnosticBoundary.entered);
+      expect(rollbackStop.owningAttempt?.plan.path, 'B');
+      await coordinator.dispose();
+    });
+
+    test('superseded promotion retires its replacement before successor',
+        () async {
+      final backend = FakeBackend();
+      final promotionEntered = Completer<void>();
+      final promotionRelease = Completer<void>();
+      final cleaned = <String>[];
+      final coordinator = HdrOpenCoordinator<String, FakePlan>(
+        backend,
+        preparer: (source, _) async => plan(source),
+        discoverReplan: (current) async =>
+            current.path == 'A' ? plan('B') : null,
+        canPromoteDiscovered: (_, __) async => true,
+        promoteDiscovered: (_, __, ___) async {
+          promotionEntered.complete();
+          await promotionRelease.future;
+        },
+        attemptCleanup: (current) async => cleaned.add(current.path),
+      );
+
+      final stale = coordinator.openSource('A', play: false);
+      await promotionEntered.future;
+      final staleExpectation =
+          expectLater(stale, throwsA(isA<OpenSuperseded>()));
+      final fresh = coordinator.openSource('C', play: false);
+      promotionRelease.complete();
+      await staleExpectation;
+      expect((await fresh).plan.path, 'C');
+
+      expect(cleaned, ['A', 'B', 'C']);
+      expect(backend.calls.where((call) => call.startsWith('open:')),
+          ['open:A', 'open:C']);
+      expect(backend.calls, isNot(contains('review:B')));
+      await coordinator.dispose();
+    });
+
+    test('promotion path consumes the shared reopen budget', () async {
+      final backend = FakeBackend();
+      final coordinator = HdrOpenCoordinator<String, FakePlan>(
+        backend,
+        preparer: (source, _) async => plan(source),
+        maxReviewReopens: 1,
+        discoverReplan: (current) async =>
+            current.path == 'A' ? plan('B') : null,
+        canPromoteDiscovered: (_, __) async => true,
+        promoteDiscovered: (_, __, ___) async {},
+        review: (_, __) async =>
+            HdrReviewDecision<FakePlan>.reopen(Duration.zero, plan('C')),
+      );
+
+      await expectLater(coordinator.openSource('A', play: false),
+          throwsA(isA<HdrReviewReopenLimit>()));
+
+      expect(
+          backend.calls.where((call) => call.startsWith('open:')), ['open:A']);
+      expect(backend.calls, contains('review:B'));
+      expect(backend.calls, isNot(contains('review:C')));
+      await coordinator.dispose();
+    });
+
+    test('replacement waits for full review and preserves the caller start',
+        () async {
+      final backend = FakeBackend()..heldReview = Completer<void>();
+      final discoveries = <String>[];
+      final decisions = <String>[];
+      final cleaned = <String>[];
+      final coordinator = HdrOpenCoordinator<String, FakePlan>(
+        backend,
+        preparer: (source, _) async => plan(source),
+        discoverReplan: (current) async {
+          discoveries.add(current.path);
+          return current.path == 'A' ? plan('B') : null;
+        },
+        review: (current, _) async {
+          decisions.add(current.path);
+          return const HdrReviewDecision<FakePlan>.accept();
+        },
+        attemptCleanup: (current) async => cleaned.add(current.path),
+      );
+      const start = Duration(seconds: 11);
+      var completed = false;
+      final opening =
+          coordinator.openSource('A', start: start, play: false).then((result) {
+        completed = true;
+        return result;
+      });
+      while (!backend.calls.contains('review:B')) {
+        await Future<void>.delayed(Duration.zero);
+      }
+      expect(completed, isFalse);
+      expect(decisions, isEmpty);
+      expect(backend.calls, isNot(contains('review:A')));
+      expect(cleaned, ['A']);
+      expect(backend.openedStarts, [start, start]);
+      expect(backend.openedPlays, [false, false]);
+      backend.heldReview!.complete();
+      final result = await opening;
+      expect(result.plan.path, 'B');
+      expect(result.presentationVerified, isFalse);
+      expect(discoveries, ['A', 'B']);
+      expect(decisions, ['B']);
+      expect(cleaned, ['A', 'B']);
+      await coordinator.dispose();
+    });
+
+    test('null discovery falls through to the ordinary full review', () async {
+      final backend = FakeBackend();
+      final discoveries = <String>[];
+      final decisions = <String>[];
+      final coordinator = HdrOpenCoordinator<String, FakePlan>(
+        backend,
+        preparer: (source, _) async => plan(source),
+        discoverReplan: (current) async {
+          discoveries.add(current.path);
+          return null;
+        },
+        review: (current, _) async {
+          decisions.add(current.path);
+          return const HdrReviewDecision<FakePlan>.accept();
+        },
+      );
+      expect((await coordinator.openSource('A', play: false)).plan.path, 'A');
+      expect(discoveries, ['A']);
+      expect(decisions, ['A']);
+      expect(
+          backend.calls.where((call) => call.startsWith('open:')), ['open:A']);
+      expect(backend.calls, contains('review:A'));
+      await coordinator.dispose();
+    });
+
+    test('playing opens do not invoke source discovery', () async {
+      final backend = FakeBackend();
+      var discoveries = 0;
+      final coordinator = HdrOpenCoordinator<String, FakePlan>(
+        backend,
+        preparer: (source, _) async => plan(source),
+        discoverReplan: (current) async {
+          discoveries++;
+          return plan('unexpected');
+        },
+      );
+      expect((await coordinator.openSource('A', play: true)).plan.path, 'A');
+      expect(discoveries, 0);
+      expect(backend.openedPlays, [true]);
+      expect(backend.calls, contains('review:A'));
+      expect(backend.calls, isNot(contains('open:unexpected')));
+      await coordinator.dispose();
+    });
+
+    test('supersede during discovery cleanup cannot open the replacement',
+        () async {
+      final backend = FakeBackend();
+      final cleanupEntered = Completer<void>();
+      final cleanupRelease = Completer<void>();
+      final coordinator = HdrOpenCoordinator<String, FakePlan>(
+        backend,
+        preparer: (source, _) async => plan(source),
+        discoverReplan: (current) async =>
+            current.path == 'A' ? plan('A-replaced') : null,
+        attemptCleanup: (current) async {
+          if (current.path == 'A') {
+            if (!cleanupEntered.isCompleted) cleanupEntered.complete();
+            await cleanupRelease.future;
+          }
+        },
+      );
+      final stale = coordinator.openSource('A', play: false);
+      await cleanupEntered.future;
+      final staleExpectation =
+          expectLater(stale, throwsA(isA<OpenSuperseded>()));
+      final fresh = coordinator.openSource('B', play: false);
+      cleanupRelease.complete();
+      await staleExpectation;
+      expect((await fresh).plan.path, 'B');
+      expect(backend.calls, isNot(contains('prepare:A-replaced')));
+      expect(backend.calls, isNot(contains('open:A-replaced')));
+      expect(backend.calls, isNot(contains('review:A')));
+      await coordinator.dispose();
+    });
+
+    test('discovery replacement obeys a zero reopen budget', () async {
+      final backend = FakeBackend();
+      final coordinator = HdrOpenCoordinator<String, FakePlan>(
+        backend,
+        preparer: (source, _) async => plan(source),
+        maxReviewReopens: 0,
+        discoverReplan: (current) async => plan('B'),
+      );
+      await expectLater(coordinator.openSource('A', play: false),
+          throwsA(isA<HdrReviewReopenLimit>()));
+      expect(
+          backend.calls.where((call) => call.startsWith('open:')), ['open:A']);
+      expect(
+          backend.calls.where((call) => call.startsWith('review:')), isEmpty);
+      expect(backend.calls.skip(backend.calls.length - 2), ['stop', 'reset']);
+      await coordinator.dispose();
+    });
+
+    for (final discoveryFirst in [true, false]) {
+      test(
+          'discovery and full review share the reopen budget '
+          '(discovery first: $discoveryFirst)', () async {
+        final backend = FakeBackend();
+        var retries = 0;
+        final coordinator = HdrOpenCoordinator<String, FakePlan>(
+          backend,
+          preparer: (source, _) async => plan(source),
+          maxReviewReopens: 1,
+          maxRetries: 2,
+          retry: (current, error) async {
+            retries++;
+            return plan('retry');
+          },
+          discoverReplan: (current) async {
+            if (discoveryFirst && current.path == 'A') return plan('B');
+            if (!discoveryFirst && current.path == 'B') return plan('C');
+            return null;
+          },
+          review: (current, _) async => HdrReviewDecision<FakePlan>.reopen(
+              Duration.zero, plan(discoveryFirst ? 'C' : 'B')),
+        );
+        await expectLater(coordinator.openSource('A', play: false),
+            throwsA(isA<HdrReviewReopenLimit>()));
+        expect(backend.calls.where((call) => call.startsWith('open:')),
+            ['open:A', 'open:B']);
+        expect(backend.calls.where((call) => call.startsWith('review:')),
+            [discoveryFirst ? 'review:B' : 'review:A']);
+        expect(retries, 0);
+        expect(backend.calls.skip(backend.calls.length - 2), ['stop', 'reset']);
+        await coordinator.dispose();
+      });
+    }
+  });
+
+  test('discovery preparation runs after output readiness and before open',
+      () async {
+    final backend = FakeBackend();
+    final order = <String>[];
+    final coordinator = HdrOpenCoordinator<String, FakePlan>(
+      backend,
+      preparer: (source, _) async => plan(source),
+      prepareDiscover: (current) async => order.add('prepare:${current.path}'),
+      discoverReplan: (current) async {
+        order.add('discover:${current.path}');
+        return null;
+      },
+      onPhase: (_, phase, __) => order.add(phase),
+    );
+
+    await coordinator.openSource('A', play: false);
+
+    expect(order.indexOf('output_ready'), lessThan(order.indexOf('prepare:A')));
+    expect(order.indexOf('prepare:A'), lessThan(order.indexOf('media_opened')));
+    expect(
+        order.indexOf('media_opened'), lessThan(order.indexOf('discover:A')));
+    expect(backend.calls.indexOf('output:A'),
+        lessThan(backend.calls.indexOf('open:A')));
+    await coordinator.dispose();
+  });
+
+  test('prepare discovery failure rolls back without opening or reviewing',
+      () async {
+    final backend = FakeBackend();
+    final coordinator = HdrOpenCoordinator<String, FakePlan>(
+      backend,
+      preparer: (source, _) async => plan(source),
+      prepareDiscover: (_) async => throw StateError('prepare discovery'),
+      discoverReplan: (_) async => null,
+    );
+
+    await expectLater(
+        coordinator.openSource('A', play: false), throwsA(isA<StateError>()));
+
+    expect(backend.calls.where((call) => call.startsWith('open:')), isEmpty);
+    expect(backend.calls.where((call) => call.startsWith('review:')), isEmpty);
+    expect(backend.calls.skip(backend.calls.length - 2), ['stop', 'reset']);
+    await coordinator.dispose();
+  });
+
+  test('supersede during discovery preparation prevents stale open', () async {
+    final backend = FakeBackend();
+    final entered = Completer<void>();
+    final release = Completer<void>();
+    final coordinator = HdrOpenCoordinator<String, FakePlan>(
+      backend,
+      preparer: (source, _) async => plan(source),
+      prepareDiscover: (current) async {
+        if (current.path == 'A') {
+          entered.complete();
+          await release.future;
+        }
+      },
+    );
+
+    final stale = coordinator.openSource('A', play: false);
+    await entered.future;
+    final staleExpectation = expectLater(stale, throwsA(isA<OpenSuperseded>()));
+    final fresh = coordinator.openSource('B', play: true);
+    release.complete();
+    await staleExpectation;
+    expect((await fresh).plan.path, 'B');
+    expect(backend.calls, isNot(contains('open:A')));
+    expect(backend.calls, contains('open:B'));
+    await coordinator.dispose();
+  });
+
   group('attempt cleanup', () {
     test('a delayed cleanup future blocks the result completion', () async {
       final gate = Completer<void>();
@@ -809,7 +1276,8 @@ void main() {
       await coordinator.dispose();
     });
 
-    test('supersede during the pending terminal cleanup fails the attempt '
+    test(
+        'supersede during the pending terminal cleanup fails the attempt '
         '(B6)', () async {
       final backend = FakeBackend();
       final gate = Completer<void>();
@@ -838,7 +1306,8 @@ void main() {
       await coordinator.dispose();
     });
 
-    test('dispose during the pending terminal cleanup fails the attempt '
+    test(
+        'dispose during the pending terminal cleanup fails the attempt '
         '(B6)', () async {
       final backend = FakeBackend();
       final gate = Completer<void>();

@@ -28,6 +28,31 @@ class HdrOptionSourceIdentity {
       identityHashCode(player), path, playlistEntryId, fileLoadedEpoch);
 }
 
+/// Samples the same source endpoints twice in one API-isolate request.
+/// Properties are still read in sequence; the Player lock and epoch fence
+/// retain the existing managed-source ownership contract.
+Future<HdrOptionSourceIdentity> readHdrOptionSourceIdentity({
+  required Object player,
+  required int Function() fileLoadedEpoch,
+  required Future<List<String>> Function(List<String>) readProperties,
+}) async {
+  final epoch = fileLoadedEpoch();
+  final values = await readProperties(
+      const ['path', 'playlist/0/id', 'path', 'playlist/0/id']);
+  if (values.length != 4 ||
+      values[0] != values[2] ||
+      values[1] != values[3] ||
+      fileLoadedEpoch() != epoch) {
+    throw StateError('Media changed while reading native DV option identity');
+  }
+  return HdrOptionSourceIdentity(
+    player: player,
+    path: values[0],
+    playlistEntryId: values[1],
+    fileLoadedEpoch: epoch,
+  );
+}
+
 /// Captured under the Player lock. It records one stop operation's result,
 /// not authority to use that result after releasing the lock. Before an
 /// owner update the backend must lock again and verify [stopped] is current.
@@ -183,6 +208,8 @@ class HdrNativeDvOptionOwner {
     required this.readProperty,
     required this.setPropertyStrict,
     required this.readIdentity,
+    this.readProperties,
+    this.currentFileLoadedEpoch,
     this.onDiagnostic,
   });
 
@@ -191,9 +218,12 @@ class HdrNativeDvOptionOwner {
   final Future<String> Function(String) readProperty;
   final Future<void> Function(String, String) setPropertyStrict;
   final Future<HdrOptionSourceIdentity> Function() readIdentity;
+  final Future<List<String>> Function(List<String>)? readProperties;
+  final int Function()? currentFileLoadedEpoch;
   final Map<String, _OwnedOption> _pending = {};
   HdrOptionSourceIdentity? _identity;
   bool _busy = false;
+  bool _requiresStoppedRestore = false;
   final void Function(HdrNativeDvOptionDiagnostic)? onDiagnostic;
   Object? _diagnosticTransaction;
   bool _emittingDiagnostic = false;
@@ -269,11 +299,62 @@ class HdrNativeDvOptionOwner {
     }
   }
 
+  Future<List<String>> _readMany(List<String> names) async {
+    final batchReader = readProperties;
+    final epochReader = currentFileLoadedEpoch;
+    final expected = _identity;
+    if (batchReader != null && epochReader != null && expected != null) {
+      if (_identity != expected || epochReader() != expected.fileLoadedEpoch) {
+        throw StateError('Native DV option source identity changed');
+      }
+      final properties = <String>[];
+      for (final name in names) {
+        properties.addAll([
+          'path',
+          'playlist/0/id',
+          'path',
+          'playlist/0/id',
+          name,
+          'path',
+          'playlist/0/id',
+          'path',
+          'playlist/0/id',
+        ]);
+      }
+      final values = await batchReader(properties);
+      if (_identity != expected ||
+          epochReader() != expected.fileLoadedEpoch ||
+          values.length != names.length * 9) {
+        throw StateError('Native DV option source identity changed');
+      }
+      final result = <String>[];
+      for (var group = 0; group < names.length; group++) {
+        final offset = group * 9;
+        if (values[offset] != expected.path ||
+            values[offset + 1] != expected.playlistEntryId ||
+            values[offset + 2] != expected.path ||
+            values[offset + 3] != expected.playlistEntryId ||
+            values[offset + 5] != expected.path ||
+            values[offset + 6] != expected.playlistEntryId ||
+            values[offset + 7] != expected.path ||
+            values[offset + 8] != expected.playlistEntryId) {
+          throw StateError('Native DV option source identity changed');
+        }
+        result.add(values[offset + 4]);
+      }
+      return result;
+    }
+    final values = <String>[];
+    for (final name in names) {
+      await assertCurrent();
+      values.add(await readProperty(name));
+      await assertCurrent();
+    }
+    return values;
+  }
+
   Future<String> _read(String name) async {
-    await assertCurrent();
-    final value = await readProperty(name);
-    await assertCurrent();
-    return value;
+    return (await _readMany([name])).single;
   }
 
   Future<void> _write(String name, String value,
@@ -359,15 +440,92 @@ class HdrNativeDvOptionOwner {
     }
   }
 
+  /// Takes ownership of an existing, still decoderless probe entry. The
+  /// caller holds Player.lock and supplies the probe's entry-specific proof.
+  /// Unlike [begin], failure retains ownership: terminate this entry before
+  /// restoring the native pair, since a setter may have changed native state.
+  Future<void> beginFromDecoderlessProbe({
+    required HdrOptionSourceIdentity entryIdentity,
+    required String originalVd,
+    required String originalRenderMode,
+    required Future<void> Function() verifyDecoderlessProbe,
+    required String vd,
+    required String renderMode,
+  }) async {
+    if (_busy || active) {
+      throw StateError('Native DV option transaction is still owned');
+    }
+    if (entryIdentity.path.isEmpty ||
+        entryIdentity.playlistEntryId.isEmpty ||
+        vd != 'native_dv=1' ||
+        (renderMode != 'timed' && renderMode != 'boolean') ||
+        originalVd.isNotEmpty ||
+        (originalRenderMode != 'boolean' && originalRenderMode != 'timed')) {
+      throw StateError('Invalid decoderless probe native DV admission');
+    }
+    _busy = true;
+    _identity = entryIdentity;
+    _requiresStoppedRestore = true;
+    if (onDiagnostic != null) _diagnosticTransaction = Object();
+    try {
+      await assertCurrent();
+      await verifyDecoderlessProbe();
+      final originals = await _readMany([vdOption, renderOption]);
+      await verifyDecoderlessProbe();
+      if (originals[0] != originalVd || originals[1] != originalRenderMode) {
+        throw StateError('Native DV probe baseline changed before promotion');
+      }
+      for (final item in [
+        MapEntry(vdOption, _OwnedOption(originalVd, vd)),
+        MapEntry(renderOption, _OwnedOption(originalRenderMode, renderMode)),
+      ]) {
+        _pending[item.key] = item.value;
+        _emit(HdrNativeDvOptionDiagnosticPurpose.originals,
+            name: item.key,
+            original: item.value.original,
+            requested: item.value.requested,
+            observed: item.value.original);
+      }
+      final expectedPair = [originalVd, originalRenderMode];
+      var pairIndex = 0;
+      for (final item in _pending.entries) {
+        await verifyDecoderlessProbe();
+        final actualPair = await _readMany([vdOption, renderOption]);
+        if (actualPair[0] != expectedPair[0] ||
+            actualPair[1] != expectedPair[1]) {
+          throw StateError('Native DV probe pair changed during promotion');
+        }
+        await verifyDecoderlessProbe();
+        await _write(item.key, item.value.requested,
+            HdrNativeDvOptionDiagnosticPurpose.apply);
+        expectedPair[pairIndex++] = item.value.requested;
+        await verifyDecoderlessProbe();
+      }
+      final appliedPair = await _readMany([vdOption, renderOption]);
+      await verifyDecoderlessProbe();
+      if (appliedPair[0] != vd || appliedPair[1] != renderMode) {
+        throw StateError('Native DV probe pair changed after promotion');
+      }
+    } catch (error, stack) {
+      _emit(HdrNativeDvOptionDiagnosticPurpose.beginFailure,
+          error: error, stack: stack);
+      Error.throwWithStackTrace(error, stack);
+    } finally {
+      _busy = false;
+    }
+  }
+
   Future<void> verify() async {
     if (_busy || !active) {
       throw StateError('No settled native DV option transaction');
     }
     _busy = true;
     try {
-      for (final item in _pending.entries) {
-        if (await _read(item.key) != item.value.requested) {
-          throw StateError('Native DV owned option changed: ${item.key}');
+      final entries = _pending.entries.toList();
+      final values = await _readMany(entries.map((item) => item.key).toList());
+      for (var i = 0; i < entries.length; i++) {
+        if (values[i] != entries[i].value.requested) {
+          throw StateError('Native DV owned option changed: ${entries[i].key}');
         }
       }
     } finally {
@@ -377,6 +535,21 @@ class HdrNativeDvOptionOwner {
 
   Future<Map<String, Object>> _restore() async {
     final failures = <String, Object>{};
+    if (_requiresStoppedRestore &&
+        (_identity?.path.isNotEmpty == true ||
+            _identity?.playlistEntryId.isNotEmpty == true)) {
+      return {
+        'sourceIdentity': StateError(
+            'Promoted native DV requires its owned stop before restore')
+      };
+    }
+    if (_requiresStoppedRestore) {
+      try {
+        await assertCurrent();
+      } catch (error) {
+        return {'sourceIdentity': error};
+      }
+    }
     for (final name in _pending.keys.toList().reversed) {
       try {
         final item = _pending[name]!;
@@ -407,6 +580,7 @@ class HdrNativeDvOptionOwner {
     }
     if (_pending.isEmpty) {
       _identity = null;
+      _requiresStoppedRestore = false;
       _diagnosticTransaction = null;
     }
     return failures;

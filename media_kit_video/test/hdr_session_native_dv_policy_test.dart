@@ -219,6 +219,8 @@ class _Environment {
           HdrSessionReviewWindow window, HdrOpenPlan plan, HdrReviewFacts facts,
           {bool Function()? live,
           Future<HdrOptionSourceIdentity> Function()? identityReader,
+          Future<String> Function(String)? propertyReader,
+          Future<List<String>> Function(List<String>)? propertyBatchReader,
           HdrNativeDvOutputSnapshot? Function()? outputReader}) =>
       consumeNativeDvSessionEvidence(
           window: window,
@@ -228,7 +230,8 @@ class _Environment {
           expectedPlayer: player,
           lock: lock,
           readIdentity: identityReader ?? readIdentity,
-          readProperty: readProperty,
+          readProperty: propertyReader ?? readProperty,
+          readProperties: propertyBatchReader,
           readOutput: outputReader ?? (() => currentOutput),
           isCurrent: live ?? (() => true));
   HdrVideoSession session(_Backend backend,
@@ -432,6 +435,131 @@ void main() {
     release.complete();
     await replace;
     await rejection;
+  });
+  for (final pendingRead in [
+    'identity',
+    'android-mediacodec-info',
+    'hwdec-current',
+  ]) {
+    test('consumer drains pending $pendingRead read before releasing Lock',
+        () async {
+      final env = _Environment();
+      final plan = env.plan(), facts = env.facts();
+      final window = await env.window(plan, facts,
+          budget: const Duration(milliseconds: 30));
+      final entered = Completer<void>();
+      final nativeResult = Completer<Object>();
+      Future<HdrOptionSourceIdentity> identityReader() {
+        if (pendingRead != 'identity') return env.readIdentity();
+        entered.complete();
+        return nativeResult.future
+            .then((value) => value as HdrOptionSourceIdentity);
+      }
+
+      Future<String> propertyReader(String name) {
+        if (name != pendingRead) return env.readProperty(name);
+        entered.complete();
+        return nativeResult.future.then((value) => value as String);
+      }
+
+      final consume = env.consume(window, plan, facts,
+          identityReader: identityReader, propertyReader: propertyReader);
+      await entered.future;
+      var successorEntered = false;
+      final successor = env.lock.synchronized(() {
+        successorEntered = true;
+      });
+      await Future<void>.delayed(const Duration(milliseconds: 80));
+      expect(successorEntered, isFalse,
+          reason: 'timed out native work still owns the shared Player lock');
+
+      nativeResult.complete(switch (pendingRead) {
+        'identity' => env.current,
+        'android-mediacodec-info' => _dvRaw,
+        _ => 'mediacodec',
+      });
+      await expectLater(
+          consume, throwsA(_kind(HdrNativeDvReviewFailureKind.timeout)));
+      await successor;
+      expect(successorEntered, isTrue);
+    });
+  }
+  test('consumer batches native reads in the original two groups and order',
+      () async {
+    final env = _Environment();
+    final plan = env.plan(), facts = env.facts();
+    final window = await env.window(plan, facts);
+    final batches = <List<String>>[];
+    await env.consume(window, plan, facts, propertyBatchReader: (names) async {
+      batches.add(List.of(names));
+      return names
+          .map((name) =>
+              name == 'android-mediacodec-info' ? _dvRaw : 'mediacodec')
+          .toList();
+    });
+
+    expect(batches, [
+      ['android-mediacodec-info', 'hwdec-current'],
+      ['android-mediacodec-info', 'hwdec-current', 'android-mediacodec-info'],
+    ]);
+    expect(env.reads, 2,
+        reason: 'only the two identity reads use scalar seams');
+  });
+  test('consumer validates the final configuration in the second batch',
+      () async {
+    final env = _Environment();
+    final plan = env.plan(), facts = env.facts();
+    final window = await env.window(plan, facts);
+    var batches = 0;
+    await expectLater(
+        env.consume(window, plan, facts, propertyBatchReader: (names) async {
+          batches++;
+          final values = names
+              .map((name) =>
+                  name == 'android-mediacodec-info' ? _dvRaw : 'mediacodec')
+              .toList();
+          if (batches == 2) values[2] = _dvRaw.replaceFirst('decoder', 'other');
+          return values;
+        }),
+        throwsA(_kind(HdrNativeDvReviewFailureKind.configuration)));
+    expect(batches, 2);
+  });
+  test('consumer rejects a native batch with a mismatched result length',
+      () async {
+    final env = _Environment();
+    final plan = env.plan(), facts = env.facts();
+    final window = await env.window(plan, facts);
+    await expectLater(
+        env.consume(window, plan, facts,
+            propertyBatchReader: (_) async => [_dvRaw]),
+        throwsA(_kind(HdrNativeDvReviewFailureKind.configuration)));
+  });
+  test(
+      'consumer drains a timed-out native property batch before releasing Lock',
+      () async {
+    final env = _Environment();
+    final plan = env.plan(), facts = env.facts();
+    final window =
+        await env.window(plan, facts, budget: const Duration(milliseconds: 30));
+    final entered = Completer<void>();
+    final pending = Completer<List<String>>();
+    final consume = env.consume(window, plan, facts, propertyBatchReader: (_) {
+      entered.complete();
+      return pending.future;
+    });
+    await entered.future;
+    var successorEntered = false;
+    final successor = env.lock.synchronized(() {
+      successorEntered = true;
+    });
+    await Future<void>.delayed(const Duration(milliseconds: 80));
+    expect(successorEntered, isFalse,
+        reason: 'the pending native batch still owns the shared Player lock');
+    pending.complete([_dvRaw, 'mediacodec']);
+    await expectLater(
+        consume, throwsA(_kind(HdrNativeDvReviewFailureKind.timeout)));
+    await successor;
+    expect(successorEntered, isTrue);
   });
   test('identity reader errors retain an aborting typed cause', () async {
     final env = _Environment();
