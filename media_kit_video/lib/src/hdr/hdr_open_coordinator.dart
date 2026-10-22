@@ -202,6 +202,10 @@ class HdrOpenCoordinator<R, P> {
     this.backend, {
     required this.preparer,
     this.review,
+    this.prepareDiscover,
+    this.discoverReplan,
+    this.canPromoteDiscovered,
+    this.promoteDiscovered,
     this.retry,
     this.maxRetries = 0,
     this.maxReviewReopens = 1,
@@ -234,6 +238,24 @@ class HdrOpenCoordinator<R, P> {
 
   /// Post-open decoder review (plan 1.4 step 8). Null accepts always.
   final HdrOpenReview<P>? review;
+
+  /// Suspends decoder work before a paused container-discovery open. This
+  /// callback is awaited after output readiness and before [backend.open].
+  final Future<void> Function(P plan)? prepareDiscover;
+
+  /// Container metadata may replace a paused discovery attempt before its
+  /// decoder settles. A replacement always runs the full transaction/review;
+  /// this hook can never accept an output or publish verified playback.
+  final Future<P?> Function(P plan)? discoverReplan;
+
+  /// Read-only admission for reusing the currently opened discovery source.
+  /// A false result keeps the ordinary cleanup-and-reopen behavior.
+  final Future<bool> Function(P previous, P next)? canPromoteDiscovered;
+
+  /// Promote a discovered replacement in place. The replacement still runs
+  /// the ordinary full review before the open can complete.
+  final Future<void> Function(P previous, P next, Duration? start)?
+      promoteDiscovered;
 
   /// Failure-driven plan replacement (plan 1.4 step 5). Null fails directly,
   /// matching the hdr_lab behavior.
@@ -320,6 +342,42 @@ class HdrOpenCoordinator<R, P> {
 
   bool _invalid(int generation) => _disposed || generation != _generation;
 
+  Future<void> _validatePromotedPlan(
+    P plan,
+    int generation,
+    HdrBackendDiagnosticAttempt<P>? diagnosticAttempt,
+  ) async {
+    _emitBackendCall(
+      HdrBackendDiagnosticMethod.validate,
+      HdrBackendDiagnosticBoundary.entered,
+      generation,
+      diagnosticAttempt,
+      HdrBackendDiagnosticPurpose.normal,
+    );
+    try {
+      await backend.validate(plan);
+    } catch (error, stack) {
+      _emitBackendCall(
+        HdrBackendDiagnosticMethod.validate,
+        HdrBackendDiagnosticBoundary.failed,
+        generation,
+        diagnosticAttempt,
+        HdrBackendDiagnosticPurpose.normal,
+        error: error,
+        stack: stack,
+      );
+      rethrow;
+    }
+    _emitBackendCall(
+      HdrBackendDiagnosticMethod.validate,
+      HdrBackendDiagnosticBoundary.returned,
+      generation,
+      diagnosticAttempt,
+      HdrBackendDiagnosticPurpose.normal,
+    );
+    _check(generation);
+  }
+
   /// Runs the injected attempt cleanup, wrapping any failure as
   /// [HdrAttemptCleanupFailure] so the transaction treats it as a terminal
   /// (non-retryable) outcome.
@@ -380,6 +438,7 @@ class HdrOpenCoordinator<R, P> {
       var currentStart = start;
       var retriesUsed = 0;
       var reviewReopens = 0;
+      var promotionFailed = false;
       while (true) {
         _lastAttemptPlan = attemptPlan;
         try {
@@ -612,6 +671,12 @@ class HdrOpenCoordinator<R, P> {
               HdrBackendDiagnosticPurpose.normal);
           _check(generation);
           mark('output_ready');
+          final prepareDiscovery = prepareDiscover;
+          if (!play && prepareDiscovery != null) {
+            await prepareDiscovery(attemptPlan);
+            _check(generation);
+            mark('source_discovery_prepared');
+          }
           _emitBackendCall(
               HdrBackendDiagnosticMethod.open,
               HdrBackendDiagnosticBoundary.entered,
@@ -639,6 +704,50 @@ class HdrOpenCoordinator<R, P> {
               HdrBackendDiagnosticPurpose.normal);
           _check(generation);
           mark('media_opened');
+          final discover = discoverReplan;
+          if (!play && discover != null) {
+            final replacement = await discover(attemptPlan);
+            _check(generation);
+            mark('source_discovered');
+            if (replacement != null) {
+              if (reviewReopens >= maxReviewReopens) {
+                throw const HdrReviewReopenLimit();
+              }
+              final canPromote = canPromoteDiscovered;
+              final promote = promoteDiscovered;
+              final promoteInPlace = canPromote != null &&
+                  promote != null &&
+                  await canPromote(attemptPlan, replacement);
+              _check(generation);
+              await _finishAttempt(attemptPlan);
+              _check(generation);
+              reviewReopens++;
+              final previousPlan = attemptPlan;
+              attemptPlan = replacement;
+              diagnosticAttempt = _diagnosticAttempt(generation, attemptPlan);
+              _lastAttemptPlan = attemptPlan;
+              _diagnosticOwner = diagnosticAttempt;
+              // Discovery only runs for paused opens. Preserve the caller's
+              // start instead of adopting an unverified decoder position.
+              if (promoteInPlace) {
+                mark('source_promotion_admitted');
+                await _validatePromotedPlan(
+                  attemptPlan,
+                  generation,
+                  diagnosticAttempt,
+                );
+                mark('source_promotion_validated');
+                promotionFailed = true;
+                await promote(previousPlan, attemptPlan, currentStart);
+                _check(generation);
+                promotionFailed = false;
+                mark('source_promoted');
+              } else {
+                mark('source_reopen');
+                continue;
+              }
+            }
+          }
           late final HdrReviewFacts facts;
           _emitBackendCall(
               HdrBackendDiagnosticMethod.reviewFacts,
@@ -722,6 +831,7 @@ class HdrOpenCoordinator<R, P> {
               error is OpenSuperseded ||
               error is HdrReviewReopenLimit ||
               error is HdrAttemptCleanupFailure ||
+              promotionFailed ||
               _invalid(generation)) {
             if (switching) {
               try {

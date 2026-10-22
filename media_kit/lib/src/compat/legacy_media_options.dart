@@ -23,6 +23,8 @@ class LegacyMediaOptions {
     Map<String, String>? httpHeaders,
     Duration? start,
     Duration? end,
+    bool containerProbe = false,
+    bool probeAutomaticSubtitles = true,
   }) {
     final values = <String, String>{};
     for (final name in _names) {
@@ -49,6 +51,18 @@ class LegacyMediaOptions {
         (start.inMilliseconds / 1000).toStringAsFixed(3);
     if (end != null) values['end'] =
         (end.inMilliseconds / 1000).toStringAsFixed(3);
+    // This typed internal flag cannot be supplied through Media.extras. mpv
+    // snapshots per-file options before processing the entry, so these five
+    // values remain scoped to the probe entry and restore automatically.
+    if (containerProbe) {
+      values.addAll({
+        'track-auto-selection': 'no',
+        'vid': 'auto',
+        'aid': 'auto',
+        'sid': probeAutomaticSubtitles ? 'auto' : 'no',
+        'secondary-sid': 'no',
+      });
+    }
     final headers = LegacyMediaHeaders().resolve(httpHeaders);
     return LegacyMediaOptions._(values, headers);
   }

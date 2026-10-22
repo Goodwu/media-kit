@@ -1526,6 +1526,16 @@ class WebPlayer extends PlatformPlayer {
     );
   }
 
+  @override
+  Future<List<String>> getPropertiesAsync(
+    List<String> properties, {
+    bool waitForInitialization = true,
+  }) async {
+    throw UnsupportedError(
+      '[WebPlayer.getPropertiesAsync] is not supported on web: the web player does not expose the mpv property surface',
+    );
+  }
+
   /// Raw mpv command invocation parity with [NativePlayer].
   /// The web `<video>` player has no internal libmpv instance, so the mpv
   /// command surface is not exposed.

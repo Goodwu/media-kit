@@ -19,6 +19,7 @@ abstract final class MpvApiOp {
   static const setPropertyNodeNone = 3;
   static const hookContinue = 4;
   static const setPropertyStringListNode = 5;
+  static const getPropertyStringList = 6;
 }
 
 /// Reply field indices of an API reply message.
@@ -28,18 +29,38 @@ abstract final class MpvApiReply {
   static const value = 2;
 }
 
+typedef MpvMediakitGetPropertyStringsNative = Int32 Function(
+  Pointer<generated.mpv_handle>,
+  Pointer<Pointer<Int8>>,
+  Int32,
+  Pointer<generated.mpv_node>,
+);
+typedef MpvMediakitGetPropertyStringsDart = int Function(
+  Pointer<generated.mpv_handle>,
+  Pointer<Pointer<Int8>>,
+  int,
+  Pointer<generated.mpv_node>,
+);
+
+const bool _startupTrace = bool.fromEnvironment('MEDIA_KIT_STARTUP_TRACE');
+const bool _nativePropertyBatch = bool.fromEnvironment(
+  'MEDIA_KIT_NATIVE_PROPERTY_BATCH',
+  defaultValue: true,
+);
+bool _loggedNativePropertyBatch = false;
+
 /// Performs one [MpvApiOp] against [ctx] with decoded [args].
 ///
-/// Executed on the event-pump isolate thread only: every synchronous libmpv
-/// call takes `mp_dispatch_lock`, and in this build the lock must not be
-/// contended across threads while `mpv_wait_event()` is parked (see the
-/// note in [InitializerIsolate]).
+/// Runs on the dedicated API isolate. Native reads may wait on the playback
+/// core and decoder/VO locks; keep the event pump free to drain events and
+/// the root isolate free to service platform surface work.
 (int, Object?) performMpvApiOp(
   generated.MPV mpvBindings,
   int op,
   Pointer<generated.mpv_handle> ctx,
-  List<Object?> args,
-) {
+  List<Object?> args, {
+  MpvMediakitGetPropertyStringsDart? readPropertyStrings,
+}) {
   var error = -1;
   Object? value;
   switch (op) {
@@ -51,6 +72,95 @@ abstract final class MpvApiReply {
         mpvBindings.mpv_free(result.cast());
       }
       calloc.free(name);
+      break;
+    case MpvApiOp.getPropertyStringList:
+      final names = args[0]! as List<Object?>;
+      final batchReader = readPropertyStrings;
+      if (names.isEmpty) {
+        value = <String?>[];
+      } else if (batchReader != null && names.length <= 4096) {
+        final allocatedNames = <Pointer<Utf8>>[];
+        final nativeNames = calloc<Pointer<Int8>>(names.length);
+        try {
+          final result = calloc<generated.mpv_node>();
+          try {
+            for (var i = 0; i < names.length; i++) {
+              final name = (names[i]! as String).toNativeUtf8();
+              allocatedNames.add(name);
+              nativeNames[i] = name.cast<Int8>();
+            }
+            error = batchReader(ctx, nativeNames, names.length, result);
+            if (error < 0) {
+              value = List<String?>.filled(names.length, null);
+            } else {
+              Never malformed(String message) {
+                error = -1;
+                throw StateError(message);
+              }
+
+              if (result.ref.format !=
+                  generated.mpv_format.MPV_FORMAT_NODE_ARRAY) {
+                malformed('Native property batch returned a non-array');
+              }
+              final list = result.ref.u.list;
+              if (list == nullptr || list.ref.num != names.length) {
+                malformed('Native property batch returned wrong length');
+              }
+              final values = <String?>[];
+              for (var i = 0; i < names.length; i++) {
+                final item = list.ref.values[i];
+                if (item.format == generated.mpv_format.MPV_FORMAT_NONE) {
+                  values.add(null);
+                } else if (item.format ==
+                    generated.mpv_format.MPV_FORMAT_STRING) {
+                  final string = item.u.string;
+                  if (string == nullptr) {
+                    malformed('Native property batch returned a null string');
+                  }
+                  values.add(string.cast<Utf8>().toDartString());
+                } else {
+                  malformed(
+                      'Native property batch returned an invalid node type');
+                }
+              }
+              value = values;
+              if (_startupTrace && !_loggedNativePropertyBatch) {
+                _loggedNativePropertyBatch = true;
+                print('MK_STARTUP nativePropertyBatch=true');
+              }
+            }
+          } finally {
+            mpvBindings.mpv_free_node_contents(result);
+            calloc.free(result);
+          }
+        } finally {
+          for (final name in allocatedNames) {
+            calloc.free(name);
+          }
+          calloc.free(nativeNames);
+        }
+      } else {
+        final values = <String?>[];
+        for (final rawName in names) {
+          final name = (rawName! as String).toNativeUtf8();
+          try {
+            final result =
+                mpvBindings.mpv_get_property_string(ctx, name.cast());
+            if (result == nullptr) {
+              values.add(null);
+            } else {
+              try {
+                values.add(result.cast<Utf8>().toDartString());
+              } finally {
+                mpvBindings.mpv_free(result.cast());
+              }
+            }
+          } finally {
+            calloc.free(name);
+          }
+        }
+        value = values;
+      }
       break;
     case MpvApiOp.getPropertyInt64:
       final name = (args[0]! as String).toNativeUtf8();
@@ -216,6 +326,20 @@ abstract final class MpvApiIsolate {
     return value as String?;
   }
 
+  /// Reads string properties sequentially in one API-isolate request. Returns
+  /// `null` for each property unavailable from mpv, preserving input order.
+  static Future<List<String?>> getPropertyStrings(
+    int ctx,
+    List<String> names,
+  ) async {
+    final (_, value) = await _request(
+      MpvApiOp.getPropertyStringList,
+      ctx,
+      [names],
+    );
+    return (value! as List<Object?>).cast<String?>();
+  }
+
   /// Reads an int64 property. Returns `null` when the property is
   /// unavailable.
   static Future<int?> getPropertyInt64(int ctx, String name) async {
@@ -282,7 +406,19 @@ class _MpvApiInit {
 }
 
 void _mpvApiIsolateEntry(_MpvApiInit init) {
-  final mpvBindings = generated.MPV(DynamicLibrary.open(init.libraryPath));
+  final library = DynamicLibrary.open(init.libraryPath);
+  final mpvBindings = generated.MPV(library);
+  MpvMediakitGetPropertyStringsDart? readPropertyStrings;
+  try {
+    if (_nativePropertyBatch) {
+      readPropertyStrings = library.lookupFunction<
+          MpvMediakitGetPropertyStringsNative, MpvMediakitGetPropertyStringsDart>(
+        'mpv_mediakit_get_property_strings',
+      );
+    }
+  } on ArgumentError {
+    // Upstream/system libmpv builds do not carry the media-kit fork extension.
+  }
   final requests = ReceivePort();
   init.reply.send(requests.sendPort);
   final reply = init.response;
@@ -296,7 +432,13 @@ void _mpvApiIsolateEntry(_MpvApiInit init) {
     int error = -1;
     Object? value;
     try {
-      (error, value) = performMpvApiOp(mpvBindings, op, ctx, args);
+      (error, value) = performMpvApiOp(
+        mpvBindings,
+        op,
+        ctx,
+        args,
+        readPropertyStrings: readPropertyStrings,
+      );
     } catch (exception, stacktrace) {
       // A failed operation must still terminate its caller's await.
       print(exception);

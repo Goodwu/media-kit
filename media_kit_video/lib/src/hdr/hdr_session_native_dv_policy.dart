@@ -126,13 +126,24 @@ class HdrSessionReviewWindow {
     return left;
   }
 
-  Future<T> bounded<T>(Future<T> Function() operation) async {
+  Future<T> bounded<T>(Future<T> Function() operation,
+      {bool drainOnTimeout = false}) async {
     final left = remaining();
+    late final Future<T> pending;
     try {
-      final value = await operation().timeout(left);
+      pending = operation();
+      final value = await pending.timeout(left);
       remaining();
       return value;
     } on TimeoutException catch (error) {
+      if (drainOnTimeout) {
+        // Native reads cannot be cancelled. Keep a caller-owned lock until
+        // the operation has actually returned, even though its result is no
+        // longer eligible for review acceptance.
+        try {
+          await pending;
+        } catch (_) {}
+      }
       throw HdrNativeDvReviewFailure(HdrNativeDvReviewFailureKind.timeout,
           cause: error);
     }
@@ -221,6 +232,7 @@ Future<void> consumeNativeDvSessionEvidence({
   required Lock lock,
   required Future<HdrOptionSourceIdentity> Function() readIdentity,
   required Future<String> Function(String) readProperty,
+  Future<List<String>> Function(List<String>)? readProperties,
   required HdrNativeDvOutputSnapshot? Function() readOutput,
   required bool Function() isCurrent,
 }) async {
@@ -279,7 +291,8 @@ Future<void> consumeNativeDvSessionEvidence({
     check();
     HdrOptionSourceIdentity currentIdentity;
     try {
-      currentIdentity = await window.bounded(readIdentity);
+      currentIdentity =
+          await window.bounded(readIdentity, drainOnTimeout: true);
     } on HdrNativeDvReviewFailure {
       rethrow;
     } on OpenSuperseded {
@@ -307,10 +320,8 @@ Future<void> consumeNativeDvSessionEvidence({
     }
   }
 
-  Future<void> verifyConfiguration() async {
+  void verifyConfigurationValue(String raw) {
     check();
-    final raw =
-        await window.bounded(() => readProperty('android-mediacodec-info'));
     final current = AndroidMediaCodecConfiguration.parse(raw);
     if (current == null ||
         current.mime != configuration.mime ||
@@ -322,31 +333,107 @@ Future<void> consumeNativeDvSessionEvidence({
     check();
   }
 
-  Future<void> verifyHwdec() async {
+  void verifyHwdecValue(String current) {
     check();
-    if (await window.bounded(() => readProperty('hwdec-current')) !=
-        evidence.hwdecCurrent) {
+    if (current != evidence.hwdecCurrent) {
       throw const HdrNativeDvReviewFailure(HdrNativeDvReviewFailureKind.hwdec);
     }
     check();
   }
 
-  await window.bounded(() => lock.synchronized(() async {
-        check();
-        await verifyIdentity();
-        verifyOutput();
-        await verifyConfiguration();
-        await verifyHwdec();
-        await verifyIdentity();
-        await verifyConfiguration();
-        await verifyHwdec();
-        // Last asynchronous read is the configured decoder. Output/deadline
-        // checks below are synchronous. Managed source changes remain blocked
-        // by this Player lock; equal endpoints are not a global ABA proof.
-        await verifyConfiguration();
-        verifyOutput();
-        check();
-      }));
+  Future<void> verifyConfiguration() async {
+    check();
+    final raw = await window.bounded(
+        () => readProperty('android-mediacodec-info'),
+        drainOnTimeout: true);
+    verifyConfigurationValue(raw);
+  }
+
+  Future<void> verifyHwdec() async {
+    check();
+    final current = await window.bounded(() => readProperty('hwdec-current'),
+        drainOnTimeout: true);
+    verifyHwdecValue(current);
+  }
+
+  Future<List<String>?> readBatch(List<String> names) async {
+    final batch = readProperties;
+    if (batch == null) return null;
+    check();
+    final values =
+        await window.bounded(() => batch(names), drainOnTimeout: true);
+    if (values.length != names.length) {
+      throw const HdrNativeDvReviewFailure(
+          HdrNativeDvReviewFailureKind.configuration);
+    }
+    check();
+    return values;
+  }
+
+  Future<void> verifyConfigurationAndHwdec() async {
+    const names = ['android-mediacodec-info', 'hwdec-current'];
+    final values = await readBatch(names);
+    if (values == null) {
+      await verifyConfiguration();
+      await verifyHwdec();
+      return;
+    }
+    verifyConfigurationValue(values[0]);
+    verifyHwdecValue(values[1]);
+  }
+
+  Future<void> verifyConfigurationHwdecConfiguration() async {
+    const names = [
+      'android-mediacodec-info',
+      'hwdec-current',
+      'android-mediacodec-info',
+    ];
+    final values = await readBatch(names);
+    if (values == null) {
+      await verifyConfiguration();
+      await verifyHwdec();
+      await verifyConfiguration();
+      return;
+    }
+    verifyConfigurationValue(values[0]);
+    verifyHwdecValue(values[1]);
+    verifyConfigurationValue(values[2]);
+  }
+
+  final admitted = Completer<void>();
+  final lockWork = lock.synchronized(() async {
+    admitted.complete();
+    check();
+    await verifyIdentity();
+    verifyOutput();
+    await verifyConfigurationAndHwdec();
+    await verifyIdentity();
+    await verifyConfigurationHwdecConfiguration();
+    // Last asynchronous read is the configured decoder. Output/deadline
+    // checks below are synchronous. Managed source changes remain blocked
+    // by this Player lock; equal endpoints are not a global ABA proof.
+    verifyOutput();
+    check();
+  });
+  try {
+    await window.bounded(() => admitted.future);
+  } catch (_) {
+    // If the lock callback won admission at the deadline boundary, drain its
+    // work before returning. If it is still queued, its initial check runs
+    // before any reads when it eventually enters.
+    if (admitted.isCompleted) {
+      try {
+        await lockWork;
+      } catch (_) {}
+    } else {
+      unawaited(lockWork.catchError((Object _) {}));
+    }
+    rethrow;
+  }
+  // Every admitted native read enforces and drains its own deadline. Await
+  // the owned work directly so an already expired outer window cannot skip
+  // draining a read that started while admission was being delivered.
+  await lockWork;
   // Lock completion itself yields: a successor can arrive after the final
   // synchronous output sample. A fast-completing Future chain may resume
   // inline, so explicitly drain an already queued supersession before the

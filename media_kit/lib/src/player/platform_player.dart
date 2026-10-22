@@ -466,6 +466,18 @@ abstract class PlatformPlayer {
     );
   }
 
+  /// Reads several string properties through one platform request when the
+  /// backend supports batching. The default implementation preserves API
+  /// compatibility for platforms that do not expose this operation.
+  Future<List<String>> getPropertiesAsync(
+    List<String> properties, {
+    bool waitForInitialization = true,
+  }) async {
+    throw UnimplementedError(
+      '[PlatformPlayer.getPropertiesAsync] is not implemented',
+    );
+  }
+
   @protected
   final StreamController<Playlist> playlistController =
       StreamController<Playlist>.broadcast();

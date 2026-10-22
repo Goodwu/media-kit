@@ -42,9 +42,466 @@ class Fixture {
       stoppedIdentity: identity(epoch: source.fileLoadedEpoch),
       vd: 'native_dv=1',
       renderMode: 'timed');
+  Future<void> beginProbe({Future<void> Function()? verify}) =>
+      owner.beginFromDecoderlessProbe(
+          entryIdentity: source,
+          originalVd: '',
+          originalRenderMode: 'boolean',
+          verifyDecoderlessProbe: verify ?? (() async {}),
+          vd: 'native_dv=1',
+          renderMode: 'timed');
 }
 
 void main() {
+  test('decoderless entry admission is separate from stopped-source begin',
+      () async {
+    final fixture = Fixture();
+    fixture.source =
+        fixture.identity(path: 'file:///probe.mkv', entry: '7', epoch: 3);
+    await expectLater(fixture.begin(), throwsStateError);
+    expect(fixture.writes, isEmpty);
+    var proofs = 0;
+    await fixture.beginProbe(verify: () async => proofs++);
+    expect(proofs, greaterThan(2));
+    expect(fixture.owner.identity, fixture.source);
+    expect(fixture.writes,
+        ['vd-lavc-o=native_dv=1', 'mediacodec-embed-render-mode=timed']);
+    final writes = List.of(fixture.writes);
+    await expectLater(
+        fixture.owner.restore(), throwsA(isA<HdrNativeDvOptionFailure>()));
+    expect(fixture.writes, writes);
+    final before = fixture.source;
+    fixture.source = fixture.identity(epoch: 3);
+    await fixture.owner.rebind(before, fixture.source);
+    await fixture.owner.restore();
+    expect(fixture.values['vd-lavc-o'], '');
+    expect(fixture.values['mediacodec-embed-render-mode'], 'boolean');
+    expect(fixture.owner.active, isFalse);
+  });
+
+  test(
+      'decoderless baseline or proof failure never writes or adopts another entry',
+      () async {
+    for (final failure in ['vd', 'render', 'proof', 'foreign']) {
+      final fixture = Fixture();
+      fixture.source =
+          fixture.identity(path: 'file:///probe.mkv', entry: '7', epoch: 3);
+      final admitted = fixture.source;
+      if (failure == 'vd') {
+        fixture.values['vd-lavc-o'] = 'external=1';
+      }
+      if (failure == 'render') {
+        fixture.values['mediacodec-embed-render-mode'] = 'timed';
+      }
+      await expectLater(fixture.beginProbe(verify: () async {
+        if (failure == 'proof') throw StateError('decoder already exists');
+        if (failure == 'foreign') {
+          fixture.source =
+              fixture.identity(path: admitted.path, entry: '8', epoch: 4);
+        }
+      }), throwsStateError, reason: failure);
+      expect(fixture.writes, isEmpty);
+      expect(fixture.owner.identity, admitted);
+      expect(fixture.owner.active, isTrue);
+      await expectLater(
+          fixture.owner.restore(), throwsA(isA<HdrNativeDvOptionFailure>()));
+      expect(fixture.writes, isEmpty);
+    }
+  });
+
+  test('decoderless native write failures keep pair debt until owned stop',
+      () async {
+    for (final failedName in [
+      HdrNativeDvOptionOwner.vdOption,
+      HdrNativeDvOptionOwner.renderOption,
+    ]) {
+      final fixture = Fixture();
+      fixture.source =
+          fixture.identity(path: 'file:///probe.mkv', entry: '7', epoch: 3);
+      var failOnce = true;
+      fixture.beforeWrite = (name, value) async {
+        if (name == failedName && failOnce) {
+          failOnce = false;
+          fixture.values[name] = value;
+          throw StateError('setter failed after mutation');
+        }
+      };
+      await expectLater(fixture.beginProbe(), throwsStateError);
+      expect(fixture.owner.active, isTrue);
+      final attempted = List.of(fixture.writes);
+      await expectLater(
+          fixture.owner.restore(), throwsA(isA<HdrNativeDvOptionFailure>()));
+      expect(fixture.writes, attempted);
+      final before = fixture.source;
+      fixture.source = fixture.identity(epoch: 3);
+      await fixture.owner.rebind(before, fixture.source);
+      await fixture.owner.restore();
+      expect(fixture.values['vd-lavc-o'], '');
+      expect(fixture.values['mediacodec-embed-render-mode'], 'boolean');
+      expect(fixture.owner.active, isFalse);
+    }
+  });
+
+  test('decoderless promotion proof is checked after each pair mutation',
+      () async {
+    final fixture = Fixture();
+    fixture.source =
+        fixture.identity(path: 'file:///probe.mkv', entry: '7', epoch: 3);
+    await expectLater(fixture.beginProbe(verify: () async {
+      if (fixture.writes.isNotEmpty) {
+        throw StateError('track selected during pair apply');
+      }
+    }), throwsStateError);
+    expect(fixture.writes, ['vd-lavc-o=native_dv=1']);
+    expect(fixture.owner.active, isTrue);
+  });
+
+  test('decoderless pair drift between writes rejects the second mutation',
+      () async {
+    final fixture = Fixture();
+    fixture.source =
+        fixture.identity(path: 'file:///probe.mkv', entry: '7', epoch: 3);
+    fixture.beforeWrite = (name, _) async {
+      if (name == HdrNativeDvOptionOwner.vdOption) {
+        fixture.values[HdrNativeDvOptionOwner.renderOption] = 'timed';
+      }
+    };
+    await expectLater(fixture.beginProbe(), throwsStateError);
+    expect(fixture.writes, ['vd-lavc-o=native_dv=1']);
+    expect(fixture.owner.active, isTrue);
+  });
+
+  test('option reads use one ordered nine-field batch with active identity',
+      () async {
+    final player = Object();
+    var epoch = 9;
+    final values = <String, String>{
+      HdrNativeDvOptionOwner.vdOption: '',
+      HdrNativeDvOptionOwner.renderOption: 'boolean',
+    };
+    final batches = <List<String>>[];
+    final owner = HdrNativeDvOptionOwner(
+      readProperty: (_) async => fail('scalar fallback should not run'),
+      setPropertyStrict: (name, value) async => values[name] = value,
+      readIdentity: () async => HdrOptionSourceIdentity(
+          player: player,
+          path: '',
+          playlistEntryId: '',
+          fileLoadedEpoch: epoch),
+      currentFileLoadedEpoch: () => epoch,
+      readProperties: (names) async {
+        batches.add(List.of(names));
+        return names
+            .map((name) => switch (name) {
+                  'path' => '',
+                  'playlist/0/id' => '',
+                  _ => values[name] ?? '',
+                })
+            .toList();
+      },
+    );
+
+    await owner.begin(
+      stoppedIdentity: HdrOptionSourceIdentity(
+          player: player,
+          path: '',
+          playlistEntryId: '',
+          fileLoadedEpoch: epoch),
+      vd: 'native_dv=1',
+      renderMode: 'timed',
+    );
+    const expectedPrefix = <String>[
+      'path',
+      'playlist/0/id',
+      'path',
+      'playlist/0/id',
+    ];
+    const expectedSuffix = <String>[
+      'path',
+      'playlist/0/id',
+      'path',
+      'playlist/0/id',
+    ];
+    expect(batches, hasLength(4));
+    for (var i = 0; i < batches.length; i++) {
+      expect(
+        batches[i],
+        [
+          ...expectedPrefix,
+          i.isEven
+              ? HdrNativeDvOptionOwner.vdOption
+              : HdrNativeDvOptionOwner.renderOption,
+          ...expectedSuffix
+        ],
+      );
+    }
+  });
+
+  test('batch option reads reject source endpoint, epoch and length drift',
+      () async {
+    for (final failureCase in ['path', 'id', 'epoch', 'length']) {
+      final player = Object();
+      var epoch = 9;
+      var path = '';
+      var entry = '';
+      final owner = HdrNativeDvOptionOwner(
+        readProperty: (_) async => fail('scalar fallback should not run'),
+        setPropertyStrict: (_, __) async {},
+        readIdentity: () async => HdrOptionSourceIdentity(
+            player: player,
+            path: path,
+            playlistEntryId: entry,
+            fileLoadedEpoch: epoch),
+        currentFileLoadedEpoch: () => epoch,
+        readProperties: (names) async {
+          if (failureCase == 'path') {
+            return ['', '', 'other', '', '', '', '', '', ''];
+          }
+          if (failureCase == 'id') {
+            return ['', '', '', '1', '', '', '', '', ''];
+          }
+          if (failureCase == 'epoch') {
+            epoch++;
+            return List<String>.filled(9, '');
+          }
+          return List<String>.filled(8, '');
+        },
+      );
+      final stopped = HdrOptionSourceIdentity(
+          player: player,
+          path: '',
+          playlistEntryId: '',
+          fileLoadedEpoch: epoch);
+      await expectLater(
+        owner.begin(
+          stoppedIdentity: stopped,
+          vd: 'native_dv=1',
+          renderMode: 'timed',
+        ),
+        throwsStateError,
+        reason: failureCase,
+      );
+    }
+  });
+
+  test('pending batch rejects ownership epoch change before accepting option',
+      () async {
+    final player = Object();
+    var epoch = 9;
+    final entered = Completer<void>();
+    final release = Completer<List<String>>();
+    final owner = HdrNativeDvOptionOwner(
+      readProperty: (_) async => fail('scalar fallback should not run'),
+      setPropertyStrict: (_, __) async {},
+      readIdentity: () async => HdrOptionSourceIdentity(
+          player: player,
+          path: '',
+          playlistEntryId: '',
+          fileLoadedEpoch: epoch),
+      currentFileLoadedEpoch: () => epoch,
+      readProperties: (_) {
+        entered.complete();
+        return release.future;
+      },
+    );
+    final review = owner.begin(
+      stoppedIdentity: HdrOptionSourceIdentity(
+          player: player,
+          path: '',
+          playlistEntryId: '',
+          fileLoadedEpoch: epoch),
+      vd: 'native_dv=1',
+      renderMode: 'timed',
+    );
+    await entered.future;
+    epoch++;
+    release.complete(List<String>.filled(9, ''));
+    await expectLater(review, throwsStateError);
+    expect(owner.active, isFalse);
+  });
+
+  test('active verify reads both options in one ordered 18-field batch',
+      () async {
+    final player = Object();
+    var path = '';
+    var entry = '';
+    var epoch = 9;
+    final values = <String, String>{
+      HdrNativeDvOptionOwner.vdOption: '',
+      HdrNativeDvOptionOwner.renderOption: 'boolean',
+    };
+    final batches = <List<String>>[];
+    final owner = HdrNativeDvOptionOwner(
+      readProperty: (_) async => fail('scalar fallback should not run'),
+      setPropertyStrict: (name, value) async => values[name] = value,
+      readIdentity: () async => HdrOptionSourceIdentity(
+          player: player,
+          path: path,
+          playlistEntryId: entry,
+          fileLoadedEpoch: epoch),
+      currentFileLoadedEpoch: () => epoch,
+      readProperties: (names) async {
+        batches.add(List.of(names));
+        return names.map((name) {
+          final value = switch (name) {
+            'path' => path,
+            'playlist/0/id' => entry,
+            _ => values[name] ?? '',
+          };
+          return value;
+        }).toList();
+      },
+    );
+    await owner.begin(
+      stoppedIdentity: HdrOptionSourceIdentity(
+          player: player,
+          path: '',
+          playlistEntryId: '',
+          fileLoadedEpoch: epoch),
+      vd: 'native_dv=1',
+      renderMode: 'timed',
+    );
+    batches.clear();
+
+    await owner.verify();
+
+    const groupVd = <String>[
+      'path',
+      'playlist/0/id',
+      'path',
+      'playlist/0/id',
+      HdrNativeDvOptionOwner.vdOption,
+      'path',
+      'playlist/0/id',
+      'path',
+      'playlist/0/id',
+    ];
+    const groupRender = <String>[
+      'path',
+      'playlist/0/id',
+      'path',
+      'playlist/0/id',
+      HdrNativeDvOptionOwner.renderOption,
+      'path',
+      'playlist/0/id',
+      'path',
+      'playlist/0/id',
+    ];
+    expect(batches, [
+      <String>[...groupVd, ...groupRender]
+    ]);
+  });
+
+  test('verify rejects second-group identity drift and first option mismatch',
+      () async {
+    for (final failureCase in ['secondIdentity', 'firstOption']) {
+      final player = Object();
+      var epoch = 9;
+      final values = <String, String>{
+        HdrNativeDvOptionOwner.vdOption: '',
+        HdrNativeDvOptionOwner.renderOption: 'boolean',
+      };
+      final batches = <List<String>>[];
+      final writes = <String>[];
+      final owner = HdrNativeDvOptionOwner(
+        readProperty: (_) async => fail('scalar fallback should not run'),
+        setPropertyStrict: (name, value) async {
+          writes.add('$name=$value');
+          values[name] = value;
+        },
+        readIdentity: () async => HdrOptionSourceIdentity(
+            player: player,
+            path: '',
+            playlistEntryId: '',
+            fileLoadedEpoch: epoch),
+        currentFileLoadedEpoch: () => epoch,
+        readProperties: (names) async {
+          batches.add(List.of(names));
+          return names.indexed.map((indexed) {
+            final (index, name) = indexed;
+            if (failureCase == 'secondIdentity' && index == 11) {
+              return 'foreign-path';
+            }
+            if (failureCase == 'firstOption' &&
+                names.length == 18 &&
+                index == 4) {
+              return 'externally-changed';
+            }
+            return switch (name) {
+              'path' => '',
+              'playlist/0/id' => '',
+              _ => values[name] ?? '',
+            };
+          }).toList();
+        },
+      );
+      await owner.begin(
+        stoppedIdentity: HdrOptionSourceIdentity(
+            player: player,
+            path: '',
+            playlistEntryId: '',
+            fileLoadedEpoch: epoch),
+        vd: 'native_dv=1',
+        renderMode: 'timed',
+      );
+      batches.clear();
+      final writesBeforeVerify = writes.length;
+
+      await expectLater(owner.verify(), throwsStateError);
+
+      expect(batches, hasLength(1), reason: failureCase);
+      expect(batches.single, hasLength(18), reason: failureCase);
+      expect(writes, hasLength(writesBeforeVerify), reason: failureCase);
+      expect(owner.active, isTrue, reason: failureCase);
+    }
+  });
+
+  test('batch identity preserves source and stopped source endpoints',
+      () async {
+    final player = Object();
+    for (final pair in [
+      <String>['test://source', '7'],
+      <String>['', '']
+    ]) {
+      final result = await readHdrOptionSourceIdentity(
+        player: player,
+        fileLoadedEpoch: () => 3,
+        readProperties: (names) async {
+          expect(names, ['path', 'playlist/0/id', 'path', 'playlist/0/id']);
+          return [...pair, ...pair];
+        },
+      );
+      expect(result.player, same(player));
+      expect(result.path, pair[0]);
+      expect(result.playlistEntryId, pair[1]);
+      expect(result.fileLoadedEpoch, 3);
+    }
+  });
+  test('batch identity rejects endpoint, epoch and length drift', () async {
+    for (final values in [
+      ['test://a', '1', 'test://b', '1'],
+      ['test://a', '1', 'test://a', '2'],
+      ['test://a'],
+      ['test://a', '1', 'test://a', '1'],
+    ]) {
+      var epoch = 3;
+      await expectLater(
+        readHdrOptionSourceIdentity(
+          player: Object(),
+          fileLoadedEpoch: () => epoch,
+          readProperties: (_) async {
+            if (values.length == 4 &&
+                values[0] == values[2] &&
+                values[1] == values[3]) {
+              epoch++;
+            }
+            return values;
+          },
+        ),
+        throwsStateError,
+      );
+    }
+  });
   TestWidgetsFlutterBinding.ensureInitialized();
   group('captureStoppedBoundaryUnderLock diagnostics', () {
     Future<StateError> captureFailure({
@@ -172,7 +629,10 @@ void main() {
             playlistEntryId: '',
             fileLoadedEpoch: 47),
         HdrOptionSourceIdentity(
-            player: player, path: '', playlistEntryId: '9', fileLoadedEpoch: 47),
+            player: player,
+            path: '',
+            playlistEntryId: '9',
+            fileLoadedEpoch: 47),
       ];
       var reads = 0;
       StateError? error;
