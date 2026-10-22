@@ -4,6 +4,14 @@
 
 **路径映射（2026-10-05 起）**：`archives/experiments/` 已整体迁移至独立仓库 **`~/src/media-kit-experiments`**（实验记录/证据/交接/索引全量归档）。本文件及 conversations 中所有 `archives/experiments/` 前缀路径均映射到该库根目录。**主库历史已剥离该路径（2026-10-06，main 51ef66cc→ee28accd，树零变化）**：剥离前提交历史不再在主库，查备份仓 `Goodwu/media-kit-history-archive`（分支 `pre-strip-20261006`）；旧哈希换算用 `~/src/media-kit-build/history-strip-20261006/commit-map.json`。
 
+## VIDEO-ROUTE-CAPABILITIES-DARWIN-WINDOWS-20261022
+
+- **implemented / 已本地提交（未推送）；Windows/darwin 实机构建待验**：为 `VideoRouteCapabilities.Get` 补 darwin 与 Windows 显示适配器（此前仅 Android 有）。macOS：NSScreen EDR 余量 >1.0 → display resolved + hdrTypes `[2,3]`（10.15+，macOS 不做 DV 直通；低版本 queryUnavailable）；iOS：无公开显示 HDR 查询 → queryUnavailable（Dart 按未知、不置灰）；Windows：DISPLAYCONFIG Advanced Color enabled → resolved + `[2,3]`，查询失败 → queryUnavailable。三端 sources 均回显 `censusComplete=false`（显式 unknown，不模拟支持）。no-libs stub 变体不加通道（MissingPlugin → unavailable → 不置灰，维持兜底语义）。
+- 动因：PiliPlus 视频格式置灰（显示轮全平台）需要桌面显示能力；迁移后 App 侧零平台代码，显示/解码事实统一经 `VideoRouteCapabilities.query` 一条链路。
+- 改动：`media_kit_video/common/darwin/Classes/plugin/MediaKitVideoPlugin.swift`（+1 case 与 handler，macos/ios 经符号链接同时生效）、`media_kit_video/windows/media_kit_video_plugin.cc`（+1 分支与 helper）。
+- 验收：`swiftc -parse` 通过；回包 schema 对齐 Dart `VideoRouteCapabilities.query` 校验（schema 1 + display/sources/hdr）。Windows C++ 与 darwin 实机构建**未验证**（mac 主机无 MSVC；macOS 构建受阻磁盘满）。
+- context：`archives/conversations/video-route-capabilities-darwin-windows-20261022.md`；App 侧 `/Users/wuweiwei1/src/PiliPlus/archives/conversations/codec-capability-graying-20261022.md`。
+
 ## MK-ROUTING-20261011（CORE继任）
 - **2026-10-22(三) Round 3 启动延迟**:验收口径改为"任意视频首次打开"点击→第一帧<2s;真瓶颈=网络供数据墙(4K DV 续播 GOP 追赶~20-25MB,同场景 first packet→correct 1.31s@好网络/4.09s@6MB/s)。mpv 侧已实现变体A:eager startup seek(未选轨 d_seek 内立即 child 定位,与 discovery/promotion 并行)+同位置 re-arm 跳过(F2),V2 两轮(P1 首读失效/P2 定位失败不标记/P3 均修);包队列预取变体因 child 级 select 污染 refresh-seek/proof 语义回退(14 项断言失败,待专项设计 demux.c force-read 状态机)。native check 在 Redmi Note 5A(API37) 582/0、帧断言 37/37、eager 路径踩到。APK pili-startup-r3 `9831fab4…`。装测与冷却基线/ curl 单并行速率待 marble 回连;若 CDN 单连接限速坐实,下一轮立项并行连接预取。App 侧 context:/Users/wuweiwei1/src/PiliPlus/archives/conversations/video-startup-latency-20261022.md。
 
