@@ -215,7 +215,7 @@ class HdrRoutePlanner {
           capabilities: capabilities,
           policy: policy,
           excluded: excluded,
-          gateMaturity: false,
+          safetyNet: true,
           options: options);
       candidates.addAll(fallbackCandidates);
       selected = fallbackCandidates.firstWhere(
@@ -304,7 +304,7 @@ class HdrRoutePlanner {
     required HdrCapabilities capabilities,
     required HdrRoutingPolicy policy,
     required Map<String, HdrDegradeReason> excluded,
-    bool gateMaturity = true,
+    bool safetyNet = false,
     required EffectiveVideoRouteOptions options,
   }) {
     // The embed option is effective only without an explicit copy
@@ -342,7 +342,7 @@ class HdrRoutePlanner {
             capabilities: capabilities,
             policy: policy,
             excluded: excluded,
-            gateMaturity: gateMaturity,
+            safetyNet: safetyNet,
             realization: realization)
           .withRoutingIdentity(sourceClass, _stageFor(strategy, sourceClass)),
     ];
@@ -352,8 +352,9 @@ class HdrRoutePlanner {
 
   /// Evaluates one strategy against the gates and this device.
   ///
-  /// Order (plan 1.3): maturity gate, then realization, then the excluded
-  /// stages — a skipped candidate keeps the first matching reason.
+  /// Order (plan 1.3): realization, then the excluded stages — a skipped
+  /// candidate keeps the first matching reason. Maturity is recorded for
+  /// diagnostics only; there is no maturity admission gate.
   static HdrCandidate _evaluate(
     HdrStrategy strategy, {
     required HdrSourceDescriptor source,
@@ -361,7 +362,7 @@ class HdrRoutePlanner {
     required HdrCapabilities capabilities,
     required HdrRoutingPolicy policy,
     required Map<String, HdrDegradeReason> excluded,
-    bool gateMaturity = true,
+    bool safetyNet = false,
     required HdrStrategyRealization realization,
   }) {
     final HdrStrategyMaturity maturity = HdrStrategyMaturityTable.of(
@@ -372,7 +373,7 @@ class HdrRoutePlanner {
       return HdrCandidate(
         strategy: strategy,
         maturity: maturity,
-        isSafetyNet: !gateMaturity,
+        isSafetyNet: safetyNet,
         skipReason: HdrDegradeReason.sourceMetadataUnknown,
       );
     }
@@ -393,7 +394,7 @@ class HdrRoutePlanner {
       return HdrCandidate(
         strategy: strategy,
         maturity: maturity,
-        isSafetyNet: !gateMaturity,
+        isSafetyNet: safetyNet,
         skipReason: realization.infeasibleReason ??
             HdrDegradeReason.unsupportedStrategy,
       );
@@ -408,7 +409,7 @@ class HdrRoutePlanner {
         return HdrCandidate(
           strategy: strategy,
           maturity: maturity,
-          isSafetyNet: !gateMaturity,
+          isSafetyNet: safetyNet,
           skipReason: entry.value,
         );
       }
@@ -418,14 +419,14 @@ class HdrRoutePlanner {
       return HdrCandidate(
         strategy: strategy,
         maturity: maturity,
-        isSafetyNet: !gateMaturity,
+        isSafetyNet: safetyNet,
         skipReason: HdrDegradeReason.sourceDecodeUnsupported,
       );
     }
     return HdrCandidate(
       strategy: strategy,
       maturity: maturity,
-      isSafetyNet: !gateMaturity,
+      isSafetyNet: safetyNet,
       feasible: true,
       route: route,
     );
