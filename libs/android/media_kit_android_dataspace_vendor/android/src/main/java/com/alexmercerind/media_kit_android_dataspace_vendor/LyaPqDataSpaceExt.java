@@ -88,6 +88,17 @@ public class LyaPqDataSpaceExt implements PlatformVideoView.SurfaceDataSpaceExt 
     }
 
     /**
+     * The validated LYA firmware needs a texture-backed Flutter UI root to
+     * avoid stale host-UI content during native HDR video composition. This
+     * concerns the UI root only; the native video Surface and PQ path remain
+     * unchanged. Reuse the exact read-only gate used by the PQ extension.
+     */
+    @Override
+    public boolean requiresFlutterTextureView() {
+        return isApplicable();
+    }
+
+    /**
      * PQ presentation self-report (plan W1): on this device the validated PQ
      * presentation carrier is the RGB 10-bit window surface (rgba1010102 +
      * the ext dataspace apply, read-back verified); no YUV window carrier is

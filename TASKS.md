@@ -4,6 +4,12 @@
 
 **路径映射（2026-10-05 起）**：`archives/experiments/` 已整体迁移至独立仓库 **`~/src/media-kit-experiments`**（实验记录/证据/交接/索引全量归档）。本文件及 conversations 中所有 `archives/experiments/` 前缀路径均映射到该库根目录。**主库历史已剥离该路径（2026-10-06，main 51ef66cc→ee28accd，树零变化）**：剥离前提交历史不再在主库，查备份仓 `Goodwu/media-kit-history-archive`（分支 `pre-strip-20261006`）；旧哈希换算用 `~/src/media-kit-build/history-strip-20261006/commit-map.json`。
 
+## FLUTTER-HOST-COMPOSITION-20261023
+
+- **implemented / 已验收，用户授权随本地提交归档（不推送）**：`SurfaceDataSpaceExt.requiresFlutterTextureView` 默认false，LYA扩展仅在既有applicability范围声明true；App经 `getRenderMode` 消费并按Activity缓存，无机型判断，其余设备默认surface。独立原生视频Surface、硬解及PQ输出路径未改。无alpha候选APK `fd1882ecb327e491a79856b5a0f158a7ccab52c68056e7e56d6e997cae72fda9` 已由用户确认横竖屏、全屏进出、控件显隐均正常且无残留；独立Verifier确认texture、OMX.hisi硬解、10-bit BT2020_PQ及帧推进正常，无FATAL/ANR。
+- **根因结论边界**：texture对照支持旧Flutter根Surface/合成拓扑参与残留；旧alpha清除补丁及GL/Vulkan临时打点已撤回并备份。具体alpha状态及HWC/驱动因果链未定。mpv无本任务diff；`f_decoder_wrapper.c` 改动属于其它任务，不纳入本任务提交。用户确认同一暂停帧、控件隐藏时横竖屏亮度/色彩仍明显变化，并决定接受现状不处理；不作为本任务阻塞项。
+- 新增5项JVM测试通过；历史整批结果48过/2个LG旧断言与未改实现不符，V1审核无阻塞。R5.1需求补接线与边界。首轮Release以6fe5b42a为native基线；最终无alpha包libmpv为c9c6c899，由当前mpv源码增量重编，不宣称全依赖latest-source链验收；构建wrapper历史脚本问题未改。详细证据与备份位置见PiliPlus context：`/Users/wuweiwei1/src/PiliPlus/archives/conversations/lya-dv-translucent-residue-20261022.md`。提交事实以Git log为准。
+
 ## ROUTED-REPORT-EXPOSURE-20261023
 
 - **implemented / 工作区未提交**：`RoutedVideoPlayback` 新增只读 `report`（`ValueListenable<HdrOutputReport>` 转发视图：跨 session 生命周期连续，session 退役/dispose 重置为 const 默认，`_reportView` 永不 dispose，闭包捕获局部 session 不读已 dispose notifier），服务 PiliPlus 播放诊断条（PiliPlus 仓 PLAYBACK-DIAG-BAR-20261022）；`media_kit_video.dart` 补 export `hdr_decoder_review.dart`（HdrDecoderObservation）。纯加法，`_reportChanged`/`ready`/`errors`/`verifiedSourceHint` 零改动。测试：routed_video_playback_test 14/14（+3 转发/重置/替换用例）、piliplus 两契约 9/9；全量 1231 过/9 skip/1 既有失败（hdr_operation_diagnostics default backend，stash 干净树复现与本改动无关）。V1 review 可交付。已知边界：非 Android `RoutedVideoPlayback.create` 也建无 session binding → report 恒默认值（App 侧诊断条显示 route:pending，纯诊断可接受）。

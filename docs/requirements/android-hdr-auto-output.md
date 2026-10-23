@@ -193,6 +193,15 @@ P5 的基础层是 IPT 色彩空间，忽略 RPU 会偏色，所以 P5 没有 `b
    - 扩展对外暴露 `id` 和"本机是否适用"，供 R1 预测和 R4 报告使用。
 4. 范围限制：私有 ABI 只用于 dataspace 应用回退。late PQ、EGL HDR、Vulkan HDR 这些诊断探针留在 hdr_lab，不进入子包。启用条件、判定方法和失效表现都要文档化，并有单测。
 
+### R5.1 宿主 Flutter UI 合成兼容需求（2026-10-23）
+
+- `SurfaceDataSpaceExt.requiresFlutterTextureView()` 默认 false；适配器只在已验证的适用范围内声明 true。它是宿主 UI 根表面的兼容需求，不表示 HDR 能力或当前会话已激活 HDR，也不选择视频纹理、解码器或输出传递函数。
+- Android 宿主在插件注册完成后、FlutterView 创建前，通过 `PlatformVideoView.requiresFlutterTextureView()` 查询；为 true 时在 `FlutterActivity.getRenderMode()` 返回 `RenderMode.texture`，否则保持宿主默认，并将首次结果固定在该 Activity 生命周期内。该入口不自动修改宿主视图树。
+- 未注册、不适用或旧扩展未声明时均为 false。自定义或缓存引擎必须在根视图创建前完成注册，之后补注册不能改变已创建的根视图，需重建 Activity。查询不调用 vendor 私有 ABI；首次引用 PlatformVideoView 可能触发已有的通用 HDR bridge 静态加载。
+- 当前只有现有 LYA 适配范围声明 true。Flutter 3.47.7 Hybrid Composition 会保留被暂停的根 Surface；同源、同 native 库的 texture 对照下用户确认横屏全屏无残留且控件正常。证据支持根表面保留/合成拓扑参与，尚不定位到具体 alpha/HWC/驱动环节。
+- 验收必须分别验证宿主模式、原生视频 Surface 的 PQ/10-bit 与硬解事实，以及冷开/旋转/全屏/控件/后台恢复/HDR↔SDR 的面板结果。不能通过把 HDR 视频迁入 SDR Flutter 纹理或遮挡控件实现通过。
+- 本轮实现/装机和待验状态见 PiliPlus `archives/conversations/lya-dv-translucent-residue-20261022.md`；独立视频载体与 HDR 路由不因宿主 UI 模式改变。
+
 ### R6 跨平台（Phase 2 另立需求）
 
 Phase 1 只做 Android。darwin（三事实交集门禁、final24 运行时禁止降档）和 OHOS（VO 动态色彩契约单层写入）各自另立需求。本需求只要求源描述、策略、偏好、报告的 API 形态与平台无关，不阻碍它们以后收敛。

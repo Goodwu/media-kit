@@ -39,11 +39,56 @@ public class ExtCapabilityReportSerializationTest {
         Map<String, Object> info = PlatformVideoView.getSurfaceDataSpaceExtInfo();
         assertEquals("legacy", info.get("id"));
         assertEquals(true, info.get("isApplicable"));
+        assertEquals(false, info.get("requiresFlutterTextureView"));
+        assertFalse(PlatformVideoView.requiresFlutterTextureView());
         assertFalse(info.containsKey("pqPresentation"));
         assertFalse(info.containsKey("validatedPredictionTransfers"));
         assertFalse(info.containsKey("setterOnlyTransfers"));
         assertFalse(info.containsKey("supportedSurfaceTransfers"));
         assertFalse(info.containsKey("yuvWindowArmApi"));
+    }
+
+    @Test
+    public void noExtension_doesNotRequireFlutterTextureView() {
+        register(null);
+        assertFalse(PlatformVideoView.requiresFlutterTextureView());
+        assertNull(PlatformVideoView.getSurfaceDataSpaceExtInfo());
+    }
+
+    @Test
+    public void nonApplicableExtension_cannotRequestFlutterTextureView() {
+        register(new PlatformVideoView.SurfaceDataSpaceExt() {
+            @Override public boolean applyDataSpace(android.view.Surface s, int d) {
+                return false;
+            }
+            @Override public String id() { return "non-applicable"; }
+            @Override public boolean isApplicable() { return false; }
+            @Override public boolean requiresFlutterTextureView() {
+                return true;
+            }
+        });
+
+        assertFalse(PlatformVideoView.requiresFlutterTextureView());
+        Map<String, Object> info = PlatformVideoView.getSurfaceDataSpaceExtInfo();
+        assertEquals(false, info.get("isApplicable"));
+        assertEquals(false, info.get("requiresFlutterTextureView"));
+    }
+
+    @Test
+    public void applicableExtension_reportsAndSelectsFlutterTextureView() {
+        register(new PlatformVideoView.SurfaceDataSpaceExt() {
+            @Override public boolean applyDataSpace(android.view.Surface s, int d) {
+                return false;
+            }
+            @Override public String id() { return "texture-root"; }
+            @Override public boolean requiresFlutterTextureView() {
+                return true;
+            }
+        });
+
+        assertTrue(PlatformVideoView.requiresFlutterTextureView());
+        assertEquals(true, PlatformVideoView.getSurfaceDataSpaceExtInfo()
+                .get("requiresFlutterTextureView"));
     }
 
     @Test

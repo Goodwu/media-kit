@@ -105,6 +105,15 @@ public final class PlatformVideoView implements PlatformView {
         }
 
         /**
+         * Whether the host Flutter UI root should use FlutterTextureView for
+         * compatibility with this device. This is independent of the native
+         * video surface, decoder choice, and HDR output path.
+         */
+        default boolean requiresFlutterTextureView() {
+            return false;
+        }
+
+        /**
          * Vendor self-report (plan W1): whether PQ can be presented through
          * the RGB {@code rgb10_a2} window surface on this device. Tri-state:
          * {@code null} means this extension does not declare the structure
@@ -224,6 +233,26 @@ public final class PlatformVideoView implements PlatformView {
     }
 
     /**
+     * Whether the registered, applicable vendor extension requires a texture
+     * backed Flutter UI root on this device. The extension is snapshotted once
+     * and only its read-only applicability and compatibility declarations are
+     * queried; this does not select a video texture or change video output.
+     */
+    public static boolean requiresFlutterTextureView() {
+        final SurfaceDataSpaceExt ext = surfaceDataSpaceExt;
+        if (ext == null) {
+            return false;
+        }
+        final boolean applicable = ext.isApplicable();
+        return requiresFlutterTextureView(ext, applicable);
+    }
+
+    private static boolean requiresFlutterTextureView(
+            SurfaceDataSpaceExt ext, boolean applicable) {
+        return applicable && ext.requiresFlutterTextureView();
+    }
+
+    /**
      * Whether the native Surface dataspace bridge loaded in this process.
      * Read-only fact for the HDR capability query; loading is not attempted
      * here.
@@ -254,7 +283,10 @@ public final class PlatformVideoView implements PlatformView {
         }
         final Map<String, Object> info = new HashMap<>();
         info.put("id", ext.id());
-        info.put("isApplicable", ext.isApplicable());
+        final boolean applicable = ext.isApplicable();
+        info.put("isApplicable", applicable);
+        info.put("requiresFlutterTextureView",
+                requiresFlutterTextureView(ext, applicable));
         // All-or-nothing, matching the Dart parser (HdrPqPresentation.fromMap
         // drops any structure whose two values are not both booleans): the
         // pqPresentation key is only reported when the extension declares

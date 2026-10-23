@@ -7,6 +7,8 @@ import static org.junit.Assert.assertTrue;
 
 import android.view.Surface;
 
+import com.alexmercerind.media_kit_video.platformview.PlatformVideoView;
+
 import org.junit.Test;
 
 import java.util.function.IntSupplier;
@@ -129,6 +131,35 @@ public class LyaPqDataSpaceExtTest {
                 sdk(30), fingerprint(OTHER_FINGERPRINT));
         assertFalse(notMatching.isApplicable());
         assertEquals(0, notMatching.loadCalls);
+    }
+
+    @Test
+    public void requiresFlutterTextureView_usesExactReadOnlyDeviceGate() {
+        RecordingExt matching = new RecordingExt(
+                sdk(Q_SDK), fingerprint(LYA_FINGERPRINT));
+        assertTrue(matching.requiresFlutterTextureView());
+        assertEquals(0, matching.nativeCalls);
+        assertEquals(0, matching.loadCalls);
+
+        ForbiddenExt wrongSdk = new ForbiddenExt(
+                sdk(30), fingerprint(LYA_FINGERPRINT));
+        assertFalse(wrongSdk.requiresFlutterTextureView());
+        ForbiddenExt wrongFingerprint = new ForbiddenExt(
+                sdk(Q_SDK), fingerprint(OTHER_FINGERPRINT));
+        assertFalse(wrongFingerprint.requiresFlutterTextureView());
+    }
+
+    @Test
+    public void lyaFlutterTextureRequirement_matchesCapabilityDiagnostic() {
+        RecordingExt matching = new RecordingExt(
+                sdk(Q_SDK), fingerprint(LYA_FINGERPRINT));
+        PlatformVideoView.setSurfaceDataSpaceExt(matching);
+
+        assertTrue(PlatformVideoView.requiresFlutterTextureView());
+        assertEquals(true, PlatformVideoView.getSurfaceDataSpaceExtInfo()
+                .get("requiresFlutterTextureView"));
+        assertEquals(0, matching.nativeCalls);
+        assertEquals(0, matching.loadCalls);
     }
 
     @Test
