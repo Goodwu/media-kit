@@ -3,7 +3,7 @@
 # Run `pod lib lint media_kit_libs_macos_video.podspec` to validate before publishing.
 #
 Pod::Spec.new do |s|
-  system("make")
+  system('make', '-C', __dir__) || raise('media-kit macOS native framework setup failed')
 
   s.name             = 'media_kit_libs_macos_video'
   s.version          = '1.0.4'

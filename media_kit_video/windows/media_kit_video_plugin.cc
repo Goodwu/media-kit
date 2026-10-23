@@ -33,7 +33,7 @@ int QueryAdvancedColorHdrState() {
     return -1;
   }
   for (const auto& path : paths) {
-    DISPLAYCONFIG_DEVICE_INFO_GET_ADVANCED_COLOR_INFO info = {};
+    DISPLAYCONFIG_GET_ADVANCED_COLOR_INFO info = {};
     info.header.type = DISPLAYCONFIG_DEVICE_INFO_GET_ADVANCED_COLOR_INFO;
     info.header.size = sizeof(info);
     info.header.adapterId = path.sourceInfo.adapterId;

@@ -1,6 +1,7 @@
 import java.io.File
 import java.nio.file.Files
 import java.security.MessageDigest
+import groovy.json.JsonSlurper
 
 group 'com.alexmercerind.media_kit_libs_android_video'
 version '1.0'
@@ -47,7 +48,9 @@ android {
     }
 }
 
-task downloadDependencies(type: Exec) {   
+// Acquisition runs during configuration so the fileTree dependency is complete
+// when Android resolves it. This is not an Exec task: it has no shell command.
+task downloadDependencies {
         // Delete previously created /output subdirectory.
 
         def outputDir = file("$buildDir/output")
@@ -83,6 +86,53 @@ task downloadDependencies(type: Exec) {
             ["url": "https://github.com/Predidit/libmpv-android-video-build/releases/download/v1.2.7/default-x86_64.jar", "sha256": "aed0fffc99e5e554d48e1af90bc700133c25fbc02615bf1bf17db9299365c481", "destination": file("$buildDir/v1.2.7/default-x86_64.jar")],
             ["url": "https://github.com/Predidit/libmpv-android-video-build/releases/download/v1.2.7/default-x86.jar", "sha256": "9269643264a1c9689116467f313d5e1b23ea56a68d338ab940c5e8fcf07061c6", "destination": file("$buildDir/v1.2.7/default-x86.jar")]
         ]
+        def nativePackageInputs = [
+            "MEDIA_KIT_NATIVE_PACKAGE_ROOT",
+            "MEDIA_KIT_NATIVE_PACKAGE_MANIFEST",
+            "MEDIA_KIT_NATIVE_PACKAGE_MANIFEST_SHA256"
+        ]
+        if (nativePackageInputs.any { System.getenv().containsKey(it) }) {
+            if (project.findProperty("mediaKitLocalArm64Jar")) {
+                throw new GradleException("Do not combine a verified native package with mediaKitLocalArm64Jar")
+            }
+            def verifier = new File(projectDir.canonicalFile,
+                    "../../../../tool/native_package/package.py").canonicalFile
+            if (!verifier.isFile()) {
+                throw new GradleException("Explicit native packages require the media-kit source checkout: ${verifier}")
+            }
+            // ProviderFactory.exec is supported at configuration time on
+            // Gradle 7.5+; Project.exec was removed in Gradle 9.
+            def verification = providers.exec {
+                commandLine((System.getenv("MEDIA_KIT_NATIVE_PACKAGE_PYTHON") ?: "python3"),
+                        verifier.absolutePath, "consume", "--platform", "android")
+                ignoreExitValue = true
+            }
+            def verificationResult = verification.result.get()
+            if (verificationResult.exitValue != 0) {
+                def verificationError = new String(verification.standardError.asBytes.get(), "UTF-8")
+                throw new GradleException("Explicit Android native package verification failed (exit ${verificationResult.exitValue}): ${verificationError}")
+            }
+            def verificationOutput = new String(verification.standardOutput.asBytes.get(), "UTF-8")
+            def verifiedPackage = new JsonSlurper().parseText(verificationOutput)
+            def wantedAbis = project.findProperty("mediaKitArm64Only")?.toString() == "true" ?
+                    ["arm64-v8a"] : ["arm64-v8a", "armeabi-v7a", "x86_64", "x86"]
+            wantedAbis.each { abi ->
+                def jar = verifiedPackage.layout.jars[abi]
+                if (jar == null) {
+                    throw new GradleException("Explicit Android native package is missing ABI ${abi}")
+                }
+                def sourceJar = new File(jar.path.toString())
+                def destinationJar = new File(outputDir, "native-${abi}.jar")
+                Files.copy(sourceJar.toPath(), destinationJar.toPath())
+                def copiedSha256 = MessageDigest.getInstance("SHA-256")
+                        .digest(Files.readAllBytes(destinationJar.toPath())).encodeHex().toString()
+                if (copiedSha256 != jar.sha256) {
+                    throw new GradleException("Explicit ${abi} JAR changed after verification")
+                }
+            }
+            println "Using verified Android native package ${verifiedPackage.manifest_sha256} (${wantedAbis.join(', ')})"
+            filesToDownload.clear()
+        }
         // The Android test app currently packages only arm64. Keep normal
         // library builds multi-ABI unless the caller opts into this property.
         if (project.findProperty("mediaKitArm64Only")?.toString() == "true") {
