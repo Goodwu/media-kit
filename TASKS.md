@@ -4,6 +4,10 @@
 
 **路径映射（2026-10-05 起）**：`archives/experiments/` 已整体迁移至独立仓库 **`~/src/media-kit-experiments`**（实验记录/证据/交接/索引全量归档）。本文件及 conversations 中所有 `archives/experiments/` 前缀路径均映射到该库根目录。**主库历史已剥离该路径（2026-10-06，main 51ef66cc→ee28accd，树零变化）**：剥离前提交历史不再在主库，查备份仓 `Goodwu/media-kit-history-archive`（分支 `pre-strip-20261006`）；旧哈希换算用 `~/src/media-kit-build/history-strip-20261006/commit-map.json`。
 
+## LYA-LOCAL-P84-PLAYBACK-20261023
+
+- **done**：仓内 `tool/build_android_native.py` 替代已删除scratch脚本，标准wrapper此前以本地源码构建Release成功（APK `66b7cc45…`、JAR `46bba27c…`），原生26命令、装机哈希通过；初版5项单测曾通过，随后归档审查加严链接归因门后未重跑测试或完整构建。LYA HDR Lab实际打开本地P8.4（同字节复制到App files），海思硬解、metadataReshape→PQ，10-bit BT2020_PQ层；120秒帧+3597约29.97fps，采样drop0、无FATAL/ANR，截图无明显黑屏/破损/残留。边界：候选仍experimental/confidence=unverified，非原生DV直通或面板光学验收。用户规则“media-kit-build不得长期放需复用工具资料”已写AGENTS.local及构建说明。证据：`docs/validation/lya-local-p84-playback-20261023.json`；context：`archives/conversations/lya-local-p84-playback-20261023.md`。
+
 ## FLUTTER-HOST-COMPOSITION-20261023
 
 - **implemented / 已验收，用户授权随本地提交归档（不推送）**：`SurfaceDataSpaceExt.requiresFlutterTextureView` 默认false，LYA扩展仅在既有applicability范围声明true；App经 `getRenderMode` 消费并按Activity缓存，无机型判断，其余设备默认surface。独立原生视频Surface、硬解及PQ输出路径未改。无alpha候选APK `fd1882ecb327e491a79856b5a0f158a7ccab52c68056e7e56d6e997cae72fda9` 已由用户确认横竖屏、全屏进出、控件显隐均正常且无残留；独立Verifier确认texture、OMX.hisi硬解、10-bit BT2020_PQ及帧推进正常，无FATAL/ANR。

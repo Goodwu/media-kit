@@ -1,13 +1,11 @@
 #!/usr/bin/env bash
 # 测试版默认构建入口：从最新源码构建 libmpv JAR，再构建 Android 测试 APK。
 #
-# 这是测试链的正向打包路径（非 hack）：
-#   1. ninja 增量编译 ~/src/mpv（media-kit/android 分支 HEAD，含未推送提交）；
-#   2. build-mks-r1.py 按历史链接配方 + genbump token 重指做最终链接，
-#      strip 后换装入 r22 钉定基础 JAR（helper 库保持钉定），产出带
-#      native-candidate.json 溯源的 media-kit-mks-r1.jar；
-#   3. flutter build，经 gradle 内建的 ORG_GRADLE_PROJECT_mediaKitLocalArm64Jar
-#      属性（build.gradle 正式支持的本地 JAR 验证通道）采用该 JAR。
+# 这是测试链的正向打包路径：
+#   1. build_android_native.py 同步本地依赖源码构建树与当前 mpv；
+#   2. 从 helper 当前源码编译，组合 NDK 运行库，产出全新 arm64 JAR/溯源；
+#   3. 经 Gradle 正式的本地 JAR 通道构建测试 APK。
+# 可复用工具与配方受版本管理；build/ 仅保存可重建产物。
 #
 # 发布构建不走本脚本：gradle 默认下载钉定发布 JAR + SHA-256 核验（发布链）。
 #
@@ -44,18 +42,25 @@ app_dir="$(cd "$app_dir" && pwd)"
 is_lab=false
 [[ "$app_dir" == "$(cd "$lab_dir" && pwd)" ]] && is_lab=true
 
-export PATH="/Users/wuweiwei1/Library/Android/sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/darwin-x86_64/bin:$PATH"
-export JAVA_HOME=/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home
+export JAVA_HOME="${MEDIA_KIT_JAVA_HOME:-/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home}"
+ndk="${MEDIA_KIT_ANDROID_NDK:-$HOME/Library/Android/sdk/ndk/27.2.12479018}"
+native_repo="${MEDIA_KIT_NATIVE_REPO:-$HOME/src/libmpv-android-video-build-dv-experiment}"
+mpv_source="${MEDIA_KIT_MPV_SOURCE:-$HOME/src/mpv}"
+[[ "$tag" != */* && "$tag" != . && "$tag" != .. ]] || { echo "tag must be a file name" >&2; exit 2; }
+native_output="${MEDIA_KIT_NATIVE_OUTPUT:-$PWD/build/android-native/$tag-$(date +%Y%m%d-%H%M%S)-$$}"
 
-echo "=== [1/3] ninja sync ~/src/mpv _build-arm64-mks ==="
-ninja -C ~/src/mpv/_build-arm64-mks
-
-echo "=== [2/3] build-mks-r1 pipeline (JAR from latest sources) ==="
-MKS_LABEL="$tag" MKS_SKIP_APK=1 python3 \
-  ~/src/media-kit-build/lg-api24/lg-api24-realtime-gpu-phase0-20261008/build-mks-r1.py
-jar="$HOME/src/media-kit-build/lg-api24/lg-api24-realtime-gpu-mks-$tag-build/media-kit-mks-r1.jar"
+# Preserve --debug as an app-variant selector. Both variants rebuild every
+# native component from local source; neither consumes a released native JAR.
+echo "=== [1-2/3] current local native sources → fresh arm64 JAR ==="
+native_args=(--native-repo "$native_repo" --mpv-source "$mpv_source" --ndk "$ndk"
+  --output "$native_output" --jobs "${MEDIA_KIT_BUILD_JOBS:-4}")
+[[ -n "${MEDIA_KIT_MPV_BUILD:-}" ]] && native_args+=(--mpv-build "$MEDIA_KIT_MPV_BUILD")
+python3 tool/build_android_native.py "${native_args[@]}"
+jar="$native_output/package/default-arm64-v8a.jar"
 [[ -f "$jar" ]] || { echo "JAR missing: $jar" >&2; exit 1; }
+jar="$(cd "$(dirname "$jar")" && pwd)/$(basename "$jar")"
 shasum -a 256 "$jar"
+[[ "${MKS_SKIP_APK:-0}" == 1 ]] && { echo "native-only: $jar"; exit 0; }
 
 echo "=== [3/3] flutter build apk ($variant, local JAR) ==="
 base_defines=()
