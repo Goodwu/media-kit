@@ -68,6 +68,27 @@ endfunction()
 string(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" LIBMPV_TARGET_PROCESSOR)
 string(TOLOWER "${CMAKE_GENERATOR_PLATFORM}" LIBMPV_GENERATOR_PLATFORM)
 
+set(MEDIA_KIT_EXTERNAL_NATIVE_PACKAGE FALSE)
+foreach(_input MEDIA_KIT_NATIVE_PACKAGE_ROOT MEDIA_KIT_NATIVE_PACKAGE_MANIFEST MEDIA_KIT_NATIVE_PACKAGE_MANIFEST_SHA256)
+  if(DEFINED ENV{${_input}})
+    set(MEDIA_KIT_EXTERNAL_NATIVE_PACKAGE TRUE)
+  endif()
+endforeach()
+
+if(MEDIA_KIT_EXTERNAL_NATIVE_PACKAGE)
+  set(MEDIA_KIT_PACKAGE_PLATFORM windows)
+  if(LIBMPV_GENERATOR_PLATFORM MATCHES "^(arm64|aarch64)$" OR
+     (LIBMPV_GENERATOR_PLATFORM STREQUAL "" AND LIBMPV_TARGET_PROCESSOR MATCHES "^(arm64|aarch64)$"))
+    set(MEDIA_KIT_PACKAGE_ARCHITECTURE arm64)
+  elseif(LIBMPV_GENERATOR_PLATFORM MATCHES "^(x64|amd64|x86_64)$" OR
+         (LIBMPV_GENERATOR_PLATFORM STREQUAL "" AND LIBMPV_TARGET_PROCESSOR MATCHES "^(x64|amd64|x86_64)$"))
+    set(MEDIA_KIT_PACKAGE_ARCHITECTURE x86_64)
+  else()
+    message(FATAL_ERROR "Unsupported Windows native package architecture")
+  endif()
+  get_filename_component(_media_kit_package_source "${CMAKE_CURRENT_SOURCE_DIR}" REALPATH)
+  include("${_media_kit_package_source}/../../../../tool/native_package/consume.cmake")
+else()
 if(LIBMPV_TARGET_PROCESSOR MATCHES "^(arm64|aarch64)$" OR LIBMPV_GENERATOR_PLATFORM MATCHES "^(arm64|aarch64)$")
   set(LIBMPV "mpv-dev-aarch64-20260811-git-ad59ff1.zip")
   set(LIBMPV_SHA256 "1b0d58db5bc1b24437d63120ae6e1b0d887ec504e53523dc4666893d00e7f4e8")
@@ -106,6 +127,8 @@ if(NOT LIBMPV_SRC_VALID)
   )
 endif()
 
+endif() # Explicit native package / pinned release download.
+
 # ------------------------------------------------------------------------------
 set(PLUGIN_NAME "media_kit_libs_windows_video_plugin")
 
@@ -140,8 +163,8 @@ target_link_libraries(
   flutter_wrapper_plugin
 )
 
-set(
-  media_kit_libs_windows_video_bundled_libraries
-  "${LIBMPV_SRC}/libmpv-2.dll"
-  PARENT_SCOPE
-)
+if(MEDIA_KIT_EXTERNAL_NATIVE_PACKAGE)
+  set(media_kit_libs_windows_video_bundled_libraries ${MEDIA_KIT_PACKAGE_BUNDLE} PARENT_SCOPE)
+else()
+  set(media_kit_libs_windows_video_bundled_libraries "${LIBMPV_SRC}/libmpv-2.dll" PARENT_SCOPE)
+endif()

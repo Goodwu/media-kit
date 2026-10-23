@@ -31,6 +31,12 @@ endif()
 message(STATUS "Detected architecture: ${ARCH_NAME}")
 
 set(LIBMPV_BUNDLE_FILES)
+set(MEDIA_KIT_EXTERNAL_NATIVE_PACKAGE FALSE)
+foreach(_input MEDIA_KIT_NATIVE_PACKAGE_ROOT MEDIA_KIT_NATIVE_PACKAGE_MANIFEST MEDIA_KIT_NATIVE_PACKAGE_MANIFEST_SHA256)
+  if(DEFINED ENV{${_input}})
+    set(MEDIA_KIT_EXTERNAL_NATIVE_PACKAGE TRUE)
+  endif()
+endforeach()
 set(_routing_native_inputs_set FALSE)
 foreach(_input MEDIA_KIT_LINUX_NATIVE_ROOT MEDIA_KIT_LINUX_NATIVE_RECEIPT MEDIA_KIT_LINUX_NATIVE_APP_ROOT MEDIA_KIT_LINUX_NATIVE_APP_SHA MEDIA_KIT_LINUX_NATIVE_MEDIA_KIT_SHA)
   if(DEFINED ${_input} AND NOT "${${_input}}" STREQUAL "")
@@ -38,7 +44,24 @@ foreach(_input MEDIA_KIT_LINUX_NATIVE_ROOT MEDIA_KIT_LINUX_NATIVE_RECEIPT MEDIA_
   endif()
 endforeach()
 
-if(MEDIA_KIT_ROUTING_MODE)
+if(MEDIA_KIT_EXTERNAL_NATIVE_PACKAGE)
+  if(MEDIA_KIT_ROUTING_MODE OR _routing_native_inputs_set)
+    message(FATAL_ERROR "Do not combine generic native packages with legacy Linux routing inputs")
+  endif()
+  if(NOT MEDIA_KIT_LIBS_AVAILABLE)
+    message(FATAL_ERROR "Explicit Linux native packages require media_kit_libs_linux")
+  endif()
+  set(MEDIA_KIT_PACKAGE_PLATFORM linux)
+  set(MEDIA_KIT_PACKAGE_ARCHITECTURE "${ARCH_NAME}")
+  if(ARCH_NAME STREQUAL "aarch64")
+    set(MEDIA_KIT_PACKAGE_ARCHITECTURE arm64)
+  endif()
+  get_filename_component(_media_kit_package_source "${CMAKE_CURRENT_SOURCE_DIR}" REALPATH)
+  include("${_media_kit_package_source}/../../tool/native_package/consume.cmake")
+  get_filename_component(LIBMPV_PATH "${MEDIA_KIT_PACKAGE_RUNTIME}" DIRECTORY)
+  set(LIBMPV_HEADER_UNZIP_DIR "${MEDIA_KIT_PACKAGE_INCLUDE}")
+  set(LIBMPV_BUNDLE_FILES ${MEDIA_KIT_PACKAGE_BUNDLE})
+elseif(MEDIA_KIT_ROUTING_MODE)
   if(NOT ARCH_NAME STREQUAL "x86_64")
     message(FATAL_ERROR "routing Linux native inputs currently require x86_64")
   endif()
@@ -321,8 +344,8 @@ endif()
 
 # The reviewed Linux bundle places the plugin and all accepted DSOs side by
 # side in bundle/lib. Do not let CMake append acquisition/build paths to its
-# runtime search path in routing mode.
-if(MEDIA_KIT_ROUTING_MODE)
+# runtime search path when using verified external inputs.
+if(MEDIA_KIT_ROUTING_MODE OR MEDIA_KIT_EXTERNAL_NATIVE_PACKAGE)
   set_target_properties(${PLUGIN_NAME} PROPERTIES
     INSTALL_RPATH "$ORIGIN"
     INSTALL_RPATH_USE_LINK_PATH FALSE)
@@ -350,7 +373,7 @@ endif()
 
 # install(FILES "${LIBMPV_PATH}/libmpv.so.2" DESTINATION lib)
 
-if(MEDIA_KIT_ROUTING_MODE)
+if(MEDIA_KIT_ROUTING_MODE OR MEDIA_KIT_EXTERNAL_NATIVE_PACKAGE)
   set(media_kit_video_bundled_libraries ${LIBMPV_BUNDLE_FILES} PARENT_SCOPE)
 else()
   set(media_kit_video_bundled_libraries "${LIBMPV_PATH}/libmpv.so.2" PARENT_SCOPE)
