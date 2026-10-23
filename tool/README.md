@@ -16,14 +16,20 @@ Android 实机验收与构建链的常用脚本。2026-09-30 起把此前散落�
 
 ### `build-android-test.sh` — 测试版默认构建（最新源码）
 
-**测试版构建的默认入口**：从最新源码构建 libmpv JAR 并构建 Android 测试 APK。三步全自动化——①ninja 增量编译 `~/src/mpv/_build-arm64-mks`（media-kit/android HEAD，含未推送提交）；②`build-mks-r1.py` 历史链接配方 + genbump token 重指 → strip → 换装 r22 钉定基础 JAR（helper 库保持钉定），产出带 `native-candidate.json` 溯源的 JAR；③经 gradle 内建 `ORG_GRADLE_PROJECT_mediaKitLocalArm64Jar` 属性（`media_kit_libs_android_video/android/build.gradle` 正式支持的本地 JAR 验证通道，非文件系统 hack）构建 APK。JAR-only 阶段可用管线环境开关 `MKS_SKIP_APK=1`。
+**测试版构建的默认入口**：默认 Release，从当前本地源码（含未提交修改）构建 native JAR，再经 Gradle 正式 `ORG_GRADLE_PROJECT_mediaKitLocalArm64Jar` 通道构建 Android 测试 APK。
 
-```
-tool/build-android-test.sh --tag mytest --local-source /data/local/tmp/media-kit-p5-mystery-box.mp4
+```sh
+tool/build-android-test.sh --tag mytest --local-source /sdcard/Android/data/com.example.media_kit_hdr_lab/files/DV-P8.4.mp4
 tool/build-android-test.sh --tag mytest-pv --platform-view --local-source /data/local/tmp/media-kit-hdr10-full.mp4
 ```
 
-产物：`media_kit_hdr_lab/build/app/outputs/flutter-apk/<tag>-release.apk` + 同名构建日志；JAR/溯源在 `~/src/media-kit-build/lg-api24/lg-api24-realtime-gpu-mks-<tag>-build/`。发布构建不走此脚本（gradle 钉定下载链保持默认）。
+受版本管理的 `build_android_native.py` 替代已删除的 scratch builder：按现存 configured build trees 对 FFmpeg、libplacebo 和其静态依赖执行 make/ninja 增量构建并 install；每个实际链接 archive 必须与本次同步的 build output 哈希一致。shaderc 使用所选 NDK 自带 `sources/third_party/shaderc` 的源码及 ndk-build；libc++ 和 libatomic 明确为同一 NDK 工具链运行库。随后编译当前 `~/src/mpv` 的正式 Meson `libmpv.so` 目标，以 NDK clang++ 按 helper CMake 的源码/链接库直接构建 helper（额外显式请求 packaging gate 所需的 GNU build-id），再调用 native repo 的 `package_native.py`（含原有 Vulkan 弱导入规范）验证 ELF 并产生全新三成员 JAR。无需历史 genbump 重链、旧 JAR、旧 APK 或唯一 scratch 脚本。
+
+默认本地输入为 `~/src/mpv/_build-arm64-mks`、`~/src/libmpv-android-video-build-dv-experiment` 及 `~/Library/Android/sdk/ndk/27.2.12479018`；要求这些源码仓库和配置好的依赖 build trees 已存在。工具不切换/清理源码、不执行网络更新；“当前”表示本次实际工作区字节，**不表示所有第三方依赖均追平远程 HEAD**。`native-candidate.json` 保存每个 Git 源的 HEAD/tree/dirty 状态、实际文件哈希、构建命令、工具链身份、archive 来源、最终 Meson 配置及 JAR SHA；前后源码漂移或未归因的链接 archive 会使构建失败。`package/packaging.json` 保存三成员 ELF/hash 检查；这些是构建证据，设备播放验收需另行执行。
+
+产物：App 的 `build/app/outputs/flutter-apk/<tag>-release.apk`；native 日志、receipt 和 `package/default-arm64-v8a.jar` 默认保存于本仓库 `build/android-native/<tag>-<timestamp>-<pid>/`。`MEDIA_KIT_NATIVE_OUTPUT` 可指定不存在的新目录；`MEDIA_KIT_NATIVE_REPO`、`MEDIA_KIT_MPV_SOURCE`、`MEDIA_KIT_MPV_BUILD`、`MEDIA_KIT_ANDROID_NDK`、`MEDIA_KIT_BUILD_JOBS` 可替换本机路径/并发数。增量对象绑定原配置的源码根和 NDK：换 NDK 路径或编译器版本时会拒绝，必须先准备独立且配置匹配的 build trees；仅改 PATH 不能使旧对象自动重编。`MKS_SKIP_APK=1` 只构建 native。`--debug` 保留为 App variant 选择，native 仍由当前本地源码编译。JDK 默认使用项目要求的 JDK 17；可通过 `MEDIA_KIT_JAVA_HOME` 显式临时覆盖（不继承全局 `JAVA_HOME`）。
+
+可复用脚本、配方、来源说明与验收资料必须保存在受版本管理仓库；禁止在 `media-kit-build/` 长期保存需要复用的工具和资料。发布构建保持 Gradle 默认钉定下载链，不走本入口。
 
 ### `matrix-build.sh` — 受审 native 输入的八行路由矩阵
 
