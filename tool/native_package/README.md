@@ -190,5 +190,13 @@ python3 -m unittest discover -s tool/native_package/tests -v
 ```
 
 These tests exercise the trust boundary and adapters using small synthetic
-payloads, including CMake and Make when installed. They do not compile Flutter,
-decode video, establish DXGI/HDR behavior, or validate a physical device.
+payloads, including CMake and Make when installed. With `gradle` on `PATH`, or
+`MEDIA_KIT_TEST_GRADLE` pointing to a Gradle executable, they also execute the
+production Android acquisition block during real Gradle configuration. This
+checks all four copied JARs and confirms a failed verifier preserves its exit
+status and stderr without downloading fallback libraries. The explicit package
+adapter uses `providers.exec`, which supports Gradle 7.5 and newer, including
+Gradle 9 where `Project.exec` was removed.
+
+These checks do not compile Flutter or Android plugins, decode video, establish
+DXGI/HDR behavior, or validate a physical device.

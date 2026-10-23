@@ -100,19 +100,20 @@ task downloadDependencies {
             if (!verifier.isFile()) {
                 throw new GradleException("Explicit native packages require the media-kit source checkout: ${verifier}")
             }
-            def verificationOutput = new ByteArrayOutputStream()
-            def verificationError = new ByteArrayOutputStream()
-            def verification = project.exec {
+            // ProviderFactory.exec is supported at configuration time on
+            // Gradle 7.5+; Project.exec was removed in Gradle 9.
+            def verification = providers.exec {
                 commandLine((System.getenv("MEDIA_KIT_NATIVE_PACKAGE_PYTHON") ?: "python3"),
                         verifier.absolutePath, "consume", "--platform", "android")
-                standardOutput = verificationOutput
-                errorOutput = verificationError
                 ignoreExitValue = true
             }
-            if (verification.exitValue != 0) {
-                throw new GradleException("Explicit Android native package verification failed: ${verificationError.toString('UTF-8')}")
+            def verificationResult = verification.result.get()
+            if (verificationResult.exitValue != 0) {
+                def verificationError = new String(verification.standardError.asBytes.get(), "UTF-8")
+                throw new GradleException("Explicit Android native package verification failed (exit ${verificationResult.exitValue}): ${verificationError}")
             }
-            def verifiedPackage = new JsonSlurper().parseText(verificationOutput.toString("UTF-8"))
+            def verificationOutput = new String(verification.standardOutput.asBytes.get(), "UTF-8")
+            def verifiedPackage = new JsonSlurper().parseText(verificationOutput)
             def wantedAbis = project.findProperty("mediaKitArm64Only")?.toString() == "true" ?
                     ["arm64-v8a"] : ["arm64-v8a", "armeabi-v7a", "x86_64", "x86"]
             wantedAbis.each { abi ->
