@@ -195,7 +195,7 @@ public class MediaKitVideoPlugin: NSObject, FlutterPlugin {
     case "Utils.ExitNativeFullscreen":
       handleExitNativeFullscreenMethodCall(call.arguments, result)
     case "VideoRouteCapabilities.Get":
-      handleRouteCapabilitiesMethodCall(call.arguments, result)
+      handleRouteCapabilitiesMethodCall(call.arguments, result: result)
     default:
       result(FlutterMethodNotImplemented)
     }
