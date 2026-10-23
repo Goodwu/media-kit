@@ -7,7 +7,9 @@ require_relative '../common/darwin/Podspec/media_kit_utils.rb'
 
 Pod::Spec.new do |s|
   # Setup required files
-  system("make -C ../common/darwin HEADERS_DESTDIR=\"$(pwd)/Headers\"")
+  system('make', '-C', File.expand_path('../common/darwin', __dir__),
+         "HEADERS_DESTDIR=#{File.join(__dir__, 'Headers')}",
+         'MEDIA_KIT_APPLE_PLATFORM=macos') || raise('media-kit macOS native header setup failed')
 
   # Initialize `MediaKitUtils`
   mku = MediaKitUtils.new(MediaKitUtils::Platform::MACOS)

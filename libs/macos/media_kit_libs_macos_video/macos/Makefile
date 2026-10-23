@@ -1,3 +1,11 @@
+ifneq ($(origin MEDIA_KIT_NATIVE_PACKAGE_ROOT)$(origin MEDIA_KIT_NATIVE_PACKAGE_MANIFEST)$(origin MEDIA_KIT_NATIVE_PACKAGE_MANIFEST_SHA256),undefinedundefinedundefined)
+export MEDIA_KIT_NATIVE_PACKAGE_ROOT MEDIA_KIT_NATIVE_PACKAGE_MANIFEST MEDIA_KIT_NATIVE_PACKAGE_MANIFEST_SHA256
+MEDIA_KIT_NATIVE_PACKAGE_PYTHON ?= python3
+.PHONY: all native-package
+all: native-package
+native-package:
+	"$(MEDIA_KIT_NATIVE_PACKAGE_PYTHON)" "$(CURDIR)/../../../../tool/native_package/package.py" consume --platform macos --stage-frameworks "$(CURDIR)/Frameworks"
+else
 all: Frameworks/*.xcframework Frameworks/.symlinks
 
 MPV_XCFRAMEWORKS_VERSION=0.6.8
@@ -40,6 +48,8 @@ Frameworks/.symlinks: Frameworks/*.xcframework
 	mkdir -p Frameworks/.symlinks/mpv
 	${SED} -i ${SED_INPLACE_FLAG} 's/\r$$//g' create_framework_symlinks.sh # remove CRLF line terminator added by Flutter packaging (https://github.com/media-kit/media-kit/issues/338)
 	sh create_framework_symlinks.sh Frameworks/Mpv.xcframework Frameworks/.symlinks/mpv
+
+endif
 
 .PHONY: clean
 clean:

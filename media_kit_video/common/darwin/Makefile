@@ -1,3 +1,12 @@
+ifneq ($(origin MEDIA_KIT_NATIVE_PACKAGE_ROOT)$(origin MEDIA_KIT_NATIVE_PACKAGE_MANIFEST)$(origin MEDIA_KIT_NATIVE_PACKAGE_MANIFEST_SHA256),undefinedundefinedundefined)
+export MEDIA_KIT_NATIVE_PACKAGE_ROOT MEDIA_KIT_NATIVE_PACKAGE_MANIFEST MEDIA_KIT_NATIVE_PACKAGE_MANIFEST_SHA256
+MEDIA_KIT_NATIVE_PACKAGE_PYTHON ?= python3
+.PHONY: all native-package
+all: native-package
+native-package:
+	@test -n "$(HEADERS_DESTDIR)" || (echo "HEADERS_DESTDIR is required" >&2; exit 1)
+	"$(MEDIA_KIT_NATIVE_PACKAGE_PYTHON)" "$(CURDIR)/../../../tool/native_package/package.py" consume --platform "$(MEDIA_KIT_APPLE_PLATFORM)" --stage-headers "$(HEADERS_DESTDIR)"
+else
 SPACE := $(subst ,, )
 HEADERS_DESTDIR_ESCAPED=$(subst $(SPACE),\ ,${HEADERS_DESTDIR})
 
@@ -27,3 +36,4 @@ ${HEADERS_DESTDIR_ESCAPED}/mpv/*.h: .cache/headers/mpv.tar.gz
 	mkdir -p ${HEADERS_DESTDIR_ESCAPED}/mpv
 	${TAR} ${TAR_WILDCARDS_FLAG} -xvf .cache/headers/mpv.tar.gz --strip-components 2 -C ${HEADERS_DESTDIR_ESCAPED}/mpv/ 'mpv-*/libmpv/*.h'
 	touch ${HEADERS_DESTDIR_ESCAPED}/mpv/*.h
+endif
