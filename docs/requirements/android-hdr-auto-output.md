@@ -265,7 +265,7 @@ Phase 1 只做 Android。darwin（三事实交集门禁、final24 运行时禁�
 - 不破坏既有公开 API（P1-3 的 `AndroidVideoOptions`/`DarwinVideoOptions` 迁移表）。会话 API 是增量入口。
 - 暂停空转修复（churn_fix_20261001 边沿触发）与 SurfaceReleaseProtocol/NativeOutputLifecycle 协议在会话编排下继续生效。
 - 测试面：`HdrOutputPolicy` 既有 11 项单测不回归（分类修复后对应用例同步修订）。hdr_lab 已有的 coordinator、slot、intent、disposal 单测迁入库内后继续通过。编排层新增行为要有 VM 单测。
-- 当前只有一台 HDR 实机（LYA，API 29，依赖私有回退）。公开 NDK 直接成功的路径（API 30–33）和 SurfaceControl 路径（API≥34）缺少实机证据，相关预测置信度标为 `unverified`。新设备接入后，先跑现有矩阵，再补其他验证。
+- 当前只有一台 HDR 实机（LYA，API 29，依赖私有回退）。公开 NDK 直接成功的路径（API 30–33）和 SurfaceControl 路径（API≥34）缺少实机证据，相关预测置信度标为 `unverified`。新设备接入后，先跑现有矩阵，再补其他验证。（2026-10-23 注记：API≥34 首台实机 marble 实测——纯 SurfaceControl 一次性层事务 commit 后被逐帧 buffer 事务覆盖，合成层保持 SRGB、PQ 按 SDR 显示；修复为 API≥34 先走生产者侧 NDK `ANativeWindow_setBuffersDataSpace`（BLAST 逐帧事务携带 dataspace），`surfaceControl` 降为窗口设置失败的回退。marble reshape 会话 `path=ndk applied=true readback=DATASPACE_BT2020_PQ`、SF 层 BT2020_PQ 实证。API 30–33 NDK 直通仍缺实机。）
 - P5 管线判定使用选项存在性作为代理（R1.4），较早的 fork 世代会被判为不可用。（注记 2026-10-02：该代理已退役，判定改为 fork 只读属性 `dovi-p5-pipeline` 经 bridge 探针，见 R1.4 注记——本条限制不再适用。）
 - （2026-10-02 实机登记）**HDR Vivid 事实在 mediacodec 路径不可观测**：Android MediaCodec 解码不向输出帧传播 CUVA 005.1 逐帧 side data，会话路由全部强制 `hwdec=mediacodec`，因此 `video-params/hdr-vivid` 在硬解路径恒 false、Vivid 源按基础层分类（实测 `archives/experiments/android-hdr-planb-device-facts-20261002.md` R1/R1b：软解 `hwdec=no` 下同一属性读 true，归因为解码通道剥离而非属性缺陷）。路由结果不受影响是指不产生错误着色；直出/转换的具体档位随第 6 节成熟度更新——2026-10-02 HLG×baseLayerDirect 升 verified 后，硬解路径的 Vivid 源按基础层 HLG 分类并默认直出，报告的元数据格式仍按基础层显示。库不为此切换软解路由（4K 软解不可行）；Vivid 元数据的可靠检测需 demuxer/码流级 SEI 探测，归入 ② 完整目标（动态元数据重建扩展）。
 

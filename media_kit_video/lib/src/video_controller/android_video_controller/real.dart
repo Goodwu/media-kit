@@ -1042,9 +1042,10 @@ class AndroidVideoController extends PlatformVideoController {
   /// and returns the native report:
   ///
   /// * `applied` (bool): whether the dataspace was applied.
-  /// * `path` (String): `ndk` (public NDK bridge, API < 34), `ext:<id>`
-  ///   (registered extension fallback), `surfaceControl` (API >= 34
-  ///   transaction) or `none` (everything failed or no live surface).
+  /// * `path` (String): `ndk` (public NDK producer-side window bridge),
+  ///   `ext:<id>` (registered extension fallback, API < 34),
+  ///   `surfaceControl` (API >= 34 window-set fallback transaction) or
+  ///   `none` (everything failed or no live surface).
   /// * `requested` (String): the [transfer] as requested.
   /// * `readback` (String): the dataspace read back from the surface as a
   ///   constant name (e.g. `DATASPACE_BT2020_PQ`), a hex value for unknown
@@ -1055,10 +1056,9 @@ class AndroidVideoController extends PlatformVideoController {
   /// through `SurfaceControl.Transaction.setDataSpace` (SurfaceFlinger layer
   /// state) while `readback` goes through `ANativeWindow_getBuffersDataSpace`
   /// (buffer side), so the readback is not guaranteed to equal the request
-  /// there. On the `ndk`/`ext` paths (API < 34) both sides go through
-  /// ANativeWindow and the readback is expected to match. Session
-  /// orchestration must exempt the `surfaceControl` path from a
-  /// `dataSpaceReadbackMismatch` judgment.
+  /// there. On the `ndk`/`ext` paths both sides go through ANativeWindow and
+  /// the readback is expected to match. Session orchestration must exempt the
+  /// `surfaceControl` path from a `dataSpaceReadbackMismatch` judgment.
   ///
   /// Not wired into playback orchestration yet; callers apply and verify a
   /// HDR dataspace after a platform-view output is bound.
