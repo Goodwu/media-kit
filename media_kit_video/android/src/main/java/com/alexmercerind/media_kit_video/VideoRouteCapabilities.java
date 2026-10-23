@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /** Read-only source/target capabilities; never creates MediaCodec or output. */
@@ -134,13 +135,42 @@ final class VideoRouteCapabilities {
 
     private static String decoderKind(MediaCodecInfo info) {
         if (Build.VERSION.SDK_INT >= 29) {
-            if (info.isSoftwareOnly()) return "software";
-            if (info.isHardwareAccelerated()) return "hardware";
+            try {
+                if (info.isSoftwareOnly()) return "software";
+                if (info.isHardwareAccelerated()) return "hardware";
+            } catch (RuntimeException | LinkageError e) {
+                return "unknown";
+            }
+            // Neither flag: the OMX path never sets the software flag, so a
+            // vendor OMX component declared "software-codec" in its XML also
+            // lands here. Absence of the hardware flag is meaningful on 29+
+            // and must not be overridden by naming.
+            return isSoftwareDecoderName(info.getName()) ? "software" : "unknown";
         }
-        String name = info.getName();
-        if (name.startsWith("OMX.google.") || name.startsWith("c2.android.") ||
-                name.startsWith("OMX.ffmpeg.") || name.equals("OMX.qcom.video.decoder.hevcswvdec")) return "software";
-        return "unknown"; // Pre-29 vendor naming is not authoritative hardware evidence.
+        // Pre-29 has no flags at all. The 29+ flag itself is derived from
+        // naming (OmxInfoBuilder/Codec2InfoBuilder: vendor OMX./c2. component
+        // without a software declaration), so mirror that derivation here:
+        // blocklist first, vendor naming then. Same scheme as HdrCapabilities.
+        String name = info.getName().toLowerCase(Locale.ROOT);
+        if (isSoftwareDecoderName(name)) return "software";
+        if (name.startsWith("omx.") || name.startsWith("c2.") ||
+                name.startsWith("arc.")) return "hardware";
+        return "unknown";
+    }
+
+    /**
+     * Software decoder naming schemes validated across the device ecosystem:
+     * platform defaults, vendor software components and ffmpeg ports.
+     */
+    private static boolean isSoftwareDecoderName(String name) {
+        String lower = name.toLowerCase(Locale.ROOT);
+        return lower.startsWith("omx.google.") || lower.startsWith("c2.android.") ||
+                lower.startsWith("c2.google.") || lower.startsWith("omx.sprd.soft.") ||
+                lower.startsWith("omx.avcodec.") || lower.startsWith("omx.pv") ||
+                lower.contains("ffmpeg") || lower.contains("sw_vd") ||
+                lower.endsWith("sw") || lower.endsWith("sw.dec") ||
+                (lower.startsWith("omx.sec.") && lower.contains(".sw.")) ||
+                lower.equals("omx.qcom.video.decoder.hevcswvdec");
     }
 
     private static String evaluate(MediaCodecInfo.CodecCapabilities caps, VideoSourceSpec s, String mime, boolean nativeDv) {

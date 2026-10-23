@@ -4,6 +4,14 @@
 
 **路径映射（2026-10-05 起）**：`archives/experiments/` 已整体迁移至独立仓库 **`~/src/media-kit-experiments`**（实验记录/证据/交接/索引全量归档）。本文件及 conversations 中所有 `archives/experiments/` 前缀路径均映射到该库根目录。**主库历史已剥离该路径（2026-10-06，main 51ef66cc→ee28accd，树零变化）**：剥离前提交历史不再在主库，查备份仓 `Goodwu/media-kit-history-archive`（分支 `pre-strip-20261006`）；旧哈希换算用 `~/src/media-kit-build/history-strip-20261006/commit-map.json`。
 
+## DECODER-KIND-PRE29-20261023
+
+- **implemented / 已实机验证，已本地提交（不推送；事实以 Git log 为准）**：`VideoRouteCapabilities.java` `decoderKind()` pre-29 分支从"厂商命名一律 unknown"改为镜像框架自身的 flags 推导——AOSP `OmxInfoBuilder`/`Codec2InfoBuilder` 对 OMX/C2 组件的 `isHardwareAccelerated` 本就是"非 OMX.google 前缀 + 无 software-codec 声明"的命名推导（android-10/11/13 源码核实），且同仓 `HdrCapabilities.java` L173-182 pre-29 早用同取向启发式，原 unknown 策略与仓内自相矛盾并导致 PiliPlus 在 API<29 设备全格式误灰（App `_decodableAtSize` 把"无 hardware 解码器"判不可播）。
+- 规则：API≥29 不变（flags 优先；双缺席时仅软解黑名单可判 software、不再猜 hardware——OMX 路径 29+ 从不设 software 标志，双缺席本身是厂商 software-codec 声明的信号）；API<29 先过生态实机验证的软解黑名单（omx.google./c2.android./c2.google./omx.sprd.soft./omx.avcodec./omx.pv*/含 ffmpeg/sw_vd/尾缀 sw|sw.dec/omx.sec.*.sw.*/hevcswvdec，来源 Parseus/codecinfo CodecUtils.kt），余下 `omx.`/`c2.`/`arc.` 厂商前缀判 hardware，非标准命名仍 unknown。`kind=hardware` 消费方（HDR 路由 fail-closed 门）不受影响：放行仍需 `evaluate()` 的 profile/level/尺寸严格校验。
+- 验证（2026-10-23 晚，dev 变体 app-release.apk 5 台全装）：P10 Plus（VKY API28）旧版 hev1/av01/avc1 探测三连灰 → 新版仅 av01 灰，流级仅 AV1 各档灰（无 AV1 硬解，正确），1080P 播放正常且 OMX.hisi 硬解实跑（HdrDiag `hwdecCurrent=mediacodec-copy verified=true`）；LG G6（API24）同样闭合；Mate 20 Pro（API29）零置灰日志、播放正常（29+ 路径回归通过）；Redmi 8/Note 5A（API37）已装未单独复测（29+ 路径未改）。App 侧按用户指令零改动。用户曾报一次"无法加载解码器"toast（mpv `Could not open codec`，release 不落 logcat）：5 轮复现全部硬解正常，用户确认重开自愈、无持续回归；注意本包 libmpv 为 08b210e2 本地源码链（非 10:48 Maven JAR），复发时先抓故障时刻 OMX/ACodec 日志与 toast 原文归因。
+- 工程事实：宿主 JDK27 不可用须 `JAVA_HOME=openjdk@21`；PiliPlus 构建须带 `ORG_GRADLE_PROJECT_dev=true`（否则产出无 `.dev` 后缀的并列包，`adb install -r` 报 Success 实为新装应用，复测会跑旧包——必须核对 `pm path`/lastUpdateTime）。APK 46MB→77.9MB 源于本仓 HEAD `08b210e2` 本地源码构建链，与本改动无关。
+- context：App 仓 `/Users/wuweiwei1/src/PiliPlus/archives/conversations/codec-capability-graying-20261022.md`（本轮追加段）。
+
 ## LYA-LOCAL-P84-PLAYBACK-20261023
 
 - **done**：仓内 `tool/build_android_native.py` 替代已删除scratch脚本，标准wrapper此前以本地源码构建Release成功（APK `66b7cc45…`、JAR `46bba27c…`），原生26命令、装机哈希通过；初版5项单测曾通过，随后归档审查加严链接归因门后未重跑测试或完整构建。LYA HDR Lab实际打开本地P8.4（同字节复制到App files），海思硬解、metadataReshape→PQ，10-bit BT2020_PQ层；120秒帧+3597约29.97fps，采样drop0、无FATAL/ANR，截图无明显黑屏/破损/残留。边界：候选仍experimental/confidence=unverified，非原生DV直通或面板光学验收。用户规则“media-kit-build不得长期放需复用工具资料”已写AGENTS.local及构建说明。证据：`docs/validation/lya-local-p84-playback-20261023.json`；context：`archives/conversations/lya-local-p84-playback-20261023.md`。
