@@ -724,9 +724,10 @@ public final class PlatformVideoView implements PlatformView {
      * first working path.
      *
      * @return the path the dataspace was applied through: {@code ndk} (public
-     *         NDK bridge, API &lt; 34), {@code ext:<id>} (registered extension
-     *         fallback), {@code surfaceControl} (API &ge; 34 transaction) —
-     *         or null when nothing was applied.
+     *         NDK producer-side window bridge), {@code ext:<id>} (registered
+     *         extension fallback, API &lt; 34), {@code surfaceControl} (API
+     *         &ge; 34 window-set fallback transaction) — or null when nothing
+     *         was applied.
      */
     private void logLgDataSpaceBinding(@NonNull String stage,
             @NonNull android.view.Surface surface, @NonNull String transfer,
@@ -754,6 +755,18 @@ public final class PlatformVideoView implements PlatformView {
             return null;
         }
         final int dataSpace = dataSpaceFor(transfer);
+        // The producer-side window dataspace comes first on every API level:
+        // per-buffer BLAST transactions carry it to the SurfaceFlinger layer,
+        // so the setting survives every subsequent frame. A one-shot layer
+        // transaction alone does not — on the first API 35 device exercised
+        // (2026-10-23) the SurfaceControl transaction committed yet the
+        // composited layer stayed SRGB and the PQ output was shown as SDR.
+        if (Build.VERSION.SDK_INT >= 34 && nativeDataSpaceBridgeLoaded
+                && setSurfaceDataSpace(
+                        surface, dataSpace, "rgba1010102".equals(initialPixelFormat))) {
+            logLgDataSpaceBinding("output", surface, transfer, "ndk-accepted");
+            return "ndk";
+        }
         if (Build.VERSION.SDK_INT < 34) {
             if (!nativeDataSpaceBridgeLoaded) {
                 logLgDataSpaceBinding("refused", surface, transfer, "bridge-not-loaded");
@@ -784,6 +797,9 @@ public final class PlatformVideoView implements PlatformView {
             }
             return null;
         }
+        // API >= 34 window-set fallback: the one-shot layer transaction.
+        // Applied and readback measure different layers on this path, so the
+        // session exempts it from the readback-match gate.
         if (!surfaceView.isAttachedToWindow()) {
             return null;
         }
@@ -833,10 +849,11 @@ public final class PlatformVideoView implements PlatformView {
      * <ul>
      *   <li>{@code applied}: whether the dataspace was applied (true exactly
      *       when {@code path != none}).</li>
-     *   <li>{@code path}: {@code ndk} (public NDK bridge succeeded, API &lt; 34),
-     *       {@code ext:<id>} (extension fallback succeeded),
-     *       {@code surfaceControl} (API &ge; 34 transaction committed),
-     *       {@code none} (everything failed or no live surface).</li>
+     *   <li>{@code path}: {@code ndk} (public NDK producer-side window bridge
+     *       succeeded), {@code ext:<id>} (extension fallback succeeded,
+     *       API &lt; 34), {@code surfaceControl} (API &ge; 34 window-set
+     *       fallback transaction committed), {@code none} (everything failed
+     *       or no live surface).</li>
      *   <li>{@code requested}: the transfer as requested.</li>
      *   <li>{@code readback}: the dataspace read back from the live surface as
      *       a known constant name (e.g. {@code DATASPACE_BT2020_PQ}) or an
@@ -849,9 +866,9 @@ public final class PlatformVideoView implements PlatformView {
      * {@code applied} goes through {@code SurfaceControl.Transaction
      * #setDataSpace} (SurfaceFlinger layer state), while {@code readback}
      * goes through {@code ANativeWindow_getBuffersDataSpace} (buffer side);
-     * the two need not agree. On the {@code ndk}/{@code ext} paths (API &lt;
-     * 34) both sides go through ANativeWindow, so the readback is expected to
-     * match the request. Session orchestration must therefore exempt the
+     * the two need not agree. On the {@code ndk}/{@code ext} paths both sides
+     * go through ANativeWindow, so the readback is expected to match the
+     * request. Session orchestration must therefore exempt the
      * {@code surfaceControl} path from a {@code dataSpaceReadbackMismatch}
      * judgment.</p>
      *
