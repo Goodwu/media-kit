@@ -145,6 +145,11 @@ platform, or a different selected architecture. Empty directories are not part
 of the inventory. The manifest itself is authenticated by its independently
 expected digest, so it is excluded from `files`.
 
+Symbolic-link targets use relative POSIX spelling in the manifest. On Windows,
+native link separators are converted to `/` before recording or comparing this
+spelling; drive-qualified, absolute, UNC, escaping and cyclic links are still
+rejected. The verifier resolves each actual link before accepting it.
+
 Export these values for the actual application build:
 
 ```sh

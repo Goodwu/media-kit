@@ -39,7 +39,8 @@ class PackageContract(unittest.TestCase):
 
     def symlink(self, path, target, directory=False):
         try:
-            path.symlink_to(target, target_is_directory=directory)
+            # Win32 does not convert POSIX separators inside a raw link target.
+            path.symlink_to(Path(target), target_is_directory=directory)
         except OSError as error:
             self.skipTest(f"Host cannot create symbolic links: {error}")
 
@@ -180,6 +181,16 @@ class PackageContract(unittest.TestCase):
         with self.assertRaisesRegex(package.PackageError, "recursive directory"):
             package.create(self.root, spec)
 
+    def test_native_link_separators_preserve_relative_target_policy(self):
+        self.assertEqual(package.link_target(r"Versions\Current\Mpv", windows=True), "Versions/Current/Mpv")
+        self.assertEqual(package.link_target(r"..\outside.h", windows=True), "../outside.h")
+        with self.assertRaises(package.PackageError):
+            package.link_target(r"Versions\Current\Mpv")
+        for target in (r"C:\outside.h", r"C:outside.h", r"\outside.h", r"\\server\share\file",
+                       r"\\?\C:\outside.h", "/outside.h", "bad\x00target"):
+            with self.subTest(target=target), self.assertRaises(package.PackageError):
+                package.link_target(target, windows=True)
+
     def test_safe_library_link_requires_flat_bundle_target(self):
         spec_path = self.fixture()
         runtime = self.root / "lib/libmpv.so.2"
@@ -297,7 +308,8 @@ class PackageContract(unittest.TestCase):
         source = self.base / "cmake source"
         source.mkdir()
         repository = MODULE_PATH.parents[2].as_posix()
-        expected_include = (self.root / "include/mpv").as_posix()
+        # The verifier resolves parent links, including macOS /var -> /private/var.
+        expected_include = (Path(verified["layout"]["include"]) / "mpv").as_posix()
         (source / "CMakeLists.txt").write_text(
             'cmake_minimum_required(VERSION 3.14)\nproject(Contract LANGUAGES CXX)\n'
             'function(apply_standard_settings target)\nendfunction()\n'
@@ -317,8 +329,8 @@ class PackageContract(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertNotIn("Downloading archive", result.stdout)
 
-    @unittest.skipUnless(shutil.which("cmake") and shutil.which("c++") and shutil.which("pkg-config"),
-                         "CMake/C++/pkg-config is not installed")
+    @unittest.skipUnless(os.name != "nt" and shutil.which("cmake") and shutil.which("c++") and shutil.which("pkg-config"),
+                         "Linux CMake adapter needs a Unix host with CMake/C++/pkg-config")
     def test_linux_cmake_sets_relative_rpath_and_bundles_package(self):
         created, verified = self.created("linux", [self.host_architecture])
         source = self.base / "cmake source"

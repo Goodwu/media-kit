@@ -115,6 +115,17 @@ def manifest_path(root: Path, path: Path | None) -> Path:
     return root / path.name
 
 
+def link_target(value: str, *, windows: bool = False) -> str:
+    # Win32 stores native relative link separators as backslashes. The manifest
+    # always uses POSIX spelling; absolute, drive and UNC targets stay forbidden.
+    if windows:
+        value = value.replace("\\", "/")
+    if (not value or "\\" in value or ":" in value or value.startswith("/")
+            or any(ord(c) < 32 for c in value)):
+        raise PackageError("Unsafe symbolic link target")
+    return value
+
+
 def inventory(root: Path, manifest: Path) -> tuple[dict[str, str], dict[str, str]]:
     files, links = {}, {}
     entry_names = []
@@ -128,10 +139,10 @@ def inventory(root: Path, manifest: Path) -> tuple[dict[str, str], dict[str, str
             rel = relative(path.relative_to(root).as_posix())
             entry_names.append(rel)
             if path.is_symlink():
-                target = os.readlink(path)
-                if (not target or "\\" in target or ":" in target or target.startswith("/")
-                        or any(ord(c) < 32 for c in target)):
-                    raise PackageError(f"Unsafe symbolic link: {rel}")
+                try:
+                    target = link_target(os.readlink(path), windows=os.name == "nt")
+                except PackageError as error:
+                    raise PackageError(f"Unsafe symbolic link: {rel}") from error
                 try:
                     resolved = path.resolve(strict=True)
                 except (OSError, RuntimeError) as error:
