@@ -52,7 +52,12 @@ android {
         )
 
         ndk {
-            abiFilters += "arm64-v8a"
+            // AGP rejects ndk abiFilters when splits abiFilters are set.
+            // --split-per-abi builds are arm64-only via the Flutter splits
+            // block; keep the filter only for universal builds.
+            if (project.findProperty("split-per-abi") != "true") {
+                abiFilters += "arm64-v8a"
+            }
         }
 
         externalNativeBuild {
