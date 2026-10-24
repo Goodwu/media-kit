@@ -1419,8 +1419,11 @@ class HdrVideoSession {
       );
       if (!replanned.playable) {
         throw HdrPlaybackBlocked(
-          replanned.selected.skipReason ??
-              HdrDegradeReason.p5PipelineUnavailable,
+          // Once the current decoder failed its promised hwdec contract,
+          // report that observed failure. The selected candidate's skip
+          // reason describes why that *other* route is unavailable and can
+          // obscure the actual failure (for example nativeDvUnavailable).
+          HdrDegradeReason.hwdecMismatch,
           sourceFacts: sourceFacts,
         );
       }

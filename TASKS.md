@@ -4,6 +4,11 @@
 
 **路径映射（2026-10-05 起）**：`archives/experiments/` 已整体迁移至独立仓库 **`~/src/media-kit-experiments`**（实验记录/证据/交接/索引全量归档）。本文件及 conversations 中所有 `archives/experiments/` 前缀路径均映射到该库根目录。**主库历史已剥离该路径（2026-10-06，main 51ef66cc→ee28accd，树零变化）**：剥离前提交历史不再在主库，查备份仓 `Goodwu/media-kit-history-archive`（分支 `pre-strip-20261006`）；旧哈希换算用 `~/src/media-kit-build/history-strip-20261006/commit-map.json`。
 
+## LG-DVP84-SOURCE-BUILD-20261024
+
+- **已修复并 LG 验证，按用户授权本地提交归档，不推送；提交事实以 Git log 为准**：标准源码 wrapper 新增 receipt→JAR→最终 APK 三成员字节一致性/钉定NDK strip检查、fork能力标记、重复成员/foreign ABI拒绝；dev缺本地JAR拒绝。真实首轮发现其它插件foreign ABI，默认强制split并选arm64后整链重跑通过。session review 的hwdecMismatch耗尽不再误报nativeDvUnavailable；session53/工具11/analyze及V2审核通过。
+- APK `e17d3aee…028c9`（27,541,013 B）设备回读一致；LG两段4K DV P8.4均高通HEVC硬解+surfacetexture→PQ、面板HDR开启，约73s/61s检查点buffer推进，零FATAL/ANR/阻断，用户确认面板正常视频。无FPS/逐帧连续性/光学校准宣称，无nativeDV直通宣称。持久证据：`docs/validation/lg-dvp84-source-build-20261024.json`；唯一context：`/Users/wuweiwei1/src/PiliPlus/archives/conversations/marble-dv-p84-route-regression-20261023.md`。
+
 ## DECODER-KIND-PRE29-20261023
 
 - **implemented / 已实机验证，已本地提交（不推送；事实以 Git log 为准）**：`VideoRouteCapabilities.java` `decoderKind()` pre-29 分支从"厂商命名一律 unknown"改为镜像框架自身的 flags 推导——AOSP `OmxInfoBuilder`/`Codec2InfoBuilder` 对 OMX/C2 组件的 `isHardwareAccelerated` 本就是"非 OMX.google 前缀 + 无 software-codec 声明"的命名推导（android-10/11/13 源码核实），且同仓 `HdrCapabilities.java` L173-182 pre-29 早用同取向启发式，原 unknown 策略与仓内自相矛盾并导致 PiliPlus 在 API<29 设备全格式误灰（App `_decodableAtSize` 把"无 hardware 解码器"判不可播）。

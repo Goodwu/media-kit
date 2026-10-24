@@ -1590,6 +1590,44 @@ void main() {
   });
 
   test(
+      'SurfaceTexture mismatch reports its cause when native DV is unavailable',
+      () async {
+    final backend = FakeBackend()
+      ..factsForOpen.add(facts(gamma: 'hlg', profile: 8, hwdec: 'no'));
+    final session = makeSession(
+      backend: backend,
+      capabilities: lgYuvPqCaps(),
+      policy: const HdrRoutingPolicy(
+        preferences: {
+          HdrSourceClass.dvP84: [HdrStrategy.baseLayerConvert],
+        },
+      ),
+      position: const Duration(seconds: 2),
+    );
+    final events = <HdrOutputEvent>[];
+    session.events.listen(events.add);
+
+    await session.open(media, hint: p84);
+    await pumpEventQueue();
+
+    expect(backend.opened, hasLength(1));
+    expect(backend.opened.single.route.strategy, HdrStrategy.baseLayerConvert);
+    expect(backend.opened.single.route.hwdec, 'surfacetexture');
+    expect(session.report.value.verified, isFalse);
+    expect(session.report.value.degradeReason, HdrDegradeReason.hwdecMismatch);
+    // This capability fixture reports no Dolby Vision decoder, so the
+    // native-DV candidate is unavailable while the convert route is the only
+    // eligible HDR route.
+    expect(lgYuvPqCaps().dolbyVisionDecoders, isEmpty);
+    expect(events.whereType<HdrRouteAppliedEvent>(), isEmpty);
+    final errors = events.whereType<HdrErrorEvent>().toList();
+    expect(errors, hasLength(1));
+    expect(errors.single.reason, HdrDegradeReason.hwdecMismatch);
+    expect(backend.calls, isNot(contains('configure:toneMapSdr:-')));
+    await session.dispose();
+  });
+
+  test(
       'an unavailable native DV admission blocks a P5 hint and never opens '
       'the media', () async {
     // Native DV is the first (verified) dvP5 candidate since the 2026-10-10
