@@ -117,6 +117,7 @@ const Map<HdrSourceClass, HdrSourceDescriptor> sources =
 HdrCapabilities caps({
   int sdkInt = 29,
   Set<int>? displayHdrTypes = const <int>{2, 3},
+  double? displayHdrMaxLuminance,
   bool p5 = true,
   HdrDataSpaceExtInfo? ext,
   List<HdrDecoderInfo> dvDecoders = const <HdrDecoderInfo>[],
@@ -125,6 +126,7 @@ HdrCapabilities caps({
   return HdrCapabilities(
     sdkInt: sdkInt,
     displayHdrTypes: displayHdrTypes,
+    displayHdrMaxLuminance: displayHdrMaxLuminance,
     hevcDecoders: const <HdrDecoderInfo>[lyHevcDecoder],
     dolbyVisionDecoders: dvDecoders,
     p5PipelineAvailable: p5,
@@ -1768,6 +1770,102 @@ void main() {
           (HdrCandidate c) => c.strategy == HdrStrategy.toneMapSdr);
       expect(toneMap.skipReason, HdrDegradeReason.displayLacksTransfer);
       expect(p5.playable, isFalse);
+    });
+  });
+
+  group('display target peak (panel peak injection)', () {
+    test('reshape and conversion carry the reported panel peak (rounded)',
+        () {
+      final HdrRoutePrediction reshaped = caps(
+        ext: extApplicable,
+        displayHdrMaxLuminance: 350,
+      ).predict(sources[HdrSourceClass.dvP84]!);
+      expect(reshaped.selected.strategy, HdrStrategy.metadataReshape);
+      expect(reshaped.selected.route!.targetPeak, '350');
+
+      final HdrRoutePrediction converted = HdrRoutePlanner.plan(
+        source: sources[HdrSourceClass.hlg]!,
+        capabilities: caps(
+          displayHdrTypes: const <int>{2},
+          ext: extApplicable,
+          displayHdrMaxLuminance: 620.4,
+        ),
+      );
+      expect(converted.selected.strategy, HdrStrategy.baseLayerConvert);
+      expect(converted.selected.route!.targetPeak, '620');
+    });
+
+    test('a 10000-nit report (PQ full scale) is carried unchanged', () {
+      // Flagship panels report peaks beyond 4000; the adapter validity
+      // ceiling is the PQ full scale, so a 10000-nit capability is a real
+      // panel peak and must reach the route verbatim.
+      final HdrRoutePrediction reshaped = caps(
+        ext: extApplicable,
+        displayHdrMaxLuminance: 10000,
+      ).predict(sources[HdrSourceClass.dvP84]!);
+      expect(reshaped.selected.strategy, HdrStrategy.metadataReshape);
+      expect(reshaped.selected.route!.targetPeak, '10000');
+    });
+
+    test('without a panel report the contract constant is the fallback', () {
+      final HdrRoutePrediction reshaped =
+          caps(ext: extApplicable).predict(sources[HdrSourceClass.dvP84]!);
+      expect(reshaped.selected.strategy, HdrStrategy.metadataReshape);
+      expect(reshaped.selected.route!.targetPeak, '1000');
+
+      final HdrRoutePrediction converted = HdrRoutePlanner.plan(
+        source: sources[HdrSourceClass.hlg]!,
+        capabilities: caps(displayHdrTypes: const <int>{2}),
+      );
+      expect(converted.selected.strategy, HdrStrategy.baseLayerConvert);
+      expect(converted.selected.route!.targetPeak, '1000');
+    });
+
+    test('the LG YUV-carrier conversion carries the panel peak too', () {
+      final HdrRoutePrediction prediction = caps(
+        sdkInt: 24,
+        displayHdrTypes: const <int>{1, 2},
+        ext: const HdrDataSpaceExtInfo(
+          id: 'lg-pq',
+          applicable: true,
+          pqPresentation:
+              HdrPqPresentation(rgbSurface: false, yuvWindow: true),
+        ),
+        displayHdrMaxLuminance: 350,
+      ).predict(sources[HdrSourceClass.dvP84]!);
+      expect(prediction.selected.strategy, HdrStrategy.baseLayerConvert);
+      expect(prediction.selected.route!.hwdec, 'surfacetexture');
+      expect(prediction.selected.route!.targetPeak, '350');
+    });
+
+    test('routes that do not render into an HDR gpu target stay null', () {
+      final HdrCapabilities lya =
+          caps(ext: extApplicable, displayHdrMaxLuminance: 350);
+      final HdrStrategyRealization direct = HdrStrategyRealizer.realize(
+        HdrStrategy.baseLayerDirect,
+        source: sources[HdrSourceClass.dvP84]!,
+        sourceClass: HdrSourceClass.dvP84,
+        capabilities: lya,
+      );
+      expect(direct.route, isNotNull);
+      expect(direct.route!.targetPeak, isNull);
+      final HdrStrategyRealization toneMap = HdrStrategyRealizer.realize(
+        HdrStrategy.toneMapSdr,
+        source: sources[HdrSourceClass.dvP84]!,
+        sourceClass: HdrSourceClass.dvP84,
+        capabilities: lya,
+      );
+      expect(toneMap.route, isNotNull);
+      expect(toneMap.route!.targetPeak, isNull);
+      // withExecution preserves the peak across the decoder-dependency wrap.
+      final HdrRoutePrediction reshaped = lya.predict(
+        sources[HdrSourceClass.dvP84]!,
+      );
+      expect(reshaped.selected.route!.targetPeak, '350');
+      expect(
+        reshaped.selected.route!.dependencies,
+        contains(HdrRouteDependency.decoderMediacodec),
+      );
     });
   });
 }

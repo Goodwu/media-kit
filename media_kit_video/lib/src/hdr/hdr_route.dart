@@ -256,6 +256,7 @@ class HdrRoute {
     this.mediacodecEmbedRenderMode,
     required this.targetPrim,
     required this.targetTrc,
+    this.targetPeak,
     required this.surfaceTransfer,
     required this.stripDvRpu,
     this.metadataHandling = HdrMetadataHandling.none,
@@ -293,6 +294,14 @@ class HdrRoute {
 
   /// `target-trc` mpv property; null leaves the default.
   final String? targetTrc;
+
+  /// Rendering target peak luminance in nits for the mpv `target-peak`
+  /// property; null = not set (mpv auto). Only routes that render with
+  /// gpu-next into an HDR target carry it — the display's reported panel
+  /// peak, injected by the realizer; without a usable panel report the
+  /// realizer applies the conservative contract constant, and every other
+  /// route stays null.
+  final String? targetPeak;
 
   /// Dataspace requested for the GPU PlatformView surface (`pq`/`hlg`), or
   /// null when the route has no GPU HDR transfer to apply.
@@ -339,6 +348,7 @@ class HdrRoute {
         mediacodecEmbedRenderMode: mediacodecEmbedRenderMode,
         targetPrim: targetPrim,
         targetTrc: targetTrc,
+        targetPeak: targetPeak,
         surfaceTransfer: surfaceTransfer,
         offscreenTransfer: offscreenTransfer,
         stripDvRpu: stripDvRpu,
@@ -361,6 +371,7 @@ class HdrRoute {
         other.mediacodecEmbedRenderMode == mediacodecEmbedRenderMode &&
         other.targetPrim == targetPrim &&
         other.targetTrc == targetTrc &&
+        other.targetPeak == targetPeak &&
         other.surfaceTransfer == surfaceTransfer &&
         other.offscreenTransfer == offscreenTransfer &&
         other.stripDvRpu == stripDvRpu &&
@@ -381,6 +392,7 @@ class HdrRoute {
         mediacodecEmbedRenderMode,
         targetPrim,
         targetTrc,
+        targetPeak,
         surfaceTransfer,
         offscreenTransfer,
         stripDvRpu,
@@ -393,7 +405,8 @@ class HdrRoute {
       'output: ${outputTransfer.name}, dynamic: $appliesDynamicMetadata, '
       'topology: ${topology.name}, vo: $vo, hwdec: $hwdec, '
       'vd-lavc-o: $vdLavcOptions, render-mode: $mediacodecEmbedRenderMode, '
-      'prim: $targetPrim, trc: $targetTrc, surface: $surfaceTransfer, '
+      'prim: $targetPrim, trc: $targetTrc, peak: ${targetPeak ?? 'none'}, '
+      'surface: $surfaceTransfer, '
       'offscreen: ${offscreenTransfer ?? 'none'}, '
       'stripRpu: $stripDvRpu, metadata: ${metadataHandling.name}, '
       'deps: $dependencies)';

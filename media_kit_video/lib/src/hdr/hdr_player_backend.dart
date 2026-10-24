@@ -901,9 +901,13 @@ class AndroidHdrBackend
       // roughly double overexposed. Applying the HLG->PQ conversion here.
       await _setOwned('target-trc', 'pq');
       // Pin the destination peak used by HLG conversion instead of resolving
-      // it from the PQ container's nominal peak. This is a rendering target;
-      // it does not assert the source mastering peak or measured panel nits.
-      await _setOwned('target-peak', HdrYuvPresentationContract.targetPeak);
+      // it from the PQ container's nominal peak. The route carries the
+      // display's real reported panel peak (planner-injected); the contract
+      // constant is only the capability-missing fallback. This is a
+      // rendering target; it does not assert the source mastering peak or
+      // measured panel nits.
+      await _setOwned(
+          'target-peak', route.targetPeak ?? HdrYuvPresentationContract.targetPeak);
       final ext = plan.capabilities.dataSpaceExt;
       final bool supportsLgYuvPq = ext != null &&
           ext.id == 'lg-pq' &&
@@ -1011,6 +1015,11 @@ class AndroidHdrBackend
       if (route.targetTrc != null) {
         await _setOwned('target-trc', route.targetTrc!);
       }
+      // Same rendering-target semantics as the branch below: the route's
+      // planner-injected panel peak, only for routes that declare one.
+      if (route.targetPeak != null) {
+        await _setOwned('target-peak', route.targetPeak!);
+      }
       await _setOwned('target-colorspace-hint', 'auto');
       await _setOwned('tone-mapping', 'bt.2390');
     } else if (route.vo == 'gpu-next') {
@@ -1019,6 +1028,14 @@ class AndroidHdrBackend
       }
       if (route.targetTrc != null) {
         await _setOwned('target-trc', route.targetTrc!);
+      }
+      // The Android EGL swapchain reports no display metadata, so
+      // target-colorspace-hint=auto cannot learn the panel peak and
+      // libplacebo maps an unknown-peak PQ target at its 10000-nit fallback.
+      // Pin the planner-injected real panel peak whenever the route carries
+      // one.
+      if (route.targetPeak != null) {
+        await _setOwned('target-peak', route.targetPeak!);
       }
       await _setOwned('target-colorspace-hint', 'auto');
     }

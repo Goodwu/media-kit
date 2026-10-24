@@ -114,9 +114,43 @@ final class VideoRouteCapabilities {
             }
             result.put("status", "resolved"); result.put("displayId", display.getDisplayId());
             result.put("modeId", modeId); result.put("hdrTypes", hdr);
+            Double luminance = hdrMaxLuminance(display);
+            if (luminance != null) result.put("hdrMaxLuminance", luminance);
             result.put("revision", display.getDisplayId() + ":" + modeId + ":" + display.getRefreshRate() + ":" + hdr);
         } catch (RuntimeException | LinkageError e) { result.clear(); result.put("status", "queryUnavailable"); }
         return result;
+    }
+
+    /**
+     * Panel peak luminance in nits from the HDR capability report, or null
+     * when it must NOT be consumed as a rendering target peak.
+     *
+     * The Android EGL swapchain never carries display metadata, so mpv's
+     * target-colorspace-hint=auto cannot learn the panel peak and libplacebo
+     * maps an unknown-peak PQ target at its 10000-nit fallback; this value is
+     * the planner's only honest source for target-peak. The accessor is
+     * {@link Display.HdrCapabilities#getDesiredMaxLuminance()} — the PUBLIC
+     * SDK name, added in API 24, returning the same mMaxLuminance field as
+     * the hidden {@code getHdrMaxLuminance()} alias, which is not in the
+     * public android.jar and would not compile.
+     *
+     * Validity window 80-10000 nits. Lower bound: below it the report is
+     * not a usable HDR peak (stub, INVALID_LUMINANCE or SDR-class values).
+     * Upper bound: PQ full scale — the nits semantic ceiling, NOT a
+     * conservatism cap: current flagship panels report peaks beyond 4000,
+     * so only values above the PQ ceiling (or non-finite) are treated as
+     * untrustworthy. Pre-API-24, missing-report and
+     * out-of-window values are ABSENT (key omitted), never clamped: a wrong
+     * target-peak cannot be corrected downstream, so an unusable report must
+     * be indistinguishable from "not reported" — the planner then applies
+     * its own conservative fallback.
+     */
+    private static Double hdrMaxLuminance(Display display) {
+        if (Build.VERSION.SDK_INT < 24) return null;
+        Display.HdrCapabilities caps = display.getHdrCapabilities();
+        if (caps == null) return null;
+        float lum = caps.getDesiredMaxLuminance();
+        return (Float.isFinite(lum) && lum >= 80f && lum <= 10000f) ? (double) lum : null;
     }
 
     private static Map<String, Object> probe(MediaCodecInfo info, VideoSourceSpec spec, boolean nativeDv) {
