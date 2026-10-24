@@ -461,6 +461,7 @@ class HdrStrategyRealizer {
         hwdec: hwdec,
         targetPrim: 'bt.2020',
         targetTrc: trc,
+        targetPeak: _displayTargetPeak(capabilities),
         // Keep the production PQ label unchanged. A limited-range override
         // is admitted only for the explicitly locked LG lab experiment.
         surfaceTransfer:
@@ -552,6 +553,7 @@ class HdrStrategyRealizer {
         hwdec: 'mediacodec',
         targetPrim: 'bt.2020',
         targetTrc: 'pq',
+        targetPeak: _displayTargetPeak(capabilities),
         surfaceTransfer: 'pq',
         // The RPU is the input of the rebuild; it must survive.
         stripDvRpu: false,
@@ -640,6 +642,19 @@ class HdrStrategyRealizer {
       ),
     );
   }
+
+  /// The mpv `target-peak` value for the routes that render with gpu-next
+  /// into an HDR target (C2 reshape, C4 conversion): the display's reported
+  /// panel peak rounded to whole nits, or — when the platform did not report
+  /// a usable panel peak — the accepted device constant from
+  /// [HdrYuvPresentationContract.targetPeak]. That constant is the
+  /// capability-missing fallback (the "fixes the 10x HLG stretch, highlights
+  /// still clipped" value), not a panel measurement; a real report always
+  /// wins. Every other route stays null (mpv auto) — SDR outputs and native
+  /// surfaces have no GPU-side peak mapping to pin.
+  static String _displayTargetPeak(HdrCapabilities capabilities) =>
+      capabilities.displayHdrMaxLuminance?.round().toString() ??
+      HdrYuvPresentationContract.targetPeak;
 
   /// Base-layer transfer function per source class; classes that do not pin
   /// one (HDR Vivid, HDR10+, SDR families) follow the reported gamma.

@@ -292,6 +292,17 @@ void main() {
       expect(result.player.properties['target-peak'], 'auto');
     });
 
+    test('YUV block reads the route peak before the contract constant',
+        () async {
+      // A planner-injected real panel peak wins over the accepted constant;
+      // the constant is only the capability-missing fallback.
+      final result = await _exercise(_yuvRoute().surrogate(targetPeak: '620'));
+      expect(result.player.properties['target-trc'], 'pq');
+      expect(result.player.properties['target-peak'], '620');
+      await result.backend.resetOwnedConfiguration();
+      expect(result.player.properties['target-peak'], 'auto');
+    });
+
     test('YUV route without the offscreen contract is refused before writes',
         () async {
       final result = _harness();
@@ -656,6 +667,7 @@ extension _RouteSurrogate on HdrRoute {
     String? offscreenTransfer = 'pq-full',
     String? targetPrim,
     String? targetTrc,
+    String? targetPeak,
   }) =>
       HdrRoute(
         strategy: strategy ?? this.strategy,
@@ -667,6 +679,7 @@ extension _RouteSurrogate on HdrRoute {
         hwdec: hwdec ?? this.hwdec,
         targetPrim: targetPrim ?? this.targetPrim,
         targetTrc: targetTrc ?? this.targetTrc,
+        targetPeak: targetPeak ?? this.targetPeak,
         surfaceTransfer: surfaceTransfer ?? this.surfaceTransfer,
         offscreenTransfer: offscreenTransfer,
         stripDvRpu: stripDvRpu,

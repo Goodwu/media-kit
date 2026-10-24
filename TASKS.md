@@ -4,6 +4,11 @@
 
 **路径映射（2026-10-05 起）**：`archives/experiments/` 已整体迁移至独立仓库 **`~/src/media-kit-experiments`**（实验记录/证据/交接/索引全量归档）。本文件及 conversations 中所有 `archives/experiments/` 前缀路径均映射到该库根目录。**主库历史已剥离该路径（2026-10-06，main 51ef66cc→ee28accd，树零变化）**：剥离前提交历史不再在主库，查备份仓 `Goodwu/media-kit-history-archive`（分支 `pre-strip-20261006`）；旧哈希换算用 `~/src/media-kit-build/history-strip-20261006/commit-map.json`。
 
+## LYA-DV-P84-TARGET-PEAK-20261024
+
+- **implemented / 两台观感验收通过，按用户授权本地提交归档（不推送；事实以 Git log 为准）**：Android 面板 HDR 峰值采集与 target-peak 统一注入。根因=Android EGL swapchain 不报显示元数据，`target-colorspace-hint=auto` 失效，libplacebo 把未知峰值 PQ 目标按 10000 nits 兜底并经 `pl_color_space_infer_map`「HLG 峰值跟随目标」规则把 HLG（1000 nits）按约 10× 亮度解读 → reshape/baseLayerConvert 路线 DV P8.4→PQ 过曝、暗部发灰无层次（LYA/LG 实机确认）。实现：Java `getDesiredMaxLuminance()`（hidden getHdrMaxLuminance 编译不过，已偏差追认）采集 hdrMaxLuminance（有效窗 finite && 80–10000，用户反馈原 4000 过保守后放宽），Dart `HdrRoute.targetPeak` 贯通 planner→backend 三分支，注入面板峰值、缺省兜底契约常数 1000（同步解决 LG 点亮轮「target-peak=1000 亮部残余过曝」遗留），decision 行加 `peak=`。验证：analyze 零新增、目标批 212 过（唯一既有失败 stash/HEAD 复证无关）、V1 无 P0/P1/P2；LYA/LG 实机 `peak=500` 生效、路线 verified 零回退、观感过曝消失。LG 取证须 exec-out logcat（环境特性）。证据：`/tmp/lya-dv-peak-fix-20261024/`。
+- context：[lya-dv-p84-target-peak-20261024.md](archives/conversations/lya-dv-p84-target-peak-20261024.md)；App 侧 `/Users/wuweiwei1/src/PiliPlus/archives/conversations/lya-dv-p84-hlg-to-pq-overexposure-20261024.md`。
+
 ## LG-DVP84-SOURCE-BUILD-20261024
 
 - **已修复并 LG 验证，按用户授权本地提交归档，不推送；提交事实以 Git log 为准**：标准源码 wrapper 新增 receipt→JAR→最终 APK 三成员字节一致性/钉定NDK strip检查、fork能力标记、重复成员/foreign ABI拒绝；dev缺本地JAR拒绝。真实首轮发现其它插件foreign ABI，默认强制split并选arm64后整链重跑通过。session review 的hwdecMismatch耗尽不再误报nativeDvUnavailable；session53/工具11/analyze及V2审核通过。

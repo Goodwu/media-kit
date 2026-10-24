@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/src/hdr/hdr_capabilities.dart';
@@ -134,6 +136,156 @@ void main() {
     expect(result.error, isA<StateError>());
     expect(result.creationSaw, isNull);
   });
+
+  test('gpu platform-view branch issues the route target-peak as an owned '
+      'write and restores the baseline', () async {
+    final harness = _peakHarness();
+    await harness.backend.prepareOutput(_routePlan(_gpuPeakRoute('350')));
+    await harness.backend.configure(_routePlan(_gpuPeakRoute('350')));
+    expect(harness.player.properties['target-peak'], '350');
+    await harness.backend.resetOwnedConfiguration();
+    expect(harness.player.properties['target-peak'], 'auto');
+  });
+
+  test('texture branch issues the route target-peak too, with restore',
+      () async {
+    final harness = _peakHarness();
+    final route = HdrRoute(
+      strategy: HdrStrategy.toneMapSdr,
+      presentation: HdrPresentation.toneMappedSdr,
+      outputTransfer: HdrOutputTransfer.sdr,
+      appliesDynamicMetadata: false,
+      topology: HdrTopology.texture,
+      vo: 'gpu-next',
+      hwdec: 'mediacodec-copy',
+      targetPrim: 'bt.709',
+      targetTrc: 'bt.1886',
+      targetPeak: '480',
+      surfaceTransfer: null,
+      stripDvRpu: false,
+    );
+    await harness.backend.prepareOutput(_routePlan(route));
+    await harness.backend.configure(_routePlan(route));
+    expect(harness.player.properties['target-trc'], 'bt.1886');
+    expect(harness.player.properties['target-peak'], '480');
+    await harness.backend.resetOwnedConfiguration();
+    expect(harness.player.properties['target-trc'], 'sdr');
+    expect(harness.player.properties['target-peak'], 'auto');
+  });
+
+  test('a route without a peak never owns target-peak', () async {
+    final harness = _peakHarness();
+    await harness.backend.prepareOutput(_routePlan(_gpuPeakRoute(null)));
+    await harness.backend.configure(_routePlan(_gpuPeakRoute(null)));
+    // No owned write at all: the seeded baseline is never rewritten.
+    expect(
+        harness.player.setPropertyCalls
+            .any((call) => call.key == 'target-peak'),
+        isFalse);
+    await harness.backend.resetOwnedConfiguration();
+    expect(harness.player.properties['target-peak'], 'auto');
+  });
+}
+
+/// Configurable-output harness for the configure-phase owned writes
+/// (target-peak): the creation-phase harness above pins prepareOutput only.
+class _PeakHarness {
+  _PeakHarness(this.player, this.backend);
+  final _FakePlayer player;
+  final AndroidHdrBackend backend;
+}
+
+_PeakHarness _peakHarness() {
+  final player = _FakePlayer('no')
+    ..properties.addAll(const {
+      'target-prim': 'bt.709',
+      'target-trc': 'sdr',
+      'target-peak': 'auto',
+      'target-colorspace-hint': 'no',
+      'tone-mapping': 'bt.1886',
+      'cache-on-disk': 'yes',
+    });
+  final backend = AndroidHdrBackend(
+    player: player,
+    outputSlot: HdrOutputSlot<VideoController>(
+      initial: null,
+      voOf: (_) async => 'gpu-next',
+      disposeForRebuild: (_) async {},
+      create: (contract) => _ConfigurableOutput(),
+      publish: (_) {},
+      waitReady: (_) async {},
+    ),
+    applyDataSpace: (_, __) async => null,
+  );
+  return _PeakHarness(player, backend);
+}
+
+/// The planner-injected panel-peak shape: gpu-next platform-view route with
+/// no dataspace request (surfaceTransfer null keeps the configure path on
+/// the property writes under test).
+HdrRoute _gpuPeakRoute(String? targetPeak) => HdrRoute(
+      strategy: HdrStrategy.baseLayerConvert,
+      presentation: HdrPresentation.nativeHdr,
+      outputTransfer: HdrOutputTransfer.pq,
+      appliesDynamicMetadata: false,
+      topology: HdrTopology.platformView,
+      vo: 'gpu-next',
+      hwdec: 'mediacodec',
+      targetPrim: 'bt.2020',
+      targetTrc: 'pq',
+      targetPeak: targetPeak,
+      surfaceTransfer: null,
+      stripDvRpu: false,
+    );
+
+HdrOpenPlan _routePlan(HdrRoute route) {
+  const source = HdrSourceDescriptor(codec: 'h264');
+  final candidate = HdrCandidate(
+    strategy: route.strategy,
+    maturity: HdrStrategyMaturity.verified,
+    feasible: true,
+    route: route,
+  );
+  return HdrOpenPlan(
+    media: Media('test://source'),
+    source: source,
+    sourceOrigin: null,
+    capabilities: const HdrCapabilities(
+      sdkInt: 24,
+      displayHdrTypes: {},
+      hevcDecoders: [],
+      dolbyVisionDecoders: [],
+      p5PipelineAvailable: false,
+      dataSpaceBridgeLoaded: false,
+      dataSpaceExt: null,
+    ),
+    prediction: HdrRoutePrediction(
+      source: source,
+      selected: candidate,
+      candidates: [candidate],
+      presentation: route.presentation,
+      confidence: HdrPredictionConfidence.verified,
+      playable: true,
+    ),
+    route: route,
+  );
+}
+
+class _ConfigurableOutput implements VideoController {
+  @override
+  final Completer<PlatformVideoController> platform =
+      Completer<PlatformVideoController>()..complete(_BoundPlatformOutput());
+  @override
+  Future<bool> prepareAndroidTextureOutput() async => true;
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _BoundPlatformOutput implements PlatformVideoController {
+  @override
+  Future<void> get waitUntilCurrentOutputBound async {}
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 Future<_Exercise> _exercise({
