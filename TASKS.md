@@ -1,8 +1,20 @@
 # TASKS.md
 
+## LG-HLG-PQ-BRIGHTNESS-MAPPING-20261025
+
+- **排查中，不增加 gamma，不提交**：LG 当前 HLG→PQ 路线亮度不足，核对 target-peak=500、libplacebo HLG OOTF 与 vendor/HWC/背光实际输出；先排除暂停闲置 DIM 干扰。跨仓唯一 context：`/Users/wuweiwei1/src/PiliPlus/archives/conversations/lg-hlg-pq-brightness-mapping-20261025.md`。
+
 任务事实源：这里只保留当前状态、验收门槛和下一步。清理前的完整任务台账快照：`archives/experiments/tasks-ledger-snapshot-20260927.md`、`archives/experiments/tasks-ledger-snapshot-20261002.md`、`archives/experiments/tasks-ledger-snapshot-20261010.md`（2026-10-10 精简前全文快照）；按各项 `context` 查看持续更新的依据。
 
 **路径映射（2026-10-05 起）**：`archives/experiments/` 已整体迁移至独立仓库 **`~/src/media-kit-experiments`**（实验记录/证据/交接/索引全量归档）。本文件及 conversations 中所有 `archives/experiments/` 前缀路径均映射到该库根目录。**主库历史已剥离该路径（2026-10-06，main 51ef66cc→ee28accd，树零变化）**：剥离前提交历史不再在主库，查备份仓 `Goodwu/media-kit-history-archive`（分支 `pre-strip-20261006`）；旧哈希换算用 `~/src/media-kit-build/history-strip-20261006/commit-map.json`。
+
+## LG-LYA-LOCAL-P5-HDR-20261025
+
+- **两台验收通过，未提交（待用户授权）**：本地 DV P5（Mystery Box 样片，md5 `3b6b8a20…`）在 LG（G6/API24）与 LYA（Mate 20 Pro/API29）hdr_lab harness 全片播放，HDR 激活证据齐备。LYA：metadataReshape→pq platformView、`peak=500`、readback=`DATASPACE_BT2020_PQ`、SF 实锤 BT2020 SMPTE 2084 层、EOS、零 fatal。LG：**nativeDolbyVision**（`native_dv=1`、`OMX.qcom.video.decoder.dolby-vision`）verified/applied、EOS、零 fatal（readback=none 为 API24 契约；SF 无 DV dataspace 行如实记录）。最终 APK `p5-local-hdr-dvfork3-20261025-release.apk` SHA-256 `46a10e2c…`（FFmpeg head `d4bb79394b`，四 marker 过）。
+- **修复（LG blocked 根因两级 + 构建链冲突）**：① hdr_lab gradle `ndk abiFilters` 与强制 `--split-per-abi` 冲突（AGP 拒绝并存），split 模式下跳过（仓内未提交改动）；② `deps/ffmpeg` 曾被重置为上游+b4d2ea4ffb，丢失 `~/src/FFmpeg` fork 的 native_dv 实验路径 → 探针 `nativeDvApi=0` → LG P5 唯一 HDR 路线（无 RGB PQ 呈现面、HDR 显示禁 toneMap）整体 blocked（"没有图像"实感），已切回 `d4bb79394b`（产品链真超集）；③ mpv `_build-arm64-mks` meson 缓存 `HAVE_LAVF_INITIAL_DOVI_HVCC=0`（旧 prefix 配置产物）→ hvcC 补全剔除 → fork 解码器 VPS/SPS/PPS 门失败，已按 mpv.sh 配方（fork pkg-config env）重建树=1，并以 c_link_args `['-Wl,--build-id=sha1','-lc++_shared']` 恢复 DT_NEEDED（新配置无 C++ 链接，缺项致 dlopen 失败）。
+- **在案缺陷**：`tool/build_android_native.py:322` `','.join` 回写 meson 列表在含逗号 arg 时产生非法单 token（本轮以构建树预置规避）；LG 流式 logcat 空须 `exec-out logcat -d`、LG tap=(1440,720)/LYA=(1560,720)；LYA 首轮曾被 uid2000 外部 `am start` PiliPlus 打断（留档）。
+- **marble 补充轮通过（2026-10-25 01:18）**：marble（Note 12 Turbo/API35）本地 P5 → **nativeDolbyVision** verified/applied（FFmpeg 修复同时解锁 marble 的 nativeDvBridgeApi=1）、`EOS time-pos=98.944000` + `completed=true`、SF 实锤 `Y_CBCR_420_P010_UBWC` 视频层 HWC Device 合成（10-bit HDR）、render_failures=0、零 fatal。协议备注：API35 无 `isStatusBarKeyguard`（round.sh 已兼容 `mKeyguardOccluded=false`）、tap=(1200,540)。marble 还原未闭合：API35 拒降级、MIUI USB 安装确认静默取消，hdr_lab 现为卸载状态（用户裁决：测试 App 不强求还原）。
+- context：[lg-lya-local-p5-hdr-20261025.md](archives/conversations/lg-lya-local-p5-hdr-20261025.md)；证据 `/tmp/p5-local-hdr-20261024/`。
 
 ## LYA-DV-P84-TARGET-PEAK-20261024
 
