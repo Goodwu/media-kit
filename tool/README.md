@@ -16,7 +16,7 @@ Android 实机验收与构建链的常用脚本。2026-09-30 起把此前散落�
 
 ### `build-android-test.sh` — 测试版默认构建（最新源码）
 
-**测试版构建的默认入口**：默认 Release，从当前本地源码（含未提交修改）构建 native JAR，再经 Gradle 正式 `ORG_GRADLE_PROJECT_mediaKitLocalArm64Jar` 通道构建 Android 测试 APK。
+**测试版构建的默认入口**：默认 Release，从当前本地源码（含未提交修改）构建 native JAR，再经 Gradle 正式 `ORG_GRADLE_PROJECT_mediaKitLocalArm64Jar` 通道构建 Android 测试 APK。Gradle `dev=true` 构建若缺少本地源码 JAR 会直接失败，避免静默使用固定发布库。使用 `--` 传入 Flutter 参数时，不可覆盖 native JAR 属性或 ABI 目标；否则入口会在构建前拒绝。 构建始终启用 `--split-per-abi` 并核验 arm64 split；显式重复传入会去重，`--no-split-per-abi` 会被拒绝。
 
 ```sh
 tool/build-android-test.sh --tag mytest --local-source /sdcard/Android/data/com.example.media_kit_hdr_lab/files/DV-P8.4.mp4
@@ -27,8 +27,9 @@ tool/build-android-test.sh --tag mytest-pv --platform-view --local-source /data/
 
 默认本地输入为 `~/src/mpv/_build-arm64-mks`、`~/src/libmpv-android-video-build-dv-experiment` 及 `~/Library/Android/sdk/ndk/27.2.12479018`；要求这些源码仓库和配置好的依赖 build trees 已存在。工具不切换/清理源码、不执行网络更新；“当前”表示本次实际工作区字节，**不表示所有第三方依赖均追平远程 HEAD**。`native-candidate.json` 保存每个 Git 源的 HEAD/tree/dirty 状态、实际文件哈希、构建命令、工具链身份、archive 来源、最终 Meson 配置及 JAR SHA；前后源码漂移或未归因的链接 archive 会使构建失败。`package/packaging.json` 保存三成员 ELF/hash 检查；这些是构建证据，设备播放验收需另行执行。
 
-产物：App 的 `build/app/outputs/flutter-apk/<tag>-release.apk`；native 日志、receipt 和 `package/default-arm64-v8a.jar` 默认保存于本仓库 `build/android-native/<tag>-<timestamp>-<pid>/`。`MEDIA_KIT_NATIVE_OUTPUT` 可指定不存在的新目录；`MEDIA_KIT_NATIVE_REPO`、`MEDIA_KIT_MPV_SOURCE`、`MEDIA_KIT_MPV_BUILD`、`MEDIA_KIT_ANDROID_NDK`、`MEDIA_KIT_BUILD_JOBS` 可替换本机路径/并发数。增量对象绑定原配置的源码根和 NDK：换 NDK 路径或编译器版本时会拒绝，必须先准备独立且配置匹配的 build trees；仅改 PATH 不能使旧对象自动重编。`MKS_SKIP_APK=1` 只构建 native。`--debug` 保留为 App variant 选择，native 仍由当前本地源码编译。JDK 默认使用项目要求的 JDK 17；可通过 `MEDIA_KIT_JAVA_HOME` 显式临时覆盖（不继承全局 `JAVA_HOME`）。
+App 输出之前还会运行 `verify_android_test_apk.py`。它把 native candidate receipt、JAR 的 `packaging.json` 和 APK 的 `libmpv.so`、helper、libc++ 逐层绑定；三成员必须逐字节相同，或只经过 receipt 所指 NDK 的 `llvm-strip --strip-unneeded`。最终库还需保留 SurfaceTexture 导入器和 native DV bridge 的能力标记。重复 ZIP 条目、非 arm64 ABI、旧库或构建属性覆盖都会使流程失败。成功和失败均留有 `<tag>-release.native-verification.json` 结果单；APK tag 副本仅在通过后产生。APK 可同时含其它 arm64 Flutter/App `.so`。
 
+产物：入口固定生成 ABI split，并核验 `build/app/outputs/flutter-apk/app-arm64-v8a-release.apk`，tag 副本为 `<tag>-release.apk`；native 日志、receipt 和 `package/default-arm64-v8a.jar` 默认保存于本仓库 `build/android-native/<tag>-<timestamp>-<pid>/`。`MEDIA_KIT_NATIVE_OUTPUT` 可指定不存在的新目录；`MEDIA_KIT_NATIVE_REPO`、`MEDIA_KIT_MPV_SOURCE`、`MEDIA_KIT_MPV_BUILD`、`MEDIA_KIT_ANDROID_NDK`、`MEDIA_KIT_BUILD_JOBS` 可替换本机路径/并发数。增量对象绑定原配置的源码根和 NDK：换 NDK 路径或编译器版本时会拒绝，必须先准备独立且配置匹配的 build trees；仅改 PATH 不能使旧对象自动重编。`MKS_SKIP_APK=1` 只构建 native。`--debug` 保留为 App variant 选择，native 仍由当前本地源码编译。JDK 默认使用项目要求的 JDK 17；可通过 `MEDIA_KIT_JAVA_HOME` 显式临时覆盖（不继承全局 `JAVA_HOME`）。
 可复用脚本、配方、来源说明与验收资料必须保存在受版本管理仓库；禁止在 `media-kit-build/` 长期保存需要复用的工具和资料。发布构建保持 Gradle 默认钉定下载链，不走本入口。
 
 ### `matrix-build.sh` — 受审 native 输入的八行路由矩阵

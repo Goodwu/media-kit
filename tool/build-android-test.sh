@@ -89,18 +89,44 @@ output_dir="$app_dir/build/app/outputs/flutter-apk"
 mkdir -p "$output_dir"
 build_marker="$(mktemp "$output_dir/.android-test-build.XXXXXX")"
 trap 'rm -f "$build_marker"' EXIT
-split_per_abi=false
+split_per_abi=true
+flutter_args=()
 for arg in "${extra[@]}"; do
-  [[ "$arg" == --split-per-abi ]] && split_per_abi=true
+  case "$arg" in
+    --target-platform|--target-platform=*|--build-dir|--build-dir=*|-PmediaKitLocalArm64Jar=*|-PmediaKitArm64Only=*|--android-project-arg|--android-project-arg=*|-P*)
+      echo "Refusing build argument that can override the current-source native artifact or ABI: $arg" >&2
+      exit 2
+      ;;
+    --no-split-per-abi|--no-split-per-abi=*)
+      echo "Refusing to disable ABI splits; the verified test APK must contain arm64 libraries only" >&2
+      exit 2
+      ;;
+    --split-per-abi)
+      # The wrapper always enables this. Consume an explicit caller copy so
+      # Flutter receives the flag once.
+      ;;
+    *) flutter_args+=("$arg");;
+  esac
 done
 (cd "$app_dir" && flutter build apk "${mode[@]}" --target-platform android-arm64 \
-  "${base_defines[@]}" "${extra[@]}")
+  --split-per-abi "${base_defines[@]}" "${flutter_args[@]}")
 apk="$output_dir/app-${variant}.apk"
 if $split_per_abi; then
   apk="$app_dir/build/app/outputs/flutter-apk/app-arm64-v8a-${variant}.apk"
 fi
 [[ -f "$apk" ]] || { echo "APK missing for $variant under $app_dir/build/app/outputs/flutter-apk" >&2; exit 1; }
 [[ "$apk" -nt "$build_marker" ]] || { echo "APK was not rebuilt in this invocation: $apk" >&2; exit 1; }
+evidence="$output_dir/$tag-$variant.native-verification.json"
+python3 tool/verify_android_test_apk.py \
+  --apk "$apk" \
+  --jar "$jar" \
+  --candidate "$native_output/native-candidate.json" \
+  --output "$evidence" \
+  --require-marker surfacetexture \
+  --require-marker 'MKSURF: version' \
+  --require-marker android-native-dv-bridge-api \
+  --require-marker native_dv_api_version
 cp "$apk" "$output_dir/$tag-$variant.apk"
-echo "=== DONE: $tag-$variant.apk ($app_dir) ==="
+echo "=== VERIFIED: $tag-$variant.apk ($app_dir) ==="
+echo "Native evidence: $evidence"
 shasum -a 256 "$output_dir/$tag-$variant.apk"
