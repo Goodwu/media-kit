@@ -1,5 +1,11 @@
 # TASKS.md
 
+## PLAYBACK-COLOR-DIAGNOSTICS-20261025
+
+- **完成，用户授权本地提交，不推送**：公开只读 `PlaybackColorValues` / `PlaybackColorSnapshot` / `PlaybackColorSampler`，片源读取 mpv 新增 `current-tracks/video/demux-color-*` 原始解复用元数据；GPU 输出只读 `video-target-params`，明确为渲染目标；实际 `mediacodec_embed` + `mediacodec` 硬件帧仅报告解码直通，不推断显示色彩。未知/缺失字段省略，无解码帧色彩回填；FFmpeg→mpv命名仅严格等价别名，片源 bt709 不转换 bt1886。标准整包VERIFIED（96d5b558…434571b）已装5台在线机且哈希一致；LYA输出目标/滚动与marble解码直通实测通过，两机实际测试源未显示源行，未拿hint填补。同包原生getter在tagged/untagged SDR及库所用alias验证，最终全机OFF。跨仓验证单见PiliPlus `docs/validation/playback-color-diag-20261025.json`。
+- **已验证**：`media_kit_video/test/playback_color_diagnostics_test.dart` 9/9；helper/tests 定向 analyze 无问题；异步源身份（含同 URI 重载 epoch）与输出路径前后校验、stop/dispose 迟到丢弃、超时保持真实在途 guard 防堆积。未改变播放/HDR 路由；本库实施者未独立构建APK或操作设备，统一整包验收见首条。
+- 唯一跨仓 context：`/Users/wuweiwei1/src/PiliPlus/archives/conversations/playback-diag-bar-20261022.md`；本次交付整包验证由该任务更新。
+
 ## LG-HLG-PQ-BRIGHTNESS-MAPPING-20261025
 
 - **排查中，不增加 gamma，不提交**：LG 当前 HLG→PQ 路线亮度不足，核对 target-peak=500、libplacebo HLG OOTF 与 vendor/HWC/背光实际输出；先排除暂停闲置 DIM 干扰。跨仓唯一 context：`/Users/wuweiwei1/src/PiliPlus/archives/conversations/lg-hlg-pq-brightness-mapping-20261025.md`。
