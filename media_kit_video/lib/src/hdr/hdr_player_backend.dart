@@ -12,7 +12,6 @@ import 'package:media_kit_video/media_kit_video.dart';
 import 'package:media_kit_video/src/video_controller/android_video_controller/android_video_controller.dart';
 
 import 'hdr_open_coordinator.dart';
-import 'hdr_decoder_review.dart';
 import 'hdr_container_source_discovery.dart';
 import 'hdr_container_probe_owner.dart';
 import 'hdr_native_dv_option_owner.dart';
@@ -234,8 +233,7 @@ class AndroidHdrBackend
       _containerProbeOwner.canPromote(previous) &&
       _promotionPlanPairIsEligible(previous, next);
 
-  Future<void> _setOwned(String name, String value,
-      {bool numericReadback = false}) async {
+  Future<void> _setOwned(String name, String value) async {
     if (!_originalProperties.containsKey(name)) {
       final original = await player.getPropertyAsync(name);
       if (original.isEmpty) {
@@ -246,12 +244,7 @@ class AndroidHdrBackend
     _ownedProperties.add(name);
     await player.setPropertyStrict(name, value);
     final actual = await player.getPropertyAsync(name);
-    final bool matches = actual == value ||
-        (numericReadback &&
-            double.tryParse(actual) != null &&
-            double.tryParse(value) != null &&
-            double.parse(actual) == double.parse(value));
-    if (!matches) {
+    if (actual != value) {
       throw StateError('$name rejected: requested=$value actual=$actual');
     }
   }
@@ -900,41 +893,12 @@ class AndroidHdrBackend
       // panel) then interpret as absolute PQ luminance — bright areas
       // roughly double overexposed. Applying the HLG->PQ conversion here.
       await _setOwned('target-trc', 'pq');
-      // Pin the destination peak used by HLG conversion instead of resolving
-      // it from the PQ container's nominal peak. The route carries the
-      // display's real reported panel peak (planner-injected); the contract
-      // constant is only the capability-missing fallback. This is a
-      // rendering target; it does not assert the source mastering peak or
-      // measured panel nits.
+      // Use the planner's rendering reference. HLG on this YUV carrier
+      // keeps the 1000-nit reference mapping; other diagnostic/declared
+      // routes may carry their own target. This is encoded signal brightness,
+      // not measured panel nits. Gamma remains a caller-owned preference.
       await _setOwned(
           'target-peak', route.targetPeak ?? HdrYuvPresentationContract.targetPeak);
-      final ext = plan.capabilities.dataSpaceExt;
-      final bool supportsLgYuvPq = ext != null &&
-          ext.id == 'lg-pq' &&
-          ext.applicable &&
-          ext.pqPresentation?.yuvWindow == true &&
-          ext.setterOnlyTransfers.contains(route.surfaceTransfer);
-      if (plan.source.transfer == 'hlg' &&
-          route.strategy == HdrStrategy.baseLayerConvert &&
-          supportsLgYuvPq) {
-        // A small midtone lift for the validated LG HLG-to-PQ route. The
-        // neutral gamma is the only value this presentation adjustment owns;
-        // a caller's non-neutral gamma remains intact.
-        if (!_ownedProperties.contains('gamma')) {
-          final String originalGamma = await player.getPropertyAsync('gamma');
-          if (originalGamma.isEmpty) {
-            throw StateError('Cannot capture original value of gamma');
-          }
-          // Gamma can be user-adjusted between HDR sessions. Unlike the
-          // generic cache retained for other route properties, recapture it
-          // whenever this presentation does not currently own the value.
-          _originalProperties['gamma'] = originalGamma;
-        }
-        final String originalGamma = _originalProperties['gamma']!;
-        if (double.tryParse(originalGamma) == 0) {
-          await _setOwned('gamma', '3', numericReadback: true);
-        }
-      }
     }
     if (route.topology == HdrTopology.platformView) {
       final output = await outputSlot.current!.platform.future;
@@ -1032,8 +996,8 @@ class AndroidHdrBackend
       // The Android EGL swapchain reports no display metadata, so
       // target-colorspace-hint=auto cannot learn the panel peak and
       // libplacebo maps an unknown-peak PQ target at its 10000-nit fallback.
-      // Pin the planner-injected real panel peak whenever the route carries
-      // one.
+      // Apply the route's rendering target, including the HLG YUV
+      // reference peak, whenever the route carries one.
       if (route.targetPeak != null) {
         await _setOwned('target-peak', route.targetPeak!);
       }

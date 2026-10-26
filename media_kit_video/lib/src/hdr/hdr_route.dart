@@ -295,12 +295,12 @@ class HdrRoute {
   /// `target-trc` mpv property; null leaves the default.
   final String? targetTrc;
 
-  /// Rendering target peak luminance in nits for the mpv `target-peak`
-  /// property; null = not set (mpv auto). Only routes that render with
-  /// gpu-next into an HDR target carry it — the display's reported panel
-  /// peak, injected by the realizer; without a usable panel report the
-  /// realizer applies the conservative contract constant, and every other
-  /// route stays null.
+  /// Rendering target peak luminance in nits for mpv `target-peak`; null
+  /// leaves mpv auto. HLG conversion on the vendor YUV window carrier uses
+  /// its 1000-nit reference mapping. Other gpu-next HDR routes use the
+  /// display's reported panel peak, or the contract fallback when absent.
+  /// Native direct and SDR routes leave this unset. A rendering target is
+  /// encoded signal brightness, not measured panel luminance.
   final String? targetPeak;
 
   /// Dataspace requested for the GPU PlatformView surface (`pq`/`hlg`), or

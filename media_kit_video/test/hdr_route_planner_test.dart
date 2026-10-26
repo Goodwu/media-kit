@@ -1821,21 +1821,69 @@ void main() {
       expect(converted.selected.route!.targetPeak, '1000');
     });
 
-    test('the LG YUV-carrier conversion carries the panel peak too', () {
-      final HdrRoutePrediction prediction = caps(
-        sdkInt: 24,
-        displayHdrTypes: const <int>{1, 2},
-        ext: const HdrDataSpaceExtInfo(
-          id: 'lg-pq',
-          applicable: true,
-          pqPresentation:
-              HdrPqPresentation(rgbSurface: false, yuvWindow: true),
-        ),
-        displayHdrMaxLuminance: 350,
-      ).predict(sources[HdrSourceClass.dvP84]!);
-      expect(prediction.selected.strategy, HdrStrategy.baseLayerConvert);
-      expect(prediction.selected.route!.hwdec, 'surfacetexture');
-      expect(prediction.selected.route!.targetPeak, '350');
+    for (final cls in [HdrSourceClass.hlg, HdrSourceClass.dvP84]) {
+      for (final panelPeak in [350.0, 500.0, 1600.0]) {
+        test('YUV HLG reference stays 1000 for $cls panel=$panelPeak', () {
+          final prediction = caps(
+            sdkInt: 24,
+            displayHdrTypes: const <int>{2},
+            // Capability shape is sufficient; no vendor-name gate.
+            ext: const HdrDataSpaceExtInfo(
+              id: 'vendor-yuv-pq',
+              applicable: true,
+              pqPresentation:
+                  HdrPqPresentation(rgbSurface: false, yuvWindow: true),
+            ),
+            displayHdrMaxLuminance: panelPeak,
+          ).predict(sources[cls]!);
+          expect(prediction.selected.strategy, HdrStrategy.baseLayerConvert);
+          expect(prediction.selected.route!.hwdec, 'surfacetexture');
+          expect(prediction.selected.route!.targetPeak, '1000');
+          expect(prediction.selected.route!.offscreenTransfer, 'pq-full');
+        });
+      }
+    }
+
+    test('RGB wins when both channels exist and keeps the reported peak', () {
+      const ext = HdrDataSpaceExtInfo(
+        id: 'vendor-dual-pq',
+        applicable: true,
+        pqPresentation: HdrPqPresentation(rgbSurface: true, yuvWindow: true),
+      );
+      final capability = caps(
+        displayHdrTypes: const <int>{2},
+        ext: ext,
+        displayHdrMaxLuminance: 620.4,
+      );
+      final converted = capability.predict(sources[HdrSourceClass.hlg]!);
+      expect(converted.selected.strategy, HdrStrategy.baseLayerConvert);
+      expect(converted.selected.route!.hwdec, 'mediacodec');
+      expect(converted.selected.route!.targetPeak, '620');
+      expect(converted.selected.route!.offscreenTransfer, isNull);
+      final reshaped = capability.predict(sources[HdrSourceClass.dvP84]!);
+      expect(reshaped.selected.strategy, HdrStrategy.metadataReshape);
+      expect(reshaped.selected.route!.targetPeak, '620');
+    });
+
+    test('native HLG and PQ direct routes keep no software peak', () {
+      for (final cls in [HdrSourceClass.hlg, HdrSourceClass.hdr10]) {
+        final direct = HdrStrategyRealizer.realize(
+          HdrStrategy.baseLayerDirect,
+          source: sources[cls]!, sourceClass: cls,
+          capabilities: caps(
+            sdkInt: 24,
+            displayHdrMaxLuminance: 500,
+            ext: const HdrDataSpaceExtInfo(
+              id: 'vendor-yuv-pq', applicable: true,
+              pqPresentation:
+                  HdrPqPresentation(rgbSurface: false, yuvWindow: true),
+            ),
+          ),
+        );
+        expect(direct.route, isNotNull);
+        expect(direct.route!.vo, 'mediacodec_embed');
+        expect(direct.route!.targetPeak, isNull);
+      }
     });
 
     test('routes that do not render into an HDR gpu target stay null', () {
