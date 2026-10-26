@@ -310,11 +310,6 @@ class HdrVideoSession {
       retry: _retry,
       maxRetries: 4, // At most two HDR executions plus three SDR executions.
       maxReviewReopens: 3, // One source rebuild, then distinct SDR requests.
-      onPhase: const bool.fromEnvironment('MEDIA_KIT_STARTUP_TRACE')
-          ? (generation, phase, elapsedMicros) =>
-              debugPrint('MK_STARTUP session=${identityHashCode(this)} '
-                  'gen=$generation phase=$phase elapsedUs=$elapsedMicros')
-          : null,
       onBackendCallDiagnostic: onBackendCallDiagnostic,
       diagnosticSessionGeneration:
           onBackendCallDiagnostic == null ? null : _generationOf,

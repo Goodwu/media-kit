@@ -13,6 +13,12 @@
 - **证据边界**：原片35秒0.1–1000nit分段中位偏差最大3.87%，稀少高光+6.79%，无<.1nit样本；fixture暗边缘/高光残差未消除，不宣称逐像素或全片一致。面板nits未量测。
 - **context**：[lg-hlg-pq-brightness-mapping-20261025.md](/Users/wuweiwei1/src/PiliPlus/archives/conversations/lg-hlg-pq-brightness-mapping-20261025.md)；永久交付摘要在PiliPlus `archives/evidence/lg-hlg-pq-minimal-20261027.json`。用户2026-10-27授权提交、推送；仅纳入本任务范围，保留其他修改。
 
+## STARTUP-TRACE-CLEANUP-20261027
+
+- **done，用户关闭启动耗时任务后清除专属日志**：删除 `MEDIA_KIT_STARTUP_TRACE` 开关、提升 MPV 日志级别的分支、native property batch 打印、container-probe eligibility/session phase 专属日志及其纯诊断状态。保留属性批读、HDR container probe、seek/prefetch 与播放逻辑。
+- **范围边界**：未运行测试或构建；mpv/media-kit 的 `git diff --check` 通过。相关启动耗时任务由 PiliPlus `/Users/wuweiwei1/src/PiliPlus/TASKS.md` 记录关闭，历史 `<2s` 指标未达不代表此处声称通过。
+- context：`/Users/wuweiwei1/src/PiliPlus/archives/conversations/video-startup-latency-20261022.md`。
+
 任务事实源：这里只保留当前状态、验收门槛和下一步。清理前的完整任务台账快照：`archives/experiments/tasks-ledger-snapshot-20260927.md`、`archives/experiments/tasks-ledger-snapshot-20261002.md`、`archives/experiments/tasks-ledger-snapshot-20261010.md`（2026-10-10 精简前全文快照）；按各项 `context` 查看持续更新的依据。
 
 **路径映射（2026-10-05 起）**：`archives/experiments/` 已整体迁移至独立仓库 **`~/src/media-kit-experiments`**（实验记录/证据/交接/索引全量归档）。本文件及 conversations 中所有 `archives/experiments/` 前缀路径均映射到该库根目录。**主库历史已剥离该路径（2026-10-06，main 51ef66cc→ee28accd，树零变化）**：剥离前提交历史不再在主库，查备份仓 `Goodwu/media-kit-history-archive`（分支 `pre-strip-20261006`）；旧哈希换算用 `~/src/media-kit-build/history-strip-20261006/commit-map.json`。
