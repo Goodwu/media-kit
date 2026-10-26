@@ -122,8 +122,6 @@ class NativePlayer extends PlatformPlayer {
       bool.fromEnvironment('MEDIA_KIT_BUFFER_TRACE');
   static const bool _transportTraceEnabled =
       bool.fromEnvironment('MEDIA_KIT_TRANSPORT_TRACE');
-  static const bool _startupTraceEnabled =
-      bool.fromEnvironment('MEDIA_KIT_STARTUP_TRACE');
   static final RegExp _httpErrorStatusPattern =
       RegExp(r'HTTP error ([45]\d\d)', caseSensitive: false);
   static final RegExp _deadlineQueryPattern = RegExp(
@@ -2687,11 +2685,6 @@ class NativePlayer extends PlatformPlayer {
       final prefix = eventLogMessage.prefix.cast<Utf8>().toDartString().trim();
       final level = eventLogMessage.level.cast<Utf8>().toDartString().trim();
       final text = eventLogMessage.text.cast<Utf8>().toDartString().trim();
-      final startupTiming =
-          _startupTraceEnabled && text.startsWith('MK_STARTUP_NATIVE ');
-      if (startupTiming) {
-        print(text);
-      }
       _traceClassifiedMpvLog(text);
       if (!logController.isClosed) {
         logController.add(
@@ -2703,7 +2696,7 @@ class NativePlayer extends PlatformPlayer {
         );
         // --------------------------------------------------
         // Emit error(s) based on the log messages.
-        if (level == 'error' && !startupTiming) {
+        if (level == 'error') {
           if (prefix == 'file') {
             // file:// not found.
             if (!errorController.isClosed) {
@@ -2974,11 +2967,9 @@ class NativePlayer extends PlatformPlayer {
         MPVLogLevel.debug: 'debug',
         MPVLogLevel.trace: 'trace',
       };
-      final requestedLogLevel = _startupTraceEnabled
-          ? MPVLogLevel.v
-          : _transportTraceEnabled
-              ? MPVLogLevel.warn
-              : configuration.logLevel;
+      final requestedLogLevel = _transportTraceEnabled
+          ? MPVLogLevel.warn
+          : configuration.logLevel;
       final level = levels[requestedLogLevel];
       if (level != null) {
         final min = level.toNativeUtf8();

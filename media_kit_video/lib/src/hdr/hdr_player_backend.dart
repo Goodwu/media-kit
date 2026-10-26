@@ -66,9 +66,6 @@ class AndroidHdrBackend
         HdrOpenBackend<HdrOpenPlan>,
         HdrContainerSourceBackend,
         HdrContainerSourcePromotionBackend {
-  static const bool _startupTrace =
-      bool.fromEnvironment('MEDIA_KIT_STARTUP_TRACE');
-
   AndroidHdrBackend({
     required this.player,
     required this.outputSlot,
@@ -1132,9 +1129,6 @@ class AndroidHdrBackend
                 isCurrent: current,
                 openWithoutLock: (probe) =>
                     _admitOpenAfterCompletedPromotionStop(() async {
-                  if (_startupTrace) {
-                    debugPrint('MK_STARTUP containerProbe=$probe');
-                  }
                   if (probe) {
                     await player.openContainerProbe(playable,
                         automaticSubtitles:
@@ -1188,15 +1182,8 @@ class AndroidHdrBackend
 
   @override
   Future<void> prepareSourceDiscovery(HdrOpenPlan plan) async {
-    void trace(bool prepared) {
-      if (_startupTrace) {
-        debugPrint('MK_STARTUP containerProbeIntent=$prepared');
-      }
-    }
-
     final currentOutput = outputSlot.current;
     if (currentOutput == null) {
-      trace(false);
       return;
     }
     final route = plan.route;
@@ -1207,14 +1194,12 @@ class AndroidHdrBackend
         route.vo == 'gpu-next' &&
         plan.options?.failurePolicy != VideoRouteFailurePolicy.stop;
     if (!eligiblePlan || !reviewIsCurrent(plan)) {
-      trace(false);
       return;
     }
     // LegacyMediaOptions permits lavfi-complex as a per-entry loadfile
     // override. A global-property check below cannot prove that such a
     // custom graph is absent, so keep the ordinary open path for it.
     if (plan.media.extras?.containsKey('lavfi-complex') ?? false) {
-      trace(false);
       return;
     }
     final output = await currentOutput.platform.future;
@@ -1222,15 +1207,13 @@ class AndroidHdrBackend
     final eligibleOutput = configuration.vo == 'gpu-next' &&
         !configuration.android.usePlatformView;
     if (!eligibleOutput || !reviewIsCurrent(plan)) {
-      trace(false);
       return;
     }
     final stopped = _stoppedBoundary;
     if (!_observedStoppedPath || stopped == null) {
-      trace(false);
       return;
     }
-    final prepared = await _containerProbeOwner.prepare(
+    await _containerProbeOwner.prepare(
       lock: player.lock,
       plan: plan,
       uri: plan.media.uri,
@@ -1240,7 +1223,6 @@ class AndroidHdrBackend
       readIdentity: _readOptionIdentity,
       readProperties: player.getPropertiesAsync,
     );
-    trace(prepared);
   }
 
   @override
@@ -1264,7 +1246,6 @@ class AndroidHdrBackend
       openedAfterEpoch: openedAfterEpoch,
       mediaUri: plan.media.uri,
     );
-    if (_startupTrace) debugPrint('MK_STARTUP containerProbeResumed=true');
   }
 
   @override

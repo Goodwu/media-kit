@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:media_kit/media_kit.dart' show FileLoadedRecord;
 import 'package:synchronized/synchronized.dart';
 
@@ -138,10 +137,7 @@ class HdrContainerProbeOwner {
             await readIdentity() != stoppedIdentity) {
           return false;
         }
-        if (!_eligibleOptions(properties)) {
-          _traceIneligibleOptions('prepare', properties);
-          return false;
-        }
+        if (!_eligibleOptions(properties)) return false;
         _lease = _HdrContainerProbeLease(
           plan: plan,
           uri: uri,
@@ -166,29 +162,6 @@ class HdrContainerProbeOwner {
       (properties[7] == 'auto' || properties[7] == 'no') &&
       properties[8] == 'no' &&
       const ['yes', 'no'].contains(properties[11]);
-
-  static void _traceIneligibleOptions(String stage, List<String> properties) {
-    if (!const bool.fromEnvironment('MEDIA_KIT_STARTUP_TRACE')) return;
-    String value(int index, Set<String> choices) =>
-        index < properties.length && choices.contains(properties[index])
-            ? properties[index]
-            : 'unavailable';
-    String selector(int index) {
-      if (index >= properties.length) return 'unavailable';
-      final raw = properties[index];
-      return raw == 'auto' || raw == 'no' || int.tryParse(raw) != null
-          ? raw
-          : 'unavailable';
-    }
-
-    debugPrint('MK_STARTUP containerProbeEligibility=$stage '
-        'flag=${value(0, const {'yes', 'no'})} '
-        'rebase=${value(3, const {'yes', 'no'})} '
-        'dir=${value(4, const {'forward', 'backward'})} '
-        'cacheWait=${value(2, const {'yes', 'no'})} '
-        'lavfiEmpty=${properties.length > 1 && properties[1].isEmpty} '
-        'selectors=${[for (var i = 5; i < 9; i++) selector(i)].join(',')}');
-  }
 
   void bindOpenedEntry({
     required Object plan,
@@ -242,7 +215,6 @@ class HdrContainerProbeOwner {
         }
         final optionsEligible = _eligibleOptions(properties) &&
             _sameSelectors(properties.sublist(5, 9), lease.selectors);
-        if (!optionsEligible) _traceIneligibleOptions('admission', properties);
         final probe = start?.isNegative != true && optionsEligible;
         if (!probe) _lease = null; // Read-only intent; nothing needs restoring.
         if (probe) markPendingOwnEntry(plan);
