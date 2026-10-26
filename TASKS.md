@@ -7,8 +7,11 @@
 - 唯一跨仓 context：`/Users/wuweiwei1/src/PiliPlus/archives/conversations/playback-diag-bar-20261022.md`；本次交付整包验证由该任务更新。
 
 ## LG-HLG-PQ-BRIGHTNESS-MAPPING-20261025
-
-- **排查中，不增加 gamma，不提交**：LG 当前 HLG→PQ 路线亮度不足，核对 target-peak=500、libplacebo HLG OOTF 与 vendor/HWC/背光实际输出；先排除暂停闲置 DIM 干扰。跨仓唯一 context：`/Users/wuweiwei1/src/PiliPlus/archives/conversations/lg-hlg-pq-brightness-mapping-20261025.md`。
+- **completed、用户采用，已授权提交推送**：1000参考峰值/gamma0，取消自动+3，不加曲线；105 tests/analyze0与5份生产源哈希保持。
+- **同帧观感**：熊35.035秒、夕阳720.052666667秒、近黑600.032766667秒用户均反馈基本一致；夕阳明确无明显过曝/细节丢失。近黑HDR10直通/离屏参考一致。
+- **交付与运行**：标准源码PiliPlus APK SHA6da37fb9…已安装LG且base.apk一致；北海道原片硬解SurfaceTexture→PQ/ext:lg-pq、peak1000、applied verified=true、HDR1。用户确认主应用连续播放“正常，采用这版”，验收通过。
+- **证据边界**：原片35秒0.1–1000nit分段中位偏差最大3.87%，稀少高光+6.79%，无<.1nit样本；fixture暗边缘/高光残差未消除，不宣称逐像素或全片一致。面板nits未量测。
+- **context**：[lg-hlg-pq-brightness-mapping-20261025.md](/Users/wuweiwei1/src/PiliPlus/archives/conversations/lg-hlg-pq-brightness-mapping-20261025.md)；永久交付摘要在PiliPlus `archives/evidence/lg-hlg-pq-minimal-20261027.json`。用户2026-10-27授权提交、推送；仅纳入本任务范围，保留其他修改。
 
 任务事实源：这里只保留当前状态、验收门槛和下一步。清理前的完整任务台账快照：`archives/experiments/tasks-ledger-snapshot-20260927.md`、`archives/experiments/tasks-ledger-snapshot-20261002.md`、`archives/experiments/tasks-ledger-snapshot-20261010.md`（2026-10-10 精简前全文快照）；按各项 `context` 查看持续更新的依据。
 
