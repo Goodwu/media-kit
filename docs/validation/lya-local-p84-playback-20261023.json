@@ -1,0 +1,283 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-23",
+  "timezone": "Asia/Shanghai",
+  "scope": "media-kit HDR Lab current-local-source Release build and LYA local DV P8.4 playback",
+  "build": {
+    "entrypoint": "tool/build-android-test.sh",
+    "nativeBuilder": "tool/build_android_native.py",
+    "status": "built-unreviewed",
+    "sourcePolicy": "current-local-checkouts-including-dirty-files",
+    "remoteFreshnessVerified": false,
+    "sourceDrift": false,
+    "successfulCommands": 26,
+    "sources": {
+      "builder": {
+        "sha256": "f3798a3e231d034419e651fc59ac30a26eb584fbf095f05bdcd7845118e2d423"
+      },
+      "dav1d": {
+        "path": "/Users/wuweiwei1/src/libmpv-android-video-build-dv-experiment/buildscripts/deps/dav1d",
+        "head": "676a864a11af2c0522e1f992e770589543894686",
+        "tree": "65da0bf96ec68ae50665345ed934ecab308179b5",
+        "sha256": "d978c92fe45020e7c3e00c9ea3fa5cebfa7825d4be52f8c2661010d5f4150c92",
+        "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "ffmpeg": {
+        "path": "/Users/wuweiwei1/src/libmpv-android-video-build-dv-experiment/buildscripts/deps/ffmpeg",
+        "head": "b4d2ea4ffb17c62cb84a676ed0a2dab96513c002",
+        "tree": "d753457325192b3bae9e48f3bbed3cdc8fdbabd6",
+        "sha256": "557b859a360a9f689e9e736b35b7b3439664a1783e8d450e450571815785e81b",
+        "diffSha256": "125b23a246f21500927a5fa50c52e35e4a975f2d94b8cf7285ff7f4b76b1a84a"
+      },
+      "freetype": {
+        "path": "/Users/wuweiwei1/src/libmpv-android-video-build-dv-experiment/buildscripts/deps/freetype",
+        "head": "de8b92dd7ec634e9e2b25ef534c54a3537555c11",
+        "tree": "4b3e621364527dc640081afefdfe861b287a9845",
+        "sha256": "00278344d449dcd52a81bb8c8c55dfe389c5c39a9627b666d30b4a6a68539f15",
+        "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "fribidi": {
+        "path": "/Users/wuweiwei1/src/libmpv-android-video-build-dv-experiment/buildscripts/deps/fribidi",
+        "head": "6428d8469e536bcbb6e12c7b79ba6659371c435a",
+        "tree": "66ddf35c13034f07b5f94f04b6465b3fe7f8701a",
+        "sha256": "796a93cf6811e87737dd513c2d5b340f269242f0ef648832c086a594c5a99505",
+        "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "harfbuzz": {
+        "path": "/Users/wuweiwei1/src/libmpv-android-video-build-dv-experiment/buildscripts/deps/harfbuzz",
+        "head": "a321c4fee56b15247c10f9aa3db7e7ccb3b8173b",
+        "tree": "97761d2f654989758434192dfba0e88ba6ce4458",
+        "sha256": "1d34aff3a2be6a295de5208f1eac18868f1602055bb0872aa6796cf3df0851d4",
+        "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "helper": {
+        "path": "/Users/wuweiwei1/src/libmpv-android-video-build-dv-experiment/buildscripts/deps/media-kit-android-helper",
+        "head": "b768ce102cfa9b5ddec618bb939d689d1b0899fa",
+        "tree": "f5dcd75b172d65e301c5b8adf8ef3e28278f4720",
+        "sha256": "a323a33ab84d8a99d2e5bb8109d0ea7455dd9e3465e4c5ae936a4634d44bcc1a",
+        "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "lcms2": {
+        "path": "/Users/wuweiwei1/src/libmpv-android-video-build-dv-experiment/buildscripts/deps/lcms2",
+        "head": "5176347635785e53ee5cee92328f76fda766ecc6",
+        "tree": "01d9f13d80bbad5690fbba272510b755a76f2f3b",
+        "sha256": "a2ccea5299ec111e082bdcdca5dbe6618147c8119cdb24207bf8d689ad8f22c6",
+        "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "libass": {
+        "path": "/Users/wuweiwei1/src/libmpv-android-video-build-dv-experiment/buildscripts/deps/libass",
+        "head": "e8ad72accd3a84268275a9385beb701c9284e5b3",
+        "tree": "eab3bd56da74caec6249a2de4cdfe53d85e2be50",
+        "sha256": "8d1360570e75122f94b061cdbca964492b0dd3433739fd864a13c7611f116fbb",
+        "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "libplacebo": {
+        "path": "/Users/wuweiwei1/src/libmpv-android-video-build-dv-experiment/buildscripts/deps/libplacebo",
+        "head": "c9fd87984d2495778133f6b733635f871505a432",
+        "tree": "bd0f7373bf25de900a9636f4a5a5edd4e61b38e5",
+        "sha256": "e78201cb7893850a9751350d023ab17e0ffbf1a02edd1d816b74a3fead156418",
+        "diffSha256": "ed2e959046cf5ca656108758f578d03806455f867bd682800a874cca2fdb4d20"
+      },
+      "libxml2": {
+        "path": "/Users/wuweiwei1/src/libmpv-android-video-build-dv-experiment/buildscripts/deps/libxml2",
+        "head": "f507d167f1755b7eaea09fb1a44d29aab828b6d1",
+        "tree": "d0553a8037968f8f28001b1920dd3980af0fd648",
+        "sha256": "451b21df9039b5299f8c03d042a55c51eb740f397cc59e64ad697e262fb57a7a",
+        "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "mbedtls": {
+        "path": "/Users/wuweiwei1/src/libmpv-android-video-build-dv-experiment/buildscripts/deps/mbedtls",
+        "head": "1873d3bfc2da771672bd8e7e8f41f57e0af77f33",
+        "tree": "7401f86a914b9f8b14c558be199091e9eddea1aa",
+        "sha256": "05d8873ac6e374a3e316914f3091e307345e8e80bd52f3d1630b632cc27f78d5",
+        "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "mpv": {
+        "path": "/Users/wuweiwei1/src/mpv",
+        "head": "c42549b5fbd29d12e997c91cc055c3d24e2615ae",
+        "tree": "cb45b7a22a0ea03d902d22f062dfcb75e0db4071",
+        "sha256": "8fa7fbdb09037c0643c5194f6ff83293d058d523a4f991cdf89a72d889993cb5",
+        "diffSha256": "37230d7a0d009d2838e34a9c8ca36a5a17602e2316891aa8a2d32c50e17e1e14"
+      },
+      "native-recipes": {
+        "sha256": "308cb0d84c6728c23cbb7b2842046281b5986836e182c6af72f9c66a535b5278"
+      },
+      "ndk-tools": {},
+      "shaderc-ndk-sources": {
+        "path": "/Users/wuweiwei1/Library/Android/sdk/ndk/27.2.12479018/sources/third_party/shaderc",
+        "sha256": "fb304b309e309b32288913031c33ae377b1de3d39e196a3ae9f880e4b4ecd52d"
+      }
+    },
+    "nativeJarSha256": "46bba27c9f416362017936c62a2aa4bad722f4967852487af5b0ae7b0c974bc1",
+    "apkVerification": {
+      "apk": "/Users/wuweiwei1/src/media-kit/media_kit_hdr_lab/build/app/outputs/flutter-apk/lya-local-p84-20261023-final-release.apk",
+      "apkSha256": "66b7cc459fb84f5e314d09541188da66ac3d25d4abc2d4ebd854d8371ceed627",
+      "members": {
+        "lib/arm64-v8a/libc++_shared.so": {
+          "sha256": "4397241b4bd20a8e579bfb41d21107857e12985f6a01ca0c2a5f83380d1270b4",
+          "verified": true,
+          "comparison": "byte-identical after standard NDK --strip-unneeded (AGP packaging)"
+        },
+        "lib/arm64-v8a/libmediakitandroidhelper.so": {
+          "sha256": "9d7a9c7ad0caa44afdc521eaa0cd5898190120739f2748e41c4b52208d9d507c",
+          "verified": true,
+          "comparison": "byte-identical"
+        },
+        "lib/arm64-v8a/libmpv.so": {
+          "sha256": "6a657dd0da70af5ab7f562624c0b940b8b77c5a5dd9ebd736068cdde14ecc43a",
+          "verified": true,
+          "comparison": "byte-identical"
+        }
+      },
+      "jarSha256": "46bba27c9f416362017936c62a2aa4bad722f4967852487af5b0ae7b0c974bc1"
+    },
+    "evidencePath": "build/android-native/lya-local-p84-20261023-final-20261023-180817-79486",
+    "unitTestsPassed": 5,
+    "independentV1Review": "passed"
+  },
+  "device": {
+    "model": "LYA-AL00",
+    "serial": "3EP7N18C28016072",
+    "api": 29,
+    "package": "com.example.media_kit_hdr_lab",
+    "installedApkSha256": "66b7cc459fb84f5e314d09541188da66ac3d25d4abc2d4ebd854d8371ceed627"
+  },
+  "sample": {
+    "originalPath": "/sdcard/Download/DV-P8.4.mp4",
+    "openedPath": "/sdcard/Android/data/com.example.media_kit_hdr_lab/files/DV-P8.4.mp4",
+    "sha256": "7626cac28819ffd1377a712b56c7cc4bbf8677f5db4b39fb0c83f92e58d74443",
+    "originalAndCopyMatch": true,
+    "runtimeProfile": 8,
+    "runtimeCompatibilityId": 4
+  },
+  "playback": {
+    "route": "metadataReshape",
+    "presentation": "nativeHdr",
+    "output": "pq",
+    "vo": "gpu-next",
+    "hwdec": "mediacodec",
+    "decoder": "OMX.hisi.video.decoder.hevc",
+    "routeVerified": true,
+    "dataspacePath": "ext:lya-pq",
+    "dataspaceReadback": "DATASPACE_BT2020_PQ",
+    "continuousSfWindowSeconds": 120.005,
+    "frameCounterStart": 1207,
+    "frameCounterEnd": 4804,
+    "averageCounterFps": 29.97375109370443,
+    "frameDropCount": 0,
+    "decoderFrameDropCount": 0,
+    "metrics": {
+      "latency": {
+        "video-latency-valid-0.txt": {
+          "presents": 126,
+          "span_seconds": 4.159308853,
+          "fps": 30.05306997335406,
+          "median_ms": 32.75,
+          "max_ms": 49.165625,
+          "gt50ms": 0
+        },
+        "video-latency-valid-30.txt": {
+          "presents": 126,
+          "span_seconds": 4.159412499,
+          "fps": 30.0523210982446,
+          "median_ms": 32.753125,
+          "max_ms": 49.132291,
+          "gt50ms": 0
+        },
+        "video-latency-valid-60.txt": {
+          "presents": 126,
+          "span_seconds": 4.173586458,
+          "fps": 29.95026010792179,
+          "median_ms": 32.734895,
+          "max_ms": 49.110937,
+          "gt50ms": 0
+        }
+      },
+      "frames": {
+        "sf-s0.txt": {
+          "counter": 1207,
+          "PQ": 1,
+          "format43": true
+        },
+        "sf-s120.txt": {
+          "counter": 4804,
+          "PQ": 1,
+          "format43": true
+        },
+        "sf-s30.txt": {
+          "counter": 2107,
+          "PQ": 1,
+          "format43": true
+        },
+        "sf-s60.txt": {
+          "counter": 3006,
+          "PQ": 1,
+          "format43": true
+        },
+        "sf-s90.txt": {
+          "counter": 3905,
+          "PQ": 1,
+          "format43": true
+        }
+      },
+      "fatal_or_anr": []
+    },
+    "sampleTimes": [
+      {
+        "target": 0,
+        "time": "2026-10-23T18:13:02.357285"
+      },
+      {
+        "target": 30,
+        "time": "2026-10-23T18:13:32.362400"
+      },
+      {
+        "target": 60,
+        "time": "2026-10-23T18:14:02.362325"
+      },
+      {
+        "target": 90,
+        "time": "2026-10-23T18:14:32.361395"
+      },
+      {
+        "target": 120,
+        "time": "2026-10-23T18:15:02.362341"
+      }
+    ],
+    "visualReview": "Three separated screenshots show readable different video frames; no obvious black screen, corruption, or player UI residue.",
+    "rawEvidencePath": "/tmp/lya-local-p84-20261023",
+    "routeConfidence": "unverified",
+    "candidateMaturity": "experimental"
+  },
+  "limits": [
+    "PQ mapping route, not native Dolby Vision passthrough acceptance.",
+    "HDR panel brightness/color accuracy not measured or human-accepted in this run.",
+    "Latency ring statistics cover three roughly four-second windows, not every present during the full interval.",
+    "Current source means the recorded local source checkouts including modifications, not all remote branch tips.",
+    "Configured native source/build trees are required; this is not a fresh-machine dependency bootstrap.",
+    "Runtime selected candidate remains experimental with confidence=unverified; verified=true concerns observed route/output, not native DV or optical color acceptance."
+  ],
+  "settings": {
+    "screen_brightness": {
+      "before": "39",
+      "after": "53"
+    },
+    "screen_brightness_mode": {
+      "before": "1",
+      "after": "1"
+    },
+    "accelerometer_rotation": {
+      "before": "1",
+      "after": "1"
+    },
+    "user_rotation": {
+      "before": "0",
+      "after": "0"
+    },
+    "screen_off_timeout": {
+      "before": "600000",
+      "after": "600000"
+    }
+  },
+  "settingsNote": "No settings writes issued. Automatic brightness remained enabled; scalar brightness changed from39 to53, and its cause was not instrumented."
+}

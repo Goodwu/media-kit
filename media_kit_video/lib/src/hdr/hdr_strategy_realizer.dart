@@ -461,6 +461,12 @@ class HdrStrategyRealizer {
         hwdec: hwdec,
         targetPrim: 'bt.2020',
         targetTrc: trc,
+        // This HLG-only YUV carrier preserves the nominal HLG reference
+        // mapping. A panel capability peak must not pre-compress its PQ
+        // signal; presentation-side mapping remains the display's job.
+        targetPeak: yuvWindowContract
+            ? HdrYuvPresentationContract.targetPeak
+            : _displayTargetPeak(capabilities),
         // Keep the production PQ label unchanged. A limited-range override
         // is admitted only for the explicitly locked LG lab experiment.
         surfaceTransfer:
@@ -552,6 +558,7 @@ class HdrStrategyRealizer {
         hwdec: 'mediacodec',
         targetPrim: 'bt.2020',
         targetTrc: 'pq',
+        targetPeak: _displayTargetPeak(capabilities),
         surfaceTransfer: 'pq',
         // The RPU is the input of the rebuild; it must survive.
         stripDvRpu: false,
@@ -640,6 +647,14 @@ class HdrStrategyRealizer {
       ),
     );
   }
+
+  /// The display target for C2 reshape and RGB C4 conversion: the reported
+  /// panel peak rounded to whole nits, or the contract fallback when absent.
+  /// HLG C4 on the YUV carrier selects its reference peak at that call site
+  /// instead. SDR outputs and native surfaces carry no GPU target peak.
+  static String _displayTargetPeak(HdrCapabilities capabilities) =>
+      capabilities.displayHdrMaxLuminance?.round().toString() ??
+      HdrYuvPresentationContract.targetPeak;
 
   /// Base-layer transfer function per source class; classes that do not pin
   /// one (HDR Vivid, HDR10+, SDR families) follow the reported gamma.

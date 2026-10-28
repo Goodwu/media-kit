@@ -165,6 +165,7 @@ class HdrOutputDiagnostics {
       'topology=${route?.topology.name ?? 'none'} '
       'surface=${route?.surfaceTransfer ?? 'none'} '
       'stripRpu=${route?.stripDvRpu ?? 'none'} '
+      'peak=${route?.targetPeak ?? 'none'} '
       'hwdecCurrent=${_orNone(hwdecCurrent)} '
       'requested=${_orNone(dataSpaceRequested)} '
       'path=${_orNone(dataSpacePath)} '

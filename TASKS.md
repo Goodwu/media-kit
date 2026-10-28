@@ -1,8 +1,57 @@
 # TASKS.md
 
+## PLAYBACK-COLOR-DIAGNOSTICS-20261025
+
+- **完成，用户授权本地提交，不推送**：公开只读 `PlaybackColorValues` / `PlaybackColorSnapshot` / `PlaybackColorSampler`，片源读取 mpv 新增 `current-tracks/video/demux-color-*` 原始解复用元数据；GPU 输出只读 `video-target-params`，明确为渲染目标；实际 `mediacodec_embed` + `mediacodec` 硬件帧仅报告解码直通，不推断显示色彩。未知/缺失字段省略，无解码帧色彩回填；FFmpeg→mpv命名仅严格等价别名，片源 bt709 不转换 bt1886。标准整包VERIFIED（96d5b558…434571b）已装5台在线机且哈希一致；LYA输出目标/滚动与marble解码直通实测通过，两机实际测试源未显示源行，未拿hint填补。同包原生getter在tagged/untagged SDR及库所用alias验证，最终全机OFF。跨仓验证单见PiliPlus `docs/validation/playback-color-diag-20261025.json`。
+- **已验证**：`media_kit_video/test/playback_color_diagnostics_test.dart` 9/9；helper/tests 定向 analyze 无问题；异步源身份（含同 URI 重载 epoch）与输出路径前后校验、stop/dispose 迟到丢弃、超时保持真实在途 guard 防堆积。未改变播放/HDR 路由；本库实施者未独立构建APK或操作设备，统一整包验收见首条。
+- 唯一跨仓 context：`/Users/wuweiwei1/src/PiliPlus/archives/conversations/playback-diag-bar-20261022.md`；本次交付整包验证由该任务更新。
+
+## LG-HLG-PQ-BRIGHTNESS-MAPPING-20261025
+- **completed、用户采用，已授权提交推送**：1000参考峰值/gamma0，取消自动+3，不加曲线；105 tests/analyze0与5份生产源哈希保持。
+- **同帧观感**：熊35.035秒、夕阳720.052666667秒、近黑600.032766667秒用户均反馈基本一致；夕阳明确无明显过曝/细节丢失。近黑HDR10直通/离屏参考一致。
+- **交付与运行**：标准源码PiliPlus APK SHA6da37fb9…已安装LG且base.apk一致；北海道原片硬解SurfaceTexture→PQ/ext:lg-pq、peak1000、applied verified=true、HDR1。用户确认主应用连续播放“正常，采用这版”，验收通过。
+- **证据边界**：原片35秒0.1–1000nit分段中位偏差最大3.87%，稀少高光+6.79%，无<.1nit样本；fixture暗边缘/高光残差未消除，不宣称逐像素或全片一致。面板nits未量测。
+- **context**：[lg-hlg-pq-brightness-mapping-20261025.md](/Users/wuweiwei1/src/PiliPlus/archives/conversations/lg-hlg-pq-brightness-mapping-20261025.md)；永久交付摘要在PiliPlus `archives/evidence/lg-hlg-pq-minimal-20261027.json`。用户2026-10-27授权提交、推送；仅纳入本任务范围，保留其他修改。
+
+## STARTUP-TRACE-CLEANUP-20261027
+
+- **done，用户关闭启动耗时任务后清除专属日志**：删除 `MEDIA_KIT_STARTUP_TRACE` 开关、提升 MPV 日志级别的分支、native property batch 打印、container-probe eligibility/session phase 专属日志及其纯诊断状态。保留属性批读、HDR container probe、seek/prefetch 与播放逻辑。
+- **范围边界**：未运行测试或构建；mpv/media-kit 的 `git diff --check` 通过。相关启动耗时任务由 PiliPlus `/Users/wuweiwei1/src/PiliPlus/TASKS.md` 记录关闭，历史 `<2s` 指标未达不代表此处声称通过。
+- context：`/Users/wuweiwei1/src/PiliPlus/archives/conversations/video-startup-latency-20261022.md`。
+
 任务事实源：这里只保留当前状态、验收门槛和下一步。清理前的完整任务台账快照：`archives/experiments/tasks-ledger-snapshot-20260927.md`、`archives/experiments/tasks-ledger-snapshot-20261002.md`、`archives/experiments/tasks-ledger-snapshot-20261010.md`（2026-10-10 精简前全文快照）；按各项 `context` 查看持续更新的依据。
 
 **路径映射（2026-10-05 起）**：`archives/experiments/` 已整体迁移至独立仓库 **`~/src/media-kit-experiments`**（实验记录/证据/交接/索引全量归档）。本文件及 conversations 中所有 `archives/experiments/` 前缀路径均映射到该库根目录。**主库历史已剥离该路径（2026-10-06，main 51ef66cc→ee28accd，树零变化）**：剥离前提交历史不再在主库，查备份仓 `Goodwu/media-kit-history-archive`（分支 `pre-strip-20261006`）；旧哈希换算用 `~/src/media-kit-build/history-strip-20261006/commit-map.json`。
+
+## LG-LYA-LOCAL-P5-HDR-20261025
+
+- **两台验收通过，未提交（待用户授权）**：本地 DV P5（Mystery Box 样片，md5 `3b6b8a20…`）在 LG（G6/API24）与 LYA（Mate 20 Pro/API29）hdr_lab harness 全片播放，HDR 激活证据齐备。LYA：metadataReshape→pq platformView、`peak=500`、readback=`DATASPACE_BT2020_PQ`、SF 实锤 BT2020 SMPTE 2084 层、EOS、零 fatal。LG：**nativeDolbyVision**（`native_dv=1`、`OMX.qcom.video.decoder.dolby-vision`）verified/applied、EOS、零 fatal（readback=none 为 API24 契约；SF 无 DV dataspace 行如实记录）。最终 APK `p5-local-hdr-dvfork3-20261025-release.apk` SHA-256 `46a10e2c…`（FFmpeg head `d4bb79394b`，四 marker 过）。
+- **修复（LG blocked 根因两级 + 构建链冲突）**：① hdr_lab gradle `ndk abiFilters` 与强制 `--split-per-abi` 冲突（AGP 拒绝并存），split 模式下跳过（仓内未提交改动）；② `deps/ffmpeg` 曾被重置为上游+b4d2ea4ffb，丢失 `~/src/FFmpeg` fork 的 native_dv 实验路径 → 探针 `nativeDvApi=0` → LG P5 唯一 HDR 路线（无 RGB PQ 呈现面、HDR 显示禁 toneMap）整体 blocked（"没有图像"实感），已切回 `d4bb79394b`（产品链真超集）；③ mpv `_build-arm64-mks` meson 缓存 `HAVE_LAVF_INITIAL_DOVI_HVCC=0`（旧 prefix 配置产物）→ hvcC 补全剔除 → fork 解码器 VPS/SPS/PPS 门失败，已按 mpv.sh 配方（fork pkg-config env）重建树=1，并以 c_link_args `['-Wl,--build-id=sha1','-lc++_shared']` 恢复 DT_NEEDED（新配置无 C++ 链接，缺项致 dlopen 失败）。
+- **在案缺陷**：`tool/build_android_native.py:322` `','.join` 回写 meson 列表在含逗号 arg 时产生非法单 token（本轮以构建树预置规避）；LG 流式 logcat 空须 `exec-out logcat -d`、LG tap=(1440,720)/LYA=(1560,720)；LYA 首轮曾被 uid2000 外部 `am start` PiliPlus 打断（留档）。
+- **marble 补充轮通过（2026-10-25 01:18）**：marble（Note 12 Turbo/API35）本地 P5 → **nativeDolbyVision** verified/applied（FFmpeg 修复同时解锁 marble 的 nativeDvBridgeApi=1）、`EOS time-pos=98.944000` + `completed=true`、SF 实锤 `Y_CBCR_420_P010_UBWC` 视频层 HWC Device 合成（10-bit HDR）、render_failures=0、零 fatal。协议备注：API35 无 `isStatusBarKeyguard`（round.sh 已兼容 `mKeyguardOccluded=false`）、tap=(1200,540)。marble 还原未闭合：API35 拒降级、MIUI USB 安装确认静默取消，hdr_lab 现为卸载状态（用户裁决：测试 App 不强求还原）。
+- context：[lg-lya-local-p5-hdr-20261025.md](archives/conversations/lg-lya-local-p5-hdr-20261025.md)；证据 `/tmp/p5-local-hdr-20261024/`。
+
+## LYA-DV-P84-TARGET-PEAK-20261024
+
+- **implemented / 两台观感验收通过，按用户授权本地提交归档（不推送；事实以 Git log 为准）**：Android 面板 HDR 峰值采集与 target-peak 统一注入。根因=Android EGL swapchain 不报显示元数据，`target-colorspace-hint=auto` 失效，libplacebo 把未知峰值 PQ 目标按 10000 nits 兜底并经 `pl_color_space_infer_map`「HLG 峰值跟随目标」规则把 HLG（1000 nits）按约 10× 亮度解读 → reshape/baseLayerConvert 路线 DV P8.4→PQ 过曝、暗部发灰无层次（LYA/LG 实机确认）。实现：Java `getDesiredMaxLuminance()`（hidden getHdrMaxLuminance 编译不过，已偏差追认）采集 hdrMaxLuminance（有效窗 finite && 80–10000，用户反馈原 4000 过保守后放宽），Dart `HdrRoute.targetPeak` 贯通 planner→backend 三分支，注入面板峰值、缺省兜底契约常数 1000（同步解决 LG 点亮轮「target-peak=1000 亮部残余过曝」遗留），decision 行加 `peak=`。验证：analyze 零新增、目标批 212 过（唯一既有失败 stash/HEAD 复证无关）、V1 无 P0/P1/P2；LYA/LG 实机 `peak=500` 生效、路线 verified 零回退、观感过曝消失。LG 取证须 exec-out logcat（环境特性）。证据：`/tmp/lya-dv-peak-fix-20261024/`。
+- context：[lya-dv-p84-target-peak-20261024.md](archives/conversations/lya-dv-p84-target-peak-20261024.md)；App 侧 `/Users/wuweiwei1/src/PiliPlus/archives/conversations/lya-dv-p84-hlg-to-pq-overexposure-20261024.md`。
+
+## LG-DVP84-SOURCE-BUILD-20261024
+
+- **已修复并 LG 验证，按用户授权本地提交归档，不推送；提交事实以 Git log 为准**：标准源码 wrapper 新增 receipt→JAR→最终 APK 三成员字节一致性/钉定NDK strip检查、fork能力标记、重复成员/foreign ABI拒绝；dev缺本地JAR拒绝。真实首轮发现其它插件foreign ABI，默认强制split并选arm64后整链重跑通过。session review 的hwdecMismatch耗尽不再误报nativeDvUnavailable；session53/工具11/analyze及V2审核通过。
+- APK `e17d3aee…028c9`（27,541,013 B）设备回读一致；LG两段4K DV P8.4均高通HEVC硬解+surfacetexture→PQ、面板HDR开启，约73s/61s检查点buffer推进，零FATAL/ANR/阻断，用户确认面板正常视频。无FPS/逐帧连续性/光学校准宣称，无nativeDV直通宣称。持久证据：`docs/validation/lg-dvp84-source-build-20261024.json`；唯一context：`/Users/wuweiwei1/src/PiliPlus/archives/conversations/marble-dv-p84-route-regression-20261023.md`。
+
+## DECODER-KIND-PRE29-20261023
+
+- **implemented / 已实机验证，已本地提交（不推送；事实以 Git log 为准）**：`VideoRouteCapabilities.java` `decoderKind()` pre-29 分支从"厂商命名一律 unknown"改为镜像框架自身的 flags 推导——AOSP `OmxInfoBuilder`/`Codec2InfoBuilder` 对 OMX/C2 组件的 `isHardwareAccelerated` 本就是"非 OMX.google 前缀 + 无 software-codec 声明"的命名推导（android-10/11/13 源码核实），且同仓 `HdrCapabilities.java` L173-182 pre-29 早用同取向启发式，原 unknown 策略与仓内自相矛盾并导致 PiliPlus 在 API<29 设备全格式误灰（App `_decodableAtSize` 把"无 hardware 解码器"判不可播）。
+- 规则：API≥29 不变（flags 优先；双缺席时仅软解黑名单可判 software、不再猜 hardware——OMX 路径 29+ 从不设 software 标志，双缺席本身是厂商 software-codec 声明的信号）；API<29 先过生态实机验证的软解黑名单（omx.google./c2.android./c2.google./omx.sprd.soft./omx.avcodec./omx.pv*/含 ffmpeg/sw_vd/尾缀 sw|sw.dec/omx.sec.*.sw.*/hevcswvdec，来源 Parseus/codecinfo CodecUtils.kt），余下 `omx.`/`c2.`/`arc.` 厂商前缀判 hardware，非标准命名仍 unknown。`kind=hardware` 消费方（HDR 路由 fail-closed 门）不受影响：放行仍需 `evaluate()` 的 profile/level/尺寸严格校验。
+- 验证（2026-10-23 晚，dev 变体 app-release.apk 5 台全装）：P10 Plus（VKY API28）旧版 hev1/av01/avc1 探测三连灰 → 新版仅 av01 灰，流级仅 AV1 各档灰（无 AV1 硬解，正确），1080P 播放正常且 OMX.hisi 硬解实跑（HdrDiag `hwdecCurrent=mediacodec-copy verified=true`）；LG G6（API24）同样闭合；Mate 20 Pro（API29）零置灰日志、播放正常（29+ 路径回归通过）；Redmi 8/Note 5A（API37）已装未单独复测（29+ 路径未改）。App 侧按用户指令零改动。用户曾报一次"无法加载解码器"toast（mpv `Could not open codec`，release 不落 logcat）：5 轮复现全部硬解正常，用户确认重开自愈、无持续回归；注意本包 libmpv 为 08b210e2 本地源码链（非 10:48 Maven JAR），复发时先抓故障时刻 OMX/ACodec 日志与 toast 原文归因。
+- 工程事实：宿主 JDK27 不可用须 `JAVA_HOME=openjdk@21`；PiliPlus 构建须带 `ORG_GRADLE_PROJECT_dev=true`（否则产出无 `.dev` 后缀的并列包，`adb install -r` 报 Success 实为新装应用，复测会跑旧包——必须核对 `pm path`/lastUpdateTime）。APK 46MB→77.9MB 源于本仓 HEAD `08b210e2` 本地源码构建链，与本改动无关。
+- context：App 仓 `/Users/wuweiwei1/src/PiliPlus/archives/conversations/codec-capability-graying-20261022.md`（本轮追加段）。
+
+## LYA-LOCAL-P84-PLAYBACK-20261023
+
+- **done**：仓内 `tool/build_android_native.py` 替代已删除scratch脚本，标准wrapper此前以本地源码构建Release成功（APK `66b7cc45…`、JAR `46bba27c…`），原生26命令、装机哈希通过；初版5项单测曾通过，随后归档审查加严链接归因门后未重跑测试或完整构建。LYA HDR Lab实际打开本地P8.4（同字节复制到App files），海思硬解、metadataReshape→PQ，10-bit BT2020_PQ层；120秒帧+3597约29.97fps，采样drop0、无FATAL/ANR，截图无明显黑屏/破损/残留。边界：候选仍experimental/confidence=unverified，非原生DV直通或面板光学验收。用户规则“media-kit-build不得长期放需复用工具资料”已写AGENTS.local及构建说明。证据：`docs/validation/lya-local-p84-playback-20261023.json`；context：`archives/conversations/lya-local-p84-playback-20261023.md`。
 
 ## FLUTTER-HOST-COMPOSITION-20261023
 

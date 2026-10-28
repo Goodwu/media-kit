@@ -238,6 +238,7 @@ class HdrCapabilities {
   const HdrCapabilities({
     required this.sdkInt,
     required this.displayHdrTypes,
+    this.displayHdrMaxLuminance,
     required this.hevcDecoders,
     required this.dolbyVisionDecoders,
     required this.p5PipelineAvailable,
@@ -255,6 +256,13 @@ class HdrCapabilities {
   /// report at all — distinct from an empty set (a display that reports
   /// support for none).
   final Set<int>? displayHdrTypes;
+
+  /// The queried display's reported HDR peak luminance in nits, already
+  /// validated by the adapter (finite, 80-10000 = PQ full scale). Null means
+  /// the platform did not report a usable panel peak — the planner then
+  /// falls back to its own conservative target-peak constant instead of
+  /// guessing a luminance.
+  final double? displayHdrMaxLuminance;
 
   /// HEVC decoders with Main10 support and the 4K size/frame-rate tier.
   final List<HdrDecoderInfo> hevcDecoders;
@@ -336,6 +344,7 @@ class HdrCapabilities {
       HdrCapabilities(
         sdkInt: sdkInt,
         displayHdrTypes: displayHdrTypes,
+        displayHdrMaxLuminance: displayHdrMaxLuminance,
         hevcDecoders: hevcDecoders,
         dolbyVisionDecoders: dolbyVisionDecoders,
         p5PipelineAvailable: p5PipelineAvailable,
@@ -383,6 +392,9 @@ class HdrCapabilities {
     return HdrCapabilities(
       sdkInt: map['sdkInt'] is int ? map['sdkInt'] as int : 0,
       displayHdrTypes: _parseDisplayHdrTypes(map['displayHdrTypes']),
+      displayHdrMaxLuminance: map['displayHdrMaxLuminance'] is num
+          ? (map['displayHdrMaxLuminance'] as num).toDouble()
+          : null,
       hevcDecoders: _parseDecoders(map['hevcDecoders']),
       dolbyVisionDecoders: _parseDecoders(map['dolbyVisionDecoders']),
       p5PipelineAvailable:
@@ -420,7 +432,9 @@ class HdrCapabilities {
 
   @override
   String toString() => 'HdrCapabilities(sdk: $sdkInt, '
-      'displayHdrTypes: $displayHdrTypes, hevc: ${hevcDecoders.length}, '
+      'displayHdrTypes: $displayHdrTypes, '
+      'displayHdrMaxLuminance: $displayHdrMaxLuminance, '
+      'hevc: ${hevcDecoders.length}, '
       'dv: ${dolbyVisionDecoders.length}, p5Pipeline: $p5PipelineAvailable, '
       'nativeDvBridgeApi: $nativeDvBridgeApi, '
       'bridge: $dataSpaceBridgeLoaded, ext: $dataSpaceExt)';
