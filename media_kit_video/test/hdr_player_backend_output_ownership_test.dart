@@ -17,6 +17,27 @@ import 'package:synchronized/synchronized.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  test('backend creates one session owner and preserves explicit lab owner', () {
+    const configuration = VideoControllerConfiguration();
+    final sessionA = Object();
+    final sessionB = Object();
+    final first =
+        AndroidHdrBackend.withManagedOutputOwner(configuration, sessionA);
+    final second =
+        AndroidHdrBackend.withManagedOutputOwner(configuration, sessionB);
+    expect(configuration.android.lgExperimentOwnerToken, isNull);
+    expect(first.android.lgExperimentOwnerToken, startsWith('mk-owner-'));
+    expect(second.android.lgExperimentOwnerToken,
+        isNot(first.android.lgExperimentOwnerToken));
+
+    const explicit = VideoControllerConfiguration(
+      android: AndroidVideoOptions(lgExperimentOwnerToken: 'lab-token'),
+    );
+    final preserved = AndroidHdrBackend.withManagedOutputOwner(explicit, Object());
+    expect(identical(preserved, explicit), isTrue);
+    expect(preserved.android.lgExperimentOwnerToken, 'lab-token');
+  });
+
   test('captures hwdec before controller creation and restores its baseline',
       () async {
     final result = await _exercise(initial: 'no');
