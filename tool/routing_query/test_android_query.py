@@ -14,10 +14,10 @@ STUBS = {
 'android/content/Context.java': '''package android.content; public class Context { public static final String DISPLAY_SERVICE="display"; public android.hardware.display.DisplayManager manager=new android.hardware.display.DisplayManager(); public Object getSystemService(String s){return manager;} }''',
 'android/hardware/display/DisplayManager.java': '''package android.hardware.display; public class DisplayManager {public java.util.Map<Integer,android.view.Display> displays=new java.util.HashMap<>(); public android.view.Display getDisplay(int id){return displays.get(id);} }''',
 'android/view/Display.java': '''package android.view; public class Display {
- public static final int DEFAULT_DISPLAY=0; public int id; public boolean valid=true; public int[] types={2};
+ public static final int DEFAULT_DISPLAY=0; public int id; public boolean valid=true; public int[] types={2}; public float maxLuminance=600f;
  public Display(int id){this.id=id;} public boolean isValid(){return valid;} public int getDisplayId(){return id;} public float getRefreshRate(){return 60;}
  public class Mode { public int getModeId(){return 1;} public int[] getSupportedHdrTypes(){return types;} }
- public Mode getMode(){return new Mode();} public class HdrCapabilities {public int[] getSupportedHdrTypes(){return types;}} public HdrCapabilities getHdrCapabilities(){return new HdrCapabilities();} }''',
+ public Mode getMode(){return new Mode();} public class HdrCapabilities {public int[] getSupportedHdrTypes(){return types;} public float getDesiredMaxLuminance(){return maxLuminance;}} public HdrCapabilities getHdrCapabilities(){return new HdrCapabilities();} }''',
 'android/media/MediaFormat.java': '''package android.media; public class MediaFormat {
  public static final String KEY_MIME="mime",KEY_WIDTH="width",KEY_HEIGHT="height",KEY_PROFILE="profile";
  public java.util.Map<String,Object> values=new java.util.HashMap<>(); public void setString(String k,String v){values.put(k,v);} public void setInteger(String k,int v){values.put(k,v);} }''',
@@ -78,6 +78,11 @@ public class QueryTest {
  check(VideoRouteCapabilities.levelSupports("video/avc",2,10,false)==1,"AVC1b above1");
  check(VideoRouteCapabilities.levelSupports("video/avc",2,11,false)==0,"AVC1b below1.1");
  q=query(c,external,target("applicationView"),s);check(Integer.valueOf(7).equals(((Map)q.get("display")).get("displayId")),"application not default");
+ check(Double.valueOf(600.0).equals(((Map)q.get("display")).get("hdrMaxLuminance")),"reported HDR panel peak");
+ external.maxLuminance=Float.NaN;q=query(c,external,target("applicationView"),s);check(!((Map)q.get("display")).containsKey("hdrMaxLuminance"),"reject NaN HDR peak");
+ external.maxLuminance=79f;q=query(c,external,target("applicationView"),s);check(!((Map)q.get("display")).containsKey("hdrMaxLuminance"),"reject SDR-class HDR peak");
+ external.maxLuminance=10001f;q=query(c,external,target("applicationView"),s);check(!((Map)q.get("display")).containsKey("hdrMaxLuminance"),"reject >PQ-scale HDR peak");
+ external.maxLuminance=600f;
  q=query(c,external,target("defaultDisplay"),s);check(Integer.valueOf(0).equals(((Map)q.get("display")).get("displayId")),"explicit default");
  Map<String,Object>t=target("nativeDisplay");t.put("platform","android");t.put("displayId",99);q=query(c,external,t,s);check("unresolved".equals(((Map)q.get("display")).get("status")),"missing display no fallback");
  t.put("displayId",7);q=query(c,external,t,s);check(Integer.valueOf(7).equals(((Map)q.get("display")).get("displayId")),"explicit external");
@@ -87,6 +92,7 @@ public class QueryTest {
  MediaCodecList.fail=true;q=query(c,external,null,s);check(Boolean.FALSE.equals(match(q,0).get("censusComplete")),"query failure not empty success");MediaCodecList.fail=false;
  MediaCodecList.calls=0;query(c,external,null,s,source("avc1.640028",1920,1080,30));check(MediaCodecList.calls==1,"batch scans once");
  android.os.Build.VERSION.SDK_INT=21;support(query(c,external,null,s),"supported");check("unknown".equals(decoder(query(c,external,null,s),0).get("kind")),"pre29 hardware unknown");
+ check(!((Map)query(c,external,target("applicationView"),s).get("display")).containsKey("hdrMaxLuminance"),"pre24 omits panel peak");
  android.os.Build.VERSION.SDK_INT=34;info.software=true;check("software".equals(decoder(query(c,external,null,s),0).get("kind")),"software distinct");info.software=false;
  info.caps.requires=true;support(query(c,external,null,s),"unsupported");info.caps.requires=false;
  info.name="vendor.dv";info.mime="video/dolby-vision";info.caps.profileLevels=new MediaCodecInfo.CodecProfileLevel[]{new MediaCodecInfo.CodecProfileLevel(32,256)};
