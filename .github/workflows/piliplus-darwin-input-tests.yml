@@ -1,7 +1,7 @@
 name: Darwin SDK input integrity (not native freshness)
 on:
   push:
-    branches: ['compat/piliplus-zero-change-20261018']
+    branches: ['dev']
     paths: ['tool/piliplus_compat/darwin_bundle_inputs.py', 'tool/piliplus_compat/darwin_header_inputs.py', '.github/workflows/piliplus-darwin-input-tests.yml']
   workflow_dispatch:
 permissions:

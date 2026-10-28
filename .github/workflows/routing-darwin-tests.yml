@@ -2,7 +2,7 @@ name: Routing Darwin viewport checks
 
 on:
   push:
-    branches: [routing/MK-ROUTING-20261011]
+    branches: [dev]
   pull_request:
     branches: [main]
   workflow_dispatch:

@@ -1,9 +1,7 @@
 name: Compatibility source snapshots
 
 on:
-  push:
-    branches: ['compat/piliplus-zero-change-20261018']
-    paths: ['.github/workflows/piliplus-source-snapshot.yml']
+  # Manual-only: the referenced Goodwu/PiliPlus feature/ohos branch is absent.
   workflow_dispatch:
 
 permissions:

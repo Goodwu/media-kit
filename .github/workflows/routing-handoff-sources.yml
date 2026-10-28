@@ -1,10 +1,7 @@
 name: Routing handoff source snapshots
 
 on:
-  push:
-    branches: [routing/MK-ROUTING-20261011]
-    paths:
-      - '.github/workflows/routing-handoff-sources.yml'
+  # Manual-only historical DEVICE handoff; cross-repo routing ref remains pinned.
   workflow_dispatch:
 
 permissions:

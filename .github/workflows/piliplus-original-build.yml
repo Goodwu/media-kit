@@ -2,7 +2,7 @@ name: Original PiliPlus builds (T1, no source patches)
 
 on:
   push:
-    branches: ['compat/piliplus-zero-change-20261018']
+    branches: ['dev']
     paths:
       - 'tool/piliplus_compat/**'
       - 'media_kit/**'
