@@ -171,6 +171,18 @@ paths. Android consumes its JSON output. Apple calls it from the existing
 Makefiles with `--stage-frameworks OUTPUT` or `--stage-headers OUTPUT`. Generated
 output must be separate from the immutable input package.
 
+### Android dev build selection
+
+A Gradle build with `-Pdev` fails **before downloading pinned release JARs** unless
+one of two explicit inputs exists: an authenticated `MEDIA_KIT_NATIVE_PACKAGE_*`
+package, or `mediaKitLocalArm64Jar` built by the local-source wrapper.
+The two inputs remain mutually exclusive, including under `-Pdev`.
+Normal builds without `-Pdev` and without explicit package inputs retain the
+existing pinned release download behavior. A verified package authenticates its
+bytes and declared provenance; it does **not** by itself prove that an
+`upstream-binary` package was built from the application's latest sources.
+Check its `identity` and the final App build receipt when freshness is required.
+
 The integration currently covers the video packages used by PiliPlus. It is
 intended for the media-kit source checkout; separately published pub packages
 do not carry the monorepo verifier. On Linux, generic package inputs cannot be

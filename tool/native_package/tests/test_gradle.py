@@ -74,12 +74,53 @@ class GradleConfiguration(unittest.TestCase):
             for abi in abis:
                 self.assertEqual(hashlib.sha256((output / f"native-{abi}.jar").read_bytes()).digest(),
                                  hashlib.sha256((root / jars[abi]).read_bytes()).digest())
+            # The dev variant may consume an explicitly authenticated package.
+            # Merely setting -Pdev must not force a fallback to a release JAR.
+            dev_command = command + ["-Pdev=true"]
+            verified_dev = subprocess.run(dev_command, cwd=project, env=environment, text=True,
+                                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=120)
+            self.assertEqual(verified_dev.returncode, 0, verified_dev.stdout)
+            self.assertEqual({path.name for path in output.iterdir()},
+                             {f"native-{abi}.jar" for abi in abis})
             environment["MEDIA_KIT_NATIVE_PACKAGE_MANIFEST_SHA256"] = "0" * 64
             invalid = subprocess.run(command, cwd=project, env=environment, text=True,
                                      stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=120)
             self.assertNotEqual(invalid.returncode, 0, invalid.stdout)
             self.assertIn("Explicit Android native package verification failed (exit 1)", invalid.stdout)
             self.assertIn("Native package manifest SHA256 mismatch", invalid.stdout)
+            self.assertEqual(list(output.iterdir()), [])
+
+            # No explicit native input must fail closed before any release download.
+            unconfigured = {key: value for key, value in environment.items()
+                            if key not in {"MEDIA_KIT_NATIVE_PACKAGE_ROOT",
+                                           "MEDIA_KIT_NATIVE_PACKAGE_MANIFEST",
+                                           "MEDIA_KIT_NATIVE_PACKAGE_MANIFEST_SHA256"}}
+            missing_dev = subprocess.run(dev_command, cwd=project, env=unconfigured, text=True,
+                                         stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=120)
+            self.assertNotEqual(missing_dev.returncode, 0, missing_dev.stdout)
+            self.assertIn("dev builds require a verified native package or mediaKitLocalArm64Jar",
+                          missing_dev.stdout)
+            self.assertEqual(list(output.iterdir()), [])
+
+            # Preserve compat's current-source local-JAR path for arm64 test APKs.
+            local_jar = root / jars["arm64-v8a"]
+            local_command = dev_command + ["-PmediaKitArm64Only=true",
+                                           f"-PmediaKitLocalArm64Jar={local_jar}"]
+            local_dev = subprocess.run(local_command, cwd=project, env=unconfigured, text=True,
+                                       stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=120)
+            self.assertEqual(local_dev.returncode, 0, local_dev.stdout)
+            self.assertEqual({path.name for path in output.iterdir()}, {"local-arm64-v8a.jar"})
+
+            # CI's strict mutual exclusion still applies in dev builds.
+            conflict = subprocess.run(local_command, cwd=project, env={
+                **unconfigured,
+                "MEDIA_KIT_NATIVE_PACKAGE_ROOT": str(root),
+                "MEDIA_KIT_NATIVE_PACKAGE_MANIFEST": created["manifest"],
+                "MEDIA_KIT_NATIVE_PACKAGE_MANIFEST_SHA256": created["manifest_sha256"],
+            }, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=120)
+            self.assertNotEqual(conflict.returncode, 0, conflict.stdout)
+            self.assertIn("Do not combine a verified native package with mediaKitLocalArm64Jar",
+                          conflict.stdout)
             self.assertEqual(list(output.iterdir()), [])
 
 
