@@ -1,9 +1,12 @@
-name: CI-compat integration regression
+name: Development native package / HDR regression
 
 on:
+  push:
+    branches:
+      - dev
   pull_request:
     branches:
-      - ci/verified-native-packages-20261023
+      - dev
 
 permissions:
   contents: read

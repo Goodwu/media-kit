@@ -1,7 +1,7 @@
 name: Managed output architecture checks
 on:
   push:
-    branches: [routing/MK-ROUTING-20261011]
+    branches: [dev]
   pull_request:
   workflow_dispatch:
 permissions:
