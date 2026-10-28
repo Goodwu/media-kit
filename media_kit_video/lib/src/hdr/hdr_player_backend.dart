@@ -66,6 +66,25 @@ class AndroidHdrBackend
         HdrOpenBackend<HdrOpenPlan>,
         HdrContainerSourceBackend,
         HdrContainerSourcePromotionBackend {
+  /// Prepare the same per-session owner identity for both the VideoController
+  /// and the legacy YUV-window adapter. Keep explicit lab identities unchanged.
+  /// This is an Android backend detail, not an output-session responsibility.
+  static VideoControllerConfiguration withManagedOutputOwner(
+    VideoControllerConfiguration configuration,
+    Object sessionOwner,
+  ) {
+    if (configuration.android.lgExperimentOwnerToken != null) {
+      return configuration;
+    }
+    return configuration.copyWith(
+      android: configuration.android.copyWith(
+        lgExperimentOwnerToken: 'mk-owner-'
+            '${DateTime.now().microsecondsSinceEpoch.toRadixString(36)}-'
+            '${identityHashCode(sessionOwner).toRadixString(36)}',
+      ),
+    );
+  }
+
   AndroidHdrBackend({
     required this.player,
     required this.outputSlot,

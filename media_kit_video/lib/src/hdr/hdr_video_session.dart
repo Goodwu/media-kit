@@ -209,20 +209,13 @@ class HdrVideoSession {
     _isAndroid = isAndroid ?? Platform.isAndroid;
     _capabilitiesProvider = capabilitiesProvider;
 
-    // W1 owner lifetime: ordinary production callers get a session-generated
-    // owner token so the YUV-carrier arm's managed admission binds to THIS
-    // session's platform-view registration. The app-supplied experiment
-    // token keeps precedence (lab compatibility). The token authorizes
-    // nothing by itself — the managed ledger registration only makes the
-    // view's surfaces admit-able, and every arm still passes the route
-    // admission before anything is armed.
-    if (_isAndroid && configuration.android.lgExperimentOwnerToken == null) {
-      _configuration = configuration.copyWith(
-        android: configuration.android.copyWith(
-          lgExperimentOwnerToken: 'mk-owner-'
-              '${DateTime.now().microsecondsSinceEpoch.toRadixString(36)}-'
-              '${identityHashCode(this).toRadixString(36)}',
-        ),
+    // Android output ownership is prepared by the backend's legacy adapter,
+    // while the Session only retains the shared controller configuration.
+    // A caller-provided owner remains authoritative.
+    if (_isAndroid) {
+      _configuration = AndroidHdrBackend.withManagedOutputOwner(
+        configuration,
+        this,
       );
     }
 

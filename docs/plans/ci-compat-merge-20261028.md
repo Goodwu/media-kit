@@ -31,3 +31,7 @@
 本次没有重建、更新或验证原生 mpv 二进制。新 Dart 片源色彩诊断涉及 mpv 的 `current-tracks/video/demux-color-*` getter（参见 `8b548a2a` 中的原生依赖 `cd2995e1`）；正式包若仍使用旧 JAR，不能将“有 Dart API”宣称为“有片源码元数据”。
 
 此合并只建立跨分支共享源码基线；不自动变更 `main`、不声称多平台 CI 或设备验证已经通过。
+
+## PR 首轮架构门禁修复
+
+`tool/managed_output/test_layering.py` 的原架构门禁在首轮 PR 报出两个失败：一个是 `HdrYuvWindowArm` 构造赋值跨行导致的严格文本断言误报；另一个是 `HdrVideoSession` 持有 `lgExperimentOwnerToken` 的真实分层违规。处理方式是由 `AndroidHdrBackend.withManagedOutputOwner` 生成并保留 owner token 配置（继承原有显式 token 优先和 session 标识规则），Session 只读取返回的完整控制器配置，供 backend 与 VideoController 一致使用；边界测试改为同语义跨行正则并验证后端负责 owner。补充 Dart 测试验证唯一性、原始配置不变和显式 token 保留。不得通过删除架构禁令来掩盖真实问题。

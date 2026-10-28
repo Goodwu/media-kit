@@ -29,7 +29,8 @@ class LayeringBoundaryTests(unittest.TestCase):
     def test_backend_owns_legacy_adapter_during_migration(self):
         source = (HDR / 'hdr_player_backend.dart').read_text()
         self.assertIn('HdrOutputResources<HdrOpenPlan>? get outputResources', source)
-        self.assertIn('this.yuvWindowArm = yuvWindowArm ?? HdrYuvWindowArm(', source)
+        self.assertRegex(source, r'this\.yuvWindowArm\s*=\s*yuvWindowArm\s*\?\?\s*HdrYuvWindowArm\(')
+        self.assertIn('static VideoControllerConfiguration withManagedOutputOwner(', source)
         legacy = (HDR / 'hdr_yuv_window_arm.dart').read_text()
         self.assertIn('implements HdrOutputResources<HdrOpenPlan>', legacy)
 
