@@ -2,7 +2,7 @@ name: PiliPlus compatibility tools (T0 only)
 
 on:
   push:
-    branches: ['compat/piliplus-zero-change-20261018']
+    branches: ['dev']
     paths:
       - 'tool/piliplus_compat/**'
       - '.github/workflows/piliplus-compat-tools.yml'

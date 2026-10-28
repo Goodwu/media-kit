@@ -1,16 +1,7 @@
 name: OHOS complete PiliPlus media integration
 
 on:
-  push:
-    branches: ['compat/piliplus-zero-change-20261018']
-    paths:
-      - '.github/workflows/piliplus-ohos-adaptation.yml'
-      - 'media_kit/**'
-      - 'media_kit_video/**'
-      - 'tool/ohos/**'
-      - 'libs/ohos/**'
-      - 'libs/universal/**'
-      - 'tool/piliplus_compat/direction_b/**'
+  # Manual-only: Goodwu/PiliPlus feature/ohos is currently absent.
   workflow_dispatch:
 
 permissions:

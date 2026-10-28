@@ -1,14 +1,14 @@
 name: Publish reviewed compatibility fixes
 on:
   push:
-    branches: ['compat/piliplus-zero-change-20261018']
+    branches: ['dev']
     paths: ['tool/piliplus_compat/reviewed_edits.json', '.github/workflows/piliplus-reviewed-edits.yml']
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
   publish:
-    if: github.repository == 'Goodwu/media-kit' && github.ref == 'refs/heads/compat/piliplus-zero-change-20261018'
+    if: github.repository == 'Goodwu/media-kit' && github.ref == 'refs/heads/dev'
     permissions:
       contents: write
     runs-on: ubuntu-latest

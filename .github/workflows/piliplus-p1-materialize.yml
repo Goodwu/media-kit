@@ -1,14 +1,14 @@
 name: Materialize reviewed P1 SDK sources
 on:
   push:
-    branches: ['compat/piliplus-zero-change-20261018']
+    branches: ['dev']
     paths: ['tool/piliplus_compat/materialize_p1.py', '.github/workflows/piliplus-p1-materialize.yml']
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
   materialize:
-    if: github.repository == 'Goodwu/media-kit' && github.ref == 'refs/heads/compat/piliplus-zero-change-20261018'
+    if: github.repository == 'Goodwu/media-kit' && github.ref == 'refs/heads/dev'
     permissions:
       contents: write
     runs-on: ubuntu-latest

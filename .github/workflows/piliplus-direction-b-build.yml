@@ -2,7 +2,7 @@ name: Direction B PiliPlus builds (T1B player integration)
 
 on:
   push:
-    branches: ['compat/piliplus-zero-change-20261018']
+    branches: ['dev']
     paths:
       - 'tool/piliplus_compat/**'
       - 'media_kit/**'

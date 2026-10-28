@@ -3,7 +3,7 @@ name: Routing source checks
 on:
   push:
     branches:
-      - routing/MK-ROUTING-20261011
+      - dev
   pull_request:
     branches: [main]
   workflow_dispatch:

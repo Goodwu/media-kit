@@ -2,7 +2,7 @@ name: PiliPlus macOS view contracts
 
 on:
   push:
-    branches: ['compat/piliplus-zero-change-20261018']
+    branches: ['dev']
     paths: ['media_kit/**', 'media_kit_video/**', '.github/workflows/piliplus-macos-view-tests.yml']
   workflow_dispatch:
 

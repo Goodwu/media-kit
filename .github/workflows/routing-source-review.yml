@@ -1,9 +1,7 @@
 name: Routing tracked source snapshot (not functional validation)
 
 on:
-  pull_request:
-  push:
-    branches: [routing/MK-ROUTING-20261011]
+  # Manual-only historical PiliPlusX routing snapshot; not a dev CI gate.
   workflow_dispatch:
 
 permissions:

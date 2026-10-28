@@ -2,7 +2,7 @@ name: OHOS Flutter direction B Dart contracts
 
 on:
   push:
-    branches: ['compat/piliplus-zero-change-20261018']
+    branches: ['dev']
     paths:
       - '.github/workflows/ohos-dart-contracts.yml'
       - 'media_kit_video/lib/**'
