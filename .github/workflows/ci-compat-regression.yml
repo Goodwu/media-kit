@@ -1,0 +1,46 @@
+name: CI-compat integration regression
+
+on:
+  pull_request:
+    branches:
+      - ci/verified-native-packages-20261023
+
+permissions:
+  contents: read
+
+jobs:
+  native-package-and-android-tools:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.14'
+      - name: Native package contract tests (real Gradle configuration)
+        run: python3 -m unittest discover -s tool/native_package/tests -v
+      - name: Android source-build and APK identity unit tests
+        run: python3 -m unittest tool.test_build_android_native tool.test_verify_android_test_apk -v
+
+  hdr-video-dart-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.2'
+          cache: true
+      - name: Resolve video package dependencies
+        working-directory: media_kit_video
+        run: flutter pub get
+      - name: HDR routing, ownership, diagnostics and capability regression
+        working-directory: media_kit_video
+        run: |
+          flutter test \
+            test/hdr_route_planner_test.dart \
+            test/hdr_player_backend_output_ownership_test.dart \
+            test/hdr_video_session_test.dart \
+            test/playback_color_diagnostics_test.dart \
+            test/video_route_capabilities_test.dart
