@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /** Read-only source/target capabilities; never creates MediaCodec or output. */
@@ -113,9 +114,43 @@ final class VideoRouteCapabilities {
             }
             result.put("status", "resolved"); result.put("displayId", display.getDisplayId());
             result.put("modeId", modeId); result.put("hdrTypes", hdr);
+            Double luminance = hdrMaxLuminance(display);
+            if (luminance != null) result.put("hdrMaxLuminance", luminance);
             result.put("revision", display.getDisplayId() + ":" + modeId + ":" + display.getRefreshRate() + ":" + hdr);
         } catch (RuntimeException | LinkageError e) { result.clear(); result.put("status", "queryUnavailable"); }
         return result;
+    }
+
+    /**
+     * Panel peak luminance in nits from the HDR capability report, or null
+     * when it must NOT be consumed as a rendering target peak.
+     *
+     * The Android EGL swapchain never carries display metadata, so mpv's
+     * target-colorspace-hint=auto cannot learn the panel peak and libplacebo
+     * maps an unknown-peak PQ target at its 10000-nit fallback; this value is
+     * the planner's only honest source for target-peak. The accessor is
+     * {@link Display.HdrCapabilities#getDesiredMaxLuminance()} — the PUBLIC
+     * SDK name, added in API 24, returning the same mMaxLuminance field as
+     * the hidden {@code getHdrMaxLuminance()} alias, which is not in the
+     * public android.jar and would not compile.
+     *
+     * Validity window 80-10000 nits. Lower bound: below it the report is
+     * not a usable HDR peak (stub, INVALID_LUMINANCE or SDR-class values).
+     * Upper bound: PQ full scale — the nits semantic ceiling, NOT a
+     * conservatism cap: current flagship panels report peaks beyond 4000,
+     * so only values above the PQ ceiling (or non-finite) are treated as
+     * untrustworthy. Pre-API-24, missing-report and
+     * out-of-window values are ABSENT (key omitted), never clamped: a wrong
+     * target-peak cannot be corrected downstream, so an unusable report must
+     * be indistinguishable from "not reported" — the planner then applies
+     * its own conservative fallback.
+     */
+    private static Double hdrMaxLuminance(Display display) {
+        if (Build.VERSION.SDK_INT < 24) return null;
+        Display.HdrCapabilities caps = display.getHdrCapabilities();
+        if (caps == null) return null;
+        float lum = caps.getDesiredMaxLuminance();
+        return (Float.isFinite(lum) && lum >= 80f && lum <= 10000f) ? (double) lum : null;
     }
 
     private static Map<String, Object> probe(MediaCodecInfo info, VideoSourceSpec spec, boolean nativeDv) {
@@ -134,13 +169,42 @@ final class VideoRouteCapabilities {
 
     private static String decoderKind(MediaCodecInfo info) {
         if (Build.VERSION.SDK_INT >= 29) {
-            if (info.isSoftwareOnly()) return "software";
-            if (info.isHardwareAccelerated()) return "hardware";
+            try {
+                if (info.isSoftwareOnly()) return "software";
+                if (info.isHardwareAccelerated()) return "hardware";
+            } catch (RuntimeException | LinkageError e) {
+                return "unknown";
+            }
+            // Neither flag: the OMX path never sets the software flag, so a
+            // vendor OMX component declared "software-codec" in its XML also
+            // lands here. Absence of the hardware flag is meaningful on 29+
+            // and must not be overridden by naming.
+            return isSoftwareDecoderName(info.getName()) ? "software" : "unknown";
         }
-        String name = info.getName();
-        if (name.startsWith("OMX.google.") || name.startsWith("c2.android.") ||
-                name.startsWith("OMX.ffmpeg.") || name.equals("OMX.qcom.video.decoder.hevcswvdec")) return "software";
-        return "unknown"; // Pre-29 vendor naming is not authoritative hardware evidence.
+        // Pre-29 has no flags at all. The 29+ flag itself is derived from
+        // naming (OmxInfoBuilder/Codec2InfoBuilder: vendor OMX./c2. component
+        // without a software declaration), so mirror that derivation here:
+        // blocklist first, vendor naming then. Same scheme as HdrCapabilities.
+        String name = info.getName().toLowerCase(Locale.ROOT);
+        if (isSoftwareDecoderName(name)) return "software";
+        if (name.startsWith("omx.") || name.startsWith("c2.") ||
+                name.startsWith("arc.")) return "hardware";
+        return "unknown";
+    }
+
+    /**
+     * Software decoder naming schemes validated across the device ecosystem:
+     * platform defaults, vendor software components and ffmpeg ports.
+     */
+    private static boolean isSoftwareDecoderName(String name) {
+        String lower = name.toLowerCase(Locale.ROOT);
+        return lower.startsWith("omx.google.") || lower.startsWith("c2.android.") ||
+                lower.startsWith("c2.google.") || lower.startsWith("omx.sprd.soft.") ||
+                lower.startsWith("omx.avcodec.") || lower.startsWith("omx.pv") ||
+                lower.contains("ffmpeg") || lower.contains("sw_vd") ||
+                lower.endsWith("sw") || lower.endsWith("sw.dec") ||
+                (lower.startsWith("omx.sec.") && lower.contains(".sw.")) ||
+                lower.equals("omx.qcom.video.decoder.hevcswvdec");
     }
 
     private static String evaluate(MediaCodecInfo.CodecCapabilities caps, VideoSourceSpec s, String mime, boolean nativeDv) {

@@ -21,6 +21,7 @@ class VideoDisplayCapabilities {
     this.modeId,
     this.revision,
     Iterable<int>? hdrTypes,
+    this.hdrMaxLuminance,
   }) : hdrTypes = hdrTypes == null ? null : Set<int>.unmodifiable(hdrTypes);
   final String status;
   final String? platform;
@@ -31,6 +32,13 @@ class VideoDisplayCapabilities {
   /// Android HDR type IDs in the Android adapter; null means not reported.
   /// Other adapters must provide normalized color support before exposing it.
   final Set<int>? hdrTypes;
+
+  /// The panel's reported HDR peak luminance in nits
+  /// (`Display.HdrCapabilities.getDesiredMaxLuminance()`, the public API-24
+  /// accessor of the peak field), already validated by the adapter (finite,
+  /// 80-10000 = PQ full scale); null means not reported or outside the
+  /// validity window — never clamped to a guess.
+  final double? hdrMaxLuminance;
   bool get resolved => status == 'resolved';
 }
 
@@ -141,6 +149,12 @@ class VideoRouteCapabilities {
         (hdrTypes is! List || hdrTypes.any((v) => v is! int))) {
       throw const FormatException('Invalid HDR types');
     }
+    // num tolerance: the platform codec delivers a double, but an adapter
+    // reporting an integer nits value must parse identically; anything else
+    // (missing, malformed) is "not reported", never a guess.
+    final Object? rawLuminance = display['hdrMaxLuminance'];
+    final double? hdrMaxLuminance =
+        rawLuminance is num ? rawLuminance.toDouble() : null;
     final results = <String, VideoSourceSupport>{};
     for (final item in raw['sources'] as List) {
       if (item is! Map ||
@@ -190,6 +204,9 @@ class VideoRouteCapabilities {
     hdrMap['displayHdrTypes'] = display['status'] == 'resolved'
         ? hdrTypes
         : null;
+    hdrMap['displayHdrMaxLuminance'] = display['status'] == 'resolved'
+        ? hdrMaxLuminance
+        : null;
     final result = VideoRouteCapabilities._(
       platform: raw['platform'] as String,
       display: VideoDisplayCapabilities(
@@ -199,6 +216,7 @@ class VideoRouteCapabilities {
         modeId: display['modeId'] as int?,
         revision: display['revision'] as String?,
         hdrTypes: (hdrTypes as List?)?.cast<int>(),
+        hdrMaxLuminance: hdrMaxLuminance,
       ),
       hdr: HdrCapabilities.parseSnapshot(hdrMap),
       sources: results,

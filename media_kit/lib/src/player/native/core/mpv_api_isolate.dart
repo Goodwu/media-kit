@@ -42,12 +42,10 @@ typedef MpvMediakitGetPropertyStringsDart = int Function(
   Pointer<generated.mpv_node>,
 );
 
-const bool _startupTrace = bool.fromEnvironment('MEDIA_KIT_STARTUP_TRACE');
 const bool _nativePropertyBatch = bool.fromEnvironment(
   'MEDIA_KIT_NATIVE_PROPERTY_BATCH',
   defaultValue: true,
 );
-bool _loggedNativePropertyBatch = false;
 
 /// Performs one [MpvApiOp] against [ctx] with decoded [args].
 ///
@@ -124,10 +122,6 @@ bool _loggedNativePropertyBatch = false;
                 }
               }
               value = values;
-              if (_startupTrace && !_loggedNativePropertyBatch) {
-                _loggedNativePropertyBatch = true;
-                print('MK_STARTUP nativePropertyBatch=true');
-              }
             }
           } finally {
             mpvBindings.mpv_free_node_contents(result);

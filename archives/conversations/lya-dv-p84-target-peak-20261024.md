@@ -1,0 +1,11 @@
+# Android 面板 HDR 峰值采集与 target-peak 统一注入（lya-dv-p84-target-peak-20261024）
+
+## Current State（2026-10-24 深夜已验收，用户授权提交归档）
+
+- **用户面板观感验收通过**：LYA（Mate 20 Pro/API29，dvP84 reshape）与 LG（G6/API24，baseLayerConvert/YUV 契约）过曝消失、暗部灰阶恢复。改动随本提交进入仓（不推送）。
+- **根因（代码级闭合）**：Android EGL swapchain `target_csp` 返回空（`vo_gpu_next.c` + `opengl/context.c:307`），gpu-next 的 `target-colorspace-hint=auto` 失效；libplacebo 把未知峰值 PQ 目标按 10000 nits 兜底（`colorspace.c:342`），`pl_color_space_infer_map` 的「HLG 源峰值跟随目标」规则（`colorspace.c:971`，经 `renderer.c:3327` pl_frames_infer 生效）把 HLG（语义 1000 nits，`colorspace.h:310`）按约 10× 亮度解读后编 PQ → 高光裁剪过曝、暗部被抬亮发灰无层次。旧 YUV 契约硬编码 `target-peak=1000` 只解决拉伸（LG 点亮轮遗留「亮部残余过曝」与此一致）。
+- **实现**：`VideoRouteCapabilities.java` describeDisplay 经公共 API `getDesiredMaxLuminance()`（hidden `getHdrMaxLuminance()` 不在公共 SDK，编译不过；两 API 返回同一字段）采集 `hdrMaxLuminance`，有效窗 `Float.isFinite && 80–10000`（上限=PQ 满刻度，用户反馈原 4000 上限过保守后放宽），无效不上报；Dart `VideoDisplayCapabilities`/`HdrCapabilities` 透传 `displayHdrMaxLuminance`（withSourceSupport 不丢值）；`HdrRoute.targetPeak` 新字段（==/hashCode/toString 纳入，candidateId 不含——峰值不影响路由选择）；realizer `_displayTargetPeak` 对 `_metadataReshape`/`_baseLayerConvert` 注入（round nits，缺省兜底契约常数 '1000'），其余路线不设；backend 三分支（YUV 契约块改读 `route.targetPeak ?? 常数`、texture、platformView+gpu-next）条件写入，_setOwned 捕获/恢复语义不变（open coordinator 每次 prepare 前 stop+reset 已核实无残留）；decision 诊断行加 `peak=`。
+- **验证**：flutter analyze 与 stash 基线逐条一致零新增；目标批 212 通过、全量 1243 过（唯一失败 `hdr_operation_diagnostics_test` 经 HEAD worktree 复证为既有）；V1 独立审核无 P0/P1/P2（P3 六项备注：TOCTOU 微窗、deprecated 调用 fail-closed、Dart 侧无二次校验等，均防御性）。端到端构建经 `tool/build-android-test.sh --tag lya-dv-peak-fix-20261024`（原生库全量重建，VERIFIED），APK SHA-256 `6e169fc42ee1807fa9ac32db6fc95fb61d5371124d612d7c1d7d525b1aab04ba`。
+- **实机证据**：两台 decision plan/applied 均 `peak=500`（两机 `getDesiredMaxLuminance` 实报 500 nits）、路线 verified 零回退、播放推进、零 FATAL/ANR。LG 取证须 `adb exec-out logcat -d`（交互 shell 管道为空的既有环境特性）；LG readback=none 为 API24 路线既定契约表现。证据 `/tmp/lya-dv-pq-overexp/`（复现）、`/tmp/lya-dv-peak-fix-20261024/`（构建/两机 HdrDiag/截屏）。
+- **任务侧记录**：PiliPlus 仓 TASKS.md + `archives/conversations/lya-dv-p84-hlg-to-pq-overexposure-20261024.md`。
+- **影响面备注**：该修复覆盖所有 reshape→gpu PQ 未设 target-peak 的 Android 设备（含 marble 无 bridge 回退形态）；能力缺失设备兜底 1000 行为与旧 YUV 契约一致。

@@ -381,7 +381,7 @@ void main() {
       const expectedKeys = <String>[
         'phase', 'gen', 'origin', 'source', 'class', 'selected', 'maturity',
         'presentation', 'confidence', 'vo', 'hwdec', 'output', 'topology',
-        'surface', 'stripRpu', 'hwdecCurrent', 'requested', 'path',
+        'surface', 'stripRpu', 'peak', 'hwdecCurrent', 'requested', 'path',
         'readback', 'verified', 'degrade', 'candidates',
       ];
       expect(keysOf(decisions[0]), expectedKeys);

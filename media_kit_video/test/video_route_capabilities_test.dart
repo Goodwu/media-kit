@@ -104,6 +104,61 @@ void main() {
     expect(caps.display.resolved, isFalse);
   });
 
+  test('resolved display hdrMaxLuminance parses into display and hdr values',
+      () async {
+    messenger.setMockMethodCallHandler(channel, (_) async {
+      final raw = response([source]);
+      (raw['display'] as Map)['hdrMaxLuminance'] = 560.0;
+      return raw;
+    });
+    final caps = await VideoRouteCapabilities.query(sources: [source]);
+    expect(caps.display.resolved, isTrue);
+    expect(caps.display.hdrMaxLuminance, 560.0);
+    expect(caps.hdr.displayHdrMaxLuminance, 560.0);
+  });
+
+  test('hdrMaxLuminance num tolerance and malformed/missing degrade to null',
+      () async {
+    // An adapter reporting an integer nits value parses identically.
+    messenger.setMockMethodCallHandler(channel, (_) async {
+      final raw = response([source]);
+      (raw['display'] as Map)['hdrMaxLuminance'] = 350;
+      return raw;
+    });
+    final caps = await VideoRouteCapabilities.query(sources: [source]);
+    expect(caps.display.hdrMaxLuminance, 350.0);
+    expect(caps.hdr.displayHdrMaxLuminance, 350.0);
+    // Malformed value: not reported, never a guess.
+    messenger.setMockMethodCallHandler(channel, (_) async {
+      final raw = response([source]);
+      (raw['display'] as Map)['hdrMaxLuminance'] = 'bright';
+      return raw;
+    });
+    final malformed = await VideoRouteCapabilities.query(sources: [source]);
+    expect(malformed.display.hdrMaxLuminance, isNull);
+    expect(malformed.hdr.displayHdrMaxLuminance, isNull);
+    // Key absent (adapter below the collection floor): not reported.
+    messenger.setMockMethodCallHandler(
+        channel, (_) async => response([source]));
+    final missing = await VideoRouteCapabilities.query(sources: [source]);
+    expect(missing.display.hdrMaxLuminance, isNull);
+    expect(missing.hdr.displayHdrMaxLuminance, isNull);
+  });
+
+  test('non-resolved display never feeds hdrMaxLuminance into hdr', () async {
+    messenger.setMockMethodCallHandler(channel, (_) async {
+      final raw = response([source], displayStatus: 'unresolved');
+      (raw['display'] as Map)['hdrMaxLuminance'] = 560.0;
+      return raw;
+    });
+    final caps = await VideoRouteCapabilities.query(sources: [source]);
+    expect(caps.display.resolved, isFalse);
+    // The display's own field still parses what the adapter reported...
+    expect(caps.display.hdrMaxLuminance, 560.0);
+    // ...but the hdr snapshot is owned by the resolved target only.
+    expect(caps.hdr.displayHdrMaxLuminance, isNull);
+  });
+
   test('changing size, fps, depth, profile, level or bitrate changes identity',
       () {
     final values = [

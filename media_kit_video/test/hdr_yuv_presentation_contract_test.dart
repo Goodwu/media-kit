@@ -116,15 +116,18 @@ void main() {
       expect(result.player.properties['video-output-levels'], 'full');
       expect(result.player.properties['target-trc'], 'pq');
       expect(result.player.properties['target-peak'], '1000');
-      expect(result.player.properties['gamma'], '3.000000');
+      expect(await result.player.getPropertyAsync('gamma'), '0.000000');
+      expect(result.player.writtenProperties, isNot(contains('gamma')));
       expect(result.dataSpaceRequested, 'pq-itu');
       await result.backend.configure(_issuedPlan(_yuvRoute()));
-      expect(result.player.properties['gamma'], '3.000000');
+      expect(await result.player.getPropertyAsync('gamma'), '0.000000');
+      expect(result.player.writtenProperties, isNot(contains('gamma')));
       await result.backend.resetOwnedConfiguration();
       expect(result.player.properties['video-output-levels'], 'auto');
       expect(result.player.properties['target-trc'], 'sdr');
       expect(result.player.properties['target-peak'], 'auto');
-      expect(result.player.properties['gamma'], '0.000000');
+      expect(await result.player.getPropertyAsync('gamma'), '0.000000');
+      expect(result.player.writtenProperties, isNot(contains('gamma')));
     });
 
     test('dataspace observation resets across PQ to SDR and a later PQ',
@@ -179,7 +182,7 @@ void main() {
       expect(result.player.properties['gamma'], '1.25');
     });
 
-    test('gamma lift is limited to HLG base-layer conversion on LG YUV PQ',
+    test('PQ input does not change gamma',
         () async {
       final nonHlg = _issuedPlan(_yuvRoute()).copyWith(
         source: const HdrSourceDescriptor(codec: 'hevc', transfer: 'pq'),
@@ -187,7 +190,7 @@ void main() {
       await _expectNoGamma(nonHlg);
     });
 
-    test('gamma lift requires the applicable LG YUV PQ extension', () async {
+    test('other YUV PQ extensions do not change gamma', () async {
       final plan = _issuedPlan(_yuvRoute()).copyWith(
         capabilities: HdrCapabilities(
           sdkInt: 24,
@@ -209,59 +212,56 @@ void main() {
       await _expectNoGamma(plan);
     });
 
-    test('gamma lift is limited to base-layer conversion', () async {
+    test('other strategies do not change gamma', () async {
       final plan = _issuedPlan(
         _yuvRoute().surrogate(strategy: HdrStrategy.toneMapSdr),
       );
       await _expectNoGamma(plan);
     });
 
-    test('gamma readback rejection fails configuration', () async {
+    test('gamma setter rejection is irrelevant to YUV configuration', () async {
       final result = _harness();
       result.player.rejectedProperties.add('gamma');
       final plan = _issuedPlan(_yuvRoute());
       await result.backend.prepareOutput(plan);
-      await expectLater(
-        result.backend.configure(plan),
-        throwsA(isA<StateError>().having(
-          (error) => error.message,
-          'message',
-          contains('gamma rejected'),
-        )),
-      );
-      result.player.rejectedProperties.remove('gamma');
+      await result.backend.configure(plan);
       await result.backend.resetOwnedConfiguration();
-      expect(result.player.properties['gamma'], '0.000000');
+      expect(await result.player.getPropertyAsync('gamma'), '0.000000');
+      expect(result.player.writtenProperties, isNot(contains('gamma')));
     });
 
-    test('later configuration failure restores the applied gamma', () async {
+    test('configuration failure restores owned output but preserves gamma',
+        () async {
       final result = _harness(dataSpaceSucceeds: false);
+      result.player.properties['gamma'] = '0.000000';
       final plan = _issuedPlan(_yuvRoute());
       await result.backend.prepareOutput(plan);
-      await expectLater(
-        result.backend.configure(plan),
-        throwsA(isA<HdrDataSpaceApplyException>()),
-      );
-      expect(result.player.properties['gamma'], '3.000000');
-      await result.backend.resetOwnedConfiguration();
+      await expectLater(result.backend.configure(plan),
+          throwsA(isA<HdrDataSpaceApplyException>()));
       expect(result.player.properties['gamma'], '0.000000');
+      // A user adjustment after failure is not a backend-owned value.
+      result.player.properties['gamma'] = '1.25';
+      await result.backend.resetOwnedConfiguration();
+      expect(result.player.properties['gamma'], '1.25');
+      expect(result.player.properties['target-peak'], 'auto');
+      expect(result.player.properties['target-trc'], 'sdr');
+      expect(result.player.properties['video-output-levels'], 'auto');
+      expect(result.player.writtenProperties, isNot(contains('gamma')));
     });
 
-    test('gamma is recaptured after reset when a new session is neutral',
-        () async {
+    test('user gamma changed during playback survives owned reset', () async {
       final result = _harness();
       final plan = _issuedPlan(_yuvRoute());
       await result.backend.prepareOutput(plan);
       await result.backend.configure(plan);
+      expect(await result.player.getPropertyAsync('gamma'), '0.000000');
+      result.player.properties['gamma'] = '1.25';
       await result.backend.resetOwnedConfiguration();
-      expect(result.player.properties['gamma'], '0.000000');
-      await result.backend.configure(plan);
-      expect(result.player.properties['gamma'], '3.000000');
-      await result.backend.resetOwnedConfiguration();
-      expect(result.player.properties['gamma'], '0.000000');
+      expect(result.player.properties['gamma'], '1.25');
+      expect(result.player.writtenProperties, isNot(contains('gamma')));
     });
 
-    test('gamma is recaptured after reset when the user changed it', () async {
+    test('new user gamma between YUV sessions remains untouched', () async {
       final result = _harness();
       final plan = _issuedPlan(_yuvRoute());
       await result.backend.prepareOutput(plan);
@@ -272,6 +272,7 @@ void main() {
       expect(result.player.properties['gamma'], '1.25');
       await result.backend.resetOwnedConfiguration();
       expect(result.player.properties['gamma'], '1.25');
+      expect(result.player.writtenProperties, isNot(contains('gamma')));
     });
 
     test('euv17 pq-request route issues the owned quad write', () async {
@@ -289,6 +290,17 @@ void main() {
       await result.backend.resetOwnedConfiguration();
       expect(result.player.properties['video-output-levels'], 'auto');
       expect(result.player.properties['target-trc'], 'sdr');
+      expect(result.player.properties['target-peak'], 'auto');
+    });
+
+    test('YUV block reads the route peak before the contract constant',
+        () async {
+      // The backend applies a route target verbatim; it does not replace
+      // an explicit diagnostic target with the production HLG reference.
+      final result = await _exercise(_yuvRoute().surrogate(targetPeak: '620'));
+      expect(result.player.properties['target-trc'], 'pq');
+      expect(result.player.properties['target-peak'], '620');
+      await result.backend.resetOwnedConfiguration();
       expect(result.player.properties['target-peak'], 'auto');
     });
 
@@ -656,6 +668,7 @@ extension _RouteSurrogate on HdrRoute {
     String? offscreenTransfer = 'pq-full',
     String? targetPrim,
     String? targetTrc,
+    String? targetPeak,
   }) =>
       HdrRoute(
         strategy: strategy ?? this.strategy,
@@ -667,6 +680,7 @@ extension _RouteSurrogate on HdrRoute {
         hwdec: hwdec ?? this.hwdec,
         targetPrim: targetPrim ?? this.targetPrim,
         targetTrc: targetTrc ?? this.targetTrc,
+        targetPeak: targetPeak ?? this.targetPeak,
         surfaceTransfer: surfaceTransfer ?? this.surfaceTransfer,
         offscreenTransfer: offscreenTransfer,
         stripDvRpu: stripDvRpu,
@@ -724,6 +738,8 @@ Future<void> _expectNoGamma(HdrOpenPlan plan) async {
   await result.backend.prepareOutput(plan);
   await result.backend.configure(plan);
   expect(result.player.properties.containsKey('gamma'), isFalse);
+  await result.backend.resetOwnedConfiguration();
+  expect(result.player.writtenProperties, isNot(contains('gamma')));
 }
 
 _Harness _harness({
@@ -839,6 +855,7 @@ class _FakePlayer implements Player {
 
   final Map<String, String> properties;
   final Set<String> rejectedProperties = <String>{};
+  final List<String> writtenProperties = <String>[];
   final Lock _lock = Lock();
   final PlayerStream _stream = PlayerStream(
       Stream.empty(),
@@ -902,6 +919,7 @@ class _FakePlayer implements Player {
   @override
   Future<void> setPropertyStrict(String name, String value,
       {bool waitForInitialization = true}) async {
+    writtenProperties.add(name);
     if (rejectedProperties.contains(name)) return;
     properties[name] = name == 'gamma' && double.tryParse(value) != null
         ? double.parse(value).toStringAsFixed(6)
