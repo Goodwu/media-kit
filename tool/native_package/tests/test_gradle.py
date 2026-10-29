@@ -1,4 +1,5 @@
 """Run the real acquisition block on Gradle without requiring Android's SDK."""
+from contextlib import contextmanager
 import hashlib
 import importlib.util
 import json
@@ -8,7 +9,9 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
+from unittest.mock import Mock
 import zipfile
 
 
@@ -20,11 +23,87 @@ SPEC.loader.exec_module(package)
 GRADLE = os.environ.get("MEDIA_KIT_TEST_GRADLE") or shutil.which("gradle")
 
 
+def cleanup_gradle_temp(temporary, *, windows=None, sleep=time.sleep, attempts=10):
+    """Bounded retry for transient Windows DLL sharing violations.
+
+    Never suppress exhausted cleanup errors: a stuck worker must remain
+    visible as a CI failure rather than silently leak a test fixture.
+    """
+    if windows is None:
+        windows = os.name == "nt"
+    if attempts < 1:
+        raise ValueError("cleanup needs at least one attempt")
+    for retry in range(attempts):
+        try:
+            temporary.cleanup()
+            return
+        except PermissionError:
+            if not windows or retry + 1 == attempts:
+                raise
+            sleep(min((retry + 1) * 0.3, 1.5))
+
+
+def stop_fixture_gradle(gradle, user_home):
+    """Stop only daemons belonging to this test's isolated Gradle home."""
+    result = subprocess.run(
+        [gradle, "--stop", "--gradle-user-home", str(user_home)],
+        cwd=user_home.parent,
+        stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+        text=True, timeout=60,
+    )
+    if result.returncode:
+        raise AssertionError("Unable to stop isolated test Gradle processes:\n" + result.stdout)
+
+
+@contextmanager
+def isolated_gradle_workspace(gradle):
+    temporary = tempfile.TemporaryDirectory(prefix="media kit Gradle ")
+    base = Path(temporary.name)
+    try:
+        yield base
+    finally:
+        stop_error = None
+        try:
+            gradle_home = base / "gradle cache"
+            if gradle_home.is_dir():
+                stop_fixture_gradle(gradle, gradle_home)
+        except (OSError, subprocess.SubprocessError, AssertionError) as error:
+            stop_error = error
+        # Cleanup still runs if Gradle shutdown failed. A persistent sharing
+        # violation is fatal, not a skipped test or ignored cleanup error.
+        cleanup_gradle_temp(temporary)
+        if stop_error is not None:
+            raise stop_error
+
+
+class GradleWorkspaceCleanupTests(unittest.TestCase):
+    def test_transient_windows_dll_lock_is_retried(self):
+        temporary = Mock()
+        temporary.cleanup.side_effect = [PermissionError("locked DLL"), None]
+        delays = []
+        cleanup_gradle_temp(temporary, windows=True, sleep=delays.append, attempts=3)
+        self.assertEqual(temporary.cleanup.call_count, 2)
+        self.assertEqual(delays, [0.3])
+
+    def test_persistent_windows_dll_lock_is_a_failure(self):
+        temporary = Mock()
+        temporary.cleanup.side_effect = PermissionError("locked DLL")
+        with self.assertRaisesRegex(PermissionError, "locked DLL"):
+            cleanup_gradle_temp(temporary, windows=True, sleep=lambda _: None, attempts=3)
+        self.assertEqual(temporary.cleanup.call_count, 3)
+
+    def test_non_windows_cleanup_error_is_not_hidden(self):
+        temporary = Mock()
+        temporary.cleanup.side_effect = PermissionError("unexpected cleanup failure")
+        with self.assertRaisesRegex(PermissionError, "unexpected cleanup failure"):
+            cleanup_gradle_temp(temporary, windows=False, sleep=lambda _: None, attempts=3)
+        temporary.cleanup.assert_called_once()
+
+
 @unittest.skipUnless(GRADLE, "Set MEDIA_KIT_TEST_GRADLE to run the actual Gradle configuration gate")
 class GradleConfiguration(unittest.TestCase):
     def test_verified_package_and_failure_stderr_on_gradle(self):
-        with tempfile.TemporaryDirectory(prefix="media kit Gradle ") as temporary:
-            base = Path(temporary)
+        with isolated_gradle_workspace(GRADLE) as base:
             checkout = base / "media-kit"
             project = checkout / "libs/android/media_kit_libs_android_video/android"
             project.mkdir(parents=True)
@@ -64,7 +143,8 @@ class GradleConfiguration(unittest.TestCase):
                 "MEDIA_KIT_NATIVE_PACKAGE_MANIFEST_SHA256": created["manifest_sha256"],
                 "MEDIA_KIT_NATIVE_PACKAGE_PYTHON": sys.executable,
             })
-            command = [GRADLE, "--offline", "--no-daemon", "--max-workers=1", "--console=plain",
+            command = [GRADLE, "--offline", "--no-daemon", "--no-watch-fs",
+                       "--max-workers=1", "--console=plain",
                        "--gradle-user-home", str(base / "gradle cache"), "help"]
             valid = subprocess.run(command, cwd=project, env=environment, text=True,
                                    stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=120)
