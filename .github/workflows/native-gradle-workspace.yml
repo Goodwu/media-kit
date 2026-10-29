@@ -1,0 +1,39 @@
+name: Native package Gradle workspace regression
+
+on:
+  push:
+    branches: [feature/dv]
+    paths:
+      - 'tool/native_package/tests/test_gradle.py'
+      - 'libs/android/media_kit_libs_android_video/android/build.gradle'
+      - '.github/workflows/native-gradle-workspace.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  gradle-fixture:
+    name: Gradle consumer and cleanup (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-2025]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.14'
+      - name: Verify actual Gradle consumer and workspace cleanup
+        shell: bash
+        run: |
+          set -euo pipefail
+          gradle --version
+          python -m unittest discover -s tool/native_package/tests -v
