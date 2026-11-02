@@ -1,0 +1,70 @@
+Display Root#0
+mBelowAppWindowsContainers#0
+WallpaperWindowToken{10af6e1 token=android.os.Binder@1037115}#0
+1070f05 com.android.systemui.HwImageWallpaper#0
+com.android.systemui.HwImageWallpaper#0
+com.android.server.wm.DisplayContent$TaskStackContainers@e0018f#0
+animationLayer#0
+animationHwFreeFormLayer#0
+splitScreenDividerAnchor#0
+WindowToken{ca69e9 android.os.BinderProxy@10a9301}#0
+10f0305 DockedStackDivider#0
+Stack=0#0
+animation background stackId=0#0
+Task=1#0
+AppWindowToken{1008248 token=Token{10965b7 ActivityRecord{1008344 u0 com.huawei.android.launcher/.unihome.UniHomeLauncher t1}}}#0
+108deb1 com.huawei.android.launcher/com.huawei.android.launcher.unihome.UniHomeLauncher#0
+120a559 com.huawei.intelligent.Workspace#0
+homeAnimationLayer#0
+Stack=7#0
+animation background stackId=7#0
+Task=14#0
+Letterbox - left#0
+AppWindowToken{11c3c09 token=Token{1144863 ActivityRecord{11c3cc6 u0 com.example.media_kit_hdr_lab/.MainActivity t14}}}#0
+10f025d com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity#0
+Background for -SurfaceView - com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity#0
+Bounds for - com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity#0
+SurfaceView - com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity#0
+SurfaceView - com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity#1
+Background for -SurfaceView - com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity#1
+com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity#0
+boostedAnimationLayer#0
+boostedHwFreeFormAnimationLayer#0
+mAboveAppWindowsContainers#0
+WindowToken{10af741 android.os.BinderProxy@fed431}#0
+108de09 AssistPreviewPanel#0
+mImeWindowsContainers#0
+WindowToken{11f1851 android.os.Binder@dba929}#0
+WindowToken{10af681 android.os.BinderProxy@10cb639}#0
+107125d StatusBar#0
+Bounds for - StatusBar#0
+StatusBar#0
+WindowToken{10af639 android.os.BinderProxy@1025261}#0
+10a305d NavigationBar0#0
+WindowToken{fcd8f9 android.view.ViewRootImpl$W@102293f}#0
+103eab1 GestureNavLeft#0
+GestureNavLeft#0
+Bounds for - GestureNavLeft#0
+SurfaceView - GestureNavLeft#0
+Background for -SurfaceView - GestureNavLeft#0
+WindowToken{fcd8b1 android.view.ViewRootImpl$W@10450fe}#0
+103ebad GestureNavRight#0
+GestureNavRight#0
+Bounds for - GestureNavRight#0
+SurfaceView - GestureNavRight#0
+Background for -SurfaceView - GestureNavRight#0
+WindowToken{fcd851 android.view.ViewRootImpl$W@1043472}#0
+103ea5d GestureNavBottom#0
+GestureNavBottom#0
+Bounds for - GestureNavBottom#0
+SurfaceView - GestureNavBottom#0
+Background for -SurfaceView - GestureNavBottom#0
+WindowToken{fcd881 android.view.ViewRootImpl$W@a8604f}#0
+a85b59 GestureSildeOut#0
+WindowToken{fcd839 android.view.ViewRootImpl$W@a861b7}#0
+a85ab1 GestureNavAnim#0
+Input Consumer pip_input_consumer#0
+Input Consumer recents_animation_input_consumer#1
+Display Overlays#0
+Hw Display Overlays#0
+com.huawei.RoundCornerDisplay_Top#0

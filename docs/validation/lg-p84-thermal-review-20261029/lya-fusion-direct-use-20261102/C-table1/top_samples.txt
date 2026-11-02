@@ -1,0 +1,21 @@
+### t=+15s 13:00:14
+  PID %CPU  %MEM[CMDLINE]
+ 3753 46.4   4.0 com.example.media_kit_hdr_lab
+### t=+31s 13:00:30
+  PID %CPU  %MEM[CMDLINE]
+ 3753 44.8   4.2 com.example.media_kit_hdr_lab
+### t=+47s 13:00:46
+  PID %CPU  %MEM[CMDLINE]
+ 3753 44.8   4.3 com.example.media_kit_hdr_lab
+### t=+60s 13:00:59
+  PID %CPU  %MEM[CMDLINE]
+ 3753 51.7   4.2 com.example.media_kit_hdr_lab
+### t=+77s 13:01:16
+  PID %CPU  %MEM[CMDLINE]
+ 3753 44.8   4.3 com.example.media_kit_hdr_lab
+### t=+90s 13:01:29
+  PID %CPU  %MEM[CMDLINE]
+ 3753 50.0   4.3 com.example.media_kit_hdr_lab
+### t=+106s 13:01:45
+  PID %CPU  %MEM[CMDLINE]
+ 3753 48.2   4.3 com.example.media_kit_hdr_lab

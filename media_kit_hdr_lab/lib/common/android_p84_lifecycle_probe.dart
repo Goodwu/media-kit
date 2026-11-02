@@ -312,15 +312,25 @@ class AndroidP84LifecycleProbe {
     throw StateError('Stop did not reach idle with no loaded source');
   }
 
-  Future<P84CompletionObservation> _waitNewFalse(int seekEpoch) async {
+  Future<P84CompletionObservation> _waitNotCompleted(double seekTarget) async {
+    // stream.completed is change-driven: seeking from mid-playback (already
+    // completed=false) never publishes a new false event, so the precondition
+    // for the EOF wait is the STATE being false with the seek settled — the
+    // real false->true transition is still gated by _waitNewCompleted below.
     final budget = Stopwatch()..start();
     while (budget.elapsed < settleTimeout) {
       _check();
       final event = readCompletion();
-      if (!event.completed && event.lastFalseEpoch > seekEpoch) return event;
+      final position =
+          double.tryParse(await _operation(() => readProperty('time-pos')));
+      if (!event.completed &&
+          position != null &&
+          (position - seekTarget).abs() <= 1.0) {
+        return event;
+      }
       await _wait(const Duration(milliseconds: 50));
     }
-    throw StateError('Seek did not publish a new completed=false event');
+    throw StateError('Seek did not settle at $seekTarget with completed=false');
   }
 
   Future<void> _waitNewCompleted(int falseEpoch) async {
@@ -377,13 +387,11 @@ class AndroidP84LifecycleProbe {
           final duration = _number(before, 'duration');
           if (duration < 5) throw StateError('EOF test requires >5s source');
           await _operation(() => setPaused(false));
-          final seekEpoch = readCompletion().epoch;
           await _operation(() =>
               seek(Duration(milliseconds: ((duration - 2) * 1000).round())));
-          await _waitPosition(duration - 2);
-          final notCompleted = await _waitNewFalse(seekEpoch);
+          final notCompleted = await _waitNotCompleted(duration - 2);
           await _capture('near-eof-seek-settled');
-          await _waitNewCompleted(notCompleted.lastFalseEpoch);
+          await _waitNewCompleted(notCompleted.epoch);
           await _capture('real-eof-completed', running: false);
           await _reopen();
           await _waitProgress(0);

@@ -1,0 +1,7 @@
+t=+16s cur_freq=139000000
+t=+31s cur_freq=139000000
+t=+47s cur_freq=139000000
+t=+60s cur_freq=139000000
+t=+77s cur_freq=139000000
+t=+90s cur_freq=139000000
+t=+106s cur_freq=139000000

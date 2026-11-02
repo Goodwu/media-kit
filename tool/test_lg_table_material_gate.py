@@ -39,13 +39,21 @@ class GateSourceTests(unittest.TestCase):
         self.assertLess(guard, call)
         self.assertLess(call, endif)
 
-    def test_tap_texture_captured_from_unique_descriptor(self):
+    def test_tap_admission_uses_shared_helper(self):
+        # 生产与 compare 必须同调一个校验助手（复审 P2：消除双标准）
         start = SOURCE.index('if (gen_params.uv_table_storage && !gen_params.uv_table_ident) {')
         end = SOURCE.index('    generate_shaders(dp, &gen_params', start)
         block = SOURCE[start:end]
-        self.assertIn('matching_tex++;', block)
-        self.assertIn('tap_tex = tex;', block)
+        self.assertIn('mks_tap_site_supported(dp, sh, &params, &site)', block)
+        self.assertNotIn('matching_tex++', block, '生产块不得再自带宽松版循环')
         self.assertIn('reason=tap-not-unique', block)
+        # 共享助手本身承载 compare 全套条件
+        hs = SOURCE.index('static pl_tex mks_tap_site_supported(')
+        he = SOURCE.index('\n}', hs)
+        helper = SOURCE[hs:he]
+        for cond in ('sampled_tex == 1', 'matching_tex == 1', 'matching_uv == 1',
+                     'PL_FMT_UNORM', 'PL_FMT_SNORM', 'vec2'):
+            self.assertIn(cond, helper)
 
 
 GATE_C = r'''

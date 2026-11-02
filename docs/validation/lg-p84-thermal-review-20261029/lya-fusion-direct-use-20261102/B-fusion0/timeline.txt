@@ -1,0 +1,39 @@
+[12:56:47] round=B out=./B-fusion0 dur=120s
+# getprop | grep debug.mks
+[debug.mks.yuv_fusion]: [0]
+[debug.mks.yuv_fusion_table]: []
+yuv_fusion=[0]
+yuv_fusion_table=[]
+[12:56:49] am start
+Starting: Intent { cmp=com.example.media_kit_hdr_lab/.MainActivity }
+  mCurrentFocus=Window{10f025d u0 com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity}
+    mStatusBar=Window{107125d u0 StatusBar} isStatusBarKeyguard=false
+    mUserRotationMode=USER_ROTATION_LOCKED mUserRotation=ROTATION_90 mAllowAllRotations=unknown
+      SurfaceOrientation: 1
+[12:56:54] tap 1560 720
+[12:56:54] playback-open marker seen 0s after tap
+11-02 12:56:54.431  2030  2030 I flutter : ANDROID_HDR_OPEN_BEGIN path=/sdcard/Android/data/com.example.media_kit_hdr_lab/files/hokkaido-p84.mp4 hint=null serial=1 simulateNoHlg=false wrongHint= noHint=false policyExperimental=false namedLocalSource=true p5RpuPipelineBuilt=true forceP84PqFallback=fa
+11-02 12:56:54.437  2030  2030 I flutter : HdrDiag HDR decision: phase=plan gen=1 origin=none source=none,none,none,none,none,none,unknown class=sdr selected=sdrDirect maturity=verified presentation=sdr confidence=verified vo=gpu-next hwdec=mediacodec output=sdr topology=texture surface=none stripRp
+11-02 12:56:54.438  2030  2030 I flutter : VIDEOPARAMS VideoParams(pixelformat: null, hwPixelformat: null, w: null, h: null, dw: null, dh: null, aspect: null, par: null, colormatrix: null, colorlevels: null, primaries: null, gamma: null, sigPeak: null, light: null, chromaLocation: null, rotate: null
+11-02 12:56:54.558  2030  2030 I flutter : VIDEOPARAMS VideoParams(pixelformat: null, hwPixelformat: null, w: null, h: null, dw: null, dh: null, aspect: null, par: null, colormatrix: null, colorlevels: null, primaries: null, gamma: null, sigPeak: null, light: null, chromaLocation: null, rotate: null
+[12:56:54] pid=2030
+AppWindowToken{11c3c09 token=Token{1144863 ActivityRecord{11c3cc6 u0 com.example.media_kit_hdr_lab/.MainActivity t14}}}#0
+10f025d com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity#0
+Background for -SurfaceView - com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity#0
+Bounds for - com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity#0
+SurfaceView - com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity#0
+SurfaceView - com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity#1
+Background for -SurfaceView - com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity#1
+com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity#0
+SurfaceView - GestureNavLeft#0
+Background for -SurfaceView - GestureNavLeft#0
+SurfaceView - GestureNavRight#0
+Background for -SurfaceView - GestureNavRight#0
+SurfaceView - GestureNavBottom#0
+Background for -SurfaceView - GestureNavBottom#0
+[12:57:26] sf latency window #1 at +31s
+[12:57:54] sf latency window #2 at +60s
+[12:57:55] screencap at +60s
+[12:58:25] sf latency window #3 at +90s
+[12:58:59] end: pid_at_start=2030 pid_at_end=[2030]
+[12:59:00] force-stop done; files in ./B-fusion0

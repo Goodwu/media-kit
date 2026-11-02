@@ -1,0 +1,4 @@
+  mCurrentFocus=Window{11367ad u0 com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity}
+    mStatusBar=Window{107125d u0 StatusBar} isStatusBarKeyguard=false
+    mUserRotationMode=USER_ROTATION_LOCKED mUserRotation=ROTATION_0 mAllowAllRotations=unknown
+      SurfaceOrientation: 1

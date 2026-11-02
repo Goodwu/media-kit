@@ -80,8 +80,9 @@ class Fixture {
       if (!suppressSeekCompletionEvents) {
         completed = false;
         falseEpoch = ++eventEpoch;
-        pendingCompletion = position >= 38;
       }
+      // EOF is a real state change and always fires, suppressed or not.
+      pendingCompletion = position >= 38;
       mutations.add('seek=${target.inMilliseconds}');
     },
     stopPlayer: () async {
@@ -179,6 +180,21 @@ void main() {
             row['step'] == 'stopped-before-reopen' &&
             row['expectedRunning'] == false),
         isTrue);
+    expect(f.rows.last['result'], 'functional_only');
+  });
+
+  test(
+      'mid-playback EOF seek needs no completed=false change event (change-driven stream)',
+      () async {
+    // Regression for the on-device failure: seeking from mid-playback keeps
+    // completed=false, so the change-driven stream never publishes a new
+    // false event; the action must proceed on the settled state alone.
+    final f = Fixture()..suppressSeekCompletionEvents = true;
+    await f.probe.run(P84LifecycleAction.nearEOFReplay);
+    final eof =
+        f.rows.singleWhere((row) => row['step'] == 'real-eof-completed');
+    expect(eof['completion']['completed'], isTrue);
+    expect(f.reopenCount, 1);
     expect(f.rows.last['result'], 'functional_only');
   });
 

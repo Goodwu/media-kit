@@ -1,0 +1,10 @@
+  mCurrentFocus=Window{108deb1 u0 com.huawei.android.launcher/com.huawei.android.launcher.unihome.UniHomeLauncher}
+    mStatusBar=Window{107125d u0 StatusBar} isStatusBarKeyguard=false
+  mWakefulness=Awake
+Display Power: state=ON
+screen_brightness=120
+screen_brightness_mode=0
+accelerometer_rotation=0
+user_rotation=0
+screen_off_timeout=1800000
+gpufreq cur=139000000

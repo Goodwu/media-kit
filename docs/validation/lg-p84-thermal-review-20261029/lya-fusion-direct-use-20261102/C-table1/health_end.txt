@@ -1,0 +1,15 @@
+pid_at_start=3753
+pid_at_end=3753
+  mCurrentFocus=Window{e5d0b1 u0 com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity}
+    mStatusBar=Window{107125d u0 StatusBar} isStatusBarKeyguard=false
+--- dropbox entries (crash/anr) in last 10 min ---
+--- dumpsys activity processes (hdr_lab) ---
+  *APP* UID 10207 ProcessRecord{dad809 3753:com.example.media_kit_hdr_lab/u0a207}
+    dir=/data/app/com.example.media_kit_hdr_lab-BL4VeeJSygVlnPadua_D0g==/base.apk publicDir=/data/app/com.example.media_kit_hdr_lab-BL4VeeJSygVlnPadua_D0g==/base.apk data=/data/user/0/com.example.media_kit_hdr_lab
+    packageList={com.example.media_kit_hdr_lab}
+      - ActivityRecord{1081544 u0 com.example.media_kit_hdr_lab/.MainActivity t15}
+      - TaskRecord{a85430 #15 I=com.example.media_kit_hdr_lab/.MainActivity U=0 StackId=8 sz=1}
+        -> ContentProviderRecord{1126d3b u0 com.example.media_kit_hdr_lab/androidx.startup.InitializationProvider}
+      - f634b4/com.android.providers.settings/.hwext.HwSettingsProvider->3753:com.example.media_kit_hdr_lab/u0a207 s1/1 u0/0 +2m9s710ms
+    Proc # 0: fore   T/A/TOP  trm: 0 3753:com.example.media_kit_hdr_lab/u0a207 (top-activity)
+    PID #3753: ProcessRecord{dad809 3753:com.example.media_kit_hdr_lab/u0a207}

@@ -1,0 +1,48 @@
+##### A-default video layer (SurfaceView #1)
+== sf_latency_1_SurfaceView_-_com.example.media_kit_hdr_lab_com.example.media_kit_hdr_lab.MainAc.txt
+   refresh_period_ns=16666666 frames=127
+   window=4.2s median_interval=32.75ms mean=33.39ms fps=29.95 p95_interval=32.8ms gaps>100ms=0
+== sf_latency_2_SurfaceView_-_com.example.media_kit_hdr_lab_com.example.media_kit_hdr_lab.MainAc.txt
+   refresh_period_ns=16666666 frames=127
+   window=4.2s median_interval=32.73ms mean=33.38ms fps=29.96 p95_interval=32.8ms gaps>100ms=0
+== sf_latency_3_SurfaceView_-_com.example.media_kit_hdr_lab_com.example.media_kit_hdr_lab.MainAc.txt
+   refresh_period_ns=16666666 frames=127
+   window=4.2s median_interval=32.74ms mean=33.39ms fps=29.95 p95_interval=32.8ms gaps>100ms=0
+##### B-fusion0 video layer (SurfaceView #1)
+== sf_latency_1_SurfaceView_-_com.example.media_kit_hdr_lab_com.example.media_kit_hdr_lab.MainActivity_N0_.txt
+   refresh_period_ns=16666666 frames=15
+   window=4.8s median_interval=32.76ms mean=344.50ms fps=2.90 p95_interval=4005.5ms gaps>100ms=2
+== sf_latency_1_SurfaceView_-_com.example.media_kit_hdr_lab_com.example.media_kit_hdr_lab.MainActivity_N1_.txt
+   refresh_period_ns=16666666 frames=127
+   window=4.2s median_interval=32.74ms mean=33.39ms fps=29.95 p95_interval=32.8ms gaps>100ms=0
+== sf_latency_2_SurfaceView_-_com.example.media_kit_hdr_lab_com.example.media_kit_hdr_lab.MainActivity_N0_.txt
+   refresh_period_ns=16666666 frames=15
+   window=4.8s median_interval=32.76ms mean=344.50ms fps=2.90 p95_interval=4005.5ms gaps>100ms=2
+== sf_latency_2_SurfaceView_-_com.example.media_kit_hdr_lab_com.example.media_kit_hdr_lab.MainActivity_N1_.txt
+   refresh_period_ns=16666666 frames=126
+   window=4.2s median_interval=32.73ms mean=33.39ms fps=29.95 p95_interval=32.8ms gaps>100ms=0
+== sf_latency_3_SurfaceView_-_com.example.media_kit_hdr_lab_com.example.media_kit_hdr_lab.MainActivity_N0_.txt
+   refresh_period_ns=16666666 frames=15
+   window=4.8s median_interval=32.76ms mean=344.50ms fps=2.90 p95_interval=4005.5ms gaps>100ms=2
+== sf_latency_3_SurfaceView_-_com.example.media_kit_hdr_lab_com.example.media_kit_hdr_lab.MainActivity_N1_.txt
+   refresh_period_ns=16666666 frames=127
+   window=4.2s median_interval=32.74ms mean=33.39ms fps=29.95 p95_interval=32.8ms gaps>100ms=0
+##### C-table1 video layer (SurfaceView #1)
+== sf_latency_1_SurfaceView_-_com.example.media_kit_hdr_lab_com.example.media_kit_hdr_lab.MainActivity_N0_.txt
+   refresh_period_ns=16666666 frames=15
+   window=4.8s median_interval=32.74ms mean=344.55ms fps=2.90 p95_interval=4071.3ms gaps>100ms=2
+== sf_latency_1_SurfaceView_-_com.example.media_kit_hdr_lab_com.example.media_kit_hdr_lab.MainActivity_N1_.txt
+   refresh_period_ns=16666666 frames=127
+   window=4.2s median_interval=32.75ms mean=33.40ms fps=29.94 p95_interval=32.8ms gaps>100ms=0
+== sf_latency_2_SurfaceView_-_com.example.media_kit_hdr_lab_com.example.media_kit_hdr_lab.MainActivity_N0_.txt
+   refresh_period_ns=16666666 frames=15
+   window=4.8s median_interval=32.74ms mean=344.55ms fps=2.90 p95_interval=4071.3ms gaps>100ms=2
+== sf_latency_2_SurfaceView_-_com.example.media_kit_hdr_lab_com.example.media_kit_hdr_lab.MainActivity_N1_.txt
+   refresh_period_ns=16666666 frames=127
+   window=4.2s median_interval=32.73ms mean=33.25ms fps=30.07 p95_interval=32.8ms gaps>100ms=0
+== sf_latency_3_SurfaceView_-_com.example.media_kit_hdr_lab_com.example.media_kit_hdr_lab.MainActivity_N0_.txt
+   refresh_period_ns=16666666 frames=15
+   window=4.8s median_interval=32.74ms mean=344.55ms fps=2.90 p95_interval=4071.3ms gaps>100ms=2
+== sf_latency_3_SurfaceView_-_com.example.media_kit_hdr_lab_com.example.media_kit_hdr_lab.MainActivity_N1_.txt
+   refresh_period_ns=16666666 frames=127
+   window=4.2s median_interval=32.74ms mean=33.39ms fps=29.95 p95_interval=32.8ms gaps>100ms=0

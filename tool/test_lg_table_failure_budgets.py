@@ -112,13 +112,28 @@ class SourceTests(unittest.TestCase):
         # 消费预算触发时表+融合同时禁用（风暴封顶）
         self.assertIn('p->fusion_table_enabled = false;\n            p->fusion_disabled = true;', block)
 
+    @staticmethod
+    def _brace_block(source, anchor):
+        start = source.index(anchor)
+        open_idx = source.index('{', start)
+        depth = 0
+        for i in range(open_idx, len(source)):
+            if source[i] == '{':
+                depth += 1
+            elif source[i] == '}':
+                depth -= 1
+                if depth == 0:
+                    return source[start:i + 1]
+        raise AssertionError('unbalanced braces after anchor')
+
     def test_consume_budget_cleared_only_by_committed_frame(self):
-        self.assertIn('p->table_consume_failures = 0;', self.SOURCE)
-        # 清零位于 commit 成功路径内
+        # 全文件唯一清零点（未来在别处加清零即此测试失败）
+        self.assertEqual(self.SOURCE.count('p->table_consume_failures = 0;'), 1,
+                         'exactly one clear site allowed')
+        # 且该唯一清零点在 commit-ok 分支块内（花括号精确提取，非距离断言）
         anchor = 'if (p->ra_ctx->fns->yuv_fusion_commit(p->ra_ctx, desc, confirmed)) {'
-        idx = self.SOURCE.index(anchor)
-        clear = self.SOURCE.index('p->table_consume_failures = 0;', idx)
-        self.assertLess(clear, idx + 400, 'clear must sit inside the commit-ok branch')
+        block = self._brace_block(self.SOURCE, anchor)
+        self.assertIn('p->table_consume_failures = 0;', block)
 
     def test_ready_still_resets_seed_budget_only(self):
         anchor = self.SOURCE.index('event=ready cache_id=')

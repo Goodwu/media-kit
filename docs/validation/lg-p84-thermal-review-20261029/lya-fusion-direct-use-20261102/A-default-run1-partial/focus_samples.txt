@@ -1,0 +1,7 @@
+t=+16s   mCurrentFocus=Window{11367ad u0 com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity}
+t=+31s   mCurrentFocus=Window{11367ad u0 com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity}
+t=+47s   mCurrentFocus=Window{11367ad u0 com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity}
+t=+60s   mCurrentFocus=Window{11367ad u0 com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity}
+t=+77s   mCurrentFocus=Window{11367ad u0 com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity}
+t=+90s   mCurrentFocus=Window{11367ad u0 com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity}
+t=+106s   mCurrentFocus=Window{11367ad u0 com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity}

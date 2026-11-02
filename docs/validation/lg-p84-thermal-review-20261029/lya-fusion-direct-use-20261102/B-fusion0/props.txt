@@ -1,0 +1,5 @@
+# getprop | grep debug.mks
+[debug.mks.yuv_fusion]: [0]
+[debug.mks.yuv_fusion_table]: []
+yuv_fusion=[0]
+yuv_fusion_table=[]

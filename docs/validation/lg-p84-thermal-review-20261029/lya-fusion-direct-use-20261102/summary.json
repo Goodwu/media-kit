@@ -1,0 +1,237 @@
+{
+  "meta": {
+    "date": "2026-11-02",
+    "device": "Huawei Mate 20 Pro LYA-AL00 (kirin980 / Mali-G76, API 29), serial 3EP7N18C28016072",
+    "apk": {
+      "path": "/Users/wuweiwei1/src/media-kit/media_kit_hdr_lab/build/app/outputs/flutter-apk/fusion-prod3-20261102-release.apk",
+      "sha256_host": "32b3fd204bb35cc328af3d882c90f9bf180e21fc582d44eb66b331f4a66434f0",
+      "sha256_device_base_apk": "32b3fd204bb35cc328af3d882c90f9bf180e21fc582d44eb66b331f4a66434f0",
+      "install": "adb install -r (data preserved), lastUpdateTime=2026-11-02 12:34:35"
+    },
+    "sample": {
+      "device_file": "/sdcard/Android/data/com.example.media_kit_hdr_lab/files/hokkaido-p84.mp4",
+      "sha256": "7626cac28819ffd1377a712b56c7cc4bbf8677f5db4b39fb0c83f92e58d74443",
+      "source_copy_of": "DV-P8.4.mp4 (identical SHA256, original preserved)"
+    },
+    "procedure": "am start -> 4s -> tap (1560,720) in landscape -> ~120s from playback-open marker -> capture -> force-stop",
+    "rounds": {
+      "A-default": {
+        "mode": "A: production default (debug.mks.* empty)",
+        "props": {},
+        "log_range": [
+          "11-02 12:52:23.028",
+          "11-02 12:54:33.509"
+        ],
+        "pid_start_end": [
+          "32354",
+          "32354"
+        ],
+        "counts": {
+          "MKS-FUSION": 0,
+          "MKS-FUSION-TABLE": 0,
+          "MKS-YUV-COMPARE": 0,
+          "MKS-YUV-COMPARE-LIB": 0,
+          "YUV-DIAG": 0,
+          "yuvDiag arm": 0,
+          "FATAL_or_fatal_signal": 0,
+          "ANR": 0
+        },
+        "route": {
+          "selected": "metadataReshape",
+          "topology": "platformView",
+          "output": "pq",
+          "peak": "500",
+          "hwdecCurrent": "mediacodec",
+          "vo": "gpu-next",
+          "readback": "DATASPACE_BT2020_PQ",
+          "verified": "true",
+          "surface": "pq"
+        },
+        "hdr_readback": "flutter : HdrDiag HDR readback: requested=pq path=ext:lya-pq applied=true readback=DATASPACE_BT2020_PQ",
+        "egl_owner_configured": 0,
+        "caps_unavailable": 0,
+        "hw_decoder": "OMX.hisi.video.decoder.hevc (ACodec 4K buffer allocs)",
+        "cpu_percent_samples": [
+          50.0,
+          44.8,
+          53.5,
+          46.4,
+          41.3,
+          42.8,
+          48.2
+        ],
+        "cpu_mean": 46.7,
+        "sf_video_layer": {
+          "name": "SurfaceView - com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity#1",
+          "size_pos": "2880x1440 @ (120,0)",
+          "dataspace": "BT2020 SMPTE 2084 Full range",
+          "active_buffer": "[1440x2880:1472",
+          "fps_median_interval_ms": 32.74
+        },
+        "sf_missed_frames_delta_in_round": {
+          "total": [
+            266,
+            266,
+            0
+          ],
+          "hwc": [
+            226,
+            226,
+            0
+          ],
+          "gpu": [
+            40,
+            40,
+            0
+          ]
+        }
+      },
+      "B-fusion0": {
+        "mode": "B: debug.mks.yuv_fusion=0",
+        "props": {
+          "debug.mks.yuv_fusion": "0"
+        },
+        "log_range": [
+          "11-02 12:56:48.964",
+          "11-02 12:58:59.615"
+        ],
+        "pid_start_end": [
+          "2030",
+          "2030"
+        ],
+        "counts": {
+          "MKS-FUSION": 0,
+          "MKS-FUSION-TABLE": 0,
+          "MKS-YUV-COMPARE": 0,
+          "MKS-YUV-COMPARE-LIB": 0,
+          "YUV-DIAG": 0,
+          "yuvDiag arm": 0,
+          "FATAL_or_fatal_signal": 0,
+          "ANR": 0
+        },
+        "route": {
+          "selected": "metadataReshape",
+          "topology": "platformView",
+          "output": "pq",
+          "peak": "500",
+          "hwdecCurrent": "mediacodec",
+          "vo": "gpu-next",
+          "readback": "DATASPACE_BT2020_PQ",
+          "verified": "true",
+          "surface": "pq"
+        },
+        "hdr_readback": "flutter : HdrDiag HDR readback: requested=pq path=ext:lya-pq applied=true readback=DATASPACE_BT2020_PQ",
+        "egl_owner_configured": 0,
+        "caps_unavailable": 0,
+        "hw_decoder": "OMX.hisi.video.decoder.hevc (ACodec 4K buffer allocs)",
+        "cpu_percent_samples": [
+          44.8,
+          46.4,
+          50.0,
+          44.8,
+          48.2,
+          44.8,
+          48.2
+        ],
+        "cpu_mean": 46.7,
+        "sf_video_layer": {
+          "name": "SurfaceView - com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity#1",
+          "size_pos": "2880x1440 @ (120,0)",
+          "dataspace": "BT2020 SMPTE 2084 Full range",
+          "active_buffer": "[1440x2880:1472",
+          "fps_median_interval_ms": 32.74
+        },
+        "sf_missed_frames_delta_in_round": {
+          "total": [
+            297,
+            297,
+            0
+          ],
+          "hwc": [
+            245,
+            245,
+            0
+          ],
+          "gpu": [
+            52,
+            52,
+            0
+          ]
+        }
+      },
+      "C-table1": {
+        "mode": "C: debug.mks.yuv_fusion_table=1",
+        "props": {
+          "debug.mks.yuv_fusion_table": "1"
+        },
+        "log_range": [
+          "11-02 12:59:53.929",
+          "11-02 13:02:04.973"
+        ],
+        "pid_start_end": [
+          "3753",
+          "3753"
+        ],
+        "counts": {
+          "MKS-FUSION": 0,
+          "MKS-FUSION-TABLE": 0,
+          "MKS-YUV-COMPARE": 1,
+          "MKS-YUV-COMPARE-LIB": 1,
+          "YUV-DIAG": 0,
+          "yuvDiag arm": 0,
+          "FATAL_or_fatal_signal": 0,
+          "ANR": 0
+        },
+        "route": {
+          "selected": "metadataReshape",
+          "topology": "platformView",
+          "output": "pq",
+          "peak": "500",
+          "hwdecCurrent": "mediacodec",
+          "vo": "gpu-next",
+          "readback": "DATASPACE_BT2020_PQ",
+          "verified": "true",
+          "surface": "pq"
+        },
+        "hdr_readback": "flutter : HdrDiag HDR readback: requested=pq path=ext:lya-pq applied=true readback=DATASPACE_BT2020_PQ",
+        "egl_owner_configured": 1,
+        "caps_unavailable": 0,
+        "hw_decoder": "OMX.hisi.video.decoder.hevc (ACodec 4K buffer allocs)",
+        "cpu_percent_samples": [
+          46.4,
+          44.8,
+          44.8,
+          51.7,
+          44.8,
+          50.0,
+          48.2
+        ],
+        "cpu_mean": 47.2,
+        "sf_video_layer": {
+          "name": "SurfaceView - com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity#1",
+          "size_pos": "2880x1440 @ (120,0)",
+          "dataspace": "BT2020 SMPTE 2084 Full range",
+          "active_buffer": "[1440x2880:1472",
+          "fps_median_interval_ms": 32.74
+        },
+        "sf_missed_frames_delta_in_round": {
+          "total": [
+            318,
+            318,
+            0
+          ],
+          "hwc": [
+            247,
+            247,
+            0
+          ],
+          "gpu": [
+            71,
+            71,
+            0
+          ]
+        }
+      }
+    }
+  }
+}
