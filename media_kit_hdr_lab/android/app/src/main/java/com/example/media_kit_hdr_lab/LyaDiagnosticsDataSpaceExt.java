@@ -10,15 +10,14 @@ import com.alexmercerind.media_kit_video.platformview.PlatformVideoView;
  * hdr_lab-only diagnostics wrapper chained onto the vendor dataspace
  * extension.
  *
- * The vendor apply path (LYA-AL00 private ABI behind its exact-fingerprint
- * gate) and its native library live in the
+ * The vendor apply paths and their native libraries live in the
  * {@code media_kit_android_dataspace_vendor} package; this test app keeps
- * only its three property-gated probes and delegates the apply path to the
- * vendor extension unchanged:
+ * only its three property-gated probes and transparently delegates the
+ * vendor capabilities, owner/surface lifecycle and apply paths:
  *
  * <ul>
  *   <li>{@link #applyDataSpace}: delegated to the vendor extension, so the
- *       report id stays {@code ext:lya-pq} and the private-ABI gate is the
+ *       report id stays the vendor's and the private-ABI gate is the
  *       vendor package's, not ours;</li>
  *   <li>{@link #onSurfaceAvailable}: late PQ probe
  *       (debug.media_kit.late_pq_probe=1);</li>
@@ -65,12 +64,14 @@ public final class LyaDiagnosticsDataSpaceExt implements PlatformVideoView.Surfa
 
     @Override
     public void onSurfaceAvailable(@NonNull Surface surface) {
+        delegate.onSurfaceAvailable(surface);
         // The native side is gated on debug.media_kit.late_pq_probe=1.
         nativeLatePqProbe(surface);
     }
 
     @Override
     public void onDataSpaceApplyFailed(@NonNull Surface surface, int dataSpace) {
+        delegate.onDataSpaceApplyFailed(surface, dataSpace);
         // The native side is gated on debug.media_kit.egl_hdr_probe=1 and
         // debug.media_kit.vk_hdr_probe=1 respectively.
         nativeEglPqProbe(surface);
@@ -89,6 +90,11 @@ public final class LyaDiagnosticsDataSpaceExt implements PlatformVideoView.Surfa
         return delegate.isApplicable();
     }
 
+    @Override
+    public boolean requiresFlutterTextureView() {
+        return delegate.requiresFlutterTextureView();
+    }
+
     // The wrapper is not a vendor subclass; without these explicit forwards
     // the interface defaults (null) would drop the delegate's pqPresentation
     // report while isApplicable still delegates — so the capability query
@@ -103,5 +109,56 @@ public final class LyaDiagnosticsDataSpaceExt implements PlatformVideoView.Surfa
     @Nullable
     public Boolean pqPresentationYuvWindow() {
         return delegate.pqPresentationYuvWindow();
+    }
+
+    @Override
+    @Nullable
+    public java.util.Set<String> validatedPredictionTransfers() {
+        return delegate.validatedPredictionTransfers();
+    }
+
+    @Override
+    @Nullable
+    public java.util.Set<String> setterOnlyTransfers() {
+        return delegate.setterOnlyTransfers();
+    }
+
+    @Override
+    @Nullable
+    public java.util.Set<String> supportedSurfaceTransfers() {
+        return delegate.supportedSurfaceTransfers();
+    }
+
+    @Override
+    public int yuvWindowArmApi() {
+        return delegate.yuvWindowArmApi();
+    }
+
+    @Override
+    public boolean supportsDeferredSurfaceTexturePublish30fps() {
+        return delegate.supportsDeferredSurfaceTexturePublish30fps();
+    }
+
+    @Override
+    public boolean enableOwnerLifetime(long handle, @Nullable String token) {
+        return delegate.enableOwnerLifetime(handle, token);
+    }
+
+    @Override
+    public boolean registerManagedOutputSurface(@NonNull Surface surface,
+            long handle, int generation, int surfaceGeneration) {
+        return delegate.registerManagedOutputSurface(surface, handle,
+                generation, surfaceGeneration);
+    }
+
+    @Override
+    public boolean armManagedOutputSurface(@NonNull Surface surface,
+            long handle, int generation) {
+        return delegate.armManagedOutputSurface(surface, handle, generation);
+    }
+
+    @Override
+    public void unregisterManagedOutputSurface(@NonNull Surface surface) {
+        delegate.unregisterManagedOutputSurface(surface);
     }
 }

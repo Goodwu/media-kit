@@ -1,0 +1,12 @@
+{
+  "returncode": 0,
+  "bytes": 304,
+  "stderr": "",
+  "validAuxvInterpretations": [
+    {
+      "wordBytes": 8,
+      "clockTicksPerSecond": 100,
+      "pageBytes": 4096
+    }
+  ]
+}

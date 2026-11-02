@@ -1,0 +1,273 @@
+@@ DIRECTORY /sys/class/kgsl/kgsl-3d0
+lrwxrwxrwx 1 root root 0 2026-10-26 01:35 /sys/class/kgsl/kgsl-3d0 -> ../../devices/soc/b00000.qcom,kgsl-3d0/kgsl/kgsl-3d0
+@@ DIRECTORY /sys/class/kgsl/kgsl-3d0/devfreq
+lrwxrwxrwx 1 root root 0 2026-10-29 14:41 /sys/class/kgsl/kgsl-3d0/devfreq -> ../../devfreq/b00000.qcom,kgsl-3d0
+@@ DIRECTORY /sys/class/devfreq
+total 0
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 624000.ufshc -> ../../devices/soc/624000.ufshc/devfreq/624000.ufshc
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 b00000.qcom,kgsl-3d0 -> ../../devices/soc/b00000.qcom,kgsl-3d0/devfreq/b00000.qcom,kgsl-3d0
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 c00000.qcom,vidc:arm9_bus_ddr -> ../../devices/soc/c00000.qcom,vidc/c00000.qcom,vidc:arm9_bus_ddr/devfreq/c00000.qcom,vidc:arm9_bus_ddr
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 c00000.qcom,vidc:bus_cnoc -> ../../devices/soc/c00000.qcom,vidc/c00000.qcom,vidc:bus_cnoc/devfreq/c00000.qcom,vidc:bus_cnoc
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 c00000.qcom,vidc:venus_bus_ddr -> ../../devices/soc/c00000.qcom,vidc/c00000.qcom,vidc:venus_bus_ddr/devfreq/c00000.qcom,vidc:venus_bus_ddr
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 c00000.qcom,vidc:venus_bus_vmem -> ../../devices/soc/c00000.qcom,vidc/c00000.qcom,vidc:venus_bus_vmem/devfreq/c00000.qcom,vidc:venus_bus_vmem
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 soc:devfreq_spdm_cpu -> ../../devices/soc/soc:devfreq_spdm_cpu/devfreq/soc:devfreq_spdm_cpu
+lrwxrwxrwx 1 root root 0 2026-10-29 13:44 soc:qcom,cpubw -> ../../devices/soc/soc:qcom,cpubw/devfreq/soc:qcom,cpubw
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 soc:qcom,gpubw -> ../../devices/soc/soc:qcom,gpubw/devfreq/soc:qcom,gpubw
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 soc:qcom,kgsl-busmon -> ../../devices/soc/soc:qcom,kgsl-busmon/devfreq/soc:qcom,kgsl-busmon
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 soc:qcom,m4m -> ../../devices/soc/soc:qcom,m4m/devfreq/soc:qcom,m4m
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 soc:qcom,memlat-cpu0 -> ../../devices/soc/soc:qcom,memlat-cpu0/devfreq/soc:qcom,memlat-cpu0
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 soc:qcom,memlat-cpu2 -> ../../devices/soc/soc:qcom,memlat-cpu2/devfreq/soc:qcom,memlat-cpu2
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 soc:qcom,mincpubw -> ../../devices/soc/soc:qcom,mincpubw/devfreq/soc:qcom,mincpubw
+@@ DIRECTORY /sys/devices/system/cpu/cpu0/cpufreq
+total 0
+-r--r--r-- 1 root   root   4096 2017-02-11 15:46 affected_cpus
+-r-------- 1 root   root   4096 2017-02-11 15:46 cpuinfo_cur_freq
+-r--r--r-- 1 root   root   4096 2017-02-11 15:46 cpuinfo_max_freq
+-r--r--r-- 1 root   root   4096 2017-02-11 15:46 cpuinfo_min_freq
+-r--r--r-- 1 root   root   4096 2017-02-11 15:46 cpuinfo_transition_latency
+drwxr-xr-x 2 root   root      0 2026-10-26 01:35 interactive
+-r--r--r-- 1 root   root   4096 2017-02-11 15:46 related_cpus
+-r--r--r-- 1 root   root   4096 2017-02-11 15:46 scaling_available_frequencies
+-r--r--r-- 1 root   root   4096 2017-02-11 15:46 scaling_available_governors
+-r--r--r-- 1 root   root   4096 2017-02-11 15:46 scaling_cur_freq
+-r--r--r-- 1 root   root   4096 2017-02-11 15:46 scaling_driver
+-rw-r--r-- 1 root   root   4096 2026-10-26 01:35 scaling_governor
+-rw-rw---- 1 system system 4096 2017-02-11 15:46 scaling_max_freq
+-rw-rw-r-- 1 system system 4096 2026-10-26 01:35 scaling_min_freq
+-rw-r--r-- 1 root   root   4096 2017-02-11 15:46 scaling_setspeed
+drwxr-xr-x 2 root   root      0 2017-02-11 15:46 stats
+@@ DIRECTORY /sys/devices/system/cpu/cpu2/cpufreq
+total 0
+-r--r--r-- 1 root root 4096 2026-10-29 15:48 affected_cpus
+-r-------- 1 root root 4096 2026-10-29 15:48 cpuinfo_cur_freq
+-r--r--r-- 1 root root 4096 2026-10-29 13:44 cpuinfo_max_freq
+-r--r--r-- 1 root root 4096 2026-10-29 15:48 cpuinfo_min_freq
+-r--r--r-- 1 root root 4096 2026-10-29 15:48 cpuinfo_transition_latency
+drwxr-xr-x 2 root root    0 2026-10-29 15:48 interactive
+-r--r--r-- 1 root root 4096 2026-10-29 15:48 related_cpus
+-r--r--r-- 1 root root 4096 2026-10-29 15:48 scaling_available_frequencies
+-r--r--r-- 1 root root 4096 2026-10-29 15:48 scaling_available_governors
+-r--r--r-- 1 root root 4096 2026-10-29 14:41 scaling_cur_freq
+-r--r--r-- 1 root root 4096 2026-10-29 15:48 scaling_driver
+-rw-r--r-- 1 root root 4096 2026-10-29 15:48 scaling_governor
+-rw-r--r-- 1 root root 4096 2026-10-29 15:48 scaling_max_freq
+-rw-r--r-- 1 root root 4096 2026-10-29 15:48 scaling_min_freq
+-rw-r--r-- 1 root root 4096 2026-10-29 15:48 scaling_setspeed
+drwxr-xr-x 2 root root    0 2026-10-29 13:28 stats
+@@ DIRECTORY /sys/class/regulator
+total 0
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.0 -> ../../devices/platform/reg-dummy/regulator/regulator.0
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.1 -> ../../devices/soc/qpnp-regulator-27/regulator/regulator.1
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.10 -> ../../devices/soc/soc:qcom,rpm-smd/soc:qcom,rpm-smd:rpm-regulator-smpa1/soc:qcom,rpm-smd:rpm-regulator-smpa1:regulator-s1-corner/regulator/regulator.10
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.103 -> ../../devices/soc/qpnp-smbcharger-16/regulator/regulator.103
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.104 -> ../../devices/soc/qpnp-smbcharger-16/regulator/regulator.104
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.105 -> ../../devices/soc/soc:usb-otg-switch/regulator/regulator.105
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.11 -> ../../devices/soc/soc:qcom,rpm-smd/soc:qcom,rpm-smd:rpm-regulator-smpa1/soc:qcom,rpm-smd:rpm-regulator-smpa1:regulator-s1-floor-corner/regulator/regulator.11
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.12 -> ../../devices/soc/soc:qcom,rpm-smd/soc:qcom,rpm-smd:rpm-regulator-smpa1/soc:qcom,rpm-smd:rpm-regulator-smpa1:regulator-s1-corner-ao/regulator/regulator.12
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.13 -> ../../devices/soc/soc:qcom,rpm-smd/soc:qcom,rpm-smd:rpm-regulator-smpa2/soc:qcom,rpm-smd:rpm-regulator-smpa2:regulator-s2-corner/regulator/regulator.13
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.14 -> ../../devices/soc/soc:qcom,rpm-smd/soc:qcom,rpm-smd:rpm-regulator-smpa2/soc:qcom,rpm-smd:rpm-regulator-smpa2:regulator-s2-corner-ao/regulator/regulator.14
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.15 -> ../../devices/soc/soc:qcom,rpm-smd/soc:qcom,rpm-smd:rpm-regulator-smpa3/soc:qcom,rpm-smd:rpm-regulator-smpa3:regulator-s3/regulator/regulator.15
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.16 -> ../../devices/soc/soc:qcom,rpm-smd/soc:qcom,rpm-smd:rpm-regulator-smpa4/soc:qcom,rpm-smd:rpm-regulator-smpa4:regulator-s4/regulator/regulator.16
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.17 -> ../../devices/soc/soc:qcom,rpm-smd/soc:qcom,rpm-smd:rpm-regulator-smpa5/soc:qcom,rpm-smd:rpm-regulator-smpa5:regulator-s5/regulator/regulator.17
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.18 -> ../../devices/soc/soc:qcom,rpm-smd/soc:qcom,rpm-smd:rpm-regulator-smpa7/soc:qcom,rpm-smd:rpm-regulator-smpa7:regulator-s7/regulator/regulator.18
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.19 -> ../../devices/soc/soc:qcom,rpm-smd/soc:qcom,rpm-smd:rpm-regulator-ldoa1/soc:qcom,rpm-smd:rpm-regulator-ldoa1:regulator-l1/regulator/regulator.19
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.2 -> ../../devices/soc/99e00c0.apc0-pwrcl-mem-acc-regulator/regulator/regulator.2
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.20 -> ../../devices/soc/soc:qcom,rpm-smd/soc:qcom,rpm-smd:rpm-regulator-ldoa2/soc:qcom,rpm-smd:rpm-regulator-ldoa2:regulator-l2/regulator/regulator.20
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.21 -> ../../devices/soc/soc:qcom,rpm-smd/soc:qcom,rpm-smd:rpm-regulator-ldoa3/soc:qcom,rpm-smd:rpm-regulator-ldoa3:regulator-l3/regulator/regulator.21
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.22 -> ../../devices/soc/soc:qcom,rpm-smd/soc:qcom,rpm-smd:rpm-regulator-ldoa4/soc:qcom,rpm-smd:rpm-regulator-ldoa4:regulator-l4/regulator/regulator.22
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.23 -> ../../devices/soc/soc:qcom,rpm-smd/soc:qcom,rpm-smd:rpm-regulator-ldoa6/soc:qcom,rpm-smd:rpm-regulator-ldoa6:regulator-l6/regulator/regulator.23
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.24 -> ../../devices/soc/soc:qcom,rpm-smd/soc:qcom,rpm-smd:rpm-regulator-ldoa8/soc:qcom,rpm-smd:rpm-regulator-ldoa8:regulator-l8/regulator/regulator.24
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.25 -> ../../devices/soc/soc:qcom,rpm-smd/soc:qcom,rpm-smd:rpm-regulator-ldoa9/soc:qcom,rpm-smd:rpm-regulator-ldoa9:regulator-l9/regulator/regulator.25
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.26 -> ../../devices/soc/soc:qcom,rpm-smd/soc:qcom,rpm-smd:rpm-regulator-ldoa10/soc:qcom,rpm-smd:rpm-regulator-ldoa10:regulator-l10/regulator/regulator.26
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.27 -> ../../devices/soc/soc:qcom,rpm-smd/soc:qcom,rpm-smd:rpm-regulator-ldoa11/soc:qcom,rpm-smd:rpm-regulator-ldoa11:regulator-l11/regulator/regulator.27
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.28 -> ../../devices/soc/soc:qcom,rpm-smd/soc:qcom,rpm-smd:rpm-regulator-ldoa12/soc:qcom,rpm-smd:rpm-regulator-ldoa12:regulator-l12/regulator/regulator.28
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.29 -> ../../devices/soc/soc:qcom,rpm-smd/soc:qcom,rpm-smd:rpm-regulator-ldoa13/soc:qcom,rpm-smd:rpm-regulator-ldoa13:regulator-l13/regulator/regulator.29
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.3 -> ../../devices/soc/99e00c0.apc1-perfcl-mem-acc-regulator/regulator/regulator.3
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.30 -> ../../devices/soc/soc:qcom,rpm-smd/soc:qcom,rpm-smd:rpm-regulator-ldoa14/soc:qcom,rpm-smd:rpm-regulator-ldoa14:regulator-l14/regulator/regulator.30
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.31 -> ../../devices/soc/soc:qcom,rpm-smd/soc:qcom,rpm-smd:rpm-regulator-ldoa15/soc:qcom,rpm-smd:rpm-regulator-ldoa15:regulator-l15/regulator/regulator.31
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.32 -> ../../devices/soc/soc:qcom,rpm-smd/soc:qcom,rpm-smd:rpm-regulator-ldoa16/soc:qcom,rpm-smd:rpm-regulator-ldoa16:regulator-l16/regulator/regulator.32
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.33 -> ../../devices/soc/soc:qcom,rpm-smd/soc:qcom,rpm-smd:rpm-regulator-ldoa17/soc:qcom,rpm-smd:rpm-regulator-ldoa17:regulator-l17/regulator/regulator.33
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.34 -> ../../devices/soc/soc:qcom,rpm-smd/soc:qcom,rpm-smd:rpm-regulator-ldoa18/soc:qcom,rpm-smd:rpm-regulator-ldoa18:regulator-l18/regulator/regulator.34
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.35 -> ../../devices/soc/soc:qcom,rpm-smd/soc:qcom,rpm-smd:rpm-regulator-ldoa18/soc:qcom,rpm-smd:rpm-regulator-ldoa18:regulator-l18-pin-ctrl/regulator/regulator.35
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.36 -> ../../devices/soc/soc:qcom,rpm-smd/soc:qcom,rpm-smd:rpm-regulator-ldoa19/soc:qcom,rpm-smd:rpm-regulator-ldoa19:regulator-l19/regulator/regulator.36
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.37 -> ../../devices/soc/soc:qcom,rpm-smd/soc:qcom,rpm-smd:rpm-regulator-ldoa20/soc:qcom,rpm-smd:rpm-regulator-ldoa20:regulator-l20/regulator/regulator.37
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.38 -> ../../devices/soc/soc:qcom,rpm-smd/soc:qcom,rpm-smd:rpm-regulator-ldoa21/soc:qcom,rpm-smd:rpm-regulator-ldoa21:regulator-l21/regulator/regulator.38
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.39 -> ../../devices/soc/soc:qcom,rpm-smd/soc:qcom,rpm-smd:rpm-regulator-ldoa22/soc:qcom,rpm-smd:rpm-regulator-ldoa22:regulator-l22/regulator/regulator.39
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.4 -> ../../devices/soc/99e00c0.apcc-l3-mem-acc-regulator/regulator/regulator.4
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.40 -> ../../devices/soc/soc:qcom,rpm-smd/soc:qcom,rpm-smd:rpm-regulator-ldoa23/soc:qcom,rpm-smd:rpm-regulator-ldoa23:regulator-l23/regulator/regulator.40
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.41 -> ../../devices/soc/soc:qcom,rpm-smd/soc:qcom,rpm-smd:rpm-regulator-ldoa24/soc:qcom,rpm-smd:rpm-regulator-ldoa24:regulator-l24/regulator/regulator.41
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.42 -> ../../devices/soc/soc:qcom,rpm-smd/soc:qcom,rpm-smd:rpm-regulator-ldoa25/soc:qcom,rpm-smd:rpm-regulator-ldoa25:regulator-l25/regulator/regulator.42
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.43 -> ../../devices/soc/soc:qcom,rpm-smd/soc:qcom,rpm-smd:rpm-regulator-ldoa26/soc:qcom,rpm-smd:rpm-regulator-ldoa26:regulator-l26-corner/regulator/regulator.43
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.44 -> ../../devices/soc/soc:qcom,rpm-smd/soc:qcom,rpm-smd:rpm-regulator-ldoa26/soc:qcom,rpm-smd:rpm-regulator-ldoa26:regulator-l26-floor-corner/regulator/regulator.44
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.45 -> ../../devices/soc/soc:qcom,rpm-smd/soc:qcom,rpm-smd:rpm-regulator-ldoa27/soc:qcom,rpm-smd:rpm-regulator-ldoa27:regulator-l27/regulator/regulator.45
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.46 -> ../../devices/soc/soc:qcom,rpm-smd/soc:qcom,rpm-smd:rpm-regulator-ldoa28/soc:qcom,rpm-smd:rpm-regulator-ldoa28:regulator-l28/regulator/regulator.46
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.47 -> ../../devices/soc/soc:qcom,rpm-smd/soc:qcom,rpm-smd:rpm-regulator-ldoa29/soc:qcom,rpm-smd:rpm-regulator-ldoa29:regulator-l29/regulator/regulator.47
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.48 -> ../../devices/soc/soc:qcom,rpm-smd/soc:qcom,rpm-smd:rpm-regulator-ldoa30/soc:qcom,rpm-smd:rpm-regulator-ldoa30:regulator-l30/regulator/regulator.48
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.49 -> ../../devices/soc/soc:qcom,rpm-smd/soc:qcom,rpm-smd:rpm-regulator-ldoa32/soc:qcom,rpm-smd:rpm-regulator-ldoa32:regulator-l32/regulator/regulator.49
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.5 -> ../../devices/soc/7af004.regulator/regulator/regulator.5
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.50 -> ../../devices/soc/soc:qcom,rpm-smd/soc:qcom,rpm-smd:rpm-regulator-vsa1/soc:qcom,rpm-smd:rpm-regulator-vsa1:regulator-lvs1/regulator/regulator.50
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.51 -> ../../devices/soc/soc:qcom,rpm-smd/soc:qcom,rpm-smd:rpm-regulator-vsa2/soc:qcom,rpm-smd:rpm-regulator-vsa2:regulator-lvs2/regulator/regulator.51
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.52 -> ../../devices/soc/soc:qcom,rpm-smd/soc:qcom,rpm-smd:rpm-regulator-smpb1/soc:qcom,rpm-smd:rpm-regulator-smpb1:regulator-s1/regulator/regulator.52
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.55 -> ../../devices/soc/soc:qcom,rpm-smd/soc:qcom,rpm-smd:rpm-regulator-bbyb/soc:qcom,rpm-smd:rpm-regulator-bbyb:regulator-bby/regulator/regulator.55
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.56 -> ../../devices/soc/spm-regulator-9/regulator/regulator.56
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.57 -> ../../devices/soc/spm-regulator-9/regulator/regulator.57
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.6 -> ../../devices/soc/99a2000.regulator/regulator/regulator.6
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.60 -> ../../devices/soc/99e8000.cpr3-ctrl/regulator/regulator.60
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.61 -> ../../devices/soc/99e8000.cpr3-ctrl/regulator/regulator.61
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.62 -> ../../devices/soc/99e8000.cpr3-ctrl/regulator/regulator.62
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.63 -> ../../devices/soc/838000.cpr3-ctrl/regulator/regulator.63
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.68 -> ../../devices/soc/8c529c.qcom,gdsc/regulator/regulator.68
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.7 -> ../../devices/soc/99a2000.regulator/regulator/regulator.7
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.70 -> ../../devices/soc/soc:wlan_en_vreg/regulator/regulator.70
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.71 -> ../../devices/soc/qpnp-power-on-11/regulator/regulator.71
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.72 -> ../../devices/soc/8c119c.qcom,gdsc/regulator/regulator.72
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.73 -> ../../devices/soc/8c247c.qcom,gdsc/regulator/regulator.73
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.74 -> ../../devices/soc/8c3c4c.qcom,gdsc/regulator/regulator.74
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.75 -> ../../devices/soc/8c1024.qcom,gdsc/regulator/regulator.75
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.76 -> ../../devices/soc/8c1040.qcom,gdsc/regulator/regulator.76
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.77 -> ../../devices/soc/8c1044.qcom,gdsc/regulator/regulator.77
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.78 -> ../../devices/soc/8c34a0.qcom,gdsc/regulator/regulator.78
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.79 -> ../../devices/soc/8c3664.qcom,gdsc/regulator/regulator.79
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.8 -> ../../devices/soc/99d2000.regulator/regulator/regulator.8
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.80 -> ../../devices/soc/8c3674.qcom,gdsc/regulator/regulator.80
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.81 -> ../../devices/soc/8c2304.qcom,gdsc/regulator/regulator.81
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.82 -> ../../devices/soc/8c35a4.qcom,gdsc/regulator/regulator.82
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.83 -> ../../devices/soc/8c36d4.qcom,gdsc/regulator/regulator.83
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.84 -> ../../devices/soc/36b004.qcom,gdsc/regulator/regulator.84
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.85 -> ../../devices/soc/36d004.qcom,gdsc/regulator/regulator.85
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.86 -> ../../devices/soc/36e004.qcom,gdsc/regulator/regulator.86
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.87 -> ../../devices/soc/30f004.qcom,gdsc/regulator/regulator.87
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.88 -> ../../devices/soc/375004.qcom,gdsc/regulator/regulator.88
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.89 -> ../../devices/soc/8c3b64.qcom,gdsc/regulator/regulator.89
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.9 -> ../../devices/soc/99d2000.regulator/regulator/regulator.9
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.90 -> ../../devices/soc/8c4034.qcom,gdsc/regulator/regulator.90
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.91 -> ../../devices/soc/8c4024.qcom,gdsc/regulator/regulator.91
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.92 -> ../../devices/soc/37d024.qcom,gdsc/regulator/regulator.92
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.93 -> ../../devices/soc/37d034.qcom,gdsc/regulator/regulator.93
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.94 -> ../../devices/soc/37d038.qcom,gdsc/regulator/regulator.94
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.95 -> ../../devices/soc/381004.qcom,gdsc/regulator/regulator.95
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.96 -> ../../devices/soc/soc:qcom,rpm-smd/soc:qcom,rpm-smd:rpm-regulator-bstb/soc:qcom,rpm-smd:rpm-regulator-bstb:regulator-bst/regulator/regulator.96
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.97 -> ../../devices/soc/soc:qcom,rpm-smd/soc:qcom,rpm-smd:rpm-regulator-bstb/soc:qcom,rpm-smd:rpm-regulator-bstb:regulator-bst-pin-ctrl/regulator/regulator.97
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.98 -> ../../devices/soc/qpnp-labibb-regulator-22/regulator/regulator.98
+lrwxrwxrwx 1 root root 0 2026-10-29 15:48 regulator.99 -> ../../devices/soc/qpnp-labibb-regulator-22/regulator/regulator.99
+@@ FILE /sys/class/kgsl/kgsl-3d0/gpubusy
+      0       0
+@@ RETURN 0
+@@ FILE /sys/class/kgsl/kgsl-3d0/gpu_busy_percentage
+0 %
+@@ RETURN 0
+@@ FILE /sys/class/kgsl/kgsl-3d0/gpuclk
+214000000
+@@ RETURN 0
+@@ FILE /sys/class/kgsl/kgsl-3d0/gpu_available_frequencies
+/system/bin/sh: cat: /sys/class/kgsl/kgsl-3d0/gpu_available_frequencies: Permission denied
+@@ RETURN 1
+@@ FILE /sys/class/kgsl/kgsl-3d0/devfreq/cur_freq
+214000000
+@@ RETURN 0
+@@ FILE /sys/class/kgsl/kgsl-3d0/devfreq/available_frequencies
+133000000 214000000 315000000 401800000 510000000 560000000 624000000 652800000
+@@ RETURN 0
+@@ FILE /sys/class/kgsl/kgsl-3d0/devfreq/busy_time
+/system/bin/sh: cat: /sys/class/kgsl/kgsl-3d0/devfreq/busy_time: No such file or directory
+@@ RETURN 1
+@@ FILE /sys/class/kgsl/kgsl-3d0/devfreq/total_time
+/system/bin/sh: cat: /sys/class/kgsl/kgsl-3d0/devfreq/total_time: No such file or directory
+@@ RETURN 1
+@@ FILE /sys/class/kgsl/kgsl-3d0/devfreq/trans_stat
+   From  :   To
+         :652800000624000000560000000510000000401800000315000000214000000133000000   time(ms)
+ 652800000:       0      37       0       0       0       0      16       0     42520
+ 624000000:      20       0      31       0       0       0       2       0     11680
+ 560000000:       0      16       0      28       0       0       4       0     11050
+ 510000000:       0       0      17       0      26       0       6       0     17540
+ 401800000:       0       0       0      21       0      46       7       0     41450
+ 315000000:       0       0       0       0      48       0      97       0   1267560
+*214000000:      32       0       0       0       0      95       0     475 154138070
+ 133000000:       1       0       0       0       0       4     470       0   2087000
+Total transition : 1499
+@@ RETURN 0
+@@ FILE /sys/class/kgsl/kgsl-3d0/devfreq/time_in_state
+/system/bin/sh: cat: /sys/class/kgsl/kgsl-3d0/devfreq/time_in_state: No such file or directory
+@@ RETURN 1
+@@ FILE /sys/class/kgsl/kgsl-3d0/devfreq/voltage
+/system/bin/sh: cat: /sys/class/kgsl/kgsl-3d0/devfreq/voltage: No such file or directory
+@@ RETURN 1
+@@ FILE /sys/class/kgsl/kgsl-3d0/voltage
+/system/bin/sh: cat: /sys/class/kgsl/kgsl-3d0/voltage: No such file or directory
+@@ RETURN 1
+@@ FILE /sys/devices/system/cpu/cpu0/cpufreq/stats/time_in_state
+307200 13777516
+384000 178456
+460800 52927
+537600 29933
+614400 800147
+691200 28800
+768000 420816
+844800 25089
+902400 18683
+979200 59803
+1056000 24471
+1132800 14125
+1209600 11723
+1286400 12599
+1363200 37119
+1440000 7852
+1516800 6377
+1593600 241614
+2188800 13601
+@@ RETURN 0
+@@ FILE /sys/devices/system/cpu/cpu2/cpufreq/stats/time_in_state
+307200 642879
+384000 1183
+460800 1010
+537600 916
+614400 11876
+691200 1553
+748800 1715
+825600 1213
+902400 1233
+979200 68704
+1056000 70668
+1132800 2775
+1209600 3337
+1286400 1491
+1363200 1396
+1440000 4086
+1516800 944
+1593600 815
+1670400 621
+1747200 182
+1824000 466
+1900800 181
+1977600 337
+2054400 466
+2150400 6717
+2246400 984
+2342400 16383
+@@ RETURN 0
+@@ FILE /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_frequencies
+307200 384000 460800 537600 614400 691200 768000 844800 902400 979200 1056000 1132800 1209600 1286400 1363200 1440000 1516800 1593600 2188800 
+@@ RETURN 0
+@@ FILE /sys/devices/system/cpu/cpu2/cpufreq/scaling_available_frequencies
+307200 384000 460800 537600 614400 691200 748800 825600 902400 979200 1056000 1132800 1209600 1286400 1363200 1440000 1516800 1593600 1670400 1747200 1824000 1900800 1977600 2054400 2150400 2246400 2342400 
+@@ RETURN 0
+@@ FILE /sys/devices/system/cpu/cpu0/cpufreq/scaling_voltages
+/system/bin/sh: cat: /sys/devices/system/cpu/cpu0/cpufreq/scaling_voltages: No such file or directory
+@@ RETURN 1
+@@ FILE /sys/devices/system/cpu/cpu0/cpufreq/UV_mV_table
+/system/bin/sh: cat: /sys/devices/system/cpu/cpu0/cpufreq/UV_mV_table: No such file or directory
+@@ RETURN 1
+@@ FILE /sys/kernel/debug/regulator/regulator_summary
+/system/bin/sh: cat: /sys/kernel/debug/regulator/regulator_summary: No such file or directory
+@@ RETURN 1
+@@ FILE /sys/class/power_supply/battery/voltage_now
+4318364
+@@ RETURN 0
+@@ FILE /sys/class/power_supply/battery/current_now
+152
+@@ RETURN 0
+@@ FILE /sys/class/power_supply/battery/status
+Full
+@@ RETURN 0
+/system/bin/sh: getconf: not found

@@ -1,0 +1,62 @@
+
+/Users/wuweiwei1/src/mpv/_build-arm64-mks/libmpv.so:	file format elf64-littleaarch64
+
+Disassembly of section .text:
+
+0000000000e184b0 <gl_pass_create>:
+  e18b70: b94022c8     	ldr	w8, [x22, #0x20]
+  e18b74: 7100051f     	cmp	w8, #0x1
+  e18b78: 540000ca     	b.ge	0xe18b90 <gl_pass_create+0x6e0>
+  e18b7c: 14000043     	b	0xe18c88 <gl_pass_create+0x7d8>
+  e18b80: f900137f     	str	xzr, [x27, #0x20]
+  e18b84: b94022c8     	ldr	w8, [x22, #0x20]
+  e18b88: 7100051f     	cmp	w8, #0x1
+  e18b8c: 540007eb     	b.lt	0xe18c88 <gl_pass_create+0x7d8>
+  e18b90: aa1f03f7     	mov	x23, xzr
+  e18b94: aa1f03f8     	mov	x24, xzr
+  e18b98: 14000011     	b	0xe18bdc <gl_pass_create+0x72c>
+  e18b9c: 8b170119     	add	x25, x8, x23
+  e18ba0: f94542a8     	ldr	x8, [x21, #0xa80]
+  e18ba4: b9400360     	ldr	w0, [x27]
+  e18ba8: f9400321     	ldr	x1, [x25]
+  e18bac: d63f0100     	blr	x8
+  e18bb0: f94936a9     	ldr	x9, [x21, #0x1268]
+  e18bb4: b9400368     	ldr	w8, [x27]
+  e18bb8: b9400f22     	ldr	w2, [x25, #0xc]
+  e18bbc: 2a0003e1     	mov	w1, w0
+  e18bc0: 2a0803e0     	mov	w0, w8
+  e18bc4: d63f0120     	blr	x9
+  e18bc8: b98022c8     	ldrsw	x8, [x22, #0x20]
+  e18bcc: 91000718     	add	x24, x24, #0x1
+  e18bd0: 910062f7     	add	x23, x23, #0x18
+  e18bd4: eb08031f     	cmp	x24, x8
+  e18bd8: 5400058a     	b.ge	0xe18c88 <gl_pass_create+0x7d8>
+  e18bdc: f9400ec8     	ldr	x8, [x22, #0x18]
+  e18be0: 8b170109     	add	x9, x8, x23
+  e18be4: b9400929     	ldr	w9, [x9, #0x8]
+  e18be8: 71000d3f     	cmp	w9, #0x3
+  e18bec: 5400018b     	b.lt	0xe18c1c <gl_pass_create+0x76c>
+  e18bf0: 54fffd6d     	b.le	0xe18b9c <gl_pass_create+0x6ec>
+  e18bf4: 7100113f     	cmp	w9, #0x4
+  e18bf8: 540002e1     	b.ne	0xe18c54 <gl_pass_create+0x7a4>
+  e18bfc: 8b170119     	add	x25, x8, x23
+  e18c00: f9447aa8     	ldr	x8, [x21, #0x8f0]
+  e18c04: b9400360     	ldr	w0, [x27]
+  e18c08: f9400322     	ldr	x2, [x25]
+  e18c0c: 52925cc1     	mov	w1, #0x92e6             // =37606
+  e18c10: d63f0100     	blr	x8
+  e18c14: f947e6a9     	ldr	x9, [x21, #0xfc8]
+  e18c18: 17ffffe7     	b	0xe18bb4 <gl_pass_create+0x704>
+  e18c1c: 5100052a     	sub	w10, w9, #0x1
+  e18c20: 7100095f     	cmp	w10, #0x2
+  e18c24: 54000142     	b.hs	0xe18c4c <gl_pass_create+0x79c>
+  e18c28: 8b170119     	add	x25, x8, x23
+  e18c2c: f9454aa8     	ldr	x8, [x21, #0xa90]
+  e18c30: b9400360     	ldr	w0, [x27]
+  e18c34: f9400321     	ldr	x1, [x25]
+  e18c38: d63f0100     	blr	x8
+  e18c3c: f948c6a8     	ldr	x8, [x21, #0x1188]
+  e18c40: b9400f21     	ldr	w1, [x25, #0xc]
+  e18c44: d63f0100     	blr	x8
+  e18c48: 17ffffe0     	b	0xe18bc8 <gl_pass_create+0x718>
+  e18c4c: 35fffbe9     	cbnz	w9, 0xe18bc8 <gl_pass_create+0x718>

@@ -1,0 +1,23 @@
+WARNING: linker: /data/local/tmp/lg_gpu_timer_probe_20261030: unsupported flags DT_FLAGS_1=0x8000001
+renderer=Adreno (TM) 530 timer_extension=1
+elapsed_counter_bits=40
+ready=1 disjoint=0 elapsed_ns=10834 gl_error=0
+WARNING: linker: /data/local/tmp/lg_gpu_timer_probe_20261030: unsupported flags DT_FLAGS_1=0x8000001
+renderer=Adreno (TM) 530 timer_extension=1
+elapsed_counter_bits=40
+ready=1 disjoint=0 elapsed_ns=10104 gl_error=0
+WARNING: linker: /data/local/tmp/lg_gpu_timer_probe_20261030: unsupported flags DT_FLAGS_1=0x8000001
+renderer=Adreno (TM) 530 timer_extension=1
+elapsed_counter_bits=40
+ready=1 disjoint=0 elapsed_ns=10833 gl_error=0
+WARNING: linker: /data/local/tmp/lg_gpu_timer_probe_20261030: unsupported flags DT_FLAGS_1=0x8000001
+renderer=Adreno (TM) 530 timer_extension=1
+elapsed_counter_bits=40
+ready=1 disjoint=0 elapsed_ns=10886 gl_error=0
+WARNING: linker: /data/local/tmp/lg_gpu_timer_probe_20261030: unsupported flags DT_FLAGS_1=0x8000001
+renderer=Adreno (TM) 530 timer_extension=1
+elapsed_counter_bits=40
+ready=1 disjoint=0 elapsed_ns=10260 gl_error=0
+0
+24300
+304

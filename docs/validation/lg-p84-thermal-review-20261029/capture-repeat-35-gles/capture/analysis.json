@@ -1,0 +1,370 @@
+{
+  "schema": 1,
+  "status": "captured-float-differences",
+  "capture_id": 5674263757,
+  "generation": 2,
+  "pid": 4653,
+  "source_pts": 35.035,
+  "target_pts": 35.035,
+  "roi": {
+    "x": 1304,
+    "y": 636,
+    "w": 64,
+    "h": 64
+  },
+  "pixels": 4096,
+  "shader_body_hash": "11628856946474726218",
+  "files": {
+    "lib": {
+      "file": "mks-yuv-compare-4653-5674263757.lib.bin",
+      "bytes": 229376,
+      "sha256": "14b1bc02c6ea76043d04068a978c8b1071c47e8afadd121064ad4ecbb5be362b"
+    },
+    "android": {
+      "file": "mks-yuv-compare-4653-5674263757.android.bin",
+      "bytes": 114688,
+      "sha256": "894d47c84f731607fae0a21351b8fcd73a9a74e8e4ec635e51a39ba77af37fe2"
+    },
+    "candidate": {
+      "file": "mks-yuv-compare-4653-5674263757.candidate.glsl",
+      "bytes": 4146,
+      "sha256": "e41d38e1a6292e91c6f1f82f1f0eefc816e74bce3b7517d9e68600b8ed8288ae"
+    },
+    "baseline": {
+      "file": "mks-yuv-compare-4653-5674263757.baseline.glsl",
+      "bytes": 3010,
+      "sha256": "79b9912c5b7172d1f5ff0897a0f2807543ef93694be6409650590d0230a9c705"
+    },
+    "vertex": {
+      "file": "mks-yuv-compare-4653-5674263757.vertex.glsl",
+      "bytes": 579,
+      "sha256": "e04be920b486682583648ce74cea2138b59fcdf5e377dc8ee24e8fa009476677"
+    }
+  },
+  "comparisons": {
+    "pre_rgb": {
+      "components": 12288,
+      "bit_mismatches": 21,
+      "nonfinite_components": 0,
+      "max_absolute_difference": 0.00011596083641052246,
+      "max_ulp_distance": 7782,
+      "max_absolute_difference_location": {
+        "x": 1338,
+        "y": 678,
+        "channel": "G"
+      },
+      "first_differences": [
+        {
+          "x": 1305,
+          "y": 657,
+          "channel": "R",
+          "left_bits": "3e7dc99d",
+          "right_bits": "3e7dc9ed",
+          "left": 0.24783940613269806,
+          "right": 0.24784059822559357,
+          "absolute_difference": 1.1920928955078125e-06
+        },
+        {
+          "x": 1305,
+          "y": 657,
+          "channel": "G",
+          "left_bits": "3e74acbf",
+          "right_bits": "3e74ac25",
+          "left": 0.23894022405147552,
+          "right": 0.23893792927265167,
+          "absolute_difference": 2.294778823852539e-06
+        },
+        {
+          "x": 1305,
+          "y": 657,
+          "channel": "B",
+          "left_bits": "3e764c5b",
+          "right_bits": "3e7633a0",
+          "left": 0.24052564799785614,
+          "right": 0.2404313087463379,
+          "absolute_difference": 9.433925151824951e-05
+        },
+        {
+          "x": 1318,
+          "y": 678,
+          "channel": "R",
+          "left_bits": "3e5045f5",
+          "right_bits": "3e504636",
+          "left": 0.20339186489582062,
+          "right": 0.20339283347129822,
+          "absolute_difference": 9.685754776000977e-07
+        },
+        {
+          "x": 1318,
+          "y": 678,
+          "channel": "G",
+          "left_bits": "3e4b40dc",
+          "right_bits": "3e4b411e",
+          "left": 0.19848960638046265,
+          "right": 0.19849058985710144,
+          "absolute_difference": 9.834766387939453e-07
+        },
+        {
+          "x": 1318,
+          "y": 678,
+          "channel": "B",
+          "left_bits": "3e4b95cb",
+          "right_bits": "3e4bb1cd",
+          "left": 0.19881360232830048,
+          "right": 0.19892044365406036,
+          "absolute_difference": 0.0001068413257598877
+        },
+        {
+          "x": 1328,
+          "y": 678,
+          "channel": "R",
+          "left_bits": "3e62132c",
+          "right_bits": "3e6213ba",
+          "left": 0.2207762598991394,
+          "right": 0.22077837586402893,
+          "absolute_difference": 2.115964889526367e-06
+        },
+        {
+          "x": 1328,
+          "y": 678,
+          "channel": "G",
+          "left_bits": "3e61c4c5",
+          "right_bits": "3e61c552",
+          "left": 0.2204771786928177,
+          "right": 0.22047927975654602,
+          "absolute_difference": 2.1010637283325195e-06
+        },
+        {
+          "x": 1328,
+          "y": 678,
+          "channel": "B",
+          "left_bits": "3e60a46d",
+          "right_bits": "3e60bee1",
+          "left": 0.21937723457813263,
+          "right": 0.21947814524173737,
+          "absolute_difference": 0.00010091066360473633
+        },
+        {
+          "x": 1337,
+          "y": 678,
+          "channel": "R",
+          "left_bits": "3e62f9bd",
+          "right_bits": "3e63154e",
+          "left": 0.22165580093860626,
+          "right": 0.22176095843315125,
+          "absolute_difference": 0.00010515749454498291
+        }
+      ],
+      "left_role": "baseline_pre_store",
+      "right_role": "candidate_pre_half"
+    },
+    "half_rgb": {
+      "components": 12288,
+      "bit_mismatches": 7,
+      "nonfinite_components": 0,
+      "max_absolute_difference": 0.000244140625,
+      "max_ulp_distance": 8192,
+      "max_absolute_difference_location": {
+        "x": 1347,
+        "y": 678,
+        "channel": "R"
+      },
+      "first_differences": [
+        {
+          "x": 1305,
+          "y": 657,
+          "channel": "B",
+          "left_bits": "3e764000",
+          "right_bits": "3e762000",
+          "left": 0.240478515625,
+          "right": 0.2403564453125,
+          "absolute_difference": 0.0001220703125
+        },
+        {
+          "x": 1318,
+          "y": 678,
+          "channel": "B",
+          "left_bits": "3e4b8000",
+          "right_bits": "3e4ba000",
+          "left": 0.19873046875,
+          "right": 0.1988525390625,
+          "absolute_difference": 0.0001220703125
+        },
+        {
+          "x": 1337,
+          "y": 678,
+          "channel": "R",
+          "left_bits": "3e62e000",
+          "right_bits": "3e630000",
+          "left": 0.2215576171875,
+          "right": 0.2216796875,
+          "absolute_difference": 0.0001220703125
+        },
+        {
+          "x": 1337,
+          "y": 678,
+          "channel": "B",
+          "left_bits": "3e568000",
+          "right_bits": "3e56a000",
+          "left": 0.20947265625,
+          "right": 0.2095947265625,
+          "absolute_difference": 0.0001220703125
+        },
+        {
+          "x": 1338,
+          "y": 678,
+          "channel": "R",
+          "left_bits": "3e692000",
+          "right_bits": "3e694000",
+          "left": 0.2276611328125,
+          "right": 0.227783203125,
+          "absolute_difference": 0.0001220703125
+        },
+        {
+          "x": 1338,
+          "y": 678,
+          "channel": "G",
+          "left_bits": "3e69e000",
+          "right_bits": "3e6a0000",
+          "left": 0.2283935546875,
+          "right": 0.228515625,
+          "absolute_difference": 0.0001220703125
+        },
+        {
+          "x": 1347,
+          "y": 678,
+          "channel": "R",
+          "left_bits": "3e828000",
+          "right_bits": "3e82a000",
+          "left": 0.2548828125,
+          "right": 0.255126953125,
+          "absolute_difference": 0.000244140625
+        }
+      ],
+      "left_role": "baseline_sampled_rgb16f",
+      "right_role": "candidate_emulated_half"
+    },
+    "yuv": {
+      "components": 12288,
+      "bit_mismatches": 15,
+      "nonfinite_components": 0,
+      "max_absolute_difference": 0.0001220703125,
+      "max_ulp_distance": 7706,
+      "max_absolute_difference_location": {
+        "x": 1347,
+        "y": 678,
+        "channel": "Cr"
+      },
+      "first_differences": [
+        {
+          "x": 1305,
+          "y": 657,
+          "channel": "Y",
+          "left_bits": "3e771e56",
+          "right_bits": "3e771c70",
+          "left": 0.24132665991783142,
+          "right": 0.2413194179534912,
+          "absolute_difference": 7.241964340209961e-06
+        },
+        {
+          "x": 1305,
+          "y": 657,
+          "channel": "Cb",
+          "left_bits": "3effc4e9",
+          "right_bits": "3effbcea",
+          "left": 0.49954918026924133,
+          "right": 0.4994881749153137,
+          "absolute_difference": 6.1005353927612305e-05
+        },
+        {
+          "x": 1305,
+          "y": 657,
+          "channel": "Cr",
+          "left_bits": "3f011fd1",
+          "right_bits": "3f012024",
+          "left": 0.5043917298316956,
+          "right": 0.5043966770172119,
+          "absolute_difference": 4.947185516357422e-06
+        },
+        {
+          "x": 1318,
+          "y": 678,
+          "channel": "Y",
+          "left_bits": "3e4c940d",
+          "right_bits": "3e4c95f3",
+          "left": 0.19978351891040802,
+          "right": 0.19979076087474823,
+          "absolute_difference": 7.241964340209961e-06
+        },
+        {
+          "x": 1318,
+          "y": 678,
+          "channel": "Cb",
+          "left_bits": "3effb6a3",
+          "right_bits": "3effbea3",
+          "left": 0.4994402825832367,
+          "right": 0.4995013177394867,
+          "absolute_difference": 6.103515625e-05
+        },
+        {
+          "x": 1318,
+          "y": 678,
+          "channel": "Cr",
+          "left_bits": "3f009f5b",
+          "right_bits": "3f009f09",
+          "left": 0.5024315714836121,
+          "right": 0.5024266839027405,
+          "absolute_difference": 4.887580871582031e-06
+        },
+        {
+          "x": 1337,
+          "y": 678,
+          "channel": "Y",
+          "left_bits": "3e62d1b4",
+          "right_bits": "3e62dc02",
+          "left": 0.22150307893753052,
+          "right": 0.2215423882007599,
+          "absolute_difference": 3.930926322937012e-05
+        },
+        {
+          "x": 1337,
+          "y": 678,
+          "channel": "Cb",
+          "left_bits": "3efcb9e0",
+          "right_bits": "3efcbfa4",
+          "left": 0.4936056137084961,
+          "right": 0.49364960193634033,
+          "absolute_difference": 4.398822784423828e-05
+        },
+        {
+          "x": 1337,
+          "y": 678,
+          "channel": "Cr",
+          "left_bits": "3f00026d",
+          "right_bits": "3f00061a",
+          "left": 0.5000370144844055,
+          "right": 0.5000931024551392,
+          "absolute_difference": 5.608797073364258e-05
+        },
+        {
+          "x": 1338,
+          "y": 678,
+          "channel": "Y",
+          "left_bits": "3e68bc90",
+          "right_bits": "3e68daaa",
+          "left": 0.22728180885314941,
+          "right": 0.2273966372013092,
+          "absolute_difference": 0.00011482834815979004
+        }
+      ],
+      "left_role": "baseline_csc_yuv",
+      "right_role": "candidate_csc_yuv"
+    }
+  },
+  "limitations": [
+    "Captured shader floats only; not raw NV12, driver quantization, scanout or panel evidence.",
+    "Shader hashes identify archived sources; they do not prove equivalence to uninstrumented baseline.",
+    "Completion/fence/error evidence is asserted by the native producer manifest, not independently queried offline.",
+    "Pixels in one capture are correlated; this is not a performance or statistical confidence test."
+  ]
+}

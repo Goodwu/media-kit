@@ -1,0 +1,82 @@
+{
+  "verdict": "PASS-on-tested-synthetic-dataset-only",
+  "recordedAt": "2026-10-29T17:57:18.807212+08:00",
+  "remoteExitCode": 0,
+  "candidateMode": "highp-small-rtz",
+  "probePid": "9481",
+  "probeExited": true,
+  "settingsUnchanged": true,
+  "hdrUnchanged": true,
+  "gpuCapUnchanged": true,
+  "cpu2CapUnchanged": true,
+  "postflight": {
+    "gpu_thermal_pwrlevel": "0",
+    "battery_temp": "31300",
+    "vts_temp": "346",
+    "settings": "1\n116\n0\n0\n30000",
+    "panel_hdr": "0",
+    "gpu_max_gpuclk": "652800000",
+    "cpu2cap": "2342400",
+    "power": "POWER MANAGER (dumpsys power)\n\nPower Manager State:\n  mDirty=0x0\n  mWakefulness=Awake\n  mWakefulnessChanging=false\n  mIsPowered=true\n  mPlugType=1\n  mBatteryLevel=100\n  mBatteryLevelWhenDreamStarted=0\n  mDockState=0\n  mStayOn=true\n  mProximityPositive=false\n  mBootCompleted=true\n  mSystemReady=true\n  mHalAutoSuspendModeEnabled=false\n  mHalInteractiveModeEnabled=true\n  mWakeLockSummary=0x0\n  mUserActivitySummary=0x4\n  mRequestWaitForNegativeProximity=false\n  mSandmanScheduled=false\n  mSandmanSummoned=false\n  mLowPowerModeEnabled=false\n  mBatteryLevelLow=false\n  mLightDeviceIdleMode=false\n  mDeviceIdleMode=false\n  mDeviceIdleWhitelist=[10105, 10117, 10138]\n  mDeviceIdleTempWhitelist=[]\n  mLastWakeTime=150937599 (14392503 ms ago)\n  mLastSleepTime=150931037 (14399065 ms ago)\n  mLastUserActivityTime=162147219 (3182883 ms ago)\n  mLastUserActivityTimeNoChangeLights=161485154 (3844948 ms ago)\n  mLastInteractivePowerHintTime=162147219 (3182883 ms ago)\n  mLastScreenBrightnessBoostTime=0 (165330102 ms ago)\n  mScreenBrightnessBoostInProgress=false\n  mDisplayReady=true\n  mHoldingWakeLockSuspendBlocker=false\n  mHoldingDisplaySuspendBlocker=true\n\nSettings and Configuration:\n  mDecoupleHalAutoSuspendModeFromDisplayConfig=false\n  mDecoupleHalInteractiveModeFromDisplayConfig=false\n  mWakeUpWhenPluggedOrUnpluggedConfig=true\n  mWakeUpWhenPluggedOrUnpluggedInTheaterModeConfig=false\n  mTheaterModeEnabled=false\n  mSuspendWhenScreenOffDueToProximityConfig=true\n  mDreamsSupportedConfig=true\n  mDreamsEnabledByDefaultConfig=true\n  mDreamsActivatedOnSleepByDefaultConfig=false\n  mDreamsActivatedOnDockByDefaultConfig=true\n  mDreamsActivatedOnKickstandByDefaultConfig=false\n  mDreamsEnabledOnBatteryConfig=false\n  mDreamsBatteryLevelMinimumWhenPoweredConfig=-1\n  mDreamsBatteryLevelMinimumWhenNotPoweredConfig=15\n  mDreamsBatteryLevelDrainCutoffConfig=5\n  mDreamsEnabledSetting=true\n  mDreamsActivateOnSleepSetting=false\n  mDreamsActivateOnDockSetting=true\n  mDreamsActivateOnKickstandSetting=false\n  mDozeAfterScreenOffConfig=false\n  mLowPowerModeSetting=false\n  mAutoLowPowerModeConfigured=false\n  mAutoLowPowerModeSnoozing=false\n  mMinimumScreenOffTimeoutConfig=10000\n  mMaximumScreenDimDurationConfig=15000\n  mMaximumScreenDimRatioConfig=0.20000005\n  mScreenOffTimeoutSetting=30000\n  mSleepTimeoutSetting=-1\n  mMaximumScreenOffTimeoutFromDeviceAdmin=2147483647 (enforced=false)\n  mStayOnWhilePluggedInSetting=7\n  mScreenBrightnessSetting=116\n  mScreenAutoBrightnessAdjustmentSetting=0.0\n  mScreenBrightnessModeSetting=1\n  mScreenBrightnessOverrideFromWindowManager=-1\n  mUserActivityTimeoutOverrideFromWindowManager=-1\n  mUserInactiveOverrideFromWindowManager=false\n  mTemporaryScreenBrightnessSettingOverride=-1\n  mTemporaryScreenAutoBrightnessAdjustmentSettingOverride=NaN\n  mDozeScreenStateOverrideFromDreamManager=0\n  mDozeScreenBrightnessOverrideFromDreamManager=-1\n  mScreenBrightnessSettingMinimum=10\n  mScreenBrightnessSettingMaximum=255\n  mScreenBrightnessSettingDefault=145\n  mDoubleTapWakeEnabled=false\n\nSleep timeout: -1 ms\nScreen off timeout: 30000 ms\nScreen dim duration: 6000 ms\n\nUID states:\n  UID 1000: 0\n  UID 1001: 0\n  UID 1002: 6\n  UID 1027: 0\n  UID 1037: 16\n  UID 2902: 6\n  UID u0a93: 10\n  UID u0a97: 16\n  UID u0a102: 10\n  UID u0a105: 6\n  UID u0a106: 3\n  UID u0a113: 16\n  UID u0a114: 16\n  UID u0a115: 10\n  UID u0a117: 10\n  UID u0a118: 10\n  UID u0a120: 7\n  UID u0a129: 10\n  UID u0a131: 2\n  UID u0a134: 10\n  UID u0a144: 0\n  UID u0a147: 16\n  UID u0a150: 0\n  UID u0a152: 10\n  UID u0a153: 10\n  UID u0a167: 16\n  UID u0a176: 2\n  UID u0a185: 16\n  UID u0a201: 3\n  UID u0a204: 16\n  UID u0a212: 16\n  UID u0a244: 13\n  UID u0a257: 14\n\nWake Locks: size=0\n\nSuspend Blockers: size=4\n  PowerManagerService.WakeLocks: ref count=0\n  PowerManagerService.Display: ref count=1\n  PowerManagerService.Broadcasts: ref count=0\n  PowerManagerService.WirelessChargerDetector: ref count=0\n\nDisplay Power: state=ON\n\nWireless Charger Detector State:\n  mGravitySensor={Sensor name=\"LGE Gravity Sensor\", vendor=\"QTI\", version=2, type=9, maxRange=78.4532, resolution=0.0023956299, power=1.0799866, minDelay=5000}\n  mPoweredWirelessly=false\n  mAtRest=false\n  mRestX=0.0, mRestY=0.0, mRestZ=0.0\n  mDetectionInProgress=false\n  mDetectionStartTime=0 (never)\n  mMustUpdateRestPosition=false\n  mTotalSamples=0\n  mMovingSamples=0\n  mFirstSampleX=0.0, mFirstSampleY=0.0, mFirstSampleZ=0.0\n  mLastSampleX=0.0, mLastSampleY=0.0, mLastSampleZ=0.0\n\nPowerManagerEx State:\n  SUPPORT_AD:false\n  TYPE_OF_AD_SENSOR:0\n  mTemporaryDisableAD:false\n  mCurrentADMode:1\n  mIsWorkingAD:false\n  mADLuxWhenAlcOff:3100\n  mADLuxWhenAlcOn:3100\n  SUPPORT_HL_MODE:true\n  mIsHLMode:0\n  mPrepareMode:-1\n  mWasADworking:false\n  mHlEnableLux:30000\n  mHlDisableLux:10000\n  mForceHLModeLux:0\n  mPocketDetecting:true\n  mThermalState:0\n  mSupportDetectWakelock:false",
+    "probe_process": "absent",
+    "probe_ps": ""
+  },
+  "smallModelObservation": {
+    "scope": "Observed baseline vs CPU hypotheses for nonzero finite abs(input)<2^-14 only; no whole-GPU rounding rule is asserted",
+    "inputDomainComponents": {
+      "zero": 16,
+      "float32Subnormal": 12,
+      "normalFloat32BelowHalfMinSubnormal": 18,
+      "halfSubnormalInterval": 24538,
+      "halfNormalOrLargerFinite": 737302,
+      "nonfinite": 18
+    },
+    "modeledComponents": 24568,
+    "rneMatches": 15358,
+    "rneMismatches": 9210,
+    "rtzMatches": 24568,
+    "rtzMismatches": 0,
+    "bothMatch": 15358,
+    "rneOnlyMatch": 0,
+    "rtzOnlyMatch": 9210,
+    "neitherMatch": 0,
+    "modeledBaselineValueClass": {
+      "halfZero": 30,
+      "halfSubnormal": 24538,
+      "halfNormal": 0,
+      "nonfinite": 0,
+      "other": 0
+    },
+    "rneMismatchBaselineValueClass": {
+      "halfZero": 4,
+      "halfSubnormal": 9206,
+      "halfNormal": 0,
+      "nonfinite": 0,
+      "other": 0
+    },
+    "rtzMismatchBaselineValueClass": {
+      "halfZero": 0,
+      "halfSubnormal": 0,
+      "halfNormal": 0,
+      "nonfinite": 0,
+      "other": 0
+    }
+  },
+  "nonfinite": {
+    "inputTransfer": 0,
+    "quantInput": 0,
+    "quantOutput": 0,
+    "cscInput": 0,
+    "cscOutput": 0
+  },
+  "coverage": "capture sentinel selfchecks complete;253968 pixels/761904 RGB components; all finite/nonfinite quant and CSC bit differences zero",
+  "limits": [
+    "Synthetic values, not captured renderer output or media frames.",
+    "CSC comparison uses highp numeric RGB capture, not layout(yuv) or NV12 driver output.",
+    "Nonfinite payloads and signed zero remain explicitly counted; no numeric tolerance is used.",
+    "highp-small-rtz is a hypothesis mode, not an assumed GPU rounding rule; only actual comparisons decide equality.",
+    "Only this process EGL pbuffer is used; no media, display settings or existing context are modified.",
+    "Equality here cannot prove fused playback shader, source-frame, YUV carrier or panel equivalence."
+  ],
+  "noAdditionalRuns": true
+}

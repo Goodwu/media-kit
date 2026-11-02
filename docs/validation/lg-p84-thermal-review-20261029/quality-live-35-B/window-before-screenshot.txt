@@ -1,0 +1,595 @@
+
+WINDOW MANAGER LAST ANR (dumpsys window lastanr)
+  <no ANR has occurred since boot>
+
+WINDOW MANAGER POLICY STATE (dumpsys window policy)
+    mSafeMode=false mSystemReady=true mSystemBooted=true
+    mLidState=-1 mLidOpenRotation=-1 mCameraLensCoverState=-1 mHdmiPlugged=false
+    mLastSystemUiFlags=0x370e mResettingSystemUiFlags=0x0 mForceClearedSystemUiFlags=0x0
+    mWakeGestureEnabledSetting=true
+    mSupportAutoRotation=true
+    mUiMode=1 mDockMode=0 mEnableCarDockHomeCapture=true mCarDockRotation=-1 mDeskDockRotation=-1
+    mUserRotationMode=1 mUserRotation=1 mAllowAllRotations=0
+    mCurrentAppOrientation=0
+    mCarDockEnablesAccelerometer=true mDeskDockEnablesAccelerometer=true
+    mLidKeyboardAccessibility=0 mLidNavigationAccessibility=0 mLidControlsScreenLock=false
+ mLidControlsSleep=false
+     mLongPressOnBackBehavior=0
+    mShortPressOnPowerBehavior=1 mLongPressOnPowerBehavior=1
+    mIsEnableExtDisplayOnLcdOff=true
+    mDoublePressOnPowerBehavior=0 mTriplePressOnPowerBehavior=0
+    mHasSoftInput=true
+    mAwake=true
+    mScreenOnEarly=true mScreenOnFully=true
+    mKeyguardDrawComplete=true mWindowManagerDrawComplete=true
+    mOrientationSensorEnabled=false
+    mOverscanScreen=(0,0) 2880x1440
+    mRestrictedOverscanScreen=(0,0) 2880x1440
+    mUnrestrictedScreen=(0,0) 2880x1440
+    mRestrictedScreen=(0,0) 2880x1440
+    mStableFullscreen=(0,0)-(2672,1440)
+    mStable=(0,96)-(2672,1440)
+    mSystem=(0,0)-(2880,1440)
+    mCur=(0,0)-(2880,1440)
+    mContent=(0,0)-(2880,1440)
+    mVoiceContent=(0,0)-(2880,1440)
+    mDock=(0,0)-(2880,1440)
+    mDockLayer=268435456 mStatusBarLayer=161000
+    mShowingLockscreen=false mShowingDream=false mDreamingLockscreen=false mDreamingSleepToken=null
+    mStatusBar=Window{565b465 u0 StatusBar} isStatusBarKeyguard=false
+    mNavigationBar=Window{62df58d u0 NavigationBar}
+    mFocusedWindow=Window{8e1f256 u0 com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity}
+    mFocusedApp=Token{15b0901 ActivityRecord{65f1ee8 u0 com.example.media_kit_hdr_lab/.MainActivity t864}}
+    mTopFullscreenOpaqueWindowState=Window{8e1f256 u0 com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity}
+    mTopFullscreenOpaqueOrDimmingWindowState=Window{8e1f256 u0 com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity}
+    mTopIsFullscreen=true mHideLockScreen=false
+    mForceStatusBar=false mForceStatusBarFromKeyguard=false
+    mDismissKeyguard=0 mWinDismissingKeyguard=null mHomePressed=false
+    mAllowLockscreenWhenOn=false mLockScreenTimeout=30000 mLockScreenTimerActive=false
+    mEndcallBehavior=2 mIncallPowerBehavior=1 mLongPressOnHomeBehavior=2
+    mLandscapeRotation=1 mSeascapeRotation=3
+    mPortraitRotation=0 mUpsideDownRotation=2
+    mDemoHdmiRotation=1 mDemoHdmiRotationLock=false
+    mUndockedHdmiRotation=-1
+    mIsTouchExplorationEnabled=false
+    mKeyMapping.size=0
+    BarController.StatusBar
+      mState=WINDOW_STATE_HIDDEN
+      mTransientBar=TRANSIENT_BAR_NONE
+    BarController.NavigationBar
+      mState=WINDOW_STATE_HIDDEN
+      mTransientBar=TRANSIENT_BAR_NONE
+    PolicyControl.sImmersiveStatusFilter=null
+    PolicyControl.sImmersiveNavigationFilter=null
+    PolicyControl.sImmersivePreconfirmationsFilter=null
+    WakeGestureListener
+      mTriggerRequested=false
+      mSensor=null
+    WindowOrientationListener
+      mEnabled=false
+      mCurrentRotation=1
+      mSensorType=null
+      mSensor={Sensor name="LG Motion Accel", vendor="QTI", version=1, type=499898101, maxRange=1.0, resolution=1.0, power=0.17999268, minDelay=0}
+      mRate=2
+      AccelSensorJudge
+        mProposedRotation=-1
+        mPredictedRotation=-1
+        mLastFilteredX=0.12721252
+        mLastFilteredY=-0.103256226
+        mLastFilteredZ=9.454849
+        mLastFilteredTimestampNanos=204393021990852 (1.482844E8ms ago)
+        mTiltHistory={last: 89.0}
+        mFlat=true
+        mSwinging=false
+        mAccelerating=false
+        mOverhead=false
+        mTouched=false
+        mTiltToleranceConfig=[[-25, 60], [-25, 60], [-25, 60], [-25, 60]]
+    KeyguardServiceDelegate
+      showing=false
+      showingAndNotOccluded=true
+      inputRestricted=false
+      occluded=false
+      secure=false
+      dreaming=false
+      systemIsReady=true
+      deviceHasKeyguard=true
+      enabled=false
+      offReason=2
+      currentUser=0
+      bootCompleted=true
+      screenState=2
+      interactiveState=1
+      KeyguardStateMonitor
+        mIsShowing=false
+        mSimSecure=false
+        mInputRestricted=false
+        mCurrentUserId=0
+    LGPhoneWindowManager
+     mHomeKeyExceptionInECMMode=false
+     mIsUseSpc=false
+     mSPLinkScreenOff=true
+     sKeyExceptionWinState=Window{8e1f256 u0 com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity}
+     mIsEnableExtDisplayOnLcdOn=false
+     sSupporLightSensor=true
+     mVolumeKeyShortcutStatus=1
+     mVolumeUpKeyShortcutAction=2
+     mVolumeDownKeyShortcutAction=1
+     mVolumeKeyLongPressEnabled=true
+     mVolumeKeyDoublePressEnabled=true
+     mSimSwitchingKey=true
+     mFourthKeySharing=false
+     mAccelSensorNotSupported=false
+     mSupportQuickMemo=true
+     mQuickMemoInstalled=true
+     mHotKeyCustomizing=false
+     mHotKeyLongPressEnabled=false
+     mHotKeyMode=0
+     mEmergencyLauncherConfigEnabled=false
+     mRestartActionEnabled=false
+     mPowerVolumeDownReset=true
+     mSupportForcedPowerOff=false
+     mPowerKeyScreenOnInCalling=true
+ mHoldingCallByPowerKey=false
+     mVRMode=false
+     mHookingMode=false
+     mSupportSmartRearKey=false
+     mIsCameraInUse=false
+     mFingerPrintScreenshotStatus=false
+     mIsFirstScreenshot=true
+
+WINDOW MANAGER ANIMATOR STATE (dumpsys window animator)
+    DisplayContentsAnimator #0:
+      Window #0: WindowStateAnimator{46d2ef8 com.android.systemui.ImageWallpaper}
+      Window #1: WindowStateAnimator{29cbfd1 com.lge.launcher3/com.lge.launcher3.LauncherExtension}
+      Window #2: WindowStateAnimator{f74d006 SurfaceView - com.appshub.bettbox/com.appshub.bettbox.MainActivity}
+      Window #3: WindowStateAnimator{e8576eb com.appshub.bettbox/com.appshub.bettbox.MainActivity}
+      Window #4: WindowStateAnimator{6d8e417 com.android.settings/com.lge.settings.easy.EasySettings}
+      Window #5: WindowStateAnimator{51c4a3a SurfaceView - com.example.piliplus.dev/com.example.piliplus.MainActivity}
+      Window #6: WindowStateAnimator{adddccf com.example.piliplus.dev/com.example.piliplus.MainActivity}
+      Window #7: WindowStateAnimator{428bb5c SurfaceView - com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity}
+      Window #8: WindowStateAnimator{395fe65 SurfaceView - com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity}
+      Window #9: WindowStateAnimator{17e473a com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity}
+      Window #10: WindowStateAnimator{5c242a4 InputMethod}
+      Window #11: WindowStateAnimator{d542feb DockedStackDivider}
+      Window #12: WindowStateAnimator{e343148 AssistPreviewPanel}
+      Window #13: WindowStateAnimator{c61b5d3 CliptrayCue}
+      Window #14: WindowStateAnimator{f32e510 KeyguardScrim}
+      Window #15: WindowStateAnimator{4d69809 StatusBar}
+      Window #16: WindowStateAnimator{1a7aa0e NavigationBar}
+      Window #17: WindowStateAnimator{f07dc2f Aspect Button}
+      Window #18: WindowStateAnimator{6c9423c ClipTray}
+      Window #19: WindowStateAnimator{c47abc5 Main_Aod_Base_com.lge.signboard (0)}
+      Window #20: WindowStateAnimator{38591a Main_Aod_System_com.lge.signboard (0)}
+
+
+    mBulkUpdateParams=0x8 ORIENTATION_CHANGE_COMPLETE
+
+WINDOW MANAGER SESSIONS (dumpsys window sessions)
+  Session Session{23797c0 2520:1000}:
+    mNumWindow=2 mClientDead=false mSurfaceSession=android.view.SurfaceSession@7400c4b
+  Session Session{3eee887 2266:u0a10120}:
+    mNumWindow=1 mClientDead=false mSurfaceSession=android.view.SurfaceSession@7064628
+  Session Session{4033098 23382:u0a10244}:
+    mNumWindow=2 mClientDead=false mSurfaceSession=android.view.SurfaceSession@25be479
+  Session Session{69dd648 22978:u0a10152}:
+    mNumWindow=0 mClientDead=false mSurfaceSession=android.view.SurfaceSession@1fc3f41
+  Session Session{74a57ca 1709:1000}:
+    mNumWindow=2 mClientDead=false mSurfaceSession=android.view.SurfaceSession@f2ece6
+  Session Session{77a587a 2481:1000}:
+    mNumWindow=1 mClientDead=false mSurfaceSession=android.view.SurfaceSession@b812227
+  Session Session{834d012 3318:u0a10131}:
+    mNumWindow=1 mClientDead=false mSurfaceSession=android.view.SurfaceSession@f8d9cd4
+  Session Session{b1862a3 24669:u0a10257}:
+    mNumWindow=2 mClientDead=false mSurfaceSession=android.view.SurfaceSession@f5355be
+  Session Session{b2ed1fb 24615:u0a10251}:
+    mNumWindow=3 mClientDead=false mSurfaceSession=android.view.SurfaceSession@8ed1be1
+  Session Session{d836043 3199:1000}:
+    mNumWindow=2 mClientDead=false mSurfaceSession=android.view.SurfaceSession@50c8e7d
+  Session Session{e5a408e 2279:u0a10150}:
+    mNumWindow=5 mClientDead=false mSurfaceSession=android.view.SurfaceSession@b70f172
+  Session Session{f2c17a3 4884:1000}:
+    mNumWindow=0 mClientDead=false mSurfaceSession=android.view.SurfaceSession@8d3b9c3
+
+
+WINDOW MANAGER DISPLAY CONTENTS (dumpsys window displays)
+  Display: mDisplayId=0
+    init=1440x2880 640dpi cur=2880x1440 app=2672x1440 rng=1440x1344-2672x2576
+    deferred=false layoutNeeded=false
+
+  Application tokens in top down Z order:
+    mStackId=1
+    mDeferDetach=false
+    mFullscreen=true
+    mBounds=[0,0][2880,1440]
+      taskId=864
+        mFullscreen=true
+        mBounds=[0,0][2880,1440]
+        mdr=false
+        appTokens=[AppWindowToken{3963583 token=Token{15b0901 ActivityRecord{65f1ee8 u0 com.example.media_kit_hdr_lab/.MainActivity t864}}}]
+        mTempInsetBounds=[0,0][0,0]
+          Activity #0 AppWindowToken{3963583 token=Token{15b0901 ActivityRecord{65f1ee8 u0 com.example.media_kit_hdr_lab/.MainActivity t864}}}
+          windows=[Window{8e1f256 u0 com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity}]
+          windowType=2 hidden=false hasVisible=true
+          app=true voiceInteraction=false
+          allAppWindows=[Window{8e1f256 u0 com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity}, Window{c799d06 u0 SurfaceView - com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity}, Window{643dfc7 u0 SurfaceView - com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity}]
+          task={taskId=864 appTokens=[AppWindowToken{3963583 token=Token{15b0901 ActivityRecord{65f1ee8 u0 com.example.media_kit_hdr_lab/.MainActivity t864}}}] mdr=false}
+           appFullscreen=true requestedOrientation=0
+          hiddenRequested=false clientHidden=false reportedDrawn=true reportedVisible=true
+          numInterestingWindows=3 numDrawnWindows=3 inPendingTransaction=false allDrawn=true (animator=true)
+          startingData=null removed=false firstWindowDrawn=true mIsExiting=false
+      taskId=807
+        mFullscreen=true
+        mBounds=[0,0][2880,1440]
+        mdr=false
+        appTokens=[AppWindowToken{c5258bd token=Token{3799d68 ActivityRecord{f19388b u0 com.example.piliplus.dev/com.example.piliplus.MainActivity t807}}}]
+        mTempInsetBounds=[0,0][0,0]
+          Activity #0 AppWindowToken{c5258bd token=Token{3799d68 ActivityRecord{f19388b u0 com.example.piliplus.dev/com.example.piliplus.MainActivity t807}}}
+          windows=[Window{f2d2357 u0 com.example.piliplus.dev/com.example.piliplus.MainActivity}]
+          windowType=2 hidden=true hasVisible=true
+          app=true voiceInteraction=false
+          allAppWindows=[Window{f2d2357 u0 com.example.piliplus.dev/com.example.piliplus.MainActivity}, Window{d8465c u0 SurfaceView - com.example.piliplus.dev/com.example.piliplus.MainActivity}]
+          task={taskId=807 appTokens=[AppWindowToken{c5258bd token=Token{3799d68 ActivityRecord{f19388b u0 com.example.piliplus.dev/com.example.piliplus.MainActivity t807}}}] mdr=false}
+           appFullscreen=true requestedOrientation=1
+          hiddenRequested=true clientHidden=true reportedDrawn=false reportedVisible=false
+          mAppStopped=true
+          numInterestingWindows=4 numDrawnWindows=4 inPendingTransaction=false allDrawn=true (animator=true)
+          startingData=null removed=false firstWindowDrawn=true mIsExiting=false
+      taskId=798
+        mFullscreen=true
+        mBounds=[0,0][2880,1440]
+        mdr=false
+        appTokens=[AppWindowToken{b850a49 token=Token{526b850 ActivityRecord{1bfce13 u0 com.google.android.gms/.octarine.ui.OctarineActivity t798}}}]
+        mTempInsetBounds=[0,0][0,0]
+          Activity #0 AppWindowToken{b850a49 token=Token{526b850 ActivityRecord{1bfce13 u0 com.google.android.gms/.octarine.ui.OctarineActivity t798}}}
+          windows=[]
+          windowType=2 hidden=true hasVisible=true
+          app=true voiceInteraction=false
+          task={taskId=798 appTokens=[AppWindowToken{b850a49 token=Token{526b850 ActivityRecord{1bfce13 u0 com.google.android.gms/.octarine.ui.OctarineActivity t798}}}] mdr=false}
+           appFullscreen=true requestedOrientation=-1
+          hiddenRequested=true clientHidden=true reportedDrawn=false reportedVisible=false
+          mAppStopped=true
+          numInterestingWindows=1 numDrawnWindows=1 inPendingTransaction=false allDrawn=true (animator=true)
+      taskId=789
+        mFullscreen=true
+        mBounds=[0,0][2880,1440]
+        mdr=false
+        appTokens=[AppWindowToken{aea5522 token=Token{2b88d04 ActivityRecord{89df517 u0 com.android.settings/com.lge.settings.easy.EasySettings t789}}}]
+        mTempInsetBounds=[0,0][0,0]
+          Activity #0 AppWindowToken{aea5522 token=Token{2b88d04 ActivityRecord{89df517 u0 com.android.settings/com.lge.settings.easy.EasySettings t789}}}
+          windows=[Window{ea81f93 u0 com.android.settings/com.lge.settings.easy.EasySettings}]
+          windowType=2 hidden=true hasVisible=true
+          app=true voiceInteraction=false
+          allAppWindows=[Window{ea81f93 u0 com.android.settings/com.lge.settings.easy.EasySettings}]
+          task={taskId=789 appTokens=[AppWindowToken{aea5522 token=Token{2b88d04 ActivityRecord{89df517 u0 com.android.settings/com.lge.settings.easy.EasySettings t789}}}] mdr=false}
+           appFullscreen=true requestedOrientation=-1
+          hiddenRequested=true clientHidden=true reportedDrawn=false reportedVisible=false
+          mAppStopped=true
+          numInterestingWindows=1 numDrawnWindows=1 inPendingTransaction=false allDrawn=true (animator=true)
+          startingData=null removed=false firstWindowDrawn=true mIsExiting=false
+      taskId=805
+        mFullscreen=true
+        mBounds=[0,0][2880,1440]
+        mdr=false
+        appTokens=[AppWindowToken{740679c token=Token{3e7386e ActivityRecord{2fbe3e9 u0 com.appshub.bettbox/.MainActivity t805}}}]
+        mTempInsetBounds=[0,0][0,0]
+          Activity #0 AppWindowToken{740679c token=Token{3e7386e ActivityRecord{2fbe3e9 u0 com.appshub.bettbox/.MainActivity t805}}}
+          windows=[Window{148991e u0 com.appshub.bettbox/com.appshub.bettbox.MainActivity}]
+          windowType=2 hidden=true hasVisible=true
+          app=true voiceInteraction=false
+          allAppWindows=[Window{148991e u0 com.appshub.bettbox/com.appshub.bettbox.MainActivity}, Window{dd16c48 u0 SurfaceView - com.appshub.bettbox/com.appshub.bettbox.MainActivity}]
+          task={taskId=805 appTokens=[AppWindowToken{740679c token=Token{3e7386e ActivityRecord{2fbe3e9 u0 com.appshub.bettbox/.MainActivity t805}}}] mdr=false}
+           appFullscreen=true requestedOrientation=-1
+          hiddenRequested=true clientHidden=true reportedDrawn=false reportedVisible=false
+          mAppStopped=true
+          numInterestingWindows=2 numDrawnWindows=2 inPendingTransaction=false allDrawn=true (animator=true)
+          startingData=null removed=false firstWindowDrawn=true mIsExiting=false
+    mStackId=0
+    mDeferDetach=false
+    mFullscreen=true
+    mBounds=[0,0][2880,1440]
+      taskId=744
+        mFullscreen=true
+        mBounds=[0,0][2880,1440]
+        mdr=false
+        appTokens=[AppWindowToken{1fd138b token=Token{abb1105 ActivityRecord{381f47c u0 com.lge.launcher3/.LauncherExtension t744}}}]
+        mTempInsetBounds=[0,0][0,0]
+          Activity #0 AppWindowToken{1fd138b token=Token{abb1105 ActivityRecord{381f47c u0 com.lge.launcher3/.LauncherExtension t744}}}
+          windows=[Window{f8760a4 u0 com.lge.launcher3/com.lge.launcher3.LauncherExtension}]
+          windowType=2 hidden=true hasVisible=true
+          app=true voiceInteraction=false
+          allAppWindows=[Window{f8760a4 u0 com.lge.launcher3/com.lge.launcher3.LauncherExtension}]
+          task={taskId=744 appTokens=[AppWindowToken{1fd138b token=Token{abb1105 ActivityRecord{381f47c u0 com.lge.launcher3/.LauncherExtension t744}}}] mdr=false}
+           appFullscreen=true requestedOrientation=5
+          hiddenRequested=true clientHidden=true reportedDrawn=false reportedVisible=false
+          mAppStopped=true
+          numInterestingWindows=1 numDrawnWindows=1 inPendingTransaction=false allDrawn=true (animator=true)
+          startingData=null removed=false firstWindowDrawn=true mIsExiting=false
+
+
+    DimLayerController
+      Stack=1
+        dimLayer=shared, animator=null, continueDimming=false
+        mDimSurface=Surface(name=DimLayerController/Stack=0) mLayer=22059 mAlpha=0.0
+        mLastBounds=[-360,-720][1800,3600] mBounds=[-720,-360][3600,1800]
+        Last animation:  mDuration=200 mStartTime=84770646 curTime=195676499
+         mStartAlpha=0.6 mTargetAlpha=0.0
+      Task=864
+        dimLayer=shared, animator=null, continueDimming=false
+        mDimSurface=Surface(name=DimLayerController/Stack=0) mLayer=22059 mAlpha=0.0
+        mLastBounds=[-360,-720][1800,3600] mBounds=[-720,-360][3600,1800]
+        Last animation:  mDuration=200 mStartTime=84770646 curTime=195676499
+         mStartAlpha=0.6 mTargetAlpha=0.0
+      Task=789
+        dimLayer=shared, animator=null, continueDimming=false
+        mDimSurface=Surface(name=DimLayerController/Stack=0) mLayer=22059 mAlpha=0.0
+        mLastBounds=[-360,-720][1800,3600] mBounds=[-720,-360][3600,1800]
+        Last animation:  mDuration=200 mStartTime=84770646 curTime=195676499
+         mStartAlpha=0.6 mTargetAlpha=0.0
+      Task=798
+        dimLayer=shared, animator=null, continueDimming=false
+        mDimSurface=Surface(name=DimLayerController/Stack=0) mLayer=22059 mAlpha=0.0
+        mLastBounds=[-360,-720][1800,3600] mBounds=[-720,-360][3600,1800]
+        Last animation:  mDuration=200 mStartTime=84770646 curTime=195676499
+         mStartAlpha=0.6 mTargetAlpha=0.0
+      Stack=0
+        dimLayer=shared, animator=null, continueDimming=false
+        mDimSurface=Surface(name=DimLayerController/Stack=0) mLayer=22059 mAlpha=0.0
+        mLastBounds=[-360,-720][1800,3600] mBounds=[-720,-360][3600,1800]
+        Last animation:  mDuration=200 mStartTime=84770646 curTime=195676499
+         mStartAlpha=0.6 mTargetAlpha=0.0
+      Task=807
+        dimLayer=shared, animator=null, continueDimming=false
+        mDimSurface=Surface(name=DimLayerController/Stack=0) mLayer=22059 mAlpha=0.0
+        mLastBounds=[-360,-720][1800,3600] mBounds=[-720,-360][3600,1800]
+        Last animation:  mDuration=200 mStartTime=84770646 curTime=195676499
+         mStartAlpha=0.6 mTargetAlpha=0.0
+      Task=744
+        dimLayer=shared, animator=null, continueDimming=false
+        mDimSurface=Surface(name=DimLayerController/Stack=0) mLayer=22059 mAlpha=0.0
+        mLastBounds=[-360,-720][1800,3600] mBounds=[-720,-360][3600,1800]
+        Last animation:  mDuration=200 mStartTime=84770646 curTime=195676499
+         mStartAlpha=0.6 mTargetAlpha=0.0
+      Task=805
+        dimLayer=shared, animator=null, continueDimming=false
+        mDimSurface=Surface(name=DimLayerController/Stack=0) mLayer=22059 mAlpha=0.0
+        mLastBounds=[-360,-720][1800,3600] mBounds=[-720,-360][3600,1800]
+        Last animation:  mDuration=200 mStartTime=84770646 curTime=195676499
+         mStartAlpha=0.6 mTargetAlpha=0.0
+
+    DockedStackDividerController
+      mLastVisibility=false
+      mMinimizedDock=false
+      mAdjustedForIme=false
+      mAdjustedForDivider=false
+
+WINDOW MANAGER TOKENS (dumpsys window tokens)
+  All tokens:
+  WindowToken{491b240 null}
+  AppWindowToken{c5258bd token=Token{3799d68 ActivityRecord{f19388b u0 com.example.piliplus.dev/com.example.piliplus.MainActivity t807}}}
+  AppWindowToken{aea5522 token=Token{2b88d04 ActivityRecord{89df517 u0 com.android.settings/com.lge.settings.easy.EasySettings t789}}}
+  AppWindowToken{b850a49 token=Token{526b850 ActivityRecord{1bfce13 u0 com.google.android.gms/.octarine.ui.OctarineActivity t798}}}
+  WindowToken{558b2be android.os.Binder@380f721}
+  WindowToken{8d93ae1 android.os.BinderProxy@d589959}
+  AppWindowToken{3963583 token=Token{15b0901 ActivityRecord{65f1ee8 u0 com.example.media_kit_hdr_lab/.MainActivity t864}}}
+  WindowToken{3ff19f4 android.os.BinderProxy@b373471}
+  WindowToken{8ae2d65 android.os.BinderProxy@49674d6}
+  AppWindowToken{1fd138b token=Token{abb1105 ActivityRecord{381f47c u0 com.lge.launcher3/.LauncherExtension t744}}}
+  WindowToken{3d89579 android.os.Binder@b742b93}
+  AppWindowToken{740679c token=Token{3e7386e ActivityRecord{2fbe3e9 u0 com.appshub.bettbox/.MainActivity t805}}}
+
+  Wallpaper tokens:
+  Wallpaper #0 WindowToken{558b2be android.os.Binder@380f721}
+
+WINDOW MANAGER WINDOWS (dumpsys window windows)
+  Window #20 Window{1839f84 u0 Main_Aod_System_com.lge.signboard (0)}:
+    mDisplayId=0 stackId=0 mSession=Session{d836043 3199:1000} mClient=android.os.BinderProxy@737c197
+    mOwnerUid=1000 mShowToOwnerOnly=true package=com.lge.signboard appop=NONE
+    mAttrs=WM.LayoutParams{(0,0)(fillxfill) gr=#11 sim=#20 ty=3014 fl=#1840018 pfl=0x20000000 wanim=0x1030465}
+    Requested w=600 h=800 mLayoutSeq=5822
+    mShowMainAodWindow=false
+    mHasSurface=false mShownPosition=[420,0] isReadyForDisplay()=false hasSavedSurface()=false mWindowRemovalAllowed=false
+    WindowStateAnimator{38591a Main_Aod_System_com.lge.signboard (0)}:
+      mShownAlpha=1.0 mAlpha=0.0 mLastAlpha=1.0
+  Window #19 Window{f3282b5 u0 Main_Aod_Base_com.lge.signboard (0)}:
+    mDisplayId=0 stackId=0 mSession=Session{d836043 3199:1000} mClient=android.os.BinderProxy@42e5eec
+    mOwnerUid=1000 mShowToOwnerOnly=true package=com.lge.signboard appop=NONE
+    mAttrs=WM.LayoutParams{(0,0)(fillxfill) gr=#11 sim=#20 ty=3011 fl=#1840018 pfl=0x20000000 wanim=0x1030001}
+    Requested w=800 h=600 mLayoutSeq=12147
+    mShowMainAodWindow=false
+    mHasSurface=true mShownPosition=[0,420] isReadyForDisplay()=true hasSavedSurface()=false mWindowRemovalAllowed=false
+    WindowStateAnimator{c47abc5 Main_Aod_Base_com.lge.signboard (0)}:
+      Surface: shown=false layer=311000 alpha=0.99 rect=(0.0,420.0) 800.0 x 600.0
+      mShownAlpha=0.0 mAlpha=0.0 mLastAlpha=1.0
+    mLastFreezeDuration=+131ms
+  Window #18 Window{e796669 u0 ClipTray}:
+    mDisplayId=0 stackId=0 mSession=Session{23797c0 2520:1000} mClient=android.os.BinderProxy@34070f0
+    mOwnerUid=1000 mShowToOwnerOnly=false package=com.lge.systemservice appop=NONE
+    mAttrs=WM.LayoutParams{(0,0)(2672x690) gr=#53 sim=#30 ty=2027 fl=#1040228 pfl=0x20000000 fmt=1 wanim=0x7f0a0001}
+    Requested w=0 h=0 mLayoutSeq=12086
+    mHasSurface=false mShownPosition=[0,0] isReadyForDisplay()=false hasSavedSurface()=false mWindowRemovalAllowed=false
+    WindowStateAnimator{6c9423c ClipTray}:
+      mShownAlpha=0.0 mAlpha=1.0 mLastAlpha=0.0
+  Window #17 Window{c98246e u0 Aspect Button}:
+    mDisplayId=0 stackId=0 mSession=Session{74a57ca 1709:1000} mClient=android.view.ViewRootImpl$WEx@56cffe9
+    mOwnerUid=1000 mShowToOwnerOnly=false package=android appop=NONE
+    mAttrs=WM.LayoutParams{(2320,0)(wrapxwrap) gr=#33 sim=#20 ty=2024 fl=#1000408 pfl=0x2 fmt=-3}
+    Requested w=352 h=352 mLayoutSeq=12087
+    mHasSurface=false mShownPosition=[2320,0] isReadyForDisplay()=false hasSavedSurface()=false mWindowRemovalAllowed=false
+    WindowStateAnimator{f07dc2f Aspect Button}:
+  Window #16 Window{62df58d u0 NavigationBar}:
+    mDisplayId=0 stackId=0 mSession=Session{e5a408e 2279:u0a10150} mClient=android.os.BinderProxy@5e6f624
+    mOwnerUid=10150 mShowToOwnerOnly=false package=com.android.systemui appop=NONE
+    mAttrs=WM.LayoutParams{(0,0)(fillxfill) sim=#20 ty=2019 fl=#1840068 pfl=0x20000000 fmt=-3}
+    Requested w=208 h=1440 mLayoutSeq=12147
+    mPolicyVisibility=false mPolicyVisibilityAfterAnim=false mAppOpVisibility=true mAttachedHidden=false
+    mHasSurface=true mShownPosition=[2672,0] isReadyForDisplay()=false hasSavedSurface()=false mWindowRemovalAllowed=false
+    WindowStateAnimator{1a7aa0e NavigationBar}:
+      mAnimating=false mLocalAnimating=false mAnimationIsEntrance=true mAnimation=null mStackClip=1
+      Surface: shown=false layer=211000 alpha=1.0 rect=(2672.0,0.0) 208.0 x 1440.0
+    mLastFreezeDuration=+284ms
+  Window #15 Window{565b465 u0 StatusBar}:
+    mDisplayId=0 stackId=0 mSession=Session{e5a408e 2279:u0a10150} mClient=android.os.BinderProxy@d2d895c
+    mOwnerUid=10150 mShowToOwnerOnly=false package=com.android.systemui appop=NONE
+    mAttrs=WM.LayoutParams{(0,0)(fillx96) gr=#30 sim=#10 ty=2000 fl=#81840048 pfl=0x20000000 fmt=-3 vsysui=0x600}
+    Requested w=2880 h=96 mLayoutSeq=12147
+    mPolicyVisibility=false mPolicyVisibilityAfterAnim=false mAppOpVisibility=true mAttachedHidden=false
+    mHasSurface=true mShownPosition=[0,0] isReadyForDisplay()=false hasSavedSurface()=false mWindowRemovalAllowed=false
+    WindowStateAnimator{4d69809 StatusBar}:
+      Surface: shown=false layer=161000 alpha=1.0 rect=(0.0,0.0) 2880.0 x 96.0
+    mLastFreezeDuration=+271ms
+  Window #14 Window{e9e2696 u0 KeyguardScrim}:
+    mDisplayId=0 stackId=0 mSession=Session{74a57ca 1709:1000} mClient=android.view.ViewRootImpl$WEx@71c5217
+    mOwnerUid=1000 mShowToOwnerOnly=false package=android appop=NONE
+    mAttrs=WM.LayoutParams{(0,0)(fillxfill) sim=#10 ty=2029 fl=#1110900 pfl=0x1 fmt=-3 or=5 vsysui=0x3610000}
+    Requested w=1440 h=2672 mLayoutSeq=38
+    mHasSurface=false mShownPosition=[0,0] isReadyForDisplay()=false hasSavedSurface()=false mWindowRemovalAllowed=false
+    WindowStateAnimator{f32e510 KeyguardScrim}:
+  Window #13 Window{20f07c6 u0 CliptrayCue}:
+    mDisplayId=0 stackId=0 mSession=Session{23797c0 2520:1000} mClient=android.os.BinderProxy@a9e79a1
+    mOwnerUid=1000 mShowToOwnerOnly=false package=com.lge.systemservice appop=NONE
+    mAttrs=WM.LayoutParams{(0,690)(73x228) gr=#55 sim=#30 ty=2008 fl=#1040228 pfl=0x20000000 fmt=1}
+    Requested w=0 h=0 mLayoutSeq=12089
+    mHasSurface=false mShownPosition=[0,0] isReadyForDisplay()=false hasSavedSurface()=false mWindowRemovalAllowed=false
+    WindowStateAnimator{c61b5d3 CliptrayCue}:
+      mShownAlpha=0.0 mAlpha=1.0 mLastAlpha=0.0
+  Window #12 Window{fcadf5 u0 AssistPreviewPanel}:
+    mDisplayId=0 stackId=0 mSession=Session{e5a408e 2279:u0a10150} mClient=android.os.BinderProxy@fe52f2c
+    mOwnerUid=10150 mShowToOwnerOnly=true package=com.android.systemui appop=NONE
+    mAttrs=WM.LayoutParams{(0,0)(fillx1000) gr=#800053 sim=#31 ty=2033 fl=#1000118 pfl=0x20000000 fmt=-3 vsysui=0x700}
+    Requested w=0 h=0 mLayoutSeq=12093
+    mHasSurface=false mShownPosition=[0,0] isReadyForDisplay()=false hasSavedSurface()=false mWindowRemovalAllowed=false
+    WindowStateAnimator{e343148 AssistPreviewPanel}:
+      mShownAlpha=0.0 mAlpha=1.0 mLastAlpha=0.0
+  Window #11 Window{2fca6df u0 DockedStackDivider}:
+    mDisplayId=0 stackId=0 mSession=Session{e5a408e 2279:u0a10150} mClient=android.os.BinderProxy@7b317e
+    mOwnerUid=10150 mShowToOwnerOnly=false package=com.android.systemui appop=NONE
+    mAttrs=WM.LayoutParams{(0,0)(wrapxfill) sim=#20 ty=2034 fl=#21840028 pfl=0x20000040 fmt=-3 vsysui=0x700}
+    Requested w=356 h=1344 mLayoutSeq=12147
+    mPolicyVisibility=false mPolicyVisibilityAfterAnim=false mAppOpVisibility=true mAttachedHidden=false
+    mHasSurface=false mShownPosition=[0,0] isReadyForDisplay()=false hasSavedSurface()=false mWindowRemovalAllowed=false
+    WindowStateAnimator{d542feb DockedStackDivider}:
+      mShownAlpha=0.0 mAlpha=1.0 mLastAlpha=0.0
+  Window #10 Window{3c78623 u0 InputMethod}:
+    mDisplayId=0 stackId=0 mSession=Session{3eee887 2266:u0a10120} mClient=android.os.BinderProxy@b9cb352
+    mOwnerUid=10120 mShowToOwnerOnly=true package=com.lge.ime appop=NONE
+    mAttrs=WM.LayoutParams{(0,0)(fillxwrap) gr=#50 sim=#20 ty=2011 fl=#800108 pfl=0x20000000 fmt=-2 wanim=0x1030056 vsysui=0x300 needsMenuKey=2}
+    Requested w=1440 h=2880 mLayoutSeq=6210
+    mIsImWindow=true mIsWallpaper=false mIsFloatingLayer=true mWallpaperVisible=false
+    mHasSurface=false mShownPosition=[0,96] isReadyForDisplay()=false hasSavedSurface()=false mWindowRemovalAllowed=false
+    WindowStateAnimator{5c242a4 InputMethod}:
+      mShownAlpha=1.0 mAlpha=1.0 mLastAlpha=0.0
+  Window #9 Window{8e1f256 u0 com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity}:
+    mDisplayId=0 stackId=1 mSession=Session{b2ed1fb 24615:u0a10251} mClient=android.os.BinderProxy@b373471
+    mOwnerUid=10251 mShowToOwnerOnly=true package=com.example.media_kit_hdr_lab appop=NONE
+    mAttrs=WM.LayoutParams{(0,0)(fillxfill) sim=#10 ty=1 fl=#81810100 pfl=0x20000 fmt=-3 wanim=0x1030001 vsysui=0x3706 needsMenuKey=2}
+    Requested w=2672 h=1440 mLayoutSeq=12147
+    mHasSurface=true mShownPosition=[104,0] isReadyForDisplay()=true hasSavedSurface()=false mWindowRemovalAllowed=false
+    WindowStateAnimator{17e473a com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity}:
+      Surface: shown=true layer=21045 alpha=1.0 rect=(104.0,0.0) 2880.0 x 1440.0
+    mLastFreezeDuration=+552ms
+  Window #8 Window{643dfc7 u0 SurfaceView - com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity}:
+    mDisplayId=0 stackId=1 mSession=Session{b2ed1fb 24615:u0a10251} mClient=android.os.BinderProxy@20305cf
+    mOwnerUid=10251 mShowToOwnerOnly=true package=null appop=NONE
+    mAttrs=WM.LayoutParams{(0,52)(2672x1336) gr=#800033 ty=1004 fl=#4218 pfl=0x10040 fmt=43}
+    Requested w=2672 h=1336 mLayoutSeq=12147
+    mAttachedWindow=Window{8e1f256 u0 com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity} mLayoutAttached=true
+    mHasSurface=true mShownPosition=[104,52] isReadyForDisplay()=true hasSavedSurface()=false mWindowRemovalAllowed=false
+    WindowStateAnimator{395fe65 SurfaceView - com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity}:
+      Surface: shown=true layer=21040 alpha=1.0 rect=(104.0,52.0) 2672.0 x 1336.0
+  Window #7 Window{c799d06 u0 SurfaceView - com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity}:
+    mDisplayId=0 stackId=1 mSession=Session{b2ed1fb 24615:u0a10251} mClient=android.os.BinderProxy@48e92d7
+    mOwnerUid=10251 mShowToOwnerOnly=true package=null appop=NONE
+    mAttrs=WM.LayoutParams{(0,0)(2672x1440) gr=#800033 ty=1001 fl=#4218 pfl=0x10040 fmt=4}
+    Requested w=2672 h=1440 mLayoutSeq=12147
+    mAttachedWindow=Window{8e1f256 u0 com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity} mLayoutAttached=true
+    mHasSurface=true mShownPosition=[104,0] isReadyForDisplay()=true hasSavedSurface()=false mWindowRemovalAllowed=false
+    WindowStateAnimator{428bb5c SurfaceView - com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity}:
+      Surface: shown=true layer=21035 alpha=1.0 rect=(104.0,0.0) 2672.0 x 1440.0
+    mLastFreezeDuration=+390ms
+  Window #6 Window{f2d2357 u0 com.example.piliplus.dev/com.example.piliplus.MainActivity}:
+    mDisplayId=0 stackId=1 mSession=Session{4033098 23382:u0a10244} mClient=android.os.BinderProxy@49674d6
+    mOwnerUid=10244 mShowToOwnerOnly=true package=com.example.piliplus.dev appop=NONE
+    mAttrs=WM.LayoutParams{(0,0)(fillxfill) sim=#10 ty=1 fl=#81810100 pfl=0x20020000 fmt=-3 wanim=0x1030001 vsysui=0x2700 needsMenuKey=2}
+    Requested w=1440 h=2880 mLayoutSeq=6229
+    mHasSurface=false mShownPosition=[0,576] isReadyForDisplay()=false hasSavedSurface()=false mWindowRemovalAllowed=false
+    WindowStateAnimator{adddccf com.example.piliplus.dev/com.example.piliplus.MainActivity}:
+      mAnimating=true mLocalAnimating=false mAnimationIsEntrance=false mAnimation=null mStackClip=1
+      XForm: has=true hasLocal=false {alpha=1.0 matrix=[1.0, 0.0, 0.0][0.0, 1.0, 0.0][0.0, 0.0, 1.0]}
+      mShownAlpha=0.0 mAlpha=1.0 mLastAlpha=0.0
+      mGlobalScale=1.0 mDsDx=1.0 mDtDx=0.0 mDsDy=0.0 mDtDy=1.0
+  Window #5 Window{d8465c u0 SurfaceView - com.example.piliplus.dev/com.example.piliplus.MainActivity}:
+    mDisplayId=0 stackId=1 mSession=Session{4033098 23382:u0a10244} mClient=android.os.BinderProxy@346be44
+    mOwnerUid=10244 mShowToOwnerOnly=true package=null appop=NONE
+    mAttrs=WM.LayoutParams{(0,0)(1440x2672) gr=#800033 ty=1001 fl=#4218 pfl=0x20012040 fmt=4}
+    Requested w=1440 h=2672 mLayoutSeq=6229
+    mAttachedWindow=Window{f2d2357 u0 com.example.piliplus.dev/com.example.piliplus.MainActivity} mLayoutAttached=true
+    mPolicyVisibility=true mPolicyVisibilityAfterAnim=true mAppOpVisibility=true mAttachedHidden=true
+    mHasSurface=false mShownPosition=[0,576] isReadyForDisplay()=false hasSavedSurface()=false mWindowRemovalAllowed=false
+    WindowStateAnimator{51c4a3a SurfaceView - com.example.piliplus.dev/com.example.piliplus.MainActivity}:
+      mAnimating=true mLocalAnimating=false mAnimationIsEntrance=false mAnimation=null mStackClip=1
+      XForm: has=true hasLocal=false {alpha=1.0 matrix=[1.0, 0.0, 0.0][0.0, 1.0, 0.0][0.0, 0.0, 1.0]}
+      mShownAlpha=0.0 mAlpha=1.0 mLastAlpha=0.0
+      mGlobalScale=1.0 mDsDx=1.0 mDtDx=0.0 mDsDy=0.0 mDtDy=1.0
+  Window #4 Window{ea81f93 u0 com.android.settings/com.lge.settings.easy.EasySettings}:
+    mDisplayId=0 stackId=1 mSession=Session{77a587a 2481:1000} mClient=android.os.BinderProxy@5030c82
+    mOwnerUid=1000 mShowToOwnerOnly=true package=com.android.settings appop=NONE
+    mAttrs=WM.LayoutParams{(0,0)(fillxfill) sim=#20 ty=1 fl=#81810100 pfl=0x20020000 wanim=0x1030465 vsysui=0x2600 needsMenuKey=2}
+    Requested w=2880 h=1440 mLayoutSeq=4102
+    mHasSurface=false mShownPosition=[0,0] isReadyForDisplay()=false hasSavedSurface()=false mWindowRemovalAllowed=false
+    WindowStateAnimator{6d8e417 com.android.settings/com.lge.settings.easy.EasySettings}:
+  Window #3 Window{148991e u0 com.appshub.bettbox/com.appshub.bettbox.MainActivity}:
+    mDisplayId=0 stackId=1 mSession=Session{b1862a3 24669:u0a10257} mClient=android.os.BinderProxy@d589959
+    mOwnerUid=10257 mShowToOwnerOnly=true package=com.appshub.bettbox appop=NONE
+    mAttrs=WM.LayoutParams{(0,0)(fillxfill) sim=#10 ty=1 fl=#81810100 pfl=0x20000 fmt=-3 wanim=0x1030001 preferredDisplayMode=1 vsysui=0x2700 needsMenuKey=2}
+    Requested w=1440 h=2672 mLayoutSeq=6015
+    mHasSurface=false mShownPosition=[0,534] isReadyForDisplay()=false hasSavedSurface()=false mWindowRemovalAllowed=false
+    WindowStateAnimator{e8576eb com.appshub.bettbox/com.appshub.bettbox.MainActivity}:
+      mAnimating=true mLocalAnimating=false mAnimationIsEntrance=false mAnimation=null mStackClip=1
+      XForm: has=true hasLocal=false {alpha=1.0 matrix=[1.0, 0.0, 0.0][0.0, 1.0, 0.0][0.0, 0.0, 1.0]}
+      mShownAlpha=0.0 mAlpha=1.0 mLastAlpha=0.0
+      mGlobalScale=1.0 mDsDx=1.0 mDtDx=0.0 mDsDy=0.0 mDtDy=1.0
+  Window #2 Window{dd16c48 u0 SurfaceView - com.appshub.bettbox/com.appshub.bettbox.MainActivity}:
+    mDisplayId=0 stackId=1 mSession=Session{b1862a3 24669:u0a10257} mClient=android.os.BinderProxy@5c485ff
+    mOwnerUid=10257 mShowToOwnerOnly=true package=null appop=NONE
+    mAttrs=WM.LayoutParams{(0,0)(1440x2672) gr=#800033 ty=1001 fl=#4218 pfl=0x12040 fmt=4}
+    Requested w=1440 h=2672 mLayoutSeq=6015
+    mAttachedWindow=Window{148991e u0 com.appshub.bettbox/com.appshub.bettbox.MainActivity} mLayoutAttached=true
+    mPolicyVisibility=true mPolicyVisibilityAfterAnim=true mAppOpVisibility=true mAttachedHidden=true
+    mHasSurface=false mShownPosition=[0,534] isReadyForDisplay()=false hasSavedSurface()=false mWindowRemovalAllowed=false
+    WindowStateAnimator{f74d006 SurfaceView - com.appshub.bettbox/com.appshub.bettbox.MainActivity}:
+      mAnimating=true mLocalAnimating=false mAnimationIsEntrance=false mAnimation=null mStackClip=1
+      XForm: has=true hasLocal=false {alpha=1.0 matrix=[1.0, 0.0, 0.0][0.0, 1.0, 0.0][0.0, 0.0, 1.0]}
+      mShownAlpha=0.0 mAlpha=1.0 mLastAlpha=0.0
+      mGlobalScale=1.0 mDsDx=1.0 mDtDx=0.0 mDsDy=0.0 mDtDy=1.0
+  Window #1 Window{f8760a4 u0 com.lge.launcher3/com.lge.launcher3.LauncherExtension}:
+    mDisplayId=0 stackId=0 mSession=Session{834d012 3318:u0a10131} mClient=android.os.BinderProxy@11b5337
+    mOwnerUid=10131 mShowToOwnerOnly=true package=com.lge.launcher3 appop=NONE
+    mAttrs=WM.LayoutParams{(0,0)(fillxfill) sim=#120 ty=1 fl=#81910100 pfl=0x20020000 fmt=-3 wanim=0x1030465 vsysui=0x700 needsMenuKey=2}
+    Requested w=1440 h=2880 mLayoutSeq=12081
+    mHasSurface=false mShownPosition=[0,0] isReadyForDisplay()=false hasSavedSurface()=false mWindowRemovalAllowed=false
+    WindowStateAnimator{29cbfd1 com.lge.launcher3/com.lge.launcher3.LauncherExtension}:
+    mWallpaperX=0.33333334 mWallpaperY=0.5
+    mWallpaperXStep=0.33333334 mWallpaperYStep=1.0
+  Window #0 Window{48de0d1 u0 com.android.systemui.ImageWallpaper}:
+    mDisplayId=0 stackId=0 mSession=Session{e5a408e 2279:u0a10150} mClient=android.os.BinderProxy@ada33f8
+    mOwnerUid=10150 mShowToOwnerOnly=true package=com.android.systemui appop=NONE
+    mAttrs=WM.LayoutParams{(0,0)(2880x2880) gr=#800033 ty=2013 fl=#318 fmt=2 wanim=0x10302f2}
+    Requested w=2880 h=2880 mLayoutSeq=12104
+    mIsImWindow=false mIsWallpaper=true mIsFloatingLayer=true mWallpaperVisible=false
+    Offsets x=0 y=-720
+    mHasSurface=true mShownPosition=[0,-720] isReadyForDisplay()=false hasSavedSurface()=false mWindowRemovalAllowed=false
+    WindowStateAnimator{46d2ef8 com.android.systemui.ImageWallpaper}:
+      Surface: shown=false layer=21000 alpha=1.0 rect=(0.0,-720.0) 2880.0 x 2880.0
+    mOrientationChanging=true mAppFreezing=false mTurnOnScreen=false
+    mWallpaperX=0.33333334 mWallpaperY=0.5
+    mWallpaperXStep=0.33333334 mWallpaperYStep=1.0
+
+  mCurConfiguration={1.0 ?mcc?mnc [zh_CN] ldltr sw360dp w668dp h336dp 640dpi nrml long land finger -keyb/v/h -nav/h as.1 s.202 fontTypeIndex0 forceEmbolden0}
+  mHasPermanentDpad=false
+  mCurrentFocus=Window{8e1f256 u0 com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity}
+  mFocusedApp=AppWindowToken{3963583 token=Token{15b0901 ActivityRecord{65f1ee8 u0 com.example.media_kit_hdr_lab/.MainActivity t864}}}
+  mInputMethodTarget=Window{f2d2357 u0 com.example.piliplus.dev/com.example.piliplus.MainActivity}
+  mInTouchMode=true mLayoutSeq=12147
+  mLastDisplayFreezeDuration=+606ms due to Window{b8ed739 u0 Starting com.example.media_kit_hdr_lab}
+  mLastWakeLockHoldingWindow=null mLastWakeLockObscuringWindow=null

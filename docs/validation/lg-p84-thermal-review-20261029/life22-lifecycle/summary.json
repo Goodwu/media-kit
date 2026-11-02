@@ -1,0 +1,47 @@
+{
+ "apk": "fusion-table-life22-20261101 (real-table build: fix20 code + LIFECYCLE define)",
+ "sessionStart": "fresh ready=1 table-pass-ran=1 latch=0",
+ "actions": [
+  {
+   "action": "PauseHoldResume",
+   "result": "functional_only PASS",
+   "tableEvents": 0
+  },
+  {
+   "action": "SeekForwardBack",
+   "result": "functional_only PASS",
+   "tableEvents": 0,
+   "missed": 0,
+   "fusionCommitsResumed": true
+  },
+  {
+   "action": "NearEOFReplay",
+   "result": "failed (probe Dart contract: Seek did not publish completed=false — same non-table failure as life13)",
+   "tableEvents": "1x fusion-fallback-table-dropped (EOF-vicinity fusion draw failure, clean fallback)",
+   "missed": 0
+  },
+  {
+   "action": "StopReopen",
+   "result": "stop leg teardown OK; reopen blocked by Lab single-open constraint (pre-existing)",
+   "note": "reopen->reseed path evidenced by every fresh-process round (ready cache_id=1)"
+  },
+  {
+   "action": "HOMEReturn",
+   "result": "PASS",
+   "pid": "9852->9852 survived",
+   "ready": 1,
+   "invalidated": 0,
+   "reseedRetry": 0,
+   "missed": 0,
+   "fusionResumed": "committed=1 attempted=10 gen=2"
+  },
+  {
+   "action": "firstSessionDeathNote",
+   "result": "life22 first launch lost fusion via transient MKSURF latch timeout (known device issue; untabled fusion behaves identically); table dropped correctly, ordinary path continued (rgb-fresh=900)"
+  }
+ ],
+ "evidence": [
+  "home-round-logcat.txt",
+  "p84-lifecycle.ndjson"
+ ]
+}

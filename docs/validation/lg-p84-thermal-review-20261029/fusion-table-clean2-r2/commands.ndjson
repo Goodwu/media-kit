@@ -1,0 +1,332 @@
+{"time": "2026-11-01T04:48:21.412619+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "echo \"@@ screen_brightness_mode\"; settings get system screen_brightness_mode\necho \"@@ screen_brightness\"; settings get system screen_brightness\necho \"@@ accelerometer_rotation\"; settings get system accelerometer_rotation\necho \"@@ user_rotation\"; settings get system user_rotation\necho \"@@ screen_off_timeout\"; settings get system screen_off_timeout"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:23.450603+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.thermal_sync"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:23.525587+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.thermal_trace"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:23.591067+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.defer_publish_flush"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:23.651800+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.gpu_timing"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:23.710831+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_fusion"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:23.771196+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_fail_commit"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:23.832629+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_fail_gl"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:23.892725+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.st_fbo"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:23.953099+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_frame_trace"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:24.011306+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.quality_pts"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:24.069123+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_compare"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:24.129215+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_compare_pts"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:24.191629+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_compare_repeat"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:24.248922+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_tap"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:24.307909+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_inv"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:24.369893+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_oracle"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:24.429644+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_oracle_a"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:24.486967+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_probe"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:24.547855+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_single"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:24.609500+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_quad"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:24.666971+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_rev"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:24.728610+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_atlas"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:24.790305+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_fusion_table"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:24.848584+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.atlas_reuse"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:24.908980+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.atlas_pts2"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:24.969674+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.atlas_nonce"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:25.030274+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.atlas_ack"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:25.089862+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "dumpsys", "power"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:25.164214+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "dumpsys", "window"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:25.244428+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "echo \"@@ battery_type\"; cat /sys/class/thermal/thermal_zone30/type 2>/dev/null || true\necho \"@@ battery_temp\"; cat /sys/class/thermal/thermal_zone30/temp 2>/dev/null || true\necho \"@@ vts_type\"; cat /sys/class/thermal/thermal_zone39/type 2>/dev/null || true\necho \"@@ vts_temp\"; cat /sys/class/thermal/thermal_zone39/temp 2>/dev/null || true\necho \"@@ gpu_thermal_pwrlevel\"; cat /sys/class/kgsl/kgsl-3d0/thermal_pwrlevel 2>/dev/null || true\necho \"@@ hdr_mode\"; cat /sys/devices/virtual/panel/img_tune/hdr_mode 2>/dev/null || true\necho \"@@ backlight\"; cat /sys/class/leds/lcd-backlight/brightness 2>/dev/null || true\necho \"@@ panel_thermal_status\"; cat /sys/class/leds/lcd-backlight/thermald_status 2>/dev/null || true"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:25.298236+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "stat -c %s /sdcard/Android/data/com.example.media_kit_hdr_lab/files/hokkaido-p84.mp4"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:25.365848+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "pm", "path", "com.example.media_kit_hdr_lab"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:25.813310+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "test -f /data/app/com.example.media_kit_hdr_lab-1/base.apk && test ! -L /data/app/com.example.media_kit_hdr_lab-1/base.apk && stat -c %s /data/app/com.example.media_kit_hdr_lab-1/base.apk"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:25.899751+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "exec-out", "cat", "/data/app/com.example.media_kit_hdr_lab-1/base.apk"], "returncode": 0, "bytes": 41598303, "stderr": ""}
+{"time": "2026-11-01T04:48:35.684604+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "input", "keyevent", "KEYCODE_WAKEUP"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:36.140368+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "dumpsys", "power"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:36.224336+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "dumpsys", "window"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:36.296068+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "settings", "put", "system", "screen_brightness_mode", "0"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:36.764610+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "settings", "put", "system", "screen_brightness", "64"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:37.213042+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "settings", "put", "system", "accelerometer_rotation", "0"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:37.697526+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "settings", "put", "system", "user_rotation", "1"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:38.148042+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "settings", "put", "system", "screen_off_timeout", "240000"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:38.607211+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.thermal_sync display-resample"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:38.673898+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.thermal_trace 1"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:38.746893+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.defer_publish_flush 0"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:38.811193+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.gpu_timing 0"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:38.872848+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.yuv_fusion 1"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:38.932496+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.yuv_fail_commit 0"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:38.992389+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.yuv_fail_gl 0"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:39.052708+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.yuv_frame_trace 1"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:39.112658+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.quality_pts 35.035"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:39.173044+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.yuv_compare 0"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:39.234113+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.yuv_compare_pts ''"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:39.311855+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.yuv_compare_repeat 0"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:39.379598+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.yuv_tap 0"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:39.433834+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.yuv_inv 0"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:39.500311+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.yuv_oracle 0"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:39.567786+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.yuv_oracle_a 0"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:39.630561+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.st_fbo 0"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:39.690900+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.yuv_probe 0"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:39.752106+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.yuv_single 0"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:39.812689+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.yuv_quad 0"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:39.873337+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.yuv_rev 0"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:39.932714+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.yuv_atlas 0"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:39.990564+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.atlas_reuse 0"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:40.050239+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.atlas_pts2 ''"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:40.120846+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.atlas_nonce ''"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:40.198687+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.atlas_ack ''"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:40.251361+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.yuv_fusion_table 1"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:40.319380+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.thermal_sync"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:40.386220+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.thermal_trace"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:40.449169+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.defer_publish_flush"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:40.509810+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.gpu_timing"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:40.571353+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_fusion"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:40.631982+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_fail_commit"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:40.691225+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_fail_gl"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:40.750608+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_frame_trace"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:40.809924+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.quality_pts"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:40.871177+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_compare"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:40.930122+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_compare_pts"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:40.990474+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_compare_repeat"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:41.049480+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_tap"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:41.109899+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_inv"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:41.170340+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_oracle"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:41.230332+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_oracle_a"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:41.290797+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.st_fbo"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:41.351797+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_probe"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:41.412291+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_single"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:41.472468+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_quad"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:41.530482+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_rev"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:41.591183+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_atlas"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:41.651358+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.atlas_reuse"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:41.710628+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.atlas_pts2"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:41.771296+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.atlas_nonce"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:41.831859+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.atlas_ack"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:41.890163+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_fusion_table"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:41.948562+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:42.051311+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "am", "force-stop", "com.example.media_kit_hdr_lab"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:42.502266+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:42.606892+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "date +%s"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:42.677091+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "am", "start", "-n", "com.example.media_kit_hdr_lab/.MainActivity"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:43.240356+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:47.402054+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "input", "tap", "1440", "720"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:47.890801+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:48.506620+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:49.114682+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:49.717218+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:50.322047+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:50.952879+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:51.567368+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:52.191811+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:52.806484+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:53.414716+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:54.028385+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:54.635437+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:55.249429+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:55.873964+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:56.482066+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:57.101713+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:57.717247+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:58.345055+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:58.961979+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:48:59.578054+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:00.207152+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:00.831154+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:01.443171+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:02.078404+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:02.708564+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:03.337121+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:03.961176+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:04.582431+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:05.211655+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:05.847757+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:06.455058+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:07.085128+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:07.701583+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:08.330393+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:08.949883+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:09.566962+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:10.210435+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:10.834108+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:11.461028+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:12.098583+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:12.711668+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:13.350006+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:13.984785+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:14.614615+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:15.239369+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:15.868213+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:16.487314+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:17.119112+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:17.740031+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:18.375294+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:19.002005+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:19.623668+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:20.256016+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:20.889660+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:21.501066+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:22.144470+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:22.772738+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:23.428331+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:24.070048+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:24.693944+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:25.325098+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:25.947991+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:26.558248+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:27.185757+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:27.822223+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:28.455303+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:29.100984+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:29.726194+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:30.356534+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:30.990117+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:31.623080+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:32.266315+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:32.914781+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:33.525043+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:34.169967+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:34.803210+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:35.438091+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:36.079391+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:36.695976+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:37.326960+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:37.953880+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:38.574074+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:39.212197+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:39.842577+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:40.484500+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:41.124510+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:41.757166+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:42.399700+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:43.054331+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:43.682645+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:44.318749+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:44.953080+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:45.573067+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:46.208175+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:46.860367+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:47.497610+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:48.135050+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:48.774735+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:49.417585+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:50.057931+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:50.684368+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:51.327401+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:51.982484+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:52.606855+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:53.242587+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:53.889654+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:54.530443+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:55.182701+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:55.829996+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:56.476570+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:57.134783+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:57.768120+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:58.412080+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:59.064761+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:49:59.732948+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:50:00.375539+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:50:01.008183+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:50:01.663390+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:50:02.311485+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:50:02.961806+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:50:03.602659+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:50:04.248636+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:50:04.895017+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:50:05.549233+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:50:06.193867+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:50:06.829367+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:50:07.472286+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:50:08.123262+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:50:08.771132+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:50:09.422312+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:50:10.073771+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:50:10.708201+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:50:11.353583+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:50:11.996201+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:50:12.629141+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:50:13.286258+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:50:13.941952+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:50:14.591778+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:50:15.252963+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:50:15.910939+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:50:16.569961+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:50:17.222151+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:50:17.884140+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:50:18.536076+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:50:19.193809+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:50:19.848197+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:50:20.511089+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:50:21.174733+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:50:21.822438+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:50:22.482752+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:50:23.145938+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:50:23.796005+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:50:24.456671+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:50:25.122745+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:50:25.777656+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:50:26.436294+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:50:27.103494+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:50:27.752354+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:50:28.432655+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:50:29.107707+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:50:29.761115+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:50:30.423870+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:50:31.091901+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:50:31.736722+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "ps"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:16.940791+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "am", "force-stop", "com.example.media_kit_hdr_lab"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:17.978106+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "settings", "put", "system", "screen_brightness", "64"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:18.632727+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "settings", "put", "system", "accelerometer_rotation", "0"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:19.236869+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "settings", "put", "system", "user_rotation", "1"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:19.813995+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "settings", "put", "system", "screen_off_timeout", "30000"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:20.462343+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "settings", "put", "system", "screen_brightness_mode", "0"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:21.092313+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.thermal_sync display-resample"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:21.165896+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.thermal_trace 1"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:21.242793+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.defer_publish_flush 0"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:21.305339+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.gpu_timing 0"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:21.368588+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.yuv_fusion 1"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:21.430543+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.yuv_fail_commit 0"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:21.491440+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.yuv_fail_gl 0"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:21.552558+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.st_fbo 0"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:21.613829+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.yuv_frame_trace 1"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:21.674278+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.quality_pts ''"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:21.738484+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.yuv_compare ''"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:21.801553+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.yuv_compare_pts ''"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:21.866205+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.yuv_compare_repeat 0"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:21.925420+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.yuv_tap 0"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:21.987125+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.yuv_inv 0"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:22.050927+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.yuv_oracle 0"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:22.111762+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.yuv_oracle_a 0"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:22.171160+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.yuv_probe 0"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:22.230427+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.yuv_single 0"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:22.295432+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.yuv_quad 0"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:22.362605+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.yuv_rev 0"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:22.428657+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.yuv_atlas ''"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:22.496701+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.yuv_fusion_table 1"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:22.567692+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.atlas_reuse ''"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:22.635038+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.atlas_pts2 ''"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:22.710697+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.atlas_nonce ''"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:22.784375+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "setprop debug.mks.atlas_ack ''"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:22.852485+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "input", "keyevent", "KEYCODE_WAKEUP"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:23.498619+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "dumpsys", "power"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:23.596743+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "dumpsys", "window"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:23.670901+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "echo \"@@ screen_brightness_mode\"; settings get system screen_brightness_mode\necho \"@@ screen_brightness\"; settings get system screen_brightness\necho \"@@ accelerometer_rotation\"; settings get system accelerometer_rotation\necho \"@@ user_rotation\"; settings get system user_rotation\necho \"@@ screen_off_timeout\"; settings get system screen_off_timeout"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:26.742604+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.thermal_sync"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:26.816691+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.thermal_trace"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:26.882699+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.defer_publish_flush"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:26.946379+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.gpu_timing"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:27.009085+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_fusion"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:27.073115+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_fail_commit"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:27.135647+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_fail_gl"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:27.194013+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.st_fbo"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:27.251323+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_frame_trace"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:27.314501+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.quality_pts"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:27.376132+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_compare"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:27.436412+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_compare_pts"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:27.502238+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_compare_repeat"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:27.568285+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_tap"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:27.629594+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_inv"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:27.691721+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_oracle"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:27.752235+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_oracle_a"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:27.811499+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_probe"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:27.874288+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_single"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:27.934277+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_quad"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:27.994371+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_rev"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:28.056148+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_atlas"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:28.116435+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.yuv_fusion_table"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:28.174578+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.atlas_reuse"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:28.233202+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.atlas_pts2"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:28.294253+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.atlas_nonce"], "returncode": 0, "stderr": ""}
+{"time": "2026-11-01T04:51:28.354071+08:00", "argv": ["adb", "-s", "LGH870DS42e27764", "shell", "getprop", "debug.mks.atlas_ack"], "returncode": 0, "stderr": ""}

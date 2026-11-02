@@ -1,0 +1,79 @@
+--- tools-used-ab4/test_lg_p84_instant_perf.py
++++ tool/test_lg_p84_instant_perf.py
+@@ -45,6 +45,66 @@
+         state=self.policy_state();state['native'][-1]['line']=state['native'][0]['line']
+         self.assertEqual(thermal.publish_policy_error(state,'1'),'native-publish-policy-has-no-effective-work')
+ 
++    def test_gpu_thermal_gate_distinguishes_normal_cap_and_unknown(self):
++        self.assertIsNone(thermal.gpu_thermal_cap_reason({'raw':{'gpu_thermal_pwrlevel':'0'}}))
++        self.assertEqual(thermal.gpu_thermal_cap_reason({'raw':{'gpu_thermal_pwrlevel':'4'}}),'fresh-gpu-thermal-cap-detected')
++        for raw in [None, '', 'Permission denied', 'NaN', '0.0', '-1']:
++            sample={} if raw is None else {'raw':{'gpu_thermal_pwrlevel':raw}}
++            self.assertEqual(thermal.gpu_thermal_cap_reason(sample),'gpu-thermal-pwrlevel-unavailable')
++
++    def test_gpu_gate_filters_rows_and_prevents_completed_validity(self):
++        import json
++        import tempfile
++        from unittest.mock import patch
++        controller={'requestedVideoSync':'display-resample','expectedPanelThermalStatus':'0',
++                    'status':'completed-observation','completeWindow':True,'restorationVerified':True,
++                    'initial':{'raw':{'gpu_thermal_pwrlevel':'0'}}}
++        normal={'elapsedSeconds':20,'runtime':{},'raw':{'gpu_thermal_pwrlevel':'0','hdr_mode':'1','backlight':'255','panel_thermal_status':'0'}}
++        for level in ['4','']:
++            bad={**normal,'raw':{**normal['raw'],'gpu_thermal_pwrlevel':level}}
++            with tempfile.TemporaryDirectory() as d, patch.object(thermal,'runtime_error',return_value=None), patch.object(thermal,'native_failure_reason',return_value=None):
++                output=Path(d);(output/'samples.ndjson').write_text('\n'.join(json.dumps(r) for r in [normal,bad]))
++                summary=m.summarize(output,controller,'source')
++                self.assertEqual(summary['stableSamples'],1)
++                self.assertFalse(summary['gpuThermalGateVerified'])
++                self.assertFalse(summary['validCompletedProfile'])
++                self.assertTrue(summary['metricsAreDiagnosticOnly'])
++
++    def test_gpu_cap_stops_before_any_additional_diagnostics(self):
++        import argparse
++        import json
++        import tempfile
++        from unittest.mock import MagicMock, patch
++        events=[]
++        normal={'batteryC':32,'vtsC':35,'raw':{'gpu_thermal_pwrlevel':'0','panel_thermal_status':'0'}}
++        capped={'batteryC':33,'vtsC':36,'raw':{'gpu_thermal_pwrlevel':'4','panel_thermal_status':'0'}}
++        adb=MagicMock()
++        adb.settings.return_value={};adb.properties.return_value={}
++        adb.screen_state.return_value={'on':True,'keyguard':False}
++        adb.wake_unprotected.return_value={'on':True,'keyguard':False}
++        snapshots=iter([normal,normal,normal,capped])
++        def snapshot():
++            row=next(snapshots);events.append('cap' if row is capped else 'snapshot');return row
++        def call(command):
++            events.append('stop' if command[:3]==['shell','am','force-stop'] else 'diagnostic-or-command')
++            return ''
++        adb.snapshot.side_effect=snapshot;adb.call.side_effect=call;adb.restore.return_value=[]
++        capture=MagicMock();capture.state.return_value={'playbackStartAt':None}
++        with tempfile.TemporaryDirectory() as d:
++            receipt=Path(d)/'receipt.json';receipt.write_text(json.dumps({'verified':True,'serial':'S','deviceSource':'source'}))
++            args=argparse.Namespace(output=str(Path(d)/'round'),serial='S',experiment='publish-flush',mode='candidate',duration=60,interval=2,
++                source_receipt=str(receipt),source_hash=None,source='source',reference_start=None,
++                instant_enabled=True,expected_panel_thermal_status='0',allow_unprotected_menu=False,tap=None)
++            with patch.object(thermal,'Adb',return_value=adb),patch.object(thermal,'LogCapture',return_value=capture):
++                result=thermal.run(args)
++        self.assertEqual(events[events.index('cap')+1],'stop')
++        self.assertEqual(result['status'],'aborted')
++        self.assertEqual(result['reason'],'fresh-gpu-thermal-cap-detected')
++        self.assertEqual(result['finalEvidenceSource'],'last-running-sample-before-stop')
++        self.assertTrue(result['restorationVerified'])
++        self.assertTrue(result['hdrLabStopped'])
++        self.assertNotIn('surfaceFlingerFinal',result)
++
+     def test_no_periodic_gpubusy_reader(self):
+         from unittest.mock import patch
+         import tempfile
+@@ -55,6 +115,9 @@
+                 adb.snapshot();adb.snapshot()
+             self.assertIn('/gpubusy',scripts[0])
+             self.assertNotIn('/gpubusy',scripts[1])
++            for script in scripts:
++                for path in ['/thermal_pwrlevel','/max_gpuclk','/cpu2/cpufreq/scaling_max_freq']:
++                    self.assertIn(path,script)
+ 
+ 
+ 

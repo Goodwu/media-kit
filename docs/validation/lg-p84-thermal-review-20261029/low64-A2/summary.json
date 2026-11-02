@@ -1,0 +1,803 @@
+{
+  "schema": 1,
+  "experiment": "publish-flush",
+  "requestedDeferPublishFlush": "0",
+  "startedAt": "2026-10-29T22:50:07.276836+08:00",
+  "mode": "baseline",
+  "requestedVideoSync": "display-resample",
+  "requestedDurationSeconds": 60.0,
+  "status": "completed-observation",
+  "completeWindow": true,
+  "samples": 29,
+  "thresholds": {
+    "batteryC": 45,
+    "vtsC": 48.5,
+    "systemHotEventsIn30s": 1
+  },
+  "device": "lge/lucye_global_com/lucye:7.0/NRD90U/172921900e77a:user/release-keys",
+  "package": "Activity Resolver Table:\n  Non-Data Actions:\n      android.intent.action.MAIN:\n        9f9885a com.example.media_kit_hdr_lab/.MainActivity filter 27e0a0\n          Action: \"android.intent.action.MAIN\"\n          Category: \"android.intent.category.LAUNCHER\"\n          AutoVerify=false\n\nReceiver Resolver Table:\n  Non-Data Actions:\n      androidx.profileinstaller.action.SAVE_PROFILE:\n        666aa8b com.example.media_kit_hdr_lab/androidx.profileinstaller.ProfileInstallReceiver filter 73c20d2\n          Action: \"androidx.profileinstaller.action.SAVE_PROFILE\"\n          AutoVerify=false\n      androidx.profileinstaller.action.INSTALL_PROFILE:\n        666aa8b com.example.media_kit_hdr_lab/androidx.profileinstaller.ProfileInstallReceiver filter ddba534\n          Action: \"androidx.profileinstaller.action.INSTALL_PROFILE\"\n          AutoVerify=false\n      androidx.profileinstaller.action.SKIP_FILE:\n        666aa8b com.example.media_kit_hdr_lab/androidx.profileinstaller.ProfileInstallReceiver filter d135f5d\n          Action: \"androidx.profileinstaller.action.SKIP_FILE\"\n          AutoVerify=false\n      androidx.profileinstaller.action.BENCHMARK_OPERATION:\n        666aa8b com.example.media_kit_hdr_lab/androidx.profileinstaller.ProfileInstallReceiver filter b0625a3\n          Action: \"androidx.profileinstaller.action.BENCHMARK_OPERATION\"\n          AutoVerify=false\n\nPermissions:\n  Permission [com.example.media_kit_hdr_lab.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION] (dad4f35):\n    sourcePackage=com.example.media_kit_hdr_lab\n    uid=10251 gids=null type=0 prot=signature\n    perm=Permission{42f2768 com.example.media_kit_hdr_lab.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION}\n    packageSetting=PackageSetting{b21753b com.example.media_kit_hdr_lab/10251}\n\nRegistered ContentProviders:\n  com.example.media_kit_hdr_lab/androidx.startup.InitializationProvider:\n    Provider{885a781 com.example.media_kit_hdr_lab/androidx.startup.InitializationProvider}\n\nContentProvider Authorities:\n  [com.example.media_kit_hdr_lab.androidx-startup]:\n    Provider{885a781 com.example.media_kit_hdr_lab/androidx.startup.InitializationProvider}\n      applicationInfo=ApplicationInfo{8b7d026 com.example.media_kit_hdr_lab}\n\nKey Set Manager:\n  [com.example.media_kit_hdr_lab]\n      Signing KeySets: 29\n\nPackages:\n  Package [com.example.media_kit_hdr_lab] (b21753b):\n    userId=10251\n    pkg=Package{b136467 com.example.media_kit_hdr_lab}\n    codePath=/data/app/com.example.media_kit_hdr_lab-1\n    resourcePath=/data/app/com.example.media_kit_hdr_lab-1\n    legacyNativeLibraryDir=/data/app/com.example.media_kit_hdr_lab-1/lib\n    primaryCpuAbi=arm64-v8a\n    secondaryCpuAbi=null\n    versionCode=4086 minSdk=24 targetSdk=36\n    versionName=1.0.0\n    splits=[base]\n    apkSigningVersion=2\n    applicationInfo=ApplicationInfo{8b7d026 com.example.media_kit_hdr_lab}\n    flags=[ HAS_CODE ALLOW_CLEAR_USER_DATA ALLOW_BACKUP ]\n    privateFlags=[ RESIZEABLE_ACTIVITIES ]\n    dataDir=/data/user/0/com.example.media_kit_hdr_lab\n    supportsScreens=[small, medium, large, xlarge, resizeable, anyDensity]\n    usesOptionalLibraries:\n      androidx.window.extensions\n      androidx.window.sidecar\n    timeStamp=2026-10-29 16:00:38\n    firstInstallTime=2026-10-25 01:51:13\n    lastUpdateTime=2026-10-29 16:00:38\n    signatures=PackageSignatures{6282a17 [32f90f38]}\n    installPermissionsFixed=true installStatus=1\n    pkgFlags=[ HAS_CODE ALLOW_CLEAR_USER_DATA ALLOW_BACKUP ]\n    declared permissions:\n      com.example.media_kit_hdr_lab.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION: prot=signature, INSTALLED\n    requested permissions:\n      com.example.media_kit_hdr_lab.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION\n    install permissions:\n      com.example.media_kit_hdr_lab.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION: granted=true\n    User 0: ceDataInode=2237528 installed=true hidden=false suspended=false stopped=true notLaunched=false enabled=0\n      runtime permissions:\n\n\nDexopt state:\n  [com.example.media_kit_hdr_lab]\n    Instruction Set: arm64\n      path: /data/app/com.example.media_kit_hdr_lab-1/base.apk\n      status: /data/app/com.example.media_kit_hdr_lab-1/oat/arm64/base.odex [compilation_filter=interpret-only, status=k\n      OatUpToDate]\n",
+  "initial": {
+    "hostTime": "2026-10-29T22:50:11.180763+08:00",
+    "hostMonotonic": 809543.4469275,
+    "pid": null,
+    "batteryC": 26.2,
+    "vtsC": 32.0,
+    "deviceUptime": 335711.85,
+    "appCpuTicks": null,
+    "processStartTicks": null,
+    "tasks": [],
+    "screen": {
+      "on": true,
+      "awake": true,
+      "keyguard": false,
+      "keyguardSecure": null
+    },
+    "raw": {
+      "uptime": "335711.85 642602.80",
+      "cpu_total": "cpu  2825590 346661 3047989 15342990 17225 473522 379535 0 0 0\ncpu0 648058 114662 824413 15083383 16474 327062 247150 0 0 0\ncpu1 669353 120847 826781 85770 261 76907 73509 0 0 0\ncpu2 778916 62672 722635 86122 245 36456 31419 0 0 0\ncpu3 729263 48480 674160 87715 245 33097 27457 0 0 0\nintr 171755170 0 0 0 28318505 0 4524248 1362942 4 5 5 2602 0 1 13903 13261 1176 1057878 1490 0 4238893 31122 8717 0 0 13 2 0 0 3520097 0 2281979 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 16943 1078019 852844 5059413 0 0 0 0 17 5623736 0 12 9 0 0 0 0 0 0 1009 2 0 0 0 0 0 0 0 0 42 11 0 11 0 0 0 0 0 0 0 0 2237168 0 18 0 0 2274 0 0 0 2237184 0 0 0 0 0 0 0 88 0 290 2 0 0 0 2 2 0 0 0 2 0 3383246 0 0 0 0 0 0 0 101048 59359 0 0 13936 7 7 6 0 0 0 0 0 0 0 9008 2631761 0 63 0 0 0 3 3 0 0 0 7 8 0 0 0 3 0 1208 838602 18060 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 532306 0 0 0 0 3 27 0 0 59361 0 0 0 0 0 0 0 0 0 0 278 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2273 0 0 0 0 0 0 0 0 0 0 0 0 0 78 0 0 0 0 0 0 0 58 0 0 0 0 0 0 0 367 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 5378 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 13215 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2816 6 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 9419343 0 0 148 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 219 0 0 0 0 0 0 0 0 0 0\nctxt 344401107\nbtime 1792949699\nprocesses 176252\nprocs_running 1\nprocs_blocked 0\nsoftirq 103612728 5965201 18776663 393493 662193 4941299 9228 9481327 15283072 2177207 45923045",
+      "cpu_online": "0-3",
+      "battery_type": "battery",
+      "battery_temp": "26200",
+      "vts_type": "vts",
+      "vts_temp": "320",
+      "backlight": "10",
+      "backlight_max": "255",
+      "hdr_mode": "0",
+      "panel_thermal_status": "0",
+      "gpu_hz": "214000000",
+      "gpu_thermal_pwrlevel": "0",
+      "gpu_max_gpuclk": "652800000",
+      "cpu2_scaling_max_freq": "2342400",
+      "gpu_driver_busy_percentage": "0 %",
+      "battery_status": "Charging",
+      "battery_voltage_now": "4247106",
+      "battery_current_now": "24413",
+      "battery_capacity": "98",
+      "usb_online": "1",
+      "ac_online": "",
+      "cpu_kryo0_regulator_name": "kryo0",
+      "cpu_kryo0_regulator_microvolts": "557517",
+      "cpu_kryo1_regulator_name": "kryo1",
+      "cpu_kryo1_regulator_microvolts": "727225",
+      "gpu_upstream_regulator_name": "pmi8994_s2",
+      "gpu_upstream_regulator_microvolts": "525000",
+      "gpu_corner_name": "gfx_corner",
+      "gpu_corner_raw": "2",
+      "cpu0_khz": "307200",
+      "cpu1_khz": "307200",
+      "cpu2_khz": "1056000",
+      "cpu3_khz": "1056000"
+    },
+    "gpuDriverReportedBusyPercent": 0.0,
+    "samplingWorkSeconds": 0.22177633293904364,
+    "clockTicksPerSecond": 100,
+    "cpuDelta": {
+      "intervalSeconds": 0.22999999998137355,
+      "systemBusyPercent": {
+        "cpu": 29.41176470588235,
+        "cpu0": 21.05263157894737,
+        "cpu1": 22.727272727272727,
+        "cpu2": 60.869565217391305,
+        "cpu3": 9.523809523809524
+      },
+      "processOneCorePercent": null,
+      "threadOneCorePercent": []
+    }
+  },
+  "gpuThermalGate": {
+    "normalPwrlevel": 0,
+    "unknownOrNonzeroStops": true,
+    "sampleIntervalSeconds": 2.0,
+    "scope": "LG observed experimental baseline; max_gpuclk/cpu2 cap are metadata"
+  },
+  "sourceReceipt": {
+    "schema": 1,
+    "startedAt": "2026-10-29T15:04:23.355097+08:00",
+    "finishedAt": "2026-10-29T15:09:19.137212+08:00",
+    "elapsedSeconds": 295.7825954160653,
+    "serial": "LGH870DS42e27764",
+    "deviceSource": "/sdcard/Android/data/com.example.media_kit_hdr_lab/files/hokkaido-p84.mp4",
+    "deviceBytes": 1232790317,
+    "deviceSha256": "7626cac28819ffd1377a712b56c7cc4bbf8677f5db4b39fb0c83f92e58d74443",
+    "returncode": 0,
+    "stderr": "",
+    "hostSource": "/Users/wuweiwei1/Downloads/test-clips/蹲守一周，我终于拍到了夕阳下的梦幻场景｜北海道VLOG _ Links  4K HDR.mp4",
+    "hostBytes": 1232790317,
+    "hostSha256": "7626cac28819ffd1377a712b56c7cc4bbf8677f5db4b39fb0c83f92e58d74443",
+    "hostFfprobe": {
+      "streams": [
+        {
+          "index": 0,
+          "codec_name": "hevc",
+          "codec_long_name": "H.265 / HEVC (High Efficiency Video Coding)",
+          "profile": "Main 10",
+          "codec_type": "video",
+          "codec_tag_string": "hvc1",
+          "codec_tag": "0x31637668",
+          "width": 3840,
+          "height": 1920,
+          "coded_width": 3840,
+          "coded_height": 1920,
+          "has_b_frames": 2,
+          "sample_aspect_ratio": "1:1",
+          "display_aspect_ratio": "2:1",
+          "pix_fmt": "yuv420p10le",
+          "level": 150,
+          "color_range": "tv",
+          "color_space": "bt2020nc",
+          "color_transfer": "arib-std-b67",
+          "color_primaries": "bt2020",
+          "chroma_location": "left",
+          "view_ids_available": "",
+          "view_pos_available": "",
+          "id": "0x1",
+          "r_frame_rate": "30000/1001",
+          "avg_frame_rate": "30000/1001",
+          "time_base": "1/30000",
+          "start_pts": 0,
+          "start_time": "0.000000",
+          "duration_ts": 35119084,
+          "duration": "1170.636133",
+          "bit_rate": "8156702",
+          "nb_frames": "35084",
+          "extradata_size": 126,
+          "disposition": {
+            "default": 1,
+            "dub": 0,
+            "original": 0,
+            "comment": 0,
+            "lyrics": 0,
+            "karaoke": 0,
+            "forced": 0,
+            "hearing_impaired": 0,
+            "visual_impaired": 0,
+            "clean_effects": 0,
+            "attached_pic": 0,
+            "timed_thumbnails": 0,
+            "non_diegetic": 0,
+            "captions": 0,
+            "descriptions": 0,
+            "metadata": 0,
+            "dependent": 0,
+            "still_image": 0,
+            "multilayer": 0
+          },
+          "tags": {
+            "creation_time": "2022-09-21T12:00:00.000000Z",
+            "language": "und",
+            "handler_name": "Bento4 Video Handler",
+            "encoder": "HEVC Coding"
+          },
+          "side_data_list": [
+            {
+              "side_data_type": "DOVI configuration record",
+              "dv_version_major": 1,
+              "dv_version_minor": 0,
+              "dv_profile": 8,
+              "dv_level": 7,
+              "rpu_present_flag": 1,
+              "el_present_flag": 0,
+              "bl_present_flag": 1,
+              "dv_bl_signal_compatibility_id": 4,
+              "dv_md_compression": "none"
+            }
+          ]
+        },
+        {
+          "index": 1,
+          "codec_name": "aac",
+          "codec_long_name": "AAC (Advanced Audio Coding)",
+          "profile": "LC",
+          "codec_type": "audio",
+          "codec_tag_string": "mp4a",
+          "codec_tag": "0x6134706d",
+          "mime_codec_string": "mp4a.40.2",
+          "sample_fmt": "fltp",
+          "sample_rate": "48000",
+          "channels": 2,
+          "channel_layout": "stereo",
+          "bits_per_sample": 0,
+          "initial_padding": 0,
+          "id": "0x2",
+          "r_frame_rate": "0/0",
+          "avg_frame_rate": "0/0",
+          "time_base": "1/48000",
+          "start_pts": 0,
+          "start_time": "0.000000",
+          "duration_ts": 56195048,
+          "duration": "1170.730167",
+          "bit_rate": "253556",
+          "nb_frames": "54878",
+          "extradata_size": 2,
+          "disposition": {
+            "default": 1,
+            "dub": 0,
+            "original": 0,
+            "comment": 0,
+            "lyrics": 0,
+            "karaoke": 0,
+            "forced": 0,
+            "hearing_impaired": 0,
+            "visual_impaired": 0,
+            "clean_effects": 0,
+            "attached_pic": 0,
+            "timed_thumbnails": 0,
+            "non_diegetic": 0,
+            "captions": 0,
+            "descriptions": 0,
+            "metadata": 0,
+            "dependent": 0,
+            "still_image": 0,
+            "multilayer": 0
+          },
+          "tags": {
+            "creation_time": "2022-09-21T12:00:00.000000Z",
+            "language": "und",
+            "handler_name": "SoundHandler"
+          }
+        },
+        {
+          "index": 2,
+          "codec_name": "mjpeg",
+          "codec_long_name": "Motion JPEG",
+          "profile": "Baseline",
+          "codec_type": "video",
+          "codec_tag_string": "[0][0][0][0]",
+          "codec_tag": "0x0000",
+          "width": 6547,
+          "height": 4091,
+          "coded_width": 6547,
+          "coded_height": 4091,
+          "has_b_frames": 0,
+          "sample_aspect_ratio": "1:1",
+          "display_aspect_ratio": "6547:4091",
+          "pix_fmt": "yuvj420p",
+          "level": -99,
+          "color_range": "pc",
+          "color_space": "bt470bg",
+          "chroma_location": "center",
+          "id": "0x0",
+          "r_frame_rate": "90000/1",
+          "avg_frame_rate": "0/0",
+          "time_base": "1/90000",
+          "start_pts": 0,
+          "start_time": "0.000000",
+          "duration_ts": 105365715,
+          "duration": "1170.730167",
+          "bits_per_raw_sample": "8",
+          "disposition": {
+            "default": 0,
+            "dub": 0,
+            "original": 0,
+            "comment": 0,
+            "lyrics": 0,
+            "karaoke": 0,
+            "forced": 0,
+            "hearing_impaired": 0,
+            "visual_impaired": 0,
+            "clean_effects": 0,
+            "attached_pic": 1,
+            "timed_thumbnails": 0,
+            "non_diegetic": 0,
+            "captions": 0,
+            "descriptions": 0,
+            "metadata": 0,
+            "dependent": 0,
+            "still_image": 0,
+            "multilayer": 0
+          }
+        }
+      ],
+      "format": {
+        "filename": "/Users/wuweiwei1/Downloads/test-clips/蹲守一周，我终于拍到了夕阳下的梦幻场景｜北海道VLOG _ Links  4K HDR.mp4",
+        "nb_streams": 3,
+        "nb_programs": 0,
+        "nb_stream_groups": 0,
+        "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+        "format_long_name": "QuickTime / MOV",
+        "start_time": "0.000000",
+        "duration": "1170.730167",
+        "size": "1232790317",
+        "bit_rate": "8424078",
+        "probe_score": 100,
+        "tags": {
+          "major_brand": "isom",
+          "minor_version": "512",
+          "compatible_brands": "isomdby1iso2mp41",
+          "creation_time": "2022-09-21T12:00:00.000000Z",
+          "title": "蹲守一周，我终于拍到了夕阳下的梦幻场景｜北海道VLOG | Links  4K HDR",
+          "artist": "Linksphotograph",
+          "encoder": "Lavf63.1.101",
+          "comment": "https://www.bilibili.com/video/BV1vY4y1N7TY/",
+          "description": "头一回用400定这么长的定焦镜头，所以我就想挑战拍摄野生动物，于是再一次来到了北海道！ 这支视频浓缩了我和小螃蟹一个星期的努力！\n 拍摄设备： Nikon Z 9  \n                    Nikkor Z 400mm f/4.5 VR S\n                    Nikkor Z 14-24mm f/2.8 S\n                    Nikkor Z 24-70mm f/4 S"
+        }
+      }
+    },
+    "verified": true,
+    "method": "fresh full byte stream adb exec-out cat; no playback or settings mutation"
+  },
+  "expectedPanelThermalStatus": "0",
+  "expectedBacklight": "64",
+  "awakeState": {
+    "on": true,
+    "awake": true,
+    "keyguard": false,
+    "keyguardSecure": null
+  },
+  "launchOutput": "Starting: Intent { cmp=com.example.media_kit_hdr_lab/.MainActivity }\n",
+  "runtimeEvidenceAvailable": true,
+  "final": {
+    "hostTime": "2026-10-29T22:51:22.693340+08:00",
+    "hostMonotonic": 809614.959615333,
+    "pid": "24112",
+    "batteryC": 28.1,
+    "vtsC": 34.3,
+    "deviceUptime": 335783.36,
+    "appCpuTicks": 3718,
+    "processStartTicks": 33571623,
+    "tasks": [
+      {
+        "tid": "24112",
+        "name": "dia_kit_hdr_lab",
+        "ticks": 279,
+        "startTicks": 33571623
+      },
+      {
+        "tid": "24117",
+        "name": "Jit thread pool",
+        "ticks": 10,
+        "startTicks": 33571625
+      },
+      {
+        "tid": "24118",
+        "name": "Signal Catcher",
+        "ticks": 0,
+        "startTicks": 33571625
+      },
+      {
+        "tid": "24119",
+        "name": "ReferenceQueueD",
+        "ticks": 0,
+        "startTicks": 33571626
+      },
+      {
+        "tid": "24120",
+        "name": "FinalizerDaemon",
+        "ticks": 0,
+        "startTicks": 33571626
+      },
+      {
+        "tid": "24121",
+        "name": "FinalizerWatchd",
+        "ticks": 0,
+        "startTicks": 33571626
+      },
+      {
+        "tid": "24122",
+        "name": "HeapTaskDaemon",
+        "ticks": 5,
+        "startTicks": 33571626
+      },
+      {
+        "tid": "24124",
+        "name": "Binder:24112_1",
+        "ticks": 47,
+        "startTicks": 33571626
+      },
+      {
+        "tid": "24125",
+        "name": "Binder:24112_2",
+        "ticks": 48,
+        "startTicks": 33571626
+      },
+      {
+        "tid": "24128",
+        "name": "Profile Saver",
+        "ticks": 1,
+        "startTicks": 33571628
+      },
+      {
+        "tid": "24138",
+        "name": "1.raster",
+        "ticks": 2,
+        "startTicks": 33571644
+      },
+      {
+        "tid": "24139",
+        "name": "1.io",
+        "ticks": 0,
+        "startTicks": 33571645
+      },
+      {
+        "tid": "24140",
+        "name": "io.worker.1",
+        "ticks": 0,
+        "startTicks": 33571647
+      },
+      {
+        "tid": "24141",
+        "name": "io.worker.2",
+        "ticks": 0,
+        "startTicks": 33571647
+      },
+      {
+        "tid": "24142",
+        "name": "dart:io EventHa",
+        "ticks": 2,
+        "startTicks": 33571647
+      },
+      {
+        "tid": "24155",
+        "name": "RenderThread",
+        "ticks": 6,
+        "startTicks": 33571663
+      },
+      {
+        "tid": "24158",
+        "name": "Thread-5",
+        "ticks": 647,
+        "startTicks": 33571677
+      },
+      {
+        "tid": "24159",
+        "name": "hwuiTask1",
+        "ticks": 0,
+        "startTicks": 33571678
+      },
+      {
+        "tid": "24176",
+        "name": "dart:io Process",
+        "ticks": 0,
+        "startTicks": 33572091
+      },
+      {
+        "tid": "24184",
+        "name": "RenderThread",
+        "ticks": 0,
+        "startTicks": 33572109
+      },
+      {
+        "tid": "24185",
+        "name": "RenderThread",
+        "ticks": 0,
+        "startTicks": 33572109
+      },
+      {
+        "tid": "24186",
+        "name": "RenderThread",
+        "ticks": 3,
+        "startTicks": 33572109
+      },
+      {
+        "tid": "24187",
+        "name": "RenderThread",
+        "ticks": 2,
+        "startTicks": 33572109
+      },
+      {
+        "tid": "24191",
+        "name": "worker",
+        "ticks": 0,
+        "startTicks": 33572115
+      },
+      {
+        "tid": "24202",
+        "name": "Binder:24112_3",
+        "ticks": 46,
+        "startTicks": 33572172
+      },
+      {
+        "tid": "24207",
+        "name": "Thread-8",
+        "ticks": 1501,
+        "startTicks": 33572212
+      },
+      {
+        "tid": "24209",
+        "name": "demux",
+        "ticks": 89,
+        "startTicks": 33572227
+      },
+      {
+        "tid": "24210",
+        "name": "mksurf-latch",
+        "ticks": 32,
+        "startTicks": 33572227
+      },
+      {
+        "tid": "24211",
+        "name": "MediaCodec_loop",
+        "ticks": 219,
+        "startTicks": 33572228
+      },
+      {
+        "tid": "24212",
+        "name": "JNISurfaceTextu",
+        "ticks": 455,
+        "startTicks": 33572228
+      },
+      {
+        "tid": "24217",
+        "name": "AudioTrack",
+        "ticks": 140,
+        "startTicks": 33572263
+      },
+      {
+        "tid": "24338",
+        "name": "DartWorker",
+        "ticks": 41,
+        "startTicks": 33576301
+      },
+      {
+        "tid": "24388",
+        "name": "DartWorker",
+        "ticks": 1,
+        "startTicks": 33578096
+      },
+      {
+        "tid": "24393",
+        "name": "DartWorker",
+        "ticks": 0,
+        "startTicks": 33578303
+      }
+    ],
+    "screen": {
+      "on": true,
+      "awake": true,
+      "keyguard": false,
+      "keyguardSecure": null
+    },
+    "raw": {
+      "uptime": "335783.36 642728.25",
+      "cpu_total": "cpu  2832806 346757 3055758 15356206 17256 474221 379754 0 0 0\ncpu0 649764 114695 826404 15086244 16479 327612 247265 0 0 0\ncpu1 671312 120858 828780 88992 273 76974 73572 0 0 0\ncpu2 780714 62703 724577 89620 251 36502 31452 0 0 0\ncpu3 731016 48501 675997 91350 253 33133 27465 0 0 0\nintr 172102883 0 0 0 28371709 0 4524283 1369619 4 5 5 2602 0 1 13903 13261 1176 1062267 1490 0 4246683 31300 8770 0 0 13 2 0 0 3521828 0 2282802 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 16946 1093488 852848 5064746 0 0 0 0 17 5631637 0 12 9 0 0 0 0 0 0 1009 2 0 0 0 0 0 0 0 0 42 11 0 11 0 0 0 0 0 0 0 0 2240256 0 18 0 0 2274 0 0 0 2240272 0 0 0 0 0 0 0 88 0 290 2 0 0 0 2 2 0 0 0 2 0 3388060 0 0 0 0 0 0 0 101535 59382 0 0 13955 7 7 6 0 0 0 0 0 0 0 9039 2631799 0 63 0 0 0 3 3 0 0 0 7 8 0 0 0 3 0 1208 844395 18060 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 538710 0 0 0 0 3 27 0 0 59384 0 0 0 0 0 0 0 0 0 0 278 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2273 0 0 0 0 0 0 0 0 0 0 0 0 0 78 0 0 0 0 0 0 0 58 0 0 0 0 0 0 0 369 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 5384 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 13215 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2816 6 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 9441238 0 0 148 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 221 0 0 0 0 0 0 0 0 0 0\nctxt 345153295\nbtime 1792949699\nprocesses 176642\nprocs_running 9\nprocs_blocked 0\nsoftirq 103800161 5970544 18801498 393653 662745 4943577 9228 9502415 15307341 2183225 46025935",
+      "cpu_online": "0-3",
+      "battery_type": "battery",
+      "battery_temp": "28100",
+      "vts_type": "vts",
+      "vts_temp": "343",
+      "backlight": "64",
+      "backlight_max": "255",
+      "hdr_mode": "1",
+      "panel_thermal_status": "0",
+      "gpu_hz": "315000000",
+      "gpu_thermal_pwrlevel": "0",
+      "gpu_max_gpuclk": "652800000",
+      "cpu2_scaling_max_freq": "2342400",
+      "gpu_driver_busy_percentage": "59 %",
+      "battery_status": "Charging",
+      "battery_voltage_now": "4091162",
+      "battery_current_now": "673671",
+      "battery_capacity": "98",
+      "usb_online": "1",
+      "ac_online": "",
+      "cpu_kryo0_regulator_name": "kryo0",
+      "cpu_kryo0_regulator_microvolts": "687031",
+      "cpu_kryo1_regulator_name": "kryo1",
+      "cpu_kryo1_regulator_microvolts": "727225",
+      "gpu_upstream_regulator_name": "pmi8994_s2",
+      "gpu_upstream_regulator_microvolts": "645000",
+      "gpu_corner_name": "gfx_corner",
+      "gpu_corner_raw": "4",
+      "cpu0_khz": "1132800",
+      "cpu1_khz": "1132800",
+      "cpu2_khz": "2342400",
+      "cpu3_khz": "2342400",
+      "app_stat": "24112 (dia_kit_hdr_lab) S 812 812 0 0 -1 1077936448 112346 736 1 0 2512 1206 0 2 20 0 34 0 33571623 6999937024 53123 18446744073709551615 1 1 0 0 0 0 2101764 4096 34040 18446744073709551615 0 0 17 1 0 0 0 0 0 0 0 0 0 0 0 0 0",
+      "threads": "24112 (dia_kit_hdr_lab) S 812 812 0 0 -1 1077936448 27167 736 1 0 219 60 0 2 20 0 34 0 33571623 6999937024 53123 18446744073709551615 1 1 0 0 0 0 2101764 4096 34040 18446744073709551615 0 0 17 1 0 0 0 0 0 0 0 0 0 0 0 0 0\n24117 (Jit thread pool) S 812 812 0 0 -1 1077936192 4135 736 0 0 7 3 0 2 29 9 34 0 33571625 6999937024 53123 18446744073709551615 1 1 0 0 0 0 4612 4096 34040 18446744073709551615 0 0 -1 3 0 0 0 0 0 0 0 0 0 0 0 0 0\n24118 (Signal Catcher) S 812 812 0 0 -1 1077936192 82 736 0 0 0 0 0 2 20 0 34 0 33571625 6999937024 53123 18446744073709551615 1 1 0 0 0 0 4096 4096 34040 18446744073709551615 0 0 -1 2 0 0 0 0 0 0 0 0 0 0 0 0 0\n24119 (ReferenceQueueD) S 812 812 0 0 -1 1077936192 44 736 0 0 0 0 0 2 20 0 34 0 33571626 6999937024 53123 18446744073709551615 1 1 0 0 0 0 4612 4096 34040 18446744073709551615 0 0 -1 1 0 0 0 0 0 0 0 0 0 0 0 0 0\n24120 (FinalizerDaemon) S 812 812 0 0 -1 1077936192 37 736 0 0 0 0 0 2 20 0 34 0 33571626 6999937024 53123 18446744073709551615 1 1 0 0 0 0 4612 4096 34040 18446744073709551615 0 0 -1 0 0 0 0 0 0 0 0 0 0 0 0 0 0\n24121 (FinalizerWatchd) S 812 812 0 0 -1 1077936192 10 736 0 0 0 0 0 2 20 0 34 0 33571626 6999937024 53123 18446744073709551615 1 1 0 0 0 0 4612 4096 34040 18446744073709551615 0 0 -1 3 0 0 0 0 0 0 0 0 0 0 0 0 0\n24122 (HeapTaskDaemon) S 812 812 0 0 -1 1077936192 3452 736 0 0 3 2 0 2 20 0 34 0 33571626 6999937024 53123 18446744073709551615 1 1 0 0 0 0 4612 4096 34040 18446744073709551615 0 0 -1 0 0 0 0 0 0 0 0 0 0 0 0 0 0\n24124 (Binder:24112_1) S 812 812 0 0 -1 1077936192 309 736 0 0 21 26 0 2 20 0 34 0 33571626 6999937024 53123 18446744073709551615 1 1 0 0 0 0 4612 4096 34040 18446744073709551615 0 0 -1 1 0 0 0 0 0 0 0 0 0 0 0 0 0\n24125 (Binder:24112_2) S 812 812 0 0 -1 1077936192 270 736 0 0 16 32 0 2 20 0 34 0 33571626 6999937024 53123 18446744073709551615 1 1 0 0 0 0 4612 4096 34040 18446744073709551615 0 0 -1 2 0 0 0 0 0 0 0 0 0 0 0 0 0\n24128 (Profile Saver) S 812 812 0 0 -1 1077936192 230 736 0 0 1 0 0 2 20 0 34 0 33571628 6999937024 53123 18446744073709551615 1 1 0 0 0 0 4612 4096 34040 18446744073709551615 0 0 -1 3 0 0 0 0 0 0 0 0 0 0 0 0 0\n24138 (1.raster) S 812 812 0 0 -1 1077936192 915 736 0 0 1 1 0 2 15 -5 34 0 33571644 6999937024 53123 18446744073709551615 1 1 0 0 0 0 4612 4096 34040 18446744073709551615 0 0 -1 3 0 0 0 0 0 0 0 0 0 0 0 0 0\n24139 (1.io) S 812 812 0 0 -1 1077936192 94 736 0 0 0 0 0 2 20 0 34 0 33571645 6999937024 53123 18446744073709551615 1 1 0 0 0 0 4612 4096 34040 18446744073709551615 0 0 -1 0 0 0 0 0 0 0 0 0 0 0 0 0 0\n24140 (io.worker.1) S 812 812 0 0 -1 1077936192 7 736 0 0 0 0 0 2 21 1 34 0 33571647 6999937024 53123 18446744073709551615 1 1 0 0 0 0 4612 4096 34040 18446744073709551615 0 0 -1 0 0 0 0 0 0 0 0 0 0 0 0 0 0\n24141 (io.worker.2) S 812 812 0 0 -1 1077936192 4 736 0 0 0 0 0 2 21 1 34 0 33571647 6999937024 53123 18446744073709551615 1 1 0 0 0 0 4612 4096 34040 18446744073709551615 0 0 -1 2 0 0 0 0 0 0 0 0 0 0 0 0 0\n24142 (dart:io EventHa) S 812 812 0 0 -1 1077936192 70 736 0 0 2 0 0 2 20 0 34 0 33571647 6999937024 53123 18446744073709551615 1 1 0 0 0 0 69210628 4096 34040 18446744073709551615 0 0 -1 2 0 0 0 0 0 0 0 0 0 0 0 0 0\n24155 (RenderThread) S 812 812 0 0 -1 1077936192 861 736 0 0 6 0 0 2 16 -4 34 0 33571663 6999937024 53123 18446744073709551615 1 1 0 0 0 0 2101764 4096 34040 18446744073709551615 0 0 -1 1 0 0 0 0 0 0 0 0 0 0 0 0 0\n24158 (Thread-5) S 812 812 0 0 -1 1077936192 10190 736 0 0 512 135 0 2 20 0 34 0 33571677 6999937024 53123 18446744073709551615 1 1 0 0 0 0 2101764 4096 34040 18446744073709551615 0 0 -1 1 0 0 0 0 0 0 0 0 0 0 0 0 0\n24159 (hwuiTask1) S 812 812 0 0 -1 1077936192 14 736 0 0 0 0 0 2 18 -2 34 0 33571678 6999937024 53123 18446744073709551615 1 1 0 0 0 0 2101764 4096 34040 18446744073709551615 0 0 -1 1 0 0 0 0 0 0 0 0 0 0 0 0 0\n24176 (dart:io Process) S 812 812 0 0 -1 1077936192 7 736 0 0 0 0 0 2 20 0 34 0 33572091 6999937024 53123 18446744073709551615 1 1 0 0 0 0 2101764 4096 34040 18446744073709551615 0 0 -1 2 0 0 0 0 0 0 0 0 0 0 0 0 0\n24184 (RenderThread) S 812 812 0 0 -1 1077936192 0 736 0 0 0 0 0 2 16 -4 34 0 33572109 6999937024 53123 18446744073709551615 1 1 0 0 0 0 2101764 4096 34040 18446744073709551615 0 0 -1 0 0 0 0 0 0 0 0 0 0 0 0 0 0\n24185 (RenderThread) S 812 812 0 0 -1 1077936192 0 736 0 0 0 0 0 2 16 -4 34 0 33572109 6999937024 53123 18446744073709551615 1 1 0 0 0 0 2101764 4096 34040 18446744073709551615 0 0 -1 1 0 0 0 0 0 0 0 0 0 0 0 0 0\n24186 (RenderThread) S 812 812 0 0 -1 1077936192 3780 736 0 0 3 0 0 2 16 -4 34 0 33572109 6999937024 53123 18446744073709551615 1 1 0 0 0 0 2101764 4096 34040 18446744073709551615 0 0 -1 2 0 0 0 0 0 0 0 0 0 0 0 0 0\n24187 (RenderThread) S 812 812 0 0 -1 1077936192 3781 736 0 0 2 0 0 2 16 -4 34 0 33572109 6999937024 53123 18446744073709551615 1 1 0 0 0 0 2101764 4096 34040 18446744073709551615 0 0 -1 3 0 0 0 0 0 0 0 0 0 0 0 0 0\n24191 (worker) S 812 812 0 0 -1 1077936192 59 736 0 0 0 0 0 2 20 0 34 0 33572115 6999937024 53123 18446744073709551615 1 1 0 0 0 0 2101764 4096 34040 18446744073709551615 0 0 -1 3 0 0 0 0 0 0 0 0 0 0 0 0 0\n24202 (Binder:24112_3) S 812 812 0 0 -1 1077936192 68 736 0 0 17 29 0 2 20 0 34 0 33572172 6999937024 53123 18446744073709551615 1 1 0 0 0 0 4612 4096 34040 18446744073709551615 0 0 -1 1 0 0 0 0 0 0 0 0 0 0 0 0 0\n24207 (Thread-8) S 812 812 0 0 -1 1077936192 3717 736 0 0 1045 456 0 2 20 0 34 0 33572212 6999937024 53123 18446744073709551615 1 1 0 0 0 0 2101764 4096 34040 18446744073709551615 0 0 -1 3 0 0 0 0 0 0 0 0 0 0 0 0 0\n24209 (demux) S 812 812 0 0 -1 1077936192 20238 736 0 0 54 35 0 2 20 0 34 0 33572227 6999937024 53123 18446744073709551615 1 1 0 0 0 0 2101764 4096 34040 18446744073709551615 0 0 -1 0 0 0 0 0 0 0 0 0 0 0 0 0 0\n24210 (mksurf-latch) S 812 812 0 0 -1 1077936192 20 736 0 0 14 18 0 2 20 0 34 0 33572227 6999937024 53123 18446744073709551615 1 1 0 0 0 0 2101764 4096 34040 18446744073709551615 0 0 -1 0 0 0 0 0 0 0 0 0 0 0 0 0 0\n24211 (MediaCodec_loop) S 812 812 0 0 -1 1077936192 758 736 0 0 122 97 0 2 18 -2 34 0 33572228 6999937024 53123 18446744073709551615 1 1 0 0 0 0 2101764 4096 34040 18446744073709551615 0 0 -1 3 0 0 0 0 0 0 0 0 0 0 0 0 0\n24212 (JNISurfaceTextu) S 812 812 0 0 -1 1077936192 7756 736 0 0 254 201 0 2 4 -16 34 0 33572228 6999937024 53123 18446744073709551615 1 1 0 0 0 0 2101764 4096 34040 18446744073709551615 0 0 -1 1 0 0 0 0 0 0 0 0 0 0 0 0 0\n24217 (AudioTrack) S 812 812 0 0 -1 1077936192 21 736 0 0 89 51 0 2 -3 -16 34 0 33572263 6999937024 53123 18446744073709551615 1 1 0 0 0 0 2101764 4096 34040 18446744073709551615 0 0 -1 2 2 1 0 0 0 0 0 0 0 0 0 0 0\n24338 (DartWorker) S 812 812 0 0 -1 1077936192 9 736 0 0 36 5 0 2 20 0 34 0 33576301 6999937024 53123 18446744073709551615 1 1 0 0 0 0 2101764 4096 34040 18446744073709551615 0 0 -1 2 0 0 0 0 0 0 0 0 0 0 0 0 0\n24388 (DartWorker) S 812 812 0 0 -1 1077936192 6 736 0 0 1 0 0 2 20 0 34 0 33578096 6999937024 53123 18446744073709551615 1 1 0 0 0 0 2101764 4096 34040 18446744073709551615 0 0 -1 3 0 0 0 0 0 0 0 0 0 0 0 0 0\n24393 (DartWorker) S 812 812 0 0 -1 1077936192 3 736 0 0 0 0 0 2 20 0 34 0 33578303 6999937024 53123 18446744073709551615 1 1 0 0 0 0 2101764 4096 34040 18446744073709551615 0 0 -1 2 0 0 0 0 0 0 0 0 0 0 0 0 0"
+    },
+    "gpuDriverReportedBusyPercent": 59.0,
+    "samplingWorkSeconds": 0.16909995896276087,
+    "clockTicksPerSecond": 100,
+    "cpuDelta": {
+      "intervalSeconds": 0.16999999998370185,
+      "systemBusyPercent": {
+        "cpu": 52.30769230769231,
+        "cpu0": 46.666666666666664,
+        "cpu1": 47.05882352941177,
+        "cpu2": 52.94117647058823,
+        "cpu3": 62.5
+      },
+      "processOneCorePercent": 47.05882353392336,
+      "threadOneCorePercent": [
+        {
+          "tid": "24207",
+          "name": "Thread-8",
+          "percent": 17.64705882522126
+        },
+        {
+          "tid": "24112",
+          "name": "dia_kit_hdr_lab",
+          "percent": 5.88235294174042
+        },
+        {
+          "tid": "24158",
+          "name": "Thread-5",
+          "percent": 5.88235294174042
+        },
+        {
+          "tid": "24209",
+          "name": "demux",
+          "percent": 5.88235294174042
+        },
+        {
+          "tid": "24211",
+          "name": "MediaCodec_loop",
+          "percent": 5.88235294174042
+        },
+        {
+          "tid": "24212",
+          "name": "JNISurfaceTextu",
+          "percent": 5.88235294174042
+        },
+        {
+          "tid": "24117",
+          "name": "Jit thread pool",
+          "percent": 0.0
+        },
+        {
+          "tid": "24118",
+          "name": "Signal Catcher",
+          "percent": 0.0
+        },
+        {
+          "tid": "24119",
+          "name": "ReferenceQueueD",
+          "percent": 0.0
+        },
+        {
+          "tid": "24120",
+          "name": "FinalizerDaemon",
+          "percent": 0.0
+        },
+        {
+          "tid": "24121",
+          "name": "FinalizerWatchd",
+          "percent": 0.0
+        },
+        {
+          "tid": "24122",
+          "name": "HeapTaskDaemon",
+          "percent": 0.0
+        },
+        {
+          "tid": "24124",
+          "name": "Binder:24112_1",
+          "percent": 0.0
+        },
+        {
+          "tid": "24125",
+          "name": "Binder:24112_2",
+          "percent": 0.0
+        },
+        {
+          "tid": "24128",
+          "name": "Profile Saver",
+          "percent": 0.0
+        },
+        {
+          "tid": "24138",
+          "name": "1.raster",
+          "percent": 0.0
+        },
+        {
+          "tid": "24139",
+          "name": "1.io",
+          "percent": 0.0
+        },
+        {
+          "tid": "24140",
+          "name": "io.worker.1",
+          "percent": 0.0
+        },
+        {
+          "tid": "24141",
+          "name": "io.worker.2",
+          "percent": 0.0
+        },
+        {
+          "tid": "24142",
+          "name": "dart:io EventHa",
+          "percent": 0.0
+        },
+        {
+          "tid": "24155",
+          "name": "RenderThread",
+          "percent": 0.0
+        },
+        {
+          "tid": "24159",
+          "name": "hwuiTask1",
+          "percent": 0.0
+        },
+        {
+          "tid": "24176",
+          "name": "dart:io Process",
+          "percent": 0.0
+        },
+        {
+          "tid": "24184",
+          "name": "RenderThread",
+          "percent": 0.0
+        },
+        {
+          "tid": "24185",
+          "name": "RenderThread",
+          "percent": 0.0
+        },
+        {
+          "tid": "24186",
+          "name": "RenderThread",
+          "percent": 0.0
+        },
+        {
+          "tid": "24187",
+          "name": "RenderThread",
+          "percent": 0.0
+        },
+        {
+          "tid": "24191",
+          "name": "worker",
+          "percent": 0.0
+        },
+        {
+          "tid": "24202",
+          "name": "Binder:24112_3",
+          "percent": 0.0
+        },
+        {
+          "tid": "24210",
+          "name": "mksurf-latch",
+          "percent": 0.0
+        },
+        {
+          "tid": "24217",
+          "name": "AudioTrack",
+          "percent": 0.0
+        },
+        {
+          "tid": "24338",
+          "name": "DartWorker",
+          "percent": 0.0
+        },
+        {
+          "tid": "24388",
+          "name": "DartWorker",
+          "percent": 0.0
+        },
+        {
+          "tid": "24393",
+          "name": "DartWorker",
+          "percent": 0.0
+        }
+      ]
+    }
+  },
+  "finalEvidenceSource": "post-completion-snapshot",
+  "surfaceFlingerFinal": "Build configuration: [sf] [libui] [libgui]\nSync configuration: [using: EGL_ANDROID_native_fence_sync EGL_KHR_wait_sync]\nDispSync configuration: app phase 0 ns, sf phase 0 ns, present offset 0 ns (refresh 16666666 ns)\n\nStatic screen stats:\n  < 1 frames: 1115.107 s (0.7%)\n  < 2 frames: 3847.323 s (2.4%)\n  < 3 frames: 3020.020 s (1.9%)\n  < 4 frames: 343.875 s (0.2%)\n  < 5 frames: 55.923 s (0.0%)\n  < 6 frames: 34.762 s (0.0%)\n  < 7 frames: 29.778 s (0.0%)\n  7+ frames: 151544.734 s (94.7%)\n\nVisible layers (count = 13)\n+ Layer 0x74685c1000 (com.android.systemui.ImageWallpaper)\n  Region transparentRegion (this=0x74685c1300, count=1)\n    [  0,   0,   0,   0]\n  Region visibleRegion (this=0x74685c1010, count=1)\n    [  0,   0,   0,   0]\n  Region surfaceDamageRegion (this=0x74685c1088, count=1)\n    [  0,   0,   0,   0]\n      layerStack=   0, z=    21000, pos=(0,-720), size=(2880,2880), crop=(   0,   0,2880,2880), finalCrop=(   0,   0,  -1,  -1), isOpaque=1, invalidate=0, blur=0x00, alpha=0xff, flags=0x00000003, tr=[1.00, 0.00][0.00, 1.00]\n      client=0x746a213780\n      format= 2, activeBuffer=[2880x2880:2880,  2], queued-frames=0, mRefreshPending=0\n            mTexName=9 mCurrentTexture=0\n            mCurrentCrop=[0,0,0,0] mCurrentTransform=0x7\n            mAbandoned=0\n            -BufferQueue mMaxAcquiredBufferCount=1, mMaxDequeuedBufferCount=2, mDequeueBufferCannotBlock=0 mAsyncMode=0, default-size=[2880x2880], default-format=2, transform-hint=04, FIFO(0)={}\n             [00:0x0] state=FREE    \n             [01:0x0] state=FREE    \n             [02:0x0] state=FREE    \n+ LayerDim 0x746038ac00 (SurfaceView - com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity)\n  Region transparentRegion (this=0x746038af00, count=1)\n    [  0,   0,   0,   0]\n  Region visibleRegion (this=0x746038ac10, count=1)\n    [  0,   0,   0,   0]\n  Region surfaceDamageRegion (this=0x746038ac88, count=1)\n    [  0,   0,   0,   0]\n      layerStack=   0, z=    21034, pos=(104,0), size=(2672,1440), crop=(   0,   0,2672,1440), finalCrop=(   0,   0,  -1,  -1), isOpaque=0, invalidate=0, blur=0x00, alpha=0xff, flags=0x00000002, tr=[1.00, 0.00][0.00, 1.00]\n      client=0x745eca9fe0\n      format= 0, activeBuffer=[   0x   0:   0,  0], queued-frames=0, mRefreshPending=0\n            mTexName=129 mCurrentTexture=-1\n            mCurrentCrop=[0,0,0,0] mCurrentTransform=0\n            mAbandoned=0\n            -BufferQueue mMaxAcquiredBufferCount=1, mMaxDequeuedBufferCount=2, mDequeueBufferCannotBlock=0 mAsyncMode=0, default-size=[1x1], default-format=1, transform-hint=04, FIFO(0)={}\n             [00:0x0] state=FREE    \n             [01:0x0] state=FREE    \n             [02:0x0] state=FREE    \n+ Layer 0x74602ad800 (SurfaceView - com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity)\n  Region transparentRegion (this=0x74602adb00, count=1)\n    [  0,   0,   0,   0]\n  Region visibleRegion (this=0x74602ad810, count=2)\n    [104,   0, 2776,  52]\n    [104, 1388, 2776, 1440]\n  Region surfaceDamageRegion (this=0x74602ad888, count=1)\n    [  0,   0,   0,   0]\n      layerStack=   0, z=    21035, pos=(104,0), size=(2672,1440), crop=(   0,   0,2672,1440), finalCrop=(   0,   0,  -1,  -1), isOpaque=1, invalidate=0, blur=0x00, alpha=0xff, flags=0x00000002, tr=[1.00, 0.00][0.00, 1.00]\n      client=0x745eca9fe0\n      format= 4, activeBuffer=[1440x2672:1472,  1], queued-frames=0, mRefreshPending=0\n            mTexName=128 mCurrentTexture=-1\n            mCurrentCrop=[0,0,0,0] mCurrentTransform=0x7\n            mAbandoned=0\n            -BufferQueue mMaxAcquiredBufferCount=1, mMaxDequeuedBufferCount=2, mDequeueBufferCannotBlock=0 mAsyncMode=0, default-size=[2672x1440], default-format=4, transform-hint=04, FIFO(0)={}\n             [00:0x0] state=FREE    \n             [01:0x0] state=FREE    \n             [02:0x0] state=FREE    \n+ LayerDim 0x7460d3c800 (SurfaceView - com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity)\n  Region transparentRegion (this=0x7460d3cb00, count=1)\n    [  0,   0,   0,   0]\n  Region visibleRegion (this=0x7460d3c810, count=1)\n    [  0,   0,   0,   0]\n  Region surfaceDamageRegion (this=0x7460d3c888, count=1)\n    [  0,   0,   0,   0]\n      layerStack=   0, z=    21039, pos=(104,52), size=(2672,1336), crop=(   0,   0,2672,1336), finalCrop=(   0,   0,  -1,  -1), isOpaque=0, invalidate=0, blur=0x00, alpha=0xff, flags=0x00000003, tr=[1.00, 0.00][0.00, 1.00]\n      client=0x745eca9fe0\n      format= 0, activeBuffer=[   0x   0:   0,  0], queued-frames=0, mRefreshPending=0\n            mTexName=131 mCurrentTexture=-1\n            mCurrentCrop=[0,0,0,0] mCurrentTransform=0\n            mAbandoned=0\n            -BufferQueue mMaxAcquiredBufferCount=1, mMaxDequeuedBufferCount=2, mDequeueBufferCannotBlock=0 mAsyncMode=0, default-size=[2672x1336], default-format=1, transform-hint=04, FIFO(0)={}\n             [00:0x0] state=FREE    \n             [01:0x0] state=FREE    \n             [02:0x0] state=FREE    \n+ Layer 0x7460db7c00 (SurfaceView - com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity)\n  Region transparentRegion (this=0x7460db7f00, count=1)\n    [  0,   0,   0,   0]\n  Region visibleRegion (this=0x7460db7c10, count=1)\n    [104,  52, 2776, 1388]\n  Region surfaceDamageRegion (this=0x7460db7c88, count=1)\n    [  0,   0,  -1,  -1]\n      layerStack=   0, z=    21040, pos=(104,52), size=(2672,1336), crop=(   0,   0,2672,1336), finalCrop=(   0,   0,  -1,  -1), isOpaque=1, invalidate=0, blur=0x00, alpha=0xff, flags=0x00000002, tr=[1.00, 0.00][0.00, 1.00]\n      client=0x745eca9fe0\n      format=43, activeBuffer=[2672x1336:2688,7FA30C04], queued-frames=1, mRefreshPending=0\n            mTexName=130 mCurrentTexture=0\n            mCurrentCrop=[0,0,0,0] mCurrentTransform=0\n            mAbandoned=0\n            -BufferQueue mMaxAcquiredBufferCount=1, mMaxDequeuedBufferCount=2, mDequeueBufferCannotBlock=0 mAsyncMode=0, default-size=[2672x1336], default-format=43, transform-hint=04, FIFO(1)={01:0x745ed32e00 crop=[0,0,0,0], xform=0x00, time=0xa29a0d345712, scale=SCALE_TO_WINDOW\n}\n            >[00:0x745ed32300] state=ACQUIRED, 0x745ecdd940 [2672x1336:2688,7FA30C04]\n             [01:0x745ed32e00] state=QUEUED  , 0x745ecdb060 [2672x1336:2688,7FA30C04]\n             [02:0x745ed32800] state=DEQUEUED, 0x745ecdbd20 [2672x1336:2688,7FA30C04]\n+ Layer 0x74602cdc00 (com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity)\n  Region transparentRegion (this=0x74602cdf00, count=1)\n    [  0,  52, 2672, 1388]\n  Region visibleRegion (this=0x74602cdc10, count=1)\n    [104,   0, 2776, 1440]\n  Region surfaceDamageRegion (this=0x74602cdc88, count=1)\n    [  0,   0,   0,   0]\n      layerStack=   0, z=    21045, pos=(104,0), size=(2880,1440), crop=(   0,   0,2672,1440), finalCrop=(   0,   0,   0,   0), isOpaque=0, invalidate=0, blur=0x00, alpha=0xff, flags=0x00000000, tr=[1.00, 0.00][0.00, 1.00]\n      client=0x745eca9fe0\n      format= 1, activeBuffer=[1440x2880:1472,  1], queued-frames=0, mRefreshPending=0\n            mTexName=127 mCurrentTexture=1\n            mCurrentCrop=[0,0,0,0] mCurrentTransform=0x7\n            mAbandoned=0\n            -BufferQueue mMaxAcquiredBufferCount=1, mMaxDequeuedBufferCount=2, mDequeueBufferCannotBlock=0 mAsyncMode=0, default-size=[2880x1440], default-format=1, transform-hint=04, FIFO(0)={}\n            >[01:0x745ed32400] state=ACQUIRED, 0x745ecdc7a0 [1440x2880:1472,  1]\n             [00:0x746a255700] state=FREE    , 0x746a21bf60 [1440x2880:1472,  1]\n             [02:0x0] state=FREE    \n+ LayerDim 0x7464dbc800 (animation background stackId=1)\n  Region transparentRegion (this=0x7464dbcb00, count=1)\n    [  0,   0,   0,   0]\n  Region visibleRegion (this=0x7464dbc810, count=1)\n    [  0,   0,   0,   0]\n  Region surfaceDamageRegion (this=0x7464dbc888, count=1)\n    [  0,   0,   0,   0]\n      layerStack=   0, z=    21049, pos=(-360,-720), size=(2160,4320), crop=(   0,   0,  -1,  -1), finalCrop=(   0,   0,  -1,  -1), isOpaque=0, invalidate=0, blur=0x00, alpha=0x00, flags=0x00000001, tr=[1.00, 0.00][0.00, 1.00]\n      client=0x7464888280\n      format= 0, activeBuffer=[   0x   0:   0,  0], queued-frames=0, mRefreshPending=0\n            mTexName=53 mCurrentTexture=-1\n            mCurrentCrop=[0,0,0,0] mCurrentTransform=0\n            mAbandoned=0\n            -BufferQueue mMaxAcquiredBufferCount=1, mMaxDequeuedBufferCount=2, mDequeueBufferCannotBlock=0 mAsyncMode=0, default-size=[2160x4320], default-format=1, transform-hint=04, FIFO(0)={}\n             [00:0x0] state=FREE    \n             [01:0x0] state=FREE    \n             [02:0x0] state=FREE    \n+ LayerDim 0x74602e9800 (DimLayerController/Stack=0)\n  Region transparentRegion (this=0x74602e9b00, count=1)\n    [  0,   0,   0,   0]\n  Region visibleRegion (this=0x74602e9810, count=1)\n    [  0,   0,   0,   0]\n  Region surfaceDamageRegion (this=0x74602e9888, count=1)\n    [  0,   0,   0,   0]\n      layerStack=   0, z=    22059, pos=(-360,-720), size=(2160,4320), crop=(   0,   0,  -1,  -1), finalCrop=(   0,   0,  -1,  -1), isOpaque=0, invalidate=0, blur=0x00, alpha=0x00, flags=0x00000001, tr=[1.00, 0.00][0.00, 1.00]\n      client=0x7464888280\n      format= 0, activeBuffer=[   0x   0:   0,  0], queued-frames=0, mRefreshPending=0\n            mTexName=48 mCurrentTexture=-1\n            mCurrentCrop=[0,0,0,0] mCurrentTransform=0\n            mAbandoned=0\n            -BufferQueue mMaxAcquiredBufferCount=1, mMaxDequeuedBufferCount=2, mDequeueBufferCannotBlock=0 mAsyncMode=0, default-size=[2160x4320], default-format=1, transform-hint=04, FIFO(0)={}\n             [00:0x0] state=FREE    \n             [01:0x0] state=FREE    \n             [02:0x0] state=FREE    \n+ Layer 0x74648c9400 (StatusBar)\n  Region transparentRegion (this=0x74648c9700, count=1)\n    [  0,   0,   0,   0]\n  Region visibleRegion (this=0x74648c9410, count=1)\n    [  0,   0,   0,   0]\n  Region surfaceDamageRegion (this=0x74648c9488, count=1)\n    [  0,   0,   0,   0]\n      layerStack=   0, z=   161000, pos=(0,0), size=(2880,  96), crop=(   0,   0,2880,  96), finalCrop=(   0,   0,  -1,  -1), isOpaque=0, invalidate=0, blur=0x00, alpha=0xff, flags=0x00000001, tr=[1.00, 0.00][0.00, 1.00]\n      client=0x746a213780\n      format= 1, activeBuffer=[  96x2880: 128,  1], queued-frames=0, mRefreshPending=0\n            mTexName=7 mCurrentTexture=1\n            mCurrentCrop=[0,0,0,0] mCurrentTransform=0x7\n            mAbandoned=0\n            -BufferQueue mMaxAcquiredBufferCount=1, mMaxDequeuedBufferCount=2, mDequeueBufferCannotBlock=0 mAsyncMode=0, default-size=[2880x96], default-format=1, transform-hint=04, FIFO(0)={}\n            >[01:0x746a255600] state=ACQUIRED, 0x745ecdb7e0 [  96x2880: 128,  1]\n             [00:0x7464d63f00] state=FREE    , 0x746a21b6c0 [  96x2880: 128,  1]\n             [02:0x0] state=FREE    \n+ Layer 0x745ed14000 (NavigationBar)\n  Region transparentRegion (this=0x745ed14300, count=1)\n    [  0,   0,   0,   0]\n  Region visibleRegion (this=0x745ed14010, count=1)\n    [  0,   0,   0,   0]\n  Region surfaceDamageRegion (this=0x745ed14088, count=1)\n    [  0,   0,   0,   0]\n      layerStack=   0, z=   211000, pos=(2672,0), size=( 208,1440), crop=(   0,   0, 208,1440), finalCrop=(   0,   0,  -1,  -1), isOpaque=0, invalidate=0, blur=0x00, alpha=0xff, flags=0x00000001, tr=[1.00, 0.00][0.00, 1.00]\n      client=0x746a213780\n      format= 1, activeBuffer=[1440x 208:1472,  1], queued-frames=0, mRefreshPending=0\n            mTexName=122 mCurrentTexture=1\n            mCurrentCrop=[0,0,0,0] mCurrentTransform=0x7\n            mAbandoned=0\n            -BufferQueue mMaxAcquiredBufferCount=1, mMaxDequeuedBufferCount=2, mDequeueBufferCannotBlock=0 mAsyncMode=0, default-size=[208x1440], default-format=1, transform-hint=04, FIFO(0)={}\n            >[01:0x746a20fe00] state=ACQUIRED, 0x745ecdb900 [1440x 208:1472,  1]\n             [02:0x746a255200] state=FREE    , 0x746a21b1e0 [1440x 208:1472,  1]\n             [00:0x746a20fd00] state=FREE    , 0x746a21b300 [1440x 208:1472,  1]\n+ LayerDim 0x74648c5c00 (black surface)\n  Region transparentRegion (this=0x74648c5f00, count=1)\n    [  0,   0,   0,   0]\n  Region visibleRegion (this=0x74648c5c10, count=1)\n    [  0,   0,   0,   0]\n  Region surfaceDamageRegion (this=0x74648c5c88, count=1)\n    [  0,   0,   0,   0]\n      layerStack=   0, z=   298000, pos=(0,0), size=(1440,2880), crop=(   0,   0,  -1,  -1), finalCrop=(   0,   0,  -1,  -1), isOpaque=0, invalidate=0, blur=0x00, alpha=0xff, flags=0x00000001, tr=[1.00, 0.00][0.00, 1.00]\n      client=0x746a213820\n      format= 0, activeBuffer=[   0x   0:   0,  0], queued-frames=0, mRefreshPending=0\n            mTexName=3 mCurrentTexture=-1\n            mCurrentCrop=[0,0,0,0] mCurrentTransform=0\n            mAbandoned=0\n            -BufferQueue mMaxAcquiredBufferCount=1, mMaxDequeuedBufferCount=2, mDequeueBufferCannotBlock=0 mAsyncMode=0, default-size=[1x1], default-format=1, transform-hint=04, FIFO(0)={}\n             [00:0x0] state=FREE    \n             [01:0x0] state=FREE    \n             [02:0x0] state=FREE    \n+ Layer 0x74648c7800 (AODFontLayer)\n  Region transparentRegion (this=0x74648c7b00, count=1)\n    [  0,   0,   0,   0]\n  Region visibleRegion (this=0x74648c7810, count=1)\n    [  0,   0,   0,   0]\n  Region surfaceDamageRegion (this=0x74648c7888, count=1)\n    [  0,   0,   0,   0]\n      layerStack=   0, z=   309000, pos=(0,0), size=(1440,2880), crop=(   0,   0,  -1,  -1), finalCrop=(   0,   0,  -1,  -1), isOpaque=1, invalidate=0, blur=0x00, alpha=0xff, flags=0x00000001, tr=[1.00, 0.00][0.00, 1.00]\n      client=0x74648880a0\n      format= 2, activeBuffer=[1440x2880:1472,  2], queued-frames=0, mRefreshPending=0\n            mTexName=4 mCurrentTexture=1\n            mCurrentCrop=[0,0,0,0] mCurrentTransform=0\n            mAbandoned=0\n            -BufferQueue mMaxAcquiredBufferCount=1, mMaxDequeuedBufferCount=2, mDequeueBufferCannotBlock=0 mAsyncMode=0, default-size=[1440x2880], default-format=2, transform-hint=04, FIFO(0)={}\n            >[01:0x746a20fb00] state=ACQUIRED, 0x746a21b4e0 [1440x2880:1472,  2]\n             [00:0x745edb6a00] state=FREE    , 0x746492cd20 [1440x2880:1472,  2]\n             [02:0x0] state=FREE    \n+ Layer 0x74685c6400 (Main_Aod_Base_com.lge.signboard (0))\n  Region transparentRegion (this=0x74685c6700, count=1)\n    [  0,   0,   0,   0]\n  Region visibleRegion (this=0x74685c6410, count=1)\n    [  0,   0,   0,   0]\n  Region surfaceDamageRegion (this=0x74685c6488, count=1)\n    [  0,   0,   0,   0]\n      layerStack=   0, z=   311000, pos=(0,420), size=( 800, 600), crop=(   0,   0, 800, 600), finalCrop=(   0,   0,  -1,  -1), isOpaque=1, invalidate=0, blur=0x00, alpha=0xfc, flags=0x00000003, tr=[1.00, 0.00][0.00, 1.00]\n      client=0x7464889b80\n      format= 1, activeBuffer=[ 600x 800: 640,  1], queued-frames=0, mRefreshPending=0\n            mTexName=12 mCurrentTexture=1\n            mCurrentCrop=[0,0,0,0] mCurrentTransform=0x7\n            mAbandoned=0\n            -BufferQueue mMaxAcquiredBufferCount=1, mMaxDequeuedBufferCount=2, mDequeueBufferCannotBlock=0 mAsyncMode=0, default-size=[800x600], default-format=1, transform-hint=04, FIFO(0)={}\n            >[01:0x746a20f300] state=ACQUIRED, 0x745ecdd820 [ 600x 800: 640,  1]\n             [00:0x745ed32900] state=FREE    , 0x746a21b060 [ 600x 800: 640,  1]\n             [02:0x0] state=FREE    \nDisplays (1 entries)\n+ DisplayDevice: Built-in Screen\n   type=0, hwcId=0, layerStack=0, (1440x2880), ANativeWindow=0x746a6cc010, orient= 1 (type=00000003), flips=371298, isSecure=1, powerMode=2, activeConfig=0, numLayers=3\n   v:[0,0,2880,1440], f:[0,0,2880,1440], s:[0,0,1440,2880],transform:[[0.000,-1.000,1440.000][1.000,0.000,0.000][0.000,0.000,1.000]]\n   emulated=0, mFrameScale=1.000000, gap(0x0)\nmAbandoned=0\n-BufferQueue mMaxAcquiredBufferCount=2, mMaxDequeuedBufferCount=1, mDequeueBufferCannotBlock=0 mAsyncMode=0, default-size=[1440x2880], default-format=1, transform-hint=00, FIFO(0)={}\n>[02:0x74686f3500] state=ACQUIRED, 0x746859a480 [1440x2880:1472,  1]\n [01:0x74686f3400] state=FREE    , 0x746859a420 [1440x2880:1472,  1]\n [00:0x74686f3300] state=FREE    , 0x746859a3c0 [1440x2880:1472,  1]\nSurfaceFlinger global state:\nEGL implementation : 1.4\nEGL_QUALCOMM_shared_image EGL_KHR_image EGL_KHR_image_base EGL_QCOM_create_image EGL_QCOM_gpu_perf EGL_KHR_lock_surface EGL_KHR_lock_surface2 EGL_KHR_lock_surface3 EGL_KHR_fence_sync EGL_KHR_wait_sync EGL_KHR_cl_event EGL_KHR_cl_event2 EGL_KHR_reusable_sync EGL_IMG_context_priority EGL_KHR_gl_texture_2D_image EGL_KHR_gl_texture_cubemap_image EGL_KHR_gl_texture_3D_image EGL_KHR_gl_renderbuffer_image EGL_EXT_create_context_robustness EGL_EXT_yuv_surface EGL_ANDROID_blob_cache EGL_KHR_create_context EGL_KHR_gl_colorspace EGL_KHR_surfaceless_context EGL_KHR_create_context_no_error EGL_KHR_get_all_proc_addresses EGL_QCOM_lock_image2 EGL_KHR_partial_update EGL_EXT_protected_content EGL_KHR_mutable_render_buffer EGL_ANDROID_recordable EGL_ANDROID_native_fence_sync EGL_ANDROID_image_native_buffer EGL_ANDROID_framebuffer_target EGL_IMG_image_plane_attribs \nGLES: Qualcomm, Adreno (TM) 530, OpenGL ES 3.2 V@145.0 (GIT@Ifb108ab6ba)\nGL_OES_EGL_image GL_OES_EGL_image_external GL_OES_EGL_sync GL_OES_vertex_half_float GL_OES_framebuffer_object GL_OES_rgb8_rgba8 GL_OES_compressed_ETC1_RGB8_texture GL_AMD_compressed_ATC_texture GL_KHR_texture_compression_astc_ldr GL_KHR_texture_compression_astc_hdr GL_OES_texture_compression_astc GL_OES_texture_npot GL_EXT_texture_filter_anisotropic GL_EXT_texture_format_BGRA8888 GL_OES_texture_3D GL_EXT_color_buffer_float GL_EXT_color_buffer_half_float GL_QCOM_alpha_test GL_OES_depth24 GL_OES_packed_depth_stencil GL_OES_depth_texture GL_OES_depth_texture_cube_map GL_EXT_sRGB GL_OES_texture_float GL_OES_texture_float_linear GL_OES_texture_half_float GL_OES_texture_half_float_linear GL_EXT_texture_type_2_10_10_10_REV GL_EXT_texture_sRGB_decode GL_OES_element_index_uint GL_EXT_copy_image GL_EXT_geometry_shader GL_EXT_tessellation_shader GL_OES_texture_stencil8 GL_EXT_shader_io_blocks GL_OES_shader_image_atomic GL_OES_sample_variables GL_EXT_texture_border_clamp GL_EXT_multisampled_render_to_texture GL_OES_shader_multisample_interpolation GL_EXT_texture_cube_map_array GL_EXT_draw_buffers_indexed GL_EXT_gpu_shader5 GL_EXT_robustness GL_EXT_texture_buffer GL_EXT_shader_framebuffer_fetch GL_ARM_shader_framebuffer_fetch_depth_stencil GL_OES_texture_storage_multisample_2d_array GL_OES_sample_shading GL_OES_get_program_binary GL_EXT_debug_label GL_KHR_blend_equation_advanced GL_KHR_blend_equation_advanced_coherent GL_QCOM_tiled_rendering GL_ANDROID_extension_pack_es31a GL_EXT_primitive_bounding_box GL_OES_standard_derivatives GL_OES_vertex_array_object GL_EXT_disjoint_timer_query GL_KHR_debug GL_EXT_YUV_target GL_EXT_sRGB_write_control GL_EXT_texture_norm16 GL_EXT_discard_framebuffer GL_OES_surfaceless_context GL_OVR_multiview GL_OVR_multiview2 GL_EXT_texture_sRGB_R8 GL_KHR_no_error GL_EXT_debug_marker GL_OES_EGL_image_external_essl3 GL_OVR_multiview_multisampled_render_to_texture GL_EXT_buffer_storage GL_EXT_blit_framebuffer_params GL_EXT_clip_cull_distance GL_EXT_protected_textures GL_EXT_shader_non_constant_global_initializers \n  Region undefinedRegion (this=0x746a6b7658, count=2)\n    [  0,   0, 1440, 104]\n    [  0, 2776, 1440, 2880]\n  orientation=1, isDisplayOn=1\n  last eglSwapBuffers() time: 3398.594000 us\n  last transaction time     : 114.479000 us\n  transaction-flags         : 00000000\n  refresh-rate              : 60.000002 fps\n  x-dpi                     : 562.706970\n  y-dpi                     : 562.706970\n  gpu_to_cpu_unsupported    : 0\n  eglSwapBuffers time: 0.000000 us\n  transaction time: 0.000000 us\nVSYNC state: enabled\n  soft-vsync: disabled\n  numListeners=48,\n  events-delivered: 849626\n    0x745ec260a0: count=-1\n    0x745ec26320: count=-1\n    0x745ec26460: count=-1\n    0x745ec2c000: count=-1\n    0x745ec2c050: count=-1\n    0x745ec2c190: count=-1\n    0x745ec2c280: count=-1\n    0x745ec2c2d0: count=-1\n    0x745ec2c500: count=-1\n    0x745ec2c550: count=-1\n    0x745ec2c690: count=-1\n    0x745ec2cf00: count=-1\n    0x745ec2cf50: count=-1\n    0x745ec306f0: count=-1\n    0x745ec30ab0: count=-1\n    0x745ec30dd0: count=-1\n    0x745ec3a7d0: count=-1\n    0x745ec3ab40: count=-1\n    0x745ec87920: count=-1\n    0x7464c551d0: count=-1\n    0x7464c55270: count=-1\n    0x7464c553b0: count=-1\n    0x7464c55680: count=-1\n    0x7464c55720: count=-1\n    0x7464c55950: count=-1\n    0x7464c55b80: count=-1\n    0x7464c55bd0: count=-1\n    0x7464c55c20: count=-1\n    0x7464c566c0: count=-1\n    0x7464c56710: count=-1\n    0x7464c568f0: count=-1\n    0x7464c569e0: count=-1\n    0x7464c587e0: count=-1\n    0x74685b3cf0: count=-1\n    0x746a21f000: count=-1\n    0x746a21f050: count=-1\n    0x746a21f0a0: count=-1\n    0x746a21f0f0: count=-1\n    0x746a21f140: count=-1\n    0x746a21f190: count=-1\n    0x746a21f1e0: count=-1\n    0x746a21f230: count=-1\n    0x746a21f280: count=-1\n    0x746a21f2d0: count=-1\n    0x746a21f3c0: count=-1\n    0x746a21f410: count=-1\n    0x746a21f460: count=-1\n    0x746a640670: count=0\nh/w composer state:\n  h/w composer present and enabled\nHardware Composer state (version 01050000):\n  mDebugForceFakeVSync=0\n  Display[0] configurations (* current):\n    * 0: 1440x2880, xdpi=562.706970, ydpi=562.706970, refresh=16666666, colorTransform=0\n  numHwLayers=4, flags=00000000\n    type   |  handle  | hint | flag | tr | blnd |   format    |     source crop (l,t,r,b)      |          frame         | name \n-----------+----------+------+------+----+------+-------------+--------------------------------+------------------------+------\n       HWC | 746a21b7e0 | 0002 | 0000 | 00 | 0100 | RGBA_8888   |    0.0,    0.0, 1440.0, 2672.0 |    0,  104, 1440, 2776 | SurfaceView - com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity\n       HWC | 745ecdd940 | 0002 | 0000 | 04 | 0100 | ? 7fa30c04  |    0.0,    0.0, 2672.0, 1336.0 |   52,  104, 1388, 2776 | SurfaceView - com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity\n       HWC | 745ecdc7a0 | 0002 | 0000 | 00 | 0105 | RGBA_8888   |    0.0,    0.0, 1440.0, 2672.0 |    0,  104, 1440, 2776 | com.example.media_kit_hdr_lab/com.example.media_kit_hdr_lab.MainActivity\n FB TARGET | 746859a480 | 0000 | 0000 | 00 | 0105 | RGBA_8888   |    0.0,    0.0, 1440.0, 2880.0 |    0,    0, 1440, 2880 | HWC_FRAMEBUFFER_TARGET\n\n-------- Snapdragon Display Manager --------\n-----------------------\ndevice type: 0\nstate: 1, vsync on: 0, max. mixer stages: 7\nnum configs: 1, active config index: 0\nres:1440 x 2880, dpi:562.71 x 562.71, fps:60,vsync period: 16666666\n\nROI(L T R B) : LEFT(0 0 1440 2880)\n\n|-----|-------------|--------|----|-------|-------------|--------------------------|---------------------|---------------------|----|------------|-----------|----|------|\n| Idx |  Comp Type  |  Split | WB |  Pipe |    W x H    |          Format          |  Src Rect (L T R B) |  Dst Rect (L T R B) |  Z |    Flags   | Deci(HxV) | CS | Range|\n|-----|-------------|--------|----|-------|-------------|--------------------------|---------------------|---------------------|----|------------|-----------|----|------|\n|   1 |         SDE |  Rot-1 |  0 | 0x000 | 2688 x 1344 |         Y_CBCR_420_VENUS |    0    0 2672 1336 |    0    0 1336 2672 |  - |      -     |     -     |  - |  - |\n|     |             | Comp-1 |  - | 0x004 | 1336 x 2672 |    Y_CBCR_420_VENUS_UBWC |    0    0  668 2672 |   52  104  720 2776 |  0 | 0x00000002 |   0 x   0 |  9 |  1 |\n|     |             | Comp-2 |  - | 0x100 | 1336 x 2672 |    Y_CBCR_420_VENUS_UBWC |  668    0 1336 2672 |  720  104 1388 2776 |  0 | 0x00000002 |   0 x   0 |  9 |  1 |\n|-----|-------------|--------|----|-------|-------------|--------------------------|---------------------|---------------------|----|------------|-----------|----|------|\n|   3 |  GPU_TARGET | Comp-1 |  - | 0x200 | 1472 x 2880 |           RGBA_8888_UBWC |    0    0  720 2880 |    0    0  720 2880 |  1 | 0x00000002 |   0 x   0 |  6 |  0 |\n|     |             | Comp-2 |  - | 0x080 | 1472 x 2880 |           RGBA_8888_UBWC |  720    0 1440 2880 |  720    0 1440 2880 |  1 | 0x00000002 |   0 x   0 |  6 |  0 |\n|-----|-------------|--------|----|-------|-------------|--------------------------|---------------------|---------------------|----|------------|-----------|----|------|\n\nAllocated buffers:\n0x745ecdb060: unknown     | 2672 (2688) x 1336 | 7FA30C04 | 0x00000900\n0x745ecdb7e0: 1440.00 KiB |   96 ( 128) x 2880 |        1 | 0x20000900\n0x745ecdb900: 1196.00 KiB | 1440 (1472) x  208 |        1 | 0x20000900\n0x745ecdbd20: unknown     | 2672 (2688) x 1336 | 7FA30C04 | 0x00000900\n0x745ecdc0e0: 2000.00 KiB |  600 ( 640) x  800 |        1 | 0x20000900\n0x745ecdc7a0: 16560.00 KiB | 1440 (1472) x 2880 |        1 | 0x20000900\n0x745ecdd820: 2000.00 KiB |  600 ( 640) x  800 |        1 | 0x20000900\n0x745ecdd8e0: 16560.00 KiB | 1440 (1472) x 2880 |        2 | 0x20000900\n0x745ecdd940: unknown     | 2672 (2688) x 1336 | 7FA30C04 | 0x00000900\n0x746492cd20: 16560.00 KiB | 1440 (1472) x 2880 |        2 | 0x10000933\n0x746859a3c0: 16560.00 KiB | 1440 (1472) x 2880 |        1 | 0x20001a00\n0x746859a420: 16560.00 KiB | 1440 (1472) x 2880 |        1 | 0x20001a00\n0x746859a480: 16560.00 KiB | 1440 (1472) x 2880 |        1 | 0x20001a00\n0x746a21b060: 2000.00 KiB |  600 ( 640) x  800 |        1 | 0x20000900\n0x746a21b1e0: 1196.00 KiB | 1440 (1472) x  208 |        1 | 0x20000900\n0x746a21b300: 1196.00 KiB | 1440 (1472) x  208 |        1 | 0x20000900\n0x746a21b4e0: 16560.00 KiB | 1440 (1472) x 2880 |        2 | 0x10000933\n0x746a21b6c0: 1440.00 KiB |   96 ( 128) x 2880 |        1 | 0x20000900\n0x746a21b720:  552.00 KiB | 1440 (1472) x   96 |        1 | 0x20000900\n0x746a21b780: 1196.00 KiB | 1440 (1472) x  208 |        1 | 0x20000900\n0x746a21b7e0: 15364.00 KiB | 1440 (1472) x 2672 |        1 | 0x20000900\n0x746a21b9c0: 32400.00 KiB | 2880 (2880) x 2880 |        2 | 0x20000900\n0x746a21bf60: 16560.00 KiB | 1440 (1472) x 2880 |        1 | 0x20000900\nTotal allocated (estimate): 194460.00 KB\n",
+  "observedDurationSeconds": 60.44674737507012,
+  "hdrLabStopped": true,
+  "restoredScreen": {
+    "on": true,
+    "awake": true,
+    "keyguard": false,
+    "keyguardSecure": null
+  },
+  "restoreErrors": [],
+  "restoredState": {
+    "settings": {
+      "screen_brightness_mode": "1",
+      "screen_brightness": "141",
+      "accelerometer_rotation": "0",
+      "user_rotation": "0",
+      "screen_off_timeout": "30000"
+    },
+    "properties": {
+      "debug.mks.thermal_sync": "",
+      "debug.mks.thermal_trace": "",
+      "debug.mks.defer_publish_flush": ""
+    }
+  },
+  "restorationVerified": true,
+  "automaticBrightnessScalarChanged": false,
+  "finishedAt": "2026-10-29T22:51:28.941857+08:00"
+}

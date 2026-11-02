@@ -1,0 +1,29 @@
+@@ /sys/class/kgsl/kgsl-3d0/thermal_pwrlevel
+4
+return=0
+@@ /sys/class/kgsl/kgsl-3d0/max_gpuclk
+401800000
+return=0
+@@ /sys/class/kgsl/kgsl-3d0/min_gpuclk
+UNAVAILABLE: path absent
+@@ /sys/class/kgsl/kgsl-3d0/max_pwrlevel
+0
+return=0
+@@ /sys/class/kgsl/kgsl-3d0/min_pwrlevel
+7
+return=0
+@@ /sys/class/kgsl/kgsl-3d0/num_pwrlevels
+8
+return=0
+@@ /sys/class/kgsl/kgsl-3d0/devfreq/max_freq
+652800000
+return=0
+@@ /sys/class/kgsl/kgsl-3d0/devfreq/min_freq
+133000000
+return=0
+@@ /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+/system/bin/sh: cat: /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq: Permission denied
+return=1
+@@ /sys/devices/system/cpu/cpu2/cpufreq/scaling_max_freq
+2150400
+return=0

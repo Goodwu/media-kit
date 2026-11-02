@@ -1,0 +1,299 @@
+{
+  "schema": 9,
+  "status": "captured-floats-bit-equal",
+  "numeric_status": "captured-floats-bit-equal",
+  "identity": {
+    "pid": 8120,
+    "capture_id": 6650462096,
+    "generation": 2,
+    "frame_id": 74,
+    "frame_token": 26,
+    "source_pts": 35.035,
+    "current_pts": 35.035,
+    "target_pts": 35.035
+  },
+  "pixels": 3569792,
+  "atlas_metadata": {
+    "width": 2672,
+    "height": 1336,
+    "pixels": 3569792,
+    "vertex_layout": {
+      "primitive": "triangle_strip",
+      "indexed": false,
+      "vertex_count": 4,
+      "num_attributes": 2,
+      "position_attrib": 1,
+      "stride": 16,
+      "byte_size": 64,
+      "viewport": [
+        0,
+        0,
+        2672,
+        1336
+      ],
+      "scissors": [
+        0,
+        0,
+        2672,
+        1336
+      ],
+      "attributes": [
+        {
+          "name": "_13",
+          "format_name": "rg32f",
+          "glsl_type": "vec2",
+          "fmt_type": "float32",
+          "opaque": false,
+          "num_planes": 0,
+          "location": 0,
+          "num_components": 2,
+          "component_depth": [
+            32,
+            32,
+            0,
+            0
+          ],
+          "host_bits": [
+            32,
+            32,
+            0,
+            0
+          ],
+          "sample_order": [
+            0,
+            1,
+            0,
+            0
+          ],
+          "offset": 0,
+          "texel_size": 8
+        },
+        {
+          "name": "_14",
+          "format_name": "rg32f",
+          "glsl_type": "vec2",
+          "fmt_type": "float32",
+          "opaque": false,
+          "num_planes": 0,
+          "location": 1,
+          "num_components": 2,
+          "component_depth": [
+            32,
+            32,
+            0,
+            0
+          ],
+          "host_bits": [
+            32,
+            32,
+            0,
+            0
+          ],
+          "sample_order": [
+            0,
+            1,
+            0,
+            0
+          ],
+          "offset": 8,
+          "texel_size": 8
+        }
+      ]
+    },
+    "status": "complete",
+    "anchor_validation_mask": 0,
+    "android_roi": {
+      "x": 1304,
+      "y": 636,
+      "w": 64,
+      "h": 64
+    },
+    "scope": "rgb-anchor-capture-only-not-quality-pass",
+    "readback_representation": "RGBA/FLOAT decoded RGB16F numerical values; not physical storage bytes",
+    "instrumentation_scope": "A0 before and after have no capture SSBO/tap; atlas A is instrumented; final CSC is instrumented only in Android ROI"
+  },
+  "readback_analysis": {
+    "status": "captured-floats-bit-equal",
+    "baseline_readback_stable": true,
+    "all_three_readbacks_bit_equal": true,
+    "comparisons": {
+      "A0_before_vs_after": {
+        "components": 14279168,
+        "bit_mismatches": 0,
+        "pixels_with_bit_mismatches": 0,
+        "nonfinite_components": 0,
+        "max_absolute_difference": 0.0,
+        "max_ulp_distance": 0,
+        "max_absolute_difference_location": null,
+        "first_differences": []
+      },
+      "A0_before_vs_atlas_A": {
+        "components": 14279168,
+        "bit_mismatches": 0,
+        "pixels_with_bit_mismatches": 0,
+        "nonfinite_components": 0,
+        "max_absolute_difference": 0.0,
+        "max_ulp_distance": 0,
+        "max_absolute_difference_location": null,
+        "first_differences": []
+      },
+      "atlas_A_vs_A0_after": {
+        "components": 14279168,
+        "bit_mismatches": 0,
+        "pixels_with_bit_mismatches": 0,
+        "nonfinite_components": 0,
+        "max_absolute_difference": 0.0,
+        "max_ulp_distance": 0,
+        "max_absolute_difference_location": null,
+        "first_differences": []
+      }
+    },
+    "representation": "RGBA/FLOAT finite float32 readback values expanded from RGBA16F; not physical storage bytes",
+    "scope": "Supplied full-screen readback values only. FBO identity, coverage and synchronization require separate metadata validation. The middle atlas shader is instrumented; no production, raw YUV, panel or power conclusion."
+  },
+  "atlas_coverage": {
+    "pixels": 3569792,
+    "coverage": "exactly-one-record-per-pixel",
+    "all_uv_finite": true,
+    "uv_min": [
+      0.00018712575547397137,
+      0.0003741830587387085
+    ],
+    "uv_max": [
+      0.9998129606246948,
+      0.9996258020401001
+    ]
+  },
+  "source_relation": {
+    "status": "exact-three-insertions",
+    "a0_contains_original_body": true,
+    "control_relation": "not-independently-verified",
+    "scope": "Archived source bytes prove three insertions relative to archived A0. The middle atlas shader is instrumented. Equivalence of A0 to an external production control and actual native bindings remain unverified offline."
+  },
+  "vertex_evidence": {
+    "status": "exact-full-record-permutation",
+    "permutation": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "stride": 16,
+    "bytes": 64,
+    "record_bytes_verified": true,
+    "padding_bytes_preserved": true,
+    "baseline_sha256": "0bba1f02d88c1435ba4f7102a729f248710e9bea710c5fe46aa9b19cc5affd51",
+    "candidate_sha256": "0bba1f02d88c1435ba4f7102a729f248710e9bea710c5fe46aa9b19cc5affd51",
+    "A_positions": [
+      [
+        -1.0,
+        1.0
+      ],
+      [
+        1.0,
+        1.0
+      ],
+      [
+        -1.0,
+        -1.0
+      ],
+      [
+        1.0,
+        -1.0
+      ]
+    ],
+    "B_positions": [
+      [
+        -1.0,
+        1.0
+      ],
+      [
+        1.0,
+        1.0
+      ],
+      [
+        -1.0,
+        -1.0
+      ],
+      [
+        1.0,
+        -1.0
+      ]
+    ],
+    "A_twice_signed_areas": [
+      -4.0,
+      -4.0
+    ],
+    "B_twice_signed_areas": [
+      -4.0,
+      -4.0
+    ],
+    "scope": "Captured CPU vertex payload and source relation only. Full record permutation preserves padding and attribute bytes. Native bindings and GPU execution are producer assertions; this is not production, panel or physical-program equivalence proof."
+  },
+  "archived_files": {
+    "a0_before": {
+      "file": "mks-yuv-atlas-8120-6650462096.a0-before.f32",
+      "bytes": 57116672,
+      "sha256": "8f03d9e585454b551c129c037e44f42caf68b99b2502ec60e259ab719b44c8d3"
+    },
+    "atlas_a": {
+      "file": "mks-yuv-atlas-8120-6650462096.atlas-a.f32",
+      "bytes": 57116672,
+      "sha256": "8f03d9e585454b551c129c037e44f42caf68b99b2502ec60e259ab719b44c8d3"
+    },
+    "a0_after": {
+      "file": "mks-yuv-atlas-8120-6650462096.a0-after.f32",
+      "bytes": 57116672,
+      "sha256": "8f03d9e585454b551c129c037e44f42caf68b99b2502ec60e259ab719b44c8d3"
+    },
+    "atlas": {
+      "file": "mks-yuv-atlas-8120-6650462096.atlas.bin",
+      "bytes": 42837504,
+      "sha256": "bd38a0b20457f1f72c12184a94271b336455627f32b3f71d3d3b940b70b424e2"
+    },
+    "a0_fragment": {
+      "file": "mks-yuv-atlas-8120-6650462096.a0.frag.glsl",
+      "bytes": 2530,
+      "sha256": "956ea3e70810e7efb558d1fc808c50928bf1b93205e66ef448912586d9087102"
+    },
+    "atlas_fragment": {
+      "file": "mks-yuv-atlas-8120-6650462096.atlas.frag.glsl",
+      "bytes": 3425,
+      "sha256": "6b8431bb0fd49b17b6b3661880b9ca0af5b4bd511eec83e83b72f294ed7000d8"
+    },
+    "vertex": {
+      "file": "mks-yuv-atlas-8120-6650462096.vertex.glsl",
+      "bytes": 462,
+      "sha256": "d581505a44b4fcb372996e09f4ffded794b72277186dbfae1c7cc61bfb50cbf2"
+    },
+    "original_body": {
+      "file": "mks-yuv-atlas-8120-6650462096.original-body.glsl",
+      "bytes": 2129,
+      "sha256": "a38842897494b29a7fe1b5062bf035a6add83f5a33fdf397441a6e8a454b0cab"
+    },
+    "baseline_vertices": {
+      "file": "mks-yuv-atlas-8120-6650462096.baseline-vertices.bin",
+      "bytes": 64,
+      "sha256": "0bba1f02d88c1435ba4f7102a729f248710e9bea710c5fe46aa9b19cc5affd51"
+    },
+    "android": {
+      "file": "mks-yuv-atlas-8120-6650462096.android.bin",
+      "bytes": 114688,
+      "sha256": "894d47c84f731607fae0a21351b8fcd73a9a74e8e4ec635e51a39ba77af37fe2"
+    }
+  },
+  "anchor_validation_mask": 0,
+  "anchor_validation_reasons": [],
+  "diagnostic_only": true,
+  "quality_pass": false,
+  "production_equivalence_established": false,
+  "limitations": [
+    "Captured shader floats only; not raw NV12, driver quantization, scanout or panel evidence.",
+    "Shader hashes identify archived sources; they do not prove equivalence to uninstrumented baseline.",
+    "Completion/fence/error evidence is asserted by the native producer manifest, not independently queried offline.",
+    "Pixels in one capture are correlated; this is not a performance or statistical confidence test.",
+    "Only full-screen RGB readback is compared. Android CSC is captured only in its ROI and is auxiliary evidence.",
+    "RGBA/FLOAT values are exact binary16 expansions, not physical RGBA16F storage bytes.",
+    "Atlas UV/count capture instruments the middle shader and may alter compilation. Native FBO, program, fence and epoch metadata are producer assertions."
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "androidSyntax": {
+    "file": "../video/out/vo_gpu_next.c",
+    "exit": 0,
+    "stderr": "",
+    "scope": "schema6 sidecar full PL_HAVE_MKS_YUV_COMPARE_ORACLE_PROBE API24 syntax"
+  },
+  "hostTests": "pure C compile+execute exit0: strict probe optin/prereqs, main/Android/sidecar coverage+finite+overflow+fieldrange, all7CPU validation bits and outside/nonfinite observations; actual source-extracted compare_save JSON7tests + actual compare_poll state/hardgate test1 + EGLregression1 + FBOregression1 =10passed",
+  "mode": "debug.mks.yuv_probe=1 independently off; requires valid compare/repeat/tap/oracle, excludes invariant. Absent/0 retains original1..5; malformed/unavailable refuses capture and uses originalRGB in compare session.",
+  "schema6": {
+    "layout": "base26 x2 andAndroid7unchanged; newB-only sidecar10 x2 completeROI chunks",
+    "sidecarOffsets": {
+      "0": "atomicrecordfrag",
+      "1": "helpercalls",
+      "2": "actualsiteexec",
+      "3": "GPUobservedAfrag",
+      "4": "GPUobservedAsite",
+      "5": "GPUobservedAUbits",
+      "6": "GPUobservedAVbits",
+      "7": "reasonmask1outside/2frag/4site/8nonfinite",
+      "8": "dependencyvalidbool",
+      "9": "selected0own/1A/2fallback"
+    },
+    "hardGates": "samecapture/gen/frameid/token/PTS/ROI, exactlength, owner+samefence+epoch, all4draws+2barriers, primaryBfrag/Afrag/Asite==1 andBdepcount0or1; allprimaryactualfloatsfinite; Androidcount1+6floatfinite; sidecarrecord/helper/actualsite1; reason0..15/dep0or1/selected0..2",
+    "cpuValidationBits": {
+      "1": "gpu-dependency-invalid",
+      "2": "reason-mismatch",
+      "4": "dependency-flag-mismatch",
+      "8": "selected-source-mismatch",
+      "16": "base-site-mismatch",
+      "32": "observed-a-uv-mismatch",
+      "64": "selected-a-uv-mismatch"
+    },
+    "maskScope": "Reason/dep/selection selfconsistency andGPUobservedUV vsCPUfinalA, plusselectedAUV vsactualBtap. mask0onlynormalcomplete; masknonzeroonlydiagnostic-invalid; observedUVnonfinite only in rawsidecar diagnostics, never actualsampleacceptance.",
+    "files": "normal7files includesoracle_probe .oracle-probe.bin; invalidentirebasename mks-yuv-compare-PID-ID.diagnostic-invalid withsame7suffixes, exclusivewrites andmanifestlast",
+    "events": "capture-complete/unknown onlyvalid; capture-diagnostic-invalid/refused onlycoveredinvalid, thenVOterminal+freeze; neverboth, nofurtherframes. Write/resource/identity/coverage failures remaincapture-failed withoutcomplete manifest.",
+    "status": "lib_statuscomplete andAndroidready/swaptrue refer actualcompletedGPUreadbackandA2CSC; logicaloraclefailure is separatestatus/CPUreasons, notfakedGLfailure",
+    "presentation": "unchangedone-rendererA1barrierB1A2barrierB2; onlyA2fresh/originalCSCcoversB2/oneSwap; newsidecarreadbackisnonblockingprobe_pollwithsameowner/fence/epoch"
+  },
+  "fboUnchanged": true,
+  "limits": "No build/device/driver proof. NativeA0sourceanchor andcross-runcomparisons remainindependenthost gates, notproducerboolean. Libraryfinalfreeze andV2separatelyowned.",
+  "files": {
+    "/Users/wuweiwei1/src/mpv/video/out/vo_gpu_next.c": "4d71cd984b54f6809f8943633f22c042be54414af0977a5b108c70768d658c52",
+    "/Users/wuweiwei1/src/mpv/video/out/yuv_compare_vo.h": "543731a3ca0cfe82a1096f0df97ae2f9bfcf4a5bfb4946648ee0a5bad2a1d223",
+    "/Users/wuweiwei1/src/mpv/test/yuv_compare_vo.c": "1b9618c5253b6665cc7e1c6a649e1b05b22ed27a6414022ec29dede403325dbc",
+    "/Users/wuweiwei1/src/media-kit/tool/test_lg_yuv_compare_manifest.py": "47deb10492ff2e715e4773b03e69f562dad72c5a4fc3f1097d7622b75596b79b",
+    "/Users/wuweiwei1/src/libplacebo/src/include/libplacebo/opengl.h": "4da24c0f41f7ddf9ec4388fb50b7f1002786525687689ad4b58f1f5e9703b5a2"
+  }
+}

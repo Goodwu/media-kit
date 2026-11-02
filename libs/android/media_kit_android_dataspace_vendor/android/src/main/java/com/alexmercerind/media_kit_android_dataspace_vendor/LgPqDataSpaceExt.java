@@ -354,6 +354,13 @@ public final class LgPqDataSpaceExt implements PlatformVideoView.SurfaceDataSpac
         return 1;
     }
 
+    /** Reserved optional policy. Long-window thermal acceptance is incomplete;
+     * keep the product capability off until independently accepted. */
+    @Override
+    public boolean supportsDeferredSurfaceTexturePublish30fps() {
+        return false;
+    }
+
     static final String FINGERPRINT =
             "lge/lucye_global_com/lucye:7.0/NRD90U/172921900e77a:user/release-keys";
 

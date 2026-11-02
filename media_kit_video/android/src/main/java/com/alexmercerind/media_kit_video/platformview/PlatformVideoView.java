@@ -168,6 +168,12 @@ public final class PlatformVideoView implements PlatformView {
             return 0;
         }
 
+        /** Explicit opt-in for the owned, real-frame 30 fps publish policy.
+         * This does not assert that the current native library supports it. */
+        default boolean supportsDeferredSurfaceTexturePublish30fps() {
+            return false;
+        }
+
         /**
          * Vendor self-report (plan W1): whether PQ can be presented through
          * the vendor YUV window carrier on this device. Tri-state: {@code
@@ -285,6 +291,8 @@ public final class PlatformVideoView implements PlatformView {
         info.put("id", ext.id());
         final boolean applicable = ext.isApplicable();
         info.put("isApplicable", applicable);
+        info.put("supportsDeferredSurfaceTexturePublish30fps",
+                ext.supportsDeferredSurfaceTexturePublish30fps());
         info.put("requiresFlutterTextureView",
                 requiresFlutterTextureView(ext, applicable));
         // All-or-nothing, matching the Dart parser (HdrPqPresentation.fromMap

@@ -1,0 +1,21 @@
+{
+ "apk": "fusion-table-fix26-20261102 SHA256 c2d2adc64e889250d1eacb4a11492e1b9a32a8e724406c7706b61ad198880330",
+ "harness": "debug.mks.yuv_table_transition=<delta> (diagnostic-only, default 0): on delta change applies a REAL VO-level resize (dwidth/dheight + resize(vo) -> gpu_ctx_resize chain), logged as transition-inject",
+ "sequence": [
+  {
+   "phase": "baseline",
+   "result": "ready cache_id=1 first-attempt + table-pass-ran + 600+ fused commits"
+  },
+  {
+   "phase": "+2 transition",
+   "result": "transition-inject 2672->2674; fusion gated (dst vs desc mismatch); every frame ordinary rgb-final presentation; stale table NEVER consumed (zero table-required-unmet / table-uv-drift / table-input-mismatch); zero render failures"
+  },
+  {
+   "phase": "return to 0",
+   "result": "transition-inject 2674->2672; geometry restored; ordinary playback continues, zero anomalies"
+  }
+ ],
+ "claimed_closed": "controlled live geometry change against a READY table: stale table never wrongly consumed, ordinary path presents throughout, clean return",
+ "remaining_open": "in-session reseed at the NEW size requires the app-level surface size to actually change (android_reconfig reads vo_android_surface_size from the Dart binding); the lab app cannot deliver a live surface-size change (all OS-level changes recreate the activity). Component coverage: dispatch size-drop is the same code as the fusion-fallback drop (observed working), fresh sessions at any size seed first-attempt.",
+ "evidence": "flutter-logcat.txt"
+}

@@ -1,0 +1,8 @@
+{
+  "time": "2026-10-29T16:44:03.929797+08:00",
+  "phase": "B1 near match, temperature still above strict battery threshold; no playback yet",
+  "stdout": "@@ /sys/class/kgsl/kgsl-3d0/thermal_pwrlevel\n0\nreturn=0\n@@ /sys/class/kgsl/kgsl-3d0/max_gpuclk\n652800000\nreturn=0\n@@ /sys/class/kgsl/kgsl-3d0/min_gpuclk\nUNAVAILABLE: path absent\n@@ /sys/class/kgsl/kgsl-3d0/max_pwrlevel\n0\nreturn=0\n@@ /sys/class/kgsl/kgsl-3d0/min_pwrlevel\n7\nreturn=0\n@@ /sys/class/kgsl/kgsl-3d0/num_pwrlevels\n8\nreturn=0\n@@ /sys/class/kgsl/kgsl-3d0/devfreq/max_freq\n652800000\nreturn=0\n@@ /sys/class/kgsl/kgsl-3d0/devfreq/min_freq\n133000000\nreturn=0\n@@ /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq\n/system/bin/sh: cat: /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq: Permission denied\nreturn=1\n@@ /sys/devices/system/cpu/cpu2/cpufreq/scaling_max_freq\n2342400\nreturn=0\n@@ temperatures\n33300\n359\n@@ battery service\nCurrent Battery Service state:\n  AC powered: true\n  USB powered: false\n  Wireless powered: false\n  Max charging current: 0\n  Max charging voltage: 0\n  Charge counter: 0\n  status: 5\n  health: 2\n  present: true\n  level: 100\n  scale: 100\n  voltage: 4322\n  temperature: 333\n  technology: Li-ion\n",
+  "stderr": "",
+  "returncode": 0,
+  "interpretation": "Cap/power-supply snapshot only; A1 initial caps unavailable."
+}

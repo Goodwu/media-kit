@@ -1,0 +1,7 @@
+/sys/class/regulator/regulator.1 lrwxrwxrwx 1 root root    0 2026-10-29 15:50 838000.cpr3-ctrl-vdd -> ../../../838000.cpr3-ctrl
+/sys/class/regulator/regulator.13 lrwxrwxrwx 1 root root    0 2026-10-29 15:50 8c0000.qcom,gpucc-vdd_gpu_mx -> ../../../../../8c0000.qcom,gpucc
+/sys/class/regulator/regulator.13 lrwxrwxrwx 1 root root    0 2026-10-29 15:50 8c0000.qcom,gpucc-vdd_mx -> ../../../../../8c0000.qcom,gpucc
+/sys/class/regulator/regulator.5 lrwxrwxrwx 1 root root    0 2026-10-29 15:50 838000.cpr3-ctrl-mem-acc -> ../../../838000.cpr3-ctrl
+/sys/class/regulator/regulator.63 lrwxrwxrwx 1 root root    0 2026-10-29 15:50 70000.qcom,msm-thermal-vdd-gfx -> ../../../70000.qcom,msm-thermal
+/sys/class/regulator/regulator.63 lrwxrwxrwx 1 root root    0 2026-10-29 15:50 8c0000.qcom,gpucc-vdd_gfx -> ../../../8c0000.qcom,gpucc
+/sys/class/regulator/regulator.63 lrwxrwxrwx 1 root root    0 2026-10-29 15:50 device -> ../../../838000.cpr3-ctrl

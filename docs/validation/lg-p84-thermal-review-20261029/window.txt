@@ -1,0 +1,2 @@
+  mCurrentFocus=Window{f2d2357 u0 com.example.piliplus.dev/com.example.piliplus.MainActivity}
+  mFocusedApp=AppWindowToken{c5258bd token=Token{3799d68 ActivityRecord{f19388b u0 com.example.piliplus.dev/com.example.piliplus.MainActivity t807}}}

@@ -1,0 +1,50 @@
+from pathlib import Path
+import argparse,datetime,json,hashlib,re,signal,subprocess,sys
+sys.path.insert(0,str(Path('/Users/wuweiwei1/src/media-kit/tool')))
+import lg_p84_instant_perf as instant
+import lg_p84_thermal_round as thermal
+root=Path('/Users/wuweiwei1/src/media-kit/docs/validation/lg-p84-thermal-review-20261029')
+reference=root/'thermal-ab4-A1/summary.json'
+a=json.loads(reference.read_text())
+assert a['status']=='completed-observation' and a['completeWindow'] and a['restorationVerified']
+expected={k:a['initial']['raw'][k] for k in ('battery_status','usb_online')}
+class SupplyMatchedAdb(instant.InstantAdb):
+    def snapshot(self):
+        row=super().snapshot()
+        mismatch={k:{'expected':v,'observed':row['raw'].get(k)} for k,v in expected.items() if row['raw'].get(k)!=v}
+        if mismatch:
+            thermal.write_json(root/'thermal-ab4-B1-supply-mismatch.json',{'time':thermal.now(),'mismatches':mismatch,'raw':row['raw']})
+            raise RuntimeError('supply-status-or-USB-does-not-match-baseline:'+json.dumps(mismatch))
+        return row
+args=argparse.Namespace(serial='LGH870DS42e27764',output=str(root/'thermal-ab4-B1'),mode='candidate',experiment='publish-flush',duration=360.0,interval=2.0,tap=[1440,720],tap_delay=4.0,allow_unprotected_menu=True,source='/sdcard/Android/data/com.example.media_kit_hdr_lab/files/hokkaido-p84.mp4',source_receipt=str(root/'local-source.json'),source_hash=None,expected_panel_thermal_status='0',instant_enabled=True,reference_start=str(reference),cooldown_timeout=1800.0,battery_tolerance=0.5,vts_tolerance=0.5)
+clock=instant.measure_clock(args.serial)
+SupplyMatchedAdb.clock_hz=clock
+thermal.Adb=SupplyMatchedAdb
+def terminate(signum,frame):
+    raise KeyboardInterrupt('termination-signal-'+str(signum))
+signal.signal(signal.SIGTERM,terminate)
+pre=subprocess.run(['adb','-s',args.serial,'shell','dumpsys','battery'],capture_output=True,text=True,timeout=15)
+(root/'thermal-ab4-B1-battery-before-cooldown.txt').write_text(pre.stdout)
+def service_state(text):
+    fields={}
+    for key,pattern in {'AC':r'AC powered:\s*(true|false)','USB':r'USB powered:\s*(true|false)','wireless':r'Wireless powered:\s*(true|false)','status':r'^\s*status:\s*(\d+)'}.items():
+        match=re.search(pattern,text,re.M)
+        if match:fields[key]=match.group(1)
+    return fields
+baseline_service=service_state((root/'thermal-ab4-A1/battery-live.txt').read_text())
+current_service=service_state(pre.stdout)
+assert len(baseline_service)==4 and current_service==baseline_service,('Android charger/status mismatch before cooldown',baseline_service,current_service)
+thermal.write_json(root/'thermal-ab4-B1-invocation.json',{'time':thermal.now(),'entry':'programmatic thermal.run(args), sampler=SupplyMatchedAdb(InstantAdb)','args':vars(args),'referenceInitial':{'batteryC':a['initial']['batteryC'],'vtsC':a['initial']['vtsC']},'expectedSupply':expected,'clockTicksPerSecond':clock,'SIGTERM':'handler raises KeyboardInterrupt; reviewed thermal.run finally independently stops hdr_lab and restores settings/properties/screen','sourceApkSha256':'e20d6b333babd10b6ee09cbcd302dd0bc50bd043668ef56e56ca2f177cf049fc','instantToolSha256':hashlib.sha256(Path(instant.__file__).read_bytes()).hexdigest(),'roundToolSha256':hashlib.sha256(Path(thermal.__file__).read_bytes()).hexdigest(),'note':'This wrapper only adds a fail-closed baseline Full/status+USB admission; no GPU counter reader beyond InstantAdb. Current/voltage are raw records, never CPU/GPU power.'})
+class Tee:
+    def __init__(self,original,file):self.original,self.file=original,file
+    def write(self,text):self.original.write(text);self.file.write(text);self.file.flush();return len(text)
+    def flush(self):self.original.flush();self.file.flush()
+with (root/'thermal-ab4-B1-driver.log').open('w') as log:
+    original=sys.stdout
+    sys.stdout=Tee(original,log)
+    try:
+        result=thermal.run(args)
+        summary=instant.summarize(Path(args.output),result,args.source)
+        print(json.dumps({'status':result['status'],'reason':result.get('reason'),'restorationVerified':result.get('restorationVerified'),'validCompletedProfile':summary['validCompletedProfile']}),flush=True)
+    finally:sys.stdout=original
+sys.exit(0 if result['status']=='completed-observation' and result.get('restorationVerified') else 2)

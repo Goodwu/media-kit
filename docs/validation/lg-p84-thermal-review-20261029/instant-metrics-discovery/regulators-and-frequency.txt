@@ -1,0 +1,273 @@
+@@ DIRECTORY /sys/class/kgsl/kgsl-3d0/
+ls: /sys/class/kgsl/kgsl-3d0//gpu_available_frequencies: Permission denied
+total 0
+-rw-r--r-- 1 root root 4096 2026-10-29 15:50 bus_split
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 clock_mhz
+-rw-r--r-- 1 root root 4096 2026-10-29 15:50 deep_nap_timer
+-rw-r--r-- 1 root root 4096 2026-10-29 15:50 default_pwrlevel
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 dev
+lrwxrwxrwx 1 root root    0 2026-10-29 14:41 devfreq -> ../../devfreq/b00000.qcom,kgsl-3d0
+lrwxrwxrwx 1 root root    0 2026-10-29 15:50 device -> ../../../b00000.qcom,kgsl-3d0
+drwxr-xr-x 2 root root    0 2026-10-29 15:50 dispatch
+-rw-r--r-- 1 root root 4096 2026-10-29 15:50 force_bus_on
+-rw-r--r-- 1 root root 4096 2026-10-29 15:50 force_clk_on
+-rw-r--r-- 1 root root 4096 2026-10-29 15:50 force_non_retention_on
+-rw-r--r-- 1 root root 4096 2026-10-29 15:50 force_rail_on
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 freq_table_mhz
+-rw-r--r-- 1 root root 4096 2026-10-29 15:50 ft_fast_hang_detect
+-rw-r--r-- 1 root root 4096 2026-10-29 15:50 ft_hang_intr_status
+-rw-r--r-- 1 root root 4096 2026-10-29 15:50 ft_long_ib_detect
+-rw-r--r-- 1 root root 4096 2026-10-29 15:50 ft_pagefault_policy
+-rw-r--r-- 1 root root 4096 2026-10-29 15:50 ft_policy
+-r--r--r-- 1 root root 4096 2026-10-29 15:48 gpu_busy_percentage
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 gpu_clock_stats
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 gpu_model
+-r--r--r-- 1 root root 4096 2017-02-11 15:46 gpubusy
+-rw-r--r-- 1 root root 4096 2017-02-11 15:46 gpuclk
+-rw-r--r-- 1 root root 4096 2026-10-29 15:50 hwcg
+-rw-r--r-- 1 root root 4096 2026-10-29 15:50 idle_timer
+-rw-r--r-- 1 root root 4096 2026-10-29 15:50 lm
+-rw-r--r-- 1 root root 4096 2026-10-29 15:50 max_clock_mhz
+-rw-r--r-- 1 root root 4096 2026-10-27 10:09 max_gpuclk
+-rw-r--r-- 1 root root 4096 2026-10-29 15:50 max_pwrlevel
+-rw-r--r-- 1 root root 4096 2026-10-29 15:50 min_clock_mhz
+-rw-r--r-- 1 root root 4096 2026-10-29 15:50 min_pwrlevel
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 num_pwrlevels
+-rw-r--r-- 1 root root 4096 2026-10-29 15:50 pmqos_active_latency
+-rw-r--r-- 1 root root 4096 2026-10-29 15:50 popp
+drwxr-xr-x 2 root root    0 2026-10-29 15:50 power
+-rw-r--r-- 1 root root 4096 2026-10-29 15:50 preemption
+-rw-r--r-- 1 root root 4096 2026-10-29 15:50 pwrscale
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 reset_count
+drwxr-xr-x 2 root root    0 2026-10-29 15:50 snapshot
+-rw-r--r-- 1 root root 4096 2026-10-29 15:50 sptp_pc
+lrwxrwxrwx 1 root root    0 2026-10-29 15:50 subsystem -> ../../../../../class/kgsl
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 temp
+-rw-r--r-- 1 root root 4096 2026-10-29 15:50 thermal_pwrlevel
+-rw-r--r-- 1 root root 4096 2026-10-29 15:50 uevent
+-rw-r--r-- 1 root root 4096 2026-10-29 15:50 wake_nice
+-rw-r--r-- 1 root root 4096 2026-10-29 15:50 wake_timeout
+@@ DIRECTORY /sys/class/kgsl/kgsl-3d0/devfreq/
+total 0
+-r--r--r-- 1 root root 4096 2026-10-29 15:48 available_frequencies
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 available_governors
+-r--r--r-- 1 root root 4096 2026-10-29 14:41 cur_freq
+lrwxrwxrwx 1 root root    0 2026-10-29 15:50 device -> ../../../b00000.qcom,kgsl-3d0
+-rw-r--r-- 1 root root 4096 2026-10-29 15:50 governor
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 gpu_load
+-rw-r--r-- 1 root root 4096 2026-10-29 15:50 max_freq
+-rw-r--r-- 1 root root 4096 2026-10-29 15:50 min_freq
+-rw-r--r-- 1 root root 4096 2026-10-29 15:50 polling_interval
+drwxr-xr-x 2 root root    0 2026-10-29 15:50 power
+lrwxrwxrwx 1 root root    0 2026-10-29 15:50 subsystem -> ../../../../../class/devfreq
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 suspend_time
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 target_freq
+-r--r--r-- 1 root root 4096 2026-10-29 15:48 trans_stat
+-rw-r--r-- 1 root root 4096 2026-10-29 15:50 uevent
+@@ DIRECTORY /sys/class/regulator/regulator.60/
+total 0
+lrwxrwxrwx 1 root root    0 2026-10-29 15:50 6400000.qcom,cpu-clock-8996-vdd-pwrcl -> ../../../6400000.qcom,cpu-clock-8996
+lrwxrwxrwx 1 root root    0 2026-10-29 15:50 device -> ../../../99e8000.cpr3-ctrl
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 max_microvolts
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 microvolts
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 min_microvolts
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 name
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 num_users
+drwxr-xr-x 2 root root    0 2026-10-29 15:50 power
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 state
+lrwxrwxrwx 1 root root    0 2026-10-29 15:50 subsystem -> ../../../../../class/regulator
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 suspend_disk_state
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 suspend_mem_state
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 suspend_standby_state
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 type
+-rw-r--r-- 1 root root 4096 2026-10-29 15:50 uevent
+@@ DIRECTORY /sys/class/regulator/regulator.63/
+total 0
+lrwxrwxrwx 1 root root    0 2026-10-29 15:50 70000.qcom,msm-thermal-vdd-gfx -> ../../../70000.qcom,msm-thermal
+lrwxrwxrwx 1 root root    0 2026-10-29 15:50 8c0000.qcom,gpucc-vdd_gfx -> ../../../8c0000.qcom,gpucc
+lrwxrwxrwx 1 root root    0 2026-10-29 15:50 device -> ../../../838000.cpr3-ctrl
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 max_microvolts
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 microvolts
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 min_microvolts
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 name
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 num_users
+drwxr-xr-x 2 root root    0 2026-10-29 15:50 power
+lrwxrwxrwx 1 root root    0 2026-10-29 15:50 regulator.91-SUPPLY -> ../../../8c4024.qcom,gdsc/regulator/regulator.91
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 state
+lrwxrwxrwx 1 root root    0 2026-10-29 15:50 subsystem -> ../../../../../class/regulator
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 suspend_disk_state
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 suspend_mem_state
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 suspend_standby_state
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 type
+-rw-r--r-- 1 root root 4096 2026-10-29 15:50 uevent
+@@ REGULATOR /sys/class/regulator/regulator.0 regulator-dummy
+@@ REGULATOR /sys/class/regulator/regulator.1 pmi8994_s2
+microvolts=525000
+@@ REGULATOR /sys/class/regulator/regulator.10 pm8994_s1_corner
+microvolts=4
+@@ REGULATOR /sys/class/regulator/regulator.103 smbcharger_charger_otg
+@@ REGULATOR /sys/class/regulator/regulator.104 smbcharger_external_otg
+@@ REGULATOR /sys/class/regulator/regulator.105 usb_otg_vreg
+@@ REGULATOR /sys/class/regulator/regulator.11 pm8994_s1_floor_corner
+microvolts=1
+@@ REGULATOR /sys/class/regulator/regulator.12 pm8994_s1_corner_ao
+microvolts=1
+@@ REGULATOR /sys/class/regulator/regulator.13 pm8994_s2_corner
+microvolts=4
+@@ REGULATOR /sys/class/regulator/regulator.14 pm8994_s2_corner_ao
+microvolts=4
+@@ REGULATOR /sys/class/regulator/regulator.15 pm8994_s3
+microvolts=1300000
+@@ REGULATOR /sys/class/regulator/regulator.16 pm8994_s4
+microvolts=1800000
+@@ REGULATOR /sys/class/regulator/regulator.17 pm8994_s5
+microvolts=2150000
+@@ REGULATOR /sys/class/regulator/regulator.18 pm8994_s7
+microvolts=800000
+@@ REGULATOR /sys/class/regulator/regulator.19 pm8994_l1
+microvolts=1000000
+@@ REGULATOR /sys/class/regulator/regulator.2 apc0_pwrcl_mem_acc_corner
+microvolts=1
+@@ REGULATOR /sys/class/regulator/regulator.20 pm8994_l2
+microvolts=1250000
+@@ REGULATOR /sys/class/regulator/regulator.21 pm8994_l3
+microvolts=1200000
+@@ REGULATOR /sys/class/regulator/regulator.22 pm8994_l4
+microvolts=1225000
+@@ REGULATOR /sys/class/regulator/regulator.23 pm8994_l6
+microvolts=1200000
+@@ REGULATOR /sys/class/regulator/regulator.24 pm8994_l8
+microvolts=1800000
+@@ REGULATOR /sys/class/regulator/regulator.25 pm8994_l9
+microvolts=1800000
+@@ REGULATOR /sys/class/regulator/regulator.26 pm8994_l10
+microvolts=1800000
+@@ REGULATOR /sys/class/regulator/regulator.27 pm8994_l11
+microvolts=1200000
+@@ REGULATOR /sys/class/regulator/regulator.28 pm8994_l12
+microvolts=1800000
+@@ REGULATOR /sys/class/regulator/regulator.29 pm8994_l13
+microvolts=1800000
+@@ REGULATOR /sys/class/regulator/regulator.3 apc1_perfcl_mem_acc_corner
+microvolts=1
+@@ REGULATOR /sys/class/regulator/regulator.30 pm8994_l14
+microvolts=1800000
+@@ REGULATOR /sys/class/regulator/regulator.31 pm8994_l15
+microvolts=1800000
+@@ REGULATOR /sys/class/regulator/regulator.32 pm8994_l16
+microvolts=2700000
+@@ REGULATOR /sys/class/regulator/regulator.33 pm8994_l17
+microvolts=2500000
+@@ REGULATOR /sys/class/regulator/regulator.34 pm8994_l18
+microvolts=1800000
+@@ REGULATOR /sys/class/regulator/regulator.35 pm8994_l18_pin_ctrl
+microvolts=2700000
+@@ REGULATOR /sys/class/regulator/regulator.36 pm8994_l19
+microvolts=3000000
+@@ REGULATOR /sys/class/regulator/regulator.37 pm8994_l20
+microvolts=2950000
+@@ REGULATOR /sys/class/regulator/regulator.38 pm8994_l21
+microvolts=2950000
+@@ REGULATOR /sys/class/regulator/regulator.39 pm8994_l22
+microvolts=3300000
+@@ REGULATOR /sys/class/regulator/regulator.4 apcc_l3_mem_acc_corner
+microvolts=1
+@@ REGULATOR /sys/class/regulator/regulator.40 pm8994_l23
+microvolts=3000000
+@@ REGULATOR /sys/class/regulator/regulator.41 pm8994_l24
+microvolts=3075000
+@@ REGULATOR /sys/class/regulator/regulator.42 pm8994_l25
+microvolts=1200000
+@@ REGULATOR /sys/class/regulator/regulator.43 pm8994_l26_corner
+microvolts=1
+@@ REGULATOR /sys/class/regulator/regulator.44 pm8994_l26_floor_corner
+microvolts=1
+@@ REGULATOR /sys/class/regulator/regulator.45 pm8994_l27
+microvolts=1200000
+@@ REGULATOR /sys/class/regulator/regulator.46 pm8994_l28
+microvolts=925000
+@@ REGULATOR /sys/class/regulator/regulator.47 pm8994_l29
+microvolts=2800000
+@@ REGULATOR /sys/class/regulator/regulator.48 pm8994_l30
+microvolts=3300000
+@@ REGULATOR /sys/class/regulator/regulator.49 pm8994_l32
+microvolts=1800000
+@@ REGULATOR /sys/class/regulator/regulator.5 gfx_mem_acc_corner
+microvolts=1
+@@ REGULATOR /sys/class/regulator/regulator.50 pm8994_lvs1
+@@ REGULATOR /sys/class/regulator/regulator.51 pm8994_lvs2
+@@ REGULATOR /sys/class/regulator/regulator.52 pmi8994_s1
+microvolts=1025000
+@@ REGULATOR /sys/class/regulator/regulator.55 pmi8994_boostbypass
+microvolts=3400000
+@@ REGULATOR /sys/class/regulator/regulator.56 pm8994_s11
+microvolts=715000
+@@ REGULATOR /sys/class/regulator/regulator.57 pm8994_s11_avs_limit
+microvolts=0
+@@ REGULATOR /sys/class/regulator/regulator.6 kryo0-retention
+microvolts=490527
+@@ REGULATOR /sys/class/regulator/regulator.60 apc0_pwrcl_corner
+microvolts=1
+@@ REGULATOR /sys/class/regulator/regulator.61 apc0_cbf_corner
+microvolts=8
+@@ REGULATOR /sys/class/regulator/regulator.62 apc1_corner
+microvolts=13
+@@ REGULATOR /sys/class/regulator/regulator.63 gfx_corner
+microvolts=2
+@@ REGULATOR /sys/class/regulator/regulator.68 gdsc_mmagic_bimc
+@@ REGULATOR /sys/class/regulator/regulator.7 kryo0
+microvolts=575381
+@@ REGULATOR /sys/class/regulator/regulator.70 wlan_en_vreg
+@@ REGULATOR /sys/class/regulator/regulator.71 pon_spare_reg
+@@ REGULATOR /sys/class/regulator/regulator.72 gdsc_mmagic_video
+@@ REGULATOR /sys/class/regulator/regulator.73 gdsc_mmagic_mdss
+@@ REGULATOR /sys/class/regulator/regulator.74 gdsc_mmagic_camss
+@@ REGULATOR /sys/class/regulator/regulator.75 gdsc_venus
+@@ REGULATOR /sys/class/regulator/regulator.76 gdsc_venus_core0
+@@ REGULATOR /sys/class/regulator/regulator.77 gdsc_venus_core1
+@@ REGULATOR /sys/class/regulator/regulator.78 gdsc_camss_top
+@@ REGULATOR /sys/class/regulator/regulator.79 gdsc_vfe0
+@@ REGULATOR /sys/class/regulator/regulator.8 kryo1-retention
+microvolts=490527
+@@ REGULATOR /sys/class/regulator/regulator.80 gdsc_vfe1
+@@ REGULATOR /sys/class/regulator/regulator.81 gdsc_mdss
+@@ REGULATOR /sys/class/regulator/regulator.82 gdsc_jpeg
+@@ REGULATOR /sys/class/regulator/regulator.83 gdsc_cpp
+@@ REGULATOR /sys/class/regulator/regulator.84 gdsc_pcie_0
+@@ REGULATOR /sys/class/regulator/regulator.85 gdsc_pcie_1
+@@ REGULATOR /sys/class/regulator/regulator.86 gdsc_pcie_2
+@@ REGULATOR /sys/class/regulator/regulator.87 gdsc_usb30
+@@ REGULATOR /sys/class/regulator/regulator.88 gdsc_ufs
+@@ REGULATOR /sys/class/regulator/regulator.89 gdsc_fd
+@@ REGULATOR /sys/class/regulator/regulator.9 kryo1
+microvolts=727225
+@@ REGULATOR /sys/class/regulator/regulator.90 gdsc_gpu
+@@ REGULATOR /sys/class/regulator/regulator.91 gdsc_gpu_gx
+@@ REGULATOR /sys/class/regulator/regulator.92 gdsc_hlos1_vote_aggre0_noc
+@@ REGULATOR /sys/class/regulator/regulator.93 gdsc_hlos1_vote_lpass_adsp
+@@ REGULATOR /sys/class/regulator/regulator.94 gdsc_hlos1_vote_lpass_core
+@@ REGULATOR /sys/class/regulator/regulator.95 gdsc_aggre0_noc
+@@ REGULATOR /sys/class/regulator/regulator.96 pmi8994_boost_5v
+@@ REGULATOR /sys/class/regulator/regulator.97 pmi8994_boost_pin_ctrl
+@@ REGULATOR /sys/class/regulator/regulator.98 ibb_reg
+microvolts=5500000
+@@ REGULATOR /sys/class/regulator/regulator.99 lab_reg
+microvolts=5500000
+@@ FILE /sys/class/kgsl/kgsl-3d0/devfreq/min_freq
+133000000
+@@ RETURN 0
+@@ FILE /sys/class/kgsl/kgsl-3d0/devfreq/max_freq
+652800000
+@@ RETURN 0
+@@ FILE /sys/class/kgsl/kgsl-3d0/gpu_voltage
+/system/bin/sh: cat: /sys/class/kgsl/kgsl-3d0/gpu_voltage: No such file or directory
+@@ RETURN 1
+@@ FILE /sys/class/kgsl/kgsl-3d0/devfreq/opp_table
+/system/bin/sh: cat: /sys/class/kgsl/kgsl-3d0/devfreq/opp_table: No such file or directory
+@@ RETURN 1
+@@ FILE /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_cur_freq
+/system/bin/sh: cat: /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_cur_freq: Permission denied
+@@ RETURN 1
+@@ FILE /sys/devices/system/cpu/cpu2/cpufreq/cpuinfo_cur_freq
+/system/bin/sh: cat: /sys/devices/system/cpu/cpu2/cpufreq/cpuinfo_cur_freq: Permission denied
+@@ RETURN 1

@@ -1,0 +1,35 @@
+{
+  "androidSyntax": {
+    "file": "../video/out/vo_gpu_next.c",
+    "exit": 0,
+    "stderr": "",
+    "scope": "full current PL_HAVE_MKS_YUV_COMPARE_UV_ORACLE API24 syntax"
+  },
+  "hostTests": "pure C compile+execute exit0 (strict framework/mode/prereqs, two barrier receipts/epoch checks, per-pixel oracle UV exact bits including signed zero, plus earlier mode/layout/epochs cases); source-extracted actualcompare_save JSON6 + EGLregression1 = 7 passed",
+  "mode": {
+    "framework": "debug.mks.yuv_oracle=1",
+    "use_a": "debug.mks.yuv_oracle_a explicitly0or1 when frameworkon; off permits absent/0only",
+    "prerequisites": "valid compare session+repeat+tap, mutually exclusive invariant_b; defaultoff; malformed/unsupported refuses capture and uses ordinaryRGB in compare session"
+  },
+  "schema5": {
+    "draw_order": [
+      "A1",
+      "B1",
+      "A2",
+      "B2"
+    ],
+    "barriers": "after each A before matchingB; 2successful receipts and both before/after epochs equal VOpre-render and all4draw epochs",
+    "layout": "2 complete ROI*26chunks unchanged; counts0/10/19/25 each1 and allfloatfinite; use_a1 requires Buv14/15 == Auv20/21 for eachpixel/pair",
+    "sources": "6files as schema3; actualA contains owner-gatedtapbody, Bactualoracle source may differ; originalbody retained; uniform0/1sameBsource/cache/order guaranteed by library contract, not VOtests",
+    "presentation": "one renderer invocation; onlyA2 receipt after all4draws and2barriers; originalCSC overwritesB2before unique swap; no Bswap",
+    "controlScope": "A0/control source anchors and uniform-only cross-round identity require hostoriginal/oracle/original source/raw verification, not producer assertion"
+  },
+  "limits": "No device/build/driver or pixel-equivalence acceptance. Lib finalfreeze and V2 independently pending. Existing schemas1-4preserved; new completeevent addsuv_oracle anduv_oracle_use_a int0/1.",
+  "files": {
+    "/Users/wuweiwei1/src/mpv/video/out/vo_gpu_next.c": "e9beb4970b388514a249a93433db435f4daaa2194c51dc82f24c74cd69f45b97",
+    "/Users/wuweiwei1/src/mpv/video/out/yuv_compare_vo.h": "f615898ecc494201895fef709f3f5d3d0520268ddc459a5fdb21c8f24fe283d1",
+    "/Users/wuweiwei1/src/mpv/test/yuv_compare_vo.c": "abdd5f81be889c5713c44798e1c8d8b29d53890e14d633f4267bbe195b3e0967",
+    "/Users/wuweiwei1/src/media-kit/tool/test_lg_yuv_compare_manifest.py": "94c07540f0a83a6e7237c09503957bc3a98dcf875e6829421ac573e4bb80d58a",
+    "/Users/wuweiwei1/src/libplacebo/src/include/libplacebo/opengl.h": "b6744161a6dd7b7c6a214ccd15bd3364113a78e30a91b57754aaa78ccf325592"
+  }
+}

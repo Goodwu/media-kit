@@ -68,6 +68,7 @@ class HdrDataSpaceExtInfo {
     this.setterOnlyTransfers = const <String>{},
     this.supportedSurfaceTransfers = const <String>{},
     this.yuvWindowArmApi = 0,
+    this.supportsDeferredSurfaceTexturePublish30fps = false,
   });
 
   final String id;
@@ -100,6 +101,10 @@ class HdrDataSpaceExtInfo {
   /// missing, malformed or non-positive report).
   final int yuvWindowArmApi;
 
+  /// Vendor opt-in only, not evidence of native support or actual frame policy.
+  /// Consumers must also require [applicable] and the exact route contract.
+  final bool supportsDeferredSurfaceTexturePublish30fps;
+
   static HdrDataSpaceExtInfo? fromMap(Object? raw) {
     if (raw is! Map) return null;
     final Object? id = raw['id'];
@@ -108,6 +113,8 @@ class HdrDataSpaceExtInfo {
     return HdrDataSpaceExtInfo(
       id: id,
       applicable: applicable == true,
+      supportsDeferredSurfaceTexturePublish30fps:
+          raw['supportsDeferredSurfaceTexturePublish30fps'] == true,
       pqPresentation: HdrPqPresentation.fromMap(raw['pqPresentation']),
       validatedPredictionTransfers:
           _stringSet(raw['validatedPredictionTransfers']),
@@ -133,13 +140,14 @@ class HdrDataSpaceExtInfo {
   }
 
   @override
-  String toString() =>
-      'HdrDataSpaceExtInfo(id: $id, applicable: $applicable, '
+  String toString() => 'HdrDataSpaceExtInfo(id: $id, applicable: $applicable, '
       'pqPresentation: $pqPresentation, '
       'validatedPredictionTransfers: $validatedPredictionTransfers, '
       'setterOnlyTransfers: $setterOnlyTransfers, '
       'supportedSurfaceTransfers: $supportedSurfaceTransfers, '
-      'yuvWindowArmApi: $yuvWindowArmApi)';
+      'yuvWindowArmApi: $yuvWindowArmApi, '
+      'supportsDeferredSurfaceTexturePublish30fps: '
+      '$supportsDeferredSurfaceTexturePublish30fps)';
 }
 
 /// One platform decoder entry (HEVC or Dolby Vision) from `MediaCodecList`.

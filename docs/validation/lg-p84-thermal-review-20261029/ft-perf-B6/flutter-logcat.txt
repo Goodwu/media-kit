@@ -1,0 +1,931 @@
+11-01 10:46:16.635 20967 20967 I flutter : [IMPORTANT:flutter/shell/common/shell.cc(528)] [Action Required]: Impeller opt-out deprecated.
+11-01 10:46:16.635 20967 20967 I flutter :     The application opted out of Impeller by either using the
+11-01 10:46:16.635 20967 20967 I flutter :     `--no-enable-impeller` flag or the
+11-01 10:46:16.635 20967 20967 I flutter :     `io.flutter.embedding.android.EnableImpeller` `AndroidManifest.xml` entry.
+11-01 10:46:16.635 20967 20967 I flutter :     These options are going to go away in an upcoming Flutter release. Remove
+11-01 10:46:16.635 20967 20967 I flutter :     the explicit opt-out. If you need to opt-out, please report a bug describing
+11-01 10:46:16.635 20967 20967 I flutter :     the issue.
+11-01 10:46:16.635 20967 20967 I flutter : 
+11-01 10:46:16.635 20967 20967 I flutter :     <URL_REDACTED>
+11-01 10:46:16.635 20967 20967 I flutter : 
+11-01 10:46:16.913 20967 20967 I flutter : HDR_PREFER_CONVERT dvP84=[HdrStrategy.baseLayerConvert, HdrStrategy.nativeDolbyVision, HdrStrategy.metadataReshape, HdrStrategy.baseLayerDirect, HdrStrategy.toneMapSdr]
+11-01 10:46:16.914 20967 20967 I flutter : ANDROID_DIRECT_OPEN awaiting_tap
+11-01 10:46:17.015 20967 20967 I flutter : HdrDiag HDR capability: sdk=24 displayHdrTypes=unreported hevcDecoders=3 hevcMain10=true hevc4k=true dvDecoders=2 p5Pipeline=true bridge=true ext=lg-pq extApplicable=true
+11-01 10:46:17.022 20967 20967 I flutter : ANDROID_CAPABILITIES {sdkInt: 24, displayHdrTypes: [2, 1], egl: {version: 1.0, extensions: EGL_KHR_get_all_proc_addresses EGL_ANDROID_presentation_time EGL_KHR_swap_buffers_with_damage EGL_ANDROID_create_native_client_buffer EGL_ANDROID_front_buffer_auto_refresh EGL_KHR_image EGL_KHR_image_base EGL_KHR_lock_surface EGL_KHR_gl_texture_2D_image EGL_KHR_gl_texture_3D_image EGL_KHR_gl_texture_cubemap_image EGL_KHR_gl_renderbuffer_image EGL_KHR_reusable_sync EGL_KHR_fence_sync EGL_KHR_create_context EGL_KHR_surfaceless_context EGL_EXT_create_context_robustness EGL_ANDROID_image_native_buffer EGL_KHR_wait_sync EGL_ANDROID_recordable EGL_KHR_partial_update EGL_KHR_create_context_no_error EGL_KHR_mutable_render_buffer EGL_EXT_yuv_surface EGL_EXT_protected_content , bt2020PqWindowSurface: false, bt2020HlgWindowSurface: false, highPrecisionConfigs: [{index: 48, red: 10, green: 10, blue: 10, alpha: 2}, {index: 49, red: 10, green: 10, blue: 10, alpha: 2}, {index: 50, red: 10, green: 10, blue: 10, alpha: 2}, {index: 51, 
+11-01 10:46:21.047 20967 20967 I flutter : ANDROID_HDR_OPEN_BEGIN path=/sdcard/Android/data/com.example.media_kit_hdr_lab/files/hokkaido-p84.mp4 hint=null serial=1 simulateNoHlg=false wrongHint= noHint=false policyExperimental=false namedLocalSource=true p5RpuPipelineBuilt=true forceP84PqFallback=false textureCopyDiagnostic=false gpuPlatformHdr=false
+11-01 10:46:21.100 20967 20967 I flutter : THERMAL_JSON {"schemaVersion":1,"runId":"20967:1793501181046555","pid":20967,"serial":1,"phase":"prepared","mode":"audio","elapsedMs":0,"wallTime":"2026-11-01T02:46:21.100464Z","sampleDurationMs":0,"sampleOrdinal":1,"properties":{},"propertyErrors":{},"report":{"generation":0,"sourcePath":"/sdcard/Android/data/com.example.media_kit_hdr_lab/files/hokkaido-p84.mp4","verified":false,"hwdecCurrent":null,"actual":null,"source":null,"error":null}}
+11-01 10:46:21.116 20967 20967 I flutter : HdrDiag HDR capability: sdk=24 displayHdrTypes=1,2 hevcDecoders=3 hevcMain10=true hevc4k=true dvDecoders=2 p5Pipeline=true bridge=true ext=lg-pq extApplicable=true
+11-01 10:46:21.116 20967 20967 I flutter : HdrDiag HDR predict: source=none,none,none,none,none,none,unknown class=sdr selected=sdrDirect maturity=verified presentation=sdr confidence=verified playable=true candidates=sdrDirect:ok,sdrDirect:ok,sdrDirect:ok
+11-01 10:46:21.116 20967 20967 I flutter : HDR_SESSION_REPORT gen=1 source=HdrSourceDescriptor(codec: , transfer: null, primaries: null, dynamicMetadata: HdrDynamicMetadata.none, dvProfile: null, dvCompatibilityId: null, enhancementLayer: null) origin=null verified=false hwdecCurrent=null dataspace requested=null path=null readback=null degrade=null diagnostic=null error=null
+11-01 10:46:21.117 20967 20967 I flutter : HDR_SESSION_PREDICTION gen=1 selected=HdrCandidate(sdrDirect, verified, feasible: true, skip: null, route: HdrRoute(sdrDirect, sdr, output: sdr, dynamic: false, topology: platformView, vo: mediacodec_embed, hwdec: mediacodec, vd-lavc-o: null, render-mode: null, prim: null, trc: null, peak: none, surface: null, offscreen: none, requestedPublishFlush: immediate, stripRpu: false, metadata: none, deps: {hwdec:mediacodec, topology:platformView, decoder:mediacodec})) presentation=sdr confidence=verified playable=true
+11-01 10:46:21.117 20967 20967 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(sdrDirect, verified, feasible: true, skip: null, route: HdrRoute(sdrDirect, sdr, output: sdr, dynamic: false, topology: platformView, vo: mediacodec_embed, hwdec: mediacodec, vd-lavc-o: null, render-mode: null, prim: null, trc: null, peak: none, surface: null, offscreen: none, requestedPublishFlush: immediate, stripRpu: false, metadata: none, deps: {hwdec:mediacodec, topology:platformView, decoder:mediacodec}))
+11-01 10:46:21.117 20967 20967 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(sdrDirect, verified, feasible: true, skip: null, route: HdrRoute(sdrDirect, sdr, output: sdr, dynamic: false, topology: texture, vo: gpu-next, hwdec: mediacodec-copy, vd-lavc-o: null, render-mode: null, prim: null, trc: null, peak: none, surface: null, offscreen: none, requestedPublishFlush: immediate, stripRpu: false, metadata: none, deps: {presenter:gpu-next-opengl-texture, decoder:mediacodec, import:cpu-upload, hwdec:mediacodec-copy}))
+11-01 10:46:21.117 20967 20967 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(sdrDirect, verified, feasible: true, skip: null, route: HdrRoute(sdrDirect, sdr, output: sdr, dynamic: false, topology: texture, vo: gpu-next, hwdec: no, vd-lavc-o: null, render-mode: null, prim: null, trc: null, peak: none, surface: null, offscreen: none, requestedPublishFlush: immediate, stripRpu: false, metadata: none, deps: {presenter:gpu-next-opengl-texture, decoder:ffmpeg-software, import:cpu-upload}))
+11-01 10:46:21.117 20967 20967 I flutter : HdrDiag HDR decision: phase=plan gen=1 origin=none source=none,none,none,none,none,none,unknown class=sdr selected=sdrDirect maturity=verified presentation=sdr confidence=verified vo=mediacodec_embed hwdec=mediacodec output=sdr topology=platformView surface=none stripRpu=false peak=none hwdecCurrent=none requested=none path=none readback=none verified=false degrade=none candidates=sdrDirect:ok,sdrDirect:ok,sdrDirect:ok
+11-01 10:46:21.119 20967 20967 I flutter : VIDEOPARAMS VideoParams(pixelformat: null, hwPixelformat: null, w: null, h: null, dw: null, dh: null, aspect: null, par: null, colormatrix: null, colorlevels: null, primaries: null, gamma: null, sigPeak: null, light: null, chromaLocation: null, rotate: null, stereoIn: null, averageBpp: null, alpha: null)
+11-01 10:46:21.122 20967 20967 I flutter : HDR_PUBLISH_FLUSH requested=immediate eligible=false configured=immediate nativeApi=1 effective=per-native-frame
+11-01 10:46:21.180 20967 20967 I flutter : [SwTrace] onCreatePlatformView id=0 ohos=false hcpp=false ohosHcpp=false swPx=null x null
+11-01 10:46:21.298 20967 20967 I flutter : VIDEOPARAMS VideoParams(pixelformat: null, hwPixelformat: null, w: null, h: null, dw: null, dh: null, aspect: null, par: null, colormatrix: null, colorlevels: null, primaries: null, gamma: null, sigPeak: null, light: null, chromaLocation: null, rotate: null, stereoIn: null, averageBpp: null, alpha: null)
+11-01 10:46:21.436 20967 20967 I flutter : MPVLOG [ffmpeg/video] error: hevc_mediacodec: MKSCOLORKEYS: avctx trc=18 prim=9 range=1
+11-01 10:46:21.700 20967 20967 I flutter : VIDEOPARAMS VideoParams(pixelformat: mediacodec, hwPixelformat: null, w: 3840, h: 1920, dw: 3840, dh: 1920, aspect: 2.0, par: 1.0, colormatrix: bt.2020-ncl, colorlevels: limited, primaries: bt.2020, gamma: hlg, sigPeak: 4.926108360290527, light: hlg, chromaLocation: mpeg1/jpeg, rotate: 0, stereoIn: mono, averageBpp: null, alpha: none)
+11-01 10:46:21.918 20967 20967 I flutter : HdrDiag HDR review: entry=1 openedAfterEpoch=0 outcome=success iter=2 elapsedMs=591 loadedMs=177 phase=complete identityOk=ok a=current-tracks/video/decoder=hevc_mediacodec,current-tracks/video/decoder-desc=,hwdec-current=mediacodec,android-mediacodec-info={"api":1,"mime":"video/hevc","codec":"OMX.qcom.video.decoder.hevc","nat…
+11-01 10:46:21.919 20967 20967 I flutter : HdrDiag HDR classify: origin=facts codec=hevc transfer=hlg primaries=bt.2020 meta=dolbyVision dv=8 compat=4 el=false
+11-01 10:46:21.920 20967 20967 I flutter : HdrDiag HDR predict: source=hevc,hlg,bt.2020,dolbyVision,8,4,false class=dvP84 selected=baseLayerConvert maturity=verified presentation=nativeHdr confidence=verified playable=true candidates=nativeDolbyVision:nativeDvUnavailable,metadataReshape:pqRgbPresentationUnavailable,baseLayerDirect:displayLacksTransfer,baseLayerConvert:ok,toneMapSdr:displayLacksTransfer,toneMapSdr:displayLacksTransfer
+11-01 10:46:21.921 20967 20967 I flutter : HdrDiag HDR predict: source=hevc,hlg,bt.2020,dolbyVision,8,4,false class=dvP84 selected=baseLayerConvert maturity=verified presentation=nativeHdr confidence=verified playable=true candidates=nativeDolbyVision:nativeDvUnavailable,metadataReshape:pqRgbPresentationUnavailable,baseLayerDirect:displayLacksTransfer,baseLayerConvert:ok,toneMapSdr:displayLacksTransfer,toneMapSdr:displayLacksTransfer
+11-01 10:46:21.921 20967 20967 I flutter : HDR_SESSION_EVENT HdrReclassifiedEvent(gen: 1, previous: HdrSourceDescriptor(codec: , transfer: null, primaries: null, dynamicMetadata: HdrDynamicMetadata.none, dvProfile: null, dvCompatibilityId: null, enhancementLayer: null), current: HdrSourceDescriptor(codec: hevc, transfer: hlg, primaries: bt.2020, dynamicMetadata: HdrDynamicMetadata.dolbyVision, dvProfile: 8, dvCompatibilityId: 4, enhancementLayer: false), rebuilt: true)
+11-01 10:46:21.999 20967 20967 I flutter : VIDEOPARAMS VideoParams(pixelformat: null, hwPixelformat: null, w: null, h: null, dw: null, dh: null, aspect: null, par: null, colormatrix: null, colorlevels: null, primaries: null, gamma: null, sigPeak: null, light: null, chromaLocation: null, rotate: null, stereoIn: null, averageBpp: null, alpha: null)
+11-01 10:46:22.056 20967 20967 I flutter : VIDEOPARAMS VideoParams(pixelformat: null, hwPixelformat: null, w: null, h: null, dw: null, dh: null, aspect: null, par: null, colormatrix: null, colorlevels: null, primaries: null, gamma: null, sigPeak: null, light: null, chromaLocation: null, rotate: null, stereoIn: null, averageBpp: null, alpha: null)
+11-01 10:46:22.060 20967 20967 I flutter : HDR_PUBLISH_FLUSH requested=immediate eligible=false configured=immediate nativeApi=1 effective=per-native-frame
+11-01 10:46:22.102 20967 20967 I flutter : YUV-DIAG: owner generation unavailable; legacy global arm
+11-01 10:46:22.168 20967 20967 I flutter : [SwTrace] onCreatePlatformView id=1 ohos=false hcpp=false ohosHcpp=false swPx=null x null
+11-01 10:46:22.258 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-THERMAL kind=vo instance=0x741840c3d0 pid=20967 mono_ns=5562419548 start_ns=5562416683 final=0 queue_frames=0 queue_resets=0 draw=0 redraw=0 display_synced=0 submit=0 flip=0 lease_copy=0 lease_reuse=0 latch=0 defer_publish_flush=0 publish_flush=0 flush_req=0 flush_ovr=0 nominal_fps=0.000000 fps_fallback=0 publish_deferred=0 retire_flush=0 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=0 swap=0 swap_ok=0 frame_id=0 pts=0.000000000 w=0 h=0
+11-01 10:46:22.259 20967 20967 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKS-THERMAL kind=yuv instance=0x741ce18450 pid=20967 mono_ns=5562685121 start_ns=5562682725 final=0 queue_frames=0 queue_resets=0 draw=0 redraw=0 display_synced=0 submit=0 flip=0 lease_copy=0 lease_reuse=0 latch=0 defer_publish_flush=0 publish_flush=0 flush_req=0 flush_ovr=0 nominal_fps=0.000000 fps_fallback=0 publish_deferred=0 retire_flush=0 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=0 swap=0 swap_ok=0 frame_id=0 pts=0.000000000 w=0 h=0
+11-01 10:46:22.260 20967 20967 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: runtime switch on; taking config49 branch
+11-01 10:46:22.260 20967 20967 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: enumerating 64 configs for config49 (visual 0x7fa30c04)
+11-01 10:46:22.261 20967 20967 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: config49 selected (config_id=49, visual=0x7fa30c04) via full enumeration
+11-01 10:46:22.262 20967 20967 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: presetting window format 0x7fa30c04 (1x1)
+11-01 10:46:22.262 20967 20967 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: ANativeWindow_setBuffersGeometry ok (format 0x7fa30c04, 1x1)
+11-01 10:46:22.263 20967 20967 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: eglCreateWindowSurface ok (config49)
+11-01 10:46:22.265 20967 20967 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKSURF-E1: dataspace applied ret=1
+11-01 10:46:22.265 20967 20967 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: eglMakeCurrent ok
+11-01 10:46:22.272 20967 20967 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-P1: queue-time setMetaData injection armed (op=2 COLOR_METADATA, 1768 B: primaries=9 range=1 transfer=16)
+11-01 10:46:22.274 20967 20967 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: GL_EXT_YUV_target present
+11-01 10:46:22.275 20967 20967 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: offscreen RGB FBO ready (2672x1440, rgba16f)
+11-01 10:46:22.275 20967 20967 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: final pass program ready
+11-01 10:46:22.275 20967 20967 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: branch active (NV12 window, libplacebo rendered to RGB offscreen, layout(yuv) final pass)
+11-01 10:46:22.275 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-YUV-COMPARE event=egl-owner-configured android-current-verified=1 egl-loader-requested=1
+11-01 10:46:22.282 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-COMPARE-LIB event=caps-ready private_ssbo=2147483647 renderer_max_buffer=0 renderer_max_ssbo=0 fragment_blocks=4 bindings=24
+11-01 10:46:22.283 20967 20967 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: placeholder resize 1x1 skipped; keeping previous offscreen state
+11-01 10:46:22.293 20967 20967 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKS-FUSION rgb-fresh=1 generation=1
+11-01 10:46:22.295 20967 20967 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-P1: 1x1 placeholder buffer; injection refused (queue passthrough)
+11-01 10:46:22.305 20967 20967 I flutter : HdrDiag HDR readback: requested=pq path=ext:lg-pq applied=true readback=none
+11-01 10:46:22.321 20967 20967 I flutter : VIDEOPARAMS VideoParams(pixelformat: null, hwPixelformat: null, w: null, h: null, dw: null, dh: null, aspect: null, par: null, colormatrix: null, colorlevels: null, primaries: null, gamma: null, sigPeak: null, light: null, chromaLocation: null, rotate: null, stereoIn: null, averageBpp: null, alpha: null)
+11-01 10:46:22.382 20967 20967 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKSURF: version surfacetexture-poc-r2
+11-01 10:46:22.401 20967 20967 I flutter : MPVLOG [ffmpeg/video] error: hevc_mediacodec: MKSCOLORKEYS: avctx trc=18 prim=9 range=1
+11-01 10:46:22.774 20967 20967 I flutter : VIDEOPARAMS VideoParams(pixelformat: mediacodec, hwPixelformat: null, w: 3840, h: 1920, dw: 3840, dh: 1920, aspect: 2.0, par: 1.0, colormatrix: bt.2020-ncl, colorlevels: limited, primaries: bt.2020, gamma: hlg, sigPeak: 4.926108360290527, light: hlg, chromaLocation: mpeg1/jpeg, rotate: 0, stereoIn: mono, averageBpp: null, alpha: none)
+11-01 10:46:22.774 20967 20967 I flutter : ANDROID_PLATFORM_LAYOUT_OUTPUT_SIZE source=3840x1920 target=2672x1336
+11-01 10:46:22.791 20967 20967 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: placeholder resize 1x1 skipped; keeping previous offscreen state
+11-01 10:46:22.792 20967 20967 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKS-INPUT-FBO event=config requested=0
+11-01 10:46:22.797 20967 20967 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKS-THERMAL kind=import instance=0x7443d76050 pid=20967 mono_ns=6093095276 start_ns=6093094130 final=0 queue_frames=0 queue_resets=0 draw=0 redraw=0 display_synced=0 submit=0 flip=0 lease_copy=0 lease_reuse=0 latch=0 defer_publish_flush=0 publish_flush=0 flush_req=0 flush_ovr=0 nominal_fps=0.000000 fps_fallback=0 publish_deferred=0 retire_flush=0 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=0 swap=0 swap_ok=0 frame_id=0 pts=0.000000000 w=0 h=0
+11-01 10:46:22.808 20967 20967 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKSURF: unverified-declaration repr.sys=RGB repr.levels=full
+11-01 10:46:22.810 20967 20967 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKSURF: unverified-declaration color identity propagated from source; sys/levels declaration unverified (diag pending)
+11-01 10:46:22.852 20967 20967 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKSURF: color-identity propagated primaries=6 transfer=13 src_levels=1
+11-01 10:46:22.857 20967 20967 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKSURF: active-importer=surfacetexture device_registered=1
+11-01 10:46:22.859 20967 20967 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKS-INPUT-FBO requested=0 slot_attempts=0 shared_attempts=1 fallbacks=0 copy_failures=0 final=0
+11-01 10:46:22.859 20967 20967 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKS-FLUSH requested=0 effective=0 nominal_fps=29.970029970 experimental_override=0
+11-01 10:46:22.860 20967 20967 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKS-FUSION-FRAME event=swap-success route=rgb-final pid=20967 instance=0x741ce18450 token=6 generation=1 frame_id=45 source_pts=0.000000000 current_pts=0.000000000 still=0 redraw=0 repeat=0 mono_ns=6140285741 gpu_draw_confirmed=0
+11-01 10:46:22.860 20967 20967 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKS-FUSION-FRAME event=swap-success route=rgb-final pid=20967 instance=0x741ce18450 token=7 generation=1 frame_id=45 source_pts=0.000000000 current_pts=0.000000000 still=1 redraw=1 repeat=0 mono_ns=6154159072 gpu_draw_confirmed=0
+11-01 10:46:22.861 20967 20967 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: offscreen RGB FBO ready (2672x1336, rgba16f)
+11-01 10:46:22.908 20967 20967 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKS-FUSION-FRAME event=swap-success route=rgb-final pid=20967 instance=0x741ce18450 token=8 generation=2 frame_id=45 source_pts=0.000000000 current_pts=0.000000000 still=1 redraw=1 repeat=0 mono_ns=6211450003 gpu_draw_confirmed=0
+11-01 10:46:22.927 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:22.929 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:22.930 20967 20967 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKS-FUSION skipped-unfresh-swap=1
+11-01 10:46:22.930 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:23.020 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:23.021 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:23.037 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:23.059 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:23.060 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:23.068 20967 20967 I flutter : HdrDiag HDR review: entry=2 openedAfterEpoch=1 outcome=success iter=2 elapsedMs=743 loadedMs=141 phase=complete identityOk=ok a=current-tracks/video/decoder=hevc_mediacodec,current-tracks/video/decoder-desc=,hwdec-current=surfacetexture,android-mediacodec-info={"api":1,"mime":"video/hevc","codec":"OMX.qcom.video.decoder.hevc",…
+11-01 10:46:23.068 20967 20967 I flutter : HdrDiag HDR classify: origin=facts codec=hevc transfer=hlg primaries=bt.2020 meta=dolbyVision dv=8 compat=4 el=false
+11-01 10:46:23.069 20967 20967 I flutter : HdrDiag HDR predict: source=hevc,hlg,bt.2020,dolbyVision,8,4,false class=dvP84 selected=baseLayerConvert maturity=verified presentation=nativeHdr confidence=verified playable=true candidates=nativeDolbyVision:nativeDvUnavailable,metadataReshape:pqRgbPresentationUnavailable,baseLayerDirect:displayLacksTransfer,baseLayerConvert:ok,toneMapSdr:displayLacksTransfer,toneMapSdr:displayLacksTransfer
+11-01 10:46:23.069 20967 20967 I flutter : HDR_SESSION_REPORT gen=1 source=HdrSourceDescriptor(codec: hevc, transfer: hlg, primaries: bt.2020, dynamicMetadata: HdrDynamicMetadata.dolbyVision, dvProfile: 8, dvCompatibilityId: 4, enhancementLayer: false) origin=decoder verified=true hwdecCurrent=surfacetexture dataspace requested=pq path=ext:lg-pq readback=none degrade=null diagnostic=null error=null
+11-01 10:46:23.069 20967 20967 I flutter : HDR_SESSION_PREDICTION gen=1 selected=HdrCandidate(baseLayerConvert, verified, feasible: true, skip: null, route: HdrRoute(baseLayerConvert, nativeHdr, output: pq, dynamic: false, topology: platformView, vo: gpu-next, hwdec: surfacetexture, vd-lavc-o: null, render-mode: null, prim: bt.2020, trc: pq, peak: 1000, surface: pq, offscreen: pq-full, requestedPublishFlush: immediate, stripRpu: true, metadata: baselineOnly, deps: {hwdec:surfacetexture, topology:platformView, dataspace:pq, decoder:mediacodec})) presentation=nativeHdr confidence=verified playable=true
+11-01 10:46:23.069 20967 20967 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(nativeDolbyVision, verified, feasible: false, skip: nativeDvUnavailable, route: null)
+11-01 10:46:23.069 20967 20967 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(metadataReshape, experimental, feasible: false, skip: pqRgbPresentationUnavailable, route: null)
+11-01 10:46:23.069 20967 20967 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(baseLayerDirect, verified, feasible: false, skip: displayLacksTransfer, route: null)
+11-01 10:46:23.069 20967 20967 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(baseLayerConvert, verified, feasible: true, skip: null, route: HdrRoute(baseLayerConvert, nativeHdr, output: pq, dynamic: false, topology: platformView, vo: gpu-next, hwdec: surfacetexture, vd-lavc-o: null, render-mode: null, prim: bt.2020, trc: pq, peak: 1000, surface: pq, offscreen: pq-full, requestedPublishFlush: immediate, stripRpu: true, metadata: baselineOnly, deps: {hwdec:surfacetexture, topology:platformView, dataspace:pq, decoder:mediacodec}))
+11-01 10:46:23.069 20967 20967 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(toneMapSdr, verified, feasible: false, skip: displayLacksTransfer, route: null)
+11-01 10:46:23.069 20967 20967 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(toneMapSdr, verified, feasible: false, skip: displayLacksTransfer, route: null)
+11-01 10:46:23.069 20967 20967 I flutter : HDR_SESSION_ACTUAL gen=1 actual=HdrRoute(baseLayerConvert, nativeHdr, output: pq, dynamic: false, topology: platformView, vo: gpu-next, hwdec: surfacetexture, vd-lavc-o: null, render-mode: null, prim: bt.2020, trc: pq, peak: 1000, surface: pq, offscreen: pq-full, requestedPublishFlush: immediate, stripRpu: true, metadata: baselineOnly, deps: {hwdec:surfacetexture, topology:platformView, dataspace:pq, decoder:mediacodec})
+11-01 10:46:23.069 20967 20967 I flutter : HdrDiag HDR decision: phase=applied gen=1 origin=decoder source=hevc,hlg,bt.2020,dolbyVision,8,4,false class=dvP84 selected=baseLayerConvert maturity=verified presentation=nativeHdr confidence=verified vo=gpu-next hwdec=surfacetexture output=pq topology=platformView surface=pq stripRpu=true peak=1000 hwdecCurrent=surfacetexture requested=pq path=ext:lg-pq readback=none verified=true degrade=none candidates=nativeDolbyVision:nativeDvUnavailable,metadataReshape:pqRgbPresentationUnavailable,baseLayerDirect:displayLacksTransfer,baseLayerConvert:ok,toneMapSdr:displayLacksTransfer,toneMapSdr:displayLacksTransfer
+11-01 10:46:23.069 20967 20967 I flutter : HDR_SESSION_EVENT HdrRouteAppliedEvent(gen: 1, route: HdrRoute(baseLayerConvert, nativeHdr, output: pq, dynamic: false, topology: platformView, vo: gpu-next, hwdec: surfacetexture, vd-lavc-o: null, render-mode: null, prim: bt.2020, trc: pq, peak: 1000, surface: pq, offscreen: pq-full, requestedPublishFlush: immediate, stripRpu: true, metadata: baselineOnly, deps: {hwdec:surfacetexture, topology:platformView, dataspace:pq, decoder:mediacodec}))
+11-01 10:46:23.070 20967 20967 I flutter : MKSURF-POC: active-importer=surfacetexture verified
+11-01 10:46:23.070 20967 20967 I flutter : ANDROID_HDR_OPEN path=/sdcard/Android/data/com.example.media_kit_hdr_lab/files/hokkaido-p84.mp4 serial=1
+11-01 10:46:23.070 20967 20967 I flutter : HDR_SESSION_REPORT gen=1 source=HdrSourceDescriptor(codec: hevc, transfer: hlg, primaries: bt.2020, dynamicMetadata: HdrDynamicMetadata.dolbyVision, dvProfile: 8, dvCompatibilityId: 4, enhancementLayer: false) origin=decoder verified=true hwdecCurrent=surfacetexture dataspace requested=pq path=ext:lg-pq readback=none degrade=null diagnostic=null error=null
+11-01 10:46:23.070 20967 20967 I flutter : HDR_SESSION_PREDICTION gen=1 selected=HdrCandidate(baseLayerConvert, verified, feasible: true, skip: null, route: HdrRoute(baseLayerConvert, nativeHdr, output: pq, dynamic: false, topology: platformView, vo: gpu-next, hwdec: surfacetexture, vd-lavc-o: null, render-mode: null, prim: bt.2020, trc: pq, peak: 1000, surface: pq, offscreen: pq-full, requestedPublishFlush: immediate, stripRpu: true, metadata: baselineOnly, deps: {hwdec:surfacetexture, topology:platformView, dataspace:pq, decoder:mediacodec})) presentation=nativeHdr confidence=verified playable=true
+11-01 10:46:23.070 20967 20967 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(nativeDolbyVision, verified, feasible: false, skip: nativeDvUnavailable, route: null)
+11-01 10:46:23.070 20967 20967 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(metadataReshape, experimental, feasible: false, skip: pqRgbPresentationUnavailable, route: null)
+11-01 10:46:23.070 20967 20967 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(baseLayerDirect, verified, feasible: false, skip: displayLacksTransfer, route: null)
+11-01 10:46:23.070 20967 20967 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(baseLayerConvert, verified, feasible: true, skip: null, route: HdrRoute(baseLayerConvert, nativeHdr, output: pq, dynamic: false, topology: platformView, vo: gpu-next, hwdec: surfacetexture, vd-lavc-o: null, render-mode: null, prim: bt.2020, trc: pq, peak: 1000, surface: pq, offscreen: pq-full, requestedPublishFlush: immediate, stripRpu: true, metadata: baselineOnly, deps: {hwdec:surfacetexture, topology:platformView, dataspace:pq, decoder:mediacodec}))
+11-01 10:46:23.070 20967 20967 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(toneMapSdr, verified, feasible: false, skip: displayLacksTransfer, route: null)
+11-01 10:46:23.070 20967 20967 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(toneMapSdr, verified, feasible: false, skip: displayLacksTransfer, route: null)
+11-01 10:46:23.070 20967 20967 I flutter : HDR_SESSION_ACTUAL gen=1 actual=HdrRoute(baseLayerConvert, nativeHdr, output: pq, dynamic: false, topology: platformView, vo: gpu-next, hwdec: surfacetexture, vd-lavc-o: null, render-mode: null, prim: bt.2020, trc: pq, peak: 1000, surface: pq, offscreen: pq-full, requestedPublishFlush: immediate, stripRpu: true, metadata: baselineOnly, deps: {hwdec:surfacetexture, topology:platformView, dataspace:pq, decoder:mediacodec})
+11-01 10:46:23.077 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:23.113 20967 20967 I flutter : THERMAL_JSON_PART {"r":"20967:1793501181046555","n":2,"i":0,"c":4,"d":"eyJzY2hlbWFWZXJzaW9uIjoxLCJydW5JZCI6IjIwOTY3OjE3OTM1MDExODEwNDY1NTUiLCJwaWQiOjIwOTY3LCJzZXJpYWwiOjEsInBoYXNlIjoic3RhcnQiLCJtb2RlIjoiYXVkaW8iLCJlbGFwc2VkTXMiOjQzLCJ3YWxsVGltZSI6IjIwMjYtMTEtMDFUMDI6NDY6MjMuMTEzNzU4WiIsInNhbXBsZUR1cmF0aW9uTXMiOjQzLCJzYW1wbGVPcmRpbmFsIjoyLCJwcm9wZXJ0aWVzIjp7InRpbWUtcG9zIjoiMC4yNjY5MzMiLCJwYXRoIjoiL3NkY2FyZC9BbmRyb2lkL2RhdGEvY29tLmV4YW1wbGUubWVkaWFfa2l0X2hkcl9sYWIvZmlsZXMvaG9ra2FpZG8tcDg0Lm1wNCIsInBhdXNlIjoibm8iLCJod2RlYy1jdXJyZW50Ijoic3VyZmFjZXRleHR1cmUiLCJod2RlYy1zb2Z0d2FyZS1mYWxsYmFjayI6IjgiLCJ2aWRlby1jb2RlYyI6IiIsImN1cnJlbnQtdHJhY2tzL3ZpZGVvL2RvbGJ5LXZpc2lvbi1w"}
+11-01 10:46:23.114 20967 20967 I flutter : THERMAL_JSON_PART {"r":"20967:1793501181046555","n":2,"i":1,"c":4,"d":"cm9maWxlIjoiOCIsImN1cnJlbnQtdHJhY2tzL3ZpZGVvL2RvbGJ5LXZpc2lvbi1jb21wYXRpYmlsaXR5LWlkIjoiNCIsInZpZGVvLXN5bmMiOiJhdWRpbyIsImRpc3BsYXktc3luYy1hY3RpdmUiOiJubyIsInZzeW5jLXJhdGlvIjoiIiwiYXVkaW8tc3BlZWQtY29ycmVjdGlvbiI6IjEuMDAwMDAwIiwidmlkZW8tc3BlZWQtY29ycmVjdGlvbiI6IjEuMDAwMDAwIiwiYXZzeW5jIjoiLTAuMDE0MzIyIiwiZGVjb2Rlci1mcmFtZS1kcm9wLWNvdW50IjoiMCIsImZyYW1lLWRyb3AtY291bnQiOiIyIiwidm8tZGVsYXllZC1mcmFtZS1jb3VudCI6IjAiLCJtaXN0aW1lZC1mcmFtZS1jb3VudCI6IiIsImVzdGltYXRlZC12Zi1mcHMiOiIyOS45NzAwMzAiLCJlc3RpbWF0ZWQtZGlzcGxheS1mcHMiOiIiLCJjb250YWluZXItZnBzIjoiMjkuOTcwMDMwIiwidmlkZW8tcGFyYW1zL3ciOiIzODQwIiwidmlk"}
+11-01 10:46:23.114 20967 20967 I flutter : THERMAL_JSON_PART {"r":"20967:1793501181046555","n":2,"i":2,"c":4,"d":"ZW8tcGFyYW1zL2giOiIxOTIwIiwidmlkZW8tcGFyYW1zL2dhbW1hIjoiaGxnIiwidmlkZW8tcGFyYW1zL3ByaW1hcmllcyI6ImJ0LjIwMjAiLCJ2aWRlby1wYXJhbXMvcGl4ZWxmb3JtYXQiOiJtZWRpYWNvZGVjIiwidmlkZW8tcGFyYW1zL2h3LXBpeGVsZm9ybWF0IjoiIiwidmlkZW8tb3V0LXBhcmFtcy93IjoiMzg0MCIsInZpZGVvLW91dC1wYXJhbXMvaCI6IjE5MjAiLCJ2aWRlby1vdXQtcGFyYW1zL2dhbW1hIjoiaGxnIiwidmlkZW8tb3V0LXBhcmFtcy9wcmltYXJpZXMiOiJidC4yMDIwIiwidGFyZ2V0LXBlYWsiOiIxMDAwIiwidGFyZ2V0LXRyYyI6InBxIiwidGFyZ2V0LXByaW0iOiJidC4yMDIwIiwiYW5kcm9pZC1zdXJmYWNlLXNpemUiOiIyNjcyeDEzMzYiLCJnYW1tYSI6IjAuMDAwMDAwIiwiaW50ZXJwb2xhdGlvbiI6Im5vIiwidm8iOiJncHUtbmV4dCJ9LCJwcm9wZXJ0eUVycm9y"}
+11-01 10:46:23.114 20967 20967 I flutter : THERMAL_JSON_PART {"r":"20967:1793501181046555","n":2,"i":3,"c":4,"d":"cyI6e30sInJlcG9ydCI6eyJnZW5lcmF0aW9uIjoxLCJzb3VyY2VQYXRoIjoiL3NkY2FyZC9BbmRyb2lkL2RhdGEvY29tLmV4YW1wbGUubWVkaWFfa2l0X2hkcl9sYWIvZmlsZXMvaG9ra2FpZG8tcDg0Lm1wNCIsInZlcmlmaWVkIjp0cnVlLCJod2RlY0N1cnJlbnQiOiJzdXJmYWNldGV4dHVyZSIsImFjdHVhbCI6eyJzdHJhdGVneSI6ImJhc2VMYXllckNvbnZlcnQiLCJod2RlYyI6InN1cmZhY2V0ZXh0dXJlIiwidGFyZ2V0VHJjIjoicHEiLCJ0YXJnZXRQcmltIjoiYnQuMjAyMCIsInRhcmdldFBlYWsiOiIxMDAwIn0sInNvdXJjZSI6eyJraW5kIjoiZG9sYnlWaXNpb25QODQiLCJjb2RlYyI6ImhldmMiLCJ0cmFuc2ZlciI6ImhsZyIsInByaW1hcmllcyI6ImJ0LjIwMjAiLCJkdlByb2ZpbGUiOjgsImR2Q29tcGF0aWJpbGl0eUlkIjo0fSwiZXJyb3IiOm51bGx9fQ=="}
+11-01 10:46:23.133 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:23.134 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:23.134 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:23.191 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:23.191 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:23.199 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:23.260 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:23.261 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:23.284 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:23.314 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:23.316 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:23.337 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:23.426 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:23.428 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:23.429 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:23.500 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:23.502 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:23.503 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:23.566 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:23.569 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:23.570 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:23.624 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:23.625 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:23.625 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:23.680 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:23.681 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:23.682 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:23.739 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:23.740 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:23.742 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:23.800 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:23.801 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:23.809 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:23.869 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:23.870 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:23.878 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:23.933 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:23.934 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:24.949 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:24.949 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:24.949 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:24.949 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:24.949 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:24.949 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:24.949 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:24.949 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:24.949 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:24.949 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:24.949 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:24.949 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:24.949 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:24.949 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:24.949 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:24.949 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:24.949 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:24.949 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:24.949 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:24.949 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:24.949 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:24.949 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:24.949 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:24.949 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:24.949 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:24.949 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:24.949 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:24.949 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:24.949 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:24.949 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:24.949 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:24.950 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:24.950 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:24.950 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:24.950 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:24.950 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:24.950 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:24.950 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:24.950 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:24.950 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:24.954 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:24.956 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:24.957 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:25.033 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:25.033 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:25.034 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:25.101 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:25.102 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:25.103 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:25.166 20967 20967 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-P1: set-done table full (32); re-setting on every queue (idempotent same-content copy)
+11-01 10:46:25.170 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:25.171 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:25.171 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:25.231 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:25.234 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:25.236 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:25.287 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:25.287 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:25.287 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:25.344 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:25.345 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:25.347 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:25.403 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:25.403 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:25.414 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:25.491 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:25.493 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:25.494 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:25.560 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:25.561 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:25.562 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:25.629 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:25.630 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:25.631 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:25.690 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:25.692 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:25.693 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:25.748 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:25.751 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:25.773 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:25.795 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:25.796 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:25.813 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:25.868 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:25.869 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:25.879 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:25.940 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:25.941 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:25.948 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:26.002 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:26.004 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:26.029 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:26.058 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:26.059 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:26.082 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:26.163 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:26.166 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:26.168 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:26.240 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:26.240 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:26.241 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:26.305 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:26.306 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:26.307 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:26.369 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:26.372 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:26.375 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:26.428 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:26.428 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:26.428 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:26.483 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:26.484 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:26.486 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:26.536 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:26.538 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:26.562 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:26.592 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:26.593 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:26.616 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:26.703 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:26.704 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:26.705 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:26.779 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:26.780 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:26.781 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:26.860 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:26.861 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:26.875 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:26.902 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:26.903 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:26.916 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:26.997 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:26.998 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:27.000 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:27.075 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:27.076 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:27.082 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:27.162 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:27.163 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:27.164 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:27.233 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:27.240 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:27.243 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:27.315 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:27.315 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:27.317 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:27.394 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:27.398 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:27.416 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:27.443 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:27.444 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:27.454 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:27.523 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:27.525 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:27.525 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:27.586 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:27.587 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:27.587 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:27.650 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:27.651 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:27.651 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:27.708 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:27.708 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:27.715 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:27.769 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:27.769 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:27.781 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:27.857 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:27.858 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:27.869 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:27.892 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:27.893 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:27.917 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:27.972 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:27.973 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:27.984 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:28.043 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:28.044 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:28.050 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:28.109 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:28.112 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:28.117 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:28.171 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:28.171 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:28.182 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:28.236 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:28.237 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:28.261 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:28.292 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:28.294 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:28.316 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:28.410 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:28.412 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:28.413 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:28.485 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:28.485 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:28.485 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:28.569 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:28.570 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:28.583 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:28.613 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:28.614 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:28.620 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:28.691 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:28.691 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:28.692 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:28.757 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:28.758 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:28.758 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:28.823 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:28.823 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:28.825 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:28.878 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:28.879 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:28.885 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:28.942 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:28.942 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:28.971 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:28.998 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:28.998 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:29.019 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:29.111 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:29.111 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:29.113 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:29.185 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:29.185 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:29.186 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:29.263 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:29.265 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:29.279 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:29.304 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:29.305 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:29.319 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:29.403 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:29.405 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:29.406 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:29.481 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:29.483 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:29.484 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:29.548 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:29.549 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:29.557 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:29.613 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:29.615 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:29.616 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:29.668 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:29.669 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:29.670 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:29.722 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:29.723 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:29.746 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:29.769 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:29.770 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:29.785 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:29.865 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:29.866 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:29.867 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:29.935 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:29.936 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:29.938 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:30.010 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:30.013 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:30.013 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:30.068 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:30.069 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:30.069 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:30.129 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:30.129 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:30.130 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:30.183 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:30.185 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:30.185 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:30.239 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:30.240 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:30.251 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:30.309 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:30.310 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:30.317 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:30.381 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:30.382 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:30.385 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:30.445 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:30.446 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:30.453 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:30.508 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:30.508 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:30.524 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:30.581 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:30.582 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:30.586 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:30.641 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:30.641 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:30.651 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:30.707 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:30.708 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:30.718 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:30.778 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:30.778 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:30.786 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:30.843 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:30.844 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:30.851 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:30.906 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:30.906 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:30.920 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:30.982 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:30.983 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:30.987 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:31.042 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:31.043 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:31.053 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:31.118 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:31.118 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:31.120 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:31.175 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:31.176 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:31.185 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:31.240 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:31.242 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:31.264 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:31.294 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:31.295 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:31.319 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:31.411 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:31.414 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:31.415 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:31.489 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:31.490 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:31.490 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:31.561 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:31.562 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:31.581 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:31.613 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:31.614 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:31.621 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:31.690 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:31.691 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:31.692 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:31.758 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:31.758 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:31.759 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:31.818 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:31.820 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:31.821 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:31.876 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:31.878 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:31.888 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:31.948 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:31.949 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:31.954 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:32.008 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:32.008 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:32.021 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:32.086 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:32.087 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:32.088 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:32.144 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:32.148 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:32.153 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:32.214 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:32.215 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:32.219 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:32.275 20967 20967 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKS-THERMAL kind=yuv instance=0x741ce18450 pid=20967 mono_ns=15579137453 start_ns=5562682725 final=0 queue_frames=0 queue_resets=0 draw=0 redraw=0 display_synced=0 submit=0 flip=0 lease_copy=0 lease_reuse=0 latch=0 defer_publish_flush=0 publish_flush=0 flush_req=0 flush_ovr=0 nominal_fps=0.000000 fps_fallback=0 publish_deferred=0 retire_flush=0 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=144 swap=144 swap_ok=144 frame_id=0 pts=0.000000000 w=2672 h=1336
+11-01 10:46:32.279 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-THERMAL kind=vo instance=0x741840c3d0 pid=20967 mono_ns=15579228286 start_ns=5562416683 final=0 queue_frames=273 queue_resets=1 draw=280 redraw=7 display_synced=0 submit=280 flip=280 lease_copy=0 lease_reuse=0 latch=0 defer_publish_flush=0 publish_flush=0 flush_req=0 flush_ovr=0 nominal_fps=0.000000 fps_fallback=0 publish_deferred=0 retire_flush=0 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=0 swap=0 swap_ok=0 frame_id=327 pts=9.409400000 w=2672 h=1336
+11-01 10:46:32.279 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:32.280 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:32.287 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:32.343 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:32.344 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:32.353 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:32.406 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:32.407 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:32.421 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:32.482 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:32.483 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:32.509 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:32.536 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:32.537 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:32.555 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:32.651 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:32.652 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:32.654 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:32.733 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:32.733 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:32.758 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:32.796 20967 20967 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKS-THERMAL kind=import instance=0x7443d76050 pid=20967 mono_ns=16099871359 start_ns=6093094130 final=0 queue_frames=0 queue_resets=0 draw=0 redraw=0 display_synced=0 submit=0 flip=0 lease_copy=288 lease_reuse=2 latch=288 defer_publish_flush=0 publish_flush=288 flush_req=0 flush_ovr=0 nominal_fps=29.970030 fps_fallback=0 publish_deferred=0 retire_flush=289 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=0 swap=0 swap_ok=0 frame_id=0 pts=9.943266667 w=3840 h=1920
+11-01 10:46:32.797 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:32.798 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:32.798 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:32.881 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:32.883 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:32.884 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:32.957 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:32.958 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:32.958 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:33.035 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:33.039 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:33.040 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:33.110 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:33.111 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:33.111 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:33.143 20967 20967 I flutter : THERMAL_JSON_PART {"r":"20967:1793501181046555","n":3,"i":0,"c":4,"d":"eyJzY2hlbWFWZXJzaW9uIjoxLCJydW5JZCI6IjIwOTY3OjE3OTM1MDExODEwNDY1NTUiLCJwaWQiOjIwOTY3LCJzZXJpYWwiOjEsInBoYXNlIjoic2FtcGxlIiwibW9kZSI6ImF1ZGlvIiwiZWxhcHNlZE1zIjoxMDA3MSwid2FsbFRpbWUiOiIyMDI2LTExLTAxVDAyOjQ2OjMzLjE0MjY3OFoiLCJzYW1wbGVEdXJhdGlvbk1zIjoyNywic2FtcGxlT3JkaW5hbCI6MywicHJvcGVydGllcyI6eyJ0aW1lLXBvcyI6IjEwLjMxMDMwMCIsInBhdGgiOiIvc2RjYXJkL0FuZHJvaWQvZGF0YS9jb20uZXhhbXBsZS5tZWRpYV9raXRfaGRyX2xhYi9maWxlcy9ob2trYWlkby1wODQubXA0IiwicGF1c2UiOiJubyIsImh3ZGVjLWN1cnJlbnQiOiJzdXJmYWNldGV4dHVyZSIsImh3ZGVjLXNvZnR3YXJlLWZhbGxiYWNrIjoiOCIsInZpZGVvLWNvZGVjIjoiIiwiY3VycmVudC10cmFja3MvdmlkZW8vZG9sYnktdmlz"}
+11-01 10:46:33.143 20967 20967 I flutter : THERMAL_JSON_PART {"r":"20967:1793501181046555","n":3,"i":1,"c":4,"d":"aW9uLXByb2ZpbGUiOiI4IiwiY3VycmVudC10cmFja3MvdmlkZW8vZG9sYnktdmlzaW9uLWNvbXBhdGliaWxpdHktaWQiOiI0IiwidmlkZW8tc3luYyI6ImF1ZGlvIiwiZGlzcGxheS1zeW5jLWFjdGl2ZSI6Im5vIiwidnN5bmMtcmF0aW8iOiIiLCJhdWRpby1zcGVlZC1jb3JyZWN0aW9uIjoiMS4wMDAwMDAiLCJ2aWRlby1zcGVlZC1jb3JyZWN0aW9uIjoiMS4wMDAwMDAiLCJhdnN5bmMiOiIwLjAwMDAxNiIsImRlY29kZXItZnJhbWUtZHJvcC1jb3VudCI6IjAiLCJmcmFtZS1kcm9wLWNvdW50IjoiMTIiLCJ2by1kZWxheWVkLWZyYW1lLWNvdW50IjoiMCIsIm1pc3RpbWVkLWZyYW1lLWNvdW50IjoiIiwiZXN0aW1hdGVkLXZmLWZwcyI6IjI5Ljk3MDAzMCIsImVzdGltYXRlZC1kaXNwbGF5LWZwcyI6IiIsImNvbnRhaW5lci1mcHMiOiIyOS45NzAwMzAiLCJ2aWRlby1wYXJhbXMvdyI6IjM4NDAi"}
+11-01 10:46:33.143 20967 20967 I flutter : THERMAL_JSON_PART {"r":"20967:1793501181046555","n":3,"i":2,"c":4,"d":"LCJ2aWRlby1wYXJhbXMvaCI6IjE5MjAiLCJ2aWRlby1wYXJhbXMvZ2FtbWEiOiJobGciLCJ2aWRlby1wYXJhbXMvcHJpbWFyaWVzIjoiYnQuMjAyMCIsInZpZGVvLXBhcmFtcy9waXhlbGZvcm1hdCI6Im1lZGlhY29kZWMiLCJ2aWRlby1wYXJhbXMvaHctcGl4ZWxmb3JtYXQiOiIiLCJ2aWRlby1vdXQtcGFyYW1zL3ciOiIzODQwIiwidmlkZW8tb3V0LXBhcmFtcy9oIjoiMTkyMCIsInZpZGVvLW91dC1wYXJhbXMvZ2FtbWEiOiJobGciLCJ2aWRlby1vdXQtcGFyYW1zL3ByaW1hcmllcyI6ImJ0LjIwMjAiLCJ0YXJnZXQtcGVhayI6IjEwMDAiLCJ0YXJnZXQtdHJjIjoicHEiLCJ0YXJnZXQtcHJpbSI6ImJ0LjIwMjAiLCJhbmRyb2lkLXN1cmZhY2Utc2l6ZSI6IjI2NzJ4MTMzNiIsImdhbW1hIjoiMC4wMDAwMDAiLCJpbnRlcnBvbGF0aW9uIjoibm8iLCJ2byI6ImdwdS1uZXh0In0sInByb3BlcnR5"}
+11-01 10:46:33.143 20967 20967 I flutter : THERMAL_JSON_PART {"r":"20967:1793501181046555","n":3,"i":3,"c":4,"d":"RXJyb3JzIjp7fSwicmVwb3J0Ijp7ImdlbmVyYXRpb24iOjEsInNvdXJjZVBhdGgiOiIvc2RjYXJkL0FuZHJvaWQvZGF0YS9jb20uZXhhbXBsZS5tZWRpYV9raXRfaGRyX2xhYi9maWxlcy9ob2trYWlkby1wODQubXA0IiwidmVyaWZpZWQiOnRydWUsImh3ZGVjQ3VycmVudCI6InN1cmZhY2V0ZXh0dXJlIiwiYWN0dWFsIjp7InN0cmF0ZWd5IjoiYmFzZUxheWVyQ29udmVydCIsImh3ZGVjIjoic3VyZmFjZXRleHR1cmUiLCJ0YXJnZXRUcmMiOiJwcSIsInRhcmdldFByaW0iOiJidC4yMDIwIiwidGFyZ2V0UGVhayI6IjEwMDAifSwic291cmNlIjp7ImtpbmQiOiJkb2xieVZpc2lvblA4NCIsImNvZGVjIjoiaGV2YyIsInRyYW5zZmVyIjoiaGxnIiwicHJpbWFyaWVzIjoiYnQuMjAyMCIsImR2UHJvZmlsZSI6OCwiZHZDb21wYXRpYmlsaXR5SWQiOjR9LCJlcnJvciI6bnVsbH19"}
+11-01 10:46:33.179 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:33.179 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:33.181 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:33.237 20967 20967 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKS-INPUT-FBO requested=0 slot_attempts=0 shared_attempts=300 fallbacks=0 copy_failures=0 final=0
+11-01 10:46:33.237 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:33.238 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:33.258 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:33.289 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:33.290 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:33.297 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:33.382 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:33.384 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:33.384 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:33.453 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:33.454 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:33.455 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:33.524 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:33.525 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:33.527 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:33.591 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:33.592 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:33.593 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:33.649 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:33.650 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:33.651 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:33.707 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:33.709 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:33.710 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:33.761 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:33.762 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:33.762 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:33.817 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:33.818 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:33.821 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:33.878 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:33.878 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:33.890 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:33.950 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:33.951 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:33.956 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:34.013 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:34.014 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:34.024 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:34.083 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:34.084 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:34.090 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:34.146 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:34.148 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:34.154 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:34.214 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:34.216 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:34.222 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:34.281 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:34.281 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:34.288 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:34.344 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:34.345 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:34.378 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:34.411 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:34.412 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:34.425 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:34.491 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:34.492 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:34.493 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:34.549 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:34.551 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:34.572 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:34.594 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:34.595 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:34.624 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:34.659 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:34.661 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:34.692 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:34.731 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:34.732 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:34.758 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:34.793 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:34.794 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:34.823 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:34.870 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:34.871 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:34.890 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:34.970 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:34.971 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:34.971 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:35.045 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:35.047 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:35.048 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:35.102 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:35.103 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:35.104 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:35.160 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:35.162 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:35.166 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:35.218 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:35.218 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:35.224 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:35.278 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:35.278 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:35.291 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:35.353 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:35.354 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:35.357 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:35.410 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:35.411 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:35.424 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:35.486 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:35.487 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:35.491 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:35.547 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:35.547 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:35.558 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:35.618 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:35.619 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:35.623 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:35.676 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:35.677 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:35.703 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:35.735 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:35.737 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:35.756 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:35.866 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:35.867 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:35.868 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:35.942 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:35.942 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:35.968 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:36.010 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:36.010 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:36.011 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:36.094 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:36.094 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:36.096 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:36.170 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:36.173 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:36.194 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:36.237 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:36.238 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:36.239 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:36.323 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:36.324 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:36.327 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:36.399 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:36.400 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:36.425 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:36.466 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:36.468 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:36.469 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:36.545 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:36.546 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:36.547 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:36.611 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:36.612 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:36.612 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:36.672 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:36.674 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:36.675 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:36.730 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:36.731 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:36.731 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:36.787 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:36.787 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:36.791 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:36.848 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:36.849 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:36.858 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:36.918 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:36.919 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:36.926 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:36.983 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:36.984 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:37.010 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:37.041 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:37.042 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:37.061 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:37.151 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:37.152 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:37.153 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:37.226 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:37.227 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:37.227 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:37.303 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:37.305 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:37.321 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:37.354 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:37.355 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:37.364 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:37.442 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:37.443 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:37.445 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:37.520 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:37.521 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:37.523 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:37.606 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:37.607 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:37.609 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:37.686 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:37.690 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:37.691 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:37.765 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:37.766 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:37.767 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:37.831 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:37.836 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:37.838 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:37.904 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:37.905 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:37.908 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:37.971 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:37.972 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:37.973 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:38.029 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:38.030 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:38.056 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:38.087 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:38.088 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:38.101 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:38.189 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:38.190 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:38.191 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:38.266 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:38.267 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:38.291 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:38.319 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:38.319 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:38.331 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:38.420 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:38.421 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:38.422 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:38.496 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:38.496 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:38.497 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:38.579 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:38.580 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:38.601 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:38.635 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:38.635 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:38.640 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:38.721 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:38.722 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:38.723 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:38.791 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:38.793 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:38.793 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:38.863 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:38.865 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:38.865 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:38.919 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:38.920 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:38.921 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:38.973 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:38.974 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:38.999 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:39.032 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:39.034 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:39.037 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:39.117 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:39.119 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:39.119 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:39.184 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:39.185 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:39.186 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:39.253 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:39.254 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:39.254 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:39.307 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:39.308 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:39.308 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:39.367 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:39.367 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:39.368 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:39.424 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:39.425 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:39.428 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:39.481 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:39.482 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:39.495 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:39.579 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:39.583 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:39.583 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:39.656 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:39.657 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:39.658 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:39.730 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:39.731 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:39.732 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:39.794 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:39.795 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:39.795 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:39.856 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:39.857 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:39.858 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:39.914 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:39.914 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:39.915 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:39.974 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:39.975 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:39.976 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:40.038 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:40.039 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:40.041 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:40.098 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:40.099 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:40.108 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:40.165 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:40.167 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:40.168 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:40.224 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:40.226 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:40.230 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:40.287 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:40.288 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:40.294 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:40.352 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:40.353 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:40.381 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:40.411 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:40.411 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:40.431 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:40.520 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:40.523 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:40.524 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:40.598 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:40.599 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:40.599 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:40.676 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:40.677 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:40.693 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:40.716 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:40.717 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:40.733 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:40.803 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:40.805 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:40.806 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:40.875 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:40.876 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:40.877 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:40.938 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:40.942 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:40.942 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:40.995 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:40.997 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:40.998 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:41.053 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:41.054 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:41.083 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:41.104 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:41.105 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:41.128 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:41.193 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:41.194 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:41.195 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:41.255 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:41.256 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:41.261 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:41.318 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:41.319 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:41.328 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:41.385 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:41.386 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:41.397 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:41.459 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:41.460 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:41.464 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:41.525 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:41.527 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:41.531 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 10:46:41.593 20967 20967 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 10:46:41.594 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 10:46:41.600 20967 20967 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1

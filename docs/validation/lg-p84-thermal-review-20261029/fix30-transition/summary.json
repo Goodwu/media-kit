@@ -1,0 +1,28 @@
+{
+ "apk": "fusion-table-fix30-20261102 SHA256 977260b35f1261ae92247294d8da63dfcb3369aa54fcea895b96d41f51c4d3cf",
+ "harness": "debug.mks.yuv_table_transition=<delta> (default 0): VO-level aspect-preserving dwidth/dheight change BEFORE start_frame + fns->reconfig (android_reconfig honors armed property as authoritative size -> real native window + YUV wrapper + RA swapchain resize, same code path as a live surface change)",
+ "changes": "fix27 moved injection before start_frame (fix26 flaw: in-flight resize refused); fix28 reconfig override made the WHOLE chain resize (wrapper FBO actually changed, zero \"Tried resizing\"); fix29 aspect-preserving delta (equal-delta letterboxed and tripped geometry gate); fix30 non-sticky table-path fusion fallback enabling designed rebuild",
+ "sequence": [
+  {
+   "phase": "baseline 2672x1336",
+   "events": "ready cache_id=1 first-attempt + table-pass-ran + fused commits"
+  },
+  {
+   "phase": "+2 -> 2674x1337 (real FBO)",
+   "events": "transition-inject; dispatch size gate DROPPED stale table (table-required-unmet active=0); table-path-failure non-sticky (fusion stays armed); fusion-fallback-table-dropped failures=1; RESEED ready cache_id=2; table-pass-ran generation=3; fused commits continue at new size"
+  },
+  {
+   "phase": "-2 -> 2672x1336 (return)",
+   "events": "same protection; ready cache_id=3; table-pass-ran generation=5; fused commits continue"
+  }
+ ],
+ "totals": "ready=3 pass=3 unmet=2(stale-table refusals) renderfail=0 fusion-disabled=0",
+ "reviewer_conditions": {
+  "1 READY+consumed": "PASS",
+  "2 REAL target resize": "PASS (wrapper FBO actually 2674x1337; no refused resize)",
+  "3 stale refused + same-frame ordinary + zero drops": "PASS",
+  "4 rebuilt and resumed at new size": "PASS (the stronger branch)",
+  "5 timeline correlation": "PASS in flutter-logcat.txt"
+ },
+ "evidence": "flutter-logcat.txt"
+}

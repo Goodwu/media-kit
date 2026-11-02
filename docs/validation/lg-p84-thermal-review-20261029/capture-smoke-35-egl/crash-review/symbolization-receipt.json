@@ -1,0 +1,16 @@
+{
+  "apk_sha256": "cdfddb3b4115238096cd94a2abc304c86ddd7cd7f9ca9b536adc217be154cf48",
+  "packaged_lib_sha256": "1a725d044d0017c7327e40eaa257d7fed017f76921559619eb5c62b4286572cc",
+  "unstripped_path": "/Users/wuweiwei1/src/mpv/_build-arm64-mks/libmpv.so",
+  "unstripped_bytes": 48665256,
+  "unstripped_sha256": "dc4a72c9bc91f7a89b8d1e2fdd84c5cb36da41e7a042f2143263197d253005df",
+  "apk_entry_offset": "0x13b8000",
+  "tombstone_map_offset": "0x19e7000",
+  "text_file_offset": "0x62f720",
+  "text_virtual_address": "0x630720",
+  "executable_segment_byte_identical": true,
+  "tombstone_relative_pc": "0x7e8bc4",
+  "elf_pc": "0xe18bc4",
+  "instruction_bytes": "20013fd6",
+  "interpretation": "blr x9; tombstone x9=0; SSBO descriptor branch first calls GetProgramResourceIndex then loads ShaderStorageBlockBinding and branches to shared indirect call"
+}

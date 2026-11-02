@@ -1,0 +1,7 @@
+{
+  "time": "2026-10-29T16:15:48.491601+08:00",
+  "returncode": 1,
+  "stdout": "@@ battery\nCurrent Battery Service state:\n  AC powered: true\n  USB powered: false\n  Wireless powered: false\n  Max charging current: 0\n  Max charging voltage: 0\n  Charge counter: 0\n  status: 5\n  health: 2\n  present: true\n  level: 100\n  scale: 100\n  voltage: 4328\n  temperature: 333\n  technology: Li-ion\n@@ vts\nvts\n359\n@@ panel\n0\n10\n0\n@@ power_supply\nFull\n0\n4328435\n1\n/system/bin/sh: cat: /sys/class/power_supply/ac/online: No such file or directory\n",
+  "stderr": "",
+  "meaning": "read-only idle before matched thermal pair; no GPU counters read"
+}

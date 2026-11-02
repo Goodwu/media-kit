@@ -1,0 +1,41 @@
+{
+  "time": "2026-10-29T16:33:09.406823+08:00",
+  "entry": "programmatic thermal.run(args), sampler=SupplyMatchedAdb(InstantAdb)",
+  "args": {
+    "serial": "LGH870DS42e27764",
+    "output": "/Users/wuweiwei1/src/media-kit/docs/validation/lg-p84-thermal-review-20261029/thermal-ab4-B1",
+    "mode": "candidate",
+    "experiment": "publish-flush",
+    "duration": 360.0,
+    "interval": 2.0,
+    "tap": [
+      1440,
+      720
+    ],
+    "tap_delay": 4.0,
+    "allow_unprotected_menu": true,
+    "source": "/sdcard/Android/data/com.example.media_kit_hdr_lab/files/hokkaido-p84.mp4",
+    "source_receipt": "/Users/wuweiwei1/src/media-kit/docs/validation/lg-p84-thermal-review-20261029/local-source.json",
+    "source_hash": null,
+    "expected_panel_thermal_status": "0",
+    "instant_enabled": true,
+    "reference_start": "/Users/wuweiwei1/src/media-kit/docs/validation/lg-p84-thermal-review-20261029/thermal-ab4-A1/summary.json",
+    "cooldown_timeout": 1800.0,
+    "battery_tolerance": 0.5,
+    "vts_tolerance": 0.5
+  },
+  "referenceInitial": {
+    "batteryC": 32.3,
+    "vtsC": 35.5
+  },
+  "expectedSupply": {
+    "battery_status": "Full",
+    "usb_online": "1"
+  },
+  "clockTicksPerSecond": 100,
+  "SIGTERM": "handler raises KeyboardInterrupt; reviewed thermal.run finally independently stops hdr_lab and restores settings/properties/screen",
+  "sourceApkSha256": "e20d6b333babd10b6ee09cbcd302dd0bc50bd043668ef56e56ca2f177cf049fc",
+  "instantToolSha256": "01a2e7feff36e92c6d551ba4e5b9ca9899a17964912dca58ea9d548b815053ec",
+  "roundToolSha256": "a4dea72e72fd802a72784c0c1d4128b715f110270d06bed67672e284eb837bdc",
+  "note": "This wrapper only adds a fail-closed baseline Full/status+USB admission; no GPU counter reader beyond InstantAdb. Current/voltage are raw records, never CPU/GPU power."
+}

@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "status": "completed-oracle-triplet",
+  "startedAt": "2026-10-30T06:53:26.677183+08:00",
+  "rounds": [
+    {
+      "directory": "/Users/wuweiwei1/src/media-kit/docs/validation/lg-p84-thermal-review-20261029/capture-oracle-single-triplet-35/01-original",
+      "mode": 0,
+      "status": "completed-capture",
+      "reason": null,
+      "restorationVerified": true
+    },
+    {
+      "directory": "/Users/wuweiwei1/src/media-kit/docs/validation/lg-p84-thermal-review-20261029/capture-oracle-single-triplet-35/02-oracle",
+      "mode": 1,
+      "status": "completed-capture",
+      "reason": null,
+      "restorationVerified": true
+    },
+    {
+      "directory": "/Users/wuweiwei1/src/media-kit/docs/validation/lg-p84-thermal-review-20261029/capture-oracle-single-triplet-35/03-original",
+      "mode": 0,
+      "status": "completed-capture",
+      "reason": null,
+      "restorationVerified": true
+    }
+  ],
+  "scope": "Diagnostic original/oracle/original evidence, not production or panel acceptance",
+  "verification": {
+    "status": "validated-triplet-evidence",
+    "modes": [
+      0,
+      1,
+      0
+    ],
+    "checks": {
+      "sameActualSources": true,
+      "originalRawBytesRepeat": true,
+      "allCapturedABytesStable": true,
+      "sameAPKMediaReceiptPTSROI": true,
+      "freshProcessesAndCaptures": true
+    },
+    "captureStatuses": [
+      "captured-float-differences",
+      "captured-floats-bit-equal",
+      "captured-float-differences"
+    ],
+    "programInstanceScope": "Each round uses a fresh process. Archived B shader source equality does not mean the same GL program instance.",
+    "withinCaptureRepeatability": "not measured: one A/B pair",
+    "oracleUVRequirement": "Oracle-mode B UV words equal the corresponding captured A UV words; independently checked by the single-capture analyzer.",
+    "scope": "One diagnostic triplet with fixed archived shader source bytes. Media identity uses the historical full-byte SHA receipt plus current per-round file size, not a fresh whole-media hash. B RGB/pre/YUV remain measured differences, not accepted equivalence. Producer barriers/uniform assertions are not independent hardware synchronization proof; no panel or compiler root cause claim."
+  },
+  "restorationVerified": true,
+  "finishedAt": "2026-10-30T06:55:37.219686+08:00"
+}

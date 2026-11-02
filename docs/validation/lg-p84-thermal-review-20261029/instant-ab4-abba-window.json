@@ -1,0 +1,1383 @@
+{
+  "schema": 1,
+  "apkSha256": "e20d6b333babd10b6ee09cbcd302dd0bc50bd043668ef56e56ca2f177cf049fc",
+  "order": [
+    "A",
+    "B",
+    "B2",
+    "A2"
+  ],
+  "window": {
+    "controllerSeconds": [
+      20.0,
+      55.0
+    ],
+    "origin": "first complete THERMAL_JSON phase=start for fresh PID/runId",
+    "weighting": "Each current sample represents its preceding host-monotonic sampling interval, clipped to20..55s; not an electrical power integration.",
+    "mediaPTS": "All opens start at0. Native media time-pos is read every10s; exact per-instant PTS is unavailable. Reported PTS plus age is an estimate only.",
+    "gpuProxy": "GPU_freq_MHz * driver_reported_busy_fraction; sample-based proxy only, never watts or energy."
+  },
+  "rounds": {
+    "A": {
+      "directory": "instant-ab4-A",
+      "status": "completed-observation",
+      "restorationVerified": true,
+      "hdrLabStopped": true,
+      "validCompletedProfile": true,
+      "durationSeconds": 60.39685983303934,
+      "policy": "0",
+      "actualSync": "display-resample",
+      "initial": {
+        "batteryC": 31.3,
+        "vtsC": 34.9,
+        "batteryStatus": "Full",
+        "batteryCurrentRaw": "0",
+        "batteryVoltageRaw": "4317143"
+      },
+      "final": {
+        "batteryC": 34.1,
+        "vtsC": 37.9
+      },
+      "firstActiveGPU": {
+        "freqHz": "315000000",
+        "driverBusyPercent": 46.0
+      },
+      "cacheState": "App/native shader cache was not cleared or instrumented; initial install/warm-cache and DVFS hysteresis remain possible confounders.",
+      "selectedSamplePoints": [
+        {
+          "elapsedSeconds": 20.317229041014798,
+          "estimatedMediaPTS": 20.622922041959697,
+          "nativeObservedMediaPTS": 20.353667,
+          "sampleReadMs": 45,
+          "weightSeconds": 0.317229041014798
+        },
+        {
+          "elapsedSeconds": 22.62642862496432,
+          "estimatedMediaPTS": 22.932128042023265,
+          "nativeObservedMediaPTS": 20.353667,
+          "sampleReadMs": 45,
+          "weightSeconds": 2.309199583949521
+        },
+        {
+          "elapsedSeconds": 24.818456083070487,
+          "estimatedMediaPTS": 25.12415554203895,
+          "nativeObservedMediaPTS": 20.353667,
+          "sampleReadMs": 45,
+          "weightSeconds": 2.1920274581061676
+        },
+        {
+          "elapsedSeconds": 26.994797541061416,
+          "estimatedMediaPTS": 27.30049670806025,
+          "nativeObservedMediaPTS": 20.353667,
+          "sampleReadMs": 45,
+          "weightSeconds": 2.1763414579909295
+        },
+        {
+          "elapsedSeconds": 29.179122791043483,
+          "estimatedMediaPTS": 29.48482887497508,
+          "nativeObservedMediaPTS": 20.353667,
+          "sampleReadMs": 45,
+          "weightSeconds": 2.1843252499820665
+        },
+        {
+          "elapsedSeconds": 31.348138500005007,
+          "estimatedMediaPTS": 31.678826499947526,
+          "nativeObservedMediaPTS": 30.397033,
+          "sampleReadMs": 66,
+          "weightSeconds": 2.169015708961524
+        },
+        {
+          "elapsedSeconds": 33.662720958003774,
+          "estimatedMediaPTS": 33.9934217500111,
+          "nativeObservedMediaPTS": 30.397033,
+          "sampleReadMs": 66,
+          "weightSeconds": 2.3145824579987675
+        },
+        {
+          "elapsedSeconds": 35.87536720803473,
+          "estimatedMediaPTS": 36.20605749996211,
+          "nativeObservedMediaPTS": 30.397033,
+          "sampleReadMs": 66,
+          "weightSeconds": 2.212646250030957
+        },
+        {
+          "elapsedSeconds": 38.08094141597394,
+          "estimatedMediaPTS": 38.41163362491242,
+          "nativeObservedMediaPTS": 30.397033,
+          "sampleReadMs": 66,
+          "weightSeconds": 2.2055742079392076
+        },
+        {
+          "elapsedSeconds": 40.2833920000121,
+          "estimatedMediaPTS": 40.60939474999775,
+          "nativeObservedMediaPTS": 40.373667,
+          "sampleReadMs": 47,
+          "weightSeconds": 2.2024505840381607
+        },
+        {
+          "elapsedSeconds": 42.48410604102537,
+          "estimatedMediaPTS": 42.81011099999175,
+          "nativeObservedMediaPTS": 40.373667,
+          "sampleReadMs": 47,
+          "weightSeconds": 2.2007140410132706
+        },
+        {
+          "elapsedSeconds": 44.798461833037436,
+          "estimatedMediaPTS": 45.12447433397044,
+          "nativeObservedMediaPTS": 40.373667,
+          "sampleReadMs": 47,
+          "weightSeconds": 2.3143557920120656
+        },
+        {
+          "elapsedSeconds": 46.98506608302705,
+          "estimatedMediaPTS": 47.31107908396386,
+          "nativeObservedMediaPTS": 40.373667,
+          "sampleReadMs": 47,
+          "weightSeconds": 2.186604249989614
+        },
+        {
+          "elapsedSeconds": 49.17110691603739,
+          "estimatedMediaPTS": 49.49711741695516,
+          "nativeObservedMediaPTS": 40.373667,
+          "sampleReadMs": 47,
+          "weightSeconds": 2.1860408330103382
+        },
+        {
+          "elapsedSeconds": 51.36346970801242,
+          "estimatedMediaPTS": 51.66184395907651,
+          "nativeObservedMediaPTS": 50.3503,
+          "sampleReadMs": 51,
+          "weightSeconds": 2.192362791975029
+        },
+        {
+          "elapsedSeconds": 53.561201166012324,
+          "estimatedMediaPTS": 53.85958229198325,
+          "nativeObservedMediaPTS": 50.3503,
+          "sampleReadMs": 51,
+          "weightSeconds": 2.1977314579999074
+        },
+        {
+          "elapsedSeconds": 55.9067970829783,
+          "estimatedMediaPTS": 56.20517699997611,
+          "nativeObservedMediaPTS": 50.3503,
+          "sampleReadMs": 51,
+          "weightSeconds": 1.4387988339876756
+        }
+      ],
+      "CPUProcessOneCorePercent": {
+        "coverageSeconds": 35.0,
+        "timeWeightedMean": 63.19798439478742,
+        "timeWeightedMedianObserved": 63.30275229378081,
+        "min": 59.65665236009773,
+        "max": 66.81818181959612,
+        "samples": 17
+      },
+      "CPUWholeDeviceBusyPercent": {
+        "coverageSeconds": 35.0,
+        "timeWeightedMean": 40.98784146299476,
+        "timeWeightedMedianObserved": 40.903823870220165,
+        "min": 38.60619469026549,
+        "max": 45.55940023068051,
+        "samples": 17
+      },
+      "GPUDriverBusyPercent": {
+        "coverageSeconds": 35.0,
+        "timeWeightedMean": 63.01844731306857,
+        "timeWeightedMedianObserved": 61.0,
+        "min": 58.0,
+        "max": 70.0,
+        "samples": 17
+      },
+      "GPUFrequencyMHz": {
+        "coverageSeconds": 35.0,
+        "timeWeightedMean": 288.17915553621214,
+        "timeWeightedMedianObserved": 315.0,
+        "min": 214.0,
+        "max": 315.0,
+        "samples": 17
+      },
+      "GPUFreqBusyProxyMHz": {
+        "coverageSeconds": 35.0,
+        "timeWeightedMean": 180.55251013710975,
+        "timeWeightedMedianObserved": 192.15,
+        "min": 124.12,
+        "max": 220.5,
+        "samples": 17
+      },
+      "GPUFrequencyWeightedSeconds": {
+        "214000000": 9.294352041906677,
+        "315000000": 25.705647958093323
+      },
+      "CPUFrequencyMHz": {
+        "cpu0": {
+          "coverageSeconds": 35.0,
+          "timeWeightedMean": 791.2352590384866,
+          "timeWeightedMedianObserved": 768.0,
+          "min": 614.4,
+          "max": 1593.6,
+          "samples": 17
+        },
+        "cpu1": {
+          "coverageSeconds": 35.0,
+          "timeWeightedMean": 791.2352590384866,
+          "timeWeightedMedianObserved": 768.0,
+          "min": 614.4,
+          "max": 1593.6,
+          "samples": 17
+        },
+        "cpu2": {
+          "coverageSeconds": 35.0,
+          "timeWeightedMean": 1934.9702776882052,
+          "timeWeightedMedianObserved": 2342.4,
+          "min": 1056.0,
+          "max": 2342.4,
+          "samples": 17
+        },
+        "cpu3": {
+          "coverageSeconds": 35.0,
+          "timeWeightedMean": 1934.9702776882052,
+          "timeWeightedMedianObserved": 2342.4,
+          "min": 1056.0,
+          "max": 2342.4,
+          "samples": 17
+        }
+      },
+      "SoftwareRailMicrovolts": {
+        "cpu_kryo0_regulator_microvolts": {
+          "coverageSeconds": 35.0,
+          "timeWeightedMean": 672190.992813941,
+          "timeWeightedMedianObserved": 611109.0,
+          "min": 584313.0,
+          "max": 825477.0,
+          "samples": 17
+        },
+        "cpu_kryo1_regulator_microvolts": {
+          "coverageSeconds": 35.0,
+          "timeWeightedMean": 731691.0,
+          "timeWeightedMedianObserved": 731691.0,
+          "min": 731691.0,
+          "max": 731691.0,
+          "samples": 17
+        },
+        "gpu_upstream_regulator_microvolts": {
+          "coverageSeconds": 35.0,
+          "timeWeightedMean": 631722.3542258475,
+          "timeWeightedMedianObserved": 645000.0,
+          "min": 595000.0,
+          "max": 645000.0,
+          "samples": 17
+        }
+      },
+      "GPUCornerRaw": [
+        "3",
+        "4"
+      ],
+      "NativeStableRates": {
+        "vo": 29.970988678782195,
+        "yuv": 29.97076458371015,
+        "import": 29.97046835205265
+      },
+      "latestImport": {
+        "kind": "import",
+        "instance": "0x7419e6bc50",
+        "pid": "30429",
+        "mono_ns": "66140492969",
+        "start_ns": "6076467673",
+        "final": "0",
+        "queue_frames": "0",
+        "queue_resets": "0",
+        "draw": "0",
+        "redraw": "0",
+        "display_synced": "0",
+        "submit": "0",
+        "flip": "0",
+        "lease_copy": "1799",
+        "lease_reuse": "2",
+        "latch": "1799",
+        "defer_publish_flush": "0",
+        "publish_flush": "1798",
+        "publish_deferred": "0",
+        "retire_flush": "1800",
+        "fence_create_failed": "0",
+        "reap_stuck": "0",
+        "latch_timeout": "0",
+        "stale_drop": "0",
+        "final_pass": "0",
+        "swap": "0",
+        "swap_ok": "0",
+        "frame_id": "0",
+        "pts": "60.026633333",
+        "w": "3840",
+        "h": "1920"
+      },
+      "PlaybackProperties": {
+        "time-pos": {
+          "first": 0.333667,
+          "last": 60.3603,
+          "min": 0.333667,
+          "max": 60.3603
+        },
+        "decoder-frame-drop-count": {
+          "first": 0.0,
+          "last": 0.0,
+          "min": 0.0,
+          "max": 0.0
+        },
+        "frame-drop-count": {
+          "first": 1.0,
+          "last": 1.0,
+          "min": 1.0,
+          "max": 1.0
+        },
+        "vo-delayed-frame-count": {
+          "first": 0.0,
+          "last": 0.0,
+          "min": 0.0,
+          "max": 0.0
+        },
+        "avsync": {
+          "first": -0.011592,
+          "last": 7.5e-05,
+          "min": -0.011592,
+          "max": 8e-05
+        },
+        "estimated-vf-fps": {
+          "first": 29.97003,
+          "last": 29.97003,
+          "min": 29.97003,
+          "max": 29.97003
+        }
+      },
+      "thermalStatusValues": [
+        "0"
+      ],
+      "backlightValues": [
+        "255"
+      ],
+      "HDRModeValues": [
+        "1"
+      ]
+    },
+    "B": {
+      "directory": "instant-ab4-B",
+      "status": "completed-observation",
+      "restorationVerified": true,
+      "hdrLabStopped": true,
+      "validCompletedProfile": true,
+      "durationSeconds": 60.39536333410069,
+      "policy": "1",
+      "actualSync": "display-resample",
+      "initial": {
+        "batteryC": 33.2,
+        "vtsC": 36.4,
+        "batteryStatus": "Full",
+        "batteryCurrentRaw": "-159300",
+        "batteryVoltageRaw": "4348882"
+      },
+      "final": {
+        "batteryC": 35.1,
+        "vtsC": 38.8
+      },
+      "firstActiveGPU": {
+        "freqHz": "214000000",
+        "driverBusyPercent": 70.0
+      },
+      "cacheState": "App/native shader cache was not cleared or instrumented; initial install/warm-cache and DVFS hysteresis remain possible confounders.",
+      "selectedSamplePoints": [
+        {
+          "elapsedSeconds": 21.836041250033304,
+          "estimatedMediaPTS": 23.09927858299912,
+          "nativeObservedMediaPTS": 20.353667,
+          "sampleReadMs": 92,
+          "weightSeconds": 1.836041250033304
+        },
+        {
+          "elapsedSeconds": 24.02884704200551,
+          "estimatedMediaPTS": 25.2920821250124,
+          "nativeObservedMediaPTS": 20.353667,
+          "sampleReadMs": 92,
+          "weightSeconds": 2.192805791972205
+        },
+        {
+          "elapsedSeconds": 26.21829454204999,
+          "estimatedMediaPTS": 27.48153324999717,
+          "nativeObservedMediaPTS": 20.353667,
+          "sampleReadMs": 92,
+          "weightSeconds": 2.18944750004448
+        },
+        {
+          "elapsedSeconds": 28.41288170905318,
+          "estimatedMediaPTS": 29.676120749948183,
+          "nativeObservedMediaPTS": 20.353667,
+          "sampleReadMs": 92,
+          "weightSeconds": 2.194587167003192
+        },
+        {
+          "elapsedSeconds": 30.614919709041715,
+          "estimatedMediaPTS": 31.90145037494805,
+          "nativeObservedMediaPTS": 30.3303,
+          "sampleReadMs": 38,
+          "weightSeconds": 2.2020379999885336
+        },
+        {
+          "elapsedSeconds": 32.92657887504902,
+          "estimatedMediaPTS": 34.21311612494029,
+          "nativeObservedMediaPTS": 30.3303,
+          "sampleReadMs": 38,
+          "weightSeconds": 2.3116591660073027
+        },
+        {
+          "elapsedSeconds": 35.13271637505386,
+          "estimatedMediaPTS": 36.41925179198589,
+          "nativeObservedMediaPTS": 30.3303,
+          "sampleReadMs": 38,
+          "weightSeconds": 2.206137500004843
+        },
+        {
+          "elapsedSeconds": 37.348264959058724,
+          "estimatedMediaPTS": 38.634801374950634,
+          "nativeObservedMediaPTS": 30.3303,
+          "sampleReadMs": 38,
+          "weightSeconds": 2.215548584004864
+        },
+        {
+          "elapsedSeconds": 39.55829833401367,
+          "estimatedMediaPTS": 40.88481083304957,
+          "nativeObservedMediaPTS": 40.373667,
+          "sampleReadMs": 45,
+          "weightSeconds": 2.2100333749549463
+        },
+        {
+          "elapsedSeconds": 41.755630709114484,
+          "estimatedMediaPTS": 43.082147708068234,
+          "nativeObservedMediaPTS": 40.373667,
+          "sampleReadMs": 45,
+          "weightSeconds": 2.197332375100814
+        },
+        {
+          "elapsedSeconds": 44.127700875047594,
+          "estimatedMediaPTS": 45.45421837505289,
+          "nativeObservedMediaPTS": 40.373667,
+          "sampleReadMs": 45,
+          "weightSeconds": 2.37207016593311
+        },
+        {
+          "elapsedSeconds": 46.33104866708163,
+          "estimatedMediaPTS": 47.657568624963616,
+          "nativeObservedMediaPTS": 40.373667,
+          "sampleReadMs": 45,
+          "weightSeconds": 2.2033477920340374
+        },
+        {
+          "elapsedSeconds": 48.53157408407424,
+          "estimatedMediaPTS": 49.85809124996756,
+          "nativeObservedMediaPTS": 40.373667,
+          "sampleReadMs": 45,
+          "weightSeconds": 2.2005254169926047
+        },
+        {
+          "elapsedSeconds": 50.73404641705565,
+          "estimatedMediaPTS": 52.05413420900907,
+          "nativeObservedMediaPTS": 50.3503,
+          "sampleReadMs": 31,
+          "weightSeconds": 2.202472332981415
+        },
+        {
+          "elapsedSeconds": 52.91551387507934,
+          "estimatedMediaPTS": 54.23560662492849,
+          "nativeObservedMediaPTS": 50.3503,
+          "sampleReadMs": 31,
+          "weightSeconds": 2.1814674580236897
+        },
+        {
+          "elapsedSeconds": 55.23704595910385,
+          "estimatedMediaPTS": 56.557139416990985,
+          "nativeObservedMediaPTS": 50.3503,
+          "sampleReadMs": 31,
+          "weightSeconds": 2.0844861249206588
+        }
+      ],
+      "CPUProcessOneCorePercent": {
+        "coverageSeconds": 35.0,
+        "timeWeightedMean": 63.31604097911453,
+        "timeWeightedMedianObserved": 63.30275229378081,
+        "min": 59.99999999910831,
+        "max": 66.36363636504105,
+        "samples": 16
+      },
+      "CPUWholeDeviceBusyPercent": {
+        "coverageSeconds": 35.0,
+        "timeWeightedMean": 37.50516130496478,
+        "timeWeightedMedianObserved": 37.371428571428574,
+        "min": 35.69620253164557,
+        "max": 40.97560975609756,
+        "samples": 16
+      },
+      "GPUDriverBusyPercent": {
+        "coverageSeconds": 35.0,
+        "timeWeightedMean": 69.53712240014491,
+        "timeWeightedMedianObserved": 70.0,
+        "min": 62.0,
+        "max": 73.0,
+        "samples": 16
+      },
+      "GPUFrequencyMHz": {
+        "coverageSeconds": 35.0,
+        "timeWeightedMean": 226.36968390330938,
+        "timeWeightedMedianObserved": 214.0,
+        "min": 214.0,
+        "max": 315.0,
+        "samples": 16
+      },
+      "GPUFreqBusyProxyMHz": {
+        "coverageSeconds": 35.0,
+        "timeWeightedMean": 157.21743477930855,
+        "timeWeightedMedianObserved": 149.8,
+        "min": 132.68,
+        "max": 217.35,
+        "samples": 16
+      },
+      "GPUFrequencyWeightedSeconds": {
+        "214000000": 30.713475875090808,
+        "315000000": 4.286524124909192
+      },
+      "CPUFrequencyMHz": {
+        "cpu0": {
+          "coverageSeconds": 35.0,
+          "timeWeightedMean": 800.3144397869493,
+          "timeWeightedMedianObserved": 768.0,
+          "min": 614.4,
+          "max": 1593.6,
+          "samples": 16
+        },
+        "cpu1": {
+          "coverageSeconds": 35.0,
+          "timeWeightedMean": 800.3144397869493,
+          "timeWeightedMedianObserved": 768.0,
+          "min": 614.4,
+          "max": 1593.6,
+          "samples": 16
+        },
+        "cpu2": {
+          "coverageSeconds": 35.0,
+          "timeWeightedMean": 1764.3205282976796,
+          "timeWeightedMedianObserved": 2150.4,
+          "min": 1056.0,
+          "max": 2246.4,
+          "samples": 16
+        },
+        "cpu3": {
+          "coverageSeconds": 35.0,
+          "timeWeightedMean": 1838.9009858623574,
+          "timeWeightedMedianObserved": 2150.4,
+          "min": 1056.0,
+          "max": 2246.4,
+          "samples": 16
+        }
+      },
+      "SoftwareRailMicrovolts": {
+        "cpu_kryo0_regulator_microvolts": {
+          "coverageSeconds": 35.0,
+          "timeWeightedMean": 681315.9260794412,
+          "timeWeightedMedianObserved": 602177.0,
+          "min": 584313.0,
+          "max": 847807.0,
+          "samples": 16
+        },
+        "cpu_kryo1_regulator_microvolts": {
+          "coverageSeconds": 35.0,
+          "timeWeightedMean": 724681.5097234284,
+          "timeWeightedMedianObserved": 731691.0,
+          "min": 620041.0,
+          "max": 731691.0,
+          "samples": 16
+        },
+        "gpu_upstream_regulator_microvolts": {
+          "coverageSeconds": 35.0,
+          "timeWeightedMean": 601123.6058927274,
+          "timeWeightedMedianObserved": 595000.0,
+          "min": 595000.0,
+          "max": 645000.0,
+          "samples": 16
+        }
+      },
+      "GPUCornerRaw": [
+        "3",
+        "4"
+      ],
+      "NativeStableRates": {
+        "vo": 29.966769229289515,
+        "yuv": 29.966824419121224,
+        "import": 29.979839541790156
+      },
+      "latestImport": {
+        "kind": "import",
+        "instance": "0x741e555850",
+        "pid": "31050",
+        "mono_ns": "65885278203",
+        "start_ns": "5780133380",
+        "final": "0",
+        "queue_frames": "0",
+        "queue_resets": "0",
+        "draw": "0",
+        "redraw": "0",
+        "display_synced": "0",
+        "submit": "0",
+        "flip": "0",
+        "lease_copy": "1801",
+        "lease_reuse": "2",
+        "latch": "1801",
+        "defer_publish_flush": "1",
+        "publish_flush": "0",
+        "publish_deferred": "1800",
+        "retire_flush": "1802",
+        "fence_create_failed": "0",
+        "reap_stuck": "0",
+        "latch_timeout": "0",
+        "stale_drop": "0",
+        "final_pass": "0",
+        "swap": "0",
+        "swap_ok": "0",
+        "frame_id": "0",
+        "pts": "60.093366667",
+        "w": "3840",
+        "h": "1920"
+      },
+      "PlaybackProperties": {
+        "time-pos": {
+          "first": 0.333667,
+          "last": 60.326933,
+          "min": 0.333667,
+          "max": 60.326933
+        },
+        "decoder-frame-drop-count": {
+          "first": 0.0,
+          "last": 0.0,
+          "min": 0.0,
+          "max": 0.0
+        },
+        "frame-drop-count": {
+          "first": 1.0,
+          "last": 1.0,
+          "min": 1.0,
+          "max": 1.0
+        },
+        "vo-delayed-frame-count": {
+          "first": 0.0,
+          "last": 0.0,
+          "min": 0.0,
+          "max": 0.0
+        },
+        "avsync": {
+          "first": -0.012905,
+          "last": 6.9e-05,
+          "min": -0.012905,
+          "max": 8.7e-05
+        },
+        "estimated-vf-fps": {
+          "first": 29.97003,
+          "last": 29.97003,
+          "min": 29.97003,
+          "max": 29.97003
+        }
+      },
+      "thermalStatusValues": [
+        "0"
+      ],
+      "backlightValues": [
+        "255"
+      ],
+      "HDRModeValues": [
+        "1"
+      ]
+    },
+    "B2": {
+      "directory": "instant-ab4-B2",
+      "status": "completed-observation",
+      "restorationVerified": true,
+      "hdrLabStopped": true,
+      "validCompletedProfile": true,
+      "durationSeconds": 60.42046016699169,
+      "policy": "1",
+      "actualSync": "display-resample",
+      "initial": {
+        "batteryC": 33.3,
+        "vtsC": 36.2,
+        "batteryStatus": "Full",
+        "batteryCurrentRaw": "-120848",
+        "batteryVoltageRaw": "4348882"
+      },
+      "final": {
+        "batteryC": 36.1,
+        "vtsC": 39.4
+      },
+      "firstActiveGPU": {
+        "freqHz": "315000000",
+        "driverBusyPercent": 30.0
+      },
+      "cacheState": "App/native shader cache was not cleared or instrumented; initial install/warm-cache and DVFS hysteresis remain possible confounders.",
+      "selectedSamplePoints": [
+        {
+          "elapsedSeconds": 20.309613749966957,
+          "estimatedMediaPTS": 20.684997958070227,
+          "nativeObservedMediaPTS": 20.4204,
+          "sampleReadMs": 29,
+          "weightSeconds": 0.3096137499669567
+        },
+        {
+          "elapsedSeconds": 22.650565291987732,
+          "estimatedMediaPTS": 23.02594800007958,
+          "nativeObservedMediaPTS": 20.4204,
+          "sampleReadMs": 29,
+          "weightSeconds": 2.3409515420207754
+        },
+        {
+          "elapsedSeconds": 24.847017624997534,
+          "estimatedMediaPTS": 25.222400332972967,
+          "nativeObservedMediaPTS": 20.4204,
+          "sampleReadMs": 29,
+          "weightSeconds": 2.196452333009802
+        },
+        {
+          "elapsedSeconds": 27.051433917018585,
+          "estimatedMediaPTS": 27.426821208032408,
+          "nativeObservedMediaPTS": 20.4204,
+          "sampleReadMs": 29,
+          "weightSeconds": 2.204416292021051
+        },
+        {
+          "elapsedSeconds": 29.259421374998055,
+          "estimatedMediaPTS": 29.63480345805604,
+          "nativeObservedMediaPTS": 20.4204,
+          "sampleReadMs": 29,
+          "weightSeconds": 2.2079874579794705
+        },
+        {
+          "elapsedSeconds": 31.46641150000505,
+          "estimatedMediaPTS": 31.82510770797561,
+          "nativeObservedMediaPTS": 30.397033,
+          "sampleReadMs": 38,
+          "weightSeconds": 2.206990125006996
+        },
+        {
+          "elapsedSeconds": 33.80084787495434,
+          "estimatedMediaPTS": 34.15955749990716,
+          "nativeObservedMediaPTS": 30.397033,
+          "sampleReadMs": 38,
+          "weightSeconds": 2.3344363749492913
+        },
+        {
+          "elapsedSeconds": 36.00102958397474,
+          "estimatedMediaPTS": 36.359736624973074,
+          "nativeObservedMediaPTS": 30.397033,
+          "sampleReadMs": 38,
+          "weightSeconds": 2.2001817090203986
+        },
+        {
+          "elapsedSeconds": 38.19166429201141,
+          "estimatedMediaPTS": 38.55037075000181,
+          "nativeObservedMediaPTS": 30.397033,
+          "sampleReadMs": 38,
+          "weightSeconds": 2.1906347080366686
+        },
+        {
+          "elapsedSeconds": 40.39927712501958,
+          "estimatedMediaPTS": 40.77184583296962,
+          "nativeObservedMediaPTS": 40.4404,
+          "sampleReadMs": 64,
+          "weightSeconds": 2.20761283300817
+        },
+        {
+          "elapsedSeconds": 42.608312334050424,
+          "estimatedMediaPTS": 42.980885457982865,
+          "nativeObservedMediaPTS": 40.4404,
+          "sampleReadMs": 64,
+          "weightSeconds": 2.2090352090308443
+        },
+        {
+          "elapsedSeconds": 44.94411170901731,
+          "estimatedMediaPTS": 45.316688542058316,
+          "nativeObservedMediaPTS": 40.4404,
+          "sampleReadMs": 64,
+          "weightSeconds": 2.335799374966882
+        },
+        {
+          "elapsedSeconds": 47.11805779195856,
+          "estimatedMediaPTS": 47.4906247500699,
+          "nativeObservedMediaPTS": 40.4404,
+          "sampleReadMs": 64,
+          "weightSeconds": 2.1739460829412565
+        },
+        {
+          "elapsedSeconds": 49.31574250000995,
+          "estimatedMediaPTS": 49.688317416971174,
+          "nativeObservedMediaPTS": 40.4404,
+          "sampleReadMs": 64,
+          "weightSeconds": 2.1976847080513835
+        },
+        {
+          "elapsedSeconds": 51.50767970900051,
+          "estimatedMediaPTS": 51.88325058304537,
+          "nativeObservedMediaPTS": 50.417033,
+          "sampleReadMs": 40,
+          "weightSeconds": 2.1919372089905664
+        },
+        {
+          "elapsedSeconds": 53.70436062500812,
+          "estimatedMediaPTS": 54.07993700002618,
+          "nativeObservedMediaPTS": 50.417033,
+          "sampleReadMs": 40,
+          "weightSeconds": 2.196680916007608
+        },
+        {
+          "elapsedSeconds": 56.04130612500012,
+          "estimatedMediaPTS": 56.416883791064095,
+          "nativeObservedMediaPTS": 50.417033,
+          "sampleReadMs": 40,
+          "weightSeconds": 1.2956393749918789
+        }
+      ],
+      "CPUProcessOneCorePercent": {
+        "coverageSeconds": 35.0,
+        "timeWeightedMean": 61.85257703260539,
+        "timeWeightedMedianObserved": 62.100456620938544,
+        "min": 59.090909090596405,
+        "max": 64.25339366624146,
+        "samples": 17
+      },
+      "CPUWholeDeviceBusyPercent": {
+        "coverageSeconds": 35.0,
+        "timeWeightedMean": 40.03233667760866,
+        "timeWeightedMedianObserved": 40.02320185614849,
+        "min": 38.26714801444043,
+        "max": 44.791666666666664,
+        "samples": 17
+      },
+      "GPUDriverBusyPercent": {
+        "coverageSeconds": 35.0,
+        "timeWeightedMean": 66.97365178332464,
+        "timeWeightedMedianObserved": 68.0,
+        "min": 59.0,
+        "max": 71.0,
+        "samples": 17
+      },
+      "GPUFrequencyMHz": {
+        "coverageSeconds": 35.0,
+        "timeWeightedMean": 239.75902124270465,
+        "timeWeightedMedianObserved": 214.0,
+        "min": 214.0,
+        "max": 315.0,
+        "samples": 17
+      },
+      "GPUFreqBusyProxyMHz": {
+        "coverageSeconds": 35.0,
+        "timeWeightedMean": 159.42449231752295,
+        "timeWeightedMedianObserved": 149.8,
+        "min": 134.82,
+        "max": 214.2,
+        "samples": 17
+      },
+      "GPUFrequencyWeightedSeconds": {
+        "214000000": 26.073606500052847,
+        "315000000": 8.926393499947153
+      },
+      "CPUFrequencyMHz": {
+        "cpu0": {
+          "coverageSeconds": 35.0,
+          "timeWeightedMean": 888.2191991115255,
+          "timeWeightedMedianObserved": 768.0,
+          "min": 614.4,
+          "max": 1593.6,
+          "samples": 17
+        },
+        "cpu1": {
+          "coverageSeconds": 35.0,
+          "timeWeightedMean": 888.2191991115255,
+          "timeWeightedMedianObserved": 768.0,
+          "min": 614.4,
+          "max": 1593.6,
+          "samples": 17
+        },
+        "cpu2": {
+          "coverageSeconds": 35.0,
+          "timeWeightedMean": 1651.3130224716451,
+          "timeWeightedMedianObserved": 2150.4,
+          "min": 1056.0,
+          "max": 2342.4,
+          "samples": 17
+        },
+        "cpu3": {
+          "coverageSeconds": 35.0,
+          "timeWeightedMean": 1651.3130224716451,
+          "timeWeightedMedianObserved": 2150.4,
+          "min": 1056.0,
+          "max": 2342.4,
+          "samples": 17
+        }
+      },
+      "SoftwareRailMicrovolts": {
+        "cpu_kryo0_regulator_microvolts": {
+          "coverageSeconds": 35.0,
+          "timeWeightedMean": 715567.5569374342,
+          "timeWeightedMedianObserved": 780817.0,
+          "min": 584313.0,
+          "max": 825477.0,
+          "samples": 17
+        },
+        "cpu_kryo1_regulator_microvolts": {
+          "coverageSeconds": 35.0,
+          "timeWeightedMean": 728591.86880398,
+          "timeWeightedMedianObserved": 731691.0,
+          "min": 682565.0,
+          "max": 731691.0,
+          "samples": 17
+        },
+        "gpu_upstream_regulator_microvolts": {
+          "coverageSeconds": 35.0,
+          "timeWeightedMean": 607751.9907142103,
+          "timeWeightedMedianObserved": 595000.0,
+          "min": 595000.0,
+          "max": 645000.0,
+          "samples": 17
+        }
+      },
+      "GPUCornerRaw": [
+        "3",
+        "4"
+      ],
+      "NativeStableRates": {
+        "vo": 29.970392657889427,
+        "yuv": 29.970359224216764,
+        "import": 29.982891677713024
+      },
+      "latestImport": {
+        "kind": "import",
+        "instance": "0x741dce2c50",
+        "pid": "31875",
+        "mono_ns": "66108005889",
+        "start_ns": "6014415283",
+        "final": "0",
+        "queue_frames": "0",
+        "queue_resets": "0",
+        "draw": "0",
+        "redraw": "0",
+        "display_synced": "0",
+        "submit": "0",
+        "flip": "0",
+        "lease_copy": "1801",
+        "lease_reuse": "2",
+        "latch": "1801",
+        "defer_publish_flush": "1",
+        "publish_flush": "0",
+        "publish_deferred": "1800",
+        "retire_flush": "1802",
+        "fence_create_failed": "0",
+        "reap_stuck": "0",
+        "latch_timeout": "0",
+        "stale_drop": "0",
+        "final_pass": "0",
+        "swap": "0",
+        "swap_ok": "0",
+        "frame_id": "0",
+        "pts": "60.093366667",
+        "w": "3840",
+        "h": "1920"
+      },
+      "PlaybackProperties": {
+        "time-pos": {
+          "first": 0.3003,
+          "last": 60.393667,
+          "min": 0.3003,
+          "max": 60.393667
+        },
+        "decoder-frame-drop-count": {
+          "first": 0.0,
+          "last": 0.0,
+          "min": 0.0,
+          "max": 0.0
+        },
+        "frame-drop-count": {
+          "first": 1.0,
+          "last": 1.0,
+          "min": 1.0,
+          "max": 1.0
+        },
+        "vo-delayed-frame-count": {
+          "first": 0.0,
+          "last": 0.0,
+          "min": 0.0,
+          "max": 0.0
+        },
+        "avsync": {
+          "first": -0.010448,
+          "last": 5.2e-05,
+          "min": -0.010448,
+          "max": 0.000189
+        },
+        "estimated-vf-fps": {
+          "first": 29.97003,
+          "last": 29.97003,
+          "min": 29.97003,
+          "max": 29.97003
+        }
+      },
+      "thermalStatusValues": [
+        "0"
+      ],
+      "backlightValues": [
+        "255"
+      ],
+      "HDRModeValues": [
+        "1"
+      ]
+    },
+    "A2": {
+      "directory": "instant-ab4-A2",
+      "status": "completed-observation",
+      "restorationVerified": true,
+      "hdrLabStopped": true,
+      "validCompletedProfile": true,
+      "durationSeconds": 60.424939375021495,
+      "policy": "0",
+      "actualSync": "display-resample",
+      "initial": {
+        "batteryC": 35.2,
+        "vtsC": 37.7,
+        "batteryStatus": "Full",
+        "batteryCurrentRaw": "-115050",
+        "batteryVoltageRaw": "4349187"
+      },
+      "final": {
+        "batteryC": 37.1,
+        "vtsC": 40.0
+      },
+      "firstActiveGPU": {
+        "freqHz": "401800000",
+        "driverBusyPercent": 36.0
+      },
+      "cacheState": "App/native shader cache was not cleared or instrumented; initial install/warm-cache and DVFS hysteresis remain possible confounders.",
+      "selectedSamplePoints": [
+        {
+          "elapsedSeconds": 20.41019154107198,
+          "estimatedMediaPTS": 20.760261292097336,
+          "nativeObservedMediaPTS": 20.387033,
+          "sampleReadMs": 35,
+          "weightSeconds": 0.4101915410719812
+        },
+        {
+          "elapsedSeconds": 22.744391957996413,
+          "estimatedMediaPTS": 23.094469875090933,
+          "nativeObservedMediaPTS": 20.387033,
+          "sampleReadMs": 35,
+          "weightSeconds": 2.334200416924432
+        },
+        {
+          "elapsedSeconds": 24.946075582993217,
+          "estimatedMediaPTS": 25.296149084105334,
+          "nativeObservedMediaPTS": 20.387033,
+          "sampleReadMs": 35,
+          "weightSeconds": 2.2016836249968037
+        },
+        {
+          "elapsedSeconds": 27.126902541029267,
+          "estimatedMediaPTS": 27.476975916994913,
+          "nativeObservedMediaPTS": 20.387033,
+          "sampleReadMs": 35,
+          "weightSeconds": 2.18082695803605
+        },
+        {
+          "elapsedSeconds": 29.318404250079766,
+          "estimatedMediaPTS": 29.66847516700457,
+          "nativeObservedMediaPTS": 20.387033,
+          "sampleReadMs": 35,
+          "weightSeconds": 2.191501709050499
+        },
+        {
+          "elapsedSeconds": 31.515734125045128,
+          "estimatedMediaPTS": 31.8800942919759,
+          "nativeObservedMediaPTS": 30.397033,
+          "sampleReadMs": 29,
+          "weightSeconds": 2.1973298749653623
+        },
+        {
+          "elapsedSeconds": 33.86549916607328,
+          "estimatedMediaPTS": 34.22986991701945,
+          "nativeObservedMediaPTS": 30.397033,
+          "sampleReadMs": 29,
+          "weightSeconds": 2.3497650410281494
+        },
+        {
+          "elapsedSeconds": 36.05744470807258,
+          "estimatedMediaPTS": 36.42181299997791,
+          "nativeObservedMediaPTS": 30.397033,
+          "sampleReadMs": 29,
+          "weightSeconds": 2.191945541999303
+        },
+        {
+          "elapsedSeconds": 38.26696362497751,
+          "estimatedMediaPTS": 38.63133579199965,
+          "nativeObservedMediaPTS": 30.397033,
+          "sampleReadMs": 29,
+          "weightSeconds": 2.2095189169049263
+        },
+        {
+          "elapsedSeconds": 40.47026791598182,
+          "estimatedMediaPTS": 40.80875716698226,
+          "nativeObservedMediaPTS": 40.373667,
+          "sampleReadMs": 34,
+          "weightSeconds": 2.203304291004315
+        },
+        {
+          "elapsedSeconds": 42.67265595798381,
+          "estimatedMediaPTS": 43.011150917060306,
+          "nativeObservedMediaPTS": 40.373667,
+          "sampleReadMs": 34,
+          "weightSeconds": 2.202388042001985
+        },
+        {
+          "elapsedSeconds": 45.01830587501172,
+          "estimatedMediaPTS": 45.35679949996863,
+          "nativeObservedMediaPTS": 40.373667,
+          "sampleReadMs": 34,
+          "weightSeconds": 2.345649917027913
+        },
+        {
+          "elapsedSeconds": 47.224457708070986,
+          "estimatedMediaPTS": 47.56294900006485,
+          "nativeObservedMediaPTS": 40.373667,
+          "sampleReadMs": 34,
+          "weightSeconds": 2.206151833059266
+        },
+        {
+          "elapsedSeconds": 49.43054587498773,
+          "estimatedMediaPTS": 49.769041875050036,
+          "nativeObservedMediaPTS": 40.373667,
+          "sampleReadMs": 34,
+          "weightSeconds": 2.206088166916743
+        },
+        {
+          "elapsedSeconds": 51.60949645796791,
+          "estimatedMediaPTS": 51.942196332978654,
+          "nativeObservedMediaPTS": 50.383667,
+          "sampleReadMs": 45,
+          "weightSeconds": 2.1789505829801783
+        },
+        {
+          "elapsedSeconds": 53.81412533298135,
+          "estimatedMediaPTS": 54.14682308294681,
+          "nativeObservedMediaPTS": 50.383667,
+          "sampleReadMs": 45,
+          "weightSeconds": 2.204628875013441
+        },
+        {
+          "elapsedSeconds": 56.11405137507245,
+          "estimatedMediaPTS": 56.44674924995155,
+          "nativeObservedMediaPTS": 50.383667,
+          "sampleReadMs": 45,
+          "weightSeconds": 1.185874667018652
+        }
+      ],
+      "CPUProcessOneCorePercent": {
+        "coverageSeconds": 35.0,
+        "timeWeightedMean": 62.199358491165356,
+        "timeWeightedMedianObserved": 62.55319148998146,
+        "min": 58.72340425590096,
+        "max": 66.0633484156632,
+        "samples": 17
+      },
+      "CPUWholeDeviceBusyPercent": {
+        "coverageSeconds": 35.0,
+        "timeWeightedMean": 40.774408835816935,
+        "timeWeightedMedianObserved": 40.85648148148148,
+        "min": 38.98704358068316,
+        "max": 43.735498839907194,
+        "samples": 17
+      },
+      "GPUDriverBusyPercent": {
+        "coverageSeconds": 35.0,
+        "timeWeightedMean": 62.739622397554506,
+        "timeWeightedMedianObserved": 59.0,
+        "min": 56.0,
+        "max": 72.0,
+        "samples": 17
+      },
+      "GPUFrequencyMHz": {
+        "coverageSeconds": 35.0,
+        "timeWeightedMean": 282.80431128209125,
+        "timeWeightedMedianObserved": 315.0,
+        "min": 214.0,
+        "max": 315.0,
+        "samples": 17
+      },
+      "GPUFreqBusyProxyMHz": {
+        "coverageSeconds": 35.0,
+        "timeWeightedMean": 174.90190591336332,
+        "timeWeightedMedianObserved": 182.7,
+        "min": 149.8,
+        "max": 214.2,
+        "samples": 17
+      },
+      "GPUFrequencyWeightedSeconds": {
+        "315000000": 23.84307816706132,
+        "214000000": 11.156921832938679
+      },
+      "CPUFrequencyMHz": {
+        "cpu0": {
+          "coverageSeconds": 35.0,
+          "timeWeightedMean": 854.4574507754189,
+          "timeWeightedMedianObserved": 768.0,
+          "min": 614.4,
+          "max": 1593.6,
+          "samples": 17
+        },
+        "cpu1": {
+          "coverageSeconds": 35.0,
+          "timeWeightedMean": 854.4574507754189,
+          "timeWeightedMedianObserved": 768.0,
+          "min": 614.4,
+          "max": 1593.6,
+          "samples": 17
+        },
+        "cpu2": {
+          "coverageSeconds": 35.0,
+          "timeWeightedMean": 1764.72199244231,
+          "timeWeightedMedianObserved": 2150.4,
+          "min": 1056.0,
+          "max": 2150.4,
+          "samples": 17
+        },
+        "cpu3": {
+          "coverageSeconds": 35.0,
+          "timeWeightedMean": 1764.72199244231,
+          "timeWeightedMedianObserved": 2150.4,
+          "min": 1056.0,
+          "max": 2150.4,
+          "samples": 17
+        }
+      },
+      "SoftwareRailMicrovolts": {
+        "cpu_kryo0_regulator_microvolts": {
+          "coverageSeconds": 35.0,
+          "timeWeightedMean": 683287.4048985366,
+          "timeWeightedMedianObserved": 642371.0,
+          "min": 584313.0,
+          "max": 825477.0,
+          "samples": 17
+        },
+        "cpu_kryo1_regulator_microvolts": {
+          "coverageSeconds": 35.0,
+          "timeWeightedMean": 731691.0,
+          "timeWeightedMedianObserved": 731691.0,
+          "min": 731691.0,
+          "max": 731691.0,
+          "samples": 17
+        },
+        "gpu_upstream_regulator_microvolts": {
+          "coverageSeconds": 35.0,
+          "timeWeightedMean": 629061.5402386591,
+          "timeWeightedMedianObserved": 645000.0,
+          "min": 595000.0,
+          "max": 645000.0,
+          "samples": 17
+        }
+      },
+      "GPUCornerRaw": [
+        "3",
+        "4"
+      ],
+      "NativeStableRates": {
+        "vo": 29.97098980220628,
+        "yuv": 29.970958394270838,
+        "import": 29.96968006861315
+      },
+      "latestImport": {
+        "kind": "import",
+        "instance": "0x740f65cc50",
+        "pid": "32558",
+        "mono_ns": "66208949214",
+        "start_ns": "6122995951",
+        "final": "0",
+        "queue_frames": "0",
+        "queue_resets": "0",
+        "draw": "0",
+        "redraw": "0",
+        "display_synced": "0",
+        "submit": "0",
+        "flip": "0",
+        "lease_copy": "1802",
+        "lease_reuse": "2",
+        "latch": "1802",
+        "defer_publish_flush": "0",
+        "publish_flush": "1801",
+        "publish_deferred": "0",
+        "retire_flush": "1803",
+        "fence_create_failed": "0",
+        "reap_stuck": "0",
+        "latch_timeout": "0",
+        "stale_drop": "0",
+        "final_pass": "0",
+        "swap": "0",
+        "swap_ok": "0",
+        "frame_id": "0",
+        "pts": "60.093366667",
+        "w": "3840",
+        "h": "1920"
+      },
+      "PlaybackProperties": {
+        "time-pos": {
+          "first": 0.333667,
+          "last": 60.393667,
+          "min": 0.333667,
+          "max": 60.393667
+        },
+        "decoder-frame-drop-count": {
+          "first": 0.0,
+          "last": 0.0,
+          "min": 0.0,
+          "max": 0.0
+        },
+        "frame-drop-count": {
+          "first": 0.0,
+          "last": 0.0,
+          "min": 0.0,
+          "max": 0.0
+        },
+        "vo-delayed-frame-count": {
+          "first": 0.0,
+          "last": 0.0,
+          "min": 0.0,
+          "max": 0.0
+        },
+        "avsync": {
+          "first": -0.011599,
+          "last": 6.7e-05,
+          "min": -0.011599,
+          "max": 0.000102
+        },
+        "estimated-vf-fps": {
+          "first": 29.97003,
+          "last": 29.97003,
+          "min": 29.97003,
+          "max": 29.97003
+        }
+      },
+      "thermalStatusValues": [
+        "0"
+      ],
+      "backlightValues": [
+        "255"
+      ],
+      "HDRModeValues": [
+        "1"
+      ]
+    }
+  },
+  "limitations": [
+    "Four short sequential instrumented runs with different initial temperatures and power-supply readings; no matched thermal or electrical power result.",
+    "CPU percent100 means one full core. Whole-device busy is separately normalized over all cores and includes observer/driver/system work.",
+    "GPU busy is an actual named driver report, not inferred from clock. GPU frequency*busy is a proxy only; driver accounting window and frequency sampling are not atomic.",
+    "GPU upstream regulator voltage is a software supply-rail report, not measured GPU core voltage. Corner indices and battery voltage are separate.",
+    "MediaPTS is low-frequency observed; exact per-instant/optical/frame-perfect matching is not established.",
+    "Native work rates/drop counters do not establish panel frame cadence, colour or brightness."
+  ]
+}

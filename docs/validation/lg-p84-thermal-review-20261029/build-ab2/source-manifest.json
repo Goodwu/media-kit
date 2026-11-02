@@ -1,0 +1,9 @@
+{
+  "apkSha256": "fb6af4c69dea62c6fb2e83cb86fff4e33d70fc986e3a19e8bde7612a38821e48",
+  "files": {
+    "/Users/wuweiwei1/src/media-kit/media_kit_hdr_lab/lib/tests/01.single_player_single_video.dart": "5631f0d9900e7b6924088b58b8255705cfa92649fd965d0204db01c0ad435977",
+    "/Users/wuweiwei1/src/media-kit/media_kit_hdr_lab/lib/common/android_p84_thermal_probe.dart": "81881bd577d47edb8d41e1ebebb628adb5f2e411884d54dcb6370f4b8466251c",
+    "/Users/wuweiwei1/src/media-kit/tool/lg_p84_thermal_round.py": "47de9caa8f9719ba4db481710b0cab76abda86e4420589caf70e5206d61524dc"
+  },
+  "nativeIdenticalToAb1": true
+}

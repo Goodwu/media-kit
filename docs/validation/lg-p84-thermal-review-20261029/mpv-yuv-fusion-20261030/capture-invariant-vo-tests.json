@@ -1,0 +1,34 @@
+{
+  "androidSyntax": {
+    "file": "../video/out/vo_gpu_next.c",
+    "exit": 0,
+    "stderr": "",
+    "scope": "current public header PL_HAVE_MKS_YUV_COMPARE_INVARIANT_B enabled; complete invariant branch API24 syntax"
+  },
+  "hostTests": "pure C compile+execute exit0 (mode dependencies, bounded UV identifier and exact two-line vertex insertion/rejects plus prior layout/epochs cases); source-extracted compare_save JSON5 + EGL regression1 = 6 passed",
+  "mode": "debug.mks.yuv_inv=1, default off; only explicit valid compare+repeat+tap; invalid or unavailable feature refuses capture/forces original A in compare session",
+  "schema4": {
+    "draw_order": [
+      "B1",
+      "A01",
+      "B2",
+      "A02"
+    ],
+    "layout": "unchanged schema3 2 full ROI*26 chunks; Android7 only A02 final CSC; same one-renderer and one-swap pipeline",
+    "metadata": [
+      "invariant_b=true",
+      "invariant_uv_identifier actual NUL-terminated ASCII identifier <=7 bytes"
+    ],
+    "files": "schema3 six files plus files.candidate_vertex basename.candidate-vertex.glsl; files.vertex remains actual A0",
+    "sourceGate": "same-owner vertices getter; source getter vertex must equal getter baseline; candidate must equal exact baseline bytes with only invariant gl_Position; LF and invariant <UV>; LF inserted immediately before unique void main() {",
+    "controlScope": "A0 denotes schema3 sample-tap A; no claim that producer assertions independently establish A0 fragment/vertex equals a previous control. Separate same-device same-APK inv0 source post-comparison needed."
+  },
+  "limits": "No device/build/driver behavior or pixel equivalence validation; lib freeze and independent reviewer separate; keep all diagnostic switches off by default.",
+  "files": {
+    "/Users/wuweiwei1/src/mpv/video/out/vo_gpu_next.c": "6c6f5796e9aca3909e17dcb273d80c93c33eea6996ec504dc845201a8e4cb1b7",
+    "/Users/wuweiwei1/src/mpv/video/out/yuv_compare_vo.h": "3bd3ee1511e7d81dc7a8a4d41e1ebfe60a3beeca1efdc8f73ee05f21421254c7",
+    "/Users/wuweiwei1/src/mpv/test/yuv_compare_vo.c": "da2b8630937da4e636265d43486829f92d0bcf8786b4eddc548515c752a0f044",
+    "/Users/wuweiwei1/src/media-kit/tool/test_lg_yuv_compare_manifest.py": "be46eec7cb1b6e9f05100e712e8db2360b61b018ec941c9824a9f7967f0bc888",
+    "/Users/wuweiwei1/src/libplacebo/src/include/libplacebo/opengl.h": "49efc5d1f719c1ef814ef2c3931ea6f4426f77c5e11dd1beceb7b36c108c41a3"
+  }
+}

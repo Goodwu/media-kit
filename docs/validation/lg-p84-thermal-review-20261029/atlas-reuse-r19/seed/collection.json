@@ -1,0 +1,47 @@
+{
+  "files": {
+    "a0_before": {
+      "bytes": 57116672,
+      "sha256": "8f03d9e585454b551c129c037e44f42caf68b99b2502ec60e259ab719b44c8d3"
+    },
+    "atlas_a": {
+      "bytes": 57116672,
+      "sha256": "8f03d9e585454b551c129c037e44f42caf68b99b2502ec60e259ab719b44c8d3"
+    },
+    "a0_after": {
+      "bytes": 57116672,
+      "sha256": "8f03d9e585454b551c129c037e44f42caf68b99b2502ec60e259ab719b44c8d3"
+    },
+    "atlas": {
+      "bytes": 42837504,
+      "sha256": "bd38a0b20457f1f72c12184a94271b336455627f32b3f71d3d3b940b70b424e2"
+    },
+    "a0_fragment": {
+      "bytes": 2530,
+      "sha256": "956ea3e70810e7efb558d1fc808c50928bf1b93205e66ef448912586d9087102"
+    },
+    "atlas_fragment": {
+      "bytes": 3425,
+      "sha256": "6b8431bb0fd49b17b6b3661880b9ca0af5b4bd511eec83e83b72f294ed7000d8"
+    },
+    "vertex": {
+      "bytes": 462,
+      "sha256": "d581505a44b4fcb372996e09f4ffded794b72277186dbfae1c7cc61bfb50cbf2"
+    },
+    "original_body": {
+      "bytes": 2129,
+      "sha256": "a38842897494b29a7fe1b5062bf035a6add83f5a33fdf397441a6e8a454b0cab"
+    },
+    "baseline_vertices": {
+      "bytes": 64,
+      "sha256": "0bba1f02d88c1435ba4f7102a729f248710e9bea710c5fe46aa9b19cc5affd51"
+    },
+    "android": {
+      "bytes": 114688,
+      "sha256": "894d47c84f731607fae0a21351b8fcd73a9a74e8e4ec635e51a39ba77af37fe2"
+    }
+  },
+  "manifestSha256": "51ee89637e05c168f58147cc0130fc0df84267c05594bad1b0aa5e3deeb81078",
+  "identityScope": "Fresh PID endpoint plus exclusive identity filenames; payloads contain no embedded PID/PTS. Local SHA archives received bytes.",
+  "timestampScope": "Log receive order is correlation, not hardware or native clock synchronization."
+}

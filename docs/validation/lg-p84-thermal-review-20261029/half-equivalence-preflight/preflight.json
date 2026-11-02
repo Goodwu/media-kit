@@ -1,0 +1,112 @@
+{
+  "capturedAt": "2026-10-29T17:26:21.728708+08:00",
+  "serial": "LGH870DS42e27764",
+  "actions": "read-only adb snapshot and local build directory inventory; no push/execute/playback/settings changes",
+  "adbReturnCode": 0,
+  "nodePaths": {
+    "gpu_thermal_pwrlevel": "/sys/class/kgsl/kgsl-3d0/thermal_pwrlevel",
+    "gpu_max_gpuclk": "/sys/class/kgsl/kgsl-3d0/max_gpuclk",
+    "gpu_devfreq_max": "/sys/class/kgsl/kgsl-3d0/devfreq/max_freq",
+    "cpu2_scaling_max_freq": "/sys/devices/system/cpu/cpu2/cpufreq/scaling_max_freq",
+    "battery_temp": "/sys/class/thermal/thermal_zone30/temp",
+    "vts_temp": "/sys/class/thermal/thermal_zone39/temp",
+    "battery_status": "/sys/class/power_supply/battery/status",
+    "battery_current_now": "/sys/class/power_supply/battery/current_now",
+    "battery_voltage_now": "/sys/class/power_supply/battery/voltage_now",
+    "usb_online": "/sys/class/power_supply/usb/online",
+    "panel_hdr": "/sys/devices/virtual/panel/img_tune/hdr_mode",
+    "backlight": "/sys/class/leds/lcd-backlight/brightness",
+    "panel_thermal_status": "/sys/class/leds/lcd-backlight/thermald_status"
+  },
+  "localFiles": [
+    {
+      "name": "host-selftest.stdout.txt",
+      "bytes": 68,
+      "sha256": "70162419ea807f601546afe7dd623b75554f6e2434580915962d93d0df856b0e"
+    },
+    {
+      "name": "host-build.stdout.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "half-cpu-selftest",
+      "bytes": 33520,
+      "sha256": "7f68b65bb3daa3d29d6d68ea0088b38222b1d25e869f61bce320748189b98a42"
+    },
+    {
+      "name": "build-receipt.json",
+      "bytes": 3558,
+      "sha256": "69ca8129871bdbeb16ab82245f473ef7a6b2535f8ecbf121a72b70ae24960306"
+    },
+    {
+      "name": "android-build.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "lg_half_equivalence",
+      "bytes": 27616,
+      "sha256": "c6c8e086d539b41aec0f7a02c2fb459df710b54fe978c7557742eb0fb1e42377"
+    },
+    {
+      "name": "android-elf.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "host-selftest.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "host-build.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "android-build.stdout.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "android-elf.stdout.txt",
+      "bytes": 2232,
+      "sha256": "6d7a9783cf4a78aa9963cc041694021f2ddc2b0def1af34f45e0619f3fdc7b04"
+    }
+  ],
+  "eglExecutionPermission": "unverified; no execution attempted",
+  "observed": {
+    "gpuThermalPwrlevel": 0,
+    "gpuMaxGpuclkHz": 652800000,
+    "gpuDevfreqMaxHz": 652800000,
+    "cpu2ScalingMaxKHz": 2342400,
+    "batteryC": 31.3,
+    "vtsC": 34.6,
+    "batteryStatus": "Full",
+    "batteryCurrentNowRaw": 305,
+    "batteryVoltageNowRaw": 4320043,
+    "usbOnline": 1,
+    "androidAcPowered": true,
+    "androidUsbPowered": false,
+    "screenOn": true,
+    "keyguard": false,
+    "keyguardSecure": false,
+    "hdrLabRunning": false,
+    "panelHdr": 0,
+    "backlight": 10,
+    "panelThermalStatus": 0
+  },
+  "originalSettings": {
+    "screen_brightness_mode": "1",
+    "screen_brightness": "116",
+    "accelerometer_rotation": "0",
+    "user_rotation": "0",
+    "screen_off_timeout": "30000"
+  },
+  "limitations": [
+    "Single idle read is not long-duration thermal validation.",
+    "Maximum clock and CPU cap are limits, not actual frequency or cause.",
+    "EGL/GLES shell execution unverified; no push or execution attempted."
+  ]
+}

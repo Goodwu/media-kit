@@ -1,0 +1,16 @@
+{
+  "scope": "Android reference CSC diagnostic backend only; no VO/lib transaction hook or device run",
+  "syntaxExit": 0,
+  "syntaxStderr": "",
+  "files": {
+    "../mpv/video/out/opengl/context_android.c": "7ed986d3c8029368f774f3a14851509f0e503905010bb43341f6fcc3f8cc4394",
+    "../mpv/video/out/opengl/mks_yuv_compare.h": "43323a7d77c4a4ab3662604c963946799f57e6f927ae1e871c582bef4895d580",
+    "../mpv/test/mks_yuv_compare_binding.c": "528ecefeb973acd82cf81f6a0f3e682c8339f823afe537ad18e53f7a90db1e6d"
+  },
+  "ssboBindingPolicy": "Arm and draw both reject any nonzero indexed binding; no existing base/range is displaced. Original zero indexed binding and generic binding are restored.",
+  "bindingGuardHostTestExit": 0,
+  "contextGuardHostTestExit": 0,
+  "ownerApi": "Pure EGL display/context/draw/read surface and capture id/generation/active status check, no GL or make-current; FAILED current may cleanup",
+  "ownerRestorePolicy": "One attempt per armed capture on recorded Android VO owner thread; query live current handles then make current once; capture stays FAILED, no swap/retry; no runtime EGL success/failure injection yet",
+  "restoreGuardHostTestExit": 0
+}

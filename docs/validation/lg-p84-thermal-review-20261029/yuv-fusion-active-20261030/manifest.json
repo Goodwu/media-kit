@@ -1,0 +1,34 @@
+{
+  "apk_sha256": "03d5342a5dffd53923dd5d8a3cabbff681528195203213b95bccf6e1d199eb19",
+  "scope": "Exploratory fusion; default off; not production acceptance",
+  "rounds": {
+    "yuv-fusion-ab-A1": {
+      "fusion": false
+    },
+    "yuv-fusion-ab-B1": {
+      "fusion": true
+    },
+    "yuv-fusion-ab-B2": {
+      "fusion": true
+    },
+    "yuv-fusion-ab-A2": {
+      "fusion": false
+    },
+    "yuv-fusion-active-smoke": {
+      "fusion": true
+    },
+    "yuv-fusion-fault-commit": {
+      "fusion": true,
+      "fault": "commit"
+    },
+    "yuv-fusion-fault-gl": {
+      "fusion": true,
+      "fault": "gl"
+    },
+    "yuv-fusion-visual-candidate": {
+      "fusion": true,
+      "brightness": 255
+    }
+  },
+  "note": "Controller experiment=publish-flush, mode=baseline in all rounds; fusion identity is setprop plus native committed/final pass, not summary mode. Brightness64 unless specified. Current installed SHA readback, not independently recorded per round."
+}

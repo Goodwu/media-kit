@@ -1,0 +1,82 @@
+--- tools-used-ab4/lg_p84_thermal_round.py
++++ tool/lg_p84_thermal_round.py
+@@ -436,6 +436,17 @@
+             self.thread.join(timeout=3)
+ 
+ 
++def gpu_thermal_cap_reason(sample: dict[str, Any]) -> str | None:
++    # LG experimental normal baseline observed at level 0. This is not a
++    # general vendor thermal specification. Missing/malformed is not level 0.
++    raw = sample.get('raw', {}).get('gpu_thermal_pwrlevel', '').strip()
++    if not re.fullmatch(r'\d+', raw):
++        return 'gpu-thermal-pwrlevel-unavailable'
++    if int(raw) != 0:
++        return 'fresh-gpu-thermal-cap-detected'
++    return None
++
++
+ def abort_reason(sample: dict[str, Any], state: dict[str, Any]) -> str | None:
+     if sample.get('batteryC') is not None and sample['batteryC'] >= 45:
+         return 'battery-at-or-above-45C'
+@@ -575,6 +586,11 @@
+         result['device'] = adb.call(['shell', 'getprop', 'ro.build.fingerprint']).strip()
+         result['package'] = adb.call(['shell', 'dumpsys', 'package', PACKAGE])
+         result['initial'] = adb.snapshot()
++        if getattr(args, 'instant_enabled', False):
++            result['gpuThermalGate'] = {'normalPwrlevel': 0, 'unknownOrNonzeroStops': True, 'sampleIntervalSeconds': args.interval, 'scope': 'LG observed experimental baseline; max_gpuclk/cpu2 cap are metadata'}
++            cap_reason = gpu_thermal_cap_reason(result['initial'])
++            if cap_reason:
++                raise RuntimeError('initial-' + cap_reason)
+         if result['initial']['batteryC'] is None or result['initial']['vtsC'] is None:
+             raise RuntimeError('required-temperature-node-contract-unavailable')
+         reason = abort_reason(result['initial'], {})
+@@ -599,6 +615,10 @@
+             deadline = time.monotonic() + args.cooldown_timeout
+             while True:
+                 current = adb.snapshot()
++                if getattr(args, 'instant_enabled', False):
++                    cap_reason = gpu_thermal_cap_reason(current)
++                    if cap_reason:
++                        raise RuntimeError('cooldown-' + cap_reason)
+                 matched = all(current.get(key) is not None and reference.get(key) is not None and
+                               abs(current[key] - reference[key]) <= tolerance
+                               for key, tolerance in [('batteryC', args.battery_tolerance), ('vtsC', args.vts_tolerance)])
+@@ -611,6 +631,9 @@
+                 time.sleep(min(10, max(0, deadline-time.monotonic())))
+         result['initial'] = adb.snapshot()
+         if getattr(args, 'instant_enabled', False):
++            cap_reason = gpu_thermal_cap_reason(result['initial'])
++            if cap_reason:
++                raise RuntimeError('prelaunch-' + cap_reason)
+             result['expectedPanelThermalStatus'] = args.expected_panel_thermal_status
+             if result['initial']['raw'].get('panel_thermal_status') != args.expected_panel_thermal_status:
+                 raise RuntimeError('prelaunch-panel-thermal-status-unknown-or-not-approved-normal')
+@@ -653,6 +676,10 @@
+                 sample['runtime'] = state
+                 stream.write(json.dumps(sample) + '\n'); stream.flush()
+                 result['samples'] += 1
++                cap_reason = gpu_thermal_cap_reason(sample) if getattr(args, 'instant_enabled', False) else None
++                if cap_reason:
++                    result['status'], result['reason'] = 'aborted', cap_reason
++                    break
+                 reason = abort_reason(sample, state)
+                 if reason:
+                     result['status'], result['reason'] = 'aborted', reason
+@@ -720,8 +747,15 @@
+                                   'batteryC': sample['batteryC'], 'vtsC': sample['vtsC'],
+                                   'backlight': sample['raw'].get('backlight'), 'labAgeSeconds': state['labAgeSeconds']}), flush=True)
+                 time.sleep(min(args.interval, max(0, args.duration-sample['elapsedSeconds'])))
+-        result['final'] = adb.snapshot()
+-        result['surfaceFlingerFinal'] = adb.call(['shell', 'dumpsys', 'SurfaceFlinger'])
++        if result['status'] == 'completed-observation':
++            result['final'] = adb.snapshot()
++            result['finalEvidenceSource'] = 'post-completion-snapshot'
++            result['surfaceFlingerFinal'] = adb.call(['shell', 'dumpsys', 'SurfaceFlinger'])
++        else:
++            # No extra device diagnostics may delay emergency stop in finally.
++            result['final'] = sample
++            result['finalEvidenceSource'] = 'last-running-sample-before-stop'
++            result['surfaceFlingerFinalSkipped'] = 'stop-before-diagnostics'
+     except KeyboardInterrupt:
+         result['status'], result['reason'] = 'aborted', 'interrupted-by-user'
+     except Exception as error:

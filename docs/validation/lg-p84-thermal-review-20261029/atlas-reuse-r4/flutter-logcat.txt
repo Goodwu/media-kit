@@ -1,0 +1,288 @@
+10-30 14:06:54.180  2139  2139 I flutter : [IMPORTANT:flutter/shell/common/shell.cc(528)] [Action Required]: Impeller opt-out deprecated.
+10-30 14:06:54.180  2139  2139 I flutter :     The application opted out of Impeller by either using the
+10-30 14:06:54.180  2139  2139 I flutter :     `--no-enable-impeller` flag or the
+10-30 14:06:54.180  2139  2139 I flutter :     `io.flutter.embedding.android.EnableImpeller` `AndroidManifest.xml` entry.
+10-30 14:06:54.180  2139  2139 I flutter :     These options are going to go away in an upcoming Flutter release. Remove
+10-30 14:06:54.180  2139  2139 I flutter :     the explicit opt-out. If you need to opt-out, please report a bug describing
+10-30 14:06:54.180  2139  2139 I flutter :     the issue.
+10-30 14:06:54.180  2139  2139 I flutter : 
+10-30 14:06:54.180  2139  2139 I flutter :     <URL_REDACTED>
+10-30 14:06:54.180  2139  2139 I flutter : 
+10-30 14:06:54.437  2139  2139 I flutter : ANDROID_DIRECT_OPEN awaiting_tap
+10-30 14:06:54.530  2139  2139 I flutter : ANDROID_CAPABILITIES {sdkInt: 24, displayHdrTypes: [2, 1], egl: {version: 1.0, extensions: EGL_KHR_get_all_proc_addresses EGL_ANDROID_presentation_time EGL_KHR_swap_buffers_with_damage EGL_ANDROID_create_native_client_buffer EGL_ANDROID_front_buffer_auto_refresh EGL_KHR_image EGL_KHR_image_base EGL_KHR_lock_surface EGL_KHR_gl_texture_2D_image EGL_KHR_gl_texture_3D_image EGL_KHR_gl_texture_cubemap_image EGL_KHR_gl_renderbuffer_image EGL_KHR_reusable_sync EGL_KHR_fence_sync EGL_KHR_create_context EGL_KHR_surfaceless_context EGL_EXT_create_context_robustness EGL_ANDROID_image_native_buffer EGL_KHR_wait_sync EGL_ANDROID_recordable EGL_KHR_partial_update EGL_KHR_create_context_no_error EGL_KHR_mutable_render_buffer EGL_EXT_yuv_surface EGL_EXT_protected_content , bt2020PqWindowSurface: false, bt2020HlgWindowSurface: false, highPrecisionConfigs: [{index: 48, red: 10, green: 10, blue: 10, alpha: 2}, {index: 49, red: 10, green: 10, blue: 10, alpha: 2}, {index: 50, red: 10, green: 10, blue: 10, alpha: 2}, {index: 51, 
+10-30 14:06:58.442  2139  2139 I flutter : MPVPROP vo=null
+10-30 14:06:58.442  2139  2139 I flutter : MPVPROP hwdec-current=
+10-30 14:06:58.443  2139  2139 I flutter : MPVPROP path=
+10-30 14:06:58.443  2139  2139 I flutter : MPVPROP video-format=
+10-30 14:06:58.443  2139  2139 I flutter : MPVPROP video-params=
+10-30 14:06:58.443  2139  2139 I flutter : MPVPROP video-out-params=
+10-30 14:06:58.444  2139  2139 I flutter : MPVPROP vf=
+10-30 14:06:58.444  2139  2139 I flutter : MPVPROP current-tracks/video/dolby-vision-profile=
+10-30 14:06:58.444  2139  2139 I flutter : MPVPROP current-tracks/video/dolby-vision-level=
+10-30 14:06:58.445  2139  2139 I flutter : MPVPROP target-prim=auto
+10-30 14:06:58.445  2139  2139 I flutter : MPVPROP target-trc=auto
+10-30 14:06:58.445  2139  2139 I flutter : MPVPROP target-colorspace-hint=auto
+10-30 14:06:58.446  2139  2139 I flutter : MPVPROP target-colorspace-hint-strict=yes
+10-30 14:06:58.447  2139  2139 I flutter : MPVPROP gpu-api=
+10-30 14:06:58.448  2139  2139 I flutter : MPVPROP gpu-context=
+10-30 14:06:58.449  2139  2139 I flutter : MPVPROP target-peak=auto
+10-30 14:06:58.449  2139  2139 I flutter : MPVPROP egl-output-format=auto
+10-30 14:06:58.450  2139  2139 I flutter : MPVPROP android-surface-size=
+10-30 14:06:58.451  2139  2139 I flutter : MPVPROP sig-peak=
+10-30 14:06:58.451  2139  2139 I flutter : MPVPROP tone-mapping=auto
+10-30 14:06:58.487  2139  2139 I flutter : ANDROID_DIRECT_OPEN trigger path=/sdcard/Android/data/com.example.media_kit_hdr_lab/files/hokkaido-p84.mp4
+10-30 14:06:58.487  2139  2139 I flutter : ANDROID_HDR_OPEN_BEGIN path=/sdcard/Android/data/com.example.media_kit_hdr_lab/files/hokkaido-p84.mp4 hint=null serial=1 simulateNoHlg=false wrongHint= noHint=false policyExperimental=false namedLocalSource=true p5RpuPipelineBuilt=true forceP84PqFallback=false textureCopyDiagnostic=false gpuPlatformHdr=false
+10-30 14:06:58.502  2139  2139 I flutter : HDR_SESSION_REPORT gen=1 source=HdrSourceDescriptor(codec: , transfer: null, primaries: null, dynamicMetadata: HdrDynamicMetadata.none, dvProfile: null, dvCompatibilityId: null, enhancementLayer: null) origin=null verified=false hwdecCurrent=null dataspace requested=null path=null readback=null degrade=null diagnostic=null error=null
+10-30 14:06:58.502  2139  2139 I flutter : HDR_SESSION_PREDICTION gen=1 selected=HdrCandidate(sdrDirect, verified, feasible: true, skip: null, route: HdrRoute(sdrDirect, sdr, output: sdr, dynamic: false, topology: platformView, vo: mediacodec_embed, hwdec: mediacodec, vd-lavc-o: null, render-mode: null, prim: null, trc: null, peak: none, surface: null, offscreen: none, requestedPublishFlush: immediate, stripRpu: false, metadata: none, deps: {hwdec:mediacodec, topology:platformView, decoder:mediacodec})) presentation=sdr confidence=verified playable=true
+10-30 14:06:58.502  2139  2139 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(sdrDirect, verified, feasible: true, skip: null, route: HdrRoute(sdrDirect, sdr, output: sdr, dynamic: false, topology: platformView, vo: mediacodec_embed, hwdec: mediacodec, vd-lavc-o: null, render-mode: null, prim: null, trc: null, peak: none, surface: null, offscreen: none, requestedPublishFlush: immediate, stripRpu: false, metadata: none, deps: {hwdec:mediacodec, topology:platformView, decoder:mediacodec}))
+10-30 14:06:58.502  2139  2139 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(sdrDirect, verified, feasible: true, skip: null, route: HdrRoute(sdrDirect, sdr, output: sdr, dynamic: false, topology: texture, vo: gpu-next, hwdec: mediacodec-copy, vd-lavc-o: null, render-mode: null, prim: null, trc: null, peak: none, surface: null, offscreen: none, requestedPublishFlush: immediate, stripRpu: false, metadata: none, deps: {presenter:gpu-next-opengl-texture, decoder:mediacodec, import:cpu-upload, hwdec:mediacodec-copy}))
+10-30 14:06:58.503  2139  2139 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(sdrDirect, verified, feasible: true, skip: null, route: HdrRoute(sdrDirect, sdr, output: sdr, dynamic: false, topology: texture, vo: gpu-next, hwdec: no, vd-lavc-o: null, render-mode: null, prim: null, trc: null, peak: none, surface: null, offscreen: none, requestedPublishFlush: immediate, stripRpu: false, metadata: none, deps: {presenter:gpu-next-opengl-texture, decoder:ffmpeg-software, import:cpu-upload}))
+10-30 14:06:58.506  2139  2139 I flutter : AUTO_COMPLETED completed=false
+10-30 14:06:58.506  2139  2139 I flutter : VIDEOPARAMS VideoParams(pixelformat: null, hwPixelformat: null, w: null, h: null, dw: null, dh: null, aspect: null, par: null, colormatrix: null, colorlevels: null, primaries: null, gamma: null, sigPeak: null, light: null, chromaLocation: null, rotate: null, stereoIn: null, averageBpp: null, alpha: null)
+10-30 14:06:58.536  2139  2139 I flutter : [SwTrace] onCreatePlatformView id=0 ohos=false hcpp=false ohosHcpp=false swPx=null x null
+10-30 14:06:58.649  2139  2139 I flutter : VIDEOPARAMS VideoParams(pixelformat: null, hwPixelformat: null, w: null, h: null, dw: null, dh: null, aspect: null, par: null, colormatrix: null, colorlevels: null, primaries: null, gamma: null, sigPeak: null, light: null, chromaLocation: null, rotate: null, stereoIn: null, averageBpp: null, alpha: null)
+10-30 14:06:58.811  2139  2139 I flutter : MPVLOG [ffmpeg/video] error: hevc_mediacodec: MKSCOLORKEYS: avctx trc=18 prim=9 range=1
+10-30 14:06:58.880  2139  2139 I flutter : VIDEOPARAMS VideoParams(pixelformat: null, hwPixelformat: null, w: 3840, h: 1920, dw: null, dh: null, aspect: null, par: null, colormatrix: null, colorlevels: null, primaries: null, gamma: null, sigPeak: null, light: null, chromaLocation: null, rotate: null, stereoIn: null, averageBpp: null, alpha: null)
+10-30 14:06:59.071  2139  2139 I flutter : VIDEOPARAMS VideoParams(pixelformat: mediacodec, hwPixelformat: null, w: 3840, h: 1920, dw: 3840, dh: 1920, aspect: 2.0, par: 1.0, colormatrix: bt.2020-ncl, colorlevels: limited, primaries: bt.2020, gamma: hlg, sigPeak: 4.926108360290527, light: hlg, chromaLocation: mpeg1/jpeg, rotate: 0, stereoIn: mono, averageBpp: null, alpha: none)
+10-30 14:06:59.347  2139  2139 I flutter : HDR_SESSION_EVENT HdrReclassifiedEvent(gen: 1, previous: HdrSourceDescriptor(codec: , transfer: null, primaries: null, dynamicMetadata: HdrDynamicMetadata.none, dvProfile: null, dvCompatibilityId: null, enhancementLayer: null), current: HdrSourceDescriptor(codec: hevc, transfer: hlg, primaries: bt.2020, dynamicMetadata: HdrDynamicMetadata.dolbyVision, dvProfile: 8, dvCompatibilityId: 4, enhancementLayer: false), rebuilt: true)
+10-30 14:06:59.433  2139  2139 I flutter : VIDEOPARAMS VideoParams(pixelformat: null, hwPixelformat: null, w: null, h: null, dw: null, dh: null, aspect: null, par: null, colormatrix: null, colorlevels: null, primaries: null, gamma: null, sigPeak: null, light: null, chromaLocation: null, rotate: null, stereoIn: null, averageBpp: null, alpha: null)
+10-30 14:06:59.475  2139  2139 I flutter : HDR_CAP_LAB {sdkInt: 24, displayHdrTypes: [2, 1], egl: {version: 1.0, extensions: EGL_KHR_get_all_proc_addresses EGL_ANDROID_presentation_time EGL_KHR_swap_buffers_with_damage EGL_ANDROID_create_native_client_buffer EGL_ANDROID_front_buffer_auto_refresh EGL_KHR_image EGL_KHR_image_base EGL_KHR_lock_surface EGL_KHR_gl_texture_2D_image EGL_KHR_gl_texture_3D_image EGL_KHR_gl_texture_cubemap_image EGL_KHR_gl_renderbuffer_image EGL_KHR_reusable_sync EGL_KHR_fence_sync EGL_KHR_create_context EGL_KHR_surfaceless_context EGL_EXT_create_context_robustness EGL_ANDROID_image_native_buffer EGL_KHR_wait_sync EGL_ANDROID_recordable EGL_KHR_partial_update EGL_KHR_create_context_no_error EGL_KHR_mutable_render_buffer EGL_EXT_yuv_surface EGL_EXT_protected_content , bt2020PqWindowSurface: false, bt2020HlgWindowSurface: false, highPrecisionConfigs: [{index: 48, red: 10, green: 10, blue: 10, alpha: 2}, {index: 49, red: 10, green: 10, blue: 10, alpha: 2}, {index: 50, red: 10, green: 10, blue: 10, alpha: 2}, {index: 51, red: 10, 
+10-30 14:06:59.510  2139  2139 I flutter : HDR_CAP_LIB_CHANNEL {dataSpaceBridgeLoaded: true, hevcDecoders: [{frameRateRange: [1, 240], widthRange: [64, 4096], supports4K: true, hardwareAcceleration: true, mimeType: video/hevc, name: OMX.qcom.video.decoder.hevc, heightRange: [64, 2160], max4KFps: 60.44444444444444, profiles: [1, 2, 4096], main10: true}, {frameRateRange: [1, 240], widthRange: [64, 4096], supports4K: true, hardwareAcceleration: true, mimeType: video/hevc, name: OMX.qcom.video.decoder.hevc.secure, heightRange: [64, 2160], max4KFps: 60.44444444444444, profiles: [1, 2, 4096], main10: true}, {frameRateRange: [0, 960], widthRange: [2, 2048], supports4K: false, hardwareAcceleration: false, mimeType: video/hevc, name: OMX.google.hevc.decoder, heightRange: [2, 2048], max4KFps: null, profiles: [1], main10: false}], dolbyVisionDecoders: [{frameRateRange: [1, 240], widthRange: [64, 4096], supports4K: true, hardwareAcceleration: true, mimeType: video/dolby-vision, name: OMX.qcom.video.decoder.dolby-vision, heightRange: [64, 2160], max4KFps: 60.4444
+10-30 14:06:59.519  2139  2139 I flutter : HDR_CAP_QUERY HdrCapabilities(sdk: 24, displayHdrTypes: {2, 1}, displayHdrMaxLuminance: 500.0, hevc: 3, dv: 2, p5Pipeline: true, nativeDvBridgeApi: 1, bridge: true, ext: HdrDataSpaceExtInfo(id: lg-pq, applicable: true, pqPresentation: HdrPqPresentation(rgbSurface: false, yuvWindow: true), validatedPredictionTransfers: {pq}, setterOnlyTransfers: {pq, pq-itu}, supportedSurfaceTransfers: {pq, pq-itu}, yuvWindowArmApi: 1, supportsDeferredSurfaceTexturePublish30fps: false))
+10-30 14:06:59.520  2139  2139 I flutter : VIDEOPARAMS VideoParams(pixelformat: null, hwPixelformat: null, w: null, h: null, dw: null, dh: null, aspect: null, par: null, colormatrix: null, colorlevels: null, primaries: null, gamma: null, sigPeak: null, light: null, chromaLocation: null, rotate: null, stereoIn: null, averageBpp: null, alpha: null)
+10-30 14:06:59.559  2139  2139 I flutter : YUV-DIAG: owner generation unavailable; legacy global arm
+10-30 14:06:59.623  2139  2139 I flutter : [SwTrace] onCreatePlatformView id=1 ohos=false hcpp=false ohosHcpp=false swPx=null x null
+10-30 14:06:59.762  2139  2139 I flutter : MPVLOG [vo/gpu-next] error: MKS-THERMAL kind=vo instance=0x741db713d0 pid=2139 mono_ns=5527528040 start_ns=5527523874 final=0 queue_frames=0 queue_resets=0 draw=0 redraw=0 display_synced=0 submit=0 flip=0 lease_copy=0 lease_reuse=0 latch=0 defer_publish_flush=0 publish_flush=0 flush_req=0 flush_ovr=0 nominal_fps=0.000000 fps_fallback=0 publish_deferred=0 retire_flush=0 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=0 swap=0 swap_ok=0 frame_id=0 pts=0.000000000 w=0 h=0
+10-30 14:06:59.763  2139  2139 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKS-THERMAL kind=yuv instance=0x7411351c50 pid=2139 mono_ns=5527980801 start_ns=5527973665 final=0 queue_frames=0 queue_resets=0 draw=0 redraw=0 display_synced=0 submit=0 flip=0 lease_copy=0 lease_reuse=0 latch=0 defer_publish_flush=0 publish_flush=0 flush_req=0 flush_ovr=0 nominal_fps=0.000000 fps_fallback=0 publish_deferred=0 retire_flush=0 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=0 swap=0 swap_ok=0 frame_id=0 pts=0.000000000 w=0 h=0
+10-30 14:06:59.763  2139  2139 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: runtime switch on; taking config49 branch
+10-30 14:06:59.764  2139  2139 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: enumerating 64 configs for config49 (visual 0x7fa30c04)
+10-30 14:06:59.764  2139  2139 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: config49 selected (config_id=49, visual=0x7fa30c04) via full enumeration
+10-30 14:06:59.765  2139  2139 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: presetting window format 0x7fa30c04 (1x1)
+10-30 14:06:59.766  2139  2139 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: ANativeWindow_setBuffersGeometry ok (format 0x7fa30c04, 1x1)
+10-30 14:06:59.766  2139  2139 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: eglCreateWindowSurface ok (config49)
+10-30 14:06:59.768  2139  2139 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKSURF-E1: dataspace applied ret=1
+10-30 14:06:59.768  2139  2139 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: eglMakeCurrent ok
+10-30 14:06:59.769  2139  2139 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-P1: queue-time setMetaData injection armed (op=2 COLOR_METADATA, 1768 B: primaries=9 range=1 transfer=16)
+10-30 14:06:59.770  2139  2139 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: GL_EXT_YUV_target present
+10-30 14:06:59.771  2139  2139 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: offscreen RGB FBO ready (2672x1440, rgba16f)
+10-30 14:06:59.780  2139  2139 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: final pass program ready
+10-30 14:06:59.781  2139  2139 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: branch active (NV12 window, libplacebo rendered to RGB offscreen, layout(yuv) final pass)
+10-30 14:06:59.781  2139  2139 I flutter : MPVLOG [vo/gpu-next] error: MKS-YUV-COMPARE event=egl-owner-configured android-current-verified=1 egl-loader-requested=1
+10-30 14:06:59.788  2139  2139 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-COMPARE-LIB event=caps-ready private_ssbo=2147483647 renderer_max_buffer=0 renderer_max_ssbo=0 fragment_blocks=4 bindings=24
+10-30 14:06:59.789  2139  2139 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: placeholder resize 1x1 skipped; keeping previous offscreen state
+10-30 14:06:59.790  2139  2139 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION gate-rejected=1 mask=0xb0018202 compat_present=0 compat=-1 flipped=1 mix=0 overlays=0 hooks=0 format=fbo
+10-30 14:06:59.791  2139  2139 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION target crop=0,0,960,540 repr=12/2 trc=0 prim=3 dst=0,0,960,540 size=2672x1440
+10-30 14:06:59.791  2139  2139 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION format type=5 components=4 depths=16,16,16,16 fbo=960x540
+10-30 14:06:59.792  2139  2139 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION params distort=0 blend=0 error_diffusion=0 icc=0 target_lut=0 corner=0 blur=16 background=1 border=0 transparency=0 visualize=0 interpolated=0 drawable_flip=0 planes=1 target_rotation=0
+10-30 14:06:59.801  2139  2139 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKS-FUSION rgb-fresh=1 generation=1
+10-30 14:06:59.803  2139  2139 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-P1: 1x1 placeholder buffer; injection refused (queue passthrough)
+10-30 14:06:59.838  2139  2139 I flutter : VIDEOPARAMS VideoParams(pixelformat: null, hwPixelformat: null, w: null, h: null, dw: null, dh: null, aspect: null, par: null, colormatrix: null, colorlevels: null, primaries: null, gamma: null, sigPeak: null, light: null, chromaLocation: null, rotate: null, stereoIn: null, averageBpp: null, alpha: null)
+10-30 14:06:59.915  2139  2139 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKSURF: version surfacetexture-poc-r2
+10-30 14:06:59.938  2139  2139 I flutter : MPVLOG [ffmpeg/video] error: hevc_mediacodec: MKSCOLORKEYS: avctx trc=18 prim=9 range=1
+10-30 14:07:00.174  2139  2139 I flutter : VIDEOPARAMS VideoParams(pixelformat: mediacodec, hwPixelformat: null, w: 3840, h: 1920, dw: 3840, dh: 1920, aspect: 2.0, par: 1.0, colormatrix: bt.2020-ncl, colorlevels: limited, primaries: bt.2020, gamma: hlg, sigPeak: 4.926108360290527, light: hlg, chromaLocation: mpeg1/jpeg, rotate: 0, stereoIn: mono, averageBpp: null, alpha: none)
+10-30 14:07:00.174  2139  2139 I flutter : ANDROID_PLATFORM_LAYOUT_OUTPUT_SIZE source=3840x1920 target=2672x1336
+10-30 14:07:00.195  2139  2139 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: placeholder resize 1x1 skipped; keeping previous offscreen state
+10-30 14:07:00.195  2139  2139 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKS-INPUT-FBO event=config requested=0
+10-30 14:07:00.196  2139  2139 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKS-THERMAL kind=import instance=0x741a097050 pid=2139 mono_ns=5959419664 start_ns=5959418987 final=0 queue_frames=0 queue_resets=0 draw=0 redraw=0 display_synced=0 submit=0 flip=0 lease_copy=0 lease_reuse=0 latch=0 defer_publish_flush=0 publish_flush=0 flush_req=0 flush_ovr=0 nominal_fps=0.000000 fps_fallback=0 publish_deferred=0 retire_flush=0 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=0 swap=0 swap_ok=0 frame_id=0 pts=0.000000000 w=0 h=0
+10-30 14:07:00.236  2139  2139 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKSURF: unverified-declaration repr.sys=RGB repr.levels=full
+10-30 14:07:00.238  2139  2139 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKSURF: unverified-declaration color identity propagated from source; sys/levels declaration unverified (diag pending)
+10-30 14:07:00.238  2139  2139 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKSURF: color-identity propagated primaries=6 transfer=13 src_levels=1
+10-30 14:07:00.239  2139  2139 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKSURF: active-importer=surfacetexture device_registered=1
+10-30 14:07:00.239  2139  2139 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKS-INPUT-FBO requested=0 slot_attempts=0 shared_attempts=1 fallbacks=0 copy_failures=0 final=0
+10-30 14:07:00.240  2139  2139 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKS-FLUSH requested=0 effective=0 nominal_fps=29.970029970 experimental_override=0
+10-30 14:07:00.259  2139  2139 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKS-FUSION-FRAME event=swap-success route=rgb-final pid=2139 instance=0x7411351c50 token=6 generation=1 frame_id=45 source_pts=0.000000000 current_pts=0.000000000 still=0 redraw=0 repeat=0 mono_ns=6028959761 gpu_draw_confirmed=0
+10-30 14:07:00.271  2139  2139 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKS-FUSION-FRAME event=swap-success route=rgb-final pid=2139 instance=0x7411351c50 token=7 generation=1 frame_id=45 source_pts=0.000000000 current_pts=0.000000000 still=1 redraw=1 repeat=0 mono_ns=6040493979 gpu_draw_confirmed=0
+10-30 14:07:00.274  2139  2139 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: offscreen RGB FBO ready (2672x1336, rgba16f)
+10-30 14:07:00.285  2139  2139 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKS-FUSION-FRAME event=swap-success route=rgb-final pid=2139 instance=0x7411351c50 token=8 generation=2 frame_id=45 source_pts=0.000000000 current_pts=0.000000000 still=1 redraw=1 repeat=0 mono_ns=6055090696 gpu_draw_confirmed=0
+10-30 14:07:00.476  2139  2139 I flutter : HDR_SESSION_REPORT gen=1 source=HdrSourceDescriptor(codec: hevc, transfer: hlg, primaries: bt.2020, dynamicMetadata: HdrDynamicMetadata.dolbyVision, dvProfile: 8, dvCompatibilityId: 4, enhancementLayer: false) origin=decoder verified=true hwdecCurrent=surfacetexture dataspace requested=pq path=ext:lg-pq readback=none degrade=null diagnostic=null error=null
+10-30 14:07:00.476  2139  2139 I flutter : HDR_SESSION_PREDICTION gen=1 selected=HdrCandidate(baseLayerConvert, verified, feasible: true, skip: null, route: HdrRoute(baseLayerConvert, nativeHdr, output: pq, dynamic: false, topology: platformView, vo: gpu-next, hwdec: surfacetexture, vd-lavc-o: null, render-mode: null, prim: bt.2020, trc: pq, peak: 1000, surface: pq, offscreen: pq-full, requestedPublishFlush: immediate, stripRpu: true, metadata: baselineOnly, deps: {hwdec:surfacetexture, topology:platformView, dataspace:pq, decoder:mediacodec})) presentation=nativeHdr confidence=verified playable=true
+10-30 14:07:00.476  2139  2139 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(nativeDolbyVision, verified, feasible: false, skip: nativeDvUnavailable, route: null)
+10-30 14:07:00.476  2139  2139 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(metadataReshape, experimental, feasible: false, skip: pqRgbPresentationUnavailable, route: null)
+10-30 14:07:00.476  2139  2139 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(baseLayerDirect, verified, feasible: false, skip: displayLacksTransfer, route: null)
+10-30 14:07:00.476  2139  2139 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(baseLayerConvert, verified, feasible: true, skip: null, route: HdrRoute(baseLayerConvert, nativeHdr, output: pq, dynamic: false, topology: platformView, vo: gpu-next, hwdec: surfacetexture, vd-lavc-o: null, render-mode: null, prim: bt.2020, trc: pq, peak: 1000, surface: pq, offscreen: pq-full, requestedPublishFlush: immediate, stripRpu: true, metadata: baselineOnly, deps: {hwdec:surfacetexture, topology:platformView, dataspace:pq, decoder:mediacodec}))
+10-30 14:07:00.476  2139  2139 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(toneMapSdr, verified, feasible: false, skip: displayLacksTransfer, route: null)
+10-30 14:07:00.476  2139  2139 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(toneMapSdr, verified, feasible: false, skip: displayLacksTransfer, route: null)
+10-30 14:07:00.477  2139  2139 I flutter : HDR_SESSION_ACTUAL gen=1 actual=HdrRoute(baseLayerConvert, nativeHdr, output: pq, dynamic: false, topology: platformView, vo: gpu-next, hwdec: surfacetexture, vd-lavc-o: null, render-mode: null, prim: bt.2020, trc: pq, peak: 1000, surface: pq, offscreen: pq-full, requestedPublishFlush: immediate, stripRpu: true, metadata: baselineOnly, deps: {hwdec:surfacetexture, topology:platformView, dataspace:pq, decoder:mediacodec})
+10-30 14:07:00.477  2139  2139 I flutter : HDR_SESSION_EVENT HdrRouteAppliedEvent(gen: 1, route: HdrRoute(baseLayerConvert, nativeHdr, output: pq, dynamic: false, topology: platformView, vo: gpu-next, hwdec: surfacetexture, vd-lavc-o: null, render-mode: null, prim: bt.2020, trc: pq, peak: 1000, surface: pq, offscreen: pq-full, requestedPublishFlush: immediate, stripRpu: true, metadata: baselineOnly, deps: {hwdec:surfacetexture, topology:platformView, dataspace:pq, decoder:mediacodec}))
+10-30 14:07:00.478  2139  2139 I flutter : MKSURF-POC: active-importer=surfacetexture verified
+10-30 14:07:00.479  2139  2139 I flutter : ANDROID_HDR_OPEN path=/sdcard/Android/data/com.example.media_kit_hdr_lab/files/hokkaido-p84.mp4 serial=1
+10-30 14:07:00.479  2139  2139 I flutter : HDR_SESSION_REPORT gen=1 source=HdrSourceDescriptor(codec: hevc, transfer: hlg, primaries: bt.2020, dynamicMetadata: HdrDynamicMetadata.dolbyVision, dvProfile: 8, dvCompatibilityId: 4, enhancementLayer: false) origin=decoder verified=true hwdecCurrent=surfacetexture dataspace requested=pq path=ext:lg-pq readback=none degrade=null diagnostic=null error=null
+10-30 14:07:00.479  2139  2139 I flutter : HDR_SESSION_PREDICTION gen=1 selected=HdrCandidate(baseLayerConvert, verified, feasible: true, skip: null, route: HdrRoute(baseLayerConvert, nativeHdr, output: pq, dynamic: false, topology: platformView, vo: gpu-next, hwdec: surfacetexture, vd-lavc-o: null, render-mode: null, prim: bt.2020, trc: pq, peak: 1000, surface: pq, offscreen: pq-full, requestedPublishFlush: immediate, stripRpu: true, metadata: baselineOnly, deps: {hwdec:surfacetexture, topology:platformView, dataspace:pq, decoder:mediacodec})) presentation=nativeHdr confidence=verified playable=true
+10-30 14:07:00.479  2139  2139 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(nativeDolbyVision, verified, feasible: false, skip: nativeDvUnavailable, route: null)
+10-30 14:07:00.479  2139  2139 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(metadataReshape, experimental, feasible: false, skip: pqRgbPresentationUnavailable, route: null)
+10-30 14:07:00.479  2139  2139 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(baseLayerDirect, verified, feasible: false, skip: displayLacksTransfer, route: null)
+10-30 14:07:00.479  2139  2139 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(baseLayerConvert, verified, feasible: true, skip: null, route: HdrRoute(baseLayerConvert, nativeHdr, output: pq, dynamic: false, topology: platformView, vo: gpu-next, hwdec: surfacetexture, vd-lavc-o: null, render-mode: null, prim: bt.2020, trc: pq, peak: 1000, surface: pq, offscreen: pq-full, requestedPublishFlush: immediate, stripRpu: true, metadata: baselineOnly, deps: {hwdec:surfacetexture, topology:platformView, dataspace:pq, decoder:mediacodec}))
+10-30 14:07:00.479  2139  2139 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(toneMapSdr, verified, feasible: false, skip: displayLacksTransfer, route: null)
+10-30 14:07:00.479  2139  2139 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(toneMapSdr, verified, feasible: false, skip: displayLacksTransfer, route: null)
+10-30 14:07:00.479  2139  2139 I flutter : HDR_SESSION_ACTUAL gen=1 actual=HdrRoute(baseLayerConvert, nativeHdr, output: pq, dynamic: false, topology: platformView, vo: gpu-next, hwdec: surfacetexture, vd-lavc-o: null, render-mode: null, prim: bt.2020, trc: pq, peak: 1000, surface: pq, offscreen: pq-full, requestedPublishFlush: immediate, stripRpu: true, metadata: baselineOnly, deps: {hwdec:surfacetexture, topology:platformView, dataspace:pq, decoder:mediacodec})
+10-30 14:07:01.329  2139  2139 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-P1: set-done table full (32); re-setting on every queue (idempotent same-content copy)
+10-30 14:07:02.444  2139  2139 I flutter : PERF t=8 time-pos=2.202200
+10-30 14:07:02.446  2139  2139 I flutter : PERF t=8 frame-drop-count=0
+10-30 14:07:02.447  2139  2139 I flutter : PERF t=8 decoder-frame-drop-count=0
+10-30 14:07:02.449  2139  2139 I flutter : PERF t=8 avsync=0.000025
+10-30 14:07:02.450  2139  2139 I flutter : PERF t=8 container-fps=29.970030
+10-30 14:07:02.452  2139  2139 I flutter : PERF t=8 pause=no
+10-30 14:07:02.453  2139  2139 I flutter : PERF t=8 eof-reached=no
+10-30 14:07:02.454  2139  2139 I flutter : PERF t=8 idle-active=no
+10-30 14:07:02.455  2139  2139 I flutter : PERF t=8 thermal-status=null
+10-30 14:07:04.452  2139  2139 I flutter : ANDROID_P5_COUNTERS {time-pos: 4.204200, frame-drop-count: 0, decoder-frame-drop-count: 0, mistimed-frame-count: , vo-delayed-frame-count: 0, avsync: 0.000032}
+10-30 14:07:09.773  2139  2139 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKS-THERMAL kind=yuv instance=0x7411351c50 pid=2139 mono_ns=15540039644 start_ns=5527973665 final=0 queue_frames=0 queue_resets=0 draw=0 redraw=0 display_synced=0 submit=0 flip=0 lease_copy=0 lease_reuse=0 latch=0 defer_publish_flush=0 publish_flush=0 flush_req=0 flush_ovr=0 nominal_fps=0.000000 fps_fallback=0 publish_deferred=0 retire_flush=0 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=293 swap=293 swap_ok=293 frame_id=0 pts=0.000000000 w=2672 h=1336
+10-30 14:07:09.780  2139  2139 I flutter : MPVLOG [vo/gpu-next] error: MKS-THERMAL kind=vo instance=0x741db713d0 pid=2139 mono_ns=15540563914 start_ns=5527523874 final=0 queue_frames=286 queue_resets=1 draw=293 redraw=7 display_synced=0 submit=293 flip=293 lease_copy=0 lease_reuse=0 latch=0 defer_publish_flush=0 publish_flush=0 flush_req=0 flush_ovr=0 nominal_fps=0.000000 fps_fallback=0 publish_deferred=0 retire_flush=0 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=0 swap=0 swap_ok=0 frame_id=330 pts=9.509500000 w=2672 h=1336
+10-30 14:07:09.983  2139  2139 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKS-FUSION rgb-fresh=300 generation=2
+10-30 14:07:10.208  2139  2139 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKS-INPUT-FBO requested=0 slot_attempts=0 shared_attempts=300 fallbacks=0 copy_failures=0 final=0
+10-30 14:07:10.209  2139  2139 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKS-THERMAL kind=import instance=0x741a097050 pid=2139 mono_ns=15976922047 start_ns=5959418987 final=0 queue_frames=0 queue_resets=0 draw=0 redraw=0 display_synced=0 submit=0 flip=0 lease_copy=300 lease_reuse=2 latch=300 defer_publish_flush=0 publish_flush=300 flush_req=0 flush_ovr=0 nominal_fps=29.970030 fps_fallback=0 publish_deferred=0 retire_flush=301 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=0 swap=0 swap_ok=0 frame_id=0 pts=9.976633333 w=3840 h=1920
+10-30 14:07:12.440  2139  2139 I flutter : PERF t=18 time-pos=12.178833
+10-30 14:07:12.444  2139  2139 I flutter : PERF t=18 frame-drop-count=0
+10-30 14:07:12.448  2139  2139 I flutter : PERF t=18 decoder-frame-drop-count=0
+10-30 14:07:12.453  2139  2139 I flutter : PERF t=18 avsync=0.000045
+10-30 14:07:12.457  2139  2139 I flutter : PERF t=18 container-fps=29.970030
+10-30 14:07:12.459  2139  2139 I flutter : PERF t=18 pause=no
+10-30 14:07:12.460  2139  2139 I flutter : PERF t=18 eof-reached=no
+10-30 14:07:12.461  2139  2139 I flutter : PERF t=18 idle-active=no
+10-30 14:07:12.463  2139  2139 I flutter : PERF t=18 thermal-status=null
+10-30 14:07:14.464  2139  2139 I flutter : ANDROID_P5_COUNTERS {time-pos: 14.214200, frame-drop-count: 0, decoder-frame-drop-count: 0, mistimed-frame-count: , vo-delayed-frame-count: 0, avsync: 0.000037}
+10-30 14:07:19.780  2139  2139 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKS-THERMAL kind=yuv instance=0x7411351c50 pid=2139 mono_ns=25547805986 start_ns=5527973665 final=0 queue_frames=0 queue_resets=0 draw=0 redraw=0 display_synced=0 submit=0 flip=0 lease_copy=0 lease_reuse=0 latch=0 defer_publish_flush=0 publish_flush=0 flush_req=0 flush_ovr=0 nominal_fps=0.000000 fps_fallback=0 publish_deferred=0 retire_flush=0 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=593 swap=593 swap_ok=593 frame_id=0 pts=0.000000000 w=2672 h=1336
+10-30 14:07:19.781  2139  2139 I flutter : MPVLOG [vo/gpu-next] error: MKS-THERMAL kind=vo instance=0x741db713d0 pid=2139 mono_ns=25547894840 start_ns=5527523874 final=0 queue_frames=586 queue_resets=1 draw=593 redraw=7 display_synced=0 submit=593 flip=593 lease_copy=0 lease_reuse=0 latch=0 defer_publish_flush=0 publish_flush=0 flush_req=0 flush_ovr=0 nominal_fps=0.000000 fps_fallback=0 publish_deferred=0 retire_flush=0 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=0 swap=0 swap_ok=0 frame_id=630 pts=19.519500000 w=2672 h=1336
+10-30 14:07:19.993  2139  2139 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKS-FUSION rgb-fresh=600 generation=2
+10-30 14:07:20.220  2139  2139 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKS-INPUT-FBO requested=0 slot_attempts=0 shared_attempts=600 fallbacks=0 copy_failures=0 final=0
+10-30 14:07:20.223  2139  2139 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKS-THERMAL kind=import instance=0x741a097050 pid=2139 mono_ns=25989438390 start_ns=5959418987 final=0 queue_frames=0 queue_resets=0 draw=0 redraw=0 display_synced=0 submit=0 flip=0 lease_copy=600 lease_reuse=2 latch=600 defer_publish_flush=0 publish_flush=600 flush_req=0 flush_ovr=0 nominal_fps=29.970030 fps_fallback=0 publish_deferred=0 retire_flush=601 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=0 swap=0 swap_ok=0 frame_id=0 pts=19.986633333 w=3840 h=1920
+10-30 14:07:22.442  2139  2139 I flutter : PERF t=28 time-pos=22.188833
+10-30 14:07:22.443  2139  2139 I flutter : PERF t=28 frame-drop-count=0
+10-30 14:07:22.444  2139  2139 I flutter : PERF t=28 decoder-frame-drop-count=0
+10-30 14:07:22.444  2139  2139 I flutter : PERF t=28 avsync=0.000041
+10-30 14:07:22.445  2139  2139 I flutter : PERF t=28 container-fps=29.970030
+10-30 14:07:22.445  2139  2139 I flutter : PERF t=28 pause=no
+10-30 14:07:22.446  2139  2139 I flutter : PERF t=28 eof-reached=no
+10-30 14:07:22.447  2139  2139 I flutter : PERF t=28 idle-active=no
+10-30 14:07:22.448  2139  2139 I flutter : PERF t=28 thermal-status=null
+10-30 14:07:24.445  2139  2139 I flutter : ANDROID_P5_COUNTERS {time-pos: 24.190833, frame-drop-count: 0, decoder-frame-drop-count: 0, mistimed-frame-count: , vo-delayed-frame-count: 0, avsync: 0.000057}
+10-30 14:07:29.791  2139  2139 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKS-THERMAL kind=yuv instance=0x7411351c50 pid=2139 mono_ns=35559544725 start_ns=5527973665 final=0 queue_frames=0 queue_resets=0 draw=0 redraw=0 display_synced=0 submit=0 flip=0 lease_copy=0 lease_reuse=0 latch=0 defer_publish_flush=0 publish_flush=0 flush_req=0 flush_ovr=0 nominal_fps=0.000000 fps_fallback=0 publish_deferred=0 retire_flush=0 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=893 swap=893 swap_ok=893 frame_id=0 pts=0.000000000 w=2672 h=1336
+10-30 14:07:29.795  2139  2139 I flutter : MPVLOG [vo/gpu-next] error: MKS-THERMAL kind=vo instance=0x741db713d0 pid=2139 mono_ns=35559830402 start_ns=5527523874 final=0 queue_frames=886 queue_resets=1 draw=893 redraw=7 display_synced=0 submit=893 flip=893 lease_copy=0 lease_reuse=0 latch=0 defer_publish_flush=0 publish_flush=0 flush_req=0 flush_ovr=0 nominal_fps=0.000000 fps_fallback=0 publish_deferred=0 retire_flush=0 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=0 swap=0 swap_ok=0 frame_id=930 pts=29.529500000 w=2672 h=1336
+10-30 14:07:30.004  2139  2139 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKS-FUSION rgb-fresh=900 generation=2
+10-30 14:07:30.230  2139  2139 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKS-INPUT-FBO requested=0 slot_attempts=0 shared_attempts=900 fallbacks=0 copy_failures=0 final=0
+10-30 14:07:30.233  2139  2139 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKS-THERMAL kind=import instance=0x741a097050 pid=2139 mono_ns=35998668431 start_ns=5959418987 final=0 queue_frames=0 queue_resets=0 draw=0 redraw=0 display_synced=0 submit=0 flip=0 lease_copy=900 lease_reuse=2 latch=900 defer_publish_flush=0 publish_flush=900 flush_req=0 flush_ovr=0 nominal_fps=29.970030 fps_fallback=0 publish_deferred=0 retire_flush=901 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=0 swap=0 swap_ok=0 frame_id=0 pts=29.996633333 w=3840 h=1920
+10-30 14:07:34.456  2139  2139 I flutter : ANDROID_P5_COUNTERS {time-pos: 34.234200, frame-drop-count: 0, decoder-frame-drop-count: 0, mistimed-frame-count: , vo-delayed-frame-count: 0, avsync: 0.000031}
+10-30 14:07:35.404  2139  2139 I flutter : MPVLOG [vo/gpu-next] error: MKS-YUV-ATLAS event=armed id=5527771531 generation=2 source_pts=35.035000000 android=1 lib=1
+10-30 14:07:44.441  2139  2139 I flutter : ANDROID_P5_COUNTERS {time-pos: 35.068367, frame-drop-count: 0, decoder-frame-drop-count: 0, mistimed-frame-count: , vo-delayed-frame-count: 0, avsync: 0.000023}
+10-30 14:07:45.417  2139  2139 I flutter : MPVLOG [vo/gpu-next] error: MKS-YUV-ATLAS event=receipt-diag rendered=1 baseline=0 epoch_valid=1 epoch_before=0 epoch_after=0
+10-30 14:07:45.419  2139  2139 I flutter : MPVLOG [vo/gpu-next] error: MKS-YUV-COMPARE event=capture-failed id=5527771531 reason=atlas-render-or-receipt-failed terminal=1 owner_current=1 owner_restored=0 frame_closed=1 fatal_context=0 requires_force_stop=0
+10-30 14:07:54.449  2139  2139 I flutter : PERF t=60 time-pos=50.283567
+10-30 14:07:54.488  2139  2139 I flutter : PERF t=60 frame-drop-count=379
+10-30 14:07:54.510  2139  2139 I flutter : PERF t=60 decoder-frame-drop-count=0
+10-30 14:07:54.551  2139  2139 I flutter : PERF t=60 avsync=3.838192
+10-30 14:07:54.569  2139  2139 I flutter : PERF t=60 container-fps=29.970030
+10-30 14:07:54.607  2139  2139 I flutter : PERF t=60 pause=no
+10-30 14:07:54.628  2139  2139 I flutter : ANDROID_P5_COUNTERS {time-pos: 50.316933, frame-drop-count: 380, decoder-frame-drop-count: 0, mistimed-frame-count: , vo-delayed-frame-count: 0, avsync: 3.784931}
+10-30 14:07:54.648  2139  2139 I flutter : PERF t=60 eof-reached=no
+10-30 14:07:54.667  2139  2139 I flutter : PERF t=60 idle-active=no
+10-30 14:07:54.672  2139  2139 I flutter : PERF t=60 thermal-status=null
+10-30 14:08:04.447  2139  2139 I flutter : ANDROID_P5_COUNTERS {time-pos: 64.197467, frame-drop-count: 614, decoder-frame-drop-count: 0, mistimed-frame-count: , vo-delayed-frame-count: 0, avsync: 0.000063}
+10-30 14:08:14.448  2139  2139 I flutter : ANDROID_P5_COUNTERS {time-pos: 74.207467, frame-drop-count: 614, decoder-frame-drop-count: 0, mistimed-frame-count: , vo-delayed-frame-count: 0, avsync: 0.000033}
+10-30 14:08:24.440  2139  2139 I flutter : PERF t=90 time-pos=84.217467
+10-30 14:08:24.443  2139  2139 I flutter : PERF t=90 frame-drop-count=614
+10-30 14:08:24.451  2139  2139 I flutter : PERF t=90 decoder-frame-drop-count=0
+10-30 14:08:24.454  2139  2139 I flutter : PERF t=90 avsync=0.000027
+10-30 14:08:24.456  2139  2139 I flutter : PERF t=90 container-fps=29.970030
+10-30 14:08:24.459  2139  2139 I flutter : PERF t=90 pause=no
+10-30 14:08:24.461  2139  2139 I flutter : ANDROID_P5_COUNTERS {time-pos: 84.217467, frame-drop-count: 614, decoder-frame-drop-count: 0, mistimed-frame-count: , vo-delayed-frame-count: 0, avsync: 0.000027}
+10-30 14:08:24.462  2139  2139 I flutter : PERF t=90 eof-reached=no
+10-30 14:08:24.463  2139  2139 I flutter : PERF t=90 idle-active=no
+10-30 14:08:24.465  2139  2139 I flutter : PERF t=90 thermal-status=null
+10-30 14:08:34.447  2139  2139 I flutter : ANDROID_P5_COUNTERS {time-pos: 94.227467, frame-drop-count: 614, decoder-frame-drop-count: 0, mistimed-frame-count: , vo-delayed-frame-count: 0, avsync: 0.000037}
+10-30 14:08:44.486  2139  2139 I flutter : ANDROID_P5_COUNTERS {time-pos: 104.237467, frame-drop-count: 614, decoder-frame-drop-count: 0, mistimed-frame-count: , vo-delayed-frame-count: 0, avsync: 0.000036}
+10-30 14:08:54.444  2139  2139 I flutter : PERF t=120 time-pos=114.214100
+10-30 14:08:54.480  2139  2139 I flutter : PERF t=120 frame-drop-count=614
+10-30 14:08:54.484  2139  2139 I flutter : PERF t=120 decoder-frame-drop-count=0
+10-30 14:08:54.485  2139  2139 I flutter : PERF t=120 avsync=0.000038
+10-30 14:08:54.486  2139  2139 I flutter : PERF t=120 container-fps=29.970030
+10-30 14:08:54.487  2139  2139 I flutter : PERF t=120 pause=no
+10-30 14:08:54.488  2139  2139 I flutter : ANDROID_P5_COUNTERS {time-pos: 114.247467, frame-drop-count: 614, decoder-frame-drop-count: 0, mistimed-frame-count: , vo-delayed-frame-count: 0, avsync: 0.000038}
+10-30 14:08:54.488  2139  2139 I flutter : PERF t=120 eof-reached=no
+10-30 14:08:54.489  2139  2139 I flutter : PERF t=120 idle-active=no
+10-30 14:08:54.491  2139  2139 I flutter : PERF t=120 thermal-status=null
+10-30 14:09:04.472  2139  2139 I flutter : ANDROID_P5_COUNTERS {time-pos: 124.224100, frame-drop-count: 614, decoder-frame-drop-count: 0, mistimed-frame-count: , vo-delayed-frame-count: 0, avsync: 0.000027}
+10-30 14:09:14.443  2139  2139 I flutter : ANDROID_P5_COUNTERS {time-pos: 134.200733, frame-drop-count: 614, decoder-frame-drop-count: 0, mistimed-frame-count: , vo-delayed-frame-count: 0, avsync: 0.000022}
+10-30 14:09:24.471  2139  2139 I flutter : PERF t=150 time-pos=144.244100
+10-30 14:09:24.491  2139  2139 I flutter : PERF t=150 frame-drop-count=614
+10-30 14:09:24.497  2139  2139 I flutter : PERF t=150 decoder-frame-drop-count=0
+10-30 14:09:24.499  2139  2139 I flutter : PERF t=150 avsync=0.000031
+10-30 14:09:24.500  2139  2139 I flutter : PERF t=150 container-fps=29.970030
+10-30 14:09:24.502  2139  2139 I flutter : PERF t=150 pause=no
+10-30 14:09:24.503  2139  2139 I flutter : ANDROID_P5_COUNTERS {time-pos: 144.244100, frame-drop-count: 614, decoder-frame-drop-count: 0, mistimed-frame-count: , vo-delayed-frame-count: 0, avsync: 0.000031}
+10-30 14:09:24.504  2139  2139 I flutter : PERF t=150 eof-reached=no
+10-30 14:09:24.511  2139  2139 I flutter : PERF t=150 idle-active=no
+10-30 14:09:24.512  2139  2139 I flutter : PERF t=150 thermal-status=null
+10-30 14:09:34.446  2139  2139 I flutter : ANDROID_P5_COUNTERS {time-pos: 154.187367, frame-drop-count: 615, decoder-frame-drop-count: 0, mistimed-frame-count: , vo-delayed-frame-count: 0, avsync: 0.000061}
+10-30 14:09:44.445  2139  2139 I flutter : ANDROID_P5_COUNTERS {time-pos: 164.197367, frame-drop-count: 615, decoder-frame-drop-count: 0, mistimed-frame-count: , vo-delayed-frame-count: 0, avsync: 0.000048}
+10-30 14:09:54.440  2139  2139 I flutter : PERF t=180 time-pos=174.207367
+10-30 14:09:54.442  2139  2139 I flutter : PERF t=180 frame-drop-count=615
+10-30 14:09:54.443  2139  2139 I flutter : PERF t=180 decoder-frame-drop-count=0
+10-30 14:09:54.444  2139  2139 I flutter : PERF t=180 avsync=0.000043
+10-30 14:09:54.446  2139  2139 I flutter : PERF t=180 container-fps=29.970030
+10-30 14:09:54.447  2139  2139 I flutter : PERF t=180 pause=no
+10-30 14:09:54.447  2139  2139 I flutter : ANDROID_P5_COUNTERS {time-pos: 174.207367, frame-drop-count: 615, decoder-frame-drop-count: 0, mistimed-frame-count: , vo-delayed-frame-count: 0, avsync: 0.000043}
+10-30 14:09:54.448  2139  2139 I flutter : PERF t=180 eof-reached=no
+10-30 14:09:54.449  2139  2139 I flutter : PERF t=180 idle-active=no
+10-30 14:09:54.451  2139  2139 I flutter : PERF t=180 thermal-status=null
+10-30 14:10:04.442  2139  2139 I flutter : ANDROID_P5_COUNTERS {time-pos: 184.184000, frame-drop-count: 615, decoder-frame-drop-count: 0, mistimed-frame-count: , vo-delayed-frame-count: 0, avsync: 0.000042}
+10-30 14:10:14.441  2139  2139 I flutter : ANDROID_P5_COUNTERS {time-pos: 194.194000, frame-drop-count: 616, decoder-frame-drop-count: 0, mistimed-frame-count: , vo-delayed-frame-count: 0, avsync: 0.000035}
+10-30 14:10:24.439  2139  2139 I flutter : PERF t=210 time-pos=204.204000
+10-30 14:10:24.441  2139  2139 I flutter : PERF t=210 frame-drop-count=616
+10-30 14:10:24.442  2139  2139 I flutter : PERF t=210 decoder-frame-drop-count=0
+10-30 14:10:24.445  2139  2139 I flutter : PERF t=210 avsync=0.000035
+10-30 14:10:24.447  2139  2139 I flutter : PERF t=210 container-fps=29.970030
+10-30 14:10:24.449  2139  2139 I flutter : PERF t=210 pause=no
+10-30 14:10:24.451  2139  2139 I flutter : ANDROID_P5_COUNTERS {time-pos: 204.204000, frame-drop-count: 616, decoder-frame-drop-count: 0, mistimed-frame-count: , vo-delayed-frame-count: 0, avsync: 0.000035}
+10-30 14:10:24.452  2139  2139 I flutter : PERF t=210 eof-reached=no
+10-30 14:10:24.454  2139  2139 I flutter : PERF t=210 idle-active=no
+10-30 14:10:24.456  2139  2139 I flutter : PERF t=210 thermal-status=null
+10-30 14:10:34.472  2139  2139 I flutter : ANDROID_P5_COUNTERS {time-pos: 214.180633, frame-drop-count: 617, decoder-frame-drop-count: 0, mistimed-frame-count: , vo-delayed-frame-count: 0, avsync: 0.000033}
+10-30 14:10:44.446  2139  2139 I flutter : ANDROID_P5_COUNTERS {time-pos: 224.190633, frame-drop-count: 617, decoder-frame-drop-count: 0, mistimed-frame-count: , vo-delayed-frame-count: 0, avsync: 0.000062}
+10-30 14:10:54.440  2139  2139 I flutter : PERF t=240 time-pos=234.200633
+10-30 14:10:54.441  2139  2139 I flutter : PERF t=240 frame-drop-count=617
+10-30 14:10:54.441  2139  2139 I flutter : PERF t=240 decoder-frame-drop-count=0
+10-30 14:10:54.442  2139  2139 I flutter : PERF t=240 avsync=0.000013
+10-30 14:10:54.444  2139  2139 I flutter : PERF t=240 container-fps=29.970030
+10-30 14:10:54.446  2139  2139 I flutter : PERF t=240 pause=no
+10-30 14:10:54.446  2139  2139 I flutter : ANDROID_P5_COUNTERS {time-pos: 234.200633, frame-drop-count: 617, decoder-frame-drop-count: 0, mistimed-frame-count: , vo-delayed-frame-count: 0, avsync: 0.000013}
+10-30 14:10:54.447  2139  2139 I flutter : PERF t=240 eof-reached=no
+10-30 14:10:54.449  2139  2139 I flutter : PERF t=240 idle-active=no
+10-30 14:10:54.451  2139  2139 I flutter : PERF t=240 thermal-status=null
+10-30 14:11:04.444  2139  2139 I flutter : ANDROID_P5_COUNTERS {time-pos: 244.210633, frame-drop-count: 617, decoder-frame-drop-count: 0, mistimed-frame-count: , vo-delayed-frame-count: 0, avsync: 0.000048}
+10-30 14:11:14.443  2139  2139 I flutter : ANDROID_P5_COUNTERS {time-pos: 254.187267, frame-drop-count: 619, decoder-frame-drop-count: 0, mistimed-frame-count: , vo-delayed-frame-count: 0, avsync: 0.000044}
+10-30 14:11:24.439  2139  2139 I flutter : PERF t=270 time-pos=264.197267
+10-30 14:11:24.441  2139  2139 I flutter : PERF t=270 frame-drop-count=621
+10-30 14:11:24.442  2139  2139 I flutter : PERF t=270 decoder-frame-drop-count=0
+10-30 14:11:24.444  2139  2139 I flutter : PERF t=270 avsync=0.000036
+10-30 14:11:24.445  2139  2139 I flutter : PERF t=270 container-fps=29.970030
+10-30 14:11:24.446  2139  2139 I flutter : PERF t=270 pause=no
+10-30 14:11:24.447  2139  2139 I flutter : ANDROID_P5_COUNTERS {time-pos: 264.197267, frame-drop-count: 621, decoder-frame-drop-count: 0, mistimed-frame-count: , vo-delayed-frame-count: 0, avsync: 0.000036}
+10-30 14:11:24.447  2139  2139 I flutter : PERF t=270 eof-reached=no
+10-30 14:11:24.448  2139  2139 I flutter : PERF t=270 idle-active=no
+10-30 14:11:24.450  2139  2139 I flutter : PERF t=270 thermal-status=null
+10-30 14:11:34.441  2139  2139 I flutter : ANDROID_P5_COUNTERS {time-pos: 274.207267, frame-drop-count: 621, decoder-frame-drop-count: 0, mistimed-frame-count: , vo-delayed-frame-count: 0, avsync: 0.000024}
+10-30 14:11:44.446  2139  2139 I flutter : ANDROID_P5_COUNTERS {time-pos: 284.183900, frame-drop-count: 622, decoder-frame-drop-count: 0, mistimed-frame-count: , vo-delayed-frame-count: 0, avsync: 0.000042}
+10-30 14:11:54.439  2139  2139 I flutter : PERF t=300 time-pos=294.193900
+10-30 14:11:54.441  2139  2139 I flutter : PERF t=300 frame-drop-count=622
+10-30 14:11:54.443  2139  2139 I flutter : PERF t=300 decoder-frame-drop-count=0
+10-30 14:11:54.444  2139  2139 I flutter : PERF t=300 avsync=0.000038
+10-30 14:11:54.445  2139  2139 I flutter : PERF t=300 container-fps=29.970030
+10-30 14:11:54.446  2139  2139 I flutter : PERF t=300 pause=no
+10-30 14:11:54.447  2139  2139 I flutter : ANDROID_P5_COUNTERS {time-pos: 294.193900, frame-drop-count: 622, decoder-frame-drop-count: 0, mistimed-frame-count: , vo-delayed-frame-count: 0, avsync: 0.000038}
+10-30 14:11:54.448  2139  2139 I flutter : PERF t=300 eof-reached=no
+10-30 14:11:54.448  2139  2139 I flutter : PERF t=300 idle-active=no
+10-30 14:11:54.450  2139  2139 I flutter : PERF t=300 thermal-status=null
+10-30 14:12:04.445  2139  2139 I flutter : ANDROID_P5_COUNTERS {time-pos: 304.203900, frame-drop-count: 622, decoder-frame-drop-count: 0, mistimed-frame-count: , vo-delayed-frame-count: 0, avsync: 0.000052}
+10-30 14:12:14.447  2139  2139 I flutter : ANDROID_P5_COUNTERS {time-pos: 314.213900, frame-drop-count: 622, decoder-frame-drop-count: 0, mistimed-frame-count: , vo-delayed-frame-count: 0, avsync: 0.000051}
+10-30 14:12:24.455  2139  2139 I flutter : PERF t=330 time-pos=324.223900
+10-30 14:12:24.473  2139  2139 I flutter : PERF t=330 frame-drop-count=622
+10-30 14:12:24.476  2139  2139 I flutter : PERF t=330 decoder-frame-drop-count=0
+10-30 14:12:24.478  2139  2139 I flutter : PERF t=330 avsync=0.000036
+10-30 14:12:24.480  2139  2139 I flutter : PERF t=330 container-fps=29.970030
+10-30 14:12:24.481  2139  2139 I flutter : PERF t=330 pause=no
+10-30 14:12:24.482  2139  2139 I flutter : ANDROID_P5_COUNTERS {time-pos: 324.257267, frame-drop-count: 622, decoder-frame-drop-count: 0, mistimed-frame-count: , vo-delayed-frame-count: 0, avsync: 0.000036}
+10-30 14:12:24.483  2139  2139 I flutter : PERF t=330 eof-reached=no
+10-30 14:12:24.484  2139  2139 I flutter : PERF t=330 idle-active=no
+10-30 14:12:24.485  2139  2139 I flutter : PERF t=330 thermal-status=null
+10-30 14:12:34.445  2139  2139 I flutter : ANDROID_P5_COUNTERS {time-pos: 334.200533, frame-drop-count: 622, decoder-frame-drop-count: 0, mistimed-frame-count: , vo-delayed-frame-count: 0, avsync: 0.000037}
+10-30 14:12:44.487  2139  2139 I flutter : ANDROID_P5_COUNTERS {time-pos: 344.243900, frame-drop-count: 623, decoder-frame-drop-count: 0, mistimed-frame-count: , vo-delayed-frame-count: 0, avsync: 0.000024}

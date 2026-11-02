@@ -442,6 +442,18 @@ class HdrStrategyRealizer {
         (_convertPqSurfaceTransfer == 'pq' ||
             _convertPqSurfaceTransfer ==
                 HdrYuvPresentationContract.windowTransfer);
+    // Permission is an explicit vendor capability, never an id/model guess.
+    // The native mapper separately verifies each frame's real nominal fps.
+    final deferPublish30fps = cls == HdrSourceClass.dvP84 &&
+        source.dynamicMetadata == HdrDynamicMetadata.dolbyVision &&
+        source.dvProfile == 8 &&
+        source.dvCompatibilityId == 4 &&
+        source.transfer == 'hlg' &&
+        yuvWindowContract &&
+        _convertPqSurfaceTransfer == 'pq' &&
+        capabilities.dataSpaceExt?.applicable == true &&
+        capabilities.dataSpaceExt?.supportsDeferredSurfaceTexturePublish30fps ==
+            true;
     final String hwdecDependency;
     if (hwdec == 'surfacetexture') {
       hwdecDependency = HdrRouteDependency.hwdecSurfaceTexture;
@@ -474,8 +486,12 @@ class HdrStrategyRealizer {
         offscreenTransfer: yuvWindowContract
             ? HdrYuvPresentationContract.offscreenTransfer
             : null,
+        surfaceTexturePublishFlushPolicy: deferPublish30fps
+            ? HdrSurfaceTexturePublishFlushPolicy.defer30fps
+            : HdrSurfaceTexturePublishFlushPolicy.immediate,
         stripDvRpu: source.dynamicMetadata == HdrDynamicMetadata.dolbyVision,
-        metadataHandling: metadataHandlingFor(source, HdrStrategy.baseLayerConvert),
+        metadataHandling:
+            metadataHandlingFor(source, HdrStrategy.baseLayerConvert),
         dependencies: <String>{
           hwdecDependency,
           HdrRouteDependency.topologyPlatformView,

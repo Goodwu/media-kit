@@ -1,0 +1,28 @@
+{
+  "hostTest": "actual shared trigger compile+execute exit0 incl paused/redraw/route/gen/seek/continuous3000steps",
+  "androidSyntax": [
+    {
+      "file": "video/out/vo_gpu_next.c",
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "video/out/opengl/context_android.c",
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "test/yuv_frame_trace.c",
+      "exit": 0,
+      "stderr": ""
+    }
+  ],
+  "files": {
+    "video/out/vo_gpu_next.c": "61dd75b89f9064be1a609ab35731bf0b3f815fc2ab60f4a20f41ba2e7bb26819",
+    "video/out/opengl/context_android.c": "05936b02fceecd4fb2f4fe0b79fd98439431b114b123cab7de8bc88967aa49b8",
+    "video/out/gpu/context.h": "dedb499f90243695ffb5bfc35927414ea767b128580062ec417492fc4790765e",
+    "video/out/yuv_frame_trace.h": "8f41cc11841473ff9566ab5dcc2980750cde0cbc7dd6b21ba2ad8cef01c02f50",
+    "test/yuv_frame_trace.c": "a739052154c4a1db3f7dc9ca3a3f207341c81068b0f8e078e2417ec10bfd41e7",
+    "test/meson.build": "c5e9dbb8fb86b1ced415c6d717d1ff457691748de8c32f0965aaca03334ea3f2"
+  }
+}

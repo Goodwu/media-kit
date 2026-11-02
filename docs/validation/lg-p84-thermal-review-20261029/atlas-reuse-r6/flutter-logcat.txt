@@ -1,0 +1,1233 @@
+10-30 14:20:33.564  9162  9162 I flutter : [IMPORTANT:flutter/shell/common/shell.cc(528)] [Action Required]: Impeller opt-out deprecated.
+10-30 14:20:33.564  9162  9162 I flutter :     The application opted out of Impeller by either using the
+10-30 14:20:33.564  9162  9162 I flutter :     `--no-enable-impeller` flag or the
+10-30 14:20:33.564  9162  9162 I flutter :     `io.flutter.embedding.android.EnableImpeller` `AndroidManifest.xml` entry.
+10-30 14:20:33.564  9162  9162 I flutter :     These options are going to go away in an upcoming Flutter release. Remove
+10-30 14:20:33.564  9162  9162 I flutter :     the explicit opt-out. If you need to opt-out, please report a bug describing
+10-30 14:20:33.564  9162  9162 I flutter :     the issue.
+10-30 14:20:33.564  9162  9162 I flutter : 
+10-30 14:20:33.564  9162  9162 I flutter :     <URL_REDACTED>
+10-30 14:20:33.564  9162  9162 I flutter : 
+10-30 14:20:33.874  9162  9162 I flutter : ANDROID_DIRECT_OPEN awaiting_tap
+10-30 14:20:33.966  9162  9162 I flutter : ANDROID_CAPABILITIES {sdkInt: 24, displayHdrTypes: [2, 1], egl: {version: 1.0, extensions: EGL_KHR_get_all_proc_addresses EGL_ANDROID_presentation_time EGL_KHR_swap_buffers_with_damage EGL_ANDROID_create_native_client_buffer EGL_ANDROID_front_buffer_auto_refresh EGL_KHR_image EGL_KHR_image_base EGL_KHR_lock_surface EGL_KHR_gl_texture_2D_image EGL_KHR_gl_texture_3D_image EGL_KHR_gl_texture_cubemap_image EGL_KHR_gl_renderbuffer_image EGL_KHR_reusable_sync EGL_KHR_fence_sync EGL_KHR_create_context EGL_KHR_surfaceless_context EGL_EXT_create_context_robustness EGL_ANDROID_image_native_buffer EGL_KHR_wait_sync EGL_ANDROID_recordable EGL_KHR_partial_update EGL_KHR_create_context_no_error EGL_KHR_mutable_render_buffer EGL_EXT_yuv_surface EGL_EXT_protected_content , bt2020PqWindowSurface: false, bt2020HlgWindowSurface: false, highPrecisionConfigs: [{index: 48, red: 10, green: 10, blue: 10, alpha: 2}, {index: 49, red: 10, green: 10, blue: 10, alpha: 2}, {index: 50, red: 10, green: 10, blue: 10, alpha: 2}, {index: 51, 
+10-30 14:20:37.879  9162  9162 I flutter : MPVPROP vo=null
+10-30 14:20:37.879  9162  9162 I flutter : MPVPROP hwdec-current=
+10-30 14:20:37.879  9162  9162 I flutter : MPVPROP path=
+10-30 14:20:37.879  9162  9162 I flutter : MPVPROP video-format=
+10-30 14:20:37.880  9162  9162 I flutter : MPVPROP video-params=
+10-30 14:20:37.880  9162  9162 I flutter : MPVPROP video-out-params=
+10-30 14:20:37.880  9162  9162 I flutter : MPVPROP vf=
+10-30 14:20:37.881  9162  9162 I flutter : MPVPROP current-tracks/video/dolby-vision-profile=
+10-30 14:20:37.881  9162  9162 I flutter : MPVPROP current-tracks/video/dolby-vision-level=
+10-30 14:20:37.882  9162  9162 I flutter : MPVPROP target-prim=auto
+10-30 14:20:37.883  9162  9162 I flutter : MPVPROP target-trc=auto
+10-30 14:20:37.884  9162  9162 I flutter : MPVPROP target-colorspace-hint=auto
+10-30 14:20:37.885  9162  9162 I flutter : MPVPROP target-colorspace-hint-strict=yes
+10-30 14:20:37.886  9162  9162 I flutter : MPVPROP gpu-api=
+10-30 14:20:37.887  9162  9162 I flutter : MPVPROP gpu-context=
+10-30 14:20:37.889  9162  9162 I flutter : MPVPROP target-peak=auto
+10-30 14:20:37.890  9162  9162 I flutter : MPVPROP egl-output-format=auto
+10-30 14:20:37.891  9162  9162 I flutter : MPVPROP android-surface-size=
+10-30 14:20:37.892  9162  9162 I flutter : MPVPROP sig-peak=
+10-30 14:20:37.893  9162  9162 I flutter : MPVPROP tone-mapping=auto
+10-30 14:20:38.012  9162  9162 I flutter : ANDROID_DIRECT_OPEN trigger path=/sdcard/Android/data/com.example.media_kit_hdr_lab/files/hokkaido-p84.mp4
+10-30 14:20:38.013  9162  9162 I flutter : ANDROID_HDR_OPEN_BEGIN path=/sdcard/Android/data/com.example.media_kit_hdr_lab/files/hokkaido-p84.mp4 hint=null serial=1 simulateNoHlg=false wrongHint= noHint=false policyExperimental=false namedLocalSource=true p5RpuPipelineBuilt=true forceP84PqFallback=false textureCopyDiagnostic=false gpuPlatformHdr=false
+10-30 14:20:38.046  9162  9162 I flutter : HDR_SESSION_REPORT gen=1 source=HdrSourceDescriptor(codec: , transfer: null, primaries: null, dynamicMetadata: HdrDynamicMetadata.none, dvProfile: null, dvCompatibilityId: null, enhancementLayer: null) origin=null verified=false hwdecCurrent=null dataspace requested=null path=null readback=null degrade=null diagnostic=null error=null
+10-30 14:20:38.047  9162  9162 I flutter : HDR_SESSION_PREDICTION gen=1 selected=HdrCandidate(sdrDirect, verified, feasible: true, skip: null, route: HdrRoute(sdrDirect, sdr, output: sdr, dynamic: false, topology: platformView, vo: mediacodec_embed, hwdec: mediacodec, vd-lavc-o: null, render-mode: null, prim: null, trc: null, peak: none, surface: null, offscreen: none, requestedPublishFlush: immediate, stripRpu: false, metadata: none, deps: {hwdec:mediacodec, topology:platformView, decoder:mediacodec})) presentation=sdr confidence=verified playable=true
+10-30 14:20:38.047  9162  9162 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(sdrDirect, verified, feasible: true, skip: null, route: HdrRoute(sdrDirect, sdr, output: sdr, dynamic: false, topology: platformView, vo: mediacodec_embed, hwdec: mediacodec, vd-lavc-o: null, render-mode: null, prim: null, trc: null, peak: none, surface: null, offscreen: none, requestedPublishFlush: immediate, stripRpu: false, metadata: none, deps: {hwdec:mediacodec, topology:platformView, decoder:mediacodec}))
+10-30 14:20:38.047  9162  9162 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(sdrDirect, verified, feasible: true, skip: null, route: HdrRoute(sdrDirect, sdr, output: sdr, dynamic: false, topology: texture, vo: gpu-next, hwdec: mediacodec-copy, vd-lavc-o: null, render-mode: null, prim: null, trc: null, peak: none, surface: null, offscreen: none, requestedPublishFlush: immediate, stripRpu: false, metadata: none, deps: {presenter:gpu-next-opengl-texture, decoder:mediacodec, import:cpu-upload, hwdec:mediacodec-copy}))
+10-30 14:20:38.047  9162  9162 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(sdrDirect, verified, feasible: true, skip: null, route: HdrRoute(sdrDirect, sdr, output: sdr, dynamic: false, topology: texture, vo: gpu-next, hwdec: no, vd-lavc-o: null, render-mode: null, prim: null, trc: null, peak: none, surface: null, offscreen: none, requestedPublishFlush: immediate, stripRpu: false, metadata: none, deps: {presenter:gpu-next-opengl-texture, decoder:ffmpeg-software, import:cpu-upload}))
+10-30 14:20:38.050  9162  9162 I flutter : AUTO_COMPLETED completed=false
+10-30 14:20:38.051  9162  9162 I flutter : VIDEOPARAMS VideoParams(pixelformat: null, hwPixelformat: null, w: null, h: null, dw: null, dh: null, aspect: null, par: null, colormatrix: null, colorlevels: null, primaries: null, gamma: null, sigPeak: null, light: null, chromaLocation: null, rotate: null, stereoIn: null, averageBpp: null, alpha: null)
+10-30 14:20:38.109  9162  9162 I flutter : [SwTrace] onCreatePlatformView id=0 ohos=false hcpp=false ohosHcpp=false swPx=null x null
+10-30 14:20:38.265  9162  9162 I flutter : VIDEOPARAMS VideoParams(pixelformat: null, hwPixelformat: null, w: null, h: null, dw: null, dh: null, aspect: null, par: null, colormatrix: null, colorlevels: null, primaries: null, gamma: null, sigPeak: null, light: null, chromaLocation: null, rotate: null, stereoIn: null, averageBpp: null, alpha: null)
+10-30 14:20:38.436  9162  9162 I flutter : MPVLOG [ffmpeg/video] error: hevc_mediacodec: MKSCOLORKEYS: avctx trc=18 prim=9 range=1
+10-30 14:20:38.692  9162  9162 I flutter : VIDEOPARAMS VideoParams(pixelformat: mediacodec, hwPixelformat: null, w: 3840, h: 1920, dw: 3840, dh: 1920, aspect: 2.0, par: 1.0, colormatrix: bt.2020-ncl, colorlevels: limited, primaries: bt.2020, gamma: hlg, sigPeak: 4.926108360290527, light: hlg, chromaLocation: mpeg1/jpeg, rotate: 0, stereoIn: mono, averageBpp: null, alpha: none)
+10-30 14:20:38.893  9162  9162 I flutter : HDR_CAP_LAB {sdkInt: 24, displayHdrTypes: [2, 1], egl: {version: 1.0, extensions: EGL_KHR_get_all_proc_addresses EGL_ANDROID_presentation_time EGL_KHR_swap_buffers_with_damage EGL_ANDROID_create_native_client_buffer EGL_ANDROID_front_buffer_auto_refresh EGL_KHR_image EGL_KHR_image_base EGL_KHR_lock_surface EGL_KHR_gl_texture_2D_image EGL_KHR_gl_texture_3D_image EGL_KHR_gl_texture_cubemap_image EGL_KHR_gl_renderbuffer_image EGL_KHR_reusable_sync EGL_KHR_fence_sync EGL_KHR_create_context EGL_KHR_surfaceless_context EGL_EXT_create_context_robustness EGL_ANDROID_image_native_buffer EGL_KHR_wait_sync EGL_ANDROID_recordable EGL_KHR_partial_update EGL_KHR_create_context_no_error EGL_KHR_mutable_render_buffer EGL_EXT_yuv_surface EGL_EXT_protected_content , bt2020PqWindowSurface: false, bt2020HlgWindowSurface: false, highPrecisionConfigs: [{index: 48, red: 10, green: 10, blue: 10, alpha: 2}, {index: 49, red: 10, green: 10, blue: 10, alpha: 2}, {index: 50, red: 10, green: 10, blue: 10, alpha: 2}, {index: 51, red: 10, 
+10-30 14:20:38.910  9162  9162 I flutter : HDR_CAP_LIB_CHANNEL {dataSpaceBridgeLoaded: true, hevcDecoders: [{frameRateRange: [1, 240], widthRange: [64, 4096], supports4K: true, hardwareAcceleration: true, mimeType: video/hevc, name: OMX.qcom.video.decoder.hevc, heightRange: [64, 2160], max4KFps: 60.44444444444444, profiles: [1, 2, 4096], main10: true}, {frameRateRange: [1, 240], widthRange: [64, 4096], supports4K: true, hardwareAcceleration: true, mimeType: video/hevc, name: OMX.qcom.video.decoder.hevc.secure, heightRange: [64, 2160], max4KFps: 60.44444444444444, profiles: [1, 2, 4096], main10: true}, {frameRateRange: [0, 960], widthRange: [2, 2048], supports4K: false, hardwareAcceleration: false, mimeType: video/hevc, name: OMX.google.hevc.decoder, heightRange: [2, 2048], max4KFps: null, profiles: [1], main10: false}], dolbyVisionDecoders: [{frameRateRange: [1, 240], widthRange: [64, 4096], supports4K: true, hardwareAcceleration: true, mimeType: video/dolby-vision, name: OMX.qcom.video.decoder.dolby-vision, heightRange: [64, 2160], max4KFps: 60.4444
+10-30 14:20:38.921  9162  9162 I flutter : HDR_CAP_QUERY HdrCapabilities(sdk: 24, displayHdrTypes: {2, 1}, displayHdrMaxLuminance: 500.0, hevc: 3, dv: 2, p5Pipeline: true, nativeDvBridgeApi: 1, bridge: true, ext: HdrDataSpaceExtInfo(id: lg-pq, applicable: true, pqPresentation: HdrPqPresentation(rgbSurface: false, yuvWindow: true), validatedPredictionTransfers: {pq}, setterOnlyTransfers: {pq, pq-itu}, supportedSurfaceTransfers: {pq, pq-itu}, yuvWindowArmApi: 1, supportsDeferredSurfaceTexturePublish30fps: false))
+10-30 14:20:38.943  9162  9162 I flutter : HDR_SESSION_EVENT HdrReclassifiedEvent(gen: 1, previous: HdrSourceDescriptor(codec: , transfer: null, primaries: null, dynamicMetadata: HdrDynamicMetadata.none, dvProfile: null, dvCompatibilityId: null, enhancementLayer: null), current: HdrSourceDescriptor(codec: hevc, transfer: hlg, primaries: bt.2020, dynamicMetadata: HdrDynamicMetadata.dolbyVision, dvProfile: 8, dvCompatibilityId: 4, enhancementLayer: false), rebuilt: true)
+10-30 14:20:39.020  9162  9162 I flutter : VIDEOPARAMS VideoParams(pixelformat: null, hwPixelformat: null, w: null, h: null, dw: null, dh: null, aspect: null, par: null, colormatrix: null, colorlevels: null, primaries: null, gamma: null, sigPeak: null, light: null, chromaLocation: null, rotate: null, stereoIn: null, averageBpp: null, alpha: null)
+10-30 14:20:39.060  9162  9162 I flutter : VIDEOPARAMS VideoParams(pixelformat: null, hwPixelformat: null, w: null, h: null, dw: null, dh: null, aspect: null, par: null, colormatrix: null, colorlevels: null, primaries: null, gamma: null, sigPeak: null, light: null, chromaLocation: null, rotate: null, stereoIn: null, averageBpp: null, alpha: null)
+10-30 14:20:39.158  9162  9162 I flutter : YUV-DIAG: owner generation unavailable; legacy global arm
+10-30 14:20:39.196  9162  9162 I flutter : [SwTrace] onCreatePlatformView id=1 ohos=false hcpp=false ohosHcpp=false swPx=null x null
+10-30 14:20:39.283  9162  9162 I flutter : MPVLOG [vo/gpu-next] error: MKS-THERMAL kind=vo instance=0x741db8d3d0 pid=9162 mono_ns=5597809440 start_ns=5597805951 final=0 queue_frames=0 queue_resets=0 draw=0 redraw=0 display_synced=0 submit=0 flip=0 lease_copy=0 lease_reuse=0 latch=0 defer_publish_flush=0 publish_flush=0 flush_req=0 flush_ovr=0 nominal_fps=0.000000 fps_fallback=0 publish_deferred=0 retire_flush=0 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=0 swap=0 swap_ok=0 frame_id=0 pts=0.000000000 w=0 h=0
+10-30 14:20:39.284  9162  9162 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKS-THERMAL kind=yuv instance=0x742512dc50 pid=9162 mono_ns=5598018607 start_ns=5598014857 final=0 queue_frames=0 queue_resets=0 draw=0 redraw=0 display_synced=0 submit=0 flip=0 lease_copy=0 lease_reuse=0 latch=0 defer_publish_flush=0 publish_flush=0 flush_req=0 flush_ovr=0 nominal_fps=0.000000 fps_fallback=0 publish_deferred=0 retire_flush=0 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=0 swap=0 swap_ok=0 frame_id=0 pts=0.000000000 w=0 h=0
+10-30 14:20:39.285  9162  9162 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: runtime switch on; taking config49 branch
+10-30 14:20:39.285  9162  9162 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: enumerating 64 configs for config49 (visual 0x7fa30c04)
+10-30 14:20:39.286  9162  9162 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: config49 selected (config_id=49, visual=0x7fa30c04) via full enumeration
+10-30 14:20:39.287  9162  9162 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: presetting window format 0x7fa30c04 (1x1)
+10-30 14:20:39.287  9162  9162 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: ANativeWindow_setBuffersGeometry ok (format 0x7fa30c04, 1x1)
+10-30 14:20:39.288  9162  9162 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: eglCreateWindowSurface ok (config49)
+10-30 14:20:39.289  9162  9162 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKSURF-E1: dataspace applied ret=1
+10-30 14:20:39.289  9162  9162 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: eglMakeCurrent ok
+10-30 14:20:39.290  9162  9162 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-P1: queue-time setMetaData injection armed (op=2 COLOR_METADATA, 1768 B: primaries=9 range=1 transfer=16)
+10-30 14:20:39.291  9162  9162 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: GL_EXT_YUV_target present
+10-30 14:20:39.292  9162  9162 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: offscreen RGB FBO ready (2672x1440, rgba16f)
+10-30 14:20:39.308  9162  9162 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: final pass program ready
+10-30 14:20:39.308  9162  9162 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: branch active (NV12 window, libplacebo rendered to RGB offscreen, layout(yuv) final pass)
+10-30 14:20:39.309  9162  9162 I flutter : MPVLOG [vo/gpu-next] error: MKS-YUV-COMPARE event=egl-owner-configured android-current-verified=1 egl-loader-requested=1
+10-30 14:20:39.316  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-COMPARE-LIB event=caps-ready private_ssbo=2147483647 renderer_max_buffer=0 renderer_max_ssbo=0 fragment_blocks=4 bindings=24
+10-30 14:20:39.317  9162  9162 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: placeholder resize 1x1 skipped; keeping previous offscreen state
+10-30 14:20:39.317  9162  9162 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION gate-rejected=1 mask=0xb0018202 compat_present=0 compat=-1 flipped=1 mix=0 overlays=0 hooks=0 format=fbo
+10-30 14:20:39.318  9162  9162 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION target crop=0,0,960,540 repr=12/2 trc=0 prim=3 dst=0,0,960,540 size=2672x1440
+10-30 14:20:39.318  9162  9162 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION format type=5 components=4 depths=16,16,16,16 fbo=960x540
+10-30 14:20:39.318  9162  9162 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION params distort=0 blend=0 error_diffusion=0 icc=0 target_lut=0 corner=0 blur=16 background=1 border=0 transparency=0 visualize=0 interpolated=0 drawable_flip=0 planes=1 target_rotation=0
+10-30 14:20:39.325  9162  9162 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKS-FUSION rgb-fresh=1 generation=1
+10-30 14:20:39.326  9162  9162 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-P1: 1x1 placeholder buffer; injection refused (queue passthrough)
+10-30 14:20:39.369  9162  9162 I flutter : VIDEOPARAMS VideoParams(pixelformat: null, hwPixelformat: null, w: null, h: null, dw: null, dh: null, aspect: null, par: null, colormatrix: null, colorlevels: null, primaries: null, gamma: null, sigPeak: null, light: null, chromaLocation: null, rotate: null, stereoIn: null, averageBpp: null, alpha: null)
+10-30 14:20:39.460  9162  9162 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKSURF: version surfacetexture-poc-r2
+10-30 14:20:39.479  9162  9162 I flutter : MPVLOG [ffmpeg/video] error: hevc_mediacodec: MKSCOLORKEYS: avctx trc=18 prim=9 range=1
+10-30 14:20:39.760  9162  9162 I flutter : VIDEOPARAMS VideoParams(pixelformat: mediacodec, hwPixelformat: null, w: 3840, h: 1920, dw: 3840, dh: 1920, aspect: 2.0, par: 1.0, colormatrix: bt.2020-ncl, colorlevels: limited, primaries: bt.2020, gamma: hlg, sigPeak: 4.926108360290527, light: hlg, chromaLocation: mpeg1/jpeg, rotate: 0, stereoIn: mono, averageBpp: null, alpha: none)
+10-30 14:20:39.761  9162  9162 I flutter : ANDROID_PLATFORM_LAYOUT_OUTPUT_SIZE source=3840x1920 target=2672x1336
+10-30 14:20:39.781  9162  9162 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: placeholder resize 1x1 skipped; keeping previous offscreen state
+10-30 14:20:39.783  9162  9162 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKS-INPUT-FBO event=config requested=0
+10-30 14:20:39.784  9162  9162 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKS-THERMAL kind=import instance=0x74251ad050 pid=9162 mono_ns=6085399184 start_ns=6085397622 final=0 queue_frames=0 queue_resets=0 draw=0 redraw=0 display_synced=0 submit=0 flip=0 lease_copy=0 lease_reuse=0 latch=0 defer_publish_flush=0 publish_flush=0 flush_req=0 flush_ovr=0 nominal_fps=0.000000 fps_fallback=0 publish_deferred=0 retire_flush=0 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=0 swap=0 swap_ok=0 frame_id=0 pts=0.000000000 w=0 h=0
+10-30 14:20:39.823  9162  9162 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKSURF: unverified-declaration repr.sys=RGB repr.levels=full
+10-30 14:20:39.825  9162  9162 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKSURF: unverified-declaration color identity propagated from source; sys/levels declaration unverified (diag pending)
+10-30 14:20:39.826  9162  9162 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKSURF: color-identity propagated primaries=6 transfer=13 src_levels=1
+10-30 14:20:39.826  9162  9162 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKSURF: active-importer=surfacetexture device_registered=1
+10-30 14:20:39.829  9162  9162 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKS-INPUT-FBO requested=0 slot_attempts=0 shared_attempts=1 fallbacks=0 copy_failures=0 final=0
+10-30 14:20:39.830  9162  9162 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKS-FLUSH requested=0 effective=0 nominal_fps=29.970029970 experimental_override=0
+10-30 14:20:39.831  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:39.848  9162  9162 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKS-FUSION-FRAME event=swap-success route=rgb-final pid=9162 instance=0x742512dc50 token=6 generation=1 frame_id=45 source_pts=0.000000000 current_pts=0.000000000 still=0 redraw=0 repeat=0 mono_ns=6162739489 gpu_draw_confirmed=0
+10-30 14:20:39.850  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:39.860  9162  9162 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKS-FUSION-FRAME event=swap-success route=rgb-final pid=9162 instance=0x742512dc50 token=7 generation=1 frame_id=45 source_pts=0.000000000 current_pts=0.000000000 still=1 redraw=1 repeat=0 mono_ns=6174261415 gpu_draw_confirmed=0
+10-30 14:20:39.861  9162  9162 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: offscreen RGB FBO ready (2672x1336, rgba16f)
+10-30 14:20:39.863  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:39.874  9162  9162 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKS-FUSION-FRAME event=swap-success route=rgb-final pid=9162 instance=0x742512dc50 token=8 generation=2 frame_id=45 source_pts=0.000000000 current_pts=0.000000000 still=1 redraw=1 repeat=0 mono_ns=6186631518 gpu_draw_confirmed=0
+10-30 14:20:39.894  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:39.921  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:39.962  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:39.972  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:40.011  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:40.033  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:40.054  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:40.072  9162  9162 I flutter : HDR_SESSION_REPORT gen=1 source=HdrSourceDescriptor(codec: hevc, transfer: hlg, primaries: bt.2020, dynamicMetadata: HdrDynamicMetadata.dolbyVision, dvProfile: 8, dvCompatibilityId: 4, enhancementLayer: false) origin=decoder verified=true hwdecCurrent=surfacetexture dataspace requested=pq path=ext:lg-pq readback=none degrade=null diagnostic=null error=null
+10-30 14:20:40.073  9162  9162 I flutter : HDR_SESSION_PREDICTION gen=1 selected=HdrCandidate(baseLayerConvert, verified, feasible: true, skip: null, route: HdrRoute(baseLayerConvert, nativeHdr, output: pq, dynamic: false, topology: platformView, vo: gpu-next, hwdec: surfacetexture, vd-lavc-o: null, render-mode: null, prim: bt.2020, trc: pq, peak: 1000, surface: pq, offscreen: pq-full, requestedPublishFlush: immediate, stripRpu: true, metadata: baselineOnly, deps: {hwdec:surfacetexture, topology:platformView, dataspace:pq, decoder:mediacodec})) presentation=nativeHdr confidence=verified playable=true
+10-30 14:20:40.073  9162  9162 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(nativeDolbyVision, verified, feasible: false, skip: nativeDvUnavailable, route: null)
+10-30 14:20:40.073  9162  9162 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(metadataReshape, experimental, feasible: false, skip: pqRgbPresentationUnavailable, route: null)
+10-30 14:20:40.073  9162  9162 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(baseLayerDirect, verified, feasible: false, skip: displayLacksTransfer, route: null)
+10-30 14:20:40.073  9162  9162 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(baseLayerConvert, verified, feasible: true, skip: null, route: HdrRoute(baseLayerConvert, nativeHdr, output: pq, dynamic: false, topology: platformView, vo: gpu-next, hwdec: surfacetexture, vd-lavc-o: null, render-mode: null, prim: bt.2020, trc: pq, peak: 1000, surface: pq, offscreen: pq-full, requestedPublishFlush: immediate, stripRpu: true, metadata: baselineOnly, deps: {hwdec:surfacetexture, topology:platformView, dataspace:pq, decoder:mediacodec}))
+10-30 14:20:40.073  9162  9162 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(toneMapSdr, verified, feasible: false, skip: displayLacksTransfer, route: null)
+10-30 14:20:40.073  9162  9162 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(toneMapSdr, verified, feasible: false, skip: displayLacksTransfer, route: null)
+10-30 14:20:40.073  9162  9162 I flutter : HDR_SESSION_ACTUAL gen=1 actual=HdrRoute(baseLayerConvert, nativeHdr, output: pq, dynamic: false, topology: platformView, vo: gpu-next, hwdec: surfacetexture, vd-lavc-o: null, render-mode: null, prim: bt.2020, trc: pq, peak: 1000, surface: pq, offscreen: pq-full, requestedPublishFlush: immediate, stripRpu: true, metadata: baselineOnly, deps: {hwdec:surfacetexture, topology:platformView, dataspace:pq, decoder:mediacodec})
+10-30 14:20:40.073  9162  9162 I flutter : HDR_SESSION_EVENT HdrRouteAppliedEvent(gen: 1, route: HdrRoute(baseLayerConvert, nativeHdr, output: pq, dynamic: false, topology: platformView, vo: gpu-next, hwdec: surfacetexture, vd-lavc-o: null, render-mode: null, prim: bt.2020, trc: pq, peak: 1000, surface: pq, offscreen: pq-full, requestedPublishFlush: immediate, stripRpu: true, metadata: baselineOnly, deps: {hwdec:surfacetexture, topology:platformView, dataspace:pq, decoder:mediacodec}))
+10-30 14:20:40.074  9162  9162 I flutter : MKSURF-POC: active-importer=surfacetexture verified
+10-30 14:20:40.074  9162  9162 I flutter : ANDROID_HDR_OPEN path=/sdcard/Android/data/com.example.media_kit_hdr_lab/files/hokkaido-p84.mp4 serial=1
+10-30 14:20:40.074  9162  9162 I flutter : HDR_SESSION_REPORT gen=1 source=HdrSourceDescriptor(codec: hevc, transfer: hlg, primaries: bt.2020, dynamicMetadata: HdrDynamicMetadata.dolbyVision, dvProfile: 8, dvCompatibilityId: 4, enhancementLayer: false) origin=decoder verified=true hwdecCurrent=surfacetexture dataspace requested=pq path=ext:lg-pq readback=none degrade=null diagnostic=null error=null
+10-30 14:20:40.074  9162  9162 I flutter : HDR_SESSION_PREDICTION gen=1 selected=HdrCandidate(baseLayerConvert, verified, feasible: true, skip: null, route: HdrRoute(baseLayerConvert, nativeHdr, output: pq, dynamic: false, topology: platformView, vo: gpu-next, hwdec: surfacetexture, vd-lavc-o: null, render-mode: null, prim: bt.2020, trc: pq, peak: 1000, surface: pq, offscreen: pq-full, requestedPublishFlush: immediate, stripRpu: true, metadata: baselineOnly, deps: {hwdec:surfacetexture, topology:platformView, dataspace:pq, decoder:mediacodec})) presentation=nativeHdr confidence=verified playable=true
+10-30 14:20:40.074  9162  9162 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(nativeDolbyVision, verified, feasible: false, skip: nativeDvUnavailable, route: null)
+10-30 14:20:40.075  9162  9162 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(metadataReshape, experimental, feasible: false, skip: pqRgbPresentationUnavailable, route: null)
+10-30 14:20:40.075  9162  9162 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(baseLayerDirect, verified, feasible: false, skip: displayLacksTransfer, route: null)
+10-30 14:20:40.075  9162  9162 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(baseLayerConvert, verified, feasible: true, skip: null, route: HdrRoute(baseLayerConvert, nativeHdr, output: pq, dynamic: false, topology: platformView, vo: gpu-next, hwdec: surfacetexture, vd-lavc-o: null, render-mode: null, prim: bt.2020, trc: pq, peak: 1000, surface: pq, offscreen: pq-full, requestedPublishFlush: immediate, stripRpu: true, metadata: baselineOnly, deps: {hwdec:surfacetexture, topology:platformView, dataspace:pq, decoder:mediacodec}))
+10-30 14:20:40.075  9162  9162 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(toneMapSdr, verified, feasible: false, skip: displayLacksTransfer, route: null)
+10-30 14:20:40.075  9162  9162 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(toneMapSdr, verified, feasible: false, skip: displayLacksTransfer, route: null)
+10-30 14:20:40.075  9162  9162 I flutter : HDR_SESSION_ACTUAL gen=1 actual=HdrRoute(baseLayerConvert, nativeHdr, output: pq, dynamic: false, topology: platformView, vo: gpu-next, hwdec: surfacetexture, vd-lavc-o: null, render-mode: null, prim: bt.2020, trc: pq, peak: 1000, surface: pq, offscreen: pq-full, requestedPublishFlush: immediate, stripRpu: true, metadata: baselineOnly, deps: {hwdec:surfacetexture, topology:platformView, dataspace:pq, decoder:mediacodec})
+10-30 14:20:40.091  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:40.124  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:40.146  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:40.179  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:40.215  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:40.250  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:40.283  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:40.319  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:40.354  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:40.385  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:40.425  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:40.456  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:40.496  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:40.527  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:40.564  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:40.599  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:40.629  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:40.658  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:40.695  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:40.726  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:40.764  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:40.804  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:40.832  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:40.858  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:40.893  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:40.922  9162  9162 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-P1: set-done table full (32); re-setting on every queue (idempotent same-content copy)
+10-30 14:20:40.931  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:40.961  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:41.004  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:41.035  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:41.064  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:41.106  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:41.132  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:41.164  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:41.202  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:41.234  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:41.264  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:41.297  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:41.330  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:41.363  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:41.406  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:41.441  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:41.463  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:41.499  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:41.533  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:41.563  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:41.601  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:41.630  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:41.661  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:41.697  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:41.732  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:41.767  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:41.801  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:41.835  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:41.865  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:41.877  9162  9162 I flutter : PERF t=8 time-pos=2.035367
+10-30 14:20:41.879  9162  9162 I flutter : PERF t=8 frame-drop-count=0
+10-30 14:20:41.880  9162  9162 I flutter : PERF t=8 decoder-frame-drop-count=0
+10-30 14:20:41.882  9162  9162 I flutter : PERF t=8 avsync=-0.000023
+10-30 14:20:41.883  9162  9162 I flutter : PERF t=8 container-fps=29.970030
+10-30 14:20:41.884  9162  9162 I flutter : PERF t=8 pause=no
+10-30 14:20:41.885  9162  9162 I flutter : PERF t=8 eof-reached=no
+10-30 14:20:41.888  9162  9162 I flutter : PERF t=8 idle-active=no
+10-30 14:20:41.890  9162  9162 I flutter : PERF t=8 thermal-status=null
+10-30 14:20:41.897  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:41.934  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:41.966  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:42.002  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:42.037  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:42.066  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:42.105  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:42.133  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:42.166  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:42.199  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:42.229  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:42.262  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:42.299  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:42.329  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:42.368  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:42.400  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:42.435  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:42.465  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:42.501  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:42.533  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:42.567  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:42.600  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:42.638  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:42.665  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:42.699  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:42.733  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:42.763  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:42.799  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:42.833  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:42.869  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:42.898  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:42.931  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:42.972  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:43.000  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:43.032  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:43.070  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:43.101  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:43.139  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:43.166  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:43.201  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:43.236  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:43.265  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:43.301  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:43.337  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:43.366  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:43.402  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:43.437  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:43.468  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:43.501  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:43.539  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:43.569  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:43.599  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:43.630  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:43.665  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:43.695  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:43.734  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:43.764  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:43.799  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:43.832  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:43.866  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:43.884  9162  9162 I flutter : ANDROID_P5_COUNTERS {time-pos: 4.037367, frame-drop-count: 0, decoder-frame-drop-count: 0, mistimed-frame-count: , vo-delayed-frame-count: 0, avsync: 0.000034}
+10-30 14:20:43.905  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:43.939  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:43.973  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:44.002  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:44.038  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:44.066  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:44.101  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:44.145  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:44.167  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:44.205  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:44.235  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:44.264  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:44.297  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:44.333  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:44.367  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:44.406  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:44.438  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:44.474  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:44.499  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:44.538  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:44.573  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:44.607  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:44.633  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:44.671  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:44.699  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:44.734  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:44.767  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:44.804  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:44.855  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:44.878  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:44.904  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:44.936  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:44.966  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:44.999  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:45.037  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:45.075  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:45.114  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:45.135  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:45.165  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:45.199  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:45.235  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:45.267  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:45.299  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:45.337  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:45.365  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:45.401  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:45.437  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:45.480  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:45.500  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:45.541  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:45.570  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:45.605  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:45.633  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:45.663  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:45.702  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:45.734  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:45.769  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:45.804  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:45.838  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:45.877  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:45.905  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:45.939  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:45.970  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:46.001  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:46.038  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:46.077  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:46.103  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:46.141  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:46.174  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:46.202  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:46.239  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:46.274  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:46.305  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:46.335  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:46.367  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:46.403  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:46.435  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:46.472  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:46.506  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:46.536  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:46.571  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:46.607  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:46.637  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:46.668  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:46.701  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:46.740  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:46.771  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:46.801  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:46.837  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:46.871  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:46.903  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:46.940  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:46.979  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:47.008  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:47.039  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:47.070  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:47.107  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:47.136  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:47.170  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:47.206  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:47.241  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:47.273  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:47.303  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:47.338  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:47.370  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:47.410  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:47.438  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:47.473  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:47.505  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:47.538  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:47.572  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:47.608  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:47.638  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:47.670  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:47.701  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:47.734  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:47.766  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:47.802  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:47.836  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:47.872  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:47.908  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:47.940  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:47.973  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:48.004  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:48.039  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:48.075  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:48.109  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:48.139  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:48.172  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:48.202  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:48.237  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:48.271  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:48.305  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:48.336  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:48.372  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:48.412  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:48.438  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:48.476  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:48.503  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:48.539  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:48.573  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:48.606  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:48.641  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:48.674  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:48.703  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:48.737  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:48.772  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:48.802  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:48.839  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:48.870  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:48.906  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:48.944  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:48.975  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:49.013  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:49.039  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:49.077  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:49.111  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:49.138  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:49.173  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:49.204  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:49.239  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:49.275  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:49.297  9162  9162 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKS-THERMAL kind=yuv instance=0x742512dc50 pid=9162 mono_ns=15610238283 start_ns=5598014857 final=0 queue_frames=0 queue_resets=0 draw=0 redraw=0 display_synced=0 submit=0 flip=0 lease_copy=0 lease_reuse=0 latch=0 defer_publish_flush=0 publish_flush=0 flush_req=0 flush_ovr=0 nominal_fps=0.000000 fps_fallback=0 publish_deferred=0 retire_flush=0 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=291 swap=291 swap_ok=291 frame_id=0 pts=0.000000000 w=2672 h=1336
+10-30 14:20:49.299  9162  9162 I flutter : MPVLOG [vo/gpu-next] error: MKS-THERMAL kind=vo instance=0x741db8d3d0 pid=9162 mono_ns=15610429794 start_ns=5597805951 final=0 queue_frames=284 queue_resets=1 draw=291 redraw=7 display_synced=0 submit=291 flip=291 lease_copy=0 lease_reuse=0 latch=0 defer_publish_flush=0 publish_flush=0 flush_req=0 flush_ovr=0 nominal_fps=0.000000 fps_fallback=0 publish_deferred=0 retire_flush=0 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=0 swap=0 swap_ok=0 frame_id=328 pts=9.442766667 w=2672 h=1336
+10-30 14:20:49.303  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:49.340  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:49.373  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:49.407  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:49.443  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:49.475  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:49.506  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:49.544  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:49.579  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:49.583  9162  9162 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKS-FUSION rgb-fresh=300 generation=2
+10-30 14:20:49.607  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:49.641  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:49.678  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:49.706  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:49.746  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:49.772  9162  9162 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKS-THERMAL kind=import instance=0x74251ad050 pid=9162 mono_ns=16085937090 start_ns=6085397622 final=0 queue_frames=0 queue_resets=0 draw=0 redraw=0 display_synced=0 submit=0 flip=0 lease_copy=299 lease_reuse=2 latch=299 defer_publish_flush=0 publish_flush=299 flush_req=0 flush_ovr=0 nominal_fps=29.970030 fps_fallback=0 publish_deferred=0 retire_flush=300 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=0 swap=0 swap_ok=0 frame_id=0 pts=9.943266667 w=3840 h=1920
+10-30 14:20:49.773  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:49.800  9162  9162 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKS-INPUT-FBO requested=0 slot_attempts=0 shared_attempts=300 fallbacks=0 copy_failures=0 final=0
+10-30 14:20:49.801  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:49.850  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:49.874  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:49.904  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:49.938  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:49.976  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:50.006  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:50.045  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:50.076  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:50.107  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:50.139  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:50.174  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:50.205  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:50.244  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:50.273  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:50.309  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:50.339  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:50.373  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:50.415  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:50.448  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:50.474  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:50.504  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:50.544  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:50.573  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:50.612  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:50.641  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:50.675  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:50.706  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:50.740  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:50.775  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:50.810  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:50.841  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:50.877  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:50.908  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:50.941  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:50.976  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:51.007  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:51.042  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:51.077  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:51.120  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:51.140  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:51.172  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:51.204  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:51.239  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:51.274  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:51.308  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:51.341  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:51.374  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:51.407  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:51.443  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:51.477  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:51.508  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:51.541  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:51.576  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:51.610  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:51.647  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:51.675  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:51.707  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:51.739  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:51.776  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:51.809  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:51.839  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:51.881  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:51.885  9162  9162 I flutter : PERF t=18 time-pos=12.078733
+10-30 14:20:51.886  9162  9162 I flutter : PERF t=18 frame-drop-count=0
+10-30 14:20:51.886  9162  9162 I flutter : PERF t=18 decoder-frame-drop-count=0
+10-30 14:20:51.887  9162  9162 I flutter : PERF t=18 avsync=0.000013
+10-30 14:20:51.888  9162  9162 I flutter : PERF t=18 container-fps=29.970030
+10-30 14:20:51.889  9162  9162 I flutter : PERF t=18 pause=no
+10-30 14:20:51.889  9162  9162 I flutter : PERF t=18 eof-reached=no
+10-30 14:20:51.890  9162  9162 I flutter : PERF t=18 idle-active=no
+10-30 14:20:51.891  9162  9162 I flutter : PERF t=18 thermal-status=null
+10-30 14:20:51.906  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:51.945  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:51.974  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:52.009  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:52.046  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:52.078  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:52.114  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:52.141  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:52.176  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:52.209  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:52.243  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:52.278  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:52.314  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:52.343  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:52.375  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:52.410  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:52.444  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:52.479  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:52.510  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:52.542  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:52.578  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:52.607  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:52.645  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:52.677  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:52.708  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:52.742  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:52.777  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:52.807  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:52.842  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:52.877  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:52.911  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:52.945  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:52.977  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:53.016  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:53.049  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:53.080  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:53.113  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:53.142  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:53.177  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:53.211  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:53.245  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:53.274  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:53.307  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:53.339  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:53.374  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:53.411  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:53.443  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:53.475  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:53.514  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:53.541  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:53.578  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:53.612  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:53.657  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:53.676  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:53.710  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:53.745  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:53.774  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:53.810  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:53.843  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:53.888  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:53.897  9162  9162 I flutter : ANDROID_P5_COUNTERS {time-pos: 14.080733, frame-drop-count: 0, decoder-frame-drop-count: 0, mistimed-frame-count: , vo-delayed-frame-count: 0, avsync: 0.000020}
+10-30 14:20:53.910  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:53.947  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:53.975  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:54.013  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:54.046  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:54.082  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:54.114  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:54.144  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:54.178  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:54.209  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:54.241  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:54.284  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:54.309  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:54.343  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:54.379  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:54.414  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:54.446  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:54.481  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:54.514  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:54.545  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:54.578  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:54.613  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:54.643  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:54.675  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:54.716  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:54.741  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:54.776  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:54.810  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:54.841  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:54.878  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:54.912  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:54.944  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:54.978  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:55.016  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:55.045  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:55.080  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:55.116  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:55.144  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:55.180  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:55.211  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:55.242  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:55.278  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:55.318  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:55.345  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:55.374  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:55.413  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:55.446  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:55.478  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:55.514  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:55.550  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:55.581  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:55.616  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:55.645  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:55.678  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:55.717  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:55.750  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:55.778  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:55.813  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:55.845  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:55.877  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:55.915  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:55.948  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:55.980  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:56.017  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:56.045  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:56.077  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:56.110  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:56.147  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:56.175  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:56.209  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:56.243  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:56.277  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:56.311  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:56.344  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:56.377  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:56.417  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:56.445  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:56.478  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:56.518  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:56.555  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:56.583  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:56.618  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:56.646  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:56.678  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:56.721  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:56.754  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:56.777  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:56.809  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:56.846  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:56.877  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:56.915  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:56.946  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:56.981  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:57.017  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:57.047  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:57.083  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:57.115  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:57.146  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:57.184  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:57.214  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:57.247  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:57.279  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:57.314  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:57.345  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:57.384  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:57.419  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:57.446  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:57.481  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:57.512  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:57.548  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:57.578  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:57.615  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:57.649  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:57.684  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:57.714  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:57.747  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:57.779  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:57.817  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:57.845  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:57.881  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:57.917  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:57.951  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:57.982  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:58.015  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:58.052  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:58.081  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:58.121  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:58.147  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:58.182  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:58.212  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:58.249  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:58.279  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:58.316  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:58.347  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:58.382  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:58.417  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:58.450  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:58.481  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:58.516  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:58.551  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:58.583  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:58.615  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:58.648  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:58.679  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:58.715  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:58.746  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:58.781  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:58.825  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:58.847  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:58.878  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:58.912  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:58.950  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:58.982  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:59.014  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:59.054  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:59.082  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:59.119  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:59.148  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:59.185  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:59.218  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:59.249  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:59.283  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:59.308  9162  9162 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKS-THERMAL kind=yuv instance=0x742512dc50 pid=9162 mono_ns=25621072386 start_ns=5598014857 final=0 queue_frames=0 queue_resets=0 draw=0 redraw=0 display_synced=0 submit=0 flip=0 lease_copy=0 lease_reuse=0 latch=0 defer_publish_flush=0 publish_flush=0 flush_req=0 flush_ovr=0 nominal_fps=0.000000 fps_fallback=0 publish_deferred=0 retire_flush=0 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=591 swap=591 swap_ok=591 frame_id=0 pts=0.000000000 w=2672 h=1336
+10-30 14:20:59.316  9162  9162 I flutter : MPVLOG [vo/gpu-next] error: MKS-THERMAL kind=vo instance=0x741db8d3d0 pid=9162 mono_ns=25621352178 start_ns=5597805951 final=0 queue_frames=584 queue_resets=1 draw=591 redraw=7 display_synced=0 submit=591 flip=591 lease_copy=0 lease_reuse=0 latch=0 defer_publish_flush=0 publish_flush=0 flush_req=0 flush_ovr=0 nominal_fps=0.000000 fps_fallback=0 publish_deferred=0 retire_flush=0 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=0 swap=0 swap_ok=0 frame_id=628 pts=19.452766667 w=2672 h=1336
+10-30 14:20:59.318  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:59.350  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:59.380  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:59.418  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:59.450  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:59.485  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:59.520  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:59.548  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:59.585  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:59.587  9162  9162 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKS-FUSION rgb-fresh=600 generation=2
+10-30 14:20:59.617  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:59.648  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:59.680  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:59.713  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:59.748  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:59.782  9162  9162 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKS-THERMAL kind=import instance=0x74251ad050 pid=9162 mono_ns=26093868694 start_ns=6085397622 final=0 queue_frames=0 queue_resets=0 draw=0 redraw=0 display_synced=0 submit=0 flip=0 lease_copy=599 lease_reuse=2 latch=599 defer_publish_flush=0 publish_flush=599 flush_req=0 flush_ovr=0 nominal_fps=29.970030 fps_fallback=0 publish_deferred=0 retire_flush=600 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=0 swap=0 swap_ok=0 frame_id=0 pts=19.953266667 w=3840 h=1920
+10-30 14:20:59.785  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:59.818  9162  9162 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKS-INPUT-FBO requested=0 slot_attempts=0 shared_attempts=600 fallbacks=0 copy_failures=0 final=0
+10-30 14:20:59.825  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:59.878  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:59.892  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:59.916  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:59.954  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:20:59.986  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:00.022  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:00.054  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:00.080  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:00.116  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:00.150  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:00.179  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:00.214  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:00.245  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:00.277  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:00.317  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:00.346  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:00.378  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:00.420  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:00.450  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:00.483  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:00.521  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:00.555  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:00.584  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:00.618  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:00.652  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:00.682  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:00.718  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:00.758  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:00.781  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:00.814  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:00.852  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:00.880  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:00.915  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:00.952  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:00.984  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:01.018  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:01.052  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:01.086  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:01.122  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:01.153  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:01.186  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:01.216  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:01.253  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:01.283  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:01.316  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:01.351  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:01.390  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:01.423  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:01.455  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:01.486  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:01.525  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:01.558  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:01.595  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:01.620  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:01.649  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:01.680  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:01.720  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:01.750  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:01.785  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:01.819  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:01.856  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:01.879  9162  9162 I flutter : PERF t=28 time-pos=22.055367
+10-30 14:21:01.881  9162  9162 I flutter : PERF t=28 frame-drop-count=0
+10-30 14:21:01.884  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:01.885  9162  9162 I flutter : PERF t=28 decoder-frame-drop-count=0
+10-30 14:21:01.887  9162  9162 I flutter : PERF t=28 avsync=0.000053
+10-30 14:21:01.888  9162  9162 I flutter : PERF t=28 container-fps=29.970030
+10-30 14:21:01.890  9162  9162 I flutter : PERF t=28 pause=no
+10-30 14:21:01.891  9162  9162 I flutter : PERF t=28 eof-reached=no
+10-30 14:21:01.892  9162  9162 I flutter : PERF t=28 idle-active=no
+10-30 14:21:01.894  9162  9162 I flutter : PERF t=28 thermal-status=null
+10-30 14:21:01.921  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:01.954  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:01.986  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:02.018  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:02.054  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:02.085  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:02.117  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:02.152  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:02.185  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:02.218  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:02.254  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:02.285  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:02.318  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:02.350  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:02.381  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:02.419  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:02.453  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:02.488  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:02.522  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:02.559  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:02.590  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:02.619  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:02.653  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:02.685  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:02.717  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:02.757  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:02.789  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:02.820  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:02.856  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:02.882  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:02.922  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:02.955  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:02.985  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:03.024  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:03.053  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:03.088  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:03.119  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:03.155  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:03.186  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:03.216  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:03.255  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:03.286  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:03.318  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:03.354  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:03.384  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:03.419  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:03.459  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:03.487  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:03.520  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:03.556  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:03.587  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:03.626  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:03.654  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:03.686  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:03.722  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:03.751  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:03.786  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:03.817  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:03.852  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:03.884  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:03.885  9162  9162 I flutter : ANDROID_P5_COUNTERS {time-pos: 24.024000, frame-drop-count: 0, decoder-frame-drop-count: 0, mistimed-frame-count: , vo-delayed-frame-count: 0, avsync: 0.000045}
+10-30 14:21:03.921  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:03.957  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:03.988  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:04.022  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:04.058  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:04.093  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:04.121  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:04.156  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:04.188  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:04.223  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:04.254  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:04.288  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:04.321  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:04.356  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:04.385  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:04.424  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:04.456  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:04.487  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:04.520  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:04.554  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:04.586  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:04.620  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:04.658  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:04.685  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:04.720  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:04.755  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:04.791  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:04.821  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:04.859  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:04.886  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:04.922  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:04.958  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:04.990  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:05.027  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:05.055  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:05.091  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:05.123  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:05.154  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:05.184  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:05.223  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:05.254  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:05.290  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:05.322  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:05.358  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:05.389  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:05.421  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:05.458  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:05.493  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:05.525  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:05.557  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:05.592  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:05.624  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:05.655  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:05.688  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:05.722  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:05.757  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:05.793  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:05.824  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:05.851  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:05.885  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:05.922  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:05.953  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:05.988  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:06.024  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:06.055  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:06.093  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:06.126  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:06.160  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:06.187  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:06.236  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:06.258  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:06.285  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:06.322  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:06.360  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:06.388  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:06.427  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:06.458  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:06.495  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:06.524  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:06.557  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:06.587  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:06.623  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:06.654  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:06.690  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:06.720  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:06.756  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:06.788  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:06.820  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:06.858  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:06.890  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:06.923  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:06.963  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:06.999  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:07.022  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:07.063  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:07.092  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:07.127  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:07.155  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:07.192  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:07.231  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:07.256  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:07.288  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:07.321  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:07.355  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:07.390  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:07.429  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:07.459  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:07.494  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:07.526  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:07.559  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:07.594  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:07.627  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:07.658  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:07.693  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:07.723  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:07.761  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:07.790  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:07.830  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:07.859  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:07.891  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:07.928  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:07.958  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:07.989  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:08.022  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:08.058  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:08.094  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:08.123  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:08.157  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:08.190  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:08.223  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:08.261  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:08.290  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:08.325  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:08.362  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:08.390  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:08.428  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:08.460  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:08.493  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:08.529  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:08.565  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:08.598  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:08.631  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:08.659  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:08.690  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:08.720  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:08.758  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:08.790  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:08.823  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:08.865  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:08.897  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:08.929  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:08.963  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:08.996  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:09.025  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:09.067  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:09.098  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:09.126  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:09.159  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:09.194  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:09.223  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:09.263  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:09.294  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:09.318  9162  9162 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKS-THERMAL kind=yuv instance=0x742512dc50 pid=9162 mono_ns=35630840604 start_ns=5598014857 final=0 queue_frames=0 queue_resets=0 draw=0 redraw=0 display_synced=0 submit=0 flip=0 lease_copy=0 lease_reuse=0 latch=0 defer_publish_flush=0 publish_flush=0 flush_req=0 flush_ovr=0 nominal_fps=0.000000 fps_fallback=0 publish_deferred=0 retire_flush=0 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=891 swap=891 swap_ok=891 frame_id=0 pts=0.000000000 w=2672 h=1336
+10-30 14:21:09.319  9162  9162 I flutter : MPVLOG [vo/gpu-next] error: MKS-THERMAL kind=vo instance=0x741db8d3d0 pid=9162 mono_ns=35631095969 start_ns=5597805951 final=0 queue_frames=884 queue_resets=1 draw=891 redraw=7 display_synced=0 submit=891 flip=891 lease_copy=0 lease_reuse=0 latch=0 defer_publish_flush=0 publish_flush=0 flush_req=0 flush_ovr=0 nominal_fps=0.000000 fps_fallback=0 publish_deferred=0 retire_flush=0 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=0 swap=0 swap_ok=0 frame_id=928 pts=29.462766667 w=2672 h=1336
+10-30 14:21:09.326  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:09.357  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:09.392  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:09.423  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:09.465  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:09.489  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:09.525  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:09.558  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:09.595  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:09.597  9162  9162 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKS-FUSION rgb-fresh=900 generation=2
+10-30 14:21:09.630  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:09.657  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:09.695  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:09.724  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:09.760  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:09.794  9162  9162 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKS-THERMAL kind=import instance=0x74251ad050 pid=9162 mono_ns=36104951859 start_ns=6085397622 final=0 queue_frames=0 queue_resets=0 draw=0 redraw=0 display_synced=0 submit=0 flip=0 lease_copy=899 lease_reuse=2 latch=899 defer_publish_flush=0 publish_flush=899 flush_req=0 flush_ovr=0 nominal_fps=29.970030 fps_fallback=0 publish_deferred=0 retire_flush=900 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=0 swap=0 swap_ok=0 frame_id=0 pts=29.963266667 w=3840 h=1920
+10-30 14:21:09.795  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:09.822  9162  9162 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKS-INPUT-FBO requested=0 slot_attempts=0 shared_attempts=900 fallbacks=0 copy_failures=0 final=0
+10-30 14:21:09.831  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:09.883  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:09.898  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:09.926  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:09.958  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:09.996  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:10.027  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:10.064  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:10.095  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:10.124  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:10.161  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:10.189  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:10.226  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:10.262  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:10.293  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:10.325  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:10.362  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:10.393  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:10.428  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:10.467  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:10.494  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:10.530  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:10.563  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:10.597  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:10.627  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:10.664  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:10.695  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:10.728  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:10.763  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:10.794  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:10.825  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:10.859  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:10.893  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:10.926  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:10.959  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:10.991  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:11.029  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:11.061  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:11.099  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:11.131  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:11.158  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:11.195  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:11.225  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:11.265  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:11.298  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:11.327  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:11.361  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:11.398  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:11.430  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:11.465  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:11.498  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:11.524  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:11.567  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:11.595  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:11.630  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:11.666  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:11.695  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:11.728  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:11.762  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:11.796  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:11.826  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:11.868  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:11.900  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:11.931  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:11.963  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:11.997  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:12.029  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:12.065  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:12.099  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:12.130  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:12.169  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:12.194  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:12.225  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:12.260  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:12.295  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:12.326  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:12.365  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:12.398  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:12.431  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:12.464  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:12.501  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:12.534  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:12.562  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:12.599  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:12.630  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:12.661  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:12.700  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:12.730  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:12.760  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:12.796  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:12.832  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:12.866  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:12.903  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:12.929  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:12.961  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:12.996  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:13.029  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:13.061  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:13.099  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:13.141  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:13.166  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:13.196  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:13.230  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:13.262  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:13.298  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:13.330  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:13.366  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:13.398  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:13.432  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:13.464  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:13.500  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:13.532  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:13.575  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:13.596  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:13.629  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:13.659  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:13.694  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:13.736  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:13.762  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:13.804  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:13.829  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:13.865  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:13.881  9162  9162 I flutter : ANDROID_P5_COUNTERS {time-pos: 34.034000, frame-drop-count: 0, decoder-frame-drop-count: 0, mistimed-frame-count: , vo-delayed-frame-count: 0, avsync: 0.000051}
+10-30 14:21:13.900  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:13.931  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:13.967  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:13.999  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:14.034  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:14.066  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:14.100  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:14.139  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:14.164  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:14.202  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:14.231  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:14.265  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:14.297  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:14.327  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:14.363  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:14.399  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:14.429  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:14.463  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:14.499  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:14.536  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:14.567  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:14.598  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:14.631  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:14.665  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:14.699  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:14.737  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:14.763  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:14.801  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:14.830  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=0 tex=0x741ddc34a0
+10-30 14:21:14.973  9162  9162 I flutter : MPVLOG [vo/gpu-next] error: MKS-YUV-ATLAS event=armed id=5597943400 generation=2 source_pts=35.035000000 android=1 lib=1 target_tex=0x741ddc34a0 swapchain_fbo=0x741ddc34a0
+10-30 14:21:14.982  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=getter-called has_anchor=1 tex=0x741ddc34a0
+10-30 14:21:23.878  9162  9162 I flutter : ANDROID_P5_COUNTERS {time-pos: 35.068367, frame-drop-count: 0, decoder-frame-drop-count: 0, mistimed-frame-count: , vo-delayed-frame-count: 0, avsync: 0.000040}
+10-30 14:21:25.048  9162  9162 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-ATLAS-LIB event=finish-called ok=1 has_anchor=1 finished=0
+10-30 14:21:25.070  9162  9162 I flutter : MPVLOG [vo/gpu-next] error: MKS-YUV-ATLAS event=receipt-diag rendered=1 baseline=0 epoch_valid=1 epoch_before=0 epoch_after=0
+10-30 14:21:25.076  9162  9162 I flutter : MPVLOG [vo/gpu-next] error: MKS-YUV-COMPARE event=capture-failed id=5597943400 reason=atlas-render-or-receipt-failed terminal=1 owner_current=1 owner_restored=0 frame_closed=1 fatal_context=0 requires_force_stop=0
+10-30 14:21:33.907  9162  9162 I flutter : PERF t=60 time-pos=49.983267
+10-30 14:21:33.944  9162  9162 I flutter : PERF t=60 frame-drop-count=373
+10-30 14:21:33.964  9162  9162 I flutter : PERF t=60 decoder-frame-drop-count=0
+10-30 14:21:33.985  9162  9162 I flutter : PERF t=60 avsync=4.012734
+10-30 14:21:34.023  9162  9162 I flutter : PERF t=60 container-fps=29.970030
+10-30 14:21:34.043  9162  9162 I flutter : ANDROID_P5_COUNTERS {time-pos: 49.949900, frame-drop-count: 372, decoder-frame-drop-count: 0, mistimed-frame-count: , vo-delayed-frame-count: 0, avsync: 3.971804}
+10-30 14:21:34.044  9162  9162 I flutter : PERF t=60 pause=no
+10-30 14:21:34.062  9162  9162 I flutter : PERF t=60 eof-reached=no
+10-30 14:21:34.085  9162  9162 I flutter : PERF t=60 idle-active=no
+10-30 14:21:34.089  9162  9162 I flutter : PERF t=60 thermal-status=null
+10-30 14:21:43.880  9162  9162 I flutter : ANDROID_P5_COUNTERS {time-pos: 64.030633, frame-drop-count: 618, decoder-frame-drop-count: 0, mistimed-frame-count: , vo-delayed-frame-count: 0, avsync: 0.000050}
+10-30 14:21:53.918  9162  9162 I flutter : ANDROID_P5_COUNTERS {time-pos: 74.074000, frame-drop-count: 619, decoder-frame-drop-count: 0, mistimed-frame-count: , vo-delayed-frame-count: 0, avsync: 0.000035}

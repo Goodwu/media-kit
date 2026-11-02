@@ -1,0 +1,184 @@
+{
+  "hostSampleStarted": "2026-10-29T14:41:48.034610+08:00",
+  "serial": "LGH870DS42e27764",
+  "commands": {
+    "battery": {
+      "argv": [
+        "adb",
+        "-s",
+        "LGH870DS42e27764",
+        "shell",
+        "dumpsys",
+        "battery"
+      ],
+      "sampleTime": "2026-10-29T14:41:48.125193+08:00",
+      "returncode": 0,
+      "stderr": "",
+      "bytesSaved": 291
+    },
+    "power": {
+      "argv": [
+        "adb",
+        "-s",
+        "LGH870DS42e27764",
+        "shell",
+        "dumpsys",
+        "power"
+      ],
+      "sampleTime": "2026-10-29T14:41:48.206124+08:00",
+      "returncode": 0,
+      "stderr": "",
+      "bytesSaved": 487
+    },
+    "window": {
+      "argv": [
+        "adb",
+        "-s",
+        "LGH870DS42e27764",
+        "shell",
+        "dumpsys",
+        "window",
+        "windows"
+      ],
+      "sampleTime": "2026-10-29T14:41:48.276234+08:00",
+      "returncode": 0,
+      "stderr": "",
+      "bytesSaved": 243
+    },
+    "ps": {
+      "argv": [
+        "adb",
+        "-s",
+        "LGH870DS42e27764",
+        "shell",
+        "ps"
+      ],
+      "sampleTime": "2026-10-29T14:41:48.348031+08:00",
+      "returncode": 0,
+      "stderr": "",
+      "bytesSaved": 389
+    },
+    "cpuinfo": {
+      "argv": [
+        "adb",
+        "-s",
+        "LGH870DS42e27764",
+        "shell",
+        "dumpsys",
+        "cpuinfo"
+      ],
+      "sampleTime": "2026-10-29T14:41:48.453375+08:00",
+      "returncode": 0,
+      "stderr": "",
+      "bytesSaved": 210
+    },
+    "top": {
+      "argv": [
+        "adb",
+        "-s",
+        "LGH870DS42e27764",
+        "shell",
+        "top",
+        "-H",
+        "-n",
+        "1",
+        "-m",
+        "35"
+      ],
+      "sampleTime": "2026-10-29T14:41:48.543192+08:00",
+      "returncode": 0,
+      "stderr": "",
+      "bytesSaved": 2727
+    },
+    "thermal": {
+      "argv": [
+        "adb",
+        "-s",
+        "LGH870DS42e27764",
+        "shell",
+        "for d in /sys/class/thermal/thermal_zone*; do printf \"%s \" \"$d\"; cat \"$d/type\" \"$d/temp\" 2>/dev/null; done"
+      ],
+      "sampleTime": "2026-10-29T14:41:48.984891+08:00",
+      "returncode": 0,
+      "stderr": "",
+      "bytesSaved": 2186
+    },
+    "freq": {
+      "argv": [
+        "adb",
+        "-s",
+        "LGH870DS42e27764",
+        "shell",
+        "for f in /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq /sys/class/kgsl/kgsl-3d0/gpuclk /sys/class/kgsl/kgsl-3d0/gpubusy /sys/class/kgsl/kgsl-3d0/devfreq/cur_freq; do printf \"%s \" \"$f\"; cat \"$f\" 2>/dev/null; done"
+      ],
+      "sampleTime": "2026-10-29T14:41:49.861497+08:00",
+      "returncode": 0,
+      "stderr": "",
+      "bytesSaved": 389
+    },
+    "package": {
+      "argv": [
+        "adb",
+        "-s",
+        "LGH870DS42e27764",
+        "shell",
+        "dumpsys",
+        "package",
+        "com.example.piliplus.dev"
+      ],
+      "sampleTime": "2026-10-29T14:41:50.158148+08:00",
+      "returncode": 0,
+      "stderr": "",
+      "bytesSaved": 192
+    },
+    "sf": {
+      "argv": [
+        "adb",
+        "-s",
+        "LGH870DS42e27764",
+        "shell",
+        "dumpsys",
+        "SurfaceFlinger"
+      ],
+      "sampleTime": "2026-10-29T14:41:50.291356+08:00",
+      "returncode": 0,
+      "stderr": "",
+      "bytesSaved": 4141
+    },
+    "route": {
+      "argv": [
+        "adb",
+        "-s",
+        "LGH870DS42e27764",
+        "exec-out",
+        "logcat",
+        "-d",
+        "-t",
+        "2000"
+      ],
+      "sampleTime": "2026-10-29T14:41:50.398103+08:00",
+      "returncode": 0,
+      "stderr": "",
+      "bytesSaved": 11861
+    },
+    "device": {
+      "argv": [
+        "adb",
+        "-s",
+        "LGH870DS42e27764",
+        "shell",
+        "getprop",
+        "ro.build.fingerprint"
+      ],
+      "sampleTime": "2026-10-29T14:41:50.655087+08:00",
+      "returncode": 0,
+      "stderr": "",
+      "bytesSaved": 70
+    }
+  },
+  "baseline": {
+    "head": "3bdf2c6cd21860c1c258d0b75f807b743d373e4a",
+    "status": ""
+  },
+  "hostSampleEnded": "2026-10-29T14:41:50.714367+08:00"
+}

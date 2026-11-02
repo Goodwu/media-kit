@@ -1,0 +1,17 @@
+{
+  "status": "source-syntax-verified-not-device-validated",
+  "mode": "debug.mks.gpu_timing=render",
+  "syntax": "NDK27.2.12479018 aarch64-linux-android24-clang using existing native compile_commands flags, replacing output/dependency generation with -fsyntax-only; gpu.c and vo_gpu_next.c both exit0 no diagnostics",
+  "files": {
+    "/Users/wuweiwei1/src/mpv/video/out/vo_gpu_next.c": "4085a2ca9c7f971a2fe25d3e1f11be0704a72bcd953cf1808854deca3fb6a2c6",
+    "/Users/wuweiwei1/src/libplacebo/src/opengl/gpu.c": "ad1824eaca10940a994c2afc7c3b9d5c9084c68e5666e562944400e16a9cc60c",
+    "/Users/wuweiwei1/src/libplacebo/src/opengl/gpu.h": "4df4a74d23f02d11526fce22e4ccca3aca310bcd7bdce088e2f9a03b94218ef5"
+  },
+  "limitations": [
+    "Existing pl_dispatch_info histories contain asynchronous shader execution samples without originating frame ID. callback_frame_id is observation frame only; samples/last/average/peak are rolling histories, not exact frame timing.",
+    "Input and YUV timing modes must be mutually exclusive with render because GL_GPU_DISJOINT_EXT is a consuming context-global read.",
+    "No device/build run performed by this worker."
+  ],
+  "counters": "MKS-GPU-RENDER issued/resolved/disjoint/dropped/epoch every10s; drops combine epoch-invalidated results and ring overflow.",
+  "modeIsolation": "input/yuv explicitly set has_queries=false; render enables EXT bridge; other values retain preexisting capability behavior."
+}

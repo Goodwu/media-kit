@@ -1,0 +1,5 @@
+    codePath=/data/app/com.example.piliplus.dev-1
+    versionCode=1 minSdk=24 targetSdk=37
+    versionName=2.1.6
+    firstInstallTime=2026-10-20 00:09:17
+    lastUpdateTime=2026-10-29 13:43:56

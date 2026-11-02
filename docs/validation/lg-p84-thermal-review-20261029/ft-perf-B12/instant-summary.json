@@ -1,0 +1,196 @@
+{
+  "gpuThermalGateVerified": false,
+  "inputFboGateVerified": true,
+  "gpuThermalGateNormalPwrlevel": 0,
+  "gpuThermalGateScope": "Observed LG experimental normal baseline; unknown/nonzero fail closed; caps are metadata, not measured clock or CPU thermal causality.",
+  "controllerStatus": "aborted",
+  "controllerReason": "fresh-gpu-thermal-cap-detected",
+  "validCompletedProfile": false,
+  "metricsAreDiagnosticOnly": true,
+  "stableSamples": 13,
+  "processCPUPercentOneCore100": {
+    "count": 13,
+    "min": 50.85470085287923,
+    "median": 52.4886877836902,
+    "max": 56.9506726462156
+  },
+  "gpuDriverReportedBusyPercent": {
+    "count": 13,
+    "min": 52.0,
+    "median": 52.0,
+    "max": 53.0
+  },
+  "gpuFrequencyHz": {
+    "count": 13,
+    "min": 214000000.0,
+    "median": 214000000.0,
+    "max": 214000000.0
+  },
+  "cpuFrequencyKHz": {
+    "cpu0": {
+      "count": 13,
+      "min": 614400.0,
+      "median": 691200.0,
+      "max": 768000.0
+    },
+    "cpu1": {
+      "count": 13,
+      "min": 614400.0,
+      "median": 691200.0,
+      "max": 768000.0
+    },
+    "cpu2": {
+      "count": 13,
+      "min": 1056000.0,
+      "median": 2150400.0,
+      "max": 2150400.0
+    },
+    "cpu3": {
+      "count": 13,
+      "min": 1056000.0,
+      "median": 2150400.0,
+      "max": 2150400.0
+    }
+  },
+  "reportedVoltageMicrovolts": {
+    "cpu_kryo0_regulator_microvolts": {
+      "count": 13,
+      "min": 584313.0,
+      "median": 602177.0,
+      "max": 776351.0
+    },
+    "cpu_kryo1_regulator_microvolts": {
+      "count": 13,
+      "min": 727225.0,
+      "median": 727225.0,
+      "max": 727225.0
+    },
+    "gpu_upstream_regulator_microvolts": {
+      "count": 13,
+      "min": 595000.0,
+      "median": 595000.0,
+      "max": 595000.0
+    },
+    "battery_voltage_now": {
+      "count": 13,
+      "min": 4318364.0,
+      "median": 4318364.0,
+      "max": 4324620.0
+    }
+  },
+  "limitations": [
+    "CPU process/thread 100% means one fully busy CPU core, not all four cores.",
+    "GPU utilisation is the named driver percentage report, not inferred from frequency; raw gpubusy zero denominator is unknown.",
+    "Regulator microvolts are software reports/targets, not optical or electrical probe measurements; GPU upstream supply is not a measured core voltage.",
+    "gpu_corner_raw is a corner index even though sysfs file is named microvolts; it is never converted to volts.",
+    "Battery voltage/current are separate power-supply fields; they do not measure CPU/GPU rail power.",
+    "Sampling overhead is recorded per row and is included in system busy counters."
+  ],
+  "topThreads": [
+    {
+      "tid": "28965",
+      "name": "Thread-7",
+      "meanOneCorePercent": 21.053113168129332,
+      "maxOneCorePercent": 21.621621621893738,
+      "samples": 13
+    },
+    {
+      "tid": "28912",
+      "name": "Thread-5",
+      "meanOneCorePercent": 9.921612648244219,
+      "maxOneCorePercent": 10.313901345377628,
+      "samples": 13
+    },
+    {
+      "tid": "28970",
+      "name": "JNISurfaceTextu",
+      "meanOneCorePercent": 6.873196098376466,
+      "maxOneCorePercent": 7.239819004646925,
+      "samples": 13
+    },
+    {
+      "tid": "28969",
+      "name": "MediaCodec_loop",
+      "meanOneCorePercent": 3.6213823244642898,
+      "maxOneCorePercent": 3.9823008849393418,
+      "samples": 13
+    },
+    {
+      "tid": "28875",
+      "name": "dia_kit_hdr_lab",
+      "meanOneCorePercent": 3.0870236369220216,
+      "maxOneCorePercent": 4.484304932772882,
+      "samples": 13
+    },
+    {
+      "tid": "28974",
+      "name": "AudioTrack",
+      "meanOneCorePercent": 2.1785145575645535,
+      "maxOneCorePercent": 2.307692307712973,
+      "samples": 13
+    },
+    {
+      "tid": "29022",
+      "name": "DartWorker",
+      "meanOneCorePercent": 1.677605053323942,
+      "maxOneCorePercent": 1.8099547511617313,
+      "samples": 8
+    },
+    {
+      "tid": "28967",
+      "name": "demux",
+      "meanOneCorePercent": 1.5435896754803977,
+      "maxOneCorePercent": 2.2522522522805977,
+      "samples": 13
+    },
+    {
+      "tid": "28910",
+      "name": "DartWorker",
+      "meanOneCorePercent": 1.3233086677275439,
+      "maxOneCorePercent": 1.8018018018244784,
+      "samples": 6
+    },
+    {
+      "tid": "28886",
+      "name": "Binder:28875_1",
+      "meanOneCorePercent": 0.8388117265713575,
+      "maxOneCorePercent": 1.3452914797616347,
+      "samples": 13
+    },
+    {
+      "tid": "28887",
+      "name": "Binder:28875_2",
+      "meanOneCorePercent": 0.8052425170029741,
+      "maxOneCorePercent": 1.3574660633712985,
+      "samples": 13
+    },
+    {
+      "tid": "28958",
+      "name": "Binder:28875_3",
+      "meanOneCorePercent": 0.8022939581898276,
+      "maxOneCorePercent": 1.1538461538564866,
+      "samples": 13
+    },
+    {
+      "tid": "28968",
+      "name": "mksurf-latch",
+      "meanOneCorePercent": 0.4984673469250162,
+      "maxOneCorePercent": 0.9009009009122392,
+      "samples": 13
+    },
+    {
+      "tid": "28880",
+      "name": "Jit thread pool",
+      "meanOneCorePercent": 0.034650034650470736,
+      "maxOneCorePercent": 0.4504504504561196,
+      "samples": 13
+    },
+    {
+      "tid": "28881",
+      "name": "Signal Catcher",
+      "meanOneCorePercent": 0.0,
+      "maxOneCorePercent": 0.0,
+      "samples": 13
+    }
+  ]
+}

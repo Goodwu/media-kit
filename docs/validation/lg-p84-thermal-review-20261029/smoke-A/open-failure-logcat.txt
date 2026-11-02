@@ -1,0 +1,2 @@
+10-29 15:13:59.737  1709  1739 I ActivityManager: Start proc 26385:com.example.media_kit_hdr_lab/u0a251 for activity com.example.media_kit_hdr_lab/.MainActivity
+10-29 15:14:36.897  1709 19360 I ActivityManager: Killing 26385:com.example.media_kit_hdr_lab/u0a251 (adj 0): stop com.example.media_kit_hdr_lab

@@ -1,0 +1,23 @@
+{
+  "androidSyntax": [
+    {
+      "file": "video/out/vo_gpu_next.c",
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "video/out/gpu_next/context.c",
+      "exit": 0,
+      "stderr": ""
+    }
+  ],
+  "testAndroidSyntaxExit": 0,
+  "hostPureTest": "compile+execute exit0 (PTS, counts, finite, size bounds; owner-current/restore-success/fatal noGL cleanup policy with open/closed frame); not actual EGL driver fault",
+  "files": {
+    "video/out/vo_gpu_next.c": "5700eb68702ee64417055a0014745bbf8ba7bdc2273cbf7bf8722534574668c3",
+    "video/out/gpu_next/context.c": "c7bfbd9a6106011a31581c10f7cc62c9bb36ad8488e8263d145a247b1bb584f3",
+    "video/out/yuv_compare_vo.h": "4ad4e525468a8d8b154b68f87d29869053e47b4d8a802e76869219ca5630611b",
+    "test/yuv_compare_vo.c": "ee3c69b014903f4bb39e43aaa9f5a1971e6967d808c4599e6fbed2dad488f859",
+    "test/meson.build": "723dcc4238555d4e5724d2993b5cb06d4b20b5a16beb13495fc07cea5dd067c9"
+  }
+}

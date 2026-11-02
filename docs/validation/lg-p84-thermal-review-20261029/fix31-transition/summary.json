@@ -1,0 +1,7 @@
+{
+ "apk": "fusion-table-fix31-20261102 SHA256 a4764910c67fda333cc13ba430e940fcc23a1f21a7898d74957f3ddb349736fa",
+ "change": "independent consume budget per review option 2: consumer/commit failures count separately, NOT reset by seed READY (only a committed fused frame clears them), >=2 disables table+fusion (sticky)",
+ "device_round": "bidirectional transition intact under the budget: each transition logged consume-failures=1 then recovered via reseed+commit (budget reset); ready=3 pass=3 zero final-VO-frame failures",
+ "tests": "tool/test_lg_table_failure_budgets.py (7): rebuild-storm loop terminates in bounded rebuilds with disable; geometry transitions survive; consume budget not reset by seed; source pins (threshold, sticky disable, clear-inside-commit-ok, READY clears seed budget only)",
+ "evidence": "flutter-logcat.txt"
+}

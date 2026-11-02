@@ -1,0 +1,32 @@
+{
+  "time": "2026-10-29T15:36:14.149236+08:00",
+  "kind": "screen-on live playback HDR/SF read-only snapshot",
+  "commands": {
+    "panel": {
+      "argv": [
+        "adb",
+        "-s",
+        "LGH870DS42e27764",
+        "exec-out",
+        "cat",
+        "/sys/devices/virtual/panel/img_tune/hdr_mode",
+        "/sys/class/leds/lcd-backlight/brightness",
+        "/sys/class/leds/lcd-backlight/thermald_status"
+      ],
+      "returncode": 0,
+      "stderr": ""
+    },
+    "surfaceflinger": {
+      "argv": [
+        "adb",
+        "-s",
+        "LGH870DS42e27764",
+        "shell",
+        "dumpsys",
+        "SurfaceFlinger"
+      ],
+      "returncode": 0,
+      "stderr": ""
+    }
+  }
+}

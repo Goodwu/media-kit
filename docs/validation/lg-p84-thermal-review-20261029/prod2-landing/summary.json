@@ -1,0 +1,22 @@
+{
+ "apk": "fusion-table-prod2-20261102-release.apk",
+ "sha256": "b760ea9af9f99de03997f5c292c4d33551c459a787ebfaf01e25a4c253594bac",
+ "deviceMd5": "63d58078a8d69f1da78439d826d2532f (installed=local)",
+ "review": "critical reviewer final verdict 2026-11-02: all blockers CLOSED, \"可以重新申请默认启用\" (Android/SurfaceTexture constrained path scope)",
+ "userAuthorization": "默认启用裁决（先例 sdrEmbed）+ 真表版观感通过（\"观感没问题\"）",
+ "threeStates": [
+  {
+   "state": "默认（属性全空）= 生产用户态",
+   "result": "ready×2（启动布局瞬态 1440→1336 的规范重建，即过渡机制正常工作）+ 当前表驱动 + 零 missed/mismatch/drift"
+  },
+  {
+   "state": "yuv_fusion_table=0",
+   "result": "零表事件 + 融合保留（fusion-only 路径，commit 持续）"
+  },
+  {
+   "state": "双 0",
+   "result": "零融合/零表 + rgb-final 原路径"
+  }
+ ],
+ "note": "设备已恢复属性空（即生产默认）+自动亮度"
+}

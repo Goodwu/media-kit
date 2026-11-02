@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "status": "built-not-run",
+  "source": "/Users/wuweiwei1/src/media-kit/tool/native/lg_yuv_ssbo_probe.c",
+  "sourceSha256": "45a7288c8ac432060001de2c26dfc399704445a1e4222053cf26353518ca299a",
+  "builderSha256": "771a4c418a04af20c871942d4e29a69fcf3bc89270f6c70eb6fda639e6f10710",
+  "compilerSha256": "1aac7c103794087632c35c35b83c6d6c8fff4cd01737e5dfbd1b4297942189e2",
+  "command": [
+    "/Users/wuweiwei1/Library/Android/sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/darwin-x86_64/bin/aarch64-linux-android24-clang",
+    "-std=c11",
+    "-O2",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-fPIE",
+    "-pie",
+    "-Wl,--build-id=sha1",
+    "/Users/wuweiwei1/src/media-kit/tool/native/lg_yuv_ssbo_probe.c",
+    "-lEGL",
+    "-lGLESv3",
+    "-landroid",
+    "-lmediandk",
+    "-o",
+    "/Users/wuweiwei1/src/media-kit/build/lg-yuv-ssbo-20261029T190845Z-22315/lg_yuv_ssbo_probe"
+  ],
+  "createdAtUTC": "20261029T190845Z",
+  "scope": "API24 independent RGB fragment SSBO execution, YUV SSBO compile and optional ImageReader YUV execution; no playback/panel/performance claim",
+  "binary": "/Users/wuweiwei1/src/media-kit/build/lg-yuv-ssbo-20261029T190845Z-22315/lg_yuv_ssbo_probe",
+  "binarySha256": "b4ad1d0a3dae9ad07a1b7c2b09c417c755d39481f2d68f3d65d55c43495e40f1",
+  "binaryBytes": 24008
+}

@@ -1,0 +1,69 @@
+{
+  "purpose": "read-only up-to100s stabilization before first baseline anchor; no playback/settings changes",
+  "rows": [
+    {
+      "time": "2026-10-29T16:23:24.750747+08:00",
+      "elapsedSeconds": 0.08919312502257526,
+      "raw": [
+        "34300",
+        "366",
+        "Full",
+        "0",
+        "4324620",
+        "1"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "batteryC": 34.3,
+      "vtsC": 36.6
+    },
+    {
+      "time": "2026-10-29T16:23:49.810452+08:00",
+      "elapsedSeconds": 25.148434542003088,
+      "raw": [
+        "33300",
+        "359",
+        "Full",
+        "152",
+        "4324925",
+        "1"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "batteryC": 33.3,
+      "vtsC": 35.9
+    },
+    {
+      "time": "2026-10-29T16:24:14.887810+08:00",
+      "elapsedSeconds": 50.22577970800921,
+      "raw": [
+        "33300",
+        "359",
+        "Full",
+        "0",
+        "4324925",
+        "1"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "batteryC": 33.3,
+      "vtsC": 35.9
+    },
+    {
+      "time": "2026-10-29T16:24:39.949787+08:00",
+      "elapsedSeconds": 75.2877524580108,
+      "raw": [
+        "33300",
+        "359",
+        "Full",
+        "152",
+        "4324925",
+        "1"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "batteryC": 33.3,
+      "vtsC": 35.9
+    }
+  ]
+}

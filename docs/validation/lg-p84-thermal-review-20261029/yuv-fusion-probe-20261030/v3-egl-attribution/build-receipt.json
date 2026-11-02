@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "status": "built-not-run",
+  "source": "/Users/wuweiwei1/src/media-kit/tool/native/lg_yuv_fusion_probe.c",
+  "sourceSha256": "8ed037ed2ddde89d30ab92a19a257651ce2cbb97d96431355c5f834a09db0474",
+  "builderSha256": "6f2f6d8d1f215602bad74dfbcd5cd99ffbd18686f428891f71e0c6bcb15fecd6",
+  "compilerSha256": "1aac7c103794087632c35c35b83c6d6c8fff4cd01737e5dfbd1b4297942189e2",
+  "command": [
+    "/Users/wuweiwei1/Library/Android/sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/darwin-x86_64/bin/aarch64-linux-android24-clang",
+    "-std=c11",
+    "-O2",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-fPIE",
+    "-pie",
+    "-Wl,--build-id=sha1",
+    "/Users/wuweiwei1/src/media-kit/tool/native/lg_yuv_fusion_probe.c",
+    "-lEGL",
+    "-lGLESv3",
+    "-landroid",
+    "-lmediandk",
+    "-o",
+    "/Users/wuweiwei1/src/media-kit/build/lg-yuv-fusion-20261029T175022Z-35771/lg_yuv_fusion_probe"
+  ],
+  "createdAtUTC": "20261029T175022Z",
+  "scope": "API24 ImageReader offscreen YUV A/B synthetic byte equality only, no playback/panel or performance claim",
+  "binary": "/Users/wuweiwei1/src/media-kit/build/lg-yuv-fusion-20261029T175022Z-35771/lg_yuv_fusion_probe",
+  "binarySha256": "5cc99846fcd24e830c4c98673e0c0c0cdf86957c07d3127e6d37557d005b1346",
+  "binaryBytes": 28368
+}

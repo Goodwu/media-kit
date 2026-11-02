@@ -1,0 +1,28 @@
+{
+  "androidSyntax": {
+    "file": "../video/out/vo_gpu_next.c",
+    "exit": 0,
+    "stderr": "",
+    "scope": "full sample-tap branch enabled by current PL_HAVE_MKS_YUV_COMPARE_SAMPLE_TAP header; API24 syntax only"
+  },
+  "sampleTapFeatureMacroPresent": true,
+  "hostTests": "pure C compile+execute exit0; actual compare_save JSON source-extracted tests4 + existing EGL wiring test1:5 passed",
+  "mode": "debug.mks.yuv_tap=1; requires valid explicit compare session and repeat1. absent/0 off; invalid value or unsupported feature refuses capture and forces ordinary RGB in compare session.",
+  "schema3": {
+    "libLayout": "two complete ROI chunks at26uint32/pixel; original0..13, Buv14..15/sampleRGB16..18/sitecount19, Auv20..21/sampleRGB22..24/sitecount25",
+    "counts": "0/10/19/25 each exactly1 per pixel; every other value finite float32",
+    "androidLayout": "7uint32/pixel, only final A2 RGB/CSC, one swap",
+    "identity": "same capture/gen/frameid/token/source/current/target PTS; repeat program tokens/epoch arrays all checked as schema2",
+    "originalBodyFile": "files.original_body: basename.original-body.glsl; nonempty original body snippet; actual archived B/A sources must both contain exact tap body from same owner-gated getter",
+    "instrumentation_scope": "actual single textureLod site UV and sampled RGB; instrumentation may change shader compilation; not an unmodified shader",
+    "hashes": "shader_body_hash original; sample_tap_body_hash instrumented; opaque producer-native linkage, not independent transformation or texture-content evidence"
+  },
+  "limits": "No device/build/driver/numerical acceptance; library implementation freeze and independent review separate. Default schema1/2 manifest layout retained; only complete event adds sample_tap=0 or1.",
+  "files": {
+    "/Users/wuweiwei1/src/mpv/video/out/vo_gpu_next.c": "73ef6cdb3f80becaa4d40cce26d06bde73237cb542bb8df708a840af885c96dc",
+    "/Users/wuweiwei1/src/mpv/video/out/yuv_compare_vo.h": "a5a6e74b0a9c2bbb982cc1de07c3ab05efffaf020d99a58c463d760fe038ba3d",
+    "/Users/wuweiwei1/src/mpv/test/yuv_compare_vo.c": "8717a2479fe65c6800b5a7ad86bdb61d0dd70a8c22d5fccfd06206e35ad229e3",
+    "/Users/wuweiwei1/src/media-kit/tool/test_lg_yuv_compare_manifest.py": "6e25028de801ecb8c1aff2b45824bad8d32bdc6776420cfba39411f4479bf350",
+    "/Users/wuweiwei1/src/libplacebo/src/include/libplacebo/opengl.h": "fb44451bc902205106daa288059d3b8bdaab606a3d12ea295429ed940bc2d258"
+  }
+}

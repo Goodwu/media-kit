@@ -1,0 +1,14 @@
+{
+  "sampleTime": "2026-10-29T14:42:22.554051+08:00",
+  "package": "com.example.piliplus.dev",
+  "pmPath": "package:/data/app/com.example.piliplus.dev-1/base.apk",
+  "apks": [
+    {
+      "path": "/data/app/com.example.piliplus.dev-1/base.apk",
+      "bytes": 27644837,
+      "sha256": "f92e9ad8e9d2e2a4475fbfd171ced8c42fa898a97c48d3bf3cba2914e57b3bd0",
+      "returncode": 0,
+      "stderr": ""
+    }
+  ]
+}

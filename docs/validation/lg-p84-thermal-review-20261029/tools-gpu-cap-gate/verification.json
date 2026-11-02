@@ -1,0 +1,35 @@
+{
+  "recordedAt": "2026-10-29T17:18:12.704118+08:00",
+  "deviceOperations": false,
+  "implementationChanges": false,
+  "ownedChanges": [
+    "tool/lg_p84_thermal_round.py",
+    "tool/lg_p84_instant_perf.py",
+    "tool/test_lg_p84_instant_perf.py"
+  ],
+  "baseline": "../tools-used-ab4/workspace-baseline.txt",
+  "tests": {
+    "command": "python3 -m unittest discover -s tool -p 'test_lg_p84_*py'",
+    "result": "18/18 PASS; offline only, includes run-loop cap\u2192force-stop before diagnostics and restoration ordering"
+  },
+  "historicalResults": "A/B remain under archived old protocol; B aborted/incomplete, not new-gate validated",
+  "files": [
+    {
+      "path": "tool/lg_p84_thermal_round.py",
+      "sha256": "089ab232c013dbc385ec6e496889de283505b0b4520d985693067ca6a02a86e7"
+    },
+    {
+      "path": "tool/lg_p84_instant_perf.py",
+      "sha256": "1e2a9ce1b08e4e94150e33496095c37b37bb894140a8ec8a1dac0ac2b0453a23"
+    },
+    {
+      "path": "tool/test_lg_p84_thermal_round.py",
+      "sha256": "191d5f4d60534dda28536ce4833b28b5dfbea3545e5a65717e44300d8fdcd550"
+    },
+    {
+      "path": "tool/test_lg_p84_instant_perf.py",
+      "sha256": "9bf3980fe863ba52dd0cea57d1245a38fb67bc105335780d80ba0d116296a0f4"
+    }
+  ],
+  "stopOrder": "aborted/invalid skip post-loop ADB diagnostics; final evidence uses explicitly labelled last running sample, next device command is finally force-stop"
+}

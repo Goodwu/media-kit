@@ -1,0 +1,59 @@
+{
+  "files": {
+    "a0": {
+      "bytes": 57116672,
+      "sha256": "3d96fe5c21f39f5f4f5dfc20ccf3a0bc0e422e5788cc7315ae00433381e0d475"
+    },
+    "uv": {
+      "bytes": 57116672,
+      "sha256": "d093665a3c4c7392b8ffd7ca81076c3d144449299cfaa68ce6c67dace277a74c"
+    },
+    "half": {
+      "bytes": 57116672,
+      "sha256": "c5d4f8dfe8d214f55f1458ed3874e97f0f07a2335f11d20fb08319948b848dbf"
+    },
+    "seed_atlas": {
+      "bytes": 42837504,
+      "sha256": "bd38a0b20457f1f72c12184a94271b336455627f32b3f71d3d3b940b70b424e2"
+    },
+    "android": {
+      "bytes": 114688,
+      "sha256": "6b948e6ab5f36637485d15862a59f58212059e7efbf55c499e1f4872372a27a3"
+    },
+    "a0_fragment": {
+      "bytes": 2530,
+      "sha256": "956ea3e70810e7efb558d1fc808c50928bf1b93205e66ef448912586d9087102"
+    },
+    "b0_fragment": {
+      "bytes": 3770,
+      "sha256": "9f574976c27e4dd022e28caae00ff614f451ee0d8547a4cd84413522bb33d412"
+    },
+    "probe_fragment": {
+      "bytes": 4851,
+      "sha256": "fd125e050743a8bf5735e8afa6b3f8de3865167dd3125604fb2a0ca243a16bf7"
+    },
+    "vertex": {
+      "bytes": 462,
+      "sha256": "d581505a44b4fcb372996e09f4ffded794b72277186dbfae1c7cc61bfb50cbf2"
+    },
+    "original_body": {
+      "bytes": 2129,
+      "sha256": "a38842897494b29a7fe1b5062bf035a6add83f5a33fdf397441a6e8a454b0cab"
+    },
+    "baseline_vertices": {
+      "bytes": 64,
+      "sha256": "0bba1f02d88c1435ba4f7102a729f248710e9bea710c5fe46aa9b19cc5affd51"
+    },
+    "seed_material": {
+      "bytes": 596,
+      "sha256": "ca4c32c739e7e78cbd94508ec936827b9cf64eb331747e888a00d6cf9ecb357d"
+    },
+    "current_material": {
+      "bytes": 596,
+      "sha256": "ca4c32c739e7e78cbd94508ec936827b9cf64eb331747e888a00d6cf9ecb357d"
+    }
+  },
+  "manifestSha256": "5a20741671e078fb8aeaddf2128720bf1a9f4ce989c65543450ea1ae6c51ca08",
+  "identityScope": "Fresh PID/current stage endpoint and exclusive filenames; raw payloads carry no embedded frame identity.",
+  "timestampScope": "Log receive order is correlation only, not synchronized native/hardware timing."
+}

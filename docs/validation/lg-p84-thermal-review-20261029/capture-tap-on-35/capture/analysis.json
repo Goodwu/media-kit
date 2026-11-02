@@ -1,0 +1,1439 @@
+{
+  "schema": 3,
+  "status": "captured-float-differences",
+  "capture_id": 5934976752,
+  "generation": 2,
+  "pid": 10678,
+  "source_pts": 35.035,
+  "target_pts": 35.035,
+  "roi": {
+    "x": 1304,
+    "y": 636,
+    "w": 64,
+    "h": 64
+  },
+  "pixels": 4096,
+  "shader_body_hash": "1522946715162228283",
+  "files": {
+    "lib": {
+      "file": "mks-yuv-compare-10678-5934976752.lib.bin",
+      "bytes": 851968,
+      "sha256": "c2a317bd2e32b140acec483a36831e9d1564ec1c0c0483ddcd8335faf90f5c99"
+    },
+    "android": {
+      "file": "mks-yuv-compare-10678-5934976752.android.bin",
+      "bytes": 114688,
+      "sha256": "894d47c84f731607fae0a21351b8fcd73a9a74e8e4ec635e51a39ba77af37fe2"
+    },
+    "candidate": {
+      "file": "mks-yuv-compare-10678-5934976752.candidate.glsl",
+      "bytes": 4676,
+      "sha256": "93ff3bb060243af6c68ab3e5062262fe21442eb40216ac04e96e7b68d833748d"
+    },
+    "baseline": {
+      "file": "mks-yuv-compare-10678-5934976752.baseline.glsl",
+      "bytes": 3540,
+      "sha256": "203e30d8f59efc15060f7c1f04e88fe1d7f8b78e3bb36d53d623b1e18716c984"
+    },
+    "vertex": {
+      "file": "mks-yuv-compare-10678-5934976752.vertex.glsl",
+      "bytes": 580,
+      "sha256": "81fad6a3d992b0bf3d2a65525f0a09294905208bea60d73c2d53d852615e881c"
+    },
+    "original_body": {
+      "file": "mks-yuv-compare-10678-5934976752.original-body.glsl",
+      "bytes": 2159,
+      "sha256": "e65cf081ba73cf8a5af2a54a185b52f47007c9e44f3bb7f1a024b2ae91c8a109"
+    }
+  },
+  "comparisons": {
+    "pre_rgb": {
+      "components": 12288,
+      "bit_mismatches": 21,
+      "nonfinite_components": 0,
+      "max_absolute_difference": 0.00011596083641052246,
+      "max_ulp_distance": 7782,
+      "max_absolute_difference_location": {
+        "x": 1338,
+        "y": 678,
+        "channel": "G"
+      },
+      "first_differences": [
+        {
+          "x": 1305,
+          "y": 657,
+          "channel": "R",
+          "left_bits": "3e7dc99d",
+          "right_bits": "3e7dc9ed",
+          "left": 0.24783940613269806,
+          "right": 0.24784059822559357,
+          "absolute_difference": 1.1920928955078125e-06
+        },
+        {
+          "x": 1305,
+          "y": 657,
+          "channel": "G",
+          "left_bits": "3e74acbf",
+          "right_bits": "3e74ac25",
+          "left": 0.23894022405147552,
+          "right": 0.23893792927265167,
+          "absolute_difference": 2.294778823852539e-06
+        },
+        {
+          "x": 1305,
+          "y": 657,
+          "channel": "B",
+          "left_bits": "3e764c5b",
+          "right_bits": "3e7633a0",
+          "left": 0.24052564799785614,
+          "right": 0.2404313087463379,
+          "absolute_difference": 9.433925151824951e-05
+        },
+        {
+          "x": 1318,
+          "y": 678,
+          "channel": "R",
+          "left_bits": "3e5045f5",
+          "right_bits": "3e504636",
+          "left": 0.20339186489582062,
+          "right": 0.20339283347129822,
+          "absolute_difference": 9.685754776000977e-07
+        },
+        {
+          "x": 1318,
+          "y": 678,
+          "channel": "G",
+          "left_bits": "3e4b40dc",
+          "right_bits": "3e4b411e",
+          "left": 0.19848960638046265,
+          "right": 0.19849058985710144,
+          "absolute_difference": 9.834766387939453e-07
+        },
+        {
+          "x": 1318,
+          "y": 678,
+          "channel": "B",
+          "left_bits": "3e4b95cb",
+          "right_bits": "3e4bb1cd",
+          "left": 0.19881360232830048,
+          "right": 0.19892044365406036,
+          "absolute_difference": 0.0001068413257598877
+        },
+        {
+          "x": 1328,
+          "y": 678,
+          "channel": "R",
+          "left_bits": "3e62132c",
+          "right_bits": "3e6213ba",
+          "left": 0.2207762598991394,
+          "right": 0.22077837586402893,
+          "absolute_difference": 2.115964889526367e-06
+        },
+        {
+          "x": 1328,
+          "y": 678,
+          "channel": "G",
+          "left_bits": "3e61c4c5",
+          "right_bits": "3e61c552",
+          "left": 0.2204771786928177,
+          "right": 0.22047927975654602,
+          "absolute_difference": 2.1010637283325195e-06
+        },
+        {
+          "x": 1328,
+          "y": 678,
+          "channel": "B",
+          "left_bits": "3e60a46d",
+          "right_bits": "3e60bee1",
+          "left": 0.21937723457813263,
+          "right": 0.21947814524173737,
+          "absolute_difference": 0.00010091066360473633
+        },
+        {
+          "x": 1337,
+          "y": 678,
+          "channel": "R",
+          "left_bits": "3e62f9bd",
+          "right_bits": "3e63154e",
+          "left": 0.22165580093860626,
+          "right": 0.22176095843315125,
+          "absolute_difference": 0.00010515749454498291
+        }
+      ],
+      "left_role": "baseline_pre_store",
+      "right_role": "candidate_pre_half"
+    },
+    "half_rgb": {
+      "components": 12288,
+      "bit_mismatches": 7,
+      "nonfinite_components": 0,
+      "max_absolute_difference": 0.000244140625,
+      "max_ulp_distance": 8192,
+      "max_absolute_difference_location": {
+        "x": 1347,
+        "y": 678,
+        "channel": "R"
+      },
+      "first_differences": [
+        {
+          "x": 1305,
+          "y": 657,
+          "channel": "B",
+          "left_bits": "3e764000",
+          "right_bits": "3e762000",
+          "left": 0.240478515625,
+          "right": 0.2403564453125,
+          "absolute_difference": 0.0001220703125
+        },
+        {
+          "x": 1318,
+          "y": 678,
+          "channel": "B",
+          "left_bits": "3e4b8000",
+          "right_bits": "3e4ba000",
+          "left": 0.19873046875,
+          "right": 0.1988525390625,
+          "absolute_difference": 0.0001220703125
+        },
+        {
+          "x": 1337,
+          "y": 678,
+          "channel": "R",
+          "left_bits": "3e62e000",
+          "right_bits": "3e630000",
+          "left": 0.2215576171875,
+          "right": 0.2216796875,
+          "absolute_difference": 0.0001220703125
+        },
+        {
+          "x": 1337,
+          "y": 678,
+          "channel": "B",
+          "left_bits": "3e568000",
+          "right_bits": "3e56a000",
+          "left": 0.20947265625,
+          "right": 0.2095947265625,
+          "absolute_difference": 0.0001220703125
+        },
+        {
+          "x": 1338,
+          "y": 678,
+          "channel": "R",
+          "left_bits": "3e692000",
+          "right_bits": "3e694000",
+          "left": 0.2276611328125,
+          "right": 0.227783203125,
+          "absolute_difference": 0.0001220703125
+        },
+        {
+          "x": 1338,
+          "y": 678,
+          "channel": "G",
+          "left_bits": "3e69e000",
+          "right_bits": "3e6a0000",
+          "left": 0.2283935546875,
+          "right": 0.228515625,
+          "absolute_difference": 0.0001220703125
+        },
+        {
+          "x": 1347,
+          "y": 678,
+          "channel": "R",
+          "left_bits": "3e828000",
+          "right_bits": "3e82a000",
+          "left": 0.2548828125,
+          "right": 0.255126953125,
+          "absolute_difference": 0.000244140625
+        }
+      ],
+      "left_role": "baseline_sampled_rgb16f",
+      "right_role": "candidate_emulated_half"
+    },
+    "yuv": {
+      "components": 12288,
+      "bit_mismatches": 15,
+      "nonfinite_components": 0,
+      "max_absolute_difference": 0.0001220703125,
+      "max_ulp_distance": 7706,
+      "max_absolute_difference_location": {
+        "x": 1347,
+        "y": 678,
+        "channel": "Cr"
+      },
+      "first_differences": [
+        {
+          "x": 1305,
+          "y": 657,
+          "channel": "Y",
+          "left_bits": "3e771e56",
+          "right_bits": "3e771c70",
+          "left": 0.24132665991783142,
+          "right": 0.2413194179534912,
+          "absolute_difference": 7.241964340209961e-06
+        },
+        {
+          "x": 1305,
+          "y": 657,
+          "channel": "Cb",
+          "left_bits": "3effc4e9",
+          "right_bits": "3effbcea",
+          "left": 0.49954918026924133,
+          "right": 0.4994881749153137,
+          "absolute_difference": 6.1005353927612305e-05
+        },
+        {
+          "x": 1305,
+          "y": 657,
+          "channel": "Cr",
+          "left_bits": "3f011fd1",
+          "right_bits": "3f012024",
+          "left": 0.5043917298316956,
+          "right": 0.5043966770172119,
+          "absolute_difference": 4.947185516357422e-06
+        },
+        {
+          "x": 1318,
+          "y": 678,
+          "channel": "Y",
+          "left_bits": "3e4c940d",
+          "right_bits": "3e4c95f3",
+          "left": 0.19978351891040802,
+          "right": 0.19979076087474823,
+          "absolute_difference": 7.241964340209961e-06
+        },
+        {
+          "x": 1318,
+          "y": 678,
+          "channel": "Cb",
+          "left_bits": "3effb6a3",
+          "right_bits": "3effbea3",
+          "left": 0.4994402825832367,
+          "right": 0.4995013177394867,
+          "absolute_difference": 6.103515625e-05
+        },
+        {
+          "x": 1318,
+          "y": 678,
+          "channel": "Cr",
+          "left_bits": "3f009f5b",
+          "right_bits": "3f009f09",
+          "left": 0.5024315714836121,
+          "right": 0.5024266839027405,
+          "absolute_difference": 4.887580871582031e-06
+        },
+        {
+          "x": 1337,
+          "y": 678,
+          "channel": "Y",
+          "left_bits": "3e62d1b4",
+          "right_bits": "3e62dc02",
+          "left": 0.22150307893753052,
+          "right": 0.2215423882007599,
+          "absolute_difference": 3.930926322937012e-05
+        },
+        {
+          "x": 1337,
+          "y": 678,
+          "channel": "Cb",
+          "left_bits": "3efcb9e0",
+          "right_bits": "3efcbfa4",
+          "left": 0.4936056137084961,
+          "right": 0.49364960193634033,
+          "absolute_difference": 4.398822784423828e-05
+        },
+        {
+          "x": 1337,
+          "y": 678,
+          "channel": "Cr",
+          "left_bits": "3f00026d",
+          "right_bits": "3f00061a",
+          "left": 0.5000370144844055,
+          "right": 0.5000931024551392,
+          "absolute_difference": 5.608797073364258e-05
+        },
+        {
+          "x": 1338,
+          "y": 678,
+          "channel": "Y",
+          "left_bits": "3e68bc90",
+          "right_bits": "3e68daaa",
+          "left": 0.22728180885314941,
+          "right": 0.2273966372013092,
+          "absolute_difference": 0.00011482834815979004
+        }
+      ],
+      "left_role": "baseline_csc_yuv",
+      "right_role": "candidate_csc_yuv"
+    }
+  },
+  "limitations": [
+    "Captured shader floats only; not raw NV12, driver quantization, scanout or panel evidence.",
+    "Shader hashes identify archived sources; they do not prove equivalence to uninstrumented baseline.",
+    "Completion/fence/error evidence is asserted by the native producer manifest, not independently queried offline.",
+    "Pixels in one capture are correlated; this is not a performance or statistical confidence test.",
+    "actual single textureLod site UV and sampled RGB; instrumentation may change shader compilation; not an unmodified shader"
+  ],
+  "repeat_metadata": {
+    "repetitions": 2,
+    "draw_order": [
+      "B1",
+      "A1",
+      "B2",
+      "A2"
+    ],
+    "draw_ok": {
+      "B1": true,
+      "A1": true,
+      "B2": true,
+      "A2": true
+    },
+    "frame_id": 71,
+    "frame_token": 23,
+    "same_input_snapshot": true,
+    "assertion_scope": "same frozen renderer input state and resource handles; no texture pixel hash",
+    "programs_reused": true,
+    "program_tokens": [
+      "498549638688",
+      "498549640480",
+      "498549638688",
+      "498549640480"
+    ],
+    "draw_epoch_before": [
+      "0",
+      "0",
+      "0",
+      "0"
+    ],
+    "draw_epoch_after": [
+      "0",
+      "0",
+      "0",
+      "0"
+    ]
+  },
+  "repeat_analysis": {
+    "comparisons": {
+      "candidate_repeat": {
+        "pre_rgb": {
+          "components": 12288,
+          "bit_mismatches": 0,
+          "nonfinite_components": 0,
+          "max_absolute_difference": 0.0,
+          "max_ulp_distance": 0,
+          "max_absolute_difference_location": null,
+          "first_differences": [],
+          "left_role": "B1",
+          "right_role": "B2"
+        },
+        "half_rgb": {
+          "components": 12288,
+          "bit_mismatches": 0,
+          "nonfinite_components": 0,
+          "max_absolute_difference": 0.0,
+          "max_ulp_distance": 0,
+          "max_absolute_difference_location": null,
+          "first_differences": [],
+          "left_role": "B1",
+          "right_role": "B2"
+        },
+        "yuv": {
+          "components": 12288,
+          "bit_mismatches": 0,
+          "nonfinite_components": 0,
+          "max_absolute_difference": 0.0,
+          "max_ulp_distance": 0,
+          "max_absolute_difference_location": null,
+          "first_differences": [],
+          "left_role": "B1",
+          "right_role": "B2"
+        }
+      },
+      "baseline_repeat": {
+        "pre_rgb": {
+          "components": 12288,
+          "bit_mismatches": 0,
+          "nonfinite_components": 0,
+          "max_absolute_difference": 0.0,
+          "max_ulp_distance": 0,
+          "max_absolute_difference_location": null,
+          "first_differences": [],
+          "left_role": "A1",
+          "right_role": "A2"
+        }
+      },
+      "ab1": {
+        "pre_rgb": {
+          "components": 12288,
+          "bit_mismatches": 21,
+          "nonfinite_components": 0,
+          "max_absolute_difference": 0.00011596083641052246,
+          "max_ulp_distance": 7782,
+          "max_absolute_difference_location": {
+            "x": 1338,
+            "y": 678,
+            "channel": "G"
+          },
+          "first_differences": [
+            {
+              "x": 1305,
+              "y": 657,
+              "channel": "R",
+              "left_bits": "3e7dc99d",
+              "right_bits": "3e7dc9ed",
+              "left": 0.24783940613269806,
+              "right": 0.24784059822559357,
+              "absolute_difference": 1.1920928955078125e-06
+            },
+            {
+              "x": 1305,
+              "y": 657,
+              "channel": "G",
+              "left_bits": "3e74acbf",
+              "right_bits": "3e74ac25",
+              "left": 0.23894022405147552,
+              "right": 0.23893792927265167,
+              "absolute_difference": 2.294778823852539e-06
+            },
+            {
+              "x": 1305,
+              "y": 657,
+              "channel": "B",
+              "left_bits": "3e764c5b",
+              "right_bits": "3e7633a0",
+              "left": 0.24052564799785614,
+              "right": 0.2404313087463379,
+              "absolute_difference": 9.433925151824951e-05
+            },
+            {
+              "x": 1318,
+              "y": 678,
+              "channel": "R",
+              "left_bits": "3e5045f5",
+              "right_bits": "3e504636",
+              "left": 0.20339186489582062,
+              "right": 0.20339283347129822,
+              "absolute_difference": 9.685754776000977e-07
+            },
+            {
+              "x": 1318,
+              "y": 678,
+              "channel": "G",
+              "left_bits": "3e4b40dc",
+              "right_bits": "3e4b411e",
+              "left": 0.19848960638046265,
+              "right": 0.19849058985710144,
+              "absolute_difference": 9.834766387939453e-07
+            },
+            {
+              "x": 1318,
+              "y": 678,
+              "channel": "B",
+              "left_bits": "3e4b95cb",
+              "right_bits": "3e4bb1cd",
+              "left": 0.19881360232830048,
+              "right": 0.19892044365406036,
+              "absolute_difference": 0.0001068413257598877
+            },
+            {
+              "x": 1328,
+              "y": 678,
+              "channel": "R",
+              "left_bits": "3e62132c",
+              "right_bits": "3e6213ba",
+              "left": 0.2207762598991394,
+              "right": 0.22077837586402893,
+              "absolute_difference": 2.115964889526367e-06
+            },
+            {
+              "x": 1328,
+              "y": 678,
+              "channel": "G",
+              "left_bits": "3e61c4c5",
+              "right_bits": "3e61c552",
+              "left": 0.2204771786928177,
+              "right": 0.22047927975654602,
+              "absolute_difference": 2.1010637283325195e-06
+            },
+            {
+              "x": 1328,
+              "y": 678,
+              "channel": "B",
+              "left_bits": "3e60a46d",
+              "right_bits": "3e60bee1",
+              "left": 0.21937723457813263,
+              "right": 0.21947814524173737,
+              "absolute_difference": 0.00010091066360473633
+            },
+            {
+              "x": 1337,
+              "y": 678,
+              "channel": "R",
+              "left_bits": "3e62f9bd",
+              "right_bits": "3e63154e",
+              "left": 0.22165580093860626,
+              "right": 0.22176095843315125,
+              "absolute_difference": 0.00010515749454498291
+            }
+          ],
+          "left_role": "A1",
+          "right_role": "B1"
+        }
+      },
+      "ab2": {
+        "pre_rgb": {
+          "components": 12288,
+          "bit_mismatches": 21,
+          "nonfinite_components": 0,
+          "max_absolute_difference": 0.00011596083641052246,
+          "max_ulp_distance": 7782,
+          "max_absolute_difference_location": {
+            "x": 1338,
+            "y": 678,
+            "channel": "G"
+          },
+          "first_differences": [
+            {
+              "x": 1305,
+              "y": 657,
+              "channel": "R",
+              "left_bits": "3e7dc99d",
+              "right_bits": "3e7dc9ed",
+              "left": 0.24783940613269806,
+              "right": 0.24784059822559357,
+              "absolute_difference": 1.1920928955078125e-06
+            },
+            {
+              "x": 1305,
+              "y": 657,
+              "channel": "G",
+              "left_bits": "3e74acbf",
+              "right_bits": "3e74ac25",
+              "left": 0.23894022405147552,
+              "right": 0.23893792927265167,
+              "absolute_difference": 2.294778823852539e-06
+            },
+            {
+              "x": 1305,
+              "y": 657,
+              "channel": "B",
+              "left_bits": "3e764c5b",
+              "right_bits": "3e7633a0",
+              "left": 0.24052564799785614,
+              "right": 0.2404313087463379,
+              "absolute_difference": 9.433925151824951e-05
+            },
+            {
+              "x": 1318,
+              "y": 678,
+              "channel": "R",
+              "left_bits": "3e5045f5",
+              "right_bits": "3e504636",
+              "left": 0.20339186489582062,
+              "right": 0.20339283347129822,
+              "absolute_difference": 9.685754776000977e-07
+            },
+            {
+              "x": 1318,
+              "y": 678,
+              "channel": "G",
+              "left_bits": "3e4b40dc",
+              "right_bits": "3e4b411e",
+              "left": 0.19848960638046265,
+              "right": 0.19849058985710144,
+              "absolute_difference": 9.834766387939453e-07
+            },
+            {
+              "x": 1318,
+              "y": 678,
+              "channel": "B",
+              "left_bits": "3e4b95cb",
+              "right_bits": "3e4bb1cd",
+              "left": 0.19881360232830048,
+              "right": 0.19892044365406036,
+              "absolute_difference": 0.0001068413257598877
+            },
+            {
+              "x": 1328,
+              "y": 678,
+              "channel": "R",
+              "left_bits": "3e62132c",
+              "right_bits": "3e6213ba",
+              "left": 0.2207762598991394,
+              "right": 0.22077837586402893,
+              "absolute_difference": 2.115964889526367e-06
+            },
+            {
+              "x": 1328,
+              "y": 678,
+              "channel": "G",
+              "left_bits": "3e61c4c5",
+              "right_bits": "3e61c552",
+              "left": 0.2204771786928177,
+              "right": 0.22047927975654602,
+              "absolute_difference": 2.1010637283325195e-06
+            },
+            {
+              "x": 1328,
+              "y": 678,
+              "channel": "B",
+              "left_bits": "3e60a46d",
+              "right_bits": "3e60bee1",
+              "left": 0.21937723457813263,
+              "right": 0.21947814524173737,
+              "absolute_difference": 0.00010091066360473633
+            },
+            {
+              "x": 1337,
+              "y": 678,
+              "channel": "R",
+              "left_bits": "3e62f9bd",
+              "right_bits": "3e63154e",
+              "left": 0.22165580093860626,
+              "right": 0.22176095843315125,
+              "absolute_difference": 0.00010515749454498291
+            }
+          ],
+          "left_role": "A2",
+          "right_role": "B2"
+        },
+        "half_rgb": {
+          "components": 12288,
+          "bit_mismatches": 7,
+          "nonfinite_components": 0,
+          "max_absolute_difference": 0.000244140625,
+          "max_ulp_distance": 8192,
+          "max_absolute_difference_location": {
+            "x": 1347,
+            "y": 678,
+            "channel": "R"
+          },
+          "first_differences": [
+            {
+              "x": 1305,
+              "y": 657,
+              "channel": "B",
+              "left_bits": "3e764000",
+              "right_bits": "3e762000",
+              "left": 0.240478515625,
+              "right": 0.2403564453125,
+              "absolute_difference": 0.0001220703125
+            },
+            {
+              "x": 1318,
+              "y": 678,
+              "channel": "B",
+              "left_bits": "3e4b8000",
+              "right_bits": "3e4ba000",
+              "left": 0.19873046875,
+              "right": 0.1988525390625,
+              "absolute_difference": 0.0001220703125
+            },
+            {
+              "x": 1337,
+              "y": 678,
+              "channel": "R",
+              "left_bits": "3e62e000",
+              "right_bits": "3e630000",
+              "left": 0.2215576171875,
+              "right": 0.2216796875,
+              "absolute_difference": 0.0001220703125
+            },
+            {
+              "x": 1337,
+              "y": 678,
+              "channel": "B",
+              "left_bits": "3e568000",
+              "right_bits": "3e56a000",
+              "left": 0.20947265625,
+              "right": 0.2095947265625,
+              "absolute_difference": 0.0001220703125
+            },
+            {
+              "x": 1338,
+              "y": 678,
+              "channel": "R",
+              "left_bits": "3e692000",
+              "right_bits": "3e694000",
+              "left": 0.2276611328125,
+              "right": 0.227783203125,
+              "absolute_difference": 0.0001220703125
+            },
+            {
+              "x": 1338,
+              "y": 678,
+              "channel": "G",
+              "left_bits": "3e69e000",
+              "right_bits": "3e6a0000",
+              "left": 0.2283935546875,
+              "right": 0.228515625,
+              "absolute_difference": 0.0001220703125
+            },
+            {
+              "x": 1347,
+              "y": 678,
+              "channel": "R",
+              "left_bits": "3e828000",
+              "right_bits": "3e82a000",
+              "left": 0.2548828125,
+              "right": 0.255126953125,
+              "absolute_difference": 0.000244140625
+            }
+          ],
+          "left_role": "A2",
+          "right_role": "B2"
+        },
+        "yuv": {
+          "components": 12288,
+          "bit_mismatches": 15,
+          "nonfinite_components": 0,
+          "max_absolute_difference": 0.0001220703125,
+          "max_ulp_distance": 7706,
+          "max_absolute_difference_location": {
+            "x": 1347,
+            "y": 678,
+            "channel": "Cr"
+          },
+          "first_differences": [
+            {
+              "x": 1305,
+              "y": 657,
+              "channel": "Y",
+              "left_bits": "3e771e56",
+              "right_bits": "3e771c70",
+              "left": 0.24132665991783142,
+              "right": 0.2413194179534912,
+              "absolute_difference": 7.241964340209961e-06
+            },
+            {
+              "x": 1305,
+              "y": 657,
+              "channel": "Cb",
+              "left_bits": "3effc4e9",
+              "right_bits": "3effbcea",
+              "left": 0.49954918026924133,
+              "right": 0.4994881749153137,
+              "absolute_difference": 6.1005353927612305e-05
+            },
+            {
+              "x": 1305,
+              "y": 657,
+              "channel": "Cr",
+              "left_bits": "3f011fd1",
+              "right_bits": "3f012024",
+              "left": 0.5043917298316956,
+              "right": 0.5043966770172119,
+              "absolute_difference": 4.947185516357422e-06
+            },
+            {
+              "x": 1318,
+              "y": 678,
+              "channel": "Y",
+              "left_bits": "3e4c940d",
+              "right_bits": "3e4c95f3",
+              "left": 0.19978351891040802,
+              "right": 0.19979076087474823,
+              "absolute_difference": 7.241964340209961e-06
+            },
+            {
+              "x": 1318,
+              "y": 678,
+              "channel": "Cb",
+              "left_bits": "3effb6a3",
+              "right_bits": "3effbea3",
+              "left": 0.4994402825832367,
+              "right": 0.4995013177394867,
+              "absolute_difference": 6.103515625e-05
+            },
+            {
+              "x": 1318,
+              "y": 678,
+              "channel": "Cr",
+              "left_bits": "3f009f5b",
+              "right_bits": "3f009f09",
+              "left": 0.5024315714836121,
+              "right": 0.5024266839027405,
+              "absolute_difference": 4.887580871582031e-06
+            },
+            {
+              "x": 1337,
+              "y": 678,
+              "channel": "Y",
+              "left_bits": "3e62d1b4",
+              "right_bits": "3e62dc02",
+              "left": 0.22150307893753052,
+              "right": 0.2215423882007599,
+              "absolute_difference": 3.930926322937012e-05
+            },
+            {
+              "x": 1337,
+              "y": 678,
+              "channel": "Cb",
+              "left_bits": "3efcb9e0",
+              "right_bits": "3efcbfa4",
+              "left": 0.4936056137084961,
+              "right": 0.49364960193634033,
+              "absolute_difference": 4.398822784423828e-05
+            },
+            {
+              "x": 1337,
+              "y": 678,
+              "channel": "Cr",
+              "left_bits": "3f00026d",
+              "right_bits": "3f00061a",
+              "left": 0.5000370144844055,
+              "right": 0.5000931024551392,
+              "absolute_difference": 5.608797073364258e-05
+            },
+            {
+              "x": 1338,
+              "y": 678,
+              "channel": "Y",
+              "left_bits": "3e68bc90",
+              "right_bits": "3e68daaa",
+              "left": 0.22728180885314941,
+              "right": 0.2273966372013092,
+              "absolute_difference": 0.00011482834815979004
+            }
+          ],
+          "left_role": "A2",
+          "right_role": "B2"
+        }
+      }
+    },
+    "repeatability": "captured-stages-bit-stable",
+    "not_captured": {
+      "baseline_repeat": [
+        "half_rgb",
+        "yuv"
+      ],
+      "ab1": [
+        "half_rgb",
+        "yuv"
+      ]
+    },
+    "ab_localization": {
+      "first_differing_stage": {
+        "ab1": "pre_rgb",
+        "ab2": "pre_rgb"
+      },
+      "captured_repeatability_confirmed": true,
+      "full_baseline_repeatability_confirmed": false,
+      "scope": "A1 sampled RGB/YUV were not captured. Stage order alone does not identify a GPU or compiler root cause."
+    }
+  },
+  "current_ab": "A2 versus B2; A1 stored RGB16F sample and CSC YUV unavailable",
+  "sample_tap_metadata": {
+    "sample_tap": true,
+    "sample_tap_site_count": 1,
+    "words_per_pixel": 26,
+    "sample_tap_body_hash": "954871728725219295",
+    "instrumentation_scope": "actual single textureLod site UV and sampled RGB; instrumentation may change shader compilation; not an unmodified shader"
+  },
+  "sample_tap_analysis": {
+    "comparisons": {
+      "candidate_repeat": {
+        "uv": {
+          "components": 8192,
+          "bit_mismatches": 0,
+          "nonfinite_components": 0,
+          "max_absolute_difference": 0.0,
+          "max_ulp_distance": 0,
+          "max_absolute_difference_location": null,
+          "first_differences": [],
+          "left_role": "B1",
+          "right_role": "B2"
+        },
+        "sample_rgb": {
+          "components": 12288,
+          "bit_mismatches": 0,
+          "nonfinite_components": 0,
+          "max_absolute_difference": 0.0,
+          "max_ulp_distance": 0,
+          "max_absolute_difference_location": null,
+          "first_differences": [],
+          "left_role": "B1",
+          "right_role": "B2"
+        }
+      },
+      "baseline_repeat": {
+        "uv": {
+          "components": 8192,
+          "bit_mismatches": 0,
+          "nonfinite_components": 0,
+          "max_absolute_difference": 0.0,
+          "max_ulp_distance": 0,
+          "max_absolute_difference_location": null,
+          "first_differences": [],
+          "left_role": "A1",
+          "right_role": "A2"
+        },
+        "sample_rgb": {
+          "components": 12288,
+          "bit_mismatches": 0,
+          "nonfinite_components": 0,
+          "max_absolute_difference": 0.0,
+          "max_ulp_distance": 0,
+          "max_absolute_difference_location": null,
+          "first_differences": [],
+          "left_role": "A1",
+          "right_role": "A2"
+        }
+      },
+      "ab1": {
+        "uv": {
+          "components": 8192,
+          "bit_mismatches": 1634,
+          "nonfinite_components": 0,
+          "max_absolute_difference": 1.1920928955078125e-07,
+          "max_ulp_distance": 3,
+          "max_absolute_difference_location": {
+            "x": 1309,
+            "y": 659,
+            "channel": "V"
+          },
+          "first_differences": [
+            {
+              "x": 1304,
+              "y": 654,
+              "channel": "V",
+              "left_bits": "3f02963a",
+              "right_bits": "3f02963b",
+              "left": 0.510104775428772,
+              "right": 0.5101048350334167,
+              "absolute_difference": 5.960464477539063e-08
+            },
+            {
+              "x": 1305,
+              "y": 654,
+              "channel": "V",
+              "left_bits": "3f02963a",
+              "right_bits": "3f02963b",
+              "left": 0.510104775428772,
+              "right": 0.5101048350334167,
+              "absolute_difference": 5.960464477539063e-08
+            },
+            {
+              "x": 1306,
+              "y": 654,
+              "channel": "V",
+              "left_bits": "3f02963a",
+              "right_bits": "3f02963b",
+              "left": 0.510104775428772,
+              "right": 0.5101048350334167,
+              "absolute_difference": 5.960464477539063e-08
+            },
+            {
+              "x": 1307,
+              "y": 654,
+              "channel": "V",
+              "left_bits": "3f02963a",
+              "right_bits": "3f02963b",
+              "left": 0.510104775428772,
+              "right": 0.5101048350334167,
+              "absolute_difference": 5.960464477539063e-08
+            },
+            {
+              "x": 1308,
+              "y": 654,
+              "channel": "V",
+              "left_bits": "3f02963a",
+              "right_bits": "3f02963b",
+              "left": 0.510104775428772,
+              "right": 0.5101048350334167,
+              "absolute_difference": 5.960464477539063e-08
+            },
+            {
+              "x": 1304,
+              "y": 655,
+              "channel": "V",
+              "left_bits": "3f02652c",
+              "right_bits": "3f02652d",
+              "left": 0.5093562602996826,
+              "right": 0.5093563199043274,
+              "absolute_difference": 5.960464477539063e-08
+            },
+            {
+              "x": 1305,
+              "y": 655,
+              "channel": "V",
+              "left_bits": "3f02652c",
+              "right_bits": "3f02652d",
+              "left": 0.5093562602996826,
+              "right": 0.5093563199043274,
+              "absolute_difference": 5.960464477539063e-08
+            },
+            {
+              "x": 1306,
+              "y": 655,
+              "channel": "V",
+              "left_bits": "3f02652c",
+              "right_bits": "3f02652d",
+              "left": 0.5093562602996826,
+              "right": 0.5093563199043274,
+              "absolute_difference": 5.960464477539063e-08
+            },
+            {
+              "x": 1307,
+              "y": 655,
+              "channel": "V",
+              "left_bits": "3f02652c",
+              "right_bits": "3f02652d",
+              "left": 0.5093562602996826,
+              "right": 0.5093563199043274,
+              "absolute_difference": 5.960464477539063e-08
+            },
+            {
+              "x": 1308,
+              "y": 655,
+              "channel": "V",
+              "left_bits": "3f02652c",
+              "right_bits": "3f02652d",
+              "left": 0.5093562602996826,
+              "right": 0.5093563199043274,
+              "absolute_difference": 5.960464477539063e-08
+            }
+          ],
+          "left_role": "A1",
+          "right_role": "B1"
+        },
+        "sample_rgb": {
+          "components": 12288,
+          "bit_mismatches": 9,
+          "nonfinite_components": 0,
+          "max_absolute_difference": 0.0001220703125,
+          "max_ulp_distance": 8192,
+          "max_absolute_difference_location": {
+            "x": 1305,
+            "y": 657,
+            "channel": "B"
+          },
+          "first_differences": [
+            {
+              "x": 1305,
+              "y": 657,
+              "channel": "B",
+              "left_bits": "3e3a4000",
+              "right_bits": "3e3a2000",
+              "left": 0.181884765625,
+              "right": 0.1817626953125,
+              "absolute_difference": 0.0001220703125
+            },
+            {
+              "x": 1318,
+              "y": 678,
+              "channel": "B",
+              "left_bits": "3e0ec000",
+              "right_bits": "3e0ee000",
+              "left": 0.139404296875,
+              "right": 0.1395263671875,
+              "absolute_difference": 0.0001220703125
+            },
+            {
+              "x": 1328,
+              "y": 678,
+              "channel": "B",
+              "left_bits": "3e236000",
+              "right_bits": "3e238000",
+              "left": 0.1595458984375,
+              "right": 0.15966796875,
+              "absolute_difference": 0.0001220703125
+            },
+            {
+              "x": 1337,
+              "y": 678,
+              "channel": "R",
+              "left_bits": "3e260000",
+              "right_bits": "3e262000",
+              "left": 0.162109375,
+              "right": 0.1622314453125,
+              "absolute_difference": 0.0001220703125
+            },
+            {
+              "x": 1337,
+              "y": 678,
+              "channel": "B",
+              "left_bits": "3e172000",
+              "right_bits": "3e174000",
+              "left": 0.1475830078125,
+              "right": 0.147705078125,
+              "absolute_difference": 0.0001220703125
+            },
+            {
+              "x": 1338,
+              "y": 678,
+              "channel": "R",
+              "left_bits": "3e2c8000",
+              "right_bits": "3e2ca000",
+              "left": 0.16845703125,
+              "right": 0.1685791015625,
+              "absolute_difference": 0.0001220703125
+            },
+            {
+              "x": 1338,
+              "y": 678,
+              "channel": "G",
+              "left_bits": "3e2d6000",
+              "right_bits": "3e2d8000",
+              "left": 0.1693115234375,
+              "right": 0.16943359375,
+              "absolute_difference": 0.0001220703125
+            },
+            {
+              "x": 1347,
+              "y": 678,
+              "channel": "G",
+              "left_bits": "3e452000",
+              "right_bits": "3e454000",
+              "left": 0.1925048828125,
+              "right": 0.192626953125,
+              "absolute_difference": 0.0001220703125
+            },
+            {
+              "x": 1321,
+              "y": 699,
+              "channel": "B",
+              "left_bits": "3e02c000",
+              "right_bits": "3e02a000",
+              "left": 0.127685546875,
+              "right": 0.1275634765625,
+              "absolute_difference": 0.0001220703125
+            }
+          ],
+          "left_role": "A1",
+          "right_role": "B1"
+        }
+      },
+      "ab2": {
+        "uv": {
+          "components": 8192,
+          "bit_mismatches": 1634,
+          "nonfinite_components": 0,
+          "max_absolute_difference": 1.1920928955078125e-07,
+          "max_ulp_distance": 3,
+          "max_absolute_difference_location": {
+            "x": 1309,
+            "y": 659,
+            "channel": "V"
+          },
+          "first_differences": [
+            {
+              "x": 1304,
+              "y": 654,
+              "channel": "V",
+              "left_bits": "3f02963a",
+              "right_bits": "3f02963b",
+              "left": 0.510104775428772,
+              "right": 0.5101048350334167,
+              "absolute_difference": 5.960464477539063e-08
+            },
+            {
+              "x": 1305,
+              "y": 654,
+              "channel": "V",
+              "left_bits": "3f02963a",
+              "right_bits": "3f02963b",
+              "left": 0.510104775428772,
+              "right": 0.5101048350334167,
+              "absolute_difference": 5.960464477539063e-08
+            },
+            {
+              "x": 1306,
+              "y": 654,
+              "channel": "V",
+              "left_bits": "3f02963a",
+              "right_bits": "3f02963b",
+              "left": 0.510104775428772,
+              "right": 0.5101048350334167,
+              "absolute_difference": 5.960464477539063e-08
+            },
+            {
+              "x": 1307,
+              "y": 654,
+              "channel": "V",
+              "left_bits": "3f02963a",
+              "right_bits": "3f02963b",
+              "left": 0.510104775428772,
+              "right": 0.5101048350334167,
+              "absolute_difference": 5.960464477539063e-08
+            },
+            {
+              "x": 1308,
+              "y": 654,
+              "channel": "V",
+              "left_bits": "3f02963a",
+              "right_bits": "3f02963b",
+              "left": 0.510104775428772,
+              "right": 0.5101048350334167,
+              "absolute_difference": 5.960464477539063e-08
+            },
+            {
+              "x": 1304,
+              "y": 655,
+              "channel": "V",
+              "left_bits": "3f02652c",
+              "right_bits": "3f02652d",
+              "left": 0.5093562602996826,
+              "right": 0.5093563199043274,
+              "absolute_difference": 5.960464477539063e-08
+            },
+            {
+              "x": 1305,
+              "y": 655,
+              "channel": "V",
+              "left_bits": "3f02652c",
+              "right_bits": "3f02652d",
+              "left": 0.5093562602996826,
+              "right": 0.5093563199043274,
+              "absolute_difference": 5.960464477539063e-08
+            },
+            {
+              "x": 1306,
+              "y": 655,
+              "channel": "V",
+              "left_bits": "3f02652c",
+              "right_bits": "3f02652d",
+              "left": 0.5093562602996826,
+              "right": 0.5093563199043274,
+              "absolute_difference": 5.960464477539063e-08
+            },
+            {
+              "x": 1307,
+              "y": 655,
+              "channel": "V",
+              "left_bits": "3f02652c",
+              "right_bits": "3f02652d",
+              "left": 0.5093562602996826,
+              "right": 0.5093563199043274,
+              "absolute_difference": 5.960464477539063e-08
+            },
+            {
+              "x": 1308,
+              "y": 655,
+              "channel": "V",
+              "left_bits": "3f02652c",
+              "right_bits": "3f02652d",
+              "left": 0.5093562602996826,
+              "right": 0.5093563199043274,
+              "absolute_difference": 5.960464477539063e-08
+            }
+          ],
+          "left_role": "A2",
+          "right_role": "B2"
+        },
+        "sample_rgb": {
+          "components": 12288,
+          "bit_mismatches": 9,
+          "nonfinite_components": 0,
+          "max_absolute_difference": 0.0001220703125,
+          "max_ulp_distance": 8192,
+          "max_absolute_difference_location": {
+            "x": 1305,
+            "y": 657,
+            "channel": "B"
+          },
+          "first_differences": [
+            {
+              "x": 1305,
+              "y": 657,
+              "channel": "B",
+              "left_bits": "3e3a4000",
+              "right_bits": "3e3a2000",
+              "left": 0.181884765625,
+              "right": 0.1817626953125,
+              "absolute_difference": 0.0001220703125
+            },
+            {
+              "x": 1318,
+              "y": 678,
+              "channel": "B",
+              "left_bits": "3e0ec000",
+              "right_bits": "3e0ee000",
+              "left": 0.139404296875,
+              "right": 0.1395263671875,
+              "absolute_difference": 0.0001220703125
+            },
+            {
+              "x": 1328,
+              "y": 678,
+              "channel": "B",
+              "left_bits": "3e236000",
+              "right_bits": "3e238000",
+              "left": 0.1595458984375,
+              "right": 0.15966796875,
+              "absolute_difference": 0.0001220703125
+            },
+            {
+              "x": 1337,
+              "y": 678,
+              "channel": "R",
+              "left_bits": "3e260000",
+              "right_bits": "3e262000",
+              "left": 0.162109375,
+              "right": 0.1622314453125,
+              "absolute_difference": 0.0001220703125
+            },
+            {
+              "x": 1337,
+              "y": 678,
+              "channel": "B",
+              "left_bits": "3e172000",
+              "right_bits": "3e174000",
+              "left": 0.1475830078125,
+              "right": 0.147705078125,
+              "absolute_difference": 0.0001220703125
+            },
+            {
+              "x": 1338,
+              "y": 678,
+              "channel": "R",
+              "left_bits": "3e2c8000",
+              "right_bits": "3e2ca000",
+              "left": 0.16845703125,
+              "right": 0.1685791015625,
+              "absolute_difference": 0.0001220703125
+            },
+            {
+              "x": 1338,
+              "y": 678,
+              "channel": "G",
+              "left_bits": "3e2d6000",
+              "right_bits": "3e2d8000",
+              "left": 0.1693115234375,
+              "right": 0.16943359375,
+              "absolute_difference": 0.0001220703125
+            },
+            {
+              "x": 1347,
+              "y": 678,
+              "channel": "G",
+              "left_bits": "3e452000",
+              "right_bits": "3e454000",
+              "left": 0.1925048828125,
+              "right": 0.192626953125,
+              "absolute_difference": 0.0001220703125
+            },
+            {
+              "x": 1321,
+              "y": 699,
+              "channel": "B",
+              "left_bits": "3e02c000",
+              "right_bits": "3e02a000",
+              "left": 0.127685546875,
+              "right": 0.1275634765625,
+              "absolute_difference": 0.0001220703125
+            }
+          ],
+          "left_role": "A2",
+          "right_role": "B2"
+        }
+      }
+    },
+    "repeatability": "sample-taps-bit-stable",
+    "captured_repeatability_confirmed": true,
+    "scope": "Instrumented sample site only; instrumentation may change shader compilation. This is not an unmodified shader capture."
+  },
+  "original_body_relation": {
+    "status": "not-independently-verified",
+    "scope": "Original body and actual instrumented shader sources are archived with SHA256. Native body hashes and producer linkage assertions do not independently prove the transformation or unmodified-shader equivalence."
+  }
+}

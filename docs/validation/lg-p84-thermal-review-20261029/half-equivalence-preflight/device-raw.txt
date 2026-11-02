@@ -1,0 +1,352 @@
+@@ gpu_thermal_pwrlevel
+0
+@@ gpu_max_gpuclk
+652800000
+@@ gpu_devfreq_max
+652800000
+@@ cpu2_scaling_max_freq
+2342400
+@@ battery_temp
+31300
+@@ vts_temp
+346
+@@ battery_status
+Full
+@@ battery_current_now
+305
+@@ battery_voltage_now
+4320043
+@@ usb_online
+1
+@@ panel_hdr
+0
+@@ backlight
+10
+@@ panel_thermal_status
+0
+@@ battery_service
+Current Battery Service state:
+  AC powered: true
+  USB powered: false
+  Wireless powered: false
+  Max charging current: 0
+  Max charging voltage: 0
+  Charge counter: 0
+  status: 5
+  health: 2
+  present: true
+  level: 100
+  scale: 100
+  voltage: 4319
+  temperature: 313
+  technology: Li-ion
+@@ power
+POWER MANAGER (dumpsys power)
+
+Power Manager State:
+  mDirty=0x0
+  mWakefulness=Awake
+  mWakefulnessChanging=false
+  mIsPowered=true
+  mPlugType=1
+  mBatteryLevel=100
+  mBatteryLevelWhenDreamStarted=0
+  mDockState=0
+  mStayOn=true
+  mProximityPositive=false
+  mBootCompleted=true
+  mSystemReady=true
+  mHalAutoSuspendModeEnabled=false
+  mHalInteractiveModeEnabled=true
+  mWakeLockSummary=0x0
+  mUserActivitySummary=0x4
+  mRequestWaitForNegativeProximity=false
+  mSandmanScheduled=false
+  mSandmanSummoned=false
+  mLowPowerModeEnabled=false
+  mBatteryLevelLow=false
+  mLightDeviceIdleMode=false
+  mDeviceIdleMode=false
+  mDeviceIdleWhitelist=[10105, 10117, 10138]
+  mDeviceIdleTempWhitelist=[]
+  mLastWakeTime=150937599 (12533402 ms ago)
+  mLastSleepTime=150931037 (12539964 ms ago)
+  mLastUserActivityTime=162147219 (1323782 ms ago)
+  mLastUserActivityTimeNoChangeLights=161485154 (1985847 ms ago)
+  mLastInteractivePowerHintTime=162147219 (1323782 ms ago)
+  mLastScreenBrightnessBoostTime=0 (163471001 ms ago)
+  mScreenBrightnessBoostInProgress=false
+  mDisplayReady=true
+  mHoldingWakeLockSuspendBlocker=false
+  mHoldingDisplaySuspendBlocker=true
+
+Settings and Configuration:
+  mDecoupleHalAutoSuspendModeFromDisplayConfig=false
+  mDecoupleHalInteractiveModeFromDisplayConfig=false
+  mWakeUpWhenPluggedOrUnpluggedConfig=true
+  mWakeUpWhenPluggedOrUnpluggedInTheaterModeConfig=false
+  mTheaterModeEnabled=false
+  mSuspendWhenScreenOffDueToProximityConfig=true
+  mDreamsSupportedConfig=true
+  mDreamsEnabledByDefaultConfig=true
+  mDreamsActivatedOnSleepByDefaultConfig=false
+  mDreamsActivatedOnDockByDefaultConfig=true
+  mDreamsActivatedOnKickstandByDefaultConfig=false
+  mDreamsEnabledOnBatteryConfig=false
+  mDreamsBatteryLevelMinimumWhenPoweredConfig=-1
+  mDreamsBatteryLevelMinimumWhenNotPoweredConfig=15
+  mDreamsBatteryLevelDrainCutoffConfig=5
+  mDreamsEnabledSetting=true
+  mDreamsActivateOnSleepSetting=false
+  mDreamsActivateOnDockSetting=true
+  mDreamsActivateOnKickstandSetting=false
+  mDozeAfterScreenOffConfig=false
+  mLowPowerModeSetting=false
+  mAutoLowPowerModeConfigured=false
+  mAutoLowPowerModeSnoozing=false
+  mMinimumScreenOffTimeoutConfig=10000
+  mMaximumScreenDimDurationConfig=15000
+  mMaximumScreenDimRatioConfig=0.20000005
+  mScreenOffTimeoutSetting=30000
+  mSleepTimeoutSetting=-1
+  mMaximumScreenOffTimeoutFromDeviceAdmin=2147483647 (enforced=false)
+  mStayOnWhilePluggedInSetting=7
+  mScreenBrightnessSetting=116
+  mScreenAutoBrightnessAdjustmentSetting=0.0
+  mScreenBrightnessModeSetting=1
+  mScreenBrightnessOverrideFromWindowManager=-1
+  mUserActivityTimeoutOverrideFromWindowManager=-1
+  mUserInactiveOverrideFromWindowManager=false
+  mTemporaryScreenBrightnessSettingOverride=-1
+  mTemporaryScreenAutoBrightnessAdjustmentSettingOverride=NaN
+  mDozeScreenStateOverrideFromDreamManager=0
+  mDozeScreenBrightnessOverrideFromDreamManager=-1
+  mScreenBrightnessSettingMinimum=10
+  mScreenBrightnessSettingMaximum=255
+  mScreenBrightnessSettingDefault=145
+  mDoubleTapWakeEnabled=false
+
+Sleep timeout: -1 ms
+Screen off timeout: 30000 ms
+Screen dim duration: 6000 ms
+
+UID states:
+  UID 1000: 0
+  UID 1001: 0
+  UID 1002: 6
+  UID 1027: 0
+  UID 1037: 16
+  UID 2902: 6
+  UID u0a93: 10
+  UID u0a97: 16
+  UID u0a102: 10
+  UID u0a105: 6
+  UID u0a106: 3
+  UID u0a113: 16
+  UID u0a114: 16
+  UID u0a115: 10
+  UID u0a117: 10
+  UID u0a118: 10
+  UID u0a120: 7
+  UID u0a129: 10
+  UID u0a131: 2
+  UID u0a134: 10
+  UID u0a144: 0
+  UID u0a147: 16
+  UID u0a150: 0
+  UID u0a152: 10
+  UID u0a153: 10
+  UID u0a167: 16
+  UID u0a176: 2
+  UID u0a185: 16
+  UID u0a196: 16
+  UID u0a201: 3
+  UID u0a204: 16
+  UID u0a212: 16
+  UID u0a244: 13
+  UID u0a257: 14
+
+Wake Locks: size=0
+
+Suspend Blockers: size=4
+  PowerManagerService.WakeLocks: ref count=0
+  PowerManagerService.Display: ref count=1
+  PowerManagerService.Broadcasts: ref count=0
+  PowerManagerService.WirelessChargerDetector: ref count=0
+
+Display Power: state=ON
+
+Wireless Charger Detector State:
+  mGravitySensor={Sensor name="LGE Gravity Sensor", vendor="QTI", version=2, type=9, maxRange=78.4532, resolution=0.0023956299, power=1.0799866, minDelay=5000}
+  mPoweredWirelessly=false
+  mAtRest=false
+  mRestX=0.0, mRestY=0.0, mRestZ=0.0
+  mDetectionInProgress=false
+  mDetectionStartTime=0 (never)
+  mMustUpdateRestPosition=false
+  mTotalSamples=0
+  mMovingSamples=0
+  mFirstSampleX=0.0, mFirstSampleY=0.0, mFirstSampleZ=0.0
+  mLastSampleX=0.0, mLastSampleY=0.0, mLastSampleZ=0.0
+
+PowerManagerEx State:
+  SUPPORT_AD:false
+  TYPE_OF_AD_SENSOR:0
+  mTemporaryDisableAD:false
+  mCurrentADMode:1
+  mIsWorkingAD:false
+  mADLuxWhenAlcOff:3100
+  mADLuxWhenAlcOn:3100
+  SUPPORT_HL_MODE:true
+  mIsHLMode:0
+  mPrepareMode:-1
+  mWasADworking:false
+  mHlEnableLux:30000
+  mHlDisableLux:10000
+  mForceHLModeLux:0
+  mPocketDetecting:true
+  mThermalState:0
+  mSupportDetectWakelock:false
+@@ window_policy
+WINDOW MANAGER POLICY STATE (dumpsys window policy)
+    mSafeMode=false mSystemReady=true mSystemBooted=true
+    mLidState=-1 mLidOpenRotation=-1 mCameraLensCoverState=-1 mHdmiPlugged=false
+    mLastSystemUiFlags=0x8708 mResettingSystemUiFlags=0x0 mForceClearedSystemUiFlags=0x0
+    mWakeGestureEnabledSetting=true
+    mSupportAutoRotation=true
+    mUiMode=1 mDockMode=0 mEnableCarDockHomeCapture=true mCarDockRotation=-1 mDeskDockRotation=-1
+    mUserRotationMode=1 mUserRotation=0 mAllowAllRotations=0
+    mCurrentAppOrientation=5
+    mCarDockEnablesAccelerometer=true mDeskDockEnablesAccelerometer=true
+    mLidKeyboardAccessibility=0 mLidNavigationAccessibility=0 mLidControlsScreenLock=false
+ mLidControlsSleep=false
+     mLongPressOnBackBehavior=0
+    mShortPressOnPowerBehavior=1 mLongPressOnPowerBehavior=1
+    mIsEnableExtDisplayOnLcdOff=true
+    mDoublePressOnPowerBehavior=0 mTriplePressOnPowerBehavior=0
+    mHasSoftInput=true
+    mAwake=true
+    mScreenOnEarly=true mScreenOnFully=true
+    mKeyguardDrawComplete=true mWindowManagerDrawComplete=true
+    mOrientationSensorEnabled=false
+    mOverscanScreen=(0,0) 1440x2880
+    mRestrictedOverscanScreen=(0,0) 1440x2672
+    mUnrestrictedScreen=(0,0) 1440x2880
+    mRestrictedScreen=(0,0) 1440x2672
+    mStableFullscreen=(0,0)-(1440,2672)
+    mStable=(0,96)-(1440,2672)
+    mSystem=(0,0)-(1440,2880)
+    mCur=(0,96)-(1440,2672)
+    mContent=(0,96)-(1440,2672)
+    mVoiceContent=(0,96)-(1440,2672)
+    mDock=(0,96)-(1440,2672)
+    mDockLayer=268435456 mStatusBarLayer=161000
+    mShowingLockscreen=false mShowingDream=false mDreamingLockscreen=false mDreamingSleepToken=null
+    mStatusBar=Window{565b465 u0 StatusBar} isStatusBarKeyguard=false
+    mNavigationBar=Window{62df58d u0 NavigationBar}
+    mFocusedWindow=Window{f8760a4 u0 com.lge.launcher3/com.lge.launcher3.LauncherExtension}
+    mFocusedApp=Token{abb1105 ActivityRecord{381f47c u0 com.lge.launcher3/.LauncherExtension t744}}
+    mTopFullscreenOpaqueWindowState=Window{f8760a4 u0 com.lge.launcher3/com.lge.launcher3.LauncherExtension}
+    mTopFullscreenOpaqueOrDimmingWindowState=Window{f8760a4 u0 com.lge.launcher3/com.lge.launcher3.LauncherExtension}
+    mTopIsFullscreen=false mHideLockScreen=false
+    mForceStatusBar=false mForceStatusBarFromKeyguard=false
+    mDismissKeyguard=0 mWinDismissingKeyguard=null mHomePressed=false
+    mAllowLockscreenWhenOn=false mLockScreenTimeout=30000 mLockScreenTimerActive=false
+    mEndcallBehavior=2 mIncallPowerBehavior=1 mLongPressOnHomeBehavior=2
+    mLandscapeRotation=1 mSeascapeRotation=3
+    mPortraitRotation=0 mUpsideDownRotation=2
+    mDemoHdmiRotation=1 mDemoHdmiRotationLock=false
+    mUndockedHdmiRotation=-1
+    mIsTouchExplorationEnabled=false
+    mKeyMapping.size=0
+    BarController.StatusBar
+      mState=WINDOW_STATE_SHOWING
+      mTransientBar=TRANSIENT_BAR_NONE
+    BarController.NavigationBar
+      mState=WINDOW_STATE_SHOWING
+      mTransientBar=TRANSIENT_BAR_NONE
+    PolicyControl.sImmersiveStatusFilter=null
+    PolicyControl.sImmersiveNavigationFilter=null
+    PolicyControl.sImmersivePreconfirmationsFilter=null
+    WakeGestureListener
+      mTriggerRequested=false
+      mSensor=null
+    WindowOrientationListener
+      mEnabled=false
+      mCurrentRotation=0
+      mSensorType=null
+      mSensor={Sensor name="LG Motion Accel", vendor="QTI", version=1, type=499898101, maxRange=1.0, resolution=1.0, power=0.17999268, minDelay=0}
+      mRate=2
+      AccelSensorJudge
+        mProposedRotation=-1
+        mPredictedRotation=-1
+        mLastFilteredX=0.12721252
+        mLastFilteredY=-0.103256226
+        mLastFilteredZ=9.454849
+        mLastFilteredTimestampNanos=204393021990852 (1.11887368E8ms ago)
+        mTiltHistory={last: 89.0}
+        mFlat=true
+        mSwinging=false
+        mAccelerating=false
+        mOverhead=false
+        mTouched=false
+        mTiltToleranceConfig=[[-25, 60], [-25, 60], [-25, 60], [-25, 60]]
+    KeyguardServiceDelegate
+      showing=false
+      showingAndNotOccluded=true
+      inputRestricted=false
+      occluded=false
+      secure=false
+      dreaming=false
+      systemIsReady=true
+      deviceHasKeyguard=true
+      enabled=false
+      offReason=2
+      currentUser=0
+      bootCompleted=true
+      screenState=2
+      interactiveState=1
+      KeyguardStateMonitor
+        mIsShowing=false
+        mSimSecure=false
+        mInputRestricted=false
+        mCurrentUserId=0
+    LGPhoneWindowManager
+     mHomeKeyExceptionInECMMode=false
+     mIsUseSpc=false
+     mSPLinkScreenOff=true
+     sKeyExceptionWinState=Window{f8760a4 u0 com.lge.launcher3/com.lge.launcher3.LauncherExtension}
+     mIsEnableExtDisplayOnLcdOn=false
+     sSupporLightSensor=true
+     mVolumeKeyShortcutStatus=1
+     mVolumeUpKeyShortcutAction=2
+     mVolumeDownKeyShortcutAction=1
+     mVolumeKeyLongPressEnabled=true
+     mVolumeKeyDoublePressEnabled=true
+     mSimSwitchingKey=true
+     mFourthKeySharing=false
+     mAccelSensorNotSupported=false
+     mSupportQuickMemo=true
+     mQuickMemoInstalled=true
+     mHotKeyCustomizing=false
+     mHotKeyLongPressEnabled=false
+     mHotKeyMode=0
+     mEmergencyLauncherConfigEnabled=false
+     mRestartActionEnabled=false
+     mPowerVolumeDownReset=true
+     mSupportForcedPowerOff=false
+     mPowerKeyScreenOnInCalling=true
+ mHoldingCallByPowerKey=false
+     mVRMode=false
+     mHookingMode=false
+     mSupportSmartRearKey=false
+     mIsCameraInUse=false
+     mFingerPrintScreenshotStatus=false
+     mIsFirstScreenshot=true
+@@ lab_process
+@@ original_settings
+1
+116
+0
+0
+30000

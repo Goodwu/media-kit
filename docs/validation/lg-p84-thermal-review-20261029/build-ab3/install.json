@@ -1,0 +1,156 @@
+{
+  "startedAt": "2026-10-29T15:35:24.709966+08:00",
+  "serial": "LGH870DS42e27764",
+  "sourceApk": "/Users/wuweiwei1/src/media-kit/media_kit_hdr_lab/build/app/outputs/flutter-apk/lg-p84-thermal-ab3-20261029-release.apk",
+  "apkSha256": "e015b2e11ea252094b88fb82e66b3de121611b6576f571fb6124fc46b55b29e4",
+  "nativeVerification": "/Users/wuweiwei1/src/media-kit/media_kit_hdr_lab/build/app/outputs/flutter-apk/lg-p84-thermal-ab3-20261029-release.native-verification.json",
+  "nativeVerificationSha256": "bd3d54916e07b2062ef77efe00f089788a69363e49579a6c21176c32e63cb725",
+  "nativeVerificationData": {
+    "abiPolicy": "arm64-v8a only",
+    "apk": "/Users/wuweiwei1/src/media-kit/media_kit_hdr_lab/build/app/outputs/flutter-apk/app-arm64-v8a-release.apk",
+    "apkBytes": 41433527,
+    "apkSha256": "e015b2e11ea252094b88fb82e66b3de121611b6576f571fb6124fc46b55b29e4",
+    "jar": "/Users/wuweiwei1/src/media-kit/build/android-native/lg-p84-thermal-ab3-20261029-20261029-153307-28668/package/default-arm64-v8a.jar",
+    "jarSha256": "944f1b42cc6902402a2bb59260f11d0e7b603a0178b97c801705bbbaebdf8fcc",
+    "members": {
+      "lib/arm64-v8a/libc++_shared.so": {
+        "bytes": 1292904,
+        "packagingMode": "ndk-strip-unneeded",
+        "sha256": "4397241b4bd20a8e579bfb41d21107857e12985f6a01ca0c2a5f83380d1270b4"
+      },
+      "lib/arm64-v8a/libmediakitandroidhelper.so": {
+        "bytes": 53984,
+        "packagingMode": "exact",
+        "sha256": "9d7a9c7ad0caa44afdc521eaa0cd5898190120739f2748e41c4b52208d9d507c"
+      },
+      "lib/arm64-v8a/libmpv.so": {
+        "bytes": 20667344,
+        "packagingMode": "exact",
+        "sha256": "cea63b44f9edddd824cccff9db793ff9d732609603c834d994960b8304bb6453"
+      }
+    },
+    "nativeCandidate": "/Users/wuweiwei1/src/media-kit/build/android-native/lg-p84-thermal-ab3-20261029-20261029-153307-28668/native-candidate.json",
+    "requiredMarkers": [
+      "surfacetexture",
+      "MKSURF: version",
+      "android-native-dv-bridge-api",
+      "native_dv_api_version"
+    ],
+    "schemaVersion": 1,
+    "sourceInputs": {
+      "builder": {
+        "head": null,
+        "sha256": "6050311006fbee0f38b45b36dea7d4a4519aa97a80165b25e47f6f6748b097c2",
+        "status": null,
+        "tree": null
+      },
+      "dav1d": {
+        "head": "676a864a11af2c0522e1f992e770589543894686",
+        "sha256": "d978c92fe45020e7c3e00c9ea3fa5cebfa7825d4be52f8c2661010d5f4150c92",
+        "status": "",
+        "tree": "65da0bf96ec68ae50665345ed934ecab308179b5"
+      },
+      "ffmpeg": {
+        "head": "9aba43cfbee182ade060cdccbe15340a0fbe3e83",
+        "sha256": "2b9c5ccd54cfc25c610d78bb158b4ea13a4136128330e4b010cfb3b7d3ff2595",
+        "status": "M configure\n M libavformat/hls.c\n?? _build-arm64/\n?? _build-cli-arm64/\n?? configure-e",
+        "tree": "48f0b23552271d95b9ceaa6843d9acbc72024988"
+      },
+      "freetype": {
+        "head": "de8b92dd7ec634e9e2b25ef534c54a3537555c11",
+        "sha256": "00278344d449dcd52a81bb8c8c55dfe389c5c39a9627b666d30b4a6a68539f15",
+        "status": "",
+        "tree": "4b3e621364527dc640081afefdfe861b287a9845"
+      },
+      "fribidi": {
+        "head": "6428d8469e536bcbb6e12c7b79ba6659371c435a",
+        "sha256": "796a93cf6811e87737dd513c2d5b340f269242f0ef648832c086a594c5a99505",
+        "status": "",
+        "tree": "66ddf35c13034f07b5f94f04b6465b3fe7f8701a"
+      },
+      "harfbuzz": {
+        "head": "a321c4fee56b15247c10f9aa3db7e7ccb3b8173b",
+        "sha256": "1d34aff3a2be6a295de5208f1eac18868f1602055bb0872aa6796cf3df0851d4",
+        "status": "",
+        "tree": "97761d2f654989758434192dfba0e88ba6ce4458"
+      },
+      "helper": {
+        "head": "b768ce102cfa9b5ddec618bb939d689d1b0899fa",
+        "sha256": "a323a33ab84d8a99d2e5bb8109d0ea7455dd9e3465e4c5ae936a4634d44bcc1a",
+        "status": "",
+        "tree": "f5dcd75b172d65e301c5b8adf8ef3e28278f4720"
+      },
+      "lcms2": {
+        "head": "5176347635785e53ee5cee92328f76fda766ecc6",
+        "sha256": "a2ccea5299ec111e082bdcdca5dbe6618147c8119cdb24207bf8d689ad8f22c6",
+        "status": "",
+        "tree": "01d9f13d80bbad5690fbba272510b755a76f2f3b"
+      },
+      "libass": {
+        "head": "e8ad72accd3a84268275a9385beb701c9284e5b3",
+        "sha256": "8d1360570e75122f94b061cdbca964492b0dd3433739fd864a13c7611f116fbb",
+        "status": "?? _build-arm64/",
+        "tree": "eab3bd56da74caec6249a2de4cdfe53d85e2be50"
+      },
+      "libplacebo": {
+        "head": "ea700489fbf27703d8c1f64874a1c6138f17ad28",
+        "sha256": "481ec3d99fb302dee107a38bb49e9009331053d4eb869c3f86120e474fc663fb",
+        "status": "M src/glsl/spirv.c\n M src/shaders/custom_mpv.c",
+        "tree": "178c15385ae9f3e955a4fde49a6e6d499bf46f0a"
+      },
+      "libxml2": {
+        "head": "f507d167f1755b7eaea09fb1a44d29aab828b6d1",
+        "sha256": "451b21df9039b5299f8c03d042a55c51eb740f397cc59e64ad697e262fb57a7a",
+        "status": "?? _build-arm64/",
+        "tree": "d0553a8037968f8f28001b1920dd3980af0fd648"
+      },
+      "mbedtls": {
+        "head": "1873d3bfc2da771672bd8e7e8f41f57e0af77f33",
+        "sha256": "05d8873ac6e374a3e316914f3091e307345e8e80bd52f3d1630b632cc27f78d5",
+        "status": "?? tests/src/test_helpers/ssl_helpers.o",
+        "tree": "7401f86a914b9f8b14c558be199091e9eddea1aa"
+      },
+      "mpv": {
+        "head": "e46016c3ec87af6002c98e6135b14981f0912ebe",
+        "sha256": "3a863d0c93aae3b7d4f10166dfa569abcc14fb1a341d0039b165a1ebee393c03",
+        "status": "M video/out/hwdec/hwdec_surfacetexture.c\n M video/out/opengl/context_android.c\n M video/out/vo_gpu_next.c\n?? video/out/mks_thermal.h",
+        "tree": "8fc6cebfdd72ad8537e989acd5254891765f9840"
+      },
+      "native-recipes": {
+        "head": null,
+        "sha256": "5376795acf63f419aa191c0d9cf31e8af2ee9413334855d5ebfc434754fdb0ef",
+        "status": null,
+        "tree": null
+      },
+      "ndk-tools": {
+        "head": null,
+        "sha256": null,
+        "status": null,
+        "tree": null
+      },
+      "shaderc-ndk-sources": {
+        "head": null,
+        "sha256": "fb304b309e309b32288913031c33ae377b1de3d39e196a3ae9f880e4b4ecd52d",
+        "status": null,
+        "tree": null
+      }
+    },
+    "status": "verified",
+    "stripTool": {
+      "path": "/Users/wuweiwei1/Library/Android/sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-strip",
+      "sha256": "b230d9ac1de11c547f1df76947a937ea79b597a6d2d9852b909aa618819f97e1"
+    }
+  },
+  "installReturncode": 0,
+  "installStdout": "Performing Streamed Install\nSuccess\n",
+  "installStderr": "",
+  "readback": {
+    "path": "/data/app/com.example.media_kit_hdr_lab-2/base.apk",
+    "bytes": 41433527,
+    "sha256": "e015b2e11ea252094b88fb82e66b3de121611b6576f571fb6124fc46b55b29e4",
+    "returncode": 0,
+    "stderr": ""
+  },
+  "installedVerified": true,
+  "finishedAt": "2026-10-29T15:35:38.903289+08:00"
+}

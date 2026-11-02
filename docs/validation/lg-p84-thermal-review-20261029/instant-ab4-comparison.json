@@ -1,0 +1,780 @@
+{
+  "schema": 1,
+  "apkSha256": "e20d6b333babd10b6ee09cbcd302dd0bc50bd043668ef56e56ca2f177cf049fc",
+  "sourceReceipt": "local-source.json",
+  "experiment": "publish-flush",
+  "measurement": "Two sequential 60s instrumented runs, 2s batch metrics; not a matched thermal/power experiment",
+  "rounds": {
+    "A": {
+      "directory": "instant-ab4-A",
+      "controller": {
+        "status": "completed-observation",
+        "completeWindow": true,
+        "restorationVerified": true,
+        "restoreErrors": [],
+        "hdrLabStopped": true,
+        "observedDurationSeconds": 60.39685983303934,
+        "requestedVideoSync": "display-resample",
+        "requestedDeferPublishFlush": "0",
+        "expectedPanelThermalStatus": "0"
+      },
+      "initial": {
+        "batteryC": 31.3,
+        "vtsC": 34.9,
+        "rawBatteryStatus": "Full",
+        "rawBatteryCurrent": "0"
+      },
+      "final": {
+        "batteryC": 34.1,
+        "vtsC": 37.9
+      },
+      "metrics": {
+        "controllerStatus": "completed-observation",
+        "controllerReason": null,
+        "validCompletedProfile": true,
+        "metricsAreDiagnosticOnly": false,
+        "stableSamples": 23,
+        "processCPUPercentOneCore100": {
+          "count": 23,
+          "min": 59.65665236009773,
+          "median": 63.30275229209058,
+          "max": 66.81818181959612
+        },
+        "gpuDriverReportedBusyPercent": {
+          "count": 23,
+          "min": 58.0,
+          "median": 61.0,
+          "max": 70.0
+        },
+        "gpuFrequencyHz": {
+          "count": 23,
+          "min": 214000000.0,
+          "median": 315000000.0,
+          "max": 315000000.0
+        },
+        "cpuFrequencyKHz": {
+          "cpu0": {
+            "count": 23,
+            "min": 614400.0,
+            "median": 768000.0,
+            "max": 1593600.0
+          },
+          "cpu1": {
+            "count": 23,
+            "min": 614400.0,
+            "median": 768000.0,
+            "max": 1593600.0
+          },
+          "cpu2": {
+            "count": 23,
+            "min": 1056000.0,
+            "median": 2342400.0,
+            "max": 2342400.0
+          },
+          "cpu3": {
+            "count": 23,
+            "min": 1056000.0,
+            "median": 2342400.0,
+            "max": 2342400.0
+          }
+        },
+        "reportedVoltageMicrovolts": {
+          "cpu_kryo0_regulator_microvolts": {
+            "count": 23,
+            "min": 584313.0,
+            "median": 611109.0,
+            "max": 825477.0
+          },
+          "cpu_kryo1_regulator_microvolts": {
+            "count": 23,
+            "min": 727225.0,
+            "median": 731691.0,
+            "max": 731691.0
+          },
+          "gpu_upstream_regulator_microvolts": {
+            "count": 23,
+            "min": 595000.0,
+            "median": 645000.0,
+            "max": 645000.0
+          },
+          "battery_voltage_now": {
+            "count": 23,
+            "min": 4315465.0,
+            "median": 4315770.0,
+            "max": 4315770.0
+          }
+        },
+        "limitations": [
+          "CPU process/thread 100% means one fully busy CPU core, not all four cores.",
+          "GPU utilisation is the named driver percentage report, not inferred from frequency; raw gpubusy zero denominator is unknown.",
+          "Regulator microvolts are software reports/targets, not optical or electrical probe measurements; GPU upstream supply is not a measured core voltage.",
+          "gpu_corner_raw is a corner index even though sysfs file is named microvolts; it is never converted to volts.",
+          "Battery voltage/current are separate power-supply fields; they do not measure CPU/GPU rail power.",
+          "Sampling overhead is recorded per row and is included in system busy counters."
+        ],
+        "topThreads": [
+          {
+            "tid": "30518",
+            "name": "Thread-8",
+            "meanOneCorePercent": 26.628095607958386,
+            "maxOneCorePercent": 27.884615385177227,
+            "samples": 23
+          },
+          {
+            "tid": "30467",
+            "name": "Thread-5",
+            "meanOneCorePercent": 11.3316042204631,
+            "maxOneCorePercent": 12.272727272987042,
+            "samples": 23
+          },
+          {
+            "tid": "30524",
+            "name": "JNISurfaceTextu",
+            "meanOneCorePercent": 8.285118360858965,
+            "maxOneCorePercent": 8.715596330303155,
+            "samples": 23
+          },
+          {
+            "tid": "30523",
+            "name": "MediaCodec_loop",
+            "meanOneCorePercent": 3.9075894259616133,
+            "maxOneCorePercent": 4.545454545550757,
+            "samples": 23
+          },
+          {
+            "tid": "30429",
+            "name": "dia_kit_hdr_lab",
+            "meanOneCorePercent": 3.754096050668868,
+            "maxOneCorePercent": 5.000000000105832,
+            "samples": 23
+          },
+          {
+            "tid": "30528",
+            "name": "AudioTrack",
+            "meanOneCorePercent": 2.3376039656168053,
+            "maxOneCorePercent": 2.7397260273943473,
+            "samples": 23
+          },
+          {
+            "tid": "30637",
+            "name": "DartWorker",
+            "meanOneCorePercent": 2.1134897190591757,
+            "maxOneCorePercent": 2.4038461538945883,
+            "samples": 9
+          },
+          {
+            "tid": "30558",
+            "name": "DartWorker",
+            "meanOneCorePercent": 1.8885756151796425,
+            "maxOneCorePercent": 2.727272727330454,
+            "samples": 15
+          },
+          {
+            "tid": "30521",
+            "name": "demux",
+            "meanOneCorePercent": 1.5887604484744653,
+            "maxOneCorePercent": 2.293577981658725,
+            "samples": 23
+          },
+          {
+            "tid": "30485",
+            "name": "Binder:30429_3",
+            "meanOneCorePercent": 0.8849398252438836,
+            "maxOneCorePercent": 1.3761467889584909,
+            "samples": 23
+          },
+          {
+            "tid": "30441",
+            "name": "Binder:30429_2",
+            "meanOneCorePercent": 0.8840086782875078,
+            "maxOneCorePercent": 0.9615384615578354,
+            "samples": 23
+          },
+          {
+            "tid": "30440",
+            "name": "Binder:30429_1",
+            "meanOneCorePercent": 0.8638011122761539,
+            "maxOneCorePercent": 1.3636363636291478,
+            "samples": 23
+          },
+          {
+            "tid": "30522",
+            "name": "mksurf-latch",
+            "meanOneCorePercent": 0.5683503426935059,
+            "maxOneCorePercent": 0.91743119266349,
+            "samples": 23
+          },
+          {
+            "tid": "30465",
+            "name": "DartWorker",
+            "meanOneCorePercent": 0.45871559631949693,
+            "maxOneCorePercent": 0.9174311926389939,
+            "samples": 2
+          },
+          {
+            "tid": "30434",
+            "name": "Jit thread pool",
+            "meanOneCorePercent": 0.019762845849697796,
+            "maxOneCorePercent": 0.4545454545430493,
+            "samples": 23
+          }
+        ]
+      },
+      "liveContracts": {
+        "hdrModes": [
+          "0",
+          "1"
+        ],
+        "backlights": [
+          "255"
+        ],
+        "panelThermalStatuses": [
+          "0"
+        ]
+      },
+      "systemCPUPercentFourCoreAggregate": {
+        "median": 41.202185792349724,
+        "min": 38.60619469026549,
+        "max": 45.55940023068051
+      },
+      "runtimeProperties": {
+        "time-pos": {
+          "first": "0.333667",
+          "last": "60.360300",
+          "min": 0.333667,
+          "max": 60.3603,
+          "unique": null
+        },
+        "decoder-frame-drop-count": {
+          "first": "0",
+          "last": "0",
+          "min": 0.0,
+          "max": 0.0,
+          "unique": null
+        },
+        "frame-drop-count": {
+          "first": "1",
+          "last": "1",
+          "min": 1.0,
+          "max": 1.0,
+          "unique": null
+        },
+        "vo-delayed-frame-count": {
+          "first": "0",
+          "last": "0",
+          "min": 0.0,
+          "max": 0.0,
+          "unique": null
+        },
+        "avsync": {
+          "first": "-0.011592",
+          "last": "0.000075",
+          "min": -0.011592,
+          "max": 8e-05,
+          "unique": null
+        },
+        "estimated-vf-fps": {
+          "first": "29.970030",
+          "last": "29.970030",
+          "min": 29.97003,
+          "max": 29.97003,
+          "unique": null
+        },
+        "hwdec-current": {
+          "first": "surfacetexture",
+          "last": "surfacetexture",
+          "min": null,
+          "max": null,
+          "unique": [
+            "surfacetexture"
+          ]
+        },
+        "video-sync": {
+          "first": "display-resample",
+          "last": "display-resample",
+          "min": null,
+          "max": null,
+          "unique": [
+            "display-resample"
+          ]
+        },
+        "display-sync-active": {
+          "first": "no",
+          "last": "no",
+          "min": null,
+          "max": null,
+          "unique": [
+            "no"
+          ]
+        },
+        "target-peak": {
+          "first": "1000",
+          "last": "1000",
+          "min": 1000.0,
+          "max": 1000.0,
+          "unique": null
+        },
+        "gamma": {
+          "first": "0.000000",
+          "last": "0.000000",
+          "min": 0.0,
+          "max": 0.0,
+          "unique": null
+        },
+        "android-surface-size": {
+          "first": "2672x1336",
+          "last": "2672x1336",
+          "min": null,
+          "max": null,
+          "unique": [
+            "2672x1336"
+          ]
+        }
+      },
+      "nativeStableRates": {
+        "vo": {
+          "counter": "submit",
+          "delta": 1500,
+          "seconds": 50.048399006,
+          "rate": 29.970988678782195
+        },
+        "yuv": {
+          "counter": "final_pass",
+          "delta": 1500,
+          "seconds": 50.048773224,
+          "rate": 29.97076458371015
+        },
+        "import": {
+          "counter": "lease_copy",
+          "delta": 1500,
+          "seconds": 50.049267912,
+          "rate": 29.97046835205265
+        }
+      },
+      "latestImportCounters": {
+        "kind": "import",
+        "instance": "0x7419e6bc50",
+        "pid": "30429",
+        "mono_ns": "66140492969",
+        "start_ns": "6076467673",
+        "final": "0",
+        "queue_frames": "0",
+        "queue_resets": "0",
+        "draw": "0",
+        "redraw": "0",
+        "display_synced": "0",
+        "submit": "0",
+        "flip": "0",
+        "lease_copy": "1799",
+        "lease_reuse": "2",
+        "latch": "1799",
+        "defer_publish_flush": "0",
+        "publish_flush": "1798",
+        "publish_deferred": "0",
+        "retire_flush": "1800",
+        "fence_create_failed": "0",
+        "reap_stuck": "0",
+        "latch_timeout": "0",
+        "stale_drop": "0",
+        "final_pass": "0",
+        "swap": "0",
+        "swap_ok": "0",
+        "frame_id": "0",
+        "pts": "60.026633333",
+        "w": "3840",
+        "h": "1920"
+      }
+    },
+    "B": {
+      "directory": "instant-ab4-B",
+      "controller": {
+        "status": "completed-observation",
+        "completeWindow": true,
+        "restorationVerified": true,
+        "restoreErrors": [],
+        "hdrLabStopped": true,
+        "observedDurationSeconds": 60.39536333410069,
+        "requestedVideoSync": "display-resample",
+        "requestedDeferPublishFlush": "1",
+        "expectedPanelThermalStatus": "0"
+      },
+      "initial": {
+        "batteryC": 33.2,
+        "vtsC": 36.4,
+        "rawBatteryStatus": "Full",
+        "rawBatteryCurrent": "-159300"
+      },
+      "final": {
+        "batteryC": 35.1,
+        "vtsC": 38.8
+      },
+      "metrics": {
+        "controllerStatus": "completed-observation",
+        "controllerReason": null,
+        "validCompletedProfile": true,
+        "metricsAreDiagnosticOnly": false,
+        "stableSamples": 24,
+        "processCPUPercentOneCore100": {
+          "count": 24,
+          "min": 59.99999999910831,
+          "median": 63.32558429138646,
+          "max": 66.36363636504105
+        },
+        "gpuDriverReportedBusyPercent": {
+          "count": 24,
+          "min": 59.0,
+          "median": 70.0,
+          "max": 73.0
+        },
+        "gpuFrequencyHz": {
+          "count": 24,
+          "min": 214000000.0,
+          "median": 214000000.0,
+          "max": 315000000.0
+        },
+        "cpuFrequencyKHz": {
+          "cpu0": {
+            "count": 24,
+            "min": 614400.0,
+            "median": 729600.0,
+            "max": 1593600.0
+          },
+          "cpu1": {
+            "count": 24,
+            "min": 614400.0,
+            "median": 729600.0,
+            "max": 1593600.0
+          },
+          "cpu2": {
+            "count": 24,
+            "min": 1056000.0,
+            "median": 2150400.0,
+            "max": 2342400.0
+          },
+          "cpu3": {
+            "count": 24,
+            "min": 1056000.0,
+            "median": 2150400.0,
+            "max": 2342400.0
+          }
+        },
+        "reportedVoltageMicrovolts": {
+          "cpu_kryo0_regulator_microvolts": {
+            "count": 24,
+            "min": 584313.0,
+            "median": 602177.0,
+            "max": 847807.0
+          },
+          "cpu_kryo1_regulator_microvolts": {
+            "count": 24,
+            "min": 620041.0,
+            "median": 731691.0,
+            "max": 731691.0
+          },
+          "gpu_upstream_regulator_microvolts": {
+            "count": 24,
+            "min": 595000.0,
+            "median": 595000.0,
+            "max": 645000.0
+          },
+          "battery_voltage_now": {
+            "count": 24,
+            "min": 4349187.0,
+            "median": 4349492.0,
+            "max": 4349797.0
+          }
+        },
+        "limitations": [
+          "CPU process/thread 100% means one fully busy CPU core, not all four cores.",
+          "GPU utilisation is the named driver percentage report, not inferred from frequency; raw gpubusy zero denominator is unknown.",
+          "Regulator microvolts are software reports/targets, not optical or electrical probe measurements; GPU upstream supply is not a measured core voltage.",
+          "gpu_corner_raw is a corner index even though sysfs file is named microvolts; it is never converted to volts.",
+          "Battery voltage/current are separate power-supply fields; they do not measure CPU/GPU rail power.",
+          "Sampling overhead is recorded per row and is included in system busy counters."
+        ],
+        "topThreads": [
+          {
+            "tid": "31133",
+            "name": "Thread-8",
+            "meanOneCorePercent": 26.248623578089607,
+            "maxOneCorePercent": 27.064220183572953,
+            "samples": 24
+          },
+          {
+            "tid": "31087",
+            "name": "Thread-5",
+            "meanOneCorePercent": 11.137210618565163,
+            "maxOneCorePercent": 11.818181818431967,
+            "samples": 24
+          },
+          {
+            "tid": "31139",
+            "name": "JNISurfaceTextu",
+            "meanOneCorePercent": 8.385679115860167,
+            "maxOneCorePercent": 9.259259259618565,
+            "samples": 24
+          },
+          {
+            "tid": "31050",
+            "name": "dia_kit_hdr_lab",
+            "meanOneCorePercent": 3.8610215493725057,
+            "maxOneCorePercent": 5.0458715596491945,
+            "samples": 24
+          },
+          {
+            "tid": "31138",
+            "name": "MediaCodec_loop",
+            "meanOneCorePercent": 3.8199651147526037,
+            "maxOneCorePercent": 4.128440366985705,
+            "samples": 24
+          },
+          {
+            "tid": "31143",
+            "name": "AudioTrack",
+            "meanOneCorePercent": 2.857021762467053,
+            "maxOneCorePercent": 27.727272727126007,
+            "samples": 24
+          },
+          {
+            "tid": "31278",
+            "name": "DartWorker",
+            "meanOneCorePercent": 2.0787883540390526,
+            "maxOneCorePercent": 2.293577981658725,
+            "samples": 5
+          },
+          {
+            "tid": "31172",
+            "name": "DartWorker",
+            "meanOneCorePercent": 1.8368580561539476,
+            "maxOneCorePercent": 2.75229357799047,
+            "samples": 10
+          },
+          {
+            "tid": "31136",
+            "name": "demux",
+            "meanOneCorePercent": 1.725220303636367,
+            "maxOneCorePercent": 2.7272727272582955,
+            "samples": 24
+          },
+          {
+            "tid": "31250",
+            "name": "DartWorker",
+            "meanOneCorePercent": 1.5633958578797684,
+            "maxOneCorePercent": 2.2727272727152465,
+            "samples": 6
+          },
+          {
+            "tid": "31225",
+            "name": "DartWorker",
+            "meanOneCorePercent": 1.4883688845916927,
+            "maxOneCorePercent": 2.5531914893869985,
+            "samples": 6
+          },
+          {
+            "tid": "31063",
+            "name": "Binder:31050_2",
+            "meanOneCorePercent": 0.9784777572205189,
+            "maxOneCorePercent": 3.7037037038474265,
+            "samples": 24
+          },
+          {
+            "tid": "31062",
+            "name": "Binder:31050_1",
+            "meanOneCorePercent": 0.9014151074410774,
+            "maxOneCorePercent": 1.8518518519237133,
+            "samples": 24
+          },
+          {
+            "tid": "31103",
+            "name": "Binder:31050_3",
+            "meanOneCorePercent": 0.8608380119826919,
+            "maxOneCorePercent": 1.3698630136971737,
+            "samples": 24
+          },
+          {
+            "tid": "31086",
+            "name": "DartWorker",
+            "meanOneCorePercent": 0.6849315068485868,
+            "maxOneCorePercent": 1.3698630136971737,
+            "samples": 2
+          }
+        ]
+      },
+      "liveContracts": {
+        "hdrModes": [
+          "0",
+          "1"
+        ],
+        "backlights": [
+          "255"
+        ],
+        "panelThermalStatuses": [
+          "0"
+        ]
+      },
+      "systemCPUPercentFourCoreAggregate": {
+        "median": 37.78878180143151,
+        "min": 35.69620253164557,
+        "max": 40.97560975609756
+      },
+      "runtimeProperties": {
+        "time-pos": {
+          "first": "0.333667",
+          "last": "60.326933",
+          "min": 0.333667,
+          "max": 60.326933,
+          "unique": null
+        },
+        "decoder-frame-drop-count": {
+          "first": "0",
+          "last": "0",
+          "min": 0.0,
+          "max": 0.0,
+          "unique": null
+        },
+        "frame-drop-count": {
+          "first": "1",
+          "last": "1",
+          "min": 1.0,
+          "max": 1.0,
+          "unique": null
+        },
+        "vo-delayed-frame-count": {
+          "first": "0",
+          "last": "0",
+          "min": 0.0,
+          "max": 0.0,
+          "unique": null
+        },
+        "avsync": {
+          "first": "-0.012905",
+          "last": "0.000069",
+          "min": -0.012905,
+          "max": 8.7e-05,
+          "unique": null
+        },
+        "estimated-vf-fps": {
+          "first": "29.970030",
+          "last": "29.970030",
+          "min": 29.97003,
+          "max": 29.97003,
+          "unique": null
+        },
+        "hwdec-current": {
+          "first": "surfacetexture",
+          "last": "surfacetexture",
+          "min": null,
+          "max": null,
+          "unique": [
+            "surfacetexture"
+          ]
+        },
+        "video-sync": {
+          "first": "display-resample",
+          "last": "display-resample",
+          "min": null,
+          "max": null,
+          "unique": [
+            "display-resample"
+          ]
+        },
+        "display-sync-active": {
+          "first": "no",
+          "last": "no",
+          "min": null,
+          "max": null,
+          "unique": [
+            "no"
+          ]
+        },
+        "target-peak": {
+          "first": "1000",
+          "last": "1000",
+          "min": 1000.0,
+          "max": 1000.0,
+          "unique": null
+        },
+        "gamma": {
+          "first": "0.000000",
+          "last": "0.000000",
+          "min": 0.0,
+          "max": 0.0,
+          "unique": null
+        },
+        "android-surface-size": {
+          "first": "2672x1336",
+          "last": "2672x1336",
+          "min": null,
+          "max": null,
+          "unique": [
+            "2672x1336"
+          ]
+        }
+      },
+      "nativeStableRates": {
+        "vo": {
+          "counter": "submit",
+          "delta": 1500,
+          "seconds": 50.055446035,
+          "rate": 29.966769229289515
+        },
+        "yuv": {
+          "counter": "final_pass",
+          "delta": 1500,
+          "seconds": 50.055353848,
+          "rate": 29.966824419121224
+        },
+        "import": {
+          "counter": "lease_copy",
+          "delta": 1501,
+          "seconds": 50.066979108,
+          "rate": 29.979839541790156
+        }
+      },
+      "latestImportCounters": {
+        "kind": "import",
+        "instance": "0x741e555850",
+        "pid": "31050",
+        "mono_ns": "65885278203",
+        "start_ns": "5780133380",
+        "final": "0",
+        "queue_frames": "0",
+        "queue_resets": "0",
+        "draw": "0",
+        "redraw": "0",
+        "display_synced": "0",
+        "submit": "0",
+        "flip": "0",
+        "lease_copy": "1801",
+        "lease_reuse": "2",
+        "latch": "1801",
+        "defer_publish_flush": "1",
+        "publish_flush": "0",
+        "publish_deferred": "1800",
+        "retire_flush": "1802",
+        "fence_create_failed": "0",
+        "reap_stuck": "0",
+        "latch_timeout": "0",
+        "stale_drop": "0",
+        "final_pass": "0",
+        "swap": "0",
+        "swap_ok": "0",
+        "frame_id": "0",
+        "pts": "60.093366667",
+        "w": "3840",
+        "h": "1920"
+      }
+    }
+  },
+  "assessment": {
+    "CPU": "No meaningful process-CPU reduction in these two runs (medians approximately63.30 vs63.33% of one core).",
+    "GPU": "Candidate had lower sampled GPU frequency/upstream regulator target and higher driver busy%; these correlated values alone do not measure power or prove thermal benefit.",
+    "functional": "Both runs maintained hardware route/PQ1000/gamma0/HDR1/backlight255 and progressed; native failure counters stayed zero.",
+    "limitations": [
+      "Initial temperatures and sequential order differ; no power instrument or core rail electrical measurement.",
+      "Software regulator readings and CPU/GPU sampling points are not atomic cross-rail measurements.",
+      "Native rates/decoder/drop counters do not prove panel per-frame smoothness or optical colour.",
+      "Instrumentation overhead is included; process CPU excludes the external adb/cat observer while aggregate system CPU includes it."
+    ]
+  }
+}

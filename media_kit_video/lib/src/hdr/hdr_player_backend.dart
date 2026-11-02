@@ -830,6 +830,39 @@ class AndroidHdrBackend
     if (eglOutputFormat != null) {
       await _setOwned('egl-output-format', eglOutputFormat);
     }
+    // Optional performance policy: an older native library must keep its
+    // existing immediate behavior, not lose HDR playback to an unknown option.
+    // Do not catch transport/cancellation failures here: only an absent or
+    // incompatible feature report is a supported legacy fallback.
+    final publishFlushApi = await player
+        .getPropertyAsync('android-surfacetexture-publish-flush-api');
+    final publishExt = plan.capabilities.dataSpaceExt;
+    final publishSource = plan.source;
+    final publishFlushEligible =
+        route.supportsDeferredSurfaceTexturePublishShape &&
+            publishExt?.applicable == true &&
+            publishExt?.supportsDeferredSurfaceTexturePublish30fps == true &&
+            publishSource.dynamicMetadata == HdrDynamicMetadata.dolbyVision &&
+            publishSource.dvProfile == 8 &&
+            publishSource.dvCompatibilityId == 4 &&
+            publishSource.transfer == 'hlg';
+    final requestedPublishFlush = publishFlushEligible
+        ? route.surfaceTexturePublishFlushPolicy
+        : HdrSurfaceTexturePublishFlushPolicy.immediate;
+    if (publishFlushApi == '1') {
+      // Also write immediate for other routes/retries so no previous request
+      // leaks across attempts. _setOwned captures/restores the caller's value.
+      await _setOwned(
+          'surfacetexture-publish-flush', requestedPublishFlush.nativeValue);
+    }
+    if (const bool.fromEnvironment('MEDIA_KIT_ANDROID_HDR_DIAGNOSTICS')) {
+      debugPrint(
+          'HDR_PUBLISH_FLUSH requested=${route.surfaceTexturePublishFlushPolicy.name} '
+          'eligible=$publishFlushEligible '
+          'configured=${publishFlushApi == '1' ? requestedPublishFlush.nativeValue : 'unchanged-native'} '
+          'nativeApi=${publishFlushApi.isEmpty ? 'unavailable' : publishFlushApi} '
+          'effective=per-native-frame');
+    }
     // The Android video controller applies its creation-time hwdec setting
     // while it initializes. Capture and register ownership before ensure()
     // can construct that controller, or its initialization may overwrite the

@@ -1,0 +1,10 @@
+10-30 13:08:45.401 18887 18887 I flutter : [IMPORTANT:flutter/shell/common/shell.cc(528)] [Action Required]: Impeller opt-out deprecated.
+10-30 13:08:45.401 18887 18887 I flutter :     The application opted out of Impeller by either using the
+10-30 13:08:45.401 18887 18887 I flutter :     `--no-enable-impeller` flag or the
+10-30 13:08:45.401 18887 18887 I flutter :     `io.flutter.embedding.android.EnableImpeller` `AndroidManifest.xml` entry.
+10-30 13:08:45.401 18887 18887 I flutter :     These options are going to go away in an upcoming Flutter release. Remove
+10-30 13:08:45.401 18887 18887 I flutter :     the explicit opt-out. If you need to opt-out, please report a bug describing
+10-30 13:08:45.401 18887 18887 I flutter :     the issue.
+10-30 13:08:45.401 18887 18887 I flutter : 
+10-30 13:08:45.401 18887 18887 I flutter :     <URL_REDACTED>
+10-30 13:08:45.401 18887 18887 I flutter : 

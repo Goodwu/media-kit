@@ -1,0 +1,1241 @@
+{
+  "schema": 7,
+  "status": "captured-float-differences",
+  "capture_id": 5802597390,
+  "generation": 2,
+  "pid": 23240,
+  "source_pts": 600.032766667,
+  "target_pts": 600.032766667,
+  "roi": {
+    "x": 1304,
+    "y": 636,
+    "w": 64,
+    "h": 64
+  },
+  "pixels": 4096,
+  "shader_body_hash": "10738701774585273105",
+  "files": {
+    "lib": {
+      "file": "mks-yuv-compare-23240-5802597390.lib.bin",
+      "bytes": 425984,
+      "sha256": "9363a6dad9ee6b24181c2ffe7440dd00c0e58f7424dd42ba847a912925b79416"
+    },
+    "android": {
+      "file": "mks-yuv-compare-23240-5802597390.android.bin",
+      "bytes": 114688,
+      "sha256": "6b948e6ab5f36637485d15862a59f58212059e7efbf55c499e1f4872372a27a3"
+    },
+    "candidate": {
+      "file": "mks-yuv-compare-23240-5802597390.candidate.glsl",
+      "bytes": 6595,
+      "sha256": "e2f090a9e72e1362c6dc7c8c64292c759ce0b4c96cd137a7cb8a136151617250"
+    },
+    "baseline": {
+      "file": "mks-yuv-compare-23240-5802597390.baseline.glsl",
+      "bytes": 3540,
+      "sha256": "203e30d8f59efc15060f7c1f04e88fe1d7f8b78e3bb36d53d623b1e18716c984"
+    },
+    "vertex": {
+      "file": "mks-yuv-compare-23240-5802597390.vertex.glsl",
+      "bytes": 580,
+      "sha256": "81fad6a3d992b0bf3d2a65525f0a09294905208bea60d73c2d53d852615e881c"
+    },
+    "original_body": {
+      "file": "mks-yuv-compare-23240-5802597390.original-body.glsl",
+      "bytes": 2159,
+      "sha256": "e65cf081ba73cf8a5af2a54a185b52f47007c9e44f3bb7f1a024b2ae91c8a109"
+    },
+    "oracle_probe": {
+      "file": "mks-yuv-compare-23240-5802597390.oracle-probe.bin",
+      "bytes": 163840,
+      "sha256": "fdc7631c89cc09a1b69a82a3610be272fa98ed81f75b75799c1ebd3239ea6f61"
+    }
+  },
+  "comparisons": {
+    "pre_rgb": {
+      "components": 12288,
+      "bit_mismatches": 21,
+      "nonfinite_components": 0,
+      "max_absolute_difference": 0.0002695322036743164,
+      "max_ulp_distance": 8083,
+      "max_absolute_difference_location": {
+        "x": 1320,
+        "y": 678,
+        "channel": "R"
+      },
+      "first_differences": [
+        {
+          "x": 1311,
+          "y": 657,
+          "channel": "R",
+          "left_bits": "3efa1c66",
+          "right_bits": "3ef9fcd3",
+          "left": 0.48849791288375854,
+          "right": 0.4882570207118988,
+          "absolute_difference": 0.0002408921718597412
+        },
+        {
+          "x": 1311,
+          "y": 657,
+          "channel": "G",
+          "left_bits": "3ee11b3a",
+          "right_bits": "3ee11909",
+          "left": 0.43966084718704224,
+          "right": 0.43964412808418274,
+          "absolute_difference": 1.671910285949707e-05
+        },
+        {
+          "x": 1311,
+          "y": 657,
+          "channel": "B",
+          "left_bits": "3ed70a4c",
+          "right_bits": "3ed70877",
+          "left": 0.42000043392181396,
+          "right": 0.41998645663261414,
+          "absolute_difference": 1.3977289199829102e-05
+        },
+        {
+          "x": 1308,
+          "y": 678,
+          "channel": "R",
+          "left_bits": "3f09b15c",
+          "right_bits": "3f09afdb",
+          "left": 0.5378625392913818,
+          "right": 0.5378395915031433,
+          "absolute_difference": 2.294778823852539e-05
+        },
+        {
+          "x": 1308,
+          "y": 678,
+          "channel": "G",
+          "left_bits": "3eedcd5d",
+          "right_bits": "3eedafe8",
+          "left": 0.4644574224948883,
+          "right": 0.4642326831817627,
+          "absolute_difference": 0.00022473931312561035
+        },
+        {
+          "x": 1308,
+          "y": 678,
+          "channel": "B",
+          "left_bits": "3ed3b6a9",
+          "right_bits": "3ed3b416",
+          "left": 0.413502961397171,
+          "right": 0.41348332166671753,
+          "absolute_difference": 1.963973045349121e-05
+        },
+        {
+          "x": 1309,
+          "y": 678,
+          "channel": "R",
+          "left_bits": "3f09d5f1",
+          "right_bits": "3f09c465",
+          "left": 0.5384207367897034,
+          "right": 0.5381529927253723,
+          "absolute_difference": 0.0002677440643310547
+        },
+        {
+          "x": 1309,
+          "y": 678,
+          "channel": "G",
+          "left_bits": "3eedf00a",
+          "right_bits": "3eeded71",
+          "left": 0.4647219777107239,
+          "right": 0.46470215916633606,
+          "absolute_difference": 1.9818544387817383e-05
+        },
+        {
+          "x": 1309,
+          "y": 678,
+          "channel": "B",
+          "left_bits": "3ed3db82",
+          "right_bits": "3ed3d8ef",
+          "left": 0.41378408670425415,
+          "right": 0.41376444697380066,
+          "absolute_difference": 1.963973045349121e-05
+        },
+        {
+          "x": 1320,
+          "y": 678,
+          "channel": "R",
+          "left_bits": "3f097479",
+          "right_bits": "3f0962cf",
+          "left": 0.5369334816932678,
+          "right": 0.5366639494895935,
+          "absolute_difference": 0.0002695322036743164
+        }
+      ],
+      "left_role": "baseline_pre_store",
+      "right_role": "candidate_pre_half"
+    },
+    "half_rgb": {
+      "components": 12288,
+      "bit_mismatches": 4,
+      "nonfinite_components": 0,
+      "max_absolute_difference": 0.000244140625,
+      "max_ulp_distance": 8192,
+      "max_absolute_difference_location": {
+        "x": 1311,
+        "y": 657,
+        "channel": "R"
+      },
+      "first_differences": [
+        {
+          "x": 1311,
+          "y": 657,
+          "channel": "R",
+          "left_bits": "3efa0000",
+          "right_bits": "3ef9e000",
+          "left": 0.48828125,
+          "right": 0.488037109375,
+          "absolute_difference": 0.000244140625
+        },
+        {
+          "x": 1308,
+          "y": 678,
+          "channel": "G",
+          "left_bits": "3eedc000",
+          "right_bits": "3eeda000",
+          "left": 0.46435546875,
+          "right": 0.464111328125,
+          "absolute_difference": 0.000244140625
+        },
+        {
+          "x": 1311,
+          "y": 699,
+          "channel": "G",
+          "left_bits": "3ef9c000",
+          "right_bits": "3ef9e000",
+          "left": 0.48779296875,
+          "right": 0.488037109375,
+          "absolute_difference": 0.000244140625
+        },
+        {
+          "x": 1321,
+          "y": 699,
+          "channel": "B",
+          "left_bits": "3ecec000",
+          "right_bits": "3ecea000",
+          "left": 0.40380859375,
+          "right": 0.403564453125,
+          "absolute_difference": 0.000244140625
+        }
+      ],
+      "left_role": "baseline_sampled_rgb16f",
+      "right_role": "candidate_emulated_half"
+    },
+    "yuv": {
+      "components": 12288,
+      "bit_mismatches": 12,
+      "nonfinite_components": 0,
+      "max_absolute_difference": 0.00016552209854125977,
+      "max_ulp_distance": 5554,
+      "max_absolute_difference_location": {
+        "x": 1308,
+        "y": 678,
+        "channel": "Y"
+      },
+      "first_differences": [
+        {
+          "x": 1311,
+          "y": 657,
+          "channel": "Y",
+          "left_bits": "3ee6f977",
+          "right_bits": "3ee6f10f",
+          "left": 0.4511220157146454,
+          "right": 0.45105788111686707,
+          "absolute_difference": 6.413459777832031e-05
+        },
+        {
+          "x": 1311,
+          "y": 657,
+          "channel": "Cb",
+          "left_bits": "3ef7825f",
+          "right_bits": "3ef786d7",
+          "left": 0.48341652750968933,
+          "right": 0.48345062136650085,
+          "absolute_difference": 3.409385681152344e-05
+        },
+        {
+          "x": 1311,
+          "y": 657,
+          "channel": "Cr",
+          "left_bits": "3f06737a",
+          "right_bits": "3f066b7a",
+          "left": 0.5251995325088501,
+          "right": 0.5250774621963501,
+          "absolute_difference": 0.0001220703125
+        },
+        {
+          "x": 1308,
+          "y": 678,
+          "channel": "Y",
+          "left_bits": "3ef60d51",
+          "right_bits": "3ef5f79f",
+          "left": 0.48057034611701965,
+          "right": 0.4804048240184784,
+          "absolute_difference": 0.00016552209854125977
+        },
+        {
+          "x": 1308,
+          "y": 678,
+          "channel": "Cb",
+          "left_bits": "3eedb38e",
+          "right_bits": "3eedbf16",
+          "left": 0.4642605185508728,
+          "right": 0.4643484950065613,
+          "absolute_difference": 8.797645568847656e-05
+        },
+        {
+          "x": 1308,
+          "y": 678,
+          "channel": "Cr",
+          "left_bits": "3f09e67a",
+          "right_bits": "3f09edd6",
+          "left": 0.5386730432510376,
+          "right": 0.5387853384017944,
+          "absolute_difference": 0.00011229515075683594
+        },
+        {
+          "x": 1311,
+          "y": 699,
+          "channel": "Y",
+          "left_bits": "3f015d7a",
+          "right_bits": "3f016853",
+          "left": 0.5053325891494751,
+          "right": 0.5054981112480164,
+          "absolute_difference": 0.00016552209854125977
+        },
+        {
+          "x": 1311,
+          "y": 699,
+          "channel": "Cb",
+          "left_bits": "3ee4b425",
+          "right_bits": "3ee4a89d",
+          "left": 0.44668689370155334,
+          "right": 0.44659891724586487,
+          "absolute_difference": 8.797645568847656e-05
+        },
+        {
+          "x": 1311,
+          "y": 699,
+          "channel": "Cr",
+          "left_bits": "3f0bca1f",
+          "right_bits": "3f0bc2c4",
+          "left": 0.546052873134613,
+          "right": 0.545940637588501,
+          "absolute_difference": 0.00011223554611206055
+        },
+        {
+          "x": 1321,
+          "y": 699,
+          "channel": "Y",
+          "left_bits": "3f01bde3",
+          "right_bits": "3f01bcf0",
+          "left": 0.5068036913871765,
+          "right": 0.5067892074584961,
+          "absolute_difference": 1.4483928680419922e-05
+        }
+      ],
+      "left_role": "baseline_csc_yuv",
+      "right_role": "candidate_csc_yuv"
+    }
+  },
+  "limitations": [
+    "Captured shader floats only; not raw NV12, driver quantization, scanout or panel evidence.",
+    "Shader hashes identify archived sources; they do not prove equivalence to uninstrumented baseline.",
+    "Completion/fence/error evidence is asserted by the native producer manifest, not independently queried offline.",
+    "Pixels in one capture are correlated; this is not a performance or statistical confidence test.",
+    "actual single textureLod site UV and sampled RGB; instrumentation may change shader compilation; not an unmodified shader",
+    "Diagnostic UV oracle only. Captured UV bit equality checks values, not an independent GPU memory-barrier audit. Instrumentation and ordering may affect compilation or execution; no production, raw YUV or panel equivalence is established.",
+    "GPU-observed A fields were recorded by B at its dependency check; CPU-terminal A fields are separate later readback facts. A consistent outside-ROI record means no A read occurred; contradictory flags are ambiguous. Diagnostic-invalid data cannot support a causal, quality or production conclusion.",
+    "Single-pair diagnostic: A1 and B1 each execute once, so within-capture repeatability is not measured. Independent processes may compare archived B source bytes; they do not share or prove reuse of one physical program instance."
+  ],
+  "repeat_metadata": {
+    "uv_oracle_single_pair": true,
+    "repetitions": 1,
+    "draw_order": [
+      "A1",
+      "B1"
+    ],
+    "draw_ok": {
+      "A1": true,
+      "B1": true
+    },
+    "programs_reused": false,
+    "program_tokens": [
+      "498624146976",
+      "498621300256"
+    ],
+    "frame_id": 72,
+    "frame_token": 24,
+    "same_input_snapshot": true,
+    "assertion_scope": "same frozen renderer input state and resource handles; no texture pixel hash",
+    "draw_epoch_before": [
+      "0",
+      "0"
+    ],
+    "draw_epoch_after": [
+      "0",
+      "0"
+    ]
+  },
+  "repeat_analysis": {
+    "status": "not-measured-single-pair",
+    "captured_repeatability_confirmed": false,
+    "scope": "Single-pair diagnostic: A1 and B1 each execute once, so within-capture repeatability is not measured. Independent processes may compare archived B source bytes; they do not share or prove reuse of one physical program instance."
+  },
+  "current_ab": "A1 versus B1; final Android CSC samples A1.",
+  "single_pair_metadata": {
+    "uv_oracle_single_pair": true,
+    "repetitions": 1,
+    "draw_order": [
+      "A1",
+      "B1"
+    ],
+    "draw_ok": {
+      "A1": true,
+      "B1": true
+    },
+    "programs_reused": false,
+    "program_tokens": [
+      "498624146976",
+      "498621300256"
+    ],
+    "frame_id": 72,
+    "frame_token": 24,
+    "same_input_snapshot": true,
+    "assertion_scope": "same frozen renderer input state and resource handles; no texture pixel hash",
+    "draw_epoch_before": [
+      "0",
+      "0"
+    ],
+    "draw_epoch_after": [
+      "0",
+      "0"
+    ]
+  },
+  "program_instance_scope": "Single-pair diagnostic: A1 and B1 each execute once, so within-capture repeatability is not measured. Independent processes may compare archived B source bytes; they do not share or prove reuse of one physical program instance.",
+  "within_capture_repeatability_measured": false,
+  "sample_tap_metadata": {
+    "sample_tap": true,
+    "sample_tap_site_count": 1,
+    "words_per_pixel": 26,
+    "sample_tap_body_hash": "10123604836123076933",
+    "instrumentation_scope": "actual single textureLod site UV and sampled RGB; instrumentation may change shader compilation; not an unmodified shader"
+  },
+  "sample_tap_analysis": {
+    "comparisons": {
+      "ab1": {
+        "uv": {
+          "components": 8192,
+          "bit_mismatches": 1634,
+          "nonfinite_components": 0,
+          "max_absolute_difference": 1.1920928955078125e-07,
+          "max_ulp_distance": 3,
+          "max_absolute_difference_location": {
+            "x": 1309,
+            "y": 659,
+            "channel": "V"
+          },
+          "first_differences": [
+            {
+              "x": 1304,
+              "y": 654,
+              "channel": "V",
+              "left_bits": "3f02963a",
+              "right_bits": "3f02963b",
+              "left": 0.510104775428772,
+              "right": 0.5101048350334167,
+              "absolute_difference": 5.960464477539063e-08
+            },
+            {
+              "x": 1305,
+              "y": 654,
+              "channel": "V",
+              "left_bits": "3f02963a",
+              "right_bits": "3f02963b",
+              "left": 0.510104775428772,
+              "right": 0.5101048350334167,
+              "absolute_difference": 5.960464477539063e-08
+            },
+            {
+              "x": 1306,
+              "y": 654,
+              "channel": "V",
+              "left_bits": "3f02963a",
+              "right_bits": "3f02963b",
+              "left": 0.510104775428772,
+              "right": 0.5101048350334167,
+              "absolute_difference": 5.960464477539063e-08
+            },
+            {
+              "x": 1307,
+              "y": 654,
+              "channel": "V",
+              "left_bits": "3f02963a",
+              "right_bits": "3f02963b",
+              "left": 0.510104775428772,
+              "right": 0.5101048350334167,
+              "absolute_difference": 5.960464477539063e-08
+            },
+            {
+              "x": 1308,
+              "y": 654,
+              "channel": "V",
+              "left_bits": "3f02963a",
+              "right_bits": "3f02963b",
+              "left": 0.510104775428772,
+              "right": 0.5101048350334167,
+              "absolute_difference": 5.960464477539063e-08
+            },
+            {
+              "x": 1304,
+              "y": 655,
+              "channel": "V",
+              "left_bits": "3f02652c",
+              "right_bits": "3f02652d",
+              "left": 0.5093562602996826,
+              "right": 0.5093563199043274,
+              "absolute_difference": 5.960464477539063e-08
+            },
+            {
+              "x": 1305,
+              "y": 655,
+              "channel": "V",
+              "left_bits": "3f02652c",
+              "right_bits": "3f02652d",
+              "left": 0.5093562602996826,
+              "right": 0.5093563199043274,
+              "absolute_difference": 5.960464477539063e-08
+            },
+            {
+              "x": 1306,
+              "y": 655,
+              "channel": "V",
+              "left_bits": "3f02652c",
+              "right_bits": "3f02652d",
+              "left": 0.5093562602996826,
+              "right": 0.5093563199043274,
+              "absolute_difference": 5.960464477539063e-08
+            },
+            {
+              "x": 1307,
+              "y": 655,
+              "channel": "V",
+              "left_bits": "3f02652c",
+              "right_bits": "3f02652d",
+              "left": 0.5093562602996826,
+              "right": 0.5093563199043274,
+              "absolute_difference": 5.960464477539063e-08
+            },
+            {
+              "x": 1308,
+              "y": 655,
+              "channel": "V",
+              "left_bits": "3f02652c",
+              "right_bits": "3f02652d",
+              "left": 0.5093562602996826,
+              "right": 0.5093563199043274,
+              "absolute_difference": 5.960464477539063e-08
+            }
+          ],
+          "left_role": "A1",
+          "right_role": "B1"
+        },
+        "sample_rgb": {
+          "components": 12288,
+          "bit_mismatches": 7,
+          "nonfinite_components": 0,
+          "max_absolute_difference": 0.00048828125,
+          "max_ulp_distance": 8192,
+          "max_absolute_difference_location": {
+            "x": 1311,
+            "y": 657,
+            "channel": "R"
+          },
+          "first_differences": [
+            {
+              "x": 1311,
+              "y": 657,
+              "channel": "R",
+              "left_bits": "3f1b6000",
+              "right_bits": "3f1b4000",
+              "left": 0.60693359375,
+              "right": 0.6064453125,
+              "absolute_difference": 0.00048828125
+            },
+            {
+              "x": 1308,
+              "y": 678,
+              "channel": "G",
+              "left_bits": "3f09e000",
+              "right_bits": "3f09c000",
+              "left": 0.53857421875,
+              "right": 0.5380859375,
+              "absolute_difference": 0.00048828125
+            },
+            {
+              "x": 1309,
+              "y": 678,
+              "channel": "R",
+              "left_bits": "3f32e000",
+              "right_bits": "3f32c000",
+              "left": 0.69873046875,
+              "right": 0.6982421875,
+              "absolute_difference": 0.00048828125
+            },
+            {
+              "x": 1320,
+              "y": 678,
+              "channel": "R",
+              "left_bits": "3f324000",
+              "right_bits": "3f322000",
+              "left": 0.6962890625,
+              "right": 0.69580078125,
+              "absolute_difference": 0.00048828125
+            },
+            {
+              "x": 1328,
+              "y": 678,
+              "channel": "R",
+              "left_bits": "3f32c000",
+              "right_bits": "3f32a000",
+              "left": 0.6982421875,
+              "right": 0.69775390625,
+              "absolute_difference": 0.00048828125
+            },
+            {
+              "x": 1311,
+              "y": 699,
+              "channel": "G",
+              "left_bits": "3f154000",
+              "right_bits": "3f156000",
+              "left": 0.5830078125,
+              "right": 0.58349609375,
+              "absolute_difference": 0.00048828125
+            },
+            {
+              "x": 1321,
+              "y": 699,
+              "channel": "B",
+              "left_bits": "3ec44000",
+              "right_bits": "3ec42000",
+              "left": 0.38330078125,
+              "right": 0.383056640625,
+              "absolute_difference": 0.000244140625
+            }
+          ],
+          "left_role": "A1",
+          "right_role": "B1"
+        }
+      }
+    },
+    "repeatability": "not-measured-single-pair",
+    "captured_repeatability_confirmed": false,
+    "scope": "Single-pair diagnostic: A1 and B1 each execute once, so within-capture repeatability is not measured. Independent processes may compare archived B source bytes; they do not share or prove reuse of one physical program instance. actual single textureLod site UV and sampled RGB; instrumentation may change shader compilation; not an unmodified shader"
+  },
+  "original_body_relation": {
+    "status": "not-independently-verified",
+    "scope": "Original body and actual instrumented shader sources are archived with SHA256. Native body hashes and producer linkage assertions do not independently prove the transformation or unmodified-shader equivalence."
+  },
+  "oracle_metadata": {
+    "uv_oracle": true,
+    "uv_oracle_use_a": false,
+    "uv_oracle_barriers": 1,
+    "uv_oracle_barrier_ok": [
+      true
+    ],
+    "uv_oracle_barrier_epoch_before": [
+      "0"
+    ],
+    "uv_oracle_barrier_epoch_after": [
+      "0"
+    ]
+  },
+  "oracle_uv_relation": {
+    "selection": "original-varying-UV",
+    "status": "UV-match-not-required-for-control",
+    "comparisons": {
+      "ab1": {
+        "components": 8192,
+        "bit_mismatches": 1634,
+        "nonfinite_components": 0,
+        "max_absolute_difference": 1.1920928955078125e-07,
+        "max_ulp_distance": 3,
+        "max_absolute_difference_location": {
+          "x": 1309,
+          "y": 659,
+          "channel": "V"
+        },
+        "first_differences": [
+          {
+            "x": 1304,
+            "y": 654,
+            "channel": "V",
+            "left_bits": "3f02963a",
+            "right_bits": "3f02963b",
+            "left": 0.510104775428772,
+            "right": 0.5101048350334167,
+            "absolute_difference": 5.960464477539063e-08
+          },
+          {
+            "x": 1305,
+            "y": 654,
+            "channel": "V",
+            "left_bits": "3f02963a",
+            "right_bits": "3f02963b",
+            "left": 0.510104775428772,
+            "right": 0.5101048350334167,
+            "absolute_difference": 5.960464477539063e-08
+          },
+          {
+            "x": 1306,
+            "y": 654,
+            "channel": "V",
+            "left_bits": "3f02963a",
+            "right_bits": "3f02963b",
+            "left": 0.510104775428772,
+            "right": 0.5101048350334167,
+            "absolute_difference": 5.960464477539063e-08
+          },
+          {
+            "x": 1307,
+            "y": 654,
+            "channel": "V",
+            "left_bits": "3f02963a",
+            "right_bits": "3f02963b",
+            "left": 0.510104775428772,
+            "right": 0.5101048350334167,
+            "absolute_difference": 5.960464477539063e-08
+          },
+          {
+            "x": 1308,
+            "y": 654,
+            "channel": "V",
+            "left_bits": "3f02963a",
+            "right_bits": "3f02963b",
+            "left": 0.510104775428772,
+            "right": 0.5101048350334167,
+            "absolute_difference": 5.960464477539063e-08
+          },
+          {
+            "x": 1304,
+            "y": 655,
+            "channel": "V",
+            "left_bits": "3f02652c",
+            "right_bits": "3f02652d",
+            "left": 0.5093562602996826,
+            "right": 0.5093563199043274,
+            "absolute_difference": 5.960464477539063e-08
+          },
+          {
+            "x": 1305,
+            "y": 655,
+            "channel": "V",
+            "left_bits": "3f02652c",
+            "right_bits": "3f02652d",
+            "left": 0.5093562602996826,
+            "right": 0.5093563199043274,
+            "absolute_difference": 5.960464477539063e-08
+          },
+          {
+            "x": 1306,
+            "y": 655,
+            "channel": "V",
+            "left_bits": "3f02652c",
+            "right_bits": "3f02652d",
+            "left": 0.5093562602996826,
+            "right": 0.5093563199043274,
+            "absolute_difference": 5.960464477539063e-08
+          },
+          {
+            "x": 1307,
+            "y": 655,
+            "channel": "V",
+            "left_bits": "3f02652c",
+            "right_bits": "3f02652d",
+            "left": 0.5093562602996826,
+            "right": 0.5093563199043274,
+            "absolute_difference": 5.960464477539063e-08
+          },
+          {
+            "x": 1308,
+            "y": 655,
+            "channel": "V",
+            "left_bits": "3f02652c",
+            "right_bits": "3f02652d",
+            "left": 0.5093562602996826,
+            "right": 0.5093563199043274,
+            "absolute_difference": 5.960464477539063e-08
+          }
+        ],
+        "left_role": "A1",
+        "right_role": "B1"
+      }
+    },
+    "scope": "Diagnostic UV oracle only. Captured UV bit equality checks values, not an independent GPU memory-barrier audit. Instrumentation and ordering may affect compilation or execution; no production, raw YUV or panel equivalence is established."
+  },
+  "fragment_source_difference": {
+    "identical": false,
+    "left_sha256": "203e30d8f59efc15060f7c1f04e88fe1d7f8b78e3bb36d53d623b1e18716c984",
+    "right_sha256": "e2f090a9e72e1362c6dc7c8c64292c759ce0b4c96cd137a7cb8a136151617250",
+    "unified_diff": "--- A.fragment\n+++ B.oracle-framework.fragment\n@@ -1,4 +1,5 @@\n #version 320 es\n+#extension GL_EXT_YUV_target : require\n #ifdef GL_FRAGMENT_PRECISION_HIGH \n precision highp float;            \n #else                             \n@@ -14,10 +15,40 @@\n uniform mat3 _d;\n uniform mat3 _e;\n in vec2 _8003;\n-out vec4 out_color;\n+layout(yuv) out highp vec3 out_color;\n+layout(std430,binding=1) coherent restrict buffer mks_oracle_probe { highp uint mks_probe_words[40960]; };\n+uniform highp int mks_probe_pair;\n+highp uint mks_probe_helpers=0u;\n+highp uint mks_probe_sites=0u;\n+highp uvec2 mks_probe_seen_counts=uvec2(0u);\n+highp uvec2 mks_probe_seen_uv=uvec2(0u);\n+highp uint mks_probe_reason=1u;\n+highp uint mks_probe_selected=2u;\n highp vec2 mks_tap_uv;\n highp vec4 mks_tap_sample;\n highp uint mks_tap_count;\n+uniform highp int mks_uv_oracle_use_a;\n+bool mks_oracle_valid;\n+highp vec2 mks_oracle_uv(highp vec2 own_uv) {\n+mks_probe_helpers++;\n+mks_oracle_valid=true;\n+ivec2 p=ivec2(gl_FragCoord.xy)-ivec2(1304,636);\n+if(all(greaterThanEqual(p,ivec2(0)))&&all(lessThan(p,ivec2(64,64)))) {\n+uint i=uint(p.y*64+p.x)*26u;\n+mks_probe_seen_counts=uvec2(_12[i+10u],_12[i+25u]);\n+mks_probe_seen_uv=uvec2(_12[i+20u],_12[i+21u]);\n+highp vec2 a_uv=uintBitsToFloat(mks_probe_seen_uv);\n+mks_probe_reason=0u;\n+if(mks_probe_seen_counts.x!=1u) mks_probe_reason|=2u;\n+if(mks_probe_seen_counts.y!=1u) mks_probe_reason|=4u;\n+if(any(isnan(a_uv))||any(isinf(a_uv))) mks_probe_reason|=8u;\n+if(mks_probe_reason!=0u) {mks_oracle_valid=false; return own_uv;}\n+mks_probe_selected=mks_uv_oracle_use_a==1 ? 1u : 0u;\n+return mks_uv_oracle_use_a==1 ? a_uv : own_uv;\n+}\n+mks_oracle_valid=false;\n+return own_uv;\n+}\n #define mks_capture_words _12\n \n const float _2 = float(0); \n@@ -25,10 +56,11 @@\n const float _8004 = float(1); \n vec4 _8001() {\n // pl_shader_sample_direct                                  \n-mks_tap_uv=_8003;\n-highp vec4 mks_sample_value=vec4(textureLod(_8002, _8003, 0.0));\n+mks_tap_uv=mks_oracle_uv(_8003);\n+highp vec4 mks_sample_value=vec4(textureLod(_8002, mks_tap_uv, 0.0));\n+mks_probe_sites++;\n mks_tap_sample=mks_sample_value;\n-mks_tap_count++;\n+mks_tap_count+=mks_oracle_valid ? 1u : 0u;\n vec4 color=vec4(_8004)*mks_sample_value;   \n return color;\n }\n@@ -88,22 +120,55 @@\n return color;\n }\n \n+highp float mks_half_store(highp float value) {\n+highp uint raw=floatBitsToUint(value); highp uint mag=raw&0x7fffffffu;\n+if(mag==0u||mag>=0x38800000u) return unpackHalf2x16(packHalf2x16(vec2(value,0.0))).x;\n+highp uint sign=raw&0x80000000u; highp int e=int(mag>>23u)-127;\n+if(e< -24) return uintBitsToFloat(sign);\n+highp uint h=((mag&0x7fffffu)|0x800000u)>>uint(-e-1);\n+highp float q=float(h)*0.000000059604644775390625;\n+return uintBitsToFloat(floatBitsToUint(q)|sign); }\n void main() {\n mks_tap_uv=vec2(0.0); mks_tap_sample=vec4(0.0); mks_tap_count=0u;\n-out_color = _1();\n+highp vec3 mks_rgb = _1().rgb;\n+highp vec3 mks_pre=mks_rgb;\n+mks_rgb=vec3(mks_half_store(mks_rgb.r),mks_half_store(mks_rgb.g),mks_half_store(mks_rgb.b));\n+highp float mks_y=0.2627*mks_rgb.r+0.6780*mks_rgb.g+0.0593*mks_rgb.b;\n+highp float mks_cb=(mks_rgb.b-mks_y)*0.5/(1.0-0.0593);\n+highp float mks_cr=(mks_rgb.r-mks_y)*0.5/(1.0-0.2627);\n+out_color=vec3(mks_y,mks_cb+0.5,mks_cr+0.5);\n ivec2 mks_p=ivec2(gl_FragCoord.xy)-ivec2(1304,636);\n if(all(greaterThanEqual(mks_p,ivec2(0)))&&all(lessThan(mks_p,ivec2(64,64)))){\n uint mks_i=uint(mks_p.y*64+mks_p.x)*26u;\n-uint mks_old=atomicAdd(_12[mks_i+10u],1u);\n+uint mks_old=atomicAdd(_12[mks_i+0u],1u);\n if(mks_old==0u){\n-_12[mks_i+11u]=floatBitsToUint(out_color[0]);\n-_12[mks_i+12u]=floatBitsToUint(out_color[1]);\n-_12[mks_i+13u]=floatBitsToUint(out_color[2]);\n-_12[mks_i+20u]=floatBitsToUint(mks_tap_uv[0]);\n-_12[mks_i+21u]=floatBitsToUint(mks_tap_uv[1]);\n-_12[mks_i+22u]=floatBitsToUint(mks_tap_sample[0]);\n-_12[mks_i+23u]=floatBitsToUint(mks_tap_sample[1]);\n-_12[mks_i+24u]=floatBitsToUint(mks_tap_sample[2]);\n-_12[mks_i+25u]=mks_tap_count;\n+_12[mks_i+1u]=floatBitsToUint(mks_pre[0]);\n+_12[mks_i+4u]=floatBitsToUint(mks_rgb[0]);\n+_12[mks_i+7u]=floatBitsToUint(out_color[0]);\n+_12[mks_i+2u]=floatBitsToUint(mks_pre[1]);\n+_12[mks_i+5u]=floatBitsToUint(mks_rgb[1]);\n+_12[mks_i+8u]=floatBitsToUint(out_color[1]);\n+_12[mks_i+3u]=floatBitsToUint(mks_pre[2]);\n+_12[mks_i+6u]=floatBitsToUint(mks_rgb[2]);\n+_12[mks_i+9u]=floatBitsToUint(out_color[2]);\n+_12[mks_i+14u]=floatBitsToUint(mks_tap_uv[0]);\n+_12[mks_i+15u]=floatBitsToUint(mks_tap_uv[1]);\n+_12[mks_i+16u]=floatBitsToUint(mks_tap_sample[0]);\n+_12[mks_i+17u]=floatBitsToUint(mks_tap_sample[1]);\n+_12[mks_i+18u]=floatBitsToUint(mks_tap_sample[2]);\n+_12[mks_i+19u]=mks_tap_count;\n+}\n+uint mks_probe_i=(uint(mks_probe_pair)*4096u+uint(mks_p.y*64+mks_p.x))*10u;\n+uint mks_probe_old=atomicAdd(mks_probe_words[mks_probe_i],1u);\n+if(mks_probe_old==0u){\n+mks_probe_words[mks_probe_i+1u]=mks_probe_helpers;\n+mks_probe_words[mks_probe_i+2u]=mks_probe_sites;\n+mks_probe_words[mks_probe_i+3u]=mks_probe_seen_counts.x;\n+mks_probe_words[mks_probe_i+4u]=mks_probe_seen_counts.y;\n+mks_probe_words[mks_probe_i+5u]=mks_probe_seen_uv.x;\n+mks_probe_words[mks_probe_i+6u]=mks_probe_seen_uv.y;\n+mks_probe_words[mks_probe_i+7u]=mks_probe_reason;\n+mks_probe_words[mks_probe_i+8u]=mks_oracle_valid ? 1u : 0u;\n+mks_probe_words[mks_probe_i+9u]=mks_probe_selected;\n }}\n }",
+    "diff_truncated": false
+  },
+  "baseline_control_relation": {
+    "status": "not-independently-verified",
+    "baseline_fragment_sha256": "203e30d8f59efc15060f7c1f04e88fe1d7f8b78e3bb36d53d623b1e18716c984",
+    "baseline_vertex_sha256": "81fad6a3d992b0bf3d2a65525f0a09294905208bea60d73c2d53d852615e881c",
+    "scope": "Original/oracle/original controls require independent same-APK, same-media/frame source and captured-stage comparison. This manifest alone does not verify the cross-round anchor."
+  },
+  "oracle_probe_metadata": {
+    "uv_oracle_probe": true,
+    "uv_oracle_probe_status": "complete",
+    "uv_oracle_probe_words": 40960,
+    "uv_oracle_probe_words_per_pixel": 10,
+    "oracle_preconditions_valid": true,
+    "oracle_cpu_validation_mask": 0,
+    "oracle_cpu_validation_reasons": []
+  },
+  "oracle_probe_analysis": {
+    "preconditions_valid": true,
+    "records": 4096,
+    "A_read_records": 4096,
+    "A_read_ambiguous_records": 0,
+    "cpu_validation_mask": 0,
+    "cpu_validation_reasons": [],
+    "invalid_records": 0,
+    "reason_counts": {
+      "0": 4096
+    },
+    "selected_source_counts": {
+      "0": 4096
+    },
+    "reason_bit_labels": {
+      "1": "outside_ROI_no_A_read",
+      "2": "observed_A_fragment_count_not_one",
+      "4": "observed_A_site_count_not_one",
+      "8": "observed_A_UV_nonfinite"
+    },
+    "selected_source_labels": {
+      "0": "original_varying_control",
+      "1": "GPU_observed_A_UV",
+      "2": "fallback_after_invalid_dependency"
+    },
+    "issue_counts": {},
+    "GPU_observed_vs_CPU_terminal": {
+      "A_fragment_count_differences": 0,
+      "A_site_count_differences": 0,
+      "A_UV_bit_differences": 0
+    },
+    "first_records": [
+      {
+        "repetition": 1,
+        "x": 1304,
+        "y": 636,
+        "execution": {
+          "fragment_records": 1,
+          "helper_calls": 1,
+          "actual_sample_sites": 1
+        },
+        "A_read_performed": true,
+        "GPU_observed_A": {
+          "fragment_count": 1,
+          "site_count": 1,
+          "raw_fragment_count": 1,
+          "raw_site_count": 1,
+          "stored_UV_bits": [
+            "3ef9f6ce",
+            "3f060932"
+          ],
+          "UV_finite": true
+        },
+        "CPU_terminal_A": {
+          "fragment_count": 1,
+          "site_count": 1,
+          "UV_bits": [
+            "3ef9f6ce",
+            "3f060932"
+          ]
+        },
+        "reason_mask": 0,
+        "dependency_valid": true,
+        "selected_source": 0,
+        "B_dependency_valid_count": 1,
+        "B_actual_UV_bits": [
+          "3ef9f6ce",
+          "3f060932"
+        ],
+        "cpu_validation_mask": 0,
+        "issues": []
+      },
+      {
+        "repetition": 1,
+        "x": 1305,
+        "y": 636,
+        "execution": {
+          "fragment_records": 1,
+          "helper_calls": 1,
+          "actual_sample_sites": 1
+        },
+        "A_read_performed": true,
+        "GPU_observed_A": {
+          "fragment_count": 1,
+          "site_count": 1,
+          "raw_fragment_count": 1,
+          "raw_site_count": 1,
+          "stored_UV_bits": [
+            "3efa27db",
+            "3f060932"
+          ],
+          "UV_finite": true
+        },
+        "CPU_terminal_A": {
+          "fragment_count": 1,
+          "site_count": 1,
+          "UV_bits": [
+            "3efa27db",
+            "3f060932"
+          ]
+        },
+        "reason_mask": 0,
+        "dependency_valid": true,
+        "selected_source": 0,
+        "B_dependency_valid_count": 1,
+        "B_actual_UV_bits": [
+          "3efa27db",
+          "3f060932"
+        ],
+        "cpu_validation_mask": 0,
+        "issues": []
+      },
+      {
+        "repetition": 1,
+        "x": 1306,
+        "y": 636,
+        "execution": {
+          "fragment_records": 1,
+          "helper_calls": 1,
+          "actual_sample_sites": 1
+        },
+        "A_read_performed": true,
+        "GPU_observed_A": {
+          "fragment_count": 1,
+          "site_count": 1,
+          "raw_fragment_count": 1,
+          "raw_site_count": 1,
+          "stored_UV_bits": [
+            "3efa58e9",
+            "3f060932"
+          ],
+          "UV_finite": true
+        },
+        "CPU_terminal_A": {
+          "fragment_count": 1,
+          "site_count": 1,
+          "UV_bits": [
+            "3efa58e9",
+            "3f060932"
+          ]
+        },
+        "reason_mask": 0,
+        "dependency_valid": true,
+        "selected_source": 0,
+        "B_dependency_valid_count": 1,
+        "B_actual_UV_bits": [
+          "3efa58e9",
+          "3f060932"
+        ],
+        "cpu_validation_mask": 0,
+        "issues": []
+      },
+      {
+        "repetition": 1,
+        "x": 1307,
+        "y": 636,
+        "execution": {
+          "fragment_records": 1,
+          "helper_calls": 1,
+          "actual_sample_sites": 1
+        },
+        "A_read_performed": true,
+        "GPU_observed_A": {
+          "fragment_count": 1,
+          "site_count": 1,
+          "raw_fragment_count": 1,
+          "raw_site_count": 1,
+          "stored_UV_bits": [
+            "3efa89f7",
+            "3f060932"
+          ],
+          "UV_finite": true
+        },
+        "CPU_terminal_A": {
+          "fragment_count": 1,
+          "site_count": 1,
+          "UV_bits": [
+            "3efa89f7",
+            "3f060932"
+          ]
+        },
+        "reason_mask": 0,
+        "dependency_valid": true,
+        "selected_source": 0,
+        "B_dependency_valid_count": 1,
+        "B_actual_UV_bits": [
+          "3efa89f7",
+          "3f060932"
+        ],
+        "cpu_validation_mask": 0,
+        "issues": []
+      },
+      {
+        "repetition": 1,
+        "x": 1308,
+        "y": 636,
+        "execution": {
+          "fragment_records": 1,
+          "helper_calls": 1,
+          "actual_sample_sites": 1
+        },
+        "A_read_performed": true,
+        "GPU_observed_A": {
+          "fragment_count": 1,
+          "site_count": 1,
+          "raw_fragment_count": 1,
+          "raw_site_count": 1,
+          "stored_UV_bits": [
+            "3efabb05",
+            "3f060932"
+          ],
+          "UV_finite": true
+        },
+        "CPU_terminal_A": {
+          "fragment_count": 1,
+          "site_count": 1,
+          "UV_bits": [
+            "3efabb05",
+            "3f060932"
+          ]
+        },
+        "reason_mask": 0,
+        "dependency_valid": true,
+        "selected_source": 0,
+        "B_dependency_valid_count": 1,
+        "B_actual_UV_bits": [
+          "3efabb05",
+          "3f060932"
+        ],
+        "cpu_validation_mask": 0,
+        "issues": []
+      },
+      {
+        "repetition": 1,
+        "x": 1309,
+        "y": 636,
+        "execution": {
+          "fragment_records": 1,
+          "helper_calls": 1,
+          "actual_sample_sites": 1
+        },
+        "A_read_performed": true,
+        "GPU_observed_A": {
+          "fragment_count": 1,
+          "site_count": 1,
+          "raw_fragment_count": 1,
+          "raw_site_count": 1,
+          "stored_UV_bits": [
+            "3efaec13",
+            "3f060932"
+          ],
+          "UV_finite": true
+        },
+        "CPU_terminal_A": {
+          "fragment_count": 1,
+          "site_count": 1,
+          "UV_bits": [
+            "3efaec13",
+            "3f060932"
+          ]
+        },
+        "reason_mask": 0,
+        "dependency_valid": true,
+        "selected_source": 0,
+        "B_dependency_valid_count": 1,
+        "B_actual_UV_bits": [
+          "3efaec13",
+          "3f060932"
+        ],
+        "cpu_validation_mask": 0,
+        "issues": []
+      },
+      {
+        "repetition": 1,
+        "x": 1310,
+        "y": 636,
+        "execution": {
+          "fragment_records": 1,
+          "helper_calls": 1,
+          "actual_sample_sites": 1
+        },
+        "A_read_performed": true,
+        "GPU_observed_A": {
+          "fragment_count": 1,
+          "site_count": 1,
+          "raw_fragment_count": 1,
+          "raw_site_count": 1,
+          "stored_UV_bits": [
+            "3efb1d20",
+            "3f060932"
+          ],
+          "UV_finite": true
+        },
+        "CPU_terminal_A": {
+          "fragment_count": 1,
+          "site_count": 1,
+          "UV_bits": [
+            "3efb1d20",
+            "3f060932"
+          ]
+        },
+        "reason_mask": 0,
+        "dependency_valid": true,
+        "selected_source": 0,
+        "B_dependency_valid_count": 1,
+        "B_actual_UV_bits": [
+          "3efb1d20",
+          "3f060932"
+        ],
+        "cpu_validation_mask": 0,
+        "issues": []
+      },
+      {
+        "repetition": 1,
+        "x": 1311,
+        "y": 636,
+        "execution": {
+          "fragment_records": 1,
+          "helper_calls": 1,
+          "actual_sample_sites": 1
+        },
+        "A_read_performed": true,
+        "GPU_observed_A": {
+          "fragment_count": 1,
+          "site_count": 1,
+          "raw_fragment_count": 1,
+          "raw_site_count": 1,
+          "stored_UV_bits": [
+            "3efb4e2e",
+            "3f060932"
+          ],
+          "UV_finite": true
+        },
+        "CPU_terminal_A": {
+          "fragment_count": 1,
+          "site_count": 1,
+          "UV_bits": [
+            "3efb4e2e",
+            "3f060932"
+          ]
+        },
+        "reason_mask": 0,
+        "dependency_valid": true,
+        "selected_source": 0,
+        "B_dependency_valid_count": 1,
+        "B_actual_UV_bits": [
+          "3efb4e2e",
+          "3f060932"
+        ],
+        "cpu_validation_mask": 0,
+        "issues": []
+      },
+      {
+        "repetition": 1,
+        "x": 1312,
+        "y": 636,
+        "execution": {
+          "fragment_records": 1,
+          "helper_calls": 1,
+          "actual_sample_sites": 1
+        },
+        "A_read_performed": true,
+        "GPU_observed_A": {
+          "fragment_count": 1,
+          "site_count": 1,
+          "raw_fragment_count": 1,
+          "raw_site_count": 1,
+          "stored_UV_bits": [
+            "3efb7f3c",
+            "3f060932"
+          ],
+          "UV_finite": true
+        },
+        "CPU_terminal_A": {
+          "fragment_count": 1,
+          "site_count": 1,
+          "UV_bits": [
+            "3efb7f3c",
+            "3f060932"
+          ]
+        },
+        "reason_mask": 0,
+        "dependency_valid": true,
+        "selected_source": 0,
+        "B_dependency_valid_count": 1,
+        "B_actual_UV_bits": [
+          "3efb7f3c",
+          "3f060932"
+        ],
+        "cpu_validation_mask": 0,
+        "issues": []
+      },
+      {
+        "repetition": 1,
+        "x": 1313,
+        "y": 636,
+        "execution": {
+          "fragment_records": 1,
+          "helper_calls": 1,
+          "actual_sample_sites": 1
+        },
+        "A_read_performed": true,
+        "GPU_observed_A": {
+          "fragment_count": 1,
+          "site_count": 1,
+          "raw_fragment_count": 1,
+          "raw_site_count": 1,
+          "stored_UV_bits": [
+            "3efbb04a",
+            "3f060932"
+          ],
+          "UV_finite": true
+        },
+        "CPU_terminal_A": {
+          "fragment_count": 1,
+          "site_count": 1,
+          "UV_bits": [
+            "3efbb04a",
+            "3f060932"
+          ]
+        },
+        "reason_mask": 0,
+        "dependency_valid": true,
+        "selected_source": 0,
+        "B_dependency_valid_count": 1,
+        "B_actual_UV_bits": [
+          "3efbb04a",
+          "3f060932"
+        ],
+        "cpu_validation_mask": 0,
+        "issues": []
+      }
+    ],
+    "first_invalid_records": [],
+    "B_site_field_semantics": "lib[19] counts dependency-valid sites; probe[2] independently counts actual executed sample sites.",
+    "scope": "GPU-observed A fields were recorded by B at its dependency check; CPU-terminal A fields are separate later readback facts. A consistent outside-ROI record means no A read occurred; contradictory flags are ambiguous. Diagnostic-invalid data cannot support a causal, quality or production conclusion."
+  },
+  "oracle_preconditions_valid": true,
+  "diagnostic_only": true,
+  "causal_conclusion_allowed": false
+}

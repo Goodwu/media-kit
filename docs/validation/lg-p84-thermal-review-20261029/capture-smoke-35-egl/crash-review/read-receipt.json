@@ -1,0 +1,16 @@
+{
+  "command": [
+    "adb",
+    "-s",
+    "LGH870DS42e27764",
+    "shell",
+    "dumpsys",
+    "dropbox",
+    "--print",
+    "SYSTEM_TOMBSTONE"
+  ],
+  "exit": 0,
+  "bytes": 66029,
+  "sha256": "3907f4ebb1c98611f1976b84e893a9e8af15bc1633a595bc8eb588588e8843ff",
+  "scope": "Read-only targeted DropBox tombstone; no log buffers cleared or device settings changed. Crash buffer empty; direct /data/tombstones listing permission denied. DropBox source contains its own TRUNCATED marker near memory-map tail."
+}

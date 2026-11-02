@@ -1,0 +1,16 @@
+  mWakefulness=Awake
+  mWakefulnessChanging=false
+  mIsPowered=true
+  mPlugType=1
+  mBatteryLevel=100
+  mBatteryLevelWhenDreamStarted=0
+  mBatteryLevelLow=false
+  mScreenBrightnessBoostInProgress=false
+  mHoldingDisplaySuspendBlocker=true
+  mScreenBrightnessSetting=162
+  mScreenBrightnessModeSetting=1
+  mScreenBrightnessOverrideFromWindowManager=-1
+  mScreenBrightnessSettingMinimum=10
+  mScreenBrightnessSettingMaximum=255
+  mScreenBrightnessSettingDefault=145
+Display Power: state=ON

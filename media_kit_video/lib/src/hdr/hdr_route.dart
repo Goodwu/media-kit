@@ -53,6 +53,18 @@ enum HdrOutputTransfer {
   sdr,
 }
 
+/// Requested SurfaceTexture publish policy. Native support and each frame's
+/// real nominal fps decide whether a deferred publish actually occurs.
+enum HdrSurfaceTexturePublishFlushPolicy {
+  immediate,
+  defer30fps;
+
+  String get nativeValue => switch (this) {
+        immediate => 'immediate',
+        defer30fps => 'defer-30fps',
+      };
+}
+
 /// The output topology of a realized route: a `gpu-next` GL texture
 /// (Texture widget) or a native surface hosted by the platform view
 /// (decoder-composited `mediacodec_embed` or the GPU HDR dataspace surface).
@@ -261,6 +273,8 @@ class HdrRoute {
     required this.stripDvRpu,
     this.metadataHandling = HdrMetadataHandling.none,
     this.offscreenTransfer,
+    this.surfaceTexturePublishFlushPolicy =
+        HdrSurfaceTexturePublishFlushPolicy.immediate,
     this.dependencies = const <String>{},
   });
 
@@ -322,6 +336,25 @@ class HdrRoute {
   /// levels carry the current semantics and nothing is issued offscreen.
   final String? offscreenTransfer;
 
+  /// Request only. Older native libraries and non-30-fps frames stay immediate.
+  final HdrSurfaceTexturePublishFlushPolicy surfaceTexturePublishFlushPolicy;
+
+  /// Shape guard shared by execution copies and the backend. Source identity
+  /// and vendor consent are checked by the realizer before making the request.
+  bool get supportsDeferredSurfaceTexturePublishShape =>
+      strategy == HdrStrategy.baseLayerConvert &&
+      presentation == HdrPresentation.nativeHdr &&
+      outputTransfer == HdrOutputTransfer.pq &&
+      !appliesDynamicMetadata &&
+      topology == HdrTopology.platformView &&
+      vo == 'gpu-next' &&
+      hwdec == 'surfacetexture' &&
+      targetPrim == 'bt.2020' &&
+      targetTrc == 'pq' &&
+      surfaceTransfer == 'pq' &&
+      offscreenTransfer == 'pq-full' &&
+      stripDvRpu;
+
   /// Whether the Dolby Vision RPU must be stripped from the bitstream.
   final bool stripDvRpu;
 
@@ -351,6 +384,10 @@ class HdrRoute {
         targetPeak: targetPeak,
         surfaceTransfer: surfaceTransfer,
         offscreenTransfer: offscreenTransfer,
+        surfaceTexturePublishFlushPolicy: hwdec == 'surfacetexture' &&
+                supportsDeferredSurfaceTexturePublishShape
+            ? surfaceTexturePublishFlushPolicy
+            : HdrSurfaceTexturePublishFlushPolicy.immediate,
         stripDvRpu: stripDvRpu,
         metadataHandling: metadataHandling,
         dependencies: Set<String>.unmodifiable(dependencies),
@@ -374,6 +411,8 @@ class HdrRoute {
         other.targetPeak == targetPeak &&
         other.surfaceTransfer == surfaceTransfer &&
         other.offscreenTransfer == offscreenTransfer &&
+        other.surfaceTexturePublishFlushPolicy ==
+            surfaceTexturePublishFlushPolicy &&
         other.stripDvRpu == stripDvRpu &&
         other.metadataHandling == metadataHandling &&
         setEquals(other.dependencies, dependencies);
@@ -395,6 +434,7 @@ class HdrRoute {
         targetPeak,
         surfaceTransfer,
         offscreenTransfer,
+        surfaceTexturePublishFlushPolicy,
         stripDvRpu,
         metadataHandling,
         Object.hashAllUnordered(dependencies),
@@ -408,6 +448,7 @@ class HdrRoute {
       'prim: $targetPrim, trc: $targetTrc, peak: ${targetPeak ?? 'none'}, '
       'surface: $surfaceTransfer, '
       'offscreen: ${offscreenTransfer ?? 'none'}, '
+      'requestedPublishFlush: ${surfaceTexturePublishFlushPolicy.name}, '
       'stripRpu: $stripDvRpu, metadata: ${metadataHandling.name}, '
       'deps: $dependencies)';
 }

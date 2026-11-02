@@ -1,0 +1,809 @@
+{
+  "schema": 1,
+  "status": "completed-capture",
+  "serial": "LGH870DS42e27764",
+  "startedAt": "2026-10-30T04:46:46.297021+08:00",
+  "requestedPTS": 720.052666667,
+  "framesRequested": 1,
+  "scope": "GPU shader floats only; not raw YUV, panel, or performance acceptance",
+  "initial": {
+    "hostTime": "2026-10-30T04:46:49.194587+08:00",
+    "batteryC": 26.1,
+    "vtsC": 32.7,
+    "raw": {
+      "battery_type": "battery",
+      "battery_temp": "26100",
+      "vts_type": "vts",
+      "vts_temp": "327",
+      "gpu_thermal_pwrlevel": "0",
+      "hdr_mode": "0",
+      "backlight": "41",
+      "panel_thermal_status": "0"
+    }
+  },
+  "sourceReceipt": {
+    "schema": 1,
+    "startedAt": "2026-10-29T15:04:23.355097+08:00",
+    "finishedAt": "2026-10-29T15:09:19.137212+08:00",
+    "elapsedSeconds": 295.7825954160653,
+    "serial": "LGH870DS42e27764",
+    "deviceSource": "/sdcard/Android/data/com.example.media_kit_hdr_lab/files/hokkaido-p84.mp4",
+    "deviceBytes": 1232790317,
+    "deviceSha256": "7626cac28819ffd1377a712b56c7cc4bbf8677f5db4b39fb0c83f92e58d74443",
+    "returncode": 0,
+    "stderr": "",
+    "hostSource": "/Users/wuweiwei1/Downloads/test-clips/蹲守一周，我终于拍到了夕阳下的梦幻场景｜北海道VLOG _ Links  4K HDR.mp4",
+    "hostBytes": 1232790317,
+    "hostSha256": "7626cac28819ffd1377a712b56c7cc4bbf8677f5db4b39fb0c83f92e58d74443",
+    "hostFfprobe": {
+      "streams": [
+        {
+          "index": 0,
+          "codec_name": "hevc",
+          "codec_long_name": "H.265 / HEVC (High Efficiency Video Coding)",
+          "profile": "Main 10",
+          "codec_type": "video",
+          "codec_tag_string": "hvc1",
+          "codec_tag": "0x31637668",
+          "width": 3840,
+          "height": 1920,
+          "coded_width": 3840,
+          "coded_height": 1920,
+          "has_b_frames": 2,
+          "sample_aspect_ratio": "1:1",
+          "display_aspect_ratio": "2:1",
+          "pix_fmt": "yuv420p10le",
+          "level": 150,
+          "color_range": "tv",
+          "color_space": "bt2020nc",
+          "color_transfer": "arib-std-b67",
+          "color_primaries": "bt2020",
+          "chroma_location": "left",
+          "view_ids_available": "",
+          "view_pos_available": "",
+          "id": "0x1",
+          "r_frame_rate": "30000/1001",
+          "avg_frame_rate": "30000/1001",
+          "time_base": "1/30000",
+          "start_pts": 0,
+          "start_time": "0.000000",
+          "duration_ts": 35119084,
+          "duration": "1170.636133",
+          "bit_rate": "8156702",
+          "nb_frames": "35084",
+          "extradata_size": 126,
+          "disposition": {
+            "default": 1,
+            "dub": 0,
+            "original": 0,
+            "comment": 0,
+            "lyrics": 0,
+            "karaoke": 0,
+            "forced": 0,
+            "hearing_impaired": 0,
+            "visual_impaired": 0,
+            "clean_effects": 0,
+            "attached_pic": 0,
+            "timed_thumbnails": 0,
+            "non_diegetic": 0,
+            "captions": 0,
+            "descriptions": 0,
+            "metadata": 0,
+            "dependent": 0,
+            "still_image": 0,
+            "multilayer": 0
+          },
+          "tags": {
+            "creation_time": "2022-09-21T12:00:00.000000Z",
+            "language": "und",
+            "handler_name": "Bento4 Video Handler",
+            "encoder": "HEVC Coding"
+          },
+          "side_data_list": [
+            {
+              "side_data_type": "DOVI configuration record",
+              "dv_version_major": 1,
+              "dv_version_minor": 0,
+              "dv_profile": 8,
+              "dv_level": 7,
+              "rpu_present_flag": 1,
+              "el_present_flag": 0,
+              "bl_present_flag": 1,
+              "dv_bl_signal_compatibility_id": 4,
+              "dv_md_compression": "none"
+            }
+          ]
+        },
+        {
+          "index": 1,
+          "codec_name": "aac",
+          "codec_long_name": "AAC (Advanced Audio Coding)",
+          "profile": "LC",
+          "codec_type": "audio",
+          "codec_tag_string": "mp4a",
+          "codec_tag": "0x6134706d",
+          "mime_codec_string": "mp4a.40.2",
+          "sample_fmt": "fltp",
+          "sample_rate": "48000",
+          "channels": 2,
+          "channel_layout": "stereo",
+          "bits_per_sample": 0,
+          "initial_padding": 0,
+          "id": "0x2",
+          "r_frame_rate": "0/0",
+          "avg_frame_rate": "0/0",
+          "time_base": "1/48000",
+          "start_pts": 0,
+          "start_time": "0.000000",
+          "duration_ts": 56195048,
+          "duration": "1170.730167",
+          "bit_rate": "253556",
+          "nb_frames": "54878",
+          "extradata_size": 2,
+          "disposition": {
+            "default": 1,
+            "dub": 0,
+            "original": 0,
+            "comment": 0,
+            "lyrics": 0,
+            "karaoke": 0,
+            "forced": 0,
+            "hearing_impaired": 0,
+            "visual_impaired": 0,
+            "clean_effects": 0,
+            "attached_pic": 0,
+            "timed_thumbnails": 0,
+            "non_diegetic": 0,
+            "captions": 0,
+            "descriptions": 0,
+            "metadata": 0,
+            "dependent": 0,
+            "still_image": 0,
+            "multilayer": 0
+          },
+          "tags": {
+            "creation_time": "2022-09-21T12:00:00.000000Z",
+            "language": "und",
+            "handler_name": "SoundHandler"
+          }
+        },
+        {
+          "index": 2,
+          "codec_name": "mjpeg",
+          "codec_long_name": "Motion JPEG",
+          "profile": "Baseline",
+          "codec_type": "video",
+          "codec_tag_string": "[0][0][0][0]",
+          "codec_tag": "0x0000",
+          "width": 6547,
+          "height": 4091,
+          "coded_width": 6547,
+          "coded_height": 4091,
+          "has_b_frames": 0,
+          "sample_aspect_ratio": "1:1",
+          "display_aspect_ratio": "6547:4091",
+          "pix_fmt": "yuvj420p",
+          "level": -99,
+          "color_range": "pc",
+          "color_space": "bt470bg",
+          "chroma_location": "center",
+          "id": "0x0",
+          "r_frame_rate": "90000/1",
+          "avg_frame_rate": "0/0",
+          "time_base": "1/90000",
+          "start_pts": 0,
+          "start_time": "0.000000",
+          "duration_ts": 105365715,
+          "duration": "1170.730167",
+          "bits_per_raw_sample": "8",
+          "disposition": {
+            "default": 0,
+            "dub": 0,
+            "original": 0,
+            "comment": 0,
+            "lyrics": 0,
+            "karaoke": 0,
+            "forced": 0,
+            "hearing_impaired": 0,
+            "visual_impaired": 0,
+            "clean_effects": 0,
+            "attached_pic": 1,
+            "timed_thumbnails": 0,
+            "non_diegetic": 0,
+            "captions": 0,
+            "descriptions": 0,
+            "metadata": 0,
+            "dependent": 0,
+            "still_image": 0,
+            "multilayer": 0
+          }
+        }
+      ],
+      "format": {
+        "filename": "/Users/wuweiwei1/Downloads/test-clips/蹲守一周，我终于拍到了夕阳下的梦幻场景｜北海道VLOG _ Links  4K HDR.mp4",
+        "nb_streams": 3,
+        "nb_programs": 0,
+        "nb_stream_groups": 0,
+        "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+        "format_long_name": "QuickTime / MOV",
+        "start_time": "0.000000",
+        "duration": "1170.730167",
+        "size": "1232790317",
+        "bit_rate": "8424078",
+        "probe_score": 100,
+        "tags": {
+          "major_brand": "isom",
+          "minor_version": "512",
+          "compatible_brands": "isomdby1iso2mp41",
+          "creation_time": "2022-09-21T12:00:00.000000Z",
+          "title": "蹲守一周，我终于拍到了夕阳下的梦幻场景｜北海道VLOG | Links  4K HDR",
+          "artist": "Linksphotograph",
+          "encoder": "Lavf63.1.101",
+          "comment": "https://www.bilibili.com/video/BV1vY4y1N7TY/",
+          "description": "头一回用400定这么长的定焦镜头，所以我就想挑战拍摄野生动物，于是再一次来到了北海道！ 这支视频浓缩了我和小螃蟹一个星期的努力！\n 拍摄设备： Nikon Z 9  \n                    Nikkor Z 400mm f/4.5 VR S\n                    Nikkor Z 14-24mm f/2.8 S\n                    Nikkor Z 24-70mm f/4 S"
+        }
+      }
+    },
+    "verified": true,
+    "method": "fresh full byte stream adb exec-out cat; no playback or settings mutation"
+  },
+  "sourceIdentityScope": "Historical full-byte SHA receipt plus current size; not a fresh source hash.",
+  "apk": {
+    "path": "/data/app/com.example.media_kit_hdr_lab-2/base.apk",
+    "bytes": 41616855,
+    "sha256": "a0b22e3c0795291685717522971429608f2031b782fd61bc7f06ac17086c6efa"
+  },
+  "controls": {
+    "debug.mks.thermal_sync": "display-resample",
+    "debug.mks.thermal_trace": "1",
+    "debug.mks.defer_publish_flush": "0",
+    "debug.mks.gpu_timing": "0",
+    "debug.mks.yuv_fusion": "1",
+    "debug.mks.yuv_fail_commit": "0",
+    "debug.mks.yuv_fail_gl": "0",
+    "debug.mks.yuv_frame_trace": "1",
+    "debug.mks.quality_pts": "720.052666667",
+    "debug.mks.yuv_compare": "1",
+    "debug.mks.yuv_compare_pts": "720.052666667"
+  },
+  "launchOutput": "Starting: Intent { cmp=com.example.media_kit_hdr_lab/.MainActivity }\n",
+  "pid": "6374",
+  "qualityBefore": {
+    "runId": "6374:1793306832321078",
+    "pid": 6374,
+    "ordinal": 1,
+    "owner": {
+      "session": 701987599,
+      "player": 626503663,
+      "serial": 1,
+      "generation": 1,
+      "sourcePath": "/sdcard/Android/data/com.example.media_kit_hdr_lab/files/hokkaido-p84.mp4"
+    },
+    "status": "observation-heartbeat",
+    "heartbeat": 4,
+    "requestedPTS": 720.052666667,
+    "actualPosition": 720.052667,
+    "acceptedPosition": 720.052667,
+    "positionToleranceSeconds": 0.001002,
+    "requestedFusionMode": "1",
+    "properties": {
+      "time-pos": "720.052667",
+      "pause": "yes",
+      "seeking": "no",
+      "path": "/sdcard/Android/data/com.example.media_kit_hdr_lab/files/hokkaido-p84.mp4",
+      "duration": "1170.730167",
+      "hwdec-current": "surfacetexture",
+      "vo": "gpu-next",
+      "target-trc": "pq",
+      "target-prim": "bt.2020",
+      "target-peak": "1000",
+      "gamma": "0.000000",
+      "video-sync": "display-resample",
+      "video-params/w": "3840",
+      "video-params/h": "1920",
+      "video-params/gamma": "hlg",
+      "video-params/primaries": "bt.2020",
+      "container-fps": "29.970030",
+      "current-tracks/video/dolby-vision-profile": "8",
+      "current-tracks/video/dolby-vision-compatibility-id": "4"
+    },
+    "report": {
+      "generation": 1,
+      "verified": true,
+      "hwdecCurrent": "surfacetexture",
+      "source": {
+        "kind": "dolbyVisionP84",
+        "dvProfile": 8,
+        "dvCompatibilityId": 4
+      },
+      "actual": {
+        "strategy": "baseLayerConvert",
+        "hwdec": "surfacetexture",
+        "targetPeak": "1000",
+        "targetTrc": "pq"
+      },
+      "error": null
+    },
+    "faultPropertiesBefore": {
+      "debug.mks.yuv_fail_commit": "0",
+      "debug.mks.yuv_fail_gl": "0"
+    },
+    "faultPropertiesAfter": {
+      "debug.mks.yuv_fail_commit": "0",
+      "debug.mks.yuv_fail_gl": "0"
+    },
+    "evidenceScope": "fresh-paused-property-position-and-route-only"
+  },
+  "captureEvent": {
+    "event": "capture-complete",
+    "id": "5705850784",
+    "generation": "2",
+    "source_pts": "720.052666667",
+    "file": "/sdcard/Android/data/com.example.media_kit_hdr_lab/files/mks-yuv-compare-6374-5705850784.json",
+    "comparison_pass": "unknown"
+  },
+  "analysis": {
+    "schema": 1,
+    "status": "captured-float-differences",
+    "capture_id": 5705850784,
+    "generation": 2,
+    "pid": 6374,
+    "source_pts": 720.052666667,
+    "target_pts": 720.052666667,
+    "roi": {
+      "x": 1304,
+      "y": 636,
+      "w": 64,
+      "h": 64
+    },
+    "pixels": 4096,
+    "shader_body_hash": "14367661186672473665",
+    "files": {
+      "lib": {
+        "file": "mks-yuv-compare-6374-5705850784.lib.bin",
+        "bytes": 229376,
+        "sha256": "8fa6f27647931206f582d3c882a044bc482c5b198e255ba94e0722351ad4ec38"
+      },
+      "android": {
+        "file": "mks-yuv-compare-6374-5705850784.android.bin",
+        "bytes": 114688,
+        "sha256": "db3760edf18c71fffe4bfd635b9068d79e7ed44110f340b3d177fde559831b1c"
+      },
+      "candidate": {
+        "file": "mks-yuv-compare-6374-5705850784.candidate.glsl",
+        "bytes": 4146,
+        "sha256": "e41d38e1a6292e91c6f1f82f1f0eefc816e74bce3b7517d9e68600b8ed8288ae"
+      },
+      "baseline": {
+        "file": "mks-yuv-compare-6374-5705850784.baseline.glsl",
+        "bytes": 3010,
+        "sha256": "79b9912c5b7172d1f5ff0897a0f2807543ef93694be6409650590d0230a9c705"
+      },
+      "vertex": {
+        "file": "mks-yuv-compare-6374-5705850784.vertex.glsl",
+        "bytes": 579,
+        "sha256": "e04be920b486682583648ce74cea2138b59fcdf5e377dc8ee24e8fa009476677"
+      }
+    },
+    "comparisons": {
+      "pre_rgb": {
+        "components": 12288,
+        "bit_mismatches": 23,
+        "nonfinite_components": 0,
+        "max_absolute_difference": 0.000228196382522583,
+        "max_ulp_distance": 8149,
+        "max_absolute_difference_location": {
+          "x": 1308,
+          "y": 657,
+          "channel": "R"
+        },
+        "first_differences": [
+          {
+            "x": 1305,
+            "y": 657,
+            "channel": "R",
+            "left_bits": "3f01dd08",
+            "right_bits": "3f01ddfa",
+            "left": 0.5072789192199707,
+            "right": 0.5072933435440063,
+            "absolute_difference": 1.4424324035644531e-05
+          },
+          {
+            "x": 1305,
+            "y": 657,
+            "channel": "G",
+            "left_bits": "3ed94554",
+            "right_bits": "3ed953de",
+            "left": 0.4243570566177368,
+            "right": 0.4244679808616638,
+            "absolute_difference": 0.00011092424392700195
+          },
+          {
+            "x": 1305,
+            "y": 657,
+            "channel": "B",
+            "left_bits": "3e769788",
+            "right_bits": "3e769958",
+            "left": 0.24081242084503174,
+            "right": 0.24081933498382568,
+            "absolute_difference": 6.9141387939453125e-06
+          },
+          {
+            "x": 1306,
+            "y": 657,
+            "channel": "G",
+            "left_bits": "3ed5e511",
+            "right_bits": "3ed5e4cf",
+            "left": 0.41776326298713684,
+            "right": 0.41776129603385925,
+            "absolute_difference": 1.9669532775878906e-06
+          },
+          {
+            "x": 1306,
+            "y": 657,
+            "channel": "B",
+            "left_bits": "3e6c0396",
+            "right_bits": "3e6c236b",
+            "left": 0.23048242926597595,
+            "right": 0.23060385882854462,
+            "absolute_difference": 0.00012142956256866455
+          },
+          {
+            "x": 1308,
+            "y": 657,
+            "channel": "R",
+            "left_bits": "3eef02ab",
+            "right_bits": "3eef2094",
+            "left": 0.4668172299861908,
+            "right": 0.4670454263687134,
+            "absolute_difference": 0.000228196382522583
+          },
+          {
+            "x": 1308,
+            "y": 657,
+            "channel": "G",
+            "left_bits": "3ec575dd",
+            "right_bits": "3ec578bf",
+            "left": 0.38566485047340393,
+            "right": 0.38568684458732605,
+            "absolute_difference": 2.199411392211914e-05
+          },
+          {
+            "x": 1308,
+            "y": 657,
+            "channel": "B",
+            "left_bits": "3e325839",
+            "right_bits": "3e325b4b",
+            "left": 0.17416466772556305,
+            "right": 0.1741763800382614,
+            "absolute_difference": 1.1712312698364258e-05
+          },
+          {
+            "x": 1309,
+            "y": 657,
+            "channel": "R",
+            "left_bits": "3ee86daa",
+            "right_bits": "3ee86cd3",
+            "left": 0.45396167039871216,
+            "right": 0.4539552628993988,
+            "absolute_difference": 6.407499313354492e-06
+          },
+          {
+            "x": 1309,
+            "y": 657,
+            "channel": "B",
+            "left_bits": "3e16a55c",
+            "right_bits": "3e16bbd7",
+            "left": 0.14711517095565796,
+            "right": 0.14720092713832855,
+            "absolute_difference": 8.575618267059326e-05
+          }
+        ],
+        "left_role": "baseline_pre_store",
+        "right_role": "candidate_pre_half"
+      },
+      "half_rgb": {
+        "components": 12288,
+        "bit_mismatches": 7,
+        "nonfinite_components": 0,
+        "max_absolute_difference": 0.000244140625,
+        "max_ulp_distance": 8192,
+        "max_absolute_difference_location": {
+          "x": 1308,
+          "y": 657,
+          "channel": "R"
+        },
+        "first_differences": [
+          {
+            "x": 1306,
+            "y": 657,
+            "channel": "B",
+            "left_bits": "3e6c0000",
+            "right_bits": "3e6c2000",
+            "left": 0.23046875,
+            "right": 0.2305908203125,
+            "absolute_difference": 0.0001220703125
+          },
+          {
+            "x": 1308,
+            "y": 657,
+            "channel": "R",
+            "left_bits": "3eef0000",
+            "right_bits": "3eef2000",
+            "left": 0.466796875,
+            "right": 0.467041015625,
+            "absolute_difference": 0.000244140625
+          },
+          {
+            "x": 1311,
+            "y": 657,
+            "channel": "B",
+            "left_bits": "3e180000",
+            "right_bits": "3e182000",
+            "left": 0.1484375,
+            "right": 0.1485595703125,
+            "absolute_difference": 0.0001220703125
+          },
+          {
+            "x": 1319,
+            "y": 678,
+            "channel": "R",
+            "left_bits": "3ee20000",
+            "right_bits": "3ee22000",
+            "left": 0.44140625,
+            "right": 0.441650390625,
+            "absolute_difference": 0.000244140625
+          },
+          {
+            "x": 1320,
+            "y": 699,
+            "channel": "B",
+            "left_bits": "3e4cc000",
+            "right_bits": "3e4ce000",
+            "left": 0.199951171875,
+            "right": 0.2000732421875,
+            "absolute_difference": 0.0001220703125
+          },
+          {
+            "x": 1321,
+            "y": 699,
+            "channel": "G",
+            "left_bits": "3ebd0000",
+            "right_bits": "3ebd2000",
+            "left": 0.369140625,
+            "right": 0.369384765625,
+            "absolute_difference": 0.000244140625
+          },
+          {
+            "x": 1321,
+            "y": 699,
+            "channel": "B",
+            "left_bits": "3e418000",
+            "right_bits": "3e41a000",
+            "left": 0.18896484375,
+            "right": 0.1890869140625,
+            "absolute_difference": 0.0001220703125
+          }
+        ],
+        "left_role": "baseline_sampled_rgb16f",
+        "right_role": "candidate_emulated_half"
+      },
+      "yuv": {
+        "components": 12288,
+        "bit_mismatches": 18,
+        "nonfinite_components": 0,
+        "max_absolute_difference": 0.00017276406288146973,
+        "max_ulp_distance": 5797,
+        "max_absolute_difference_location": {
+          "x": 1321,
+          "y": 699,
+          "channel": "Y"
+        },
+        "first_differences": [
+          {
+            "x": 1306,
+            "y": 657,
+            "channel": "Y",
+            "left_bits": "3edb1fe0",
+            "right_bits": "3edb20d2",
+            "left": 0.4279775619506836,
+            "right": 0.4279847741127014,
+            "absolute_difference": 7.212162017822266e-06
+          },
+          {
+            "x": 1306,
+            "y": 657,
+            "channel": "Cb",
+            "left_bits": "3eca401a",
+            "right_bits": "3eca481a",
+            "left": 0.3950203061103821,
+            "right": 0.3950813412666321,
+            "absolute_difference": 6.103515625e-05
+          },
+          {
+            "x": 1306,
+            "y": 657,
+            "channel": "Cr",
+            "left_bits": "3f0c5582",
+            "right_bits": "3f0c5530",
+            "left": 0.5481797456741333,
+            "right": 0.5481748580932617,
+            "absolute_difference": 4.887580871582031e-06
+          },
+          {
+            "x": 1308,
+            "y": 657,
+            "channel": "Y",
+            "left_bits": "3ec9e402",
+            "right_bits": "3ec9ec6a",
+            "left": 0.3943176865577698,
+            "right": 0.3943818211555481,
+            "absolute_difference": 6.413459777832031e-05
+          },
+          {
+            "x": 1308,
+            "y": 657,
+            "channel": "Cb",
+            "left_bits": "3ec4101a",
+            "right_bits": "3ec40ba3",
+            "left": 0.3829353451728821,
+            "right": 0.38290128111839294,
+            "absolute_difference": 3.406405448913574e-05
+          },
+          {
+            "x": 1308,
+            "y": 657,
+            "channel": "Cr",
+            "left_bits": "3f0c9536",
+            "right_bits": "3f0c9d36",
+            "left": 0.5491517782211304,
+            "right": 0.5492738485336304,
+            "absolute_difference": 0.0001220703125
+          },
+          {
+            "x": 1311,
+            "y": 657,
+            "channel": "Y",
+            "left_bits": "3ec08749",
+            "right_bits": "3ec0883c",
+            "left": 0.37603214383125305,
+            "right": 0.37603938579559326,
+            "absolute_difference": 7.241964340209961e-06
+          },
+          {
+            "x": 1311,
+            "y": 657,
+            "channel": "Cb",
+            "left_bits": "3ec2101a",
+            "right_bits": "3ec2181a",
+            "left": 0.3790290951728821,
+            "right": 0.3790901303291321,
+            "absolute_difference": 6.103515625e-05
+          },
+          {
+            "x": 1311,
+            "y": 657,
+            "channel": "Cr",
+            "left_bits": "3f0ca9cd",
+            "right_bits": "3f0ca97a",
+            "left": 0.5494659543037415,
+            "right": 0.5494610071182251,
+            "absolute_difference": 4.947185516357422e-06
+          },
+          {
+            "x": 1319,
+            "y": 678,
+            "channel": "Y",
+            "left_bits": "3ebe72b2",
+            "right_bits": "3ebe7b1a",
+            "left": 0.3719688057899475,
+            "right": 0.37203294038772583,
+            "absolute_difference": 6.413459777832031e-05
+          }
+        ],
+        "left_role": "baseline_csc_yuv",
+        "right_role": "candidate_csc_yuv"
+      }
+    },
+    "limitations": [
+      "Captured shader floats only; not raw NV12, driver quantization, scanout or panel evidence.",
+      "Shader hashes identify archived sources; they do not prove equivalence to uninstrumented baseline.",
+      "Completion/fence/error evidence is asserted by the native producer manifest, not independently queried offline.",
+      "Pixels in one capture are correlated; this is not a performance or statistical confidence test."
+    ]
+  },
+  "postCollectionHeartbeatWatermark": 10,
+  "qualityAfter": {
+    "runId": "6374:1793306832321078",
+    "pid": 6374,
+    "ordinal": 1,
+    "owner": {
+      "session": 701987599,
+      "player": 626503663,
+      "serial": 1,
+      "generation": 1,
+      "sourcePath": "/sdcard/Android/data/com.example.media_kit_hdr_lab/files/hokkaido-p84.mp4"
+    },
+    "status": "observation-heartbeat",
+    "heartbeat": 12,
+    "requestedPTS": 720.052666667,
+    "actualPosition": 720.052667,
+    "acceptedPosition": 720.052667,
+    "positionToleranceSeconds": 0.001002,
+    "requestedFusionMode": "1",
+    "properties": {
+      "time-pos": "720.052667",
+      "pause": "yes",
+      "seeking": "no",
+      "path": "/sdcard/Android/data/com.example.media_kit_hdr_lab/files/hokkaido-p84.mp4",
+      "duration": "1170.730167",
+      "hwdec-current": "surfacetexture",
+      "vo": "gpu-next",
+      "target-trc": "pq",
+      "target-prim": "bt.2020",
+      "target-peak": "1000",
+      "gamma": "0.000000",
+      "video-sync": "display-resample",
+      "video-params/w": "3840",
+      "video-params/h": "1920",
+      "video-params/gamma": "hlg",
+      "video-params/primaries": "bt.2020",
+      "container-fps": "29.970030",
+      "current-tracks/video/dolby-vision-profile": "8",
+      "current-tracks/video/dolby-vision-compatibility-id": "4"
+    },
+    "report": {
+      "generation": 1,
+      "verified": true,
+      "hwdecCurrent": "surfacetexture",
+      "source": {
+        "kind": "dolbyVisionP84",
+        "dvProfile": 8,
+        "dvCompatibilityId": 4
+      },
+      "actual": {
+        "strategy": "baseLayerConvert",
+        "hwdec": "surfacetexture",
+        "targetPeak": "1000",
+        "targetTrc": "pq"
+      },
+      "error": null
+    },
+    "faultPropertiesBefore": {
+      "debug.mks.yuv_fail_commit": "0",
+      "debug.mks.yuv_fail_gl": "0"
+    },
+    "faultPropertiesAfter": {
+      "debug.mks.yuv_fail_commit": "0",
+      "debug.mks.yuv_fail_gl": "0"
+    },
+    "evidenceScope": "fresh-paused-property-position-and-route-only"
+  },
+  "hdrLabStopped": true,
+  "restored": {
+    "settings": {
+      "screen_brightness_mode": "1",
+      "screen_brightness": "41",
+      "accelerometer_rotation": "0",
+      "user_rotation": "0",
+      "screen_off_timeout": "30000"
+    },
+    "properties": {
+      "debug.mks.thermal_sync": "",
+      "debug.mks.thermal_trace": "",
+      "debug.mks.defer_publish_flush": "",
+      "debug.mks.gpu_timing": "",
+      "debug.mks.yuv_fusion": "",
+      "debug.mks.yuv_fail_commit": "",
+      "debug.mks.yuv_fail_gl": "",
+      "debug.mks.yuv_frame_trace": "",
+      "debug.mks.quality_pts": "",
+      "debug.mks.yuv_compare": "",
+      "debug.mks.yuv_compare_pts": ""
+    }
+  },
+  "restorationVerified": true,
+  "automaticBrightnessScalarChanged": false,
+  "restoreErrors": [],
+  "finishedAt": "2026-10-30T04:47:28.502036+08:00"
+}

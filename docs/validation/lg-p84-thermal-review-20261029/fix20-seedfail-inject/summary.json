@@ -1,0 +1,10 @@
+{
+ "apkSha256": "1a023388396e683c1ddb6c1a547645ead03be8fb185af13e18980779ab530f89",
+ "apkDeviceMd5": "26f252b9642984f42a5ef07efdb1dd35",
+ "injection": "debug.mks.yuv_table_fail_seed=1 persistent (every seed attempt fails)",
+ "armFailedInjected": 2,
+ "tableDisabled": 1,
+ "renderFailures": 0,
+ "swapSuccess": 3,
+ "tablePassRan": 0
+}

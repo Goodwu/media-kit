@@ -1,0 +1,24 @@
+{
+  "androidSyntax": {
+    "file": "../video/out/vo_gpu_next.c",
+    "exit": 0,
+    "stderr": ""
+  },
+  "hostPureTest": "clang -std=c11 -Wall -Wextra -Werror -I../mpv ../mpv/test/yuv_compare_vo.c -lm; compile+execute exit0; repeat opt-in parsing, 1/2 chunk sizing/overflow/count/finite, draw receipts/tokens/epoch continuity and owner cleanup policy",
+  "sourceExtractedManifestTest": "python3 -m unittest tool/test_lg_yuv_compare_manifest.py tool/test_lg_yuv_compare_egl_wiring.py: 4 passed (3 actual compare_save JSON tests; 1 existing EGL wiring regression)",
+  "mode": "debug.mks.yuv_compare_repeat=1 only with valid explicit compare session; absent/0 schema1, other repeat values force original RGB and refuse capture",
+  "schema2": {
+    "libLayout": "2 consecutive complete ROI*14 uint32 chunks (B1/A1 then B2/A2)",
+    "androidLayout": "ROI*7 uint32, A2 sampled RGB and single final CSC only",
+    "program_tokens": "4 decimal strings, nonzero, B1=B2 and A1=A2",
+    "draw_epoch_before_after": "4 decimal strings each, equal VO pre-render error_epoch throughout",
+    "assertion_scope": "same frozen renderer input state and resource handles; no texture pixel hash"
+  },
+  "limits": "No device, APK, driver or numerical equivalence validation. Library repeat implementation/final baseline receipt separately owned and not established by these VO tests. Default diagnostic off. Capture complete is not comparison-pass.",
+  "files": {
+    "/Users/wuweiwei1/src/mpv/video/out/vo_gpu_next.c": "c23d90d78d34be7e10efecc8f620df76378864ad95d7d48a2923201063974d81",
+    "/Users/wuweiwei1/src/mpv/video/out/yuv_compare_vo.h": "054d3a08c281a44f14f4aca764e131a2d695fa376a79b50b4ddcf38eecd4b714",
+    "/Users/wuweiwei1/src/mpv/test/yuv_compare_vo.c": "28d661a1a040c83060fd597b3dfb7cf46eb4228a2041dab0faf5ae860179f96f",
+    "/Users/wuweiwei1/src/media-kit/tool/test_lg_yuv_compare_manifest.py": "4277805e1adb29e6ee66f9ca7dfe4372b292c732d7e67da5024f73b48c32cdab"
+  }
+}

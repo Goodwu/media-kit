@@ -1,0 +1,105 @@
+{
+  "status": "user-requested-stop-source-frozen-not-final-reviewed",
+  "at": "2026-10-30T09:58:19.486407+08:00",
+  "source": "/Users/wuweiwei1/src/libplacebo",
+  "deps": "/Users/wuweiwei1/src/libmpv-android-video-build-dv-experiment/buildscripts/deps/libplacebo",
+  "all_source_deps_match": true,
+  "files": [
+    {
+      "path": "src/dispatch.c",
+      "source_sha256": "25a9120ef773d177fd4c91c9bdfebe0cdd2698ddc242b6a6e1395d87522f4f16",
+      "deps_sha256": "25a9120ef773d177fd4c91c9bdfebe0cdd2698ddc242b6a6e1395d87522f4f16"
+    },
+    {
+      "path": "src/sample_tap.h",
+      "source_sha256": "b2f8265d9b4449b13f3d7e57ba2ed942fe07071cace7562a6828e9e7f0df323a",
+      "deps_sha256": "b2f8265d9b4449b13f3d7e57ba2ed942fe07071cace7562a6828e9e7f0df323a"
+    },
+    {
+      "path": "src/atlas_anchor.h",
+      "source_sha256": "83e84159e8087287b48aa4475edf335187b466de47a0a52b88f12cd03c16b7fa",
+      "deps_sha256": "83e84159e8087287b48aa4475edf335187b466de47a0a52b88f12cd03c16b7fa"
+    },
+    {
+      "path": "src/atlas_read.h",
+      "source_sha256": "3beaeac283b2e0b4b29465cc58f0eed816afd373df4bee0346115180b301bba5",
+      "deps_sha256": "3beaeac283b2e0b4b29465cc58f0eed816afd373df4bee0346115180b301bba5"
+    },
+    {
+      "path": "src/gpu.h",
+      "source_sha256": "90d135c6d980e047be72bbf04025e9fa04e45717de482f46fea836a4ad9072ac",
+      "deps_sha256": "90d135c6d980e047be72bbf04025e9fa04e45717de482f46fea836a4ad9072ac"
+    },
+    {
+      "path": "src/include/libplacebo/opengl.h",
+      "source_sha256": "633b967acba3ed438794cef26c2c720a03387a49fe710085b2e952a48fa15eb3",
+      "deps_sha256": "633b967acba3ed438794cef26c2c720a03387a49fe710085b2e952a48fa15eb3"
+    },
+    {
+      "path": "src/opengl/gpu.h",
+      "source_sha256": "e87f537e0dbbe6cef8c579c17aadf2f8b94be73fc6d269dd39dd863f2658d59c",
+      "deps_sha256": "e87f537e0dbbe6cef8c579c17aadf2f8b94be73fc6d269dd39dd863f2658d59c"
+    },
+    {
+      "path": "src/opengl/gpu.c",
+      "source_sha256": "70b0bacb865d9562bd9d1a03bf7102b4e637448abead96d35c7af6f5d132ea70",
+      "deps_sha256": "70b0bacb865d9562bd9d1a03bf7102b4e637448abead96d35c7af6f5d132ea70"
+    },
+    {
+      "path": "src/opengl/gpu_tex.c",
+      "source_sha256": "3d05e6df57998819b83e0d69a16886438cafabd7f6b5b3df6a65ccdfa17482da",
+      "deps_sha256": "3d05e6df57998819b83e0d69a16886438cafabd7f6b5b3df6a65ccdfa17482da"
+    },
+    {
+      "path": "src/opengl/gpu_pass.c",
+      "source_sha256": "4401913485b7cbac967ae02a124b64e0b692d6e9c2215aa7f60d5a7e3e82f7b4",
+      "deps_sha256": "4401913485b7cbac967ae02a124b64e0b692d6e9c2215aa7f60d5a7e3e82f7b4"
+    },
+    {
+      "path": "src/opengl/swapchain.c",
+      "source_sha256": "657e6578d8b9adc4e1c1d9da85338f1a26b13ef9095936c39984dbb11e18dac1",
+      "deps_sha256": "657e6578d8b9adc4e1c1d9da85338f1a26b13ef9095936c39984dbb11e18dac1"
+    }
+  ],
+  "public_macro": "PL_HAVE_MKS_UV_ATLAS_READ",
+  "new_untracked_header": "src/atlas_read.h",
+  "implementation": "schema10 defaultoff seedpromote readonlyatlas + A0-first/B UV/B half one-frozen-input diagnostic; ordinal1 then2; no auto rebuild; always original A display",
+  "test_evidence": {
+    "initial_sweep": "/tmp/lg-atlas-read-tests.json",
+    "initial_sweep_count": 17,
+    "initial_sweep_all_passed": true,
+    "latest_api24_syntax_units": 6,
+    "latest_api24_syntax_all_zero": true,
+    "latest_targeted": [
+      "/tmp/test_atlas_read_backend.py",
+      "/tmp/test_atlas_read_dispatch.py",
+      "/tmp/test_atlas_read_transform.py"
+    ],
+    "baseline_tests_updated_for_new_private_ABI": [
+      "/tmp/test_atlas_anchor_backend.py",
+      "/tmp/test_atlas_anchor_dispatch.py"
+    ],
+    "source_sync_and_syntax_script": "/tmp/check_capture_syntax.py (writes source to deps; DO NOT RUN while frozen)"
+  },
+  "remaining": [
+    "Final unified schema10 receipt and independent V2 not finished",
+    "VO/Lab/host/analyzer integration and tests are separate in-progress work; no claim of full transaction acceptance",
+    "No standard build, installation or runtime test for schema10",
+    "No full-screen actual YUV or uninstrumented B0 numerical anchor; source insertion relation only",
+    "No B-only normal playback or production cache path implemented"
+  ],
+  "risks": [
+    "LG full diagnostic incremental peak about314141696bytes/299.6MiB, max352MiB; unsupported/OOM stop",
+    "Source/material/geometry/pointer/epoch/owner/fence resource guards still need independent review",
+    "B0/probe GLSL device compilation not tested; offline parser temporarily substitutes unsupported YUV output qualifier and is not actual YUV compile proof",
+    "A0 UV exactness is unobserved; schema9 established only decoded RGB16F value equality for one fixed frame",
+    "Current seed input watcher prevents t1 pointer reuse; released only after valid ordinal1, ordinal2 permits changed input texture only with exact material/source/geometry match"
+  ],
+  "preserved": [
+    "all unrelated dirty sources, including src/opengl/utils.c",
+    "all old schemas1..9 and previous evidence"
+  ],
+  "source_frozen": true,
+  "no_device_or_build": true,
+  "no_commit": true
+}

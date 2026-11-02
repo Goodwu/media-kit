@@ -1,0 +1,11 @@
+{
+  "apkSha256": "e015b2e11ea252094b88fb82e66b3de121611b6576f571fb6124fc46b55b29e4",
+  "files": {
+    "/Users/wuweiwei1/src/media-kit/media_kit_hdr_lab/lib/tests/01.single_player_single_video.dart": "5631f0d9900e7b6924088b58b8255705cfa92649fd965d0204db01c0ad435977",
+    "/Users/wuweiwei1/src/media-kit/media_kit_hdr_lab/lib/common/android_p84_thermal_probe.dart": "81881bd577d47edb8d41e1ebebb628adb5f2e411884d54dcb6370f4b8466251c",
+    "/Users/wuweiwei1/src/media-kit/media_kit_hdr_lab/android/app/src/main/java/com/example/media_kit_hdr_lab/LyaDiagnosticsDataSpaceExt.java": "1f679c0771c8f9f567caad3b53a43932fe57d0cfc3c8690ca2e47b1b4d59c519",
+    "/Users/wuweiwei1/src/media-kit/tool/lg_p84_thermal_round.py": "b0b920e9d692d4d8c6b4360578cf0024ee5cda024d20f090d798dbaf0f779066",
+    "/Users/wuweiwei1/src/media-kit/tool/test_lya_diagnostics_delegate.py": "1100e26995f0d34678e2d9ef3c6c8613f427ce5ca2c810fa82c18789bc5d184a"
+  },
+  "nativeSameAsAb1Ab2": true
+}

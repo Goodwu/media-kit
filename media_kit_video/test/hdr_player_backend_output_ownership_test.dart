@@ -10,6 +10,7 @@ import 'package:media_kit_video/src/hdr/hdr_player_backend.dart';
 import 'package:media_kit_video/src/hdr/hdr_route.dart';
 import 'package:media_kit_video/src/hdr/hdr_source_descriptor.dart';
 import 'package:media_kit_video/src/hdr/hdr_strategy.dart';
+import 'package:media_kit_video/src/hdr/hdr_yuv_window_arm.dart';
 import 'package:media_kit_video/src/video_controller/video_controller.dart';
 import 'package:media_kit_video/src/video_controller/platform_video_controller.dart';
 import 'package:synchronized/synchronized.dart';
@@ -17,7 +18,8 @@ import 'package:synchronized/synchronized.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  test('backend creates one session owner and preserves explicit lab owner', () {
+  test('backend creates one session owner and preserves explicit lab owner',
+      () {
     const configuration = VideoControllerConfiguration();
     final sessionA = Object();
     final sessionB = Object();
@@ -33,7 +35,8 @@ void main() {
     const explicit = VideoControllerConfiguration(
       android: AndroidVideoOptions(lgExperimentOwnerToken: 'lab-token'),
     );
-    final preserved = AndroidHdrBackend.withManagedOutputOwner(explicit, Object());
+    final preserved =
+        AndroidHdrBackend.withManagedOutputOwner(explicit, Object());
     expect(identical(preserved, explicit), isTrue);
     expect(preserved.android.lgExperimentOwnerToken, 'lab-token');
   });
@@ -116,8 +119,7 @@ void main() {
     expect(result.player.properties['hwdec-software-fallback'], '3');
   });
 
-  test(
-      'resetOwnedConfiguration restores a caller-set hwdec-software-fallback',
+  test('resetOwnedConfiguration restores a caller-set hwdec-software-fallback',
       () async {
     final result = await _exercise(initial: 'no', softwareFallback: 'no');
     expect(result.player.properties['hwdec-software-fallback'], '8');
@@ -158,7 +160,83 @@ void main() {
     expect(result.creationSaw, isNull);
   });
 
-  test('gpu platform-view branch issues the route target-peak as an owned '
+  test(
+      'supported native receives owned defer before output and restores caller value',
+      () async {
+    final h =
+        _publishHarness(nativePublishApi: '1', initialPublish: 'immediate');
+    await h.backend
+        .prepareOutput(_routePlan(_gpuPublishRoute(), publishEligible: true));
+    expect(h.player.properties['surfacetexture-publish-flush'], 'defer-30fps');
+    final names = h.player.setPropertyCalls.map((v) => v.key).toList();
+    expect(names.indexOf('surfacetexture-publish-flush'),
+        lessThan(names.indexOf('hwdec')));
+    await h.backend.resetOwnedConfiguration();
+    expect(h.player.properties['surfacetexture-publish-flush'], 'immediate');
+  });
+
+  test('retry to SDR writes immediate without replacing original ownership',
+      () async {
+    final h =
+        _publishHarness(nativePublishApi: '1', initialPublish: 'defer-30fps');
+    await h.backend
+        .prepareOutput(_routePlan(_gpuPublishRoute(), publishEligible: true));
+    await h.backend.prepareOutput(_plan('mediacodec'));
+    expect(h.player.properties['surfacetexture-publish-flush'], 'immediate');
+    await h.backend.resetOwnedConfiguration();
+    expect(h.player.properties['surfacetexture-publish-flush'], 'defer-30fps');
+  });
+
+  test('unsupported legacy native never receives an unknown option write',
+      () async {
+    for (final api in [null, '', '0', '2', 'garbage']) {
+      final h = _publishHarness(nativePublishApi: api);
+      await h.backend
+          .prepareOutput(_routePlan(_gpuPublishRoute(), publishEligible: true));
+      expect(
+          h.player.setPropertyCalls
+              .where((c) => c.key == 'surfacetexture-publish-flush'),
+          isEmpty);
+      await h.backend.resetOwnedConfiguration();
+    }
+  });
+
+  test('capability/source disagreement cannot turn a shape-only request on',
+      () async {
+    final h = _publishHarness(nativePublishApi: '1');
+    await h.backend.prepareOutput(_routePlan(_gpuPublishRoute()));
+    expect(h.player.properties['surfacetexture-publish-flush'], 'immediate');
+  });
+
+  test('feature transport failures are not hidden as legacy absence', () async {
+    final h = _publishHarness(nativePublishApi: '1');
+    h.player.readErrors['android-surfacetexture-publish-flush-api'] =
+        StateError('transport failed');
+    await expectLater(
+        h.backend.prepareOutput(
+            _routePlan(_gpuPublishRoute(), publishEligible: true)),
+        throwsStateError);
+  });
+
+  test('publish policy readback rejection and restoration debt remain visible',
+      () async {
+    final h = _publishHarness(nativePublishApi: '1');
+    h.player.readbackOverrides['surfacetexture-publish-flush'] = 'immediate';
+    await expectLater(
+        h.backend.prepareOutput(
+            _routePlan(_gpuPublishRoute(), publishEligible: true)),
+        throwsStateError);
+    h.player.readbackOverrides.clear();
+    h.player.writeErrors['surfacetexture-publish-flush'] =
+        StateError('restore failed');
+    await expectLater(h.backend.resetOwnedConfiguration(), throwsStateError);
+    h.player.writeErrors.clear();
+    await h.backend.resetOwnedConfiguration();
+    expect(h.player.properties['surfacetexture-publish-flush'], 'immediate');
+  });
+
+  test(
+      'gpu platform-view branch issues the route target-peak as an owned '
       'write and restores the baseline', () async {
     final harness = _peakHarness();
     await harness.backend.prepareOutput(_routePlan(_gpuPeakRoute('350')));
@@ -216,7 +294,20 @@ class _PeakHarness {
   final AndroidHdrBackend backend;
 }
 
-_PeakHarness _peakHarness() {
+// Unit seam: isolate property ownership from the independently tested native
+// YUV arm protocol. This fixture does not claim device/output admission.
+_PeakHarness _publishHarness(
+    {String? nativePublishApi, String initialPublish = 'immediate'}) {
+  return _peakHarness(
+      nativePublishApi: nativePublishApi,
+      initialPublish: initialPublish,
+      yuvWindowArm: _PropertyOnlyYuvArm());
+}
+
+_PeakHarness _peakHarness(
+    {String? nativePublishApi,
+    String initialPublish = 'immediate',
+    HdrYuvWindowArm? yuvWindowArm}) {
   final player = _FakePlayer('no')
     ..properties.addAll(const {
       'target-prim': 'bt.709',
@@ -226,8 +317,14 @@ _PeakHarness _peakHarness() {
       'tone-mapping': 'bt.1886',
       'cache-on-disk': 'yes',
     });
+  player.properties['surfacetexture-publish-flush'] = initialPublish;
+  if (nativePublishApi != null) {
+    player.properties['android-surfacetexture-publish-flush-api'] =
+        nativePublishApi;
+  }
   final backend = AndroidHdrBackend(
     player: player,
+    yuvWindowArm: yuvWindowArm,
     outputSlot: HdrOutputSlot<VideoController>(
       initial: null,
       voOf: (_) async => 'gpu-next',
@@ -239,6 +336,21 @@ _PeakHarness _peakHarness() {
     applyDataSpace: (_, __) async => null,
   );
   return _PeakHarness(player, backend);
+}
+
+class _PropertyOnlyYuvArm implements HdrYuvWindowArm {
+  @override
+  void assertRouteAdmission(HdrOpenPlan plan) {}
+  @override
+  Future<T> initializeOutput<T>(
+          HdrOpenPlan plan, Future<T> Function() initialize) =>
+      initialize();
+  @override
+  Future<void> prepareManagedAttempt(HdrOpenPlan plan) async {}
+  @override
+  Future<void> armForAttempt(HdrOpenPlan plan) async {}
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 /// The planner-injected panel-peak shape: gpu-next platform-view route with
@@ -259,8 +371,32 @@ HdrRoute _gpuPeakRoute(String? targetPeak) => HdrRoute(
       stripDvRpu: false,
     );
 
-HdrOpenPlan _routePlan(HdrRoute route) {
-  const source = HdrSourceDescriptor(codec: 'h264');
+HdrRoute _gpuPublishRoute() => const HdrRoute(
+    strategy: HdrStrategy.baseLayerConvert,
+    presentation: HdrPresentation.nativeHdr,
+    outputTransfer: HdrOutputTransfer.pq,
+    appliesDynamicMetadata: false,
+    topology: HdrTopology.platformView,
+    vo: 'gpu-next',
+    hwdec: 'surfacetexture',
+    targetPrim: 'bt.2020',
+    targetTrc: 'pq',
+    targetPeak: '1000',
+    surfaceTransfer: 'pq',
+    offscreenTransfer: 'pq-full',
+    stripDvRpu: true,
+    surfaceTexturePublishFlushPolicy:
+        HdrSurfaceTexturePublishFlushPolicy.defer30fps);
+
+HdrOpenPlan _routePlan(HdrRoute route, {bool publishEligible = false}) {
+  final source = publishEligible
+      ? const HdrSourceDescriptor(
+          codec: 'hevc',
+          transfer: 'hlg',
+          dynamicMetadata: HdrDynamicMetadata.dolbyVision,
+          dvProfile: 8,
+          dvCompatibilityId: 4)
+      : const HdrSourceDescriptor(codec: 'h264');
   final candidate = HdrCandidate(
     strategy: route.strategy,
     maturity: HdrStrategyMaturity.verified,
@@ -271,14 +407,19 @@ HdrOpenPlan _routePlan(HdrRoute route) {
     media: Media('test://source'),
     source: source,
     sourceOrigin: null,
-    capabilities: const HdrCapabilities(
+    capabilities: HdrCapabilities(
       sdkInt: 24,
       displayHdrTypes: {},
       hevcDecoders: [],
       dolbyVisionDecoders: [],
       p5PipelineAvailable: false,
       dataSpaceBridgeLoaded: false,
-      dataSpaceExt: null,
+      dataSpaceExt: publishEligible
+          ? const HdrDataSpaceExtInfo(
+              id: 'vendor',
+              applicable: true,
+              supportsDeferredSurfaceTexturePublish30fps: true)
+          : null,
     ),
     prediction: HdrRoutePrediction(
       source: source,
@@ -424,6 +565,9 @@ class _FakePlayer implements Player {
   final Object? readError;
   final Map<String, String>? _readbackOverrides;
   final List<MapEntry<String, String>> setPropertyCalls = [];
+  final readErrors = <String, Object>{};
+  final writeErrors = <String, Object>{};
+  final readbackOverrides = <String, String>{};
   final Lock _lock = Lock();
   final PlayerStream _stream = PlayerStream(
       Stream.empty(),
@@ -462,6 +606,8 @@ class _FakePlayer implements Player {
   Future<String> getPropertyAsync(String name,
       {bool waitForInitialization = true}) async {
     if (readError != null) throw readError!;
+    if (readErrors.containsKey(name)) throw readErrors[name]!;
+    if (readbackOverrides.containsKey(name)) return readbackOverrides[name]!;
     final overridden = _readbackOverrides?[name];
     if (overridden != null) return overridden;
     return properties[name] ?? '';
@@ -471,6 +617,7 @@ class _FakePlayer implements Player {
   Future<void> setPropertyStrict(String name, String value,
       {bool waitForInitialization = true}) async {
     setPropertyCalls.add(MapEntry(name, value));
+    if (writeErrors.containsKey(name)) throw writeErrors[name]!;
     properties[name] = value;
   }
 

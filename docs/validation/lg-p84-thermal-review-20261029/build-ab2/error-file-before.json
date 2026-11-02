@@ -1,0 +1,6 @@
+{
+  "time": "2026-10-29T15:24:52.390638+08:00",
+  "returncode": 1,
+  "stdout": "",
+  "stderr": "stat: '%s': No such file or directory\nstat: '/sdcard/Android/data/com.example.media_kit_hdr_lab/files/thermal-open-error.json': No such file or directory\n"
+}

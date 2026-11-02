@@ -1,0 +1,221 @@
+{
+  "finishedAt": "2026-10-30T07:03:35.430523+08:00",
+  "rounds": [
+    {
+      "pts": 600.032766667,
+      "round": "01-original",
+      "pid": "23240",
+      "status": "completed-capture",
+      "analysisStatus": "captured-float-differences",
+      "counts": {
+        "uv": 1634,
+        "sample_rgb": 7,
+        "pre_rgb": 21,
+        "half_rgb": 4,
+        "yuv": 12
+      },
+      "restore": true,
+      "reanalyzeExit": 3,
+      "fileHashes": {
+        "lib": "9363a6dad9ee6b24181c2ffe7440dd00c0e58f7424dd42ba847a912925b79416",
+        "android": "6b948e6ab5f36637485d15862a59f58212059e7efbf55c499e1f4872372a27a3",
+        "candidate": "e2f090a9e72e1362c6dc7c8c64292c759ce0b4c96cd137a7cb8a136151617250",
+        "baseline": "203e30d8f59efc15060f7c1f04e88fe1d7f8b78e3bb36d53d623b1e18716c984",
+        "vertex": "81fad6a3d992b0bf3d2a65525f0a09294905208bea60d73c2d53d852615e881c",
+        "original_body": "e65cf081ba73cf8a5af2a54a185b52f47007c9e44f3bb7f1a024b2ae91c8a109",
+        "oracle_probe": "fdc7631c89cc09a1b69a82a3610be272fa98ed81f75b75799c1ebd3239ea6f61"
+      },
+      "temperatureInitial": {
+        "batteryC": 25.3,
+        "vtsC": 31.3
+      },
+      "snapshots": 48,
+      "gpuAndPanelThermalAllZero": true
+    },
+    {
+      "pts": 600.032766667,
+      "round": "02-oracle",
+      "pid": "24217",
+      "status": "completed-capture",
+      "analysisStatus": "captured-floats-bit-equal",
+      "counts": {
+        "uv": 0,
+        "sample_rgb": 0,
+        "pre_rgb": 0,
+        "half_rgb": 0,
+        "yuv": 0
+      },
+      "restore": true,
+      "reanalyzeExit": 0,
+      "fileHashes": {
+        "lib": "2dda1827bf2532de026242809cabc5e117eb0869874642751e36c41294304347",
+        "android": "6b948e6ab5f36637485d15862a59f58212059e7efbf55c499e1f4872372a27a3",
+        "candidate": "e2f090a9e72e1362c6dc7c8c64292c759ce0b4c96cd137a7cb8a136151617250",
+        "baseline": "203e30d8f59efc15060f7c1f04e88fe1d7f8b78e3bb36d53d623b1e18716c984",
+        "vertex": "81fad6a3d992b0bf3d2a65525f0a09294905208bea60d73c2d53d852615e881c",
+        "original_body": "e65cf081ba73cf8a5af2a54a185b52f47007c9e44f3bb7f1a024b2ae91c8a109",
+        "oracle_probe": "f39bc43b8dfe942b81fd2168b2fa9cc3f082c1ec394ff2e9996bacab0b287145"
+      },
+      "temperatureInitial": {
+        "batteryC": 26.1,
+        "vtsC": 32.5
+      },
+      "snapshots": 48,
+      "gpuAndPanelThermalAllZero": true
+    },
+    {
+      "pts": 600.032766667,
+      "round": "03-original",
+      "pid": "25198",
+      "status": "completed-capture",
+      "analysisStatus": "captured-float-differences",
+      "counts": {
+        "uv": 1634,
+        "sample_rgb": 7,
+        "pre_rgb": 21,
+        "half_rgb": 4,
+        "yuv": 12
+      },
+      "restore": true,
+      "reanalyzeExit": 3,
+      "fileHashes": {
+        "lib": "9363a6dad9ee6b24181c2ffe7440dd00c0e58f7424dd42ba847a912925b79416",
+        "android": "6b948e6ab5f36637485d15862a59f58212059e7efbf55c499e1f4872372a27a3",
+        "candidate": "e2f090a9e72e1362c6dc7c8c64292c759ce0b4c96cd137a7cb8a136151617250",
+        "baseline": "203e30d8f59efc15060f7c1f04e88fe1d7f8b78e3bb36d53d623b1e18716c984",
+        "vertex": "81fad6a3d992b0bf3d2a65525f0a09294905208bea60d73c2d53d852615e881c",
+        "original_body": "e65cf081ba73cf8a5af2a54a185b52f47007c9e44f3bb7f1a024b2ae91c8a109",
+        "oracle_probe": "fdc7631c89cc09a1b69a82a3610be272fa98ed81f75b75799c1ebd3239ea6f61"
+      },
+      "temperatureInitial": {
+        "batteryC": 26.1,
+        "vtsC": 32.7
+      },
+      "snapshots": 48,
+      "gpuAndPanelThermalAllZero": true
+    },
+    {
+      "pts": 720.052666667,
+      "round": "01-original",
+      "pid": "26225",
+      "status": "completed-capture",
+      "analysisStatus": "captured-float-differences",
+      "counts": {
+        "uv": 1634,
+        "sample_rgb": 10,
+        "pre_rgb": 23,
+        "half_rgb": 7,
+        "yuv": 18
+      },
+      "restore": true,
+      "reanalyzeExit": 3,
+      "fileHashes": {
+        "lib": "005fb1be71f78e0c07be1f3db662bd21b8f6636f1ae29dd536212ea78ec52cd7",
+        "android": "db3760edf18c71fffe4bfd635b9068d79e7ed44110f340b3d177fde559831b1c",
+        "candidate": "e2f090a9e72e1362c6dc7c8c64292c759ce0b4c96cd137a7cb8a136151617250",
+        "baseline": "203e30d8f59efc15060f7c1f04e88fe1d7f8b78e3bb36d53d623b1e18716c984",
+        "vertex": "81fad6a3d992b0bf3d2a65525f0a09294905208bea60d73c2d53d852615e881c",
+        "original_body": "e65cf081ba73cf8a5af2a54a185b52f47007c9e44f3bb7f1a024b2ae91c8a109",
+        "oracle_probe": "fdc7631c89cc09a1b69a82a3610be272fa98ed81f75b75799c1ebd3239ea6f61"
+      },
+      "temperatureInitial": {
+        "batteryC": 27.2,
+        "vtsC": 32.9
+      },
+      "snapshots": 50,
+      "gpuAndPanelThermalAllZero": true
+    },
+    {
+      "pts": 720.052666667,
+      "round": "02-oracle",
+      "pid": "27193",
+      "status": "completed-capture",
+      "analysisStatus": "captured-floats-bit-equal",
+      "counts": {
+        "uv": 0,
+        "sample_rgb": 0,
+        "pre_rgb": 0,
+        "half_rgb": 0,
+        "yuv": 0
+      },
+      "restore": true,
+      "reanalyzeExit": 0,
+      "fileHashes": {
+        "lib": "8553e01e76b0e1d991ebd42ea2bfab2369b206ceae94257f6b3470e12859abb9",
+        "android": "db3760edf18c71fffe4bfd635b9068d79e7ed44110f340b3d177fde559831b1c",
+        "candidate": "e2f090a9e72e1362c6dc7c8c64292c759ce0b4c96cd137a7cb8a136151617250",
+        "baseline": "203e30d8f59efc15060f7c1f04e88fe1d7f8b78e3bb36d53d623b1e18716c984",
+        "vertex": "81fad6a3d992b0bf3d2a65525f0a09294905208bea60d73c2d53d852615e881c",
+        "original_body": "e65cf081ba73cf8a5af2a54a185b52f47007c9e44f3bb7f1a024b2ae91c8a109",
+        "oracle_probe": "f39bc43b8dfe942b81fd2168b2fa9cc3f082c1ec394ff2e9996bacab0b287145"
+      },
+      "temperatureInitial": {
+        "batteryC": 27.1,
+        "vtsC": 33.1
+      },
+      "snapshots": 48,
+      "gpuAndPanelThermalAllZero": true
+    },
+    {
+      "pts": 720.052666667,
+      "round": "03-original",
+      "pid": "28149",
+      "status": "completed-capture",
+      "analysisStatus": "captured-float-differences",
+      "counts": {
+        "uv": 1634,
+        "sample_rgb": 10,
+        "pre_rgb": 23,
+        "half_rgb": 7,
+        "yuv": 18
+      },
+      "restore": true,
+      "reanalyzeExit": 3,
+      "fileHashes": {
+        "lib": "005fb1be71f78e0c07be1f3db662bd21b8f6636f1ae29dd536212ea78ec52cd7",
+        "android": "db3760edf18c71fffe4bfd635b9068d79e7ed44110f340b3d177fde559831b1c",
+        "candidate": "e2f090a9e72e1362c6dc7c8c64292c759ce0b4c96cd137a7cb8a136151617250",
+        "baseline": "203e30d8f59efc15060f7c1f04e88fe1d7f8b78e3bb36d53d623b1e18716c984",
+        "vertex": "81fad6a3d992b0bf3d2a65525f0a09294905208bea60d73c2d53d852615e881c",
+        "original_body": "e65cf081ba73cf8a5af2a54a185b52f47007c9e44f3bb7f1a024b2ae91c8a109",
+        "oracle_probe": "fdc7631c89cc09a1b69a82a3610be272fa98ed81f75b75799c1ebd3239ea6f61"
+      },
+      "temperatureInitial": {
+        "batteryC": 27.1,
+        "vtsC": 33.4
+      },
+      "snapshots": 52,
+      "gpuAndPanelThermalAllZero": true
+    }
+  ],
+  "checks": [
+    {
+      "ptsTag": "600",
+      "sameFourSources": true,
+      "AActualSlotsAllEqual": true,
+      "AndroidAllEqual": true,
+      "FirstLastAllSevenFilesEqual": true,
+      "allReanalysisExact": true
+    },
+    {
+      "ptsTag": "720",
+      "sameFourSources": true,
+      "AActualSlotsAllEqual": true,
+      "AndroidAllEqual": true,
+      "FirstLastAllSevenFilesEqual": true,
+      "allReanalysisExact": true
+    }
+  ],
+  "gitStatus": " M TASKS.md\n M libs/android/media_kit_android_dataspace_vendor/android/src/main/java/com/alexmercerind/media_kit_android_dataspace_vendor/LgPqDataSpaceExt.java\n M media_kit_hdr_lab/android/app/src/main/java/com/example/media_kit_hdr_lab/LyaDiagnosticsDataSpaceExt.java\n M media_kit_hdr_lab/lib/tests/01.single_player_single_video.dart\n M media_kit_video/android/src/main/java/com/alexmercerind/media_kit_video/platformview/PlatformVideoView.java\n M media_kit_video/lib/src/hdr/hdr_capabilities.dart\n M media_kit_video/lib/src/hdr/hdr_player_backend.dart\n M media_kit_video/lib/src/hdr/hdr_route.dart\n M media_kit_video/lib/src/hdr/hdr_strategy_realizer.dart\n M media_kit_video/test/hdr_player_backend_output_ownership_test.dart\n?? archives/conversations/lg-dv-p84-thermal-review-20261029.md\n?? docs/validation/lg-p84-thermal-review-20261029/\n?? media_kit_hdr_lab/lib/common/android_p84_lifecycle_probe.dart\n?? media_kit_hdr_lab/lib/common/android_p84_quality_probe.dart\n?? media_kit_hdr_lab/lib/common/android_p84_thermal_probe.dart\n?? media_kit_hdr_lab/test/android_p84_lifecycle_probe_test.dart\n?? media_kit_hdr_lab/test/android_p84_quality_probe_test.dart\n?? media_kit_hdr_lab/test/android_p84_thermal_probe_test.dart\n?? media_kit_video/test/hdr_surface_texture_publish_flush_test.dart\n?? tool/analyze_lg_p84_thermal.py\n?? tool/analyze_lg_yuv_capture.py\n?? tool/build_lg_half_equivalence.py\n?? tool/build_lg_yuv_fusion_probe.py\n?? tool/build_lg_yuv_ssbo_probe.py\n?? tool/lg_p84_capture_round.py\n?? tool/lg_p84_instant_perf.py\n?? tool/lg_p84_quality_round.py\n?? tool/lg_p84_thermal_round.py\n?? tool/native/\n?? tool/test_analyze_lg_yuv_capture.py\n?? tool/test_lg_input_fbo_reuse.py\n?? tool/test_lg_p84_capture_round.py\n?? tool/test_lg_p84_instant_perf.py\n?? tool/test_lg_p84_quality_round.py\n?? tool/test_lg_p84_thermal_round.py\n?? tool/test_lg_yuv_compare_egl_wiring.py\n?? tool/test_lg_yuv_compare_manifest.py\n?? tool/test_lya_diagnostics_delegate.py\n",
+  "toolHashes": {
+    "tool/lg_p84_capture_round.py": "365f028a200fc2c509981f2cdced09d954276b6463cd7e71ab2ccdeba099c8d5",
+    "tool/analyze_lg_yuv_capture.py": "5772697d78aacf605b490693e632ba55ab0c445b9291010e3c40c462d7f7e657",
+    "tool/lg_p84_thermal_round.py": "7912a53570c5f488256f8ca9b2307f1f129d1682df5805fa568d3c3bfbc47c61"
+  },
+  "implementationFilesModifiedByVerifier": [],
+  "createdEvidenceDirectories": [
+    "oracle-more-frames-verifier",
+    "capture-oracle-single-triplet-600",
+    "capture-oracle-single-triplet-720"
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "files": {
+    "lib": {
+      "bytes": 229376,
+      "sha256": "14b1bc02c6ea76043d04068a978c8b1071c47e8afadd121064ad4ecbb5be362b"
+    },
+    "android": {
+      "bytes": 114688,
+      "sha256": "894d47c84f731607fae0a21351b8fcd73a9a74e8e4ec635e51a39ba77af37fe2"
+    },
+    "candidate": {
+      "bytes": 4146,
+      "sha256": "e41d38e1a6292e91c6f1f82f1f0eefc816e74bce3b7517d9e68600b8ed8288ae"
+    },
+    "baseline": {
+      "bytes": 3010,
+      "sha256": "79b9912c5b7172d1f5ff0897a0f2807543ef93694be6409650590d0230a9c705"
+    },
+    "vertex": {
+      "bytes": 579,
+      "sha256": "e04be920b486682583648ce74cea2138b59fcdf5e377dc8ee24e8fa009476677"
+    }
+  },
+  "manifestSha256": "d6b94fccd8f234a994df55969d898cff5e7c9e4492d9b4781f55eff2b1a18a40",
+  "identityScope": "Fresh-process complete event and exclusive identity filenames bind payload/shaders; raw words have no embedded PID/PTS. Local SHA archives bytes; no producer SHA claim.",
+  "timestampScope": "Log receive order is correlation only; not hardware or native-clock synchronization."
+}

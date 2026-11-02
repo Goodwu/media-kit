@@ -1,0 +1,8 @@
+/sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq 307200
+/sys/devices/system/cpu/cpu1/cpufreq/scaling_cur_freq 307200
+/sys/devices/system/cpu/cpu2/cpufreq/scaling_cur_freq 2150400
+/sys/devices/system/cpu/cpu3/cpufreq/scaling_cur_freq 2150400
+/sys/class/kgsl/kgsl-3d0/gpuclk 214000000
+/sys/class/kgsl/kgsl-3d0/gpubusy       0       0
+/sys/class/kgsl/kgsl-3d0/devfreq/cur_freq 214000000
+

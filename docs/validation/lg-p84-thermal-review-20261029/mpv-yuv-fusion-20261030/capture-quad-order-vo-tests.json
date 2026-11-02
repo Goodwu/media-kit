@@ -1,0 +1,26 @@
+{
+  "androidSyntax": {
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "hostTests": "pure C strict config/fullrecord permutation/NDC quad tests compile+run0; actual compare_save/compare_poll source-extract tests10+EGL1+FBO1=12 passed, including modes0/1,9payload writes+manifestlast, invalid geometry/layout/formats/bytes/identity/epochs and no-complete on failure",
+  "mode": "debug.mks.yuv_quad=1 and explicit debug.mks.yuv_rev=0|1; require compare+repeat+tap+oracle+probe+single, invariant0 and use_a0. Malformed/unavailable refuses capture and forces originalRGB in compare session. Existing defaults/schemas1..7 unchanged.",
+  "schema8": {
+    "execution": "one A1/barrier/B1; library only B actual host vertex_data changes identity or complete-record [3,2,1,0]; only original A1 fresh receipt then original CSC full coverage and unique swap",
+    "payload": "same 26main/10probe/7Android words per ROI pixel as schema7. 9files: prior7 plus baseline_vertices/candidate_vertices .baseline-vertices.bin/.candidate-vertices.bin, each4*stride<=4096 bytes",
+    "layout": "all actual primitive/indexed/count/stride/byte_size/viewport/scissors/position_index and attributes name/format/glsl/type/opaque/planes/location/components/depth/host_bits/sample_order/offset/texelsize serialized; strict bounds/nonoverlap/floatfinite/fullNDCquad and fullrecord permutation byteeq",
+    "failure": "all existing owner/identity/coverage/fences/epochs/7bitCPUinvalid gates preserved; logical invalid only dedicated diagnostic-invalid files/event and terminal; malformed payload/layout never completes",
+    "limits": "Saved host-submission data is not proof of GPU vertex fetch. Actual A0/source/program/viewport equality and B-only runparam copy are lib/driver contracts; independent analyzer+sameAPK triple controls still required. No runtime performance/quality claims."
+  },
+  "fboUnchanged": true,
+  "files": {
+    "/Users/wuweiwei1/src/mpv/video/out/vo_gpu_next.c": "6124390f2702c972bd032024a398b423bfdf5db0aee7a124b2556e45ce25b772",
+    "/Users/wuweiwei1/src/mpv/video/out/yuv_compare_vo.h": "9aef19574ee020dcbdb05e248e7044d1eeaedccaae51cfc83e3ef5d6ef073f51",
+    "/Users/wuweiwei1/src/mpv/test/yuv_compare_vo.c": "9b8cd40f881f9da348b1498c890ec8f53c7af5d3f6147f267f2835fe36641d66",
+    "/Users/wuweiwei1/src/media-kit/tool/test_lg_yuv_compare_manifest.py": "8a4f9ffbbf066a3a6df106775acddda24d0ff8339b1856145203224f9356af67",
+    "/Users/wuweiwei1/src/libplacebo/src/include/libplacebo/opengl.h": "6d419cb0e0d0029887e54a5b9bf2e91b8bce4205730ca583607fc5fd71fb79cc"
+  },
+  "limits": "No APK build/device operation. Final library backend freeze received; V2/source/runtime acceptance remains separate.",
+  "libraryFreeze": "Final schema8 header 6d419cb0e0d0029887e54a5b9bf2e91b8bce4205730ca583607fc5fd71fb79cc; lib receipt reports9source/depsmatch,6API24syntax0,11mockPASS; independently reviewed/driver evidence separate."
+}

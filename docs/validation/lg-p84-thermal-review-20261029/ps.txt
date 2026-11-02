@@ -1,0 +1,5 @@
+USER      PID   PPID  VSIZE  RSS   WCHAN              PC  NAME
+system    556   1     295524 10476 SyS_epoll_ 0000000000 S /system/bin/surfaceflinger
+mediacodec 828   1     50088  2632  binder_thr 0000000000 S media.codec
+media     905   1     61472  2308  binder_thr 0000000000 S /system/bin/mediaserver
+u0_a244   23382 812   2869564 460544 SyS_epoll_ 0000000000 S com.example.piliplus.dev

@@ -21,6 +21,10 @@ import 'package:media_kit_video/src/hdr/hdr_native_dv_option_owner.dart';
 import 'package:media_kit_video/src/hdr/hdr_native_dv_review_evidence.dart';
 
 import '../common/android_service_probe.dart';
+import '../common/android_p84_thermal_probe.dart';
+import '../common/android_p84_lifecycle_probe.dart';
+import '../common/android_p84_quality_probe.dart';
+import '../common/android_p84_atlas_reuse_probe.dart';
 import '../common/android_hdr_convert_experiment.dart';
 import '../common/android_surface_texture_experiment.dart';
 import '../common/sources/android_hdr_player_backend.dart'
@@ -681,6 +685,229 @@ class SinglePlayerSingleVideoScreen extends StatefulWidget {
 
 class _SinglePlayerSingleVideoScreenState
     extends State<SinglePlayerSingleVideoScreen> with WidgetsBindingObserver {
+  static const _androidP84ThermalProbeEnabled = bool.fromEnvironment(
+    'MEDIA_KIT_ANDROID_P84_THERMAL_PROBE',
+  );
+  AndroidP84ThermalProbe? _p84ThermalProbe;
+  static const _androidP84LifecycleProbeEnabled = bool.fromEnvironment(
+    'MEDIA_KIT_ANDROID_P84_LIFECYCLE_PROBE',
+  );
+  AndroidP84LifecycleProbe? _p84LifecycleProbe;
+  static const _androidP84QualityProbeEnabled = bool.fromEnvironment(
+    'MEDIA_KIT_ANDROID_P84_QUALITY_PROBE',
+  );
+  AndroidP84QualityProbe? _p84QualityProbe;
+  String? _p84QualityStartupFusionMode;
+  double? _p84QualityAutoTarget;
+  Future<void> _p84QualityRecordTail = Future<void>.value();
+  P84AtlasReuseConfig? _p84AtlasReuseConfig;
+  AndroidP84AtlasReuseProbe? _p84AtlasReuseProbe;
+  Future<void> _p84AtlasReuseRecordTail = Future<void>.value();
+
+  Future<String> _readP84AtlasProperty(String name) async {
+    final result = await Process.run('/system/bin/getprop', [name]);
+    if (result.exitCode != 0) throw StateError('Atlas property unavailable: $name');
+    return '${result.stdout}'.trim();
+  }
+
+  Future<void> _recordP84AtlasReuse(Map<String, Object?> row) {
+    final frozen = jsonEncode({'pid': pid, ...row});
+    final write = _p84AtlasReuseRecordTail.then((_) async {
+      final directory = await path_provider.getExternalStorageDirectory();
+      if (directory == null) throw StateError('Atlas reuse storage unavailable');
+      await File('${directory.path}/p84-atlas-reuse-$pid.ndjson')
+          .writeAsString('$frozen\n', mode: FileMode.append, flush: true);
+      debugPrint('P84_ATLAS_REUSE ${jsonEncode({'pid': pid, 'runId': row['runId'],
+        'nonce': row['nonce'], 'status': row['status']})}');
+    });
+    _p84AtlasReuseRecordTail = write.then<void>((_) {}, onError: (Object _, StackTrace __) {});
+    return write;
+  }
+
+  Future<Map<String, String>> _readP84QualityFaultModes() async {
+    final values = <String, String>{};
+    for (final key in AndroidP84QualityProbe.faultProperties) {
+      final result = await Process.run('/system/bin/getprop', [key]);
+      if (result.exitCode != 0) throw StateError('Quality fault property unavailable: $key');
+      values[key] = '${result.stdout}'.trim();
+    }
+    return values;
+  }
+
+  void _ensureP84QualityProbe() {
+    if (_p84QualityProbe != null) return;
+    final owner = _p84LifecycleOwner();
+    if (owner == null) throw StateError('Quality owner unavailable');
+    _p84QualityProbe = AndroidP84QualityProbe(
+      owner: owner, currentOwner: _p84LifecycleOwner,
+      expectedFusionMode: _p84QualityStartupFusionMode ??
+          (throw StateError('Quality startup mode unavailable')),
+      readProperty: (name) => player.getPropertyAsync(name, waitForInitialization: false),
+      readFusionMode: () async {
+        final result = await Process.run('/system/bin/getprop', const ['debug.mks.yuv_fusion']);
+        if (result.exitCode != 0) throw StateError('Fusion property unavailable');
+        return '${result.stdout}'.trim();
+      },
+      readReport: _p84LifecycleReport,
+      readFaultModes: _readP84QualityFaultModes,
+      setPaused: (paused) => paused ? player.pause() : player.play(),
+      seek: player.seek,
+      record: (row) {
+        final frozen = jsonEncode(row);
+        final write = _p84QualityRecordTail.then((_) async {
+          final directory = await path_provider.getExternalStorageDirectory();
+          if (directory == null) throw StateError('Quality storage unavailable');
+          await File('${directory.path}/p84-quality-$pid.ndjson')
+              .writeAsString('$frozen\n', mode: FileMode.append, flush: true);
+          debugPrint('P84_QUALITY ${jsonEncode({'pid': pid, 'runId': row['runId'],
+            'ordinal': row['ordinal'], 'status': row['status'],
+            'requestedPTS': row['requestedPTS'], 'actualPosition': row['actualPosition'],
+            'requestedFusionMode': row['requestedFusionMode'],
+            'heartbeat': row['heartbeat']})}');
+        });
+        _p84QualityRecordTail = write.then<void>((_) {}, onError: (Object _, StackTrace __) {});
+        return write;
+      },
+      changed: () { if (mounted) setState(() {}); },
+    );
+    if (mounted) setState(() {});
+    final target = _p84QualityAutoTarget;
+    final reuse = _p84AtlasReuseConfig;
+    if (reuse != null) {
+      if (target != reuse.firstPTS || _p84QualityStartupFusionMode != '1') {
+        throw StateError('Atlas reuse requires explicit first auto target and swap guard');
+      }
+      _p84AtlasReuseProbe = AndroidP84AtlasReuseProbe(
+        config: reuse, quality: _p84QualityProbe!,
+        nativeLogs: player.stream.log.map((log) => log.text),
+        readAck: () => _readP84AtlasProperty(P84AtlasReuseConfig.ackProperty),
+        currentOwnerValid: () => mounted && !_autoPlayerDisposed &&
+            _p84LifecycleOwner() == owner,
+        record: _recordP84AtlasReuse,
+      );
+      unawaited(_p84AtlasReuseProbe!.run().catchError((Object error) {
+        debugPrint('P84_ATLAS_REUSE_ERROR $error');
+      }));
+    } else if (target != null) {
+      _runP84Quality(target);
+    }
+  }
+
+  void _runP84Quality(double target) {
+    final probe = _p84QualityProbe;
+    if (probe != null) {
+      unawaited(probe.observe(target).catchError((Object error) {
+        debugPrint('P84_QUALITY_ERROR $error');
+      }));
+    }
+  }
+
+  StreamSubscription<PlayerLog>? _p84LifecycleNativeLog;
+  StreamSubscription<bool>? _p84LifecycleCompletedLog;
+  int _p84LifecycleCompletedEpoch = 0;
+  int _p84LifecycleFalseEpoch = 0;
+  int _p84LifecycleTrueEpoch = 0;
+  final _p84LifecycleNativeCounters = <String, Map<String, String>>{};
+  Future<void> _p84LifecycleRecordTail = Future<void>.value();
+  bool _p84LifecycleReopening = false;
+  String? _p84LifecycleSyncMode;
+  int? _p84LifecycleDeferPublishFlush;
+
+  P84LifecycleOwner? _p84LifecycleOwner() {
+    final session = _hdrSession;
+    if (!mounted || _autoPlayerDisposed || session == null) return null;
+    return P84LifecycleOwner(identityHashCode(session), identityHashCode(player),
+        _hdrOpenSerial, session.report.value.generation, _hdrCurrentSource ?? '');
+  }
+
+  Map<String, Object?> _p84LifecycleReport() {
+    final report = _hdrSession?.report.value;
+    final route = report?.actual;
+    final source = report?.source;
+    return {
+      'generation': report?.generation, 'verified': report?.verified,
+      'hwdecCurrent': report?.hwdecCurrent,
+      'source': source == null ? null : {
+        'kind': source.kind.name, 'dvProfile': source.dvProfile,
+        'dvCompatibilityId': source.dvCompatibilityId,
+      },
+      'actual': route == null ? null : {
+        'strategy': route.strategy.name, 'hwdec': route.hwdec,
+        'targetPeak': route.targetPeak, 'targetTrc': route.targetTrc,
+      },
+      'error': report?.error?.toString(),
+    };
+  }
+
+  Future<void> _recordP84Lifecycle(Map<String, Object?> row) {
+    final frozen = jsonEncode(row);
+    final write = _p84LifecycleRecordTail.then((_) async {
+      final directory = await path_provider.getExternalStorageDirectory();
+      if (directory == null) throw StateError('P84 lifecycle storage unavailable');
+      await File('${directory.path}/p84-lifecycle-$pid.ndjson')
+          .writeAsString('$frozen\n', mode: FileMode.append, flush: true);
+      debugPrint('P84_LIFECYCLE ${jsonEncode({
+        'pid': pid, 'runId': row['runId'], 'actionOrdinal': row['actionOrdinal'],
+        'step': row['step'], 'action': row['action'], 'result': row['result'],
+        'redrawCoverage': row['redrawCoverage'],
+      })}');
+    });
+    _p84LifecycleRecordTail = write.then<void>((_) {}, onError: (Object _, StackTrace __) {});
+    return write;
+  }
+
+  void _ensureP84LifecycleProbe() {
+    if (_p84LifecycleProbe != null) return;
+    final owner = _p84LifecycleOwner();
+    final session = _requireHdrSession();
+    final report = session.report.value;
+    if (owner == null || !report.verified ||
+        report.source?.kind != HdrMediaKind.dolbyVisionP84 ||
+        report.actual?.strategy != HdrStrategy.baseLayerConvert ||
+        report.actual?.hwdec != _surfaceTextureHwdec) {
+      throw StateError('P84 lifecycle requires the verified local P8.4 convert session');
+    }
+    _p84LifecycleProbe = AndroidP84LifecycleProbe(
+      owner: owner, currentOwner: _p84LifecycleOwner,
+      readProperty: (name) => player.getPropertyAsync(name, waitForInitialization: false),
+      readReport: _p84LifecycleReport,
+      readNativeCounters: () => _p84LifecycleNativeCounters.values
+          .map((value) => Map<String, String>.of(value)).toList(),
+      setPaused: (paused) => paused ? player.pause() : player.play(),
+      seek: player.seek, stopPlayer: player.stop,
+      reopen: () async {
+        _p84LifecycleReopening = true;
+        try {
+          await _openHdrSource(owner.sourcePath, start: Duration.zero);
+          return _p84LifecycleOwner() ?? (throw StateError('P84 reopen owner missing'));
+        } finally { _p84LifecycleReopening = false; }
+      },
+      readCompletion: () => P84CompletionObservation(player.state.completed,
+          _p84LifecycleCompletedEpoch, _p84LifecycleFalseEpoch, _p84LifecycleTrueEpoch),
+      record: _recordP84Lifecycle,
+      videoSync: _p84LifecycleSyncMode ?? (throw StateError('P84 lifecycle sync missing')),
+      deferPublishFlush: _p84LifecycleDeferPublishFlush ??
+          (throw StateError('P84 lifecycle publish policy missing')),
+      changed: () { if (mounted) setState(() {}); },
+    );
+    if (mounted) setState(() {});
+  }
+
+  void _runP84LifecycleAction(P84LifecycleAction action) {
+    final probe = _p84LifecycleProbe;
+    if (probe == null) return;
+    unawaited(probe.run(action).catchError((Object error) {
+      debugPrint('P84_LIFECYCLE_ACTION_ERROR $error');
+    }));
+  }
+
+  Future<void> _stopP84ThermalProbe() async {
+    final probe = _p84ThermalProbe;
+    if (probe == null) return;
+    await probe.stop();
+    if (identical(_p84ThermalProbe, probe)) _p84ThermalProbe = null;
+  }
+
   static const _androidNativeDvReleaseDiagnostic = bool.fromEnvironment(
     'MEDIA_KIT_ANDROID_NATIVE_DV_RELEASE_DIAGNOSTIC',
   );
@@ -3152,10 +3379,136 @@ class _SinglePlayerSingleVideoScreenState
     }
     final experimentOwner = _lgExperimentOwner;
     final session = _requireHdrSession();
+    if (_androidP84LifecycleProbeEnabled && _p84LifecycleProbe != null &&
+        !_p84LifecycleReopening) {
+      throw StateError('P84 lifecycle source replacement requires an owned action');
+    }
+    if (_androidP84QualityProbeEnabled && _p84QualityProbe != null) {
+      throw StateError('Restart quality test for a new source or fusion mode');
+    }
     final serial = ++_hdrOpenSerial;
     _hdrCurrentSource = source;
+    AndroidP84ThermalProbe? thermalProbe;
+    HdrSourceDescriptor? thermalOpenHint;
     try {
+      if (_androidP84ThermalProbeEnabled) {
+        await _stopP84ThermalProbe();
+        if (!Platform.isAndroid ||
+            !_androidHdrTransaction ||
+            _androidAutoSecondSource.isNotEmpty ||
+            AndroidSurfaceTextureDiag.enabled) {
+          throw StateError('Thermal probe requires one Android HDR source '
+              'without pixel readback');
+        }
+        if (!mounted || serial != _hdrOpenSerial) return;
+        thermalProbe = AndroidP84ThermalProbe(
+          serial: serial,
+          isCurrent: () => mounted &&
+              serial == _hdrOpenSerial &&
+              identical(_hdrSession, session),
+          readProperty: (name) =>
+              player.getPropertyAsync(name, waitForInitialization: false),
+          writeProperty: player.setPropertyStrict,
+          readReport: () {
+            final report = session.report.value;
+            final route = report.actual;
+            final sourceDescriptor = report.source;
+            return <String, Object?>{
+              'generation': report.generation,
+              'sourcePath': source,
+              'verified': report.verified,
+              'hwdecCurrent': report.hwdecCurrent,
+              'actual': route == null ? null : <String, Object?>{
+                'strategy': route.strategy.name,
+                'hwdec': route.hwdec,
+                'targetTrc': route.targetTrc,
+                'targetPrim': route.targetPrim,
+                'targetPeak': route.targetPeak,
+              },
+              'source': sourceDescriptor == null ? null : <String, Object?>{
+                'kind': sourceDescriptor.kind.name,
+                'codec': sourceDescriptor.codec,
+                'transfer': sourceDescriptor.transfer,
+                'primaries': sourceDescriptor.primaries,
+                'dvProfile': sourceDescriptor.dvProfile,
+                'dvCompatibilityId': sourceDescriptor.dvCompatibilityId,
+              },
+              'error': report.error?.toString(),
+            };
+          },
+          emit: debugPrint,
+        );
+        _p84ThermalProbe = thermalProbe;
+      }
       Future<void> prepare() async {
+        if (_androidP84ThermalProbeEnabled) await thermalProbe?.prepare();
+        if (_androidP84LifecycleProbeEnabled || _androidP84QualityProbeEnabled) {
+          bool current() => mounted && serial == _hdrOpenSerial && identical(_hdrSession, session);
+          if (!current()) throw StateError('P84 lifecycle open superseded');
+          final mode = await AndroidP84ThermalProbe.readAndroidMode();
+          if (!current()) throw StateError('P84 lifecycle open superseded');
+          if (mode != 'audio' && mode != 'display-resample') throw StateError('Invalid P84 lifecycle sync: $mode');
+          if (_p84LifecycleProbe != null && mode != _p84LifecycleProbe!.videoSync) {
+            throw StateError('P84 lifecycle sync changed during the run');
+          }
+          final policyResult = await Process.run('/system/bin/getprop',
+              const ['debug.mks.defer_publish_flush']);
+          if (!current()) throw StateError('P84 lifecycle open superseded');
+          final policyText = '${policyResult.stdout}'.trim();
+          if (policyResult.exitCode != 0 ||
+              (policyText.isNotEmpty && policyText != '0' && policyText != '1')) {
+            throw StateError('Invalid P84 lifecycle native publish policy');
+          }
+          final policy = policyText == '1' ? 1 : 0;
+          if (_p84LifecycleProbe != null && policy != _p84LifecycleProbe!.deferPublishFlush) {
+            throw StateError('P84 lifecycle native publish policy changed');
+          }
+          await player.setPropertyStrict('video-sync', mode);
+          if (!current()) throw StateError('P84 lifecycle open superseded');
+          final accepted = await player.getPropertyAsync('video-sync');
+          if (!current() || accepted != mode) throw StateError('P84 lifecycle sync not accepted');
+          _p84LifecycleSyncMode = mode;
+          _p84LifecycleDeferPublishFlush = policy;
+          if (_androidP84QualityProbeEnabled) {
+            final fusionResult = await Process.run('/system/bin/getprop', const ['debug.mks.yuv_fusion']);
+            if (!current()) throw StateError('Quality open superseded');
+            final fusion = '${fusionResult.stdout}'.trim();
+            if (fusionResult.exitCode != 0 || (fusion != '0' && fusion != '1')) {
+              throw StateError('Quality requires explicit startup fusion 0/1');
+            }
+            final faults = await _readP84QualityFaultModes();
+            if (!current()) throw StateError('Quality open superseded');
+            AndroidP84QualityProbe.validateFaultModes(fusion, faults);
+            _p84QualityStartupFusionMode = fusion;
+            final targetResult = await Process.run('/system/bin/getprop', const ['debug.mks.quality_pts']);
+            if (!current()) throw StateError('Quality open superseded');
+            final targetText = '${targetResult.stdout}'.trim();
+            if (targetResult.exitCode != 0) throw StateError('Quality target unavailable');
+            if (targetText.isNotEmpty) {
+              final target = AndroidP84QualityProbe.finite(targetText);
+              if (target == null || !AndroidP84QualityProbe.points.any((t) => (t - target).abs() < 0.00000001)) {
+                throw StateError('Quality auto target must be a preset PTS');
+              }
+              _p84QualityAutoTarget = target;
+            }
+
+            final reuseMode = await _readP84AtlasProperty(P84AtlasReuseConfig.property);
+            if (!current()) throw StateError('Atlas reuse open superseded');
+            final reuseValues = <String, String>{P84AtlasReuseConfig.property: reuseMode};
+            if (reuseMode != '' && reuseMode != '0') {
+              for (final key in P84AtlasReuseConfig.properties) {
+                reuseValues[key] = await _readP84AtlasProperty(key);
+                if (!current()) throw StateError('Atlas reuse open superseded');
+              }
+            }
+            _p84AtlasReuseConfig = P84AtlasReuseConfig.parse(reuseValues);
+
+          }
+        }
+        if (_androidP84ThermalProbeEnabled &&
+            (!mounted || serial != _hdrOpenSerial)) {
+          throw StateError('Thermal open was superseded');
+        }
         await _applyAndroidVideoTimingOffset();
         await _applyAndroidScalers();
         if (_androidVfFullRange) {
@@ -3204,6 +3557,7 @@ class _SinglePlayerSingleVideoScreenState
       }
 
       final hint = _hintFor(source);
+      thermalOpenHint = hint;
       if (AndroidSurfaceTextureDiag.enabled) {
         // OES leg: enable the importer-side small-area readback for this
         // open transaction before the decoder init can emit its per-frame
@@ -3371,6 +3725,21 @@ class _SinglePlayerSingleVideoScreenState
       debugPrint('ANDROID_HDR_OPEN path=$source serial=$serial');
       if (serial == _hdrOpenSerial && mounted) {
         _logHdrSessionReport();
+        if (_androidP84ThermalProbeEnabled) {
+          final report = session.report.value;
+          final route = report.actual;
+          if (!report.verified ||
+              route?.strategy != HdrStrategy.baseLayerConvert ||
+              route?.hwdec != _surfaceTextureHwdec ||
+              route?.targetTrc != 'pq' ||
+              route?.targetPeak != '1000') {
+            throw StateError('Thermal probe requires verified LG PQ convert '
+                'with the production 1000 reference peak');
+          }
+          await thermalProbe?.start();
+        }
+        if (_androidP84LifecycleProbeEnabled) _ensureP84LifecycleProbe();
+        if (_androidP84QualityProbeEnabled) _ensureP84QualityProbe();
       }
       if (_androidOpenPhaseTrace) {
         unawaited(() async {
@@ -3425,7 +3794,42 @@ class _SinglePlayerSingleVideoScreenState
               'pause=${await player.getPropertyAsync('pause')}');
         }));
       }
-    } catch (_) {
+    } catch (error, stack) {
+      if (_androidP84ThermalProbeEnabled && serial == _hdrOpenSerial) {
+        thermalProbe?.reportError(error);
+        // Error-only persistence; never runs during the measurement window.
+        // Capture before awaiting storage so a newer owner cannot rewrite it.
+        final failure = jsonEncode({
+          'pid': pid,
+          'serial': serial,
+          'runId': thermalProbe?.runId,
+          'sourcePath': source,
+          'hint': thermalOpenHint?.toString(),
+          'error': '$error',
+          'stack': '$stack',
+          'report': thermalProbe?.readReport(),
+          'reportDescription': session.report.value.toString(),
+        });
+        try {
+          final directory = await path_provider.getExternalStorageDirectory();
+          if (directory != null) {
+            await File('${directory.path}/thermal-open-error.json')
+                .writeAsString(failure, flush: true);
+          }
+        } catch (writeError) {
+          debugPrint('THERMAL_ERROR_STORE $writeError');
+        }
+        try {
+          await _stopP84ThermalProbe();
+          if (mounted &&
+              serial == _hdrOpenSerial &&
+              identical(_hdrSession, session)) {
+            await player.stop();
+          }
+        } catch (cleanupError) {
+          debugPrint('THERMAL_ERROR_CLEANUP $cleanupError');
+        }
+      }
       rethrow;
     }
   }
@@ -3627,6 +4031,7 @@ class _SinglePlayerSingleVideoScreenState
     // (Texture SDR) itself. The serial bump invalidates delayed HDR
     // pause/resume callbacks, as the old source-intent invalidation did.
     _hdrOpenSerial++;
+    if (_androidP84ThermalProbeEnabled) await _stopP84ThermalProbe();
     _hdrCurrentSource = source;
     await _requireHdrSession().open(Media(source), hint: _hintFor(source));
     debugPrint('ANDROID_HDR_SDR_RECOVERY_OPEN path=$source '
@@ -4248,6 +4653,51 @@ class _SinglePlayerSingleVideoScreenState
   @override
   void initState() {
     super.initState();
+    if (_androidP84QualityProbeEnabled && _androidP84LifecycleProbeEnabled) {
+      throw StateError('Quality and lifecycle probes are mutually exclusive');
+    }
+    if (_androidP84LifecycleProbeEnabled || _androidP84QualityProbeEnabled) {
+      if (_androidP84ThermalProbeEnabled || !Platform.isAndroid ||
+          !_androidHdrTransaction || !_androidPreopenFullscreen ||
+          _androidNativeDvSessionDiagnostic || _androidAutoSecondSource.isNotEmpty ||
+          AndroidSurfaceTextureDiag.enabled || _androidOutputFailureAtSeconds >= 0 ||
+          _androidDualPlayerView || _androidDualViewLifecycleProbe ||
+          _androidHdr10SessionDiagnostic || _androidNativeDvReleaseDiagnostic ||
+          _androidNativeDvSessionNegativeN1 || _androidNativeDvSessionForeignOwnershipN4 ||
+          _androidNativeDvSessionLifecycleActions ||
+          _androidHdrPauseAtMediaSeconds >= 0 || _androidHdrAutoPauseProbeSeconds > 0 ||
+          _androidAutoSeekAtSeconds >= 0 || _androidAutoReopenAfterSeek ||
+          _androidHotSwitchTarget.isNotEmpty || _androidHotSwitchAtSeconds >= 0 ||
+          _androidAutoSecondSourceAtSeconds > 0 || _androidAutoSdrAfterP5Seconds > 0 ||
+          _androidHdrPreferenceSwapAtSeconds > 0 || _androidHdrPolicySwapAtSeconds > 0 ||
+          _androidPostBindSeekProbe || _androidPostBindReopenProbe ||
+          _androidHdrAutoResumeProbe || _androidHdrLifecyclePositionProbe ||
+          _androidPreDestroyVidStop || _androidEngineDestroyAtSeconds >= 0 ||
+          _androidP5AutoFullscreenAtSeconds >= 0 || _androidP5InplaceFullscreen ||
+          _androidP5ScopeFullscreen || _androidLoopSource || _androidVoSummaryStopSeconds > 0) {
+        throw StateError('P84 lifecycle requires a standalone single-source HDR page; excludes thermal/P5/readback/failure modes');
+      }
+      _p84LifecycleNativeLog = player.stream.log.listen((log) {
+        final text = log.text;
+        if (!text.contains('MKS-THERMAL ')) return;
+        final values = <String, String>{
+          for (final match in RegExp(r'(\w+)=([^\s]+)').allMatches(text))
+            match.group(1)!: match.group(2)!,
+        };
+        if (values['pid'] != '$pid') return;
+        values['_receivedAtMicros'] = '${DateTime.now().microsecondsSinceEpoch}';
+        final key = '${values['kind']}:${values['instance']}:${values['start_ns']}';
+        _p84LifecycleNativeCounters[key] = values;
+      });
+      _p84LifecycleCompletedLog = player.stream.completed.listen((completed) {
+        final epoch = ++_p84LifecycleCompletedEpoch;
+        if (completed) {
+          _p84LifecycleTrueEpoch = epoch;
+        } else {
+          _p84LifecycleFalseEpoch = epoch;
+        }
+      });
+    }
     AndroidHdrConvertExperiment.validateVisual278Admission(
         enabled: _androidLgVisual278Experiment,
         routeLocked: _androidHdrConvertRouteLock,
@@ -4637,7 +5087,7 @@ class _SinglePlayerSingleVideoScreenState
           debugPrint('DATASPACE_PROBE error=$error');
         }));
       }
-      if (_androidAvTrace) {
+      if (_androidAvTrace && !_androidP84ThermalProbeEnabled) {
         Timer.periodic(const Duration(seconds: 2), (timer) {
           if (_autoPlayerDisposed || !mounted) {
             timer.cancel();
@@ -4663,7 +5113,7 @@ class _SinglePlayerSingleVideoScreenState
           }());
         });
       }
-      if (_androidVoPassesTrace) {
+      if (_androidVoPassesTrace && !_androidP84ThermalProbeEnabled) {
         var voPassesFailures = 0;
         Timer.periodic(const Duration(seconds: 5), (timer) {
           if (_autoPlayerDisposed || !mounted) {
@@ -4746,7 +5196,7 @@ class _SinglePlayerSingleVideoScreenState
       );
     }
     player.stream.error.listen((error) => debugPrint(error));
-    if (Platform.isAndroid && _androidPerfProbe) {
+    if (Platform.isAndroid && _androidPerfProbe && !_androidP84ThermalProbeEnabled) {
       player.stream.completed.listen(
         (completed) {
           debugPrint('AUTO_COMPLETED completed=$completed');
@@ -4763,6 +5213,7 @@ class _SinglePlayerSingleVideoScreenState
       (params) => debugPrint('VIDEOPARAMS $params'),
     );
     Future<void>.delayed(const Duration(seconds: 4), () async {
+      if (_androidP84ThermalProbeEnabled) return;
       for (final property in [
         'vo',
         'hwdec-current',
@@ -4799,7 +5250,7 @@ class _SinglePlayerSingleVideoScreenState
         }
       }
     });
-    if (Platform.isAndroid) {
+    if (Platform.isAndroid && !_androidP84ThermalProbeEnabled) {
       // S2 device-round probe: capture the lab's own capabilities channel,
       // the library HdrCapabilities.Get channel and the full library query
       // (including the P5 option probe) in the same session for comparison.
@@ -4847,7 +5298,7 @@ class _SinglePlayerSingleVideoScreenState
         }
       });
     }
-    if (Platform.isAndroid && _androidPerfProbe) {
+    if (Platform.isAndroid && _androidPerfProbe && !_androidP84ThermalProbeEnabled) {
       for (final second in [
         8,
         18,
@@ -5584,6 +6035,16 @@ class _SinglePlayerSingleVideoScreenState
 
   Future<void> _disposeTestPlayerOnce() async {
     _autoPlayerDisposed = true;
+    if (_androidP84ThermalProbeEnabled) await _stopP84ThermalProbe();
+    if (_androidP84LifecycleProbeEnabled) await _p84LifecycleProbe?.cancelAndDrain();
+    if (_androidP84QualityProbeEnabled) {
+      await _p84AtlasReuseProbe?.cancelAndDrain();
+      await _p84AtlasReuseRecordTail;
+      await _p84QualityProbe?.cancelAndDrain();
+      await _p84QualityRecordTail;
+      await _p84LifecycleNativeLog?.cancel();
+      await _p84LifecycleCompletedLog?.cancel();
+    }
     if (_androidHdr10SessionDiagnostic) {
       await _closeHdr10Owned();
       return;
@@ -5629,6 +6090,18 @@ class _SinglePlayerSingleVideoScreenState
       await _disposeHdrPlayer();
     } else {
       await player.dispose();
+    }
+    if (_androidP84LifecycleProbeEnabled) {
+      await _recordP84Lifecycle({
+        'runId': _p84LifecycleProbe?.runId, 'pid': pid,
+        'step': 'ExitCancel:after-dispose', 'result': 'disposed',
+        'cleanDispose': _hdrDisposeReportClean,
+        'nativeCounters': _p84LifecycleNativeCounters.values.toList(),
+      });
+      await _p84LifecycleNativeLog?.cancel();
+      _p84LifecycleNativeLog = null;
+      await _p84LifecycleCompletedLog?.cancel();
+      _p84LifecycleCompletedLog = null;
     }
     debugPrint('AUTO_PLAYER_DISPOSE completed');
   }
@@ -6370,6 +6843,17 @@ class _SinglePlayerSingleVideoScreenState
                 }());
               },
             ),
+            if (_androidP84QualityProbeEnabled && _p84QualityAutoTarget == null)
+              Positioned(left: 0, right: 0, bottom: 0,
+                child: AndroidP84QualityControls(probe: _p84QualityProbe, run: _runP84Quality)),
+            if (_androidP84LifecycleProbeEnabled)
+              Positioned(left: 0, right: 0, bottom: 0,
+                child: AndroidP84LifecycleControls(
+                  ready: _p84LifecycleProbe != null && !_p84LifecycleProbe!.closed,
+                  busy: _p84LifecycleProbe?.busy ?? false,
+                  run: _runP84LifecycleAction,
+                  exit: () => unawaited(_exitAutoPlayerAfterDisposal()),
+                )),
           ],
         ),
       );

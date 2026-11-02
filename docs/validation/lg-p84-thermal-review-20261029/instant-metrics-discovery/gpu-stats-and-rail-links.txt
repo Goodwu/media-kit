@@ -1,0 +1,79 @@
+@@ DIRECTORY /sys/class/regulator/regulator.56/
+total 0
+lrwxrwxrwx 1 root root    0 2026-10-29 15:50 99e8000.cpr3-ctrl-vdd -> ../../../99e8000.cpr3-ctrl
+lrwxrwxrwx 1 root root    0 2026-10-29 15:50 device -> ../../../spm-regulator-9
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 max_microvolts
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 microvolts
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 min_microvolts
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 name
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 num_users
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 opmode
+drwxr-xr-x 2 root root    0 2026-10-29 15:50 power
+lrwxrwxrwx 1 root root    0 2026-10-29 15:50 soc:qcom,lmh-vdd-apss -> ../../../soc:qcom,lmh
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 state
+lrwxrwxrwx 1 root root    0 2026-10-29 15:50 subsystem -> ../../../../../class/regulator
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 suspend_disk_state
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 suspend_mem_state
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 suspend_standby_state
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 type
+-rw-r--r-- 1 root root 4096 2026-10-29 15:50 uevent
+@@ DIRECTORY /sys/class/regulator/regulator.7/
+total 0
+lrwxrwxrwx 1 root root    0 2026-10-29 15:50 99e8000.cpr3-ctrl-vdd-thread0-ldo -> ../../../99e8000.cpr3-ctrl
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 bypass
+lrwxrwxrwx 1 root root    0 2026-10-29 15:50 device -> ../../../99a2000.regulator
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 max_microvolts
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 microvolts
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 min_microvolts
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 name
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 num_users
+drwxr-xr-x 2 root root    0 2026-10-29 15:50 power
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 state
+lrwxrwxrwx 1 root root    0 2026-10-29 15:50 subsystem -> ../../../../../class/regulator
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 suspend_disk_state
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 suspend_mem_state
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 suspend_standby_state
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 type
+-rw-r--r-- 1 root root 4096 2026-10-29 15:50 uevent
+@@ DIRECTORY /sys/class/regulator/regulator.9/
+total 0
+lrwxrwxrwx 1 root root    0 2026-10-29 15:50 99e8000.cpr3-ctrl-vdd-thread1-ldo -> ../../../99e8000.cpr3-ctrl
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 bypass
+lrwxrwxrwx 1 root root    0 2026-10-29 15:50 device -> ../../../99d2000.regulator
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 max_microvolts
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 microvolts
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 min_microvolts
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 name
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 num_users
+drwxr-xr-x 2 root root    0 2026-10-29 15:50 power
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 state
+lrwxrwxrwx 1 root root    0 2026-10-29 15:50 subsystem -> ../../../../../class/regulator
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 suspend_disk_state
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 suspend_mem_state
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 suspend_standby_state
+-r--r--r-- 1 root root 4096 2026-10-29 15:50 type
+-rw-r--r-- 1 root root 4096 2026-10-29 15:50 uevent
+@@ FILE /sys/class/kgsl/kgsl-3d0/gpu_clock_stats
+20799967 7376565 4206510 7382375 17517205 783250940 1643462698 685653972 
+@@ RETURN 0
+@@ FILE /sys/class/kgsl/kgsl-3d0/devfreq/gpu_load
+17
+@@ RETURN 0
+@@ FILE /sys/class/kgsl/kgsl-3d0/temp
+339
+@@ RETURN 0
+@@ FILE /sys/class/kgsl/kgsl-3d0/freq_table_mhz
+652 624 560 510 401 315 214 133 
+@@ RETURN 0
+@@ FILE /sys/class/regulator/regulator.56/min_microvolts
+470000
+@@ RETURN 0
+@@ FILE /sys/class/regulator/regulator.56/max_microvolts
+1140000
+@@ RETURN 0
+@@ FILE /sys/class/regulator/regulator.7/type
+voltage
+@@ RETURN 0
+@@ FILE /sys/class/regulator/regulator.9/type
+voltage
+@@ RETURN 0

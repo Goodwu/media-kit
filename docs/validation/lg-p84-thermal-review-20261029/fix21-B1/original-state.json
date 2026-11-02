@@ -1,0 +1,26 @@
+{
+  "settings": {
+    "screen_brightness_mode": "0",
+    "screen_brightness": "255",
+    "accelerometer_rotation": "0",
+    "user_rotation": "1",
+    "screen_off_timeout": "30000"
+  },
+  "properties": {
+    "debug.mks.thermal_sync": "display-resample",
+    "debug.mks.thermal_trace": "1",
+    "debug.mks.defer_publish_flush": "0",
+    "debug.mks.gpu_timing": "0",
+    "debug.mks.yuv_fusion": "1",
+    "debug.mks.yuv_fail_commit": "0",
+    "debug.mks.yuv_fail_gl": "0",
+    "debug.mks.st_fbo": "0",
+    "debug.mks.yuv_fusion_table": "1"
+  },
+  "screen": {
+    "on": true,
+    "awake": true,
+    "keyguard": false,
+    "keyguardSecure": null
+  }
+}

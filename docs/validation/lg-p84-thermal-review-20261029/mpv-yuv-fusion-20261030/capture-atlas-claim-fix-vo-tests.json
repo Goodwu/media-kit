@@ -1,0 +1,20 @@
+{
+  "cause": "Actual nativeatlas_save event declaredcomparison_pass butJSON omittedit. Exacthistoricalmanifest reproducedInvalidCapture: invalid atlas completion claim. Analyzer unchanged.",
+  "historicalEvidence": {
+    "path": "/Users/wuweiwei1/src/media-kit/docs/validation/lg-p84-thermal-review-20261029/atlas-anchor-smoke-35/capture/mks-yuv-atlas-3585-6057418040.json",
+    "sha256": "d64452fc71e44ef24aafe1332597651fdfcf370d1105aeecaa58212487fc8e0a",
+    "comparison_pass_missing": true,
+    "edited": false
+  },
+  "fix": "JSON addscomparison_pass=unknown forcomplete/mask0,refused fordiagnostic-invalid/mask1..3. Noquality/pass claim added;noexistingvalidationrelaxed.",
+  "tests": "ActualC atlas_save output for4masks passes realanalyzer.atlas_metadata AND realhost.validate_manifest; missing/pass/passed/wrongunknown-or-refused eachrejected byboth consumers. All150combinedVO/analyzer/hosttestsPASS;fullAPI24syntax0;diffcheck0.",
+  "androidSyntax": {
+    "exit": 0,
+    "stderr": ""
+  },
+  "files": {
+    "/Users/wuweiwei1/src/mpv/video/out/vo_gpu_next.c": "d760690165b7c1c6e7c12d033cf11f7111fb06ccc29de0f9f0aa259b0185fafa",
+    "/Users/wuweiwei1/src/media-kit/tool/test_lg_yuv_atlas_vo.py": "9ed50899cd0045f0112bce56d3f9aae0dd90e1acc110f29c725ce29e8cfd6580"
+  },
+  "scope": "NoAPKbuild,deviceoperation,orhistoricalevidencepatch. Wire-protocolfixonly;runtime/quality/numericalacceptancepending."
+}

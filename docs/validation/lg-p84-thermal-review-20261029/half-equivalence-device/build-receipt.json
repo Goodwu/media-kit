@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "createdAtUTC": "20261029T093300Z",
+  "purpose": "Standalone synthetic GPU quantization gate; not an APK or playback acceptance",
+  "source": "/Users/wuweiwei1/src/media-kit/tool/native/lg_half_equivalence.c",
+  "sourceSha256": "3cb6c2b2799db3b46d96015eacb70c50820ecff95e4f22fe3a7da4fb5614e2f1",
+  "builder": "/Users/wuweiwei1/src/media-kit/tool/build_lg_half_equivalence.py",
+  "builderSha256": "b01a4ea8d069cf375213eaecd28538d39cd529b1d0b4cb68ae17c3b8f5138194",
+  "ndk": "/Users/wuweiwei1/Library/Android/sdk/ndk/27.2.12479018",
+  "ndkSourceProperties": "Pkg.Desc = Android NDK\nPkg.Revision = 27.2.12479018\nPkg.BaseRevision = 27.2.12479018\nPkg.ReleaseName = r27c\n",
+  "compilerDriver": "/Users/wuweiwei1/Library/Android/sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/darwin-x86_64/bin/aarch64-linux-android24-clang",
+  "compilerDriverSha256": "2c82f72dd2090b3f3a1ac2aa84644fd8ebe2afdb4a4bb8700e430766e1acc368",
+  "compilerDriverResolved": "/Users/wuweiwei1/Library/Android/sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/darwin-x86_64/bin/aarch64-linux-android24-clang",
+  "compilerDriverResolvedSha256": "2c82f72dd2090b3f3a1ac2aa84644fd8ebe2afdb4a4bb8700e430766e1acc368",
+  "compilerBackendResolved": "/Users/wuweiwei1/Library/Android/sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang-18",
+  "compilerBackendSha256": "1aac7c103794087632c35c35b83c6d6c8fff4cd01737e5dfbd1b4297942189e2",
+  "commands": [
+    {
+      "argv": [
+        "/Users/wuweiwei1/Library/Android/sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/darwin-x86_64/bin/aarch64-linux-android24-clang",
+        "--version"
+      ],
+      "returncode": 0,
+      "evidence": "android-compiler-version"
+    },
+    {
+      "argv": [
+        "/usr/bin/clang",
+        "-std=c11",
+        "-O2",
+        "-DNDEBUG",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-DLG_HALF_HOST_TEST=1",
+        "/Users/wuweiwei1/src/media-kit/tool/native/lg_half_equivalence.c",
+        "-lm",
+        "-o",
+        "/Users/wuweiwei1/src/media-kit/build/lg-half-equivalence-20261029T093300Z-29643/half-cpu-selftest"
+      ],
+      "returncode": 0,
+      "evidence": "host-build"
+    },
+    {
+      "argv": [
+        "/Users/wuweiwei1/src/media-kit/build/lg-half-equivalence-20261029T093300Z-29643/half-cpu-selftest"
+      ],
+      "returncode": 0,
+      "evidence": "host-selftest"
+    },
+    {
+      "argv": [
+        "/Users/wuweiwei1/Library/Android/sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/darwin-x86_64/bin/aarch64-linux-android24-clang",
+        "-std=c11",
+        "-O2",
+        "-DNDEBUG",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-fPIE",
+        "-pie",
+        "-Wl,--build-id=sha1",
+        "/Users/wuweiwei1/src/media-kit/tool/native/lg_half_equivalence.c",
+        "-lEGL",
+        "-lGLESv3",
+        "-llog",
+        "-lm",
+        "-o",
+        "/Users/wuweiwei1/src/media-kit/build/lg-half-equivalence-20261029T093300Z-29643/lg_half_equivalence"
+      ],
+      "returncode": 0,
+      "evidence": "android-build"
+    },
+    {
+      "argv": [
+        "/Users/wuweiwei1/Library/Android/sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-readelf",
+        "-h",
+        "-d",
+        "/Users/wuweiwei1/src/media-kit/build/lg-half-equivalence-20261029T093300Z-29643/lg_half_equivalence"
+      ],
+      "returncode": 0,
+      "evidence": "android-elf"
+    }
+  ],
+  "status": "built-and-host-selftested",
+  "deviceDeployed": false,
+  "deviceRun": false,
+  "dependencyBoundary": "Only current diagnostic C plus NDK platform EGL/GLESv3/liblog/libm/libc stubs/runtime; no project prebuilt input",
+  "compilerVersion": "Android (12470979, +pgo, -bolt, +lto, -mlgo, based on r522817c) clang version 18.0.3 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)\nTarget: aarch64-unknown-linux-android24\nThread model: posix\nInstalledDir: /Users/wuweiwei1/Library/Android/sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/darwin-x86_64/bin",
+  "binary": "/Users/wuweiwei1/src/media-kit/build/lg-half-equivalence-20261029T093300Z-29643/lg_half_equivalence",
+  "binarySha256": "2ef551fd1d3b401b19b14030ccc89afc889e18be35d270fff7b23abb23856f10",
+  "binaryBytes": 29112,
+  "hostSelftestPassed": true,
+  "limitations": [
+    "No Android GPU execution was performed.",
+    "Successful build/CPU tests do not establish GPU format support or equality."
+  ]
+}

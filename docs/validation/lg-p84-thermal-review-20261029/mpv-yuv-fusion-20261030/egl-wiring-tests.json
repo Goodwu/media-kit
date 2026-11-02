@@ -1,0 +1,25 @@
+{
+  "configuredFeatures": {
+    "HAVE_EGL": 0,
+    "HAVE_EGL_ANDROID": 1,
+    "HAVE_ANDROID": 1
+  },
+  "androidSyntax": [
+    {
+      "file": "video/out/gpu_next/context.c",
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "video/out/vo_gpu_next.c",
+      "exit": 0,
+      "stderr": ""
+    }
+  ],
+  "hostTest": "test_lg_yuv_compare_egl_wiring: source-extracted actual helpers; defaultoff unchanged/no EGL reads, owner/handle rejects, EGL fallback, optional CAPS macro with/without; exit0",
+  "limits": "API doubles do not establish real driver EGL loader success; device build/run not performed",
+  "files": {
+    "/Users/wuweiwei1/src/mpv/video/out/gpu_next/context.c": "1788d4af18937f062ec787451ba3baafef9b25115cf5bcde7b67f824ebc3876a",
+    "/Users/wuweiwei1/src/mpv/video/out/vo_gpu_next.c": "3cf669f7b169ee78ef29c71494fc30ed96d9b6cdffdac6c6a3a8e21e29dc3cc5"
+  }
+}

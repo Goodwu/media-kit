@@ -1,0 +1,35 @@
+{
+  "files": {
+    "lib": {
+      "bytes": 851968,
+      "sha256": "c50704cebd5c8306b04c3a24617f151e3495ca2c470f163f606d9b7cc1dc07c3"
+    },
+    "android": {
+      "bytes": 114688,
+      "sha256": "894d47c84f731607fae0a21351b8fcd73a9a74e8e4ec635e51a39ba77af37fe2"
+    },
+    "candidate": {
+      "bytes": 6595,
+      "sha256": "5536217d1be73d56ba4b3d8a8a7b99726fb6400665d5f45fcff5261c59572584"
+    },
+    "baseline": {
+      "bytes": 3540,
+      "sha256": "203e30d8f59efc15060f7c1f04e88fe1d7f8b78e3bb36d53d623b1e18716c984"
+    },
+    "vertex": {
+      "bytes": 580,
+      "sha256": "81fad6a3d992b0bf3d2a65525f0a09294905208bea60d73c2d53d852615e881c"
+    },
+    "original_body": {
+      "bytes": 2159,
+      "sha256": "e65cf081ba73cf8a5af2a54a185b52f47007c9e44f3bb7f1a024b2ae91c8a109"
+    },
+    "oracle_probe": {
+      "bytes": 327680,
+      "sha256": "26213470df8b10a7e0a95cf16ea58ed30844a90431472e207e6a71e9d4dee24d"
+    }
+  },
+  "manifestSha256": "5015329967bea9284a889cd5296ea6cc054ae676078f18ca7752e79d952653e2",
+  "identityScope": "Fresh-process endpoint event and exclusive identity filenames bind payload/shaders; raw words have no embedded PID/PTS. Local SHA archives bytes; no producer SHA claim.",
+  "timestampScope": "Log receive order is correlation only; not hardware or native-clock synchronization."
+}

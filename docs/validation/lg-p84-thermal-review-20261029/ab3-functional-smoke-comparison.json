@@ -1,0 +1,455 @@
+{
+  "apkSha256": "e015b2e11ea252094b88fb82e66b3de121611b6576f571fb6124fc46b55b29e4",
+  "sourceReceipt": "local-source.json",
+  "rounds": {
+    "smoke-A3": {
+      "status": "completed-observation",
+      "completeWindow": true,
+      "restorationVerified": true,
+      "automaticBrightnessScalarChanged": true,
+      "duration": 60.59162720898166,
+      "initial": {
+        "batteryC": 32.3,
+        "vtsC": 35.5
+      },
+      "nativeStableRates": {
+        "vo": {
+          "counter": "submit",
+          "delta": 1500,
+          "seconds": 50.049964786,
+          "perSecond": 29.970051056251307,
+          "first": {
+            "kind": "vo",
+            "instance": "0x741198b3d0",
+            "pid": "27938",
+            "mono_ns": "15631362135",
+            "start_ns": "5612177616",
+            "final": "0",
+            "queue_frames": "279",
+            "queue_resets": "1",
+            "draw": "286",
+            "redraw": "7",
+            "display_synced": "0",
+            "submit": "286",
+            "flip": "286",
+            "lease_copy": "0",
+            "lease_reuse": "0",
+            "latch": "0",
+            "final_pass": "0",
+            "swap": "0",
+            "swap_ok": "0",
+            "frame_id": "326",
+            "pts": "9.376033333",
+            "w": "2672",
+            "h": "1336"
+          },
+          "last": {
+            "kind": "vo",
+            "instance": "0x741198b3d0",
+            "pid": "27938",
+            "mono_ns": "65681326921",
+            "start_ns": "5612177616",
+            "final": "0",
+            "queue_frames": "1779",
+            "queue_resets": "1",
+            "draw": "1786",
+            "redraw": "7",
+            "display_synced": "0",
+            "submit": "1786",
+            "flip": "1786",
+            "lease_copy": "0",
+            "lease_reuse": "0",
+            "latch": "0",
+            "final_pass": "0",
+            "swap": "0",
+            "swap_ok": "0",
+            "frame_id": "1826",
+            "pts": "59.426033333",
+            "w": "2672",
+            "h": "1336"
+          }
+        },
+        "yuv": {
+          "counter": "final_pass",
+          "delta": 1500,
+          "seconds": 50.049997182,
+          "perSecond": 29.970031657453532,
+          "first": {
+            "kind": "yuv",
+            "instance": "0x741e4c3e50",
+            "pid": "27938",
+            "mono_ns": "15631110833",
+            "start_ns": "5612281470",
+            "final": "0",
+            "queue_frames": "0",
+            "queue_resets": "0",
+            "draw": "0",
+            "redraw": "0",
+            "display_synced": "0",
+            "submit": "0",
+            "flip": "0",
+            "lease_copy": "0",
+            "lease_reuse": "0",
+            "latch": "0",
+            "final_pass": "286",
+            "swap": "286",
+            "swap_ok": "286",
+            "frame_id": "0",
+            "pts": "0.000000000",
+            "w": "2672",
+            "h": "1336"
+          },
+          "last": {
+            "kind": "yuv",
+            "instance": "0x741e4c3e50",
+            "pid": "27938",
+            "mono_ns": "65681108015",
+            "start_ns": "5612281470",
+            "final": "0",
+            "queue_frames": "0",
+            "queue_resets": "0",
+            "draw": "0",
+            "redraw": "0",
+            "display_synced": "0",
+            "submit": "0",
+            "flip": "0",
+            "lease_copy": "0",
+            "lease_reuse": "0",
+            "latch": "0",
+            "final_pass": "1786",
+            "swap": "1786",
+            "swap_ok": "1786",
+            "frame_id": "0",
+            "pts": "0.000000000",
+            "w": "2672",
+            "h": "1336"
+          }
+        },
+        "import": {
+          "counter": "lease_copy",
+          "delta": 1500,
+          "seconds": 50.052781348,
+          "perSecond": 29.968364586395488,
+          "first": {
+            "kind": "import",
+            "instance": "0x7419e9c850",
+            "pid": "27938",
+            "mono_ns": "16167998332",
+            "start_ns": "6161791207",
+            "final": "0",
+            "queue_frames": "0",
+            "queue_resets": "0",
+            "draw": "0",
+            "redraw": "0",
+            "display_synced": "0",
+            "submit": "0",
+            "flip": "0",
+            "lease_copy": "296",
+            "lease_reuse": "2",
+            "latch": "296",
+            "final_pass": "0",
+            "swap": "0",
+            "swap_ok": "0",
+            "frame_id": "0",
+            "pts": "9.943266667",
+            "w": "3840",
+            "h": "1920"
+          },
+          "last": {
+            "kind": "import",
+            "instance": "0x7419e9c850",
+            "pid": "27938",
+            "mono_ns": "66220779680",
+            "start_ns": "6161791207",
+            "final": "0",
+            "queue_frames": "0",
+            "queue_resets": "0",
+            "draw": "0",
+            "redraw": "0",
+            "display_synced": "0",
+            "submit": "0",
+            "flip": "0",
+            "lease_copy": "1796",
+            "lease_reuse": "2",
+            "latch": "1796",
+            "final_pass": "0",
+            "swap": "0",
+            "swap_ok": "0",
+            "frame_id": "0",
+            "pts": "59.993266667",
+            "w": "3840",
+            "h": "1920"
+          }
+        }
+      },
+      "panelLive": [
+        "1",
+        "255",
+        "0"
+      ],
+      "contract": {
+        "hwdec-current": [
+          "surfacetexture"
+        ],
+        "video-sync": [
+          "display-resample"
+        ],
+        "display-sync-active": [
+          "no"
+        ],
+        "target-peak": [
+          "1000"
+        ],
+        "target-trc": [
+          "pq"
+        ],
+        "target-prim": [
+          "bt.2020"
+        ],
+        "gamma": [
+          "0.000000"
+        ],
+        "android-surface-size": [
+          "2672x1336"
+        ],
+        "frame-drop-count": [
+          "3"
+        ],
+        "decoder-frame-drop-count": [
+          "0"
+        ],
+        "vo-delayed-frame-count": [
+          "0"
+        ]
+      }
+    },
+    "smoke-B3-functional": {
+      "status": "completed-observation",
+      "completeWindow": true,
+      "restorationVerified": true,
+      "automaticBrightnessScalarChanged": false,
+      "duration": 60.633878124994226,
+      "initial": {
+        "batteryC": 33.3,
+        "vtsC": 36.2
+      },
+      "nativeStableRates": {
+        "vo": {
+          "counter": "submit",
+          "delta": 1500,
+          "seconds": 50.049185881,
+          "perSecond": 29.970517473880427,
+          "first": {
+            "kind": "vo",
+            "instance": "0x741d80c990",
+            "pid": "28798",
+            "mono_ns": "15565749328",
+            "start_ns": "5556912986",
+            "final": "0",
+            "queue_frames": "286",
+            "queue_resets": "1",
+            "draw": "293",
+            "redraw": "7",
+            "display_synced": "0",
+            "submit": "293",
+            "flip": "293",
+            "lease_copy": "0",
+            "lease_reuse": "0",
+            "latch": "0",
+            "final_pass": "0",
+            "swap": "0",
+            "swap_ok": "0",
+            "frame_id": "331",
+            "pts": "9.542866667",
+            "w": "2672",
+            "h": "1336"
+          },
+          "last": {
+            "kind": "vo",
+            "instance": "0x741d80c990",
+            "pid": "28798",
+            "mono_ns": "65614935209",
+            "start_ns": "5556912986",
+            "final": "0",
+            "queue_frames": "1786",
+            "queue_resets": "1",
+            "draw": "1793",
+            "redraw": "7",
+            "display_synced": "0",
+            "submit": "1793",
+            "flip": "1793",
+            "lease_copy": "0",
+            "lease_reuse": "0",
+            "latch": "0",
+            "final_pass": "0",
+            "swap": "0",
+            "swap_ok": "0",
+            "frame_id": "1831",
+            "pts": "59.592866667",
+            "w": "2672",
+            "h": "1336"
+          }
+        },
+        "yuv": {
+          "counter": "final_pass",
+          "delta": 1500,
+          "seconds": 50.049220568,
+          "perSecond": 29.970496702581134,
+          "first": {
+            "kind": "yuv",
+            "instance": "0x742313b150",
+            "pid": "28798",
+            "mono_ns": "15565470943",
+            "start_ns": "5557001996",
+            "final": "0",
+            "queue_frames": "0",
+            "queue_resets": "0",
+            "draw": "0",
+            "redraw": "0",
+            "display_synced": "0",
+            "submit": "0",
+            "flip": "0",
+            "lease_copy": "0",
+            "lease_reuse": "0",
+            "latch": "0",
+            "final_pass": "293",
+            "swap": "293",
+            "swap_ok": "293",
+            "frame_id": "0",
+            "pts": "0.000000000",
+            "w": "2672",
+            "h": "1336"
+          },
+          "last": {
+            "kind": "yuv",
+            "instance": "0x742313b150",
+            "pid": "28798",
+            "mono_ns": "65614691511",
+            "start_ns": "5557001996",
+            "final": "0",
+            "queue_frames": "0",
+            "queue_resets": "0",
+            "draw": "0",
+            "redraw": "0",
+            "display_synced": "0",
+            "submit": "0",
+            "flip": "0",
+            "lease_copy": "0",
+            "lease_reuse": "0",
+            "latch": "0",
+            "final_pass": "1793",
+            "swap": "1793",
+            "swap_ok": "1793",
+            "frame_id": "0",
+            "pts": "0.000000000",
+            "w": "2672",
+            "h": "1336"
+          }
+        },
+        "import": {
+          "counter": "lease_copy",
+          "delta": 1500,
+          "seconds": 50.076316711,
+          "perSecond": 29.954279757770262,
+          "first": {
+            "kind": "import",
+            "instance": "0x741e4b4050",
+            "pid": "28798",
+            "mono_ns": "16001137462",
+            "start_ns": "5988782161",
+            "final": "0",
+            "queue_frames": "0",
+            "queue_resets": "0",
+            "draw": "0",
+            "redraw": "0",
+            "display_synced": "0",
+            "submit": "0",
+            "flip": "0",
+            "lease_copy": "300",
+            "lease_reuse": "2",
+            "latch": "300",
+            "final_pass": "0",
+            "swap": "0",
+            "swap_ok": "0",
+            "frame_id": "0",
+            "pts": "10.010000000",
+            "w": "3840",
+            "h": "1920"
+          },
+          "last": {
+            "kind": "import",
+            "instance": "0x741e4b4050",
+            "pid": "28798",
+            "mono_ns": "66077454173",
+            "start_ns": "5988782161",
+            "final": "0",
+            "queue_frames": "0",
+            "queue_resets": "0",
+            "draw": "0",
+            "redraw": "0",
+            "display_synced": "0",
+            "submit": "0",
+            "flip": "0",
+            "lease_copy": "1800",
+            "lease_reuse": "2",
+            "latch": "1800",
+            "final_pass": "0",
+            "swap": "0",
+            "swap_ok": "0",
+            "frame_id": "0",
+            "pts": "60.060000000",
+            "w": "3840",
+            "h": "1920"
+          }
+        }
+      },
+      "panelLive": [
+        "1",
+        "255",
+        "0"
+      ],
+      "contract": {
+        "hwdec-current": [
+          "surfacetexture"
+        ],
+        "video-sync": [
+          "audio"
+        ],
+        "display-sync-active": [
+          "no"
+        ],
+        "target-peak": [
+          "1000"
+        ],
+        "target-trc": [
+          "pq"
+        ],
+        "target-prim": [
+          "bt.2020"
+        ],
+        "gamma": [
+          "0.000000"
+        ],
+        "android-surface-size": [
+          "2672x1336"
+        ],
+        "frame-drop-count": [
+          "1"
+        ],
+        "decoder-frame-drop-count": [
+          "0"
+        ],
+        "vo-delayed-frame-count": [
+          "0"
+        ]
+      }
+    }
+  },
+  "conclusions": [
+    "Both modes pass 60-second functional smoke with identical active convert/hwdec/PQ/peak/gamma and live HDR1/backlight255 evidence.",
+    "Baseline display-resample was display-sync-active=no and native display_synced=0.",
+    "Both modes show approximately source-rate stable renderer/import/final-pass work; no 60Hz full-chain duplication observed in these rounds.",
+    "Temperature starts differ; these smoke rounds cannot establish heating/energy savings.",
+    "YUV-P1 set-done-table-full warning observed in both rounds remains a separate investigation candidate."
+  ]
+}

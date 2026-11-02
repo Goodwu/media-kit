@@ -1,5 +1,31 @@
 # TASKS.md
 
+## LG-DV-P84-THERMAL-REVIEW-20261029
+
+- **无表与查表取舍讨论（2026-11-02）**：原路径是行为基准而非数学真值；无表可能更接近理想结果，现无独立参考可排序。查表保一致性但有内存和 GPU 成本，助手建议以观感和性能评估无表；用户尚未决定改默认，现状不变。讨论及证据边界见 `archives/conversations/lg-dv-p84-thermal-review-20261029.md` Current State。
+- **输出融合+UV查表生产化完成（2026-11-02 终版 v2：无表融合=默认，查表=备选）**：critical reviewer 四轮复审全部 CLOSED 后，用户终裁"诊断未证明无表融合差异（0.12% 末位分量、肉眼不可见、两次最高亮度观感通过）劣于原路径"——**无表融合为生产默认，查表改为 `debug.mks.yuv_fusion_table=1` 备选**（表路径含全部复审验证：material/UV角点五层身份门、真实过渡重建、消费预算封顶）。最终生产包 `fusion-prod3-20261102-release.apk`（SHA256 `32b3fd20…34f0`）装机核验一致，三态实测：默认=无表融合（表零参与）；table=1=首试建表+表驱动+零 missed；fusion=0=原路径。默认收益=无表融合实测：CPU -15%/GPU busy -23%/触热cap +80%（82s→148s）。关键历程：生产化实现→critical 全链审查阻断（1P0+10P1）→修复中抓出"查表标识机制从未生效"重大真相（DV hook 路径不记录 sample_uv_ident，全部历史轮为无表融合）→fix18 tap 解析真表驱动→映射身份五层闭环→真实 resize 过渡双向重建闭环→消费预算封顶重建风暴。工具：`yuv_table_transition`（过渡注入）+`yuv_table_fail_seed`（持续失败注入）诊断 harness；tool 354 项全绿（material 门 8+失败预算 7 状态机）。残留如实：HOME 后 App 层 VO 重建 bridge 失败为先于表的独立 App/HW 已知问题（表关对照实证同签名）；LYA/Mali 未测。**三仓改动均未提交**（libplacebo/mpv 工作树+media-kit 工具与文档），待授权。证据 `docs/validation/lg-p84-thermal-review-20261029/{fix18..fix31-*,prod3-landing,home-control-tableoff}`；方案 `docs/plans/uv-atlas-fusion-production-20261101.md`。
+- **atlas 全屏未插桩锚**：单帧 2672×1336 全屏 A0→atlas A→A0 的 14,279,168 RGB 分量一致、UV覆盖全1且有限，V2复核通过；仅诊断锚，未验证候选使用、跨帧/全屏YUV/性能/面板，fusion默认关闭。详见 context。
+- **顶点反序实机无效**：原→反→原三轮实际顶点记录确认、完整raw逐位相同，差异未改善；融合仍默认关闭。详见 context。
+- **同帧坐标因果实验**：LG单组 original→A0 UV→original，同ROI差异 1634/9/21/7/15→全部0→复现，源码/raw锚及恢复通过；不代表可交付修复或全帧画质。融合默认关闭，继续评估低成本精确坐标生成。见 context。
+- **输入 FBO 复用四轮短测**：A1/B1/B2/A2 路径命中及恢复通过，但起播温度逐轮升高、GPU代理无稳定明显收益，保持默认关闭；固定帧画质未验证。细节见 context 与 `input-fbo-ab-results.md`。
+- **候选 invariant 实机无效（2026-10-30）**：同APK控制与候选固定帧采集和恢复完成，独立复核 raw 两轮逐字节相同，差异未消除；融合仍默认关闭，不能宣称画质或降热验收。详见 context。
+- **采样差异定位（2026-10-30）**：真实同帧中心 ROI 中 A/B 的 UV 差异全部出现在 V 坐标；受影响采样像素与 preRGB 差异位置一致。只改候选 vertex 的 invariant 实验与同包控制组正在实施和审核，尚无实机结果；融合维持默认关闭。详细数据见 context。
+- **真实帧数值门未通过**：35.035秒中心ROI的preRGB21、half7、YUV15个分量逐bit不同；需A/A、B/B重放定位，融合保持defaultoff，性能收益不能替代画质验收。详见context。
+- **固定帧路径观察**：35/600/720s各A/B同源PTS实际swap且恢复，系统截图全黑不可比较画质；真实视频SSBO数值对照仍在开发和独立审查。
+- **融合实际命中、显著负载下降但未验收**：低亮度ABBA GPU频率约305.5→214MHz、freq×busy代理约-36.7%、CPU约-12.2%，故障注入可回原路；最高亮度五分钟A/B未显示VTS降温且电池候选更高。raw YUV、同PTS画质/用户观感、生命周期和持续热收益仍待验，默认off。详见context。
+- **末端融合PoC进行中**：默认关闭、独立V2审查；YUV读取器窗口EGL_BAD_MATCH，raw字节与真实播放质量、收益均未验。详见context。
+- **真实播放计时 A/B 初测**：三类各一对完成，input 5.540/5.298ms、YUV 5.677/5.874ms，render滚动pass样本有数据；GPU频率/温度未匹配，不能确认候选收益。不能拼成逐帧总耗时，诊断扰动未量化；详情见context和GPU timing evidence。
+- **GPU计时能力可用**：LG独立EGL异步计时探针五次成功、40bit、无disjoint；未测真实视频。下一步通过typed `vo-passes`采集播放器renderer，独立评估OES与final YUV异步计时；GPU硬件细分计数器尚未确认。详见context。
+- **新增六轮低亮度 A/B**：三基线/三候选均完整、策略及恢复通过；20–55秒频率轮均约296.1/294.0MHz，busy约59.7/61.1%，各轮交叉，未确认稳定收益；A1和A3起播温度偏离。见context及 `low64-six-*`。
+- **低亮度 A/B 完成**：backlight64/HDR1 四轮有效，20–55秒GPU频率A 320.8/251.9、B 302.4/277.1MHz，busy A 57.5/64.9、B 58.1/62.9%；分布交叉，无法确认稳定收益，也不是SoC功率。已恢复设置；详情见context。
+- **锁频 A/B blocked**：LG已连接，频率节点root:root 0644，ADB shell不可写，user/ro.debuggable=0且未发现su；未经特权无法锁频。未修改频率或进行锁频对照；需可用的设备管理权限或其他可写控制接口。
+- **最新 matched3 复测**：四轮无热cap，基线GPU频率20–55秒样本均值315/233MHz、候选258/265MHz；分布重叠，低频基线native已确认策略0。起播温度一轮未匹配，无法确定频率或功耗收益；详情与下一步见context。
+- **SOC 功耗判读（2026-10-29，资料调研，非本机实测）**：设备为 SD821（Adreno 530 + Kryo）。硬解块 ~0.1–0.2W 为小头；管线内大头是 GPU 渲染路径（核心 ~0.25–0.45W + DDR 流量 ~0.2–0.4W），CPU ~0.3–0.6W 同量级略小且无结构性杠杆；最高亮度背光 ~0.7–1.2W 为整机最大单项（不在播放代码控制范围）。ab4 的 21.9% 工作点降幅折算仅 ~0.1W，与 240s 热态 A/B 难分辨一致。AC 下 `battery_current_now` 不能当功率计。数据底稿与来源：`docs/validation/lg-p84-thermal-review-20261029/soc-power-research-20261029.md`。
+- **交接 / 下一步**：用户要求本人多轮短测验证第一候选 GPU 频率差异；repeat2 一组有效 315 vs 214 MHz，后两轮热限频中止。冷却、匹配热状态并交错补测；候选收益与长期降热均尚未定论。完整步骤、条件、成果及证据入口见下方 context 顶部 Current State。
+- **in_progress / 首候选未通过降热验收，默认保持关闭**：短ABBA显示GPU工作点约285→233MHz、CPU无稳定收益，用户120s观感确认正常；但正式A360s/B265s中B触发GPU thermal_pwrlevel4/max401.8MHz而中止。共同240s无明确温升改善，起播实际温度/同期caps仍有混淆；不宣称降热成功。6分钟基线及B采样均持续硬解、29.97fps、无新增丢帧/四项native异常，未复现中途软解。LG新策略能力false/native默认immediate，源SDK/owned-option仍草稿未部署。独立LG GPU数值门已通过：highp-small-rtz在253,968组样本/761,904个RGB分量上量化和CSC逐位差异0，严格输入/读回/错误/清理检查通过；仅为测试集等价，尚未实现末级融合或证明播放/降热收益。下一步需独立审核融合实现与真实帧/YUV验收；新增自动GPU热cap停止门，P84生命周期仅defaultoff测试入口。
+- **验收**：独立 V2 审查给出有源码依据的处理链、按收益/风险排序的优化候选、已知与未验证边界，以及同源/匹配亮度/充电条件的长时 A/B 验证方案；保留已验收 PQ 映射与画质，不以短时实时播放替代温控验收。
+- **context**：[lg-dv-p84-thermal-review-20261029.md](archives/conversations/lg-dv-p84-thermal-review-20261029.md)；现场证据 `docs/validation/lg-p84-thermal-review-20261029/`。
+
 ## PLAYBACK-COLOR-DIAGNOSTICS-20261025
 
 - **完成，用户授权本地提交，不推送**：公开只读 `PlaybackColorValues` / `PlaybackColorSnapshot` / `PlaybackColorSampler`，片源读取 mpv 新增 `current-tracks/video/demux-color-*` 原始解复用元数据；GPU 输出只读 `video-target-params`，明确为渲染目标；实际 `mediacodec_embed` + `mediacodec` 硬件帧仅报告解码直通，不推断显示色彩。未知/缺失字段省略，无解码帧色彩回填；FFmpeg→mpv命名仅严格等价别名，片源 bt709 不转换 bt1886。标准整包VERIFIED（96d5b558…434571b）已装5台在线机且哈希一致；LYA输出目标/滚动与marble解码直通实测通过，两机实际测试源未显示源行，未拿hint填补。同包原生getter在tagged/untagged SDR及库所用alias验证，最终全机OFF。跨仓验证单见PiliPlus `docs/validation/playback-color-diag-20261025.json`。

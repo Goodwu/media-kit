@@ -1,0 +1,7 @@
+{
+ "claim": "HOME attribution control: table+fusion OFF",
+ "props": "debug.mks.yuv_fusion=\"\" debug.mks.yuv_fusion_table=\"\"",
+ "result": "after HOME return: bridge not initialized=1, yuv420p10 SDR fallback=62 lines, fusion commits=0 (off), process survived (pid 12839)",
+ "conclusion": "The post-HOME VO-recreation bridge failure and SDR fallback occur IDENTICALLY with table+fusion disabled. It is a pre-existing app/HW-level session-recovery limitation, not a UV-table regression. Table sessions after HOME follow the same app-level recovery path as any fresh session (first-attempt ready proven in every fresh round).",
+ "pairedEvidence": "life22-lifecycle/home-round-logcat.txt (same signature with table on)"
+}

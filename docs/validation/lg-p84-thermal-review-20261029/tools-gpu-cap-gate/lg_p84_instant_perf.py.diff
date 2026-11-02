@@ -1,0 +1,39 @@
+--- tools-used-ab4/lg_p84_instant_perf.py
++++ tool/lg_p84_instant_perf.py
+@@ -32,6 +32,9 @@
+     'hdr_mode': '/sys/devices/virtual/panel/img_tune/hdr_mode',
+     'panel_thermal_status': '/sys/class/leds/lcd-backlight/thermald_status',
+     'gpu_hz': '/sys/class/kgsl/kgsl-3d0/gpuclk',
++    'gpu_thermal_pwrlevel': '/sys/class/kgsl/kgsl-3d0/thermal_pwrlevel',
++    'gpu_max_gpuclk': '/sys/class/kgsl/kgsl-3d0/max_gpuclk',
++    'cpu2_scaling_max_freq': '/sys/devices/system/cpu/cpu2/cpufreq/scaling_max_freq',
+     'gpu_driver_busy_percentage': '/sys/class/kgsl/kgsl-3d0/gpu_busy_percentage',
+     'battery_status': '/sys/class/power_supply/battery/status',
+     'battery_voltage_now': '/sys/class/power_supply/battery/voltage_now',
+@@ -178,7 +181,8 @@
+                thermal.runtime_error(state, controller['requestedVideoSync'], row.get('pid'), source) is None and
+                row['raw'].get('hdr_mode')=='1' and row['raw'].get('backlight')=='255' and
+                row['raw'].get('panel_thermal_status')==controller.get('expectedPanelThermalStatus') and
+-               thermal.native_failure_reason(state) is None)
++               thermal.native_failure_reason(state) is None and
++               thermal.gpu_thermal_cap_reason(row) is None)
+         if valid and controller.get('experiment')=='publish-flush':
+             valid=thermal.publish_policy_error(state, controller['requestedDeferPublishFlush']) is None
+         if valid:stable.append(row)
+@@ -186,9 +190,13 @@
+     gpu=[r['gpuDriverReportedBusyPercent'] for r in stable if r.get('gpuDriverReportedBusyPercent') is not None]
+     def stats(values):
+         return {'count':len(values),'min':min(values),'median':statistics.median(values),'max':max(values)} if values else None
+-    result={'controllerStatus':controller.get('status'), 'controllerReason':controller.get('reason'),
+-            'validCompletedProfile':controller.get('status')=='completed-observation' and controller.get('completeWindow') is True and controller.get('restorationVerified') is True and bool(stable),
+-            'metricsAreDiagnosticOnly':controller.get('status')!='completed-observation' or controller.get('restorationVerified') is not True,
++    gpu_gate_verified=bool(rows) and all(thermal.gpu_thermal_cap_reason(r) is None for r in rows) and thermal.gpu_thermal_cap_reason(controller.get('initial',{})) is None
++    result={'gpuThermalGateVerified':gpu_gate_verified,
++            'gpuThermalGateNormalPwrlevel':0,
++            'gpuThermalGateScope':'Observed LG experimental normal baseline; unknown/nonzero fail closed; caps are metadata, not measured clock or CPU thermal causality.',
++            'controllerStatus':controller.get('status'), 'controllerReason':controller.get('reason'),
++            'validCompletedProfile':controller.get('status')=='completed-observation' and controller.get('completeWindow') is True and controller.get('restorationVerified') is True and bool(stable) and gpu_gate_verified,
++            'metricsAreDiagnosticOnly':controller.get('status')!='completed-observation' or controller.get('restorationVerified') is not True or not gpu_gate_verified or controller.get('completeWindow') is not True,
+             'stableSamples':len(stable),'processCPUPercentOneCore100':stats(cpu),
+             'gpuDriverReportedBusyPercent':stats(gpu),
+             'gpuFrequencyHz':stats([v for r in stable if (v:=thermal.number(r['raw'].get('gpu_hz'))) is not None]),

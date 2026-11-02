@@ -1,0 +1,8 @@
+status=running completed=0 pid=8877
+status=unsupported-or-error completed=0 cleanup=1 stage=yuv-window
+error=ImageReader YUV EGL surface/context unsupported egl_error=0x3009 gl_error=0x0 renderer= version=
+config_id=49 visual=0x7fa30c04 yuv_ext=0 plane_count=0 bytes=0 mismatch=0 repeat_a=0 repeat_b=0
+ranges=0-0,0-0,0-0 first_diff=0:0:0:0:0
+pattern_diff=0,0,0
+timestamps_ns=0,0,0,0,0,0,0,0
+limits=synthetic-source;not-playback;not-panel;API24-ImageReader-consumer-may-reject-LG-NV12;no-timing-or-power-claim;YUV420-subsampling-compared-as-raw-planes

@@ -1,0 +1,30 @@
+{
+  "archivedAt": "2026-10-29T17:16:59.174627+08:00",
+  "purpose": "Preserve pre GPU-cap automatic-gate tools actually used by ab4 profiles; not retroactive compliance under new protocol",
+  "files": [
+    {
+      "source": "tool/lg_p84_thermal_round.py",
+      "snapshot": "lg_p84_thermal_round.py",
+      "sha256": "a4dea72e72fd802a72784c0c1d4128b715f110270d06bed67672e284eb837bdc",
+      "bytes": 44087
+    },
+    {
+      "source": "tool/lg_p84_instant_perf.py",
+      "snapshot": "lg_p84_instant_perf.py",
+      "sha256": "01a2e7feff36e92c6d551ba4e5b9ca9899a17964912dca58ea9d548b815053ec",
+      "bytes": 13975
+    },
+    {
+      "source": "tool/test_lg_p84_thermal_round.py",
+      "snapshot": "test_lg_p84_thermal_round.py",
+      "sha256": "191d5f4d60534dda28536ce4833b28b5dfbea3545e5a65717e44300d8fdcd550",
+      "bytes": 8422
+    },
+    {
+      "source": "tool/test_lg_p84_instant_perf.py",
+      "snapshot": "test_lg_p84_instant_perf.py",
+      "sha256": "78e465aa7a036914bcb4097077ac66aa1c6396f3a448f72f509da2b20a391144",
+      "bytes": 3776
+    }
+  ]
+}

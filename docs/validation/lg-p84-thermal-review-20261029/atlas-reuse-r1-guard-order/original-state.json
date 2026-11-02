@@ -1,0 +1,43 @@
+{
+  "settings": {
+    "screen_brightness_mode": "1",
+    "screen_brightness": "41",
+    "accelerometer_rotation": "0",
+    "user_rotation": "0",
+    "screen_off_timeout": "30000"
+  },
+  "properties": {
+    "debug.mks.thermal_sync": "",
+    "debug.mks.thermal_trace": "",
+    "debug.mks.defer_publish_flush": "",
+    "debug.mks.gpu_timing": "",
+    "debug.mks.yuv_fusion": "",
+    "debug.mks.yuv_fail_commit": "",
+    "debug.mks.yuv_fail_gl": "",
+    "debug.mks.st_fbo": "",
+    "debug.mks.yuv_frame_trace": "",
+    "debug.mks.quality_pts": "",
+    "debug.mks.yuv_compare": "",
+    "debug.mks.yuv_compare_pts": "",
+    "debug.mks.yuv_compare_repeat": "",
+    "debug.mks.yuv_tap": "",
+    "debug.mks.yuv_inv": "",
+    "debug.mks.yuv_oracle": "",
+    "debug.mks.yuv_oracle_a": "",
+    "debug.mks.yuv_probe": "",
+    "debug.mks.yuv_single": "",
+    "debug.mks.yuv_quad": "",
+    "debug.mks.yuv_rev": "",
+    "debug.mks.yuv_atlas": "",
+    "debug.mks.atlas_reuse": "",
+    "debug.mks.atlas_pts2": "",
+    "debug.mks.atlas_nonce": "",
+    "debug.mks.atlas_ack": ""
+  },
+  "screen": {
+    "on": true,
+    "awake": true,
+    "keyguard": false,
+    "keyguardSecure": null
+  }
+}

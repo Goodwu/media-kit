@@ -1,0 +1,1932 @@
+{
+  "schema": 1,
+  "status": "completed-capture",
+  "serial": "LGH870DS42e27764",
+  "startedAt": "2026-10-30T07:23:12.990922+08:00",
+  "requestedPTS": 35.035,
+  "framesRequested": 1,
+  "repeatRequested": true,
+  "sampleTapRequested": true,
+  "invariantBRequested": false,
+  "oracleMode": 0,
+  "oracleProbeRequested": true,
+  "singlePairRequested": true,
+  "quadReverse": 0,
+  "quadOrderRequested": true,
+  "requestedInputFbo": null,
+  "displayControls": {
+    "brightness": 64,
+    "expectedBacklight": 64,
+    "expectedPanelThermalStatus": "0"
+  },
+  "expectedCaptureSchema": 8,
+  "scope": "GPU shader floats only; not raw YUV, panel, or performance acceptance",
+  "initial": {
+    "hostTime": "2026-10-30T07:23:16.447905+08:00",
+    "batteryC": 26.1,
+    "vtsC": 32.7,
+    "raw": {
+      "battery_type": "battery",
+      "battery_temp": "26100",
+      "vts_type": "vts",
+      "vts_temp": "327",
+      "gpu_thermal_pwrlevel": "0",
+      "hdr_mode": "0",
+      "backlight": "41",
+      "panel_thermal_status": "0"
+    }
+  },
+  "sourceReceipt": {
+    "schema": 1,
+    "startedAt": "2026-10-29T15:04:23.355097+08:00",
+    "finishedAt": "2026-10-29T15:09:19.137212+08:00",
+    "elapsedSeconds": 295.7825954160653,
+    "serial": "LGH870DS42e27764",
+    "deviceSource": "/sdcard/Android/data/com.example.media_kit_hdr_lab/files/hokkaido-p84.mp4",
+    "deviceBytes": 1232790317,
+    "deviceSha256": "7626cac28819ffd1377a712b56c7cc4bbf8677f5db4b39fb0c83f92e58d74443",
+    "returncode": 0,
+    "stderr": "",
+    "hostSource": "/Users/wuweiwei1/Downloads/test-clips/蹲守一周，我终于拍到了夕阳下的梦幻场景｜北海道VLOG _ Links  4K HDR.mp4",
+    "hostBytes": 1232790317,
+    "hostSha256": "7626cac28819ffd1377a712b56c7cc4bbf8677f5db4b39fb0c83f92e58d74443",
+    "hostFfprobe": {
+      "streams": [
+        {
+          "index": 0,
+          "codec_name": "hevc",
+          "codec_long_name": "H.265 / HEVC (High Efficiency Video Coding)",
+          "profile": "Main 10",
+          "codec_type": "video",
+          "codec_tag_string": "hvc1",
+          "codec_tag": "0x31637668",
+          "width": 3840,
+          "height": 1920,
+          "coded_width": 3840,
+          "coded_height": 1920,
+          "has_b_frames": 2,
+          "sample_aspect_ratio": "1:1",
+          "display_aspect_ratio": "2:1",
+          "pix_fmt": "yuv420p10le",
+          "level": 150,
+          "color_range": "tv",
+          "color_space": "bt2020nc",
+          "color_transfer": "arib-std-b67",
+          "color_primaries": "bt2020",
+          "chroma_location": "left",
+          "view_ids_available": "",
+          "view_pos_available": "",
+          "id": "0x1",
+          "r_frame_rate": "30000/1001",
+          "avg_frame_rate": "30000/1001",
+          "time_base": "1/30000",
+          "start_pts": 0,
+          "start_time": "0.000000",
+          "duration_ts": 35119084,
+          "duration": "1170.636133",
+          "bit_rate": "8156702",
+          "nb_frames": "35084",
+          "extradata_size": 126,
+          "disposition": {
+            "default": 1,
+            "dub": 0,
+            "original": 0,
+            "comment": 0,
+            "lyrics": 0,
+            "karaoke": 0,
+            "forced": 0,
+            "hearing_impaired": 0,
+            "visual_impaired": 0,
+            "clean_effects": 0,
+            "attached_pic": 0,
+            "timed_thumbnails": 0,
+            "non_diegetic": 0,
+            "captions": 0,
+            "descriptions": 0,
+            "metadata": 0,
+            "dependent": 0,
+            "still_image": 0,
+            "multilayer": 0
+          },
+          "tags": {
+            "creation_time": "2022-09-21T12:00:00.000000Z",
+            "language": "und",
+            "handler_name": "Bento4 Video Handler",
+            "encoder": "HEVC Coding"
+          },
+          "side_data_list": [
+            {
+              "side_data_type": "DOVI configuration record",
+              "dv_version_major": 1,
+              "dv_version_minor": 0,
+              "dv_profile": 8,
+              "dv_level": 7,
+              "rpu_present_flag": 1,
+              "el_present_flag": 0,
+              "bl_present_flag": 1,
+              "dv_bl_signal_compatibility_id": 4,
+              "dv_md_compression": "none"
+            }
+          ]
+        },
+        {
+          "index": 1,
+          "codec_name": "aac",
+          "codec_long_name": "AAC (Advanced Audio Coding)",
+          "profile": "LC",
+          "codec_type": "audio",
+          "codec_tag_string": "mp4a",
+          "codec_tag": "0x6134706d",
+          "mime_codec_string": "mp4a.40.2",
+          "sample_fmt": "fltp",
+          "sample_rate": "48000",
+          "channels": 2,
+          "channel_layout": "stereo",
+          "bits_per_sample": 0,
+          "initial_padding": 0,
+          "id": "0x2",
+          "r_frame_rate": "0/0",
+          "avg_frame_rate": "0/0",
+          "time_base": "1/48000",
+          "start_pts": 0,
+          "start_time": "0.000000",
+          "duration_ts": 56195048,
+          "duration": "1170.730167",
+          "bit_rate": "253556",
+          "nb_frames": "54878",
+          "extradata_size": 2,
+          "disposition": {
+            "default": 1,
+            "dub": 0,
+            "original": 0,
+            "comment": 0,
+            "lyrics": 0,
+            "karaoke": 0,
+            "forced": 0,
+            "hearing_impaired": 0,
+            "visual_impaired": 0,
+            "clean_effects": 0,
+            "attached_pic": 0,
+            "timed_thumbnails": 0,
+            "non_diegetic": 0,
+            "captions": 0,
+            "descriptions": 0,
+            "metadata": 0,
+            "dependent": 0,
+            "still_image": 0,
+            "multilayer": 0
+          },
+          "tags": {
+            "creation_time": "2022-09-21T12:00:00.000000Z",
+            "language": "und",
+            "handler_name": "SoundHandler"
+          }
+        },
+        {
+          "index": 2,
+          "codec_name": "mjpeg",
+          "codec_long_name": "Motion JPEG",
+          "profile": "Baseline",
+          "codec_type": "video",
+          "codec_tag_string": "[0][0][0][0]",
+          "codec_tag": "0x0000",
+          "width": 6547,
+          "height": 4091,
+          "coded_width": 6547,
+          "coded_height": 4091,
+          "has_b_frames": 0,
+          "sample_aspect_ratio": "1:1",
+          "display_aspect_ratio": "6547:4091",
+          "pix_fmt": "yuvj420p",
+          "level": -99,
+          "color_range": "pc",
+          "color_space": "bt470bg",
+          "chroma_location": "center",
+          "id": "0x0",
+          "r_frame_rate": "90000/1",
+          "avg_frame_rate": "0/0",
+          "time_base": "1/90000",
+          "start_pts": 0,
+          "start_time": "0.000000",
+          "duration_ts": 105365715,
+          "duration": "1170.730167",
+          "bits_per_raw_sample": "8",
+          "disposition": {
+            "default": 0,
+            "dub": 0,
+            "original": 0,
+            "comment": 0,
+            "lyrics": 0,
+            "karaoke": 0,
+            "forced": 0,
+            "hearing_impaired": 0,
+            "visual_impaired": 0,
+            "clean_effects": 0,
+            "attached_pic": 1,
+            "timed_thumbnails": 0,
+            "non_diegetic": 0,
+            "captions": 0,
+            "descriptions": 0,
+            "metadata": 0,
+            "dependent": 0,
+            "still_image": 0,
+            "multilayer": 0
+          }
+        }
+      ],
+      "format": {
+        "filename": "/Users/wuweiwei1/Downloads/test-clips/蹲守一周，我终于拍到了夕阳下的梦幻场景｜北海道VLOG _ Links  4K HDR.mp4",
+        "nb_streams": 3,
+        "nb_programs": 0,
+        "nb_stream_groups": 0,
+        "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+        "format_long_name": "QuickTime / MOV",
+        "start_time": "0.000000",
+        "duration": "1170.730167",
+        "size": "1232790317",
+        "bit_rate": "8424078",
+        "probe_score": 100,
+        "tags": {
+          "major_brand": "isom",
+          "minor_version": "512",
+          "compatible_brands": "isomdby1iso2mp41",
+          "creation_time": "2022-09-21T12:00:00.000000Z",
+          "title": "蹲守一周，我终于拍到了夕阳下的梦幻场景｜北海道VLOG | Links  4K HDR",
+          "artist": "Linksphotograph",
+          "encoder": "Lavf63.1.101",
+          "comment": "https://www.bilibili.com/video/BV1vY4y1N7TY/",
+          "description": "头一回用400定这么长的定焦镜头，所以我就想挑战拍摄野生动物，于是再一次来到了北海道！ 这支视频浓缩了我和小螃蟹一个星期的努力！\n 拍摄设备： Nikon Z 9  \n                    Nikkor Z 400mm f/4.5 VR S\n                    Nikkor Z 14-24mm f/2.8 S\n                    Nikkor Z 24-70mm f/4 S"
+        }
+      }
+    },
+    "verified": true,
+    "method": "fresh full byte stream adb exec-out cat; no playback or settings mutation"
+  },
+  "sourceIdentityScope": "Historical full-byte SHA receipt plus current size; not a fresh source hash.",
+  "apk": {
+    "path": "/data/app/com.example.media_kit_hdr_lab-1/base.apk",
+    "bytes": 41658063,
+    "sha256": "81ebdba7f7fa85cb0ed2cf93be6098c76568863d72a302f86f3027b581b40fab"
+  },
+  "controls": {
+    "debug.mks.thermal_sync": "display-resample",
+    "debug.mks.thermal_trace": "1",
+    "debug.mks.defer_publish_flush": "0",
+    "debug.mks.gpu_timing": "0",
+    "debug.mks.yuv_fusion": "1",
+    "debug.mks.yuv_fail_commit": "0",
+    "debug.mks.yuv_fail_gl": "0",
+    "debug.mks.yuv_frame_trace": "1",
+    "debug.mks.quality_pts": "35.035",
+    "debug.mks.yuv_compare": "1",
+    "debug.mks.yuv_compare_pts": "35.035",
+    "debug.mks.yuv_compare_repeat": "1",
+    "debug.mks.yuv_tap": "1",
+    "debug.mks.yuv_inv": "0",
+    "debug.mks.yuv_oracle": "1",
+    "debug.mks.yuv_oracle_a": "0",
+    "debug.mks.st_fbo": "0",
+    "debug.mks.yuv_probe": "1",
+    "debug.mks.yuv_single": "1",
+    "debug.mks.yuv_quad": "1",
+    "debug.mks.yuv_rev": "0"
+  },
+  "launchOutput": "Starting: Intent { cmp=com.example.media_kit_hdr_lab/.MainActivity }\n",
+  "pid": "31884",
+  "qualityBefore": {
+    "runId": "31884:1793316220156964",
+    "pid": 31884,
+    "ordinal": 1,
+    "owner": {
+      "session": 330297480,
+      "player": 643762583,
+      "serial": 1,
+      "generation": 1,
+      "sourcePath": "/sdcard/Android/data/com.example.media_kit_hdr_lab/files/hokkaido-p84.mp4"
+    },
+    "status": "observation-heartbeat",
+    "heartbeat": 3,
+    "requestedPTS": 35.035,
+    "actualPosition": 35.035,
+    "acceptedPosition": 35.035,
+    "positionToleranceSeconds": 0.001002,
+    "requestedFusionMode": "1",
+    "properties": {
+      "time-pos": "35.035000",
+      "pause": "yes",
+      "seeking": "no",
+      "path": "/sdcard/Android/data/com.example.media_kit_hdr_lab/files/hokkaido-p84.mp4",
+      "duration": "1170.730167",
+      "hwdec-current": "surfacetexture",
+      "vo": "gpu-next",
+      "target-trc": "pq",
+      "target-prim": "bt.2020",
+      "target-peak": "1000",
+      "gamma": "0.000000",
+      "video-sync": "display-resample",
+      "video-params/w": "3840",
+      "video-params/h": "1920",
+      "video-params/gamma": "hlg",
+      "video-params/primaries": "bt.2020",
+      "container-fps": "29.970030",
+      "current-tracks/video/dolby-vision-profile": "8",
+      "current-tracks/video/dolby-vision-compatibility-id": "4"
+    },
+    "report": {
+      "generation": 1,
+      "verified": true,
+      "hwdecCurrent": "surfacetexture",
+      "source": {
+        "kind": "dolbyVisionP84",
+        "dvProfile": 8,
+        "dvCompatibilityId": 4
+      },
+      "actual": {
+        "strategy": "baseLayerConvert",
+        "hwdec": "surfacetexture",
+        "targetPeak": "1000",
+        "targetTrc": "pq"
+      },
+      "error": null
+    },
+    "faultPropertiesBefore": {
+      "debug.mks.yuv_fail_commit": "0",
+      "debug.mks.yuv_fail_gl": "0"
+    },
+    "faultPropertiesAfter": {
+      "debug.mks.yuv_fail_commit": "0",
+      "debug.mks.yuv_fail_gl": "0"
+    },
+    "evidenceScope": "fresh-paused-property-position-and-route-only"
+  },
+  "captureEvent": {
+    "event": "capture-complete",
+    "id": "5754267655",
+    "generation": "2",
+    "source_pts": "35.035000000",
+    "file": "/sdcard/Android/data/com.example.media_kit_hdr_lab/files/mks-yuv-compare-31884-5754267655.json",
+    "comparison_pass": "unknown",
+    "repetitions": "1",
+    "sample_tap": "1",
+    "invariant_b": "0",
+    "uv_oracle": "1",
+    "uv_oracle_use_a": "0",
+    "uv_oracle_probe": "1",
+    "uv_oracle_single_pair": "1",
+    "quad_order": "1",
+    "quad_order_reverse": "0"
+  },
+  "analysis": {
+    "schema": 8,
+    "status": "captured-float-differences",
+    "capture_id": 5754267655,
+    "generation": 2,
+    "pid": 31884,
+    "source_pts": 35.035,
+    "target_pts": 35.035,
+    "roi": {
+      "x": 1304,
+      "y": 636,
+      "w": 64,
+      "h": 64
+    },
+    "pixels": 4096,
+    "shader_body_hash": "15190905593636587473",
+    "files": {
+      "lib": {
+        "file": "mks-yuv-compare-31884-5754267655.lib.bin",
+        "bytes": 425984,
+        "sha256": "e60e6d53747d377d64288bff9b49280bfcd9e0e811535bd37ca9fadeaba37498"
+      },
+      "android": {
+        "file": "mks-yuv-compare-31884-5754267655.android.bin",
+        "bytes": 114688,
+        "sha256": "894d47c84f731607fae0a21351b8fcd73a9a74e8e4ec635e51a39ba77af37fe2"
+      },
+      "candidate": {
+        "file": "mks-yuv-compare-31884-5754267655.candidate.glsl",
+        "bytes": 6595,
+        "sha256": "e2f090a9e72e1362c6dc7c8c64292c759ce0b4c96cd137a7cb8a136151617250"
+      },
+      "baseline": {
+        "file": "mks-yuv-compare-31884-5754267655.baseline.glsl",
+        "bytes": 3540,
+        "sha256": "203e30d8f59efc15060f7c1f04e88fe1d7f8b78e3bb36d53d623b1e18716c984"
+      },
+      "vertex": {
+        "file": "mks-yuv-compare-31884-5754267655.vertex.glsl",
+        "bytes": 580,
+        "sha256": "81fad6a3d992b0bf3d2a65525f0a09294905208bea60d73c2d53d852615e881c"
+      },
+      "original_body": {
+        "file": "mks-yuv-compare-31884-5754267655.original-body.glsl",
+        "bytes": 2159,
+        "sha256": "e65cf081ba73cf8a5af2a54a185b52f47007c9e44f3bb7f1a024b2ae91c8a109"
+      },
+      "oracle_probe": {
+        "file": "mks-yuv-compare-31884-5754267655.oracle-probe.bin",
+        "bytes": 163840,
+        "sha256": "fdc7631c89cc09a1b69a82a3610be272fa98ed81f75b75799c1ebd3239ea6f61"
+      },
+      "baseline_vertices": {
+        "file": "mks-yuv-compare-31884-5754267655.baseline-vertices.bin",
+        "bytes": 64,
+        "sha256": "0bba1f02d88c1435ba4f7102a729f248710e9bea710c5fe46aa9b19cc5affd51"
+      },
+      "candidate_vertices": {
+        "file": "mks-yuv-compare-31884-5754267655.candidate-vertices.bin",
+        "bytes": 64,
+        "sha256": "0bba1f02d88c1435ba4f7102a729f248710e9bea710c5fe46aa9b19cc5affd51"
+      }
+    },
+    "comparisons": {
+      "pre_rgb": {
+        "components": 12288,
+        "bit_mismatches": 21,
+        "nonfinite_components": 0,
+        "max_absolute_difference": 0.00011596083641052246,
+        "max_ulp_distance": 7782,
+        "max_absolute_difference_location": {
+          "x": 1338,
+          "y": 678,
+          "channel": "G"
+        },
+        "first_differences": [
+          {
+            "x": 1305,
+            "y": 657,
+            "channel": "R",
+            "left_bits": "3e7dc99d",
+            "right_bits": "3e7dc9ed",
+            "left": 0.24783940613269806,
+            "right": 0.24784059822559357,
+            "absolute_difference": 1.1920928955078125e-06
+          },
+          {
+            "x": 1305,
+            "y": 657,
+            "channel": "G",
+            "left_bits": "3e74acbf",
+            "right_bits": "3e74ac25",
+            "left": 0.23894022405147552,
+            "right": 0.23893792927265167,
+            "absolute_difference": 2.294778823852539e-06
+          },
+          {
+            "x": 1305,
+            "y": 657,
+            "channel": "B",
+            "left_bits": "3e764c5b",
+            "right_bits": "3e7633a0",
+            "left": 0.24052564799785614,
+            "right": 0.2404313087463379,
+            "absolute_difference": 9.433925151824951e-05
+          },
+          {
+            "x": 1318,
+            "y": 678,
+            "channel": "R",
+            "left_bits": "3e5045f5",
+            "right_bits": "3e504636",
+            "left": 0.20339186489582062,
+            "right": 0.20339283347129822,
+            "absolute_difference": 9.685754776000977e-07
+          },
+          {
+            "x": 1318,
+            "y": 678,
+            "channel": "G",
+            "left_bits": "3e4b40dc",
+            "right_bits": "3e4b411e",
+            "left": 0.19848960638046265,
+            "right": 0.19849058985710144,
+            "absolute_difference": 9.834766387939453e-07
+          },
+          {
+            "x": 1318,
+            "y": 678,
+            "channel": "B",
+            "left_bits": "3e4b95cb",
+            "right_bits": "3e4bb1cd",
+            "left": 0.19881360232830048,
+            "right": 0.19892044365406036,
+            "absolute_difference": 0.0001068413257598877
+          },
+          {
+            "x": 1328,
+            "y": 678,
+            "channel": "R",
+            "left_bits": "3e62132c",
+            "right_bits": "3e6213ba",
+            "left": 0.2207762598991394,
+            "right": 0.22077837586402893,
+            "absolute_difference": 2.115964889526367e-06
+          },
+          {
+            "x": 1328,
+            "y": 678,
+            "channel": "G",
+            "left_bits": "3e61c4c5",
+            "right_bits": "3e61c552",
+            "left": 0.2204771786928177,
+            "right": 0.22047927975654602,
+            "absolute_difference": 2.1010637283325195e-06
+          },
+          {
+            "x": 1328,
+            "y": 678,
+            "channel": "B",
+            "left_bits": "3e60a46d",
+            "right_bits": "3e60bee1",
+            "left": 0.21937723457813263,
+            "right": 0.21947814524173737,
+            "absolute_difference": 0.00010091066360473633
+          },
+          {
+            "x": 1337,
+            "y": 678,
+            "channel": "R",
+            "left_bits": "3e62f9bd",
+            "right_bits": "3e63154e",
+            "left": 0.22165580093860626,
+            "right": 0.22176095843315125,
+            "absolute_difference": 0.00010515749454498291
+          }
+        ],
+        "left_role": "baseline_pre_store",
+        "right_role": "candidate_pre_half"
+      },
+      "half_rgb": {
+        "components": 12288,
+        "bit_mismatches": 7,
+        "nonfinite_components": 0,
+        "max_absolute_difference": 0.000244140625,
+        "max_ulp_distance": 8192,
+        "max_absolute_difference_location": {
+          "x": 1347,
+          "y": 678,
+          "channel": "R"
+        },
+        "first_differences": [
+          {
+            "x": 1305,
+            "y": 657,
+            "channel": "B",
+            "left_bits": "3e764000",
+            "right_bits": "3e762000",
+            "left": 0.240478515625,
+            "right": 0.2403564453125,
+            "absolute_difference": 0.0001220703125
+          },
+          {
+            "x": 1318,
+            "y": 678,
+            "channel": "B",
+            "left_bits": "3e4b8000",
+            "right_bits": "3e4ba000",
+            "left": 0.19873046875,
+            "right": 0.1988525390625,
+            "absolute_difference": 0.0001220703125
+          },
+          {
+            "x": 1337,
+            "y": 678,
+            "channel": "R",
+            "left_bits": "3e62e000",
+            "right_bits": "3e630000",
+            "left": 0.2215576171875,
+            "right": 0.2216796875,
+            "absolute_difference": 0.0001220703125
+          },
+          {
+            "x": 1337,
+            "y": 678,
+            "channel": "B",
+            "left_bits": "3e568000",
+            "right_bits": "3e56a000",
+            "left": 0.20947265625,
+            "right": 0.2095947265625,
+            "absolute_difference": 0.0001220703125
+          },
+          {
+            "x": 1338,
+            "y": 678,
+            "channel": "R",
+            "left_bits": "3e692000",
+            "right_bits": "3e694000",
+            "left": 0.2276611328125,
+            "right": 0.227783203125,
+            "absolute_difference": 0.0001220703125
+          },
+          {
+            "x": 1338,
+            "y": 678,
+            "channel": "G",
+            "left_bits": "3e69e000",
+            "right_bits": "3e6a0000",
+            "left": 0.2283935546875,
+            "right": 0.228515625,
+            "absolute_difference": 0.0001220703125
+          },
+          {
+            "x": 1347,
+            "y": 678,
+            "channel": "R",
+            "left_bits": "3e828000",
+            "right_bits": "3e82a000",
+            "left": 0.2548828125,
+            "right": 0.255126953125,
+            "absolute_difference": 0.000244140625
+          }
+        ],
+        "left_role": "baseline_sampled_rgb16f",
+        "right_role": "candidate_emulated_half"
+      },
+      "yuv": {
+        "components": 12288,
+        "bit_mismatches": 15,
+        "nonfinite_components": 0,
+        "max_absolute_difference": 0.0001220703125,
+        "max_ulp_distance": 7706,
+        "max_absolute_difference_location": {
+          "x": 1347,
+          "y": 678,
+          "channel": "Cr"
+        },
+        "first_differences": [
+          {
+            "x": 1305,
+            "y": 657,
+            "channel": "Y",
+            "left_bits": "3e771e56",
+            "right_bits": "3e771c70",
+            "left": 0.24132665991783142,
+            "right": 0.2413194179534912,
+            "absolute_difference": 7.241964340209961e-06
+          },
+          {
+            "x": 1305,
+            "y": 657,
+            "channel": "Cb",
+            "left_bits": "3effc4e9",
+            "right_bits": "3effbcea",
+            "left": 0.49954918026924133,
+            "right": 0.4994881749153137,
+            "absolute_difference": 6.1005353927612305e-05
+          },
+          {
+            "x": 1305,
+            "y": 657,
+            "channel": "Cr",
+            "left_bits": "3f011fd1",
+            "right_bits": "3f012024",
+            "left": 0.5043917298316956,
+            "right": 0.5043966770172119,
+            "absolute_difference": 4.947185516357422e-06
+          },
+          {
+            "x": 1318,
+            "y": 678,
+            "channel": "Y",
+            "left_bits": "3e4c940d",
+            "right_bits": "3e4c95f3",
+            "left": 0.19978351891040802,
+            "right": 0.19979076087474823,
+            "absolute_difference": 7.241964340209961e-06
+          },
+          {
+            "x": 1318,
+            "y": 678,
+            "channel": "Cb",
+            "left_bits": "3effb6a3",
+            "right_bits": "3effbea3",
+            "left": 0.4994402825832367,
+            "right": 0.4995013177394867,
+            "absolute_difference": 6.103515625e-05
+          },
+          {
+            "x": 1318,
+            "y": 678,
+            "channel": "Cr",
+            "left_bits": "3f009f5b",
+            "right_bits": "3f009f09",
+            "left": 0.5024315714836121,
+            "right": 0.5024266839027405,
+            "absolute_difference": 4.887580871582031e-06
+          },
+          {
+            "x": 1337,
+            "y": 678,
+            "channel": "Y",
+            "left_bits": "3e62d1b4",
+            "right_bits": "3e62dc02",
+            "left": 0.22150307893753052,
+            "right": 0.2215423882007599,
+            "absolute_difference": 3.930926322937012e-05
+          },
+          {
+            "x": 1337,
+            "y": 678,
+            "channel": "Cb",
+            "left_bits": "3efcb9e0",
+            "right_bits": "3efcbfa4",
+            "left": 0.4936056137084961,
+            "right": 0.49364960193634033,
+            "absolute_difference": 4.398822784423828e-05
+          },
+          {
+            "x": 1337,
+            "y": 678,
+            "channel": "Cr",
+            "left_bits": "3f00026d",
+            "right_bits": "3f00061a",
+            "left": 0.5000370144844055,
+            "right": 0.5000931024551392,
+            "absolute_difference": 5.608797073364258e-05
+          },
+          {
+            "x": 1338,
+            "y": 678,
+            "channel": "Y",
+            "left_bits": "3e68bc90",
+            "right_bits": "3e68daaa",
+            "left": 0.22728180885314941,
+            "right": 0.2273966372013092,
+            "absolute_difference": 0.00011482834815979004
+          }
+        ],
+        "left_role": "baseline_csc_yuv",
+        "right_role": "candidate_csc_yuv"
+      }
+    },
+    "limitations": [
+      "Captured shader floats only; not raw NV12, driver quantization, scanout or panel evidence.",
+      "Shader hashes identify archived sources; they do not prove equivalence to uninstrumented baseline.",
+      "Completion/fence/error evidence is asserted by the native producer manifest, not independently queried offline.",
+      "Pixels in one capture are correlated; this is not a performance or statistical confidence test.",
+      "actual single textureLod site UV and sampled RGB; instrumentation may change shader compilation; not an unmodified shader",
+      "Diagnostic UV oracle only. Captured UV bit equality checks values, not an independent GPU memory-barrier audit. Instrumentation and ordering may affect compilation or execution; no production, raw YUV or panel equivalence is established.",
+      "GPU-observed A fields were recorded by B at its dependency check; CPU-terminal A fields are separate later readback facts. A consistent outside-ROI record means no A read occurred; contradictory flags are ambiguous. Diagnostic-invalid data cannot support a causal, quality or production conclusion.",
+      "Single-pair diagnostic: A1 and B1 each execute once, so within-capture repeatability is not measured. Independent processes may compare archived B source bytes; they do not share or prove reuse of one physical program instance.",
+      "Captured CPU vertex payload and source relation only. Full record permutation preserves padding and attribute bytes. Native bindings and GPU execution are producer assertions; this is not production, panel or physical-program equivalence proof."
+    ],
+    "repeat_metadata": {
+      "uv_oracle_single_pair": true,
+      "repetitions": 1,
+      "draw_order": [
+        "A1",
+        "B1"
+      ],
+      "draw_ok": {
+        "A1": true,
+        "B1": true
+      },
+      "programs_reused": false,
+      "program_tokens": [
+        "498716568096",
+        "498733771296"
+      ],
+      "frame_id": 72,
+      "frame_token": 24,
+      "same_input_snapshot": true,
+      "assertion_scope": "same frozen renderer input state and resource handles; no texture pixel hash",
+      "draw_epoch_before": [
+        "0",
+        "0"
+      ],
+      "draw_epoch_after": [
+        "0",
+        "0"
+      ]
+    },
+    "repeat_analysis": {
+      "status": "not-measured-single-pair",
+      "captured_repeatability_confirmed": false,
+      "scope": "Single-pair diagnostic: A1 and B1 each execute once, so within-capture repeatability is not measured. Independent processes may compare archived B source bytes; they do not share or prove reuse of one physical program instance."
+    },
+    "current_ab": "A1 versus B1; final Android CSC samples A1.",
+    "single_pair_metadata": {
+      "uv_oracle_single_pair": true,
+      "repetitions": 1,
+      "draw_order": [
+        "A1",
+        "B1"
+      ],
+      "draw_ok": {
+        "A1": true,
+        "B1": true
+      },
+      "programs_reused": false,
+      "program_tokens": [
+        "498716568096",
+        "498733771296"
+      ],
+      "frame_id": 72,
+      "frame_token": 24,
+      "same_input_snapshot": true,
+      "assertion_scope": "same frozen renderer input state and resource handles; no texture pixel hash",
+      "draw_epoch_before": [
+        "0",
+        "0"
+      ],
+      "draw_epoch_after": [
+        "0",
+        "0"
+      ]
+    },
+    "program_instance_scope": "Single-pair diagnostic: A1 and B1 each execute once, so within-capture repeatability is not measured. Independent processes may compare archived B source bytes; they do not share or prove reuse of one physical program instance.",
+    "within_capture_repeatability_measured": false,
+    "sample_tap_metadata": {
+      "sample_tap": true,
+      "sample_tap_site_count": 1,
+      "words_per_pixel": 26,
+      "sample_tap_body_hash": "2807144557236300817",
+      "instrumentation_scope": "actual single textureLod site UV and sampled RGB; instrumentation may change shader compilation; not an unmodified shader"
+    },
+    "sample_tap_analysis": {
+      "comparisons": {
+        "ab1": {
+          "uv": {
+            "components": 8192,
+            "bit_mismatches": 1634,
+            "nonfinite_components": 0,
+            "max_absolute_difference": 1.1920928955078125e-07,
+            "max_ulp_distance": 3,
+            "max_absolute_difference_location": {
+              "x": 1309,
+              "y": 659,
+              "channel": "V"
+            },
+            "first_differences": [
+              {
+                "x": 1304,
+                "y": 654,
+                "channel": "V",
+                "left_bits": "3f02963a",
+                "right_bits": "3f02963b",
+                "left": 0.510104775428772,
+                "right": 0.5101048350334167,
+                "absolute_difference": 5.960464477539063e-08
+              },
+              {
+                "x": 1305,
+                "y": 654,
+                "channel": "V",
+                "left_bits": "3f02963a",
+                "right_bits": "3f02963b",
+                "left": 0.510104775428772,
+                "right": 0.5101048350334167,
+                "absolute_difference": 5.960464477539063e-08
+              },
+              {
+                "x": 1306,
+                "y": 654,
+                "channel": "V",
+                "left_bits": "3f02963a",
+                "right_bits": "3f02963b",
+                "left": 0.510104775428772,
+                "right": 0.5101048350334167,
+                "absolute_difference": 5.960464477539063e-08
+              },
+              {
+                "x": 1307,
+                "y": 654,
+                "channel": "V",
+                "left_bits": "3f02963a",
+                "right_bits": "3f02963b",
+                "left": 0.510104775428772,
+                "right": 0.5101048350334167,
+                "absolute_difference": 5.960464477539063e-08
+              },
+              {
+                "x": 1308,
+                "y": 654,
+                "channel": "V",
+                "left_bits": "3f02963a",
+                "right_bits": "3f02963b",
+                "left": 0.510104775428772,
+                "right": 0.5101048350334167,
+                "absolute_difference": 5.960464477539063e-08
+              },
+              {
+                "x": 1304,
+                "y": 655,
+                "channel": "V",
+                "left_bits": "3f02652c",
+                "right_bits": "3f02652d",
+                "left": 0.5093562602996826,
+                "right": 0.5093563199043274,
+                "absolute_difference": 5.960464477539063e-08
+              },
+              {
+                "x": 1305,
+                "y": 655,
+                "channel": "V",
+                "left_bits": "3f02652c",
+                "right_bits": "3f02652d",
+                "left": 0.5093562602996826,
+                "right": 0.5093563199043274,
+                "absolute_difference": 5.960464477539063e-08
+              },
+              {
+                "x": 1306,
+                "y": 655,
+                "channel": "V",
+                "left_bits": "3f02652c",
+                "right_bits": "3f02652d",
+                "left": 0.5093562602996826,
+                "right": 0.5093563199043274,
+                "absolute_difference": 5.960464477539063e-08
+              },
+              {
+                "x": 1307,
+                "y": 655,
+                "channel": "V",
+                "left_bits": "3f02652c",
+                "right_bits": "3f02652d",
+                "left": 0.5093562602996826,
+                "right": 0.5093563199043274,
+                "absolute_difference": 5.960464477539063e-08
+              },
+              {
+                "x": 1308,
+                "y": 655,
+                "channel": "V",
+                "left_bits": "3f02652c",
+                "right_bits": "3f02652d",
+                "left": 0.5093562602996826,
+                "right": 0.5093563199043274,
+                "absolute_difference": 5.960464477539063e-08
+              }
+            ],
+            "left_role": "A1",
+            "right_role": "B1"
+          },
+          "sample_rgb": {
+            "components": 12288,
+            "bit_mismatches": 9,
+            "nonfinite_components": 0,
+            "max_absolute_difference": 0.0001220703125,
+            "max_ulp_distance": 8192,
+            "max_absolute_difference_location": {
+              "x": 1305,
+              "y": 657,
+              "channel": "B"
+            },
+            "first_differences": [
+              {
+                "x": 1305,
+                "y": 657,
+                "channel": "B",
+                "left_bits": "3e3a4000",
+                "right_bits": "3e3a2000",
+                "left": 0.181884765625,
+                "right": 0.1817626953125,
+                "absolute_difference": 0.0001220703125
+              },
+              {
+                "x": 1318,
+                "y": 678,
+                "channel": "B",
+                "left_bits": "3e0ec000",
+                "right_bits": "3e0ee000",
+                "left": 0.139404296875,
+                "right": 0.1395263671875,
+                "absolute_difference": 0.0001220703125
+              },
+              {
+                "x": 1328,
+                "y": 678,
+                "channel": "B",
+                "left_bits": "3e236000",
+                "right_bits": "3e238000",
+                "left": 0.1595458984375,
+                "right": 0.15966796875,
+                "absolute_difference": 0.0001220703125
+              },
+              {
+                "x": 1337,
+                "y": 678,
+                "channel": "R",
+                "left_bits": "3e260000",
+                "right_bits": "3e262000",
+                "left": 0.162109375,
+                "right": 0.1622314453125,
+                "absolute_difference": 0.0001220703125
+              },
+              {
+                "x": 1337,
+                "y": 678,
+                "channel": "B",
+                "left_bits": "3e172000",
+                "right_bits": "3e174000",
+                "left": 0.1475830078125,
+                "right": 0.147705078125,
+                "absolute_difference": 0.0001220703125
+              },
+              {
+                "x": 1338,
+                "y": 678,
+                "channel": "R",
+                "left_bits": "3e2c8000",
+                "right_bits": "3e2ca000",
+                "left": 0.16845703125,
+                "right": 0.1685791015625,
+                "absolute_difference": 0.0001220703125
+              },
+              {
+                "x": 1338,
+                "y": 678,
+                "channel": "G",
+                "left_bits": "3e2d6000",
+                "right_bits": "3e2d8000",
+                "left": 0.1693115234375,
+                "right": 0.16943359375,
+                "absolute_difference": 0.0001220703125
+              },
+              {
+                "x": 1347,
+                "y": 678,
+                "channel": "G",
+                "left_bits": "3e452000",
+                "right_bits": "3e454000",
+                "left": 0.1925048828125,
+                "right": 0.192626953125,
+                "absolute_difference": 0.0001220703125
+              },
+              {
+                "x": 1321,
+                "y": 699,
+                "channel": "B",
+                "left_bits": "3e02c000",
+                "right_bits": "3e02a000",
+                "left": 0.127685546875,
+                "right": 0.1275634765625,
+                "absolute_difference": 0.0001220703125
+              }
+            ],
+            "left_role": "A1",
+            "right_role": "B1"
+          }
+        }
+      },
+      "repeatability": "not-measured-single-pair",
+      "captured_repeatability_confirmed": false,
+      "scope": "Single-pair diagnostic: A1 and B1 each execute once, so within-capture repeatability is not measured. Independent processes may compare archived B source bytes; they do not share or prove reuse of one physical program instance. actual single textureLod site UV and sampled RGB; instrumentation may change shader compilation; not an unmodified shader"
+    },
+    "original_body_relation": {
+      "status": "not-independently-verified",
+      "scope": "Original body and actual instrumented shader sources are archived with SHA256. Native body hashes and producer linkage assertions do not independently prove the transformation or unmodified-shader equivalence."
+    },
+    "oracle_metadata": {
+      "uv_oracle": true,
+      "uv_oracle_use_a": false,
+      "uv_oracle_barriers": 1,
+      "uv_oracle_barrier_ok": [
+        true
+      ],
+      "uv_oracle_barrier_epoch_before": [
+        "0"
+      ],
+      "uv_oracle_barrier_epoch_after": [
+        "0"
+      ]
+    },
+    "oracle_uv_relation": {
+      "selection": "original-varying-UV",
+      "status": "UV-match-not-required-for-control",
+      "comparisons": {
+        "ab1": {
+          "components": 8192,
+          "bit_mismatches": 1634,
+          "nonfinite_components": 0,
+          "max_absolute_difference": 1.1920928955078125e-07,
+          "max_ulp_distance": 3,
+          "max_absolute_difference_location": {
+            "x": 1309,
+            "y": 659,
+            "channel": "V"
+          },
+          "first_differences": [
+            {
+              "x": 1304,
+              "y": 654,
+              "channel": "V",
+              "left_bits": "3f02963a",
+              "right_bits": "3f02963b",
+              "left": 0.510104775428772,
+              "right": 0.5101048350334167,
+              "absolute_difference": 5.960464477539063e-08
+            },
+            {
+              "x": 1305,
+              "y": 654,
+              "channel": "V",
+              "left_bits": "3f02963a",
+              "right_bits": "3f02963b",
+              "left": 0.510104775428772,
+              "right": 0.5101048350334167,
+              "absolute_difference": 5.960464477539063e-08
+            },
+            {
+              "x": 1306,
+              "y": 654,
+              "channel": "V",
+              "left_bits": "3f02963a",
+              "right_bits": "3f02963b",
+              "left": 0.510104775428772,
+              "right": 0.5101048350334167,
+              "absolute_difference": 5.960464477539063e-08
+            },
+            {
+              "x": 1307,
+              "y": 654,
+              "channel": "V",
+              "left_bits": "3f02963a",
+              "right_bits": "3f02963b",
+              "left": 0.510104775428772,
+              "right": 0.5101048350334167,
+              "absolute_difference": 5.960464477539063e-08
+            },
+            {
+              "x": 1308,
+              "y": 654,
+              "channel": "V",
+              "left_bits": "3f02963a",
+              "right_bits": "3f02963b",
+              "left": 0.510104775428772,
+              "right": 0.5101048350334167,
+              "absolute_difference": 5.960464477539063e-08
+            },
+            {
+              "x": 1304,
+              "y": 655,
+              "channel": "V",
+              "left_bits": "3f02652c",
+              "right_bits": "3f02652d",
+              "left": 0.5093562602996826,
+              "right": 0.5093563199043274,
+              "absolute_difference": 5.960464477539063e-08
+            },
+            {
+              "x": 1305,
+              "y": 655,
+              "channel": "V",
+              "left_bits": "3f02652c",
+              "right_bits": "3f02652d",
+              "left": 0.5093562602996826,
+              "right": 0.5093563199043274,
+              "absolute_difference": 5.960464477539063e-08
+            },
+            {
+              "x": 1306,
+              "y": 655,
+              "channel": "V",
+              "left_bits": "3f02652c",
+              "right_bits": "3f02652d",
+              "left": 0.5093562602996826,
+              "right": 0.5093563199043274,
+              "absolute_difference": 5.960464477539063e-08
+            },
+            {
+              "x": 1307,
+              "y": 655,
+              "channel": "V",
+              "left_bits": "3f02652c",
+              "right_bits": "3f02652d",
+              "left": 0.5093562602996826,
+              "right": 0.5093563199043274,
+              "absolute_difference": 5.960464477539063e-08
+            },
+            {
+              "x": 1308,
+              "y": 655,
+              "channel": "V",
+              "left_bits": "3f02652c",
+              "right_bits": "3f02652d",
+              "left": 0.5093562602996826,
+              "right": 0.5093563199043274,
+              "absolute_difference": 5.960464477539063e-08
+            }
+          ],
+          "left_role": "A1",
+          "right_role": "B1"
+        }
+      },
+      "scope": "Diagnostic UV oracle only. Captured UV bit equality checks values, not an independent GPU memory-barrier audit. Instrumentation and ordering may affect compilation or execution; no production, raw YUV or panel equivalence is established."
+    },
+    "fragment_source_difference": {
+      "identical": false,
+      "left_sha256": "203e30d8f59efc15060f7c1f04e88fe1d7f8b78e3bb36d53d623b1e18716c984",
+      "right_sha256": "e2f090a9e72e1362c6dc7c8c64292c759ce0b4c96cd137a7cb8a136151617250",
+      "unified_diff": "--- A.fragment\n+++ B.oracle-framework.fragment\n@@ -1,4 +1,5 @@\n #version 320 es\n+#extension GL_EXT_YUV_target : require\n #ifdef GL_FRAGMENT_PRECISION_HIGH \n precision highp float;            \n #else                             \n@@ -14,10 +15,40 @@\n uniform mat3 _d;\n uniform mat3 _e;\n in vec2 _8003;\n-out vec4 out_color;\n+layout(yuv) out highp vec3 out_color;\n+layout(std430,binding=1) coherent restrict buffer mks_oracle_probe { highp uint mks_probe_words[40960]; };\n+uniform highp int mks_probe_pair;\n+highp uint mks_probe_helpers=0u;\n+highp uint mks_probe_sites=0u;\n+highp uvec2 mks_probe_seen_counts=uvec2(0u);\n+highp uvec2 mks_probe_seen_uv=uvec2(0u);\n+highp uint mks_probe_reason=1u;\n+highp uint mks_probe_selected=2u;\n highp vec2 mks_tap_uv;\n highp vec4 mks_tap_sample;\n highp uint mks_tap_count;\n+uniform highp int mks_uv_oracle_use_a;\n+bool mks_oracle_valid;\n+highp vec2 mks_oracle_uv(highp vec2 own_uv) {\n+mks_probe_helpers++;\n+mks_oracle_valid=true;\n+ivec2 p=ivec2(gl_FragCoord.xy)-ivec2(1304,636);\n+if(all(greaterThanEqual(p,ivec2(0)))&&all(lessThan(p,ivec2(64,64)))) {\n+uint i=uint(p.y*64+p.x)*26u;\n+mks_probe_seen_counts=uvec2(_12[i+10u],_12[i+25u]);\n+mks_probe_seen_uv=uvec2(_12[i+20u],_12[i+21u]);\n+highp vec2 a_uv=uintBitsToFloat(mks_probe_seen_uv);\n+mks_probe_reason=0u;\n+if(mks_probe_seen_counts.x!=1u) mks_probe_reason|=2u;\n+if(mks_probe_seen_counts.y!=1u) mks_probe_reason|=4u;\n+if(any(isnan(a_uv))||any(isinf(a_uv))) mks_probe_reason|=8u;\n+if(mks_probe_reason!=0u) {mks_oracle_valid=false; return own_uv;}\n+mks_probe_selected=mks_uv_oracle_use_a==1 ? 1u : 0u;\n+return mks_uv_oracle_use_a==1 ? a_uv : own_uv;\n+}\n+mks_oracle_valid=false;\n+return own_uv;\n+}\n #define mks_capture_words _12\n \n const float _2 = float(0); \n@@ -25,10 +56,11 @@\n const float _8004 = float(1); \n vec4 _8001() {\n // pl_shader_sample_direct                                  \n-mks_tap_uv=_8003;\n-highp vec4 mks_sample_value=vec4(textureLod(_8002, _8003, 0.0));\n+mks_tap_uv=mks_oracle_uv(_8003);\n+highp vec4 mks_sample_value=vec4(textureLod(_8002, mks_tap_uv, 0.0));\n+mks_probe_sites++;\n mks_tap_sample=mks_sample_value;\n-mks_tap_count++;\n+mks_tap_count+=mks_oracle_valid ? 1u : 0u;\n vec4 color=vec4(_8004)*mks_sample_value;   \n return color;\n }\n@@ -88,22 +120,55 @@\n return color;\n }\n \n+highp float mks_half_store(highp float value) {\n+highp uint raw=floatBitsToUint(value); highp uint mag=raw&0x7fffffffu;\n+if(mag==0u||mag>=0x38800000u) return unpackHalf2x16(packHalf2x16(vec2(value,0.0))).x;\n+highp uint sign=raw&0x80000000u; highp int e=int(mag>>23u)-127;\n+if(e< -24) return uintBitsToFloat(sign);\n+highp uint h=((mag&0x7fffffu)|0x800000u)>>uint(-e-1);\n+highp float q=float(h)*0.000000059604644775390625;\n+return uintBitsToFloat(floatBitsToUint(q)|sign); }\n void main() {\n mks_tap_uv=vec2(0.0); mks_tap_sample=vec4(0.0); mks_tap_count=0u;\n-out_color = _1();\n+highp vec3 mks_rgb = _1().rgb;\n+highp vec3 mks_pre=mks_rgb;\n+mks_rgb=vec3(mks_half_store(mks_rgb.r),mks_half_store(mks_rgb.g),mks_half_store(mks_rgb.b));\n+highp float mks_y=0.2627*mks_rgb.r+0.6780*mks_rgb.g+0.0593*mks_rgb.b;\n+highp float mks_cb=(mks_rgb.b-mks_y)*0.5/(1.0-0.0593);\n+highp float mks_cr=(mks_rgb.r-mks_y)*0.5/(1.0-0.2627);\n+out_color=vec3(mks_y,mks_cb+0.5,mks_cr+0.5);\n ivec2 mks_p=ivec2(gl_FragCoord.xy)-ivec2(1304,636);\n if(all(greaterThanEqual(mks_p,ivec2(0)))&&all(lessThan(mks_p,ivec2(64,64)))){\n uint mks_i=uint(mks_p.y*64+mks_p.x)*26u;\n-uint mks_old=atomicAdd(_12[mks_i+10u],1u);\n+uint mks_old=atomicAdd(_12[mks_i+0u],1u);\n if(mks_old==0u){\n-_12[mks_i+11u]=floatBitsToUint(out_color[0]);\n-_12[mks_i+12u]=floatBitsToUint(out_color[1]);\n-_12[mks_i+13u]=floatBitsToUint(out_color[2]);\n-_12[mks_i+20u]=floatBitsToUint(mks_tap_uv[0]);\n-_12[mks_i+21u]=floatBitsToUint(mks_tap_uv[1]);\n-_12[mks_i+22u]=floatBitsToUint(mks_tap_sample[0]);\n-_12[mks_i+23u]=floatBitsToUint(mks_tap_sample[1]);\n-_12[mks_i+24u]=floatBitsToUint(mks_tap_sample[2]);\n-_12[mks_i+25u]=mks_tap_count;\n+_12[mks_i+1u]=floatBitsToUint(mks_pre[0]);\n+_12[mks_i+4u]=floatBitsToUint(mks_rgb[0]);\n+_12[mks_i+7u]=floatBitsToUint(out_color[0]);\n+_12[mks_i+2u]=floatBitsToUint(mks_pre[1]);\n+_12[mks_i+5u]=floatBitsToUint(mks_rgb[1]);\n+_12[mks_i+8u]=floatBitsToUint(out_color[1]);\n+_12[mks_i+3u]=floatBitsToUint(mks_pre[2]);\n+_12[mks_i+6u]=floatBitsToUint(mks_rgb[2]);\n+_12[mks_i+9u]=floatBitsToUint(out_color[2]);\n+_12[mks_i+14u]=floatBitsToUint(mks_tap_uv[0]);\n+_12[mks_i+15u]=floatBitsToUint(mks_tap_uv[1]);\n+_12[mks_i+16u]=floatBitsToUint(mks_tap_sample[0]);\n+_12[mks_i+17u]=floatBitsToUint(mks_tap_sample[1]);\n+_12[mks_i+18u]=floatBitsToUint(mks_tap_sample[2]);\n+_12[mks_i+19u]=mks_tap_count;\n+}\n+uint mks_probe_i=(uint(mks_probe_pair)*4096u+uint(mks_p.y*64+mks_p.x))*10u;\n+uint mks_probe_old=atomicAdd(mks_probe_words[mks_probe_i],1u);\n+if(mks_probe_old==0u){\n+mks_probe_words[mks_probe_i+1u]=mks_probe_helpers;\n+mks_probe_words[mks_probe_i+2u]=mks_probe_sites;\n+mks_probe_words[mks_probe_i+3u]=mks_probe_seen_counts.x;\n+mks_probe_words[mks_probe_i+4u]=mks_probe_seen_counts.y;\n+mks_probe_words[mks_probe_i+5u]=mks_probe_seen_uv.x;\n+mks_probe_words[mks_probe_i+6u]=mks_probe_seen_uv.y;\n+mks_probe_words[mks_probe_i+7u]=mks_probe_reason;\n+mks_probe_words[mks_probe_i+8u]=mks_oracle_valid ? 1u : 0u;\n+mks_probe_words[mks_probe_i+9u]=mks_probe_selected;\n }}\n }",
+      "diff_truncated": false
+    },
+    "baseline_control_relation": {
+      "status": "not-independently-verified",
+      "baseline_fragment_sha256": "203e30d8f59efc15060f7c1f04e88fe1d7f8b78e3bb36d53d623b1e18716c984",
+      "baseline_vertex_sha256": "81fad6a3d992b0bf3d2a65525f0a09294905208bea60d73c2d53d852615e881c",
+      "scope": "Original/oracle/original controls require independent same-APK, same-media/frame source and captured-stage comparison. This manifest alone does not verify the cross-round anchor."
+    },
+    "oracle_probe_metadata": {
+      "uv_oracle_probe": true,
+      "uv_oracle_probe_status": "complete",
+      "uv_oracle_probe_words": 40960,
+      "uv_oracle_probe_words_per_pixel": 10,
+      "oracle_preconditions_valid": true,
+      "oracle_cpu_validation_mask": 0,
+      "oracle_cpu_validation_reasons": []
+    },
+    "oracle_probe_analysis": {
+      "preconditions_valid": true,
+      "records": 4096,
+      "A_read_records": 4096,
+      "A_read_ambiguous_records": 0,
+      "cpu_validation_mask": 0,
+      "cpu_validation_reasons": [],
+      "invalid_records": 0,
+      "reason_counts": {
+        "0": 4096
+      },
+      "selected_source_counts": {
+        "0": 4096
+      },
+      "reason_bit_labels": {
+        "1": "outside_ROI_no_A_read",
+        "2": "observed_A_fragment_count_not_one",
+        "4": "observed_A_site_count_not_one",
+        "8": "observed_A_UV_nonfinite"
+      },
+      "selected_source_labels": {
+        "0": "original_varying_control",
+        "1": "GPU_observed_A_UV",
+        "2": "fallback_after_invalid_dependency"
+      },
+      "issue_counts": {},
+      "GPU_observed_vs_CPU_terminal": {
+        "A_fragment_count_differences": 0,
+        "A_site_count_differences": 0,
+        "A_UV_bit_differences": 0
+      },
+      "first_records": [
+        {
+          "repetition": 1,
+          "x": 1304,
+          "y": 636,
+          "execution": {
+            "fragment_records": 1,
+            "helper_calls": 1,
+            "actual_sample_sites": 1
+          },
+          "A_read_performed": true,
+          "GPU_observed_A": {
+            "fragment_count": 1,
+            "site_count": 1,
+            "raw_fragment_count": 1,
+            "raw_site_count": 1,
+            "stored_UV_bits": [
+              "3ef9f6ce",
+              "3f060932"
+            ],
+            "UV_finite": true
+          },
+          "CPU_terminal_A": {
+            "fragment_count": 1,
+            "site_count": 1,
+            "UV_bits": [
+              "3ef9f6ce",
+              "3f060932"
+            ]
+          },
+          "reason_mask": 0,
+          "dependency_valid": true,
+          "selected_source": 0,
+          "B_dependency_valid_count": 1,
+          "B_actual_UV_bits": [
+            "3ef9f6ce",
+            "3f060932"
+          ],
+          "cpu_validation_mask": 0,
+          "issues": []
+        },
+        {
+          "repetition": 1,
+          "x": 1305,
+          "y": 636,
+          "execution": {
+            "fragment_records": 1,
+            "helper_calls": 1,
+            "actual_sample_sites": 1
+          },
+          "A_read_performed": true,
+          "GPU_observed_A": {
+            "fragment_count": 1,
+            "site_count": 1,
+            "raw_fragment_count": 1,
+            "raw_site_count": 1,
+            "stored_UV_bits": [
+              "3efa27db",
+              "3f060932"
+            ],
+            "UV_finite": true
+          },
+          "CPU_terminal_A": {
+            "fragment_count": 1,
+            "site_count": 1,
+            "UV_bits": [
+              "3efa27db",
+              "3f060932"
+            ]
+          },
+          "reason_mask": 0,
+          "dependency_valid": true,
+          "selected_source": 0,
+          "B_dependency_valid_count": 1,
+          "B_actual_UV_bits": [
+            "3efa27db",
+            "3f060932"
+          ],
+          "cpu_validation_mask": 0,
+          "issues": []
+        },
+        {
+          "repetition": 1,
+          "x": 1306,
+          "y": 636,
+          "execution": {
+            "fragment_records": 1,
+            "helper_calls": 1,
+            "actual_sample_sites": 1
+          },
+          "A_read_performed": true,
+          "GPU_observed_A": {
+            "fragment_count": 1,
+            "site_count": 1,
+            "raw_fragment_count": 1,
+            "raw_site_count": 1,
+            "stored_UV_bits": [
+              "3efa58e9",
+              "3f060932"
+            ],
+            "UV_finite": true
+          },
+          "CPU_terminal_A": {
+            "fragment_count": 1,
+            "site_count": 1,
+            "UV_bits": [
+              "3efa58e9",
+              "3f060932"
+            ]
+          },
+          "reason_mask": 0,
+          "dependency_valid": true,
+          "selected_source": 0,
+          "B_dependency_valid_count": 1,
+          "B_actual_UV_bits": [
+            "3efa58e9",
+            "3f060932"
+          ],
+          "cpu_validation_mask": 0,
+          "issues": []
+        },
+        {
+          "repetition": 1,
+          "x": 1307,
+          "y": 636,
+          "execution": {
+            "fragment_records": 1,
+            "helper_calls": 1,
+            "actual_sample_sites": 1
+          },
+          "A_read_performed": true,
+          "GPU_observed_A": {
+            "fragment_count": 1,
+            "site_count": 1,
+            "raw_fragment_count": 1,
+            "raw_site_count": 1,
+            "stored_UV_bits": [
+              "3efa89f7",
+              "3f060932"
+            ],
+            "UV_finite": true
+          },
+          "CPU_terminal_A": {
+            "fragment_count": 1,
+            "site_count": 1,
+            "UV_bits": [
+              "3efa89f7",
+              "3f060932"
+            ]
+          },
+          "reason_mask": 0,
+          "dependency_valid": true,
+          "selected_source": 0,
+          "B_dependency_valid_count": 1,
+          "B_actual_UV_bits": [
+            "3efa89f7",
+            "3f060932"
+          ],
+          "cpu_validation_mask": 0,
+          "issues": []
+        },
+        {
+          "repetition": 1,
+          "x": 1308,
+          "y": 636,
+          "execution": {
+            "fragment_records": 1,
+            "helper_calls": 1,
+            "actual_sample_sites": 1
+          },
+          "A_read_performed": true,
+          "GPU_observed_A": {
+            "fragment_count": 1,
+            "site_count": 1,
+            "raw_fragment_count": 1,
+            "raw_site_count": 1,
+            "stored_UV_bits": [
+              "3efabb05",
+              "3f060932"
+            ],
+            "UV_finite": true
+          },
+          "CPU_terminal_A": {
+            "fragment_count": 1,
+            "site_count": 1,
+            "UV_bits": [
+              "3efabb05",
+              "3f060932"
+            ]
+          },
+          "reason_mask": 0,
+          "dependency_valid": true,
+          "selected_source": 0,
+          "B_dependency_valid_count": 1,
+          "B_actual_UV_bits": [
+            "3efabb05",
+            "3f060932"
+          ],
+          "cpu_validation_mask": 0,
+          "issues": []
+        },
+        {
+          "repetition": 1,
+          "x": 1309,
+          "y": 636,
+          "execution": {
+            "fragment_records": 1,
+            "helper_calls": 1,
+            "actual_sample_sites": 1
+          },
+          "A_read_performed": true,
+          "GPU_observed_A": {
+            "fragment_count": 1,
+            "site_count": 1,
+            "raw_fragment_count": 1,
+            "raw_site_count": 1,
+            "stored_UV_bits": [
+              "3efaec13",
+              "3f060932"
+            ],
+            "UV_finite": true
+          },
+          "CPU_terminal_A": {
+            "fragment_count": 1,
+            "site_count": 1,
+            "UV_bits": [
+              "3efaec13",
+              "3f060932"
+            ]
+          },
+          "reason_mask": 0,
+          "dependency_valid": true,
+          "selected_source": 0,
+          "B_dependency_valid_count": 1,
+          "B_actual_UV_bits": [
+            "3efaec13",
+            "3f060932"
+          ],
+          "cpu_validation_mask": 0,
+          "issues": []
+        },
+        {
+          "repetition": 1,
+          "x": 1310,
+          "y": 636,
+          "execution": {
+            "fragment_records": 1,
+            "helper_calls": 1,
+            "actual_sample_sites": 1
+          },
+          "A_read_performed": true,
+          "GPU_observed_A": {
+            "fragment_count": 1,
+            "site_count": 1,
+            "raw_fragment_count": 1,
+            "raw_site_count": 1,
+            "stored_UV_bits": [
+              "3efb1d20",
+              "3f060932"
+            ],
+            "UV_finite": true
+          },
+          "CPU_terminal_A": {
+            "fragment_count": 1,
+            "site_count": 1,
+            "UV_bits": [
+              "3efb1d20",
+              "3f060932"
+            ]
+          },
+          "reason_mask": 0,
+          "dependency_valid": true,
+          "selected_source": 0,
+          "B_dependency_valid_count": 1,
+          "B_actual_UV_bits": [
+            "3efb1d20",
+            "3f060932"
+          ],
+          "cpu_validation_mask": 0,
+          "issues": []
+        },
+        {
+          "repetition": 1,
+          "x": 1311,
+          "y": 636,
+          "execution": {
+            "fragment_records": 1,
+            "helper_calls": 1,
+            "actual_sample_sites": 1
+          },
+          "A_read_performed": true,
+          "GPU_observed_A": {
+            "fragment_count": 1,
+            "site_count": 1,
+            "raw_fragment_count": 1,
+            "raw_site_count": 1,
+            "stored_UV_bits": [
+              "3efb4e2e",
+              "3f060932"
+            ],
+            "UV_finite": true
+          },
+          "CPU_terminal_A": {
+            "fragment_count": 1,
+            "site_count": 1,
+            "UV_bits": [
+              "3efb4e2e",
+              "3f060932"
+            ]
+          },
+          "reason_mask": 0,
+          "dependency_valid": true,
+          "selected_source": 0,
+          "B_dependency_valid_count": 1,
+          "B_actual_UV_bits": [
+            "3efb4e2e",
+            "3f060932"
+          ],
+          "cpu_validation_mask": 0,
+          "issues": []
+        },
+        {
+          "repetition": 1,
+          "x": 1312,
+          "y": 636,
+          "execution": {
+            "fragment_records": 1,
+            "helper_calls": 1,
+            "actual_sample_sites": 1
+          },
+          "A_read_performed": true,
+          "GPU_observed_A": {
+            "fragment_count": 1,
+            "site_count": 1,
+            "raw_fragment_count": 1,
+            "raw_site_count": 1,
+            "stored_UV_bits": [
+              "3efb7f3c",
+              "3f060932"
+            ],
+            "UV_finite": true
+          },
+          "CPU_terminal_A": {
+            "fragment_count": 1,
+            "site_count": 1,
+            "UV_bits": [
+              "3efb7f3c",
+              "3f060932"
+            ]
+          },
+          "reason_mask": 0,
+          "dependency_valid": true,
+          "selected_source": 0,
+          "B_dependency_valid_count": 1,
+          "B_actual_UV_bits": [
+            "3efb7f3c",
+            "3f060932"
+          ],
+          "cpu_validation_mask": 0,
+          "issues": []
+        },
+        {
+          "repetition": 1,
+          "x": 1313,
+          "y": 636,
+          "execution": {
+            "fragment_records": 1,
+            "helper_calls": 1,
+            "actual_sample_sites": 1
+          },
+          "A_read_performed": true,
+          "GPU_observed_A": {
+            "fragment_count": 1,
+            "site_count": 1,
+            "raw_fragment_count": 1,
+            "raw_site_count": 1,
+            "stored_UV_bits": [
+              "3efbb04a",
+              "3f060932"
+            ],
+            "UV_finite": true
+          },
+          "CPU_terminal_A": {
+            "fragment_count": 1,
+            "site_count": 1,
+            "UV_bits": [
+              "3efbb04a",
+              "3f060932"
+            ]
+          },
+          "reason_mask": 0,
+          "dependency_valid": true,
+          "selected_source": 0,
+          "B_dependency_valid_count": 1,
+          "B_actual_UV_bits": [
+            "3efbb04a",
+            "3f060932"
+          ],
+          "cpu_validation_mask": 0,
+          "issues": []
+        }
+      ],
+      "first_invalid_records": [],
+      "B_site_field_semantics": "lib[19] counts dependency-valid sites; probe[2] independently counts actual executed sample sites.",
+      "scope": "GPU-observed A fields were recorded by B at its dependency check; CPU-terminal A fields are separate later readback facts. A consistent outside-ROI record means no A read occurred; contradictory flags are ambiguous. Diagnostic-invalid data cannot support a causal, quality or production conclusion."
+    },
+    "oracle_preconditions_valid": true,
+    "diagnostic_only": true,
+    "causal_conclusion_allowed": false,
+    "quad_order_metadata": {
+      "quad_order": true,
+      "quad_order_reverse": false,
+      "quad_vertex_layout": {
+        "primitive": "triangle_strip",
+        "indexed": false,
+        "vertex_count": 4,
+        "num_attributes": 2,
+        "position_attrib": 1,
+        "stride": 16,
+        "byte_size": 64,
+        "viewport": [
+          0,
+          0,
+          2672,
+          1336
+        ],
+        "scissors": [
+          0,
+          0,
+          2672,
+          1336
+        ],
+        "attributes": [
+          {
+            "name": "_15",
+            "format_name": "rg32f",
+            "glsl_type": "vec2",
+            "fmt_type": "float32",
+            "opaque": false,
+            "num_planes": 0,
+            "location": 0,
+            "num_components": 2,
+            "component_depth": [
+              32,
+              32,
+              0,
+              0
+            ],
+            "host_bits": [
+              32,
+              32,
+              0,
+              0
+            ],
+            "sample_order": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "offset": 0,
+            "texel_size": 8
+          },
+          {
+            "name": "_16",
+            "format_name": "rg32f",
+            "glsl_type": "vec2",
+            "fmt_type": "float32",
+            "opaque": false,
+            "num_planes": 0,
+            "location": 1,
+            "num_components": 2,
+            "component_depth": [
+              32,
+              32,
+              0,
+              0
+            ],
+            "host_bits": [
+              32,
+              32,
+              0,
+              0
+            ],
+            "sample_order": [
+              0,
+              1,
+              0,
+              0
+            ],
+            "offset": 8,
+            "texel_size": 8
+          }
+        ]
+      }
+    },
+    "quad_payload_relation": {
+      "status": "exact-full-record-permutation",
+      "permutation": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "stride": 16,
+      "bytes": 64,
+      "record_bytes_verified": true,
+      "padding_bytes_preserved": true,
+      "baseline_sha256": "0bba1f02d88c1435ba4f7102a729f248710e9bea710c5fe46aa9b19cc5affd51",
+      "candidate_sha256": "0bba1f02d88c1435ba4f7102a729f248710e9bea710c5fe46aa9b19cc5affd51",
+      "A_positions": [
+        [
+          -1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0
+        ],
+        [
+          -1.0,
+          -1.0
+        ],
+        [
+          1.0,
+          -1.0
+        ]
+      ],
+      "B_positions": [
+        [
+          -1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0
+        ],
+        [
+          -1.0,
+          -1.0
+        ],
+        [
+          1.0,
+          -1.0
+        ]
+      ],
+      "A_twice_signed_areas": [
+        -4.0,
+        -4.0
+      ],
+      "B_twice_signed_areas": [
+        -4.0,
+        -4.0
+      ],
+      "scope": "Captured CPU vertex payload and source relation only. Full record permutation preserves padding and attribute bytes. Native bindings and GPU execution are producer assertions; this is not production, panel or physical-program equivalence proof."
+    }
+  },
+  "postCollectionHeartbeatWatermark": 15,
+  "qualityAfter": {
+    "runId": "31884:1793316220156964",
+    "pid": 31884,
+    "ordinal": 1,
+    "owner": {
+      "session": 330297480,
+      "player": 643762583,
+      "serial": 1,
+      "generation": 1,
+      "sourcePath": "/sdcard/Android/data/com.example.media_kit_hdr_lab/files/hokkaido-p84.mp4"
+    },
+    "status": "observation-heartbeat",
+    "heartbeat": 17,
+    "requestedPTS": 35.035,
+    "actualPosition": 35.035,
+    "acceptedPosition": 35.035,
+    "positionToleranceSeconds": 0.001002,
+    "requestedFusionMode": "1",
+    "properties": {
+      "time-pos": "35.035000",
+      "pause": "yes",
+      "seeking": "no",
+      "path": "/sdcard/Android/data/com.example.media_kit_hdr_lab/files/hokkaido-p84.mp4",
+      "duration": "1170.730167",
+      "hwdec-current": "surfacetexture",
+      "vo": "gpu-next",
+      "target-trc": "pq",
+      "target-prim": "bt.2020",
+      "target-peak": "1000",
+      "gamma": "0.000000",
+      "video-sync": "display-resample",
+      "video-params/w": "3840",
+      "video-params/h": "1920",
+      "video-params/gamma": "hlg",
+      "video-params/primaries": "bt.2020",
+      "container-fps": "29.970030",
+      "current-tracks/video/dolby-vision-profile": "8",
+      "current-tracks/video/dolby-vision-compatibility-id": "4"
+    },
+    "report": {
+      "generation": 1,
+      "verified": true,
+      "hwdecCurrent": "surfacetexture",
+      "source": {
+        "kind": "dolbyVisionP84",
+        "dvProfile": 8,
+        "dvCompatibilityId": 4
+      },
+      "actual": {
+        "strategy": "baseLayerConvert",
+        "hwdec": "surfacetexture",
+        "targetPeak": "1000",
+        "targetTrc": "pq"
+      },
+      "error": null
+    },
+    "faultPropertiesBefore": {
+      "debug.mks.yuv_fail_commit": "0",
+      "debug.mks.yuv_fail_gl": "0"
+    },
+    "faultPropertiesAfter": {
+      "debug.mks.yuv_fail_commit": "0",
+      "debug.mks.yuv_fail_gl": "0"
+    },
+    "evidenceScope": "fresh-paused-property-position-and-route-only"
+  },
+  "hdrLabStopped": true,
+  "restored": {
+    "settings": {
+      "screen_brightness_mode": "1",
+      "screen_brightness": "41",
+      "accelerometer_rotation": "0",
+      "user_rotation": "0",
+      "screen_off_timeout": "30000"
+    },
+    "properties": {
+      "debug.mks.thermal_sync": "",
+      "debug.mks.thermal_trace": "",
+      "debug.mks.defer_publish_flush": "",
+      "debug.mks.gpu_timing": "",
+      "debug.mks.yuv_fusion": "",
+      "debug.mks.yuv_fail_commit": "",
+      "debug.mks.yuv_fail_gl": "",
+      "debug.mks.st_fbo": "",
+      "debug.mks.yuv_frame_trace": "",
+      "debug.mks.quality_pts": "",
+      "debug.mks.yuv_compare": "",
+      "debug.mks.yuv_compare_pts": "",
+      "debug.mks.yuv_compare_repeat": "",
+      "debug.mks.yuv_tap": "",
+      "debug.mks.yuv_inv": "",
+      "debug.mks.yuv_oracle": "",
+      "debug.mks.yuv_oracle_a": "",
+      "debug.mks.yuv_probe": "",
+      "debug.mks.yuv_single": "",
+      "debug.mks.yuv_quad": "",
+      "debug.mks.yuv_rev": ""
+    }
+  },
+  "restorationVerified": true,
+  "automaticBrightnessScalarChanged": false,
+  "restoreErrors": [],
+  "finishedAt": "2026-10-30T07:23:56.766755+08:00"
+}

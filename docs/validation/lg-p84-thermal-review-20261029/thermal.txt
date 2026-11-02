@@ -1,0 +1,87 @@
+/sys/class/thermal/thermal_zone0 bms
+37300
+/sys/class/thermal/thermal_zone1 battery-veneer
+37300
+/sys/class/thermal/thermal_zone10 tsens_tz_sensor8
+424
+/sys/class/thermal/thermal_zone11 tsens_tz_sensor9
+430
+/sys/class/thermal/thermal_zone12 tsens_tz_sensor10
+491
+/sys/class/thermal/thermal_zone13 tsens_tz_sensor11
+469
+/sys/class/thermal/thermal_zone14 tsens_tz_sensor12
+433
+/sys/class/thermal/thermal_zone15 tsens_tz_sensor13
+401
+/sys/class/thermal/thermal_zone16 tsens_tz_sensor14
+382
+/sys/class/thermal/thermal_zone17 tsens_tz_sensor15
+388
+/sys/class/thermal/thermal_zone18 tsens_tz_sensor16
+401
+/sys/class/thermal/thermal_zone19 tsens_tz_sensor17
+401
+/sys/class/thermal/thermal_zone2 tsens_tz_sensor0
+392
+/sys/class/thermal/thermal_zone20 tsens_tz_sensor18
+391
+/sys/class/thermal/thermal_zone21 tsens_tz_sensor19
+391
+/sys/class/thermal/thermal_zone22 tsens_tz_sensor20
+391
+/sys/class/thermal/thermal_zone23 pm8994_tz
+40519
+/sys/class/thermal/thermal_zone24 xo_therm
+39
+/sys/class/thermal/thermal_zone25 bd_therm_1
+-40
+/sys/class/thermal/thermal_zone26 bd_therm_2
+38
+/sys/class/thermal/thermal_zone27 pa_therm0
+37
+/sys/class/thermal/thermal_zone28 pa_therm1
+37
+/sys/class/thermal/thermal_zone29 xo_therm_buf
+39
+/sys/class/thermal/thermal_zone3 tsens_tz_sensor1
+408
+/sys/class/thermal/thermal_zone30 battery
+37300
+/sys/class/thermal/thermal_zone31 DLMt_APC1
+0
+/sys/class/thermal/thermal_zone32 LLM_cp00
+0
+/sys/class/thermal/thermal_zone33 LLM_cp01
+0
+/sys/class/thermal/thermal_zone34 LLM_cp10
+0
+/sys/class/thermal/thermal_zone35 LLM_cp11
+0
+/sys/class/thermal/thermal_zone36 LLM_m4m0
+0
+/sys/class/thermal/thermal_zone37 LLM_l21-
+0
+/sys/class/thermal/thermal_zone38 LLM_l20-
+0
+/sys/class/thermal/thermal_zone39 vts
+385
+/sys/class/thermal/thermal_zone4 tsens_tz_sensor2
+398
+/sys/class/thermal/thermal_zone40 led_sensor
+17
+/sys/class/thermal/thermal_zone41 led_c_sensor
+1
+/sys/class/thermal/thermal_zone42 wsatz.13
+42
+/sys/class/thermal/thermal_zone5 tsens_tz_sensor3
+401
+/sys/class/thermal/thermal_zone6 tsens_tz_sensor4
+395
+/sys/class/thermal/thermal_zone7 tsens_tz_sensor5
+395
+/sys/class/thermal/thermal_zone8 tsens_tz_sensor6
+395
+/sys/class/thermal/thermal_zone9 tsens_tz_sensor7
+408
+

@@ -1,0 +1,12 @@
+{
+  "apkSha256": "e20d6b333babd10b6ee09cbcd302dd0bc50bd043668ef56e56ca2f177cf049fc",
+  "files": {
+    "/Users/wuweiwei1/src/media-kit/media_kit_hdr_lab/android/app/src/main/java/com/example/media_kit_hdr_lab/LyaDiagnosticsDataSpaceExt.java": "1f679c0771c8f9f567caad3b53a43932fe57d0cfc3c8690ca2e47b1b4d59c519",
+    "/Users/wuweiwei1/src/media-kit/media_kit_hdr_lab/lib/common/android_p84_thermal_probe.dart": "81881bd577d47edb8d41e1ebebb628adb5f2e411884d54dcb6370f4b8466251c",
+    "/Users/wuweiwei1/src/mpv/video/out/mks_thermal.h": "1068a8ee79b6e27c4eac7c6d1f82d48f0dbf3c1205a18fe97c979441026a9452",
+    "/Users/wuweiwei1/src/mpv/video/out/hwdec/hwdec_surfacetexture.c": "dcbca956f67791525822a3e9648c7db2c3d41829cf282f34cd6ab90526c361ca"
+  },
+  "defaultDeferPublishFlush": false,
+  "experimentalProperty": "debug.mks.defer_publish_flush",
+  "samePixelPipeline": true
+}

@@ -1,0 +1,187 @@
+@@gpu_thermal_pwrlevel
+0
+@@battery_temp
+31300
+@@vts_temp
+346
+@@settings
+1
+116
+0
+0
+30000
+@@panel_hdr
+0
+@@gpu_max_gpuclk
+652800000
+@@cpu2cap
+2342400
+@@power
+POWER MANAGER (dumpsys power)
+
+Power Manager State:
+  mDirty=0x0
+  mWakefulness=Awake
+  mWakefulnessChanging=false
+  mIsPowered=true
+  mPlugType=1
+  mBatteryLevel=100
+  mBatteryLevelWhenDreamStarted=0
+  mDockState=0
+  mStayOn=true
+  mProximityPositive=false
+  mBootCompleted=true
+  mSystemReady=true
+  mHalAutoSuspendModeEnabled=false
+  mHalInteractiveModeEnabled=true
+  mWakeLockSummary=0x0
+  mUserActivitySummary=0x4
+  mRequestWaitForNegativeProximity=false
+  mSandmanScheduled=false
+  mSandmanSummoned=false
+  mLowPowerModeEnabled=false
+  mBatteryLevelLow=false
+  mLightDeviceIdleMode=false
+  mDeviceIdleMode=false
+  mDeviceIdleWhitelist=[10105, 10117, 10138]
+  mDeviceIdleTempWhitelist=[]
+  mLastWakeTime=150937599 (14392503 ms ago)
+  mLastSleepTime=150931037 (14399065 ms ago)
+  mLastUserActivityTime=162147219 (3182883 ms ago)
+  mLastUserActivityTimeNoChangeLights=161485154 (3844948 ms ago)
+  mLastInteractivePowerHintTime=162147219 (3182883 ms ago)
+  mLastScreenBrightnessBoostTime=0 (165330102 ms ago)
+  mScreenBrightnessBoostInProgress=false
+  mDisplayReady=true
+  mHoldingWakeLockSuspendBlocker=false
+  mHoldingDisplaySuspendBlocker=true
+
+Settings and Configuration:
+  mDecoupleHalAutoSuspendModeFromDisplayConfig=false
+  mDecoupleHalInteractiveModeFromDisplayConfig=false
+  mWakeUpWhenPluggedOrUnpluggedConfig=true
+  mWakeUpWhenPluggedOrUnpluggedInTheaterModeConfig=false
+  mTheaterModeEnabled=false
+  mSuspendWhenScreenOffDueToProximityConfig=true
+  mDreamsSupportedConfig=true
+  mDreamsEnabledByDefaultConfig=true
+  mDreamsActivatedOnSleepByDefaultConfig=false
+  mDreamsActivatedOnDockByDefaultConfig=true
+  mDreamsActivatedOnKickstandByDefaultConfig=false
+  mDreamsEnabledOnBatteryConfig=false
+  mDreamsBatteryLevelMinimumWhenPoweredConfig=-1
+  mDreamsBatteryLevelMinimumWhenNotPoweredConfig=15
+  mDreamsBatteryLevelDrainCutoffConfig=5
+  mDreamsEnabledSetting=true
+  mDreamsActivateOnSleepSetting=false
+  mDreamsActivateOnDockSetting=true
+  mDreamsActivateOnKickstandSetting=false
+  mDozeAfterScreenOffConfig=false
+  mLowPowerModeSetting=false
+  mAutoLowPowerModeConfigured=false
+  mAutoLowPowerModeSnoozing=false
+  mMinimumScreenOffTimeoutConfig=10000
+  mMaximumScreenDimDurationConfig=15000
+  mMaximumScreenDimRatioConfig=0.20000005
+  mScreenOffTimeoutSetting=30000
+  mSleepTimeoutSetting=-1
+  mMaximumScreenOffTimeoutFromDeviceAdmin=2147483647 (enforced=false)
+  mStayOnWhilePluggedInSetting=7
+  mScreenBrightnessSetting=116
+  mScreenAutoBrightnessAdjustmentSetting=0.0
+  mScreenBrightnessModeSetting=1
+  mScreenBrightnessOverrideFromWindowManager=-1
+  mUserActivityTimeoutOverrideFromWindowManager=-1
+  mUserInactiveOverrideFromWindowManager=false
+  mTemporaryScreenBrightnessSettingOverride=-1
+  mTemporaryScreenAutoBrightnessAdjustmentSettingOverride=NaN
+  mDozeScreenStateOverrideFromDreamManager=0
+  mDozeScreenBrightnessOverrideFromDreamManager=-1
+  mScreenBrightnessSettingMinimum=10
+  mScreenBrightnessSettingMaximum=255
+  mScreenBrightnessSettingDefault=145
+  mDoubleTapWakeEnabled=false
+
+Sleep timeout: -1 ms
+Screen off timeout: 30000 ms
+Screen dim duration: 6000 ms
+
+UID states:
+  UID 1000: 0
+  UID 1001: 0
+  UID 1002: 6
+  UID 1027: 0
+  UID 1037: 16
+  UID 2902: 6
+  UID u0a93: 10
+  UID u0a97: 16
+  UID u0a102: 10
+  UID u0a105: 6
+  UID u0a106: 3
+  UID u0a113: 16
+  UID u0a114: 16
+  UID u0a115: 10
+  UID u0a117: 10
+  UID u0a118: 10
+  UID u0a120: 7
+  UID u0a129: 10
+  UID u0a131: 2
+  UID u0a134: 10
+  UID u0a144: 0
+  UID u0a147: 16
+  UID u0a150: 0
+  UID u0a152: 10
+  UID u0a153: 10
+  UID u0a167: 16
+  UID u0a176: 2
+  UID u0a185: 16
+  UID u0a201: 3
+  UID u0a204: 16
+  UID u0a212: 16
+  UID u0a244: 13
+  UID u0a257: 14
+
+Wake Locks: size=0
+
+Suspend Blockers: size=4
+  PowerManagerService.WakeLocks: ref count=0
+  PowerManagerService.Display: ref count=1
+  PowerManagerService.Broadcasts: ref count=0
+  PowerManagerService.WirelessChargerDetector: ref count=0
+
+Display Power: state=ON
+
+Wireless Charger Detector State:
+  mGravitySensor={Sensor name="LGE Gravity Sensor", vendor="QTI", version=2, type=9, maxRange=78.4532, resolution=0.0023956299, power=1.0799866, minDelay=5000}
+  mPoweredWirelessly=false
+  mAtRest=false
+  mRestX=0.0, mRestY=0.0, mRestZ=0.0
+  mDetectionInProgress=false
+  mDetectionStartTime=0 (never)
+  mMustUpdateRestPosition=false
+  mTotalSamples=0
+  mMovingSamples=0
+  mFirstSampleX=0.0, mFirstSampleY=0.0, mFirstSampleZ=0.0
+  mLastSampleX=0.0, mLastSampleY=0.0, mLastSampleZ=0.0
+
+PowerManagerEx State:
+  SUPPORT_AD:false
+  TYPE_OF_AD_SENSOR:0
+  mTemporaryDisableAD:false
+  mCurrentADMode:1
+  mIsWorkingAD:false
+  mADLuxWhenAlcOff:3100
+  mADLuxWhenAlcOn:3100
+  SUPPORT_HL_MODE:true
+  mIsHLMode:0
+  mPrepareMode:-1
+  mWasADworking:false
+  mHlEnableLux:30000
+  mHlDisableLux:10000
+  mForceHLModeLux:0
+  mPocketDetecting:true
+  mThermalState:0
+  mSupportDetectWakelock:false
+@@probe_process
+absent
+@@probe_ps

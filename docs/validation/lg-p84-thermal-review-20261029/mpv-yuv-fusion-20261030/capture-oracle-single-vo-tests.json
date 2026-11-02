@@ -1,0 +1,30 @@
+{
+  "androidSyntax": {
+    "file": "../video/out/vo_gpu_next.c",
+    "exit": 0,
+    "stderr": "",
+    "scope": "full schema7 PL_HAVE_MKS_YUV_COMPARE_ORACLE_SINGLE_PAIR API24 syntax"
+  },
+  "hostTests": "pureC compile+execute0: strictsingleprereqs, count-parameterized single/barrier/sidecar validation, olddouble wrappers stillrejectsinglecounts, coverage/epochs/7bitinvalidcases preserved; actualcompare_save formatting+compare_pollhardgate/state source-extracted tests9 +EGL1+FBO1=11passed",
+  "mode": "debug.mks.yuv_single=1 independentoff, requiresvalidcompare+repeatproperty1+tap+oracle+probe andinvariant0; actualrepetitions1. Invalid/unavailable refusescaptureandforcesoriginalRGB incompare session.",
+  "schema7": {
+    "draw_order": [
+      "A1",
+      "B1"
+    ],
+    "execution": "libraryA1/barrier/B1; onlyA1RGBreceipt afterbothdraws+onebarrier/continuouscleanepochs, originalCSCoversB1thenoneswap; noA2/B2",
+    "arrays": "only2actualdrawrecords/programtokens/epochs,onebarrierok/beforeafter; programs_reusedfalse (noin-transactionrepeat)",
+    "layout": "1completeROI*26basechunk +1ROI*10sidecarchunk,Android7finalA1;7files",
+    "status": "schema6hardgates/7bitCPUmask/reasons unchanged;normalcompleteonlymask0,coveredinvalidonlyindependentdiagnostic-invalidbasename/event/refused+terminal;oldschemas1..6remainstrict",
+    "sourceScope": "A0sourceunchangedbylibrarycontract;Bprobearraycapacitydiffersfromschema6,butmode0/1/0sameactualBsourcewithinnewdiagnostic. Crossfreshprocesssourceidentityisnotphysicalprogramreuse;hostcontrolanchorrequired."
+  },
+  "fboUnchanged": true,
+  "limits": "NoAPKbuild/device/driverorqualityacceptance. Hosttestspoll/savecontractsnotactualGPUdrawcount;librarymock/source/V2separate. SinglepairavoidssecondpairfailurebutdoesnotestablishB2zero-readrootcause.",
+  "files": {
+    "/Users/wuweiwei1/src/mpv/video/out/vo_gpu_next.c": "3f382a34cde4a09ce34514069527055d4278fd459dfa7a597c2c3c35e863a7ec",
+    "/Users/wuweiwei1/src/mpv/video/out/yuv_compare_vo.h": "b65fd4dda025a53099b2c953b63b92d050b6ab8fe6e24e4e5f206258dd6cfa69",
+    "/Users/wuweiwei1/src/mpv/test/yuv_compare_vo.c": "73f55120079d9d00f3a726dacff594cf921de25b0b89df1325eb58e301acd706",
+    "/Users/wuweiwei1/src/media-kit/tool/test_lg_yuv_compare_manifest.py": "5f5332d5488da33d7297cb7e74ef17b0b21c34709e1ac803df34f933d733c96e",
+    "/Users/wuweiwei1/src/libplacebo/src/include/libplacebo/opengl.h": "1c6cf97fb4f9e4e81ad4a13b6e84f3d66af00bedb5ee9a16e60f22350e2e7a0d"
+  }
+}

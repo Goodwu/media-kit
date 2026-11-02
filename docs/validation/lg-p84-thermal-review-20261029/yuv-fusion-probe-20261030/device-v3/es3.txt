@@ -1,0 +1,13 @@
+status=running completed=0 pid=8948
+config_renderable_type=0x45 config_surface_type=0x15a5 window_before=256:256:0x23
+geometry_rc=0 window_after=256:256:0x7fa30c04
+bind_api_ok=1 bind_api_error=0x3000
+context_primary_ok=1 context_primary_error=0x3000 requested_client_version=3 flags=0
+window_surface_ok=0 window_surface_error=0x3009
+status=unsupported-or-error completed=0 cleanup=1 stage=create-window-surface
+error=eglCreateWindowSurface failed egl_error=0x3009 gl_error=0x0 renderer= version=
+config_id=49 visual=0x7fa30c04 yuv_ext=0 plane_count=0 bytes=0 mismatch=0 repeat_a=0 repeat_b=0
+ranges=0-0,0-0,0-0 first_diff=0:0:0:0:0
+pattern_diff=0,0,0
+timestamps_ns=0,0,0,0,0,0,0,0
+limits=synthetic-source;not-playback;not-panel;API24-ImageReader-consumer-may-reject-LG-NV12;no-timing-or-power-claim;YUV420-subsampling-compared-as-raw-planes

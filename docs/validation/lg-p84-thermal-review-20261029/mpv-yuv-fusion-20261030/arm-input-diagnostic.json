@@ -1,0 +1,6 @@
+{
+  "purpose": "only arm failure metadata; no gate relaxation",
+  "syntaxExit": 0,
+  "stderr": "",
+  "voSha256": "08bed712700683bd1d3056deb77b5aacb1a5b01471b9b8b278cf03bd9c545b3d"
+}

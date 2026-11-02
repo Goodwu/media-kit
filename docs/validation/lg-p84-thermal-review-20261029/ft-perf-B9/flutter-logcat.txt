@@ -1,0 +1,969 @@
+11-01 11:28:51.683 24931 24931 I flutter : [IMPORTANT:flutter/shell/common/shell.cc(528)] [Action Required]: Impeller opt-out deprecated.
+11-01 11:28:51.683 24931 24931 I flutter :     The application opted out of Impeller by either using the
+11-01 11:28:51.683 24931 24931 I flutter :     `--no-enable-impeller` flag or the
+11-01 11:28:51.683 24931 24931 I flutter :     `io.flutter.embedding.android.EnableImpeller` `AndroidManifest.xml` entry.
+11-01 11:28:51.683 24931 24931 I flutter :     These options are going to go away in an upcoming Flutter release. Remove
+11-01 11:28:51.683 24931 24931 I flutter :     the explicit opt-out. If you need to opt-out, please report a bug describing
+11-01 11:28:51.683 24931 24931 I flutter :     the issue.
+11-01 11:28:51.683 24931 24931 I flutter : 
+11-01 11:28:51.683 24931 24931 I flutter :     <URL_REDACTED>
+11-01 11:28:51.683 24931 24931 I flutter : 
+11-01 11:28:51.943 24931 24931 I flutter : HDR_PREFER_CONVERT dvP84=[HdrStrategy.baseLayerConvert, HdrStrategy.nativeDolbyVision, HdrStrategy.metadataReshape, HdrStrategy.baseLayerDirect, HdrStrategy.toneMapSdr]
+11-01 11:28:51.945 24931 24931 I flutter : ANDROID_DIRECT_OPEN awaiting_tap
+11-01 11:28:52.045 24931 24931 I flutter : HdrDiag HDR capability: sdk=24 displayHdrTypes=unreported hevcDecoders=3 hevcMain10=true hevc4k=true dvDecoders=2 p5Pipeline=true bridge=true ext=lg-pq extApplicable=true
+11-01 11:28:52.051 24931 24931 I flutter : ANDROID_CAPABILITIES {sdkInt: 24, displayHdrTypes: [2, 1], egl: {version: 1.0, extensions: EGL_KHR_get_all_proc_addresses EGL_ANDROID_presentation_time EGL_KHR_swap_buffers_with_damage EGL_ANDROID_create_native_client_buffer EGL_ANDROID_front_buffer_auto_refresh EGL_KHR_image EGL_KHR_image_base EGL_KHR_lock_surface EGL_KHR_gl_texture_2D_image EGL_KHR_gl_texture_3D_image EGL_KHR_gl_texture_cubemap_image EGL_KHR_gl_renderbuffer_image EGL_KHR_reusable_sync EGL_KHR_fence_sync EGL_KHR_create_context EGL_KHR_surfaceless_context EGL_EXT_create_context_robustness EGL_ANDROID_image_native_buffer EGL_KHR_wait_sync EGL_ANDROID_recordable EGL_KHR_partial_update EGL_KHR_create_context_no_error EGL_KHR_mutable_render_buffer EGL_EXT_yuv_surface EGL_EXT_protected_content , bt2020PqWindowSurface: false, bt2020HlgWindowSurface: false, highPrecisionConfigs: [{index: 48, red: 10, green: 10, blue: 10, alpha: 2}, {index: 49, red: 10, green: 10, blue: 10, alpha: 2}, {index: 50, red: 10, green: 10, blue: 10, alpha: 2}, {index: 51, 
+11-01 11:28:56.096 24931 24931 I flutter : ANDROID_HDR_OPEN_BEGIN path=/sdcard/Android/data/com.example.media_kit_hdr_lab/files/hokkaido-p84.mp4 hint=null serial=1 simulateNoHlg=false wrongHint= noHint=false policyExperimental=false namedLocalSource=true p5RpuPipelineBuilt=true forceP84PqFallback=false textureCopyDiagnostic=false gpuPlatformHdr=false
+11-01 11:28:56.155 24931 24931 I flutter : THERMAL_JSON {"schemaVersion":1,"runId":"24931:1793503736095976","pid":24931,"serial":1,"phase":"prepared","mode":"audio","elapsedMs":0,"wallTime":"2026-11-01T03:28:56.154978Z","sampleDurationMs":0,"sampleOrdinal":1,"properties":{},"propertyErrors":{},"report":{"generation":0,"sourcePath":"/sdcard/Android/data/com.example.media_kit_hdr_lab/files/hokkaido-p84.mp4","verified":false,"hwdecCurrent":null,"actual":null,"source":null,"error":null}}
+11-01 11:28:56.180 24931 24931 I flutter : HdrDiag HDR capability: sdk=24 displayHdrTypes=1,2 hevcDecoders=3 hevcMain10=true hevc4k=true dvDecoders=2 p5Pipeline=true bridge=true ext=lg-pq extApplicable=true
+11-01 11:28:56.181 24931 24931 I flutter : HdrDiag HDR predict: source=none,none,none,none,none,none,unknown class=sdr selected=sdrDirect maturity=verified presentation=sdr confidence=verified playable=true candidates=sdrDirect:ok,sdrDirect:ok,sdrDirect:ok
+11-01 11:28:56.181 24931 24931 I flutter : HDR_SESSION_REPORT gen=1 source=HdrSourceDescriptor(codec: , transfer: null, primaries: null, dynamicMetadata: HdrDynamicMetadata.none, dvProfile: null, dvCompatibilityId: null, enhancementLayer: null) origin=null verified=false hwdecCurrent=null dataspace requested=null path=null readback=null degrade=null diagnostic=null error=null
+11-01 11:28:56.181 24931 24931 I flutter : HDR_SESSION_PREDICTION gen=1 selected=HdrCandidate(sdrDirect, verified, feasible: true, skip: null, route: HdrRoute(sdrDirect, sdr, output: sdr, dynamic: false, topology: platformView, vo: mediacodec_embed, hwdec: mediacodec, vd-lavc-o: null, render-mode: null, prim: null, trc: null, peak: none, surface: null, offscreen: none, requestedPublishFlush: immediate, stripRpu: false, metadata: none, deps: {hwdec:mediacodec, topology:platformView, decoder:mediacodec})) presentation=sdr confidence=verified playable=true
+11-01 11:28:56.181 24931 24931 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(sdrDirect, verified, feasible: true, skip: null, route: HdrRoute(sdrDirect, sdr, output: sdr, dynamic: false, topology: platformView, vo: mediacodec_embed, hwdec: mediacodec, vd-lavc-o: null, render-mode: null, prim: null, trc: null, peak: none, surface: null, offscreen: none, requestedPublishFlush: immediate, stripRpu: false, metadata: none, deps: {hwdec:mediacodec, topology:platformView, decoder:mediacodec}))
+11-01 11:28:56.181 24931 24931 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(sdrDirect, verified, feasible: true, skip: null, route: HdrRoute(sdrDirect, sdr, output: sdr, dynamic: false, topology: texture, vo: gpu-next, hwdec: mediacodec-copy, vd-lavc-o: null, render-mode: null, prim: null, trc: null, peak: none, surface: null, offscreen: none, requestedPublishFlush: immediate, stripRpu: false, metadata: none, deps: {presenter:gpu-next-opengl-texture, decoder:mediacodec, import:cpu-upload, hwdec:mediacodec-copy}))
+11-01 11:28:56.181 24931 24931 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(sdrDirect, verified, feasible: true, skip: null, route: HdrRoute(sdrDirect, sdr, output: sdr, dynamic: false, topology: texture, vo: gpu-next, hwdec: no, vd-lavc-o: null, render-mode: null, prim: null, trc: null, peak: none, surface: null, offscreen: none, requestedPublishFlush: immediate, stripRpu: false, metadata: none, deps: {presenter:gpu-next-opengl-texture, decoder:ffmpeg-software, import:cpu-upload}))
+11-01 11:28:56.181 24931 24931 I flutter : HdrDiag HDR decision: phase=plan gen=1 origin=none source=none,none,none,none,none,none,unknown class=sdr selected=sdrDirect maturity=verified presentation=sdr confidence=verified vo=mediacodec_embed hwdec=mediacodec output=sdr topology=platformView surface=none stripRpu=false peak=none hwdecCurrent=none requested=none path=none readback=none verified=false degrade=none candidates=sdrDirect:ok,sdrDirect:ok,sdrDirect:ok
+11-01 11:28:56.184 24931 24931 I flutter : VIDEOPARAMS VideoParams(pixelformat: null, hwPixelformat: null, w: null, h: null, dw: null, dh: null, aspect: null, par: null, colormatrix: null, colorlevels: null, primaries: null, gamma: null, sigPeak: null, light: null, chromaLocation: null, rotate: null, stereoIn: null, averageBpp: null, alpha: null)
+11-01 11:28:56.192 24931 24931 I flutter : HDR_PUBLISH_FLUSH requested=immediate eligible=false configured=immediate nativeApi=1 effective=per-native-frame
+11-01 11:28:56.237 24931 24931 I flutter : [SwTrace] onCreatePlatformView id=0 ohos=false hcpp=false ohosHcpp=false swPx=null x null
+11-01 11:28:56.367 24931 24931 I flutter : VIDEOPARAMS VideoParams(pixelformat: null, hwPixelformat: null, w: null, h: null, dw: null, dh: null, aspect: null, par: null, colormatrix: null, colorlevels: null, primaries: null, gamma: null, sigPeak: null, light: null, chromaLocation: null, rotate: null, stereoIn: null, averageBpp: null, alpha: null)
+11-01 11:28:56.510 24931 24931 I flutter : MPVLOG [ffmpeg/video] error: hevc_mediacodec: MKSCOLORKEYS: avctx trc=18 prim=9 range=1
+11-01 11:28:56.764 24931 24931 I flutter : VIDEOPARAMS VideoParams(pixelformat: mediacodec, hwPixelformat: null, w: 3840, h: 1920, dw: 3840, dh: 1920, aspect: 2.0, par: 1.0, colormatrix: bt.2020-ncl, colorlevels: limited, primaries: bt.2020, gamma: hlg, sigPeak: 4.926108360290527, light: hlg, chromaLocation: mpeg1/jpeg, rotate: 0, stereoIn: mono, averageBpp: null, alpha: none)
+11-01 11:28:56.985 24931 24931 I flutter : HdrDiag HDR review: entry=1 openedAfterEpoch=0 outcome=success iter=2 elapsedMs=571 loadedMs=147 phase=complete identityOk=ok a=current-tracks/video/decoder=hevc_mediacodec,current-tracks/video/decoder-desc=,hwdec-current=mediacodec,android-mediacodec-info={"api":1,"mime":"video/hevc","codec":"OMX.qcom.video.decoder.hevc","nat…
+11-01 11:28:56.985 24931 24931 I flutter : HdrDiag HDR classify: origin=facts codec=hevc transfer=hlg primaries=bt.2020 meta=dolbyVision dv=8 compat=4 el=false
+11-01 11:28:56.985 24931 24931 I flutter : HdrDiag HDR predict: source=hevc,hlg,bt.2020,dolbyVision,8,4,false class=dvP84 selected=baseLayerConvert maturity=verified presentation=nativeHdr confidence=verified playable=true candidates=nativeDolbyVision:nativeDvUnavailable,metadataReshape:pqRgbPresentationUnavailable,baseLayerDirect:displayLacksTransfer,baseLayerConvert:ok,toneMapSdr:displayLacksTransfer,toneMapSdr:displayLacksTransfer
+11-01 11:28:56.985 24931 24931 I flutter : HdrDiag HDR predict: source=hevc,hlg,bt.2020,dolbyVision,8,4,false class=dvP84 selected=baseLayerConvert maturity=verified presentation=nativeHdr confidence=verified playable=true candidates=nativeDolbyVision:nativeDvUnavailable,metadataReshape:pqRgbPresentationUnavailable,baseLayerDirect:displayLacksTransfer,baseLayerConvert:ok,toneMapSdr:displayLacksTransfer,toneMapSdr:displayLacksTransfer
+11-01 11:28:56.985 24931 24931 I flutter : HDR_SESSION_EVENT HdrReclassifiedEvent(gen: 1, previous: HdrSourceDescriptor(codec: , transfer: null, primaries: null, dynamicMetadata: HdrDynamicMetadata.none, dvProfile: null, dvCompatibilityId: null, enhancementLayer: null), current: HdrSourceDescriptor(codec: hevc, transfer: hlg, primaries: bt.2020, dynamicMetadata: HdrDynamicMetadata.dolbyVision, dvProfile: 8, dvCompatibilityId: 4, enhancementLayer: false), rebuilt: true)
+11-01 11:28:57.076 24931 24931 I flutter : VIDEOPARAMS VideoParams(pixelformat: null, hwPixelformat: null, w: null, h: null, dw: null, dh: null, aspect: null, par: null, colormatrix: null, colorlevels: null, primaries: null, gamma: null, sigPeak: null, light: null, chromaLocation: null, rotate: null, stereoIn: null, averageBpp: null, alpha: null)
+11-01 11:28:57.088 24931 24931 I flutter : VIDEOPARAMS VideoParams(pixelformat: null, hwPixelformat: null, w: null, h: null, dw: null, dh: null, aspect: null, par: null, colormatrix: null, colorlevels: null, primaries: null, gamma: null, sigPeak: null, light: null, chromaLocation: null, rotate: null, stereoIn: null, averageBpp: null, alpha: null)
+11-01 11:28:57.119 24931 24931 I flutter : HDR_PUBLISH_FLUSH requested=immediate eligible=false configured=immediate nativeApi=1 effective=per-native-frame
+11-01 11:28:57.220 24931 24931 I flutter : YUV-DIAG: owner generation unavailable; legacy global arm
+11-01 11:28:57.290 24931 24931 I flutter : [SwTrace] onCreatePlatformView id=1 ohos=false hcpp=false ohosHcpp=false swPx=null x null
+11-01 11:28:57.380 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-THERMAL kind=vo instance=0x741db84710 pid=24931 mono_ns=5647962039 start_ns=5647957456 final=0 queue_frames=0 queue_resets=0 draw=0 redraw=0 display_synced=0 submit=0 flip=0 lease_copy=0 lease_reuse=0 latch=0 defer_publish_flush=0 publish_flush=0 flush_req=0 flush_ovr=0 nominal_fps=0.000000 fps_fallback=0 publish_deferred=0 retire_flush=0 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=0 swap=0 swap_ok=0 frame_id=0 pts=0.000000000 w=0 h=0
+11-01 11:28:57.380 24931 24931 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKS-THERMAL kind=yuv instance=0x741db7ec50 pid=24931 mono_ns=5648201206 start_ns=5648198237 final=0 queue_frames=0 queue_resets=0 draw=0 redraw=0 display_synced=0 submit=0 flip=0 lease_copy=0 lease_reuse=0 latch=0 defer_publish_flush=0 publish_flush=0 flush_req=0 flush_ovr=0 nominal_fps=0.000000 fps_fallback=0 publish_deferred=0 retire_flush=0 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=0 swap=0 swap_ok=0 frame_id=0 pts=0.000000000 w=0 h=0
+11-01 11:28:57.381 24931 24931 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: runtime switch on; taking config49 branch
+11-01 11:28:57.381 24931 24931 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: enumerating 64 configs for config49 (visual 0x7fa30c04)
+11-01 11:28:57.382 24931 24931 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: config49 selected (config_id=49, visual=0x7fa30c04) via full enumeration
+11-01 11:28:57.384 24931 24931 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: presetting window format 0x7fa30c04 (1x1)
+11-01 11:28:57.384 24931 24931 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: ANativeWindow_setBuffersGeometry ok (format 0x7fa30c04, 1x1)
+11-01 11:28:57.384 24931 24931 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: eglCreateWindowSurface ok (config49)
+11-01 11:28:57.386 24931 24931 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKSURF-E1: dataspace applied ret=1
+11-01 11:28:57.386 24931 24931 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: eglMakeCurrent ok
+11-01 11:28:57.387 24931 24931 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-P1: queue-time setMetaData injection armed (op=2 COLOR_METADATA, 1768 B: primaries=9 range=1 transfer=16)
+11-01 11:28:57.388 24931 24931 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: GL_EXT_YUV_target present
+11-01 11:28:57.391 24931 24931 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: offscreen RGB FBO ready (2672x1440, rgba16f)
+11-01 11:28:57.405 24931 24931 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: final pass program ready
+11-01 11:28:57.406 24931 24931 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: branch active (NV12 window, libplacebo rendered to RGB offscreen, layout(yuv) final pass)
+11-01 11:28:57.407 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-YUV-COMPARE event=egl-owner-configured android-current-verified=1 egl-loader-requested=1
+11-01 11:28:57.417 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-YUV-COMPARE-LIB event=caps-ready private_ssbo=2147483647 renderer_max_buffer=0 renderer_max_ssbo=0 fragment_blocks=4 bindings=24
+11-01 11:28:57.418 24931 24931 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: placeholder resize 1x1 skipped; keeping previous offscreen state
+11-01 11:28:57.427 24931 24931 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKS-FUSION rgb-fresh=1 generation=1
+11-01 11:28:57.429 24931 24931 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-P1: 1x1 placeholder buffer; injection refused (queue passthrough)
+11-01 11:28:57.446 24931 24931 I flutter : HdrDiag HDR readback: requested=pq path=ext:lg-pq applied=true readback=none
+11-01 11:28:57.463 24931 24931 I flutter : VIDEOPARAMS VideoParams(pixelformat: null, hwPixelformat: null, w: null, h: null, dw: null, dh: null, aspect: null, par: null, colormatrix: null, colorlevels: null, primaries: null, gamma: null, sigPeak: null, light: null, chromaLocation: null, rotate: null, stereoIn: null, averageBpp: null, alpha: null)
+11-01 11:28:57.524 24931 24931 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKSURF: version surfacetexture-poc-r2
+11-01 11:28:57.550 24931 24931 I flutter : MPVLOG [ffmpeg/video] error: hevc_mediacodec: MKSCOLORKEYS: avctx trc=18 prim=9 range=1
+11-01 11:28:57.908 24931 24931 I flutter : VIDEOPARAMS VideoParams(pixelformat: mediacodec, hwPixelformat: null, w: 3840, h: 1920, dw: 3840, dh: 1920, aspect: 2.0, par: 1.0, colormatrix: bt.2020-ncl, colorlevels: limited, primaries: bt.2020, gamma: hlg, sigPeak: 4.926108360290527, light: hlg, chromaLocation: mpeg1/jpeg, rotate: 0, stereoIn: mono, averageBpp: null, alpha: none)
+11-01 11:28:57.908 24931 24931 I flutter : ANDROID_PLATFORM_LAYOUT_OUTPUT_SIZE source=3840x1920 target=2672x1336
+11-01 11:28:57.931 24931 24931 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: placeholder resize 1x1 skipped; keeping previous offscreen state
+11-01 11:28:57.932 24931 24931 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKS-INPUT-FBO event=config requested=0
+11-01 11:28:57.932 24931 24931 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKS-THERMAL kind=import instance=0x7425548050 pid=24931 mono_ns=6198417921 start_ns=6198408494 final=0 queue_frames=0 queue_resets=0 draw=0 redraw=0 display_synced=0 submit=0 flip=0 lease_copy=0 lease_reuse=0 latch=0 defer_publish_flush=0 publish_flush=0 flush_req=0 flush_ovr=0 nominal_fps=0.000000 fps_fallback=0 publish_deferred=0 retire_flush=0 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=0 swap=0 swap_ok=0 frame_id=0 pts=0.000000000 w=0 h=0
+11-01 11:28:57.979 24931 24931 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKSURF: unverified-declaration repr.sys=RGB repr.levels=full
+11-01 11:28:57.987 24931 24931 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKSURF: unverified-declaration color identity propagated from source; sys/levels declaration unverified (diag pending)
+11-01 11:28:57.988 24931 24931 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKSURF: color-identity propagated primaries=6 transfer=13 src_levels=1
+11-01 11:28:57.989 24931 24931 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKSURF: active-importer=surfacetexture device_registered=1
+11-01 11:28:57.992 24931 24931 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKS-INPUT-FBO requested=0 slot_attempts=0 shared_attempts=1 fallbacks=0 copy_failures=0 final=0
+11-01 11:28:57.992 24931 24931 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKS-FLUSH requested=0 effective=0 nominal_fps=29.970029970 experimental_override=0
+11-01 11:28:58.017 24931 24931 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKS-FUSION-FRAME event=swap-success route=rgb-final pid=24931 instance=0x741db7ec50 token=6 generation=1 frame_id=45 source_pts=0.000000000 current_pts=0.000000000 still=0 redraw=0 repeat=0 mono_ns=6284851663 gpu_draw_confirmed=0
+11-01 11:28:58.028 24931 24931 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKS-FUSION-FRAME event=swap-success route=rgb-final pid=24931 instance=0x741db7ec50 token=7 generation=1 frame_id=45 source_pts=0.000000000 current_pts=0.000000000 still=1 redraw=1 repeat=0 mono_ns=6296404526 gpu_draw_confirmed=0
+11-01 11:28:58.031 24931 24931 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-DIAG: offscreen RGB FBO ready (2672x1336, rgba16f)
+11-01 11:28:58.111 24931 24931 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKS-FUSION-FRAME event=swap-success route=rgb-final pid=24931 instance=0x741db7ec50 token=8 generation=2 frame_id=45 source_pts=0.000000000 current_pts=0.000000000 still=1 redraw=1 repeat=0 mono_ns=6378627591 gpu_draw_confirmed=0
+11-01 11:28:58.142 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:28:58.145 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:28:58.150 24931 24931 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKS-FUSION skipped-unfresh-swap=1
+11-01 11:28:58.152 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:28:58.153 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:28:58.240 24931 24931 I flutter : HdrDiag HDR review: entry=2 openedAfterEpoch=1 outcome=success iter=2 elapsedMs=773 loadedMs=147 phase=complete identityOk=ok a=current-tracks/video/decoder=hevc_mediacodec,current-tracks/video/decoder-desc=,hwdec-current=surfacetexture,android-mediacodec-info={"api":1,"mime":"video/hevc","codec":"OMX.qcom.video.decoder.hevc",…
+11-01 11:28:58.240 24931 24931 I flutter : HdrDiag HDR classify: origin=facts codec=hevc transfer=hlg primaries=bt.2020 meta=dolbyVision dv=8 compat=4 el=false
+11-01 11:28:58.241 24931 24931 I flutter : HdrDiag HDR predict: source=hevc,hlg,bt.2020,dolbyVision,8,4,false class=dvP84 selected=baseLayerConvert maturity=verified presentation=nativeHdr confidence=verified playable=true candidates=nativeDolbyVision:nativeDvUnavailable,metadataReshape:pqRgbPresentationUnavailable,baseLayerDirect:displayLacksTransfer,baseLayerConvert:ok,toneMapSdr:displayLacksTransfer,toneMapSdr:displayLacksTransfer
+11-01 11:28:58.241 24931 24931 I flutter : HDR_SESSION_REPORT gen=1 source=HdrSourceDescriptor(codec: hevc, transfer: hlg, primaries: bt.2020, dynamicMetadata: HdrDynamicMetadata.dolbyVision, dvProfile: 8, dvCompatibilityId: 4, enhancementLayer: false) origin=decoder verified=true hwdecCurrent=surfacetexture dataspace requested=pq path=ext:lg-pq readback=none degrade=null diagnostic=null error=null
+11-01 11:28:58.241 24931 24931 I flutter : HDR_SESSION_PREDICTION gen=1 selected=HdrCandidate(baseLayerConvert, verified, feasible: true, skip: null, route: HdrRoute(baseLayerConvert, nativeHdr, output: pq, dynamic: false, topology: platformView, vo: gpu-next, hwdec: surfacetexture, vd-lavc-o: null, render-mode: null, prim: bt.2020, trc: pq, peak: 1000, surface: pq, offscreen: pq-full, requestedPublishFlush: immediate, stripRpu: true, metadata: baselineOnly, deps: {hwdec:surfacetexture, topology:platformView, dataspace:pq, decoder:mediacodec})) presentation=nativeHdr confidence=verified playable=true
+11-01 11:28:58.241 24931 24931 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(nativeDolbyVision, verified, feasible: false, skip: nativeDvUnavailable, route: null)
+11-01 11:28:58.241 24931 24931 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(metadataReshape, experimental, feasible: false, skip: pqRgbPresentationUnavailable, route: null)
+11-01 11:28:58.241 24931 24931 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(baseLayerDirect, verified, feasible: false, skip: displayLacksTransfer, route: null)
+11-01 11:28:58.241 24931 24931 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(baseLayerConvert, verified, feasible: true, skip: null, route: HdrRoute(baseLayerConvert, nativeHdr, output: pq, dynamic: false, topology: platformView, vo: gpu-next, hwdec: surfacetexture, vd-lavc-o: null, render-mode: null, prim: bt.2020, trc: pq, peak: 1000, surface: pq, offscreen: pq-full, requestedPublishFlush: immediate, stripRpu: true, metadata: baselineOnly, deps: {hwdec:surfacetexture, topology:platformView, dataspace:pq, decoder:mediacodec}))
+11-01 11:28:58.241 24931 24931 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(toneMapSdr, verified, feasible: false, skip: displayLacksTransfer, route: null)
+11-01 11:28:58.241 24931 24931 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(toneMapSdr, verified, feasible: false, skip: displayLacksTransfer, route: null)
+11-01 11:28:58.241 24931 24931 I flutter : HDR_SESSION_ACTUAL gen=1 actual=HdrRoute(baseLayerConvert, nativeHdr, output: pq, dynamic: false, topology: platformView, vo: gpu-next, hwdec: surfacetexture, vd-lavc-o: null, render-mode: null, prim: bt.2020, trc: pq, peak: 1000, surface: pq, offscreen: pq-full, requestedPublishFlush: immediate, stripRpu: true, metadata: baselineOnly, deps: {hwdec:surfacetexture, topology:platformView, dataspace:pq, decoder:mediacodec})
+11-01 11:28:58.241 24931 24931 I flutter : HdrDiag HDR decision: phase=applied gen=1 origin=decoder source=hevc,hlg,bt.2020,dolbyVision,8,4,false class=dvP84 selected=baseLayerConvert maturity=verified presentation=nativeHdr confidence=verified vo=gpu-next hwdec=surfacetexture output=pq topology=platformView surface=pq stripRpu=true peak=1000 hwdecCurrent=surfacetexture requested=pq path=ext:lg-pq readback=none verified=true degrade=none candidates=nativeDolbyVision:nativeDvUnavailable,metadataReshape:pqRgbPresentationUnavailable,baseLayerDirect:displayLacksTransfer,baseLayerConvert:ok,toneMapSdr:displayLacksTransfer,toneMapSdr:displayLacksTransfer
+11-01 11:28:58.241 24931 24931 I flutter : HDR_SESSION_EVENT HdrRouteAppliedEvent(gen: 1, route: HdrRoute(baseLayerConvert, nativeHdr, output: pq, dynamic: false, topology: platformView, vo: gpu-next, hwdec: surfacetexture, vd-lavc-o: null, render-mode: null, prim: bt.2020, trc: pq, peak: 1000, surface: pq, offscreen: pq-full, requestedPublishFlush: immediate, stripRpu: true, metadata: baselineOnly, deps: {hwdec:surfacetexture, topology:platformView, dataspace:pq, decoder:mediacodec}))
+11-01 11:28:58.243 24931 24931 I flutter : MKSURF-POC: active-importer=surfacetexture verified
+11-01 11:28:58.243 24931 24931 I flutter : ANDROID_HDR_OPEN path=/sdcard/Android/data/com.example.media_kit_hdr_lab/files/hokkaido-p84.mp4 serial=1
+11-01 11:28:58.243 24931 24931 I flutter : HDR_SESSION_REPORT gen=1 source=HdrSourceDescriptor(codec: hevc, transfer: hlg, primaries: bt.2020, dynamicMetadata: HdrDynamicMetadata.dolbyVision, dvProfile: 8, dvCompatibilityId: 4, enhancementLayer: false) origin=decoder verified=true hwdecCurrent=surfacetexture dataspace requested=pq path=ext:lg-pq readback=none degrade=null diagnostic=null error=null
+11-01 11:28:58.243 24931 24931 I flutter : HDR_SESSION_PREDICTION gen=1 selected=HdrCandidate(baseLayerConvert, verified, feasible: true, skip: null, route: HdrRoute(baseLayerConvert, nativeHdr, output: pq, dynamic: false, topology: platformView, vo: gpu-next, hwdec: surfacetexture, vd-lavc-o: null, render-mode: null, prim: bt.2020, trc: pq, peak: 1000, surface: pq, offscreen: pq-full, requestedPublishFlush: immediate, stripRpu: true, metadata: baselineOnly, deps: {hwdec:surfacetexture, topology:platformView, dataspace:pq, decoder:mediacodec})) presentation=nativeHdr confidence=verified playable=true
+11-01 11:28:58.243 24931 24931 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(nativeDolbyVision, verified, feasible: false, skip: nativeDvUnavailable, route: null)
+11-01 11:28:58.243 24931 24931 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(metadataReshape, experimental, feasible: false, skip: pqRgbPresentationUnavailable, route: null)
+11-01 11:28:58.243 24931 24931 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(baseLayerDirect, verified, feasible: false, skip: displayLacksTransfer, route: null)
+11-01 11:28:58.243 24931 24931 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(baseLayerConvert, verified, feasible: true, skip: null, route: HdrRoute(baseLayerConvert, nativeHdr, output: pq, dynamic: false, topology: platformView, vo: gpu-next, hwdec: surfacetexture, vd-lavc-o: null, render-mode: null, prim: bt.2020, trc: pq, peak: 1000, surface: pq, offscreen: pq-full, requestedPublishFlush: immediate, stripRpu: true, metadata: baselineOnly, deps: {hwdec:surfacetexture, topology:platformView, dataspace:pq, decoder:mediacodec}))
+11-01 11:28:58.243 24931 24931 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(toneMapSdr, verified, feasible: false, skip: displayLacksTransfer, route: null)
+11-01 11:28:58.243 24931 24931 I flutter : HDR_SESSION_CANDIDATE gen=1 candidate=HdrCandidate(toneMapSdr, verified, feasible: false, skip: displayLacksTransfer, route: null)
+11-01 11:28:58.243 24931 24931 I flutter : HDR_SESSION_ACTUAL gen=1 actual=HdrRoute(baseLayerConvert, nativeHdr, output: pq, dynamic: false, topology: platformView, vo: gpu-next, hwdec: surfacetexture, vd-lavc-o: null, render-mode: null, prim: bt.2020, trc: pq, peak: 1000, surface: pq, offscreen: pq-full, requestedPublishFlush: immediate, stripRpu: true, metadata: baselineOnly, deps: {hwdec:surfacetexture, topology:platformView, dataspace:pq, decoder:mediacodec})
+11-01 11:28:58.255 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:28:58.262 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:28:58.265 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:28:58.268 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:28:58.319 24931 24931 I flutter : THERMAL_JSON_PART {"r":"24931:1793503736095976","n":2,"i":0,"c":4,"d":"eyJzY2hlbWFWZXJzaW9uIjoxLCJydW5JZCI6IjI0OTMxOjE3OTM1MDM3MzYwOTU5NzYiLCJwaWQiOjI0OTMxLCJzZXJpYWwiOjEsInBoYXNlIjoic3RhcnQiLCJtb2RlIjoiYXVkaW8iLCJlbGFwc2VkTXMiOjcwLCJ3YWxsVGltZSI6IjIwMjYtMTEtMDFUMDM6Mjg6NTguMzE5MTE4WiIsInNhbXBsZUR1cmF0aW9uTXMiOjcwLCJzYW1wbGVPcmRpbmFsIjoyLCJwcm9wZXJ0aWVzIjp7InRpbWUtcG9zIjoiMC4yMzM1NjciLCJwYXRoIjoiL3NkY2FyZC9BbmRyb2lkL2RhdGEvY29tLmV4YW1wbGUubWVkaWFfa2l0X2hkcl9sYWIvZmlsZXMvaG9ra2FpZG8tcDg0Lm1wNCIsInBhdXNlIjoibm8iLCJod2RlYy1jdXJyZW50Ijoic3VyZmFjZXRleHR1cmUiLCJod2RlYy1zb2Z0d2FyZS1mYWxsYmFjayI6IjgiLCJ2aWRlby1jb2RlYyI6IiIsImN1cnJlbnQtdHJhY2tzL3ZpZGVvL2RvbGJ5LXZpc2lvbi1w"}
+11-01 11:28:58.319 24931 24931 I flutter : THERMAL_JSON_PART {"r":"24931:1793503736095976","n":2,"i":1,"c":4,"d":"cm9maWxlIjoiOCIsImN1cnJlbnQtdHJhY2tzL3ZpZGVvL2RvbGJ5LXZpc2lvbi1jb21wYXRpYmlsaXR5LWlkIjoiNCIsInZpZGVvLXN5bmMiOiJhdWRpbyIsImRpc3BsYXktc3luYy1hY3RpdmUiOiJubyIsInZzeW5jLXJhdGlvIjoiIiwiYXVkaW8tc3BlZWQtY29ycmVjdGlvbiI6IjEuMDAwMDAwIiwidmlkZW8tc3BlZWQtY29ycmVjdGlvbiI6IjEuMDAwMDAwIiwiYXZzeW5jIjoiLTAuMDE1OTQ3IiwiZGVjb2Rlci1mcmFtZS1kcm9wLWNvdW50IjoiMCIsImZyYW1lLWRyb3AtY291bnQiOiIzIiwidm8tZGVsYXllZC1mcmFtZS1jb3VudCI6IjAiLCJtaXN0aW1lZC1mcmFtZS1jb3VudCI6IiIsImVzdGltYXRlZC12Zi1mcHMiOiIyOS45NzAwMzAiLCJlc3RpbWF0ZWQtZGlzcGxheS1mcHMiOiIiLCJjb250YWluZXItZnBzIjoiMjkuOTcwMDMwIiwidmlkZW8tcGFyYW1zL3ciOiIzODQwIiwidmlk"}
+11-01 11:28:58.319 24931 24931 I flutter : THERMAL_JSON_PART {"r":"24931:1793503736095976","n":2,"i":2,"c":4,"d":"ZW8tcGFyYW1zL2giOiIxOTIwIiwidmlkZW8tcGFyYW1zL2dhbW1hIjoiaGxnIiwidmlkZW8tcGFyYW1zL3ByaW1hcmllcyI6ImJ0LjIwMjAiLCJ2aWRlby1wYXJhbXMvcGl4ZWxmb3JtYXQiOiJtZWRpYWNvZGVjIiwidmlkZW8tcGFyYW1zL2h3LXBpeGVsZm9ybWF0IjoiIiwidmlkZW8tb3V0LXBhcmFtcy93IjoiMzg0MCIsInZpZGVvLW91dC1wYXJhbXMvaCI6IjE5MjAiLCJ2aWRlby1vdXQtcGFyYW1zL2dhbW1hIjoiaGxnIiwidmlkZW8tb3V0LXBhcmFtcy9wcmltYXJpZXMiOiJidC4yMDIwIiwidGFyZ2V0LXBlYWsiOiIxMDAwIiwidGFyZ2V0LXRyYyI6InBxIiwidGFyZ2V0LXByaW0iOiJidC4yMDIwIiwiYW5kcm9pZC1zdXJmYWNlLXNpemUiOiIyNjcyeDEzMzYiLCJnYW1tYSI6IjAuMDAwMDAwIiwiaW50ZXJwb2xhdGlvbiI6Im5vIiwidm8iOiJncHUtbmV4dCJ9LCJwcm9wZXJ0eUVycm9y"}
+11-01 11:28:58.319 24931 24931 I flutter : THERMAL_JSON_PART {"r":"24931:1793503736095976","n":2,"i":3,"c":4,"d":"cyI6e30sInJlcG9ydCI6eyJnZW5lcmF0aW9uIjoxLCJzb3VyY2VQYXRoIjoiL3NkY2FyZC9BbmRyb2lkL2RhdGEvY29tLmV4YW1wbGUubWVkaWFfa2l0X2hkcl9sYWIvZmlsZXMvaG9ra2FpZG8tcDg0Lm1wNCIsInZlcmlmaWVkIjp0cnVlLCJod2RlY0N1cnJlbnQiOiJzdXJmYWNldGV4dHVyZSIsImFjdHVhbCI6eyJzdHJhdGVneSI6ImJhc2VMYXllckNvbnZlcnQiLCJod2RlYyI6InN1cmZhY2V0ZXh0dXJlIiwidGFyZ2V0VHJjIjoicHEiLCJ0YXJnZXRQcmltIjoiYnQuMjAyMCIsInRhcmdldFBlYWsiOiIxMDAwIn0sInNvdXJjZSI6eyJraW5kIjoiZG9sYnlWaXNpb25QODQiLCJjb2RlYyI6ImhldmMiLCJ0cmFuc2ZlciI6ImhsZyIsInByaW1hcmllcyI6ImJ0LjIwMjAiLCJkdlByb2ZpbGUiOjgsImR2Q29tcGF0aWJpbGl0eUlkIjo0fSwiZXJyb3IiOm51bGx9fQ=="}
+11-01 11:28:58.330 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:28:58.334 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:28:58.335 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:28:58.337 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:28:58.400 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:28:58.401 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:28:58.408 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:28:58.414 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:28:58.440 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:28:58.441 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:28:58.447 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:28:58.447 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:28:58.529 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:28:58.530 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:28:58.530 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:28:58.530 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:28:58.614 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:28:58.619 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:28:58.624 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:28:58.626 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:28:58.669 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:28:58.671 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:28:58.682 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:28:58.691 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:28:58.734 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:28:58.734 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:28:58.735 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:28:58.737 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:28:58.796 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:28:58.797 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:28:58.798 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:28:59.801 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:28:59.801 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:28:59.801 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:28:59.801 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:28:59.801 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:28:59.801 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:28:59.801 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:28:59.801 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:28:59.801 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:28:59.801 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:28:59.801 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:28:59.801 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:28:59.801 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:28:59.801 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:28:59.801 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:28:59.801 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:28:59.801 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:28:59.801 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:28:59.801 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:28:59.801 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:28:59.801 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:28:59.801 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:28:59.801 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:28:59.801 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:28:59.801 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:28:59.801 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:28:59.801 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:28:59.801 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:28:59.801 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:28:59.801 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:28:59.801 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:28:59.801 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:28:59.802 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:28:59.802 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:28:59.802 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:28:59.802 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:28:59.802 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:28:59.802 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:28:59.802 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:28:59.802 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:28:59.802 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:28:59.802 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:28:59.802 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:28:59.802 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:28:59.802 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:28:59.802 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:28:59.802 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:28:59.802 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:28:59.802 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:28:59.802 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:28:59.802 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:28:59.802 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:28:59.802 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:28:59.802 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:28:59.802 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:28:59.802 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:28:59.802 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:28:59.850 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:28:59.851 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:28:59.853 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:28:59.858 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:28:59.923 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:28:59.924 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:28:59.925 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:28:59.929 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:28:59.993 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:28:59.994 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:28:59.995 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:28:59.996 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:00.051 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:00.052 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:00.053 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:00.055 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:00.118 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:00.125 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:00.127 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:00.129 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:00.179 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:00.180 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:00.186 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:00.188 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:00.245 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:00.245 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:00.256 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:00.257 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:00.310 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:00.310 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:00.318 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:00.320 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:00.370 24931 24931 I flutter : MPVLOG [vo/gpu-next/opengl] error: YUV-P1: set-done table full (32); re-setting on every queue (idempotent same-content copy)
+11-01 11:29:00.373 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:00.374 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:00.385 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:00.386 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:00.442 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:00.442 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:00.452 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:00.454 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:00.509 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:00.514 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:00.518 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:00.522 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:00.586 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:00.587 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:00.588 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:00.589 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:00.641 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:00.642 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:00.653 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:00.654 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:00.732 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:00.734 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:00.735 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:00.735 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:00.802 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:00.803 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:00.804 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:00.804 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:00.862 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:00.865 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:00.866 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:00.870 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:00.924 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:00.925 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:00.926 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:00.927 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:00.982 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:00.982 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:00.985 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:00.989 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:01.044 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:01.045 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:01.052 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:01.053 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:01.108 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:01.110 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:01.121 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:01.122 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:01.203 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:01.204 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:01.228 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:01.231 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:01.276 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:01.277 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:01.279 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:01.280 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:01.349 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:01.350 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:01.351 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:01.351 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:01.415 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:01.417 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:01.418 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:01.420 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:01.470 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:01.472 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:01.493 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:01.494 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:01.514 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:01.514 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:01.534 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:01.535 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:01.617 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:01.618 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:01.621 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:01.622 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:01.693 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:01.695 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:01.721 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:01.722 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:01.765 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:01.766 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:01.768 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:01.769 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:01.850 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:01.853 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:01.854 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:01.855 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:01.927 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:01.928 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:01.929 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:01.934 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:01.996 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:01.998 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:01.999 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:02.001 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:02.056 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:02.057 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:02.057 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:02.058 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:02.114 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:02.114 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:02.122 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:02.123 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:02.181 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:02.181 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:02.188 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:02.189 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:02.245 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:02.248 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:02.255 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:02.256 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:02.315 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:02.316 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:02.320 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:02.323 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:02.383 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:02.383 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:02.386 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:02.387 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:02.441 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:02.442 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:02.455 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:02.456 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:02.529 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:02.530 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:02.532 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:02.533 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:02.590 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:02.591 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:02.592 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:02.594 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:02.649 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:02.649 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:02.655 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:02.659 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:02.717 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:02.718 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:02.722 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:02.725 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:02.783 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:02.784 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:02.790 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:02.792 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:02.844 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:02.845 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:02.854 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:02.855 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:02.913 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:02.914 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:02.921 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:02.922 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:02.980 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:02.981 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:02.987 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:02.987 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:03.046 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:03.048 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:03.057 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:03.058 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:03.116 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:03.117 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:03.123 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:03.125 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:03.177 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:03.181 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:03.203 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:03.204 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:03.230 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:03.231 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:03.257 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:03.259 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:03.296 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:03.296 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:03.323 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:03.325 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:03.420 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:03.421 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:03.422 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:03.425 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:03.502 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:03.504 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:03.504 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:03.505 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:03.562 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:03.563 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:03.565 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:03.565 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:03.619 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:03.619 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:03.623 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:03.624 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:03.679 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:03.679 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:03.690 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:03.691 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:03.748 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:03.749 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:03.757 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:03.758 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:03.831 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:03.832 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:03.833 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:03.834 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:03.905 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:03.906 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:03.908 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:03.909 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:03.977 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:03.980 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:03.981 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:03.982 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:04.037 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:04.038 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:04.039 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:04.040 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:04.094 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:04.095 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:04.096 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:04.098 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:04.148 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:04.149 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:04.159 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:04.160 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:04.214 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:04.215 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:04.224 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:04.224 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:04.278 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:04.278 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:04.290 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:04.292 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:04.372 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:04.373 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:04.375 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:04.375 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:04.445 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:04.448 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:04.450 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:04.452 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:04.521 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:04.522 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:04.526 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:04.527 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:04.590 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:04.591 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:04.592 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:04.594 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:04.645 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:04.646 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:04.646 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:04.647 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:04.704 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:04.705 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:04.706 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:04.707 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:04.758 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:04.758 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:04.763 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:04.765 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:04.817 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:04.818 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:04.824 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:04.825 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:04.880 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:04.880 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:04.889 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:04.890 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:04.944 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:04.945 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:04.956 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:04.958 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:05.015 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:05.016 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:05.043 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:05.043 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:05.073 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:05.074 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:05.092 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:05.097 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:05.192 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:05.194 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:05.198 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:05.201 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:05.274 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:05.275 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:05.297 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:05.298 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:05.318 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:05.318 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:05.335 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:05.336 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:05.394 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:05.394 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:05.394 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:05.394 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:05.448 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:05.448 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:05.456 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:05.459 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:05.519 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:05.519 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:05.526 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:05.527 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:05.579 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:05.580 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:05.592 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:05.593 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:05.646 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:05.646 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:05.659 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:05.660 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:05.720 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:05.721 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:05.725 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:05.727 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:05.786 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:05.787 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:05.790 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:05.791 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:05.845 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:05.845 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:05.857 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:05.858 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:05.911 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:05.914 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:05.938 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:05.938 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:05.968 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:05.970 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:05.990 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:05.991 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:06.075 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:06.076 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:06.077 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:06.081 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:06.151 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:06.152 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:06.152 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:06.152 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:06.227 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:06.230 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:06.231 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:06.233 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:06.299 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:06.300 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:06.325 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:06.326 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:06.352 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:06.353 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:06.364 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:06.365 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:06.430 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:06.431 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:06.433 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:06.433 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:06.508 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:06.509 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:06.510 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:06.511 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:06.575 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:06.576 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:06.579 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:06.580 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:06.663 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:06.664 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:06.665 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:06.666 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:06.761 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:06.762 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:06.769 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:06.769 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:06.803 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:06.803 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:06.810 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:06.811 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:06.867 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:06.868 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:06.869 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:06.870 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:06.927 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:06.929 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:06.930 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:06.930 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:06.993 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:06.995 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:06.997 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:06.997 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:07.054 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:07.055 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:07.061 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:07.062 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:07.125 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:07.126 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:07.129 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:07.130 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:07.188 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:07.190 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:07.193 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:07.195 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:07.255 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:07.256 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:07.261 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:07.261 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:07.323 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:07.323 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:07.325 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:07.326 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:07.386 24931 24931 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKS-THERMAL kind=yuv instance=0x741db7ec50 pid=24931 mono_ns=15653923695 start_ns=5648198237 final=0 queue_frames=0 queue_resets=0 draw=0 redraw=0 display_synced=0 submit=0 flip=0 lease_copy=0 lease_reuse=0 latch=0 defer_publish_flush=0 publish_flush=0 flush_req=0 flush_ovr=0 nominal_fps=0.000000 fps_fallback=0 publish_deferred=0 retire_flush=0 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=142 swap=142 swap_ok=142 frame_id=0 pts=0.000000000 w=2672 h=1336
+11-01 11:29:07.388 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-THERMAL kind=vo instance=0x741db84710 pid=24931 mono_ns=15654016664 start_ns=5647957456 final=0 queue_frames=269 queue_resets=1 draw=276 redraw=7 display_synced=0 submit=276 flip=276 lease_copy=0 lease_reuse=0 latch=0 defer_publish_flush=0 publish_flush=0 flush_req=0 flush_ovr=0 nominal_fps=0.000000 fps_fallback=0 publish_deferred=0 retire_flush=0 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=0 swap=0 swap_ok=0 frame_id=325 pts=9.342666667 w=2672 h=1336
+11-01 11:29:07.389 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:07.390 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:07.392 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:07.393 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:07.455 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:07.456 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:07.466 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:07.472 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:07.532 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:07.533 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:07.534 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:07.535 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:07.660 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:07.662 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:07.664 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:07.666 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:07.707 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:07.708 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:07.709 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:07.712 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:07.799 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:07.800 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:07.801 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:07.802 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:07.866 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:07.867 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:07.868 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:07.869 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:07.927 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:07.929 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:07.929 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:07.929 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:07.974 24931 24931 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKS-THERMAL kind=import instance=0x7425548050 pid=24931 mono_ns=16238740407 start_ns=6198408494 final=0 queue_frames=0 queue_resets=0 draw=0 redraw=0 display_synced=0 submit=0 flip=0 lease_copy=285 lease_reuse=2 latch=285 defer_publish_flush=0 publish_flush=285 flush_req=0 flush_ovr=0 nominal_fps=29.970030 fps_fallback=0 publish_deferred=0 retire_flush=286 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=0 swap=0 swap_ok=0 frame_id=0 pts=9.909900000 w=3840 h=1920
+11-01 11:29:07.997 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:08.007 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:08.008 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:08.009 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:08.069 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:08.071 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:08.091 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:08.091 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:08.120 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:08.121 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:08.132 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:08.134 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:08.197 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:08.199 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:08.200 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:08.201 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:08.259 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:08.260 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:08.262 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:08.266 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:08.338 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:08.339 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:08.340 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:08.346 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:08.370 24931 24931 I flutter : THERMAL_JSON_PART {"r":"24931:1793503736095976","n":3,"i":0,"c":4,"d":"eyJzY2hlbWFWZXJzaW9uIjoxLCJydW5JZCI6IjI0OTMxOjE3OTM1MDM3MzYwOTU5NzYiLCJwaWQiOjI0OTMxLCJzZXJpYWwiOjEsInBoYXNlIjoic2FtcGxlIiwibW9kZSI6ImF1ZGlvIiwiZWxhcHNlZE1zIjoxMDEyMSwid2FsbFRpbWUiOiIyMDI2LTExLTAxVDAzOjI5OjA4LjM3MDAwNloiLCJzYW1wbGVEdXJhdGlvbk1zIjo0OSwic2FtcGxlT3JkaW5hbCI6MywicHJvcGVydGllcyI6eyJ0aW1lLXBvcyI6IjEwLjMxMDMwMCIsInBhdGgiOiIvc2RjYXJkL0FuZHJvaWQvZGF0YS9jb20uZXhhbXBsZS5tZWRpYV9raXRfaGRyX2xhYi9maWxlcy9ob2trYWlkby1wODQubXA0IiwicGF1c2UiOiJubyIsImh3ZGVjLWN1cnJlbnQiOiJzdXJmYWNldGV4dHVyZSIsImh3ZGVjLXNvZnR3YXJlLWZhbGxiYWNrIjoiOCIsInZpZGVvLWNvZGVjIjoiIiwiY3VycmVudC10cmFja3MvdmlkZW8vZG9sYnktdmlz"}
+11-01 11:29:08.370 24931 24931 I flutter : THERMAL_JSON_PART {"r":"24931:1793503736095976","n":3,"i":1,"c":4,"d":"aW9uLXByb2ZpbGUiOiI4IiwiY3VycmVudC10cmFja3MvdmlkZW8vZG9sYnktdmlzaW9uLWNvbXBhdGliaWxpdHktaWQiOiI0IiwidmlkZW8tc3luYyI6ImF1ZGlvIiwiZGlzcGxheS1zeW5jLWFjdGl2ZSI6Im5vIiwidnN5bmMtcmF0aW8iOiIiLCJhdWRpby1zcGVlZC1jb3JyZWN0aW9uIjoiMS4wMDAwMDAiLCJ2aWRlby1zcGVlZC1jb3JyZWN0aW9uIjoiMS4wMDAwMDAiLCJhdnN5bmMiOiIwLjAwMDAyMyIsImRlY29kZXItZnJhbWUtZHJvcC1jb3VudCI6IjAiLCJmcmFtZS1kcm9wLWNvdW50IjoiMTQiLCJ2by1kZWxheWVkLWZyYW1lLWNvdW50IjoiMCIsIm1pc3RpbWVkLWZyYW1lLWNvdW50IjoiIiwiZXN0aW1hdGVkLXZmLWZwcyI6IjI5Ljk3MDAzMCIsImVzdGltYXRlZC1kaXNwbGF5LWZwcyI6IiIsImNvbnRhaW5lci1mcHMiOiIyOS45NzAwMzAiLCJ2aWRlby1wYXJhbXMvdyI6IjM4NDAi"}
+11-01 11:29:08.370 24931 24931 I flutter : THERMAL_JSON_PART {"r":"24931:1793503736095976","n":3,"i":2,"c":4,"d":"LCJ2aWRlby1wYXJhbXMvaCI6IjE5MjAiLCJ2aWRlby1wYXJhbXMvZ2FtbWEiOiJobGciLCJ2aWRlby1wYXJhbXMvcHJpbWFyaWVzIjoiYnQuMjAyMCIsInZpZGVvLXBhcmFtcy9waXhlbGZvcm1hdCI6Im1lZGlhY29kZWMiLCJ2aWRlby1wYXJhbXMvaHctcGl4ZWxmb3JtYXQiOiIiLCJ2aWRlby1vdXQtcGFyYW1zL3ciOiIzODQwIiwidmlkZW8tb3V0LXBhcmFtcy9oIjoiMTkyMCIsInZpZGVvLW91dC1wYXJhbXMvZ2FtbWEiOiJobGciLCJ2aWRlby1vdXQtcGFyYW1zL3ByaW1hcmllcyI6ImJ0LjIwMjAiLCJ0YXJnZXQtcGVhayI6IjEwMDAiLCJ0YXJnZXQtdHJjIjoicHEiLCJ0YXJnZXQtcHJpbSI6ImJ0LjIwMjAiLCJhbmRyb2lkLXN1cmZhY2Utc2l6ZSI6IjI2NzJ4MTMzNiIsImdhbW1hIjoiMC4wMDAwMDAiLCJpbnRlcnBvbGF0aW9uIjoibm8iLCJ2byI6ImdwdS1uZXh0In0sInByb3BlcnR5"}
+11-01 11:29:08.370 24931 24931 I flutter : THERMAL_JSON_PART {"r":"24931:1793503736095976","n":3,"i":3,"c":4,"d":"RXJyb3JzIjp7fSwicmVwb3J0Ijp7ImdlbmVyYXRpb24iOjEsInNvdXJjZVBhdGgiOiIvc2RjYXJkL0FuZHJvaWQvZGF0YS9jb20uZXhhbXBsZS5tZWRpYV9raXRfaGRyX2xhYi9maWxlcy9ob2trYWlkby1wODQubXA0IiwidmVyaWZpZWQiOnRydWUsImh3ZGVjQ3VycmVudCI6InN1cmZhY2V0ZXh0dXJlIiwiYWN0dWFsIjp7InN0cmF0ZWd5IjoiYmFzZUxheWVyQ29udmVydCIsImh3ZGVjIjoic3VyZmFjZXRleHR1cmUiLCJ0YXJnZXRUcmMiOiJwcSIsInRhcmdldFByaW0iOiJidC4yMDIwIiwidGFyZ2V0UGVhayI6IjEwMDAifSwic291cmNlIjp7ImtpbmQiOiJkb2xieVZpc2lvblA4NCIsImNvZGVjIjoiaGV2YyIsInRyYW5zZmVyIjoiaGxnIiwicHJpbWFyaWVzIjoiYnQuMjAyMCIsImR2UHJvZmlsZSI6OCwiZHZDb21wYXRpYmlsaXR5SWQiOjR9LCJlcnJvciI6bnVsbH19"}
+11-01 11:29:08.417 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:08.418 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:08.419 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:08.421 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:08.484 24931 24931 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKS-INPUT-FBO requested=0 slot_attempts=0 shared_attempts=300 fallbacks=0 copy_failures=0 final=0
+11-01 11:29:08.484 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:08.485 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:08.507 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:08.508 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:08.528 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:08.528 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:08.544 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:08.546 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:08.611 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:08.613 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:08.613 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:08.614 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:08.670 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:08.671 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:08.672 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:08.673 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:08.734 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:08.738 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:08.739 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:08.740 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:08.799 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:08.802 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:08.803 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:08.805 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:08.893 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:08.893 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:08.893 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:08.893 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:08.960 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:08.961 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:08.962 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:08.963 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:09.023 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:09.023 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:09.024 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:09.025 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:09.087 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:09.089 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:09.091 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:09.092 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:09.175 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:09.176 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:09.176 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:09.176 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:09.294 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:09.295 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:09.295 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:09.295 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:09.384 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:09.385 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:09.408 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:09.409 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:09.441 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:09.441 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:09.448 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:09.451 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:09.515 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:09.517 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:09.520 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:09.521 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:09.594 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:09.595 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:09.596 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:09.597 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:09.664 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:09.665 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:09.668 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:09.668 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:09.748 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:09.748 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:09.763 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:09.768 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:09.813 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:09.813 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:09.814 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:09.814 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:09.904 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:09.905 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:09.905 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:09.905 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:09.971 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:09.972 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:09.976 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:09.976 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:10.058 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:10.059 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:10.060 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:10.062 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:10.198 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:10.199 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:10.200 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:10.200 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:10.219 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:10.220 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:10.257 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:10.258 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:10.306 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:10.307 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:10.307 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:10.308 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:10.368 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:10.370 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:10.371 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:10.373 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:10.427 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:10.429 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:10.452 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:10.453 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:10.476 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:10.476 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:10.495 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:10.495 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:10.566 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:10.568 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:10.569 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:10.570 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:10.627 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:10.628 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:10.632 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:10.633 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:10.688 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:10.689 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:10.715 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:10.717 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:10.744 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:10.746 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:10.764 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:10.765 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:10.837 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:10.838 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:10.838 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:10.839 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:10.898 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:10.899 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:10.899 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:10.900 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:10.959 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:10.960 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:10.986 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:10.986 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:11.014 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:11.015 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:11.030 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:11.030 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:11.101 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:11.101 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:11.102 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:11.104 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:11.169 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:11.169 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:11.170 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:11.171 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:11.233 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:11.234 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:11.257 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:11.258 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:11.300 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:11.300 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:11.301 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:11.301 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:11.380 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:11.383 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:11.385 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:11.386 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:11.446 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:11.446 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:11.448 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:11.448 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:11.513 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:11.514 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:11.538 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:11.540 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:11.572 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:11.573 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:11.573 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:11.573 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:11.667 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:11.671 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:11.672 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:11.672 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:11.756 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:11.757 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:11.778 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:11.778 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:11.813 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:11.814 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:11.820 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:11.821 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:11.906 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:11.906 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:11.907 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:11.907 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:11.969 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:11.970 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:11.998 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:11.999 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:12.034 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:12.035 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:12.040 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:12.041 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:12.110 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:12.110 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:12.111 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:12.111 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:12.177 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: Failed rendering image!
+11-01 11:29:12.180 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: Failed rendering frame!
+11-01 11:29:12.181 24931 24931 I flutter : MPVLOG [vo/gpu-next/libplacebo] error: MKS-ANCHOR-DIAG poll enter inv=1
+11-01 11:29:12.182 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=seed-retry status=-1
+11-01 11:29:12.275 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-FUSION-TABLE event=ready cache_id=202 failures=0
+11-01 11:29:12.340 24931 24931 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKS-FUSION committed=1 attempted=411 generation=2
+11-01 11:29:12.342 24931 24931 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKS-FUSION-FRAME event=swap-success route=fused pid=24931 instance=0x741db7ec50 token=411 generation=2 frame_id=472 source_pts=14.247566667 current_pts=14.247566667 still=0 redraw=0 repeat=0 mono_ns=20609896064 gpu_draw_confirmed=1
+11-01 11:29:17.402 24931 24931 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKS-THERMAL kind=yuv instance=0x741db7ec50 pid=24931 mono_ns=25669982016 start_ns=5648198237 final=0 queue_frames=0 queue_resets=0 draw=0 redraw=0 display_synced=0 submit=0 flip=0 lease_copy=0 lease_reuse=0 latch=0 defer_publish_flush=0 publish_flush=0 flush_req=0 flush_ovr=0 nominal_fps=0.000000 fps_fallback=0 publish_deferred=0 retire_flush=0 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=209 swap=363 swap_ok=363 frame_id=0 pts=0.000000000 w=2672 h=1336
+11-01 11:29:17.404 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-THERMAL kind=vo instance=0x741db84710 pid=24931 mono_ns=25670080766 start_ns=5647957456 final=0 queue_frames=557 queue_resets=1 draw=564 redraw=7 display_synced=0 submit=564 flip=564 lease_copy=0 lease_reuse=0 latch=0 defer_publish_flush=0 publish_flush=0 flush_req=0 flush_ovr=0 nominal_fps=0.000000 fps_fallback=0 publish_deferred=0 retire_flush=0 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=0 swap=0 swap_ok=0 frame_id=626 pts=19.386033333 w=2672 h=1336
+11-01 11:29:17.973 24931 24931 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKS-THERMAL kind=import instance=0x7425548050 pid=24931 mono_ns=26240063626 start_ns=6198408494 final=0 queue_frames=0 queue_resets=0 draw=0 redraw=0 display_synced=0 submit=0 flip=0 lease_copy=575 lease_reuse=2 latch=575 defer_publish_flush=0 publish_flush=575 flush_req=0 flush_ovr=0 nominal_fps=29.970030 fps_fallback=0 publish_deferred=0 retire_flush=576 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=0 swap=0 swap_ok=0 frame_id=0 pts=19.986633333 w=3840 h=1920
+11-01 11:29:18.352 24931 24931 I flutter : THERMAL_JSON_PART {"r":"24931:1793503736095976","n":4,"i":0,"c":4,"d":"eyJzY2hlbWFWZXJzaW9uIjoxLCJydW5JZCI6IjI0OTMxOjE3OTM1MDM3MzYwOTU5NzYiLCJwaWQiOjI0OTMxLCJzZXJpYWwiOjEsInBoYXNlIjoic2FtcGxlIiwibW9kZSI6ImF1ZGlvIiwiZWxhcHNlZE1zIjoyMDEwMywid2FsbFRpbWUiOiIyMDI2LTExLTAxVDAzOjI5OjE4LjM1MjI1NloiLCJzYW1wbGVEdXJhdGlvbk1zIjozMSwic2FtcGxlT3JkaW5hbCI6NCwicHJvcGVydGllcyI6eyJ0aW1lLXBvcyI6IjIwLjMyMDMwMCIsInBhdGgiOiIvc2RjYXJkL0FuZHJvaWQvZGF0YS9jb20uZXhhbXBsZS5tZWRpYV9raXRfaGRyX2xhYi9maWxlcy9ob2trYWlkby1wODQubXA0IiwicGF1c2UiOiJubyIsImh3ZGVjLWN1cnJlbnQiOiJzdXJmYWNldGV4dHVyZSIsImh3ZGVjLXNvZnR3YXJlLWZhbGxiYWNrIjoiOCIsInZpZGVvLWNvZGVjIjoiIiwiY3VycmVudC10cmFja3MvdmlkZW8vZG9sYnktdmlz"}
+11-01 11:29:18.352 24931 24931 I flutter : THERMAL_JSON_PART {"r":"24931:1793503736095976","n":4,"i":1,"c":4,"d":"aW9uLXByb2ZpbGUiOiI4IiwiY3VycmVudC10cmFja3MvdmlkZW8vZG9sYnktdmlzaW9uLWNvbXBhdGliaWxpdHktaWQiOiI0IiwidmlkZW8tc3luYyI6ImF1ZGlvIiwiZGlzcGxheS1zeW5jLWFjdGl2ZSI6Im5vIiwidnN5bmMtcmF0aW8iOiIiLCJhdWRpby1zcGVlZC1jb3JyZWN0aW9uIjoiMS4wMDAwMDAiLCJ2aWRlby1zcGVlZC1jb3JyZWN0aW9uIjoiMS4wMDAwMDAiLCJhdnN5bmMiOiIwLjAwMDAyMyIsImRlY29kZXItZnJhbWUtZHJvcC1jb3VudCI6IjAiLCJmcmFtZS1kcm9wLWNvdW50IjoiMjUiLCJ2by1kZWxheWVkLWZyYW1lLWNvdW50IjoiMCIsIm1pc3RpbWVkLWZyYW1lLWNvdW50IjoiIiwiZXN0aW1hdGVkLXZmLWZwcyI6IjI5Ljk3MDAzMCIsImVzdGltYXRlZC1kaXNwbGF5LWZwcyI6IiIsImNvbnRhaW5lci1mcHMiOiIyOS45NzAwMzAiLCJ2aWRlby1wYXJhbXMvdyI6IjM4NDAi"}
+11-01 11:29:18.352 24931 24931 I flutter : THERMAL_JSON_PART {"r":"24931:1793503736095976","n":4,"i":2,"c":4,"d":"LCJ2aWRlby1wYXJhbXMvaCI6IjE5MjAiLCJ2aWRlby1wYXJhbXMvZ2FtbWEiOiJobGciLCJ2aWRlby1wYXJhbXMvcHJpbWFyaWVzIjoiYnQuMjAyMCIsInZpZGVvLXBhcmFtcy9waXhlbGZvcm1hdCI6Im1lZGlhY29kZWMiLCJ2aWRlby1wYXJhbXMvaHctcGl4ZWxmb3JtYXQiOiIiLCJ2aWRlby1vdXQtcGFyYW1zL3ciOiIzODQwIiwidmlkZW8tb3V0LXBhcmFtcy9oIjoiMTkyMCIsInZpZGVvLW91dC1wYXJhbXMvZ2FtbWEiOiJobGciLCJ2aWRlby1vdXQtcGFyYW1zL3ByaW1hcmllcyI6ImJ0LjIwMjAiLCJ0YXJnZXQtcGVhayI6IjEwMDAiLCJ0YXJnZXQtdHJjIjoicHEiLCJ0YXJnZXQtcHJpbSI6ImJ0LjIwMjAiLCJhbmRyb2lkLXN1cmZhY2Utc2l6ZSI6IjI2NzJ4MTMzNiIsImdhbW1hIjoiMC4wMDAwMDAiLCJpbnRlcnBvbGF0aW9uIjoibm8iLCJ2byI6ImdwdS1uZXh0In0sInByb3BlcnR5"}
+11-01 11:29:18.352 24931 24931 I flutter : THERMAL_JSON_PART {"r":"24931:1793503736095976","n":4,"i":3,"c":4,"d":"RXJyb3JzIjp7fSwicmVwb3J0Ijp7ImdlbmVyYXRpb24iOjEsInNvdXJjZVBhdGgiOiIvc2RjYXJkL0FuZHJvaWQvZGF0YS9jb20uZXhhbXBsZS5tZWRpYV9raXRfaGRyX2xhYi9maWxlcy9ob2trYWlkby1wODQubXA0IiwidmVyaWZpZWQiOnRydWUsImh3ZGVjQ3VycmVudCI6InN1cmZhY2V0ZXh0dXJlIiwiYWN0dWFsIjp7InN0cmF0ZWd5IjoiYmFzZUxheWVyQ29udmVydCIsImh3ZGVjIjoic3VyZmFjZXRleHR1cmUiLCJ0YXJnZXRUcmMiOiJwcSIsInRhcmdldFByaW0iOiJidC4yMDIwIiwidGFyZ2V0UGVhayI6IjEwMDAifSwic291cmNlIjp7ImtpbmQiOiJkb2xieVZpc2lvblA4NCIsImNvZGVjIjoiaGV2YyIsInRyYW5zZmVyIjoiaGxnIiwicHJpbWFyaWVzIjoiYnQuMjAyMCIsImR2UHJvZmlsZSI6OCwiZHZDb21wYXRpYmlsaXR5SWQiOjR9LCJlcnJvciI6bnVsbH19"}
+11-01 11:29:18.806 24931 24931 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKS-INPUT-FBO requested=0 slot_attempts=0 shared_attempts=600 fallbacks=0 copy_failures=0 final=0
+11-01 11:29:22.250 24931 24931 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKS-FUSION committed=300 attempted=710 generation=2
+11-01 11:29:27.414 24931 24931 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKS-THERMAL kind=yuv instance=0x741db7ec50 pid=24931 mono_ns=35681606796 start_ns=5648198237 final=0 queue_frames=0 queue_resets=0 draw=0 redraw=0 display_synced=0 submit=0 flip=0 lease_copy=0 lease_reuse=0 latch=0 defer_publish_flush=0 publish_flush=0 flush_req=0 flush_ovr=0 nominal_fps=0.000000 fps_fallback=0 publish_deferred=0 retire_flush=0 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=209 swap=663 swap_ok=663 frame_id=0 pts=0.000000000 w=2672 h=1336
+11-01 11:29:27.420 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-THERMAL kind=vo instance=0x741db84710 pid=24931 mono_ns=35681861276 start_ns=5647957456 final=0 queue_frames=857 queue_resets=1 draw=864 redraw=7 display_synced=0 submit=864 flip=864 lease_copy=0 lease_reuse=0 latch=0 defer_publish_flush=0 publish_flush=0 flush_req=0 flush_ovr=0 nominal_fps=0.000000 fps_fallback=0 publish_deferred=0 retire_flush=0 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=0 swap=0 swap_ok=0 frame_id=926 pts=29.396033333 w=2672 h=1336
+11-01 11:29:27.985 24931 24931 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKS-THERMAL kind=import instance=0x7425548050 pid=24931 mono_ns=36252108250 start_ns=6198408494 final=0 queue_frames=0 queue_resets=0 draw=0 redraw=0 display_synced=0 submit=0 flip=0 lease_copy=875 lease_reuse=2 latch=875 defer_publish_flush=0 publish_flush=875 flush_req=0 flush_ovr=0 nominal_fps=29.970030 fps_fallback=0 publish_deferred=0 retire_flush=876 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=0 swap=0 swap_ok=0 frame_id=0 pts=29.996633333 w=3840 h=1920
+11-01 11:29:28.367 24931 24931 I flutter : THERMAL_JSON_PART {"r":"24931:1793503736095976","n":5,"i":0,"c":4,"d":"eyJzY2hlbWFWZXJzaW9uIjoxLCJydW5JZCI6IjI0OTMxOjE3OTM1MDM3MzYwOTU5NzYiLCJwaWQiOjI0OTMxLCJzZXJpYWwiOjEsInBoYXNlIjoic2FtcGxlIiwibW9kZSI6ImF1ZGlvIiwiZWxhcHNlZE1zIjozMDExOCwid2FsbFRpbWUiOiIyMDI2LTExLTAxVDAzOjI5OjI4LjM2NzE3M1oiLCJzYW1wbGVEdXJhdGlvbk1zIjo0Niwic2FtcGxlT3JkaW5hbCI6NSwicHJvcGVydGllcyI6eyJ0aW1lLXBvcyI6IjMwLjMzMDMwMCIsInBhdGgiOiIvc2RjYXJkL0FuZHJvaWQvZGF0YS9jb20uZXhhbXBsZS5tZWRpYV9raXRfaGRyX2xhYi9maWxlcy9ob2trYWlkby1wODQubXA0IiwicGF1c2UiOiJubyIsImh3ZGVjLWN1cnJlbnQiOiJzdXJmYWNldGV4dHVyZSIsImh3ZGVjLXNvZnR3YXJlLWZhbGxiYWNrIjoiOCIsInZpZGVvLWNvZGVjIjoiIiwiY3VycmVudC10cmFja3MvdmlkZW8vZG9sYnktdmlz"}
+11-01 11:29:28.367 24931 24931 I flutter : THERMAL_JSON_PART {"r":"24931:1793503736095976","n":5,"i":1,"c":4,"d":"aW9uLXByb2ZpbGUiOiI4IiwiY3VycmVudC10cmFja3MvdmlkZW8vZG9sYnktdmlzaW9uLWNvbXBhdGliaWxpdHktaWQiOiI0IiwidmlkZW8tc3luYyI6ImF1ZGlvIiwiZGlzcGxheS1zeW5jLWFjdGl2ZSI6Im5vIiwidnN5bmMtcmF0aW8iOiIiLCJhdWRpby1zcGVlZC1jb3JyZWN0aW9uIjoiMS4wMDAwMDAiLCJ2aWRlby1zcGVlZC1jb3JyZWN0aW9uIjoiMS4wMDAwMDAiLCJhdnN5bmMiOiIwLjAwMDA0MyIsImRlY29kZXItZnJhbWUtZHJvcC1jb3VudCI6IjAiLCJmcmFtZS1kcm9wLWNvdW50IjoiMjUiLCJ2by1kZWxheWVkLWZyYW1lLWNvdW50IjoiMCIsIm1pc3RpbWVkLWZyYW1lLWNvdW50IjoiIiwiZXN0aW1hdGVkLXZmLWZwcyI6IjI5Ljk3MDAzMCIsImVzdGltYXRlZC1kaXNwbGF5LWZwcyI6IiIsImNvbnRhaW5lci1mcHMiOiIyOS45NzAwMzAiLCJ2aWRlby1wYXJhbXMvdyI6IjM4NDAi"}
+11-01 11:29:28.367 24931 24931 I flutter : THERMAL_JSON_PART {"r":"24931:1793503736095976","n":5,"i":2,"c":4,"d":"LCJ2aWRlby1wYXJhbXMvaCI6IjE5MjAiLCJ2aWRlby1wYXJhbXMvZ2FtbWEiOiJobGciLCJ2aWRlby1wYXJhbXMvcHJpbWFyaWVzIjoiYnQuMjAyMCIsInZpZGVvLXBhcmFtcy9waXhlbGZvcm1hdCI6Im1lZGlhY29kZWMiLCJ2aWRlby1wYXJhbXMvaHctcGl4ZWxmb3JtYXQiOiIiLCJ2aWRlby1vdXQtcGFyYW1zL3ciOiIzODQwIiwidmlkZW8tb3V0LXBhcmFtcy9oIjoiMTkyMCIsInZpZGVvLW91dC1wYXJhbXMvZ2FtbWEiOiJobGciLCJ2aWRlby1vdXQtcGFyYW1zL3ByaW1hcmllcyI6ImJ0LjIwMjAiLCJ0YXJnZXQtcGVhayI6IjEwMDAiLCJ0YXJnZXQtdHJjIjoicHEiLCJ0YXJnZXQtcHJpbSI6ImJ0LjIwMjAiLCJhbmRyb2lkLXN1cmZhY2Utc2l6ZSI6IjI2NzJ4MTMzNiIsImdhbW1hIjoiMC4wMDAwMDAiLCJpbnRlcnBvbGF0aW9uIjoibm8iLCJ2byI6ImdwdS1uZXh0In0sInByb3BlcnR5"}
+11-01 11:29:28.368 24931 24931 I flutter : THERMAL_JSON_PART {"r":"24931:1793503736095976","n":5,"i":3,"c":4,"d":"RXJyb3JzIjp7fSwicmVwb3J0Ijp7ImdlbmVyYXRpb24iOjEsInNvdXJjZVBhdGgiOiIvc2RjYXJkL0FuZHJvaWQvZGF0YS9jb20uZXhhbXBsZS5tZWRpYV9raXRfaGRyX2xhYi9maWxlcy9ob2trYWlkby1wODQubXA0IiwidmVyaWZpZWQiOnRydWUsImh3ZGVjQ3VycmVudCI6InN1cmZhY2V0ZXh0dXJlIiwiYWN0dWFsIjp7InN0cmF0ZWd5IjoiYmFzZUxheWVyQ29udmVydCIsImh3ZGVjIjoic3VyZmFjZXRleHR1cmUiLCJ0YXJnZXRUcmMiOiJwcSIsInRhcmdldFByaW0iOiJidC4yMDIwIiwidGFyZ2V0UGVhayI6IjEwMDAifSwic291cmNlIjp7ImtpbmQiOiJkb2xieVZpc2lvblA4NCIsImNvZGVjIjoiaGV2YyIsInRyYW5zZmVyIjoiaGxnIiwicHJpbWFyaWVzIjoiYnQuMjAyMCIsImR2UHJvZmlsZSI6OCwiZHZDb21wYXRpYmlsaXR5SWQiOjR9LCJlcnJvciI6bnVsbH19"}
+11-01 11:29:28.821 24931 24931 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKS-INPUT-FBO requested=0 slot_attempts=0 shared_attempts=900 fallbacks=0 copy_failures=0 final=0
+11-01 11:29:32.270 24931 24931 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKS-FUSION committed=600 attempted=1010 generation=2
+11-01 11:29:37.423 24931 24931 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKS-THERMAL kind=yuv instance=0x741db7ec50 pid=24931 mono_ns=45690865952 start_ns=5648198237 final=0 queue_frames=0 queue_resets=0 draw=0 redraw=0 display_synced=0 submit=0 flip=0 lease_copy=0 lease_reuse=0 latch=0 defer_publish_flush=0 publish_flush=0 flush_req=0 flush_ovr=0 nominal_fps=0.000000 fps_fallback=0 publish_deferred=0 retire_flush=0 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=209 swap=963 swap_ok=963 frame_id=0 pts=0.000000000 w=2672 h=1336
+11-01 11:29:37.425 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-THERMAL kind=vo instance=0x741db84710 pid=24931 mono_ns=45691064910 start_ns=5647957456 final=0 queue_frames=1157 queue_resets=1 draw=1164 redraw=7 display_synced=0 submit=1164 flip=1164 lease_copy=0 lease_reuse=0 latch=0 defer_publish_flush=0 publish_flush=0 flush_req=0 flush_ovr=0 nominal_fps=0.000000 fps_fallback=0 publish_deferred=0 retire_flush=0 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=0 swap=0 swap_ok=0 frame_id=1226 pts=39.406033333 w=2672 h=1336
+11-01 11:29:37.999 24931 24931 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKS-THERMAL kind=import instance=0x7425548050 pid=24931 mono_ns=46263595790 start_ns=6198408494 final=0 queue_frames=0 queue_resets=0 draw=0 redraw=0 display_synced=0 submit=0 flip=0 lease_copy=1175 lease_reuse=2 latch=1175 defer_publish_flush=0 publish_flush=1175 flush_req=0 flush_ovr=0 nominal_fps=29.970030 fps_fallback=0 publish_deferred=0 retire_flush=1176 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=0 swap=0 swap_ok=0 frame_id=0 pts=40.006633333 w=3840 h=1920
+11-01 11:29:38.365 24931 24931 I flutter : THERMAL_JSON_PART {"r":"24931:1793503736095976","n":6,"i":0,"c":4,"d":"eyJzY2hlbWFWZXJzaW9uIjoxLCJydW5JZCI6IjI0OTMxOjE3OTM1MDM3MzYwOTU5NzYiLCJwaWQiOjI0OTMxLCJzZXJpYWwiOjEsInBoYXNlIjoic2FtcGxlIiwibW9kZSI6ImF1ZGlvIiwiZWxhcHNlZE1zIjo0MDExNiwid2FsbFRpbWUiOiIyMDI2LTExLTAxVDAzOjI5OjM4LjM2NDk4MVoiLCJzYW1wbGVEdXJhdGlvbk1zIjo0NCwic2FtcGxlT3JkaW5hbCI6NiwicHJvcGVydGllcyI6eyJ0aW1lLXBvcyI6IjQwLjMwNjkzMyIsInBhdGgiOiIvc2RjYXJkL0FuZHJvaWQvZGF0YS9jb20uZXhhbXBsZS5tZWRpYV9raXRfaGRyX2xhYi9maWxlcy9ob2trYWlkby1wODQubXA0IiwicGF1c2UiOiJubyIsImh3ZGVjLWN1cnJlbnQiOiJzdXJmYWNldGV4dHVyZSIsImh3ZGVjLXNvZnR3YXJlLWZhbGxiYWNrIjoiOCIsInZpZGVvLWNvZGVjIjoiIiwiY3VycmVudC10cmFja3MvdmlkZW8vZG9sYnktdmlz"}
+11-01 11:29:38.366 24931 24931 I flutter : THERMAL_JSON_PART {"r":"24931:1793503736095976","n":6,"i":1,"c":4,"d":"aW9uLXByb2ZpbGUiOiI4IiwiY3VycmVudC10cmFja3MvdmlkZW8vZG9sYnktdmlzaW9uLWNvbXBhdGliaWxpdHktaWQiOiI0IiwidmlkZW8tc3luYyI6ImF1ZGlvIiwiZGlzcGxheS1zeW5jLWFjdGl2ZSI6Im5vIiwidnN5bmMtcmF0aW8iOiIiLCJhdWRpby1zcGVlZC1jb3JyZWN0aW9uIjoiMS4wMDAwMDAiLCJ2aWRlby1zcGVlZC1jb3JyZWN0aW9uIjoiMS4wMDAwMDAiLCJhdnN5bmMiOiIwLjAwMDA0MyIsImRlY29kZXItZnJhbWUtZHJvcC1jb3VudCI6IjAiLCJmcmFtZS1kcm9wLWNvdW50IjoiMjUiLCJ2by1kZWxheWVkLWZyYW1lLWNvdW50IjoiMCIsIm1pc3RpbWVkLWZyYW1lLWNvdW50IjoiIiwiZXN0aW1hdGVkLXZmLWZwcyI6IjI5Ljk3MDAzMCIsImVzdGltYXRlZC1kaXNwbGF5LWZwcyI6IiIsImNvbnRhaW5lci1mcHMiOiIyOS45NzAwMzAiLCJ2aWRlby1wYXJhbXMvdyI6IjM4NDAi"}
+11-01 11:29:38.366 24931 24931 I flutter : THERMAL_JSON_PART {"r":"24931:1793503736095976","n":6,"i":2,"c":4,"d":"LCJ2aWRlby1wYXJhbXMvaCI6IjE5MjAiLCJ2aWRlby1wYXJhbXMvZ2FtbWEiOiJobGciLCJ2aWRlby1wYXJhbXMvcHJpbWFyaWVzIjoiYnQuMjAyMCIsInZpZGVvLXBhcmFtcy9waXhlbGZvcm1hdCI6Im1lZGlhY29kZWMiLCJ2aWRlby1wYXJhbXMvaHctcGl4ZWxmb3JtYXQiOiIiLCJ2aWRlby1vdXQtcGFyYW1zL3ciOiIzODQwIiwidmlkZW8tb3V0LXBhcmFtcy9oIjoiMTkyMCIsInZpZGVvLW91dC1wYXJhbXMvZ2FtbWEiOiJobGciLCJ2aWRlby1vdXQtcGFyYW1zL3ByaW1hcmllcyI6ImJ0LjIwMjAiLCJ0YXJnZXQtcGVhayI6IjEwMDAiLCJ0YXJnZXQtdHJjIjoicHEiLCJ0YXJnZXQtcHJpbSI6ImJ0LjIwMjAiLCJhbmRyb2lkLXN1cmZhY2Utc2l6ZSI6IjI2NzJ4MTMzNiIsImdhbW1hIjoiMC4wMDAwMDAiLCJpbnRlcnBvbGF0aW9uIjoibm8iLCJ2byI6ImdwdS1uZXh0In0sInByb3BlcnR5"}
+11-01 11:29:38.366 24931 24931 I flutter : THERMAL_JSON_PART {"r":"24931:1793503736095976","n":6,"i":3,"c":4,"d":"RXJyb3JzIjp7fSwicmVwb3J0Ijp7ImdlbmVyYXRpb24iOjEsInNvdXJjZVBhdGgiOiIvc2RjYXJkL0FuZHJvaWQvZGF0YS9jb20uZXhhbXBsZS5tZWRpYV9raXRfaGRyX2xhYi9maWxlcy9ob2trYWlkby1wODQubXA0IiwidmVyaWZpZWQiOnRydWUsImh3ZGVjQ3VycmVudCI6InN1cmZhY2V0ZXh0dXJlIiwiYWN0dWFsIjp7InN0cmF0ZWd5IjoiYmFzZUxheWVyQ29udmVydCIsImh3ZGVjIjoic3VyZmFjZXRleHR1cmUiLCJ0YXJnZXRUcmMiOiJwcSIsInRhcmdldFByaW0iOiJidC4yMDIwIiwidGFyZ2V0UGVhayI6IjEwMDAifSwic291cmNlIjp7ImtpbmQiOiJkb2xieVZpc2lvblA4NCIsImNvZGVjIjoiaGV2YyIsInRyYW5zZmVyIjoiaGxnIiwicHJpbWFyaWVzIjoiYnQuMjAyMCIsImR2UHJvZmlsZSI6OCwiZHZDb21wYXRpYmlsaXR5SWQiOjR9LCJlcnJvciI6bnVsbH19"}
+11-01 11:29:38.830 24931 24931 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKS-INPUT-FBO requested=0 slot_attempts=0 shared_attempts=1200 fallbacks=0 copy_failures=0 final=0
+11-01 11:29:42.270 24931 24931 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKS-FUSION committed=900 attempted=1310 generation=2
+11-01 11:29:47.434 24931 24931 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKS-THERMAL kind=yuv instance=0x741db7ec50 pid=24931 mono_ns=55701161357 start_ns=5648198237 final=0 queue_frames=0 queue_resets=0 draw=0 redraw=0 display_synced=0 submit=0 flip=0 lease_copy=0 lease_reuse=0 latch=0 defer_publish_flush=0 publish_flush=0 flush_req=0 flush_ovr=0 nominal_fps=0.000000 fps_fallback=0 publish_deferred=0 retire_flush=0 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=209 swap=1263 swap_ok=1263 frame_id=0 pts=0.000000000 w=2672 h=1336
+11-01 11:29:47.438 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-THERMAL kind=vo instance=0x741db84710 pid=24931 mono_ns=55701397711 start_ns=5647957456 final=0 queue_frames=1457 queue_resets=1 draw=1464 redraw=7 display_synced=0 submit=1464 flip=1464 lease_copy=0 lease_reuse=0 latch=0 defer_publish_flush=0 publish_flush=0 flush_req=0 flush_ovr=0 nominal_fps=0.000000 fps_fallback=0 publish_deferred=0 retire_flush=0 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=0 swap=0 swap_ok=0 frame_id=1526 pts=49.416033333 w=2672 h=1336
+11-01 11:29:48.005 24931 24931 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKS-THERMAL kind=import instance=0x7425548050 pid=24931 mono_ns=56272104269 start_ns=6198408494 final=0 queue_frames=0 queue_resets=0 draw=0 redraw=0 display_synced=0 submit=0 flip=0 lease_copy=1475 lease_reuse=2 latch=1475 defer_publish_flush=0 publish_flush=1475 flush_req=0 flush_ovr=0 nominal_fps=29.970030 fps_fallback=0 publish_deferred=0 retire_flush=1476 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=0 swap=0 swap_ok=0 frame_id=0 pts=50.016633333 w=3840 h=1920
+11-01 11:29:48.366 24931 24931 I flutter : THERMAL_JSON_PART {"r":"24931:1793503736095976","n":7,"i":0,"c":4,"d":"eyJzY2hlbWFWZXJzaW9uIjoxLCJydW5JZCI6IjI0OTMxOjE3OTM1MDM3MzYwOTU5NzYiLCJwaWQiOjI0OTMxLCJzZXJpYWwiOjEsInBoYXNlIjoic2FtcGxlIiwibW9kZSI6ImF1ZGlvIiwiZWxhcHNlZE1zIjo1MDExNywid2FsbFRpbWUiOiIyMDI2LTExLTAxVDAzOjI5OjQ4LjM2NjA5NloiLCJzYW1wbGVEdXJhdGlvbk1zIjo0NSwic2FtcGxlT3JkaW5hbCI6NywicHJvcGVydGllcyI6eyJ0aW1lLXBvcyI6IjUwLjM1MDMwMCIsInBhdGgiOiIvc2RjYXJkL0FuZHJvaWQvZGF0YS9jb20uZXhhbXBsZS5tZWRpYV9raXRfaGRyX2xhYi9maWxlcy9ob2trYWlkby1wODQubXA0IiwicGF1c2UiOiJubyIsImh3ZGVjLWN1cnJlbnQiOiJzdXJmYWNldGV4dHVyZSIsImh3ZGVjLXNvZnR3YXJlLWZhbGxiYWNrIjoiOCIsInZpZGVvLWNvZGVjIjoiIiwiY3VycmVudC10cmFja3MvdmlkZW8vZG9sYnktdmlz"}
+11-01 11:29:48.366 24931 24931 I flutter : THERMAL_JSON_PART {"r":"24931:1793503736095976","n":7,"i":1,"c":4,"d":"aW9uLXByb2ZpbGUiOiI4IiwiY3VycmVudC10cmFja3MvdmlkZW8vZG9sYnktdmlzaW9uLWNvbXBhdGliaWxpdHktaWQiOiI0IiwidmlkZW8tc3luYyI6ImF1ZGlvIiwiZGlzcGxheS1zeW5jLWFjdGl2ZSI6Im5vIiwidnN5bmMtcmF0aW8iOiIiLCJhdWRpby1zcGVlZC1jb3JyZWN0aW9uIjoiMS4wMDAwMDAiLCJ2aWRlby1zcGVlZC1jb3JyZWN0aW9uIjoiMS4wMDAwMDAiLCJhdnN5bmMiOiIwLjAwMDAyOCIsImRlY29kZXItZnJhbWUtZHJvcC1jb3VudCI6IjAiLCJmcmFtZS1kcm9wLWNvdW50IjoiMjUiLCJ2by1kZWxheWVkLWZyYW1lLWNvdW50IjoiMCIsIm1pc3RpbWVkLWZyYW1lLWNvdW50IjoiIiwiZXN0aW1hdGVkLXZmLWZwcyI6IjI5Ljk3MDAzMCIsImVzdGltYXRlZC1kaXNwbGF5LWZwcyI6IiIsImNvbnRhaW5lci1mcHMiOiIyOS45NzAwMzAiLCJ2aWRlby1wYXJhbXMvdyI6IjM4NDAi"}
+11-01 11:29:48.367 24931 24931 I flutter : THERMAL_JSON_PART {"r":"24931:1793503736095976","n":7,"i":2,"c":4,"d":"LCJ2aWRlby1wYXJhbXMvaCI6IjE5MjAiLCJ2aWRlby1wYXJhbXMvZ2FtbWEiOiJobGciLCJ2aWRlby1wYXJhbXMvcHJpbWFyaWVzIjoiYnQuMjAyMCIsInZpZGVvLXBhcmFtcy9waXhlbGZvcm1hdCI6Im1lZGlhY29kZWMiLCJ2aWRlby1wYXJhbXMvaHctcGl4ZWxmb3JtYXQiOiIiLCJ2aWRlby1vdXQtcGFyYW1zL3ciOiIzODQwIiwidmlkZW8tb3V0LXBhcmFtcy9oIjoiMTkyMCIsInZpZGVvLW91dC1wYXJhbXMvZ2FtbWEiOiJobGciLCJ2aWRlby1vdXQtcGFyYW1zL3ByaW1hcmllcyI6ImJ0LjIwMjAiLCJ0YXJnZXQtcGVhayI6IjEwMDAiLCJ0YXJnZXQtdHJjIjoicHEiLCJ0YXJnZXQtcHJpbSI6ImJ0LjIwMjAiLCJhbmRyb2lkLXN1cmZhY2Utc2l6ZSI6IjI2NzJ4MTMzNiIsImdhbW1hIjoiMC4wMDAwMDAiLCJpbnRlcnBvbGF0aW9uIjoibm8iLCJ2byI6ImdwdS1uZXh0In0sInByb3BlcnR5"}
+11-01 11:29:48.367 24931 24931 I flutter : THERMAL_JSON_PART {"r":"24931:1793503736095976","n":7,"i":3,"c":4,"d":"RXJyb3JzIjp7fSwicmVwb3J0Ijp7ImdlbmVyYXRpb24iOjEsInNvdXJjZVBhdGgiOiIvc2RjYXJkL0FuZHJvaWQvZGF0YS9jb20uZXhhbXBsZS5tZWRpYV9raXRfaGRyX2xhYi9maWxlcy9ob2trYWlkby1wODQubXA0IiwidmVyaWZpZWQiOnRydWUsImh3ZGVjQ3VycmVudCI6InN1cmZhY2V0ZXh0dXJlIiwiYWN0dWFsIjp7InN0cmF0ZWd5IjoiYmFzZUxheWVyQ29udmVydCIsImh3ZGVjIjoic3VyZmFjZXRleHR1cmUiLCJ0YXJnZXRUcmMiOiJwcSIsInRhcmdldFByaW0iOiJidC4yMDIwIiwidGFyZ2V0UGVhayI6IjEwMDAifSwic291cmNlIjp7ImtpbmQiOiJkb2xieVZpc2lvblA4NCIsImNvZGVjIjoiaGV2YyIsInRyYW5zZmVyIjoiaGxnIiwicHJpbWFyaWVzIjoiYnQuMjAyMCIsImR2UHJvZmlsZSI6OCwiZHZDb21wYXRpYmlsaXR5SWQiOjR9LCJlcnJvciI6bnVsbH19"}
+11-01 11:29:48.840 24931 24931 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKS-INPUT-FBO requested=0 slot_attempts=0 shared_attempts=1500 fallbacks=0 copy_failures=0 final=0
+11-01 11:29:52.278 24931 24931 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKS-FUSION committed=1200 attempted=1610 generation=2
+11-01 11:29:57.443 24931 24931 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKS-THERMAL kind=yuv instance=0x741db7ec50 pid=24931 mono_ns=65710611554 start_ns=5648198237 final=0 queue_frames=0 queue_resets=0 draw=0 redraw=0 display_synced=0 submit=0 flip=0 lease_copy=0 lease_reuse=0 latch=0 defer_publish_flush=0 publish_flush=0 flush_req=0 flush_ovr=0 nominal_fps=0.000000 fps_fallback=0 publish_deferred=0 retire_flush=0 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=209 swap=1563 swap_ok=1563 frame_id=0 pts=0.000000000 w=2672 h=1336
+11-01 11:29:57.445 24931 24931 I flutter : MPVLOG [vo/gpu-next] error: MKS-THERMAL kind=vo instance=0x741db84710 pid=24931 mono_ns=65710748741 start_ns=5647957456 final=0 queue_frames=1757 queue_resets=1 draw=1764 redraw=7 display_synced=0 submit=1764 flip=1764 lease_copy=0 lease_reuse=0 latch=0 defer_publish_flush=0 publish_flush=0 flush_req=0 flush_ovr=0 nominal_fps=0.000000 fps_fallback=0 publish_deferred=0 retire_flush=0 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=0 swap=0 swap_ok=0 frame_id=1826 pts=59.426033333 w=2672 h=1336
+11-01 11:29:58.018 24931 24931 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKS-THERMAL kind=import instance=0x7425548050 pid=24931 mono_ns=66283457174 start_ns=6198408494 final=0 queue_frames=0 queue_resets=0 draw=0 redraw=0 display_synced=0 submit=0 flip=0 lease_copy=1775 lease_reuse=2 latch=1775 defer_publish_flush=0 publish_flush=1775 flush_req=0 flush_ovr=0 nominal_fps=29.970030 fps_fallback=0 publish_deferred=0 retire_flush=1776 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=0 swap=0 swap_ok=0 frame_id=0 pts=60.026633333 w=3840 h=1920
+11-01 11:29:58.359 24931 24931 I flutter : THERMAL_JSON_PART {"r":"24931:1793503736095976","n":8,"i":0,"c":4,"d":"eyJzY2hlbWFWZXJzaW9uIjoxLCJydW5JZCI6IjI0OTMxOjE3OTM1MDM3MzYwOTU5NzYiLCJwaWQiOjI0OTMxLCJzZXJpYWwiOjEsInBoYXNlIjoic2FtcGxlIiwibW9kZSI6ImF1ZGlvIiwiZWxhcHNlZE1zIjo2MDExMCwid2FsbFRpbWUiOiIyMDI2LTExLTAxVDAzOjI5OjU4LjM1ODcwM1oiLCJzYW1wbGVEdXJhdGlvbk1zIjozNywic2FtcGxlT3JkaW5hbCI6OCwicHJvcGVydGllcyI6eyJ0aW1lLXBvcyI6IjYwLjMyNjkzMyIsInBhdGgiOiIvc2RjYXJkL0FuZHJvaWQvZGF0YS9jb20uZXhhbXBsZS5tZWRpYV9raXRfaGRyX2xhYi9maWxlcy9ob2trYWlkby1wODQubXA0IiwicGF1c2UiOiJubyIsImh3ZGVjLWN1cnJlbnQiOiJzdXJmYWNldGV4dHVyZSIsImh3ZGVjLXNvZnR3YXJlLWZhbGxiYWNrIjoiOCIsInZpZGVvLWNvZGVjIjoiIiwiY3VycmVudC10cmFja3MvdmlkZW8vZG9sYnktdmlz"}
+11-01 11:29:58.359 24931 24931 I flutter : THERMAL_JSON_PART {"r":"24931:1793503736095976","n":8,"i":1,"c":4,"d":"aW9uLXByb2ZpbGUiOiI4IiwiY3VycmVudC10cmFja3MvdmlkZW8vZG9sYnktdmlzaW9uLWNvbXBhdGliaWxpdHktaWQiOiI0IiwidmlkZW8tc3luYyI6ImF1ZGlvIiwiZGlzcGxheS1zeW5jLWFjdGl2ZSI6Im5vIiwidnN5bmMtcmF0aW8iOiIiLCJhdWRpby1zcGVlZC1jb3JyZWN0aW9uIjoiMS4wMDAwMDAiLCJ2aWRlby1zcGVlZC1jb3JyZWN0aW9uIjoiMS4wMDAwMDAiLCJhdnN5bmMiOiIwLjAwMDA2MiIsImRlY29kZXItZnJhbWUtZHJvcC1jb3VudCI6IjAiLCJmcmFtZS1kcm9wLWNvdW50IjoiMjUiLCJ2by1kZWxheWVkLWZyYW1lLWNvdW50IjoiMCIsIm1pc3RpbWVkLWZyYW1lLWNvdW50IjoiIiwiZXN0aW1hdGVkLXZmLWZwcyI6IjI5Ljk3MDAzMCIsImVzdGltYXRlZC1kaXNwbGF5LWZwcyI6IiIsImNvbnRhaW5lci1mcHMiOiIyOS45NzAwMzAiLCJ2aWRlby1wYXJhbXMvdyI6IjM4NDAi"}
+11-01 11:29:58.359 24931 24931 I flutter : THERMAL_JSON_PART {"r":"24931:1793503736095976","n":8,"i":2,"c":4,"d":"LCJ2aWRlby1wYXJhbXMvaCI6IjE5MjAiLCJ2aWRlby1wYXJhbXMvZ2FtbWEiOiJobGciLCJ2aWRlby1wYXJhbXMvcHJpbWFyaWVzIjoiYnQuMjAyMCIsInZpZGVvLXBhcmFtcy9waXhlbGZvcm1hdCI6Im1lZGlhY29kZWMiLCJ2aWRlby1wYXJhbXMvaHctcGl4ZWxmb3JtYXQiOiIiLCJ2aWRlby1vdXQtcGFyYW1zL3ciOiIzODQwIiwidmlkZW8tb3V0LXBhcmFtcy9oIjoiMTkyMCIsInZpZGVvLW91dC1wYXJhbXMvZ2FtbWEiOiJobGciLCJ2aWRlby1vdXQtcGFyYW1zL3ByaW1hcmllcyI6ImJ0LjIwMjAiLCJ0YXJnZXQtcGVhayI6IjEwMDAiLCJ0YXJnZXQtdHJjIjoicHEiLCJ0YXJnZXQtcHJpbSI6ImJ0LjIwMjAiLCJhbmRyb2lkLXN1cmZhY2Utc2l6ZSI6IjI2NzJ4MTMzNiIsImdhbW1hIjoiMC4wMDAwMDAiLCJpbnRlcnBvbGF0aW9uIjoibm8iLCJ2byI6ImdwdS1uZXh0In0sInByb3BlcnR5"}
+11-01 11:29:58.359 24931 24931 I flutter : THERMAL_JSON_PART {"r":"24931:1793503736095976","n":8,"i":3,"c":4,"d":"RXJyb3JzIjp7fSwicmVwb3J0Ijp7ImdlbmVyYXRpb24iOjEsInNvdXJjZVBhdGgiOiIvc2RjYXJkL0FuZHJvaWQvZGF0YS9jb20uZXhhbXBsZS5tZWRpYV9raXRfaGRyX2xhYi9maWxlcy9ob2trYWlkby1wODQubXA0IiwidmVyaWZpZWQiOnRydWUsImh3ZGVjQ3VycmVudCI6InN1cmZhY2V0ZXh0dXJlIiwiYWN0dWFsIjp7InN0cmF0ZWd5IjoiYmFzZUxheWVyQ29udmVydCIsImh3ZGVjIjoic3VyZmFjZXRleHR1cmUiLCJ0YXJnZXRUcmMiOiJwcSIsInRhcmdldFByaW0iOiJidC4yMDIwIiwidGFyZ2V0UGVhayI6IjEwMDAifSwic291cmNlIjp7ImtpbmQiOiJkb2xieVZpc2lvblA4NCIsImNvZGVjIjoiaGV2YyIsInRyYW5zZmVyIjoiaGxnIiwicHJpbWFyaWVzIjoiYnQuMjAyMCIsImR2UHJvZmlsZSI6OCwiZHZDb21wYXRpYmlsaXR5SWQiOjR9LCJlcnJvciI6bnVsbH19"}
+11-01 11:29:58.846 24931 24931 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKS-INPUT-FBO requested=0 slot_attempts=0 shared_attempts=1800 fallbacks=0 copy_failures=0 final=0

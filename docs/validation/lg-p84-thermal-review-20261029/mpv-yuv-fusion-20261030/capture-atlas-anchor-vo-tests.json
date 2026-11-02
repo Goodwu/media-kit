@@ -1,0 +1,32 @@
+{
+  "androidSyntax": {
+    "exit": 0,
+    "stderr": ""
+  },
+  "hostTests": "pureC compile+run0:63,488 finite half expansions plus invalid bits, bounded fullframe UV/count/RGB/data andmask gates; actual atlas VO save/poll/render/flip source-extract3 + existingmanifest10 + EGL1 +FBO1 =15PASS; Meson unit registration added (no project build)",
+  "mode": "debug.mks.yuv_atlas=1 andcompare1+exactPTS; all oldrepeat/tap/invariant/oracle/use_a/probe/single/quad/reverseoff, malformed or conflicting enables forceordinaryRGB andindependentconfig-invalid. Oldschemas1..8/defaultsoff preserved.",
+  "schema9": {
+    "execution": "ordinary renderer target unchanged; Android guardarm then independentlibraryhandle; single renderer invocation with library A0before->instrumentedatlasA->sameoriginalA0 replay allsameRGB16F FBO; finaloriginalA0receipt/repeatedepochchecks thenoriginalCSCunique swap",
+    "resources": "fullframe max4,194,304pixels; RGB3*4uints/pixel legalRGBA/FLOAT numericreadback (finitebinary16expanded, notphysicalstoragebytes), UVatlas3uint/pixel U,V,count=1; separatehandle survives targetdetach safely",
+    "files": "10files+manifestlastO_EXCL underfixedlabexternalfiles: a0_before/atlas_a/a0_after f32,atlasbin,actualA0/atlasfragment,vertex,originalbody,baselinevertexpayload,Android7ROI",
+    "gates": "identity/frame/token/exactPTS/fullsize/FBOsame nonzero/3draw+readback+halfexact/finish+allstageepochs/prerenderanchor/fence/sourceABI/actualA0noSSBOcapture/passthroughquad geometry; programtokens0=2!=1; independentCPUdata finitehalf/UVfinite/count1 and mismatchcountsverify",
+    "status": "maskbit1 a0-replay-mismatch,bit2 atlas-rgb-mismatch; onlylegalcoverage maysave diagnostic-invalid withwholeindependentbasename/event, terminalandnoprogression. Complete mask0 iscaptureonly, neverqualitypass. FinalCSC remainscenterROIinstrumented andisdisclosed.",
+    "failure": "render/flush/preandpostsubmitreceiptfailure immediatelycloseframe andabortswap; duplicateflipblocked; context/identityfail follows existingownedrestore/noGLabortterminalpolicy; independenthandlecancel beforeanyGPUteardown, failuredefersallGPUcleanupforce-stop"
+  },
+  "fboUnchanged": true,
+  "files": {
+    "/Users/wuweiwei1/src/mpv/video/out/vo_gpu_next.c": "c51beca2764d9c492de977d8743890659da6b194e6c1f1234ae31ad501857acf",
+    "/Users/wuweiwei1/src/mpv/video/out/yuv_atlas_anchor.h": "2da8435c51472b52a0c245cf99179af8a7c983a2a5d0492cd22f2c21cc68c2aa",
+    "/Users/wuweiwei1/src/mpv/test/yuv_atlas_anchor.c": "37ed0e458e3ca00057effeb4156ce17490e3fea6d5ce82e368d6eb46f6319c49",
+    "/Users/wuweiwei1/src/mpv/test/meson.build": "7ebaf6290c12426c77b5f86bc836720d0d1202f32be74411879c0a5bf6484a68",
+    "/Users/wuweiwei1/src/media-kit/tool/test_lg_yuv_atlas_vo.py": "bb602205af1ade867f5a3115c4c91ee6cf88dbec6ebf67392e955402adccce6e",
+    "/Users/wuweiwei1/src/libplacebo/src/include/libplacebo/opengl.h": "f346587202837f51dacc90ae740e5840cd5b7a5666e8aa9b2d6f207b133db323"
+  },
+  "limits": "No APK build/device/driver/numerical/quality acceptance. API doubles prove VO contracts, not actual GPU drawcount orphysicalbinds. Library backend freeze and independent V2/runtime evidence separate.",
+  "v2PretargetFix": {
+    "cause": "presubmit atlas receipt gate lackedcompare_started; configuredatlas wouldreject ordinaryRGB beforetargetPTS",
+    "change": "requirecompare_atlas && compare_started && frame_pending beforebaseline receipt check",
+    "regression": "source-extracted actualflip:configuredatlas/noanchor/baselinefalse/startedfalse submits+swaps1,baselinegettercalls0,noabort; startedtrue/baselinefalse denies submit+swap,baselinegettercalls1+abort1; existing postsubmiterror/foreign/submitfailure/duplicateflip retained",
+    "validation": "all15hosttestsPASS beforeextra baseline-call assertions; atlas3testsPASS after assertions; API24syntax0,diffcheck0"
+  }
+}

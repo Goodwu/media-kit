@@ -1,0 +1,40 @@
+User 3%, System 21%, IOW 0%, IRQ 0%
+User 3 + Nice 0 + Sys 16 + Idle 57 + IOW 0 + IRQ 0 + SIRQ 0 = 76
+
+  PID   TID USER     PR  NI CPU% S     VSS     RSS PCY Thread          Proc
+24826 24826 shell    20   0  21% R   9216K   2952K  fg top             top
+27184 27184 wifi     20   0   1% S  17220K   3276K  fg wpa_supplicant  /system/bin/wpa_supplicant
+   16    16 root     20   0   1% S      0K      0K  fg ksoftirqd/2     
+    7     7 root     20   0   0% S      0K      0K  fg rcu_preempt     
+    8     8 root     20   0   0% S      0K      0K  fg rcu_sched       
+    9     9 root     20   0   0% S      0K      0K  fg rcu_bh          
+   10    10 root     RT   0   0% S      0K      0K  fg migration/0     
+   11    11 root     RT   0   0% S      0K      0K  fg migration/1     
+   12    12 root     20   0   0% S      0K      0K  fg ksoftirqd/1     
+   15    15 root     RT   0   0% S      0K      0K  fg migration/2     
+   19    19 root     RT   0   0% S      0K      0K  fg migration/3     
+   20    20 root     20   0   0% S      0K      0K  fg ksoftirqd/3     
+   23    23 root      0 -20   0% S      0K      0K  fg khelper         
+   24    24 root      0 -20   0% S      0K      0K  fg netns           
+   25    25 root      0 -20   0% S      0K      0K  fg perf            
+   26    26 root      0 -20   0% S      0K      0K  fg smd_channel_clo 
+   27    27 root     20   0   0% S      0K      0K  fg dsps_smd_trans_ 
+   28    28 root     20   0   0% S      0K      0K  fg lpass_smd_trans 
+   29    29 root     20   0   0% S      0K      0K  fg mpss_smd_trans_ 
+   30    30 root     20   0   0% S      0K      0K  fg wcnss_smd_trans 
+   31    31 root     20   0   0% S      0K      0K  fg rpm_smd_trans_g 
+   32    32 root     RT   0   0% S      0K      0K  fg msm_watchdog    
+   34    34 root      0 -20   0% S      0K      0K  fg rpm_requests    
+   35    35 root     20   0   0% S      0K      0K  fg smem_native_mps 
+   36    36 root     20   0   0% S      0K      0K  fg mpss_smem_glink 
+   37    37 root     20   0   0% S      0K      0K  fg smem_native_lpa 
+   38    38 root     -2   0   0% S      0K      0K  fg lpass_smem_glin 
+   39    39 root     20   0   0% S      0K      0K  fg smem_native_dsp 
+   40    40 root     20   0   0% S      0K      0K  fg dsps_smem_glink 
+   41    41 root     20   0   0% S      0K      0K  fg smem_native_rpm 
+   42    42 root     20   0   0% S      0K      0K  fg rpm_smem_glink_ 
+   44    44 root     20   0   0% D      0K      0K  fg kworker/u8:1    
+   45    45 root      0 -20   0% S      0K      0K  fg deferwq         
+   46    46 root     RT   0   0% S      0K      0K  fg irq/169-cpr3    
+   47    47 root     RT   0   0% S      0K      0K  fg irq/170-cpr3_ce 
+

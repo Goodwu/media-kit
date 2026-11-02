@@ -1,0 +1,16 @@
+status=running completed=0 pid=21521
+egl_call=initialize ok=1 error=0x3000
+egl_call=bind-api ok=1 error=0x3000
+egl_call=rgb-context ok=1 error=0x3000
+egl_call=rgb-pbuffer ok=1 error=0x3000
+egl_call=rgb-current ok=1 error=0x3000
+renderer=Adreno (TM) 530 version=OpenGL ES 3.2 V@145.0 (GIT@Ifb108ab6ba) glsl=OpenGL ES GLSL ES 3.20
+fragment_ssbo_blocks=4 ssbo_bindings=24 max_block_bytes=2147483647 required_bytes=5120 yuv_extension=1
+execution=rgb pixels=256 coverage_bad=0 payload_bad=0 unmap=1
+yuv_ssbo_compiled_on_rgb_context=1 yuv_executed=0
+yuv_geometry_rc=0 actual=16:16:0x7fa30c04
+yuv-context-primary=1 error=0x3000
+egl_call=yuv-window-surface ok=0 error=0x3009
+status=unsupported-or-error completed=0 cleanup=1 rgb_ssbo_executed=1 yuv_ssbo_compiled=1 yuv_ssbo_executed=0 stage=yuv-window
+error=yuv-window-surface gl_error=0x0 egl_error=0x3009 coverage_bad=0 payload_bad=0
+limits=synthetic-capability-only;RGB-execution-or-shader-compilation-is-not-YUV-execution;not-playback;not-raw-NV12;not-panel;not-performance

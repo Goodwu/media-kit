@@ -1,0 +1,1 @@
+WARNING: linker: /data/local/tmp/lg-half-highp-9220d2a699f64488b9a239a7a0a78d07/lg_half_equivalence: unsupported flags DT_FLAGS_1=0x8000001

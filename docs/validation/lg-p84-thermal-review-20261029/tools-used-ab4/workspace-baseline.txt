@@ -1,0 +1,23 @@
+ M TASKS.md
+ M libs/android/media_kit_android_dataspace_vendor/android/src/main/java/com/alexmercerind/media_kit_android_dataspace_vendor/LgPqDataSpaceExt.java
+ M media_kit_hdr_lab/android/app/src/main/java/com/example/media_kit_hdr_lab/LyaDiagnosticsDataSpaceExt.java
+ M media_kit_hdr_lab/lib/tests/01.single_player_single_video.dart
+ M media_kit_video/android/src/main/java/com/alexmercerind/media_kit_video/platformview/PlatformVideoView.java
+ M media_kit_video/lib/src/hdr/hdr_capabilities.dart
+ M media_kit_video/lib/src/hdr/hdr_player_backend.dart
+ M media_kit_video/lib/src/hdr/hdr_route.dart
+ M media_kit_video/lib/src/hdr/hdr_strategy_realizer.dart
+ M media_kit_video/test/hdr_player_backend_output_ownership_test.dart
+?? archives/conversations/lg-dv-p84-thermal-review-20261029.md
+?? docs/validation/lg-p84-thermal-review-20261029/
+?? media_kit_hdr_lab/lib/common/android_p84_lifecycle_probe.dart
+?? media_kit_hdr_lab/lib/common/android_p84_thermal_probe.dart
+?? media_kit_hdr_lab/test/android_p84_lifecycle_probe_test.dart
+?? media_kit_hdr_lab/test/android_p84_thermal_probe_test.dart
+?? media_kit_video/test/hdr_surface_texture_publish_flush_test.dart
+?? tool/analyze_lg_p84_thermal.py
+?? tool/lg_p84_instant_perf.py
+?? tool/lg_p84_thermal_round.py
+?? tool/test_lg_p84_instant_perf.py
+?? tool/test_lg_p84_thermal_round.py
+?? tool/test_lya_diagnostics_delegate.py

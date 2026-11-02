@@ -1,0 +1,24 @@
+{
+  "apkSha256": "5347a6c9e1638a65f7ac96272f16f966866c4967e23d84b47dbaf357ecceac1d",
+  "nativeVerificationStatus": "verified",
+  "files": {
+    "/Users/wuweiwei1/src/media-kit/media_kit_hdr_lab/lib/tests/01.single_player_single_video.dart": "20448cb5ef3d987ce3dc468a16e5eb9c92bd31244845325d7b7e254b8a55e0db",
+    "/Users/wuweiwei1/src/media-kit/media_kit_hdr_lab/lib/common/android_p84_thermal_probe.dart": "a5f4a3555c825a1df66aaeed24e62109991dd1731227dbcc33ee57ac09f01e1c",
+    "/Users/wuweiwei1/src/media-kit/tool/lg_p84_thermal_round.py": "6d201d70d41d40aa03d46a3fab7250e5ca82e5e828107e8352224e92475f7293",
+    "/Users/wuweiwei1/src/media-kit/tool/build-android-test.sh": "56d89f17de663a371f9436de19b3e57f9a7e3d96cf84c2b667e4cc7457e222dd",
+    "/Users/wuweiwei1/src/media-kit/tool/build_android_native.py": "4467403f02e68362897ca680f201b21222c2cb9b4bd13d64dc3fe52b3127207f",
+    "/Users/wuweiwei1/src/mpv/video/out/mks_thermal.h": "bc860de1c60de48c25bf9bb5e6a1128ceb69a001adc2b0cedb916d4e4a5e3789",
+    "/Users/wuweiwei1/src/mpv/video/out/hwdec/hwdec_surfacetexture.c": "eeb73e85181eefa4c08df5548fa8c24dc105f018096caec4ae455e54c39500c4",
+    "/Users/wuweiwei1/src/mpv/video/out/vo_gpu_next.c": "e3559dfd924b367b5f5039ccd832d737a12b79fa2151cf8f44f777c77da6abc2",
+    "/Users/wuweiwei1/src/mpv/video/out/opengl/context_android.c": "40a5d3505d69d85df1d5e6401293851f706050dce4da73a6f4e53b1781d49072"
+  },
+  "definitions": [
+    "MEDIA_KIT_ANDROID_P84_THERMAL_PROBE=true",
+    "MEDIA_KIT_ANDROID_HDR_PREFER_CONVERT=true",
+    "MEDIA_KIT_ANDROID_HDR_DIAGNOSTICS=true",
+    "MEDIA_KIT_ANDROID_PERF_PROBE=false",
+    "MEDIA_KIT_ANDROID_P5_COUNTER_PROBE=false",
+    "MEDIA_KIT_ANDROID_DIRECT_OPEN_TRACE=false"
+  ],
+  "productionFallbackChanged": false
+}

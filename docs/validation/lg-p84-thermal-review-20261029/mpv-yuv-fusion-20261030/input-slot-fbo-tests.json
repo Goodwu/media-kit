@@ -1,0 +1,30 @@
+{
+  "mode": "debug.mks.st_fbo=1 opt-in, read at mapper creation; absent default off; explicit0 logs original path; invalid override warns and retains original path",
+  "scope": "Only borrow existing RA-owned per-slot FBO instead of shared FBO reattachment/check. No invalidate/discard, new target, shader, geometry, precision, GLstate normalization, fence, latch, release or lease policy changes. Probe and diagnostic readback remain shared-FBO path.",
+  "androidSyntax": [
+    {
+      "file": "../video/out/opengl/ra_gl.c",
+      "exit": 0,
+      "stderr": ""
+    },
+    {
+      "file": "../video/out/hwdec/hwdec_surfacetexture.c",
+      "exit": 0,
+      "stderr": ""
+    }
+  ],
+  "hostTest": "python3 -m unittest tool/test_lg_input_fbo_reuse.py: 1 passed; source-extracted actual getter,report,draw_copy with GL doubles cover null/nonGL/wrapped/external/default/nonrenderable refusal; current texture FBO replacement; default attach/check vs candidate noattach/nocheck; original6state reads and splitFBO/program/viewport/active/OES restoration; single draw with error returnsfalse no retry; shared incomplete FBO skipsdraw; timing/probe behavior",
+  "lifecycle": "Static inspection: RA creates+checks owned FBO with texture; hwdec exposes only raw texture to libplacebo; no attachment redefinition/DrawBuffers mutation; slot resize frees old texture then creates new; RA destroys FBO before texture. Getter borrows every map and never caches or deletes. Actual driver lifecycle/bit equivalence not exercised.",
+  "runtimeEvidence": "MKS-INPUT-FBO event=config requested=0|1; first/every300attempt/final counters slot_attempts/shared_attempts/fallbacks/copy_failures; absent property no new reports/counter path. Measures path usage, not performance gain.",
+  "oracleVoUnchanged": {
+    "sha256": "e9beb4970b388514a249a93433db435f4daaa2194c51dc82f24c74cd69f45b97",
+    "matchesFrozenOracleVoReceipt": true
+  },
+  "limits": "No APK build, device, image equivalence or performance acceptance. Candidate draw failure follows pre-existing map failure before publication, no same-frame retry. GPUtimer may not observe CPU bookkeeping savings; actualAB needed.",
+  "files": {
+    "/Users/wuweiwei1/src/mpv/video/out/opengl/ra_gl.c": "44ed1f6a2cae4dc0557ca52ace5af723906e71b9abd70ebd4207d54fa74387f8",
+    "/Users/wuweiwei1/src/mpv/video/out/opengl/ra_gl.h": "33b663e654f1c1a2070f4323cbde08ba9ba287c3ddc240b9b9eb1789f090eda7",
+    "/Users/wuweiwei1/src/mpv/video/out/hwdec/hwdec_surfacetexture.c": "ffa12706615e8943323db86804c7310fa6acb9961241a3e231724469d2ea7efc",
+    "/Users/wuweiwei1/src/media-kit/tool/test_lg_input_fbo_reuse.py": "beb92bc730407f7a4802140c3d48b55df834e6c231dfebe85091df98290161d9"
+  }
+}

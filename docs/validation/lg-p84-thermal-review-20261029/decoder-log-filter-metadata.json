@@ -1,0 +1,21 @@
+{
+  "sampleTime": "2026-10-29T14:43:29.879187+08:00",
+  "argv": [
+    "adb",
+    "-s",
+    "LGH870DS42e27764",
+    "exec-out",
+    "logcat",
+    "-d",
+    "-t",
+    "4000"
+  ],
+  "returncode": 0,
+  "stderr": "",
+  "inputLines": 13374,
+  "firstLogLineTime": "10-29 14:23:00.045",
+  "lastLogLineTime": "10-29 14:43:28.621",
+  "matchedLines": 0,
+  "filter": "(?i)hwdec|fallback|software.decoder|mediacodec|OMX\\.|ACodec|CCodec|ffmpeg|Could not open codec|decoder.*(fail|error)|fatal|vidc",
+  "limitation": "bounded available logcat; absence of decoder/fallback messages is not proof no fallback occurred"
+}

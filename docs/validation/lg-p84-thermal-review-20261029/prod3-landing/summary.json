@@ -1,0 +1,20 @@
+{
+ "apk": "fusion-prod3-20261102-release.apk",
+ "sha256": "32b3fd204bb35cc328af3d882c90f9bf180e21fc582d44eb66b331f4a66434f0",
+ "userRuling": "2026-11-02 用户终裁：诊断未证明无表融合差异劣于原路径——无表融合=默认，查表=备选",
+ "threeStates": [
+  {
+   "state": "默认（属性空）= 生产用户态",
+   "result": "无表融合持续提交（committed 1/300 行），表零参与（ready=0/pass=0），起播数帧 rgb-final 正常"
+  },
+  {
+   "state": "yuv_fusion_table=1（表备选）",
+   "result": "首试 ready + table-pass-ran + missed=0，表驱动融合（全部复审验证的路径）"
+  },
+  {
+   "state": "yuv_fusion=0（完全退出）",
+   "result": "零融合零表，rgb-final 原路径"
+  }
+ ],
+ "note": "设备中途 USB 断连重插→keyguard+竖屏导致两轮 tap 无效，解锁+横屏后全部通过；设备已恢复生产默认态+自动亮度+自动旋转"
+}

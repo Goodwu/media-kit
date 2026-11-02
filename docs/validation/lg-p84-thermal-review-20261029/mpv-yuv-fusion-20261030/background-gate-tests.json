@@ -1,0 +1,15 @@
+{
+  "hostTest": "current actual headers compile and execution exit0",
+  "compatibilityGuardStubs": {
+    "api346NoBlurEnum": "compile+execute0",
+    "api338NoClearEnum": "compile+skip77"
+  },
+  "voSyntaxExit": 0,
+  "testAndroidSyntaxExit": 0,
+  "files": {
+    "video/out/vo_gpu_next.c": "ece5854c107a94e640d6092896a527c50628a137c5c2ceaf779c84643af69000",
+    "video/out/yuv_fusion_gate.h": "ef1194e43b748ef88c3cd61db6d6f3594705ccc0e85685efd58b1af966936b60",
+    "test/yuv_fusion_gate.c": "724fc53ed948cfaffa38ffe9f7178c4c8b85274ae360fe50c61fd985336f2ad9",
+    "test/meson.build": "ba3a94800d87cc3c4929832e166e805d1420e56d5a005f68ffa7b5f3b4cfe351"
+  }
+}

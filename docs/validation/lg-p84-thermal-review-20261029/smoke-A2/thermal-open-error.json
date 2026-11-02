@@ -1,0 +1,19 @@
+{
+  "pid": 27231,
+  "serial": 1,
+  "runId": "27231:1793258705980299",
+  "sourcePath": "/sdcard/Android/data/com.example.media_kit_hdr_lab/files/hokkaido-p84.mp4",
+  "hint": null,
+  "error": "HdrOutputPreparationFailure(yuvWindowArmUnavailable, vendor YUV arm capability gate refused (ext=lg-pq, applicable=true, yuvWindowArmApi=0, required=1))",
+  "stack": "#0      HdrYuvWindowArm.assertRouteAdmission (package:media_kit_video/src/hdr/hdr_yuv_window_arm.dart:357)\n#1      AndroidHdrBackend.validate (package:media_kit_video/src/hdr/hdr_player_backend.dart:282)\n#2      HdrSessionReviewBackend.validate (package:media_kit_video/src/hdr/hdr_session_native_dv_policy.dart:183)\n#3      HdrOpenCoordinator.openSource.<anonymous closure> (package:media_kit_video/src/hdr/hdr_open_coordinator.dart:511)\n<asynchronous suspension>\n",
+  "report": {
+    "generation": 1,
+    "sourcePath": "/sdcard/Android/data/com.example.media_kit_hdr_lab/files/hokkaido-p84.mp4",
+    "verified": false,
+    "hwdecCurrent": null,
+    "actual": null,
+    "source": null,
+    "error": "HdrOutputPreparationFailure(yuvWindowArmUnavailable, vendor YUV arm capability gate refused (ext=lg-pq, applicable=true, yuvWindowArmApi=0, required=1))"
+  },
+  "reportDescription": "HdrOutputReport(gen: 1, source: null (null), actual: null, dataspace: null/null/null, hwdec: null, verified: false, setterAccepted: false, readbackVerified: false, degrade: null, diagnostic: HdrOutputPreparationFailure(yuvWindowArmUnavailable, vendor YUV arm capability gate refused (ext=lg-pq, applicable=true, yuvWindowArmApi=0, required=1)), error: HdrOutputPreparationFailure(yuvWindowArmUnavailable, vendor YUV arm capability gate refused (ext=lg-pq, applicable=true, yuvWindowArmApi=0, required=1)))"
+}
