@@ -33,5 +33,5 @@
 - 分支重建（commit-map）：compat/piliplus→7876d265、DV-BUILD-01→7cca4ba8、DV004→32d2f940、routing→da278e79、perf2/lg-p84→ff299501；7 条分支 log 主题序列逆映射验证一致。
 - codex/hdr-ab-diagnostics 弃分支：cherry-pick `4bc0c9d9` 两演化文件冲突，降级归档 `~/Documents/media-kit-validation-archive/local-migration-20261104/codex-tools-4bc0c9d9/`。
 - worktree：luna-ohos-e3→acbe1340、mk-verify-0c57dcd9→4e61c01d、8f00ec76→efec0948、b8da287d→befa9ef5、head-4daafd9d→bd1db98a、perf2-mk→perf2/lg-p84；patch+未跟踪回迁后 status 与迁移前回执逐行一致（回执存 `~/Documents/media-kit-validation-archive/local-migration-20261104/worktree-receipts/`）。
-- 退役：`media-kit-verify-20261010@08735626`（2026-10-10 隔离验证树残留，结论已入 tracked 归档 `archives/conversations/media-kit-routing-20261011.md`）；bundle 可恢复。
-- commit-map/ref-map 副本：`attachments/`。
+- 退役：`media-kit-verify-20261010@08735626`（2026-10-10 隔离验证树残留；快照本体由 bundle 保全并已验证可恢复到精确 OID。所属任务线的正式归档 `archives/conversations/media-kit-routing-20261011.md` 中无本树的直接绑定记录，引用仅为任务线背景，勿据其检索本树结论。）；bundle 可恢复。
+- commit-map/ref-map 副本：`repo-weight-remediation-20261104/attachments/`。
