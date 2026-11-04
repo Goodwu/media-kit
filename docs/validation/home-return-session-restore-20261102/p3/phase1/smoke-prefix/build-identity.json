@@ -1,0 +1,83 @@
+{
+ "schema": 1,
+ "purpose": "P3 phase1 smoke-prefix: one normal-HOME round on pre-fix A2 Lab build (smoke, NOT acceptance)",
+ "recordedAt": "2026-11-02T21:00+08:00",
+ "apk": {
+  "path": "/Users/wuweiwei1/src/media-kit/media_kit_hdr_lab/build/app/outputs/flutter-apk/p3-a2-release.apk",
+  "mtime": "2026-11-02 20:45:35 +0800",
+  "bytes": 41621487,
+  "sha256": "5fff6f55638e42950285a7a6258e1360621b1b34b549927ae1676459f3c95af8",
+  "sameAs": "app-arm64-v8a-release.apk (sha256 identical)",
+  "nativeVerification": "/Users/wuweiwei1/src/media-kit/media_kit_hdr_lab/build/app/outputs/flutter-apk/p3-a2-release.native-verification.json (status=verified, apkSha256 matches)",
+  "libmpvJarSha256": "22bc9306a5eae9641c4c73c9f256311a62c8704bf33eebd6a843d5c1153fcfd5",
+  "buildLog": "docs/validation/home-return-session-restore-20261102/p3/phase1/build-lab.log",
+  "markerCheck(grep -c -a on unzip -p member)": {
+   "libmedia_kit_video_hdr_bridge.so:MKS-HOME-TRACE": 1,
+   "libapp.so:MKS-HOME-TRACE": 1,
+   "classes.dex:MKS-HOME-TRACE": 1,
+   "classes.dex strings": [
+    "PlatformVideoView.AuthorizeBridgeActivation",
+    "authorize enter handle=",
+    "authorize result code="
+   ],
+   "libapp.so strings(subset)": [
+    "authorize result epoch=",
+    "authorize failed wid=",
+    "authorize stale discard wid=",
+    "BridgeActivationIssue("
+   ]
+  },
+  "dartDefines": "CLAIMED by Lead as identical to P0 (see p0-trace/build-identity.json); build-lab.log does not echo the define list -> not independently verified. Runtime behaviour (SURFACE_TIMELINE trace lines, HdrDiag lines, platformView topology, local source hokkaido-p84.mp4) is consistent with P0 defines."
+ },
+ "device": {
+  "serial": "LGH870DS42e27764",
+  "model": "LG-H870DS",
+  "sdk": 24,
+  "package": "com.example.media_kit_hdr_lab",
+  "before": {
+   "pmPath": "/data/app/com.example.media_kit_hdr_lab-2/base.apk",
+   "lastUpdateTime": "2026-11-02 17:13:14",
+   "readbackSha256": "76d776677994426508d511e72da3bf1a6f5849b41a9ccec70b29d1acbfd10471 (= P0 home-trace-p0)"
+  },
+  "install": {
+   "cmd": "adb -s LGH870DS42e27764 install -r <apk>",
+   "result": "Performing Streamed Install / Success",
+   "at": "2026-11-02 20:56:41..20:56:50 +0800"
+  },
+  "after": {
+   "pmPath": "/data/app/com.example.media_kit_hdr_lab-1/base.apk",
+   "lastUpdateTime": "2026-11-02 20:56:50",
+   "readbackSha256": "5fff6f55638e42950285a7a6258e1360621b1b34b549927ae1676459f3c95af8",
+   "match": true
+  },
+  "readbackMethod": "adb exec-out cat <pm path> | shasum -a 256",
+  "installLog": "install.log",
+  "screenBefore": "Display Power: state=ON, isStatusBarKeyguard=false, mShowingLockscreen=false",
+  "clockOffsetDeviceMinusHostMs": {
+   "samples": [
+    1110,
+    1118,
+    1120,
+    1097,
+    1343,
+    1091,
+    1106,
+    1108,
+    1097,
+    1136,
+    1101,
+    1131,
+    1113,
+    1110
+   ],
+   "min": 1091,
+   "max": 1343
+  }
+ },
+ "driver": {
+  "script": "run_round_smoke.sh (copy of p0-trace/run_round.sh; only change = per-buffer logcat -c, see run_round_smoke.diff)",
+  "args": "<dir> fresh normal",
+  "env": "defaults (TAP 1440,720; PRE_HOME_WAIT=16)",
+  "timeline": "p0-trace/make_timeline.py (unmodified)"
+ }
+}

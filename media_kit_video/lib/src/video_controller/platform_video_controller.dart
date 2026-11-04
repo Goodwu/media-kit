@@ -5,12 +5,14 @@
 /// Use of this source code is governed by MIT license that can be found in the LICENSE file.
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'package:media_kit/media_kit.dart';
 
 import 'package:media_kit_video/src/video_controller/hdr_transaction_report.dart';
 import 'package:media_kit_video/src/video_controller/video_controller.dart';
+import 'package:media_kit_video/src/video_controller/android_video_controller/bridge_activation.dart';
 
 /// Rendering topology selected for a video output.
 enum VideoOutputSurfaceKind { texture, nativeSurface }
@@ -177,6 +179,27 @@ abstract class PlatformVideoController {
   /// acknowledgement. Platforms without a separate output use the initial
   /// barrier.
   Future<void> get waitUntilCurrentOutputBound => waitUntilInitialOutputBound;
+
+  /// The most recent scoped surfacetexture bridge activation issue observed
+  /// by this output, or `null` when none is currently held.
+  ///
+  /// Only the Android PlatformView carrier with an explicit owner token
+  /// reports issues. Implementations without bridge activation always expose
+  /// an inert listenable whose value is `null`.
+  ValueListenable<BridgeActivationIssue?> get bridgeActivationIssue =>
+      BridgeActivationIssues.none;
+
+  /// Whether [issue] still describes this output's latest real activation
+  /// attempt for its exact owner identity. The session re-checks this on
+  /// every replay and every deferred processing pass.
+  bool isCurrentBridgeActivationIssue(BridgeActivationIssue issue) => false;
+
+  /// The review-scope anchor of the currently bound output (C2): the
+  /// complete owner identity, output intent serial and activation epoch at
+  /// read time. Null for outputs without bridge activation scoping (every
+  /// non-Android implementation and non-bridge Android routes), where the
+  /// session's verified-write comparison must stay a no-op.
+  BridgeActivationScopeAnchor? get bridgeActivationScopeAnchor => null;
 
   /// [Completer] used to signal the decoding & rendering of the first video frame.
   /// Use [waitUntilFirstFrameRendered] to wait for the first frame to be rendered.

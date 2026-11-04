@@ -38,7 +38,8 @@ import com.alexmercerind.media_kit_video.GlobalObjectRefManager;
  * A class used to create a native video view that can be embedded in a Flutter app.
  * It wraps a SurfaceView and connects it to libmpv.
  */
-public final class PlatformVideoView implements PlatformView {
+public final class PlatformVideoView extends BridgeActivationAuthorizer.Target
+        implements PlatformView {
     private static final String TAG = "PlatformVideoView";
 
     /**
@@ -369,23 +370,147 @@ public final class PlatformVideoView implements PlatformView {
         lgOwnerGeneration = generation;
         lgOwnerViewId = viewId;
         lgOwnerToken = token;
-        // Explicit owner-scoped bridge init: the native surfacetexture
-        // backend initializes ONLY here, bound to (owner token, generation);
-        // the raw token never crosses into native state. Without an owner
-        // the bridge stays uninitialized and every native gate refuses
-        // (fail-closed). The view never calls the native shutdown: the
-        // decoder window's ANativeWindow is owned by the mpv-side importer,
-        // and a Java-side teardown would race the GL-thread latch while the
-        // producer is still live (surface release stays producer-ACK-driven
-        // in this view for the same reason).
+        if (HomeTrace.ENABLED) {
+            HomeTrace.emit("setLgExperimentOwner enter handle=" + handle + " viewId=" + viewId
+                    + " ownerGeneration=" + generation
+                    + " tokenPresent=" + (token != null && !token.isEmpty())
+                    + " surfaceGeneration=" + surfaceGeneration + " wid=" + wid);
+        }
+        // Cold-start owner-scoped bridge init, bound to (owner token,
+        // controller generation); the raw token never crosses into native
+        // state. Without an owner the bridge stays uninitialized and every
+        // native gate refuses (fail-closed). This is no longer the ONLY init
+        // entry: re-activation after a producer teardown (e.g. a HOME return)
+        // runs the same init through the AuthorizeBridgeActivation channel
+        // method (see ensureOwnerBridgeInitialized), while surfaceCreated
+        // still never initializes. The view never calls the native shutdown:
+        // the decoder window's ANativeWindow is owned by the mpv-side
+        // importer, and a Java-side teardown would race the GL-thread latch
+        // while the producer is still live (surface release stays
+        // producer-ACK-driven in this view for the same reason).
         if (token == null || token.isEmpty() || generation <= 0) {
+            if (HomeTrace.ENABLED) {
+                HomeTrace.emit("setLgExperimentOwner exit handle=" + handle + " viewId=" + viewId
+                        + " ensureInitialized=skipped(no owner)");
+            }
             return;
         }
         try {
-            MediaCodecSurfaceTextureBridge.ensureInitialized(token, generation);
+            ensureOwnerBridgeInitialized();
+            if (HomeTrace.ENABLED) {
+                HomeTrace.emit("setLgExperimentOwner exit handle=" + handle + " viewId=" + viewId
+                        + " ownerGeneration=" + generation + " ensureInitialized=ok");
+            }
         } catch (Throwable t) {
-            Log.w("MKSURF", "bridge init failed (opt-in surfacetexture hwdec will be unavailable)", t);
+            // Redact before recording (same discipline as the authorization
+            // entry): a throwable message may embed owner-token text (e.g.
+            // from an injected initializer), and the cold-start path keeps
+            // its record-not-throw contract without ever emitting it.
+            final String redacted =
+                    BridgeActivationAuthorizer.describeThrowable(t, token);
+            if (HomeTrace.ENABLED) {
+                HomeTrace.emit("setLgExperimentOwner exit handle=" + handle + " viewId=" + viewId
+                        + " ownerGeneration=" + generation
+                        + " ensureInitialized=threw " + redacted);
+            }
+            Log.w("MKSURF", "bridge init failed (opt-in surfacetexture hwdec will be unavailable)"
+                    + ": " + redacted);
         }
+    }
+
+    /**
+     * Injectable seam for the bridge init (A2 activation barrier).
+     * Production always uses the real {@link MediaCodecSurfaceTextureBridge
+     * #ensureInitialized(String, int)}; the JVM host test injects a recorder
+     * so the real plugin/factory/view/authorizer chain runs without the
+     * native library.
+     */
+    private BridgeActivationAuthorizer.BridgeInitializer bridgeInitializer =
+            MediaCodecSurfaceTextureBridge::ensureInitialized;
+
+    void setBridgeInitializer(BridgeActivationAuthorizer.BridgeInitializer initializer) {
+        this.bridgeInitializer = initializer;
+    }
+
+    /**
+     * Explicit owner-scoped bridge init shared by the cold-start owner setter
+     * and the {@code PlatformVideoView.AuthorizeBridgeActivation} entry, bound
+     * to THIS view's own owner tuple (lgOwnerToken, lgOwnerGeneration — the
+     * controller/topology generation, never the per-view surfaceGeneration).
+     * Every authorization really invokes the bridge: no initialized boolean
+     * is cached here, because native idempotence is decided per identical
+     * tuple and any producer teardown must be answered by an explicit re-init.
+     *
+     * @throws Throwable when the bridge refuses or fails; the cold-start
+     *         setter logs and continues, the authorization entry maps it to a
+     *         structured initFailed (never emitting the raw token).
+     */
+    private void ensureOwnerBridgeInitialized() {
+        bridgeInitializer.ensureInitialized(lgOwnerToken, lgOwnerGeneration);
+    }
+
+    // BridgeActivationAuthorizer.Target facade: read-only live identity of
+    // this view for the A2 activation-barrier authorization. Package-private
+    // on purpose — the raw owner token accessor never becomes public API.
+    // The decision logic itself lives in BridgeActivationAuthorizer (plain
+    // Java, host-testable per V2 C4); this view only supplies state through
+    // the facade and performs the real init on a passing identity.
+
+    @Override
+    synchronized BridgeActivationAuthorizer.Result authorizeActivation(
+            BridgeActivationAuthorizer.Request request) {
+        return BridgeActivationAuthorizer.checkTarget(this, request);
+    }
+
+    @Override
+    boolean isDisposed() {
+        return disposed;
+    }
+
+    @Override
+    long handle() {
+        return handle;
+    }
+
+    @Override
+    int ownerGeneration() {
+        return lgOwnerGeneration;
+    }
+
+    @Override
+    int viewId() {
+        return lgOwnerViewId;
+    }
+
+    @Override
+    int activeSurfaceGeneration() {
+        return activeSurfaceGeneration;
+    }
+
+    @Override
+    long currentWid() {
+        return wid;
+    }
+
+    @Override
+    Long surfaceReference(int surfaceGeneration) {
+        return surfaceReferences.get(surfaceGeneration);
+    }
+
+    @Override
+    boolean hasValidHolderSurface() {
+        final android.view.Surface surface = surfaceView.getHolder().getSurface();
+        return surface != null && surface.isValid();
+    }
+
+    @Override
+    String ownerToken() {
+        return lgOwnerToken;
+    }
+
+    @Override
+    void initializeOwnerBridge() {
+        ensureOwnerBridgeInitialized();
     }
 
     private void revokeManagedSurface(int generation) {
@@ -533,6 +658,15 @@ public final class PlatformVideoView implements PlatformView {
             public void surfaceCreated(@NonNull SurfaceHolder holder) {
                 Log.i(TAG, "surfaceCreated: handle=" + handle + ", width=" + width + ", height=" + height +
                         ", viewIdentity=" + System.identityHashCode(surfaceView));
+                if (HomeTrace.ENABLED) {
+                    HomeTrace.emit("surfaceCreated enter handle=" + handle + " viewId=" + lgOwnerViewId
+                            + " ownerGeneration=" + lgOwnerGeneration
+                            + " surfaceGenerationBefore=" + surfaceGeneration
+                            + " activeSurfaceGeneration=" + activeSurfaceGeneration
+                            + " widBefore=" + wid + " disposed=" + disposed
+                            + " tokenPresent=" + (lgOwnerToken != null)
+                            + " ensureInitializedCalledHere=false");
+                }
                 if (!disposed && holder.getSurface() != null) {
                     // Count every creation attempt, including one rejected
                     // before a WID exists, so its failure cannot be confused
@@ -570,6 +704,12 @@ public final class PlatformVideoView implements PlatformView {
                         if (appliedPath == null) {
                             revokeLgSurface(generation);
                             revokeManagedSurface(generation);
+                            if (HomeTrace.ENABLED) {
+                                HomeTrace.emit("surfaceCreated exit handle=" + handle
+                                        + " viewId=" + lgOwnerViewId
+                                        + " surfaceGeneration=" + generation
+                                        + " sendSurfaceEvent=SurfaceFailed(initialDataSpaceRejected)");
+                            }
                             // Do not publish a WID for a Surface generation
                             // whose HDR dataspace could not be applied.
                             onSurfaceEvent.accept(new SurfaceEvent(
@@ -585,7 +725,18 @@ public final class PlatformVideoView implements PlatformView {
                     surfaceReferences.put(generation, wid);
                     Log.i(TAG, "surfaceCreated: created new wid=" + wid);
                     final long createdWid = wid;
+                    if (HomeTrace.ENABLED) {
+                        HomeTrace.emit("surfaceCreated sendSurfaceEvent=SurfaceAvailable begin handle="
+                                + handle + " viewId=" + lgOwnerViewId
+                                + " ownerGeneration=" + lgOwnerGeneration
+                                + " surfaceGeneration=" + generation + " wid=" + createdWid);
+                    }
                     onSurfaceEvent.accept(new SurfaceEvent(wid, generation, false));
+                    if (HomeTrace.ENABLED) {
+                        HomeTrace.emit("surfaceCreated sendSurfaceEvent=SurfaceAvailable done handle="
+                                + handle + " viewId=" + lgOwnerViewId
+                                + " surfaceGeneration=" + generation + " wid=" + createdWid);
+                    }
                     if (needsPqResetMonitoring()) {
                         final android.view.Surface createdSurface = holder.getSurface();
                         final Handler handler = new Handler(Looper.getMainLooper());
@@ -651,11 +802,30 @@ public final class PlatformVideoView implements PlatformView {
             @Override
             public void surfaceDestroyed(@NonNull SurfaceHolder holder) {
                 Log.i(TAG, "surfaceDestroyed: handle=" + handle + ", wid=" + wid);
+                if (HomeTrace.ENABLED) {
+                    HomeTrace.emit("surfaceDestroyed enter handle=" + handle + " viewId=" + lgOwnerViewId
+                            + " ownerGeneration=" + lgOwnerGeneration
+                            + " surfaceGeneration=" + surfaceGeneration
+                            + " activeSurfaceGeneration=" + activeSurfaceGeneration
+                            + " wid=" + wid + " disposed=" + disposed);
+                }
                 revokeLgSurface(surfaceGeneration);
                 revokeManagedSurface(surfaceGeneration);
                 final long destroyedWid = wid;
                 if (destroyedWid != 0) {
+                    if (HomeTrace.ENABLED) {
+                        HomeTrace.emit("surfaceDestroyed sendSurfaceEvent=SurfaceDestroyed begin handle="
+                                + handle + " viewId=" + lgOwnerViewId
+                                + " surfaceGeneration=" + activeSurfaceGeneration
+                                + " wid=" + destroyedWid);
+                    }
                     onSurfaceEvent.accept(new SurfaceEvent(destroyedWid, activeSurfaceGeneration, true));
+                    if (HomeTrace.ENABLED) {
+                        HomeTrace.emit("surfaceDestroyed sendSurfaceEvent=SurfaceDestroyed done handle="
+                                + handle + " viewId=" + lgOwnerViewId
+                                + " surfaceGeneration=" + activeSurfaceGeneration
+                                + " wid=" + destroyedWid);
+                    }
                     wid = 0;
                 }
             }
@@ -987,6 +1157,13 @@ public final class PlatformVideoView implements PlatformView {
     @Override
     public synchronized void dispose() {
         Log.i(TAG, "dispose: handle=" + handle);
+        if (HomeTrace.ENABLED) {
+            HomeTrace.emit("dispose enter handle=" + handle + " viewId=" + lgOwnerViewId
+                    + " ownerGeneration=" + lgOwnerGeneration
+                    + " surfaceGeneration=" + surfaceGeneration + " wid=" + wid
+                    + " alreadyDisposed=" + disposed
+                    + " pendingSurfaceRefs=" + surfaceReferences.size());
+        }
         if (disposed) return;
         disposed = true;
         revokeAllLgSurfaces();
@@ -995,6 +1172,11 @@ public final class PlatformVideoView implements PlatformView {
         // until Dart has stopped the matching mpv producer (when still active)
         // and acknowledges the exact generation through ReleaseSurface.
         for (Map.Entry<Integer, Long> reference : new HashMap<>(surfaceReferences).entrySet()) {
+            if (HomeTrace.ENABLED) {
+                HomeTrace.emit("dispose sendSurfaceEvent=SurfaceDestroyed handle=" + handle
+                        + " viewId=" + lgOwnerViewId + " surfaceGeneration=" + reference.getKey()
+                        + " wid=" + reference.getValue());
+            }
             onSurfaceEvent.accept(new SurfaceEvent(reference.getValue(), reference.getKey(), true));
         }
         wid = 0;

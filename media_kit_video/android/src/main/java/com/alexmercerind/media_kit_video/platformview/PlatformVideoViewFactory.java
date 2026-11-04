@@ -26,7 +26,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * A factory class responsible for creating platform video views that can be embedded in a Flutter
  * app.
  */
-public class PlatformVideoViewFactory extends PlatformViewFactory {
+public class PlatformVideoViewFactory extends PlatformViewFactory
+        implements BridgeActivationAuthorizer.Registry {
     private static final String TAG = "PlatformVideoViewFactory";
     private final MethodChannel channel;
     private final ConcurrentHashMap<Long, PlatformVideoView> views = new ConcurrentHashMap<>();
@@ -154,6 +155,95 @@ public class PlatformVideoViewFactory extends PlatformViewFactory {
         return report;
     }
 
+    /**
+     * A2 activation-barrier authorization ({@code
+     * PlatformVideoView.AuthorizeBridgeActivation}): synchronously verifies
+     * the exact (handle, generation, viewId, surfaceGeneration, wid) identity
+     * and re-initializes the surfacetexture bridge for it after the Dart bind
+     * transaction has stopped the previous producer (e.g. after a HOME
+     * return). Runs on the platform main thread inside the channel handler —
+     * no worker thread, no bridge shutdown, and a structured result for every
+     * malformed input (nothing may throw out of the handler, or the Dart
+     * await would never complete). The raw owner token never reaches this
+     * method's result or trace.
+     *
+     * @return the authorization result map ({@code applicable}/{@code ok}/
+     *         {@code code}/{@code ownerGeneration}/{@code surfaceGeneration}/
+     *         {@code message}); never null.
+     */
+    @NonNull
+    public Map<String, Object> authorizeBridgeActivation(@Nullable Object arguments) {
+        BridgeActivationAuthorizer.Request request = null;
+        String parseError = null;
+        try {
+            request = BridgeActivationAuthorizer.Request.parse(arguments);
+        } catch (IllegalArgumentException error) {
+            parseError = error.getMessage();
+        }
+        BridgeActivationAuthorizer.Result result;
+        if (request == null) {
+            result = BridgeActivationAuthorizer.Result.invalidArguments(
+                    parseError != null ? parseError : "arguments must be a map");
+        } else {
+            // MKS-HOME-TRACE authorization anchors (default-off, HomeTrace):
+            // identity in, structured result out
+            // (code/ownerGeneration/surfaceGeneration/viewId/wid); the raw
+            // owner token is never logged, only its presence.
+            if (HomeTrace.ENABLED) {
+                HomeTrace.emit("authorize enter handle=" + request.handle
+                        + " generation=" + request.generation + " viewId=" + request.viewId
+                        + " surfaceGeneration=" + request.surfaceGeneration
+                        + " wid=" + request.wid
+                        + " ownerTokenPresent=" + (request.ownerToken != null));
+            }
+            try {
+                result = BridgeActivationAuthorizer.authorize(this, request);
+            } catch (Throwable error) {
+                // Containment: a broken registry lookup must not escape the
+                // channel handler. Not an identity verdict — report it as an
+                // unusable request so the Dart side fails closed.
+                result = BridgeActivationAuthorizer.Result.invalidArguments(
+                        "unexpected authorization failure: "
+                                + error.getClass().getSimpleName());
+            }
+        }
+        if (HomeTrace.ENABLED) {
+            HomeTrace.emit("authorize result code=" + result.code
+                    + " applicable=" + result.applicable + " ok=" + result.ok
+                    + " ownerGeneration=" + result.ownerGeneration
+                    + " surfaceGeneration=" + result.surfaceGeneration
+                    + " viewId=" + (request != null ? request.viewId : null)
+                    + " wid=" + (request != null ? request.wid : null));
+        }
+        return result.toMap();
+    }
+
+    // BridgeActivationAuthorizer.Registry: narrow read-only facade over the
+    // exact owner registry for the activation authorizer (host-testable
+    // without Android).
+
+    @Override
+    public boolean isControllerTerminated(long handle, int generation) {
+        return terminatedControllers.contains(new ControllerOwner(handle, generation));
+    }
+
+    @Override
+    public BridgeActivationAuthorizer.Target locateSurfaceOwner(
+            long handle, int generation, int viewId) {
+        // Exact (handle, generation, viewId) identity only: the handle-indexed
+        // `views` map is deliberately NOT consulted, so an authorization can
+        // never land on a "nearest" view of the same handle (V2 C4).
+        return surfaceOwners.get(new SurfaceOwner(handle, generation, viewId));
+    }
+
+    @Override
+    public boolean isLiveSurfaceGeneration(
+            long handle, int generation, int viewId, int surfaceGeneration) {
+        final Integer live =
+                liveSurfaceGenerations.get(new SurfaceOwner(handle, generation, viewId));
+        return live != null && live.intValue() == surfaceGeneration;
+    }
+
     public String releaseSurface(
             long handle,
             int generation,
@@ -254,6 +344,12 @@ public class PlatformVideoViewFactory extends PlatformViewFactory {
         final int creationSerial = nextViewCreationSerial.incrementAndGet();
 
         Log.i(TAG, "Creating PlatformVideoView for handle: " + handle);
+        if (HomeTrace.ENABLED) {
+            HomeTrace.emit("factory.create enter handle=" + handle + " viewId=" + id
+                    + " ownerGeneration=" + generation + " creationSerial=" + creationSerial
+                    + " tokenPresent=" + (params.get("lgExperimentOwnerToken") != null)
+                    + " managedYuvCarrier=" + Boolean.TRUE.equals(params.get("managedYuvCarrier")));
+        }
         final PlatformVideoView view = new PlatformVideoView(context, handle, width, height, initialDataSpace,
             initialPixelFormat,
             (event) -> {});
@@ -264,6 +360,13 @@ public class PlatformVideoViewFactory extends PlatformViewFactory {
         surfaceOwners.put(owner, view);
         view.setOnSurfaceEvent((surfaceEvent) -> {
             if (terminatedControllers.contains(new ControllerOwner(handle, generation))) {
+                if (HomeTrace.ENABLED) {
+                    HomeTrace.emit("factory surfaceEvent swallowed(controller terminated) handle="
+                            + handle + " viewId=" + id + " ownerGeneration=" + generation
+                            + " surfaceGeneration=" + surfaceEvent.generation + " wid=" + surfaceEvent.wid
+                            + " destroyed=" + surfaceEvent.destroyed + " failed=" + surfaceEvent.failed);
+                }
+
                 if (view.releaseAllSurfacesAfterProducerTermination()) {
                     surfaceOwners.remove(owner, view);
                     liveSurfaceGenerations.remove(owner);
@@ -305,6 +408,14 @@ public class PlatformVideoViewFactory extends PlatformViewFactory {
                 views.put(handle, view);
             }
             final boolean cleanup = surfaceEvent.destroyed;
+            if (HomeTrace.ENABLED) {
+                HomeTrace.emit("factory channel.invokeMethod "
+                        + (cleanup ? "PlatformVideoView.SurfaceDestroyed"
+                                   : "PlatformVideoView.SurfaceAvailable")
+                        + " handle=" + handle + " viewId=" + id + " ownerGeneration=" + generation
+                        + " creationSerial=" + creationSerial
+                        + " surfaceGeneration=" + surfaceEvent.generation + " wid=" + surfaceEvent.wid);
+            }
             channel.invokeMethod(
                 cleanup ? "PlatformVideoView.SurfaceDestroyed" : "PlatformVideoView.SurfaceAvailable",
                 event);
@@ -319,6 +430,11 @@ public class PlatformVideoViewFactory extends PlatformViewFactory {
         created.put("pixelFormat", initialPixelFormat);
         // Creation is the pending-view intent. It must precede any Surface
         // callback so a late failure from an older view cannot fail its wait.
+        if (HomeTrace.ENABLED) {
+            HomeTrace.emit("factory channel.invokeMethod PlatformVideoView.ViewCreated handle="
+                    + handle + " viewId=" + id + " ownerGeneration=" + generation
+                    + " creationSerial=" + creationSerial);
+        }
         channel.invokeMethod("PlatformVideoView.ViewCreated", created);
         return view;
     }

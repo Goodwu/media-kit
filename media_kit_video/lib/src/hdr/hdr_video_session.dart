@@ -13,6 +13,8 @@ import 'package:media_kit/media_kit.dart';
 import 'package:synchronized/synchronized.dart';
 
 import 'package:media_kit_video/src/video_controller/android_video_controller/android_video_controller.dart';
+import 'package:media_kit_video/src/video_controller/android_video_controller/bridge_activation.dart';
+import 'package:media_kit_video/src/video_controller/android_video_controller/platform_surface_release.dart';
 import 'package:media_kit_video/src/video_controller/platform_video_controller.dart';
 import 'package:media_kit_video/src/video_controller/video_controller.dart';
 
@@ -248,7 +250,7 @@ class HdrVideoSession {
           (await controller.platform.future).configuration.vo ?? '',
       disposeForRebuild: (controller) => controller.disposeForRebuild(),
       create: _createController,
-      publish: (controller) => _controller.value = controller,
+      publish: _publishSlotController,
       waitReady: (controller) async {
         final output = await controller.platform.future;
         await HdrOutputBindTimeout.waitFor(
@@ -287,6 +289,11 @@ class HdrVideoSession {
             _nativeReviewWindow = window;
           }
         },
+        // B3: the review scope is bound BEFORE any facts are sampled and
+        // re-checked right after sampling; `_review` never re-adopts a
+        // current output identity.
+        onBeforeReviewFacts: _captureBridgeActivationReviewAnchor,
+        onAfterReviewFacts: _recheckBridgeActivationAnchorAfterFacts,
         monotonicNow: reviewMonotonicNow,
         budget: reviewBudget,
       ),
@@ -424,6 +431,27 @@ class HdrVideoSession {
   Future<void>? _disposeFuture;
   Future<void> Function()? _disposeOutputForTesting;
   Future<void> Function()? _disposeBackendForTesting;
+
+  // A2 scoped bridge activation issues (C2/C3): the session subscribes to the
+  // current slot controller's issue listenable. The subscription epoch is
+  // bumped on every publish/replace so a stale controller's notifier and a
+  // superseded activation epoch can never publish into a newer output.
+  int _bridgeIssueSubscriptionEpoch = 0;
+  VideoController? _bridgeIssueController;
+  ValueListenable<BridgeActivationIssue?>? _bridgeIssueListenable;
+  VoidCallback? _bridgeIssueListener;
+  final Set<(int, AndroidSurfaceAccountId, int)> _publishedBridgeIssues = {};
+
+  /// The review-scope anchor (C2/B3): the controller/platform and its
+  /// owner + activation epoch + latest view captured BEFORE the current
+  /// attempt's review facts are sampled. The success write must not restore
+  /// `verified` unless the same controller still holds the same anchor AND
+  /// the anchor did not drift while the facts were sampled — an old review
+  /// can otherwise verify over a newer attempt (issue or not).
+  VideoController? _reviewBridgeActivationController;
+  PlatformVideoController? _reviewBridgeActivationPlatform;
+  BridgeActivationScopeAnchor? _reviewBridgeActivationAnchor;
+  bool _reviewBridgeActivationAnchorDrifted = false;
 
   /// The current video controller, replaced when the route's topology
   /// changes. Null until the first controller is created.
@@ -591,6 +619,11 @@ class HdrVideoSession {
     _decoderObservation = null;
     _requestedRoute = null;
     _optionFulfillment = null;
+    // A new open invalidates the previous open's review-scope anchor (C2).
+    _reviewBridgeActivationController = null;
+    _reviewBridgeActivationPlatform = null;
+    _reviewBridgeActivationAnchor = null;
+    _reviewBridgeActivationAnchorDrifted = false;
     final intentSerial = _intent.begin();
     // Consume the override before yielding; another open must not inherit it.
     final capabilitiesOverride = _capabilitiesOverride;
@@ -620,6 +653,18 @@ class HdrVideoSession {
         _currentSourceSpec = sourceSpec;
         final observation = _backend!.observe();
         final plan = result.plan;
+        // A2 guard: a current scoped bridge activation issue keeps this
+        // generation unverified — the review's output evidence describes the
+        // activation that failed and must not be written as verified over a
+        // just-published failure, nor may it restore `verified` (only a fresh
+        // review of the current output can). The review-scope anchor must
+        // also still hold: an old review (captured before a newer attempt,
+        // successful or failed) must not verify the newer output. Everything
+        // from openSource's return to this write is synchronous, so both
+        // reads are transaction-consistent with the controller's epoch.
+        final bridgeIssue = _currentBridgeActivationIssue();
+        final reviewScopeHeld = _reviewBridgeActivationScopeHeld();
+        final verified = bridgeIssue == null && reviewScopeHeld;
         final report = HdrOutputReport(
           generation: serial,
           source: plan.source,
@@ -632,14 +677,23 @@ class HdrVideoSession {
           optionFulfillment: _optionFulfillment,
           attemptedRoutes:
               List<HdrRoute>.unmodifiable(_attemptPolicy.attempted),
-          dataSpaceRequested: observation.dataSpaceRequested,
-          dataSpacePath: observation.dataSpacePath,
-          dataSpaceReadback: observation.dataSpaceReadback,
-          hwdecCurrent: observation.hwdecCurrent,
-          decoderObservation: _decoderObservation,
-          verified: true,
+          dataSpaceRequested: verified ? observation.dataSpaceRequested : null,
+          dataSpacePath: verified ? observation.dataSpacePath : null,
+          dataSpaceReadback: verified ? observation.dataSpaceReadback : null,
+          hwdecCurrent: verified ? observation.hwdecCurrent : null,
+          decoderObservation: verified ? _decoderObservation : null,
+          verified: verified,
           degradeReason: _degradeReason ?? _stagedDegradeReason,
-          diagnostic: _reviewDiagnostic,
+          diagnostic: !verified
+              ? (bridgeIssue == null
+                  ? 'bridge activation scope changed since the review'
+                  : 'bridge activation failed: ${bridgeIssue.code.name}')
+              : _reviewDiagnostic,
+          error: bridgeIssue == null
+              ? null
+              : (bridgeIssue.error ??
+                  StateError(
+                      'bridge activation failed: ${bridgeIssue.code.name}')),
         );
         _report.value = report;
         // `HDR decision:` layer, applied phase (R4.3): the same decision
@@ -1285,6 +1339,11 @@ class HdrVideoSession {
     if (generation != _serial || _disposed) {
       return const HdrReviewDecision<HdrOpenPlan>.accept();
     }
+    // B3: the review scope (controller + owner + activation epoch + latest
+    // view) was captured BEFORE the facts were sampled by the review
+    // backend's onBeforeReviewFacts hook. This review must never re-adopt a
+    // current output identity: the success write compares the facts against
+    // the pre-captured anchor, not against whatever is current now.
     if (plan.route.strategy == HdrStrategy.nativeDolbyVision) {
       // Missing/contradictory native evidence throws before either ordinary
       // mismatch branch, including the second-disagreement blocking path.
@@ -1804,6 +1863,217 @@ class HdrVideoSession {
     );
   }
 
+  // ---------------------------------------------------------------------------
+  // Scoped bridge activation issues (A2 wiring, C2/C3)
+  // ---------------------------------------------------------------------------
+
+  /// Resolves the current slot controller's platform and captures its
+  /// scope anchor for the attempt whose review facts are about to be
+  /// sampled. Never throws: a controller whose platform failed resolves to
+  /// no anchor (nothing to compare).
+  Future<void> _captureBridgeActivationReviewAnchor() async {
+    _reviewBridgeActivationAnchorDrifted = false;
+    final controller = _controller.value;
+    _reviewBridgeActivationController = controller;
+    _reviewBridgeActivationPlatform = null;
+    _reviewBridgeActivationAnchor = null;
+    if (controller == null) return;
+    try {
+      final platform = await controller.platform.future;
+      if (!identical(_controller.value, controller) || _disposed) {
+        return;
+      }
+      _reviewBridgeActivationPlatform = platform;
+      _reviewBridgeActivationAnchor = platform.bridgeActivationScopeAnchor;
+    } catch (_) {
+      // The slot's rebuild path owns the follow-up; the next review of the
+      // replacement controller captures its own anchor.
+    }
+  }
+
+  /// Post-sampling re-check (B3): if the captured scope no longer describes
+  /// the platform's output, the just-sampled facts are void for
+  /// verification — a newer activation (successful or not) or a newer
+  /// ViewCreated must never be verified by them.
+  Future<void> _recheckBridgeActivationAnchorAfterFacts() async {
+    final anchor = _reviewBridgeActivationAnchor;
+    final platform = _reviewBridgeActivationPlatform;
+    if (anchor == null || platform == null) return;
+    if (platform.bridgeActivationScopeAnchor != anchor) {
+      _reviewBridgeActivationAnchorDrifted = true;
+    }
+  }
+
+  /// Whether the anchor captured before the facts sampling still describes
+  /// the current slot's controller output without drift. Null anchors
+  /// (non-bridge outputs, or no controller at all) compare equal so
+  /// non-scoped opens keep their exact previous verified semantics.
+  bool _reviewBridgeActivationScopeHeld() {
+    if (_reviewBridgeActivationAnchorDrifted) return false;
+    if (!identical(_reviewBridgeActivationController, _controller.value)) {
+      return false;
+    }
+    return _reviewBridgeActivationPlatform?.bridgeActivationScopeAnchor ==
+        _reviewBridgeActivationAnchor;
+  }
+
+  /// The output slot's publish target (and the test seam driving exactly this
+  /// path): publishes the controller and re-subscribes its scoped issue
+  /// notifier. `publish(null)` unsubscribes immediately, so the slot's
+  /// waitReady failure-rebuild path is covered by the same subscription.
+  void _publishSlotController(VideoController? controller) {
+    _controller.value = controller;
+    _resubscribeBridgeActivationIssues(controller);
+  }
+
+  /// Test-only driver of the slot publish path (the slot itself is private
+  /// and backend-owned); declared in the testing extension below so fake
+  /// `implements HdrVideoSession` harnesses stay source-compatible.
+
+  void _resubscribeBridgeActivationIssues(VideoController? controller) {
+    // Always detach first: a replaced or cleared slot must never leave the
+    // previous controller's notifier attached, even if a later cleanup step
+    // fails (C3).
+    _detachBridgeActivationIssueSubscription();
+    _bridgeIssueSubscriptionEpoch++;
+    if (controller == null || _disposed) return;
+    final epoch = _bridgeIssueSubscriptionEpoch;
+    unawaited(_attachBridgeActivationIssues(controller, epoch));
+  }
+
+  Future<void> _attachBridgeActivationIssues(
+    VideoController controller,
+    int epoch,
+  ) async {
+    ValueListenable<BridgeActivationIssue?> listenable;
+    try {
+      final platform = await controller.platform.future;
+      if (_disposed ||
+          epoch != _bridgeIssueSubscriptionEpoch ||
+          !identical(_controller.value, controller)) {
+        return;
+      }
+      listenable = platform.bridgeActivationIssue;
+    } catch (_) {
+      // The controller's platform initialization failed; the slot's rebuild
+      // path owns the follow-up and the next publish re-subscribes.
+      return;
+    }
+    if (_disposed ||
+        epoch != _bridgeIssueSubscriptionEpoch ||
+        !identical(_controller.value, controller) ||
+        _bridgeIssueListener != null) {
+      return;
+    }
+    void listener() {
+      final issue = listenable.value;
+      if (issue == null) return;
+      // Never await inside the notifier's synchronous listener; the processing
+      // re-validates its scope when it runs (C3).
+      scheduleMicrotask(() {
+        _processBridgeActivationIssue(controller, epoch, issue);
+      });
+    }
+    try {
+      listenable.addListener(listener);
+    } catch (_) {
+      // The platform controller may already be disposed with its wrapper.
+      return;
+    }
+    _bridgeIssueController = controller;
+    _bridgeIssueListenable = listenable;
+    _bridgeIssueListener = listener;
+    // Replay an issue that predates the subscription (C2).
+    listener();
+  }
+
+  void _detachBridgeActivationIssueSubscription() {
+    final listener = _bridgeIssueListener;
+    final listenable = _bridgeIssueListenable;
+    _bridgeIssueListener = null;
+    _bridgeIssueListenable = null;
+    _bridgeIssueController = null;
+    _publishedBridgeIssues.clear();
+    if (listener != null && listenable != null) {
+      try {
+        listenable.removeListener(listener);
+      } catch (_) {
+        // The notifier may already be disposed with its controller.
+      }
+    }
+  }
+
+  Future<void> _processBridgeActivationIssue(
+    VideoController controller,
+    int epoch,
+    BridgeActivationIssue issue,
+  ) async {
+    if (_disposed ||
+        epoch != _bridgeIssueSubscriptionEpoch ||
+        !identical(_controller.value, controller)) {
+      return;
+    }
+    final platform = issue.controller;
+    // Full scope re-check on every processing pass: the issue must still name
+    // its controller's latest real activation attempt (C2). The session serial
+    // alone is not a sufficient scope key.
+    if (platform is! PlatformVideoController ||
+        !platform.isCurrentBridgeActivationIssue(issue)) {
+      return;
+    }
+    // Same owner + intent failures publish exactly once; no retry either way.
+    if (!_publishedBridgeIssues.add(
+        (identityHashCode(issue.controller), issue.owner,
+            issue.outputIntentSerial))) {
+      return;
+    }
+    final serial = _serial;
+    final error = issue.error ??
+        StateError('bridge activation failed: ${issue.code.name}');
+    final diagnostic = 'bridge activation failed: '
+        'code=${issue.code.name}, owner=${issue.owner}, '
+        'activationEpoch=${issue.activationEpoch}, '
+        'outputIntentSerial=${issue.outputIntentSerial}';
+    final current = _report.value;
+    // Construct a NEW report: `copyWith(null)` cannot clear the observation
+    // fields, and the hwdec/dataspace evidence of the output that failed
+    // activation must not survive as current evidence.
+    _publish(HdrOutputReport(
+      generation: serial,
+      source: current.source,
+      sourceOrigin: current.sourceOrigin,
+      sourceFacts: current.sourceFacts,
+      prediction: current.prediction,
+      actual: current.actual,
+      requested: current.requested,
+      options: current.options,
+      optionFulfillment: current.optionFulfillment,
+      attemptedRoutes: current.attemptedRoutes,
+      verified: false,
+      degradeReason: current.degradeReason,
+      diagnostic: diagnostic,
+      error: error,
+    ));
+    _emit(HdrErrorEvent(serial, error: error, diagnostic: diagnostic));
+  }
+
+  /// The currently scoped, still-current activation issue of the slot's
+  /// controller, or null. A verified report write must consult this so an old
+  /// review cannot overwrite a freshly published failure.
+  BridgeActivationIssue? _currentBridgeActivationIssue() {
+    final listenable = _bridgeIssueListenable;
+    if (listenable == null) return null;
+    // The subscription must still describe the current slot's controller.
+    if (!identical(_bridgeIssueController, _controller.value)) return null;
+    final issue = listenable.value;
+    if (issue == null) return null;
+    final platform = issue.controller;
+    return platform is PlatformVideoController &&
+            platform.isCurrentBridgeActivationIssue(issue)
+        ? issue
+        : null;
+  }
+
   void _publish(HdrOutputReport report) {
     if (_disposed || report.generation != _serial) return;
     _report.value = report;
@@ -1857,6 +2127,10 @@ class HdrVideoSession {
     if (!_disposed) {
       _disposed = true;
       _serial++;
+      // Unbind the scoped issue subscription first (C3): a later cleanup
+      // failure must not leave a disposed controller's notifier attached.
+      _detachBridgeActivationIssueSubscription();
+      _bridgeIssueSubscriptionEpoch++;
       if (_isAndroid) {
         AndroidVideoController.unregisterHdrCapabilitiesChangedListener(
             _onNativeCapabilitiesChanged);
@@ -1928,6 +2202,14 @@ class HdrVideoSession {
 extension HdrVideoSessionReviewTesting on HdrVideoSession {
   @visibleForTesting
   bool reviewIsCurrentForTesting(HdrOpenPlan plan) => _reviewIsCurrent(plan);
+
+  /// Drives the output slot's publish path (the slot itself is private and
+  /// backend-owned) so the scoped bridge activation issue subscription can be
+  /// exercised without a real Android backend.
+  @visibleForTesting
+  void publishControllerForTesting(VideoController? controller) {
+    _publishSlotController(controller);
+  }
 }
 
 class HdrSessionDisposalFailure implements Exception {

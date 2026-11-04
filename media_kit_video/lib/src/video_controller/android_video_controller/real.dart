@@ -19,7 +19,9 @@ import 'package:media_kit_video/src/utils/query_decoders.dart';
 import 'package:media_kit_video/src/utils/mpv_owner_broker.dart';
 import 'package:media_kit_video/src/video_controller/platform_video_controller.dart';
 
+import 'bridge_activation.dart';
 import 'current_output_intent.dart';
+import 'platform_output_availability.dart';
 import 'current_bound_output_identity.dart';
 import 'platform_surface_release.dart';
 import 'surface_owner_ledger.dart';
@@ -116,10 +118,10 @@ class AndroidVideoController extends PlatformVideoController {
   final ValueNotifier<int?> wid = ValueNotifier<int?>(null);
   Future<void> Function()? _playerReleaseCallback;
 
-  Completer<void> _initialPlatformViewOutputBound = Completer<void>();
-  Completer<void> _currentPlatformViewOutputBound = Completer<void>();
-  bool _currentPlatformOutputUnavailable = true;
-  bool _initialPlatformOutputFailed = false;
+  /// The PlatformView output-availability waiter state machine (B4): every
+  /// waiter/availability transition of this controller goes through it.
+  final PlatformOutputAvailability _outputAvailability =
+      PlatformOutputAvailability();
   final Map<int, int> _viewCreationSerialById = {};
   final Map<int, String?> _viewDataSpaceById = {};
   final Map<int, String?> _viewPixelFormatById = {};
@@ -131,47 +133,59 @@ class AndroidVideoController extends PlatformVideoController {
   int? _pendingSurfaceFailureViewSerial;
   final _outputIntent = CurrentOutputIntent<AndroidSurfaceAccountId>();
 
+  // A2 activation barrier state (scoped bridge activation issues). The
+  // activation protocol owns the stop → authorize → apply choreography and
+  // the dispatch-counted activation epoch (incremented only when an
+  // authorization actually reaches the channel); the pending gate keeps at
+  // most one outstanding authorization per controller.
+  late final BridgeActivationProtocol _bridgeActivation =
+      BridgeActivationProtocol(
+    strictSetter: (key, value) => _setOutputProperty(key, value),
+    invokeAuthorization: invokeBridgeAuthorization,
+    trace: _traceSurface,
+  );
+
+  /// Scoped surfacetexture bridge activation issues (A2). Published when a
+  /// token-route PlatformView activation fails closed; consumed by the HDR
+  /// session which reports it as a scoped [HdrErrorEvent] and clears
+  /// `verified`. A newer real activation attempt supersedes the held issue.
+  @override
+  final ValueNotifier<BridgeActivationIssue?> bridgeActivationIssue =
+      ValueNotifier<BridgeActivationIssue?>(null);
+
   @override
   Future<void> get waitUntilInitialOutputBound =>
       (configuration.android.usePlatformView ||
               !configuration.android.enableSurfaceProducer)
-          ? _initialPlatformViewOutputBound.future
+          ? _outputAvailability.initialFuture
           : Future<void>.value();
 
   @override
   Future<void> get waitUntilCurrentOutputBound {
-    if (!configuration.android.usePlatformView) return waitUntilInitialOutputBound;
+    if (!configuration.android.usePlatformView)
+      return waitUntilInitialOutputBound;
     if (_disposed || _fullyDisposed) {
       return Future<void>.error(StateError('Android output is disposed'));
     }
-    if (!_currentPlatformOutputUnavailable &&
-        wid.value != null &&
-        _platformViewId != null &&
-        _ledger.inFlightOwner == null) {
+    if (isCurrentPlatformOutputImmediatelyAvailable(
+      outputAvailable: !_outputAvailability.currentOutputUnavailable,
+      widBound: wid.value != null,
+      viewIdBound: _platformViewId != null,
+      hasInFlightOwner: _ledger.inFlightOwner != null,
+    )) {
       return Future<void>.value();
     }
     // A detach retry may replace an already failed Completer. Preserve the
     // runtime failure for later waitReady callers until a new Surface attempt.
     if (_pendingSurfaceFailure != null) _failPlatformSurfaceIfNoAlternative();
-    return _currentPlatformViewOutputBound.future;
+    return _outputAvailability.currentFuture;
   }
 
-  void _invalidateCurrentOutputBound() {
-    _currentPlatformOutputUnavailable = true;
-    if (_currentPlatformViewOutputBound.isCompleted) {
-      _currentPlatformViewOutputBound = Completer<void>();
-    }
-  }
+  void _invalidateCurrentOutputBound() =>
+      _outputAvailability.invalidateCurrent();
 
-  void _failCurrentOutputBound(Object error, StackTrace stack) {
-    if (!_currentPlatformViewOutputBound.isCompleted) {
-      _currentPlatformViewOutputBound.completeError(error, stack);
-      // A waiter may not have subscribed yet. Consume the error on this
-      // branch while preserving it for any caller holding the same Future.
-      unawaited(
-          _currentPlatformViewOutputBound.future.catchError((Object _) {}));
-    }
-  }
+  void _failCurrentOutputBound(Object error, StackTrace stack) =>
+      _outputAvailability.failCurrent(error, stack);
 
   void _markPlatformViewCreated(int generation, int viewId, int creationSerial,
       String? dataspace, String? pixelFormat) {
@@ -190,14 +204,7 @@ class AndroidVideoController extends PlatformVideoController {
       _pendingSurfaceFailure = null;
       _pendingSurfaceFailureStack = null;
       _pendingSurfaceFailureViewSerial = null;
-      if (_initialPlatformOutputFailed) {
-        _initialPlatformViewOutputBound = Completer<void>();
-        _initialPlatformOutputFailed = false;
-      }
-      if (_currentPlatformOutputUnavailable &&
-          _currentPlatformViewOutputBound.isCompleted) {
-        _currentPlatformViewOutputBound = Completer<void>();
-      }
+      _outputAvailability.beginNewOutputAttempt();
       // A still-playing SDR view cannot satisfy a newly requested PQ view.
       // Keep the old producer alive until normal strict detach/rebind, but
       // make the new policy's output waiter wait for its own compatible view.
@@ -217,26 +224,22 @@ class AndroidVideoController extends PlatformVideoController {
   }
 
   bool _promoteCompatibleBoundFallback() {
-    if (_ledger.inFlightOwner != null) return false;
-    for (final owner in _ledger.liveOwners) {
-      if (!_isBoundSurfaceOwner(owner) || !_isCompatibleWithLatestView(owner)) {
-        continue;
-      }
-      if (_ledger.anyQueuedCandidate((queued) => queued != owner)) {
-        continue;
-      }
-      final serial = _outputIntent.bind(owner);
-      _ledger.authorizeFallbackSerial(serial);
-      _currentPlatformOutputUnavailable = false;
-      if (!_currentPlatformViewOutputBound.isCompleted) {
-        _currentPlatformViewOutputBound.complete();
-      }
-      if (!_initialPlatformViewOutputBound.isCompleted) {
-        _initialPlatformViewOutputBound.complete();
-      }
-      return true;
-    }
-    return false;
+    // The C1 no-promotion rule lives in the shared decision unit: a retained
+    // in-flight debt blocks promotion and a cleared (stopped) identity can
+    // never re-match `isBoundSurfaceOwner`.
+    final owner = decideCompatibleBoundFallback(
+      hasInFlightOwner: _ledger.inFlightOwner != null,
+      liveOwnersInArrivalOrder: _ledger.liveOwners,
+      isBoundSurfaceOwner: _isBoundSurfaceOwner,
+      isCompatibleWithLatestView: _isCompatibleWithLatestView,
+      hasOtherQueuedCandidate: (candidate) =>
+          _ledger.anyQueuedCandidate((queued) => queued != candidate),
+    );
+    if (owner == null) return false;
+    final serial = _outputIntent.bind(owner);
+    _ledger.authorizeFallbackSerial(serial);
+    _outputAvailability.publishCurrentAvailable();
+    return true;
   }
 
   bool _isCurrentPlatformViewEvent(
@@ -250,8 +253,12 @@ class AndroidVideoController extends PlatformVideoController {
 
   bool _mayPublishPlatformSurface(
       AndroidSurfaceAccountId owner, int outputIntentSerial) {
-    return _viewCreationSerialById[owner.viewId] == _latestViewCreationSerial ||
-        _ledger.isAuthorizedFallbackSerial(outputIntentSerial);
+    return mayPublishPlatformSurface(
+      ownerViewCreationSerial: _viewCreationSerialById[owner.viewId],
+      latestViewCreationSerial: _latestViewCreationSerial,
+      authorizedFallbackSerial:
+          _ledger.isAuthorizedFallbackSerial(outputIntentSerial),
+    );
   }
 
   bool _beginPlatformSurfaceAttempt(int generation, int viewId, int attempt) {
@@ -266,14 +273,7 @@ class AndroidVideoController extends PlatformVideoController {
     _pendingSurfaceFailure = null;
     _pendingSurfaceFailureStack = null;
     _pendingSurfaceFailureViewSerial = null;
-    if (_initialPlatformOutputFailed) {
-      _initialPlatformViewOutputBound = Completer<void>();
-      _initialPlatformOutputFailed = false;
-    }
-    if (_currentPlatformOutputUnavailable &&
-        _currentPlatformViewOutputBound.isCompleted) {
-      _currentPlatformViewOutputBound = Completer<void>();
-    }
+    _outputAvailability.beginNewOutputAttempt();
     return true;
   }
 
@@ -285,7 +285,7 @@ class AndroidVideoController extends PlatformVideoController {
         _pendingSurfaceFailureViewSerial != _latestViewCreationSerial ||
         _disposed ||
         _fullyDisposed ||
-        !_currentPlatformOutputUnavailable ||
+        !_outputAvailability.currentOutputUnavailable ||
         _promoteCompatibleBoundFallback()) {
       return;
     }
@@ -299,12 +299,7 @@ class AndroidVideoController extends PlatformVideoController {
       return;
     }
     _failCurrentOutputBound(error, stack);
-    if (!_initialPlatformViewOutputBound.isCompleted) {
-      _initialPlatformOutputFailed = true;
-      _initialPlatformViewOutputBound.completeError(error, stack);
-      unawaited(
-          _initialPlatformViewOutputBound.future.catchError((Object _) {}));
-    }
+    _outputAvailability.failInitial(error, stack, rememberFailure: true);
   }
 
   void _markPlatformSurfaceFailed(int generation, int viewId,
@@ -448,6 +443,7 @@ class AndroidVideoController extends PlatformVideoController {
   late final Future<void> Function() _postTerminationCallback;
   int? _platformViewId;
   int _platformSurfaceGeneration = 0;
+
   // Arrival order is the fallback priority. A replaced view retains its JNI
   // reference until its own destroy event, even while another view is bound.
   final SurfaceOwnerLedger<AndroidSurfaceAccountId> _ledger =
@@ -765,8 +761,19 @@ class AndroidVideoController extends PlatformVideoController {
   );
 
   void _traceSurface(String event) {
+    _homeTrace(event);
+  }
+
+  // MKS-HOME-TRACE: temporary diagnostic instrumentation (P0 HOME-return
+  // bridge timeline). Logs only; no control-flow change. rt= is
+  // DateTime.now().millisecondsSinceEpoch (CLOCK_REALTIME ms, comparable with
+  // the Java/native rt= column). Gated by the same define as the existing
+  // SURFACE_TIMELINE trace.
+  static void _homeTrace(String event) {
     if (_surfaceTimeline) {
-      debugPrint('SURFACE_TIMELINE ${DateTime.now().toIso8601String()} $event');
+      final now = DateTime.now();
+      debugPrint('MKS-HOME-TRACE rt=${now.millisecondsSinceEpoch} dart '
+          'SURFACE_TIMELINE ${now.toIso8601String()} $event');
     }
   }
 
@@ -800,18 +807,89 @@ class AndroidVideoController extends PlatformVideoController {
   }
 
   /// Listener for updating the --wid property.
+  ///
+  /// On the token-route PlatformView carrier the listener goes through the
+  /// same activation barrier as an explicit bind (state invalidation,
+  /// in-flight debts, typed failure and the C1 no-promotion rule); every
+  /// other configuration keeps the original plain re-apply.
   Future<void> widListener() {
     return lock.synchronized(
       () {
         if (_disposed) return Future<void>.value();
-        return _applyWidLocked(seekAfterSurfaceBind: true);
+        return _applyWidForListenerLocked();
       },
     );
+  }
+
+  /// The wid-listener activation transaction (B4 production object): all
+  /// listener state transitions — suspend/restore of availability, the
+  /// in-flight debt, the guarded apply, the success publication (B2-1) and
+  /// the stale/failure debt semantics — run inside it, over this
+  /// controller's real availability machine and ledger.
+  late final WidListenerActivation _widListenerActivation =
+      WidListenerActivation(
+    availability: _outputAvailability,
+    ledger: _ledger,
+    isIdentityCurrent: _isActivationIdentityCurrent,
+    isIntentCurrent: (owner, serial) => _outputIntent.isCurrent(owner, serial),
+    mayPublishOutput: _mayPublishPlatformSurface,
+    plainReapply: () => _applyWidLocked(seekAfterSurfaceBind: true),
+    guardedApply: (owner, outputIntentSerial) => _applyWidLocked(
+      seekAfterSurfaceBind: true,
+      authorizeActivation: () =>
+          _authorizeBridgeActivation(owner, outputIntentSerial),
+      activationStillCurrent: () =>
+          _isActivationIdentityCurrent(owner, outputIntentSerial),
+    ),
+    strictStop: _stopAfterAbandonedActivation,
+    clearSuspendedOwner: _clearSurfaceOwner,
+    recordFailure: (owner, outputIntentSerial, error, stack,
+            {required bool boundIdentityClearable}) =>
+        _recordBridgeActivationFailure(owner, outputIntentSerial, error, stack,
+            boundIdentityClearable: boundIdentityClearable),
+    onNotExpectedOutput: _failPlatformSurfaceIfNoAlternative,
+    trace: _traceSurface,
+  );
+
+  Future<void> _applyWidForListenerLocked() async {
+    final handle = nativeHandle;
+    final owner = handle == null ? null : _boundSurfaceOwner(handle);
+    final plan = planWidListenerActivation(
+      bridgeActivationEnabled: _bridgeActivationEnabled,
+      hasCompleteBoundIdentity: owner != null,
+      boundWid: owner?.wid ?? 0,
+      boundOwnerIsCurrentIntent:
+          owner != null && _outputIntent.expected == owner,
+      hasForeignInFlightOwner:
+          _ledger.inFlightOwner != null && _ledger.inFlightOwner != owner,
+    );
+    await _widListenerActivation.run(
+      plan: plan,
+      owner: owner,
+      outputIntentSerial: _outputIntent.serial,
+    );
+  }
+
+  /// Completes a stop that the activation barrier interrupted after its
+  /// `vo=null` ACK. Best effort: a failure stays retryable through the
+  /// owner's own destroy/dispose path, so only the outcome is returned —
+  /// only a successful stop may drop the suspended owner state.
+  Future<bool> _stopAfterAbandonedActivation() async {
+    try {
+      await _applyWidLocked(widValueOverride: '0');
+      return true;
+    } catch (error, stack) {
+      _traceSurface('authorize abandoned stop failed error=$error');
+      debugPrint(stack.toString());
+      return false;
+    }
   }
 
   Future<void> _applyWidLocked({
     bool seekAfterSurfaceBind = false,
     String? widValueOverride,
+    Future<void> Function()? authorizeActivation,
+    bool Function()? activationStillCurrent,
   }) async {
     final width = rect.value?.width.toInt() ?? 1;
     final height = rect.value?.height.toInt() ?? 1;
@@ -820,46 +898,269 @@ class AndroidVideoController extends PlatformVideoController {
     // When --wid is 0, vo=null is required to avoid SIGSEGV.
     final voValue = widValue == '0' ? 'null' : configuration.vo!;
     final vidValue = widValue == '0' ? 'no' : 'auto';
-    _traceSurface('apply begin wid=$widValue vo=$voValue vid=$vidValue');
     final stopVideoFirst = _stopVideoBeforePlatformDetach &&
         configuration.android.usePlatformView &&
         configuration.vo == 'mediacodec_embed' &&
         widValue == '0';
-    if (stopVideoFirst) {
-      _traceSurface('property begin vid=no before vo=null');
-      await _setOutputProperty('vid', 'no');
-      _traceSurface('property complete vid=no before vo=null');
-    }
-    // It is important to re-initialize --vo after --android-surface-size.
-    await _setOutputProperty('vo', 'null');
-    _traceSurface('property complete vo=null');
-    final properties = <String, String>{
-      // ORDER IS IMPORTANT.
-      'android-surface-size': androidSurfaceSizeValue,
-      'wid': widValue,
-      'vo': voValue,
-      // It is important to re-initialize --vid in-case of --vo=mediacodec_embed.
-      // Not doing so causes error "Could not open codec." & video never gets rendered.
-      if (configuration.android.usePlatformView ||
+    await _bridgeActivation.apply(
+      widValue: widValue,
+      voValue: voValue,
+      vidValue: vidValue,
+      androidSurfaceSizeValue: androidSurfaceSizeValue,
+      writeVid: configuration.android.usePlatformView ||
           (configuration.vo == 'mediacodec_embed' &&
-              !configuration.android.usePlatformView))
-        'vid': vidValue,
-    };
-    for (final entry in properties.entries) {
-      await _setOutputProperty(entry.key, entry.value);
-      _traceSurface('property complete ${entry.key}=${entry.value}');
-    }
-    _traceSurface('apply complete wid=$widValue');
+              !configuration.android.usePlatformView),
+      stopVideoFirst: stopVideoFirst,
+      authorizeActivation: authorizeActivation,
+      activationStillCurrent: activationStillCurrent,
+    );
     // A new Surface needs a seek at the current position to resume its output.
     // A video-parameter size update reuses the same Surface and must not seek:
     // seeking at position zero while the HEVC reference queue is forming can
-    // discard references before the first frame is rendered.
+    // discard references before the first frame is rendered. An activation
+    // whose identity died during the transaction must not seek either.
     if (widValue != '0' &&
         seekAfterSurfaceBind &&
+        (activationStillCurrent == null || activationStillCurrent()) &&
         player.state.playlist.medias.isNotEmpty) {
       final currentPosition = player.state.position;
       await player.seek(currentPosition);
     }
+  }
+
+  // -------------------------------------------------------------------------
+  // A2 activation barrier helpers (token-route PlatformView only).
+  // -------------------------------------------------------------------------
+
+  /// The authorization gate: only the surfacetexture-carrier PlatformView
+  /// output with an explicit owner token activates the bridge (see
+  /// [bridgeActivationGateEnabled] for the carrier proof). Every other
+  /// configuration — including token-carrying `mediacodec_embed` and other
+  /// PlatformView routes, since the HDR session injects a token for every
+  /// Android session — keeps its existing behavior with zero additional
+  /// channel calls.
+  bool get _bridgeActivationEnabled => bridgeActivationGateEnabled(
+        usePlatformView: configuration.android.usePlatformView,
+        ownerToken: configuration.android.lgExperimentOwnerToken,
+        hwdec: configuration.hwdec,
+      );
+
+  /// Full-identity guard re-checked around every await of a token-route
+  /// activation: the controller must be alive, the controller generation and
+  /// the complete owner + output intent must still match, and the latest-view
+  /// gate must still allow this owner to publish (a newer ViewCreated whose
+  /// Surface has not arrived yet does not change the output intent — checking
+  /// owner + intent alone is not enough).
+  bool _isActivationIdentityCurrent(
+    AndroidSurfaceAccountId owner,
+    int outputIntentSerial,
+  ) {
+    return !_disposed &&
+        !_fullyDisposed &&
+        !_playerTerminated &&
+        nativeSurfaceGeneration == owner.generation &&
+        _ledger.isLive(owner) &&
+        _outputIntent.isCurrent(owner, outputIntentSerial) &&
+        _mayPublishPlatformSurface(owner, outputIntentSerial);
+  }
+
+  /// Builds the stop-ACK authorization barrier for one bind transaction.
+  Future<void> Function()? _bridgeActivationBarrierFor(
+    AndroidSurfaceAccountId owner,
+    int outputIntentSerial,
+  ) {
+    if (!_bridgeActivationEnabled) return null;
+    return () => _authorizeBridgeActivation(owner, outputIntentSerial);
+  }
+
+  /// Runs one guarded bridge authorization. The activation epoch lives in
+  /// the protocol and counts dispatched channel calls only (see
+  /// [BridgeActivationProtocol.dispatchEpoch]), so a discarded pre-check
+  /// stale transaction never supersedes a published issue.
+  Future<void> _authorizeBridgeActivation(
+    AndroidSurfaceAccountId owner,
+    int outputIntentSerial,
+  ) async {
+    _traceSurface(
+        'authorize begin wid=${owner.wid} generation=${owner.generation} '
+        'viewId=${owner.viewId} '
+        'surfaceGeneration=${owner.surfaceGeneration} '
+        'intentSerial=$outputIntentSerial');
+    if (!_isActivationIdentityCurrent(owner, outputIntentSerial)) {
+      throw const BridgeActivationException(
+        BridgeActivationCode.staleIdentity,
+        message: 'activation identity changed before authorize',
+      );
+    }
+    await _bridgeActivation.authorize(
+      request: BridgeAuthorizationRequest(
+        handle: owner.handle,
+        generation: owner.generation,
+        viewId: owner.viewId,
+        surfaceGeneration: owner.surfaceGeneration,
+        wid: owner.wid,
+        ownerToken: configuration.android.lgExperimentOwnerToken,
+      ),
+      stillCurrent: () =>
+          _isActivationIdentityCurrent(owner, outputIntentSerial),
+      onResult: (result) => _traceSurface(
+          'authorize result epoch=${_bridgeActivation.dispatchEpoch} '
+          'wid=${owner.wid} code=${result.code.name} '
+          'applicable=${result.applicable} ok=${result.ok} '
+          'ownerGeneration=${result.ownerGeneration} '
+          'surfaceGeneration=${result.surfaceGeneration}'),
+    );
+  }
+
+  /// Handles a stale transaction detected inside a bind: before the new wid
+  /// write the attempt is discarded (its in-flight marker and release request
+  /// are cancelled; the live Surface stays in the ledger and only its own
+  /// destroy/dispose may release the JNI reference). After the wid write
+  /// started, the in-flight marker and release debt are retained and mpv is
+  /// stopped strictly — a Surface mpv may still reference is never released
+  /// here.
+  Future<void> _discardStaleBridgeActivation(
+    AndroidSurfaceAccountId incoming,
+    BridgeActivationException error,
+  ) async {
+    _traceSurface('authorize stale discard wid=${incoming.wid} '
+        'phase=${error.phase.name} code=${error.code.name}');
+    if (!error.widWriteStarted) {
+      _ledger.clearInFlightIf(incoming);
+      _ledger.cancelRelease(incoming);
+      // B2 (same invariant as C1): a same-Surface re-activation keeps the
+      // confirmed Dart identity while stopping this transaction runs — the
+      // transaction's own strict stop already unhooked mpv from this owner,
+      // so the stopped identity must not survive as a promotion candidate.
+      if (_isBoundSurfaceOwner(incoming)) {
+        wid.value = null;
+        _platformViewId = null;
+        _platformSurfaceGeneration = 0;
+        _invalidateCurrentOutputBound();
+      }
+      return;
+    }
+    // Complete the stop strictly (best effort — the retained debts make a
+    // failure retryable through the owner's own destroy/detach path). The
+    // in-flight marker and release debt stay regardless: the original owner
+    // lifecycle reclaims them, and detach stops strictly before it releases
+    // the JNI reference.
+    await _stopAfterAbandonedActivation();
+  }
+
+  /// Records a hard authorization failure (decision A: fail-closed).
+  ///
+  /// The new wid is never written, no bound identity is published, and the
+  /// waiter stays observably failed (a fresh Completer is NOT installed —
+  /// `_failCurrentOutputBound` keeps the error visible to every later
+  /// `waitUntilCurrentOutputBound` caller until the next real Surface
+  /// attempt). No bind retry is scheduled for the same owner + intent: a
+  /// permanent init failure must not become a repeated init loop.
+  ///
+  /// [boundIdentityClearable] says whether the strict stop that preceded the
+  /// failure completed: a bind already completed its stop, while a wid
+  /// listener activation may have failed its own stop — then the confirmed
+  /// identity and in-flight debt must survive so the owner's detach still
+  /// stops mpv strictly before releasing the JNI reference.
+  void _recordBridgeActivationFailure(
+    AndroidSurfaceAccountId owner,
+    int outputIntentSerial,
+    BridgeActivationException error,
+    StackTrace stack, {
+    bool boundIdentityClearable = true,
+  }) {
+    _traceSurface('authorize failed wid=${owner.wid} code=${error.code.name} '
+        'phase=${error.phase.name}');
+    _ledger.markBindFailed(owner);
+    // C1: after a successful strict stop the previously confirmed bound
+    // identity must not remain promotable. A same-Surface re-activation still
+    // holds the old Dart identity; clear it (mpv is stopped) without dropping
+    // the in-flight marker that blocks `_promoteCompatibleBoundFallback`.
+    if (boundIdentityClearable && _isBoundSurfaceOwner(owner)) {
+      wid.value = null;
+      _platformViewId = null;
+      _platformSurfaceGeneration = 0;
+      _invalidateCurrentOutputBound();
+    }
+    final failure = StateError('Android PlatformView bridge activation failed: '
+        'code=${error.code.name}, generation=${owner.generation}, '
+        'viewId=${owner.viewId}, '
+        'surfaceGeneration=${owner.surfaceGeneration}, wid=${owner.wid}'
+        '${error.message == null ? '' : ', ${error.message}'}');
+    if (_pendingSurfaceFailure == null) {
+      _pendingSurfaceFailure = failure;
+      _pendingSurfaceFailureStack = stack;
+      _pendingSurfaceFailureViewSerial = _viewCreationSerialById[owner.viewId];
+    }
+    if (_outputIntent.isCurrent(owner, outputIntentSerial)) {
+      _outputAvailability.markCurrentUnavailable();
+      // Keep the failed waiter observable; do not replace it with a fresh
+      // Completer the way the generic property-failure catch does.
+      _failCurrentOutputBound(failure, stack);
+      _outputAvailability.failInitial(failure, stack, rememberFailure: true);
+    }
+    _publishBridgeActivationIssue(owner, error);
+  }
+
+  void _publishBridgeActivationIssue(
+    AndroidSurfaceAccountId owner,
+    BridgeActivationException error,
+  ) {
+    final current = bridgeActivationIssue.value;
+    if (current != null &&
+        current.owner == owner &&
+        current.outputIntentSerial == _outputIntent.serial &&
+        current.code == error.code) {
+      // Same owner + intent failure: do not re-notify.
+      return;
+    }
+    bridgeActivationIssue.value = BridgeActivationIssue(
+      controller: this,
+      owner: owner,
+      activationEpoch: _bridgeActivation.dispatchEpoch,
+      outputIntentSerial: _outputIntent.serial,
+      code: error.code,
+      error: error,
+      message: error.message,
+    );
+  }
+
+  /// Scope currency for the session (delegates to the shared production
+  /// unit): controller identity + aliveness + the dispatch-counted activation
+  /// epoch + the complete owner + output intent serial + the latest-view
+  /// gate. A new ViewCreated that arrived before any new channel dispatch
+  /// therefore also supersedes an old owner's issue (the epoch alone cannot
+  /// detect that window).
+  @override
+  bool isCurrentBridgeActivationIssue(BridgeActivationIssue issue) {
+    return isBridgeActivationIssueCurrent(
+      issue: issue,
+      controller: this,
+      controllerActive: !_disposed && !_fullyDisposed && !_playerTerminated,
+      activationEpoch: _bridgeActivation.dispatchEpoch,
+      expectedOwner: _outputIntent.expected,
+      outputIntentSerial: _outputIntent.serial,
+      ownerAllowedByLatestView:
+          _mayPublishPlatformSurface(issue.owner, issue.outputIntentSerial),
+    );
+  }
+
+  /// The review-scope anchor (C2). Null for non-bridge outputs so the
+  /// session's verified-write comparison stays a no-op for them. Includes
+  /// the latest-view serial: a newer ViewCreated without a new Surface
+  /// leaves the owner, intent and epoch unchanged, and only this component
+  /// distinguishes that scope.
+  @override
+  BridgeActivationScopeAnchor? get bridgeActivationScopeAnchor {
+    if (!_bridgeActivationEnabled) return null;
+    final handle = nativeHandle;
+    return BridgeActivationScopeAnchor(
+      controller: this,
+      owner: handle == null ? null : _boundSurfaceOwner(handle),
+      activationEpoch: _bridgeActivation.dispatchEpoch,
+      outputIntentSerial: _outputIntent.serial,
+      latestViewCreationSerial: _latestViewCreationSerial,
+    );
   }
 
   Future<void> _detachPlatformSurface(
@@ -870,7 +1171,7 @@ class AndroidVideoController extends PlatformVideoController {
     int? fallbackIntentSerial,
   ) async {
     _traceSurface(
-        'detach requested wid=$expectedWid surfaceGeneration=$surfaceGeneration');
+        'detach requested wid=$expectedWid surfaceGeneration=$surfaceGeneration generation=$generation viewId=$viewId');
     final owner = _surfaceOwner(
       handle: nativeHandle ?? await player.handle,
       generation: generation,
@@ -882,6 +1183,8 @@ class AndroidVideoController extends PlatformVideoController {
         fallbackIntentSerial ?? _ledger.pendingFallbackSerial(owner);
     try {
       await lock.synchronized(() async {
+        _traceSurface(
+            'detach lock acquired wid=$expectedWid surfaceGeneration=$surfaceGeneration generation=$generation viewId=$viewId boundWid=${wid.value} boundSurfaceGeneration=$_platformSurfaceGeneration');
         _ledger.beginRelease(owner);
         if (_fullyDisposed) {
           await _releaseSurfaceOwnerLocked(owner);
@@ -900,7 +1203,12 @@ class AndroidVideoController extends PlatformVideoController {
         }
         final isCurrentOutput = _isBoundSurfaceOwner(owner);
         final isInFlightOutput = _ledger.inFlightOwner == owner;
-        if (isCurrentOutput || isInFlightOutput) {
+        _traceSurface(
+            'detach decision wid=$expectedWid isCurrentOutput=$isCurrentOutput isInFlightOutput=$isInFlightOutput');
+        if (releaseRequiresStrictStop(
+          isBoundOutput: isCurrentOutput,
+          isInFlightOutput: isInFlightOutput,
+        )) {
           // Do not enqueue a second listener behind this lock: Java may release
           // the JNI reference only after mpv has observed wid=0 and vo=null.
           wid.removeListener(widListener);
@@ -920,7 +1228,11 @@ class AndroidVideoController extends PlatformVideoController {
         await _releaseSurfaceOwnerLocked(owner);
         _traceSurface('detach reference released wid=$expectedWid');
       });
+      _traceSurface(
+          'detach lock released wid=$expectedWid surfaceGeneration=$surfaceGeneration');
     } catch (_) {
+      _traceSurface(
+          'detach lock released(error) wid=$expectedWid surfaceGeneration=$surfaceGeneration');
       // Keep the exact owner pending. A failed stop must retain its JNI
       // reference; a failed release or ACK is idempotently retried.
       _schedulePlatformDetachRetry(owner, retryFallbackIntentSerial);
@@ -969,7 +1281,7 @@ class AndroidVideoController extends PlatformVideoController {
     return currentBoundOutputIdentityForState(
       candidate: candidate,
       expected: _outputIntent.expected,
-      outputAvailable: !_currentPlatformOutputUnavailable,
+      outputAvailable: !_outputAvailability.currentOutputUnavailable,
       noInFlightOwner: _ledger.inFlightOwner == null,
       ownerLive: candidate != null && _ledger.isLive(candidate),
       ownerNotBindFailed: candidate != null && !_ledger.isBindFailed(candidate),
@@ -1024,8 +1336,7 @@ class AndroidVideoController extends PlatformVideoController {
 
   /// Two-phase release over an injectable channel: unit tests drive the
   /// out-of-order, late and failed-ACK interleavings from a fake.
-  static final SurfaceReleaseProtocol _surfaceRelease =
-      SurfaceReleaseProtocol(
+  static final SurfaceReleaseProtocol _surfaceRelease = SurfaceReleaseProtocol(
     MethodChannelPlatformSurfaceReleaseChannel(
       releaseTimeout: _surfaceReleaseTimeout,
       acknowledgeTimeout: _surfaceReleaseOwnerAckTimeout,
@@ -1076,8 +1387,7 @@ class AndroidVideoController extends PlatformVideoController {
   /// capability changes, e.g. the system HDR toggle or a display switch).
   /// The session consumes these to republish capability reports.
   static final List<HdrCapabilitiesChangedListener>
-      _hdrCapabilitiesChangedListeners =
-      <HdrCapabilitiesChangedListener>[];
+      _hdrCapabilitiesChangedListeners = <HdrCapabilitiesChangedListener>[];
 
   /// Registers a `HdrCapabilities.Changed` listener. Idempotent.
   static void registerHdrCapabilitiesChangedListener(
@@ -1112,12 +1422,10 @@ class AndroidVideoController extends PlatformVideoController {
     );
   }
 
-
   static const int _maxOrphanReleaseAttempts = 3;
-  static final Map<AndroidSurfaceAccountId, int>
-      _orphanSurfaceReleaseAttempts = {};
-  static final Map<AndroidSurfaceAccountId, Timer> _orphanReleaseTimers =
+  static final Map<AndroidSurfaceAccountId, int> _orphanSurfaceReleaseAttempts =
       {};
+  static final Map<AndroidSurfaceAccountId, Timer> _orphanReleaseTimers = {};
 
   static Future<void> _releaseOrphanPlatformSurface(
     AndroidSurfaceAccountId owner,
@@ -1185,7 +1493,7 @@ class AndroidVideoController extends PlatformVideoController {
     required int outputIntentSerial,
   }) async {
     _traceSurface(
-        'bind requested wid=$widValue surfaceGeneration=$surfaceGeneration');
+        'bind requested wid=$widValue surfaceGeneration=$surfaceGeneration generation=$generation viewId=$viewId intentSerial=$outputIntentSerial');
     final incoming = _surfaceOwner(
       handle: handle,
       generation: generation,
@@ -1196,9 +1504,12 @@ class AndroidVideoController extends PlatformVideoController {
     _ledger.enqueueBind(incoming);
     try {
       await lock.synchronized(() async {
+        _traceSurface(
+            'bind lock acquired wid=$widValue surfaceGeneration=$surfaceGeneration generation=$generation viewId=$viewId boundWid=${wid.value} boundSurfaceGeneration=$_platformSurfaceGeneration inFlight=${_ledger.inFlightOwner?.wid}');
         if (!_outputIntent.isCurrent(incoming, outputIntentSerial)) {
-          if (_outputIntent.expected != incoming ||
-              !_ledger.isLive(incoming)) {
+          _traceSurface(
+              'bind branch=intent_not_current wid=$widValue surfaceGeneration=$surfaceGeneration live=${_ledger.isLive(incoming)}');
+          if (_outputIntent.expected != incoming || !_ledger.isLive(incoming)) {
             _cancelPlatformBindRetry(incoming);
           }
           // A queued bind can lose to a newer view while its Surface remains
@@ -1210,11 +1521,13 @@ class AndroidVideoController extends PlatformVideoController {
           return;
         }
         if (_fullyDisposed) {
+          _traceSurface('bind branch=fully_disposed wid=$widValue');
           _ledger.beginRelease(incoming);
           await _releaseSurfaceOwnerLocked(incoming);
           return;
         }
         if (_disposed) {
+          _traceSurface('bind branch=disposed wid=$widValue');
           _ledger.beginRelease(incoming);
           if (_playerTerminated) {
             await _releaseSurfaceOwnerLocked(incoming);
@@ -1225,20 +1538,29 @@ class AndroidVideoController extends PlatformVideoController {
             nativeSurfaceGeneration != generation ||
             (_platformViewId == viewId &&
                 surfaceGeneration < _platformSurfaceGeneration)) {
+          _traceSurface(
+              'bind branch=stale_or_not_live wid=$widValue live=${_ledger.isLive(incoming)} nativeSurfaceGeneration=$nativeSurfaceGeneration generation=$generation platformViewId=$_platformViewId viewId=$viewId surfaceGeneration=$surfaceGeneration platformSurfaceGeneration=$_platformSurfaceGeneration');
           _ledger.beginRelease(incoming);
           await _releaseSurfaceOwnerLocked(incoming);
           return;
         }
         final bound = _boundSurfaceOwner(incoming.handle);
         if (bound == incoming && _ledger.inFlightOwner == null) {
+          _traceSurface('bind branch=already_bound wid=$widValue');
           _ledger.clearBindFailed(incoming);
           _cancelPlatformBindRetry(incoming);
-          if (_outputIntent.isCurrent(incoming, outputIntentSerial) &&
-              _mayPublishPlatformSurface(incoming, outputIntentSerial)) {
-            _currentPlatformOutputUnavailable = false;
-            if (!_currentPlatformViewOutputBound.isCompleted) {
-              _currentPlatformViewOutputBound.complete();
-            }
+          // The repeated already-bound gate lives in the shared production
+          // unit: a retained in-flight debt (an activation failure keeps it)
+          // or a closed latest-view gate blocks the republish.
+          if (mayRepublishAlreadyBoundOutput(
+            confirmedBound: true,
+            hasInFlightOwner: false,
+            intentCurrent:
+                _outputIntent.isCurrent(incoming, outputIntentSerial),
+            mayPublishLatestView:
+                _mayPublishPlatformSurface(incoming, outputIntentSerial),
+          )) {
+            _outputAvailability.publishCurrentAvailable(completeInitial: false);
           }
           return;
         }
@@ -1253,6 +1575,8 @@ class AndroidVideoController extends PlatformVideoController {
         wid.removeListener(widListener);
         try {
           final previousInFlight = _ledger.inFlightOwner;
+          _traceSurface(
+              'bind branch=rebind wid=$widValue boundWid=${bound?.wid} boundSurfaceGeneration=${bound?.surfaceGeneration} previousInFlightWid=${previousInFlight?.wid} stopPreviousFirst=${bound != null || previousInFlight != null}');
           if (bound != null || previousInFlight != null) {
             // Keep A as the confirmed owner until the strict stop reply succeeds.
             // A failed first vo=null therefore cannot make a late A destroy look
@@ -1268,8 +1592,7 @@ class AndroidVideoController extends PlatformVideoController {
           if (bound != null && _ledger.isLive(bound)) {
             _ledger.cancelRelease(bound);
           }
-          if (previousInFlight != null &&
-              _ledger.isLive(previousInFlight)) {
+          if (previousInFlight != null && _ledger.isLive(previousInFlight)) {
             _ledger.cancelRelease(previousInFlight);
           }
           // From this point B may be visible to a partially completed mpv
@@ -1277,9 +1600,31 @@ class AndroidVideoController extends PlatformVideoController {
           // succeeded; failure paths must stop B before releasing it.
           _ledger.markInFlight(incoming);
           await _drainPendingSurfaceReleasesLocked(except: incoming);
+          // The A2 activation barrier: only the token-route PlatformView
+          // carrier passes an authorization callback; other callers keep the
+          // exact previous behavior.
+          final authorizeActivation =
+              _bridgeActivationBarrierFor(incoming, outputIntentSerial);
           // Rebinding vo/wid attaches the current decoder output to this new
           // Surface. Seeking again discards HEVC references during rebuild.
-          await _applyWidLocked(widValueOverride: incoming.wid.toString());
+          await _applyWidLocked(
+            widValueOverride: incoming.wid.toString(),
+            authorizeActivation: authorizeActivation,
+            activationStillCurrent: authorizeActivation == null
+                ? null
+                : () =>
+                    _isActivationIdentityCurrent(incoming, outputIntentSerial),
+          );
+          // Re-check the full identity once more before publishing the Dart
+          // bound identity or completing any waiter. A transaction that went
+          // stale after its last await keeps its in-flight marker and release
+          // debt: the owner's own destroy/dispose reclaims it.
+          if (authorizeActivation != null &&
+              !_isActivationIdentityCurrent(incoming, outputIntentSerial)) {
+            _traceSurface(
+                'authorize stale discard wid=${incoming.wid} phase=applied');
+            return;
+          }
           wid.value = incoming.wid == 0 ? null : incoming.wid;
           _platformViewId = incoming.viewId;
           _platformSurfaceGeneration = incoming.surfaceGeneration;
@@ -1290,37 +1635,35 @@ class AndroidVideoController extends PlatformVideoController {
           final isExpectedOutput = widValue != 0 &&
               _outputIntent.isCurrent(incoming, outputIntentSerial) &&
               _mayPublishPlatformSurface(incoming, outputIntentSerial);
-          _currentPlatformOutputUnavailable = !isExpectedOutput;
+          if (isExpectedOutput) {
+            _outputAvailability.publishCurrentAvailable();
+          } else {
+            _outputAvailability.markCurrentUnavailable();
+          }
           _traceSurface(
               'bind complete wid=$widValue surfaceGeneration=$surfaceGeneration');
-          if (isExpectedOutput &&
-              !_currentPlatformViewOutputBound.isCompleted) {
-            _currentPlatformViewOutputBound.complete();
-          }
-          if (isExpectedOutput &&
-              !_initialPlatformViewOutputBound.isCompleted) {
-            _initialPlatformViewOutputBound.complete();
-          }
           if (!isExpectedOutput) {
             // A newer view can be created during the native await above. If
             // that view failed and this older compatible Surface is now truly
             // bound, resolve its pending waiter through the explicit fallback.
             _failPlatformSurfaceIfNoAlternative();
           }
+        } on BridgeActivationException catch (error, stackTrace) {
+          // Dedicated activation failure branch (decision A).
+          if (error.stale) {
+            await _discardStaleBridgeActivation(incoming, error);
+          } else {
+            _recordBridgeActivationFailure(
+                incoming, outputIntentSerial, error, stackTrace);
+          }
         } catch (error, stackTrace) {
           _ledger.markBindFailed(incoming);
           if (_outputIntent.isCurrent(incoming, outputIntentSerial)) {
-            _currentPlatformOutputUnavailable = true;
+            _outputAvailability.markCurrentUnavailable();
             if (_pendingSurfaceFailure == null ||
                 _mayPublishPlatformSurface(incoming, outputIntentSerial)) {
-              _failCurrentOutputBound(error, stackTrace);
-              _currentPlatformViewOutputBound = Completer<void>();
-              if (!_initialPlatformViewOutputBound.isCompleted) {
-                _initialPlatformViewOutputBound.completeError(
-                    error, stackTrace);
-                unawaited(_initialPlatformViewOutputBound.future
-                    .catchError((Object _) {}));
-              }
+              _outputAvailability.failCurrentAndRenew(error, stackTrace);
+              _outputAvailability.failInitial(error, stackTrace);
             }
             _schedulePlatformBindRetry(incoming, outputIntentSerial);
           }
@@ -1329,6 +1672,8 @@ class AndroidVideoController extends PlatformVideoController {
           if (!_disposed) wid.addListener(widListener);
         }
       });
+      _traceSurface(
+          'bind lock released wid=$widValue surfaceGeneration=$surfaceGeneration');
     } finally {
       _ledger.dequeueBind(incoming);
       _failPlatformSurfaceIfNoAlternative();
@@ -1478,7 +1823,8 @@ class AndroidVideoController extends PlatformVideoController {
           controller._nativeTextureCreation = _channel
               .invokeMapMethod<String, dynamic>('VideoOutputManager.Create', {
             'handle': handle.toString(),
-            'enableSurfaceProducer': configuration.android.enableSurfaceProducer,
+            'enableSurfaceProducer':
+                configuration.android.enableSurfaceProducer,
             'generation': controller.nativeSurfaceGeneration,
           }).then((surface) {
             controller._videoOutputCreated = true;
@@ -1538,7 +1884,7 @@ class AndroidVideoController extends PlatformVideoController {
                 widValueOverride: textureWid.toString());
             controller.id.value = textureId;
             controller.wid.value = textureWid;
-            controller._initialPlatformViewOutputBound.complete();
+            controller._outputAvailability.completeInitial();
           } finally {
             controller.wid.addListener(controller.widListener);
           }
@@ -1635,21 +1981,17 @@ class AndroidVideoController extends PlatformVideoController {
     }
     _disposed = true;
     _cancelPlatformSurfaceRetries();
-    _currentPlatformOutputUnavailable = true;
+    _outputAvailability.markCurrentUnavailable();
     _failCurrentOutputBound(
       StateError('Android output disposed before current bind.'),
       StackTrace.current,
     );
-    if (_published && !_initialPlatformViewOutputBound.isCompleted) {
-      _initialPlatformViewOutputBound.completeError(
+    if (_published) {
+      _outputAvailability.failInitial(
         StateError(
             'Android PlatformView disposed before its initial output bound.'),
+        StackTrace.current,
       );
-      // The transaction may wait on the current output instead. Preserve the
-      // error for initial-output callers without reporting an unhandled error
-      // when no such caller exists.
-      unawaited(
-          _initialPlatformViewOutputBound.future.catchError((Object _) {}));
     }
     Object? cleanupError;
     StackTrace? cleanupStack;
@@ -1734,7 +2076,7 @@ class AndroidVideoController extends PlatformVideoController {
   Future<void> _disposeAfterPlayerTermination() async {
     _disposed = true;
     _cancelPlatformSurfaceRetries();
-    _currentPlatformOutputUnavailable = true;
+    _outputAvailability.markCurrentUnavailable();
     _failCurrentOutputBound(
       StateError('Android output terminated before current bind.'),
       StackTrace.current,
@@ -1750,7 +2092,8 @@ class AndroidVideoController extends PlatformVideoController {
     // initialization barrier has completed. Wait for its native ownership to
     // settle before deciding whether the terminal callback may finalize.
     // Dispose is idempotent on Java even when Create itself returned an error.
-    if (!configuration.android.usePlatformView && _nativeTextureCreation != null) {
+    if (!configuration.android.usePlatformView &&
+        _nativeTextureCreation != null) {
       try {
         await _nativeTextureCreation;
       } catch (_) {
@@ -1850,6 +2193,9 @@ class AndroidVideoController extends PlatformVideoController {
     }
     wid.removeListener(widListener);
     wid.dispose();
+    // The session unsubscribes on its own dispose; releasing the notifier
+    // here is the terminal backstop for any remaining listener.
+    bridgeActivationIssue.dispose();
     super.dispose();
   }
 
@@ -1934,6 +2280,8 @@ class AndroidVideoController extends PlatformVideoController {
               final int creationSerial = call.arguments['creationSerial'];
               final String? dataspace = call.arguments['dataspace'];
               final String? pixelFormat = call.arguments['pixelFormat'];
+              _homeTrace(
+                  'event ViewCreated handle=$handle generation=$generation viewId=$viewId creationSerial=$creationSerial controllerPresent=${_controllers[handle] != null}');
               _controllers[handle]?._markPlatformViewCreated(
                   generation, viewId, creationSerial, dataspace, pixelFormat);
               break;
@@ -1947,6 +2295,8 @@ class AndroidVideoController extends PlatformVideoController {
               final int creationSerial = call.arguments['creationSerial'];
               final int surfaceGeneration = call.arguments['surfaceGeneration'];
               final controller = _controllers[handle];
+              _homeTrace(
+                  'event SurfaceAvailable handle=$handle wid=$wid generation=$generation viewId=$viewId creationSerial=$creationSerial surfaceGeneration=$surfaceGeneration controllerPresent=${controller != null} isCurrentView=${controller?._isCurrentPlatformViewEvent(generation, viewId, creationSerial)}');
               if (controller == null ||
                   !controller._isCurrentPlatformViewEvent(
                       generation, viewId, creationSerial)) {
@@ -2004,6 +2354,8 @@ class AndroidVideoController extends PlatformVideoController {
               final int surfaceGeneration = call.arguments['surfaceGeneration'];
               final String reason = call.arguments['reason'];
               final controller = _controllers[handle];
+              _homeTrace(
+                  'event SurfaceRuntimeFailed handle=$handle wid=$wid generation=$generation viewId=$viewId creationSerial=$creationSerial surfaceGeneration=$surfaceGeneration reason=$reason controllerPresent=${controller != null}');
               if (controller == null) {
                 await _releaseOrphanPlatformSurface(_surfaceOwner(
                   handle: handle,
@@ -2054,6 +2406,8 @@ class AndroidVideoController extends PlatformVideoController {
               final int viewId = call.arguments['viewId'];
               final int surfaceGeneration = call.arguments['surfaceGeneration'];
               final controller = _controllers[handle];
+              _homeTrace(
+                  'event SurfaceDestroyed handle=$handle wid=$wid generation=$generation viewId=$viewId surfaceGeneration=$surfaceGeneration controllerPresent=${controller != null} boundWid=${controller?.wid.value} boundSurfaceGeneration=${controller?._platformSurfaceGeneration}');
               if (controller == null) {
                 // The controller's dispose barrier already stopped its
                 // producer before unregistering. A later Java view-dispose
@@ -2094,8 +2448,9 @@ class AndroidVideoController extends PlatformVideoController {
               final arguments = call.arguments;
               if (arguments is Map) {
                 final snapshot = Map<Object?, Object?>.from(arguments);
-                final listeners = List<HdrCapabilitiesChangedListener>
-                    .unmodifiable(_hdrCapabilitiesChangedListeners);
+                final listeners =
+                    List<HdrCapabilitiesChangedListener>.unmodifiable(
+                        _hdrCapabilitiesChangedListeners);
                 for (final listener in listeners) {
                   try {
                     listener(snapshot);

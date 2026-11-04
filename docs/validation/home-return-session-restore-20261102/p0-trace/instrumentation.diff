@@ -1,0 +1,618 @@
+diff --git a/media_kit_video/android/src/main/cpp/mediakit_surfacetexture_bridge.cpp b/media_kit_video/android/src/main/cpp/mediakit_surfacetexture_bridge.cpp
+index 9e1a3c5c..0801d044 100644
+--- a/media_kit_video/android/src/main/cpp/mediakit_surfacetexture_bridge.cpp
++++ b/media_kit_video/android/src/main/cpp/mediakit_surfacetexture_bridge.cpp
+@@ -56,6 +56,11 @@
+ #include <android/native_window.h>
+ #include <android/native_window_jni.h>
+ #include <GLES2/gl2.h>
++// MKS-HOME-TRACE temporary diagnostic instrumentation (EGL current-context
++// identity + gettid for the HOME-return bridge timeline).
++#include <EGL/egl.h>
++#include <unistd.h>
++#include <cstdio>
+ 
+ #include <atomic>
+ #include <cerrno>
+@@ -240,6 +245,52 @@ int mkst_lc_shutdown_locked(MkstLifecycle* lc) {
+ 
+ MkstLifecycle g_lifecycle;
+ 
++// MKS-HOME-TRACE temporary diagnostic instrumentation --------------------
++// Logs only; never changes control flow or return values. Placed OUTSIDE the
++// MKST-LIFECYCLE extraction block so the host lifecycle test stays intact.
++// rt= CLOCK_REALTIME ms (comparable with Dart DateTime.now() and the Java
++// System.currentTimeMillis column); mono= CLOCK_MONOTONIC ms (comparable
++// with Java SystemClock.uptimeMillis).
++struct MksHomeSnapshot {
++    bool initialized;
++    bool window_active;
++    unsigned long long owner_key;
++    unsigned generation;
++};
++
++// Must be called while g_lifecycle.lock is NOT held by this thread (the
++// lifecycle mutex is non-recursive).
++static MksHomeSnapshot mks_home_snapshot_unlocked() {
++    MksHomeSnapshot s{};
++    pthread_mutex_lock(&g_lifecycle.lock);
++    s.initialized = g_lifecycle.initialized;
++    s.window_active = g_lifecycle.window_active;
++    s.owner_key = static_cast<unsigned long long>(g_lifecycle.owner_key);
++    s.generation = static_cast<unsigned>(g_lifecycle.generation);
++    pthread_mutex_unlock(&g_lifecycle.lock);
++    return s;
++}
++
++static long long mks_home_ms(clockid_t clk) {
++    timespec ts{};
++    clock_gettime(clk, &ts);
++    return static_cast<long long>(ts.tv_sec) * 1000LL + ts.tv_nsec / 1000000LL;
++}
++
++static void mks_home_trace(const char* where, const char* phase,
++                           const MksHomeSnapshot& s, const char* extra) {
++    __android_log_print(ANDROID_LOG_INFO, "MKS-HOME-TRACE",
++                        "rt=%lld mono=%lld tid=%d egl_ctx=%p native %s %s"
++                        " initialized=%d window_active=%d owner_key=%llu"
++                        " generation=%u %s",
++                        mks_home_ms(CLOCK_REALTIME), mks_home_ms(CLOCK_MONOTONIC),
++                        static_cast<int>(gettid()),
++                        static_cast<void*>(eglGetCurrentContext()), where, phase,
++                        s.initialized ? 1 : 0, s.window_active ? 1 : 0,
++                        s.owner_key, s.generation, extra ? extra : "");
++}
++// MKS-HOME-TRACE end -------------------------------------------------------
++
+ // JNI class/method resources are resolved only from the Java-called
+ // nativeInit (a thread with Java frames, so FindClass resolves through the
+ // app classloader). Guarded by g_lifecycle.lock; read lock-free by
+@@ -531,6 +582,12 @@ extern "C" int mkst_init(uint64_t owner_key, uint32_t generation);
+ extern "C" JNIEXPORT jboolean JNICALL
+ Java_com_alexmercerind_media_1kit_1video_platformview_MediaCodecSurfaceTextureBridge_nativeInit(
+     JNIEnv* env, jclass, jlong owner_key, jint generation) {
++    {
++        char extra[96];
++        snprintf(extra, sizeof(extra), "req_owner_key=%llu req_generation=%d",
++                 static_cast<unsigned long long>(owner_key), static_cast<int>(generation));
++        mks_home_trace("nativeInit(JNI)", "enter", mks_home_snapshot_unlocked(), extra);
++    }
+     // This is only ever called from Java, so the VM is always obtainable
+     // here; cache it for the mkst_* paths that run on native threads.
+     if (g_vm.load(std::memory_order_relaxed) == nullptr) {
+@@ -602,10 +659,19 @@ Java_com_alexmercerind_media_1kit_1video_platformview_MediaCodecSurfaceTextureBr
+ // ---------------------------------------------------------------------------
+ 
+ extern "C" JNIEXPORT int mkst_init(uint64_t owner_key, uint32_t generation) {
++    {
++        char extra[128];
++        snprintf(extra, sizeof(extra), "req_owner_key=%llu req_generation=%u resources_ready=%d",
++                 static_cast<unsigned long long>(owner_key), generation,
++                 g_resources_ready.load(std::memory_order_acquire));
++        mks_home_trace("mkst_init(lc_init)", "enter", mks_home_snapshot_unlocked(), extra);
++    }
+     // Only the Java-called nativeInit resolves the JNI resources; this C
+     // entry is the pure state transition and refuses while they are missing.
+     if (g_resources_ready.load(std::memory_order_acquire) == 0) {
+         MKSURF_LOGW("init: refused (resources unresolved; Java nativeInit must run first)");
++        mks_home_trace("mkst_init(lc_init)", "exit", mks_home_snapshot_unlocked(),
++                       "rc=-1 reason=resources_unresolved");
+         return -1;
+     }
+     const int rc = mkst_lc_init(&g_lifecycle, owner_key, generation);
+@@ -618,6 +684,11 @@ extern "C" JNIEXPORT int mkst_init(uint64_t owner_key, uint32_t generation) {
+                     static_cast<unsigned long long>(owner_key), generation,
+                     MKSURF_VERSION);
+     }
++    {
++        char extra[64];
++        snprintf(extra, sizeof(extra), "rc=%d", rc);
++        mks_home_trace("mkst_init(lc_init)", "exit", mks_home_snapshot_unlocked(), extra);
++    }
+     return rc;
+ }
+ 
+@@ -625,7 +696,14 @@ extern "C" JNIEXPORT int mkst_ensure_init(void) {
+     // Verify-only: 1 = an owner explicitly initialized the bridge, 0 = not.
+     // Never initializes; the Java nativeInit is the only initialization
+     // entry, so a native-first call can never poison the Java-side init.
+-    return mkst_lc_verify(&g_lifecycle);
++    mks_home_trace("mkst_ensure_init(lc_verify)", "enter", mks_home_snapshot_unlocked(), "");
++    const int ready = mkst_lc_verify(&g_lifecycle);
++    {
++        char extra[64];
++        snprintf(extra, sizeof(extra), "ready=%d", ready);
++        mks_home_trace("mkst_ensure_init(lc_verify)", "exit", mks_home_snapshot_unlocked(), extra);
++    }
++    return ready;
+ }
+ 
+ // The whole create body runs under g_lifecycle.lock (serialized transition;
+@@ -816,6 +894,7 @@ static void* do_create_decoder_window_locked() {
+ }
+ 
+ extern "C" JNIEXPORT void* mkst_create_decoder_window(void) {
++    mks_home_trace("mkst_create_decoder_window", "enter", mks_home_snapshot_unlocked(), "");
+     pthread_mutex_lock(&g_lifecycle.lock);
+     if (mkst_lc_create_gate_locked(&g_lifecycle) != 0) {
+         const bool initialized = g_lifecycle.initialized;
+@@ -823,15 +902,24 @@ extern "C" JNIEXPORT void* mkst_create_decoder_window(void) {
+         pthread_mutex_unlock(&g_lifecycle.lock);
+         MKSURF_LOGW("create: refused (initialized=%d window_active=%d)",
+                     initialized ? 1 : 0, window_active ? 1 : 0);
++        mks_home_trace("mkst_create_decoder_window", "exit", mks_home_snapshot_unlocked(),
++                       "result=refused(gate) window=0x0");
+         return nullptr;
+     }
+     void* window = do_create_decoder_window_locked();
+     if (window == nullptr) {
+         pthread_mutex_unlock(&g_lifecycle.lock);
++        mks_home_trace("mkst_create_decoder_window", "exit", mks_home_snapshot_unlocked(),
++                       "result=create_failed window=0x0");
+         return nullptr;
+     }
+     mkst_lc_create_commit_locked(&g_lifecycle);
+     pthread_mutex_unlock(&g_lifecycle.lock);
++    {
++        char extra[64];
++        snprintf(extra, sizeof(extra), "result=ok window=%p", window);
++        mks_home_trace("mkst_create_decoder_window", "exit", mks_home_snapshot_unlocked(), extra);
++    }
+     return window;
+ }
+ 
+@@ -994,6 +1082,7 @@ extern "C" JNIEXPORT void mkst_set_diag_enabled(int enabled) {
+ }
+ 
+ extern "C" JNIEXPORT int mkst_shutdown(void) {
++    mks_home_trace("mkst_shutdown", "enter", mks_home_snapshot_unlocked(), "");
+     // Serialized transition: the lifecycle lock is held for the whole
+     // teardown (lock discipline above). The binding is torn down FIRST, so
+     // every lifecycle gate refuses from this point on even while the JNI
+@@ -1003,6 +1092,8 @@ extern "C" JNIEXPORT int mkst_shutdown(void) {
+     if (mkst_lc_shutdown_locked(&g_lifecycle) == 0) {
+         pthread_mutex_unlock(&g_lifecycle.lock);
+         MKSURF_LOGI("shutdown: no-op (already down)");
++        mks_home_trace("mkst_shutdown", "exit", mks_home_snapshot_unlocked(),
++                       "result=noop(already down)");
+         return 0;  // Idempotent.
+     }
+     // Stop counter accounting first: any in-flight frame callback now
+@@ -1076,5 +1167,12 @@ extern "C" JNIEXPORT int mkst_shutdown(void) {
+     MKSURF_LOGI("shutdown: complete version=%s frames=%lld latched=%lld",
+                 MKSURF_VERSION, static_cast<long long>(frames_total),
+                 static_cast<long long>(latched_total));
++    {
++        char extra[96];
++        snprintf(extra, sizeof(extra), "result=complete frames=%lld latched=%lld",
++                 static_cast<long long>(frames_total),
++                 static_cast<long long>(latched_total));
++        mks_home_trace("mkst_shutdown", "exit", mks_home_snapshot_unlocked(), extra);
++    }
+     return 0;
+ }
+diff --git a/media_kit_video/android/src/main/java/com/alexmercerind/media_kit_video/platformview/MediaCodecSurfaceTextureBridge.java b/media_kit_video/android/src/main/java/com/alexmercerind/media_kit_video/platformview/MediaCodecSurfaceTextureBridge.java
+index 6e11f292..3ab5071e 100644
+--- a/media_kit_video/android/src/main/java/com/alexmercerind/media_kit_video/platformview/MediaCodecSurfaceTextureBridge.java
++++ b/media_kit_video/android/src/main/java/com/alexmercerind/media_kit_video/platformview/MediaCodecSurfaceTextureBridge.java
+@@ -93,7 +93,13 @@ public final class MediaCodecSurfaceTextureBridge implements SurfaceTexture.OnFr
+      *         native init reports failure (never silently ignored).
+      */
+     public static void ensureInitialized(String ownerToken, int generation) {
++        PlatformVideoView.homeTrace("bridge.ensureInitialized enter generation=" + generation
++                + " tokenPresent=" + (ownerToken != null && !ownerToken.isEmpty())
++                + " ownerKey=" + (ownerToken == null ? 0 : ownerKey(ownerToken))
++                + " libraryLoaded=" + sLibraryLoaded.get());
+         if (ownerToken == null || ownerToken.isEmpty() || generation <= 0) {
++            PlatformVideoView.homeTrace("bridge.ensureInitialized exit generation=" + generation
++                    + " result=throw(no owner)");
+             throw new IllegalStateException(
+                     "MKSURF: native surfacetexture bridge init refused"
+                             + " (no experiment owner)");
+@@ -106,7 +112,10 @@ public final class MediaCodecSurfaceTextureBridge implements SurfaceTexture.OnFr
+                 }
+             }
+         }
+-        if (!nativeInit(ownerKey(ownerToken), generation)) {
++        final boolean nativeOk = nativeInit(ownerKey(ownerToken), generation);
++        PlatformVideoView.homeTrace("bridge.ensureInitialized nativeInit returned=" + nativeOk
++                + " generation=" + generation + " ownerKey=" + ownerKey(ownerToken));
++        if (!nativeOk) {
+             throw new IllegalStateException(
+                     "MKSURF: native surfacetexture bridge init failed");
+         }
+diff --git a/media_kit_video/android/src/main/java/com/alexmercerind/media_kit_video/platformview/PlatformVideoView.java b/media_kit_video/android/src/main/java/com/alexmercerind/media_kit_video/platformview/PlatformVideoView.java
+index 6dece188..8eae9c6a 100644
+--- a/media_kit_video/android/src/main/java/com/alexmercerind/media_kit_video/platformview/PlatformVideoView.java
++++ b/media_kit_video/android/src/main/java/com/alexmercerind/media_kit_video/platformview/PlatformVideoView.java
+@@ -41,6 +41,18 @@ import com.alexmercerind.media_kit_video.GlobalObjectRefManager;
+ public final class PlatformVideoView implements PlatformView {
+     private static final String TAG = "PlatformVideoView";
+ 
++    // MKS-HOME-TRACE: temporary diagnostic instrumentation (P0 HOME-return
++    // bridge timeline). Logs only; no control-flow change. realtime_ms is
++    // comparable with the Dart DateTime.now().millisecondsSinceEpoch and the
++    // native CLOCK_REALTIME column; mono_ms is SystemClock.uptimeMillis().
++    static void homeTrace(String msg) {
++        Log.i("MKS-HOME-TRACE", "rt=" + System.currentTimeMillis()
++                + " mono=" + android.os.SystemClock.uptimeMillis()
++                + " tid=" + android.os.Process.myTid()
++                + " thr=" + Thread.currentThread().getName()
++                + " java " + msg);
++    }
++
+     /**
+      * Vendor/diagnostics extension for Surface dataspace handling.
+      *
+@@ -369,6 +381,10 @@ public final class PlatformVideoView implements PlatformView {
+         lgOwnerGeneration = generation;
+         lgOwnerViewId = viewId;
+         lgOwnerToken = token;
++        homeTrace("setLgExperimentOwner enter handle=" + handle + " viewId=" + viewId
++                + " ownerGeneration=" + generation
++                + " tokenPresent=" + (token != null && !token.isEmpty())
++                + " surfaceGeneration=" + surfaceGeneration + " wid=" + wid);
+         // Explicit owner-scoped bridge init: the native surfacetexture
+         // backend initializes ONLY here, bound to (owner token, generation);
+         // the raw token never crosses into native state. Without an owner
+@@ -379,11 +395,17 @@ public final class PlatformVideoView implements PlatformView {
+         // producer is still live (surface release stays producer-ACK-driven
+         // in this view for the same reason).
+         if (token == null || token.isEmpty() || generation <= 0) {
++            homeTrace("setLgExperimentOwner exit handle=" + handle + " viewId=" + viewId
++                    + " ensureInitialized=skipped(no owner)");
+             return;
+         }
+         try {
+             MediaCodecSurfaceTextureBridge.ensureInitialized(token, generation);
++            homeTrace("setLgExperimentOwner exit handle=" + handle + " viewId=" + viewId
++                    + " ownerGeneration=" + generation + " ensureInitialized=ok");
+         } catch (Throwable t) {
++            homeTrace("setLgExperimentOwner exit handle=" + handle + " viewId=" + viewId
++                    + " ownerGeneration=" + generation + " ensureInitialized=threw " + t);
+             Log.w("MKSURF", "bridge init failed (opt-in surfacetexture hwdec will be unavailable)", t);
+         }
+     }
+@@ -533,6 +555,13 @@ public final class PlatformVideoView implements PlatformView {
+             public void surfaceCreated(@NonNull SurfaceHolder holder) {
+                 Log.i(TAG, "surfaceCreated: handle=" + handle + ", width=" + width + ", height=" + height +
+                         ", viewIdentity=" + System.identityHashCode(surfaceView));
++                homeTrace("surfaceCreated enter handle=" + handle + " viewId=" + lgOwnerViewId
++                        + " ownerGeneration=" + lgOwnerGeneration
++                        + " surfaceGenerationBefore=" + surfaceGeneration
++                        + " activeSurfaceGeneration=" + activeSurfaceGeneration
++                        + " widBefore=" + wid + " disposed=" + disposed
++                        + " tokenPresent=" + (lgOwnerToken != null)
++                        + " ensureInitializedCalledHere=false");
+                 if (!disposed && holder.getSurface() != null) {
+                     // Count every creation attempt, including one rejected
+                     // before a WID exists, so its failure cannot be confused
+@@ -570,6 +599,9 @@ public final class PlatformVideoView implements PlatformView {
+                         if (appliedPath == null) {
+                             revokeLgSurface(generation);
+                             revokeManagedSurface(generation);
++                            homeTrace("surfaceCreated exit handle=" + handle + " viewId=" + lgOwnerViewId
++                                    + " surfaceGeneration=" + generation
++                                    + " sendSurfaceEvent=SurfaceFailed(initialDataSpaceRejected)");
+                             // Do not publish a WID for a Surface generation
+                             // whose HDR dataspace could not be applied.
+                             onSurfaceEvent.accept(new SurfaceEvent(
+@@ -585,7 +617,13 @@ public final class PlatformVideoView implements PlatformView {
+                     surfaceReferences.put(generation, wid);
+                     Log.i(TAG, "surfaceCreated: created new wid=" + wid);
+                     final long createdWid = wid;
++                    homeTrace("surfaceCreated sendSurfaceEvent=SurfaceAvailable begin handle=" + handle
++                            + " viewId=" + lgOwnerViewId + " ownerGeneration=" + lgOwnerGeneration
++                            + " surfaceGeneration=" + generation + " wid=" + createdWid);
+                     onSurfaceEvent.accept(new SurfaceEvent(wid, generation, false));
++                    homeTrace("surfaceCreated sendSurfaceEvent=SurfaceAvailable done handle=" + handle
++                            + " viewId=" + lgOwnerViewId + " surfaceGeneration=" + generation
++                            + " wid=" + createdWid);
+                     if (needsPqResetMonitoring()) {
+                         final android.view.Surface createdSurface = holder.getSurface();
+                         final Handler handler = new Handler(Looper.getMainLooper());
+@@ -640,6 +678,9 @@ public final class PlatformVideoView implements PlatformView {
+                         }, 8000);
+                     }
+                 }
++                homeTrace("surfaceCreated exit handle=" + handle + " viewId=" + lgOwnerViewId
++                        + " surfaceGeneration=" + surfaceGeneration
++                        + " activeSurfaceGeneration=" + activeSurfaceGeneration + " wid=" + wid);
+             }
+ 
+             @Override
+@@ -651,13 +692,26 @@ public final class PlatformVideoView implements PlatformView {
+             @Override
+             public void surfaceDestroyed(@NonNull SurfaceHolder holder) {
+                 Log.i(TAG, "surfaceDestroyed: handle=" + handle + ", wid=" + wid);
++                homeTrace("surfaceDestroyed enter handle=" + handle + " viewId=" + lgOwnerViewId
++                        + " ownerGeneration=" + lgOwnerGeneration
++                        + " surfaceGeneration=" + surfaceGeneration
++                        + " activeSurfaceGeneration=" + activeSurfaceGeneration
++                        + " wid=" + wid + " disposed=" + disposed);
+                 revokeLgSurface(surfaceGeneration);
+                 revokeManagedSurface(surfaceGeneration);
+                 final long destroyedWid = wid;
+                 if (destroyedWid != 0) {
++                    homeTrace("surfaceDestroyed sendSurfaceEvent=SurfaceDestroyed begin handle=" + handle
++                            + " viewId=" + lgOwnerViewId
++                            + " surfaceGeneration=" + activeSurfaceGeneration + " wid=" + destroyedWid);
+                     onSurfaceEvent.accept(new SurfaceEvent(destroyedWid, activeSurfaceGeneration, true));
++                    homeTrace("surfaceDestroyed sendSurfaceEvent=SurfaceDestroyed done handle=" + handle
++                            + " viewId=" + lgOwnerViewId
++                            + " surfaceGeneration=" + activeSurfaceGeneration + " wid=" + destroyedWid);
+                     wid = 0;
+                 }
++                homeTrace("surfaceDestroyed exit handle=" + handle + " viewId=" + lgOwnerViewId
++                        + " sentEvent=" + (destroyedWid != 0) + " wid=" + wid);
+             }
+         });
+     }
+@@ -987,6 +1041,11 @@ public final class PlatformVideoView implements PlatformView {
+     @Override
+     public synchronized void dispose() {
+         Log.i(TAG, "dispose: handle=" + handle);
++        homeTrace("dispose enter handle=" + handle + " viewId=" + lgOwnerViewId
++                + " ownerGeneration=" + lgOwnerGeneration
++                + " surfaceGeneration=" + surfaceGeneration + " wid=" + wid
++                + " alreadyDisposed=" + disposed
++                + " pendingSurfaceRefs=" + surfaceReferences.size());
+         if (disposed) return;
+         disposed = true;
+         revokeAllLgSurfaces();
+@@ -995,9 +1054,13 @@ public final class PlatformVideoView implements PlatformView {
+         // until Dart has stopped the matching mpv producer (when still active)
+         // and acknowledges the exact generation through ReleaseSurface.
+         for (Map.Entry<Integer, Long> reference : new HashMap<>(surfaceReferences).entrySet()) {
++            homeTrace("dispose sendSurfaceEvent=SurfaceDestroyed handle=" + handle
++                    + " viewId=" + lgOwnerViewId + " surfaceGeneration=" + reference.getKey()
++                    + " wid=" + reference.getValue());
+             onSurfaceEvent.accept(new SurfaceEvent(reference.getValue(), reference.getKey(), true));
+         }
+         wid = 0;
+         onDispose.run();
++        homeTrace("dispose exit handle=" + handle + " viewId=" + lgOwnerViewId);
+     }
+ }
+diff --git a/media_kit_video/android/src/main/java/com/alexmercerind/media_kit_video/platformview/PlatformVideoViewFactory.java b/media_kit_video/android/src/main/java/com/alexmercerind/media_kit_video/platformview/PlatformVideoViewFactory.java
+index c134a5be..d66487bf 100644
+--- a/media_kit_video/android/src/main/java/com/alexmercerind/media_kit_video/platformview/PlatformVideoViewFactory.java
++++ b/media_kit_video/android/src/main/java/com/alexmercerind/media_kit_video/platformview/PlatformVideoViewFactory.java
+@@ -254,16 +254,29 @@ public class PlatformVideoViewFactory extends PlatformViewFactory {
+         final int creationSerial = nextViewCreationSerial.incrementAndGet();
+ 
+         Log.i(TAG, "Creating PlatformVideoView for handle: " + handle);
++        PlatformVideoView.homeTrace("factory.create enter handle=" + handle + " viewId=" + id
++                + " ownerGeneration=" + generation + " creationSerial=" + creationSerial
++                + " tokenPresent=" + (params.get("lgExperimentOwnerToken") != null)
++                + " managedYuvCarrier=" + Boolean.TRUE.equals(params.get("managedYuvCarrier")));
+         final PlatformVideoView view = new PlatformVideoView(context, handle, width, height, initialDataSpace,
+             initialPixelFormat,
+             (event) -> {});
++        PlatformVideoView.homeTrace("factory.create view constructed handle=" + handle + " viewId=" + id
++                + " -> calling setLgExperimentOwner(ownerGeneration=" + generation + ")");
+         view.setLgExperimentOwner(generation, id, (String) params.get("lgExperimentOwnerToken"));
++        PlatformVideoView.homeTrace("factory.create setLgExperimentOwner returned handle=" + handle
++                + " viewId=" + id);
+         view.setManagedYuvCarrier(
+                 Boolean.TRUE.equals(params.get("managedYuvCarrier")));
+         final SurfaceOwner owner = new SurfaceOwner(handle, generation, id);
+         surfaceOwners.put(owner, view);
+         view.setOnSurfaceEvent((surfaceEvent) -> {
+             if (terminatedControllers.contains(new ControllerOwner(handle, generation))) {
++                PlatformVideoView.homeTrace("factory surfaceEvent swallowed(controller terminated) handle=" + handle
++                        + " viewId=" + id + " ownerGeneration=" + generation
++                        + " surfaceGeneration=" + surfaceEvent.generation + " wid=" + surfaceEvent.wid
++                        + " destroyed=" + surfaceEvent.destroyed + " failed=" + surfaceEvent.failed);
++
+                 if (view.releaseAllSurfacesAfterProducerTermination()) {
+                     surfaceOwners.remove(owner, view);
+                     liveSurfaceGenerations.remove(owner);
+@@ -305,6 +318,11 @@ public class PlatformVideoViewFactory extends PlatformViewFactory {
+                 views.put(handle, view);
+             }
+             final boolean cleanup = surfaceEvent.destroyed;
++            PlatformVideoView.homeTrace("factory channel.invokeMethod "
++                    + (cleanup ? "PlatformVideoView.SurfaceDestroyed" : "PlatformVideoView.SurfaceAvailable")
++                    + " handle=" + handle + " viewId=" + id + " ownerGeneration=" + generation
++                    + " creationSerial=" + creationSerial
++                    + " surfaceGeneration=" + surfaceEvent.generation + " wid=" + surfaceEvent.wid);
+             channel.invokeMethod(
+                 cleanup ? "PlatformVideoView.SurfaceDestroyed" : "PlatformVideoView.SurfaceAvailable",
+                 event);
+@@ -319,7 +337,10 @@ public class PlatformVideoViewFactory extends PlatformViewFactory {
+         created.put("pixelFormat", initialPixelFormat);
+         // Creation is the pending-view intent. It must precede any Surface
+         // callback so a late failure from an older view cannot fail its wait.
++        PlatformVideoView.homeTrace("factory channel.invokeMethod PlatformVideoView.ViewCreated handle=" + handle
++                + " viewId=" + id + " ownerGeneration=" + generation + " creationSerial=" + creationSerial);
+         channel.invokeMethod("PlatformVideoView.ViewCreated", created);
++        PlatformVideoView.homeTrace("factory.create exit handle=" + handle + " viewId=" + id);
+         return view;
+     }
+ }
+diff --git a/media_kit_video/lib/src/video_controller/android_video_controller/real.dart b/media_kit_video/lib/src/video_controller/android_video_controller/real.dart
+index 14296d15..0b31276c 100644
+--- a/media_kit_video/lib/src/video_controller/android_video_controller/real.dart
++++ b/media_kit_video/lib/src/video_controller/android_video_controller/real.dart
+@@ -765,8 +765,19 @@ class AndroidVideoController extends PlatformVideoController {
+   );
+ 
+   void _traceSurface(String event) {
++    _homeTrace(event);
++  }
++
++  // MKS-HOME-TRACE: temporary diagnostic instrumentation (P0 HOME-return
++  // bridge timeline). Logs only; no control-flow change. rt= is
++  // DateTime.now().millisecondsSinceEpoch (CLOCK_REALTIME ms, comparable with
++  // the Java/native rt= column). Gated by the same define as the existing
++  // SURFACE_TIMELINE trace.
++  static void _homeTrace(String event) {
+     if (_surfaceTimeline) {
+-      debugPrint('SURFACE_TIMELINE ${DateTime.now().toIso8601String()} $event');
++      final now = DateTime.now();
++      debugPrint('MKS-HOME-TRACE rt=${now.millisecondsSinceEpoch} dart '
++          'SURFACE_TIMELINE ${now.toIso8601String()} $event');
+     }
+   }
+ 
+@@ -831,6 +842,7 @@ class AndroidVideoController extends PlatformVideoController {
+       _traceSurface('property complete vid=no before vo=null');
+     }
+     // It is important to re-initialize --vo after --android-surface-size.
++    _traceSurface('property begin vo=null');
+     await _setOutputProperty('vo', 'null');
+     _traceSurface('property complete vo=null');
+     final properties = <String, String>{
+@@ -846,6 +858,7 @@ class AndroidVideoController extends PlatformVideoController {
+         'vid': vidValue,
+     };
+     for (final entry in properties.entries) {
++      _traceSurface('property begin ${entry.key}=${entry.value}');
+       await _setOutputProperty(entry.key, entry.value);
+       _traceSurface('property complete ${entry.key}=${entry.value}');
+     }
+@@ -870,7 +883,7 @@ class AndroidVideoController extends PlatformVideoController {
+     int? fallbackIntentSerial,
+   ) async {
+     _traceSurface(
+-        'detach requested wid=$expectedWid surfaceGeneration=$surfaceGeneration');
++        'detach requested wid=$expectedWid surfaceGeneration=$surfaceGeneration generation=$generation viewId=$viewId');
+     final owner = _surfaceOwner(
+       handle: nativeHandle ?? await player.handle,
+       generation: generation,
+@@ -882,6 +895,8 @@ class AndroidVideoController extends PlatformVideoController {
+         fallbackIntentSerial ?? _ledger.pendingFallbackSerial(owner);
+     try {
+       await lock.synchronized(() async {
++        _traceSurface(
++            'detach lock acquired wid=$expectedWid surfaceGeneration=$surfaceGeneration generation=$generation viewId=$viewId boundWid=${wid.value} boundSurfaceGeneration=$_platformSurfaceGeneration');
+         _ledger.beginRelease(owner);
+         if (_fullyDisposed) {
+           await _releaseSurfaceOwnerLocked(owner);
+@@ -900,6 +915,8 @@ class AndroidVideoController extends PlatformVideoController {
+         }
+         final isCurrentOutput = _isBoundSurfaceOwner(owner);
+         final isInFlightOutput = _ledger.inFlightOwner == owner;
++        _traceSurface(
++            'detach decision wid=$expectedWid isCurrentOutput=$isCurrentOutput isInFlightOutput=$isInFlightOutput');
+         if (isCurrentOutput || isInFlightOutput) {
+           // Do not enqueue a second listener behind this lock: Java may release
+           // the JNI reference only after mpv has observed wid=0 and vo=null.
+@@ -920,7 +937,11 @@ class AndroidVideoController extends PlatformVideoController {
+         await _releaseSurfaceOwnerLocked(owner);
+         _traceSurface('detach reference released wid=$expectedWid');
+       });
++      _traceSurface(
++          'detach lock released wid=$expectedWid surfaceGeneration=$surfaceGeneration');
+     } catch (_) {
++      _traceSurface(
++          'detach lock released(error) wid=$expectedWid surfaceGeneration=$surfaceGeneration');
+       // Keep the exact owner pending. A failed stop must retain its JNI
+       // reference; a failed release or ACK is idempotently retried.
+       _schedulePlatformDetachRetry(owner, retryFallbackIntentSerial);
+@@ -1185,7 +1206,7 @@ class AndroidVideoController extends PlatformVideoController {
+     required int outputIntentSerial,
+   }) async {
+     _traceSurface(
+-        'bind requested wid=$widValue surfaceGeneration=$surfaceGeneration');
++        'bind requested wid=$widValue surfaceGeneration=$surfaceGeneration generation=$generation viewId=$viewId intentSerial=$outputIntentSerial');
+     final incoming = _surfaceOwner(
+       handle: handle,
+       generation: generation,
+@@ -1196,7 +1217,11 @@ class AndroidVideoController extends PlatformVideoController {
+     _ledger.enqueueBind(incoming);
+     try {
+       await lock.synchronized(() async {
++        _traceSurface(
++            'bind lock acquired wid=$widValue surfaceGeneration=$surfaceGeneration generation=$generation viewId=$viewId boundWid=${wid.value} boundSurfaceGeneration=$_platformSurfaceGeneration inFlight=${_ledger.inFlightOwner?.wid}');
+         if (!_outputIntent.isCurrent(incoming, outputIntentSerial)) {
++          _traceSurface(
++              'bind branch=intent_not_current wid=$widValue surfaceGeneration=$surfaceGeneration live=${_ledger.isLive(incoming)}');
+           if (_outputIntent.expected != incoming ||
+               !_ledger.isLive(incoming)) {
+             _cancelPlatformBindRetry(incoming);
+@@ -1210,11 +1235,13 @@ class AndroidVideoController extends PlatformVideoController {
+           return;
+         }
+         if (_fullyDisposed) {
++          _traceSurface('bind branch=fully_disposed wid=$widValue');
+           _ledger.beginRelease(incoming);
+           await _releaseSurfaceOwnerLocked(incoming);
+           return;
+         }
+         if (_disposed) {
++          _traceSurface('bind branch=disposed wid=$widValue');
+           _ledger.beginRelease(incoming);
+           if (_playerTerminated) {
+             await _releaseSurfaceOwnerLocked(incoming);
+@@ -1225,12 +1252,15 @@ class AndroidVideoController extends PlatformVideoController {
+             nativeSurfaceGeneration != generation ||
+             (_platformViewId == viewId &&
+                 surfaceGeneration < _platformSurfaceGeneration)) {
++          _traceSurface(
++              'bind branch=stale_or_not_live wid=$widValue live=${_ledger.isLive(incoming)} nativeSurfaceGeneration=$nativeSurfaceGeneration generation=$generation platformViewId=$_platformViewId viewId=$viewId surfaceGeneration=$surfaceGeneration platformSurfaceGeneration=$_platformSurfaceGeneration');
+           _ledger.beginRelease(incoming);
+           await _releaseSurfaceOwnerLocked(incoming);
+           return;
+         }
+         final bound = _boundSurfaceOwner(incoming.handle);
+         if (bound == incoming && _ledger.inFlightOwner == null) {
++          _traceSurface('bind branch=already_bound wid=$widValue');
+           _ledger.clearBindFailed(incoming);
+           _cancelPlatformBindRetry(incoming);
+           if (_outputIntent.isCurrent(incoming, outputIntentSerial) &&
+@@ -1253,6 +1283,8 @@ class AndroidVideoController extends PlatformVideoController {
+         wid.removeListener(widListener);
+         try {
+           final previousInFlight = _ledger.inFlightOwner;
++          _traceSurface(
++              'bind branch=rebind wid=$widValue boundWid=${bound?.wid} boundSurfaceGeneration=${bound?.surfaceGeneration} previousInFlightWid=${previousInFlight?.wid} stopPreviousFirst=${bound != null || previousInFlight != null}');
+           if (bound != null || previousInFlight != null) {
+             // Keep A as the confirmed owner until the strict stop reply succeeds.
+             // A failed first vo=null therefore cannot make a late A destroy look
+@@ -1329,6 +1361,8 @@ class AndroidVideoController extends PlatformVideoController {
+           if (!_disposed) wid.addListener(widListener);
+         }
+       });
++      _traceSurface(
++          'bind lock released wid=$widValue surfaceGeneration=$surfaceGeneration');
+     } finally {
+       _ledger.dequeueBind(incoming);
+       _failPlatformSurfaceIfNoAlternative();
+@@ -1934,6 +1968,8 @@ class AndroidVideoController extends PlatformVideoController {
+               final int creationSerial = call.arguments['creationSerial'];
+               final String? dataspace = call.arguments['dataspace'];
+               final String? pixelFormat = call.arguments['pixelFormat'];
++              _homeTrace(
++                  'event ViewCreated handle=$handle generation=$generation viewId=$viewId creationSerial=$creationSerial controllerPresent=${_controllers[handle] != null}');
+               _controllers[handle]?._markPlatformViewCreated(
+                   generation, viewId, creationSerial, dataspace, pixelFormat);
+               break;
+@@ -1947,6 +1983,8 @@ class AndroidVideoController extends PlatformVideoController {
+               final int creationSerial = call.arguments['creationSerial'];
+               final int surfaceGeneration = call.arguments['surfaceGeneration'];
+               final controller = _controllers[handle];
++              _homeTrace(
++                  'event SurfaceAvailable handle=$handle wid=$wid generation=$generation viewId=$viewId creationSerial=$creationSerial surfaceGeneration=$surfaceGeneration controllerPresent=${controller != null} isCurrentView=${controller?._isCurrentPlatformViewEvent(generation, viewId, creationSerial)}');
+               if (controller == null ||
+                   !controller._isCurrentPlatformViewEvent(
+                       generation, viewId, creationSerial)) {
+@@ -2004,6 +2042,8 @@ class AndroidVideoController extends PlatformVideoController {
+               final int surfaceGeneration = call.arguments['surfaceGeneration'];
+               final String reason = call.arguments['reason'];
+               final controller = _controllers[handle];
++              _homeTrace(
++                  'event SurfaceRuntimeFailed handle=$handle wid=$wid generation=$generation viewId=$viewId creationSerial=$creationSerial surfaceGeneration=$surfaceGeneration reason=$reason controllerPresent=${controller != null}');
+               if (controller == null) {
+                 await _releaseOrphanPlatformSurface(_surfaceOwner(
+                   handle: handle,
+@@ -2054,6 +2094,8 @@ class AndroidVideoController extends PlatformVideoController {
+               final int viewId = call.arguments['viewId'];
+               final int surfaceGeneration = call.arguments['surfaceGeneration'];
+               final controller = _controllers[handle];
++              _homeTrace(
++                  'event SurfaceDestroyed handle=$handle wid=$wid generation=$generation viewId=$viewId surfaceGeneration=$surfaceGeneration controllerPresent=${controller != null} boundWid=${controller?.wid.value} boundSurfaceGeneration=${controller?._platformSurfaceGeneration}');
+               if (controller == null) {
+                 // The controller's dispose barrier already stopped its
+                 // producer before unregistering. A later Java view-dispose

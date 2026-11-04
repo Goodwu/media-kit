@@ -27,13 +27,14 @@
   },
   {
    "action": "HOMEReturn",
-   "result": "PASS",
+   "result": "FAIL (corrected 2026-11-02; original claim was PASS)",
    "pid": "9852->9852 survived",
-   "ready": 1,
+   "ready": 0,
    "invalidated": 0,
    "reseedRetry": 0,
    "missed": 0,
-   "fusionResumed": "committed=1 attempted=10 gen=2"
+   "fusionResumed": false,
+   "erratum": "Original entry claimed PASS with 'committed=1 attempted=10 gen=2'. Critical re-review (lg-dv-p84-thermal-review-20261029.md Current State 2026-11-02) found that data is from BEFORE HOME (home-round-logcat.txt:105-107). After return the same PID created a new VO (:178-179), eglCreateWindowSurface ok (:185), then 'MKSURF: bridge not initialized (verify-only ensure_init; Java side owns init)' (:197-198) and software-decode fallback pixelformat yuv420p10 (:200); no table ready / no fused commit after HOME. Root cause tracked as TASKS.md HOME-RETURN-SESSION-RESTORE-20261102 (bridge is initialized only once at PlatformView creation; VO rebuild does not re-init). This entry must not be used as HOME recovery acceptance."
   },
   {
    "action": "firstSessionDeathNote",

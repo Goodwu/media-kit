@@ -1,0 +1,37 @@
+=== P3 phase1 baseline snapshot 2026-11-02T12:41:00Z (local 2026-11-02T20:41:00+0800) ===
+--- repo: . ---
+761e29a84203e5612e7e715a7796a1ac599bbc5b
+ M TASKS.md
+ M docs/validation/lg-p84-thermal-review-20261029/home-control-tableoff/summary.json
+ M docs/validation/lg-p84-thermal-review-20261029/life22-lifecycle/summary.json
+ M media_kit_video/android/src/main/cpp/mediakit_surfacetexture_bridge.cpp
+ M media_kit_video/android/src/main/java/com/alexmercerind/media_kit_video/MediaKitVideoPlugin.java
+ M media_kit_video/android/src/main/java/com/alexmercerind/media_kit_video/platformview/MediaCodecSurfaceTextureBridge.java
+ M media_kit_video/android/src/main/java/com/alexmercerind/media_kit_video/platformview/PlatformVideoView.java
+ M media_kit_video/android/src/main/java/com/alexmercerind/media_kit_video/platformview/PlatformVideoViewFactory.java
+ M media_kit_video/lib/src/hdr/hdr_video_session.dart
+ M media_kit_video/lib/src/video_controller/android_video_controller/real.dart
+ M media_kit_video/lib/src/video_controller/platform_video_controller.dart
+ M media_kit_video/test/hdr_video_session_test.dart
+ M media_kit_video/test/managed_video_playback_test.dart
+ M media_kit_video/test/routed_video_playback_test.dart
+ M media_kit_video/test/surface_owner_ledger_test.dart
+?? archives/conversations/home-return-session-restore-20261102.md
+?? docs/plans/home-return-session-restore-20261102.md
+?? docs/validation/home-return-session-restore-20261102/
+?? media_kit_video/android/src/main/java/com/alexmercerind/media_kit_video/platformview/BridgeActivationAuthorizer.java
+?? media_kit_video/lib/src/video_controller/android_video_controller/bridge_activation.dart
+?? media_kit_video/test/bridge_activation_test.dart
+?? tool/test_platform_bridge_activation.py
+--- repo: /Users/wuweiwei1/src/mpv ---
+c7bffdd1b0bbde12916381aa472e4022717f1f60
+--- repo: /Users/wuweiwei1/src/libmpv-android-video-build-dv-experiment ---
+3605f300ecfe16bc084addd0b403d2cd55ef6a81
+?? .DS_Store
+?? .commandcode/
+?? buildscripts/.DS_Store
+--- repo: /Users/wuweiwei1/src/PiliPlus ---
+cbf2c34d36f99100effb71b075bda9dfc0277c0f
+ M TASKS.md
+ M lib/plugin/pl_player/view/view.dart
+?? archives/conversations/pull-source-android-apk-20261029.md

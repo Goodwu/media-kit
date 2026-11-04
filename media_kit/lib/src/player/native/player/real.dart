@@ -2865,7 +2865,12 @@ class NativePlayer extends PlatformPlayer {
         'dither': 'no',
         'cache': 'yes',
         'cache-on-disk': 'yes',
-        'hr-seek': 'yes',
+        // Keyframe-landing seeks by default (user ruling 2026-11-03: a
+        // repeated scene is better than a long black screen). Explicit
+        // `+exact` / VERY_EXACT callers (A-B loop, frame stepping, pause
+        // refresh) are unaffected; runtime output recovery lands on the
+        // nearest keyframe natively inside mpv (player/loadfile.c).
+        'hr-seek': 'no',
         'hr-seek-framedrop': 'no',
         'correct-downscaling': 'no',
         'linear-downscaling': 'no',

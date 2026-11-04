@@ -108,6 +108,44 @@ void main() {
     session.closeNotifiers();
   });
 
+  // A2 decision A, documented consequence: a HOME-return runtime bridge
+  // activation failure publishes an unverified report with an error (what the
+  // session's scoped issue handler emits). The binding must drop readiness,
+  // surface the error, and gate transport — play()/seek() then do nothing
+  // until an explicit reopen. This is the deliberate fail-closed outcome.
+  test('a runtime unverified report clears readiness and gates transport',
+      () async {
+    final player = TestPlayer(), session = TestSession();
+    final binding = RoutedVideoPlayback.forTesting(player, session: session);
+    final errors = <Object>[];
+    binding.errors.listen(errors.add);
+    final opening = binding.open(Media('test://a'));
+    await turn();
+    session.accept(0);
+    await opening;
+    expect(binding.ready.value, isTrue);
+    // The verified open itself applies the pending play intent.
+    final callsWhenReady = player.calls.length;
+
+    session.report.value = HdrOutputReport(
+      generation: 1,
+      verified: false,
+      error: StateError('bridge activation failed: initFailed'),
+    );
+    await turn();
+
+    expect(binding.ready.value, isFalse);
+    expect(errors.whereType<StateError>(), isNotEmpty);
+    await binding.play();
+    await binding.seek(const Duration(seconds: 4));
+    await turn();
+    // No new transport happened after readiness dropped.
+    expect(player.calls.length, callsWhenReady);
+    expect(player.calls, isNot(contains('seek:4')));
+    await binding.dispose();
+    session.closeNotifiers();
+  });
+
   test('sourceHint reaches the session open unmodified', () async {
     final player = TestPlayer(), session = TestSession();
     final binding = RoutedVideoPlayback.forTesting(player, session: session);
