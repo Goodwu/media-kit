@@ -1,5 +1,13 @@
 # TASKS.md
 
+## LG-P84-PERF-ROUND2-20261104
+
+- **隔离环境就绪（2026-11-04）**：按用户要求与主树 HOME 恢复任务隔离——独立 worktree `perf2-mk`（本仓 761e29a8）/`perf2-mpv`（c7bffdd1b0）/`perf2-lp`（libplacebo 3a13e0ca），分支均 `perf2/lg-p84`；mpv 独立 meson 树配置与既有验证树逐参数一致。方案 `docs/plans/lg-p84-perf-round2-20261102.md`；唯一 context `archives/conversations/lg-p84-perf-round2-20261104.md`。执行顺序=用户四步：基线重测（输入复制 vs 融合色转输出）→ 占比决策门（输入融合 vs PQ 小查表）→ 交错 ≥3 对 A/B（验收目标：GPU 每帧处理时间稳定 -10%）→ 数值/观感/生命周期 → 持续热态。同步/FBO/延迟 flush 不再投入。不派 subagent（critical 复审除外）。
+- **阶段 1 完成与决策门（2026-11-04）**：8 轮全有效（C/I/R×3+C2，214MHz 零 cap，起温逐轮匹配 33.3/35.9）。输入复制 5.80–5.92ms（1049 样本/轮、零 disjoint），融合 pass 11.73–11.78ms；**share_input≈33.1%**（一致性：份额和/帧预算≈busy 52–53% 吻合，计时扰动不可测）。决策门 share≥30% → 轨道 A；但设计级可行性分析：lease 直删不可行（30fps@60Hz 重现 vs updateTexImage 竞态，结构性原因在案），仅剩 MRT 并 pass（~15–20%，YUV drawable+MRT 在 Adreno530 无先例，高风险）或 updateTexImage 调度重构（更高风险）两条路 → 待用户裁决后再实施。证据 `docs/validation/lg-p84-perf-round2-20261102/`。
+- **阶段 2/3 实施与否定（2026-11-04）**：轨道 A-UNORM16 形态实施完成（mpv mapper `debug.mks.st_lease_rgba16` 默认关 + 工具链接线 + 单测），功能验证过（F2：rgba16 chosen 真实 FBO draw 探测通过、融合正常），**性能 A/B 证伪**：copy 6.00→8.63ms（+44%）、融合 11.81→16.77ms（+42%）（三检查点中位口径），UNORM16 观测性否定、提前停止（未做三对完整验收与数值门）。轨道 A 其余形态：MRT=GL 层不可行（默认 FB 不能挂第二颜色附件）；OES 直采=设计级风险（OES 可变与 lease 生命周期契约成立；"必撕裂"非本轮运行事实，实测 draw≈30Hz/display_synced=0）；updateTexImage 调度重构=高风险动 A/V。**输入侧无已证 ≥10% 可行低风险路径**。`st_lease_rgba16` 保留为默认关诊断开关（复现否定结果用），不投产。轨道 B 探针实机两跑失败（timer 饿死/挂起，根因 OPEN），PQ 占比与 LUT 精度数据未取得。
+- **critical 复审已闭环（2026-11-04）**：team-reviewer-critical 全链复审（无 P0；7 P1+6 P2）——独立复算确认阶段 1 三对 share 33.093/33.124/33.475%（中位 33.124%，`occupancy-aggregate.json`）；探针四个确定性缺陷（堆越界/f16 进位/三组统计覆盖/cpu_reference）全部修复并加边界 host 用例（`10b571e0…`，未实机重测）；分析器 fail-closed 化+单位修正（7 测试）；keyguard 正则加固+MENU 重试安全+4 项单测；fixture 更名 `.log.txt` 解决 gitignore；同包收据与探针挂起归因标 OPEN（无持久包身份回读记录）；文档错误断言（UNORM16 精度/带宽、恒 214MHz、"必撕裂"）全部降级更正。
+- **收尾状态 / 本轮结论（按复审口径）**：①输入复制占 GPU 每帧 ~33.1%（分会话估算模型，CLOSED）；②融合 pass ~66.9%；③无已证 ≥10% 收益候选（A 轨观测性否定、B 轨数据缺口）；④数值/观感/生命周期/持续热态全部未验收；⑤三仓改动未提交待授权。下一步选项：探针修复版实机重测（触发复审）/ B 轨 in-app 原型 / 维持负结果收尾。
+
 ## LG-DV-P84-THERMAL-REVIEW-20261029
 
 - **LYA 评估（2026-11-02，遗留③关闭）**：prod3 原包（`32b3fd20…`）在 LYA（Kirin980/Mali-G76/API29）三态各测约 120s：默认、`yuv_fusion=0`、`yuv_fusion_table=1`。三态均为 metadataReshape→PQ verified、OMX.hisi 硬解、BT2020_PQ RGBA_1010102 视频层、29.95fps，零丢帧、零 FATAL/ANR。融合与查表日志全 0：LYA 走 RGB10 窗口直出、没有 YUV 载体，融合结构性不介入；table=1 只多出 EGL owner/caps-ready。结论：可直接使用、无回归，但 LYA 没有融合收益。未测生命周期、长时热态、其它路线、面板观感和 PiliPlus 宿主。证据 `docs/validation/lg-p84-thermal-review-20261029/lya-fusion-direct-use-20261102/`；context 见本节末。

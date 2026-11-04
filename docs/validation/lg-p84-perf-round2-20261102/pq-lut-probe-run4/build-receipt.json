@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "createdAtUTC": "20261103T230609Z",
+  "purpose": "Standalone PQ-encode LUT cost/accuracy probe; not an APK or playback acceptance",
+  "source": "/Users/wuweiwei1/src/worktrees/perf2-mk/tool/native/lg_pq_lut_probe.c",
+  "sourceSha256": "d3f878d1375130592d0c82e5b6e4b1c943f7843ee0e41eaba2fff465780287e3",
+  "builder": "/Users/wuweiwei1/src/worktrees/perf2-mk/tool/build_lg_pq_lut_probe.py",
+  "builderSha256": "6540dbd99c10788a9b48116322bcd858628d2271db4fa2f987c63c517c849f07",
+  "ndk": "/Users/wuweiwei1/Library/Android/sdk/ndk/27.2.12479018",
+  "ndkSourceProperties": "Pkg.Desc = Android NDK\nPkg.Revision = 27.2.12479018\nPkg.BaseRevision = 27.2.12479018\nPkg.ReleaseName = r27c\n",
+  "compilerDriver": "/Users/wuweiwei1/Library/Android/sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/darwin-x86_64/bin/aarch64-linux-android24-clang",
+  "compilerDriverSha256": "2c82f72dd2090b3f3a1ac2aa84644fd8ebe2afdb4a4bb8700e430766e1acc368",
+  "commands": [
+    {
+      "argv": [
+        "/Users/wuweiwei1/Library/Android/sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/darwin-x86_64/bin/aarch64-linux-android24-clang",
+        "--version"
+      ],
+      "returncode": 0,
+      "evidence": "android-compiler-version"
+    },
+    {
+      "argv": [
+        "/usr/bin/clang",
+        "-std=c11",
+        "-O2",
+        "-DNDEBUG",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-DLG_PQ_HOST_TEST=1",
+        "/Users/wuweiwei1/src/worktrees/perf2-mk/tool/native/lg_pq_lut_probe.c",
+        "-lm",
+        "-o",
+        "/Users/wuweiwei1/src/worktrees/perf2-mk/build/lg-pq-lut-probe-20261103T230609Z-29656/pq-cpu-selftest"
+      ],
+      "returncode": 0,
+      "evidence": "host-build"
+    },
+    {
+      "argv": [
+        "/Users/wuweiwei1/src/worktrees/perf2-mk/build/lg-pq-lut-probe-20261103T230609Z-29656/pq-cpu-selftest"
+      ],
+      "returncode": 0,
+      "evidence": "host-selftest"
+    },
+    {
+      "argv": [
+        "/Users/wuweiwei1/Library/Android/sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/darwin-x86_64/bin/aarch64-linux-android24-clang",
+        "-std=c11",
+        "-O2",
+        "-DNDEBUG",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-fPIE",
+        "-pie",
+        "-Wl,--build-id=sha1",
+        "/Users/wuweiwei1/src/worktrees/perf2-mk/tool/native/lg_pq_lut_probe.c",
+        "-lEGL",
+        "-lGLESv3",
+        "-lm",
+        "-o",
+        "/Users/wuweiwei1/src/worktrees/perf2-mk/build/lg-pq-lut-probe-20261103T230609Z-29656/lg_pq_lut_probe"
+      ],
+      "returncode": 0,
+      "evidence": "android-build"
+    },
+    {
+      "argv": [
+        "/Users/wuweiwei1/Library/Android/sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-readelf",
+        "-h",
+        "-d",
+        "/Users/wuweiwei1/src/worktrees/perf2-mk/build/lg-pq-lut-probe-20261103T230609Z-29656/lg_pq_lut_probe"
+      ],
+      "returncode": 0,
+      "evidence": "android-elf"
+    }
+  ],
+  "status": "built-and-host-selftested",
+  "deviceDeployed": false,
+  "deviceRun": false,
+  "dependencyBoundary": "Only current diagnostic C plus NDK platform EGL/GLESv3/libm/libc stubs/runtime; no project prebuilt input",
+  "compilerVersion": "Android (12470979, +pgo, -bolt, +lto, -mlgo, based on r522817c) clang version 18.0.3 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)\nTarget: aarch64-unknown-linux-android24\nThread model: posix\nInstalledDir: /Users/wuweiwei1/Library/Android/sdk/ndk/27.2.12479018/toolchains/llvm/prebuilt/darwin-x86_64/bin",
+  "binary": "/Users/wuweiwei1/src/worktrees/perf2-mk/build/lg-pq-lut-probe-20261103T230609Z-29656/lg_pq_lut_probe",
+  "binarySha256": "529aea6bea7d616a7b77064ecc04a31d5ebdb763ffd71343526d94b011a3bca3",
+  "binaryBytes": 31272,
+  "hostSelftestPassed": true,
+  "limitations": [
+    "No Android GPU execution was performed.",
+    "Successful build/CPU tests do not establish GPU extension support, timer behavior, or LUT accuracy on device."
+  ]
+}

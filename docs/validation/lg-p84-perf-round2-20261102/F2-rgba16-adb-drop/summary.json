@@ -1,0 +1,139 @@
+{
+  "schema": 1,
+  "experiment": "sync",
+  "requestedDeferPublishFlush": "0",
+  "startedAt": "2026-11-04T04:46:58.239954+08:00",
+  "mode": "baseline",
+  "requestedVideoSync": "display-resample",
+  "requestedDurationSeconds": 40.0,
+  "status": "failed",
+  "completeWindow": false,
+  "samples": 0,
+  "requestedInputFbo": "0",
+  "inputFboValidationRequired": false,
+  "thresholds": {
+    "batteryC": 45,
+    "vtsC": 48.5,
+    "systemHotEventsIn30s": 1
+  },
+  "device": "lge/lucye_global_com/lucye:7.0/NRD90U/172921900e77a:user/release-keys",
+  "package": "Activity Resolver Table:\n  Non-Data Actions:\n      android.intent.action.MAIN:\n        1889865 com.example.media_kit_hdr_lab/.MainActivity filter 6f24453\n          Action: \"android.intent.action.MAIN\"\n          Category: \"android.intent.category.LAUNCHER\"\n          AutoVerify=false\n\nReceiver Resolver Table:\n  Non-Data Actions:\n      androidx.profileinstaller.action.SAVE_PROFILE:\n        8b5d93a com.example.media_kit_hdr_lab/androidx.profileinstaller.ProfileInstallReceiver filter 855d28d\n          Action: \"androidx.profileinstaller.action.SAVE_PROFILE\"\n          AutoVerify=false\n      androidx.profileinstaller.action.INSTALL_PROFILE:\n        8b5d93a com.example.media_kit_hdr_lab/androidx.profileinstaller.ProfileInstallReceiver filter ff923b7\n          Action: \"androidx.profileinstaller.action.INSTALL_PROFILE\"\n          AutoVerify=false\n      androidx.profileinstaller.action.SKIP_FILE:\n        8b5d93a com.example.media_kit_hdr_lab/androidx.profileinstaller.ProfileInstallReceiver filter c802724\n          Action: \"androidx.profileinstaller.action.SKIP_FILE\"\n          AutoVerify=false\n      androidx.profileinstaller.action.BENCHMARK_OPERATION:\n        8b5d93a com.example.media_kit_hdr_lab/androidx.profileinstaller.ProfileInstallReceiver filter 8bfcc42\n          Action: \"androidx.profileinstaller.action.BENCHMARK_OPERATION\"\n          AutoVerify=false\n\nPermissions:\n  Permission [com.example.media_kit_hdr_lab.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION] (dad4f35):\n    sourcePackage=com.example.media_kit_hdr_lab\n    uid=10251 gids=null type=0 prot=signature\n    perm=Permission{a7959eb com.example.media_kit_hdr_lab.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION}\n    packageSetting=PackageSetting{b21753b com.example.media_kit_hdr_lab/10251}\n\nRegistered ContentProviders:\n  com.example.media_kit_hdr_lab/androidx.startup.InitializationProvider:\n    Provider{5d31348 com.example.media_kit_hdr_lab/androidx.startup.InitializationProvider}\n\nContentProvider Authorities:\n  [com.example.media_kit_hdr_lab.androidx-startup]:\n    Provider{5d31348 com.example.media_kit_hdr_lab/androidx.startup.InitializationProvider}\n      applicationInfo=ApplicationInfo{c6f55e1 com.example.media_kit_hdr_lab}\n\nKey Set Manager:\n  [com.example.media_kit_hdr_lab]\n      Signing KeySets: 29\n\nPackages:\n  Package [com.example.media_kit_hdr_lab] (b21753b):\n    userId=10251\n    pkg=Package{4984f06 com.example.media_kit_hdr_lab}\n    codePath=/data/app/com.example.media_kit_hdr_lab-2\n    resourcePath=/data/app/com.example.media_kit_hdr_lab-2\n    legacyNativeLibraryDir=/data/app/com.example.media_kit_hdr_lab-2/lib\n    primaryCpuAbi=arm64-v8a\n    secondaryCpuAbi=null\n    versionCode=4086 minSdk=24 targetSdk=36\n    versionName=1.0.0\n    splits=[base]\n    apkSigningVersion=2\n    applicationInfo=ApplicationInfo{c6f55e1 com.example.media_kit_hdr_lab}\n    flags=[ HAS_CODE ALLOW_CLEAR_USER_DATA ALLOW_BACKUP ]\n    privateFlags=[ RESIZEABLE_ACTIVITIES ]\n    dataDir=/data/user/0/com.example.media_kit_hdr_lab\n    supportsScreens=[small, medium, large, xlarge, resizeable, anyDensity]\n    usesOptionalLibraries:\n      androidx.window.extensions\n      androidx.window.sidecar\n    timeStamp=2026-11-04 04:46:07\n    firstInstallTime=2026-10-25 01:51:13\n    lastUpdateTime=2026-11-04 04:46:08\n    signatures=PackageSignatures{6282a17 [32f90f38]}\n    installPermissionsFixed=true installStatus=1\n    pkgFlags=[ HAS_CODE ALLOW_CLEAR_USER_DATA ALLOW_BACKUP ]\n    declared permissions:\n      com.example.media_kit_hdr_lab.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION: prot=signature, INSTALLED\n    requested permissions:\n      com.example.media_kit_hdr_lab.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION\n    install permissions:\n      com.example.media_kit_hdr_lab.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION: granted=true\n    User 0: ceDataInode=2237528 installed=true hidden=false suspended=false stopped=false notLaunched=false enabled=0\n      runtime permissions:\n\n\nDexopt state:\n  [com.example.media_kit_hdr_lab]\n    Instruction Set: arm64\n      path: /data/app/com.example.media_kit_hdr_lab-2/base.apk\n      status: /data/app/com.example.media_kit_hdr_lab-2/oat/arm64/base.odex [compilation_filter=interpret-only, status=k\n      OatUpToDate]\n",
+  "initial": {
+    "hostTime": "2026-11-04T04:52:45.987827+08:00",
+    "hostMonotonic": 190149.716675958,
+    "pid": null,
+    "batteryC": 33.3,
+    "vtsC": 36.2,
+    "deviceUptime": 789466.48,
+    "appCpuTicks": null,
+    "processStartTicks": null,
+    "tasks": [],
+    "screen": {
+      "on": false,
+      "awake": false,
+      "keyguard": true,
+      "keyguardSecure": false
+    },
+    "raw": {
+      "uptime": "789466.48 1852958.03",
+      "cpu_total": "cpu  8074767 860991 8995123 50459325 58966 1437217 1215061 0 0 0\ncpu0 1909902 252068 2456785 43325043 43476 1054938 875319 0 0 0\ncpu1 2112699 270236 2672480 2194624 5602 215586 185513 0 0 0\ncpu2 2128396 188755 2042802 2417965 5083 90486 88582 0 0 0\ncpu3 1923770 149932 1823056 2521693 4805 76207 65647 0 0 0\nintr 614173883 0 0 0 80272699 0 13750191 6290480 4 5 5 5899 0 1 26512 1396667 2350 1662100 1664536 0 13201675 161857 49401 0 0 13 2 0 0 11319766 0 10502349 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 36096 11425923 1408114 16636074 0 0 0 0 47 9907300 0 12 9 0 0 0 0 0 0 1729 2 0 0 0 0 0 0 0 0 181 75 0 77 0 0 0 0 0 0 0 0 3737496 0 36 0 0 9480 0 0 0 3737557 0 0 0 0 0 0 0 572 0 635 2 0 0 0 2 2 0 0 0 2 0 6157751 0 0 0 0 0 0 0 397827 171272 0 0 35392 7 7 6 0 0 0 0 0 0 0 33090 14673109 0 63 0 0 0 3 3 0 0 0 7 8 0 0 0 3 0 1208 4113751 31056 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 4925876 0 0 0 0 3 27 0 0 171267 0 0 0 0 0 0 0 0 0 0 401450 0 0 0 0 0 0 0 0 0 0 0 0 0 0 3377 0 0 0 0 0 0 0 0 0 0 0 0 0 78 0 0 0 0 0 0 0 135 0 0 0 0 0 0 0 2212 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 20471 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1396575 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 5679 6 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 62265050 0 0 896 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1316 0 0 0 0 0 0 0 0 0 0\nctxt 1206349425\nbtime 1792949699\nprocesses 670966\nprocs_running 2\nprocs_blocked 0\nsoftirq 339726387 18077210 53710123 2181006 5701183 15908244 18702 58100063 45003664 7114546 133911646",
+      "cpu_online": "0-3",
+      "battery_type": "battery",
+      "battery_temp": "33300",
+      "vts_type": "vts",
+      "vts_temp": "362",
+      "backlight": "0",
+      "backlight_max": "255",
+      "hdr_mode": "0",
+      "panel_thermal_status": "0",
+      "gpu_hz": "214000000",
+      "gpu_thermal_pwrlevel": "0",
+      "gpu_max_gpuclk": "652800000",
+      "cpu2_scaling_max_freq": "2342400",
+      "gpu_driver_busy_percentage": "0 %",
+      "battery_status": "Full",
+      "battery_voltage_now": "4327214",
+      "battery_current_now": "152",
+      "battery_capacity": "100",
+      "usb_online": "1",
+      "ac_online": "",
+      "cpu_kryo0_regulator_name": "kryo0",
+      "cpu_kryo0_regulator_microvolts": "570915",
+      "cpu_kryo1_regulator_name": "kryo1",
+      "cpu_kryo1_regulator_microvolts": "727225",
+      "gpu_upstream_regulator_name": "pmi8994_s2",
+      "gpu_upstream_regulator_microvolts": "525000",
+      "gpu_corner_name": "gfx_corner",
+      "gpu_corner_raw": "2",
+      "cpu0_khz": "307200",
+      "cpu1_khz": "307200",
+      "cpu2_khz": "902400",
+      "cpu3_khz": "902400"
+    },
+    "gpuDriverReportedBusyPercent": 0.0,
+    "samplingWorkSeconds": 0.24343479200615548,
+    "clockTicksPerSecond": 100,
+    "cpuDelta": {
+      "intervalSeconds": 0.5300000000279397,
+      "systemBusyPercent": {
+        "cpu": 12.244897959183673,
+        "cpu0": 6.521739130434782,
+        "cpu1": 4.166666666666667,
+        "cpu2": 37.254901960784316,
+        "cpu3": 0.0
+      },
+      "processOneCorePercent": null,
+      "threadOneCorePercent": []
+    }
+  },
+  "gpuThermalGate": {
+    "normalPwrlevel": 0,
+    "unknownOrNonzeroStops": true,
+    "sampleIntervalSeconds": 2.0,
+    "scope": "LG observed experimental baseline; max_gpuclk/cpu2 cap are metadata"
+  },
+  "expectedPanelThermalStatus": "0",
+  "expectedBacklight": "64",
+  "awakeState": {
+    "on": true,
+    "awake": true,
+    "keyguard": false,
+    "keyguardSecure": false
+  },
+  "launchOutput": "Starting: Intent { cmp=com.example.media_kit_hdr_lab/.MainActivity }\n",
+  "pid": "29879",
+  "reason": "ADB failed (1): ['shell', 'echo \"@@ uptime\"; cat /proc/uptime 2>/dev/null || true\\necho \"@@ cpu_total\"; cat /proc/stat 2>/dev/null || true\\necho \"@@ cpu_online\"; cat /sys/devices/system/cpu/online 2>/dev/null || true\\necho \"@@ battery_type\"; cat /sys/class/thermal/thermal_zone30/type 2>/dev/null || true\\necho \"@@ battery_temp\"; cat /sys/class/thermal/thermal_zone30/temp 2>/dev/null || true\\necho \"@@ vts_type\"; cat /sys/class/thermal/thermal_zone39/type 2>/dev/null || true\\necho \"@@ vts_temp\"; cat /sys/class/thermal/thermal_zone39/temp 2>/dev/null || true\\necho \"@@ backlight\"; cat /sys/class/leds/lcd-backlight/brightness 2>/dev/null || true\\necho \"@@ backlight_max\"; cat /sys/class/leds/lcd-backlight/max_brightness 2>/dev/null || true\\necho \"@@ hdr_mode\"; cat /sys/devices/virtual/panel/img_tune/hdr_mode 2>/dev/null || true\\necho \"@@ panel_thermal_status\"; cat /sys/class/leds/lcd-backlight/thermald_status 2>/dev/null || true\\necho \"@@ gpu_hz\"; cat /sys/class/kgsl/kgsl-3d0/gpuclk 2>/dev/null || true\\necho \"@@ gpu_thermal_pwrlevel\"; cat /sys/class/kgsl/kgsl-3d0/thermal_pwrlevel 2>/dev/null || true\\necho \"@@ gpu_max_gpuclk\"; cat /sys/class/kgsl/kgsl-3d0/max_gpuclk 2>/dev/null || true\\necho \"@@ cpu2_scaling_max_freq\"; cat /sys/devices/system/cpu/cpu2/cpufreq/scaling_max_freq 2>/dev/null || true\\necho \"@@ gpu_driver_busy_percentage\"; cat /sys/class/kgsl/kgsl-3d0/gpu_busy_percentage 2>/dev/null || true\\necho \"@@ battery_status\"; cat /sys/class/power_supply/battery/status 2>/dev/null || true\\necho \"@@ battery_voltage_now\"; cat /sys/class/power_supply/battery/voltage_now 2>/dev/null || true\\necho \"@@ battery_current_now\"; cat /sys/class/power_supply/battery/current_now 2>/dev/null || true\\necho \"@@ battery_capacity\"; cat /sys/class/power_supply/battery/capacity 2>/dev/null || true\\necho \"@@ usb_online\"; cat /sys/class/power_supply/usb/online 2>/dev/null || true\\necho \"@@ ac_online\"; cat /sys/class/power_supply/ac/online 2>/dev/null || true\\necho \"@@ cpu_kryo0_regulator_name\"; cat /sys/class/regulator/regulator.7/name 2>/dev/null || true\\necho \"@@ cpu_kryo0_regulator_microvolts\"; cat /sys/class/regulator/regulator.7/microvolts 2>/dev/null || true\\necho \"@@ cpu_kryo1_regulator_name\"; cat /sys/class/regulator/regulator.9/name 2>/dev/null || true\\necho \"@@ cpu_kryo1_regulator_microvolts\"; cat /sys/class/regulator/regulator.9/microvolts 2>/dev/null || true\\necho \"@@ gpu_upstream_regulator_name\"; cat /sys/class/regulator/regulator.1/name 2>/dev/null || true\\necho \"@@ gpu_upstream_regulator_microvolts\"; cat /sys/class/regulator/regulator.1/microvolts 2>/dev/null || true\\necho \"@@ gpu_corner_name\"; cat /sys/class/regulator/regulator.63/name 2>/dev/null || true\\necho \"@@ gpu_corner_raw\"; cat /sys/class/regulator/regulator.63/microvolts 2>/dev/null || true\\necho \"@@ cpu0_khz\"; cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq 2>/dev/null || true\\necho \"@@ cpu1_khz\"; cat /sys/devices/system/cpu/cpu1/cpufreq/scaling_cur_freq 2>/dev/null || true\\necho \"@@ cpu2_khz\"; cat /sys/devices/system/cpu/cpu2/cpufreq/scaling_cur_freq 2>/dev/null || true\\necho \"@@ cpu3_khz\"; cat /sys/devices/system/cpu/cpu3/cpufreq/scaling_cur_freq 2>/dev/null || true\\necho \"@@ app_stat\"; cat /proc/29879/stat 2>/dev/null || true\\necho \"@@ threads\"; for f in /proc/29879/task/*/stat; do cat \"$f\" 2>/dev/null; done\\n']: ",
+  "observedDurationSeconds": 0,
+  "hdrLabStopped": true,
+  "restoredScreen": {
+    "on": false,
+    "awake": false,
+    "keyguard": true,
+    "keyguardSecure": false
+  },
+  "restoreErrors": [],
+  "restoredState": {
+    "settings": {
+      "screen_brightness_mode": "1",
+      "screen_brightness": "41",
+      "accelerometer_rotation": "1",
+      "user_rotation": "1",
+      "screen_off_timeout": "30000"
+    },
+    "properties": {
+      "debug.mks.thermal_sync": "",
+      "debug.mks.thermal_trace": "1",
+      "debug.mks.defer_publish_flush": "0",
+      "debug.mks.gpu_timing": "0",
+      "debug.mks.yuv_fusion": "0",
+      "debug.mks.yuv_fail_commit": "0",
+      "debug.mks.yuv_fail_gl": "0",
+      "debug.mks.st_fbo": "0",
+      "debug.mks.yuv_fusion_table": "0",
+      "debug.mks.st_lease_rgba16": "0"
+    }
+  },
+  "restorationVerified": true,
+  "automaticBrightnessScalarChanged": false,
+  "finishedAt": "2026-11-04T04:53:06.859103+08:00"
+}

@@ -83,6 +83,120 @@ class ThermalRoundTests(unittest.TestCase):
             with patch.object(adb,'shell') as shell:adb.restore({},props)
             self.assertIn("setprop debug.mks.st_fbo ''",[c.args[0] for c in shell.call_args_list])
 
+    def test_lease_rgba16_flag_reaches_device_and_restores(self):
+        with tempfile.TemporaryDirectory() as d:
+            adb = m.Adb('S',Path(d))
+            with patch.object(adb,'call',return_value=''):props = adb.properties()
+            self.assertIn('debug.mks.st_lease_rgba16',props)
+            with patch.object(adb,'shell') as shell:adb.restore({},props)
+            self.assertIn("setprop debug.mks.st_lease_rgba16 ''",[c.args[0] for c in shell.call_args_list])
+
+    POWER_ON = 'mWakefulness=Awake\nDisplay Power: state=ON'
+
+    def _screen_state(self, window, power=POWER_ON):
+        adb = m.Adb('S', Path('/tmp'))
+        with patch.object(adb, 'call', side_effect=lambda argv, **kw:
+                          window if argv[-1] == 'window' else power):
+            return adb.screen_state()
+
+    def test_screen_state_lg_keyguard_delegate_section_form(self):
+        window = ("mStatusBar=Window{} isStatusBarKeyguard=true\n"
+                  "    KeyguardServiceDelegate\n      showing=true\n"
+                  "      occluded=false\n      secure=false\n")
+        state = self._screen_state(window)
+        self.assertEqual((state['keyguard'], state['keyguardSecure']), (True, False))
+
+    def test_screen_state_foreign_delegate_section_is_not_matched(self):
+        window = ("isStatusBarKeyguard=true\n"
+                  "    KeyguardServiceDelegate\n      showing=true\n"
+                  "    OtherDelegate\n      secure=false\n")
+        state = self._screen_state(window)
+        self.assertIsNone(state['keyguardSecure'])
+
+    def test_screen_state_foreign_renamed_section_is_not_matched(self):
+        window = ("isStatusBarKeyguard=true\n"
+                  "    KeyguardServiceDelegate\n      showing=true\n"
+                  "    OtherSection\n      secure=false\n")
+        state = self._screen_state(window)
+        self.assertIsNone(state['keyguardSecure'])
+
+    def test_screen_state_nested_block_header_is_not_our_field(self):
+        # original reviewer counterexample, verbatim indentation: OtherSection
+        # sits at the same indent as the keyguard FIELDS, with its own deeper
+        # secure=; the nested subtree must not be taken as keyguard state.
+        window = ("KeyguardServiceDelegate\n"
+                  "  showing=true\n"
+                  "  OtherSection\n"
+                  "    secure=false\n")
+        self.assertIsNone(self._screen_state(window)['keyguardSecure'])
+
+    def test_screen_state_keyguard_block_without_fields_leaks_nothing(self):
+        window = ("KeyguardServiceDelegate\n"
+                  "OtherSection\n  secure=false\n")
+        self.assertIsNone(self._screen_state(window)['keyguardSecure'])
+
+    def test_screen_state_same_indent_sibling_section_ends_block(self):
+        window = ("  KeyguardServiceDelegate\n    showing=true\n"
+                  "  OtherSection\n    secure=false\n")
+        self.assertIsNone(self._screen_state(window)['keyguardSecure'])
+
+    def test_screen_state_conflicting_sections_fail_closed(self):
+        window = ("KeyguardServiceDelegate\n  secure=false\n"
+                  "mKeyguardDelegate\n  secure=true\n")
+        self.assertIsNone(self._screen_state(window)['keyguardSecure'])
+
+    def test_screen_state_inline_mkeyguard_delegate_form(self):
+        window = ("isStatusBarKeyguard=true\n"
+                  "    mKeyguardDelegate=...\n      secure=false\n"
+                  "    Window{other} x=1\n      secure=true\n")
+        state = self._screen_state(window)
+        self.assertEqual(state['keyguardSecure'], False)
+
+    def test_wake_unprotected_retries_menu_and_refuses_if_secure_appears(self):
+        adb = m.Adb('S', Path('/tmp'))
+        states = [
+            {'on': True, 'awake': True, 'keyguard': True, 'keyguardSecure': False},
+            {'on': True, 'awake': True, 'keyguard': True, 'keyguardSecure': False},
+            {'on': True, 'awake': True, 'keyguard': True, 'keyguardSecure': True},
+        ]
+        calls = []
+        with patch.object(adb, 'call', side_effect=lambda argv, **kw: calls.append(argv) or ''):
+            with patch.object(adb, 'screen_state', side_effect=states):
+                with self.assertRaisesRegex(RuntimeError, 'protected-or-unknown-keyguard'):
+                    adb.wake_unprotected({'on': True}, False)
+        menus = [c for c in calls if 'KEYCODE_MENU' in c]
+        # first MENU dismissed the unknown-secure gate; the second state was
+        # still unprotected so a retry MENU went out; the third state turned
+        # secure and the loop must have refused before a third MENU.
+        self.assertEqual(len(menus), 2)
+
+    def test_restore_screen_settle_loop_matches_original(self):
+        adb = m.Adb('S', Path('/tmp'))
+        result = {}
+        errors = []
+        reads = iter([
+            {'on': True, 'awake': False, 'keyguard': False, 'keyguardSecure': False},  # lagging
+            {'on': False, 'awake': False, 'keyguard': True, 'keyguardSecure': False},  # settled
+        ])
+        with patch.object(adb, 'call', return_value='') as call, \
+             patch.object(adb, 'screen_state', side_effect=lambda: next(reads)), \
+             patch.object(m.time, 'sleep'):
+            m.restore_screen(adb, {'on': False}, result, errors)
+        self.assertFalse(result['restoredScreen']['on'])
+        self.assertEqual(errors, [])
+        self.assertIn('KEYCODE_SLEEP', call.call_args_list[0].args[0])
+
+    def test_restore_screen_lagging_state_is_a_failure(self):
+        adb = m.Adb('S', Path('/tmp'))
+        result = {}
+        errors = []
+        states = [{'on': True, 'awake': False, 'keyguard': False, 'keyguardSecure': False}] * 3
+        with patch.object(adb, 'call', return_value=''), \
+             patch.object(adb, 'screen_state', side_effect=states), \
+             patch.object(m.time, 'sleep'):
+            m.restore_screen(adb, {'on': False}, result, errors)
+        self.assertIn('screen-ON/OFF-state-not-restored', errors)
+
     def test_explicit_lg_temperature_contract_and_missing_nodes(self):
         self.assertEqual(m.temperature({'battery_type': 'battery', 'battery_temp': '37300', 'vts_type': 'vts', 'vts_temp': '485'}), (37.3, 48.5))
         self.assertEqual(m.temperature({'battery_type': 'tsens', 'battery_temp': '491', 'vts_type': 'wrong', 'vts_temp': '485'}), (None, None))

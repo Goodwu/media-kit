@@ -1,0 +1,308 @@
+{
+  "limitations": [
+    "input/yuv and renderer timings come from separate sessions and never form a per-frame total",
+    "renderer pass numbers are rolling 256-sample histories at ~10s checkpoints, not per-frame attribution",
+    "frequency normalization uses the round's stable-window median gpuclk; DVFS is not controlled",
+    "timing instrumentation itself has overhead; compare only against rounds with the same mode"
+  ],
+  "rounds": {
+    "C1": {
+      "counters": null,
+      "directory": "docs/validation/lg-p84-perf-round2-20261102/C1",
+      "drawSamples": {},
+      "frequencyNormalized": null,
+      "gpuBusyPercentMedian": 52.0,
+      "gpuFrequencyHzMedian": 214000000.0,
+      "metricsAreDiagnosticOnly": false,
+      "processCPUPercentMedian": 53.393665156458475,
+      "reason": null,
+      "rendererPasses": null,
+      "stableSamples": 23,
+      "startBatteryC": 33.3,
+      "startVtsC": 35.9,
+      "status": "completed-observation",
+      "timerUnsupported": null,
+      "validCompletedProfile": true
+    },
+    "C2": {
+      "counters": null,
+      "directory": "docs/validation/lg-p84-perf-round2-20261102/C2",
+      "drawSamples": {},
+      "frequencyNormalized": null,
+      "gpuBusyPercentMedian": 53.0,
+      "gpuFrequencyHzMedian": 214000000.0,
+      "metricsAreDiagnosticOnly": false,
+      "processCPUPercentMedian": 53.617021277126966,
+      "reason": null,
+      "rendererPasses": null,
+      "stableSamples": 23,
+      "startBatteryC": 33.3,
+      "startVtsC": 35.9,
+      "status": "completed-observation",
+      "timerUnsupported": null,
+      "validCompletedProfile": true
+    },
+    "I1": {
+      "counters": {
+        "input-copy": {
+          "attempts": 1802,
+          "begin": 0,
+          "ctx": 0,
+          "disjoint": 0,
+          "issued": 1801,
+          "max": 9469062,
+          "min": 3477604,
+          "nested": 0,
+          "pending": 0,
+          "results": 1801,
+          "ring": 0,
+          "sum": 10720208254
+        }
+      },
+      "directory": "docs/validation/lg-p84-perf-round2-20261102/I1",
+      "drawSamples": {
+        "input-copy": {
+          "count": 1049,
+          "max": 7.255312,
+          "mean": 5.837639113441372,
+          "median": 5.801771,
+          "min": 4.656615
+        }
+      },
+      "frequencyNormalized": {
+        "input-copy": {
+          "medianMcycles": 1241.578994
+        }
+      },
+      "gpuBusyPercentMedian": 52.0,
+      "gpuFrequencyHzMedian": 214000000.0,
+      "metricsAreDiagnosticOnly": false,
+      "processCPUPercentMedian": 53.81355932235245,
+      "reason": null,
+      "rendererPasses": null,
+      "stableSamples": 23,
+      "startBatteryC": 33.3,
+      "startVtsC": 35.9,
+      "status": "completed-observation",
+      "timerUnsupported": null,
+      "validCompletedProfile": true
+    },
+    "I2": {
+      "counters": {
+        "input-copy": {
+          "attempts": 1801,
+          "begin": 0,
+          "ctx": 0,
+          "disjoint": 0,
+          "issued": 1800,
+          "max": 9794531,
+          "min": 3548229,
+          "nested": 0,
+          "pending": 0,
+          "results": 1800,
+          "ring": 0,
+          "sum": 10706373652
+        }
+      },
+      "directory": "docs/validation/lg-p84-perf-round2-20261102/I2",
+      "drawSamples": {
+        "input-copy": {
+          "count": 1049,
+          "max": 9.305104,
+          "mean": 5.912339789323165,
+          "median": 5.835105,
+          "min": 4.647916
+        }
+      },
+      "frequencyNormalized": {
+        "input-copy": {
+          "medianMcycles": 1248.7124700000002
+        }
+      },
+      "gpuBusyPercentMedian": 52.0,
+      "gpuFrequencyHzMedian": 214000000.0,
+      "metricsAreDiagnosticOnly": false,
+      "processCPUPercentMedian": 53.71179039486985,
+      "reason": null,
+      "rendererPasses": null,
+      "stableSamples": 23,
+      "startBatteryC": 33.3,
+      "startVtsC": 35.9,
+      "status": "completed-observation",
+      "timerUnsupported": null,
+      "validCompletedProfile": true
+    },
+    "I3": {
+      "counters": {
+        "input-copy": {
+          "attempts": 1800,
+          "begin": 0,
+          "ctx": 0,
+          "disjoint": 0,
+          "issued": 1799,
+          "max": 8962031,
+          "min": 3537343,
+          "nested": 0,
+          "pending": 0,
+          "results": 1799,
+          "ring": 0,
+          "sum": 10825804514
+        }
+      },
+      "directory": "docs/validation/lg-p84-perf-round2-20261102/I3",
+      "drawSamples": {
+        "input-copy": {
+          "count": 1049,
+          "max": 8.935104,
+          "mean": 6.014977339370829,
+          "median": 5.920573,
+          "min": 4.647292
+        }
+      },
+      "frequencyNormalized": {
+        "input-copy": {
+          "medianMcycles": 1267.002622
+        }
+      },
+      "gpuBusyPercentMedian": 53.0,
+      "gpuFrequencyHzMedian": 214000000.0,
+      "metricsAreDiagnosticOnly": false,
+      "processCPUPercentMedian": 54.700854701616684,
+      "reason": null,
+      "rendererPasses": null,
+      "stableSamples": 23,
+      "startBatteryC": 33.3,
+      "startVtsC": 35.9,
+      "status": "completed-observation",
+      "timerUnsupported": null,
+      "validCompletedProfile": true
+    },
+    "R1": {
+      "counters": null,
+      "directory": "docs/validation/lg-p84-perf-round2-20261102/R1",
+      "drawSamples": {},
+      "frequencyNormalized": {
+        "index0": {
+          "medianMcycles": 2510.18897
+        }
+      },
+      "gpuBusyPercentMedian": 53.0,
+      "gpuFrequencyHzMedian": 214000000.0,
+      "metricsAreDiagnosticOnly": false,
+      "processCPUPercentMedian": 53.61310506379134,
+      "reason": null,
+      "rendererPasses": {
+        "index0": {
+          "avgNsPerCheckpoint": {
+            "count": 3,
+            "max": 11.79449,
+            "mean": 11.737863333333333,
+            "median": 11.729855,
+            "min": 11.689245
+          },
+          "checkpoints": 3,
+          "primaryAvgNs": 11794490,
+          "primaryDesc": "color decoding, color encoding",
+          "primaryLastNs": 12236042,
+          "primaryPeakNs": 13666042,
+          "primarySamples": 256
+        }
+      },
+      "stableSamples": 24,
+      "startBatteryC": 33.3,
+      "startVtsC": 35.9,
+      "status": "completed-observation",
+      "timerUnsupported": null,
+      "validCompletedProfile": true
+    },
+    "R2": {
+      "counters": null,
+      "directory": "docs/validation/lg-p84-perf-round2-20261102/R2",
+      "drawSamples": {},
+      "frequencyNormalized": {
+        "index0": {
+          "medianMcycles": 2521.131432
+        }
+      },
+      "gpuBusyPercentMedian": 53.0,
+      "gpuFrequencyHzMedian": 214000000.0,
+      "metricsAreDiagnosticOnly": false,
+      "processCPUPercentMedian": 53.21100917306165,
+      "reason": null,
+      "rendererPasses": {
+        "index0": {
+          "avgNsPerCheckpoint": {
+            "count": 3,
+            "max": 11.806432,
+            "mean": 11.762229,
+            "median": 11.780988,
+            "min": 11.699267
+          },
+          "checkpoints": 3,
+          "primaryAvgNs": 11780988,
+          "primaryDesc": "color decoding, color encoding",
+          "primaryLastNs": 11642708,
+          "primaryPeakNs": 12968958,
+          "primarySamples": 256
+        }
+      },
+      "stableSamples": 23,
+      "startBatteryC": 33.3,
+      "startVtsC": 35.9,
+      "status": "completed-observation",
+      "timerUnsupported": null,
+      "validCompletedProfile": true
+    },
+    "R3": {
+      "counters": null,
+      "directory": "docs/validation/lg-p84-perf-round2-20261102/R3",
+      "drawSamples": {},
+      "frequencyNormalized": {
+        "index0": {
+          "medianMcycles": 2517.8713559999997
+        }
+      },
+      "gpuBusyPercentMedian": 53.0,
+      "gpuFrequencyHzMedian": 214000000.0,
+      "metricsAreDiagnosticOnly": false,
+      "processCPUPercentMedian": 52.96803653103188,
+      "reason": null,
+      "rendererPasses": {
+        "index0": {
+          "avgNsPerCheckpoint": {
+            "count": 3,
+            "max": 11.781384,
+            "mean": 11.751266666666666,
+            "median": 11.765754,
+            "min": 11.706662
+          },
+          "checkpoints": 3,
+          "primaryAvgNs": 11706662,
+          "primaryDesc": "color decoding, color encoding",
+          "primaryLastNs": 12113802,
+          "primaryPeakNs": 12306250,
+          "primarySamples": 256
+        }
+      },
+      "stableSamples": 23,
+      "startBatteryC": 33.3,
+      "startVtsC": 35.9,
+      "status": "completed-observation",
+      "timerUnsupported": null,
+      "validCompletedProfile": true
+    }
+  },
+  "share": {
+    "caveat": "input and renderer timings come from separate sessions; the sum is an occupancy estimate, not a measured per-frame total",
+    "fusedRendererMcycles": 2510.18897,
+    "fusedShare": 0.6690682883607031,
+    "inputLabel": "I1",
+    "inputMcycles": 1241.578994,
+    "inputShare": 0.33093171163929685,
+    "rendererLabel": "R1"
+  },
+  "windowPts": [
+    20.0,
+    55.0
+  ]
+}

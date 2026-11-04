@@ -1,0 +1,22 @@
+{
+  "aggregation": "share=pairwise inputMcycles/(input+fused), pairwise then median; all rounds gatesOk",
+  "pairs": {
+    "pair1": {
+      "inputMs": 5.801771,
+      "fusedMs": 11.729855,
+      "sharePct": 33.09317116392969
+    },
+    "pair2": {
+      "inputMs": 5.835105,
+      "fusedMs": 11.780988,
+      "sharePct": 33.123718182005504
+    },
+    "pair3": {
+      "inputMs": 5.920573,
+      "fusedMs": 11.765754,
+      "sharePct": 33.47542426417876
+    }
+  },
+  "shareInputMedianPct": 33.123718182005504,
+  "caveat": "occupancy estimate from separate sessions; not a per-frame measured total"
+}

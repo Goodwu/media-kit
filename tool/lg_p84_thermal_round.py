@@ -34,7 +34,62 @@ MODES = {'baseline': 'display-resample', 'candidate': 'audio'}
 SETTINGS = ('screen_brightness_mode', 'screen_brightness',
             'accelerometer_rotation', 'user_rotation', 'screen_off_timeout')
 INPUT_FBO_PROPERTY = 'debug.mks.st_fbo'
-PROPERTIES = ('debug.mks.thermal_sync', 'debug.mks.thermal_trace', 'debug.mks.defer_publish_flush', 'debug.mks.gpu_timing', 'debug.mks.yuv_fusion', 'debug.mks.yuv_fail_commit', 'debug.mks.yuv_fail_gl', INPUT_FBO_PROPERTY, 'debug.mks.yuv_fusion_table')
+PROPERTIES = ('debug.mks.thermal_sync', 'debug.mks.thermal_trace', 'debug.mks.defer_publish_flush', 'debug.mks.gpu_timing', 'debug.mks.yuv_fusion', 'debug.mks.yuv_fail_commit', 'debug.mks.yuv_fail_gl', INPUT_FBO_PROPERTY, 'debug.mks.yuv_fusion_table', 'debug.mks.st_lease_rgba16')
+
+
+def restore_screen(adb: 'Adb', original_screen: dict[str, Any], result: dict[str, Any],
+                   errors: list[str]) -> None:
+    """Return the display to the pre-round on/off state and record the result.
+
+    The display power state lags the wake/sleep keyevent, so the state is
+    sampled with a short settle loop before declaring a restoration failure.
+    """
+    key = 'KEYCODE_WAKEUP' if original_screen.get('on') else 'KEYCODE_SLEEP'
+    adb.call(['shell', 'input', 'keyevent', key])
+    for _ in range(3):
+        time.sleep(1.5)
+        result['restoredScreen'] = adb.screen_state()
+        if result['restoredScreen']['on'] == original_screen.get('on'):
+            break
+    if result['restoredScreen']['on'] != original_screen.get('on'):
+        errors.append('screen-ON/OFF-state-not-restored')
+
+
+def _keyguard_secure_field(window: str) -> str | None:
+    """secure= of the keyguard delegate sections, or None when not unambiguous.
+
+    Section-scoped field scan: a delegate header owns only its DIRECT field
+    lines — lines indented strictly deeper than the header AND containing
+    "=". A deeper line without "=" is a nested block header (e.g.
+    KeyguardStateMonitor): the scan stops there, so a foreign section's
+    subtree can never supply the keyguard state. Same-indent lines end the
+    block; conflicting secure values across matching headers fail closed.
+    """
+    values = []
+    for header in ('KeyguardServiceDelegate', 'mKeyguardDelegate'):
+        for match in re.finditer(r'^([ \t]*)' + re.escape(header) + r'[^\n]*$', window, re.M):
+            header_indent = len(match.group(1))
+            block_secure = None
+            for line in window[match.end():].split('\n')[:40]:
+                if not line.strip():
+                    continue
+                current = len(line) - len(line.lstrip())
+                if current <= header_indent:
+                    break  # sibling section or parent level: block ended
+                if '=' not in line:
+                    break  # nested block header: its subtree is not ours
+                secure = re.fullmatch(r'\s*secure=(true|false)\s*', line)
+                if secure:
+                    block_secure = secure.group(1)
+                    break
+            if block_secure is not None:
+                values.append(block_secure)
+    if not values:
+        return None
+    if all(v == values[0] for v in values):
+        return values[0]
+    return None  # conflicting sections: refuse rather than guess
+
 LOG_PATTERN = re.compile(r'THERMAL_JSON|THERMAL_ERROR|MKS-THERMAL|MKS-INPUT-FBO|check_hot|thermal.*(shutdown|critical)|FATAL EXCEPTION|Fatal signal', re.I)
 
 
@@ -326,11 +381,11 @@ class Adb:
         power = self.call(['shell', 'dumpsys', 'power'])
         window = self.call(['shell', 'dumpsys', 'window'])
         match = re.search(r'isStatusBarKeyguard=(true|false)', window)
-        secure = re.search(r'mKeyguardDelegate[\s\S]{0,1800}?secure=(true|false)', window)
+        secure = _keyguard_secure_field(window)
         return {'on': 'Display Power: state=ON' in power,
                 'awake': 'mWakefulness=Awake' in power,
                 'keyguard': None if not match else match.group(1) == 'true',
-                'keyguardSecure': None if not secure else secure.group(1) == 'true'}
+                'keyguardSecure': None if secure is None else secure == 'true'}
 
     def wake_unprotected(self, original: dict[str, Any], allow_unprotected: bool) -> dict[str, Any]:
         self.call(['shell', 'input', 'keyevent', 'KEYCODE_WAKEUP'])
@@ -342,8 +397,18 @@ class Adb:
                 raise RuntimeError('protected-or-unknown-keyguard-refuse-MENU')
             if awake['keyguardSecure'] is True:
                 raise RuntimeError('protected-keyguard-refuse-MENU')
-            self.call(['shell', 'input', 'keyevent', 'KEYCODE_MENU'])
-            awake = self.screen_state()
+            # A MENU issued immediately after WAKEUP can be swallowed while the
+            # keyguard is still drawing; retry with a short delay. Every retry
+            # re-evaluates the protected state and refuses to send MENU at a
+            # secure or unknown lockscreen.
+            for _ in range(3):
+                self.call(['shell', 'input', 'keyevent', 'KEYCODE_MENU'])
+                time.sleep(1)
+                awake = self.screen_state()
+                if awake['keyguard'] is not True:
+                    break
+                if awake['keyguardSecure'] is not False:
+                    raise RuntimeError('protected-or-unknown-keyguard-refuse-MENU')
         if not awake['on'] or awake['keyguard'] is not False:
             raise RuntimeError('screen-or-keyguard-precondition-failed')
         return awake
@@ -757,6 +822,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         adb.call(['shell', 'setprop', 'debug.mks.yuv_fail_commit', '1' if getattr(args, 'yuv_fault', None) == 'commit' else '0'])
         adb.call(['shell', 'setprop', 'debug.mks.yuv_fail_gl', '1' if getattr(args, 'yuv_fault', None) == 'gl' else '0'])
         adb.call(['shell', 'setprop', 'debug.mks.yuv_fusion_table', '1' if getattr(args, 'fusion_table', False) else '0'])
+        adb.call(['shell', 'setprop', 'debug.mks.st_lease_rgba16', '1' if getattr(args, 'lease_rgba16', False) else '0'])
         adb.call(['shell', 'setprop', INPUT_FBO_PROPERTY, expected_fbo])
         if adb.call(['shell', 'getprop', INPUT_FBO_PROPERTY]).strip() != expected_fbo:
             raise RuntimeError('input-fbo-property-readback-mismatch')
@@ -921,11 +987,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             errors = ['unexpected-restore-error: ' + str(error)]
         if touched and original_screen:
             try:
-                key = 'KEYCODE_WAKEUP' if original_screen.get('on') else 'KEYCODE_SLEEP'
-                adb.call(['shell', 'input', 'keyevent', key])
-                result['restoredScreen'] = adb.screen_state()
-                if result['restoredScreen']['on'] != original_screen.get('on'):
-                    errors.append('screen-ON/OFF-state-not-restored')
+                restore_screen(adb, original_screen, result, errors)
             except Exception as error:
                 errors.append('screen-restore-error: ' + str(error))
         result['restoreErrors'] = errors

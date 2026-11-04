@@ -1,0 +1,35 @@
+{
+  "gpuThermalGateVerified": false,
+  "inputFboGateVerified": true,
+  "gpuThermalGateNormalPwrlevel": 0,
+  "gpuThermalGateScope": "Observed LG experimental normal baseline; unknown/nonzero fail closed; caps are metadata, not measured clock or CPU thermal causality.",
+  "controllerStatus": "failed",
+  "controllerReason": "initial-fresh-gpu-thermal-cap-detected",
+  "validCompletedProfile": false,
+  "metricsAreDiagnosticOnly": true,
+  "stableSamples": 0,
+  "processCPUPercentOneCore100": null,
+  "gpuDriverReportedBusyPercent": null,
+  "gpuFrequencyHz": null,
+  "cpuFrequencyKHz": {
+    "cpu0": null,
+    "cpu1": null,
+    "cpu2": null,
+    "cpu3": null
+  },
+  "reportedVoltageMicrovolts": {
+    "cpu_kryo0_regulator_microvolts": null,
+    "cpu_kryo1_regulator_microvolts": null,
+    "gpu_upstream_regulator_microvolts": null,
+    "battery_voltage_now": null
+  },
+  "limitations": [
+    "CPU process/thread 100% means one fully busy CPU core, not all four cores.",
+    "GPU utilisation is the named driver percentage report, not inferred from frequency; raw gpubusy zero denominator is unknown.",
+    "Regulator microvolts are software reports/targets, not optical or electrical probe measurements; GPU upstream supply is not a measured core voltage.",
+    "gpu_corner_raw is a corner index even though sysfs file is named microvolts; it is never converted to volts.",
+    "Battery voltage/current are separate power-supply fields; they do not measure CPU/GPU rail power.",
+    "Sampling overhead is recorded per row and is included in system busy counters."
+  ],
+  "topThreads": []
+}

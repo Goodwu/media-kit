@@ -1,0 +1,131 @@
+{
+  "schema": 1,
+  "experiment": "sync",
+  "requestedDeferPublishFlush": "0",
+  "startedAt": "2026-11-04T01:32:12.636650+08:00",
+  "mode": "baseline",
+  "requestedVideoSync": "display-resample",
+  "requestedDurationSeconds": 60.0,
+  "status": "restoration-failed",
+  "completeWindow": false,
+  "samples": 0,
+  "requestedInputFbo": "0",
+  "inputFboValidationRequired": false,
+  "thresholds": {
+    "batteryC": 45,
+    "vtsC": 48.5,
+    "systemHotEventsIn30s": 1
+  },
+  "device": "lge/lucye_global_com/lucye:7.0/NRD90U/172921900e77a:user/release-keys",
+  "package": "Activity Resolver Table:\n  Non-Data Actions:\n      android.intent.action.MAIN:\n        c0f8a42 com.example.media_kit_hdr_lab/.MainActivity filter b2cc7d9\n          Action: \"android.intent.action.MAIN\"\n          Category: \"android.intent.category.LAUNCHER\"\n          AutoVerify=false\n\nReceiver Resolver Table:\n  Non-Data Actions:\n      androidx.profileinstaller.action.SAVE_PROFILE:\n        fca2a53 com.example.media_kit_hdr_lab/androidx.profileinstaller.ProfileInstallReceiver filter 1044d23\n          Action: \"androidx.profileinstaller.action.SAVE_PROFILE\"\n          AutoVerify=false\n      androidx.profileinstaller.action.INSTALL_PROFILE:\n        fca2a53 com.example.media_kit_hdr_lab/androidx.profileinstaller.ProfileInstallReceiver filter 8805add\n          Action: \"androidx.profileinstaller.action.INSTALL_PROFILE\"\n          AutoVerify=false\n      androidx.profileinstaller.action.SKIP_FILE:\n        fca2a53 com.example.media_kit_hdr_lab/androidx.profileinstaller.ProfileInstallReceiver filter e443652\n          Action: \"androidx.profileinstaller.action.SKIP_FILE\"\n          AutoVerify=false\n      androidx.profileinstaller.action.BENCHMARK_OPERATION:\n        fca2a53 com.example.media_kit_hdr_lab/androidx.profileinstaller.ProfileInstallReceiver filter a67b220\n          Action: \"androidx.profileinstaller.action.BENCHMARK_OPERATION\"\n          AutoVerify=false\n\nPermissions:\n  Permission [com.example.media_kit_hdr_lab.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION] (dad4f35):\n    sourcePackage=com.example.media_kit_hdr_lab\n    uid=10251 gids=null type=0 prot=signature\n    perm=Permission{12b7f90 com.example.media_kit_hdr_lab.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION}\n    packageSetting=PackageSetting{b21753b com.example.media_kit_hdr_lab/10251}\n\nRegistered ContentProviders:\n  com.example.media_kit_hdr_lab/androidx.startup.InitializationProvider:\n    Provider{9c36089 com.example.media_kit_hdr_lab/androidx.startup.InitializationProvider}\n\nContentProvider Authorities:\n  [com.example.media_kit_hdr_lab.androidx-startup]:\n    Provider{9c36089 com.example.media_kit_hdr_lab/androidx.startup.InitializationProvider}\n      applicationInfo=ApplicationInfo{290088e com.example.media_kit_hdr_lab}\n\nKey Set Manager:\n  [com.example.media_kit_hdr_lab]\n      Signing KeySets: 29\n\nPackages:\n  Package [com.example.media_kit_hdr_lab] (b21753b):\n    userId=10251\n    pkg=Package{5c318af com.example.media_kit_hdr_lab}\n    codePath=/data/app/com.example.media_kit_hdr_lab-1\n    resourcePath=/data/app/com.example.media_kit_hdr_lab-1\n    legacyNativeLibraryDir=/data/app/com.example.media_kit_hdr_lab-1/lib\n    primaryCpuAbi=arm64-v8a\n    secondaryCpuAbi=null\n    versionCode=4086 minSdk=24 targetSdk=36\n    versionName=1.0.0\n    splits=[base]\n    apkSigningVersion=2\n    applicationInfo=ApplicationInfo{290088e com.example.media_kit_hdr_lab}\n    flags=[ HAS_CODE ALLOW_CLEAR_USER_DATA ALLOW_BACKUP ]\n    privateFlags=[ RESIZEABLE_ACTIVITIES ]\n    dataDir=/data/user/0/com.example.media_kit_hdr_lab\n    supportsScreens=[small, medium, large, xlarge, resizeable, anyDensity]\n    usesOptionalLibraries:\n      androidx.window.extensions\n      androidx.window.sidecar\n    timeStamp=2026-11-04 01:09:51\n    firstInstallTime=2026-10-25 01:51:13\n    lastUpdateTime=2026-11-04 01:09:52\n    signatures=PackageSignatures{6282a17 [32f90f38]}\n    installPermissionsFixed=true installStatus=1\n    pkgFlags=[ HAS_CODE ALLOW_CLEAR_USER_DATA ALLOW_BACKUP ]\n    declared permissions:\n      com.example.media_kit_hdr_lab.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION: prot=signature, INSTALLED\n    requested permissions:\n      com.example.media_kit_hdr_lab.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION\n    install permissions:\n      com.example.media_kit_hdr_lab.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION: granted=true\n    User 0: ceDataInode=2237528 installed=true hidden=false suspended=false stopped=true notLaunched=false enabled=0\n      runtime permissions:\n\n\nDexopt state:\n  [com.example.media_kit_hdr_lab]\n    Instruction Set: arm64\n      path: /data/app/com.example.media_kit_hdr_lab-1/base.apk\n      status: /data/app/com.example.media_kit_hdr_lab-1/oat/arm64/base.odex [compilation_filter=interpret-only, status=k\n      OatUpToDate]\n",
+  "initial": {
+    "hostTime": "2026-11-04T01:37:01.039926+08:00",
+    "hostMonotonic": 178404.75200325,
+    "pid": null,
+    "batteryC": 35.1,
+    "vtsC": 38.0,
+    "deviceUptime": 777721.58,
+    "appCpuTicks": null,
+    "processStartTicks": null,
+    "tasks": [],
+    "screen": {
+      "on": false,
+      "awake": false,
+      "keyguard": true,
+      "keyguardSecure": null
+    },
+    "raw": {
+      "uptime": "777721.58 1817281.58",
+      "cpu_total": "cpu  7785296 848928 8368010 47138128 52526 1353730 1110399 0 0 0\ncpu0 1842408 249573 2345560 42549748 42553 984420 783624 0 0 0\ncpu1 2010913 267452 2409756 1481712 3764 208103 179656 0 0 0\ncpu2 2061073 185205 1892834 1538785 3185 87391 84481 0 0 0\ncpu3 1870902 146698 1719860 1567883 3024 73816 62638 0 0 0\nintr 549509185 0 0 0 77164089 0 13543313 5887886 4 5 5 5891 0 1 26512 1396598 2350 1659049 1662482 0 12592607 154972 47240 0 0 13 2 0 0 10740607 0 10474137 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 35497 10483197 1405207 15642119 0 0 0 0 47 9881091 0 12 9 0 0 0 0 0 0 1729 2 0 0 0 0 0 0 0 0 175 72 0 74 0 0 0 0 0 0 0 0 3737496 0 36 0 0 9133 0 0 0 3737557 0 0 0 0 0 0 0 547 0 635 2 0 0 0 2 2 0 0 0 2 0 6131923 0 0 0 0 0 0 0 385402 167374 0 0 34031 7 7 6 0 0 0 0 0 0 0 32090 13715400 0 63 0 0 0 3 3 0 0 0 7 8 0 0 0 3 0 1208 3870935 31056 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 4537510 0 0 0 0 3 27 0 0 167369 0 0 0 0 0 0 0 0 0 0 401056 0 0 0 0 0 0 0 0 0 0 0 0 0 0 3377 0 0 0 0 0 0 0 0 0 0 0 0 0 78 0 0 0 0 0 0 0 135 0 0 0 0 0 0 0 2127 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 19905 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1396529 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 4342 6 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 32779050 0 0 862 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1265 0 0 0 0 0 0 0 0 0 0\nctxt 1105882107\nbtime 1792949699\nprocesses 651312\nprocs_running 3\nprocs_blocked 0\nsoftirq 307940984 17080141 51715501 2173373 5698659 15150519 18702 37562951 42924140 6796181 128820817",
+      "cpu_online": "0-3",
+      "battery_type": "battery",
+      "battery_temp": "35100",
+      "vts_type": "vts",
+      "vts_temp": "380",
+      "backlight": "0",
+      "backlight_max": "255",
+      "hdr_mode": "0",
+      "panel_thermal_status": "0",
+      "gpu_hz": "214000000",
+      "gpu_thermal_pwrlevel": "0",
+      "gpu_max_gpuclk": "652800000",
+      "cpu2_scaling_max_freq": "2150400",
+      "gpu_driver_busy_percentage": "0 %",
+      "battery_status": "Full",
+      "battery_voltage_now": "4322026",
+      "battery_current_now": "11291",
+      "battery_capacity": "100",
+      "usb_online": "1",
+      "ac_online": "",
+      "cpu_kryo0_regulator_name": "kryo0",
+      "cpu_kryo0_regulator_microvolts": "557517",
+      "cpu_kryo1_regulator_name": "kryo1",
+      "cpu_kryo1_regulator_microvolts": "727225",
+      "gpu_upstream_regulator_name": "pmi8994_s2",
+      "gpu_upstream_regulator_microvolts": "525000",
+      "gpu_corner_name": "gfx_corner",
+      "gpu_corner_raw": "2",
+      "cpu0_khz": "307200",
+      "cpu1_khz": "307200",
+      "cpu2_khz": "2150400",
+      "cpu3_khz": "2150400"
+    },
+    "gpuDriverReportedBusyPercent": 0.0,
+    "samplingWorkSeconds": 0.20332099997904152,
+    "clockTicksPerSecond": 100,
+    "cpuDelta": {
+      "intervalSeconds": 0.44999999995343387,
+      "systemBusyPercent": {
+        "cpu": 16.96969696969697,
+        "cpu0": 15.0,
+        "cpu1": 10.0,
+        "cpu2": 31.818181818181817,
+        "cpu3": 9.75609756097561
+      },
+      "processOneCorePercent": null,
+      "threadOneCorePercent": []
+    }
+  },
+  "gpuThermalGate": {
+    "normalPwrlevel": 0,
+    "unknownOrNonzeroStops": true,
+    "sampleIntervalSeconds": 2.0,
+    "scope": "LG observed experimental baseline; max_gpuclk/cpu2 cap are metadata"
+  },
+  "expectedPanelThermalStatus": "0",
+  "expectedBacklight": "64",
+  "reason": "protected-or-unknown-keyguard-refuse-MENU",
+  "observedDurationSeconds": 0,
+  "restoredScreen": {
+    "on": true,
+    "awake": false,
+    "keyguard": true,
+    "keyguardSecure": null
+  },
+  "restoreErrors": [
+    "screen-ON/OFF-state-not-restored"
+  ],
+  "restoredState": {
+    "settings": {
+      "screen_brightness_mode": "1",
+      "screen_brightness": "114",
+      "accelerometer_rotation": "1",
+      "user_rotation": "1",
+      "screen_off_timeout": "30000"
+    },
+    "properties": {
+      "debug.mks.thermal_sync": "display-resample",
+      "debug.mks.thermal_trace": "1",
+      "debug.mks.defer_publish_flush": "0",
+      "debug.mks.gpu_timing": "0",
+      "debug.mks.yuv_fusion": "",
+      "debug.mks.yuv_fail_commit": "0",
+      "debug.mks.yuv_fail_gl": "0",
+      "debug.mks.st_fbo": "0",
+      "debug.mks.yuv_fusion_table": ""
+    }
+  },
+  "restorationVerified": false,
+  "automaticBrightnessScalarChanged": false,
+  "finishedAt": "2026-11-04T01:37:09.219384+08:00"
+}

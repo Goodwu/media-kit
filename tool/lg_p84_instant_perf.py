@@ -183,8 +183,6 @@ def summarize(output: Path, controller: dict[str, Any], source: str) -> dict[str
                row['raw'].get('panel_thermal_status')==controller.get('expectedPanelThermalStatus') and
                thermal.native_failure_reason(state) is None and
                thermal.gpu_thermal_cap_reason(row) is None)
-        if valid and controller.get('experiment')=='fusion-table':
-            valid=thermal.fusion_table_state(state)==controller.get('requestedFusionTable','off') if False else valid
         if valid and controller.get('experiment')=='publish-flush':
             valid=thermal.publish_policy_error(state, controller['requestedDeferPublishFlush']) is None
         if valid and controller.get('inputFboValidationRequired'):
@@ -239,9 +237,16 @@ def main() -> int:
     p.add_argument('--gpu-timing',choices=('input','yuv','render'))
     p.add_argument('--yuv-fusion',action='store_true')
     p.add_argument('--yuv-fault',choices=('commit','gl'))
+    p.add_argument('--lease-rgba16',action='store_true',help='prefer the rgba16 unorm lease (debug.mks.st_lease_rgba16=1)')
     p.add_argument('--brightness',type=int,default=255)
     p.add_argument('--expected-backlight',type=int,default=255)
+    p.add_argument('--reference-start',help='JSON file with the reference start snapshot; enables matched-start cooldown')
+    p.add_argument('--cooldown-timeout',type=float,default=0,help='seconds to wait for the reference temperatures to match')
+    p.add_argument('--battery-tolerance',type=float,default=0.5)
+    p.add_argument('--vts-tolerance',type=float,default=1)
     args=p.parse_args()
+    if args.reference_start and args.cooldown_timeout <= 0:
+        p.error('--reference-start requires a positive --cooldown-timeout')
     if args.experiment == 'fusion-table':
         args.yuv_fusion = True
         args.fusion_table = True
@@ -252,7 +257,6 @@ def main() -> int:
     if not 30<=args.duration<=360 or not 1<=args.interval<=2:
         p.error('profile duration30..360s, interval1..2s only')
     args.instant_enabled=True
-    args.reference_start=None;args.cooldown_timeout=0;args.battery_tolerance=0.5;args.vts_tolerance=1
     InstantAdb.clock_hz=measure_clock(args.serial)
     thermal.Adb=InstantAdb
     def terminate(signum,frame):raise KeyboardInterrupt('termination-signal-'+str(signum))

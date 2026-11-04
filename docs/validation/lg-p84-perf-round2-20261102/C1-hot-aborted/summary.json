@@ -1,0 +1,673 @@
+{
+  "schema": 1,
+  "experiment": "sync",
+  "requestedDeferPublishFlush": "0",
+  "startedAt": "2026-11-04T00:47:02.507835+08:00",
+  "mode": "baseline",
+  "requestedVideoSync": "display-resample",
+  "requestedDurationSeconds": 60.0,
+  "status": "aborted",
+  "completeWindow": false,
+  "samples": 10,
+  "requestedInputFbo": "0",
+  "inputFboValidationRequired": false,
+  "thresholds": {
+    "batteryC": 45,
+    "vtsC": 48.5,
+    "systemHotEventsIn30s": 1
+  },
+  "device": "lge/lucye_global_com/lucye:7.0/NRD90U/172921900e77a:user/release-keys",
+  "package": "Activity Resolver Table:\n  Non-Data Actions:\n      android.intent.action.MAIN:\n        9458b1b com.example.media_kit_hdr_lab/.MainActivity filter b38df7a\n          Action: \"android.intent.action.MAIN\"\n          Category: \"android.intent.category.LAUNCHER\"\n          AutoVerify=false\n\nReceiver Resolver Table:\n  Non-Data Actions:\n      androidx.profileinstaller.action.SAVE_PROFILE:\n        4e0a4b8 com.example.media_kit_hdr_lab/androidx.profileinstaller.ProfileInstallReceiver filter 8f1099c\n          Action: \"androidx.profileinstaller.action.SAVE_PROFILE\"\n          AutoVerify=false\n      androidx.profileinstaller.action.INSTALL_PROFILE:\n        4e0a4b8 com.example.media_kit_hdr_lab/androidx.profileinstaller.ProfileInstallReceiver filter 8ea8a6e\n          Action: \"androidx.profileinstaller.action.INSTALL_PROFILE\"\n          AutoVerify=false\n      androidx.profileinstaller.action.SKIP_FILE:\n        4e0a4b8 com.example.media_kit_hdr_lab/androidx.profileinstaller.ProfileInstallReceiver filter 11ea50f\n          Action: \"androidx.profileinstaller.action.SKIP_FILE\"\n          AutoVerify=false\n      androidx.profileinstaller.action.BENCHMARK_OPERATION:\n        4e0a4b8 com.example.media_kit_hdr_lab/androidx.profileinstaller.ProfileInstallReceiver filter a36cfa5\n          Action: \"androidx.profileinstaller.action.BENCHMARK_OPERATION\"\n          AutoVerify=false\n\nPermissions:\n  Permission [com.example.media_kit_hdr_lab.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION] (dad4f35):\n    sourcePackage=com.example.media_kit_hdr_lab\n    uid=10251 gids=null type=0 prot=signature\n    perm=Permission{4266291 com.example.media_kit_hdr_lab.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION}\n    packageSetting=PackageSetting{b21753b com.example.media_kit_hdr_lab/10251}\n\nRegistered ContentProviders:\n  com.example.media_kit_hdr_lab/androidx.startup.InitializationProvider:\n    Provider{38655f6 com.example.media_kit_hdr_lab/androidx.startup.InitializationProvider}\n\nContentProvider Authorities:\n  [com.example.media_kit_hdr_lab.androidx-startup]:\n    Provider{38655f6 com.example.media_kit_hdr_lab/androidx.startup.InitializationProvider}\n      applicationInfo=ApplicationInfo{a7bdf7 com.example.media_kit_hdr_lab}\n\nKey Set Manager:\n  [com.example.media_kit_hdr_lab]\n      Signing KeySets: 29\n\nPackages:\n  Package [com.example.media_kit_hdr_lab] (b21753b):\n    userId=10251\n    pkg=Package{7575464 com.example.media_kit_hdr_lab}\n    codePath=/data/app/com.example.media_kit_hdr_lab-1\n    resourcePath=/data/app/com.example.media_kit_hdr_lab-1\n    legacyNativeLibraryDir=/data/app/com.example.media_kit_hdr_lab-1/lib\n    primaryCpuAbi=arm64-v8a\n    secondaryCpuAbi=null\n    versionCode=4086 minSdk=24 targetSdk=36\n    versionName=1.0.0\n    splits=[base]\n    apkSigningVersion=2\n    applicationInfo=ApplicationInfo{a7bdf7 com.example.media_kit_hdr_lab}\n    flags=[ HAS_CODE ALLOW_CLEAR_USER_DATA ALLOW_BACKUP ]\n    privateFlags=[ RESIZEABLE_ACTIVITIES ]\n    dataDir=/data/user/0/com.example.media_kit_hdr_lab\n    supportsScreens=[small, medium, large, xlarge, resizeable, anyDensity]\n    usesOptionalLibraries:\n      androidx.window.extensions\n      androidx.window.sidecar\n    timeStamp=2026-11-04 00:46:32\n    firstInstallTime=2026-10-25 01:51:13\n    lastUpdateTime=2026-11-04 00:46:32\n    signatures=PackageSignatures{6282a17 [32f90f38]}\n    installPermissionsFixed=true installStatus=1\n    pkgFlags=[ HAS_CODE ALLOW_CLEAR_USER_DATA ALLOW_BACKUP ]\n    declared permissions:\n      com.example.media_kit_hdr_lab.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION: prot=signature, INSTALLED\n    requested permissions:\n      com.example.media_kit_hdr_lab.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION\n    install permissions:\n      com.example.media_kit_hdr_lab.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION: granted=true\n    User 0: ceDataInode=2237528 installed=true hidden=false suspended=false stopped=true notLaunched=false enabled=0\n      runtime permissions:\n\n\nDexopt state:\n  [com.example.media_kit_hdr_lab]\n    Instruction Set: arm64\n      path: /data/app/com.example.media_kit_hdr_lab-1/base.apk\n      status: /data/app/com.example.media_kit_hdr_lab-1/oat/arm64/base.odex [compilation_filter=interpret-only, status=k\n      OatUpToDate]\n",
+  "initial": {
+    "hostTime": "2026-11-04T00:53:10.732837+08:00",
+    "hostMonotonic": 175774.456479041,
+    "pid": null,
+    "batteryC": 37.2,
+    "vtsC": 39.0,
+    "deviceUptime": 775091.3,
+    "appCpuTicks": null,
+    "processStartTicks": null,
+    "tasks": [],
+    "screen": {
+      "on": true,
+      "awake": true,
+      "keyguard": false,
+      "keyguardSecure": null
+    },
+    "raw": {
+      "uptime": "775091.30 1808662.95",
+      "cpu_total": "cpu  7711614 841611 8286481 46304187 49449 1343422 1097810 0 0 0\ncpu0 1829072 248118 2327400 42347649 42053 976202 773008 0 0 0\ncpu1 1992229 265775 2383105 1278751 2845 206909 178891 0 0 0\ncpu2 2038363 183146 1872289 1328553 2355 86955 83838 0 0 0\ncpu3 1851950 144572 1703687 1349234 2196 73356 62073 0 0 0\nintr 542357677 0 0 0 76608617 0 13484196 5838397 4 5 5 5787 0 1 26380 1396592 2350 1658343 1662351 0 12494513 152223 46403 0 0 13 2 0 0 10469145 0 10373819 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 35375 10353055 1401000 15525651 0 0 0 0 47 9874183 0 12 9 0 0 0 0 0 0 1729 2 0 0 0 0 0 0 0 0 172 71 0 72 0 0 0 0 0 0 0 0 3737496 0 36 0 0 9041 0 0 0 3737557 0 0 0 0 0 0 0 537 0 635 2 0 0 0 2 2 0 0 0 2 0 6125121 0 0 0 0 0 0 0 380164 166502 0 0 33753 7 7 6 0 0 0 0 0 0 0 31490 13628594 0 63 0 0 0 3 3 0 0 0 7 8 0 0 0 3 0 1208 3824083 31056 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 4485099 0 0 0 0 3 27 0 0 166497 0 0 0 0 0 0 0 0 0 0 401031 0 0 0 0 0 0 0 0 0 0 0 0 0 0 3364 0 0 0 0 0 0 0 0 0 0 0 0 0 78 0 0 0 0 0 0 0 135 0 0 0 0 0 0 0 2083 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 19855 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1396525 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 4190 6 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 30651012 0 0 844 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1239 0 0 0 0 0 0 0 0 0 0\nctxt 1093294276\nbtime 1792949699\nprocesses 633320\nprocs_running 2\nprocs_blocked 0\nsoftirq 303868041 16959765 51360421 2147698 5631754 14764570 18702 35909274 42607409 6706929 127761519",
+      "cpu_online": "0-3",
+      "battery_type": "battery",
+      "battery_temp": "37200",
+      "vts_type": "vts",
+      "vts_temp": "390",
+      "backlight": "10",
+      "backlight_max": "255",
+      "hdr_mode": "0",
+      "panel_thermal_status": "0",
+      "gpu_hz": "214000000",
+      "gpu_thermal_pwrlevel": "0",
+      "gpu_max_gpuclk": "652800000",
+      "cpu2_scaling_max_freq": "2150400",
+      "gpu_driver_busy_percentage": "0 %",
+      "battery_status": "Full",
+      "battery_voltage_now": "4343694",
+      "battery_current_now": "-81328",
+      "battery_capacity": "100",
+      "usb_online": "1",
+      "ac_online": "",
+      "cpu_kryo0_regulator_name": "kryo0",
+      "cpu_kryo0_regulator_microvolts": "557517",
+      "cpu_kryo1_regulator_name": "kryo1",
+      "cpu_kryo1_regulator_microvolts": "727225",
+      "gpu_upstream_regulator_name": "pmi8994_s2",
+      "gpu_upstream_regulator_microvolts": "525000",
+      "gpu_corner_name": "gfx_corner",
+      "gpu_corner_raw": "2",
+      "cpu0_khz": "307200",
+      "cpu1_khz": "307200",
+      "cpu2_khz": "2150400",
+      "cpu3_khz": "2150400"
+    },
+    "gpuDriverReportedBusyPercent": 0.0,
+    "samplingWorkSeconds": 0.16614295900217257,
+    "clockTicksPerSecond": 100,
+    "cpuDelta": {
+      "intervalSeconds": 0.3600000001024455,
+      "systemBusyPercent": {
+        "cpu": 20.895522388059703,
+        "cpu0": 20.58823529411765,
+        "cpu1": 11.428571428571429,
+        "cpu2": 38.23529411764706,
+        "cpu3": 12.903225806451612
+      },
+      "processOneCorePercent": null,
+      "threadOneCorePercent": []
+    }
+  },
+  "gpuThermalGate": {
+    "normalPwrlevel": 0,
+    "unknownOrNonzeroStops": true,
+    "sampleIntervalSeconds": 2.0,
+    "scope": "LG observed experimental baseline; max_gpuclk/cpu2 cap are metadata"
+  },
+  "expectedPanelThermalStatus": "0",
+  "expectedBacklight": "64",
+  "awakeState": {
+    "on": true,
+    "awake": true,
+    "keyguard": false,
+    "keyguardSecure": null
+  },
+  "launchOutput": "Starting: Intent { cmp=com.example.media_kit_hdr_lab/.MainActivity }\n",
+  "pid": "22838",
+  "reason": "fresh-gpu-thermal-cap-detected",
+  "final": {
+    "hostTime": "2026-11-04T00:53:40.934055+08:00",
+    "hostMonotonic": 175804.657171666,
+    "pid": "22838",
+    "batteryC": 38.1,
+    "vtsC": 40.4,
+    "deviceUptime": 775121.49,
+    "appCpuTicks": 1095,
+    "processStartTicks": 77509628,
+    "tasks": [
+      {
+        "tid": "22838",
+        "name": "dia_kit_hdr_lab",
+        "ticks": 131,
+        "startTicks": 77509628
+      },
+      {
+        "tid": "22843",
+        "name": "Jit thread pool",
+        "ticks": 11,
+        "startTicks": 77509630
+      },
+      {
+        "tid": "22844",
+        "name": "Signal Catcher",
+        "ticks": 0,
+        "startTicks": 77509630
+      },
+      {
+        "tid": "22846",
+        "name": "ReferenceQueueD",
+        "ticks": 0,
+        "startTicks": 77509630
+      },
+      {
+        "tid": "22847",
+        "name": "FinalizerDaemon",
+        "ticks": 0,
+        "startTicks": 77509630
+      },
+      {
+        "tid": "22848",
+        "name": "FinalizerWatchd",
+        "ticks": 0,
+        "startTicks": 77509630
+      },
+      {
+        "tid": "22849",
+        "name": "HeapTaskDaemon",
+        "ticks": 6,
+        "startTicks": 77509630
+      },
+      {
+        "tid": "22850",
+        "name": "Binder:22838_1",
+        "ticks": 14,
+        "startTicks": 77509630
+      },
+      {
+        "tid": "22852",
+        "name": "Binder:22838_2",
+        "ticks": 13,
+        "startTicks": 77509631
+      },
+      {
+        "tid": "22856",
+        "name": "Profile Saver",
+        "ticks": 1,
+        "startTicks": 77509633
+      },
+      {
+        "tid": "22859",
+        "name": "flutter-worker-",
+        "ticks": 0,
+        "startTicks": 77509647
+      },
+      {
+        "tid": "22860",
+        "name": "flutter-worker-",
+        "ticks": 2,
+        "startTicks": 77509649
+      },
+      {
+        "tid": "22866",
+        "name": "1.raster",
+        "ticks": 2,
+        "startTicks": 77509654
+      },
+      {
+        "tid": "22867",
+        "name": "1.io",
+        "ticks": 0,
+        "startTicks": 77509654
+      },
+      {
+        "tid": "22868",
+        "name": "io.worker.1",
+        "ticks": 0,
+        "startTicks": 77509655
+      },
+      {
+        "tid": "22869",
+        "name": "io.worker.2",
+        "ticks": 0,
+        "startTicks": 77509655
+      },
+      {
+        "tid": "22870",
+        "name": "dart:io EventHa",
+        "ticks": 2,
+        "startTicks": 77509655
+      },
+      {
+        "tid": "22872",
+        "name": "RenderThread",
+        "ticks": 6,
+        "startTicks": 77509670
+      },
+      {
+        "tid": "22879",
+        "name": "DartWorker",
+        "ticks": 28,
+        "startTicks": 77509685
+      },
+      {
+        "tid": "22880",
+        "name": "Thread-5",
+        "ticks": 186,
+        "startTicks": 77509686
+      },
+      {
+        "tid": "22881",
+        "name": "hwuiTask1",
+        "ticks": 0,
+        "startTicks": 77509698
+      },
+      {
+        "tid": "22899",
+        "name": "RenderThread",
+        "ticks": 0,
+        "startTicks": 77510108
+      },
+      {
+        "tid": "22900",
+        "name": "RenderThread",
+        "ticks": 0,
+        "startTicks": 77510108
+      },
+      {
+        "tid": "22901",
+        "name": "RenderThread",
+        "ticks": 2,
+        "startTicks": 77510108
+      },
+      {
+        "tid": "22902",
+        "name": "RenderThread",
+        "ticks": 2,
+        "startTicks": 77510108
+      },
+      {
+        "tid": "22908",
+        "name": "worker",
+        "ticks": 0,
+        "startTicks": 77510115
+      },
+      {
+        "tid": "22920",
+        "name": "Binder:22838_3",
+        "ticks": 13,
+        "startTicks": 77510186
+      },
+      {
+        "tid": "22923",
+        "name": "hwuiTask2",
+        "ticks": 0,
+        "startTicks": 77510205
+      },
+      {
+        "tid": "22926",
+        "name": "Thread-8",
+        "ticks": 363,
+        "startTicks": 77510218
+      },
+      {
+        "tid": "22928",
+        "name": "demux",
+        "ticks": 27,
+        "startTicks": 77510234
+      },
+      {
+        "tid": "22929",
+        "name": "mksurf-latch",
+        "ticks": 9,
+        "startTicks": 77510234
+      },
+      {
+        "tid": "22930",
+        "name": "MediaCodec_loop",
+        "ticks": 65,
+        "startTicks": 77510236
+      },
+      {
+        "tid": "22931",
+        "name": "JNISurfaceTextu",
+        "ticks": 114,
+        "startTicks": 77510236
+      },
+      {
+        "tid": "22935",
+        "name": "AudioTrack",
+        "ticks": 37,
+        "startTicks": 77510273
+      },
+      {
+        "tid": "22975",
+        "name": "DartWorker",
+        "ticks": 4,
+        "startTicks": 77511486
+      }
+    ],
+    "screen": {
+      "on": true,
+      "awake": true,
+      "keyguard": false,
+      "keyguardSecure": null
+    },
+    "raw": {
+      "uptime": "775121.49 1808733.74",
+      "cpu_total": "cpu  7713655 841967 8288666 46311118 49537 1343614 1097913 0 0 0\ncpu0 1829523 248192 2327971 42349242 42063 976364 773066 0 0 0\ncpu1 1992733 265867 2383675 1280490 2869 206929 178903 0 0 0\ncpu2 2039036 183247 1872860 1330181 2381 86955 83856 0 0 0\ncpu3 1852363 144661 1704160 1351205 2224 73366 62088 0 0 0\nintr 542499678 0 0 0 76625140 0 13484196 5840651 4 5 5 5787 0 1 26380 1396592 2350 1658353 1662351 0 12497512 152401 46456 0 0 13 2 0 0 10479056 0 10373908 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 35378 10358045 1401003 15528288 0 0 0 0 47 9874448 0 12 9 0 0 0 0 0 0 1729 2 0 0 0 0 0 0 0 0 172 71 0 72 0 0 0 0 0 0 0 0 3737496 0 36 0 0 9043 0 0 0 3737557 0 0 0 0 0 0 0 537 0 635 2 0 0 0 2 2 0 0 0 2 0 6125384 0 0 0 0 0 0 0 380403 166513 0 0 33760 7 7 6 0 0 0 0 0 0 0 31507 13628598 0 63 0 0 0 3 3 0 0 0 7 8 0 0 0 3 0 1208 3825430 31056 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 4487252 0 0 0 0 3 27 0 0 166508 0 0 0 0 0 0 0 0 0 0 401031 0 0 0 0 0 0 0 0 0 0 0 0 0 0 3364 0 0 0 0 0 0 0 0 0 0 0 0 0 78 0 0 0 0 0 0 0 135 0 0 0 0 0 0 0 2085 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 19858 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1396525 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 4190 6 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 30657416 0 0 844 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1241 0 0 0 0 0 0 0 0 0 0\nctxt 1093609359\nbtime 1792949699\nprocesses 633678\nprocs_running 7\nprocs_blocked 0\nsoftirq 303947194 16962412 51368860 2147737 5631770 14780157 18702 35915386 42615438 6709573 127797159",
+      "cpu_online": "0-3",
+      "battery_type": "battery",
+      "battery_temp": "38100",
+      "vts_type": "vts",
+      "vts_temp": "404",
+      "backlight": "64",
+      "backlight_max": "255",
+      "hdr_mode": "1",
+      "panel_thermal_status": "0",
+      "gpu_hz": "214000000",
+      "gpu_thermal_pwrlevel": "4",
+      "gpu_max_gpuclk": "401800000",
+      "cpu2_scaling_max_freq": "2150400",
+      "gpu_driver_busy_percentage": "49 %",
+      "battery_status": "Full",
+      "battery_voltage_now": "4349492",
+      "battery_current_now": "-119323",
+      "battery_capacity": "100",
+      "usb_online": "1",
+      "ac_online": "",
+      "cpu_kryo0_regulator_name": "kryo0",
+      "cpu_kryo0_regulator_microvolts": "584313",
+      "cpu_kryo1_regulator_name": "kryo1",
+      "cpu_kryo1_regulator_microvolts": "642371",
+      "gpu_upstream_regulator_name": "pmi8994_s2",
+      "gpu_upstream_regulator_microvolts": "595000",
+      "gpu_corner_name": "gfx_corner",
+      "gpu_corner_raw": "3",
+      "cpu0_khz": "614400",
+      "cpu1_khz": "614400",
+      "cpu2_khz": "2150400",
+      "cpu3_khz": "2150400",
+      "app_stat": "22838 (dia_kit_hdr_lab) S 812 812 0 0 -1 1077936448 86864 0 151 0 737 358 0 0 20 0 35 0 77509628 6968266752 48502 18446744073709551615 1 1 0 0 0 0 2101764 4096 34040 18446744073709551615 0 0 17 3 0 0 0 0 0 0 0 0 0 0 0 0 0",
+      "threads": "22838 (dia_kit_hdr_lab) S 812 812 0 0 -1 1077936448 26481 0 86 0 98 33 0 0 20 0 35 0 77509628 6968266752 48502 18446744073709551615 1 1 0 0 0 0 2101764 4096 34040 18446744073709551615 0 0 17 3 0 0 0 0 0 0 0 0 0 0 0 0 0\n22843 (Jit thread pool) S 812 812 0 0 -1 1077936192 3807 0 13 0 8 3 0 0 29 9 35 0 77509630 6968266752 48502 18446744073709551615 1 1 0 0 0 0 4612 4096 34040 18446744073709551615 0 0 -1 3 0 0 0 0 0 0 0 0 0 0 0 0 0\n22844 (Signal Catcher) S 812 812 0 0 -1 1077936192 88 0 0 0 0 0 0 0 20 0 35 0 77509630 6968266752 48502 18446744073709551615 1 1 0 0 0 0 4096 4096 34040 18446744073709551615 0 0 -1 1 0 0 0 0 0 0 0 0 0 0 0 0 0\n22846 (ReferenceQueueD) S 812 812 0 0 -1 1077936192 25 0 0 0 0 0 0 0 20 0 35 0 77509630 6968266752 48502 18446744073709551615 1 1 0 0 0 0 4612 4096 34040 18446744073709551615 0 0 -1 0 0 0 0 0 0 0 0 0 0 0 0 0 0\n22847 (FinalizerDaemon) S 812 812 0 0 -1 1077936192 27 0 0 0 0 0 0 0 20 0 35 0 77509630 6968266752 48502 18446744073709551615 1 1 0 0 0 0 4612 4096 34040 18446744073709551615 0 0 -1 0 0 0 0 0 0 0 0 0 0 0 0 0 0\n22848 (FinalizerWatchd) S 812 812 0 0 -1 1077936192 7 0 0 0 0 0 0 0 20 0 35 0 77509630 6968266752 48502 18446744073709551615 1 1 0 0 0 0 4612 4096 34040 18446744073709551615 0 0 -1 0 0 0 0 0 0 0 0 0 0 0 0 0 0\n22849 (HeapTaskDaemon) S 812 812 0 0 -1 1077936192 3337 0 37 0 5 1 0 0 20 0 35 0 77509630 6968266752 48502 18446744073709551615 1 1 0 0 0 0 4612 4096 34040 18446744073709551615 0 0 -1 2 0 0 0 0 0 0 0 0 0 0 0 0 0\n22850 (Binder:22838_1) S 812 812 0 0 -1 1077936192 243 0 0 0 6 8 0 0 20 0 35 0 77509630 6968266752 48502 18446744073709551615 1 1 0 0 0 0 4612 4096 34040 18446744073709551615 0 0 -1 1 0 0 0 0 0 0 0 0 0 0 0 0 0\n22852 (Binder:22838_2) S 812 812 0 0 -1 1077936192 120 0 0 0 6 7 0 0 20 0 35 0 77509631 6968266752 48502 18446744073709551615 1 1 0 0 0 0 4612 4096 34040 18446744073709551615 0 0 -1 1 0 0 0 0 0 0 0 0 0 0 0 0 0\n22856 (Profile Saver) S 812 812 0 0 -1 1077936192 221 0 0 0 1 0 0 0 20 0 35 0 77509633 6968266752 48502 18446744073709551615 1 1 0 0 0 0 4612 4096 34040 18446744073709551615 0 0 -1 1 0 0 0 0 0 0 0 0 0 0 0 0 0\n22859 (flutter-worker-) S 812 812 0 0 -1 1077936192 942 0 3 0 0 0 0 0 20 0 35 0 77509647 6968266752 48502 18446744073709551615 1 1 0 0 0 0 4612 4096 34040 18446744073709551615 0 0 -1 0 0 0 0 0 0 0 0 0 0 0 0 0 0\n22860 (flutter-worker-) S 812 812 0 0 -1 1077936192 2988 0 0 0 2 0 0 0 20 0 35 0 77509649 6968266752 48502 18446744073709551615 1 1 0 0 0 0 4612 4096 34040 18446744073709551615 0 0 -1 3 0 0 0 0 0 0 0 0 0 0 0 0 0\n22866 (1.raster) S 812 812 0 0 -1 1077936192 772 0 1 0 2 0 0 0 15 -5 35 0 77509654 6968266752 48502 18446744073709551615 1 1 0 0 0 0 4612 4096 34040 18446744073709551615 0 0 -1 2 0 0 0 0 0 0 0 0 0 0 0 0 0\n22867 (1.io) S 812 812 0 0 -1 1077936192 100 0 0 0 0 0 0 0 20 0 35 0 77509654 6968266752 48502 18446744073709551615 1 1 0 0 0 0 4612 4096 34040 18446744073709551615 0 0 -1 1 0 0 0 0 0 0 0 0 0 0 0 0 0\n22868 (io.worker.1) S 812 812 0 0 -1 1077936192 4 0 0 0 0 0 0 0 21 1 35 0 77509655 6968266752 48502 18446744073709551615 1 1 0 0 0 0 4612 4096 34040 18446744073709551615 0 0 -1 2 0 0 0 0 0 0 0 0 0 0 0 0 0\n22869 (io.worker.2) S 812 812 0 0 -1 1077936192 4 0 0 0 0 0 0 0 21 1 35 0 77509655 6968266752 48502 18446744073709551615 1 1 0 0 0 0 4612 4096 34040 18446744073709551615 0 0 -1 3 0 0 0 0 0 0 0 0 0 0 0 0 0\n22870 (dart:io EventHa) S 812 812 0 0 -1 1077936192 8 0 0 0 1 1 0 0 20 0 35 0 77509655 6968266752 48502 18446744073709551615 1 1 0 0 0 0 69210628 4096 34040 18446744073709551615 0 0 -1 0 0 0 0 0 0 0 0 0 0 0 0 0 0\n22872 (RenderThread) S 812 812 0 0 -1 1077936192 710 0 0 0 5 1 0 0 16 -4 35 0 77509670 6968266752 48502 18446744073709551615 1 1 0 0 0 0 2101764 4096 34040 18446744073709551615 0 0 -1 1 0 0 0 0 0 0 0 0 0 0 0 0 0\n22879 (DartWorker) S 812 812 0 0 -1 1077936192 89 0 3 0 24 4 0 0 20 0 35 0 77509685 6968266752 48502 18446744073709551615 1 1 0 0 0 0 2101764 4096 34040 18446744073709551615 0 0 -1 0 0 0 0 0 0 0 0 0 0 0 0 0 0\n22880 (Thread-5) S 812 812 0 0 -1 1077936192 3666 0 1 0 135 51 0 0 20 0 35 0 77509686 6968266752 48502 18446744073709551615 1 1 0 0 0 0 2101764 4096 34040 18446744073709551615 0 0 -1 0 0 0 0 0 0 0 0 0 0 0 0 0 0\n22881 (hwuiTask1) S 812 812 0 0 -1 1077936192 16 0 0 0 0 0 0 0 18 -2 35 0 77509698 6968266752 48502 18446744073709551615 1 1 0 0 0 0 2101764 4096 34040 18446744073709551615 0 0 -1 0 0 0 0 0 0 0 0 0 0 0 0 0 0\n22899 (RenderThread) S 812 812 0 0 -1 1077936192 0 0 0 0 0 0 0 0 16 -4 35 0 77510108 6968266752 48502 18446744073709551615 1 1 0 0 0 0 2101764 4096 34040 18446744073709551615 0 0 -1 0 0 0 0 0 0 0 0 0 0 0 0 0 0\n22900 (RenderThread) S 812 812 0 0 -1 1077936192 0 0 0 0 0 0 0 0 16 -4 35 0 77510108 6968266752 48502 18446744073709551615 1 1 0 0 0 0 2101764 4096 34040 18446744073709551615 0 0 -1 1 0 0 0 0 0 0 0 0 0 0 0 0 0\n22901 (RenderThread) S 812 812 0 0 -1 1077936192 3780 0 0 0 2 0 0 0 16 -4 35 0 77510108 6968266752 48502 18446744073709551615 1 1 0 0 0 0 2101764 4096 34040 18446744073709551615 0 0 -1 2 0 0 0 0 0 0 0 0 0 0 0 0 0\n22902 (RenderThread) S 812 812 0 0 -1 1077936192 3780 0 0 0 2 0 0 0 16 -4 35 0 77510108 6968266752 48502 18446744073709551615 1 1 0 0 0 0 2101764 4096 34040 18446744073709551615 0 0 -1 3 0 0 0 0 0 0 0 0 0 0 0 0 0\n22908 (worker) S 812 812 0 0 -1 1077936192 51 0 0 0 0 0 0 0 20 0 35 0 77510115 6968266752 48502 18446744073709551615 1 1 0 0 0 0 2101764 4096 34040 18446744073709551615 0 0 -1 3 0 0 0 0 0 0 0 0 0 0 0 0 0\n22920 (Binder:22838_3) S 812 812 0 0 -1 1077936192 40 0 0 0 5 8 0 0 20 0 35 0 77510186 6968266752 48502 18446744073709551615 1 1 0 0 0 0 4612 4096 34040 18446744073709551615 0 0 -1 2 0 0 0 0 0 0 0 0 0 0 0 0 0\n22923 (hwuiTask2) S 812 812 0 0 -1 1077936192 5 0 0 0 0 0 0 0 18 -2 35 0 77510205 6968266752 48502 18446744073709551615 1 1 0 0 0 0 2101764 4096 34040 18446744073709551615 0 0 -1 1 0 0 0 0 0 0 0 0 0 0 0 0 0\n22926 (Thread-8) S 812 812 0 0 -1 1077936192 2006 0 3 0 259 104 0 0 20 0 35 0 77510218 6968266752 48502 18446744073709551615 1 1 0 0 0 0 2101764 4096 34040 18446744073709551615 0 0 -1 3 0 0 0 0 0 0 0 0 0 0 0 0 0\n22928 (demux) S 812 812 0 0 -1 1077936192 11055 0 0 0 14 13 0 0 20 0 35 0 77510234 6968266752 48502 18446744073709551615 1 1 0 0 0 0 2101764 4096 34040 18446744073709551615 0 0 -1 1 0 0 0 0 0 0 0 0 0 0 0 0 0\n22929 (mksurf-latch) S 812 812 0 0 -1 1077936192 15 0 0 0 5 4 0 0 20 0 35 0 77510234 6968266752 48502 18446744073709551615 1 1 0 0 0 0 2101764 4096 34040 18446744073709551615 0 0 -1 3 0 0 0 0 0 0 0 0 0 0 0 0 0\n22930 (MediaCodec_loop) S 812 812 0 0 -1 1077936192 166 0 0 0 32 33 0 0 18 -2 35 0 77510236 6968266752 48502 18446744073709551615 1 1 0 0 0 0 2101764 4096 34040 18446744073709551615 0 0 -1 2 0 0 0 0 0 0 0 0 0 0 0 0 0\n22931 (JNISurfaceTextu) S 812 812 0 0 -1 1077936192 2376 0 0 0 67 47 0 0 4 -16 35 0 77510236 6968266752 48502 18446744073709551615 1 1 0 0 0 0 2101764 4096 34040 18446744073709551615 0 0 -1 2 0 0 0 0 0 0 0 0 0 0 0 0 0\n22935 (AudioTrack) S 812 812 0 0 -1 1077936192 8 0 0 0 27 10 0 0 -3 -16 35 0 77510273 6968266752 48502 18446744073709551615 1 1 0 0 0 0 2101764 4096 34040 18446744073709551615 0 0 -1 0 2 1 0 0 0 0 0 0 0 0 0 0 0\n22975 (DartWorker) S 812 812 0 0 -1 1077936192 7 0 0 0 4 0 0 0 20 0 35 0 77511486 6968266752 48502 18446744073709551615 1 1 0 0 0 0 2101764 4096 34040 18446744073709551615 0 0 -1 3 0 0 0 0 0 0 0 0 0 0 0 0 0"
+    },
+    "gpuDriverReportedBusyPercent": 49.0,
+    "samplingWorkSeconds": 0.17332691699266434,
+    "clockTicksPerSecond": 100,
+    "cpuDelta": {
+      "intervalSeconds": 2.1799999999348074,
+      "systemBusyPercent": {
+        "cpu": 66.07981220657277,
+        "cpu0": 67.96116504854369,
+        "cpu1": 63.76146788990825,
+        "cpu2": 66.66666666666667,
+        "cpu3": 66.04651162790698
+      },
+      "processOneCorePercent": 32.11009174407951,
+      "threadOneCorePercent": [
+        {
+          "tid": "22926",
+          "name": "Thread-8",
+          "percent": 12.844036697631806
+        },
+        {
+          "tid": "22880",
+          "name": "Thread-5",
+          "percent": 5.504587156127917
+        },
+        {
+          "tid": "22931",
+          "name": "JNISurfaceTextu",
+          "percent": 3.6697247707519445
+        },
+        {
+          "tid": "22838",
+          "name": "dia_kit_hdr_lab",
+          "percent": 1.8348623853759722
+        },
+        {
+          "tid": "22930",
+          "name": "MediaCodec_loop",
+          "percent": 1.8348623853759722
+        },
+        {
+          "tid": "22935",
+          "name": "AudioTrack",
+          "percent": 1.3761467890319792
+        },
+        {
+          "tid": "22928",
+          "name": "demux",
+          "percent": 0.9174311926879861
+        },
+        {
+          "tid": "22975",
+          "name": "DartWorker",
+          "percent": 0.9174311926879861
+        },
+        {
+          "tid": "22850",
+          "name": "Binder:22838_1",
+          "percent": 0.45871559634399306
+        },
+        {
+          "tid": "22852",
+          "name": "Binder:22838_2",
+          "percent": 0.45871559634399306
+        },
+        {
+          "tid": "22920",
+          "name": "Binder:22838_3",
+          "percent": 0.45871559634399306
+        },
+        {
+          "tid": "22843",
+          "name": "Jit thread pool",
+          "percent": 0.0
+        },
+        {
+          "tid": "22844",
+          "name": "Signal Catcher",
+          "percent": 0.0
+        },
+        {
+          "tid": "22846",
+          "name": "ReferenceQueueD",
+          "percent": 0.0
+        },
+        {
+          "tid": "22847",
+          "name": "FinalizerDaemon",
+          "percent": 0.0
+        },
+        {
+          "tid": "22848",
+          "name": "FinalizerWatchd",
+          "percent": 0.0
+        },
+        {
+          "tid": "22849",
+          "name": "HeapTaskDaemon",
+          "percent": 0.0
+        },
+        {
+          "tid": "22856",
+          "name": "Profile Saver",
+          "percent": 0.0
+        },
+        {
+          "tid": "22859",
+          "name": "flutter-worker-",
+          "percent": 0.0
+        },
+        {
+          "tid": "22860",
+          "name": "flutter-worker-",
+          "percent": 0.0
+        },
+        {
+          "tid": "22866",
+          "name": "1.raster",
+          "percent": 0.0
+        },
+        {
+          "tid": "22867",
+          "name": "1.io",
+          "percent": 0.0
+        },
+        {
+          "tid": "22868",
+          "name": "io.worker.1",
+          "percent": 0.0
+        },
+        {
+          "tid": "22869",
+          "name": "io.worker.2",
+          "percent": 0.0
+        },
+        {
+          "tid": "22870",
+          "name": "dart:io EventHa",
+          "percent": 0.0
+        },
+        {
+          "tid": "22872",
+          "name": "RenderThread",
+          "percent": 0.0
+        },
+        {
+          "tid": "22879",
+          "name": "DartWorker",
+          "percent": 0.0
+        },
+        {
+          "tid": "22881",
+          "name": "hwuiTask1",
+          "percent": 0.0
+        },
+        {
+          "tid": "22899",
+          "name": "RenderThread",
+          "percent": 0.0
+        },
+        {
+          "tid": "22900",
+          "name": "RenderThread",
+          "percent": 0.0
+        },
+        {
+          "tid": "22901",
+          "name": "RenderThread",
+          "percent": 0.0
+        },
+        {
+          "tid": "22902",
+          "name": "RenderThread",
+          "percent": 0.0
+        },
+        {
+          "tid": "22908",
+          "name": "worker",
+          "percent": 0.0
+        },
+        {
+          "tid": "22923",
+          "name": "hwuiTask2",
+          "percent": 0.0
+        },
+        {
+          "tid": "22929",
+          "name": "mksurf-latch",
+          "percent": 0.0
+        }
+      ]
+    },
+    "elapsedSeconds": 0,
+    "launchWaitSeconds": 20.53746449999744,
+    "runtime": {
+      "hostMonotonic": 175804.657673291,
+      "nativeImportIdentity": {
+        "instance": "0x7443db2050",
+        "start_ns": "6135939439"
+      },
+      "nativeImportChanged": false,
+      "lab": null,
+      "labAgeSeconds": null,
+      "playbackStartAt": null,
+      "playbackSerial": null,
+      "playbackRunId": null,
+      "playbackPid": null,
+      "labPid": null,
+      "native": [
+        {
+          "hostMonotonic": 175785.33579225,
+          "line": "11-04 00:53:22.173 22838 22838 I flutter : MPVLOG [vo/gpu-next] error: MKS-THERMAL kind=vo instance=0x741919c710 pid=22838 mono_ns=5555733768 start_ns=5555730799 final=0 queue_frames=0 queue_resets=0 draw=0 redraw=0 display_synced=0 submit=0 flip=0 lease_copy=0 lease_reuse=0 latch=0 defer_publish_flush=0 publish_flush=0 flush_req=0 flush_ovr=0 nominal_fps=0.000000 fps_fallback=0 publish_deferred=0 retire_flush=0 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=0 swap=0 swap_ok=0 frame_id=0 pts=0.000000000 w=0 h=0"
+        },
+        {
+          "hostMonotonic": 175785.336980166,
+          "line": "11-04 00:53:22.173 22838 22838 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKS-THERMAL kind=yuv instance=0x7411cb0050 pid=22838 mono_ns=5555958038 start_ns=5555955695 final=0 queue_frames=0 queue_resets=0 draw=0 redraw=0 display_synced=0 submit=0 flip=0 lease_copy=0 lease_reuse=0 latch=0 defer_publish_flush=0 publish_flush=0 flush_req=0 flush_ovr=0 nominal_fps=0.000000 fps_fallback=0 publish_deferred=0 retire_flush=0 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=0 swap=0 swap_ok=0 frame_id=0 pts=0.000000000 w=0 h=0"
+        },
+        {
+          "hostMonotonic": 175786.499683,
+          "line": "11-04 00:53:23.335 22838 22838 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKS-THERMAL kind=import instance=0x7443db2050 pid=22838 mono_ns=6135941105 start_ns=6135939439 final=0 queue_frames=0 queue_resets=0 draw=0 redraw=0 display_synced=0 submit=0 flip=0 lease_copy=0 lease_reuse=0 latch=0 defer_publish_flush=0 publish_flush=0 flush_req=0 flush_ovr=0 nominal_fps=0.000000 fps_fallback=0 publish_deferred=0 retire_flush=0 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=0 swap=0 swap_ok=0 frame_id=0 pts=0.000000000 w=0 h=0"
+        },
+        {
+          "hostMonotonic": 175795.361340208,
+          "line": "11-04 00:53:32.200 22838 22838 I flutter : MPVLOG [vo/gpu-next/opengl] error: MKS-THERMAL kind=yuv instance=0x7411cb0050 pid=22838 mono_ns=15582071462 start_ns=5555955695 final=0 queue_frames=0 queue_resets=0 draw=0 redraw=0 display_synced=0 submit=0 flip=0 lease_copy=0 lease_reuse=0 latch=0 defer_publish_flush=0 publish_flush=0 flush_req=0 flush_ovr=0 nominal_fps=0.000000 fps_fallback=0 publish_deferred=0 retire_flush=0 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=7 swap=289 swap_ok=289 frame_id=0 pts=0.000000000 w=2672 h=1440"
+        },
+        {
+          "hostMonotonic": 175795.364437083,
+          "line": "11-04 00:53:32.202 22838 22838 I flutter : MPVLOG [vo/gpu-next] error: MKS-THERMAL kind=vo instance=0x741919c710 pid=22838 mono_ns=15582143754 start_ns=5555730799 final=0 queue_frames=282 queue_resets=1 draw=289 redraw=7 display_synced=0 submit=289 flip=289 lease_copy=0 lease_reuse=0 latch=0 defer_publish_flush=0 publish_flush=0 flush_req=0 flush_ovr=0 nominal_fps=0.000000 fps_fallback=0 publish_deferred=0 retire_flush=0 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=0 swap=0 swap_ok=0 frame_id=327 pts=9.409400000 w=2672 h=1336"
+        },
+        {
+          "hostMonotonic": 175795.93992275,
+          "line": "11-04 00:53:32.776 22838 22838 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKS-THERMAL kind=import instance=0x7443db2050 pid=22838 mono_ns=16154412603 start_ns=6135939439 final=0 queue_frames=0 queue_resets=0 draw=0 redraw=0 display_synced=0 submit=0 flip=0 lease_copy=300 lease_reuse=2 latch=300 defer_publish_flush=0 publish_flush=300 flush_req=0 flush_ovr=0 nominal_fps=29.970030 fps_fallback=0 publish_deferred=0 retire_flush=301 fence_create_failed=0 reap_stuck=0 latch_timeout=0 stale_drop=0 final_pass=0 swap=0 swap_ok=0 frame_id=0 pts=10.010000000 w=3840 h=1920"
+        }
+      ],
+      "hotEventsLast30s": 0,
+      "fatalEvents": [],
+      "harnessErrors": [],
+      "multipartExpiredGroups": 0,
+      "multipartRejectedParts": 0,
+      "inputFbo": {
+        "configCount": 1,
+        "requested": "0",
+        "rows": [
+          {
+            "hostMonotonic": 175786.501355875,
+            "line": "11-04 00:53:23.335 22838 22838 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKS-INPUT-FBO requested=0 slot_attempts=0 shared_attempts=1 fallbacks=0 copy_failures=0 final=0",
+            "requested": "0",
+            "slot_attempts": "0",
+            "shared_attempts": "1",
+            "fallbacks": "0",
+            "copy_failures": "0",
+            "final": "0"
+          },
+          {
+            "hostMonotonic": 175795.935843458,
+            "line": "11-04 00:53:32.773 22838 22838 I flutter : MPVLOG [vo/gpu-next/surfacetexture] error: MKS-INPUT-FBO requested=0 slot_attempts=0 shared_attempts=300 fallbacks=0 copy_failures=0 final=0",
+            "requested": "0",
+            "slot_attempts": "0",
+            "shared_attempts": "300",
+            "fallbacks": "0",
+            "copy_failures": "0",
+            "final": "0"
+          }
+        ],
+        "error": null
+      },
+      "logcatAlive": true
+    }
+  },
+  "finalEvidenceSource": "last-running-sample-before-stop",
+  "surfaceFlingerFinalSkipped": "stop-before-diagnostics",
+  "observedDurationSeconds": 0,
+  "hdrLabStopped": true,
+  "restoredScreen": {
+    "on": true,
+    "awake": true,
+    "keyguard": false,
+    "keyguardSecure": null
+  },
+  "restoreErrors": [],
+  "restoredState": {
+    "settings": {
+      "screen_brightness_mode": "1",
+      "screen_brightness": "114",
+      "accelerometer_rotation": "1",
+      "user_rotation": "1",
+      "screen_off_timeout": "30000"
+    },
+    "properties": {
+      "debug.mks.thermal_sync": "display-resample",
+      "debug.mks.thermal_trace": "1",
+      "debug.mks.defer_publish_flush": "0",
+      "debug.mks.gpu_timing": "0",
+      "debug.mks.yuv_fusion": "",
+      "debug.mks.yuv_fail_commit": "0",
+      "debug.mks.yuv_fail_gl": "0",
+      "debug.mks.st_fbo": "0",
+      "debug.mks.yuv_fusion_table": ""
+    }
+  },
+  "restorationVerified": true,
+  "automaticBrightnessScalarChanged": true,
+  "finishedAt": "2026-11-04T00:53:48.437949+08:00"
+}

@@ -1,0 +1,39 @@
+WARNING: linker: /data/local/tmp/lg_pq_lut_probe: unsupported flags DT_FLAGS_1=0x8000001
+PQLUT renderer=Adreno (TM) 530 version=OpenGL ES 3.2 V@145.0 (GIT@Ifb108ab6ba)
+PQLUT caps ext_timer=1 ext_color_buffer_float=1 half_float_linear=1 gles=3.2
+PQLUT timer_counter_bits=40
+PQLUT phase=timing set=0 variant=identity
+PQLUT phase=timing set=0 variant=analytic
+PQLUT phase=timing set=0 variant=lut1024-linear
+PQLUT phase=timing set=0 variant=lut1024-sqrt
+PQLUT phase=timing set=0 variant=lut4096-linear
+PQLUT phase=timing set=0 variant=lut4096-sqrt
+PQLUT phase=timing set=1 variant=identity
+PQLUT phase=timing set=1 variant=analytic
+PQLUT phase=timing set=1 variant=lut1024-linear
+PQLUT phase=timing set=1 variant=lut1024-sqrt
+PQLUT phase=timing set=1 variant=lut4096-linear
+PQLUT phase=timing set=1 variant=lut4096-sqrt
+PQLUT phase=timing set=2 variant=identity
+PQLUT phase=timing set=2 variant=analytic
+PQLUT phase=timing set=2 variant=lut1024-linear
+PQLUT phase=timing set=2 variant=lut1024-sqrt
+PQLUT phase=timing set=2 variant=lut4096-linear
+PQLUT phase=timing set=2 variant=lut4096-sqrt
+PQLUT timing wall_seconds=342.66 attempts=2160 issued=705 results=481 disjoint_drop=0
+PQLUT variant=identity count=120 median_ns=7278854 mean_ns=6109345 min_ns=2830313 max_ns=7684114
+PQLUT variant=analytic count=120 median_ns=8319375 mean_ns=8330494 min_ns=8308594 max_ns=8464427
+PQLUT variant=lut1024-linear count=120 median_ns=11576614 mean_ns=11407572 min_ns=10752812 max_ns=11798385
+PQLUT variant=lut1024-sqrt count=120 median_ns=14990625 mean_ns=14927541 min_ns=14535729 max_ns=15224166
+PQLUT variant=lut4096-linear count=1 median_ns=0 mean_ns=0 min_ns=0 max_ns=0
+PQLUT variant=lut4096-sqrt count=0 median_ns=0 mean_ns=0 min_ns=0 max_ns=0
+PQLUT phase=accuracy
+PQLUT accuracy variant=lut1024-linear comps=10709376 differing=0 max_abs=0.000000000 max_ulp=0
+PQLUT accuracy variant=lut1024-sqrt comps=10709376 differing=0 max_abs=0.000000000 max_ulp=0
+PQLUT accuracy variant=lut4096-linear comps=10709376 differing=0 max_abs=0.000000000 max_ulp=0
+PQLUT accuracy variant=lut4096-sqrt comps=10709376 differing=0 max_abs=0.000000000 max_ulp=0
+PQLUT phase=cpu_reference
+PQLUT cpu_reference comps=768 exact_mismatch=768 within1ulp=0 max_abs=1.000000000 note=GPU-pow-vs-double-full-tail
+PQLUT gl_errors=0 disjoint_drop=0
+PQLUT verdict=fail
+exit=2
