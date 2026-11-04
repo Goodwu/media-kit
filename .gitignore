@@ -63,3 +63,14 @@ docs/validation/home-return-session-restore-20261102/**
 !docs/validation/home-return-session-restore-20261102/**/*.native-verification.json
 !docs/validation/home-return-session-restore-20261102/**/git-baseline.txt
 !docs/validation/home-return-session-restore-20261102/**/baseline-git-status.txt
+
+# 2026-11-04 仓库历史整改（REPO-WEIGHT-REMEDIATION-20261104）：
+# 以下大体积验证产物不再入库（30 个历史 blob 已剥离，内容在归档 bundle）。
+# 新验证轮的报告/小证据照常入库；>1MiB 二进制一律外置归档并在报告中写明路径。
+docs/validation/**/*.uv-probe.bin
+docs/validation/**/*.half-probe.bin
+docs/validation/**/*.f32
+docs/validation/**/*atlas*.bin
+docs/validation/**/*libmpv-unstripped.so
+docs/validation/**/*screencap_*.png
+docs/validation/**/*native-candidate.json

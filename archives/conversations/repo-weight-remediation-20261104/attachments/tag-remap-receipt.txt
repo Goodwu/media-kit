@@ -1,0 +1,3 @@
+# 9 个变化 tag 的最终 OID 映射(2026-11-04 推送回执)
+# 4 个轻量 archive tag 系 filter-repo 部分模式 ref-map 缺失后手工按 commit-map 修正
+archive/ci-compat-20261028        9c67f5305ec52fe9e12a86cdda295711161919f0 -> db34cbcf57c32927ae2eceb51350e4c2488ab848
