@@ -1,5 +1,11 @@
 # TASKS.md
 
+## LG-P84-TARGET-LEASE-20261105
+
+- **pending / 新会话接手（2026-11-05 立项，用户指示）**：perf round 3 主线=目标尺寸 RGBA16F lease（copy 即降采样到 2672×1336，模型总 -17.1%，specialist 首推）。**方案与环境交接自包含于 `docs/plans/lg-p84-target-lease-20261105.md`**；topic `archives/conversations/lg-p84-target-lease-20261105.md`（首读 Current State 第一步清单）。前置 round 2 已归档（占比 33.1/66.9 CLOSED、UNORM16 观测性否定、B 轨测量未闭合、无已证 ≥10% 候选）。红线：帧身份/A-V 契约不动、不伪报尺寸、非等比回退、≥10% 验收目标非预测、每轮 md5 门、收尾 critical 复审、提交需授权。
+- 验收：M0 设计裁决（A1/A2）→M1 功能轮→M2 同包 A/B ≥3 对（≥10%）→M3 数值/观感/生命周期（含真实 resize）→M4 热态→M5 LYA 回归+critical 复审。
+- context：[lg-p84-target-lease-20261105.md](archives/conversations/lg-p84-target-lease-20261105.md)；方案 `docs/plans/lg-p84-target-lease-20261105.md`；round2 证据 `docs/validation/lg-p84-perf-round2-20261102/`。
+
 ## LG-P84-PERF-ROUND2-20261104
 
 - **隔离环境就绪（2026-11-04）**：按用户要求与主树 HOME 恢复任务隔离——独立 worktree `perf2-mk`（本仓 761e29a8）/`perf2-mpv`（c7bffdd1b0）/`perf2-lp`（libplacebo 3a13e0ca），分支均 `perf2/lg-p84`；mpv 独立 meson 树配置与既有验证树逐参数一致。方案 `docs/plans/lg-p84-perf-round2-20261102.md`；唯一 context `archives/conversations/lg-p84-perf-round2-20261104.md`。执行顺序=用户四步：基线重测（输入复制 vs 融合色转输出）→ 占比决策门（输入融合 vs PQ 小查表）→ 交错 ≥3 对 A/B（验收目标：GPU 每帧处理时间稳定 -10%）→ 数值/观感/生命周期 → 持续热态。同步/FBO/延迟 flush 不再投入。不派 subagent（critical 复审除外）。
