@@ -74,3 +74,14 @@ docs/validation/**/*atlas*.bin
 docs/validation/**/*libmpv-unstripped.so
 docs/validation/**/*screencap_*.png
 docs/validation/**/*native-candidate.json
+
+# 历史大 ndjson 防回灌(精确路径, 2026-11-04 剥离的 9 个 >1MiB 文件; 勿全局化 *.ndjson, 小证据仍入库)
+docs/validation/lg-p84-thermal-review-20261029/ft-thermal-A1/samples.ndjson
+docs/validation/lg-p84-thermal-review-20261029/ft-thermal-B1/samples.ndjson
+docs/validation/lg-p84-thermal-review-20261029/thermal-ab4-A1/samples.ndjson
+docs/validation/lg-p84-thermal-review-20261029/thermal-ab4-B1/samples.ndjson
+docs/validation/lg-p84-thermal-review-20261029/visual-ab4-candidate/samples.ndjson
+docs/validation/lg-p84-thermal-review-20261029/yuv-fusion-thermal-A1/samples.ndjson
+docs/validation/lg-p84-thermal-review-20261029/yuv-fusion-thermal-B1/samples.ndjson
+docs/validation/lg-p84-thermal-review-20261029/yuv-fusion-user-replay-120-r2/samples.ndjson
+docs/validation/lg-p84-thermal-review-20261029/yuv-fusion-visual-candidate/samples.ndjson

@@ -26,12 +26,12 @@
 
 6 个 keep tag（dev-darwin/integration-piliplusx×2/source-predidit×2/version-1.3.0）远端原样未动。
 **4 个轻量 archive tag 的 ref 更新系手工按 commit-map 修正**（filter-repo 部分模式 ref-map 只含 5 个 libmpv tag）；
-完整依据见 `attachments/tag-remap-receipt.txt` 与镜像 `filter-repo/` 元数据。
+完整依据见 `repo-weight-remediation-20261104/attachments/tag-remap-receipt.txt` 与镜像 `filter-repo/` 元数据。
 
 ### 本地迁移回执（2026-11-04）
 
 - 分支重建（commit-map）：compat/piliplus→7876d265、DV-BUILD-01→7cca4ba8、DV004→32d2f940、routing→da278e79、perf2/lg-p84→ff299501；7 条分支 log 主题序列逆映射验证一致。
 - codex/hdr-ab-diagnostics 弃分支：cherry-pick `4bc0c9d9` 两演化文件冲突，降级归档 `~/Documents/media-kit-validation-archive/local-migration-20261104/codex-tools-4bc0c9d9/`。
 - worktree：luna-ohos-e3→acbe1340、mk-verify-0c57dcd9→4e61c01d、8f00ec76→efec0948、b8da287d→befa9ef5、head-4daafd9d→bd1db98a、perf2-mk→perf2/lg-p84；patch+未跟踪回迁后 status 与迁移前回执逐行一致（回执存 `~/Documents/media-kit-validation-archive/local-migration-20261104/worktree-receipts/`）。
-- 退役：`media-kit-verify-20261010@08735626`（2026-10-10 隔离验证树残留，结论已入 `media-kit-routing-20261102` 等正式档案）；bundle 可恢复。
+- 退役：`media-kit-verify-20261010@08735626`（2026-10-10 隔离验证树残留，结论已入 tracked 归档 `archives/conversations/media-kit-routing-20261011.md`）；bundle 可恢复。
 - commit-map/ref-map 副本：`attachments/`。
