@@ -46,3 +46,6 @@ libs/ohos/media_kit_libs_ohos/ohos/libs/
 archives/experiments/
 .zcode
 .zcodeignore
+
+# LG P8.4 原始验证证据：外置归档（media-kit-validation-archive），仓内不跟踪
+docs/validation/lg-p84-target-lease-20261105/

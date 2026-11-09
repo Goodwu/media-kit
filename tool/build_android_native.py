@@ -285,7 +285,8 @@ class Builder:
                           'APP_PLATFORM=android-26', 'APP_STL=c++_shared', 'APP_ABI=arm64-v8a',
                           'NDK_APP_OUT=' + str(root / 'local'), 'NDK_APP_LIBS_OUT=' + str(root / 'libs'),
                           'libshaderc_combined'], self.shader)
-                archive = root / 'local/arm64-v8a/libshaderc_combined.a'
+                # NDK TARGET_OUT is NDK_APP_OUT/<app>/<abi>; ndk-build's app is local.
+                archive = root / 'local/local/arm64-v8a/libshaderc_combined.a'
                 shutil.copytree(self.shader / 'libshaderc/include', self.prefix / 'include', dirs_exist_ok=True)
                 shutil.copy2(archive, self.prefix / 'lib/libshaderc_combined.a')
                 self.install_archive(archive)

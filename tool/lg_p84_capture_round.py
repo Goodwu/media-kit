@@ -370,7 +370,8 @@ def collect(adb, event, pid, target, directory, guard, repeat: bool = False, sam
 
 def controls(target, repeat: bool = False, sample_tap: bool = False, invariant_b: bool = False,
              oracle_mode: int | None = None, st_fbo: str | None = None, uv_probe: bool = False,
-             single_pair: bool = False, quad_reverse: int | None = None):
+             single_pair: bool = False, quad_reverse: int | None = None,
+             lease_target: bool = False):
     capture_schema(repeat, sample_tap, invariant_b, oracle_mode, uv_probe, single_pair, quad_reverse)
     if invariant_b and not (repeat and sample_tap):
         raise RuntimeError('invariant-b-requires-repeat-and-sample-tap')
@@ -389,7 +390,8 @@ def controls(target, repeat: bool = False, sample_tap: bool = False, invariant_b
             thermal.INPUT_FBO_PROPERTY: st_fbo or '0', PROBE_PROPERTY: '1' if uv_probe else '0',
             SINGLE_PROPERTY: '1' if single_pair else '0',QUAD_PROPERTY:'1' if quad_reverse is not None else '0',
             QUAD_REVERSE_PROPERTY:str(quad_reverse) if quad_reverse is not None else '0', ATLAS_PROPERTY:'0',
-            ATLAS_REUSE_PROPERTY:'0',ATLAS_PTS2_PROPERTY:'',ATLAS_NONCE_PROPERTY:'',ATLAS_ACK_PROPERTY:''}
+            ATLAS_REUSE_PROPERTY:'0',ATLAS_PTS2_PROPERTY:'',ATLAS_NONCE_PROPERTY:'',ATLAS_ACK_PROPERTY:'',
+            'debug.mks.st_lease_target': '1' if lease_target else '0'}
 
 
 def current_seek_index(lines, pid, target):
@@ -456,7 +458,8 @@ def run(args):
                            ('accelerometer_rotation', 0), ('user_rotation', 1),
                            ('screen_off_timeout', int((args.timeout+120)*1000))]:
             adb.call(['shell', 'settings', 'put', 'system', key, str(value)])
-        result['controls'] = controls(args.pts, repeat, sample_tap, invariant_b, oracle_mode, st_fbo, uv_probe, single_pair, quad_reverse)
+        result['controls'] = controls(args.pts, repeat, sample_tap, invariant_b, oracle_mode, st_fbo, uv_probe, single_pair, quad_reverse,
+                                      bool(getattr(args, 'lease_target', False)))
         for key, value in result['controls'].items():
             # An empty value must survive the device shell; adb.call with ''
             # drops the argument and setprop fails with "Need 2 arguments".
@@ -584,6 +587,8 @@ def run(args):
         if isinstance(error, analyzer.InvalidCapture) and getattr(error, 'diagnostic', None) is not None:
             result['analyzerDiagnostic'] = error.diagnostic
     finally:
+        # Preserve the capture result before stop/restore can replace status.
+        result['captureStatusBeforeCleanup'] = result['status']
         handlers = {sig: signal.signal(sig, signal.SIG_IGN) for sig in (signal.SIGINT, signal.SIGTERM)}
         if launched:
             try:
@@ -793,6 +798,7 @@ def main():
     p.add_argument('--quad-mode',choices=('original','reverse'),help='Schema8 B-only submitted vertex order; requires single/probe/repeat/tap and --oracle-mode original.')
     p.add_argument('--quad-triplet',action='store_true',help='Schema8 original/reverse/original in fresh processes, with actual source/A vertex/raw and whole-record B reversal checks.')
     p.add_argument('--st-fbo', choices=('0','1'), help='Explicit diagnostic mapper path. Current reports lack target PTS, so requested fixed-frame FBO capture remains invalid.')
+    p.add_argument('--lease-target', action='store_true', help='target-size lease for this capture (debug.mks.st_lease_target=1); recorded in controls and restored after the round')
     p.add_argument('--source', default=REMOTE + 'hokkaido-p84.mp4')
     p.add_argument('--source-receipt', required=True)
     p.add_argument('--expected-apk-sha256', required=True)

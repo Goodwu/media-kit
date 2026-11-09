@@ -34,7 +34,11 @@ MODES = {'baseline': 'display-resample', 'candidate': 'audio'}
 SETTINGS = ('screen_brightness_mode', 'screen_brightness',
             'accelerometer_rotation', 'user_rotation', 'screen_off_timeout')
 INPUT_FBO_PROPERTY = 'debug.mks.st_fbo'
-PROPERTIES = ('debug.mks.thermal_sync', 'debug.mks.thermal_trace', 'debug.mks.defer_publish_flush', 'debug.mks.gpu_timing', 'debug.mks.yuv_fusion', 'debug.mks.yuv_fail_commit', 'debug.mks.yuv_fail_gl', INPUT_FBO_PROPERTY, 'debug.mks.yuv_fusion_table', 'debug.mks.st_lease_rgba16')
+# M2' frame GPU owner file channel: written by the app (same uid) under its
+# external files dir, pulled by the round tool after force-stop. App-writable
+# and adb-readable on the LG target (no root).
+FGPU_LOG_DEVICE_PATH = '/sdcard/Android/data/com.example.media_kit_hdr_lab/files/mks-fgpu.log'
+PROPERTIES = ('debug.mks.thermal_sync', 'debug.mks.thermal_trace', 'debug.mks.defer_publish_flush', 'debug.mks.gpu_timing', 'debug.mks.yuv_fusion', 'debug.mks.yuv_fail_commit', 'debug.mks.yuv_fail_gl', INPUT_FBO_PROPERTY, 'debug.mks.yuv_fusion_table', 'debug.mks.st_lease_rgba16', 'debug.mks.st_lease_target', 'debug.mks.fgpu_log')
 
 
 def restore_screen(adb: 'Adb', original_screen: dict[str, Any], result: dict[str, Any],
@@ -823,6 +827,14 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         adb.call(['shell', 'setprop', 'debug.mks.yuv_fail_gl', '1' if getattr(args, 'yuv_fault', None) == 'gl' else '0'])
         adb.call(['shell', 'setprop', 'debug.mks.yuv_fusion_table', '1' if getattr(args, 'fusion_table', False) else '0'])
         adb.call(['shell', 'setprop', 'debug.mks.st_lease_rgba16', '1' if getattr(args, 'lease_rgba16', False) else '0'])
+        adb.call(['shell', 'setprop', 'debug.mks.st_lease_target', '1' if getattr(args, 'lease_target', False) else '0'])
+        # M2' frame GPU owner device-side log channel: the round tool pulls
+        # this file after force-stop. Empty when frame timing is off.
+        fgpu_mode = getattr(args, 'gpu_timing', None) or ''
+        if fgpu_mode.startswith('frame'):
+            adb.call(['shell', 'setprop', 'debug.mks.fgpu_log', FGPU_LOG_DEVICE_PATH])
+        else:
+            adb.call(['shell', 'setprop', 'debug.mks.fgpu_log', ''])
         adb.call(['shell', 'setprop', INPUT_FBO_PROPERTY, expected_fbo])
         if adb.call(['shell', 'getprop', INPUT_FBO_PROPERTY]).strip() != expected_fbo:
             raise RuntimeError('input-fbo-property-readback-mismatch')
@@ -971,11 +983,30 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         result['observedDurationSeconds'] = time.monotonic() - started if started is not None else 0
         if launched:
             try:
+                # Graceful stop first: BACK lets the lab app dispose the
+                # player, so mpv/vo uninit emits the MKS-FGPU-S and
+                # MKS-FGPU-FINAL ledger lines into the captured log before
+                # the process is removed. force-stop alone truncates uninit.
+                adb.call(['shell', 'input', 'keyevent', 'KEYCODE_BACK'])
+                time.sleep(3)
                 adb.call(['shell', 'am', 'force-stop', PACKAGE])
                 result['hdrLabStopped'] = True
             except Exception as error:
                 result['hdrLabStopped'] = False
                 result['stopError'] = str(error)
+        # M2' frame GPU owner file channel: pull before restoration touches
+        # the app's storage and delete on device so the next round is fresh.
+        fgpu_mode = getattr(args, 'gpu_timing', None) or ''
+        if fgpu_mode.startswith('frame'):
+            try:
+                adb.call(['shell', 'test', '-f', FGPU_LOG_DEVICE_PATH])
+                adb.call(['pull', FGPU_LOG_DEVICE_PATH,
+                          str(output / 'fgpu-device.log')])
+                adb.call(['shell', 'rm', '-f', FGPU_LOG_DEVICE_PATH])
+                result['fgpuFilePulled'] = (output / 'fgpu-device.log').exists()
+            except Exception as error:
+                result['fgpuFilePulled'] = False
+                result['fgpuPullError'] = str(error)
         if capture:
             try:
                 capture.close()
@@ -1029,6 +1060,8 @@ def main() -> int:
     p.add_argument('--cooldown-timeout', type=float, default=1800)
     p.add_argument('--battery-tolerance', type=float, default=0.5)
     p.add_argument('--vts-tolerance', type=float, default=1)
+    p.add_argument('--lease-rgba16', action='store_true', help='prefer the rgba16 unorm lease (debug.mks.st_lease_rgba16=1)')
+    p.add_argument('--lease-target', action='store_true', help='target-size lease, copy downsamples to display size (debug.mks.st_lease_target=1)')
     args = p.parse_args()
     if not 30 <= args.duration <= 1200 or not 5 <= args.interval <= 30:
         p.error('duration must be 30..1200 seconds and interval 5..30 seconds')
