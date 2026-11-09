@@ -96,6 +96,7 @@ class AnalyzerTests(unittest.TestCase):
             make_ticket(t=1, copies_ok=1),
             make_seg(t=1, g=0, kind='render.pre', tstate='resolved'),
             make_seg(t=1, g=1, kind='copy', tstate='resolved'),
+            make_copy(t=1),
             make_summary(tickets=1, copies=1),
             make_final(),
         ])
@@ -134,11 +135,13 @@ class AnalyzerTests(unittest.TestCase):
             make_ticket(t=1),
             make_seg(t=1, g=0, elapsed=1000000),
             make_seg(t=1, g=1, elapsed=2000000),
+            make_copy(t=1),
             make_summary(tickets=1),
             make_final(),
             make_ticket(t=2),
             make_seg(t=2, g=0, elapsed=3000000),
             make_seg(t=2, g=1, elapsed=4000000),
+            make_copy(t=2),
             make_summary(through_t=2, tickets=2, copies=2),
             make_final(),
         ])

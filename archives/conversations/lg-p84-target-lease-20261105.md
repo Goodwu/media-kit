@@ -2,46 +2,21 @@
 
 ## Current State
 
-- **S6 同 sync G-9 三对完成（2026-11-10，待 Lead 裁决 G-9 阈值）**：S5 证据链经
-  三重纠偏后重跑——①上轮 owner 修复（MAX_COPIES 2048/acq-rel 计数）实际未落盘
-  （"17 测试"无对应断言），已真修复（环满解耦：C 行/copies_ok 与环容量解耦 +
-  suspend 计数 + 2 新 host 测试 14 场景全绿）并在 s5f/s5g/s5h 真机验证
-  （acq=1 全覆盖、C 行连续、copies_ok≥98%）；②历史 G9tm 五对 sync 混杂
-  （A=display-resample/B=audio）降级探索性；③S6 协议同 sync（全 --mode
-  baseline，B 轮仅加 --lease-target）。构建链三次返工（片源 dart-define 旧路径、
-  缺 THERMAL_PROBE define、探针被 fgpu logcat 洪流饿死 30s→停滞误判），结构性
-  修复=MKS-FGPU-* 改设备侧文件通道（context_android.c 直写 + 工具 pull，
-  logcat 仅 INIT/S/FINAL 标记）——S/FINAL 首次真机出现（bind=rel_result=9231、
-  invariant=0、FINAL complete=1，C.3 闭合数据首次可得），探针拼装 8/8。
-  装机 APK=lgp84-s5h（md5 门 8247a7fe…47a1）。**结果：P1 r=+10.21%✅、
-  P2 r=−52.23%❌（DVFS 混杂：P2A 中位 315MHz，ms 口径 +3.31%）、
-  P3 r=+11.02%✅；G-10 全过（lease 切换 100% 有效）；B 轮三对 ms ±1% 稳定。
-  冻结判据"每对 ≥10%"→ 2/3 不满足完整验收；G-9 阈值决定待 Lead**。
-  分析器修复数字枚举归一 + 新增 analyze_lg_p84_g9_pairs.py（窗口中位频率
-  Mcycles 兜底 + ms 方向门 + G-10）。已登记偏差：pts 窗口（0.32× 播放速率下
-  20-55 不可达→pts≥5）、逐帧频率锚缺失（T 行无逐帧 mono，设计兜底法标注）。
-  S6 证据 9 目录在 docs/validation/lg-p84-target-lease-20261105/（含 SHA256SUMS
-  与 2 个 invalid 轮）。设备已恢复灭屏。未提交（等授权）。
-- **disabled-by-owner 闭环（2026-11-10）**：根因是日志级别非编译——隔离 deps 树
-  gpu.c 停留 PL_INFO（perf2-lp 的 PL_ERR 修正未同步 deps），mpv pllog 默认上限
-  PL_LOG_ERR 将其过滤；"产物无 mks_disable_timers 痕迹"为假阴性（字段赋值无字符
-  串）。同步 PL_ERR→重编→s5j（md5 2fc0fe1b…8015）→真机双行齐现
-  （MKS-FGPU-LP-DISABLE prop=frame active=1 + disabled-by-owner=1），S2 机制
-  自始生效，互斥契约设备级闭合。预处理实验曾误覆写 context.c.o（已重编修复，
-  APK/设备数据不受影响）。
-- **G-9 结算：未达标（2026-11-10，Lead 预声明规则裁决）**：裁决=预声明配对
-  有效性规则（A/B 中位频率均 ≤220MHz + G-10 + ms 方向）+ ms 主判据 + 补跑至
-  3 干净配对；P4 补跑（完整 AB，用户指示 P5 起 A-only 与最近 B 配对，未触发）
-  结果干净但 r_ms=+9.40%<10% → 按规则判 **G-9 不达标，不再补跑**。终局 4 对：
-  P1 +10.21%✅、P2 剔除（P2A 中位 315MHz）、P3 +11.02%✅、P4 +9.40%❌。
-  效果方向全部正向（3.31-11.02%），量级在 10% 线边缘；lease 保留为探索性优化。
-  终局 JSON `S6-g9-final-analysis.json`（8 轮 4 对，含 P4 SHA256SUMS）。
-  分析脚本曾把 P2 的 A/B 方向写反（−52.23% 错报，正确 +3.31%），已修正并记录。
-  设备恢复灭屏。M3/M4/M5 仍为独立待办。
-- **Lead 终裁：G-9 通过（2026-11-10）+ 提交授权**：机械结算 P4 干净配对
-  r=9.40%<10% 后，Lead 判定 G-9 通过（依据：4 配对方向全正向、干净 2/3 ≥10%、
-  P4 距线 0.6pp、B 基线 ±1.4%、G-10 全过、P2 为 governor 混杂非效果缺失；
-  判据字面 2/3 一事如实留档）。授权提交三仓改动与证据。
+## Current State
+
+- **最终状态（2026-11-10 收敛，此前逐条过程记录已并入下方历史区与本仓 Git log）**：
+  **G-9 Lead 终裁通过**（S6 同 sync 8 轮 4 对：P1 +10.21%、P3 +11.02% 过线，P4
+  +9.40% 差 0.6pp，P2 频率混杂剔除；判据字面 2/3 留档在案）。收尾 critical
+  复审 BLOCK（2P0+6P1+2P2）→ 全部 P0/P1 修复（环满解耦记账、copies_ok=真实
+  发布数、HOL quarantine tracker 填充、LP 禁用互斥握手 fail-closed、HAVE_ANDROID
+  门、分析器 fail-closed+频率窗口对齐、md5 回执归档），修复后重建 lgp84-s5k
+  （LG/LYA 双机 md5 门过）。M4 热态（5 轮，r 观察 +8.62%，LG 升温有限 26-27°C
+  如实登记）、M3c 字幕共存演练（账本全净；渲染观感归 M3b）、M5 LYA 回归
+  （lease 路由结构性不适用 + Mali 计时 OOM 观察项）均完成并登记 TASKS.md。
+  剩余需用户参与：M3b 观感验收；截图/非等比演练（需 lab 触发通道，Open）。
+  三仓已提交并推送（perf2/lg-p84：mk f18ef2df+修复提交、mpv 5278651a+修复提交、
+  lp ebefbc18）。定向重审 verdict 见 TASKS.md 收尾条目。
+
 - **M2′ 计时口径设计（2026-11-08，修订中）**：specialist 设计稿（ra_ctx owner、
   ticket 分段、frame/frame-span 属性值、覆盖账本、S1-S4 切分）归档于
   `docs/plans/lg-p84-frame-gpu-timing-design-20261108.md`（35ce831f…）。独立

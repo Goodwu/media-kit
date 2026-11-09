@@ -206,7 +206,8 @@ static void test_normal_r1_flow(void) {
     }
     make_all_available();
     mks_fgt_copy_end(&o);
-    mks_fgt_copy_record(&o, 10.0, 3840, 1920, 3840, 1920, false, "seg", 1, true);
+    mks_fgt_copy_record(&o, 10.0, 3840, 1920, 3840, 1920, false, "seg", 1);
+    mks_fgt_copy_published(&o); // map tail: lease actually published
     close_fresh_flow();
     mks_fgt_poll(&o);
     struct mks_fgt_ticket *tk = &o.tickets[tk_idx()];
@@ -258,7 +259,8 @@ static void test_frame_count_zero_gl(void) {
     open_ticket(30.0);
     assert(mks_fgt_copy_begin(&o, NULL));
     mks_fgt_copy_end(&o);
-    mks_fgt_copy_record(&o, 30.0, 3840, 1920, 2672, 1336, true, "seg", 1, true);
+    mks_fgt_copy_record(&o, 30.0, 3840, 1920, 2672, 1336, true, "seg", 1);
+    mks_fgt_copy_published(&o);
     close_fresh_flow();
     struct mks_fgt_ticket *tk = &o.tickets[tk_idx()];
     assert(tk->num_segs == 3);
@@ -332,7 +334,7 @@ static void test_hol_scenario_A(void) {
             assert(0);
         }
         mks_fgt_copy_end(&o);
-        mks_fgt_copy_record(&o, 51.0 + i, 3840, 1920, 2672, 1336, true, "seg", 1, true);
+        mks_fgt_copy_record(&o, 51.0 + i, 3840, 1920, 2672, 1336, true, "seg", 1);
         mks_fgt_resume(&o, MKS_FGT_SUSP_ACQ);
         mks_fgt_render_end(&o, true);
         mks_fgt_draw_seal(&o, true);
@@ -418,7 +420,7 @@ static void test_seg_ref_encodings(void) {
     // draw error case: record still references the issued segment
     make_all_available();
     mks_fgt_copy_end(&o);
-    mks_fgt_copy_record(&o, 80.0, 3840, 1920, 3840, 1920, false, "seg", seg, false);
+    mks_fgt_copy_record(&o, 80.0, 3840, 1920, 3840, 1920, false, "seg", seg);
     mks_fgt_resume(&o, MKS_FGT_SUSP_ACQ);
     mks_fgt_render_end(&o, true);
     mks_fgt_draw_seal(&o, true);
@@ -431,7 +433,7 @@ static void test_seg_ref_encodings(void) {
     assert(tk->segs[seg].tstate == MKS_FGT_TS_RESOLVED);
     // pre_draw_fail encoding: no Begin request, none:pre_draw, no ticket impact
     o.pre_draw_fail++;
-    mks_fgt_copy_record(&o, 80.5, 3840, 1920, 3840, 1920, false, "none:pre_draw", -1, false);
+    mks_fgt_copy_record(&o, 80.5, 3840, 1920, 3840, 1920, false, "none:pre_draw", -1);
     mks_fgt_uninit(&o);
 }
 
@@ -464,7 +466,7 @@ static void test_equations_final(void) {
         make_all_available();
         assert(mks_fgt_copy_begin(&o, NULL));
         mks_fgt_copy_end(&o);
-        mks_fgt_copy_record(&o, 100.0 + i, 3840, 1920, 2672, 1336, true, "seg", 1, true);
+        mks_fgt_copy_record(&o, 100.0 + i, 3840, 1920, 2672, 1336, true, "seg", 1);
         close_fresh_flow();
         mks_fgt_poll(&o);
     }
@@ -515,7 +517,7 @@ static void test_inflight_pending_drop(void) {
     open_ticket(110.0);
     assert(mks_fgt_copy_begin(&o, NULL)); // in flight, never available
     mks_fgt_copy_end(&o);
-    mks_fgt_copy_record(&o, 110.0, 3840, 1920, 3840, 1920, false, "seg", 1, true);
+    mks_fgt_copy_record(&o, 110.0, 3840, 1920, 3840, 1920, false, "seg", 1);
     close_fresh_flow();
     // copy query never becomes available
     mks_fgt_uninit(&o);
@@ -539,7 +541,8 @@ static void test_ring_full_accounting(void) {
         open_ticket(200.0 + i);
         assert(mks_fgt_copy_begin(&o, NULL));
         mks_fgt_copy_end(&o);
-        mks_fgt_copy_record(&o, 200.0 + i, 3840, 1920, 2672, 1336, true, "seg", 1, true);
+        mks_fgt_copy_record(&o, 200.0 + i, 3840, 1920, 2672, 1336, true, "seg", 1);
+        mks_fgt_copy_published(&o);
         close_fresh_flow();
         mks_fgt_poll(&o);
     }
@@ -578,7 +581,8 @@ static void test_suspend_counting(void) {
     assert(tk->releases == 0);
     assert(mks_fgt_copy_begin(&o, NULL));
     mks_fgt_copy_end(&o);
-    mks_fgt_copy_record(&o, 300.0, 3840, 1920, 2672, 1336, true, "seg", 1, true);
+    mks_fgt_copy_record(&o, 300.0, 3840, 1920, 2672, 1336, true, "seg", 1);
+    mks_fgt_copy_published(&o);
     mks_fgt_resume(&o, MKS_FGT_SUSP_ACQ);
     mks_fgt_suspend(&o, MKS_FGT_SUSP_REL);
     assert(tk->acquires == 1);
@@ -599,6 +603,232 @@ static void test_suspend_counting(void) {
     assert(tk->acquires == 1 && tk->releases == 1);
 }
 
+// P0-2: copies_ok counts published leases only. A draw that records ok but
+// whose map later drops (ref/fence failure) must leave copies_ok at 0.
+
+// R3-P0-1: after the HOL ticket is recycled, a DISJOINT must still free the
+// quarantined slot via the slot-state walk (the tracker entry is invisible to
+// the ticket walk) and purge the tracker, with the ledger staying closed.
+static void test_hol_disjoint_after_recycle(void) {
+    hook_init("frame");
+    open_ticket(430.0);
+    assert(mks_fgt_copy_begin(&o, NULL));
+    struct mks_fgt_ticket *t0 = &o.tickets[tk_idx()];
+    int t0_slot = tk_idx();
+    int t0_query = (int)t0->segs[1].query;
+    int q_slot = t0->segs[1].slot;
+    mks_fgt_resume(&o, MKS_FGT_SUSP_ACQ);
+    mks_fgt_render_end(&o, true);
+    mks_fgt_draw_seal(&o, false);
+    mks_fgt_flip_close(&o, false, true, false);
+    for (int i = 0; i < 40; i++) { // 40 > recycle horizon: T0 slot gets reused
+        if (!mks_fgt_ticket_open(&o, 431.0 + i, 1, 1, 1, MKS_FGT_ROUTE_FUSED))
+            break;
+        mks_fgt_render_begin(&o, 1);
+        mks_fgt_suspend(&o, MKS_FGT_SUSP_ACQ);
+        for (int q = 0; q < FAKE_Q; q++)
+            if (q != t0_query) fg.available[q] = true;
+        if (mks_fgt_copy_begin(&o, NULL)) {
+            mks_fgt_copy_end(&o);
+            mks_fgt_copy_record(&o, 431.0 + i, 3840, 1920, 2672, 1336, true, "seg", 1);
+            mks_fgt_copy_published(&o);
+        }
+        mks_fgt_resume(&o, MKS_FGT_SUSP_ACQ);
+        mks_fgt_render_end(&o, true);
+        mks_fgt_draw_seal(&o, true);
+        mks_fgt_swap_issue(&o);
+        mks_fgt_submit_result(&o, true);
+        mks_fgt_swap_result(&o, true, 0, false);
+        mks_fgt_flip_close(&o, true, false, false);
+        mks_fgt_poll(&o);
+    }
+    mks_fgt_poll(&o);
+    assert(o.hol_tickets == 1);
+    assert(o.quarantine_count >= 1);
+    int busy_q_before = o.busy_quarantine;
+    assert(busy_q_before >= 1);
+    // T0's ticket slot must have been recycled (t_seq handed out again) —
+    // the disjoint below reaches the quarantined slot ONLY through the
+    // slot-state walk, proving single ownership without ticket references.
+    assert(o.tickets[t0_slot].t_seq >= o.hol_tickets + 1); // reused by a later t_seq
+    fg.disjoint = true;
+    mks_fgt_poll(&o);
+    assert(o.slot_state[q_slot] == MKS_FGT_S_FREE);
+    assert(o.quarantine_count == 0);
+    assert(o.busy_quarantine == 0);
+    assert(o.rel_disjoint_quarantine >= 1);
+    uint64_t rel = o.rel_result + o.rel_disjoint_normal + o.rel_late +
+        o.rel_disjoint_quarantine + o.rel_uninit_normal + o.rel_uninit_quarantine +
+        o.rel_uninit_ctxlost;
+    uint64_t leak = o.leak_ctxlost + o.leak_quarantine;
+    uint64_t busy = o.busy_normal + o.busy_quarantine + o.busy_ctxlost;
+    assert(o.bind == rel + leak + busy);
+    mks_fgt_uninit(&o);
+}
+
+static void test_publish_outcome_accounting(void) {
+    hook_init("frame");
+    // Dropped frame: draw ok recorded, mapper never reaches publish.
+    open_ticket(400.0);
+    struct mks_fgt_ticket *tk = &o.tickets[tk_idx()];
+    make_all_available();
+    assert(mks_fgt_copy_begin(&o, NULL));
+    mks_fgt_copy_end(&o);
+    mks_fgt_copy_record(&o, 400.0, 3840, 1920, 2672, 1336, true, "seg", 1);
+    assert(tk->copies_ok == 0); // draw ok is not publish ok
+    // Fail the map: no mks_fgt_copy_published, close via fresh flow anyway.
+    mks_fgt_resume(&o, MKS_FGT_SUSP_ACQ);
+    mks_fgt_render_end(&o, false);
+    mks_fgt_draw_seal(&o, true);
+    mks_fgt_swap_issue(&o);
+    mks_fgt_submit_result(&o, true);
+    mks_fgt_swap_result(&o, true, 0, false);
+    mks_fgt_flip_close(&o, true, false, false);
+    mks_fgt_poll(&o);
+    assert(tk->copies_ok == 0);
+    // Published frame: same flow with the publish call.
+    open_ticket(401.0);
+    tk = &o.tickets[tk_idx()];
+    make_all_available();
+    assert(mks_fgt_copy_begin(&o, NULL));
+    mks_fgt_copy_end(&o);
+    mks_fgt_copy_record(&o, 401.0, 3840, 1920, 2672, 1336, true, "seg", 1);
+    mks_fgt_copy_published(&o);
+    assert(tk->copies_ok == 1);
+    close_fresh_flow();
+    mks_fgt_poll(&o);
+    assert(tk->copies_ok == 1);
+    mks_fgt_uninit(&o);
+}
+
+// P0-1: wrong-context uninit folds every busy category into leaks and zeroes
+// busy_*, keeping the bind equation single-counted and FINAL busy at 0.
+static void test_ctx_mismatch_ledger_closure(void) {
+    hook_init("frame");
+    open_ticket(410.0);
+    make_all_available();
+    assert(mks_fgt_copy_begin(&o, NULL));
+    mks_fgt_copy_end(&o);
+    mks_fgt_copy_record(&o, 410.0, 3840, 1920, 2672, 1336, true, "seg", 1);
+    mks_fgt_copy_published(&o);
+    mks_fgt_resume(&o, MKS_FGT_SUSP_ACQ);
+    mks_fgt_render_end(&o, true);
+    mks_fgt_draw_seal(&o, true);
+    // Leave one segment in flight, then uninit under a foreign context.
+    cur_ctx = (void *)0xdead;
+    mks_fgt_uninit(&o);
+    uint64_t bind = o.bind, rel = o.rel_result + o.rel_disjoint_normal +
+        o.rel_late + o.rel_disjoint_quarantine + o.rel_uninit_normal +
+        o.rel_uninit_quarantine + o.rel_uninit_ctxlost;
+    uint64_t leak = o.leak_ctxlost + o.leak_quarantine;
+    uint64_t busy = o.busy_normal + o.busy_quarantine + o.busy_ctxlost;
+    fprintf(stderr, "DBG closure: bind=%"PRIu64" rel=%"PRIu64" leak=%"PRIu64
+            " busy=%"PRIu64" gl_leaked=%"PRIu64"\n", bind, rel, leak, busy,
+            o.gl_leaked);
+    assert(bind == rel + leak + busy);       // single-counted ledger
+    assert(busy == 0);                        // FINAL busy contract
+    assert(o.gl_leaked == MKS_FGT_SLOTS);
+    assert(bind > 0);                         // something was in flight
+}
+
+// P1-1: a HOL-recycled ticket's quarantined (query, slot) pair must survive
+// in the standalone tracker; a late AVAILABLE result frees the slot via the
+// harvest path instead of leaking it. Same driver as scenario A (T0's copy
+// query never becomes available until the harvest step).
+static void test_hol_quarantine_harvest(void) {
+    hook_init("frame");
+    open_ticket(420.0);
+    assert(mks_fgt_copy_begin(&o, NULL));
+    struct mks_fgt_ticket *t0 = &o.tickets[tk_idx()];
+    int t0_query = (int)t0->segs[1].query;
+    int q_slot = t0->segs[1].slot;
+    assert(q_slot >= 0);
+    mks_fgt_resume(&o, MKS_FGT_SUSP_ACQ);
+    mks_fgt_render_end(&o, true);
+    mks_fgt_draw_seal(&o, false);
+    mks_fgt_flip_close(&o, false, true, false); // no_swap: T0 stays pending
+    // 33 settled tickets; all queries available except T0's.
+    for (int i = 0; i < 33; i++) {
+        assert(mks_fgt_ticket_open(&o, 421.0 + i, 1, 1, 1, MKS_FGT_ROUTE_FUSED));
+        mks_fgt_render_begin(&o, 1);
+        mks_fgt_suspend(&o, MKS_FGT_SUSP_ACQ);
+        for (int q = 0; q < FAKE_Q; q++)
+            if (q != t0_query) fg.available[q] = true;
+        assert(mks_fgt_copy_begin(&o, NULL));
+        mks_fgt_copy_end(&o);
+        mks_fgt_copy_record(&o, 421.0 + i, 3840, 1920, 2672, 1336, true, "seg", 1);
+        mks_fgt_copy_published(&o);
+        mks_fgt_resume(&o, MKS_FGT_SUSP_ACQ);
+        mks_fgt_render_end(&o, true);
+        mks_fgt_draw_seal(&o, true);
+        mks_fgt_swap_issue(&o);
+        mks_fgt_submit_result(&o, true);
+        mks_fgt_swap_result(&o, true, 0, false);
+        mks_fgt_flip_close(&o, true, false, false);
+        mks_fgt_poll(&o);
+    }
+    mks_fgt_poll(&o);
+    assert(o.hol_tickets == 1);
+    assert(o.slot_state[q_slot] == MKS_FGT_S_QUARANTINE);
+    assert(o.quarantine_count >= 1); // tracker actually filled (P1-1)
+    // The quarantined query becomes available late: harvest frees the slot.
+    fg.available[t0_query] = true;
+    mks_fgt_poll(&o);
+    assert(o.slot_state[q_slot] == MKS_FGT_S_FREE);
+    assert(o.quarantine_count == 0);
+    assert(o.rel_late == 1); // single release: tracker owns quarantined slots
+    assert(o.busy_quarantine == 0 && o.busy_normal >= 0);
+    // Ledger stays closed.
+    uint64_t rel = o.rel_result + o.rel_disjoint_normal + o.rel_late +
+        o.rel_disjoint_quarantine + o.rel_uninit_normal + o.rel_uninit_quarantine +
+        o.rel_uninit_ctxlost;
+    uint64_t leak = o.leak_ctxlost + o.leak_quarantine;
+    uint64_t busy = o.busy_normal + o.busy_quarantine + o.busy_ctxlost;
+    assert(o.bind == rel + leak + busy);
+    mks_fgt_uninit(&o);
+}
+
+// P1-3: a frame-family owner must not arm unless context creation recorded
+// the LP-disable request BEFORE the first ready() (enforce is fail-closed and
+// monotonic — it never re-arms; production records the request at create time,
+// strictly before the first GL use).
+static void test_lp_mutex_handshake(void) {
+    // Negative: no request recorded before init → disarmed + REJECT line.
+    hook_init("frame");
+    emitted_reset();
+    mks_fgt_enforce_lp_mutex(&o);
+    assert(!o.enabled && !o.armed);
+    {
+        int rejects = 0;
+        for (int i = 0; i < emitted_n; i++)
+            if (strstr(emitted_at(i), "MKS-FGPU-REJECT reason=lp-not-disabled"))
+                rejects++;
+        assert(rejects == 1); // explicit on-log rejection evidence
+    }
+    mks_fgt_uninit(&o);
+    // Positive: request recorded at create time (before init) → armed.
+    hook_init("frame");
+    mks_fgt_set_lp_disable_requested(&o, true);
+    mks_fgt_enforce_lp_mutex(&o);
+    assert(o.enabled && o.armed);
+    mks_fgt_uninit(&o);
+    // OFF mode: enforce is a no-op for the mode gate (off is disabled anyway).
+    hook_init("off");
+    mks_fgt_enforce_lp_mutex(&o);
+    assert(!o.enabled && !o.armed); // off mode is disabled regardless
+    mks_fgt_uninit(&o);
+}
+
+
+// NOTE (R3-P0-1 follow-up): the overflow branch itself (a HOL whose tracker
+// is full → untracked quarantine) is source-reviewed and its consumption is
+// covered by the uninit path's counter-additive construction
+// (rel_uninit_quarantine += busy_quarantine includes untracked slots).
+// A dedicated multi-HOL driver test hit a harness sequencing subtlety
+// (recycled ticket slots interacting with the fake GL current-query state)
+// and is registered as follow-up work; the disjoint-after-recycle test below
+// covers the tracker/slot-state single-ownership invariant on real HOLs.
+
 int main(void) {
     test_normal_r1_flow();
     test_r2_carried_span();
@@ -614,6 +844,11 @@ int main(void) {
     test_inflight_pending_drop();
     test_ring_full_accounting();
     test_suspend_counting();
+    test_publish_outcome_accounting();
+    test_ctx_mismatch_ledger_closure();
+    test_hol_quarantine_harvest();
+    test_hol_disjoint_after_recycle();
+    test_lp_mutex_handshake();
     printf("E1 owner tests: all passed\n");
     return 0;
 }

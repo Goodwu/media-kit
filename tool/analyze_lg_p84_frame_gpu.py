@@ -79,7 +79,7 @@ def reconcile(records):
             if rec.get('session') != session:
                 errors.append(f'session mismatch in {rec_type}: {rec.get("session")} vs {session}')
 
-    # Ticket seq uniqueness and ordering
+    # Ticket seq uniqueness and ordering (R2-P1-1: continuity + summary count)
     t_seqs = []
     for rec in records['T']:
         try:
@@ -88,14 +88,20 @@ def reconcile(records):
             errors.append(f'invalid t_seq: {rec.get("t")}')
     if len(t_seqs) != len(set(t_seqs)):
         errors.append('duplicate t_seq in ticket records')
+    if t_seqs and t_seqs != list(range(1, len(t_seqs) + 1)):
+        errors.append(f't_seq not continuous 1..{len(t_seqs)}')
 
-    # Copy seq uniqueness
+    # Copy seq uniqueness and continuity (C.3: c_seq is a monotonic ledger)
     c_seqs = []
     for rec in records['C']:
         try:
             c_seqs.append(int(rec.get('c', -1)))
         except (ValueError, TypeError):
             errors.append(f'invalid c_seq: {rec.get("c")}')
+    if len(c_seqs) != len(set(c_seqs)):
+        errors.append('duplicate c_seq in copy records')
+    if c_seqs and c_seqs != list(range(1, len(c_seqs) + 1)):
+        errors.append(f'c_seq not continuous 1..{len(c_seqs)}')
 
     # Ticket axis closure: 7a (present) + 7b (reclaim)
     present_counts = {}
@@ -121,6 +127,112 @@ def reconcile(records):
     invariant = int(summary.get('invariant', 0))
     if invariant > 0:
         errors.append(f'invariant_violation={invariant}')
+
+    # Ticket emission count vs summary (R2-P1-1)
+    if summary and int(summary.get('tickets', -1)) != len(records['T']):
+        errors.append(f"ticket count mismatch: records={len(records['T'])} "
+                      f"summary={summary.get('tickets')}")
+
+    # G-line integrity: (t,g) uniqueness, per-ticket completeness against
+    # T.segs, ticket reference validity, and per-ticket acq/rel sanity.
+    ticket_by_t = {rec.get('t'): rec for rec in records['T']}
+    seg_count_by_t = {}
+    seen_tg = set()
+    g_kind = {}
+    for rec in records['G']:
+        key = (rec.get('t'), rec.get('g'))
+        if key in seen_tg:
+            errors.append(f'duplicate G record t={key[0]} g={key[1]}')
+        seen_tg.add(key)
+        g_kind[key] = rec.get('kind')
+        if rec.get('t') not in ticket_by_t:
+            errors.append(f'G references unknown ticket t={rec.get("t")}')
+        seg_count_by_t[rec.get('t')] = seg_count_by_t.get(rec.get('t'), 0) + 1
+    for t, rec in ticket_by_t.items():
+        try:
+            declared = int(rec.get('segs', -1))
+        except (TypeError, ValueError):
+            declared = -1
+        got = seg_count_by_t.get(t, 0)
+        if declared >= 0 and got != declared:
+            errors.append(f'ticket {t}: G count {got} != T.segs {declared}')
+        # g indices must be exactly 0..declared-1
+        idxs = sorted(int(g) for (tt, g) in seen_tg
+                      if tt == t and str(g).lstrip('-').isdigit())
+        if declared >= 0 and idxs != list(range(declared)):
+            errors.append(f'ticket {t}: g indices {idxs} != 0..{declared - 1}')
+        acq = int(rec.get('acq', 0))
+        rel = int(rec.get('rel', 0))
+        if acq < 0 or rel < 0 or rel > acq:
+            errors.append(f'ticket {t}: acq/rel invalid (acq={acq} rel={rel})')
+        if rec.get('reclaim') in ('1', 'normal') and acq != rel:
+            errors.append(f'ticket {t}: settled with acq={acq} rel={rel}')
+        copies_ok = int(rec.get('copies_ok', 0))
+        if copies_ok < 0:
+            errors.append(f'ticket {t}: negative copies_ok')
+
+    # C.seg references must point at an existing copy-kind G of the same
+    # ticket; frame-span mode's copy rides a span segment (R4-P1-2).
+    allowed_kinds = {'span'} if init.get('mode') == 'frame-span' else {'copy'}
+    for rec in records['C']:
+        try:
+            seg = int(rec.get('seg', -1))
+        except (TypeError, ValueError):
+            continue
+        if seg >= 0:
+            key = (rec.get('t'), str(seg))
+            if key not in g_kind:
+                errors.append(f'C c={rec.get("c")} seg={seg} references '
+                              f'missing G t={key[0]}')
+            elif g_kind[key] not in allowed_kinds:
+                errors.append(f'C c={rec.get("c")} seg={seg} references '
+                              f'G kind={g_kind[key]} (expected '
+                              f'{"|".join(sorted(allowed_kinds))})')
+
+    # Resource closure (bind equation) and FINAL busy contract: every bound
+    # query slot must be accounted exactly once across release/leak/busy.
+    if summary:
+        bind = int(summary.get('bind', 0))
+        rel = sum(int(summary.get(k, 0)) for k in
+                  ('rel_result', 'rel_dn', 'rel_late', 'rel_dq',
+                   'rel_un', 'rel_uq', 'rel_uc'))
+        leak = int(summary.get('leak_c', 0)) + int(summary.get('leak_q', 0))
+        busy = sum(int(summary.get(k, 0)) for k in
+                   ('busy_n', 'busy_q', 'busy_c'))
+        if bind != rel + leak + busy:
+            errors.append(f'bind equation mismatch: bind={bind} '
+                          f'rel+leak+busy={rel + leak + busy}')
+        if busy != 0:
+            errors.append(f'FINAL busy non-zero: {busy}')
+        for k in ('busy_n', 'busy_q', 'busy_c', 'leak_c', 'leak_q'):
+            if int(summary.get(k, 0)) < 0:
+                errors.append(f'negative counter {k}={summary.get(k)}')
+        gl_deleted = int(summary.get('gl_del', 0))
+        gl_leaked = int(summary.get('gl_leak', 0))
+        # frame-count mode never generates queries: a legal FINAL is 0/0.
+        if init.get('mode') == 'frame-count':
+            if gl_deleted or gl_leaked:
+                errors.append(f'frame-count GL closure: del={gl_deleted} '
+                              f'leak={gl_leaked} (expected 0/0)')
+        elif gl_deleted + gl_leaked != 64:  # MKS_FGT_SLOTS
+            errors.append(f'GL slot closure: del={gl_deleted} leak={gl_leaked}')
+
+    # Per-ticket copies_ok (publish outcome) consistency: a ticket publishes
+    # at most once (copies_ok ∈ {0,1}); a publish that followed a copy draw
+    # must be backed by that ticket's successful C record. Reuse publishes
+    # (fresh/cur/retired) have no C record at all and are legitimate.
+    c_by_ticket = {}
+    for rec in records['C']:
+        t = rec.get('t')
+        c_by_ticket.setdefault(t, []).append(rec)
+    for rec in records['T']:
+        t = rec.get('t')
+        copies_ok = int(rec.get('copies_ok', 0))
+        if copies_ok > 1:
+            errors.append(f'ticket {t}: copies_ok={copies_ok} > 1')
+        recs = c_by_ticket.get(t, [])
+        if copies_ok == 1 and recs and all(r.get('timer') != 'seg' for r in recs):
+            errors.append(f'ticket {t}: copies_ok=1 but no successful copy C record')
 
     # Property consistency
     for s in records['S']:
@@ -158,6 +270,17 @@ def classify_tickets(records):
     for rec in records['G']:
         t = int(rec.get('t', -1))
         segs_by_ticket.setdefault(t, []).append(rec)
+    # Fresh-copy C records by ticket (R2-P0-2): with copies_ok counting real
+    # publishes, a reuse publish (no copy at all) also lands copies_ok=1 —
+    # S0 must require a fresh copy draw, or reuse frames without copy elapsed
+    # would pollute the timing sample.
+    fresh_copy_by_ticket = set()
+    for rec in records['C']:
+        if rec.get('timer') == 'seg' and int(rec.get('seg', -1)) >= 0:
+            try:
+                fresh_copy_by_ticket.add(int(rec.get('t', -1)))
+            except (TypeError, ValueError):
+                pass
 
     for rec in records['T']:
         t = int(rec.get('t', -1))
@@ -186,7 +309,8 @@ def classify_tickets(records):
             layers['X-seed'].append(t)
         elif (copies_ok == 1 and acq == 1 and mix == 1 and hw == 1 and
               route in ROUTE_FUSED and not seed and not afail and
-              foreign == 0 and reclaim in RECLAIM_NORMAL and all_resolved):
+              foreign == 0 and reclaim in RECLAIM_NORMAL and all_resolved and
+              t in fresh_copy_by_ticket):
             layers['S0'].append(t)
         elif copies_ok == 0 and acq >= 1:
             layers['S1'].append(t)

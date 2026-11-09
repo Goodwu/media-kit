@@ -14,13 +14,14 @@ observed ~0.32x rate a 60s round reaches pts ~19, so the window is pts >= 5
 G-10: B-side copy records >=99% target-size lease, A-side >=99% source-size.
 """
 from __future__ import annotations
+import base64
 import json
 import re
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from analyze_lg_p84_frame_gpu import parse_log_file, classify_tickets, compute_s0_median_ms
+from analyze_lg_p84_frame_gpu import parse_log_file, classify_tickets, compute_s0_median_ms, reconcile
 
 WINDOW_MIN_PTS = 5.0
 TARGET_LEASE = '2672x1336'
@@ -28,8 +29,23 @@ SOURCE_LEASE = '3840x1920'
 
 
 def round_stats(round_dir: Path) -> dict:
+    # Fail-closed entry (P1-4): the round must be completed-observation with
+    # restoration verified and the device log actually pulled, and its ledger
+    # must pass the full reconcile before any statistic is computed.
+    summary = json.loads((round_dir / 'summary.json').read_text())
+    gate_fail = []
+    if summary.get('status') != 'completed-observation':
+        gate_fail.append(f"status={summary.get('status')}")
+    if not summary.get('restorationVerified'):
+        gate_fail.append('restoration-unverified')
+    if not summary.get('fgpuFilePulled'):
+        gate_fail.append('fgpu-file-not-pulled')
     log = round_dir / 'fgpu-device.log'
     records = parse_log_file(log)
+    errors = reconcile(records)
+    if gate_fail or errors:
+        return {'valid': False,
+                'reason': gate_fail + errors}
     layers = classify_tickets(records)
     s0 = set(layers['S0'])
 
@@ -55,9 +71,57 @@ def round_stats(round_dir: Path) -> dict:
     n = len(elapsed_ns)
     med_ns = elapsed_ns[n // 2] if n % 2 else (elapsed_ns[n // 2 - 1] + elapsed_ns[n // 2]) / 2 if n else None
 
+    # Frequency window (R2-P1-3): anchor to the probe's own pts>=5 samples
+    # (assembled from thermal-logcat THERMAL_JSON[_PART]) so the frequency
+    # window matches the elapsed window; fall back to the summary snapshot
+    # range only if no probe sample carries a usable time-pos. Median rule
+    # identical to elapsed (two-middle average for even counts).
+    from datetime import datetime
+    def _t(s):
+        return datetime.fromisoformat(s)
+    probe_ts = []
+    tlog = round_dir / 'thermal-logcat.txt'
+    if tlog.exists():
+        groups = {}
+        for l in tlog.read_text(errors='ignore').splitlines():
+            if 'THERMAL_JSON_PART' not in l:
+                continue
+            try:
+                tail = l.split('THERMAL_JSON_PART', 1)[1]
+                p = json.loads(tail[tail.index('{'):])
+                groups.setdefault((p['r'], p['n']), []).append(p)
+            except (ValueError, KeyError):
+                continue
+        for parts in groups.values():
+            if len(parts) != max(p['c'] for p in parts):
+                continue
+            parts = sorted(parts, key=lambda p: p['i'])
+            try:
+                row = json.loads(base64.b64decode(
+                    ''.join(p['d'] for p in parts), validate=True))
+            except Exception:
+                continue
+            tp = (row.get('properties') or {}).get('time-pos')
+            try:
+                if float(tp) >= WINDOW_MIN_PTS:
+                    probe_ts.append(_t(row['wallTime']))
+            except (KeyError, TypeError, ValueError):
+                continue
+    if probe_ts:
+        f0, f1 = min(probe_ts), max(probe_ts)
+        anchor_note = f'probe pts>=5 window ({len(probe_ts)} samples)'
+    else:
+        f0, f1 = _t(summary['initial']['hostTime']), _t(summary['final']['hostTime'])
+        anchor_note = 'fallback: summary snapshot range'
     freqs = []
     for line in (round_dir / 'samples.ndjson').read_text().splitlines():
         d = json.loads(line)
+        try:
+            ts = _t(d['hostTime'])
+        except (KeyError, ValueError):
+            continue
+        if not (f0 <= ts <= f1):
+            continue
         hz = (d.get('raw') or {}).get('gpu_hz')
         try:
             hz = float(hz)
@@ -66,7 +130,10 @@ def round_stats(round_dir: Path) -> dict:
         if hz > 0:
             freqs.append(hz)
     freqs.sort()
-    med_hz = freqs[len(freqs) // 2] if freqs else None
+    if freqs:
+        med_hz = (freqs[(len(freqs) - 1) // 2] + freqs[len(freqs) // 2]) / 2
+    else:
+        med_hz = None
 
     c_lease = [rec.get('lease', '') for rec in records['C']]
     c_win = [rec for rec in records['C']
@@ -75,6 +142,7 @@ def round_stats(round_dir: Path) -> dict:
     src = sum(1 for rec in c_win if rec.get('lease') == SOURCE_LEASE)
 
     return {
+        'valid': True,
         's0_total': len(s0),
         'window_frames': n,
         'median_elapsed_ms': med_ns / 1e6 if med_ns is not None else None,
@@ -82,7 +150,10 @@ def round_stats(round_dir: Path) -> dict:
         'mcycles_median': (med_ns * med_hz / 1e9 / 1e6) if (med_ns and med_hz) else None,
         'g10_target_fraction': tgt / len(c_win) if c_win else None,
         'g10_source_fraction': src / len(c_win) if c_win else None,
-        'freq_method': 'window-median (design-declared fallback; no per-frame anchor in T lines)',
+        'freq_samples': len(freqs),
+        'freq_method': f'round-window-median ({anchor_note}; design-declared fallback, no per-frame anchor in T lines)',
+        'freq_window': {'from': f0.isoformat(), 'to': f1.isoformat(),
+                        'source': 'probe-pts>=5' if probe_ts else 'summary-snapshot-fallback'},
     }
 
 
@@ -138,6 +209,11 @@ def main():
             continue
         sa, sb = round_stats(da), round_stats(db)
         out['rounds'][a_dir], out['rounds'][b_dir] = sa, sb
+        if not (sa.get('valid') and sb.get('valid')):
+            out['pairs'][label] = {'A': a_dir, 'B': b_dir,
+                                   'excluded': 'round failed fail-closed gates',
+                                   'A_valid': sa.get('valid'), 'B_valid': sb.get('valid')}
+            continue
         out['pairs'][label] = {'A': a_dir, 'B': b_dir, 'reduction': pair_reduction(sa, sb)}
     print(json.dumps(out, indent=1, sort_keys=True))
 
