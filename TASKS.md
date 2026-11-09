@@ -142,6 +142,15 @@
 - **受影响步骤 blocked（2026-11-05，2026-11-08 部分解阻）**：目标消费者接入已完成静态实现（见 2026-11-08 条），`gpu-next` 已 opt-in 逐映射几何，`gpu`（legacy）仍未 opt-in；目标尺寸开关打开也只有 gpu-next 走目标路径且仍需实机验证，不是功能修复完成。设备轮解阻还需：独立 critical 复审通过、可审查的隔离 bootstrap、独立依赖/prefix 和 Flutter 写入边界及足够空间峰值证据。独立 mpv build 仍链接共享 prefix，不得直接复用。mapper 与消费者均已做语法检查、host 测试和独立静态复核（消费者 critical 复审进行中）；非真实 GPU 或完整资源验收。未再操作设备，恢复现场仍待核。
 - 验收：M0 重新完成逐映射几何与缓存/字幕/截图消费者设计（历史 A1/A2 裁决已撤回）→M1 功能轮→M2 同包 A/B ≥3 对（≥10%，须先闭合逐帧指标和可比性）→M3 数值/观感/生命周期（含真实 resize）→M4 热态→M5 LYA 回归+critical 复审。
 - context：[lg-p84-target-lease-20261105.md](archives/conversations/lg-p84-target-lease-20261105.md)；方案 `docs/plans/lg-p84-target-lease-20261105.md`；round2 证据 `docs/validation/lg-p84-perf-round2-20261102/`。
+- **提交与合并完成（2026-11-10，Lead 授权"提交代码"）**：perf2-mpv
+  `5278651a`（lease 消费接入+M2′ owner+文件通道，9 文件 +1322−53）；perf2-lp
+  `ebefbc18`（mks_disable_timers，3 文件 +22−4）；perf2-mk `31acca6f`（工具链/
+  测试/设计文档 32 文件 +9461−130，含 .gitignore 证据外置忽略）。S6 证据外置
+  `media-kit-validation-archive/…/lg-p84-target-lease-20261105-s6-same-sync-g9-20261110/`
+  （12 目录 105 文件 28MB，SHA256SUMS 在案）。origin/feature/dv 领先 4 提交
+  （repo-weight-remediation + home-return-session-restore）已合并入
+  perf2/lg-p84（merge `26561273`；冲突仅 .gitignore/TASKS.md 顶部双侧新增节，
+  两侧内容全保留；合并后 owner/分析器测试复跑通过）。未 push（push 需逐次请示）。
 
 ## LG-P84-PERF-ROUND2-20261104
 
