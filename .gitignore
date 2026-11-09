@@ -49,3 +49,42 @@ archives/experiments/
 
 # LG P8.4 原始验证证据：外置归档（media-kit-validation-archive），仓内不跟踪
 docs/validation/lg-p84-target-lease-20261105/
+
+# home-return-session-restore-20261102 证据瘦身（2026-11-04 用户裁决）：
+# 仅提交 summary/脚本/构建身份；原始 logcat、SF 密集采样、截图等大块原始数据保留在磁盘不入库。
+docs/validation/home-return-session-restore-20261102/**
+!docs/validation/home-return-session-restore-20261102/**/
+!docs/validation/home-return-session-restore-20261102/**/*.md
+!docs/validation/home-return-session-restore-20261102/**/*.py
+!docs/validation/home-return-session-restore-20261102/**/*.sh
+!docs/validation/home-return-session-restore-20261102/**/*.diff
+!docs/validation/home-return-session-restore-20261102/**/build-identity*.json
+!docs/validation/home-return-session-restore-20261102/**/source-sha256.txt
+!docs/validation/home-return-session-restore-20261102/**/source-identity.txt
+!docs/validation/home-return-session-restore-20261102/**/identity.txt
+!docs/validation/home-return-session-restore-20261102/**/install-verify*.txt
+!docs/validation/home-return-session-restore-20261102/**/*.native-verification.json
+!docs/validation/home-return-session-restore-20261102/**/git-baseline.txt
+!docs/validation/home-return-session-restore-20261102/**/baseline-git-status.txt
+
+# 2026-11-04 仓库历史整改（REPO-WEIGHT-REMEDIATION-20261104）：
+# 以下大体积验证产物不再入库（30 个历史 blob 已剥离，内容在归档 bundle）。
+# 新验证轮的报告/小证据照常入库；>1MiB 二进制一律外置归档并在报告中写明路径。
+docs/validation/**/*.uv-probe.bin
+docs/validation/**/*.half-probe.bin
+docs/validation/**/*.f32
+docs/validation/**/*atlas*.bin
+docs/validation/**/*libmpv-unstripped.so
+docs/validation/**/*screencap_*.png
+docs/validation/**/*native-candidate.json
+
+# 历史大 ndjson 防回灌(精确路径, 2026-11-04 剥离的 9 个 >1MiB 文件; 勿全局化 *.ndjson, 小证据仍入库)
+docs/validation/lg-p84-thermal-review-20261029/ft-thermal-A1/samples.ndjson
+docs/validation/lg-p84-thermal-review-20261029/ft-thermal-B1/samples.ndjson
+docs/validation/lg-p84-thermal-review-20261029/thermal-ab4-A1/samples.ndjson
+docs/validation/lg-p84-thermal-review-20261029/thermal-ab4-B1/samples.ndjson
+docs/validation/lg-p84-thermal-review-20261029/visual-ab4-candidate/samples.ndjson
+docs/validation/lg-p84-thermal-review-20261029/yuv-fusion-thermal-A1/samples.ndjson
+docs/validation/lg-p84-thermal-review-20261029/yuv-fusion-thermal-B1/samples.ndjson
+docs/validation/lg-p84-thermal-review-20261029/yuv-fusion-user-replay-120-r2/samples.ndjson
+docs/validation/lg-p84-thermal-review-20261029/yuv-fusion-visual-candidate/samples.ndjson

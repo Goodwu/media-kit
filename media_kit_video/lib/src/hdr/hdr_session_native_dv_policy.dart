@@ -165,6 +165,8 @@ class HdrSessionReviewBackend implements HdrOpenBackend<HdrOpenPlan> {
     required this.isCurrent,
     required this.admit,
     required this.publishWindow,
+    this.onBeforeReviewFacts,
+    this.onAfterReviewFacts,
     this.monotonicNow,
     this.budget = const Duration(seconds: 8),
   });
@@ -174,6 +176,18 @@ class HdrSessionReviewBackend implements HdrOpenBackend<HdrOpenPlan> {
   final bool Function(int) isCurrent;
   final void Function(HdrOpenPlan) admit;
   final void Function(HdrSessionReviewWindow) publishWindow;
+
+  /// A2 review-scope binding (B3): invoked BEFORE the delegate samples any
+  /// review facts, so the session binds this attempt's scope (controller +
+  /// owner + activation epoch + latest view) to the facts before a sampling
+  /// await can race a newer activation. `_review` itself never re-adopts a
+  /// current output identity.
+  final Future<void> Function()? onBeforeReviewFacts;
+
+  /// Invoked right AFTER the facts were sampled: the session re-checks the
+  /// captured scope and voids the facts for verification when it drifted.
+  final Future<void> Function()? onAfterReviewFacts;
+
   final Duration Function()? monotonicNow;
   final Duration budget;
 
@@ -185,8 +199,11 @@ class HdrSessionReviewBackend implements HdrOpenBackend<HdrOpenPlan> {
 
   @override
   Future<HdrReviewFacts> reviewFacts(HdrOpenPlan plan) async {
+    await onBeforeReviewFacts?.call();
     if (plan.route.strategy != HdrStrategy.nativeDolbyVision) {
-      return delegate.reviewFacts(plan);
+      final facts = await delegate.reviewFacts(plan);
+      await onAfterReviewFacts?.call();
+      return facts;
     }
     final generation = generationOf(plan);
     if (!isCurrent(generation)) throw const OpenSuperseded();
@@ -198,6 +215,7 @@ class HdrSessionReviewBackend implements HdrOpenBackend<HdrOpenPlan> {
     publishWindow(window);
     final facts = await window.bounded(() => delegate.reviewFacts(plan));
     if (!isCurrent(generation)) throw const OpenSuperseded();
+    await onAfterReviewFacts?.call();
     window._facts = facts;
     return facts;
   }

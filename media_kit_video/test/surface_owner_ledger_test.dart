@@ -227,5 +227,48 @@ void main() {
       ledger.dequeueBind('A');
       expect(ledger.phaseOf('A'), SurfaceOwnerPhase.untracked);
     });
+
+    // A2 C1: after a stop-then-authorize failure the controller retains the
+    // owner's in-flight marker while marking the bind failed. The ledger
+    // invariants that keep such an owner non-promotable are pinned here:
+    // it never becomes a queued candidate, isLiveAndNotBindFailed stays
+    // false (so _failPlatformSurfaceIfNoAlternative cannot treat it as a
+    // surviving output), and clearing the in-flight marker lands it in
+    // `failed` — never in `bound`.
+    test('a bind-failed owner retained in-flight stays non-promotable (C1)',
+        () {
+      final ledger = SurfaceOwnerLedger<String>();
+      ledger.announceQueuedBind('A');
+      ledger.markInFlight('A');
+      ledger.markBindFailed('A');
+      expect(ledger.phaseOf('A'), SurfaceOwnerPhase.inFlight);
+      expect(ledger.isLiveAndNotBindFailed('A'), isFalse);
+      expect(ledger.isQueuedCandidate('A'), isFalse);
+      expect(ledger.anyQueuedCandidate((owner) => true), isFalse);
+
+      // A stale discard before any wid write clears only this owner's
+      // in-flight marker; cancelRelease keeps the Surface live in the ledger
+      // for its own destroy/dispose to release.
+      ledger.clearInFlightIf('A');
+      ledger.beginRelease('A');
+      ledger.cancelRelease('A');
+      expect(ledger.phaseOf('A'), SurfaceOwnerPhase.failed);
+      expect(ledger.isLive('A'), isTrue);
+    });
+
+    test('a failed owner never resolves to bound via in-flight clearing', () {
+      final ledger = SurfaceOwnerLedger<String>();
+      ledger.announceQueuedBind('B');
+      ledger.markInFlight('B');
+      ledger.markBindFailed('B');
+      ledger.clearInFlight();
+      ledger.dequeueBind('B');
+      expect(ledger.phaseOf('B'), SurfaceOwnerPhase.failed);
+      // Only an explicit clearBindFailed (a successful retry) can make the
+      // owner a candidate again.
+      expect(ledger.isQueuedCandidate('B'), isFalse);
+      ledger.clearBindFailed('B');
+      expect(ledger.phaseOf('B'), SurfaceOwnerPhase.bound);
+    });
   });
 }

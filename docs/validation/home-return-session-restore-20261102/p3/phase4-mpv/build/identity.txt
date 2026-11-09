@@ -1,0 +1,4 @@
+apk sha256: 22e15c40fe2a5b2eec697a5cca78001f421ea974993cee775841306e929e2398  /Users/wuweiwei1/src/PiliPlus/build/app/outputs/flutter-apk/piliplus-p4-mpvkf-release.apk
+jar: see native-verification
+c7bffdd1b0bbde12916381aa472e4022717f1f60
+761e29a84203e5612e7e715a7796a1ac599bbc5b

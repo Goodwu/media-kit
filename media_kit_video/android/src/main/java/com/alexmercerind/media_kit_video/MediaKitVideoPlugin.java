@@ -197,6 +197,17 @@ public class MediaKitVideoPlugin implements FlutterPlugin, MethodCallHandler, Ac
                 result.success(platformVideoViewFactory.applyDataSpaceReport(handle, transfer));
                 break;
             }
+            case "PlatformVideoView.AuthorizeBridgeActivation": {
+                // A2 activation barrier (HOME-return bridge re-init):
+                // synchronous on the platform main thread; never spawns a
+                // thread and never calls the bridge shutdown. The factory
+                // maps malformed arguments to a structured invalidArguments
+                // result instead of throwing out of the handler (a thrown
+                // handler never completes the Dart await).
+                result.success(platformVideoViewFactory.authorizeBridgeActivation(
+                        call.arguments()));
+                break;
+            }
             case "VideoRouteCapabilities.Get": {
                 try {
                     if (!(call.arguments instanceof java.util.Map)) {

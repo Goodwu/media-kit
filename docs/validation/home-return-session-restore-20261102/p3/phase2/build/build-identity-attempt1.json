@@ -1,0 +1,181 @@
+{
+  "schema": "p3-phase2a-build-identity/1",
+  "verdict": "BLOCKED",
+  "verdictReason": "Concurrent modification of media_kit_video implementation sources by another actor during this step (first observed 21:29:18, still ongoing at 21:36:16). PiliPlus build compiled a mid-edit snapshot and failed (environment/premise failure, not attributable to the 21:22 baseline code). Lab APK built OK and its Dart kernel is proven to contain the 21:22 baseline sources, but that baseline is no longer the working-tree state; Lab NOT installed pending Lead decision.",
+  "recordedBy": "Verifier (P3 phase2 (a))",
+  "baselineRecordedAt": "2026-11-02 21:22:00 +0800",
+  "host": {
+    "os": "darwin 27.2.0 arm64",
+    "javaHomeUsed": "/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home (17.0.21.0.3)",
+    "defaultJava": "27.0.1.0.3 (not used)",
+    "flutterLab": "/opt/homebrew/bin/flutter 3.47.2 (d3b14c8769)",
+    "flutterPiliPlus": "/Users/wuweiwei1/flutter-sdks/3.47.8/bin/flutter 3.47.8 (737ba8f885)",
+    "ndk": "27.2.12479018"
+  },
+  "repos": {
+    "media-kit": {
+      "head": "761e29a84203e5612e7e715a7796a1ac599bbc5b",
+      "dirtyAtBaseline": "15 modified (TASKS.md, 2 thermal summary.json, mediakit_surfacetexture_bridge.cpp, MediaKitVideoPlugin.java, MediaCodecSurfaceTextureBridge.java, PlatformVideoView.java, PlatformVideoViewFactory.java, hdr_video_session.dart, real.dart, platform_video_controller.dart, 4 tests); untracked: BridgeActivationAuthorizer.java, bridge_activation.dart, bridge_activation_test.dart, tool/test_platform_bridge_activation.py, archives/plan/validation docs",
+      "diffStatAtBaseline": "15 files changed, 1818 insertions(+), 90 deletions(-)",
+      "driftAfterBaseline": [
+        {
+          "mtime": "21:29:18",
+          "file": "media_kit_video/lib/src/video_controller/android_video_controller/bridge_activation.dart",
+          "sha256Now": "d7da65b3d5a0a8b061c77b4a9772043a2423106b2423ad2c4b9ae6a7b70beaa3"
+        },
+        {
+          "mtime": "21:30:59",
+          "file": "media_kit_video/lib/src/video_controller/android_video_controller/platform_output_availability.dart",
+          "note": "new untracked file, absent at baseline",
+          "sha256Now": "3eff29d41eb0714e2bc2cda3852da346f0fa7ec02a6d5b92fca406f18e0afecd"
+        },
+        {
+          "mtime": "21:32:08",
+          "file": "media_kit_video/lib/src/video_controller/android_video_controller/real.dart",
+          "sha256Now": "a2ac2cee2c29b33e274c5c5baa6153dcebedf036779ef8738d34658c468bd9b1"
+        },
+        {
+          "mtime": "21:33:16",
+          "file": "media_kit_video/lib/src/hdr/hdr_session_native_dv_policy.dart",
+          "sha256Now": null
+        },
+        {
+          "mtime": "21:34:05",
+          "file": "media_kit_video/lib/src/hdr/hdr_video_session.dart",
+          "sha256Now": "e574685048c0311de5e7e5615e1bdab5889ddcb25ea12a0b3abb3ddd36ff1419"
+        }
+      ],
+      "driftNote": "Verifier made none of these edits. Java/C++ sources listed below unchanged (no mtime after 21:21:30; hashes re-checked 21:32:31)."
+    },
+    "PiliPlus": {
+      "head": "cbf2c34d36f99100effb71b075bda9dfc0277c0f",
+      "branch": "feature/dv",
+      "dirty": "M TASKS.md, M lib/plugin/pl_player/view/view.dart, ?? archives/conversations/pull-source-android-apk-20261029.md (pre-existing, untouched; same at end)",
+      "mediaKitResolution": "pubspec_overrides.yaml -> ../media-kit path sources"
+    },
+    "libmpv-android-video-build-dv-experiment": {
+      "head": "3605f300ecfe16bc084addd0b403d2cd55ef6a81",
+      "branch": "feature/dv",
+      "dirty": "?? .DS_Store, ?? .commandcode/, ?? buildscripts/.DS_Store"
+    },
+    "mpv": {
+      "head": "c7bffdd1b0bbde12916381aa472e4022717f1f60",
+      "branch": "feature/dv",
+      "dirty": "clean"
+    }
+  },
+  "sourceSha256AtBaseline": {
+    "media_kit_video/lib/src/video_controller/android_video_controller/real.dart": "a4d8ffa93cc3edf04c5516e1af274972a790f1e2739a299d92d37d45bf932445",
+    "media_kit_video/lib/src/video_controller/android_video_controller/bridge_activation.dart": "54d78185af703298dd63b0a93fd2249096904714d69a40dff77779d808306b46",
+    "media_kit_video/lib/src/hdr/hdr_video_session.dart": "e74e3ab37c439a8f4ea5c01d17e2e4d78a7ef79beebbd91529cd538da0687660",
+    "media_kit_video/android/src/main/java/com/alexmercerind/media_kit_video/platformview/BridgeActivationAuthorizer.java": "7a42dcb7924c8d9c105b881026ea85683fa1c808d1378369ad80fd8c216b626d",
+    "media_kit_video/android/src/main/java/com/alexmercerind/media_kit_video/platformview/PlatformVideoView.java": "0ff9d1048732da30c6e292ff70d0ea9db2cbba7864fcc5acb5c005d13ede0b6e",
+    "media_kit_video/android/src/main/java/com/alexmercerind/media_kit_video/platformview/PlatformVideoViewFactory.java": "4009a2258a313b2933847d2c73bf268c71352836b95c4a76c743c254d60f2723",
+    "media_kit_video/android/src/main/java/com/alexmercerind/media_kit_video/MediaKitVideoPlugin.java": "f6577dd1c4f459750322300978e8f0f129f65c84cfb9f7f2c7d358ec5621e277",
+    "media_kit_video/android/src/main/cpp/mediakit_surfacetexture_bridge.cpp": "6e12e3fa8d1803ec77cd0d33a3620561f24276e4de36d5a5de35aab3f9fd9d4a",
+    "media_kit_video/android/src/main/java/com/alexmercerind/media_kit_video/platformview/MediaCodecSurfaceTextureBridge.java": "b5988b52b56b528f96234678ae12f936c44433979e9422df759912f61deb6465",
+    "media_kit_video/lib/src/video_controller/platform_video_controller.dart": "21935e93b0a13ef3b05582963693bfb417443c39cdc89839d5dd2baa647660b4"
+  },
+  "lab": {
+    "status": "BUILT_VERIFIED_NOT_INSTALLED",
+    "command": "JAVA_HOME=/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home tool/build-android-test.sh --tag p3b-a2 --platform-view --local-source /sdcard/Android/data/com.example.media_kit_hdr_lab/files/hokkaido-p84.mp4 -- --dart-define=MEDIA_KIT_ANDROID_SURFACE_TIMELINE=true --dart-define=MEDIA_KIT_ANDROID_HDR_PREFER_CONVERT=true --dart-define=MEDIA_KIT_ANDROID_HDR_DIAGNOSTICS=true",
+    "cwd": "/Users/wuweiwei1/src/media-kit",
+    "window": "21:22:47 -> 21:26:09 (exit 0)",
+    "log": "/Users/wuweiwei1/src/media-kit/docs/validation/home-return-session-restore-20261102/p3/phase2/build/build-lab.log",
+    "defineSet": {
+      "scriptBaseDefines(lab)": [
+        "MEDIA_KIT_AUTO_SINGLE_PLAYER=true",
+        "MEDIA_KIT_ANDROID_OPEN_ON_TAP=true",
+        "MEDIA_KIT_ANDROID_PREOPEN_FULLSCREEN=true",
+        "MEDIA_KIT_ANDROID_NAMED_LOCAL_SOURCE=true",
+        "MEDIA_KIT_ANDROID_P5_RPU_PIPELINE_BUILT=true",
+        "MEDIA_KIT_ANDROID_HDR_TRANSACTION=true",
+        "MEDIA_KIT_ANDROID_SURFACE_PRODUCER=false",
+        "MEDIA_KIT_ANDROID_TEXTURE_LAYOUT_SIZE=true",
+        "MEDIA_KIT_ANDROID_PERF_PROBE=true",
+        "MEDIA_KIT_ANDROID_P5_COUNTER_PROBE=true",
+        "MEDIA_KIT_ANDROID_DIRECT_OPEN_TRACE=true",
+        "MEDIA_KIT_ANDROID_LOCAL_SOURCE=/sdcard/Android/data/com.example.media_kit_hdr_lab/files/hokkaido-p84.mp4",
+        "MEDIA_KIT_ANDROID_PLATFORM_VIEW=true"
+      ],
+      "extra": [
+        "MEDIA_KIT_ANDROID_SURFACE_TIMELINE=true",
+        "MEDIA_KIT_ANDROID_HDR_PREFER_CONVERT=true",
+        "MEDIA_KIT_ANDROID_HDR_DIAGNOSTICS=true"
+      ],
+      "note": "Build log does not echo defines; set is from command line + tool/build-android-test.sh base_defines (lab branch). Corroborated by const-gated markers below."
+    },
+    "apk": "/Users/wuweiwei1/src/media-kit/media_kit_hdr_lab/build/app/outputs/flutter-apk/p3b-a2-release.apk",
+    "apkSha256": "7c5777ea9dab15ba30a2fdbd86c665922aba83367b2f8d52855544abd88c8360",
+    "apkBytes": 41621487,
+    "jar": "/Users/wuweiwei1/src/media-kit/build/android-native/p3b-a2-20261102-212247-46661/package/default-arm64-v8a.jar",
+    "jarSha256": "22bc9306a5eae9641c4c73c9f256311a62c8704bf33eebd6a843d5c1153fcfd5",
+    "nativeVerification": "/Users/wuweiwei1/src/media-kit/media_kit_hdr_lab/build/app/outputs/flutter-apk/p3b-a2-release.native-verification.json (status=verified)",
+    "kernelSourceIdentity": {
+      "dill": "/Users/wuweiwei1/src/media-kit/media_kit_hdr_lab/.dart_tool/flutter_build/52b95f4d051f2740c0550c56bcdd3d1f/app.dill (mtime 21:25:12, inside build window)",
+      "method": "embedded kernel Source text extracted by length prefix and SHA-256'd; tool copy: dill_source_sha.py (python3 -I dill_source_sha.py <dill> name=anchor ...)",
+      "real.dart": "a4d8ffa93cc3edf04c5516e1af274972a790f1e2739a299d92d37d45bf932445 (== baseline)",
+      "bridge_activation.dart": "54d78185af703298dd63b0a93fd2249096904714d69a40dff77779d808306b46 (== baseline; anchor 'malformed AuthorizeBridgeActivation reply')",
+      "hdr_video_session.dart": "e74e3ab37c439a8f4ea5c01d17e2e4d78a7ef79beebbd91529cd538da0687660 (== baseline, 86865 bytes)",
+      "negative": "'class WidListenerActivation {' (introduced by 21:29 edit) absent from dill",
+      "inference": "libapp.so derived from this dill (same build window); not byte-proven"
+    },
+    "markers": {
+      "libapp.so": {
+        "MKS-HOME-TRACE rt= (gated const SURFACE_TIMELINE)": 1,
+        "HDR_PREFER_CONVERT dvP84= (gated const HDR_PREFER_CONVERT)": 1,
+        "HDR_PUBLISH_FLUSH requested= (gated const HDR_DIAGNOSTICS)": 1,
+        "PlatformVideoView.AuthorizeBridgeActivation": 1,
+        "authorize begin wid=": 1,
+        "malformed AuthorizeBridgeActivation reply": 1,
+        "hokkaido-p84.mp4": 2
+      },
+      "classes.dex": {
+        "MKS-HOME-TRACE": 1,
+        "PlatformVideoView.AuthorizeBridgeActivation": 1,
+        "authorize enter handle=": 1,
+        "BridgeActivationAuthorizer (class name)": "0 - R8-renamed in release, expected"
+      },
+      "libmedia_kit_video_hdr_bridge.so": {
+        "MKS-HOME-TRACE": 1
+      },
+      "method": "unzip lib/arm64-v8a/* classes*.dex; strings -a <file> | grep -cF <marker>",
+      "limit": "const-gated marker presence implies define=true under AOT tree-shaking; no negative-control build was made"
+    }
+  },
+  "piliplus": {
+    "status": "BUILD_FAILED (environment: concurrent source edit)",
+    "command": "PATH=/Users/wuweiwei1/flutter-sdks/3.47.8/bin:$PATH JAVA_HOME=/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home ORG_GRADLE_PROJECT_dev=true tool/build-android-test.sh --tag piliplus-p3b-a2 --app-dir /Users/wuweiwei1/src/PiliPlus -- --dart-define=MEDIA_KIT_ANDROID_SURFACE_TIMELINE=true",
+    "cwd": "/Users/wuweiwei1/src/media-kit",
+    "window": "21:27:12 -> 21:30:59 (exit 1); native output build/android-native/piliplus-p3b-a2-20261102-212712-49744",
+    "log": "/Users/wuweiwei1/src/media-kit/docs/validation/home-return-session-restore-20261102/p3/phase2/build/build-piliplus.log",
+    "defineSet": {
+      "scriptBaseDefines": "none (non-lab app-dir)",
+      "extra": [
+        "MEDIA_KIT_ANDROID_SURFACE_TIMELINE=true"
+      ],
+      "gradle": "ORG_GRADLE_PROJECT_dev=true"
+    },
+    "nativeJarSha256": "22bc9306a5eae9641c4c73c9f256311a62c8704bf33eebd6a843d5c1153fcfd5 (native step OK, same as Lab)",
+    "error": "bridge_activation.dart:838:9 Type 'PlatformOutputAvailability' not found; :839:9 Type 'SurfaceOwnerLedger' not found -> :app:compileFlutterBuildRelease failed",
+    "classification": "environment/premise failure: compiled bridge_activation.dart was the 21:29:18 mid-edit version (not baseline 54d781..), together with platform_output_availability.dart still being written (final mtime 21:30:59). Not a verdict on baseline code nor on the final edited code.",
+    "apk": null,
+    "staleArtifactCheck": "no piliplus-p3b-a2-release.apk produced; older piliplus-p3-a2-release.apk (20:57:04) untouched and must not be used"
+  },
+  "install": {
+    "device": "LGH870DS42e27764 (LG_H870DS)",
+    "performed": false,
+    "reason": "Withheld: source tree under concurrent edit; Lab APK identity = 21:22 baseline which is no longer the working tree, and the paired PiliPlus build failed. Awaiting Lead decision.",
+    "deviceStateUnchanged": {
+      "pmPath": "/data/app/com.example.media_kit_hdr_lab-1/base.apk",
+      "versionCode": 4086,
+      "lastUpdateTime": "2026-11-02 20:56:50 (pre-fix smoke package 5fff6f55..., per task card)",
+      "deviceSha": "not read: device lacks sha256sum"
+    }
+  },
+  "verifierSideEffects": [
+    "created this build/ directory and its 4 files",
+    "build outputs under build/android-native/p3b-a2-*, build/android-native/piliplus-p3b-a2-*, media_kit_hdr_lab/build, media_kit_hdr_lab/.dart_tool, PiliPlus/build, .cxx fingerprints (regenerable)",
+    "temp: /tmp/p3b-lab-apk.lJnR, /tmp/p3b-verify-scripts, /tmp/mk_ref_2121"
+  ]
+}

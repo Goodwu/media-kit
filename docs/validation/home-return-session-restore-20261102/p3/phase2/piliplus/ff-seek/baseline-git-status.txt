@@ -1,0 +1,23 @@
+ M TASKS.md
+ M docs/validation/lg-p84-thermal-review-20261029/home-control-tableoff/summary.json
+ M docs/validation/lg-p84-thermal-review-20261029/life22-lifecycle/summary.json
+ M media_kit_video/android/src/main/java/com/alexmercerind/media_kit_video/MediaKitVideoPlugin.java
+ M media_kit_video/android/src/main/java/com/alexmercerind/media_kit_video/platformview/PlatformVideoView.java
+ M media_kit_video/android/src/main/java/com/alexmercerind/media_kit_video/platformview/PlatformVideoViewFactory.java
+ M media_kit_video/lib/src/hdr/hdr_session_native_dv_policy.dart
+ M media_kit_video/lib/src/hdr/hdr_video_session.dart
+ M media_kit_video/lib/src/video_controller/android_video_controller/real.dart
+ M media_kit_video/lib/src/video_controller/platform_video_controller.dart
+ M media_kit_video/test/hdr_video_session_test.dart
+ M media_kit_video/test/managed_video_playback_test.dart
+ M media_kit_video/test/platform_view_entry_contract_test.dart
+ M media_kit_video/test/routed_video_playback_test.dart
+ M media_kit_video/test/surface_owner_ledger_test.dart
+?? archives/conversations/home-return-session-restore-20261102.md
+?? docs/plans/home-return-session-restore-20261102.md
+?? docs/validation/home-return-session-restore-20261102/
+?? media_kit_video/android/src/main/java/com/alexmercerind/media_kit_video/platformview/BridgeActivationAuthorizer.java
+?? media_kit_video/lib/src/video_controller/android_video_controller/bridge_activation.dart
+?? media_kit_video/lib/src/video_controller/android_video_controller/platform_output_availability.dart
+?? media_kit_video/test/bridge_activation_test.dart
+?? tool/test_platform_bridge_activation.py

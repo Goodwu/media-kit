@@ -1,9 +1,10 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:media_kit_video/src/routing/video_route_options.dart';
 import 'package:media_kit/media_kit.dart'
-    show FileLoadedRecord, Media, VideoParams;
+    show FileLoadedRecord, Media, PlatformPlayer, Player, VideoParams;
 import 'package:media_kit_video/src/hdr/hdr_capabilities.dart';
 import 'package:media_kit_video/src/hdr/hdr_container_source_discovery.dart';
 import 'package:media_kit_video/src/hdr/hdr_decoder_review.dart';
@@ -12,11 +13,16 @@ import 'package:media_kit_video/src/hdr/hdr_player_backend.dart'
 import 'package:media_kit_video/src/hdr/android_mediacodec_configuration.dart';
 import 'package:media_kit_video/src/hdr/hdr_native_dv_option_owner.dart';
 import 'package:media_kit_video/src/hdr/hdr_native_dv_review_evidence.dart';
+import 'package:media_kit_video/src/video_controller/android_video_controller/bridge_activation.dart';
 import 'package:media_kit_video/src/video_controller/android_video_controller/platform_surface_release.dart';
+import 'package:media_kit_video/src/video_controller/platform_video_controller.dart';
+import 'package:media_kit_video/src/video_controller/video_controller.dart';
 import 'package:synchronized/synchronized.dart';
 import 'package:media_kit_video/src/hdr/hdr_open_coordinator.dart';
 import 'package:media_kit_video/src/hdr/hdr_open_plan.dart';
+import 'package:media_kit_video/src/hdr/hdr_output_contract.dart';
 import 'package:media_kit_video/src/hdr/hdr_output_event.dart';
+import 'package:media_kit_video/src/hdr/hdr_output_slot.dart';
 import 'package:media_kit_video/src/hdr/hdr_route.dart';
 import 'package:media_kit_video/src/hdr/hdr_route_planner.dart';
 import 'package:media_kit_video/src/hdr/hdr_source_descriptor.dart';
@@ -2392,6 +2398,571 @@ void main() {
       await session.dispose();
     });
   });
+
+  group('scoped bridge activation issues (A2)', () {
+    const issueOwner = AndroidSurfaceAccountId(
+      handle: 11,
+      generation: 3,
+      viewId: 7,
+      surfaceGeneration: 2,
+      wid: 4242,
+    );
+
+    BridgeActivationIssue issueOf(
+      Object controller, {
+      int epoch = 1,
+      int intent = 4,
+      BridgeActivationCode code = BridgeActivationCode.initFailed,
+      AndroidSurfaceAccountId owner = issueOwner,
+    }) =>
+        BridgeActivationIssue(
+          controller: controller,
+          owner: owner,
+          activationEpoch: epoch,
+          outputIntentSerial: intent,
+          code: code,
+          error: BridgeActivationException(code, message: 'init failed'),
+        );
+
+    test('a current issue publishes a scoped error and clears verified plus '
+        'stale observation evidence', () async {
+      final backend = FakeBackend()..factsForOpen.add(gammaFacts(gamma: 'pq'));
+      final session = makeSession(backend: backend, capabilities: caps());
+      final events = <HdrOutputEvent>[];
+      session.events.listen(events.add);
+      await session.open(media, hint: hdr10);
+      await pumpEventQueue();
+      expect(session.report.value.verified, isTrue);
+      expect(session.report.value.hwdecCurrent, isNotNull);
+
+      final platform = _IssuePlatformController(_Player());
+      final controller = _controllerWithPlatform(platform);
+      session.publishControllerForTesting(controller);
+      await pumpEventQueue();
+      // A HOME-return failure has no active open waiter; the event must be
+      // published anyway, with the current session serial.
+      platform.issues.value = issueOf(platform);
+      await pumpUntil(
+          () => events.whereType<HdrErrorEvent>().isNotEmpty);
+
+      final error = events.whereType<HdrErrorEvent>().single;
+      expect(error.generation, session.report.value.generation);
+      expect(error.error, isA<BridgeActivationException>());
+      expect(error.diagnostic, contains('initFailed'));
+      final report = session.report.value;
+      expect(report.verified, isFalse);
+      expect(report.error, isA<BridgeActivationException>());
+      // The old review's observation fields must not survive as evidence.
+      expect(report.hwdecCurrent, isNull);
+      expect(report.dataSpaceReadback, isNull);
+      expect(report.decoderObservation, isNull);
+      await session.dispose();
+    });
+
+    test('the same owner+intent failure publishes exactly once', () async {
+      final backend = FakeBackend()..factsForOpen.add(gammaFacts(gamma: 'pq'));
+      final session = makeSession(backend: backend, capabilities: caps());
+      final events = <HdrOutputEvent>[];
+      session.events.listen(events.add);
+      await session.open(media, hint: hdr10);
+      final platform = _IssuePlatformController(_Player());
+      session.publishControllerForTesting(_controllerWithPlatform(platform));
+      await pumpEventQueue();
+
+      platform.issues.value = issueOf(platform, epoch: 1);
+      await pumpUntil(() => events.whereType<HdrErrorEvent>().isNotEmpty);
+      // A repeated failure for the same owner+intent is not re-published.
+      platform.issues.value = null;
+      await pumpEventQueue();
+      platform.issues.value = issueOf(platform, epoch: 1);
+      await pumpEventQueue();
+      expect(events.whereType<HdrErrorEvent>(), hasLength(1));
+      await session.dispose();
+    });
+
+    test('a superseded activation epoch is ignored (real currency state)',
+        () async {
+      final backend = FakeBackend()..factsForOpen.add(gammaFacts(gamma: 'pq'));
+      final session = makeSession(backend: backend, capabilities: caps());
+      final events = <HdrOutputEvent>[];
+      session.events.listen(events.add);
+      await session.open(media, hint: hdr10);
+      // A newer real dispatch happened: the old issue's epoch is superseded.
+      final platform = _IssuePlatformController(_Player())
+        ..dispatchEpoch = 2;
+      session.publishControllerForTesting(_controllerWithPlatform(platform));
+      await pumpEventQueue();
+
+      platform.issues.value = issueOf(platform);
+      await pumpEventQueue();
+      expect(events.whereType<HdrErrorEvent>(), isEmpty);
+      expect(session.report.value.verified, isTrue);
+      await session.dispose();
+    });
+
+    test('an issue existing before the subscription is replayed', () async {
+      final backend = FakeBackend()..factsForOpen.add(gammaFacts(gamma: 'pq'));
+      final session = makeSession(backend: backend, capabilities: caps());
+      final events = <HdrOutputEvent>[];
+      session.events.listen(events.add);
+      await session.open(media, hint: hdr10);
+      final platform = _IssuePlatformController(_Player());
+      platform.issues.value = issueOf(platform);
+
+      session.publishControllerForTesting(_controllerWithPlatform(platform));
+      await pumpUntil(() => events.whereType<HdrErrorEvent>().isNotEmpty);
+      expect(events.whereType<HdrErrorEvent>(), hasLength(1));
+      await session.dispose();
+    });
+
+    test('a replaced controller issues only through its own subscription',
+        () async {
+      final backend = FakeBackend()..factsForOpen.add(gammaFacts(gamma: 'pq'));
+      final session = makeSession(backend: backend, capabilities: caps());
+      final events = <HdrOutputEvent>[];
+      session.events.listen(events.add);
+      await session.open(media, hint: hdr10);
+      final first = _IssuePlatformController(_Player());
+      session.publishControllerForTesting(_controllerWithPlatform(first));
+      await pumpEventQueue();
+      first.issues.value = issueOf(first);
+      await pumpUntil(() => events.whereType<HdrErrorEvent>().isNotEmpty);
+
+      // Slot replacement: publish(null) then the successor controller.
+      session.publishControllerForTesting(null);
+      await pumpEventQueue();
+      final second = _IssuePlatformController(_Player());
+      session.publishControllerForTesting(_controllerWithPlatform(second));
+      await pumpEventQueue();
+      second.issues.value = issueOf(second);
+      await pumpUntil(() => events.whereType<HdrErrorEvent>().length == 2);
+
+      // The retired controller's notifier must no longer reach the session.
+      first.issues.value = issueOf(first,
+          owner: const AndroidSurfaceAccountId(
+            handle: 11,
+            generation: 3,
+            viewId: 7,
+            surfaceGeneration: 9,
+            wid: 9999,
+          ));
+      await pumpEventQueue();
+      expect(events.whereType<HdrErrorEvent>(), hasLength(2));
+      await session.dispose();
+    });
+
+    test('dispose unbinds the subscription before cleanup continues',
+        () async {
+      final backend = FakeBackend()..factsForOpen.add(gammaFacts(gamma: 'pq'));
+      final session = makeSession(backend: backend, capabilities: caps());
+      await session.open(media, hint: hdr10);
+      final platform = _IssuePlatformController(_Player());
+      session.publishControllerForTesting(_controllerWithPlatform(platform));
+      await pumpEventQueue();
+      await session.dispose();
+
+      // Firing the notifier after dispose must be a no-op, not a throw.
+      platform.issues.value = issueOf(platform);
+      await pumpEventQueue();
+    });
+
+    test('a failed platform future is tolerated', () async {
+      final backend = FakeBackend()..factsForOpen.add(gammaFacts(gamma: 'pq'));
+      final session = makeSession(backend: backend, capabilities: caps());
+      await session.open(media, hint: hdr10);
+      final failing = VideoController(_Player());
+      failing.platform.completeError(StateError('platform init failed'));
+      session.publishControllerForTesting(failing);
+      await pumpEventQueue();
+      expect(session.report.value.verified, isTrue);
+      await session.dispose();
+    });
+
+    test('a late open success cannot overwrite a published failure '
+        '(merged review-scope interleave)', () async {
+      final backend = _HoldingReviewBackend()
+        ..factsForOpen.add(gammaFacts(gamma: 'pq'));
+      backend.holdReviewFacts = Completer<void>();
+      final session = makeSession(backend: backend, capabilities: caps());
+      final events = <HdrOutputEvent>[];
+      session.events.listen(events.add);
+
+      // The controller's output identity moves on AFTER the pre-sampling
+      // scope capture but while the facts are still being sampled — the
+      // exact interleave a newer attempt lands in.
+      final platform = _IssuePlatformController(_Player())
+        ..anchor = const BridgeActivationScopeAnchor(
+          controller: null,
+          owner: _issueOwner,
+          activationEpoch: 1,
+          outputIntentSerial: 4,
+          latestViewCreationSerial: 1,
+        );
+      backend.duringReviewFacts = () {
+        // A newer successful attempt rebound the output mid-sampling.
+        platform.anchor = const BridgeActivationScopeAnchor(
+          controller: null,
+          owner: _issueOwner,
+          activationEpoch: 2,
+          outputIntentSerial: 5,
+          latestViewCreationSerial: 1,
+        );
+        // And a HOME-return-shaped failure for the OLD scope is published
+        // while the open is still in flight.
+        platform.issues.value = issueOf(platform);
+      };
+      session.publishControllerForTesting(_controllerWithPlatform(platform));
+      await pumpEventQueue();
+      final opening = session.open(media, hint: hdr10);
+      await pumpUntil(() => events.whereType<HdrErrorEvent>().isNotEmpty);
+
+      backend.holdReviewFacts!.complete();
+      await opening;
+      await pumpEventQueue();
+      // The success write is doubly guarded: verified stays false, the error
+      // survives (single event, not re-published), and the observation fields
+      // are not written as verified evidence.
+      final report = session.report.value;
+      expect(report.verified, isFalse);
+      expect(report.error, isA<BridgeActivationException>());
+      expect(report.hwdecCurrent, isNull);
+      expect(events.whereType<HdrErrorEvent>(), hasLength(1));
+      await session.dispose();
+    });
+
+    test('an old review cannot verify over a newer successful attempt: '
+        'real pre-sampling capture, no current issue', () async {
+      final backend = _HoldingReviewBackend()
+        ..factsForOpen.add(gammaFacts(gamma: 'pq'));
+      final session = makeSession(backend: backend, capabilities: caps());
+      final platform = _IssuePlatformController(_Player())
+        ..anchor = const BridgeActivationScopeAnchor(
+          controller: null,
+          owner: _issueOwner,
+          activationEpoch: 1,
+          outputIntentSerial: 4,
+          latestViewCreationSerial: 1,
+        );
+      backend.duringReviewFacts = () {
+        // A newer successful attempt (no issue at all) moved the epoch
+        // after the pre-sampling capture, while the facts were gathered.
+        platform.anchor = const BridgeActivationScopeAnchor(
+          controller: null,
+          owner: _issueOwner,
+          activationEpoch: 2,
+          outputIntentSerial: 4,
+          latestViewCreationSerial: 1,
+        );
+      };
+      session.publishControllerForTesting(_controllerWithPlatform(platform));
+      await pumpEventQueue();
+      await session.open(media, hint: hdr10);
+      await pumpEventQueue();
+      final report = session.report.value;
+      expect(report.verified, isFalse);
+      expect(report.error, isNull);
+      expect(report.diagnostic,
+          contains('bridge activation scope changed since the review'));
+      expect(report.hwdecCurrent, isNull);
+      await session.dispose();
+    });
+
+    test('a newer ViewCreated without a new Surface voids the review '
+        '(anchor latest-view component)', () async {
+      final backend = _HoldingReviewBackend()
+        ..factsForOpen.add(gammaFacts(gamma: 'pq'));
+      final session = makeSession(backend: backend, capabilities: caps());
+      final platform = _IssuePlatformController(_Player())
+        ..anchor = const BridgeActivationScopeAnchor(
+          controller: null,
+          owner: _issueOwner,
+          activationEpoch: 1,
+          outputIntentSerial: 4,
+          latestViewCreationSerial: 1,
+        );
+      backend.duringReviewFacts = () {
+        // Only a ViewCreated arrived after the pre-sampling capture: owner,
+        // intent and epoch are unchanged.
+        platform.anchor = const BridgeActivationScopeAnchor(
+          controller: null,
+          owner: _issueOwner,
+          activationEpoch: 1,
+          outputIntentSerial: 4,
+          latestViewCreationSerial: 2,
+        );
+      };
+      session.publishControllerForTesting(_controllerWithPlatform(platform));
+      await pumpEventQueue();
+      await session.open(media, hint: hdr10);
+      await pumpEventQueue();
+      final report = session.report.value;
+      expect(report.verified, isFalse);
+      expect(report.error, isNull);
+      expect(report.diagnostic,
+          contains('bridge activation scope changed since the review'));
+      await session.dispose();
+    });
+
+    test('an invalidated old issue plus an anchor change still blocks the '
+        'verified write (anchor gate is independent)', () async {
+      final backend = _HoldingReviewBackend()
+        ..factsForOpen.add(gammaFacts(gamma: 'pq'));
+      final session = makeSession(backend: backend, capabilities: caps());
+      final events = <HdrOutputEvent>[];
+      session.events.listen(events.add);
+      // A stale issue is held (its epoch was superseded): the issue gate
+      // alone would let the write through.
+      final platform = _IssuePlatformController(_Player())
+        ..dispatchEpoch = 2
+        ..anchor = const BridgeActivationScopeAnchor(
+          controller: null,
+          owner: _issueOwner,
+          activationEpoch: 2,
+          outputIntentSerial: 4,
+          latestViewCreationSerial: 1,
+        );
+      platform.issues.value = issueOf(platform, epoch: 1);
+      backend.duringReviewFacts = () {
+        platform.anchor = const BridgeActivationScopeAnchor(
+          controller: null,
+          owner: _issueOwner,
+          activationEpoch: 3,
+          outputIntentSerial: 4,
+          latestViewCreationSerial: 1,
+        );
+      };
+      session.publishControllerForTesting(_controllerWithPlatform(platform));
+      await pumpEventQueue();
+      // The stale issue must not have published anything.
+      expect(events.whereType<HdrErrorEvent>(), isEmpty);
+
+      await session.open(media, hint: hdr10);
+      await pumpEventQueue();
+      final report = session.report.value;
+      expect(report.verified, isFalse);
+      expect(report.error, isNull);
+      expect(report.diagnostic,
+          contains('bridge activation scope changed since the review'));
+      await session.dispose();
+    });
+
+    test('a later successful bind does not restore verified (real currency '
+        'state, no manual flags)', () async {
+      final backend = FakeBackend()..factsForOpen.add(gammaFacts(gamma: 'pq'));
+      final session = makeSession(backend: backend, capabilities: caps());
+      await session.open(media, hint: hdr10);
+      final platform = _IssuePlatformController(_Player());
+      session.publishControllerForTesting(_controllerWithPlatform(platform));
+      await pumpEventQueue();
+      platform.issues.value = issueOf(platform);
+      await pumpUntil(() => !session.report.value.verified);
+
+      // A newer real dispatch succeeded (epoch advanced, no new issue): the
+      // replayed old issue is out of scope and verified stays false.
+      platform.dispatchEpoch = 2;
+      platform.issues.value = null;
+      await pumpEventQueue();
+      platform.issues.value = issueOf(platform);
+      await pumpEventQueue();
+      expect(session.report.value.verified, isFalse);
+      await session.dispose();
+    });
+
+    test('a destroyed owner or a newer ViewCreated supersedes the issue '
+        '(real currency state)', () async {
+      final backend = FakeBackend()..factsForOpen.add(gammaFacts(gamma: 'pq'));
+      final session = makeSession(backend: backend, capabilities: caps());
+      final events = <HdrOutputEvent>[];
+      session.events.listen(events.add);
+      await session.open(media, hint: hdr10);
+
+      // Destroyed owner: the expected output identity moved to null.
+      final destroyed = _IssuePlatformController(_Player())
+        ..expectedOwner = null;
+      session.publishControllerForTesting(_controllerWithPlatform(destroyed));
+      await pumpEventQueue();
+      destroyed.issues.value = issueOf(destroyed);
+      await pumpEventQueue();
+
+      // Newer ViewCreated without a new dispatch: the latest-view gate
+      // closed while the epoch and intent are unchanged (B3).
+      session.publishControllerForTesting(null);
+      await pumpEventQueue();
+      final newerView = _IssuePlatformController(_Player())
+        ..ownerAllowedByLatestView = false;
+      session.publishControllerForTesting(_controllerWithPlatform(newerView));
+      await pumpEventQueue();
+      newerView.issues.value = issueOf(newerView);
+      await pumpEventQueue();
+
+      expect(events.whereType<HdrErrorEvent>(), isEmpty);
+      expect(session.report.value.verified, isTrue);
+      await session.dispose();
+    });
+
+    test('a replaced or disposed session ignores a late platform resolution',
+        () async {
+      final backend = FakeBackend()..factsForOpen.add(gammaFacts(gamma: 'pq'));
+      final session = makeSession(backend: backend, capabilities: caps());
+      final events = <HdrOutputEvent>[];
+      session.events.listen(events.add);
+      await session.open(media, hint: hdr10);
+
+      // The platform future stays unresolved across the replacement.
+      final unresolved = VideoController(_Player());
+      session.publishControllerForTesting(unresolved);
+      await pumpEventQueue();
+      session.publishControllerForTesting(null);
+      await pumpEventQueue();
+      final latePlatform = _IssuePlatformController(_Player());
+      await session.dispose();
+      // The late resolution must abort against the disposed session without
+      // attaching or throwing.
+      unresolved.platform.complete(latePlatform);
+      latePlatform.issues.value = issueOf(latePlatform);
+      await pumpEventQueue();
+      expect(events.whereType<HdrErrorEvent>(), isEmpty);
+    });
+
+    test('the slot waitReady failure rebuild re-subscribes through the real '
+        'publish path', () async {
+      final backend = FakeBackend()..factsForOpen.add(gammaFacts(gamma: 'pq'));
+      final session = makeSession(backend: backend, capabilities: caps());
+      final events = <HdrOutputEvent>[];
+      session.events.listen(events.add);
+      await session.open(media, hint: hdr10);
+
+      final platforms = <_IssuePlatformController>[];
+      VideoController makeController() {
+        final platform = _IssuePlatformController(_Player());
+        platforms.add(platform);
+        return _controllerWithPlatform(platform);
+      }
+
+      var remainingBindFailures = 1;
+      // A real HdrOutputSlot whose publish target IS the session's publish
+      // path: its waitReady failure rebuild drives publish(next) → failure →
+      // disposeForRebuild → publish(null) → create → publish(next) exactly
+      // like the production backend does.
+      final slot = HdrOutputSlot<VideoController>(
+        initial: null,
+        voOf: (controller) async => 'gpu-next',
+        disposeForRebuild: (controller) => controller.disposeForRebuild(),
+        create: (_) => makeController(),
+        publish: session.publishControllerForTesting,
+        waitReady: (controller) async {
+          if (remainingBindFailures-- > 0) {
+            throw StateError('bind failed');
+          }
+        },
+      );
+      const contract = HdrOutputContract(
+        vo: 'gpu-next',
+        topology: HdrTopology.platformView,
+        requestedHwdec: 'surfacetexture',
+      );
+      // First attempt: publish(failing), waitReady throws, publish(null).
+      await expectLater(
+          slot.ensure(contract), throwsA(isA<StateError>()));
+      await pumpEventQueue();
+      // The failed-and-retired controller's issue must not reach the session.
+      platforms[0].issues.value = issueOf(platforms[0]);
+      await pumpEventQueue();
+      expect(events.whereType<HdrErrorEvent>(), isEmpty);
+
+      // Second attempt succeeds and keeps its subscription.
+      await slot.ensure(contract);
+      await pumpEventQueue();
+      platforms[1].issues.value = issueOf(platforms[1]);
+      await pumpUntil(() => events.whereType<HdrErrorEvent>().isNotEmpty);
+      expect(events.whereType<HdrErrorEvent>(), hasLength(1));
+      expect(session.report.value.verified, isFalse);
+      await session.dispose();
+    });
+  });
+}
+
+class _Player extends Fake implements Player {
+  @override
+  PlatformPlayer? get platform => null;
+}
+
+const _issueOwner = AndroidSurfaceAccountId(
+  handle: 11,
+  generation: 3,
+  viewId: 7,
+  surfaceGeneration: 2,
+  wid: 4242,
+);
+
+/// Platform controller fake exposing a controllable bridge activation issue
+/// notifier and the REAL scope-currency state (the same production unit the
+/// Android controller uses), so session tests exercise genuine currency
+/// semantics instead of a manual boolean.
+class _IssuePlatformController extends PlatformVideoController {
+  _IssuePlatformController(Player player)
+      : super(player, const VideoControllerConfiguration());
+
+  final ValueNotifier<BridgeActivationIssue?> issues =
+      ValueNotifier<BridgeActivationIssue?>(null);
+
+  /// Currency state mirroring the Android controller's scope inputs.
+  AndroidSurfaceAccountId? expectedOwner = _issueOwner;
+  int outputIntentSerial = 4;
+  int dispatchEpoch = 1;
+  bool ownerAllowedByLatestView = true;
+  bool controllerActive = true;
+
+  /// Review-scope anchor (plain mutable state; the production capture
+  /// timing — before facts sampling — is what the interleave tests drive).
+  BridgeActivationScopeAnchor? anchor;
+
+  @override
+  Future<void> setSize({int? width, int? height}) async {}
+
+  @override
+  ValueListenable<BridgeActivationIssue?> get bridgeActivationIssue => issues;
+
+  @override
+  bool isCurrentBridgeActivationIssue(BridgeActivationIssue issue) =>
+      isBridgeActivationIssueCurrent(
+        issue: issue,
+        controller: this,
+        controllerActive: controllerActive,
+        activationEpoch: dispatchEpoch,
+        expectedOwner: expectedOwner,
+        outputIntentSerial: outputIntentSerial,
+        ownerAllowedByLatestView: ownerAllowedByLatestView,
+      );
+
+  @override
+  BridgeActivationScopeAnchor? get bridgeActivationScopeAnchor => anchor;
+}
+
+/// Backend whose reviewFacts sampling can be held, with a hook that runs
+/// AFTER the session's pre-sampling scope capture but BEFORE the facts are
+/// gathered — the exact interleave a newer activation lands in.
+class _HoldingReviewBackend extends FakeBackend {
+  Completer<void>? holdReviewFacts;
+  void Function()? duringReviewFacts;
+
+  @override
+  Future<HdrReviewFacts> reviewFacts(HdrOpenPlan plan) async {
+    duringReviewFacts?.call();
+    await holdReviewFacts?.future;
+    return super.reviewFacts(plan);
+  }
+}
+
+/// Builds a [VideoController] whose platform future completes with
+/// [platform]. In a plain (non-pumped) test the wrapper's own asynchronous
+/// platform dispatch never reaches its first await, so the manual completion
+/// is the sole provider.
+VideoController _controllerWithPlatform(
+    _IssuePlatformController platform) {
+  final controller = VideoController(_Player());
+  controller.platform.complete(platform);
+  return controller;
 }
 
 /// Recording fake for the session-level YUV window arm tests. Mirrors the

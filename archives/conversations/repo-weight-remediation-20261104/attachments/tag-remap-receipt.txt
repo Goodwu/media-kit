@@ -1,0 +1,12 @@
+# 9 个变化 tag 的最终 OID 映射(2026-11-04 推送回执,全部轻量 tag=commit OID)
+# 标注 [手工] 的 4 条系 filter-repo 部分模式 ref-map 缺失后按 commit-map 手工 update-ref 修正
+# 其余 5 条由 filter-repo 正常重写
+archive/ci-compat-20261028   [手工] 9c67f5305ec52fe9e12a86cdda295711161919f0 -> db34cbcf57c32927ae2eceb51350e4c2488ab848
+archive/compat-20261026      [手工] c8c5aaab3ee777bcf1f2b87166695a9814c24772 -> 7876d265532b8a94f8104b81f311cbe2036b6e89
+archive/native-ci-20261023   [手工] d76622180dc9d082c9e690dd7d355f418627fb4a -> 2431319c4ac5245b00cdbac7dc95a74f88f6e0b9
+archive/routing-20261011     [手工] 0597c8318ccf50f0824249ceeab310632efb84ab -> da278e79e7dd9f7af9c0dfc346dba2b89805ba0a
+libmpv-android-v2026.011            3c0bfe5bd244445f98888298bb1c3bcffd0a8fe4 -> 3b694d607dc82696b30e4a314051a0bc9fc1bb25
+libmpv-android-v2026.012            573aea8d168d4c6c167a3cb1f4ca414bd9983f7b -> 99232166f73cbfbb64985f5aa8044548c6735eec
+libmpv-android-v2026.013            7ea31c55a867d772965ca89911d7b432687826f4 -> 070f44509fd5e8162a1730fb5b338684ec78e4c5
+libmpv-android-v2026.09             595f68483d14661684378c74a3d0e06bbfd28d4c -> 18bcf22e5e9e2c79e296167344289dcf88b2d480
+libmpv-android-v2026.10             495629bcb66348f2545aa31b9d2cb967adf195b5 -> 3fb808bfa9f812aa0d05a50fbafd9eb999911b2d

@@ -1,0 +1,8 @@
+1a2
+> # [P3 smoke copy: only change = per-buffer logcat clear in fresh path]
+32,33c33,34
+<   adb -s "$S" logcat -c -b main -b system -b crash -b events -b radio -b kernel
+<   ev logcat_cleared
+---
+>   for b in main system crash events radio kernel; do adb -s "$S" logcat -c -b "$b" && echo "logcat -c -b $b rc=0" || echo "logcat -c -b $b rc=$?"; done
+>   ev logcat_cleared "per-buffer"

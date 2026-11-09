@@ -118,10 +118,12 @@ class _Harness {
     onChanged: () {
       events.add('changed:${playback.player != null}');
     },
+    onError: errors.add,
     onFallback: (_) => events.add('fallback'),
   );
   final slot = PlayerOwnerSlot();
   final events = <String>[];
+  final errors = <Object>[];
   bool current = true;
   bool Function()? currentAction;
   bool get isRequestCurrent => current && (currentAction?.call() ?? true);
@@ -219,6 +221,35 @@ void main() {
         throwsA(isA<RoutedOpenSuperseded>()));
     expect(h.players, hasLength(1));
     expect(h.controllers, isEmpty);
+    await h.playback.dispose();
+  });
+
+  // A2 decision A, documented consequence: a HOME-return runtime bridge
+  // activation failure surfaces through the routed error stream (the session
+  // published an unverified report and the binding dropped readiness). It is
+  // NOT an `open` failure, so the legacy fallback switch — even when enabled —
+  // must never convert it into a legacy output switch; recovery requires an
+  // explicit reopen by the application/user.
+  test('a runtime authorization failure never falls back to the legacy output',
+      () async {
+    final h = _Harness();
+    await h.ensure();
+    await h.open();
+    expect(h.controllers, isEmpty);
+
+    h.routes.single.errorsController
+        .add(StateError('bridge activation failed: initFailed'));
+    await Future<void>.delayed(Duration.zero);
+
+    expect(h.errors, hasLength(1));
+    expect(h.events, isNot(contains('fallback')));
+    expect(h.controllers, isEmpty);
+    expect(h.playback.routed, same(h.routes.single));
+    // A later open on the same request reuses the routed owner; the runtime
+    // failure did not poison the owner into a silent legacy switch.
+    await h.open(allowLegacyFallback: true);
+    expect(h.controllers, isEmpty);
+    expect(h.routes, hasLength(1));
     await h.playback.dispose();
   });
 

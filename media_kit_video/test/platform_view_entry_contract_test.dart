@@ -241,7 +241,7 @@ void main() {
             .contains('Future<void> get waitUntilInitialOutputBound') &&
         androidController.contains('_bindPlatformViewSurface') &&
         androidController
-            .contains('_initialPlatformViewOutputBound.complete()'),
+            .contains('_outputAvailability.completeInitial()'),
     'Android PlatformView must bind its first Surface before releasing media open',
   );
   _require(

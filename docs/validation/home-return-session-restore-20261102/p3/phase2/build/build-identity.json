@@ -1,0 +1,219 @@
+{
+  "schema": "p3-phase2a-build-identity/2",
+  "attempt": 2,
+  "previousAttempt": "build-identity-attempt1.json (BLOCKED: concurrent source edit; Lab p3b-a2 7c5777ea.. superseded, never installed)",
+  "verdict": "PASS",
+  "recordedBy": "Verifier (P3 phase2 (a), rerun on stable tree after Lead notice of Dart round 3 completion)",
+  "baselineRecordedAt": "2026-11-02 21:59:13 +0800",
+  "host": {
+    "os": "darwin 27.2.0 arm64",
+    "javaHome": "/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home (17.0.21.0.3)",
+    "flutterLab": "/opt/homebrew/bin/flutter 3.47.2 (d3b14c8769)",
+    "flutterPiliPlus": "/Users/wuweiwei1/flutter-sdks/3.47.8/bin/flutter 3.47.8 (737ba8f885)",
+    "ndk": "27.2.12479018"
+  },
+  "repos": {
+    "media-kit": {
+      "head": "761e29a84203e5612e7e715a7796a1ac599bbc5b",
+      "dirty": "25 entries: 17 M (TASKS.md, 2 thermal summary.json, mediakit_surfacetexture_bridge.cpp, MediaKitVideoPlugin.java, MediaCodecSurfaceTextureBridge.java, PlatformVideoView.java, PlatformVideoViewFactory.java, hdr_session_native_dv_policy.dart, hdr_video_session.dart, real.dart, platform_video_controller.dart, 5 tests); 8 ?? (archives/plans/validation docs, BridgeActivationAuthorizer.java, bridge_activation.dart, platform_output_availability.dart, bridge_activation_test.dart, tool/test_platform_bridge_activation.py). Same at 21:59 and 22:12 (status md5 a9739f117a52cfbde54050476b060e35 at end).",
+      "diffStatHead": "17 files changed, 1941 insertions(+), 170 deletions(-)"
+    },
+    "PiliPlus": {
+      "head": "cbf2c34d36f99100effb71b075bda9dfc0277c0f",
+      "branch": "feature/dv",
+      "dirty": "M TASKS.md, M lib/plugin/pl_player/view/view.dart, ?? archives/conversations/pull-source-android-apk-20261029.md (pre-existing, untouched, same at end)",
+      "mediaKitResolution": "pubspec_overrides.yaml -> ../media-kit path sources"
+    },
+    "libmpv-android-video-build-dv-experiment": {
+      "head": "3605f300ecfe16bc084addd0b403d2cd55ef6a81",
+      "branch": "feature/dv",
+      "dirty": "?? .DS_Store, ?? .commandcode/, ?? buildscripts/.DS_Store"
+    },
+    "mpv": {
+      "head": "c7bffdd1b0bbde12916381aa472e4022717f1f60",
+      "branch": "feature/dv",
+      "dirty": "clean"
+    }
+  },
+  "sourceSha256": {
+    "dart": {
+      "media_kit_video/lib/src/video_controller/android_video_controller/real.dart": "a2ac2cee2c29b33e274c5c5baa6153dcebedf036779ef8738d34658c468bd9b1",
+      "media_kit_video/lib/src/video_controller/android_video_controller/bridge_activation.dart": "d7da65b3d5a0a8b061c77b4a9772043a2423106b2423ad2c4b9ae6a7b70beaa3",
+      "media_kit_video/lib/src/video_controller/android_video_controller/platform_output_availability.dart": "3eff29d41eb0714e2bc2cda3852da346f0fa7ec02a6d5b92fca406f18e0afecd",
+      "media_kit_video/lib/src/hdr/hdr_video_session.dart": "e574685048c0311de5e7e5615e1bdab5889ddcb25ea12a0b3abb3ddd36ff1419",
+      "media_kit_video/lib/src/hdr/hdr_session_native_dv_policy.dart": "544233b22d283a1b8f35b01002eb640ebcbf2dca7840caaad043111643c874b0",
+      "media_kit_video/lib/src/video_controller/platform_video_controller.dart": "21935e93b0a13ef3b05582963693bfb417443c39cdc89839d5dd2baa647660b4"
+    },
+    "javaCpp": {
+      "media_kit_video/android/src/main/java/com/alexmercerind/media_kit_video/platformview/BridgeActivationAuthorizer.java": "7a42dcb7924c8d9c105b881026ea85683fa1c808d1378369ad80fd8c216b626d",
+      "media_kit_video/android/src/main/java/com/alexmercerind/media_kit_video/platformview/PlatformVideoView.java": "0ff9d1048732da30c6e292ff70d0ea9db2cbba7864fcc5acb5c005d13ede0b6e",
+      "media_kit_video/android/src/main/java/com/alexmercerind/media_kit_video/platformview/PlatformVideoViewFactory.java": "4009a2258a313b2933847d2c73bf268c71352836b95c4a76c743c254d60f2723",
+      "media_kit_video/android/src/main/java/com/alexmercerind/media_kit_video/MediaKitVideoPlugin.java": "f6577dd1c4f459750322300978e8f0f129f65c84cfb9f7f2c7d358ec5621e277",
+      "media_kit_video/android/src/main/java/com/alexmercerind/media_kit_video/platformview/MediaCodecSurfaceTextureBridge.java": "b5988b52b56b528f96234678ae12f936c44433979e9422df759912f61deb6465",
+      "media_kit_video/android/src/main/cpp/mediakit_surfacetexture_bridge.cpp": "6e12e3fa8d1803ec77cd0d33a3620561f24276e4de36d5a5de35aab3f9fd9d4a"
+    },
+    "note": "Recorded 21:59; identical to 21:35 attempt-1 end-state; last mtimes 21:29:18..21:34:05 (no edits since)."
+  },
+  "stabilityGuard": {
+    "tool": "guarded_build.py (copy in this dir; polls every 3s, kills build process group on any change)",
+    "watchedFiles": 1768,
+    "watchedRoots": "media_kit/lib, media_kit_video/{lib,android/src,pubspec.yaml}, media_kit/pubspec.yaml, media_kit_hdr_lab/{lib,android/app/src,pubspec.yaml}, libs/android, tool/{build-android-test.sh,build_android_native.py,verify_android_test_apk.py}, PiliPlus/{lib,pubspec*,android/app/src,android/app/build.gradle.kts}",
+    "manifestSha256": "242b3548f1744caba9c9362d7399b5ccaa34639a448a4eb133fade022fba0946",
+    "lab": "unchanged across 54 checks (manifest build-lab-manifest-start.json)",
+    "piliplus": "unchanged across 75 checks (build-piliplus-manifest-start.json, identical to Lab manifest)",
+    "postInstallRecheck": "22:12:29 zero changed of 1768"
+  },
+  "lab": {
+    "status": "BUILT_VERIFIED_INSTALLED",
+    "command": "JAVA_HOME=/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home tool/build-android-test.sh --tag p3c-a2 --platform-view --local-source /sdcard/Android/data/com.example.media_kit_hdr_lab/files/hokkaido-p84.mp4 -- --dart-define=MEDIA_KIT_ANDROID_SURFACE_TIMELINE=true --dart-define=MEDIA_KIT_ANDROID_HDR_PREFER_CONVERT=true --dart-define=MEDIA_KIT_ANDROID_HDR_DIAGNOSTICS=true",
+    "invokedVia": "python3 -I guarded_build.py build-lab.log <dir> -- env JAVA_HOME=... <command>",
+    "cwd": "/Users/wuweiwei1/src/media-kit",
+    "window": "22:00:04 -> 22:03:56 +0800, exit 0",
+    "log": "/Users/wuweiwei1/src/media-kit/docs/validation/home-return-session-restore-20261102/p3/phase2/build/build-lab.log",
+    "defineSet": {
+      "scriptBaseDefines(lab branch of tool/build-android-test.sh)": [
+        "MEDIA_KIT_AUTO_SINGLE_PLAYER=true",
+        "MEDIA_KIT_ANDROID_OPEN_ON_TAP=true",
+        "MEDIA_KIT_ANDROID_PREOPEN_FULLSCREEN=true",
+        "MEDIA_KIT_ANDROID_NAMED_LOCAL_SOURCE=true",
+        "MEDIA_KIT_ANDROID_P5_RPU_PIPELINE_BUILT=true",
+        "MEDIA_KIT_ANDROID_HDR_TRANSACTION=true",
+        "MEDIA_KIT_ANDROID_SURFACE_PRODUCER=false",
+        "MEDIA_KIT_ANDROID_TEXTURE_LAYOUT_SIZE=true",
+        "MEDIA_KIT_ANDROID_PERF_PROBE=true",
+        "MEDIA_KIT_ANDROID_P5_COUNTER_PROBE=true",
+        "MEDIA_KIT_ANDROID_DIRECT_OPEN_TRACE=true",
+        "MEDIA_KIT_ANDROID_LOCAL_SOURCE=/sdcard/Android/data/com.example.media_kit_hdr_lab/files/hokkaido-p84.mp4",
+        "MEDIA_KIT_ANDROID_PLATFORM_VIEW=true"
+      ],
+      "extra": [
+        "MEDIA_KIT_ANDROID_SURFACE_TIMELINE=true",
+        "MEDIA_KIT_ANDROID_HDR_PREFER_CONVERT=true",
+        "MEDIA_KIT_ANDROID_HDR_DIAGNOSTICS=true"
+      ],
+      "evidence": "command line + script source; build log does not echo defines; corroborated by const-gated markers"
+    },
+    "apk": "/Users/wuweiwei1/src/media-kit/media_kit_hdr_lab/build/app/outputs/flutter-apk/p3c-a2-release.apk",
+    "apkSha256": "46c2215418810497e9c6b7a8a68023cf77a554ae97a63c6a1f75f2690019b3f0",
+    "apkBytes": 41687023,
+    "package": "com.example.media_kit_hdr_lab versionCode 4086 versionName 1.0.0",
+    "jar": "/Users/wuweiwei1/src/media-kit/build/android-native/p3c-a2-20261102-220004-70891/package/default-arm64-v8a.jar",
+    "jarSha256": "22bc9306a5eae9641c4c73c9f256311a62c8704bf33eebd6a843d5c1153fcfd5",
+    "jarMembers": {
+      "lib/arm64-v8a/libc++_shared.so": "4397241b4bd20a8e579bfb41d21107857e12985f6a01ca0c2a5f83380d1270b4",
+      "lib/arm64-v8a/libmediakitandroidhelper.so": "9d7a9c7ad0caa44afdc521eaa0cd5898190120739f2748e41c4b52208d9d507c",
+      "lib/arm64-v8a/libmpv.so": "dd818602e6c57504b782e7ef43758ccfd9248166506d941746c8e889d4a5b810"
+    },
+    "nativeVerification": "/Users/wuweiwei1/src/media-kit/media_kit_hdr_lab/build/app/outputs/flutter-apk/p3c-a2-release.native-verification.json (status=verified)",
+    "kernelSourceIdentity": {
+      "dill": "/Users/wuweiwei1/src/media-kit/media_kit_hdr_lab/.dart_tool/flutter_build/52b95f4d051f2740c0550c56bcdd3d1f/app.dill (mtime 22:03:21)",
+      "method": "dill_exact.py: exact file bytes preceded by kernel UInt length prefix == file length",
+      "result": "6/6 MATCH (all dart files in sourceSha256.dart)",
+      "negativeControl": "old Lab dill efa601bc.../app.dill (13:13) -> 6/6 NOMATCH",
+      "inference": "libapp.so built from this dill (same invocation); not byte-proven"
+    },
+    "markers": {
+      "libapp.so": {
+        "MKS-HOME-TRACE rt= [const SURFACE_TIMELINE]": 1,
+        "HDR_PREFER_CONVERT dvP84= [const HDR_PREFER_CONVERT]": 1,
+        "HDR_PUBLISH_FLUSH requested= [const HDR_DIAGNOSTICS]": 1,
+        "PlatformVideoView.AuthorizeBridgeActivation": 1,
+        "authorize begin wid=": 1,
+        "malformed AuthorizeBridgeActivation reply": 1,
+        "hokkaido-p84.mp4": 2
+      },
+      "classes.dex": {
+        "MKS-HOME-TRACE": 1,
+        "PlatformVideoView.AuthorizeBridgeActivation": 1,
+        "authorize enter handle=": 1
+      },
+      "libmedia_kit_video_hdr_bridge.so": {
+        "MKS-HOME-TRACE": 1
+      },
+      "method": "unzip lib/arm64-v8a/* classes*.dex; strings -a <file> | grep -cF <marker>"
+    }
+  },
+  "piliplus": {
+    "status": "BUILT_VERIFIED_NOT_INSTALLED (by design, for step (c))",
+    "command": "PATH=/Users/wuweiwei1/flutter-sdks/3.47.8/bin:$PATH JAVA_HOME=/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home ORG_GRADLE_PROJECT_dev=true tool/build-android-test.sh --tag piliplus-p3c-a2 --app-dir /Users/wuweiwei1/src/PiliPlus -- --dart-define=MEDIA_KIT_ANDROID_SURFACE_TIMELINE=true",
+    "invokedVia": "python3 -I guarded_build.py build-piliplus.log <dir> -- env PATH=... JAVA_HOME=... ORG_GRADLE_PROJECT_dev=true <script args>",
+    "cwd": "/Users/wuweiwei1/src/media-kit",
+    "window": "22:04:14 -> 22:09:58 +0800, exit 0",
+    "log": "/Users/wuweiwei1/src/media-kit/docs/validation/home-return-session-restore-20261102/p3/phase2/build/build-piliplus.log",
+    "defineSet": {
+      "scriptBaseDefines": "none (non-lab app-dir)",
+      "extra": [
+        "MEDIA_KIT_ANDROID_SURFACE_TIMELINE=true"
+      ],
+      "gradle": "ORG_GRADLE_PROJECT_dev=true"
+    },
+    "apk": "/Users/wuweiwei1/src/PiliPlus/build/app/outputs/flutter-apk/piliplus-p3c-a2-release.apk",
+    "apkSha256": "dd07a4a0c4be85e16ba0d6e7d1838a52a3230a3060c600a691552c4249cce816",
+    "apkBytes": 27766813,
+    "package": "com.example.piliplus.dev versionCode 1 versionName 2.1.6",
+    "jar": "/Users/wuweiwei1/src/media-kit/build/android-native/piliplus-p3c-a2-20261102-220414-74088/package/default-arm64-v8a.jar",
+    "jarSha256": "22bc9306a5eae9641c4c73c9f256311a62c8704bf33eebd6a843d5c1153fcfd5 (byte-identical to Lab JAR)",
+    "jarMembers": {
+      "lib/arm64-v8a/libc++_shared.so": "4397241b4bd20a8e579bfb41d21107857e12985f6a01ca0c2a5f83380d1270b4",
+      "lib/arm64-v8a/libmediakitandroidhelper.so": "9d7a9c7ad0caa44afdc521eaa0cd5898190120739f2748e41c4b52208d9d507c",
+      "lib/arm64-v8a/libmpv.so": "dd818602e6c57504b782e7ef43758ccfd9248166506d941746c8e889d4a5b810"
+    },
+    "nativeVerification": "/Users/wuweiwei1/src/PiliPlus/build/app/outputs/flutter-apk/piliplus-p3c-a2-release.native-verification.json (status=verified)",
+    "kernelSourceIdentity": {
+      "dill": "/Users/wuweiwei1/src/PiliPlus/.dart_tool/flutter_build/794d521374102def1ba2354c9bdf32bc/app.dill (mtime 22:07:38)",
+      "result": "6/6 MATCH (same hashes as Lab)"
+    },
+    "markers": {
+      "libapp.so": {
+        "MKS-HOME-TRACE rt= [const SURFACE_TIMELINE]": 1,
+        "HDR_PREFER_CONVERT dvP84=": "0 (Lab-only code; expected)",
+        "HDR_PUBLISH_FLUSH requested= [const HDR_DIAGNOSTICS, shared media_kit_video code]": "0 (define not set; negative control confirms const-gate tree-shaking)",
+        "PlatformVideoView.AuthorizeBridgeActivation": 1,
+        "authorize begin wid=": 1,
+        "malformed AuthorizeBridgeActivation reply": 1
+      },
+      "classes.dex": {
+        "MKS-HOME-TRACE": 1,
+        "PlatformVideoView.AuthorizeBridgeActivation": 1,
+        "authorize enter handle=": 1
+      },
+      "libmedia_kit_video_hdr_bridge.so": {
+        "MKS-HOME-TRACE": 1
+      }
+    },
+    "staleArtifactNote": "older piliplus-p3-a2-release.apk (20:57:04) in same dir is pre-fix; do not use"
+  },
+  "labInstall": {
+    "device": "LGH870DS42e27764 (LG_H870DS)",
+    "command": "adb -s LGH870DS42e27764 install -r <lab apk>",
+    "time": "22:11:48 -> 22:11:56 +0800",
+    "result": "Success",
+    "before": {
+      "pmPath": "/data/app/com.example.media_kit_hdr_lab-1/base.apk",
+      "lastUpdateTime": "2026-11-02 20:56:50"
+    },
+    "after": {
+      "pmPath": "/data/app/com.example.media_kit_hdr_lab-2/base.apk",
+      "versionCode": 4086,
+      "firstInstallTime": "2026-10-25 01:51:13",
+      "lastUpdateTime": "2026-11-02 22:11:56",
+      "deviceFile": "41687023 bytes, system:system, 2026-11-02 22:11"
+    },
+    "readback": {
+      "method": "adb pull <pm path> /tmp/p3c-pull/base.apk; shasum -a 256 on Mac (device lacks sha256sum)",
+      "sha256": "46c2215418810497e9c6b7a8a68023cf77a554ae97a63c6a1f75f2690019b3f0",
+      "matchesHost": true
+    }
+  },
+  "verifierSideEffects": [
+    "this dir: renamed attempt-1 files to *-attempt1.*; added build-identity.json, build-{lab,piliplus}.log, build-{lab,piliplus}-manifest-start.json, guarded_build.py, dill_exact.py",
+    "regenerable build outputs: build/android-native/{p3c-a2-20261102-220004-70891,piliplus-p3c-a2-20261102-220414-74088}, media_kit_hdr_lab/build + .dart_tool, PiliPlus/build + .dart_tool, .cxx fingerprints",
+    "device: Lab package replaced (no restore duty per AGENTS.local.md)",
+    "temp: /tmp/p3c-*, /tmp/p3b-*"
+  ],
+  "notVerified": [
+    "libapp.so byte-derivation from the checked app.dill (inferred from same invocation)",
+    "Java/C++ compiled output vs source (covered by stability guard + dex/.so markers only)",
+    "runtime behaviour (out of scope for (a))"
+  ]
+}
