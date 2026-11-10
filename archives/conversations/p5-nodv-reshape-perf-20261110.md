@@ -2,4 +2,5 @@
 
 ## Current State
 
+- **S1 预检完成（2026-11-10）：立项表征 0.38fps 不成立——P5-on-LYA reshape 性能实际正常，勘误待 Lead/用户裁决**：M5 基线账本重析发现 `42s 渲染 16 帧` 系**跨 session 拼接误读**（A 短会话 16 tickets/0.82s + B 正式播放 2468 tickets/42.23s≈59.94fps 满帧 1× 实速、GPU 每帧 p50=0.86ms）；零构建复测两轮（现装 s5k-lya，md5 门复核一致）独立证实：30.0 render-fps（=实际源节奏满帧）、1.000× 实速、GPU p50=1.85ms/p99=2.42ms、FINAL complete=1、invariant=0、零 OOM。S2 优化与 S3 验收无对象，建议勘误结项或改立观察项。**次要观察未定论**：s5k-lya 构建对 59.94fps 源呈 29.97fps 隔帧节奏（M5 的 p5-lya 构建同素材为 59.94 全速）——构建差异或设备功耗状态，thermal_sync 属性已排除。设备已还原（属性清空灭屏）。证据 `docs/validation/p5-nodv-reshape-perf-20261110/S1-baseline-recheck/`；完整事实与过程偏差见 `TASKS.md` §P5-NODV-RESHAPE-PERF-20261110 首条（权威）。改动未提交（提交需授权）。
 - **立项交接（2026-11-10，自 LG-P84-TARGET-LEASE-20261105 会话派生，Lead 指示换会话继续）**：目标 = 定位并优化 P5-on-LYA metadataReshape 路线的 **0.38fps**（对照同机 P8.4=30fps，80× 异常）。全部背景、端到端流程实证、候选优化清单、红线与环境就绪状态见 `TASKS.md` §P5-NODV-RESHAPE-PERF-20261110（权威）。起始动作 = S1 定位三实验：per-frame 分段时间戳 + 全 instrumentation 关闭对照 + 降分辨率对照。基线证据 `docs/validation/lg-p84-target-lease-20261105/M5-lya-p5-mysterybox/`（外置 `…-m5-lya-p5-20261110`）。设备 LYA 已还原（s5k-lya 在装、属性清空、灭屏）；LG 现装 s5m 不受影响。本文件为新会话唯一上下文；父项目 context 见 `lg-p84-target-lease-20261105.md`。
