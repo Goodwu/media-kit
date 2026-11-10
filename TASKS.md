@@ -1,5 +1,12 @@
 # TASKS.md
 
+## P5-NODV-RESHAPE-PERF-20261110
+
+- **立项（2026-11-10，Lead 指示"立个项目换会话继续"；自 LG-P84-TARGET-LEASE-20261105 派生）**：P5-on-无DV设备（LYA 样本）metadataReshape 路线的性能定位与优化。**现状**：P5-on-LYA 实测 42s 渲染 16 帧 ≈ **0.38fps**（对照同机同路由族 P8.4=30fps，80× 异常），瓶颈未定位不写死。**已知线索**：①与 P8.4 的管线差异 = IPT→BT.2020 PQ 全量重缩放 + external YUV（MEDIACODEC_YUV）直采路径；②`hwdec_aimagereader.c:48` 已登记本机 GLES external YUV sampler 驱动归一化怪癖；③`vo_gpu_next.c:3288` dovi-p5-fast-path 仅覆盖 P5→SDR 目标，PQ 目标走常规 dovi 路径。端到端流程实证见 LG-P84 节"P5-on-LYA 端到端流程"条目。
+- **步骤**：S1 定位（前置必须，约半天）——per-frame 分段时间戳（解码出帧/导入/reshape 提交/上屏）+ 两对照：全 instrumentation 关闭对照、P5 降分辨率（1080p）对照（耗时按像素线性下降→GPU 填充率；不变→CPU/同步阻塞）；S2 按 S1 靶子优化（候选序：external-YUV 直采替换为导入后单次 RGB10_A2 拷贝 / dovi-p5-fast-path 扩展到 PQ 目标 / RPU-LUT 按 RPU 内容哈希缓存 / 降分辨率 reshape+上采样[重缩放为逐像素非线性映射，几何不变，质量损失有限]）；S3 验收——fps 目标（≥24）+ 质量非回归（screencap 对照）+ 账本 reconcile 干净（bind 等式/busy=0/c_seq 连续）。
+- **红线与约束**：Mali frame-timing OOM 为前置坑（LYA 上 gpu_timing=frame 观测 2/2 轮 GL_OUT_OF_MEMORY，播放未中断；定位轮若用 frame 计时须先修或改无计时协议）；质量红线：不得以 silently 错色换性能；LYA 用手动协议（instant_perf 热门为 Qualcomm 门，Kirin fail-closed）；每轮 md5 门；证据外置归档（新证据放 `docs/validation/p5-nodv-reshape-perf-20261110/`，.gitignore 已预留）；提交需授权、push 逐次请示；不派 subagent（critical 复审除外）。
+- **环境**：LYA-AL00（3EP7N18C28016072，Kirin980/Mali-G76/API29），现装 lgp84-s5k-lya（无探针变体），属性已清空灭屏；P5 素材 = p5-mystery-box 变体（3e610d3b…cc9f/361648124B，主机 `~/Downloads/test-clips/Mystery Box Dolby Vision Profile 5.mp4`；原始固定 P5 dacfd045 主机不在、存于离线 marble）；构建配方照抄 lgp84-p5-lya（`--tag <new> --local-source /sdcard/Android/data/com.example.media_kit_hdr_lab/files/p5-mystery-box.mp4`，无探针 define，先 push 素材再构建）；LG 不受影响（有 DV 硬解，P5 走 DV 路线）。基线证据：`docs/validation/lg-p84-target-lease-20261105/M5-lya-p5-mysterybox/`（外置 `…-m5-lya-p5-20261110`）。context：`archives/conversations/p5-nodv-reshape-perf-20261110.md`。
+
 ## LG-P84-TARGET-LEASE-20261105
 
 - **S2 完成（2026-11-08）：LP 禁用参数 + EV-1 闭合**：LP 三文件 22 行——L1

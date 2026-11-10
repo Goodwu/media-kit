@@ -2,6 +2,7 @@
 
 ## Current State
 
+- **派生项目（2026-11-10）**：P5-on-LYA 性能定位与优化（0.38fps 异常）拆分至新项目 P5-NODV-RESHAPE-PERF-20261110，context `p5-nodv-reshape-perf-20261110.md`；本文件此后不再承载该项目进展。
 ## Current State
 
 - **最终状态（2026-11-10 收敛，此前逐条过程记录已并入下方历史区与本仓 Git log）**：

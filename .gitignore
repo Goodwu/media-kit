@@ -49,6 +49,7 @@ archives/experiments/
 
 # LG P8.4 原始验证证据：外置归档（media-kit-validation-archive），仓内不跟踪
 docs/validation/lg-p84-target-lease-20261105/
+docs/validation/p5-nodv-reshape-perf-20261110/
 
 # home-return-session-restore-20261102 证据瘦身（2026-11-04 用户裁决）：
 # 仅提交 summary/脚本/构建身份；原始 logcat、SF 密集采样、截图等大块原始数据保留在磁盘不入库。
